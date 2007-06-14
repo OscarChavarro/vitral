@@ -1,27 +1,31 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - March 15 2006 - Oscar Chavarro: Original base version                 =
+//= - March 16 2006 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.gui.TranslateGizmo;
 import javax.media.opengl.GL;
 
-import vsdk.toolkit.common.QualitySelection;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Sphere;
-
-public class JoglGeometryRenderer
+public class JoglTranslateGizmoRenderer
 {
-    public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
-    {
-        String geometryType = g.getClass().getName();
 
-        if ( geometryType == "vsdk.toolkit.environment.geometry.Sphere" ) {
-            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
-    }
+    public static void draw(GL gl, TranslateGizmo gizmo, Vector3D position)
+    {
+        Matrix4x4 R;
+
+        R = new Matrix4x4(gizmo.getTransformationMatrix());
+
+        R.M[0][3] = position.x;
+        R.M[1][3] = position.y;
+        R.M[2][3] = position.z;
+
+        gl.glLineWidth(3);
+        JoglMatrixRenderer.drawGL(gl, R);
     }
 }
 

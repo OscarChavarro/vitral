@@ -82,7 +82,7 @@ public class RaytracerSimple {
             System.err.println("Error grabando la imagen!!");
             System.exit(1);
         }
-        System.out.println("Se ha generado una imagen llamada salida.ppm");
+        System.out.println("Se ha generado una imagen llamada output.ppm");
         System.out.println("En Unix / Linux puede verla con el comando");
         System.out.println("  display salida.ppm");
 

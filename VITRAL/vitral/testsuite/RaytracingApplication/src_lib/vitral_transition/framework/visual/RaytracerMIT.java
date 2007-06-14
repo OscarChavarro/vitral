@@ -214,28 +214,14 @@ public class RaytracerMIT {
         Enumeration i;
         RayableObject gi;
         RayableObject nearestObject;
-        Ray myRay;
-        Vector3D po;
-        Matrix4x4 R, Ri;
 
         inRay.t = INFINITO;
         nearestObject = null;
-
         for ( i = inRayableObjectArray.elements(); i.hasMoreElements(); ) {
             gi = (RayableObject)i.nextElement();
-            po = gi.getPosition();
-            Ri = gi.getRotationInverse();
-
-            myRay = new Ray ( 
-                Ri.multiply(inRay.origin.substract(po)),
-                Ri.multiply(inRay.direction)
-            );
-            myRay.t = inRay.t;
-
-            if ( gi.getGeometry().doIntersection(myRay) ) {
+            if ( gi.doIntersection(inRay) ) {
                 nearestObject = gi;
             }
-            inRay.t = myRay.t;
         }
         return nearestObject;
     }

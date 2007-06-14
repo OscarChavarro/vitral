@@ -28,6 +28,12 @@ public class QualitySelection {
     private boolean normals;
     private boolean trianglesNormals;
 
+    // To be used in future: depending of the rendering implementation for
+    // each geometry, this can be used to specify the desired amount of
+    // primitives to generate in dynamic or progressive geometry rendering
+    // algorithms.
+    private int lodHint;
+
     public QualitySelection() {
         shadingType = SHADING_TYPE_FLAT;
 

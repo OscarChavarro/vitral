@@ -18,7 +18,7 @@ March 14 2006, Oscar Chavarro: 30min
     default scene is created and this Scene model is independent of JOGL
 
 March 15 2006, Oscar Chavarro: 295min
-  - aprox 2h: swing studying for Tab distribution of buttons commands in the
+  - 2h: swing studying for Tab distribution of buttons commands in the
     left tabbed pane with inside scrollpanned areas.
   - 55min: added functionality of things inclusion to the GUI and first
     sphere succesfully painted.
@@ -27,5 +27,13 @@ March 15 2006, Oscar Chavarro: 295min
     account the selected interaction mode.
   - 50min: Cursor feedback interaccion research... changing cursor image...
 
+March 15 2006, Oscar Chavarro: 320
+  - 1h40min: Building first gizmos into the vsdk toolkit, and testing in this
+    program. This implied activating the QualitySelection Infraestructure.
+    Basic interactive selection mechanisms implemented, using arrows keys
+    and the ray intersection mouse click selection technique.
+  - 45min tests with TranslationGizmo ... :-)
+  - 1h15min -> Implemented basic rotate and scale gizmos
+  - 1h40min -> Implemented basic Jogl gizmos renderers  :-)
 
-<<TOTAL>> 563min (9h23min)
+<<TOTAL>> 883 min (14h43min)

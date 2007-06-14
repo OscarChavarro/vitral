@@ -153,8 +153,8 @@ public class SceneEditorApplication {
         JSplitPane splitPane;
 
         menubar = buildMenu();
-        drawingArea = new JoglDrawingArea(theScene);
         JPanel statusBar = createStatusBar();
+        drawingArea = new JoglDrawingArea(theScene, statusMessage);
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
         Dimension minleft = new Dimension(160, 120);
@@ -409,9 +409,24 @@ class ButtonsPanel extends JPanel implements ActionListener
                 parent.drawingArea.CAMERA_INTERACTION_MODE;
         }
         else if ( label == "SelectMode" ) {
-            parent.statusMessage.setText("Selection mode interaction - click mouse to select objects.");
+            parent.statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
             parent.drawingArea.interactionMode = 
-                parent.drawingArea.SELECT_INTERACTION_MODE;
+            parent.drawingArea.SELECT_INTERACTION_MODE;
+        }
+        else if ( label == "TranslateMode" ) {
+            parent.statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+            parent.drawingArea.interactionMode = 
+            parent.drawingArea.TRANSLATE_INTERACTION_MODE;
+        }
+        else if ( label == "RotateMode" ) {
+            parent.statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
+            parent.drawingArea.interactionMode = 
+                parent.drawingArea.ROTATE_INTERACTION_MODE;
+        }
+        else if ( label == "ScaleMode" ) {
+            parent.statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
+            parent.drawingArea.interactionMode = 
+                parent.drawingArea.SCALE_INTERACTION_MODE;
         }
 
         parent.drawingArea.canvas.repaint();

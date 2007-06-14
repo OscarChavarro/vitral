@@ -1,3 +1,9 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//===========================================================================
+
 package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
@@ -7,9 +13,9 @@ import java.awt.event.KeyEvent;
 public interface CameraController {
   public boolean processMouseEventAwt(MouseEvent mouseEvent);
 
-  public boolean processKeyPressedEventAwt(KeyEvent mouseEvent);
+  public boolean processKeyPressedEventAwt(KeyEvent keyEvent);
 
-  public boolean processKeyReleasedEventAwt(KeyEvent mouseEvent);
+  public boolean processKeyReleasedEventAwt(KeyEvent keyEvent);
 
   public boolean processMousePressedEventAwt(MouseEvent e);
 
@@ -23,3 +29,7 @@ public interface CameraController {
 
   public boolean processMouseWheelEventAwt(MouseWheelEvent e);
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

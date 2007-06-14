@@ -13,6 +13,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
+import javax.swing.JLabel;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
@@ -20,18 +21,27 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
+import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
+import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
+import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
+import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.CameraControllerGravZero;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
-import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.gui.TranslateGizmo;
+import vsdk.toolkit.gui.RotateGizmo;
+import vsdk.toolkit.gui.ScaleGizmo;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
@@ -46,8 +56,12 @@ public class JoglDrawingArea implements
     public GLCanvas canvas;
 
     private CameraController cameraController;
+    private TranslateGizmo translationGizmo;
+    private RotateGizmo rotateGizmo;
+    private ScaleGizmo scaleGizmo;
 
     private Scene theScene;
+    private JLabel statusMessage;
 
     public int interactionMode;
 
@@ -56,17 +70,21 @@ public class JoglDrawingArea implements
     private Cursor camadvanceCursor;
     private Cursor selectCursor;
 
-    public JoglDrawingArea(Scene theScene)
+    public JoglDrawingArea(Scene theScene, JLabel statusMessage)
     {
         this.theScene = theScene;
+        this.statusMessage = statusMessage;
 
         interactionMode = CAMERA_INTERACTION_MODE;
 
-    createCursors();
+        createCursors();
 
         //cameraController = new CameraControllerGravZero(theScene.camera);
         //cameraController = new CameraControllerBlender(theScene.camera);
         cameraController = new CameraControllerAquynza(theScene.camera);
+        translationGizmo = new TranslateGizmo();
+        rotateGizmo = new RotateGizmo();
+        scaleGizmo = new ScaleGizmo();
 
         canvas = new GLCanvas();
 
@@ -110,6 +128,48 @@ public class JoglDrawingArea implements
         return canvas;
     }
 
+    private void drawGizmos(GL gl)
+    {
+        gl.glDisable(gl.GL_DEPTH_TEST);
+        if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
+            if ( theScene.selectedThingIndex >= 0 ) {
+              Vector3D position;
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+
+              position = gi.getPosition();
+              translationGizmo.setTransformationMatrix(gi.getRotation());
+              JoglTranslateGizmoRenderer.draw(gl, translationGizmo, position);
+            }
+        }
+        else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
+            if ( theScene.selectedThingIndex >= 0 ) {
+              Vector3D position;
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+
+              position = gi.getPosition();
+              rotateGizmo.setTransformationMatrix(gi.getRotation());
+              JoglRotateGizmoRenderer.draw(gl, rotateGizmo, position);
+            }
+        }
+        else if ( interactionMode == SCALE_INTERACTION_MODE ) {
+            if ( theScene.selectedThingIndex >= 0 ) {
+              Vector3D position;
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+
+              position = gi.getPosition();
+              scaleGizmo.setTransformationMatrix(gi.getRotation());
+              JoglScaleGizmoRenderer.draw(gl, scaleGizmo, position);
+            }
+        }
+        gl.glEnable(gl.GL_DEPTH_TEST);
+    }
+
     private void drawObjectsGL(GL gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -132,6 +192,9 @@ public class JoglDrawingArea implements
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
+
+    // Must be the last to draw
+        drawGizmos(gl);
     }
 
     /** Called by drawable to initiate drawing */
@@ -221,6 +284,15 @@ public class JoglDrawingArea implements
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMousePressedEventAwt(e) ) {
           canvas.repaint();
+        }
+        else if ( interactionMode == SELECT_INTERACTION_MODE ||
+                  interactionMode == TRANSLATE_INTERACTION_MODE || 
+                  interactionMode == ROTATE_INTERACTION_MODE || 
+                  interactionMode == SCALE_INTERACTION_MODE 
+                 ) {
+          theScene.selectObjectMouse(e.getX(), e.getY());
+          reportObjectSelection();
+          canvas.repaint();
       }
   }
 
@@ -275,15 +347,173 @@ public class JoglDrawingArea implements
   }
 
   public void keyPressed(KeyEvent e) {
-      if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-          System.exit(0);
-      }
+      char unicode_id;
+      int keycode;
+
+      unicode_id = e.getKeyChar();
+      keycode = e.getKeyCode();
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processKeyPressedEventAwt(e) ) {
           canvas.repaint();
       }
+      else if ( interactionMode == SELECT_INTERACTION_MODE ) {
+          if ( unicode_id == e.CHAR_UNDEFINED ) {
+            switch ( keycode ) {
+              case KeyEvent.VK_LEFT:
+                if ( theScene.selectedThingIndex == -1 ) {
+                    theScene.selectedThingIndex = theScene.things.size()-1;
+                }
+                else {
+                    theScene.selectedThingIndex--;
+                }
+                reportObjectSelection();
+                break;
+              case KeyEvent.VK_RIGHT:
+                if ( theScene.selectedThingIndex >= theScene.things.size()-1 ) {
+                    theScene.selectedThingIndex = -1;
+                }
+                else {
+                    theScene.selectedThingIndex++;
+                }
+                reportObjectSelection();
+                break;
+            }
+            canvas.repaint();
+          }
+      }
+      else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
+          if ( theScene.selectedThingIndex >= 0 ) {
+              Matrix4x4 composed;
+              Vector3D position;
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+
+              position = gi.getPosition();
+              composed = new Matrix4x4(gi.getRotation());
+              composed.M[0][3] = position.x;
+              composed.M[1][3] = position.y;
+              composed.M[2][3] = position.z;
+
+              translationGizmo.setTransformationMatrix(composed);
+              if ( translationGizmo.processKeyPressedEventAwt(e) ) {
+                  composed = translationGizmo.getTransformationMatrix();
+                  position.x = composed.M[0][3];
+                  position.y = composed.M[1][3];
+                  position.z = composed.M[2][3];
+                  composed.M[0][3] = 0;
+                  composed.M[1][3] = 0;
+                  composed.M[2][3] = 0;
+                  gi.setPosition(position);
+                  gi.setRotation(composed);
+                  composed = new Matrix4x4(composed);
+                  composed.invert();
+                  gi.setRotationInverse(composed);
+                  canvas.repaint();
+              }
+          }
+      }
+      else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
+          if ( theScene.selectedThingIndex >= 0 ) {
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+              Matrix4x4 R = gi.getRotation();
+
+              rotateGizmo.setTransformationMatrix(R);
+
+              if ( rotateGizmo.processKeyPressedEventAwt(e) ) {
+                  R = rotateGizmo.getTransformationMatrix();
+                  gi.setRotation(R);
+                  Matrix4x4 Ri = new Matrix4x4(R);
+                  Ri.invert();
+                  gi.setRotationInverse(Ri);
+                  canvas.repaint();
+              }
+          }
+      }
+      else if ( interactionMode == SCALE_INTERACTION_MODE ) {
+          if ( theScene.selectedThingIndex >= 0 ) {
+              RayableObject gi;
+
+              gi = theScene.things.get(theScene.selectedThingIndex);
+              Vector3D s = gi.getScale();
+              Matrix4x4 S = new Matrix4x4();
+              S.M[0][0] = s.x;
+              S.M[1][1] = s.y;
+              S.M[2][2] = s.z;
+
+              scaleGizmo.setTransformationMatrix(S);
+
+              if ( scaleGizmo.processKeyPressedEventAwt(e) ) {
+                  S = scaleGizmo.getTransformationMatrix();
+                  s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
+                  gi.setScale(s);
+                  canvas.repaint();
+              }
+          }
+      }
+
+      // Global commands
+      if ( keycode == KeyEvent.VK_ESCAPE) System.exit(0);
+
+      if ( unicode_id != e.CHAR_UNDEFINED ) {
+          switch ( unicode_id ) {
+            case 'c':
+              statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
+              interactionMode = CAMERA_INTERACTION_MODE;
+              canvas.repaint();
+              break;
+
+            case 'q':
+              statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
+              interactionMode = SELECT_INTERACTION_MODE;
+              canvas.repaint();
+              break;
+
+            case 'w':
+              statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+              interactionMode = TRANSLATE_INTERACTION_MODE;
+              canvas.repaint();
+              break;
+
+            case 'e':
+              statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
+              interactionMode = ROTATE_INTERACTION_MODE;
+              canvas.repaint();
+              break;
+
+            case 'r':
+              statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
+              interactionMode = SCALE_INTERACTION_MODE;
+              canvas.repaint();
+              break;
+          }
+      }
+
+      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+          canvas.setCursor(camrotateCursor);
+      }
+      else {
+          canvas.setCursor(selectCursor);
+      }
+
   }
+
+  private void reportObjectSelection()
+  {
+      if ( theScene.selectedThingIndex <= -1 ) {
+          statusMessage.setText("All things are UNSELECTED");
+      }
+      else {
+          statusMessage.setText("Thing [" + theScene.selectedThingIndex + 
+                                "] selected, which is a [" + 
+((RayableObject)(theScene.things.get(theScene.selectedThingIndex))).getGeometry().getClass().getName() 
+                                + "]");
+      }
+  }
+
 
   public void keyReleased(KeyEvent e) {
       if ( interactionMode == CAMERA_INTERACTION_MODE && 

@@ -2,6 +2,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
@@ -26,6 +27,7 @@ public class Scene
     public SimpleCorridor corridor;
     public boolean showCorridor;
     public ArrayList<RayableObject> things;
+    public int selectedThingIndex; // Negative when none selected
 
     Scene()
     {
@@ -33,6 +35,7 @@ public class Scene
         things = new ArrayList<RayableObject>();
         camera = new Camera();
         activeCamera = camera;
+        selectedThingIndex = -1;
 
         //-----------------------------------------------------------------
         simpleBackground = new SimpleBackground();
@@ -74,7 +77,29 @@ public class Scene
 
         //-----------------------------------------------------------------
         corridor = new SimpleCorridor();
-        showCorridor = true;
+        showCorridor = false;
+    }
+
+    public void selectObjectMouse(int x, int y)
+    {
+        Ray r;
+        RayableObject gi;
+
+        activeCamera.updateVectors();
+        r = activeCamera.generateRay(x, y);
+
+        r.t = Float.MAX_VALUE;
+
+        Iterator i;
+        int index = 0;
+
+        selectedThingIndex = -1;
+        for ( i = things.iterator(); i.hasNext(); index++ ) {
+            gi = (RayableObject)i.next();
+            if ( gi.doIntersection(r) ) {
+                selectedThingIndex = index;
+            }
+    }
     }
 
     public void print()
