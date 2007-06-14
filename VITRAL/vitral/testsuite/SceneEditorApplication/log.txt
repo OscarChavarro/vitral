@@ -72,4 +72,10 @@ March 29 2006, Oscar Chavarro:
     intersection and minmax operations and test schema in the scene application
 
 April 6 2006, Oscar Chavarro:
-  - 7:23pm-> Zbuffer access operations
+  - 1:30min: Zbuffer access operations with palette color encoding
+  - 25min: Palette selection option and testing
+  - 1h Gizmo design (no coding, just analysis)
+
+April 7 2006, Oscar Chavarro:
+  - 1h55min: Basic TranslateGizmo geometric model  :-)
+  - 4:XXpm ->

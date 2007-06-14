@@ -3,6 +3,7 @@
 // involved. This will help him to dominate the involved libraries.
 
 // Java basic classes
+import java.io.File;
 import java.io.FileReader;
 
 // Java GUI classes
@@ -19,6 +20,7 @@ import javax.swing.border.Border;
 import javax.swing.BorderFactory; 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JFileChooser;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -37,6 +39,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -49,9 +52,56 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.io.geometry.ReaderObj;
+import vsdk.toolkit.io.image.RGBColorPaletteBuilder;
 
 // Internal classes
 import gui.GuiCache;
+
+abstract class SuffixAwareFilter
+    extends javax.swing.filechooser.FileFilter {
+
+  public String getSuffix(File f) {
+    String s = f.getPath(), suffix = null;
+    int i = s.lastIndexOf('.');
+
+    if (i > 0 && i < s.length() - 1) {
+      suffix = s.substring(i + 1).toLowerCase();
+    }
+
+    return suffix;
+  }
+
+  public boolean accept(File f) {
+    return f.isDirectory();
+  }
+
+}
+
+class MyFilter
+    extends SuffixAwareFilter {
+  private String suffix;
+  private String description;
+
+  public MyFilter(String suffix, String description) {
+    this.suffix = suffix;
+    this.description = description;
+  }
+
+  public boolean accept(File f) {
+    boolean accept = super.accept(f);
+    if (!accept) {
+      String _suffix = getSuffix(f);
+      if (suffix != null) {
+        accept = suffix.equals(_suffix);
+      }
+    }
+    return accept;
+  }
+
+  public String getDescription() {
+    return description + " (*." + suffix + ")";
+  }
+}
 
 public class SceneEditorApplication {
     // Application model
@@ -60,6 +110,7 @@ public class SceneEditorApplication {
     public RGBImage zbufferImage;
     public int raytracedImageWidth;
     public int raytracedImageHeight;
+    public RGBColorPalette palette;
 
     // Application GUI
     public JoglDrawingArea drawingArea;
@@ -99,6 +150,16 @@ public class SceneEditorApplication {
         raytracedImage = new RGBImage();
         raytracedImageWidth = 320;
         raytracedImageHeight = 240;
+
+        palette = null;
+        try {
+            palette = RGBColorPaletteBuilder.importGimpPalette(new java.io.FileReader("../../etc/palettes/Cranes.gpl"));
+        }
+        catch (Exception e) {
+            System.err.println(e);
+            System.exit(0);
+        }
+
     }
 
     private JPanel createStatusBar()
@@ -350,10 +411,13 @@ class ButtonsPanel extends JPanel implements ActionListener
             break;
 
           case 4:
-            b = new JButton("Obtain Zbuffer Image");
+            b = new JButton("Select palette for depthmap display");
             configureButton(b);
 
             b = new JButton("Obtain Zbuffer Depthmap");
+            configureButton(b);
+
+            b = new JButton("Obtain Zbuffer Image");
             configureButton(b);
 
             b = new JButton("Raytrace Scene");
@@ -529,6 +593,29 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
+        }
+        else if ( label == "Select palette for depthmap display" ) {
+            JFileChooser jfc = null;
+            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/palettes");
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
+            jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
+            int opc = jfc.showOpenDialog(new JPanel());
+            if (opc == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File file = jfc.getSelectedFile();
+
+
+                    parent.palette = RGBColorPaletteBuilder.importGimpPalette(new java.io.FileReader(file.getAbsolutePath()));
+
+
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to read file");
+                    return;
+                }
+            }
+
         }
         else if ( label == "Obtain Zbuffer Image" ) {
             parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");

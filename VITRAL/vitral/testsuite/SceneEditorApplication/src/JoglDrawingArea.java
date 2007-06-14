@@ -33,7 +33,6 @@ import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
-import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -88,7 +87,7 @@ public class JoglDrawingArea implements
         //cameraController = new CameraControllerGravZero(theScene.camera);
         //cameraController = new CameraControllerBlender(theScene.camera);
         cameraController = new CameraControllerAquynza(theScene.camera);
-        translationGizmo = new TranslateGizmo();
+        translationGizmo = new TranslateGizmo(theScene.camera);
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
 
@@ -139,7 +138,11 @@ public class JoglDrawingArea implements
 
     private void drawGizmos(GL gl)
     {
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        // Pending: Turn off scene light and turn on gizmo specific lighting
+
+        translationGizmo.setCamera(theScene.activeCamera);
+
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
         if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
             if ( theScene.selectedThingIndex >= 0 ) {
               Vector3D position;
@@ -147,8 +150,15 @@ public class JoglDrawingArea implements
 
               gi = theScene.things.get(theScene.selectedThingIndex);
 
+              Matrix4x4 composed;
+
               position = gi.getPosition();
-              translationGizmo.setTransformationMatrix(gi.getRotation());
+              composed = new Matrix4x4(gi.getRotation());
+              composed.M[0][3] = position.x;
+              composed.M[1][3] = position.y;
+              composed.M[2][3] = position.z;
+              translationGizmo.setTransformationMatrix(composed);
+
               JoglTranslateGizmoRenderer.draw(gl, translationGizmo, position);
             }
         }
@@ -179,38 +189,8 @@ public class JoglDrawingArea implements
         gl.glEnable(gl.GL_DEPTH_TEST);
     }
 
-    private void drawObjectsGL(GL gl)
+    private void copyColorBufferIfNeeded(GL gl)
     {
-        JoglSceneRenderer.draw(gl, theScene);
-
-    // Draw world coordinates reference frame
-/*
-        gl.glLineWidth(3.0f);
-        gl.glBegin(GL.GL_LINES);
-            gl.glColor3d(1, 0, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(1, 0, 0);
-
-            gl.glColor3d(0, 1, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 1, 0);
-
-            gl.glColor3d(0, 0, 1);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 0, 1);
-        gl.glEnd();
-*/
-
-    // Must be the last to draw
-        drawGizmos(gl);
-    }
-
-    /** Called by drawable to initiate drawing */
-    public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
-
-        drawObjectsGL(gl);
-
         if ( wantToGetColor ) {
             parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
             if ( parent.imageControlWindow == null ) {
@@ -223,17 +203,11 @@ public class JoglDrawingArea implements
             parent.statusMessage.setText("ZBuffer Color Image obtained!");
             wantToGetColor = false;
     }
+    }
+    private void copyZBufferIfNeeded(GL gl)
+    {
         if ( wantToGetDepth ) {
-            RGBColorPalette p = null;
-            try {
-                p = vsdk.toolkit.io.image.RGBColorPaletteBuilder.importGimpPalette(new java.io.FileReader("../../etc/palettes/Topographic.gpl"));
-            }
-            catch (Exception e) {
-                System.err.println(e);
-                System.exit(0);
-            }
-
-            parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(p);
+            parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(parent.palette);
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage);
         }
@@ -244,6 +218,22 @@ public class JoglDrawingArea implements
             parent.statusMessage.setText("ZBuffer depth map obtained!");
             wantToGetDepth = false;
     }
+    }
+
+    /** Called by drawable to initiate drawing */
+    public void display(GLAutoDrawable drawable) {
+        GL gl = drawable.getGL();
+
+        JoglSceneRenderer.draw(gl, theScene);
+
+        // Note that gizmo information will not be reported, as they damage
+        // the zbuffer...
+        copyZBufferIfNeeded(gl);
+
+      // Must be the last to draw
+        drawGizmos(gl);
+
+        copyColorBufferIfNeeded(gl);
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
