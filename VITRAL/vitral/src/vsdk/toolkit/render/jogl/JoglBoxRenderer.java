@@ -1,40 +1,48 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - March 14 2006 - Oscar Chavarro: Original base version                 =
+//= - March 20 2006 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUquadric;
 import com.sun.opengl.util.GLUT;
 
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.Box;
 
-public class JoglSphereRenderer {
+public class JoglBoxRenderer {
 
     private static GLUT glut = null;
 
-    public static void draw(GL gl, Sphere s, Camera c, QualitySelection q)
+    public static void draw(GL gl, Box box, Camera c, QualitySelection q)
     {
         if (glut == null) {
             glut = new GLUT();
         }
+
+        Vector3D size = box.getSize();
+
+        gl.glPushMatrix();
+        gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
-            glut.glutSolidSphere(s.getRadius(), 20, 10);
+        glut.glutSolidCube(1);
         }
 
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);
-            glut.glutWireSphere(s.getRadius(), 20, 10);
+        glut.glutWireCube(1);
         }
+        gl.glPopMatrix();
 
         if ( q.isBoundingVolumeSet() ) {
-            JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
+            JoglGeometryRenderer.drawMinMaxBox(gl, box, q);
     }
-
     }
 
 }

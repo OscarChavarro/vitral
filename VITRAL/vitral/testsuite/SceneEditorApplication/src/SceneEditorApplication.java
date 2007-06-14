@@ -18,7 +18,6 @@ import java.awt.event.ActionListener;
 import javax.swing.border.Border; 
 import javax.swing.BorderFactory; 
 import javax.swing.BoxLayout;
-import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -41,8 +40,10 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.RayableObject;
 
 // Internal classes
@@ -332,6 +333,9 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Toggle test corridor");
             configureButton(b);
 
+            b = new JButton("Toggle grid");
+            configureButton(b);
+
             b = new JButton("Print scene report in console");
             configureButton(b);
 
@@ -408,10 +412,22 @@ class ButtonsPanel extends JPanel implements ActionListener
         return m;
     }
 
+    private void addThing(Geometry g)
+    {
+        RayableObject thing;
+
+        thing = new RayableObject();
+        thing.setGeometry(g);
+        thing.setPosition(new Vector3D());
+        thing.setRotation(new Matrix4x4());
+        thing.setRotationInverse(new Matrix4x4());
+        thing.setMaterial(defaultMaterial());
+        parent.theScene.things.add(thing);
+    }
+
     public void actionPerformed(ActionEvent ev) {
         String label = ev.getActionCommand();
 
-        RayableObject thing;
         Light light;
 
         if ( label == "Motif" ) {
@@ -430,25 +446,19 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.drawingArea.rotateBackground();
         }
         else if ( label == "Create Sphere" ) {
-            thing = new RayableObject();
-            thing.setGeometry(new Sphere(1));
-            thing.setPosition(new Vector3D());
-            thing.setRotation(new Matrix4x4());
-            thing.setRotationInverse(new Matrix4x4());
-            thing.setMaterial(defaultMaterial());
-            parent.theScene.things.add(thing);
+            addThing(new Sphere(1));
         }
         else if ( label == "Create Cone/Cylinder" ) {
-            thing = new RayableObject();
-            thing.setGeometry(new Cone(1, 0, 2));
-            thing.setPosition(new Vector3D());
-            thing.setRotation(new Matrix4x4());
-            thing.setRotationInverse(new Matrix4x4());
-            thing.setMaterial(defaultMaterial());
-            parent.theScene.things.add(thing);
+            addThing(new Cone(1, 0, 2));
+        }
+        else if ( label == "Create Cube" ) {
+            addThing(new Box(1, 1, 1));
+        }
+        else if ( label == "Create Box" ) {
+            addThing(new Box(1, 2, 3));
         }
         else if ( label == "Create Light" ) {
-            light = new Light(Light.POINT, new Vector3D(10, 9, 8), new ColorRgb(1, 1, 1));
+            light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.lights.add(light);
         }
         else if ( label == "Toggle test corridor" ) {
@@ -457,6 +467,14 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
             else {
                 parent.theScene.showCorridor = true;
+            }
+        }
+        else if ( label == "Toggle grid" ) {
+            if ( parent.theScene.showGrid == true ) {
+                parent.theScene.showGrid = false;
+            }
+            else {
+                parent.theScene.showGrid = true;
             }
         }
         else if ( label == "Print scene report in console" ) {

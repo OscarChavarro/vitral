@@ -212,19 +212,24 @@ public class Raytracer {
     and its combination with geometric transformations.
     */
     public RayableObject 
-    trazar_rayo_en_escena(Ray inRay, ArrayList inRayableObjectArray) {
+    trazar_rayo_en_escena(Ray inOut_Ray, ArrayList inRayableObjectArray) {
         Iterator i;
         RayableObject gi;
         RayableObject nearestObject;
+        double nearestDistance;
 
-        inRay.t = INFINITO;
+        nearestDistance = INFINITO;
         nearestObject = null;
         for ( i = inRayableObjectArray.iterator(); i.hasNext(); ) {
+            inOut_Ray.t = INFINITO;
             gi = (RayableObject)i.next();
-            if ( gi.doIntersection(inRay) ) {
+            if ( gi.doIntersection(inOut_Ray) && 
+                 inOut_Ray.t < nearestDistance ) {
+                nearestDistance = inOut_Ray.t;
                 nearestObject = gi;
             }
         }
+        inOut_Ray.t = nearestDistance;
         return nearestObject;
     }
 

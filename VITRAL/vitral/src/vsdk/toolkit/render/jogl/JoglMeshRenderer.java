@@ -89,7 +89,7 @@ public class JoglMeshRenderer
         }
         if (quality.isBoundingVolumeSet())
         {
-            drawBoundingVolume(gl, mesh);
+            //drawBoundingVolume(gl, mesh);
         }
         if (quality.isTextureSet())
         {
@@ -228,36 +228,6 @@ else {
             gl.glEnd();
         }
       }
-
-    public static void drawBoundingVolume(GL gl, Mesh mesh)
-    {
-        gl.glBegin(gl.GL_LINE_LOOP);
-        {
-
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(1), mesh.getMinMaxAt(5)); // 6
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(1), mesh.getMinMaxAt(5)); // 5
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(4), mesh.getMinMaxAt(5)); // 8
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(4), mesh.getMinMaxAt(5)); // 7
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(1), mesh.getMinMaxAt(5)); // 6
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(1), mesh.getMinMaxAt(2)); // 1
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(4), mesh.getMinMaxAt(2)); // 2
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(4), mesh.getMinMaxAt(5)); // 7
-        }
-        gl.glEnd();
-
-        gl.glBegin(gl.GL_LINE_LOOP);
-        {
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(1), mesh.getMinMaxAt(2)); // 4
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(4), mesh.getMinMaxAt(2)); // 3
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(4), mesh.getMinMaxAt(2)); // 2
-            gl.glVertex3d(mesh.getMinMaxAt(0), mesh.getMinMaxAt(1), mesh.getMinMaxAt(2)); // 1
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(1), mesh.getMinMaxAt(2)); // 4
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(1), mesh.getMinMaxAt(5)); // 5
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(4), mesh.getMinMaxAt(5)); // 8
-            gl.glVertex3d(mesh.getMinMaxAt(3), mesh.getMinMaxAt(4), mesh.getMinMaxAt(2)); // 3
-        }
-        gl.glEnd();
-    }
 
     public static void drawTexture(GL gl, Mesh mesh)
     {

@@ -16,6 +16,7 @@ public abstract class Geometry {
     public abstract boolean doIntersection(Ray r);
     public abstract void doExtraInformation(Ray inRay, double intT, 
                                       GeometryIntersectionInformation outData);
+    public abstract double[] getMinMax();
 }
 
 //===========================================================================

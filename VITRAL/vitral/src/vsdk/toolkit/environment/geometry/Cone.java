@@ -68,7 +68,7 @@ public class Cone extends Geometry {
 
         //- Translacion para concordar con la interpretacion AQUYNZA --------
         Ray r = new Ray(inOutRay);
-        r.origin.z -= inH/2;
+        r.origin.z -= inH;
         r.direction.normalize();
 
         //- Calcula el termino A --------------------------------------------
@@ -114,7 +114,7 @@ public class Cone extends Geometry {
             outInfo.n.z = -outInfo.p.z * VSDK.square(inR/inH);
             outInfo.n.normalize();
     
-            outInfo.p.z += inH/2;
+            outInfo.p.z += inH;
             inOutRay.t = t0;
 
             return true;
@@ -167,7 +167,7 @@ public class Cone extends Geometry {
 
         //- Cone case -----------------------------------------------------
         if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            tap1 = doIntersectionTap(tap1Ray, r1, -h/2, infoTap1);
+            tap1 = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
             body = doIntersectionCone(bodyRay, r1, h, infoBody);
             if ( (tap1 && !body) ||
                  (tap1 && body && (tap1Ray.t < bodyRay.t)) ) {
@@ -201,6 +201,23 @@ public class Cone extends Geometry {
         outData.p = lastInfo.p;
         outData.n = lastInfo.n;
         outData.n.normalize();
+    }
+
+    public double[] getMinMax()
+    {
+        // TODO!
+        double [] minmax = new double[6];
+
+        double r = Math.max(r1, r2);
+
+        minmax[0] = -r;
+        minmax[1] = -r;
+        minmax[2] = 0;
+        minmax[3] = r;
+        minmax[4] = r;
+        minmax[5] = h;
+
+        return minmax;
     }
 
 }

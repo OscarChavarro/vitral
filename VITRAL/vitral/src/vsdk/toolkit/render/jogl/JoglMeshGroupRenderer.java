@@ -67,9 +67,9 @@ public class JoglMeshGroupRenderer {
           gl.glDepthMask(false);
           gl.glColor3f(0, 0, 1);
 
-          JoglMeshRenderer.drawBoundingVolume(gl, mesh);
+          //JoglMeshRenderer.drawBoundingVolume(gl, mesh);
         }
-                drawBoundingVolume(gl,meshGroup);
+                //drawBoundingVolume(gl,meshGroup);
         gl.glPopAttrib();
 
       }
@@ -128,36 +128,4 @@ public class JoglMeshGroupRenderer {
 
   }
   
-  private static void drawBoundingVolume(GL gl,MeshGroup meshGroup)
-  {
-        gl.glColor3f(0, 1, 0);
-        meshGroup.calculateMinMaxPositions();
-        double [] MinMax = meshGroup.getMinMax();
-        
-        gl.glBegin(gl.GL_LINE_LOOP);
-        {
-            gl.glVertex3d(MinMax[0], MinMax[1], MinMax[5]); // 6
-            gl.glVertex3d(MinMax[3], MinMax[1], MinMax[5]); // 5
-            gl.glVertex3d(MinMax[3], MinMax[4], MinMax[5]); // 8
-            gl.glVertex3d(MinMax[0], MinMax[4], MinMax[5]); // 7
-            gl.glVertex3d(MinMax[0], MinMax[1], MinMax[5]); // 6
-            gl.glVertex3d(MinMax[0], MinMax[1], MinMax[2]); // 1
-            gl.glVertex3d(MinMax[0], MinMax[4], MinMax[2]); // 2
-            gl.glVertex3d(MinMax[0], MinMax[4], MinMax[5]); // 7
-        }
-        gl.glEnd();
-
-        gl.glBegin(gl.GL_LINE_LOOP);
-        {
-            gl.glVertex3d(MinMax[3], MinMax[1], MinMax[2]); // 4
-            gl.glVertex3d(MinMax[3], MinMax[4], MinMax[2]); // 3
-            gl.glVertex3d(MinMax[0], MinMax[4], MinMax[2]); // 2
-            gl.glVertex3d(MinMax[0], MinMax[1], MinMax[2]); // 1
-            gl.glVertex3d(MinMax[3], MinMax[1], MinMax[2]); // 4
-            gl.glVertex3d(MinMax[3], MinMax[1], MinMax[5]); // 5
-            gl.glVertex3d(MinMax[3], MinMax[4], MinMax[5]); // 8
-            gl.glVertex3d(MinMax[3], MinMax[4], MinMax[2]); // 3
-        }
-        gl.glEnd();
-  }
 }

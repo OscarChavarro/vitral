@@ -78,7 +78,7 @@ public class QualitySelection {
         this.wires = b;
     }
 
-    public void setBoundignVolume(boolean b)
+    public void setBoundingVolume(boolean b)
     {
         this.boundingVolume = b;
     }

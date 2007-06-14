@@ -1,6 +1,6 @@
 clear
 # -Xms800m -Xmx800m
 rm -f output.ppm
-time java -Xms300m -Xmx300m -classpath ./classes:../../lib/vsdk.jar:../../lib/vitral_transition.jar RaytracerSimple
+time java -Xms300m -Xmx300m -classpath ./classes:../../lib/vsdk.jar RaytracerSimple
 display output.ppm
 cd ..

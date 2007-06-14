@@ -30,28 +30,36 @@ March 15 2006, Oscar Chavarro: 295min
     account the selected interaction mode.
   - 50min: Cursor feedback interaccion research... changing cursor image...
 
-March 15 2006, Oscar Chavarro: 320
+March 15 2006, Oscar Chavarro: 320min
   - 1h40min: Building first gizmos into the vsdk toolkit, and testing in this
     program. This implied activating the QualitySelection Infraestructure.
     Basic interactive selection mechanisms implemented, using arrows keys
     and the ray intersection mouse click selection technique.
   - 45min tests with TranslationGizmo ... :-)
-  - 1h15min -> Implemented basic rotate and scale gizmos
-  - 1h40min -> Implemented basic Jogl gizmos renderers  :-)
+  - 1h15min: Implemented basic rotate and scale gizmos
+  - 1h40min: Implemented basic Jogl gizmos renderers  :-)
 
-March 16 2006, Oscar Chavarro: 65
+March 16 2006, Oscar Chavarro: 65min
   - 1h5min Adding lights to the model (incomplete)
 
-March 16 2006, Oscar Chavarro: 85
+March 16 2006, Oscar Chavarro: 85min
   - 55min: Fixing lighting not anticipated issue: updated Material and light 
     renderers in the toolkit
   - 30min: Added cone feature
 
-<<TOTAL>> 1033 min (17h13min)
-
-March 16 2006, Oscar Chavarro:
+March 19 2006, Oscar Chavarro: 183min
   - 14min: Cleaning jogl package in toolkit 
   - 40min: Developing interface ProgressMonitor and Console implementation
   - 35min: Adding raytracing render option to editor and image control window
   - 50min: Preparing raytracing example for reuse
   - 44min: Adding raytracing functionality to the application :)
+
+March 20 2006, Oscar Chavarro: 106min
+  - 29min: Making reference plane for the editor
+  - 35min: Updating toolkit to manage rendering of minmaxes and minmaxframes
+           (first version, only accurate with Spheres)
+  - 10min: Reconfiguring interpretation of Cones in toolkit (centered in
+           its base)
+  - 32min: Integration of Box, and reconvertion from Cube
+
+<<TOTAL>> 1322 min (22h02min)

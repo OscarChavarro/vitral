@@ -171,7 +171,9 @@ public class JoglDrawingArea implements
     {
         JoglSceneRenderer.draw(gl, theScene);
 
-        gl.glLineWidth((float)3.0);
+    // Draw world coordinates reference frame
+/*
+        gl.glLineWidth(3.0f);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
@@ -185,6 +187,7 @@ public class JoglDrawingArea implements
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
+*/
 
     // Must be the last to draw
         drawGizmos(gl);
@@ -270,7 +273,7 @@ public class JoglDrawingArea implements
                   interactionMode == ROTATE_INTERACTION_MODE || 
                   interactionMode == SCALE_INTERACTION_MODE 
                  ) {
-          theScene.selectObjectMouse(e.getX(), e.getY());
+          theScene.selectObjectWithMouse(e.getX(), e.getY());
           reportObjectSelection();
           canvas.repaint();
       }
@@ -469,6 +472,16 @@ public class JoglDrawingArea implements
               interactionMode = SCALE_INTERACTION_MODE;
               canvas.repaint();
               break;
+
+        case 'g':
+              if ( theScene.showGrid == true ) {
+                  theScene.showGrid = false;
+              }
+              else {
+                  theScene.showGrid = true;
+              }
+              canvas.repaint();
+          break;
           }
       }
 

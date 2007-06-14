@@ -2,6 +2,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
@@ -32,6 +34,7 @@ public class Scene
     //- 4. Objects ---------------------------------------------------------
     public SimpleCorridor corridor;
     public boolean showCorridor;
+    public boolean showGrid;
     public ArrayList<RayableObject> things;
     public int selectedThingIndex; // Negative when none selected
 
@@ -40,13 +43,19 @@ public class Scene
         //-----------------------------------------------------------------
         things = new ArrayList<RayableObject>();
         lights = new ArrayList<Light>();
+
+        Matrix4x4 R = new Matrix4x4();
+        R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
         camera = new Camera();
+        camera.setPosition(new Vector3D(-5, -5, 5));
+        camera.setRotation(R);
+
         activeCamera = camera;
         selectedThingIndex = -1;
 
         //-----------------------------------------------------------------
         simpleBackground = new SimpleBackground();
-        simpleBackground.setColor(0, 0, 0);
+        simpleBackground.setColor(0.49, 0.49, 0.49);
 
         RGBAImage front, right, back, left, down, up;
 
@@ -85,9 +94,10 @@ public class Scene
         //-----------------------------------------------------------------
         corridor = new SimpleCorridor();
         showCorridor = false;
+        showGrid = true;
     }
 
-    public void selectObjectMouse(int x, int y)
+    public void selectObjectWithMouse(int x, int y)
     {
         Ray r;
         RayableObject gi;
@@ -95,7 +105,7 @@ public class Scene
         activeCamera.updateVectors();
         r = activeCamera.generateRay(x, y);
 
-        r.t = Float.MAX_VALUE;
+        double nearestDistance = Float.MAX_VALUE;
 
         Iterator i;
         int index = 0;
@@ -103,7 +113,8 @@ public class Scene
         selectedThingIndex = -1;
         for ( i = things.iterator(); i.hasNext(); index++ ) {
             gi = (RayableObject)i.next();
-            if ( gi.doIntersection(r) ) {
+            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
+                nearestDistance = r.t;
                 selectedThingIndex = index;
             }
     }

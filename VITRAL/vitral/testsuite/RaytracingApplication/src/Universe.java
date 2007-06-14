@@ -23,7 +23,7 @@ import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.Cube;
+import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
@@ -144,7 +144,7 @@ public class Universe
 
                   imprimirMensaje("cube");
                   thing = new RayableObject();
-          thing.setGeometry(new Cube(r));
+          thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);

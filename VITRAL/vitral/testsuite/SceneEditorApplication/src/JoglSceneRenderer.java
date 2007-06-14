@@ -60,13 +60,14 @@ public class JoglSceneRenderer
             scale = gi.getScale();
 
             quality = new QualitySelection();
+            quality.setSurfaces(true);
+            quality.setWires(false);
+
             if ( j == s.selectedThingIndex ) {
-                quality.setSurfaces(true);
-                quality.setWires(false);
+                quality.setBoundingVolume(true);
             }
             else {
-                quality.setSurfaces(false);
-                quality.setWires(true);
+                quality.setBoundingVolume(false);
             }
 
             gl.glPushMatrix();
@@ -90,5 +91,44 @@ public class JoglSceneRenderer
             JoglLightRenderer.draw(gl, l);
         }
 
+        // Draw reference grid plane
+        if ( s.showGrid ) drawGridRectangle(gl);
+
     }
+
+    private static void drawGridRectangle(GL gl)
+    {
+        int nx = 14; // Must be an even number
+        int ny = 14; // Must be an even number
+        double dx = 1.0;
+        double dy = 1.0;
+        int x, y;
+        double minx = -(((double)nx)/2) * dx;
+        double maxx = (((double)nx)/2) * dx;
+        double miny = -(((double)ny)/2) * dy;
+        double maxy = (((double)ny)/2) * dy;
+
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glLineWidth(1.0f);
+        gl.glBegin(GL.GL_LINES);
+        gl.glColor3d(0.37, 0.37, 0.37);
+        for ( x = 0; x <= nx; x++ ) {
+            if ( x == nx/2 ) continue;
+        gl.glVertex3d(minx + ((double)x)*dx, miny, 0);
+        gl.glVertex3d(minx + ((double)x)*dx, maxy, 0);
+    }
+        for ( y = 0; y <= ny; y++ ) {
+            if ( y == ny/2 ) continue;
+        gl.glVertex3d(minx, minx + ((double)y)*dy, 0);
+        gl.glVertex3d(maxx, minx + ((double)y)*dy, 0);
+    }
+        gl.glColor3d(0, 0, 0);
+    gl.glVertex3d(minx + ((double)(nx/2))*dx, miny, 0);
+    gl.glVertex3d(minx + ((double)(nx/2))*dx, maxy, 0);
+    gl.glVertex3d(minx, minx + ((double)(ny/2))*dy, 0);
+        gl.glVertex3d(maxx, minx + ((double)(ny/2))*dy, 0);
+
+        gl.glEnd();
+    }
+
 }

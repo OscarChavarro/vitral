@@ -15,11 +15,13 @@ public class Sphere extends Geometry {
     private double _radio;
     private double _radio_al_cuadrado;
     private Vector3D _static_delta;
+    private double [] _static_minmax;
 
     public Sphere(double r) {
         _radio = r;
         _radio_al_cuadrado = _radio*_radio;
         _static_delta = new Vector3D();
+        _static_minmax = new double[6];
     }
 
     /**
@@ -61,12 +63,6 @@ public class Sphere extends Geometry {
         _static_delta.z = -inout_rayo.origin.z;
         double v = inout_rayo.direction.dotProduct(_static_delta);
 
-        // Do the following quick check to see if there is even a chance
-        // that an intersection here might be closer than a previous one
-        if ( v - _radio > inout_rayo.t ) {
-            return false;
-        }
-
         // Test if the inout_rayo actually intersects the sphere
         double t = _radio_al_cuadrado + v*v 
                   - _static_delta.x*_static_delta.x 
@@ -77,9 +73,9 @@ public class Sphere extends Geometry {
         }
 
         // Test if the intersection is in the positive
-        // inout_rayo direction and it is the closest so far
+        // inout_rayo direction
         t = v - Math.sqrt(t);
-        if ( (t > inout_rayo.t) || (t < 0) ) {
+        if ( t < 0 ) {
             return false;
         }
 
@@ -109,6 +105,17 @@ public class Sphere extends Geometry {
         outData.n.y = outData.p.y;
         outData.n.z = outData.p.z;
         outData.n.normalize();
+    }
+
+    public double[] getMinMax()
+    {
+        for ( int i = 0; i < 3; i++ ) {
+        _static_minmax[i] = -_radio;
+    }
+        for ( int i = 3; i < 6; i++ ) {
+        _static_minmax[i] = _radio;
+    }
+        return _static_minmax;
     }
 
     public double getRadius()

@@ -2,6 +2,9 @@
 # This file is the result of feeding "balls" from Eric Haines'
 # SPD through nff2shade.awk and then hand-tweaking things.
 #
+
+viewport 640 480
+
 eye 2.1 1.3 1.7
 up 0 0 1
 lookat 0 0 0
