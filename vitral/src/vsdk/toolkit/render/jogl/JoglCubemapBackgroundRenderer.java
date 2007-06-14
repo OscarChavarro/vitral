@@ -54,7 +54,6 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         gl.glEnable(gl.GL_TEXTURE_2D);
 
-
         // Front
         JoglRGBAImageRenderer.activate(gl, images[0]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
@@ -94,14 +93,14 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
             gl.glVertex3d( 1,  1, -1);
         gl.glEnd();
 
-        // Back
-        JoglRGBAImageRenderer.activate(gl, images[2]);
+        // Left
+        JoglRGBAImageRenderer.activate(gl, images[3]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
                            gl.GL_NEAREST);
         gl.glLoadIdentity();
-        gl.glRotated(180, 0, 0, 1);
+        gl.glRotated(90, 0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
             gl.glNormal3d(0, -1, 0);
             gl.glTexCoord2f(1, 1);
@@ -114,14 +113,14 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
             gl.glVertex3d( 1,  1, -1);
         gl.glEnd();
 
-        // Left
-        JoglRGBAImageRenderer.activate(gl, images[3]);
+        // Back
+        JoglRGBAImageRenderer.activate(gl, images[2]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
                            gl.GL_NEAREST);
         gl.glLoadIdentity();
-        gl.glRotated(90, 0, 0, 1);
+        gl.glRotated(180, 0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
             gl.glNormal3d(0, -1, 0);
             gl.glTexCoord2f(1, 1);

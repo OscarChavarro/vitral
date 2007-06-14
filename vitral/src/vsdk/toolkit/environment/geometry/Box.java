@@ -18,8 +18,8 @@ public class Box extends Solid {
 
     private Vector3D size;
 
-    GeometryIntersectionInformation lastInfo;
-    int lastPlane;
+    private GeometryIntersectionInformation lastInfo;
+    private int lastPlane;
 
     public Box(double dx, double dy, double dz) {
         size = new Vector3D(dx, dy, dz);
@@ -33,6 +33,11 @@ public class Box extends Solid {
 
         lastInfo = new GeometryIntersectionInformation();
         lastPlane = 0;
+    }
+
+    public int getLastIntersectedPlane()
+    {
+        return lastPlane;
     }
 
     /**

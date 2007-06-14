@@ -1,5 +1,4 @@
-import java.util.Iterator;
-
+//===========================================================================
 import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.Vector3D;
@@ -40,6 +39,7 @@ public class JoglSceneRenderer
 
     public static void draw(GL gl, Scene s)
     {
+        int i;
         Image texture;
 
         drawBackground(gl, s);
@@ -63,21 +63,20 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
         }
 
-        for ( Iterator i = s.lights.iterator(); i.hasNext(); ) {
-            Light l = (Light)i.next();
+        for ( i = 0; i < s.lights.size(); i++ ) {
+            Light l = s.lights.get(i);
             JoglLightRenderer.activate(gl, l);
         }
 
-        int j = 0;
-        for ( Iterator i = s.things.iterator(); i.hasNext(); j++ ) {
+        for ( i = 0; i < s.things.size(); i++ ) {
             RendererConfiguration quality;
-            gi = ((SimpleBody)i.next());
+            gi = s.things.get(i);
             p = gi.getPosition();
             scale = gi.getScale();
 
             quality = s.qualityTemplate;
 
-            if ( s.selectedThings.isSelected(j) ) {
+            if ( s.selectedThings.isSelected(i) ) {
                 quality.setSelectionCorners(true);
             }
             else {
@@ -111,9 +110,8 @@ public class JoglSceneRenderer
 
         }
 
-        for ( Iterator i = s.lights.iterator(); i.hasNext(); j++ ) {
-            Light l = (Light)i.next();
-            JoglLightRenderer.draw(gl, l);
+        for ( i = 0; i < s.lights.size(); i++ ) {
+            JoglLightRenderer.draw(gl, s.lights.get(i));
         }
 
         // Draw reference grid plane
@@ -158,3 +156,7 @@ public class JoglSceneRenderer
     }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

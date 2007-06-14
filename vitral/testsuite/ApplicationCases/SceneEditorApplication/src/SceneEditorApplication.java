@@ -42,6 +42,7 @@ import javax.media.opengl.GLCanvas;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.environment.Camera;
@@ -124,6 +125,9 @@ public class SceneEditorApplication {
     public int raytracedImageWidth;
     public int raytracedImageHeight;
     public RGBColorPalette palette;
+    public boolean withVisualDebugRay;
+    public Ray visualDebugRay;
+    public int visualDebugRayLevels;
 
     // Application GUI
     public GuiCache gui;
@@ -187,6 +191,10 @@ public class SceneEditorApplication {
             System.err.println(e);
             System.exit(0);
         }
+
+        visualDebugRay = new Ray(new Vector3D(0, -1, 0), new Vector3D(0, 1, 0));
+        visualDebugRayLevels = 2;
+        withVisualDebugRay = false;
 
     }
 
@@ -768,6 +776,14 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
         }
+    else if ( label.equals("IDC_TOOLS_RAY") ) {
+            if ( parent.withVisualDebugRay ) {
+                parent.withVisualDebugRay = false;
+        }
+        else {
+                parent.withVisualDebugRay = true;
+        }
+    }
 
         //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();

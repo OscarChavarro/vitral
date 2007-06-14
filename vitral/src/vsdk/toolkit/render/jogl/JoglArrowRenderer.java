@@ -54,10 +54,48 @@ public class JoglArrowRenderer extends JoglRenderer {
             gluQuadric = glu.gluNewQuadric();
         }
 
-        if ( q.isWiresSet() ) {
-            gl.glLineWidth(1);
+        if ( q.isSurfacesSet() ) {
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonOffset(0.0f, 0.0f);
+            drawParts(gl, arrow);
         }
-        drawParts(gl, arrow);
+
+        if ( q.isWiresSet() ) {
+            JoglRenderer.disableNvidiaCgProfiles();
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glShadeModel(gl.GL_FLAT);
+
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glLineWidth(1.0f);
+
+            // Warning: Change with configured color for borders
+            gl.glColor3d(1, 1, 1);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
+            drawParts(gl, arrow);
+        }
+
+        if ( q.isPointsSet() ) {
+            JoglRenderer.disableNvidiaCgProfiles();
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glShadeModel(gl.GL_FLAT);
+
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_POINTS);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glLineWidth(1.0f);
+
+            // Warning: Change with configured color for borders
+            gl.glColor3d(1, 1, 1);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
+            drawParts(gl, arrow);
+        }
 
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, arrow, q);

@@ -129,6 +129,59 @@ public class Vector3D extends FundamentalEntity
 
         return msg;
     }
+
+    /**
+    Taking current vector as tail-anchored to the origin, this method
+    calculates the theta angle (in radians) of the tip, corresponding
+    to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
+    Note that theta goes from 0 to 2*PI, and correspond to an axis of
+    rotation <0, 0, 1>.
+    POST: 0 <= theta <= 2*PI
+    */
+    public double obtainSphericalThetaAngle()
+    {
+        double val;
+    if ( Math.abs(x) > VSDK.EPSILON ) {
+        if ( x > 0 ) val = Math.atan(y/x);
+        else val = Math.PI + Math.atan(y/x);
+    }
+    else if ( y > 0 ) {
+        val = Math.PI/2;
+    }
+    else {
+        val = Math.PI + Math.PI/2;
+    }
+    while ( val < 0 ) val += 2*Math.PI;
+    while ( val > 2*Math.PI ) val -= 2*Math.PI;
+    return val;
+    }
+
+    /**
+    Taking current vector as tail-anchored to the origin, this method
+    calculates the phi angle (in radians) of the tip, corresponding
+    to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
+    Note phi goes from 0 to PI.
+    */
+    public double obtainSphericalPhiAngle()
+    {
+        double r = length();
+
+    if ( r < VSDK.EPSILON ) return 0;
+
+        return Math.acos(z/r);
+    }
+
+    /**
+    Given a point <r, theta, phi> in spherical coordinates, this method sets
+    current vector to corresponding cartesian coordinates <x, y, z>. Angles
+    are in radians.
+    */
+    public void setSphericalCoordinates(double r, double theta, double phi)
+    {
+        x = r * Math.sin(phi) * Math.cos(theta);
+        y = r * Math.sin(phi) * Math.sin(theta);
+        z = r * Math.cos(phi);
+    }
 }
 
 //===========================================================================

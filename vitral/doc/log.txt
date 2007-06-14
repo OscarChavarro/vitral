@@ -225,3 +225,9 @@ Changes in 2007 april 22 revition
 Changes in 2007 may 1 revition
   - Image persistence linked directly to JDK's ImageIO class. Not depending
     on slow and deprecated sun propiertary API anymore.
+
+Changes in 2007 may 2 revition
+  - Vector3D methods for spherical to cartesian and cartesian to spherical
+    coordinate translations
+  - Added visual debug ray control to SceneEditorApplication
+  - CubemapBackground.colorInDireccion correctly implemented

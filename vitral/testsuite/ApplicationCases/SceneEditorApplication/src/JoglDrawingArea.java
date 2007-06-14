@@ -41,8 +41,11 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
+import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.JoglArrowRenderer;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
@@ -70,11 +73,13 @@ public class JoglDrawingArea implements
     public GLCanvas canvas;
 
     private RendererConfiguration qualitySelection;
+    private RendererConfiguration qualitySelectionVisualDebug;
     private CameraController cameraController;
     private RendererConfigurationController qualityController;
     private TranslateGizmo translationGizmo;
     private RotateGizmo rotateGizmo;
     private ScaleGizmo scaleGizmo;
+    private Arrow visualDebugRayGizmo;
 
     private Scene theScene;
     private JLabel statusMessage;
@@ -129,9 +134,13 @@ public class JoglDrawingArea implements
 
         qualitySelection = parent.theScene.qualityTemplate;
         qualityController = new RendererConfigurationController(qualitySelection);
-
+        qualitySelectionVisualDebug = new RendererConfiguration();
+        qualitySelectionVisualDebug.setShadingType(
+            qualitySelectionVisualDebug.SHADING_TYPE_GOURAUD);
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
+
+        visualDebugRayGizmo = new Arrow(1, 0.4, 0.05, 0.1);
 
         canvas = new GLCanvas();
 
@@ -311,31 +320,34 @@ public class JoglDrawingArea implements
         //-----------------------------------------------------------------
         if ( renderMode == RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
-    }
-    else {
-            JoglSceneRenderer.drawBackground(gl, theScene);
-        if ( viewportFullSize ) {
-              parent.raytracedImageWidth = viewportXsize;
-            parent.raytracedImageHeight = viewportYsize;
         }
         else {
-              parent.raytracedImageWidth = viewportXframe;
-            parent.raytracedImageHeight = viewportYframe;
-        }
+            JoglSceneRenderer.drawBackground(gl, theScene);
+            if ( viewportFullSize ) {
+                parent.raytracedImageWidth = viewportXsize;
+                parent.raytracedImageHeight = viewportYsize;
+            }
+            else {
+                parent.raytracedImageWidth = viewportXframe;
+                parent.raytracedImageHeight = viewportYframe;
+            }
             parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
             parent.theScene.raytrace(parent.raytracedImage);
-        gl.glMatrixMode(gl.GL_PROJECTION);
-        gl.glPushMatrix();
+            gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glPushMatrix();
             gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-        gl.glPushMatrix();
+            gl.glMatrixMode(gl.GL_MODELVIEW);
+            gl.glPushMatrix();
             gl.glLoadIdentity();
             JoglImageRenderer.draw(gl, parent.raytracedImage);
-        gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-    }
+            gl.glPopMatrix();
+            gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glPopMatrix();
+            gl.glMatrixMode(gl.GL_MODELVIEW);
+        }
+
+        //-----------------------------------------------------------------
+        drawVisualRayDebug(gl);
 
         //-----------------------------------------------------------------
         // Note that gizmo information will not be reported, as they damage
@@ -347,6 +359,25 @@ public class JoglDrawingArea implements
 
         copyColorBufferIfNeeded(gl);
     }
+
+    private void drawVisualRayDebug(GL gl)
+    {
+        if ( !parent.withVisualDebugRay ) {
+            return;
+        }
+        gl.glEnable(gl.GL_LIGHTING);
+        gl.glPushMatrix();
+        gl.glTranslated(parent.visualDebugRay.origin.x, parent.visualDebugRay.origin.y, parent.visualDebugRay.origin.z);
+        Matrix4x4 R = new Matrix4x4();
+        double yaw, pitch;
+        yaw = parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+        pitch = parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+        R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
+        JoglMatrixRenderer.activate(gl, R);
+        JoglArrowRenderer.draw(gl, visualDebugRayGizmo, theScene.camera, qualitySelectionVisualDebug);
+        gl.glPopMatrix();
+    }
+
 
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
@@ -430,11 +461,11 @@ public class JoglDrawingArea implements
 
           if ( viewportFullSize ) {
               theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
-      }
-      else {
+          }
+          else {
               theScene.selectObjectWithMouse(e.getX()-viewportXpos,
                                              e.getY()-viewportXpos, composite);
-      }
+          }
 
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
                interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -625,6 +656,7 @@ public class JoglDrawingArea implements
   public void keyPressed(KeyEvent e) {
       char unicode_id;
       int keycode;
+      boolean skipKey = false;
 
       unicode_id = e.getKeyChar();
       keycode = e.getKeyCode();
@@ -752,49 +784,160 @@ public class JoglDrawingArea implements
             parent.imageControlWindow.redrawImage();
       }
 
-      if ( unicode_id != e.CHAR_UNDEFINED ) {
+      if ( keycode == KeyEvent.VK_0 ) {
+          // Alphanumeric 0
+          skipKey = true;
+          switch ( viewportXframe ) {
+            case 0:
+              viewportXframe = 320;
+              viewportYframe = 240;
+              viewportFullSize = false;
+              break;
+            case 320:
+              viewportXframe = 640;
+              viewportYframe = 480;
+              viewportFullSize = false;
+              break;
+            case 640:
+              viewportXframe = 800;
+              viewportYframe = 600;
+              viewportFullSize = false;
+              break;
+            case 800:
+              viewportXframe = 0;
+              viewportYframe = 0;
+              viewportFullSize = true;
+              break;
+          }
+          if ( viewportFullSize ) {
+              viewportXpos = 0;
+              viewportYpos = 0;
+          }
+          viewportResizeNeeded = true;
+          canvas.repaint();
+      }
+
+      if ( keycode == KeyEvent.VK_9 ) {
+          // Alphanumeric 0
+          skipKey = true;
+          switch ( renderMode ) {
+            case RENDER_MODE_ZBUFFER:
+              renderMode = RENDER_MODE_RAYTRACING;
+              break;
+            default:
+              renderMode = RENDER_MODE_ZBUFFER;
+              break;
+          }
+          canvas.repaint();
+      }
+
+      double theta = 0;
+      double phi = Math.PI/2;
+
+      if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
           switch ( unicode_id ) {
-            case '0':
-              switch ( viewportXframe ) {
-                case 0:
-                  viewportXframe = 320;
-                  viewportYframe = 240;
-                  viewportFullSize = false;
-                  break;
-                case 320:
-                  viewportXframe = 640;
-                  viewportYframe = 480;
-                  viewportFullSize = false;
-                  break;
-                case 640:
-                  viewportXframe = 800;
-                  viewportYframe = 600;
-                  viewportFullSize = false;
-                  break;
-                case 800:
-                  viewportXframe = 0;
-                  viewportYframe = 0;
-                  viewportFullSize = true;
-                  break;
+            //- Visual debug ray control ---------------------------------
+            case '4': // Numpad 4
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.x -= 0.1;
+                  canvas.repaint();
               }
-              if ( viewportFullSize ) {
-                  viewportXpos = 0;
-                  viewportYpos = 0;
+              break;
+            case '6': // Numpad 6
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.x += 0.1;
+                  canvas.repaint();
               }
-              viewportResizeNeeded = true;
+              break;
+            case '8': // Numpad 8
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.y += 0.1;
+                  canvas.repaint();
+              }
+              break;
+            case '2': // Numpad 2
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.y -= 0.1;
+                  canvas.repaint();
+              }
+              break;
+            case '1': // Numpad 1
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.z -= 0.1;
+                  canvas.repaint();
+              }
+              break;
+            case '7': // Numpad 7
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRay.origin.z += 0.1;
+                  canvas.repaint();
+              }
+              break;
+            case '5': // Numpad 5
+              if ( parent.withVisualDebugRay ) {
+                  parent.withVisualDebugRay = false;
+              }
+              else {
+                  parent.withVisualDebugRay = true;
+              }
               canvas.repaint();
               break;
-            case '9':
-              switch ( renderMode ) {
-                case RENDER_MODE_ZBUFFER:
-                  renderMode = RENDER_MODE_RAYTRACING;
-                  break;
-                default:
-                  renderMode = RENDER_MODE_ZBUFFER;
-                  break;
+            case '*': // Numpad *
+              if ( parent.withVisualDebugRay ) {
+                  theta =
+                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                  phi =
+                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                  theta -= Math.toRadians(15);
+                  parent.visualDebugRay.direction.setSphericalCoordinates(
+                   1, theta, phi);
+          System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
+                    Math.toDegrees(theta), Math.toDegrees(phi));
+                  canvas.repaint();
               }
-              canvas.repaint();
               break;
+            case '/': // Numpad /
+              if ( parent.withVisualDebugRay ) {
+                  theta =
+                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                  phi =
+                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                  theta += Math.toRadians(15);
+                  parent.visualDebugRay.direction.setSphericalCoordinates(
+                   1, theta, phi);
+          System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
+                    Math.toDegrees(theta), Math.toDegrees(phi));
+                  canvas.repaint();
+              }
+              break;
+            case '+': // Numpad +
+              if ( parent.withVisualDebugRay ) {
+                  theta =
+                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                  phi =
+                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                  phi += Math.toRadians(15);
+                  if ( phi > Math.PI ) phi = Math.PI;
+                  parent.visualDebugRay.direction.setSphericalCoordinates(
+                   1, theta, phi);
+                  canvas.repaint();
+              }
+              break;
+            case '-': // Numpad -
+              if ( parent.withVisualDebugRay ) {
+                  theta =
+                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                  phi =
+                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                  phi -= Math.toRadians(15);
+                  if ( phi < 0 ) phi = 0;
+                  parent.visualDebugRay.direction.setSphericalCoordinates(
+                   1, theta, phi);
+                  canvas.repaint();
+              }
+              break;
+            //------------------------------------------------------------
+
             case 't':
               if ( firstThingSelected >= 0 ) {
                   SimpleBody gi;

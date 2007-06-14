@@ -3,6 +3,7 @@
 //= Module history:                                                         =
 //= - November 27 2005 - Oscar Chavarro: Original base version              =
 //= - February 15 2006 - Oscar Chavarro: Implemented true colorInDirection  =
+//= - May 3 2007 - Oscar Chavarro: colorInDirection corrected for cubemap   =
 //===========================================================================
 
 package vsdk.toolkit.environment;
@@ -10,7 +11,10 @@ package vsdk.toolkit.environment;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBAPixel;
 
@@ -20,6 +24,7 @@ public class CubemapBackground extends Background {
 
     private RGBAImage [] backgroundImages;
     private Camera camera;
+    private Box boundingCube = null;
 
     public CubemapBackground(Camera camera,
                              RGBAImage front,
@@ -38,72 +43,57 @@ public class CubemapBackground extends Background {
         backgroundImages[3] = left;
         backgroundImages[4] = down;
         backgroundImages[5] = up;
+        boundingCube = new Box(1, 1, 1);
     }
 
     /**
-    \todo
-    ALL - method not implemented
     */
     public ColorRgb colorInDireccion(Vector3D d)
     {
-        ColorRgb _color = new ColorRgb();
-        RGBAPixel p;
-        double theta, phi, u = 0, v = 0;
-        RGBAImage i;
+        double u = 0, v = 0;
+        RGBAImage img = null;
 
-        phi = Math.acos(d.z);
-        theta = Math.asin(d.y/Math.sin(phi));
+        img = backgroundImages[0];
 
-        if ( phi > 3*Math.PI/4 ) {
-            // Down
-            i = backgroundImages[4];
+        d.normalize();
+        Ray r = new Ray(new Vector3D(0, 0, 0), d);
+        if ( !boundingCube.doIntersection(r) ) {
+            return new ColorRgb();
         }
-        else if ( phi > Math.PI/4 ) {
-            // Front, right, back or left
-            v = (phi - Math.PI/4) / (Math.PI/2);
-            if ( theta > -Math.PI/4 && theta < Math.PI/4 && d.x > 0 ) {
-                // Right
-                i = backgroundImages[1];
-                u = 1 - (theta+Math.PI/4)/(Math.PI/2);
-            }
-            else if ( theta > 0 -Math.PI/4 && theta < Math.PI/4 && d.x < 0 ) {
-                // Left
-                i = backgroundImages[3];
-                u = (theta+Math.PI/4)/(Math.PI/2);
-            }
-            else if ( (theta >= Math.PI/4 && d.y > 0) ||
-                      d.y > 0 && d.x < VSDK.EPSILON ) {
-                // Front
-                if ( theta < 0 ) theta = Math.PI/2;
-                u = (theta - Math.PI/4) / (Math.PI/2);
-                if ( d.x > 0 ) {
-                    u = (1 - u);
-                }
-                i = backgroundImages[0];
-            }
-            else {
-                // Back
-                theta *= -1;
-                u = (theta - Math.PI/4) / (Math.PI/2);
-                if ( d.x > 0 ) {
-                    u = (1 - u);
-                }
-                u = (1 - u);
-                i = backgroundImages[2];
-            }
-        }
-        else {
-            // Up
-            i = backgroundImages[5];
+        GeometryIntersectionInformation data;
+        data = new GeometryIntersectionInformation();
+        boundingCube.doExtraInformation(r, r.t, data);
+
+        int plane = boundingCube.getLastIntersectedPlane();
+
+        u = 1 - data.u;
+        v = 1 - data.v;
+        switch ( plane ) {
+          case 1: // Top
+            img = backgroundImages[5];
+            u = 1 - data.v;
+            v = data.u;
+            break;
+          case 2: // Down
+            img = backgroundImages[4];
+            u = data.v;
+            v = 1 - data.u;
+            break;
+          case 3: // Front
+            img = backgroundImages[0];
+            break;
+          case 4: // Back
+            img = backgroundImages[2];
+            break;
+          case 5: // Right
+            img = backgroundImages[1];
+            break;
+          default: // Left
+            img = backgroundImages[3];
+            break;
         }
 
-        p = i.getPixel((int)(u*(i.getXSize()-1)), (int)(v*(i.getYSize()-1)));
-
-        _color.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        _color.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        _color.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
-
-        return _color;
+        return img.getColorRgbBiLinear(u, v);
     }
 
     public RGBAImage [] getImages()

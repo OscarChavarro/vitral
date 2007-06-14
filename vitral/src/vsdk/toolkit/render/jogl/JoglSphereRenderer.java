@@ -155,25 +155,25 @@ public class JoglSphereRenderer extends JoglRenderer {
         gl.glNormal3d(N.x, N.y, N.z);
 
         //- If inside a Cg schema, pass non standard OpenGL parameters ----
-    if ( renderingWithNvidiaGpu() ) {
-        CGparameter tangentParam;
-        CGparameter binormalParam;
-        double vectorarray[];
+        if ( renderingWithNvidiaGpu() ) {
+            CGparameter tangentParam;
+            CGparameter binormalParam;
+            double vectorarray[];
 
             tangentParam = accessNvidiaGpuVertexParameter("TObject");
             if ( tangentParam != null ) {
                 vectorarray = T.exportToDoubleArrayVect();
                 CgGL.cgGLSetParameter3dv(tangentParam, vectorarray, 0);
-        }
+            }
             binormalParam = accessNvidiaGpuVertexParameter("BObject");
             if ( binormalParam != null ) {
-        B.x = 1;
-        B.y = 0;
-        B.z = 0;
+                B.x = 1;
+                B.y = 0;
+                B.z = 0;
                 vectorarray = B.exportToDoubleArrayVect();
                 CgGL.cgGLSetParameter3dv(binormalParam, vectorarray, 0);
+            }
         }
-    }
 
         //-----------------------------------------------------------------
         gl.glVertex3d(P.x, P.y, P.z);

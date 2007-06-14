@@ -167,3 +167,6 @@ Dec 20 2006, Oscar Chavarro:
 Dec 22 2006, Oscar Chavarro:
   - 1h: Activated non fullscreen viewport and multiple rendering modes in 
     editor :-)
+
+May 3 2006, Oscar Chavarro:
+  - 3h: Added visual debug ray control
