@@ -10,7 +10,6 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.Geometry;
 
 public class Sphere extends Solid {
     /// Check the general attribute description in superclass Entity.

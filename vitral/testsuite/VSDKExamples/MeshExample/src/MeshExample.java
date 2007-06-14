@@ -27,19 +27,19 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.gui.CameraController;
-import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.io.geometry.ReaderObj;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.io.geometry.ReaderObj;          // Persistence elements
+import vsdk.toolkit.render.jogl.JoglCameraRenderer; // View elements
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
+import vsdk.toolkit.gui.CameraController;           // Control elements
+import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.RendererConfigurationController;
 
 // Application classes
 import util.filters.ObjectFilter;

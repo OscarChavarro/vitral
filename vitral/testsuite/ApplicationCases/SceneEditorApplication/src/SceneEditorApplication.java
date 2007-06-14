@@ -49,6 +49,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 
 import vsdk.toolkit.environment.geometry.Arrow;
+import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -481,6 +482,10 @@ class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
+        }
+        else if ( label.equals("IDC_CREATE_VOLUME") ) {
+            VoxelVolume vv = new VoxelVolume();
+            addThing(vv);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
             ParametricCurve curve;

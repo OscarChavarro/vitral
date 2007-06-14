@@ -23,12 +23,12 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.gui.CameraController;
+import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
+import vsdk.toolkit.render.jogl.JoglRenderer;
+import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 
 /**
 Note that this program is designed to work as a java application, or as a

@@ -46,11 +46,11 @@ import javax.swing.JPanel;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;                      // Utilities
-import vsdk.toolkit.media.Image;                      // Model
+import vsdk.toolkit.media.Image;                      // Model elements
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.io.image.ImagePersistence;        // Persistence
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;   // Viewer
+import vsdk.toolkit.io.image.ImagePersistence;        // Persistence elements
+import vsdk.toolkit.render.awt.AwtRGBImageRenderer;   // View elements
 
 // Note that this code defines 2 internal private classes:
 // MyButtonsPanel & MyCanvasPanel

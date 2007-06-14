@@ -11,9 +11,8 @@ import java.io.File;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;                      // Utilities
-import vsdk.toolkit.media.RGBImage;                   // Model
-import vsdk.toolkit.io.image.ImagePersistence;        // Persistence
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;   // Viewer
+import vsdk.toolkit.media.RGBImage;                   // Model elements
+import vsdk.toolkit.io.image.ImagePersistence;        // Persistence elements
 
 public class ImageOfflineExample 
 {

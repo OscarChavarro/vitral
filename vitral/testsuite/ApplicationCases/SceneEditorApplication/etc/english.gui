@@ -74,6 +74,7 @@ MENU "GLOBAL" {
             MENUITEM "Cube", IDC_CREATE_CUBE
             MENUITEM "Box", IDC_CREATE_BOX
             MENUITEM "Arrow", IDC_CREATE_ARROW
+            MENUITEM "Volume", IDC_CREATE_VOXELSET
             MENUITEM SEPARATOR
             MENUITEM "CSG", IDC_CREATE_CSG, GRAYED
         }
@@ -289,6 +290,10 @@ COMMAND IDC_CREATE_ARROW {
     name "Create Arrow"
 }
 
+COMMAND IDC_CREATE_VOLUME {
+    name "Create Volume (voxels)"
+}
+
 COMMAND IDC_IMPORT_OBJECTS_FROM_FILE {
     name "Import objects from file"
 }
@@ -395,6 +400,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_CUBE, 
         IDC_CREATE_BOX, 
         IDC_CREATE_ARROW, 
+        IDC_CREATE_VOLUME, 
         IDC_IMPORT_OBJECTS_FROM_FILE, 
         IDC_CREATE_PARAMETRICCUBICCURVE, 
         IDC_CREATE_PARAMETRICBICUBICPATCH, 

@@ -13,26 +13,26 @@ import java.text.FieldPosition;
 import vsdk.toolkit.common.Vector3D;
 
 /**
-!\mainpage VSDK Toolkit documentation.
+!\mainpage Vitral SDK Toolkit documentation.
 
 .
 
-VSDK stands for "VITRAL Software Development Kit", and it is a software
+Vitral SDK stands for "VITRAL Software Development Kit", and it is a software
 platform for computer graphics, virtual reality and augmented reality
 application development. Here is the main software documentation for current
-VSDK implementation.  VITRAL is a trademark of the TAKINA research group, and
-identifies the computer graphics laboratory in the Pontificia Universidad
-Javeriana of Bogot&aacute; Colombia.
+Vitral SDK implementation.  VITRAL is a trademark of the TAKINA research
+group, and identifies the computer graphics laboratory in the Pontificia
+Universidad Javeriana of Bogot&aacute; Colombia.
 
-\section intro Introduction: the VSDK Architecture and design specification
+\section intro Introduction: the Vitral SDK Architecture and design specification
 
-This is an automatically generated page from the VSDK source code. It is not
+This is an automatically generated page from the Vitral SDK source code. It is not
 editable.  You can browse the literate programming style documentation, but
-remember to take a look first at the document describing the VSDK toolkit:<P>
+remember to take a look first at the document describing the Vitral SDK toolkit:<P>
 
-<A HREF="../ArchitectureAndDesignSpecification.html">Architecture and design specification of the VSDK toolkit</A>.
+<A HREF="../ArchitectureAndDesignSpecification.html">Architecture and design specification of the Vitral SDK toolkit</A>.
 
-\section model The VSDK toolkit data model
+\section model The Vitral SDK toolkit data model
 
 At some point in the future, the data model implemented on the toolkit will be 
 described in an external document, and that document will be linked here. At
@@ -40,26 +40,32 @@ the moment such a detailed description is not available.
 
 \section next What to do next?
 
-The recomended steps are: 1. Install the VSDK toolkit. 2. Take a look at the
+The recomended steps are: 1. Install the Vitral SDK toolkit. 2. Take a look at the
 samples in the testsuite directory. 3. Have this API documentation available
 and look at specific method description for help. 4. Have in hand a good
 computer graphics textbook.
 
+Some of the samples in the testsuite directory are also available as applets,
+and are currently viewable here (you need a web browser with a java plugin
+version 1.5 or newer):
+
+<A HREF="../applets_index.html">Applets examples for the Vitral SDK toolkit</A>.
+
 \section VSDK The vsdk.toolkit.common.VSDK utility class
 
-All classes in the VSDK toolkit have access to an static class called VSDK,
+All classes in the Vitral SDK toolkit have access to an static class called VSDK,
 which is governed by the SINGLETON design pattern behavior. That is, it is
 an static class that lives only once per virtual machine.  Some operations
-in this class are not thread safe, so thread partitioning of VSDK toolkit
+in this class are not thread safe, so thread partitioning of Vitral SDK toolkit
 based applications is not recommended. Instead, heavy process partition is
-recommended, as specified by the VSDK framework.
+recommended, as specified by the Vitral SDK framework.
 
 The VSDK class provides the following services:
-  - It contains common mathematical constants used by VSDK, but not
+  - It contains common mathematical constants used by Vitral SDK, but not
     defined in Java's Math class
-  - It provides common mathematical methods useful for VSDK, not
+  - It provides common mathematical methods useful for Vitral SDK, not
     defined in Java's Math class, as such vector distance, data type
-    conversions and data formatting, tuned for VSDK
+    conversions and data formatting, tuned for Vitral SDK
   - It provides a basic error reporting mechanism, for easing the
     error handling and internationalization of messages
   - It provides to a heavy process (i.e. a JVM) the ability to count
