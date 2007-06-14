@@ -1,0 +1,211 @@
+//===========================================================================
+//= spanish.gui                                                             =
+//=-------------------------------------------------------------------------=
+//= Este archivo contiene la especificacion de la interface grafica de      =
+//= usuario AQUYNZA para la version en castellano.                          =
+//=-------------------------------------------------------------------------=
+//= Oscar J. Chavarro G.  -JEDILINK-            ojchavarro@javeriana.edu.co =
+//= Grupo de investigacion de informatica grafica VITRAL                    =
+//===========================================================================
+
+//===========================================================================
+//= MENUS DE LA APLICACION                                                  =
+//===========================================================================
+
+/*---------------------------------------------------------------------------
+Notese que aqui se definen varios menus, y cada uno tiene un nombre propio.
+Ese nombre se utiliza en el proceso de construccion de la interfase para
+asociar cada menu a un contexto de la aplicacion (i.e. cada VISTA posee
+una lista de nombres de menu, y su menu de contexto sera la concatenacion
+de los menus que especifica y estan definidos aqui).
+
+Los atajos (i.e. aceleradores o shortcut's) de teclado se definen dentro del
+nombre de opcion o menu como parte del nombre y despues de un "\t".  El
+menu de ayuda (que se coloca a la derecha de una barra de menu) se identifica
+de manera similar con "\a".
+---------------------------------------------------------------------------*/
+
+MENU "GLOBAL" {
+    POPUP "&Archivo" {
+        MENUITEM "&Nuevo...\tCtrl+N", IDC_FILE_NEW
+        MENUITEM "&Leer...\tCtrl+L", IDC_FILE_LOAD
+        MENUITEM "&Grabar...\tCtrl+G", IDC_FILE_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "&Salir", IDC_FILE_SALIR
+    }
+    POPUP "&Edicion" {
+        MENUITEM "&Seleccionar", IDC_EDIT_SELECT, GRAYED
+        MENUITEM "Seleccionar &Todo\tCtrl+T", IDC_EDIT_SELECT_ALL, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Cortar\tCtrl+X", IDC_EDIT_CUT, GRAYED
+        MENUITEM "&Copiar\tCtrl+C", IDC_EDIT_COPY, GRAYED
+        MENUITEM "&Pegar\tCtrl+V", IDC_EDIT_PASTE, GRAYED
+    }
+    POPUP "&Ver" {
+        POPUP "&Visualizador" {
+            //INCLUDE "VISUALIZADOR"
+        }
+        POPUP "&Camara" {
+            //INCLUDE "CAMARA"
+        }
+        POPUP "Calidad &visual" {
+            //INCLUDE "CALIDAD_VISUAL"
+        }
+        MENUITEM SEPARATOR
+        MENUITEM "&Nueva vista", IDC_NEW_VIEW
+        MENUITEM "&Display remoto ...", IDC_MESSAGE
+        MENUITEM SEPARATOR
+        MENUITEM "!&Imprimir todo!", IDC_PRINT_ALL
+    }
+/*
+    POPUP "&Insertar" {
+        MENUITEM "&Esfera", IDC_INS_SPHERE
+        MENUITEM "&Octree", IDC_INS_, GRAYED
+        MENUITEM "&GCS", IDC_INS_, GRAYED
+        MENUITEM "&Frontera", IDC_INS_, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Actuador", IDC_INS_ACTUATOR, GRAYED
+        MENUITEM "&Sensor", IDC_INS_SENSOR
+        MENUITEM "&Control", IDC_INS_CONTROL, GRAYED
+        MENUITEM "S&istema de control", IDC_INS_SYSTEM_C, GRAYED
+    }
+*/
+    POPUP "&Simulacion" {
+        MENUITEM "&Play/Stop", IDC_PLAY
+        MENUITEM "&Tiempo de discretizacion...", IDC_DELTA_T
+    }
+    POPUP "\aA&yuda" {
+        MENUITEM "&Acerca de...", IDC_AYUDA_ACERCADE
+    }
+
+}
+
+POPUP "ESCENA" {
+    //INCLUDE "VISUALIZADOR"
+    MENUITEM SEPARATOR
+    //INCLUDE "CAMARA"
+    MENUITEM SEPARATOR
+    //INCLUDE "CALIDAD_VISUAL"
+}
+
+POPUP "CAMARA" {
+    MENUITEM "&Perspectiva", IDC_CAMARA_PERSPECTIVA, CHECKED
+    MENUITEM "&Etiqueta", IDC_CAMARA_ETIQUETA, CHECKED
+    MENUITEM "&Mostrar", IDC_CAMARA_MOSTRAR, UNCHECKED
+}
+
+POPUP "VISUALIZADOR" {
+    MENUITEM "&Zbuffer usando OpenGL", IDC_OPENGL_RENDER
+    MENUITEM "&Raytracing criollo", IDC_RAYTRACING_CRIOLLO
+    MENUITEM "Raytracing usando &POVray", IDC_RAYTRACER_POVRAY
+}
+
+POPUP "CALIDAD_VISUAL" {
+    POPUP "Calidad &visual" {
+        MENUITEM "&Wireframe", IDC_WIREFRAME_RENDER, UNCHECKED
+        MENUITEM "&Superficie", IDC_SURFACE_RENDER, UNCHECKED
+        MENUITEM "Modelo &Phong", IDC_PHONG_RENDER, UNCHECKED
+        MENUITEM "&Textura", IDC_TEXTURE_RENDER, UNCHECKED
+    }
+    POPUP "Calidad &interactiva" {
+        MENUITEM "&Igual", IDC_SAME_INTER, CHECKED
+        MENUITEM SEPARATOR
+        MENUITEM "&Wireframe", IDC_WIREFRAME_INTER, UNCHECKED
+        MENUITEM "&Lineas ocultas", IDC_HIDDEN_INTER, UNCHECKED
+        MENUITEM "Superficie pla&na", IDC_FLAT_INTER, UNCHECKED
+        MENUITEM "Superficie &suave", IDC_SMOOTH_INTER, UNCHECKED
+        MENUITEM "&Textura", IDC_TEXTURE_INTER, UNCHECKED, GRAYED
+    }
+    POPUP "Calidad &espacio" {
+        MENUITEM "&Ninguno", IDC_ESPACIO_NONE, CHECKED
+        MENUITEM "&Marco", IDC_ESPACIO_MARCO, UNCHECKED
+        MENUITEM "&Lineas", IDC_ESPACIO_LINEAS, UNCHECKED
+        MENUITEM "&Superficie", IDC_ESPACIO_SUPERFICIE, UNCHECKED
+        MENUITEM "&Piso a cuadros", IDC_ESPACIO_PISO, UNCHECKED, GRAYED
+        POPUP "Modelo de &iluminacion" {
+            MENUITEM "Superficie pla&na", IDC_FLAT_ESPACIO, CHECKED
+            MENUITEM "Superficie &suave", IDC_SMOOTH_ESPACIO, UNCHECKED
+            MENUITEM "&Textura", IDC_TEXTURE_ESPACIO, UNCHECKED, GRAYED
+        }
+        POPUP "&Transparencia" {
+            MENUITEM "Paredes &ocultas", IDC_OPAC_ESPACIO, CHECKED
+            MENUITEM "Paredes &transparentes", IDC_TRANS_ESPACIO, UNCHECKED
+        }
+        POPUP "&Fondo" {
+            MENUITEM "&Uniforme", IDC_FONDO_UNIFORME, CHECKED
+            MENUITEM "&Degrade", IDC_FONDO_DEGRADE, UNCHECKED, GRAYED
+            MENUITEM "&Color...", IDC_FONDO_COLOR, UNCHECKED, GRAYED
+        }
+    }
+}
+
+//===========================================================================
+//= ESPECIFICACION DE COMANDOS                                              =
+//===========================================================================
+
+/*---------------------------------------------------------------------------
+Un COMANDO es una accion en particular que puede tomar la aplicacion.
+Cada COMANDO tiene por lo menos un identificador y un nombre, y su
+informacion es usada dinamicamente por la GUI para guiar al usuario y para
+lanzar acciones.
+NOTA: El directorio de los iconos es "./etc/icons"
+---------------------------------------------------------------------------*/
+
+COMANDO IDC_FILE_SALIR {
+    nombre "Salir", icono "f_quit.ppm",
+    resumen "Termina los procesos de edicion y simulacion AQUYNZA",
+    ayuda "La opcion salir termina los procesos de edicion y/o simulacion y "
+    ayuda "da por concluida la ejecucion de la aplicacion.  Este comando "
+    ayuda "solicita confirmacion si la sesion de edicion actual no ha sido "
+    ayuda "guardada.  Para terminar la sesion de edicion y dejar corriendo "
+    ayuda "una simulacion en modo batch (procesamiento por lotes), vea el "
+    ayuda "comando <eat>."
+}
+
+COMANDO IDC_FILE_NEW {
+    nombre "Nuevo", icono "f_new.ppm",
+    resumen "Cierra la sesion actual (si la hay) y empieza una nueva",
+    ayuda "El comando solicita confirmacion si la sesion actual no ha sido "
+    ayuda "grabada. En la version profesional de Nukak puede especificarse "
+    ayuda "la edicion distribuida."
+}
+
+COMANDO IDC_FILE_LOAD {
+    nombre "Leer", icono "f_load.ppm",
+    resumen "Lee un entorno AQUYNZA previamente creado",
+    ayuda "<Aun no disponible>"
+}
+
+COMANDO IDC_FILE_SAVE {
+    nombre "Grabar", icono "f_save.ppm",
+    resumen "Graba el entorno actual AQUYNZA",
+    ayuda "<Aun no disponible>"
+}
+
+//===========================================================================
+//= ESPECIFICACION DE GRUPOS DE BOTONES                                     =
+//===========================================================================
+
+/*---------------------------------------------------------------------------
+Los posibles estilos son los siguientes flags:
+    HORIZONTAL, CON_SEPARADOR, CON_TITULO, ACTIVABLE
+y cualquier combinacion de ellos se puede incluir (separados por comas) en
+el grupo opcional "ESTILO { ... }" dentro de los bloques BOTONERA.  Notese
+que si no se especifica el estilo "HORIZONTAL" se supone que es VERTICAL, 
+pero no es valido especificarlo explicitamente (!). Notese que el flag
+ACTIVABLE solo tiene sentido cuando la botonera tiene titulo.  El
+parametro `tam` debe ser seguido por un entero e indica el grosor o la
+altura de los grupos (en botones), y es opcional (por defecto tam es 2).
+---------------------------------------------------------------------------*/
+
+BOTONERA "GLOBAL" {
+    ESTILO { CON_TITULO, ACTIVABLE, tam 2 }
+    GRUPO "Archivo ウェブ" { // Some japanese characters...
+        IDC_FILE_NEW, IDC_FILE_LOAD, IDC_FILE_SAVE,
+        IDC_FILE_SALIR
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

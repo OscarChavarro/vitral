@@ -1,0 +1,22 @@
+This application example was build having the followin requirements in mind:
+
+GUI Independence:
+  - The model and the GUI are independent enough to allow destroying the GUI
+    at any running time, and recreating it WITHOUT affecting the model. This
+    allows to entirely re-structure the GUI, changing for example its
+    look and feel, its layout, or its language.
+  - The application is usable as:
+    . Batch utility, using no GUI at all
+    . Batch service, using no GUI or using a virtual GUI
+    . Stang alone application
+    . Inside an applet
+
+Internationalization (I18N)
+  - All the GUI elements come from a file, and each GUI file is in one
+    language. This allows the definition of multiple GUI language variations
+  - The GUI elements are identified by an String identifier
+  - Each String identifier in a GUI is associated with a set of texts,
+    for main text, tooltip and detail help, and these texts are specified
+    in the GUI file (once for each language)
+  - The String texts can be in normal 7bit ASCI (utf8) or in utf8 using
+    HTML (for non-english languages)

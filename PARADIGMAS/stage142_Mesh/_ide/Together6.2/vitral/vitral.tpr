@@ -1,0 +1,60 @@
+[Project]
+Language=java
+Root.0=C:/Documents and Settings/GabrielE/Mis documentos/U/Tesis/Implementacion/JOGL/stage135_Mesh/src
+Root.0.access=writable
+Root.0.file_types=java_source;java_class
+Root.0.package_prefix=
+Root.1=C:/Documents and Settings/GabrielE/Mis documentos/U/Tesis/Implementacion/JOGL/stage135_Mesh/doc
+Root.1.access=writable
+Root.1.file_types=diagram
+Root.1.package_prefix=
+Root.3=C:/Documents and Settings/GabrielE/Mis documentos/U/Tesis/Implementacion/JOGL/stage135_Mesh/pkgs/jogl.jar
+Root.3.access=import
+Version=3.0
+projectfile.encoding=Cp1252
+Project.JDK=C:\\Archivos de programa\\Java\\jdk1.5.0_01
+Root.0.srcControlEnabled=false
+Root.0.srcControlProject=
+Root.5=C:\\Archivos de programa\\Java\\jdk1.5.0_01\\jre\\lib\\rt.jar
+Root.5.access=import
+Root.5.non_removable=
+debugger.SkipClass.0=,com.sun.*,1
+debugger.SkipClass.1=,java.*,1
+debugger.SkipClass.2=,javax.*,1
+debugger.SkipClass.3=,org.omg.*,1
+debugger.SkipClass.4=,sun.*,1
+debugger.SmartStep=true
+[editor]
+recent.file.0=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src\\vitral\\toolkits\\visual\\jogl\\SceneController.java
+recent.file.1=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src\\vitral\\toolkits\\visual\\jogl\\JoglMeshRenderer.java
+recent.file.2=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src\\vitral\\toolkits\\util\\loaders\\ReaderObj.java
+recent.file.3=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src\\vitral\\toolkits\\geometry\\MeshGroup.java
+recent.file.4=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src\\vitral\\toolkits\\geometry\\Mesh.java
+[autoformat]
+java.mode=both
+[builder]
+userCompilingTool_enabled=false
+[parser]
+java.java14syntax=false
+[compiler]
+cross-bootclasspath=C:\\Archivos de programa\\Java\\jdk1.5.0_01\\jre\\lib\\rt.jar
+cross-compilation_enabled=true
+cross-target=1.5
+encoding=Default
+sourcepath=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\src
+[build]
+destination=C:\\Documents and Settings\\GabrielE\\Mis documentos\\U\\Tesis\\Implementacion\\JOGL\\stage135_Mesh\\classes\\
+[workspace]
+Developer.CodingWorkspace={{0,2,-1,0,0,0,0,0,0,1,0,50,75,25,-1,-1,-1,-1}${0,1,-1,0,0,0,0,1,0,1,0,50,75,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,25,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,5,-1,0,0,0,0,0,0,1,0,50,50,25,-1,-1,-1,-1}${0,4,-1,0,0,0,0,1,0,1,1,66,50,25,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+Developer.DebugWorkspace={{0,2,-1,0,0,0,0,0,0,1,0,50,75,25,-1,-1,-1,-1}${0,1,-1,0,0,0,0,1,0,1,1,50,75,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,0,0,1,0,50,50,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,0,0,1,0,50,50,25,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,4,-1,0,0,0,0,0,0,1,0,50,50,25,-1,-1,-1,-1}${0,0,-1,0,0,0,0,1,0,1,0,75,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+Developer.DesignWorkspace={{0,2,-1,0,0,0,0,1,0,1,0,50,75,22,-1,-1,-1,-1}${0,1,-1,0,0,0,0,0,0,1,0,50,75,22,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,50,50,22,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,50,50,22,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,4,-1,0,0,0,0,1,0,1,1,50,50,22,-1,-1,-1,-1}${0,0,-1,0,0,0,0,0,0,1,0,75,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+Developer.vitral={{0,2,-1,0,0,0,0,1,0,1,1,62,75,25,-1,-1,-1,-1}${0,1,-1,0,0,0,0,1,0,1,0,62,75,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,50,50,25,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,50,50,25,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,4,-1,0,0,0,0,0,0,1,0,50,50,25,-1,-1,-1,-1}${0,0,-1,0,0,0,0,1,0,1,0,58,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+names.Developer={vitral,DesignWorkspace,CodingWorkspace,DebugWorkspace}
+[jdkit]
+homedir=C:\\Archivos de programa\\Java\\jdk1.5.0_01
+[EJB]
+AppServer=EJB20
+[lastOpenProjectName]
+Developer=vitral
+[vcs]
+provider.class=CVS LAN

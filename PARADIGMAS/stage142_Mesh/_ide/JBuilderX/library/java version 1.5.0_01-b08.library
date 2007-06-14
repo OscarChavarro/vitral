@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library>
+  <!--JBuilder JDK Definition File-->
+  <fullname>java version 1.5.0_01-b08</fullname>
+  <homepath>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01</homepath>
+  <debug/>
+  <class>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/CodePointIM/CodePointIM.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Java2D/Java2Demo.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/CodePointIM/CodePointIM.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Java2D/Java2Demo.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/charsets.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/deploy.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/ext/classes12.zip]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/ext/dnsns.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/ext/localedata.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/ext/sunjce_provider.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/ext/sunpkcs11.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/im/indicim.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/im/thaiim.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/javaws.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/jce.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/jsse.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/plugin.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/jre/lib/rt.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/lib/classes12.zip]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/lib/dt.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/lib/htmlconverter.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/lib/jconsole.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/lib/tools.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/servlet/jardiff.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/servlet/jnlp-servlet.jar]</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/servlet/jnlp.jar]</path>
+  </class>
+  <source>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/Animator</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/ArcTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/BarChart</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/Blink</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/CardTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/Clock</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/DitherTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/DrawTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/Fractal</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/GraphicsTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/GraphLayout</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/ImageMap</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/JumpingBox</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/MoleculeViewer</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/NervousText</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/SimpleGraph</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/SortDemo</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/SpreadSheet</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/TicTacToe</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/applets/WireFrame</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/CodePointIM/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/FileChooserDemo/FileChooserDemo.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/FileChooserDemo/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Font2DTest/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Java2D/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Metalworks/Metalworks.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Metalworks/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Notepad/Notepad.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Notepad/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SampleTree/SampleTree.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SampleTree/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Stylepad/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/Stylepad/Stylepad.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SwingApplet/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SwingApplet/SwingApplet.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SwingSet2/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/SwingSet2/SwingSet2.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/TableExample/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jfc/TableExample/TableExample.jar]/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jpda/examples.jar]</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jvmti/heapTracker/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/jvmti/mtrace/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/management/FullThreadDump/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/management/MemoryMonitor/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/management/VerboseGC/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/Animator</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/ArcTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/BarChart</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/Blink</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/CardTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/Clock</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/DitherTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/DrawTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/Fractal</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/GraphicsTest</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/GraphLayout</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/ImageMap</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/JumpingBox</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/MoleculeViewer</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/NervousText</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/SimpleGraph</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/SortDemo</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/SpreadSheet</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/TicTacToe</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/applets/WireFrame</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/CodePointIM/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/FileChooserDemo/FileChooserDemo.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/FileChooserDemo/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Font2DTest/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Java2D/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Metalworks/Metalworks.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Metalworks/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Notepad/Notepad.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Notepad/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SampleTree/SampleTree.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SampleTree/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Stylepad/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/Stylepad/Stylepad.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SwingApplet/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SwingApplet/SwingApplet.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SwingSet2/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/SwingSet2/SwingSet2.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/TableExample/src</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/demo/plugin/jfc/TableExample/TableExample.jar]/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/corba/src/core</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/corba/src/stubs</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/jreinstaller/src/share/classes</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/raf/src</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/servlet/src/classes</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/webpad/src/servlet</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/jnlp/webpad/src/version1</path>
+    <path>../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/sample/nio/server</path>
+    <path>[../../../../../../../../../../../Archivos de programa/Java/jdk1.5.0_01/src.zip]</path>
+  </source>
+  <documentation>
+    <path>[../../../../../../../../../../../Borland/JBuilder2005/doc/jdk_docs.jar]/java/api</path>
+  </documentation>
+  <lastmodsaved>1128889827765</lastmodsaved>
+</library>

@@ -1,0 +1,5 @@
+Support more GUI Look and feel than the default supported:
+  - Download and integrate more themes
+  - Add code to detect available themes that add options to the look & feel
+    menu
+  - Support changing/configuring the GTK look & feel from a GTK spec. file
