@@ -1,4 +1,8 @@
+import java.nio.ByteBuffer;
+import com.sun.opengl.util.BufferUtil;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -16,8 +20,15 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JFrame;
 
+// test classes
+import com.sun.opengl.util.texture.Texture;
+import com.sun.opengl.util.texture.TextureIO;
+
+// VSDK classes
+
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -26,7 +37,7 @@ import vsdk.toolkit.gui.CameraControllerGravZero;
 import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
-public class ImageExample extends JFrame implements 
+public class ImageExample extends JFrame implements
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
@@ -35,7 +46,11 @@ public class ImageExample extends JFrame implements
     private SimpleCorridor corridor;
     private RGBAImage img;
 
-    private int machete = 0;
+    private static int checkImageWidth = 128;
+    private static int checkImageHeight = 128;
+    private static final int color = 3;
+    private ByteBuffer checkImageBuf = 
+    BufferUtil.newByteBuffer(checkImageHeight * checkImageWidth * color);
 
     public ImageExample() {
         super("VITRAL concept test - Image use example");
@@ -69,18 +84,21 @@ public class ImageExample extends JFrame implements
     public Dimension getPreferredSize() {
         return new Dimension (1024, 768);
     }
-    
+
     public static void main (String[] args) {
-        JFrame f = new ImageExample();
+        ImageExample f = new ImageExample();
+
         f.pack();
         f.setVisible(true);
     }
-    
+
     private void drawObjectsGL(GL gl)
     {
         // Preparation
-        gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+
         gl.glLoadIdentity();
 
         // Draw test environment
@@ -102,31 +120,38 @@ public class ImageExample extends JFrame implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
-        // Draw polygon with image
-        gl.glEnable(gl.GL_TEXTURE_2D);
-        JoglRGBAImageRenderer.activate(gl, img);
+        // Prepare to draw polygon with image
+        gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
+        gl.glPolygonMode(GL.GL_BACK, GL.GL_LINE);
+        gl.glShadeModel(GL.GL_FLAT);
+        gl.glEnable(GL.GL_TEXTURE_2D);
 
-        // WARNING: It is not supposed to be, but this code requires to call this in THIS place
+        // First: activate texture, Second: set texture parameters
+        JoglRGBAImageRenderer.activate(gl, img);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+        gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
 
+        // Draw textured geometry
         double dx = (double)img.getXSize()/(double)img.getYSize();
 
         gl.glBegin(GL.GL_QUADS);
             gl.glNormal3d(0, 0, 1);
             gl.glColor3d(1, 1, 1);
 
-            gl.glTexCoord2f(0, 0);
+            gl.glTexCoord2d(0, 0);
             gl.glVertex3d(0, 0, 0);
 
-            gl.glTexCoord2f(1, 0);
+            gl.glTexCoord2d(1, 0);
             gl.glVertex3d(dx, 0, 0);
 
-            gl.glTexCoord2f(1, 1);
+            gl.glTexCoord2d(1, 1);
             gl.glVertex3d(dx, 1, 0);
 
-            gl.glTexCoord2f(0, 1);
-            gl.glVertex3d(0, 1, 0);            
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(0, 1, 0);
         gl.glEnd();
 
         // Draw image directly over screen
@@ -134,10 +159,10 @@ public class ImageExample extends JFrame implements
         gl.glLoadIdentity();
         gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
-        gl.glDisable(gl.GL_DEPTH_TEST);
 
-        // WARNING: Texture must be disabled in order to maintain original version, and not be
-        // under the influence of glTexParameteri configurations
+        // WARNING: Texture must be disabled in order to maintain original 
+        // version, and not be under the influence of glTexParameteri 
+        // configurations
         gl.glDisable(gl.GL_TEXTURE_2D);
         JoglRGBAImageRenderer.draw(gl, img);
     }
@@ -146,15 +171,19 @@ public class ImageExample extends JFrame implements
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-        gl.glColor3d(1, 1, 1);
-
         JoglCameraRenderer.activate(gl, camera);
+
+        gl.glDisable(gl.GL_BLEND);
+        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glDepthFunc(GL.GL_LESS);
+        gl.glClearColor(0, 0, 0, 1);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+        gl.glColor3d(1, 1, 1);
 
         drawObjectsGL(gl);
     }
-   
+
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
         ;
@@ -164,7 +193,7 @@ public class ImageExample extends JFrame implements
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
-    
+
     /** Called to indicate the drawing surface has been moved and/or resized */
     public void reshape (GLAutoDrawable drawable,
                          int x,
@@ -172,10 +201,10 @@ public class ImageExample extends JFrame implements
                          int width,
                          int height) {
         GL gl = drawable.getGL();
-        gl.glViewport(0, 0, width, height); 
+        gl.glViewport(0, 0, width, height);
 
         camera.updateViewportResize(width, height);
-    }   
+    }
 
   public void mouseEntered(MouseEvent e) {
       canvas.requestFocusInWindow();

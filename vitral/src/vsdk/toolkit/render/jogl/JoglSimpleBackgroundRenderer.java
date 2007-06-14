@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.SimpleBackground;
 import javax.media.opengl.GL;
 
-public class JoglSimpleBackgroundRenderer
+public class JoglSimpleBackgroundRenderer extends JoglRenderer 
 {
     public static void draw(GL gl, SimpleBackground background)
     {

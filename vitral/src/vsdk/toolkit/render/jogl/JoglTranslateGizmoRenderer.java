@@ -21,7 +21,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 
-public class JoglTranslateGizmoRenderer
+public class JoglTranslateGizmoRenderer extends JoglRenderer 
 {
     public static Light light1 = null;
     public static Light light2 = null;

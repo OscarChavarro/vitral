@@ -13,7 +13,7 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Sphere;
 
-public class JoglSphereRenderer {
+public class JoglSphereRenderer extends JoglRenderer {
 
     private static GLUT glut = null;
 

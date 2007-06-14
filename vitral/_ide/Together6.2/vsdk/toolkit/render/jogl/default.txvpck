@@ -53,95 +53,204 @@
         <property name="@__options" value=""/>
         <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglZBufferRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,10,168,105"/>
+            <property name="bounds" value="320,0,168,105"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglZBufferRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="465,0"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="465,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference56" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBAImageRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,150,180,146"/>
+            <property name="bounds" value="50,10,180,146"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglRGBAImageRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="140,10"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="428,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference57" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglCameraRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="210,10,134,169"/>
+            <property name="bounds" value="500,0,134,169"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglCameraRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="567,0"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="491,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference58" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,330,200,137"/>
-        </reference>
-        <reference df-class-name="reference59" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBAImageRendererImageAssociation">
-            <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="370,10,200,111"/>
+            <property name="bounds" value="40,210,200,137"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="140,210"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="434,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference60" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglConeRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="370,170,147,130"/>
+            <property name="bounds" value="650,0,147,130"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglConeRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="723,0"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="498,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference61" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="230,350,161,89"/>
+            <property name="bounds" value="280,210,161,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="360,210"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="457,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference62" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglSphereRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="411,350,130,98"/>
+            <property name="bounds" value="470,220,130,98"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglSphereRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="535,220"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="479,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference63" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglMaterialRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,490,135,89"/>
+            <property name="bounds" value="880,370,135,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglMaterialRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="947,370"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="499,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference64" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="165,490,200,89"/>
+            <property name="bounds" value="290,340,200,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="463,340"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="463,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference65" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglBoxRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="590,10,111,98"/>
+            <property name="bounds" value="1100,10,111,98"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglBoxRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="1155,10"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="501,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference66" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglArrowRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="537,170,147,130"/>
+            <property name="bounds" value="820,10,147,130"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglArrowRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="893,10"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="500,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference67" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="385,490,200,89"/>
+            <property name="bounds" value="610,340,200,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="710,340"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="486,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference68" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglMatrixRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="561,350,125,105"/>
+            <property name="bounds" value="660,220,125,105"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglMatrixRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="722,220"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="498,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference69" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,610,178,114"/>
+            <property name="bounds" value="290,480,178,114"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="379,480"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="460,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference70" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="721,10,173,329"/>
-        </reference>
-        <reference df-class-name="reference71" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricCubicCurveRenderer">
-            <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="605,490,200,217"/>
+            <property name="bounds" value="1220,10,173,329"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="1306,10"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="505,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference72" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,770,197,89"/>
+            <property name="bounds" value="70,460,197,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="168,460"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="445,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference73" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglGeometryRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="227,750,144,105"/>
-        </reference>
-        <reference df-class-name="reference74" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBImageRendererImageAssociation">
-            <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,890,200,111"/>
+            <property name="bounds" value="480,480,144,105"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglGeometryRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="552,480"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="472,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference75" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBImageRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="391,750,180,146"/>
+            <property name="bounds" value="650,480,180,146"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglRGBImageRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="740,480"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="483,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference76" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="706,370,156,89"/>
+            <property name="bounds" value="810,230,156,89"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="888,230"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="499,-154"/>
+            </reference>
         </reference>
         <reference df-class-name="reference77" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglLightRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="591,750,183,130"/>
+            <property name="bounds" value="860,490,183,130"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglLightRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="951,490"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="499,-154"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference4" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl._JoglRGBAImageRendererImageAssociation">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="1120,-220,200,111"/>
+        </reference>
+        <reference df-class-name="reference5" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="420,-240,89,86"/>
+        </reference>
+        <reference df-class-name="reference6" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl._JoglRGBImageRendererImageAssociation">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="910,-220,200,111"/>
+        </reference>
+        <reference df-class-name="reference2" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricCurveRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="979,119,186,217"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.render.jogl.JoglParametricCurveRenderer:vsdk.toolkit.render.jogl.JoglRenderer">
+                <property name="sourceAnchor" value="1072,119"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="500,-154"/>
+            </reference>
         </reference>
         <property name="$defaultDiagram" value=""/>
     </view>

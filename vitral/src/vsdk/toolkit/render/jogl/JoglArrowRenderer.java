@@ -14,7 +14,7 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
 
-public class JoglArrowRenderer {
+public class JoglArrowRenderer extends JoglRenderer {
 
     private static GLU glu = null;
     private static GLUquadric gluQuadric = null;

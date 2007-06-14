@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.gui.RotateGizmo;
 import javax.media.opengl.GL;
 
-public class JoglRotateGizmoRenderer
+public class JoglRotateGizmoRenderer extends JoglRenderer 
 {
 
     public static void draw(GL gl, RotateGizmo gizmo, Vector3D position)

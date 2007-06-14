@@ -21,9 +21,9 @@ import org.w3c.dom.NodeList;
 
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
-import vsdk.toolkit.io.geometry.ParametricCubicCurvePersistence;
+import vsdk.toolkit.io.geometry.ParametricCurvePersistence;
 import vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 
 public class XmlManager {
   public XmlManager() {
@@ -43,13 +43,13 @@ public class XmlManager {
       document = builder.newDocument();
       Element nodeRoot = null;
       if (object.getClass().getName().equals(
-          "vsdk.toolkit.environment.geometry.ParametricCubicCurve")) {
-        ParametricCubicCurve curve = (ParametricCubicCurve) object;
+          "vsdk.toolkit.environment.geometry.ParametricCurve")) {
+        ParametricCurve curve = (ParametricCurve) object;
 /*
         System.out.print("curve to export with: " + curve.getPointSize() +
                          " points");
 */
-        nodeRoot = ParametricCubicCurvePersistence.toElement(curve, document);
+        nodeRoot = ParametricCurvePersistence.toElement(curve, document);
       }
       else if (object.getClass().getName().equals(
           "vsdk.toolkit.environment.geometry.ParametricBiCubicPatch")) {
@@ -116,13 +116,13 @@ public class XmlManager {
 
       Node rootNode = document.getFirstChild();
 
-      if (rootNode.getNodeName() == ParametricCubicCurvePersistence.rootName) {
+      if (rootNode.getNodeName() == ParametricCurvePersistence.rootName) {
         nodeList = document.getElementsByTagName(
-            ParametricCubicCurvePersistence.rootName);
+            ParametricCurvePersistence.rootName);
         Node firstCuve = nodeList.item(0);
-        ParametricCubicCurve curve = null;
+        ParametricCurve curve = null;
 
-        curve = ParametricCubicCurvePersistence.nodeToParametricCubicCurve(
+        curve = ParametricCurvePersistence.nodeToParametricCurve(
             firstCuve);
 /*
         System.out.println("curva con: " + curve.getPointSize() + " puntos");
@@ -171,8 +171,8 @@ public class XmlManager {
     try {
       obj = importXml(fileNameIn);
       if (obj.getClass().getName().equals(
-          "vsdk.toolkit.environment.geometry.ParametricCubicCurve")) {
-        ParametricCubicCurve curve = (ParametricCubicCurve) obj;
+          "vsdk.toolkit.environment.geometry.ParametricCurve")) {
+        ParametricCurve curve = (ParametricCurve) obj;
 /*
         System.out.print("curve with: " + curve.getPointSize() + " points");
 */

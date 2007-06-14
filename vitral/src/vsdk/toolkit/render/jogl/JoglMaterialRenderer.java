@@ -10,7 +10,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
 import javax.media.opengl.GL;
 
-public class JoglMaterialRenderer {
+public class JoglMaterialRenderer extends JoglRenderer {
 
     public static void activate(GL gl, Material m)
     {

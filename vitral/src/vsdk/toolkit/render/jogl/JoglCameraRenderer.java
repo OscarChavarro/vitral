@@ -15,7 +15,7 @@ import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 
-public class JoglCameraRenderer
+public class JoglCameraRenderer extends JoglRenderer
 {
     /**
     stereoMode must have one of the STEREO_MODE values

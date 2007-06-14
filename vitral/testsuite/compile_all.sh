@@ -10,6 +10,9 @@ cd ..
 cd CameraSwingExample
 ./compile.sh
 cd ..
+cd GlyphExample
+./compile.sh
+cd ..
 cd CohenSutherlandClippingTechnique
 ./compile.sh
 cd ..

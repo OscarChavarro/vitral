@@ -14,13 +14,13 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
-public class JoglGeometryRenderer
+public class JoglGeometryRenderer extends JoglRenderer 
 {
     public static void drawMinMaxBox(GL gl, Geometry g, QualitySelection q)
     {
@@ -74,8 +74,8 @@ public class JoglGeometryRenderer
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Arrow" ) {
             triangles = JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricCubicCurve" ) {
-        JoglParametricCubicCurveRenderer.draw(gl, (ParametricCubicCurve)g, c, q);
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricCurve" ) {
+        JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricBiCubicPatch" ) {
         triangles = JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);

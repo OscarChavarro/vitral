@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-public class JoglTriangleMeshGroupRenderer {
+public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
 
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved

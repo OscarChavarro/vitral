@@ -34,7 +34,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     /// Note that the contourCurve must have 4 points with its respective
     /// control parameters.
-    public ParametricCubicCurve contourCurve;
+    public ParametricCurve contourCurve;
     public int type;
 
     // Number of steps for curve approximation
@@ -42,12 +42,12 @@ public class ParametricBiCubicPatch extends Surface {
     private int approximationSteps;
 
     public ParametricBiCubicPatch(int type) {
-        contourCurve = new ParametricCubicCurve();
+        contourCurve = new ParametricCurve();
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = type;
     }
 
-    public ParametricBiCubicPatch(int type, ParametricCubicCurve curve) {
+    public ParametricBiCubicPatch(int type, ParametricCurve curve) {
         this.contourCurve = curve;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = type;
@@ -233,17 +233,17 @@ public class ParametricBiCubicPatch extends Surface {
         Matrix4x4 M_MATRIX = new Matrix4x4();
         Matrix4x4 Mt_MATRIX = new Matrix4x4();
 
-        if ( this.type == ParametricCubicCurve.BEZIER ) {
+        if ( this.type == ParametricCurve.BEZIER ) {
             buildGeometryMatricesXYZ_Bezier();
-            M_MATRIX = ParametricCubicCurve.BEZIER_MATRIX;
+            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
         }
-        else if ( this.type == ParametricCubicCurve.HERMITE ) {
+        else if ( this.type == ParametricCurve.HERMITE ) {
             buildGeometryMatricesXYZ_Hermite();
-            M_MATRIX = ParametricCubicCurve.HERMITE_MATRIX;
+            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
         }
         else if ( this.type == ParametricBiCubicPatch.QUAD ) {
             buildGeometryMatricesXYZ_Quad();
-            M_MATRIX = ParametricCubicCurve.BEZIER_MATRIX;
+            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
         }
         Mt_MATRIX = new Matrix4x4(M_MATRIX);
         Mt_MATRIX.transpose();

@@ -9,23 +9,31 @@
 
 package vsdk.toolkit.render.jogl;
 
+import java.io.FileInputStream;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+//import javax.media.opengl.glu.GLU;
+
+import com.sun.opengl.util.texture.Texture;
+import com.sun.opengl.util.texture.TextureData;
+import com.sun.opengl.util.texture.TextureIO;
+
 import vsdk.toolkit.media.RGBAImage;
 
-class JoglRGBAImageRendererImageAssociation
+class _JoglRGBAImageRendererImageAssociation
 {
     public int glList;
+    public Texture renderer;
     public RGBAImage image;
 }
 
-public class JoglRGBAImageRenderer
+public class JoglRGBAImageRenderer extends JoglRenderer 
 {
-    private static ArrayList<JoglRGBAImageRendererImageAssociation> compiledImages = new ArrayList<JoglRGBAImageRendererImageAssociation>();
-    private static GLU glu = null;
+    private static ArrayList<_JoglRGBAImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBAImageRendererImageAssociation>();
+    //private static GLU glu = null;
 
     /**
     This method generates an OpenGL/JOGL MipMap structure, assoiates it with
@@ -58,17 +66,19 @@ public class JoglRGBAImageRenderer
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
         }
 
+        /*
         if ( glu == null ) {
             glu = new GLU();
         }
+    */
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        JoglRGBAImageRendererImageAssociation item = null;
+        _JoglRGBAImageRendererImageAssociation item = null;
 
         Iterator it = compiledImages.iterator();
         while ( it.hasNext() ) {
-            item = (JoglRGBAImageRendererImageAssociation)it.next();
+            item = (_JoglRGBAImageRendererImageAssociation)it.next();
             if ( item.image == img ) {
                 glListIsCompiled = true;
                 break;
@@ -78,7 +88,7 @@ public class JoglRGBAImageRenderer
         //- 3. If there is no glList, create it ---------------------------
         if ( glListIsCompiled == false ) {
             //----
-            item = new JoglRGBAImageRendererImageAssociation();
+            item = new _JoglRGBAImageRendererImageAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -86,17 +96,57 @@ public class JoglRGBAImageRenderer
             //----
             gl.glGenTextures(1, lists, 0);
             item.glList=lists[0];
-            gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
+            //gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
+
+            //----
+            try {
+/*
+                item.renderer = TextureIO.newTexture(
+                new FileInputStream("./etc/render.png"), true, TextureIO.PNG);
+*/
+
+                TextureData textureData;
+                textureData = new TextureData(
+           3, // int internalFormat (number of components)
+           x_tam, // int width
+                   y_tam, // int height
+                   0, // int border
+                   gl.GL_RGBA, // int pixelFormat
+                   gl.GL_UNSIGNED_BYTE, // int pixelType
+                   true, // boolean mipmap
+                   false, // boolean dataIsCompressed
+                   false, // boolean mustFlipVertically
+                   ByteBuffer.wrap(img.getRawImage()), // Buffer buffer
+                   null // TextureData.Flusher flusher
+                );
+
+                item.renderer = TextureIO.newTexture(textureData);
+        }
+        catch ( Exception e ) {
+                System.err.println(e);
+        }
+
+            //----
+            /*
             //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, x_tam, y_tam, gl.GL_RGBA, 
             //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 4, x_tam, y_tam, 0, gl.GL_RGBA,
-                            gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 
+                            0, 4, 
+                            x_tam, y_tam, 
+                            0, gl.GL_RGBA,
+                            gl.GL_UNSIGNED_BYTE, 
+                            ByteBuffer.wrap(img.getRawImage()));
+            */    
         }
 
         //- 4. Use the image's glList -------------------------------------
+    item.renderer.bind();
+    item.renderer.enable();
+        /*
         if ( item != null ) {
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
+        */
     }
 
     public static void draw(GL gl, RGBAImage img)

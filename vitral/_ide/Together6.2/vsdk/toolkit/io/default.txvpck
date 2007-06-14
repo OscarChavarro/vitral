@@ -52,12 +52,16 @@
         <reference df-class-name="reference6" referencedUin="design:view:::id7cjvmemmkro68emmksgnu">
             <property name="$shortcutReference" value="true"/>
             <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.geometry"/>
-            <property name="bounds" value="10,150,83,104"/>
+            <property name="bounds" value="10,150,200,136"/>
         </reference>
         <reference df-class-name="reference9" referencedUin="design:view:::idbc9themmkro68emmksgpl">
             <property name="$shortcutReference" value="true"/>
             <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.image"/>
             <property name="bounds" value="216,10,193,152"/>
+        </reference>
+        <reference df-class-name="reference1" referencedUin="jdt:e_class:src:vsdk.toolkit.io.XmlException">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="561,311,142,162"/>
         </reference>
         <property name="$defaultDiagram" value=""/>
     </view>

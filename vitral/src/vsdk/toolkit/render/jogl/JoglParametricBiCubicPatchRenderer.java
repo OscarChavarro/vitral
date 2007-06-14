@@ -14,13 +14,13 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
-import vsdk.toolkit.render.jogl.JoglParametricCubicCurveRenderer;
+import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
 
-public class JoglParametricBiCubicPatchRenderer {
+public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
     public static void drawSurfaceGrid(GL gl, double[][][] points,
                                        float tilingU, float tilingV, 
@@ -73,7 +73,7 @@ public class JoglParametricBiCubicPatchRenderer {
                                        Camera c, QualitySelection q,
                                        ColorRgb color) {
         // Now we draw the points
-        if (patch.type == ParametricCubicCurve.BEZIER) {
+        if (patch.type == ParametricCurve.BEZIER) {
             gl.glDisable(gl.GL_LIGHTING);
             gl.glColor3d(color.r, color.g, color.b);
             gl.glLineWidth(1);
@@ -95,21 +95,21 @@ public class JoglParametricBiCubicPatchRenderer {
             }
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 
-            JoglParametricCubicCurveRenderer.drawPoints(gl, patch.contourCurve.points);
+            JoglParametricCurveRenderer.drawPoints(gl, patch.contourCurve.points);
 
         }
-        else if (patch.type == ParametricCubicCurve.HERMITE) {
+        else if (patch.type == ParametricCurve.HERMITE) {
             // Now we draw the points
-            ParametricCubicCurve c1 = new ParametricCubicCurve();
+            ParametricCurve c1 = new ParametricCurve();
             c1.addPoint(patch.contourCurve.getPoint(0), c1.HERMITE);
             c1.addPoint(patch.contourCurve.getPoint(1), c1.HERMITE);
             c1.addPoint(patch.contourCurve.getPoint(3), c1.HERMITE);
 
-            JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
+            JoglParametricCurveRenderer.draw(gl, c1, c, q,
                                                   new ColorRgb(1, 0.4, 0.5));
-            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
+            JoglParametricCurveRenderer.drawControlPointsCurve(gl, c1);
 
-            c1 = new ParametricCubicCurve();
+            c1 = new ParametricCurve();
             Vector3D[] v3 = new Vector3D[] {
                 patch.contourCurve.getPoint(4)[0], patch.contourCurve.getPoint(4)[2],
                 patch.contourCurve.getPoint(4)[1]};
@@ -123,17 +123,17 @@ public class JoglParametricBiCubicPatchRenderer {
                 patch.contourCurve.getPoint(3)[0], patch.contourCurve.getPoint(3)[2],
                 patch.contourCurve.getPoint(3)[1]};
             c1.addPoint(v3, c1.HERMITE);
-            JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
+            JoglParametricCurveRenderer.draw(gl, c1, c, q,
                                                   new ColorRgb(0.5, 0.5, 0.8));
-            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
+            JoglParametricCurveRenderer.drawControlPointsCurve(gl, c1);
 
         }
         else {
 
             // Now we draw the points
-            JoglParametricCubicCurveRenderer.draw(gl, patch.contourCurve, c, q,
+            JoglParametricCurveRenderer.draw(gl, patch.contourCurve, c, q,
                                                   new ColorRgb(1, 1, 1));
-            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl,
+            JoglParametricCurveRenderer.drawControlPointsCurve(gl,
                                                                     patch.contourCurve);
         }
     }

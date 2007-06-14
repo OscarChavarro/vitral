@@ -13,7 +13,7 @@ import javax.media.opengl.GL;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.ZBuffer;
 
-public class JoglZBufferRenderer
+public class JoglZBufferRenderer extends JoglRenderer 
 {
     public static byte[] importZBuffer(GL gl) {
         int[] view = new int[4];

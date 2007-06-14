@@ -52,7 +52,7 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
@@ -400,7 +400,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Create TriangleMesh");
             configureButton(b);
 
-            b = new JButton("Create ParametricCubicCurve");
+            b = new JButton("Create ParametricCurve");
             configureButton(b);
 
             b = new JButton("Create ParametricBiCubicPatch");
@@ -563,14 +563,14 @@ class ButtonsPanel extends JPanel implements ActionListener
                   label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
-        else if ( label.equals("Create ParametricCubicCurve") ||
+        else if ( label.equals("Create ParametricCurve") ||
                   label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
-            ParametricCubicCurve curve;
+            ParametricCurve curve;
 
             // Case 1: curve hard-coded in source
             Vector3D pointParameters[];
 
-            curve = new ParametricCubicCurve();
+            curve = new ParametricCurve();
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(0, 0, 0);
             pointParameters[1] = new Vector3D(0, 0, 0); // Not used
@@ -585,7 +585,7 @@ class ButtonsPanel extends JPanel implements ActionListener
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(2, 0, 1);
-            pointParameters[1] = new Vector3D(1.5, -0.5, 0);
+            pointParameters[1] = new Vector3D(2, 0, 0);
             pointParameters[2] = new Vector3D(0, 0, 0); // Not used
             curve.addPoint(pointParameters, curve.BEZIER);
 
@@ -602,7 +602,7 @@ class ButtonsPanel extends JPanel implements ActionListener
 /*
             // Case 2: curve read from a previous existing data file
             try {
-                curve = (ParametricCubicCurve)XmlManager.importXml(
+                curve = (ParametricCurve)XmlManager.importXml(
                           "curveTest.xml");
                 addThing(curve);
               }
@@ -616,7 +616,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             ParametricBiCubicPatch patch;
 /*
             // Case 1: Patch hard-coded in source
-            ParametricCubicCurve border = new ParametricCubicCurve();
+            ParametricCurve border = new ParametricCurve();
             Vector3D pointParameters[];
             pointParameters = new Vector3D[3];
 

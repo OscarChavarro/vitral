@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Light;
 import javax.media.opengl.GL;
 
-public class JoglLightRenderer {
+public class JoglLightRenderer extends JoglRenderer {
 
     public static int supportedLightsInOpenGL = 8;
 

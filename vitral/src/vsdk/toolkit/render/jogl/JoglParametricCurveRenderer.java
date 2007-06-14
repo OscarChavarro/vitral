@@ -14,9 +14,9 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 
-public class JoglParametricCubicCurveRenderer {
+public class JoglParametricCurveRenderer extends JoglRenderer {
 
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
@@ -24,7 +24,7 @@ public class JoglParametricCubicCurveRenderer {
 
     @todo Do not turn off lighting here, that's a wrongly supposed used.
     */
-    static public void draw(GL gl, ParametricCubicCurve curve, 
+    static public void draw(GL gl, ParametricCurve curve, 
                             Camera c, QualitySelection q,
                             ColorRgb color) {
     int i;
@@ -32,8 +32,14 @@ public class JoglParametricCubicCurveRenderer {
         gl.glDisable(GL.GL_LIGHTING);
 
         for ( i = 1; i < curve.types.size(); i++ ) {
+            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+                i++;
+                continue;
+        }
+
         // Build a polyline for approximating the [i] curve segment
             ArrayList polyline = curve.calculatePoints(i, false);
+
             gl.glColor3d(color.r, color.g, color.b);
 
         // Draw the polyline
@@ -52,13 +58,13 @@ public class JoglParametricCubicCurveRenderer {
     }
     }
 
-    static public void draw(GL gl, ParametricCubicCurve curve,
+    static public void draw(GL gl, ParametricCurve curve,
                             Camera c, QualitySelection q) {
         draw(gl, curve, c, q, new ColorRgb(1, 1, 1));
     }
 
     static public void drawControlPointsCurve(GL gl, 
-                                              ParametricCubicCurve curve) {
+                                              ParametricCurve curve) {
         ColorRgb colorLine = new ColorRgb(1, 1, 0);
         ColorRgb colorCenterPoint = new ColorRgb(1, 0, 0);
         ColorRgb colorTangPoint = new ColorRgb(0, 1, 0);
@@ -67,7 +73,7 @@ public class JoglParametricCubicCurveRenderer {
     }
 
     static public void drawControlPointsCurve(GL gl,
-                                              ParametricCubicCurve curve,
+                                              ParametricCurve curve,
                                               ColorRgb colorLine,
                                               ColorRgb colorCenterPoint,
                                               ColorRgb colorTangPoint) {
@@ -75,8 +81,8 @@ public class JoglParametricCubicCurveRenderer {
 
         int typeseg = curve.types.get(0);
 
-        if (typeseg == ParametricCubicCurve.BEZIER ||
-            typeseg == ParametricCubicCurve.HERMITE) {
+        if (typeseg == ParametricCurve.BEZIER ||
+            typeseg == ParametricCurve.HERMITE) {
             drawTwoControlPoints(gl, curve.points.get(0), 2, colorLine,
                                  colorCenterPoint, colorTangPoint);
         }
@@ -89,8 +95,8 @@ public class JoglParametricCubicCurveRenderer {
         for (int i = 1; i < curve.types.size(); i++) {
             typeseg = curve.types.get(i);
 
-            if (typeseg == ParametricCubicCurve.BEZIER ||
-                typeseg == ParametricCubicCurve.HERMITE) {
+            if (typeseg == ParametricCurve.BEZIER ||
+                typeseg == ParametricCurve.HERMITE) {
                 if (i == curve.types.size() - 1) {
                     drawTwoControlPoints(gl, curve.points.get(i), 1, colorLine,
                                          colorCenterPoint, colorTangPoint);

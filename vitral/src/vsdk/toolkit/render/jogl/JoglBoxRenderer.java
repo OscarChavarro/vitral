@@ -16,7 +16,7 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Box;
 
-public class JoglBoxRenderer {
+public class JoglBoxRenderer extends JoglRenderer {
 
     private static GLUT glut = null;
 

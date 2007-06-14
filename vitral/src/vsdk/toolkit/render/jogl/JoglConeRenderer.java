@@ -16,7 +16,7 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Cone;
 
-public class JoglConeRenderer {
+public class JoglConeRenderer extends JoglRenderer {
 
     private static GLU glu = null;
     private static GLUquadric gluQuadric = null;

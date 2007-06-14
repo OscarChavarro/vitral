@@ -23,7 +23,7 @@ public class ParametricBiCubicPatchPersistence {
   private static String patchAttributesNames[] = {
       "type", "approximationSteps"};
   private final static String[] nodesNames = {
-      "ParametricCubicCurve",
+      "ParametricCurve",
       "Point"
   };
 
@@ -56,8 +56,8 @@ public class ParametricBiCubicPatchPersistence {
           // patch.contourCurve = the first curve node
           for (int i = 0; i < nodeList.getLength(); i++) {
             Node nodeCurve = nodeList.item(i);
-            patch.contourCurve = ParametricCubicCurvePersistence.
-                nodeToParametricCubicCurve(nodeCurve);
+            patch.contourCurve = ParametricCurvePersistence.
+                nodeToParametricCurve(nodeCurve);
             if(patch.contourCurve!=null){
               break;
             }
@@ -82,7 +82,7 @@ public class ParametricBiCubicPatchPersistence {
 
       Element eCurve;
 
-      eCurve = ParametricCubicCurvePersistence.toElement(patch.
+      eCurve = ParametricCurvePersistence.toElement(patch.
           contourCurve, document);
 
       nodeRoot.appendChild(eCurve);

@@ -19,11 +19,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
 
-public class ParametricCubicCurvePersistence {
-    public static final String rootName = "ParametricCubicCurve";
+public class ParametricCurvePersistence {
+    public static final String rootName = "ParametricCurve";
     private static final String[] nodesNames = {
         "Point",
         "Vector3D",
@@ -33,14 +33,14 @@ public class ParametricCubicCurvePersistence {
     private static final String pointAttributesNames[] = {
         "type"};
 
-    public static ParametricCubicCurve nodeToParametricCubicCurve(Node nodeRoot) throws
+    public static ParametricCurve nodeToParametricCurve(Node nodeRoot) throws
         XmlException {
 
         if (nodeRoot.getNodeName() != rootName) {
             new XmlException("The node no is a curve ");
             return null;
         }
-        ParametricCubicCurve curve = new ParametricCubicCurve();
+        ParametricCurve curve = new ParametricCurve();
         NamedNodeMap atts = nodeRoot.getAttributes();
         if (atts != null) {
             Node atributo;
@@ -92,7 +92,7 @@ public class ParametricCubicCurvePersistence {
 
 
 
-    public static Element toElement(ParametricCubicCurve curve,
+    public static Element toElement(ParametricCurve curve,
                                     Document document) throws XmlException{
         Element nodeCurve = document.createElement(rootName);
         try {

@@ -3,10 +3,14 @@
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
+//= [.SUN2006] Java 1.5.0 API, available at http://java.sun.com             =
+//= [.FONT2006] The FontForge project home page, available at               =
+//=            http://fontforge.sourceforge.net/bezier.html                 =
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - April 20 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2005 - Gina Chiquillo / Oscar Chavarro: quality check        =
+//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
+//= - July 25 2006 - Oscar Chavarro: quality check, documentation added     =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -19,19 +23,57 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 /**
-This class can represents a set of curve segments, forming a poly-curve. Each
-segment is a parametric cubic curve with a set of points in the form
-<x(t), y(t), z(t)> for t in the interval [0.0, 1.0]. The behavior of each
-segment can vary depending of the type of its defining control points. Note
-that each control point is stored in the `points` ArrayList, and depending
-of its type, the number of Vector3d's that forms it varies, and its
-specific interpretation varies.
+This class represents a set of curve segments, forming a poly-line.
+The represented poly-line can be straight or curved, can be integral 
+(continous) or broken in pieces (discontinous), and each piece can be 
+open or closed. Usually, a poly-line is co-planar, all of its pieces are 
+closed, and the first closed piece conforms the outer contour, while the 
+remaining close pieces make holes inside the first piece.  In this scheme,
+the order in which pieces and segments are defined is important.
+
+Each segment is a parametric cubic curve with an infinite set of points in
+the form <x(t), y(t), z(t)> for t in the interval [0.0, 1.0]. Only the
+starting (t = 0) and ending (t = 1) points are explicity represented, 
+and the remaining intermediate points can be calculated via interpolation 
+using the `evaluate` method.
+
+The behavior of each segment can vary depending of the type of its defining
+control points. For each type of curve supported, there is a public constant
+defined in this class that specify it, and a static matrix that represents the
+interpolation equations used. 
+
+Note that each control point is stored in the `points` ArrayList, and depending
+of its type (which is stored in the `types` ArrayList), the number of 
+Vector3D's that forms it varies, and its specific interpretation also varies.
+Check the documentation of each identification type value constant to 
+understand the exact interpretation of control points. The curve interpolation
+scheme can be:
+  - Reset interpolation sequence: the control point is not really a point,
+    but a command that indicate to algorithms to break the poly-line in two
+    pieces. Note that for this type of command, there is no Vector3D positions
+    associated to array list, so the corresponding static vector is null or
+    empty.
+  - First order in respect to t: the curve segment is "linear", that is
+    straight, the control points are "corners" between lines and each control
+    point has just one Vector3D (the position of a line end)
+  - Second order in respect to t: the curve segment is "quadratic"
+  - Third order in respect to t: the curve segment is "cubic". There are
+    multiple cubic curve interpretations based on the specific interpolation
+    method used, and in specific control point interpretation.
+
+From a design point of view, this class is similar to Sun Microsystems'
+java.awt.geom.PathIterator class [.SUN2006], only that this one supports 
+curves in 3D space, not just a 2D plane. The implementation follows the
+parametric curve development derived in [FOLE1992, Chapter 11].
 
 @todo Document in detail the interpretation of point data for each curve type.
 @todo Pending to implement some other curve types, like Catmull-Rom.
+@todo Include some curve examples and its corresponding data structure in
+      this documentation.
+@todo Fix the definition of UNRBSPLINE_MATRIX, to have it divided by 6.
 */
 
-public class ParametricCubicCurve extends Curve {
+public class ParametricCurve extends Curve {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
@@ -43,16 +85,43 @@ public class ParametricCubicCurve extends Curve {
     public static Matrix4x4 UNRBSPLINE_MATRIX = null;
     public static Matrix4x4 CATMULL_ROM_MATRIX = null;
 
-    // Constants used for identification of defining points
-    public static final int CORNER = 1; // Usual name for linear polycurves
-    public static final int HERMITE = 2;
-    public static final int BEZIER = 3;
-    public static final int UNRBSPLINE = 4;
-    public static final int NUNRBSPLINE = 5;
-    public static final int CATMULLROM = 6;
+    // Constants used for identification type values for controlling points
+    /// Identification type value for specify a discontinuity in the curve.
+    /// A control point of this type doesn't have any Vector3D, but uses a
+    /// slot (possibly null) in the `points` attribute.
+    public static final int BREAK = 1; 
+    /// Identification type value for straight lines. A control point of this
+    /// type has one Vector3D, representing and end of a straight line.
+    public static final int CORNER = 2; 
+    /// Identification type value for quadratic curves. A control point of this
+    /// type has two Vector3D.
+    public static final int QUAD = 3; 
+    /// Identification type value for cubic curve with Hermite interpolation.
+    /// A control point of this type has three Vector3D.
+    public static final int HERMITE = 4;
+    /// Identification type value for cubic curve with Bezier interpolation
+    /// A control point of this type has three Vector3D.
+    public static final int BEZIER = 5;
+    /// Identification type value for cubic curve with Uniform Non Rational
+    /// B Spline interpolation
+    /// A control point of this type has three Vector3D.
+    public static final int UNRBSPLINE = 6;
+    /// Identification type value for cubic curve with Non Uniform Non 
+    /// Rational B Spline interpolation
+    /// A control point of this type has three Vector3D.
+    public static final int NUNRBSPLINE = 7;
+    /// Identification type value for cubic curve with Catmull-Rom 
+    /// interpolation
+    /// A control point of this type has three Vector3D.
+    public static final int CATMULLROM = 8;
 
     // Curve model: a set of points, each having a type of data interpretation
+    /// Controlling points array
     public ArrayList<Vector3D[]> points;
+    /// Controlling points types array. This array always has the same
+    /// dimension of the `points` array. The values always correspond to one
+    /// of the identification type values defined in this class (i.e.
+    /// CORNER, HERMITE, BEZIER, etc.).
     public ArrayList<Integer> types;
 
     // Number of steps for curve approximation
@@ -71,7 +140,7 @@ public class ParametricCubicCurve extends Curve {
     initialized to standard teoretical values, with their scalar constants 
     applied. This implies updating the evaluation methods.
     */
-    public ParametricCubicCurve() {
+    public ParametricCurve() {
         //- Matrix initialization -----------------------------------------
         // All the matrixes are computed only for the first time this
         // class is instantiated. Note that this makes the Matrix4x4
@@ -139,8 +208,27 @@ public class ParametricCubicCurve extends Curve {
     }
 
     public void addPoint(Vector3D[] point, int type) {
+        if ( type == BREAK && points.size() < 1 ) {
+        return;
+    }
         points.add(point);
         types.add(new Integer(type));
+    }
+
+    /**
+    Calculates and return the number of pieces in current curve.
+    */
+    public int getNumPieces()
+    {
+        int sum = 1, i;
+
+        for ( i = 1; i < types.size(); i++ ) {
+            if ( types.get(i).intValue() == BREAK ) {
+                sum++;
+        }
+    }
+
+        return sum;
     }
 
     public void addPointAt(Vector3D[] point, int type, int position) {
@@ -166,34 +254,41 @@ public class ParametricCubicCurve extends Curve {
     }
 
     /**
-    Given current ParametricCubicCurve, this method takes the scalar 
+    Given current ParametricCurve, this method takes the scalar 
     parameter t, which must be inside the interval [0.0, 1.0], and 
-    returns the Vector3D resulting from the evaluation of the n_seg
-    segment of the polycurve.
+    returns the Vector3D resulting from the evaluation of the 
+    segment of the polycurve ending in the segment `endingSegment`.
+    The ending segment type determines the interpretation of
+    interpolants.
+
+    Returns null if current endingSegment is not a segment but a BREAK.
     */
-    public Vector3D evaluate(int n_seg,  double t) {
-        if (types.get(n_seg).intValue() == CORNER ) {
-            return evaluateLinear(n_seg, t);
+    public Vector3D evaluate(int endingSegment,  double t) {
+        if ( types.get(endingSegment).intValue() == CORNER ) {
+            return evaluateLinear(endingSegment, t);
         }
-        else if (types.get(n_seg).intValue() == HERMITE ) {
-            return evaluateHermite(n_seg, t);
+        else if ( types.get(endingSegment).intValue() == QUAD ) {
+            return evaluateQuadratic(endingSegment, t);
         }
-        else if (types.get(n_seg).intValue() == BEZIER ) {
-            return evaluateBezier(n_seg, t);
+        else if ( types.get(endingSegment).intValue() == HERMITE ) {
+            return evaluateHermite(endingSegment, t);
         }
-        else if (types.get(n_seg).intValue() == UNRBSPLINE ) {
-            return evaluateBspline(n_seg, t);
+        else if ( types.get(endingSegment).intValue() == BEZIER ) {
+            return evaluateBezier(endingSegment, t);
+        }
+        else if ( types.get(endingSegment).intValue() == UNRBSPLINE ) {
+            return evaluateBspline(endingSegment, t);
         }
         return null;
     }
 
     private Vector3D evaluateLinear(int nseg, double t) {
-        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
-        Vector3D[] endingSegmentPoint = points.get(nseg);
+        Vector3D[] startingSegmentControl = points.get(nseg - 1);
+        Vector3D[] endingSegmentControl = points.get(nseg);
         Vector3D p;
 
         // p1
-        Vector3D result = startingSegmentPoint[0];
+        Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
             vt += LINEAR_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
@@ -205,7 +300,7 @@ public class ParametricCubicCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += LINEAR_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        p = endingSegmentPoint[0];
+        p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
 
         // 0
@@ -227,12 +322,67 @@ public class ParametricCubicCurve extends Curve {
         return result;
     }
 
-    private Vector3D evaluateHermite(int nseg, double t) {
-        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
-        Vector3D[] endingSegmentPoint = points.get(nseg);
+    /**
+    Note that current implemented quadratic spline interpolation strategy
+    is to first express the second order quadric as a third order Bezier
+    spline, and later evaluate the Bezier spline, as noted on [.FONT2006].
+
+    @todo Express this interpolation as a QUAD_MATRIX and similar scheme to
+    other points in this class.
+    */
+    private Vector3D evaluateQuadratic(int nseg, double t)
+    {
+        Vector3D[] startingSegmentControl = points.get(nseg - 1);
+        Vector3D[] endingSegmentControl = points.get(nseg);
+        Vector3D p;
+
+    Vector3D qp0, qp1, qp2;
+        qp0 = startingSegmentControl[0];
+        qp1 = endingSegmentControl[1];
+        qp2 = endingSegmentControl[0];
+
+        // p0
+        Vector3D result = qp0;
+        double vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += BEZIER_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+        }
+        result = result.multiply(vt);
 
         // p1
-        Vector3D result = startingSegmentPoint[0];
+        vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+        }
+    p = qp0.add((qp1.substract(qp0)).multiply(2/3));
+        result = result.add(p.multiply(vt));
+
+        // p2
+        vt = 0;
+
+        for (int i = 0; i < 4; i++) {
+            vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+        }
+        p = qp1.add((qp2.substract(qp0)).multiply(1/3));
+        result = result.add(p.multiply(vt));
+
+        // p3
+        vt = 0;
+        for (int i = 0; i < 4; i++) {
+            vt += BEZIER_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+        }
+        p = endingSegmentControl[0];
+        result = result.add(p.multiply(vt));
+
+        return result;
+    }
+
+    private Vector3D evaluateHermite(int nseg, double t) {
+        Vector3D[] startingSegmentControl = points.get(nseg - 1);
+        Vector3D[] endingSegmentControl = points.get(nseg);
+
+        // p1
+        Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
@@ -244,7 +394,7 @@ public class ParametricCubicCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        Vector3D p = endingSegmentPoint[0];
+        Vector3D p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
 
         // r1
@@ -252,7 +402,7 @@ public class ParametricCubicCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
         }
-        p = startingSegmentPoint[2];
+        p = startingSegmentControl[2];
         result = result.add(p.multiply(vt));
 
         // r4
@@ -260,19 +410,19 @@ public class ParametricCubicCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
         }
-        p = endingSegmentPoint[1];
+        p = endingSegmentControl[1];
         result = result.add(p.multiply(vt));
 
         return result;
     }
 
     private Vector3D evaluateBezier(int nseg, double t) {
-        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
-        Vector3D[] endingSegmentPoint = points.get(nseg);
+        Vector3D[] startingSegmentControl = points.get(nseg - 1);
+        Vector3D[] endingSegmentControl = points.get(nseg);
         Vector3D p;
 
         // p1
-        Vector3D result = startingSegmentPoint[0];
+        Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
@@ -284,7 +434,7 @@ public class ParametricCubicCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        p = startingSegmentPoint[2];
+        p = startingSegmentControl[2];
         result = result.add(p.multiply(vt));
 
         // p3
@@ -293,7 +443,7 @@ public class ParametricCubicCurve extends Curve {
         for (int i = 0; i < 4; i++) {
             vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
         }
-        p = endingSegmentPoint[1];
+        p = endingSegmentControl[1];
         result = result.add(p.multiply(vt));
 
         // p4
@@ -301,7 +451,7 @@ public class ParametricCubicCurve extends Curve {
         for (int i = 0; i < 4; i++) {
             vt += BEZIER_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
         }
-        p = endingSegmentPoint[0];
+        p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
 
         return result;

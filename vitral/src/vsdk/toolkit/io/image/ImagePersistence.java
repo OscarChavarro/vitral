@@ -89,14 +89,14 @@ public class ImagePersistence
             for ( y = 0; y < h; y++ ) {
                 for ( x = 0; x < w; x++ ) {
                     // Warning: This method call is so slow...
-            pixel = bi.getRGB(x, y);
+                    pixel = bi.getRGB(x, y);
                     a = (byte)((pixel & 0xFF000000) >> 24);
                     r = (byte)((pixel & 0x00FF0000) >> 16);
-            g = (byte)((pixel & 0x0000FF00) >> 8);
-            b = (byte)((pixel & 0x000000FF));
+                    g = (byte)((pixel & 0x0000FF00) >> 8);
+                    b = (byte)((pixel & 0x000000FF));
                     retImage.putPixel(x, y, r, g, b, a);
-        }
-        }
+                }
+            }
 /*
             int[] pix = new int[w*h];
 
@@ -163,7 +163,7 @@ public class ImagePersistence
         if ( image instanceof BufferedImage ) {
             return (BufferedImage)image;
         }
-    //System.out.println(image.getClass().getName());
+        //System.out.println(image.getClass().getName());
     
         // This code ensures that all the pixels in the image are loaded
         image = new ImageIcon(image).getImage();
@@ -237,9 +237,9 @@ public class ImagePersistence
     public static boolean exportPPM(File fd, vsdk.toolkit.media.Image img)
     {
         try {
-            BufferedOutputStream escritor;
+            BufferedOutputStream writer;
 
-            escritor = new BufferedOutputStream(new FileOutputStream(fd));
+            writer = new BufferedOutputStream(new FileOutputStream(fd));
 
             String linea1 = "P6\n";
             String linea2 = img.getXSize() + " " + img.getYSize() + "\n";
@@ -247,22 +247,25 @@ public class ImagePersistence
             byte arr[];
 
             arr = linea1.getBytes();
-            escritor.write(arr, 0, arr.length);
+            writer.write(arr, 0, arr.length);
             arr = linea2.getBytes();
-            escritor.write(arr, 0, arr.length);
+            writer.write(arr, 0, arr.length);
             arr = linea3.getBytes();
-            escritor.write(arr, 0, arr.length);
+            writer.write(arr, 0, arr.length);
 
             RGBPixel p;
-            for ( int y = 0; y < img.getXSize(); y++ ) {
-                for ( int x = 0; x < img.getXSize(); x++ ) {
+            int x = 0, y = 0;
+            for ( y = 0; y < img.getYSize(); y++ ) {
+                for ( x = 0; x < img.getXSize(); x++ ) {
                     p = img.getPixelRgb(x, y);
-                    escritor.write(p.r);
-                    escritor.write(p.g);
-                    escritor.write(p.b);
-        }
+                    writer.write(p.r);
+                    writer.write(p.g);
+                    writer.write(p.b);
+                }
             }
-            escritor.close();
+
+            writer.flush();
+            writer.close();
         }
         catch (Exception e) {
             return false;

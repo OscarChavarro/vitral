@@ -81,3 +81,16 @@ Changes in 2006 may 22/may25 revition
     Oscar Chavarro
   - document.sh script now builds two versions for online literate programming
     style documentation: doxygen and javadoc
+
+Changes in 2006 july 25 revition
+  - GUI infraestructure advanced inside the SceneEditorApplication
+  - JoglRenderer interface
+  - ParametricCubicCurve renamed to ParametricCurve, as is currently
+    representing also linear curves (polylines) and will be extended to
+    support quadric curves
+
+Changes in 2006 august 1 revition
+  - Fixed a bug in ImagePersistence.exportPPM
+  - Fixed a bug in Jogl Image renderers that caused large textures not to
+    appear on Windows. Now glTexImage2D is not used directly, but with
+    com.sun.opengl.util.texture.Texture rendering utility

@@ -26,13 +26,12 @@ public class PbufferExample implements GLEventListener {
     public PbufferExample() {
         // Create a GLCapabilities object for the pbuffer
         GLCapabilities pbCaps = new GLCapabilities();
-        pbCaps.setAlphaBits(8);
         pbCaps.setDoubleBuffered(false);
         pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
         pbuffer.addGLEventListener(this);
         pbuffer.display();
     }
-  
+
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
@@ -54,7 +53,7 @@ public class PbufferExample implements GLEventListener {
         image=JoglRGBAImageRenderer.getImageJOGL(gl);
         ImagePersistence.exportPPM(new File("./output.ppm"), image);
     }
-  
+
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {
     }
 

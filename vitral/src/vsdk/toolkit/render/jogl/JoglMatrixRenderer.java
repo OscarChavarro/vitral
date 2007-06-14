@@ -16,7 +16,7 @@ vitral internal representation of a matrix containing an homogeneous
 coordinates geometrical transformation represented in the 
 `vsdk.toolkit.common.Matrix4x4` class.
  */
-public class JoglMatrixRenderer {
+public class JoglMatrixRenderer extends JoglRenderer {
 
     /**
     This method acumulates the matrix represented in `A` in the currently

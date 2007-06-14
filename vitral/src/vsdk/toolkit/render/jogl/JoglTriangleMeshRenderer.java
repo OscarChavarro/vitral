@@ -8,7 +8,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.common.QualitySelection;
 import java.util.ArrayList;
 
-public class JoglTriangleMeshRenderer {
+public class JoglTriangleMeshRenderer extends JoglRenderer {
     private static HashMap<TriangleMesh, TextureDecorator> objTex = new HashMap<TriangleMesh,
     TextureDecorator> ();
     private static class TextureDecorator {
