@@ -1,0 +1,191 @@
+//===========================================================================
+package vitral_transition.toolkits.media;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import vsdk.toolkit.media.RGBPixel;
+
+public class RGBImage 
+{
+    private RGBPixel data[];
+    private int xSize;
+    private int ySize;
+
+    /**
+    Constructora de imagen. OJO: No la inicializa, antes de usarla debe
+    llamarse el m&eacute;todo init.
+    */
+    public RGBImage()
+    {
+        xSize = 0;
+        ySize = 0;
+        data = null;
+    }
+
+    /**
+    Esta es la destructora de la clase.  Si es usted tan gentil, por favor 
+    llame este metodo al final del alcance de su objeto.
+    */
+    public void dispose()
+    {
+        if ( data != null ) {
+            for ( int i = 0; i < xSize*ySize; i++ ) {
+                if ( data[i] != null ) {
+                    data[i] = null;
+                }
+            }
+            xSize = 0;
+            ySize = 0;
+            data = null;
+            System.gc();
+        }
+    }
+
+    /**
+    Inicializaci&oacute;n del contenido de una imagen.
+
+    Recibe el ancho y el alto que debe tener esta RGBImage (n&oacute;tese
+    que una imagen puede asi cambiar de tama&ntilde;o en cualquier momento)
+    y asigna la memoria necesaria para hacerlo.
+
+    OJO: NO inicializa la imagen, solo asigna la memoria necesaria.
+
+    Este m&eacute;todo retorna true si todo sale bien, o false si no
+    se pudo asignar la cantidad de memoria necesaria para almacenar la
+    imagen del tama&ntilde;o seleccionado.
+    */
+    public boolean init(int ancho, int alto)
+    {
+        try {
+          data = new RGBPixel[ancho * alto];
+          for ( int i = 0; i < ancho*alto; i++ ) {
+              data[i] = new RGBPixel();
+          }
+        }
+        catch (Exception e) {
+          data = null;
+          return false;
+        }
+        xSize = ancho;        
+        ySize = alto;        
+        return true;
+    }
+
+    /**
+    Este m&eacute;todo cambia la posicion (x, y) de la matriz de imagen y
+    escribe en ella un pixel con coordenadas (r, g, b).
+    */
+    public void putpixel(int x, int y, byte r, byte g, byte b)
+    {
+        int index = xSize*y + x;
+        data[index].r = r;
+        data[index].g = g;
+        data[index].b = b;
+    }
+
+    /**
+    Este m&eacute;todo retorna las coordenadas de color (r, g, b) para el pixel
+    de la posicion (x, y) de la imagen.
+    */
+    public RGBPixel getpixel(int x, int y)
+    {
+        RGBPixel p = new RGBPixel();
+        int index = xSize*y + x;
+        p.r = data[index].r;
+        p.g = data[index].g;
+        p.b = data[index].b;
+
+        return new RGBPixel();
+    }
+
+    /**
+    Este m&eacute;todo genera un patron de prueba visual tipo ajedrez, con
+    un par de lineas de colores atravezandolo por el centro.  Puede utilizarse
+    para probar otras operaciones de imagenes, o para inicializarlas.
+    */
+    public void crear_patron_de_prueba()
+    {
+        int i;
+        int j;
+        byte r;
+        byte g;
+        byte b;
+
+        for ( i = 0; i < ySize ; i++ ) {
+            for ( j = 0; j < xSize ; j++ ) {
+                if ( ((i % 2 != 0) && (j % 2 == 0)) || 
+                     ((j % 2 != 0) && (i % 2 == 0)) ) {
+                    r = (byte)255;
+                    g = (byte)255;
+                    b = (byte)255;
+                  }
+                  else {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                }
+                if ( i == ySize/2 ) {
+                    r = (byte)255;
+                    g = 0;
+                    b = 0;
+                }
+                if ( j == xSize/2) {
+                    r = 0;
+                    g = (byte)255;
+                    b = 0;
+                }
+                putpixel(j, i, r, g, b);
+            }
+        }
+    }
+
+    /**
+    Este m&eacute;todo escribe los contenidos de la imagen actual en un
+    archivo de imagen en formato PPM RGB (i.e. P6). Retorna true si todo
+    sale bien o false si algo falla (i.e. como un problema de permisos o
+    que se acabe el espacio en el dispositivo de almacenamiento `fd`).
+    */
+    public boolean exportar_ppm(File fd)
+    {
+        try {
+            FileOutputStream escritor = new FileOutputStream(fd);
+
+            String linea1 = "P6\n";
+            String linea2 = xSize + " " + ySize + "\n";
+            String linea3 = "255\n";
+            byte arr[];
+
+            arr = linea1.getBytes();
+            escritor.write(arr, 0, arr.length);
+            arr = linea2.getBytes();
+            escritor.write(arr, 0, arr.length);
+            arr = linea3.getBytes();
+            escritor.write(arr, 0, arr.length);
+
+            for ( int i = 0; i < xSize*ySize; i++ ) {
+                escritor.write(data[i].r);
+                escritor.write(data[i].g);
+                escritor.write(data[i].b);
+            }
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public int getXSize()
+    {
+        return xSize;
+    }
+
+    public int getYSize()
+    {
+        return ySize;
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

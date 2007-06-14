@@ -1,0 +1,180 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - February 13 2006 - Oscar Chavarro: Original base version              =
+//===========================================================================
+
+package vsdk.toolkit.environment.geometry;
+
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.common.Ray;
+
+public class Cylinder extends Geometry {
+    private double r1; // Radius at the base
+    private double r2; // Radius at the top
+    private double h;  // Height
+
+    GeometryIntersectionInformation lastInfo;
+
+    public Cylinder(double r1, double r2, double h) {
+        this.r1 = r1;
+        this.r2 = r2;
+        this.h = h;
+    }
+
+    private boolean
+    doIntersectionCylinder(Ray inOutRay) {
+        return false;
+    }
+
+    private boolean
+    doIntersectionCone(Ray inOutRay, double inR, double inH,
+                      GeometryIntersectionInformation outInfo) 
+    {
+        double A, B, C, discriminant, t0;
+
+        //- Translacion para concordar con la interpretacion AQUYNZA --------
+        Ray r = new Ray(inOutRay);
+        r.origin.z -= inH/2;
+        r.direction.normalize();
+
+        //- Calcula el termino A --------------------------------------------
+        A = VSDK.square(r.direction.x) +
+            VSDK.square(r.direction.y) -
+            VSDK.square(r.direction.z * inR / inH);
+
+        //- Calcula el termino B --------------------------------------------
+        B = 2 *
+            ((r.direction.x * r.origin.x) +
+             (r.direction.y * r.origin.y) -
+             (r.direction.z * r.origin.z * VSDK.square(inR)) / 
+             VSDK.square(inH)
+             );
+
+        //- Calcula el termino C --------------------------------------------
+        C = VSDK.square(r.origin.x) +
+            VSDK.square(r.origin.y) -
+            VSDK.square(r.origin.z * inR / inH);
+
+        //- Calcula el discriminant. Si el discriminant no es positivo el -
+        //- rayo no intersecta la esfera. retorna t = 0                      
+        discriminant = VSDK.square(B) - 4*A*C;
+        if ( discriminant <= VSDK.EPSILON ) return false;
+
+        //- Resuelve la ecuacion cuadratica para las raices de la ecuacion. -
+        //- (-B +/- sqrt(B^2 - 4*A*C)) / 2A.                                -
+        discriminant = Math.sqrt(discriminant);
+        t0 = (-B-discriminant) / (2 * A);
+        //- Si t0 es > 0 listo. Si no debemos calcular la otra raiz t1. -----
+        if ( t0 > VSDK.EPSILON ) {
+            // OJO: Aqui va el calculo del punto y la normal!
+            outInfo.p = r.origin.add(r.direction.multiply(t0));
+            if ( outInfo.p.z > 0 || outInfo.p.z < -inH ) {
+                return false;
+            }
+
+            // Se calcula la normal como el gradiente de la formula del cono,
+            // notese que aqui se obtiene un vector escalado en 1/2 respecto al
+            // gradiente (para ahorrar multiplicaciones)
+            outInfo.n.x = outInfo.p.x;
+            outInfo.n.y = outInfo.p.y;
+            outInfo.n.z = -outInfo.p.z * VSDK.square(inR/inH);
+            outInfo.n.normalize();
+    
+            outInfo.p.z += inH/2;
+            inOutRay.t = t0;
+
+            return true;
+        }
+
+        return false;
+
+    }
+
+    private boolean
+    doIntersectionTap(Ray inOutRay, double inR, double inH,
+                      GeometryIntersectionInformation outInfo) {
+        double t;
+        Vector3D p;
+        Vector3D proy;
+        Vector3D o = new Vector3D(0, 0, 0);
+
+        if ( Math.abs(inOutRay.direction.z) > VSDK.EPSILON ) {
+            t = (inH - inOutRay.origin.z) / inOutRay.direction.z;
+            if ( t > -VSDK.EPSILON ) {
+                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                proy = new Vector3D(p.x, p.y, 0);
+                if ( VSDK.vectorDistance(proy, o) < inR ) {
+                    inOutRay.t = t;
+                    outInfo.n.x = 0;
+                    outInfo.n.y = 0;
+                    outInfo.n.z = 1;
+                    outInfo.p = p;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+    */
+    public boolean
+    doIntersection(Ray inOutRay) {
+        Ray bodyRay;
+        Ray tap1Ray;
+        GeometryIntersectionInformation infoTap1;
+        GeometryIntersectionInformation infoBody;
+        boolean tap1, body;
+
+        bodyRay = new Ray(inOutRay);
+        tap1Ray = new Ray(inOutRay);
+        infoTap1 = new GeometryIntersectionInformation();
+        infoBody = new GeometryIntersectionInformation();
+
+        //- Cone case -----------------------------------------------------
+        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+            tap1 = doIntersectionTap(tap1Ray, r1, -h/2, infoTap1);
+            body = doIntersectionCone(bodyRay, r1, h, infoBody);
+            if ( (tap1 && !body) ||
+                 (tap1 && body && (tap1Ray.t < bodyRay.t)) ) {
+                inOutRay.origin = tap1Ray.origin;
+                inOutRay.direction = tap1Ray.direction;
+                inOutRay.t = tap1Ray.t;
+                infoTap1.n = infoTap1.n.multiply(-1);
+                lastInfo = infoTap1;
+                return true;
+            }
+            if ( (!tap1 && body) ||
+                 (tap1 && body && (tap1Ray.t > bodyRay.t)) ) {
+                inOutRay.origin = bodyRay.origin;
+                inOutRay.direction = bodyRay.direction;
+                inOutRay.t = bodyRay.t;
+                lastInfo = infoBody;
+                return true;
+            }
+        }
+
+        //- Cylinder case -------------------------------------------------
+
+        return false;
+    }
+
+    /**
+    */
+    public void doExtraInformation(Ray inRay, double inT, 
+                                  GeometryIntersectionInformation outData)
+    {
+        outData.p = lastInfo.p;
+        outData.n = lastInfo.n;
+        outData.n.normalize();
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

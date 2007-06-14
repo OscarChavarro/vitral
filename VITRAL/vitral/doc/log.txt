@@ -1,0 +1,34 @@
+Revision de noviembre 1 de 2005
+  - Revision MESH: la etapa 141 original de Lhyna y Gabriel se pasa a la
+    142, y se le annaden scripts de compilacion para linux y se le reviso el
+    encoding para que no fallaran los comentarios en linux. El ejemplo de
+    testsuite no imprime nada.
+    . Pendiente: Tipificar Arraylist en Mesh.java
+    . Pendiente: revision de entorno JBuilder
+    15 min
+  - Revision QualitySelection: se renombro Shading para que fuera ShadingType
+  - Revision de clases y migracion a JOGL Beta: 6:30pm->
+
+  - Is class RGBAImageBuilder implementing a builder or Factory design pattern?
+
+Changes in 2006 march 14 revition
+  - Library is now packaged in just one big dir, not using the old
+    stages order directories. Now all the examples are inside the 
+    testsuite directory.
+  - Incorporated ZBuffer and JoglZBufferRenderer classes from Fabio Aroca
+    & Eduardo Mendoza main work, allowing for distributed rendering based
+    on ZBuffer algorithms and other manipulations for depth maps.
+  - New organization of packages and classes inside packages. Below are
+the old names and the new names for packages:
+    . vitral is no longer called such that, it is now "vsdk" which stands for
+      "Vitral Software Development Kit".
+    . Inside the VSDK architecture, the current toolkit is one, so the main
+      package is called "toolkit" instead of "toolkits".
+    . Package "geometry" is now inside package "environment"
+    . Old package "visual" is now called "render"
+    . Old package "util" is now called "io"
+    . Package "io" is organized such as each data type has its own subdirectory
+      so class ReaderObj is in io.geometry
+    . Classes ImageNotRecognizedException, RGBAImageBuilder and TargaImage 
+      which handles image loading from files were moved to package io.image.
+  - The main library is not "vitral.jar", but "vsdk.jar"
