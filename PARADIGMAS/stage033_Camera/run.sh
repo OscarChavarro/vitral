@@ -1,1 +1,0 @@
-java -classpath ./classes CameraExample

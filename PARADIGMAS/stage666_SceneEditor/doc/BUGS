@@ -1,2 +1,0 @@
-  - When resizing an Split Pane containing a GLCanvas, the canvas area gets
-    blanked. Perhaps a problem due to lightweight/heavyweight component types
