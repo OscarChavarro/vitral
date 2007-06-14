@@ -45,11 +45,11 @@ public class JoglMeshRenderer
             gl.glTexImage2D(gl.GL_TEXTURE_2D, 
                             0, 
                             colors, 
-                            m.getTextureAt(i).xtam(), m.getTextureAt(i).ytam(),
+                            m.getTextureAt(i).getXSize(), m.getTextureAt(i).getYSize(),
                             0, 
                             colors, 
                             gl.GL_UNSIGNED_BYTE, 
-                ByteBuffer.wrap(m.getTextureAt(i).getRawImage())
+                            ByteBuffer.wrap(m.getTextureAt(i).getRawImage())
                             );
         }
 
@@ -76,12 +76,12 @@ public class JoglMeshRenderer
         if (quality.isSurfacesSet())
         {
             int qt = quality.getShadingType();
-        if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
+            if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
                 drawSurfacesSolid(gl, mesh);
-          }
-          else {
+              }
+              else {
                 drawSurfacesSmooth(gl,mesh);
-        }
+            }
         }
         if (quality.isWiresSet())
         {

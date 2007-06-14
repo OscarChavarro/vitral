@@ -190,12 +190,12 @@ public class RGBAImage
         return true;
     }
 
-    public int xtam()
+    public int getXSize()
     {
         return x_tam;
     }
 
-    public int ytam()
+    public int getYSize()
     {
         return y_tam;
     }
@@ -233,21 +233,26 @@ public class RGBAImage
     
     public byte[] getRawImage()
     {
-        byte[] pixels=new byte[this.x_tam*this.y_tam*this.pixelDepth];
-        
-        int dPos=0;
-        for(int i=0; i<this.data.length; i++)
-        {
-            pixels[dPos]=this.data[i].r;
-            dPos++;
-            pixels[dPos]=this.data[i].g;
-            dPos++;
-            pixels[dPos]=this.data[i].b;
-            dPos++;
-            if(pixelDepth==32)
-            {
-                pixels[dPos]=this.data[i].a;
-                dPos++;
+        byte[] pixels=new byte[this.x_tam*this.y_tam*4];
+
+        int i, j;
+        int acum = 0;
+        for ( i = y_tam-1; i >= 0 ; i-- ) {
+            for ( j = 0; j < x_tam ; j++ ) {
+                pixels[acum]=this.data[i*x_tam+j].r;
+                acum++;
+                pixels[acum]=this.data[i*x_tam+j].g;
+                acum++;
+                pixels[acum]=this.data[i*x_tam+j].b;
+                acum++;
+                if ( pixelDepth == 32 ) {
+                    pixels[acum]=this.data[i].a;
+                    acum++;
+                  }
+                  else {
+                    pixels[acum]=0;
+                    acum++;
+                }
             }
         }
         return pixels;

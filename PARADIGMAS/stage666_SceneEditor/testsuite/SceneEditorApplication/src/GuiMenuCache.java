@@ -16,7 +16,7 @@ public class GuiMenuCache extends GuiElementCache
 
     public GuiMenuCache(GuiCache parent)
     {
-    this.parent = parent;
+        this.parent = parent;
         children = new Vector<GuiElementCache>();
         name = null;
     }
@@ -24,75 +24,75 @@ public class GuiMenuCache extends GuiElementCache
     public void read(StreamTokenizer parser) throws Exception
     {
         int tokenType;
-    int level = 0;
+        int level = 0;
 
-    System.out.println("- MENU ----------------------------------");
+        System.out.println("- MENU ----------------------------------");
 
         do {
             try {
                 tokenType = parser.nextToken();
-          }
-          catch (Exception e) {
-        throw e;
-        }
+              }
+              catch (Exception e) {
+                throw e;
+            }
             switch ( tokenType ) {
-            case StreamTokenizer.TT_EOL: break;
-            case StreamTokenizer.TT_EOF: break;
-          case StreamTokenizer.TT_NUMBER:
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
+              case StreamTokenizer.TT_NUMBER:
                 //System.out.println("NUMBER " + parser.sval);
-            break;
-          case StreamTokenizer.TT_WORD:
-        if ( parser.sval.equals("POPUP") ) {
-            GuiMenuCache popup = new GuiMenuCache(parent);
+                break;
+              case StreamTokenizer.TT_WORD:
+                if ( parser.sval.equals("POPUP") ) {
+                    GuiMenuCache popup = new GuiMenuCache(parent);
                     try {
-              popup.read(parser);
-            }
-            catch (Exception e) {
-            throw e;
-            }
+                      popup.read(parser);
+                    }
+                    catch (Exception e) {
+                        throw e;
+                    }
                     children.add(popup);
-        }
+                }
 
-        else if ( parser.sval.equals("MENUITEM") ) {
-            GuiMenuItemCache item = new GuiMenuItemCache(parent);
+                else if ( parser.sval.equals("MENUITEM") ) {
+                    GuiMenuItemCache item = new GuiMenuItemCache(parent);
                     try {
-              item.read(parser);
-            }
-            catch (Exception e) {
-            throw e;
-            }
+                      item.read(parser);
+                    }
+                    catch (Exception e) {
+                        throw e;
+                    }
                     children.add(item);
-        }
+                }
 
-            break;
-          default:
-        if ( parser.ttype == '\"' ) {
+                break;
+              default:
+                if ( parser.ttype == '\"' ) {
                     name = new String(parser.sval);
-          }
-          else {
+                  }
+                  else {
                     // Only supposed to contain '{' or '}'
-            char content = parser.toString().charAt(7);
-            if ( content == '{' ) {
+                    char content = parser.toString().charAt(7);
+                    if ( content == '{' ) {
                         //System.out.println("{ MARK");
-            level++;
-              }
-              else if ( content == '}' ) {
+                        level++;
+                      }
+                      else if ( content == '}' ) {
                         //System.out.println("} MARK");
-            level--;
-            if ( level == 0 ) {
-                tokenType = StreamTokenizer.TT_EOF;
+                        level--;
+                        if ( level == 0 ) {
+                            tokenType = StreamTokenizer.TT_EOF;
+                        }
+                      }
+                      else {
+                        throw new ExceptionGuiCacheParseError();
+                    }
+                }
+                break;
             }
-              }
-              else {
-            throw new ExceptionGuiCacheParseError();
-            }
-        }
-            break;
-        }
-    } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while ( tokenType != StreamTokenizer.TT_EOF );
 
         if ( name == null ) {
-        throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiCacheBadName();
         }
     }
 
@@ -109,12 +109,12 @@ public class GuiMenuCache extends GuiElementCache
 
         menubar = new JMenuBar();
 
-    System.out.println("---------------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------");
         Enumeration i;
 
         for ( i = children.elements(); i.hasMoreElements(); ) {
             System.out.println((GuiElementCache)i.nextElement());
-    }
+        }
 
         popup = new JMenu("WOW");
         menubar.add(popup);
@@ -126,7 +126,7 @@ public class GuiMenuCache extends GuiElementCache
 
         popup.getPopupMenu().setLightWeightPopupEnabled(false);
 
-    System.out.println("---------------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------");
 
         return menubar;
     }

@@ -110,16 +110,16 @@ public class CameraControllerBlender
 
             switch ( keycode ) {
               case KeyEvent.VK_X:
-        if ( (mask & SHIFT_MASK) == 0 ) {
+                if ( (mask & SHIFT_MASK) == 0 ) {
                     // Minuscula
                     eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
                     updated = true;
                 }
-        else if ( (mask & SHIFT_MASK) != 0 ) {
+                else if ( (mask & SHIFT_MASK) != 0 ) {
                     // Mayuscula
                     eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
                     updated = true;
-        }
+                }
                 break;
 
               case KeyEvent.VK_NUMPAD5: // Rote el modo de proyeccion
@@ -135,7 +135,7 @@ public class CameraControllerBlender
                 break;
 
               case KeyEvent.VK_NUMPAD4:
-        if ( (mask & CTRL_MASK) == 0 ) {
+                if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
                     DR = new Matrix4x4();
@@ -148,18 +148,18 @@ public class CameraControllerBlender
                     R = COMPUESTA.multiply(R);
                     updated = true;
                 }
-        else if ( (mask & CTRL_MASK) != 0 ) {
+                else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
                         eyePosition.add(v.multiply(deltaMov));
                     focusedPosition = 
                         focusedPosition.add(v.multiply(deltaMov));
                     updated = true;
-        }
+                }
                 break;
 
               case KeyEvent.VK_NUMPAD6:
-        if ( (mask & CTRL_MASK) == 0 ) {
+                if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
                     DR = new Matrix4x4();
@@ -172,18 +172,18 @@ public class CameraControllerBlender
                     R = COMPUESTA.multiply(R);
                     updated = true;
                 }
-        else if ( (mask & CTRL_MASK) != 0 ) {
+                else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
                         eyePosition.substract(v.multiply(deltaMov));
                     focusedPosition = 
                         focusedPosition.substract(v.multiply(deltaMov));
                     updated = true;
-        }
+                }
                 break;
 
               case KeyEvent.VK_NUMPAD2:
-        if ( (mask & CTRL_MASK) == 0 ) {
+                if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
                     DR = new Matrix4x4();
@@ -196,18 +196,18 @@ public class CameraControllerBlender
                     R = COMPUESTA.multiply(R);
                     updated = true;
                 }
-        else if ( (mask & CTRL_MASK) != 0 ) {
+                else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
                         eyePosition.substract(w.multiply(deltaMov));
                     focusedPosition = 
                         focusedPosition.substract(w.multiply(deltaMov));
                     updated = true;
-        }
+                }
                 break;
 
               case KeyEvent.VK_NUMPAD8:
-        if ( (mask & CTRL_MASK) == 0 ) {
+                if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
                     DR = new Matrix4x4();
@@ -220,14 +220,14 @@ public class CameraControllerBlender
                     R = COMPUESTA.multiply(R);
                     updated = true;
                 }
-        else if ( (mask & CTRL_MASK) != 0 ) {
+                else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
                         eyePosition.add(w.multiply(deltaMov));
                     focusedPosition = 
                         focusedPosition.add(w.multiply(deltaMov));
                     updated = true;
-        }
+                }
                 break;
 
               case KeyEvent.VK_NUMPAD1:
@@ -235,7 +235,7 @@ public class CameraControllerBlender
                 R.axisRotation(0, 0, 0, 1);
                 break;
 
-          case 107: // Warning: How to tell KeyEvent.VK_NUMPAD_PLUS: ?
+              case 107: // Warning: How to tell KeyEvent.VK_NUMPAD_PLUS: ?
                 // Translation
                 eyePosition = 
                     eyePosition.add(u.multiply(deltaMov));
@@ -244,7 +244,7 @@ public class CameraControllerBlender
                 updated = true;
                 break;
 
-          case 109: // Warning: How to tell KeyEvent.VK_NUMPAD_LESS: ?
+              case 109: // Warning: How to tell KeyEvent.VK_NUMPAD_LESS: ?
                 // Translation
                 eyePosition = 
                     eyePosition.substract(u.multiply(deltaMov));
@@ -313,23 +313,23 @@ public class CameraControllerBlender
                 updated = true;
                 break;
   
-          case 'N':
+            case 'N':
                 nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'n':
+              break;
+            case 'n':
                 nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
   
-          case 'F':
+            case 'F':
                 farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'f':
+              break;
+            case 'f':
                 farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
     
               // Queries
               case 'i':
@@ -339,13 +339,13 @@ public class CameraControllerBlender
         }
 */
         // Heuristic to simulate Blender's orthogonal behavior
-    double d = eyePosition.length();
+        double d = eyePosition.length();
         if ( d < 0.1 ) {
             orthogonalZoom = 10;
           }
-      else {
+          else {
             orthogonalZoom = 1 / d;
-    }
+        }
 
         // 4. Update camera's internal parameters from local copy
         camera.setPosition(eyePosition);
@@ -361,7 +361,7 @@ public class CameraControllerBlender
     }
 
     public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
-    return false;
+        return false;
     }
 
     public boolean processMousePressedEventAwt(MouseEvent e)

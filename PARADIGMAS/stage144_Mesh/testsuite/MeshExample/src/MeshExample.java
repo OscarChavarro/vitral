@@ -93,18 +93,18 @@ public class MeshExample
     gl.glClear(GL.GL_COLOR_BUFFER_BIT);
     gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
     gl.glColor3d(1, 1, 1);
-    
+        
     JoglCameraRenderer.activateGL(gl, camera);
    
-    initLight(gl);
+        initLight(gl);
 
     drawObjectsGL(gl);
   }
 
   private void initLight(GL gl) {
-    gl.glEnable(gl.GL_LIGHTING);
-    gl.glEnable(gl.GL_LIGHT0);
-    float[] light_position = {
+        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(gl.GL_LIGHT0);
+        float[] light_position = {
         (float) 1.5, (float) 0.0, (float) 1.0, (float) 0.0};
     float[] shadow_color = {
         (float) 0.1, (float) 0.1, (float) 0.1, 1};

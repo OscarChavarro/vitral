@@ -48,8 +48,8 @@ public class CameraExample extends JFrame implements
 
         camera = new Camera();
 
-    //cameraController = new CameraControllerGravZero(camera);
-    //cameraController = new CameraControllerBlender(camera);
+        //cameraController = new CameraControllerGravZero(camera);
+        //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 
         corridor = new SimpleCorridor();

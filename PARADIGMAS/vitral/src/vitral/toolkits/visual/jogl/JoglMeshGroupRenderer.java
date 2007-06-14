@@ -27,12 +27,12 @@ public class JoglMeshGroupRenderer {
       mesh = (Mesh) i.nextElement();
       if (quality.isSurfacesSet()) {
           int qt = quality.getShadingType();
-      if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
+          if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
               JoglMeshRenderer.drawSurfacesSolid(gl, mesh);
-        }
-        else {
+            }
+            else {
               JoglMeshRenderer.drawSurfacesSmooth(gl,mesh);
-      }
+          }
       }
       if (quality.isWiresSet()) {
         gl.glPushAttrib(gl.GL_ALL_ATTRIB_BITS);
@@ -58,7 +58,7 @@ public class JoglMeshGroupRenderer {
 
           JoglMeshRenderer.drawBoundingVolume(gl, mesh);
         }
-        drawBoundingVolume(gl,meshGroup);
+                drawBoundingVolume(gl,meshGroup);
         gl.glPopAttrib();
 
       }
@@ -119,11 +119,11 @@ public class JoglMeshGroupRenderer {
   
   private static void drawBoundingVolume(GL gl,MeshGroup meshGroup)
   {
-    gl.glColor3f(0, 1, 0);
-    meshGroup.calculateMinMaxPositions();
-    double [] MinMax = meshGroup.getMinMax();
-    
-    gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glColor3f(0, 1, 0);
+        meshGroup.calculateMinMaxPositions();
+        double [] MinMax = meshGroup.getMinMax();
+        
+        gl.glBegin(gl.GL_LINE_LOOP);
         {
             gl.glVertex3d(MinMax[0], MinMax[1], MinMax[5]); // 6
             gl.glVertex3d(MinMax[3], MinMax[1], MinMax[5]); // 5

@@ -8,12 +8,12 @@ public class SimpleBackground extends Background {
     ColorRgb _color;
 
     public SimpleBackground() {
-    super();
+        super();
 
         _color = new ColorRgb();
-    _color.r = 0;
-    _color.g = 0;
-    _color.b = 0;
+        _color.r = 0;
+        _color.g = 0;
+        _color.b = 0;
     }
 
     public ColorRgb color_en_direccion(Vector3D d)

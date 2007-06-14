@@ -197,7 +197,7 @@ public class QualitySelection {
         shadingType++;
         if ( shadingType == 4 ) {
             shadingType = 0;
-    }
+        }
     }
 
 }

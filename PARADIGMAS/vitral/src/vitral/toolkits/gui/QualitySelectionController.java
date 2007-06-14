@@ -66,14 +66,14 @@ public class QualitySelectionController {
           st = qualitySelection.getShadingType();
           if ( st == qualitySelection.SHADING_TYPE_FLAT ) {
               st = qualitySelection.SHADING_TYPE_GOURAUD;
-        }
-      else if ( st == qualitySelection.SHADING_TYPE_GOURAUD ) {
+            }
+          else if ( st == qualitySelection.SHADING_TYPE_GOURAUD ) {
               st = qualitySelection.SHADING_TYPE_PHONG;
-        }
-        else {
+            }
+            else {
               st = qualitySelection.SHADING_TYPE_FLAT;
-        }
-      ;
+            }
+          ;
           qualitySelection.setShadingType(st);
           updated = true;
           break;

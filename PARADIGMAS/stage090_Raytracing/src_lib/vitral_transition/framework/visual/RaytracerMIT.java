@@ -43,7 +43,7 @@ public class RaytracerMIT {
 
         ColorRgb resultado = new ColorRgb();
         Geometry objeto_mas_cercano;
-    ColorRgb color_de_fondo = fondo.color_en_direccion(n);
+        ColorRgb color_de_fondo = fondo.color_en_direccion(n);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -100,7 +100,7 @@ public class RaytracerMIT {
                         if ( spec > 0 ) {
                             // OJO: Raro...
                             spec = ((specular.r + specular.g + specular.b)/3)*(
-                (float) Math.pow((double) spec, (double)m.getPhongExponent()));
+                                (float) Math.pow((double) spec, (double)m.getPhongExponent()));
                             resultado.r += spec*luz.ir;
                             resultado.g += spec*luz.ig;
                             resultado.b += spec*luz.ib;
@@ -266,10 +266,10 @@ public class RaytracerMIT {
           completa de Oscar Chavarro.
     */
     public void ejecutar(RGBImage inout_viewport, 
-             Vector in_arr_objetos,
-             Vector in_arr_luces,
-             Background in_fondo,
-             Camera in_camara)
+                         Vector in_arr_objetos,
+                         Vector in_arr_luces,
+                         Background in_fondo,
+                         Camera in_camara)
     {
         int x, y;
         Ray rayo;

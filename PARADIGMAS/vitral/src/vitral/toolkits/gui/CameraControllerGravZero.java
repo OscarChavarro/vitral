@@ -186,23 +186,23 @@ public class CameraControllerGravZero implements CameraController
                 updated = true;
                 break;
   
-          case 'N':
+            case 'N':
                 nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'n':
+              break;
+            case 'n':
                 nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
   
-          case 'F':
+            case 'F':
                 farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'f':
+              break;
+            case 'f':
                 farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
   
               case 'p': // Rote el modo de proyeccion
                 switch ( projectionMode ) {
@@ -238,7 +238,7 @@ public class CameraControllerGravZero implements CameraController
     }
 
     public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
-    return false;
+        return false;
     }
 
     public boolean processMousePressedEventAwt(MouseEvent e)
@@ -387,8 +387,8 @@ public class CameraControllerGravZero implements CameraController
                 else if ( fov < 175 - EPSILON ) fov += 5*clicks;
             }
             updated = true;
-    }
-    else if ( clicks < 0 ) {
+        }
+        else if ( clicks < 0 ) {
             if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2*clicks;
               }
@@ -398,7 +398,7 @@ public class CameraControllerGravZero implements CameraController
                 else if ( fov > 0.1 + EPSILON  ) fov -= 0.1*clicks;
             }
             updated = true;
-    }
+        }
 
         //------------------------------------------------------------
         camera.setFov(fov);

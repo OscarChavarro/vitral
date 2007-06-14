@@ -23,9 +23,9 @@ public class GuiCache
         parser.quoteChar('\"');
         parser.slashSlashComments(true);
         parser.slashStarComments(true);
-    parser.whitespaceChars(' ', ' ');
-    parser.whitespaceChars(',', ',');
-    parser.whitespaceChars('\t', '\t');
+        parser.whitespaceChars(' ', ' ');
+        parser.whitespaceChars(',', ',');
+        parser.whitespaceChars('\t', '\t');
         parser.wordChars('A', 'Z');
         parser.wordChars('a', 'z');
         parser.wordChars('0', '9');
@@ -36,49 +36,49 @@ public class GuiCache
         do {
             try {
                 tokenType = parser.nextToken();
-          }
-          catch (Exception e) {
-        break;
-        }
+              }
+              catch (Exception e) {
+                break;
+            }
             switch ( tokenType ) {
-            case StreamTokenizer.TT_EOL: break;
-            case StreamTokenizer.TT_EOF: break;
-          case StreamTokenizer.TT_NUMBER:
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
+              case StreamTokenizer.TT_NUMBER:
                 //System.out.println("NUMBER " + parser.sval);
-            break;
-          case StreamTokenizer.TT_WORD:
+                break;
+              case StreamTokenizer.TT_WORD:
                 //System.out.println("WORD " + parser.sval);
-        if ( parser.sval.equals("MENU") ) {
+                if ( parser.sval.equals("MENU") ) {
                     menubar = new GuiMenuCache(this);
                     try {
-              menubar.read(parser);
-            }
-            catch (Exception e) {
-            System.err.println(e);
-            }
-        }
-            break;
-          default:
-        if ( parser.ttype == '\"' ) {
+                      menubar.read(parser);
+                    }
+                    catch (Exception e) {
+                        System.err.println(e);
+                    }
+                }
+                break;
+              default:
+                if ( parser.ttype == '\"' ) {
                     //System.out.println("STRING " + parser.sval);
-          }
-          else {
+                  }
+                  else {
                     // Only supposed to contain '{' or '}'
-            char content = parser.toString().charAt(7);
-            if ( content == '{' ) {
+                    char content = parser.toString().charAt(7);
+                    if ( content == '{' ) {
                         //System.out.println("{ MARK");
-              }
-              else if ( content == '}' ) {
+                      }
+                      else if ( content == '}' ) {
                         //System.out.println("} MARK");
-              }
-              else {
+                      }
+                      else {
                         System.err.println("UNKNOWN " + parser);
-            return;
+                        return;
+                    }
+                }
+                break;
             }
-        }
-            break;
-        }
-    } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while ( tokenType != StreamTokenizer.TT_EOF );
     }
 
     public JMenuBar exportSwingMenubar()
@@ -99,10 +99,10 @@ public class GuiCache
                 }});
 
             popup.getPopupMenu().setLightWeightPopupEnabled(false);
-    }
-    else {
+        }
+        else {
             menubar = this.menubar.exportSwingMenubar();
-    }
+        }
 
         return menubar;
     }

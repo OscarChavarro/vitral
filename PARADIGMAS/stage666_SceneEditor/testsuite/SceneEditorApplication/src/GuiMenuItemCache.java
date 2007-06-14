@@ -8,7 +8,7 @@ public class GuiMenuItemCache extends GuiElementCache
 
     public GuiMenuItemCache(GuiCache parent)
     {
-    this.parent = parent;
+        this.parent = parent;
         name = null;
     }
 
@@ -16,55 +16,55 @@ public class GuiMenuItemCache extends GuiElementCache
     {
         int tokenType;
 
-    System.out.println(" - MENUITEM");
+        System.out.println(" - MENUITEM");
 
         do {
             try {
                 tokenType = parser.nextToken();
-          }
-          catch (Exception e) {
-        throw e;
-        }
+              }
+              catch (Exception e) {
+                throw e;
+            }
             switch ( tokenType ) {
-            case StreamTokenizer.TT_EOL: break;
-            case StreamTokenizer.TT_EOF: break;
-          case StreamTokenizer.TT_NUMBER:
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
+              case StreamTokenizer.TT_NUMBER:
                 //System.out.println("NUMBER " + parser.sval);
-            break;
-          case StreamTokenizer.TT_WORD:
+                break;
+              case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("MENUITEM") ||
                      parser.sval.equals("POPUP") ) {
-            parser.pushBack();
-            return;
-        }
+                    parser.pushBack();
+                    return;
+                }
                 System.out.println("    . MODIFIER [" + parser.sval + "]");
-            break;
-          default:
-        if ( parser.ttype == '\"' ) {
+                break;
+              default:
+                if ( parser.ttype == '\"' ) {
                     System.out.println("    . STRING [" + parser.sval + "]");
                     name = new String(parser.sval);
-          }
-          else {
+                  }
+                  else {
                     // Only supposed to contain '{' or '}'
-            char content = parser.toString().charAt(7);
-            if ( content == '{' ) {
+                    char content = parser.toString().charAt(7);
+                    if ( content == '{' ) {
                         throw new ExceptionGuiCacheParseError();
                         //System.out.println("{ MARK");
-              }
-              else if ( content == '}' ) {
+                      }
+                      else if ( content == '}' ) {
                         //System.out.println("} MARK");
-              return;
-              }
-              else {
-            throw new ExceptionGuiCacheParseError();
+                          return;
+                      }
+                      else {
+                        throw new ExceptionGuiCacheParseError();
+                    }
+                }
+                break;
             }
-        }
-            break;
-        }
-    } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while ( tokenType != StreamTokenizer.TT_EOF );
 
         if ( name == null ) {
-        throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiCacheBadName();
         }
     }
 

@@ -1,2 +1,4 @@
   - Define HDRI interpretation of values in the 
     vitral.toolkits.common.ColorRgb class
+  - Check the names in JoglRenderers... should be activate and draw,
+    or activateGL and drawGL, but not mixed ...

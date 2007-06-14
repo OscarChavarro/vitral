@@ -2,23 +2,16 @@
 // so the user/programmer can be exposed to all the complexity involved. This will help him
 // to dominate the involved libraries.
 
+import java.io.File;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.KeyListener;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
@@ -26,24 +19,30 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.swing.JFrame;
+
 import vitral.toolkits.environment.Camera;
+import vitral.toolkits.media.RGBAImage;
+import vitral.toolkits.media.RGBAImageBuilder;
 import vitral.toolkits.gui.CameraController;
 import vitral.toolkits.gui.CameraControllerAquynza;
 import vitral.toolkits.gui.CameraControllerBlender;
 import vitral.toolkits.gui.CameraControllerGravZero;
+import vitral.toolkits.visual.jogl.JoglRGBAImageRenderer;
 
-public class CameraSwingExample extends JFrame implements 
+public class ImageExample extends JFrame implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
     private CameraController cameraController;
     private GLCanvas canvas;
     private SimpleCorridor corridor;
-    private ButtonsPanel controls;
-    private JMenuBar menubar;
+    private RGBAImage img;
 
-    public CameraSwingExample() {
-        super("VITRAL concept test - JOGL Hello World");
+    private int machete = 0;
+
+    public ImageExample() {
+        super("VITRAL concept test - Image use example");
 
         GLCapabilities capabilities = new GLCapabilities();
         canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
@@ -53,12 +52,8 @@ public class CameraSwingExample extends JFrame implements
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
 
-        controls = new ButtonsPanel();
-        menubar = this.buildMenu();
-
         this.add(canvas, BorderLayout.CENTER);
-        this.add(controls, BorderLayout.SOUTH);
-        this.setJMenuBar(menubar);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         camera = new Camera();
 
@@ -67,26 +62,35 @@ public class CameraSwingExample extends JFrame implements
         cameraController = new CameraControllerAquynza(camera);
 
         corridor = new SimpleCorridor();
+        try {
+            img = RGBAImageBuilder.buildImage(new File("./etc/render.jpg"));
+        }
+        catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     public Dimension getPreferredSize() {
-        return new Dimension (640, 480);
+        return new Dimension (1024, 768);
     }
     
     public static void main (String[] args) {
-        JFrame f = new CameraSwingExample();
+        JFrame f = new ImageExample();
         f.pack();
         f.setVisible(true);
     }
     
     private void drawObjectsGL(GL gl)
     {
+        // Preparation
         gl.glEnable(gl.GL_DEPTH_TEST);
-
+        gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLoadIdentity();
 
+        // Draw test environment
         corridor.drawGL(gl);
 
+        // Draw reference frame
         gl.glLineWidth((float)3.0);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
@@ -101,6 +105,45 @@ public class CameraSwingExample extends JFrame implements
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
+
+        // Draw polygon with image
+        gl.glEnable(gl.GL_TEXTURE_2D);
+        JoglRGBAImageRenderer.activateGL(gl, img);
+
+        // WARNING: It is not supposed to be, but this code requires to call this in THIS place
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+
+        double dx = (double)img.getXSize()/(double)img.getYSize();
+
+        gl.glBegin(GL.GL_QUADS);
+            gl.glNormal3d(0, 0, 1);
+            gl.glColor3d(dx, 1, 1);
+
+            gl.glTexCoord2f(0, 0);
+            gl.glVertex3d(0, 0, 0);
+
+            gl.glTexCoord2f(1, 0);
+            gl.glVertex3d(dx, 0, 0);
+
+            gl.glTexCoord2f(1, 1);
+            gl.glVertex3d(dx, 1, 0);
+
+            gl.glTexCoord2f(0, 1);
+            gl.glVertex3d(0, 1, 0);            
+        gl.glEnd();
+
+        // Draw image directly over screen
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glLoadIdentity();
+        gl.glDisable(gl.GL_DEPTH_TEST);
+
+        // WARNING: Texture must be disabled in order to maintain original version, and not be
+        // under the influence of glTexParameteri configurations
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        JoglRGBAImageRenderer.draw(gl, img);
     }
 
     /** Called by drawable to initiate drawing */
@@ -211,45 +254,4 @@ public class CameraSwingExample extends JFrame implements
       ;
   }
 
-    public JMenuBar buildMenu()
-    {
-        JMenuBar menubar;
-        JMenu popup;
-        JMenuItem option;
-
-        menubar = new JMenuBar();
-        popup = new JMenu("File");
-        menubar.add(popup);
-
-        option = popup.add(new JMenuItem("Exit"));
-        option.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }});
-
-        popup.getPopupMenu().setLightWeightPopupEnabled(false);
-
-        return menubar;
-    }
-
-}
-
-class ButtonsPanel extends JPanel implements ActionListener
-{
-    public ButtonsPanel()
-    {
-        JButton b = null;
-
-        b = new JButton("Exit");
-        b.addActionListener(this);
-        add(b);
-    }
-
-    public void actionPerformed(ActionEvent ev) {
-        String label = ev.getActionCommand();
-
-        if ( label == "Exit" ) {
-            System.exit(1);
-        }
-    }
 }

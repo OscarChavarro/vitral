@@ -195,23 +195,23 @@ public class CameraControllerAquynza
                 updated = true;
                 break;
   
-          case 'N':
+            case 'N':
                 nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'n':
+              break;
+            case 'n':
                 nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
   
-          case 'F':
+            case 'F':
                 farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
-          case 'f':
+              break;
+            case 'f':
                 farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
-            break;
+              break;
   
               case 'p': // Rote el modo de proyeccion
                 switch ( projectionMode ) {
@@ -248,7 +248,7 @@ public class CameraControllerAquynza
     }
 
     public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
-    return false;
+        return false;
     }
 
     public boolean processMousePressedEventAwt(MouseEvent e)
@@ -323,7 +323,7 @@ public class CameraControllerAquynza
             R = DR.multiply(R);
 
             updated = true;
-    }
+        }
         else if ( (modifiers & e.BUTTON2_DOWN_MASK) != 0 ) {
             // Move
             eyePosition = eyePosition.substract(v.multiply(senseFactor*((double)deltaX)));
@@ -331,16 +331,16 @@ public class CameraControllerAquynza
             focusedPosition = focusedPosition.substract(v.multiply(senseFactor*((double)deltaX)));
             focusedPosition = focusedPosition.substract(w.multiply(senseFactor*((double)deltaY)));
             updated = true;
-    }
+        }
         else if ( (modifiers & e.BUTTON3_DOWN_MASK) != 0 ) {
-        // Advance
+            // Advance
             eyePosition = eyePosition.substract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
             DR = new Matrix4x4();
             DR.axisRotation(ax, u.x, u.y, u.z);
             R = DR.multiply(R);
             updated = true;
-    }
+        }
 
         // Update camera's internal parameters from local copy
         //R.eulerAnglesRotation(yaw, pitch, roll);
@@ -384,8 +384,8 @@ public class CameraControllerAquynza
                 else if ( fov < 175 - EPSILON ) fov += 5*clicks;
             }
             updated = true;
-    }
-    else if ( clicks < 0 ) {
+        }
+        else if ( clicks < 0 ) {
             if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2*clicks;
               }
@@ -395,7 +395,7 @@ public class CameraControllerAquynza
                 else if ( fov > 0.1 + EPSILON  ) fov -= 0.1*clicks;
             }
             updated = true;
-    }
+        }
 
         //------------------------------------------------------------
         camera.setFov(fov);

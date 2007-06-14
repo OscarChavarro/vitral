@@ -1,39 +1,50 @@
-/*
- * RGBImageFactory.java
- *
- * Created on 2 de septiembre de 2005, 10:35 AM
- *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
- */
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - September 2 2005 - David Diaz: Original base version                  =
+//= - November 24 2005 - Oscar Chavarro: check pending:                     =
+//=   THIS CLASS HAS NOT BEEN REVISED... DESIGN COULD CHANGE                =
+//===========================================================================
 
 package vitral.toolkits.media;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
-import java.awt.*;
-import java.awt.image.*;
-import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
+import java.awt.image.PixelGrabber;
+import java.awt.image.ColorModel;
+import javax.swing.ImageIcon;
+
 /**
- *
- * @author usuario
+Does this implements a "Builder" design pattern???
  */
-public class RGBAImageBuilder 
+public class RGBAImageBuilder
 {
-    public static RGBAImage buildImage(File imagen)throws ImageNotRecognizedException
+    /**
+    Will change:
+      - Choose a better name for this method
+      - Do not recieve a File, but a Stream of bytes
+      - Move this class to readers/helpers/util package
+    */
+    public static RGBAImage buildImage(File imagen) throws ImageNotRecognizedException
     {
         String type=accept(imagen);
         RGBAImage retImage=new RGBAImage();
-        if(type.equals("tga"))
-        {
+        if(type.equals("tga")) {
             TargaImage t=new TargaImage(imagen);
             retImage.loadImage(t.getTexture(), t.getPixelDepth(), t.getWidth(), t.getHeight());
             return retImage;
         }
-        if(type.equals("jpg") || type.equals("png") || type.equals("jpeg") || type.equals("gif"))
-        {
+        if(type.equals("jpg") || type.equals("png") || type.equals("jpeg") || type.equals("gif"))  {
             Toolkit tools=Toolkit.getDefaultToolkit();
             Image i=tools.getImage(imagen.getAbsolutePath());
             
@@ -41,7 +52,7 @@ public class RGBAImageBuilder
             
             int w=bi.getWidth();
             int h=bi.getHeight();
-            System.out.println("w: "+w+"; h: "+h);
+            //System.out.println("w: "+w+"; h: "+h);
             int[] pix=new int[w*h];
             
             pix=bi.getRGB(0,0,w,h, pix,0,w);
@@ -156,7 +167,6 @@ public class RGBAImageBuilder
     
         return bimage;
     }
-
     
     private static String accept(File f)
     {
@@ -173,3 +183,7 @@ public class RGBAImageBuilder
     
     
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

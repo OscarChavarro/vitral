@@ -121,12 +121,12 @@ public class SceneEditorApplication {
         GuiCache guiReader = null;
 
         try {
-        guiReader = new GuiCache(new FileReader("./etc/spanish.gui"));
-    }
-    catch (Exception e) {
+            guiReader = new GuiCache(new FileReader("./etc/spanish.gui"));
+        }
+        catch (Exception e) {
             System.err.println("Fatal error: can not open GUI file");
             System.exit(0);
-    }
+        }
 
         menubar = guiReader.exportSwingMenubar();
 

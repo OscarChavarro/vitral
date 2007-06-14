@@ -79,14 +79,14 @@ public class MeshGroup {
 
             for ( int i=0; i<meshes.size(); i++)
             {
-                double [] minmax_mesh = meshes.elementAt(i).getMinMax();
+                                double [] minmax_mesh = meshes.elementAt(i).getMinMax();
                 double x = minmax_mesh[0];
                 double y = minmax_mesh[1];
                 double z = minmax_mesh[2];
-                double X = minmax_mesh[3];
+                                double X = minmax_mesh[3];
                 double Y = minmax_mesh[4];
                 double Z = minmax_mesh[5];
-        
+                
                 if(first)
                 {
                     minX = x; maxX=X; minY=y; maxY=Y; minZ=z; maxZ=Z;

@@ -222,7 +222,7 @@ public class Mesh
             triangles[i].normal.normalize();
         }
 
-    // TODO: Fix this data structure
+        // TODO: Fix this data structure
         ArrayList<vitral.toolkits.common.Triangle> [] vecinos;
         vecinos = new ArrayList[vertexes.length];
 

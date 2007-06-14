@@ -36,8 +36,8 @@ public class JoglDrawingArea implements
     {
         corridor = new SimpleCorridor();
         activeCamera = camera;
-    //cameraController = new CameraControllerGravZero(camera);
-    //cameraController = new CameraControllerBlender(camera);
+        //cameraController = new CameraControllerGravZero(camera);
+        //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 
         GLCapabilities capabilities = new GLCapabilities();

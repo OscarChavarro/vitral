@@ -86,7 +86,7 @@ public class Universe
         material_actual = new Material(0.8f, 0.2f, 0.9f, 
                                        0.2f, 0.4f, 0.4f, 
                                        10.0f, 0f, 0f, 1f);
-    */
+        */
         material_actual = new Material();
         material_actual.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
         material_actual.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
@@ -193,7 +193,7 @@ public class Universe
                   material_actual = new Material(r, g, b, 
                                                 ka, kd, ks, 
                                                 ns, kr, kt, index);
-          */
+                  */
                   material_actual = new Material();
                   material_actual.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
                   material_actual.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));

@@ -71,10 +71,10 @@ public class RaytracerSimple {
         la_escena.camara.updateViewportResize(la_imagen_resultado.xtam(), 
                                          la_imagen_resultado.ytam());
         el_visualizador.ejecutar(la_imagen_resultado,
-                 la_escena.arr_cosas,
-                 la_escena.arr_luces, 
-                 la_escena.fondo,
-                 la_escena.camara);
+                                 la_escena.arr_cosas,
+                                 la_escena.arr_luces, 
+                                 la_escena.fondo,
+                                 la_escena.camara);
 
         //- 3. Exportar la imagen a un archivo ----------------------------
         if ( !la_imagen_resultado.exportar_ppm(fd) )
