@@ -5,6 +5,8 @@
 //= - May 2 2006 - Oscar Chavarro: quality check, doIntersection doc/test   =
 //= - May 3 2006 - Oscar Chavarro: fixed doIntersection error when testing  =
 //=       back facing triangles                                             =
+//= - November 6 2006 - Oscar Chavarro: introduced bounding box and normal  =
+//=       interpolation                                                     =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -18,6 +20,7 @@ import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.scene.SimpleBody;
 
 /**
 This class represents a "basic" triangle mesh. Its model is based in a set
@@ -30,7 +33,7 @@ and each texture can be mapped to a different set of triangles.
 
 As every model class or `Entity` in VSDK, this class only can represent
 (store in memory) the mesh model. It doesn´t provide persistence or rendering
-functionality, and this could be found at `io` and `render` packages.
+functionality, as this could be found at `io` and `render` packages.
 Nevertheles, this class will be highly coupled with both of those, so
 making any change here will impact highly that code.
 
@@ -54,7 +57,7 @@ public class TriangleMesh extends Surface {
     private Triangle[] triangles;
 
     // Auxiliary components for data model, should be extracted from here?
-    private Material material;
+    private Material[] materials;
     private Image[] textures;
     private int[][][] texTriRel;
     private Vector3D[] verTex;
@@ -62,11 +65,13 @@ public class TriangleMesh extends Surface {
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
     private double[] minMax;
-    private GeometryIntersectionInformation lastInfo;
     private int selectedTriangle;
+    private SimpleBody boundingVolume;
+    private GeometryIntersectionInformation lastInfo;
 
     public TriangleMesh() {
         lastInfo = new GeometryIntersectionInformation();
+        boundingVolume = null;
     }
 
     public TriangleMesh(Vertex[] vertexes, Triangle[] triangles) {
@@ -74,6 +79,7 @@ public class TriangleMesh extends Surface {
         this.triangles = triangles;
         minMax = null;
         lastInfo = new GeometryIntersectionInformation();
+        boundingVolume = null;
     }
 
     public String getName() {
@@ -94,6 +100,10 @@ public class TriangleMesh extends Surface {
 
     public Triangle getTriangleAt(int index) {
         return this.triangles[index];
+    }
+
+    public Material[] getMaterials() {
+        return this.materials;
     }
 
     public Image[] getTextures() {
@@ -124,83 +134,94 @@ public class TriangleMesh extends Surface {
         return this.verTex[index];
     }
 
-    public Material getMaterial() {
-        return this.material;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
     public void setVertexes(Vertex[] vertexes) {
         this.vertexes = vertexes;
+        boundingVolume = null;
     }
 
     public void setTriangles(Triangle[] triangles) {
         this.triangles = triangles;
+        boundingVolume = null;
     }
 
     public void setTextures(Image[] textures) {
         this.textures = textures;
     }
 
+    public void setMaterials(Material[] materials) {
+        this.materials = materials;
+    }
+
     public void setVerTexture(Vector3D[] verTex) {
         this.verTex = verTex;
     }
 
-    public void setMaterial(Material material) {
-        this.material = material;
-    }
-
     public void setTrianglesSize(int size) {
         this.triangles = new Triangle[size];
+        boundingVolume = null;
     }
 
     public void setVertexesSize(int size) {
         this.vertexes = new Vertex[size];
+        boundingVolume = null;
     }
 
     public void setTexturesSize(int size) {
         this.textures = new Image[size];
+        boundingVolume = null;
     }
 
     public void setVerTextureSize(int size) {
         this.verTex = new Vector3D[size];
+        boundingVolume = null;
     }
 
     public void setTexTriRelSize(int size) {
         this.texTriRel = new int[size][][];
+        boundingVolume = null;
     }
 
     public void setTexTriRel(int r[][][]) {
         this.texTriRel = r;
+        boundingVolume = null;
     }
 
     public void setTexTriRelSizeAt(int index, int size) {
         this.texTriRel[index] = new int[size][2];
+        boundingVolume = null;
     }
 
     public void setTextTriRelAt(int i, int j, int[] ttr) {
         this.texTriRel[i][j] = ttr;
+        boundingVolume = null;
     }
 
     public void setVertexAt(int index, Vertex vertex) {
         this.vertexes[index] = vertex;
+        boundingVolume = null;
     }
 
     public void setVerTextureAt(int index, Vector3D verTex) {
         this.verTex[index] = verTex;
+        boundingVolume = null;
     }
 
     public void setTriangleAt(int index, Triangle triangle) {
         this.triangles[index] = triangle;
+        boundingVolume = null;
     }
 
     public void setTextureAt(int index, Image image) {
         this.textures[index] = image;
+        boundingVolume = null;
     }
 
     public void calculateNormals() {
+        boundingVolume = null;
         for (int i = 0; i < this.triangles.length; i++) {
             Vertex v1 = vertexes[triangles[i].getPoint0()];
             Vertex v2 = vertexes[triangles[i].getPoint1()];
@@ -251,6 +272,7 @@ public class TriangleMesh extends Surface {
 
     /** Needed for supplying the Geometry.getMinMax operation */
     private void calculateMinMaxPositions() {
+        boundingVolume = null;
         if ( minMax == null ) {
             minMax = new double[6];
 
@@ -362,10 +384,27 @@ public class TriangleMesh extends Surface {
         boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         Vector3D v0, v1, v2;  // Positions of the three triangle points
+        Vector3D n0, n1, n2;  // Normals of the three triangle points
         Vector3D u, v, n;     // Edge vectors and normal
         Vector3D p;           // Point of intersection between ray and plane
         double t, a, b, d;    // Coefficients for solving equation (2)
         double s1, s2, s3;    // Side test for each of triangle border
+
+        // Bounding volume check
+        if ( boundingVolume == null ) {
+            double[] mm = getMinMax();
+            Vector3D size, center;
+            size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+            center = new Vector3D((mm[3]+mm[0])/2,
+                                  (mm[4]+mm[1])/2,
+                                  (mm[5]+mm[2])/2);
+            boundingVolume = new SimpleBody();
+            boundingVolume.setPosition(center);
+            boundingVolume.setGeometry(new Box(size));
+        }
+        if ( !boundingVolume.doIntersection(inOut_Ray) ) {
+            return false;
+        }
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
@@ -375,9 +414,9 @@ public class TriangleMesh extends Surface {
         // For each triangle in the mesh ...
         for ( i = 0; i < triangles.length; i++ ) {
             // The Triangle i has vertices <v0, v1, v2>
-            v0 = vertexes[triangles[i].getPoint0()].getPosition();
-            v1 = vertexes[triangles[i].getPoint1()].getPosition();
-            v2 = vertexes[triangles[i].getPoint2()].getPosition();
+            v0 = vertexes[triangles[i].p0].position;
+            v1 = vertexes[triangles[i].p1].position;
+            v2 = vertexes[triangles[i].p2].position;
 
             // The vectors u & v are two triangle edges, and define the 
             // normal (1)
@@ -412,6 +451,39 @@ public class TriangleMesh extends Surface {
                 if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
                      (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
                     if ( t < min_t ) {
+
+                        //if ( withNormalInterpolation ) {
+                        // Normal interpolation
+                        n0 = vertexes[triangles[i].p0].normal;
+                        n1 = vertexes[triangles[i].p1].normal;
+                        n2 = vertexes[triangles[i].p2].normal;
+
+                        // Obtain barycentric coordinates for point p
+                        // Method taken from wikipedia
+                        double A, B, C, D, E, F, G, H, I;
+                        double lambda1, lambda2, lambda3;
+
+                        A = v0.x - v2.x;
+                        B = v1.x - v2.x;
+                        C = v2.x - p.x;
+                        D = v0.y - v2.y;
+                        E = v1.y - v2.y;
+                        F = v2.y - p.y;
+                        G = v0.z - v2.z;
+                        H = v1.z - v2.z;
+                        I = v2.z - p.z;
+
+                        // Recalculate n as the barycentric normal 
+                        // interpolation of three vertex normals
+                        lambda1 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
+                        lambda2 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
+                        lambda3 = 1-lambda1-lambda2;
+                        n = n0.multiply(lambda1).
+                            add(n1.multiply(lambda2).
+                            add(n2.multiply(lambda3)));
+                        n.normalize();
+                //}
+
                         // Normal is always pointed "outwards" with respect to 
                         // the triangle (this manages the issue of back-facing
                         // normals)
@@ -421,7 +493,6 @@ public class TriangleMesh extends Surface {
                           else {
                             lastInfo.n = n.multiply(-1);
                         }
-
                         lastInfo.p = p;
                         inOut_Ray.t = t;
                         min_t = t;

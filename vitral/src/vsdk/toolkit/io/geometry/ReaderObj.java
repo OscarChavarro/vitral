@@ -31,8 +31,8 @@ import vsdk.toolkit.io.image.ImagePersistence;
 /**
 The class ReaderObj provides wavefront obj loading functionality. Wavefront
 obj is a 3d object format used to describe polygon meshes; it is capable of
-storing vertex, vertex normal, vetrex texture, faces, material and texture 
-information. 
+storing vertex, vertex normal, vetrex texture, faces, material, texture and
+other maps information.
 By the use of extensions, it has the potential to describe more information.
 The original Wavefront format is not well standarized, so many variations
 could exist. This code currently manages only triangle faces.
@@ -41,7 +41,7 @@ public class ReaderObj
 {
     /**
     This method reads an Alias/Wavefront .obj file in ASCII form from the 
-    file name. A wavefront obj file can have many objects within, so this 
+    given filename. A wavefront obj file can have many objects within, so this 
     method returns a group of objects rather than a single one.
 
     Even though a wavefront obj file has many objects, all the objects in 
@@ -50,7 +50,7 @@ public class ReaderObj
 
     For a mesh to have a material, the matrial file has to be in the same
     folder as the mesh file; the same statement can be given about the
-    texture.
+    textures.
 
     @todo should not recieve a filename, but a previously opened stream, to
     make it independent of filesystems, and generalize it to URLs or whatever
@@ -64,108 +64,100 @@ public class ReaderObj
         ArrayList<Vector3D> vertexesTex=new ArrayList<Vector3D>();
         ArrayList<int[][]> faces=new ArrayList<int[][]>();
 
-        HashMap<String, RGBAImage> texturasHash=new HashMap<String, RGBAImage>();
-        ArrayList<RGBAImage> texturasList=new ArrayList<RGBAImage>();
+        HashMap<String, RGBAImage> texturasHash;
+        texturasHash=new HashMap<String, RGBAImage>();
+        ArrayList<RGBAImage> texturesList=new ArrayList<RGBAImage>();
+        ArrayList<Material> materialsList=new ArrayList<Material>();
         
-        ArrayList<ArrayList<int[]>> relCarTex=new ArrayList<ArrayList<int[]>>();
+        ArrayList<ArrayList<int[]>> relCarTex;
+        relCarTex = new ArrayList<ArrayList<int[]>>();
         ArrayList<int[]> inicial=new ArrayList<int[]>();
         inicial.add(new int[2]);
         relCarTex.add(inicial);
         
-        HashMap<String, Material> materiales=new HashMap<String, Material>();
-        Material matAct=new Material();
+        HashMap<String, Material> materialsHashMap;
+        materialsHashMap = new HashMap<String, Material>();
+        String nomObj = "default";
         
-        String nomObj="default";
-        
-        int textAct=0;
-        
+        int textAct = 0;
+
         BufferedReader m;
         int cont = 0;
-        String cad;
+        String lineOfText;
         m = new BufferedReader(new FileReader(fileName));
-        
+
         Vector3D buffer;
         ArrayList<int[][]> bufferT;
-        //int[][] bufferT;
         int num = 0;
-        
-        /****************Crear Mallas******************/
-        while ( (cad = m.readLine()) != null)
-        {
-            /****************Agregar Materiales*************/
-            if (cad.startsWith("mtllib "))
-            {
-                materiales = readMaterials(cad, fileName);
+
+        //- Crear Mallas -----------------------------------------------------
+        while ( (lineOfText = m.readLine()) != null ) {
+            // Build material library
+            if ( lineOfText.startsWith("mtllib ") ) {
+                materialsHashMap = readMaterials(lineOfText, fileName);
             }
-            /****************Usar Materiale*************/
-            if (cad.startsWith("usemtl "))
-            {
-                matAct=materiales.get(cad);
+            // Change active material
+            if ( lineOfText.startsWith("usemtl ") ) {
+                materialsList.add(materialsHashMap.get(lineOfText));
             }
-            /****************Agregar Vertices*************/
-            if (cad.startsWith("v "))
-            {
-                buffer = readVertex(cad);
+            // Add a vertex
+            if ( lineOfText.startsWith("v ") ) {
+                buffer = readVertex(lineOfText);
                 vertexes.add(buffer);
-                
             }
-            /***************Agregar Vector de Normales**************/
-            if (cad.startsWith("vn "))
-            {
-                buffer = readVertex(cad);
+            // Add a normal
+            if ( lineOfText.startsWith("vn ") ) {
+                buffer = readVertex(lineOfText);
                 normals.add(buffer);
             }
-            /***************Agregar Vector de Texturas**************/
-            if (cad.startsWith("vt "))
-            {
-                buffer = readVertexTexture(cad);
+            // Add a texture coordinate
+            if ( lineOfText.startsWith("vt ") ) {
+                buffer = readVertexTexture(lineOfText);
                 vertexesTex.add(buffer);
             }
-            /******************Leer triangulos*********************/
-            if (cad.startsWith("f "))
-            {
-                try
-                {
-                    bufferT = readTriangle(cad);
-                    for(int[][] elem : bufferT)
-                    {
+            // Read faces (only triangles)
+            if ( lineOfText.startsWith("f ") ) {
+                try {
+                    // Note that only first 3 vertexes for each polygon are
+                    // processed
+                    bufferT = readPolygon(lineOfText);
+                    for( int[][] elem : bufferT ) {
                         faces.add(elem);
                     }
-                    
-                    ArrayList<int[]> actRanges=relCarTex.get(textAct);
-                    int[] lastRange=actRanges.get(actRanges.size()-1);
-                    lastRange[1]=faces.size();
+                    ArrayList<int[]> actRanges = relCarTex.get(textAct);
+                    int[] lastRange = actRanges.get(actRanges.size()-1);
+                    lastRange[1] = faces.size();
                 }
-                catch(NoSuchElementException nsee)
-                {
+                catch(NoSuchElementException nsee) {
                 }
             }
-            /******************inicializar textura*********************/
-            if ( cad.startsWith("usemap ") ) {
-                if ( !texturasHash.containsKey(cad) ) {
-                    RGBAImage texture = obtainTextureFromFile(cad, fileName);
+            // Inicializar textura
+            if ( lineOfText.startsWith("usemap ") ) {
+                if ( !texturasHash.containsKey(lineOfText) ) {
+                    RGBAImage texture;
+                    texture = obtainTextureFromFile(lineOfText, fileName);
                     if ( texture == null ) {
                         textAct = 0;
                     }
                     else {
-                        texturasList.add(texture);
+                        texturesList.add(texture);
                         relCarTex.add(new ArrayList<int[]>());
-                        textAct = texturasList.size();
+                        textAct = texturesList.size();
                     }
-                    texturasHash.put(cad, texture);
+                    texturasHash.put(lineOfText, texture);
                 }
                 else {
-                    RGBAImage texture = texturasHash.get(cad);
+                    RGBAImage texture = texturasHash.get(lineOfText);
                     if( texture == null ) {
                         textAct=0;
                     }
-                    else if( !texturasList.contains(texture) ) {
-                        texturasList.add(texture);
+                    else if( !texturesList.contains(texture) ) {
+                        texturesList.add(texture);
                         relCarTex.add(new ArrayList<int[]>());
-                        textAct=texturasList.size();
+                        textAct=texturesList.size();
                     }
                     else {
-                        textAct=texturasList.indexOf(texture)+1;
+                        textAct=texturesList.indexOf(texture)+1;
                     }
                 }
                 ArrayList<int[]> actRanges=relCarTex.get(textAct);
@@ -173,40 +165,46 @@ public class ReaderObj
                 newRange[0]=faces.size();
                 actRanges.add(newRange);
             }
-            /******************armar objeto*********************/
-            if ( cad.startsWith("o ") || cad.startsWith("g ") )
-            {
+            // Armar objeto
+            if ( lineOfText.startsWith("o ") || lineOfText.startsWith("g ") ) {
                 if ( vertexes.size() > 0 ) {
-                    TriangleMesh object=armarObjeto(vertexes, normals, vertexesTex, faces, texturasList, relCarTex);
+                    TriangleMesh object;
+                    if ( materialsList.size() == 0 ) {
+                        materialsList.add(new Material());
+            }
+                    object = buildGeometry(vertexes, normals,
+                                           vertexesTex, faces,
+                                           texturesList, relCarTex,
+                                           materialsList);
                     object.setName(nomObj);
-                    object.setMaterial(new Material(matAct));
                     meshGroup.add(object);
-        }
-                
-                StringTokenizer auxNomObj=new StringTokenizer(cad, " ");
+                }
+                StringTokenizer auxNomObj;
+                auxNomObj = new StringTokenizer(lineOfText, " ");
                 auxNomObj.nextToken();
                 nomObj=auxNomObj.nextToken();
-                
                 faces=new ArrayList<int[][]>();
-                
-                texturasList=new ArrayList<RGBAImage>();
+                texturesList=new ArrayList<RGBAImage>();
+                materialsList=new ArrayList<Material>();
                 relCarTex=new ArrayList<ArrayList<int[]>>();
                 inicial=new ArrayList<int[]>();
                 int[] rangoInicial=new int[2];
                 rangoInicial[0]=rangoInicial[1]=0;
                 inicial.add(rangoInicial);
                 relCarTex.add(inicial);
-                
                 textAct=0;
-                
             }
         }
 
+        // Build the last mesh from remaining vertexes, if any
         if ( vertexes.size() > 0 ) {
             TriangleMesh object;
-            object = armarObjeto(vertexes, normals, vertexesTex, 
-                                 faces, texturasList, relCarTex);
-            object.setMaterial(new Material(matAct));
+            if ( materialsList.size() == 0 ) {
+                materialsList.add(new Material());
+        }
+            object = buildGeometry(vertexes, normals, vertexesTex, 
+                                   faces, texturesList, relCarTex,
+                                   materialsList);
             object.setName(nomObj);
             meshGroup.add(object);
         }
@@ -216,14 +214,15 @@ public class ReaderObj
             Vertex[] test = mAux.getVertexes();
             if ( test.length > 0 ) {
                 mgRet.addMesh(mAux);
-        }
+            }
         }
         return mgRet;
     }
     
-    private static RGBAImage obtainTextureFromFile(String cad, String fileName)
+    private static RGBAImage
+    obtainTextureFromFile(String lineOfText, String fileName)
     {
-        StringTokenizer st = new StringTokenizer(cad, " ");
+        StringTokenizer st = new StringTokenizer(lineOfText, " ");
         st.nextToken(); //usemap
         String dirObj = new File(fileName).getParentFile().getAbsolutePath();
         String nomImage = st.nextToken();
@@ -240,95 +239,97 @@ public class ReaderObj
         }
     }
     
-    private static TriangleMesh armarObjeto(
+    private static TriangleMesh buildGeometry(
         ArrayList<Vector3D> vertexes, 
         ArrayList<Vector3D> normals,
-        ArrayList<Vector3D>vertexesTex,
+        ArrayList<Vector3D> vertexesTex,
         ArrayList<int[][]> faces,
-        ArrayList<RGBAImage> texturas,
-        ArrayList<ArrayList<int[]>> relCarTex)
+        ArrayList<RGBAImage> textures,
+        ArrayList<ArrayList<int[]>> relCarTex,
+        ArrayList<Material> materials)
     {
         TriangleMesh m = new TriangleMesh();
 
         m.setTriangles(new Triangle[faces.size()]);
 
-        ArrayList<Integer> usedVertexes=new ArrayList<Integer>();
-        ArrayList<Integer> usedTexVertexes=new ArrayList<Integer>();
+        ArrayList<Integer> usedVertexes = new ArrayList<Integer>();
+        ArrayList<Integer> usedTexVertexes = new ArrayList<Integer>();
         
-        HashMap<Integer, Integer> cambiosVert=new HashMap<Integer, Integer>();
-        HashMap<Integer, Integer> cambiosVertTex=new HashMap<Integer, Integer>();
-        int indexVert=0;
-        int indexVertTex=0;
-        
-        for( int i=0; i<m.getTriangles().length; i++ ) {
-            int[] p1=faces.get(i)[0];
-            int[] p2=faces.get(i)[1];
-            int[] p3=faces.get(i)[2];
-            
+        HashMap<Integer, Integer> cambiosVert;
+        cambiosVert = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> cambiosVertTex;
+        cambiosVertTex = new HashMap<Integer, Integer>();
+        int indexVert = 0;
+        int indexVertTex = 0;
+
+        for( int i = 0; i < m.getTriangles().length; i++ ) {
+            int[] p1 = faces.get(i)[0];
+            int[] p2 = faces.get(i)[1];
+            int[] p3 = faces.get(i)[2];
+
             if ( !cambiosVert.containsKey(p1[0]) ) {
                 cambiosVert.put(p1[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p1[0]);
             }
-            p1[0]=cambiosVert.get(p1[0]);
+            p1[0] = cambiosVert.get(p1[0]);
             
-            if(!cambiosVertTex.containsKey(p1[1]) && p1[1]!=-1) {
+            if( !cambiosVertTex.containsKey(p1[1]) && p1[1] != -1 ) {
                 cambiosVertTex.put(p1[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p1[1]);
             }
-            if(p1[1]!=-1) {
+            if( p1[1]!=-1 ) {
                 p1[1]=cambiosVertTex.get(p1[1]);
             }
             
-            if(!cambiosVert.containsKey(p2[0])) {
+            if( !cambiosVert.containsKey(p2[0]) ) {
                 cambiosVert.put(p2[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p2[0]);
             }
-            p2[0]=cambiosVert.get(p2[0]);
+            p2[0] = cambiosVert.get(p2[0]);
             
-            if(!cambiosVertTex.containsKey(p2[1]) && p2[1]!=-1) {
+            if( !cambiosVertTex.containsKey(p2[1]) && p2[1] != -1 ) {
                 cambiosVertTex.put(p2[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p2[1]);
             }
-            if(p2[1]!=-1) {
+            if( p2[1] != -1 ) {
                 p2[1]=cambiosVertTex.get(p2[1]);
             }
             
-            if(!cambiosVert.containsKey(p3[0])) {
+            if( !cambiosVert.containsKey(p3[0]) ) {
                 cambiosVert.put(p3[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p3[0]);
             }
-            p3[0]=cambiosVert.get(p3[0]);
+            p3[0] = cambiosVert.get(p3[0]);
             
-            if(!cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1) {
+            if( !cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1 ) {
                 cambiosVertTex.put(p3[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p3[1]);
             }
-            if(p3[1]!=-1) {
-                p3[1]=cambiosVertTex.get(p3[1]);
+            if( p3[1] != -1 ) {
+                p3[1] = cambiosVertTex.get(p3[1]);
             }
         }
         
         m.setVertexes(new Vertex[usedVertexes.size()]);
-        for(int i=0; i<usedVertexes.size(); i++) {
+        for ( int i = 0; i < usedVertexes.size(); i++ ) {
             m.getVertexes()[i]=new Vertex();
             m.getVertexes()[i].setPosition(new Vector3D());
-            m.getVertexes()[i].setPosition(vertexes.get(usedVertexes.get(i)-1));
+            m.getVertexes()[i].setPosition(
+                vertexes.get(usedVertexes.get(i)-1));
         }
         
         m.setVerTexture(new Vector3D[usedTexVertexes.size()]);
-        for(int i=0; i<m.getVerTexture().length; i++)
-        {
+        for ( int i = 0; i < m.getVerTexture().length; i++ ) {
             m.getVerTexture()[i]=vertexesTex.get(usedTexVertexes.get(i)-1);
         }
         
-        for(int i=0; i<m.getTriangles().length; i++)
-        {
+        for ( int i = 0; i < m.getTriangles().length; i++ ) {
             m.getTriangles()[i]=new Triangle();
             m.getTriangles()[i].setPoint0(faces.get(i)[0][0]);
             m.getTriangles()[i].setPoint1(faces.get(i)[1][0]);
@@ -339,213 +340,150 @@ public class ReaderObj
             m.getTriangles()[i].setVt2(faces.get(i)[2][1]);
         }
         
-        m.setTextures(new RGBAImage[texturas.size()]);
-        for(int i=0; i<m.getTextures().length; i++) {
-            m.getTextures()[i]=texturas.get(i);
+        m.setTextures(new RGBAImage[textures.size()]);
+        for ( int i = 0; i < m.getTextures().length; i++ ) {
+            m.getTextures()[i]=textures.get(i);
         }
-        
+
+        m.setMaterials(new Material[materials.size()]);
+        for ( int i = 0; i < m.getMaterials().length; i++ ) {
+            m.getMaterials()[i]=materials.get(i);
+        }
+
         m.setTexTriRel(new int[relCarTex.size()][][]);
-        for(int i=0; i<m.getTextTriRel().length; i++)
-        {
-            ArrayList<int[]> actRanges=relCarTex.get(i);
+        for ( int i = 0; i < m.getTextTriRel().length; i++ ) {
+            ArrayList<int[]> actRanges = relCarTex.get(i);
             m.getTextTriRel()[i]=new int[actRanges.size()][2];
-            for(int j=0; j<m.getTextTriRel()[i].length; j++)
-            {
+            for( int j = 0; j < m.getTextTriRel()[i].length; j++ ) {
                 m.getTextTriRel()[i][j]=actRanges.get(j);
             }
         }
         
         m.calculateNormals();
-        //m.getMinMaxPositions();
         
         return m;
     }
     
-    private static int[] copy(int[] a)
+    private static int[] copyLength3IntArray(int[] a)
     {
-        int[] ret=new int[3];
-        ret[0]=a[0];
-        ret[1]=a[1];
-        ret[2]=a[2];
+        int[] ret = new int[3];
+        ret[0] = a[0];
+        ret[1] = a[1];
+        ret[2] = a[2];
         return ret;
     }
     
-    private static ArrayList<int[][]> readTriangle(String cad)
-    {
-        ArrayList<int[][]> ret=new ArrayList<int[][]>();
-        StringTokenizer st=new StringTokenizer(cad, " ");
-        st.nextToken();//the f token
-        int numTok=st.countTokens();
+    /**
+    This method reads a polygon from a face line. The returned array of arrays
+    has a row element for each vertex polygon. Note that this method is
+    compatible with polygon of any number of vertexes.
+    */
+    private static ArrayList<int[][]> readPolygon(String lineOfText) {
+        ArrayList<int[][]> ret = new ArrayList<int[][]>();
+        StringTokenizer st = new StringTokenizer(lineOfText, " \n\r\t");
+        st.nextToken(); //the f token
+        int numberOfTokens = st.countTokens();
+        int[] p0 = null;
+        int[] p1 = null;
+        int[] p2 = null;
+        int[][]aux = null;
+        int i;
         
-        int[] p0=null;
-        int[] p1=null;
-        int[] p2=null;
-        
-        int[][]aux=null;
-        
-        for(int i=0; i<numTok; i++)
-        {
-            String cadAux=st.nextToken();
-            int[] indexes=makeFaceVertex(cadAux);
-            
-            if(i==0)
-            {
-                p0=indexes;
+        for( i = 0; i < numberOfTokens; i++ ) {
+            String token = st.nextToken();
+            int[] indexes = readFaceVertex(token);
+
+            if( i == 0 ) {
+                p0 = indexes;
                 continue;
             }
-            
-            if(i==1)
-            {
+            if( i == 1 ) {
                 p1=indexes;
                 continue;
             }
-            
-            p2=indexes;
-            
-            aux=new int[3][];
-            aux[0]=copy(p0);
-            aux[1]=copy(p1);
-            aux[2]=copy(p2);
-            
+            p2 = indexes;
+
+            aux = new int[3][];
+            aux[0] = copyLength3IntArray(p0);
+            aux[1] = copyLength3IntArray(p1);
+            aux[2] = copyLength3IntArray(p2);
             ret.add(aux);
-            
-            p1=new int[3];
-            p1[0]=p2[0];
-            p1[1]=p2[1];
-            p1[2]=p2[2];
+
+            p1 = new int[3];
+            p1[0] = p2[0];
+            p1[1] = p2[1];
+            p1[2] = p2[2];
         }
-        
         return ret;
     }
     
-    private static int[] makeFaceVertex(String cad)
+    private static int[] readFaceVertex(String lineOfText)
     {
         int[] ret=new int[3];
-        StringTokenizer st=new StringTokenizer(cad, "/");
-        if(st.countTokens()==2)
-        {
-            if(cad.endsWith("/"))//Has vertex and texture
-            {
-                try
-                {
+        StringTokenizer st=new StringTokenizer(lineOfText, "/");
+        if ( st.countTokens() == 2 ) {
+            if( lineOfText.endsWith("/") ) {
+                //Has vertex and texture
+                try {
                     ret[0]=Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe)
-                {
+                catch(NumberFormatException nfe) {
                     ret[0]=-1;
                 }
-                
-                try
-                {
+                try {
                     ret[1]=Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe)
-                {
+                catch(NumberFormatException nfe) {
                     ret[1]=-1;
                 }
-                
                 ret[2]=-1;
-            }
-            else//Has vertex and normal
-            {
-                try
-                {
+              }
+              else {
+                //Has vertex and normal
+                try {
                     ret[0]=Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe)
-                {
+                catch(NumberFormatException nfe) {
                     ret[0]=-1;
                 }
-                
                 ret[1]=-1;
-                
-                try
-                {
+                try {
                     ret[2]=Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe)
-                {
+                catch(NumberFormatException nfe) {
                     ret[2]=-1;
                 }
             }
-        }
-        else//Has all
-        {
-            try
-            {
+          }
+          else {
+            // Has all
+            try {
                 ret[0]=Integer.parseInt(st.nextToken());
             }
-            catch(NumberFormatException nfe)
-            {
+            catch(NumberFormatException nfe) {
                 ret[0]=-1;
             }
-            
-            try
-            {
+            try {
                 ret[1]=Integer.parseInt(st.nextToken());
             }
-            catch(NumberFormatException nfe)
-            {
+            catch(NumberFormatException nfe) {
                 ret[1]=-1;
             }
-            
-            try
-            {
+            try {
                 ret[2]=Integer.parseInt(st.nextToken());
             }
-            catch(NumberFormatException nfe)
-            {
+            catch(NumberFormatException nfe) {
                 ret[2]=-1;
             }
-        }
+          }
+        ;
         return ret;
     }
     
-/*
-    private TriangleMesh readTriangles(String cad, TriangleMesh obj)
-    {
-        Vector<Triangle> triangles = new Vector<Triangle> ();
-        Vector3D[] position = new Vector3D[3];
-        Vector3D[] normals = new Vector3D[3];
-        StringTokenizer token_space = new StringTokenizer(cad);
-        int countTokens = token_space.countTokens();
-        token_space.nextElement();
-        int[] triang = new int[countTokens];
-        int[] nor = new int[countTokens];
-        int lastIndex;
-        String cade;
-        int j = 0;
-        while (token_space.hasMoreTokens())
-        {
-            cade = token_space.nextToken();
-            StringTokenizer token_faces = new StringTokenizer(cade);
-            triang[j] = Integer.parseInt(token_faces.nextToken("/"));
-            token_faces.nextToken("/");
-            nor[j] = Integer.parseInt(token_faces.nextToken("/"));
-            j++;
-        }
-        for (int k = 1; k < countTokens - 2; k++)
-        {
-            position[0] = obj.getPositionAt(triang[0] - 1);
-            position[1] = obj.getPositionAt(triang[k] - 1);
-            position[2] = obj.getPositionAt(triang[k + 1] - 1);
-            normals[0] = obj.getNormalAt(nor[0] - 1);
-            normals[1] = obj.getNormalAt(nor[k] - 1);
-            normals[2] = obj.getNormalAt(nor[k + 1] - 1);
-            obj.addVertex(new Vertex(position[0], normals[0]));
-            obj.addVertex(new Vertex(position[1], normals[1]));
-            obj.addVertex(new Vertex(position[2], normals[2]));
-            lastIndex = obj.getVertexes().size();
-            obj.addTriangle(lastIndex - 3, lastIndex - 2, lastIndex-1);
-        }
-        return obj;
-    }
- */
-    
-    private static Vector3D readVertex(String cad)
+    private static Vector3D readVertex(String lineOfText)
     {
         Vector3D vert = new Vector3D();
-        StringTokenizer st = new StringTokenizer(cad);
+        StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
         vert.x = Double.parseDouble(st.nextToken());
         vert.y = Double.parseDouble(st.nextToken());
@@ -553,107 +491,88 @@ public class ReaderObj
 
         return vert;
     }
-    
-    private static Vector3D readVertexTexture(String cad)
-    {
+
+    private static Vector3D readVertexTexture(String lineOfText) {
         Vector3D vert = new Vector3D();
-        StringTokenizer st = new StringTokenizer(cad);
+        StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
         vert.x = Double.parseDouble(st.nextToken());
         vert.y = Double.parseDouble(st.nextToken());
-        try
-        {
+        try {
             vert.z = Double.parseDouble(st.nextToken());
         }
-        catch(Exception e)
-        {}
+        catch( Exception e ) {}
         return vert;
     }
-    
-    private static HashMap<String, Material> readMaterials(String material, String fileName)
-    {
-        HashMap<String, Material> ret=new HashMap<String, Material>();
-        
-        StringTokenizer st=new StringTokenizer(material, " ");
-        st.nextToken();//mtlib
+
+    private static HashMap<String, Material>
+    readMaterials(String material, String fileName) {
+        HashMap<String, Material> ret = new HashMap<String, Material>();
+        StringTokenizer st = new StringTokenizer(material, " ");
+        st.nextToken(); // "mtlib" token
         File arc=new File(fileName);
         File dirArc=arc.getParentFile();
-        String nomArc=dirArc+System.getProperty("file.separator")+st.nextToken();
+        String nomArc;
+        nomArc = dirArc + System.getProperty("file.separator")+st.nextToken();
         
-        try
-        {
+        try {
             BufferedReader in=new BufferedReader(new FileReader(nomArc));
-            String cad="";
+            String lineOfText="";
             
-            Material matAct=new Material();
-            matAct.setName("default");
+            Material activeMaterial=new Material();
+            activeMaterial.setName("default");
             
-            while((cad=in.readLine())!=null)
-            {
-                if(cad.startsWith("Ns"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
-                    stMat.nextToken();//Ns
-                    
-                    matAct.setPhongExponent(Float.parseFloat(stMat.nextToken()));
+            while( (lineOfText = in.readLine()) != null ) {
+                if ( lineOfText.startsWith("Ns") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Ns
+                    activeMaterial.setPhongExponent(
+                        Float.parseFloat(stMat.nextToken()));
                 }
-                if(cad.startsWith("Kd"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
-                    stMat.nextToken();//Kd
-                    
+                if ( lineOfText.startsWith("Kd") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Kd
                     ColorRgb color=new ColorRgb();
                     color.r=Float.parseFloat(stMat.nextToken());
                     color.g=Float.parseFloat(stMat.nextToken());
                     color.b=Float.parseFloat(stMat.nextToken());
-                    
-                    matAct.setDiffuse(color);
+                    activeMaterial.setDiffuse(color);
                 }
-                if(cad.startsWith("Ka"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
-                    stMat.nextToken();//Ka
-                    
+                if ( lineOfText.startsWith("Ka") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Ka
                     ColorRgb color=new ColorRgb();
                     color.r=Float.parseFloat(stMat.nextToken());
                     color.g=Float.parseFloat(stMat.nextToken());
                     color.b=Float.parseFloat(stMat.nextToken());
-                    
-                    matAct.setAmbient(color);
+                    activeMaterial.setAmbient(color);
                 }
-                if(cad.startsWith("Ks"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
-                    stMat.nextToken();//Ks
-                    
+                if ( lineOfText.startsWith("Ks") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Ks
                     ColorRgb color=new ColorRgb();
                     color.r=Float.parseFloat(stMat.nextToken());
                     color.g=Float.parseFloat(stMat.nextToken());
                     color.b=Float.parseFloat(stMat.nextToken());
-                    
-                    matAct.setSpecular(color);
+                    activeMaterial.setSpecular(color);
                 }
-                if(cad.startsWith("d"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
-                    stMat.nextToken();//d
-                    
-                    //matAct.setAlpha(Float.parseFloat(stMat.nextToken()));
+                if ( lineOfText.startsWith("d") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // d
+                    //activeMaterial.setAlpha(Float.parseFloat(stMat.nextToken()));
                 }
-                if(cad.startsWith("newmtl"))
-                {
-                    StringTokenizer stMat=new StringTokenizer(cad, " ");
+                if ( lineOfText.startsWith("newmtl") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken();//newmtl
-                    
-                    ret.put("usemtl "+matAct.getName(), matAct);
-                    matAct=new Material();
-                    matAct.setName(stMat.nextToken());
+                    ret.put("usemtl "+activeMaterial.getName(),
+                            activeMaterial);
+                    activeMaterial = new Material();
+                    activeMaterial.setName(stMat.nextToken());
                 }
             }
-            ret.put("usemtl "+matAct.getName(), matAct);
+            ret.put("usemtl "+activeMaterial.getName(), activeMaterial);
         }
-        catch(IOException ioe)
-        {
+        catch( IOException ioe ) {
         }
         return ret;
     }

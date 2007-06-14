@@ -3,15 +3,17 @@
 //= Module history:                                                         =
 //= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
 //= - April 28 2006 - Oscar Chavarro: quality group                         =
+//= - November 6 2006 - Oscar Chavarro: introduced bounding box             =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Vector3D;
-import java.util.Iterator;
+import vsdk.toolkit.environment.scene.SimpleBody;
 
 public class TriangleMeshGroup extends Surface {
     /// Check the general attribute description in superclass Entity.
@@ -23,20 +25,25 @@ public class TriangleMeshGroup extends Surface {
     private GeometryIntersectionInformation lastInfo;
     private int[] intersectionInformation;
 
+    private SimpleBody boundingVolume;
+
     public TriangleMeshGroup() {
         meshes = new ArrayList<TriangleMesh> ();
         MinMax = null;
         lastInfo = new GeometryIntersectionInformation();
+    boundingVolume = null;
     }
 
     public TriangleMeshGroup(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
         lastInfo = new GeometryIntersectionInformation();
+    boundingVolume = null;
     }
 
     public TriangleMeshGroup(TriangleMeshGroup group) {
         this.meshes = group.getMeshes();
         lastInfo = new GeometryIntersectionInformation();
+    boundingVolume = null;
     }
 
     public ArrayList<TriangleMesh> getMeshes() {
@@ -44,11 +51,13 @@ public class TriangleMeshGroup extends Surface {
     }
 
     public void setMeshes(ArrayList<TriangleMesh> meshes) {
+    boundingVolume = null;
         this.meshes = meshes;
     }
 
     public void addMesh(TriangleMesh mesh) {
         this.meshes.add(mesh);
+    boundingVolume = null;
     }
 
     public TriangleMesh getMeshAt(int index) {
@@ -56,6 +65,7 @@ public class TriangleMeshGroup extends Surface {
     }
 
     public double[] getMinMax() {
+        calculateMinMaxPositions();
         return this.MinMax;
     }
 
@@ -70,7 +80,7 @@ public class TriangleMeshGroup extends Surface {
      * @return double[]
      */
     public void calculateMinMaxPositions() {
-        if (MinMax == null) {
+        if ( MinMax == null ) {
             MinMax = new double[6];
 
             boolean first = true;
@@ -147,9 +157,27 @@ public class TriangleMeshGroup extends Surface {
         intersection = false;
         Info = new GeometryIntersectionInformation();
 
+        // Bounding volume check
+        if ( boundingVolume == null ) {
+            double[] mm = getMinMax();
+            Vector3D size, center;
+            size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+            center = new Vector3D((mm[3]+mm[0])/2,
+                                  (mm[4]+mm[1])/2,
+                                  (mm[5]+mm[2])/2);
+            boundingVolume = new SimpleBody();
+            boundingVolume.setPosition(center);
+            boundingVolume.setGeometry(new Box(size));
+    }
+        if ( !boundingVolume.doIntersection(inOut_Ray) ) {
+        return false;
+    }
+
+        // Chain of responsability behavior design pattern with TriangleMesh
         for ( i= 0; i< meshes.size(); i++ ) {
             TriangleMesh mesh = meshes.get(i);
             Ray ray = new Ray(inOut_Ray);
+
             if ( mesh.doIntersection(ray) == true ) {
                 mesh.doExtraInformation(ray, 0.0, Info);
 
@@ -174,6 +202,7 @@ public class TriangleMeshGroup extends Surface {
                 }
             }
         }
+
         return intersection;
     }
 

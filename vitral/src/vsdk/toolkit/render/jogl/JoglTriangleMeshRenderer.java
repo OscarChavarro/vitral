@@ -62,13 +62,13 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               case QualitySelection.SHADING_TYPE_FLAT:
                 gl.glEnable(gl.GL_LIGHTING);
                 gl.glShadeModel(gl.GL_FLAT);
-                JoglMaterialRenderer.activate(gl, mesh.getMaterial());
+                JoglMaterialRenderer.activate(gl, mesh.getMaterials()[0]);
                 break;
               case QualitySelection.SHADING_TYPE_PHONG:
               case QualitySelection.SHADING_TYPE_GOURAUD: default:
                 gl.glEnable(gl.GL_LIGHTING);
                 gl.glShadeModel(gl.GL_SMOOTH);
-                JoglMaterialRenderer.activate(gl, mesh.getMaterial());
+                JoglMaterialRenderer.activate(gl, mesh.getMaterials()[0]);
                 break;
             }
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
@@ -229,15 +229,16 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
                 else {
                     gl.glDisable(gl.GL_TEXTURE_2D);
                 }
-                drawRangeWithTexture(gl, mesh, mesh.getTextTriRelAt(i, j, 0),
-                                           mesh.getTextTriRelAt(i, j, 1), flip);
+                drawRangeWithTexture(gl, mesh,
+                                     mesh.getTextTriRelAt(i, j, 0),
+                                     mesh.getTextTriRelAt(i, j, 1), flip);
             }
         }
     }
 
     private static void
     drawRangeWithTexture(GL gl, TriangleMesh mesh, 
-                               int ini, int fin, boolean flipNormals) {
+                         int ini, int fin, boolean flipNormals) {
         Vertex v0, v1, v2;
 
         gl.glBegin(gl.GL_TRIANGLES);

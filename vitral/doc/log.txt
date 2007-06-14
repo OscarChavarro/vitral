@@ -135,3 +135,6 @@ Changes in 2006 november 5 revition
 
 Changes in 2006 november 6 revition
   - Reorganized testsuite directory
+  - Added bounding volumes in TriangleMesh and TriangleMeshGroup for
+    doIntersection operation
+  - Added normal interpolation in TriangleMesh doIntersection operation

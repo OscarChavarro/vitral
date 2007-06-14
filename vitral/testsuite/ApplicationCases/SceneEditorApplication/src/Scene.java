@@ -171,9 +171,23 @@ public class Scene
         }
 
         visualizationEngine = new Raytracer();
+        long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, things, lights, 
                     activeBackground, activeCamera,
                                     reporter, null);
+        long finalTime = System.currentTimeMillis();
+        System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
+
+        File fd = new File("./output.jpg");
+
+        System.out.print("Exporting result image to file: ");
+        if ( !ImagePersistence.exportJPG(fd, out_Viewport) )
+        {
+            System.err.println("Error grabando la imagen!!");
+            System.exit(1);
+        }
+        System.out.println(" OK!");
+        System.out.println("An image has been created in the file output.jpg");
 
         //-----------------------------------------------------------------
         activeCamera.updateViewportResize(originalWidth, originalHeight);
