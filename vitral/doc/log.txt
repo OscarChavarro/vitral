@@ -1,0 +1,83 @@
+Revision de noviembre 1 de 2005
+  - Revision MESH: la etapa 141 original de Lhyna y Gabriel se pasa a la
+    142, y se le annaden scripts de compilacion para linux y se le reviso el
+    encoding para que no fallaran los comentarios en linux. El ejemplo de
+    testsuite no imprime nada.
+    . Pendiente: Tipificar Arraylist en Mesh.java
+    . Pendiente: revision de entorno JBuilder
+    15 min
+  - Revision QualitySelection: se renombro Shading para que fuera ShadingType
+  - Revision de clases y migracion a JOGL Beta: 6:30pm->
+
+  - Is class RGBAImageBuilder implementing a builder or Factory design pattern?
+
+Changes in 2006 march 14 revition
+  - Library is now packaged in just one big dir, not using the old
+    stages order directories. Now all the examples are inside the 
+    testsuite directory.
+  - Incorporated ZBuffer and JoglZBufferRenderer classes from Fabio Aroca
+    & Eduardo Mendoza main work, allowing for distributed rendering based
+    on ZBuffer algorithms and other manipulations for depth maps.
+  - New organization of packages and classes inside packages. Below are
+the old names and the new names for packages:
+    . vitral is no longer called such that, it is now "vsdk" which stands for
+      "Vitral Software Development Kit".
+    . Inside the VSDK architecture, the current toolkit is one, so the main
+      package is called "toolkit" instead of "toolkits".
+    . Package "geometry" is now inside package "environment"
+    . Old package "visual" is now called "render"
+    . Old package "util" is now called "io"
+    . Package "io" is organized such as each data type has its own subdirectory
+      so class ReaderObj is in io.geometry
+    . Classes ImageNotRecognizedException, RGBAImageBuilder and TargaImage 
+      which handles image loading from files were moved to package io.image.
+  - The main library is not "vitral.jar", but "vsdk.jar"
+  - As a cylinder is a special case of cone, class Cylinder is now called
+    Cone
+
+Changes in 2006 march 19 revition
+  - Raytracing application example was set for full code reuse, now the
+    raytracer is generic and lies in the main toolkit render package
+  - SceneEditor application example in its first fully functional version :-)
+
+Changes in 2006 march 31 revition
+  - RGBColorPalette
+
+Changes in 2006 april 6 revition
+  - RGBColorPalette completed, and AwtRGBColorPalette functions and sample
+    working fine.
+  - Exporting from ZBuffer to RGBImages now uses palettes :-)
+
+Changes in 2006 april 28 revition
+  - Integrated the models of ParametricCubicCurve and ParametricCubicPatches
+  - Mesh revition. Now it is called TriangleMesh / TriangleMeshGroup
+  - A RayableObject is not a Geometry, but something that contains one.
+    It is not inside the geometry package... And now is a SimpleThing.
+  - RGBAImageBuilder renamed to ImagePersistence, and added exporting PPM
+    format. Images doesn't manage persistence anymore by themselves.
+  - Entity! All modelling classes are Serializable and reflectionable...
+  - Jogl*Renderer classes with draw/activate names normalized. There is no
+    more activateGL or drawGL versions
+
+Changes in 2006 may 5 revition
+  - Minor updates to ParametricCubicCurve code
+  - JoglParametricCubicCurve.drawCurve is now JoglParametricCubicCurve.draw
+  - First XML persistence classes for curves and patches
+  - Draw methods for curve renderers normalized to manage cameras and 
+    quality selection
+  - ParametricCubicCurveRenderer::getMinMax working
+
+Changes in 2006 may 19 revition
+  - Raytracer support for depth-maps by Alfonso Barbosa
+  - Basic ReaderObj functionality fixed by David Diaz
+  - XML persistence classes for curves and patches fixed by Gina Chiquillo
+
+Changes in 2006 may 22/may25 revition
+  - All Entities are now Serializable! Note the use of serialVersionUID static
+    attribute in all classes and the implemented class hierarchy.
+  - SimpleThing is now called SimpleBody
+  - RGBColorPaletteBuilder renamed to RGBColorPalettePersistence
+  - Various classes have now javadoc inline documentation by David Diaz and
+    Oscar Chavarro
+  - document.sh script now builds two versions for online literate programming
+    style documentation: doxygen and javadoc

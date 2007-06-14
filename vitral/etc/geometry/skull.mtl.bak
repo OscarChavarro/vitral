@@ -1,0 +1,9 @@
+# Max2Mtl Version 6.0 Jul 29th, 2003
+newmtl craneo4
+Ka  0.1 0.1 0.1
+Kd  0.5 0.5 0.3
+Ks  1.0 1.0 1.0
+d  1.0
+Ns  0.0
+illum 2
+# EOF
