@@ -77,11 +77,11 @@ public class DatasetControl
         String inputFilename = "input_" + VSDK.formatDouble(r) + ".ppm";
         String outputFilename = "output_" + VSDK.formatDouble(r);
         ImagePersistence.exportPPM(new File(inputFilename), texture);
-        runOperatingSystemCommand("./generateSphericalHarmonics " + inputFilename);
+        runOperatingSystemCommand("../../../pkgs/SpharmonicKit27/bin/generateSphericalHarmonics " + inputFilename);
         runOperatingSystemCommand("mv output.ppm " + outputFilename + ".ppm");
         runOperatingSystemCommand("mv output.txt " + outputFilename + ".txt");
         runOperatingSystemCommand("sync");
-        try{Thread.sleep(100);}catch ( Exception e ) {}
+    //try{Thread.sleep(100);}catch ( Exception e ) {}
         
         //-----------------------------------------------------------------
         BufferedReader br;
