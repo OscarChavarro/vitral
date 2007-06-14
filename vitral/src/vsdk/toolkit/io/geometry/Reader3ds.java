@@ -694,8 +694,14 @@ public class Reader3ds extends PersistenceElement
                 a = readIntLE(is);
                 b = readIntLE(is);
                 c = readIntLE(is);
-                flags = readIntLE(is);
-                currentTrianglesList[i] = new Triangle(a, b, c);
+                flags = readIntLE(is) & 0x07;
+                if ( (flags & 0x04) != 0x00 ) {
+                    currentTrianglesList[i] = new Triangle(a, c, b);
+          }
+          else {
+                    currentTrianglesList[i] = new Triangle(a, b, c);
+        }
+        System.out.println("FACE: " + flags);
             }
 
             //----
