@@ -19,6 +19,7 @@
 //=   for inclusion of sub-viewport spec.                                   =
 //= - November 19 2006 - Oscar Chavarro: material handling supporting       =
 //=   submaterials inside geometry.                                         =
+//= - December 20 2006 - Oscar Chavarro: bump mapping added                 =
 //===========================================================================
 
 package vsdk.toolkit.render;
@@ -77,6 +78,9 @@ public class Raytracer extends RenderingElement {
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations. (This must be taken
     into account in the reflection and refraction calculations)
+
+    @todo Check the inconsistent use of tangent vector in bump mapping
+    calculation... it is non sense to always be <0, 1, 0>.
     */
     private ColorRgb evaluateIlluminationModel(
         GeometryIntersectionInformation info, Vector3D v, 
@@ -113,16 +117,21 @@ public class Raytracer extends RenderingElement {
             Vector3D NxPt;
             Vector3D NxPs;
 
-            normalVariation = info.normalMap.getNormal(info.u, info.v);
+            normalVariation = info.normalMap.getNormal(info.u, 1-info.v);
             if ( normalVariation != null ) {
                 // Evaluation of [BLIN1978b]/[FOLE1992].16.23 equation
                 N = info.n;    N.normalize();
-                Ps = info.t;    Ps.normalize();
+                Ps = info.t;   Ps.normalize();
+
+                // This is non-sense, but it works! Currently not using
+                // tangent vector from geometry! Explain this!
+                Ps.x = 0; Ps.y = 1; Ps.z = 0;
+
                 Pt = N.crossProduct(Ps);
                 NxPt = N.crossProduct(Pt);
                 NxPs = N.crossProduct(Ps);
-                Bu = -normalVariation.x;
-                Bv = -normalVariation.y;
+                Bu = normalVariation.x;
+                Bv = normalVariation.y;
                 // Note: this only works when `N` is a unit vector. If not,
                 //      `normalPerturbation` must be divided by N's length
                 normalPerturbation =
@@ -170,7 +179,7 @@ public class Raytracer extends RenderingElement {
                     diffuse = material.getDiffuse();
                     if ( info.texture != null ) {
                         diffuse.modulate(
-                            info.texture.getColorRgbBiLinear(info.u, info.v));
+                            info.texture.getColorRgbBiLinear(info.u, 1-info.v));
                     }
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
                         result.r += lambert*diffuse.r*lightEmission.r;

@@ -26,3 +26,8 @@
   - In SceneEditorApplication, keyPressed event is not processing correctly:
     only accepts 2nd key after some other event as mouse click or cursor
     re-entry to working canvas window
+  - Take into account for the mouse processing inside gizmos, that eventually
+    and application can have a non (0, 0) located viewport.  For that cases,
+    gizmos should include a `setViewportPosition` method, and act acordingly.
+  - Explain the failures in tangent vector interpretation for the raytracing
+    bump-mapping algorithm!

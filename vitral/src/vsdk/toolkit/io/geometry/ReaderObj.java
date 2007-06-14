@@ -424,6 +424,7 @@ public class ReaderObj extends PersistenceElement
         
         //- Build the mesh triangles --------------------------------------
         Triangle newTriangleArray[];
+
         newTriangleArray = new Triangle[triangleDatasetsArray.size()];
         for ( i = 0; i < newTriangleArray.length; i++ ) {
             newTriangleArray[i] = new Triangle();

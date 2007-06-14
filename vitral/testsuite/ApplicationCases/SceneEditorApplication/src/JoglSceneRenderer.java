@@ -18,10 +18,8 @@ import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 public class JoglSceneRenderer
 {
-    public static void draw(GL gl, Scene s)
+    public static void drawBackground(GL gl, Scene s)
     {
-        Image texture;
-
         switch ( s.selectedBackground ) {
           case 1:
             if ( s.cubemapBackground == null ) {
@@ -38,7 +36,13 @@ public class JoglSceneRenderer
             JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
             break;
         }
+    }
 
+    public static void draw(GL gl, Scene s)
+    {
+        Image texture;
+
+        drawBackground(gl, s);
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
         gl.glEnable(gl.GL_DEPTH_TEST);

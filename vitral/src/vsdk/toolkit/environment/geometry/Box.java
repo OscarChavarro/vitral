@@ -157,66 +157,67 @@ public class Box extends Solid {
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         outData.p = lastInfo.p;
+
         switch ( lastPlane ) {
           case 1:
             outData.n.x = 0;
             outData.n.y = 0;
             outData.n.z = 1;
             outData.u = outData.p.y / size.y - 0.5;
-            outData.v = outData.p.x / size.x - 0.5;
-        outData.t.x = 0;
-        outData.t.y = 1;
-        outData.t.z = 0;
+            outData.v = 1-(outData.p.x / size.x - 0.5);
+            outData.t.x = 0;
+            outData.t.y = 1;
+            outData.t.z = 0;
             break;
           case 2:
             outData.n.x = 0;
             outData.n.y = 0;
             outData.n.z = -1;
             outData.u = outData.p.y / size.y - 0.5;
-            outData.v = 1-(outData.p.x / size.x - 0.5);
-        outData.t.x = 0;
-        outData.t.y = 1;
-        outData.t.z = 0;
+            outData.v = outData.p.x / size.x - 0.5;
+            outData.t.x = 0;
+            outData.t.y = 1;
+            outData.t.z = 0;
             break;
           case 3:
             outData.n.x = 0;
             outData.n.z = 0;
             outData.n.y = 1;
             outData.u = 1-(outData.p.x / size.x - 0.5);
-            outData.v = 1-(outData.p.z / size.z - 0.5);
-        outData.t.x = -1;
-        outData.t.y = 0;
-        outData.t.z = 0;
+            outData.v = outData.p.z / size.z - 0.5;
+            outData.t.x = -1;
+            outData.t.y = 0;
+            outData.t.z = 0;
             break;
           case 4:
             outData.n.x = 0;
             outData.n.z = 0;
             outData.n.y = -1;
             outData.u = outData.p.x / size.x - 0.5;
-            outData.v = 1-(outData.p.z / size.z - 0.5);
-        outData.t.x = 1;
-        outData.t.y = 0;
-        outData.t.z = 0;
+            outData.v = outData.p.z / size.z - 0.5;
+            outData.t.x = 1;
+            outData.t.y = 0;
+            outData.t.z = 0;
             break;
           case 5:
             outData.n.x = 1;
             outData.n.y = 0;
             outData.n.z = 0;
             outData.u = outData.p.y / size.y - 0.5;
-            outData.v = 1-(outData.p.z / size.z - 0.5);
-        outData.t.x = 0;
-        outData.t.y = 1;
-        outData.t.z = 0;
+            outData.v = outData.p.z / size.z - 0.5;
+            outData.t.x = 0;
+            outData.t.y = 1;
+            outData.t.z = 0;
             break;
           case 6:
             outData.n.x = -1;
             outData.n.y = 0;
             outData.n.z = 0;
             outData.u = 1-(outData.p.y / size.y - 0.5);
-            outData.v = 1-(outData.p.z / size.z - 0.5);
-        outData.t.x = 0;
-        outData.t.y = -1;
-        outData.t.z = 0;
+            outData.v = outData.p.z / size.z - 0.5;
+            outData.t.x = 0;
+            outData.t.y = -1;
+            outData.t.z = 0;
             break;
           default:
             outData.u = 0;

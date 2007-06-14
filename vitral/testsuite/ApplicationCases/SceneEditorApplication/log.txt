@@ -163,3 +163,7 @@ Dec 20 2006, Oscar Chavarro:
   - 50min: Normal map
   - 1h30min: Bumpmapping in raytracing. Pending to check normal map and process
     computation. Actually given some errors...
+
+Dec 22 2006, Oscar Chavarro:
+  - 1h: Activated non fullscreen viewport and multiple rendering modes in 
+    editor :-)

@@ -184,13 +184,7 @@ public class TriangleMeshGroup extends Surface {
                     min_t = ray.t;
 
                     // Stores standard doIntersection operation information
-                    lastInfo.p.x = Info.p.x;
-                    lastInfo.p.y = Info.p.y;
-                    lastInfo.p.z = Info.p.z;
-                    lastInfo.n.x = Info.n.x;
-                    lastInfo.n.y = Info.n.y;
-                    lastInfo.n.z = Info.n.z;
-                    lastInfo.material = Info.material;
+                    lastInfo.clone(Info);
                     inOut_Ray.t = ray.t;
 
                     // Stores the intersected mesh and the triangle intersected inside that mesh
@@ -213,13 +207,7 @@ public class TriangleMeshGroup extends Surface {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-        outData.p.x = lastInfo.p.x;
-        outData.p.y = lastInfo.p.y;
-        outData.p.z = lastInfo.p.z;
-        outData.n.x = lastInfo.n.x;
-        outData.n.y = lastInfo.n.y;
-        outData.n.z = lastInfo.n.z;
-        outData.material = lastInfo.material;
+    outData.clone(lastInfo);
     }
 
     public int[] doIntersectionInformation()

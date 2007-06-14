@@ -126,12 +126,12 @@ public class Sphere extends Solid {
         }
         // Suponiendo que theta esta en [0, 2*PI] y phi en [0, PI]...
         outData.u = ((theta+Math.PI/2)/(2*Math.PI));
-        outData.v = phi / Math.PI;
+        outData.v = 1 - (phi / Math.PI);
 
         //-----------------------------------------------------------------
-    outData.t.x = Math.sin(theta-Math.PI/2);
+        outData.t.x = Math.sin(theta-Math.PI/2);
         outData.t.y = -Math.cos(theta-Math.PI/2);
-    outData.t.z = 0;
+        outData.t.z = 0;
 
         //-----------------------------------------------------------------
     }

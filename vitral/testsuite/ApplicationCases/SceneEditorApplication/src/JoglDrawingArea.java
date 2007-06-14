@@ -42,6 +42,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
@@ -88,6 +89,19 @@ public class JoglDrawingArea implements
     private Cursor camadvanceCursor;
     private Cursor selectCursor;
 
+    //
+    private static final int RENDER_MODE_ZBUFFER = 1;
+    private static final int RENDER_MODE_RAYTRACING = 2;
+    private int renderMode;
+    private boolean viewportFullSize;
+    private boolean viewportResizeNeeded;
+    private int viewportXpos;
+    private int viewportYpos;
+    private int viewportXsize;
+    private int viewportYsize;
+    private int viewportXframe;
+    private int viewportYframe;
+
     SceneEditorApplication parent;
 
     public JoglDrawingArea(Scene theScene, JLabel statusMessage, SceneEditorApplication parent)
@@ -95,6 +109,15 @@ public class JoglDrawingArea implements
         this.parent = parent;
         this.theScene = theScene;
         this.statusMessage = statusMessage;
+        this.viewportResizeNeeded = false;
+        this.viewportFullSize = true;
+        this.viewportXpos = 0;
+        this.viewportYpos = 0;
+        this.viewportXsize = 0;
+        this.viewportYsize = 0;
+        this.viewportXframe = 0;
+        this.viewportYframe = 0;
+        this.renderMode = RENDER_MODE_ZBUFFER;
 
         interactionMode = CAMERA_INTERACTION_MODE;
 
@@ -246,8 +269,75 @@ public class JoglDrawingArea implements
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        JoglSceneRenderer.draw(gl, theScene);
+        //-----------------------------------------------------------------
+        if ( viewportResizeNeeded ) {
+            if ( viewportFullSize ) {
+                if ( viewportXpos != 0 || viewportYpos != 0 ) {
+                    gl.glClearColor(0, 0, 0, 1);
+                    gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+                }
+                gl.glViewport(viewportXpos, viewportYpos,
+                              viewportXsize, viewportYsize); 
+                theScene.activeCamera.updateViewportResize(
+                    viewportXsize, viewportYsize);
+                viewportResizeNeeded = false;
+              }
+              else {
+                int w, h;
+                if ( viewportXframe < viewportXsize ) {
+                    w = viewportXframe;
+                }
+                else {
+                    w = viewportXsize;
+                }
+                if ( viewportYframe < viewportYsize ) {
+                    h = viewportYframe;
+                }
+                else {
+                    h = viewportYsize;
+                }
+                viewportXpos = (viewportXsize - w) / 2;
+                viewportYpos = (viewportYsize - h) / 2;
+                if ( viewportXpos != 0 || viewportYpos != 0 ) {
+                    gl.glClearColor(0, 0, 0, 1);
+                    gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+                }
+                gl.glViewport(viewportXpos, viewportYpos, w, h);
+                theScene.activeCamera.updateViewportResize(w, h);
+                viewportResizeNeeded = false;
+            }
+        }
 
+        //-----------------------------------------------------------------
+        if ( renderMode == RENDER_MODE_ZBUFFER ) {
+            JoglSceneRenderer.draw(gl, theScene);
+    }
+    else {
+            JoglSceneRenderer.drawBackground(gl, theScene);
+        if ( viewportFullSize ) {
+              parent.raytracedImageWidth = viewportXsize;
+            parent.raytracedImageHeight = viewportYsize;
+        }
+        else {
+              parent.raytracedImageWidth = viewportXframe;
+            parent.raytracedImageHeight = viewportYframe;
+        }
+            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
+            parent.theScene.raytrace(parent.raytracedImage);
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPushMatrix();
+            gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glPushMatrix();
+            gl.glLoadIdentity();
+            JoglImageRenderer.draw(gl, parent.raytracedImage);
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+    }
+
+        //-----------------------------------------------------------------
         // Note that gizmo information will not be reported, as they damage
         // the zbuffer...
         copyZBufferIfNeeded(gl);
@@ -274,10 +364,11 @@ public class JoglDrawingArea implements
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
-        gl.glViewport(0, 0, width, height); 
-
-        theScene.activeCamera.updateViewportResize(width, height);
+        this.viewportXpos = 0;
+        this.viewportYpos = 0;
+        this.viewportXsize = width;
+        this.viewportYsize = height;
+        this.viewportResizeNeeded = true;
     }   
 
   public void mouseEntered(MouseEvent e) {
@@ -336,7 +427,15 @@ public class JoglDrawingArea implements
               composite = true;
           }
           int f = theScene.selectedThings.firstSelected();
-          theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
+
+          if ( viewportFullSize ) {
+              theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
+      }
+      else {
+              theScene.selectObjectWithMouse(e.getX()-viewportXpos,
+                                             e.getY()-viewportXpos, composite);
+      }
+
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
                interactionMode == TRANSLATE_INTERACTION_MODE &&
                translationGizmo.isActive() ) {
@@ -655,6 +754,47 @@ public class JoglDrawingArea implements
 
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
+            case '0':
+              switch ( viewportXframe ) {
+                case 0:
+                  viewportXframe = 320;
+                  viewportYframe = 240;
+                  viewportFullSize = false;
+                  break;
+                case 320:
+                  viewportXframe = 640;
+                  viewportYframe = 480;
+                  viewportFullSize = false;
+                  break;
+                case 640:
+                  viewportXframe = 800;
+                  viewportYframe = 600;
+                  viewportFullSize = false;
+                  break;
+                case 800:
+                  viewportXframe = 0;
+                  viewportYframe = 0;
+                  viewportFullSize = true;
+                  break;
+              }
+              if ( viewportFullSize ) {
+                  viewportXpos = 0;
+                  viewportYpos = 0;
+              }
+              viewportResizeNeeded = true;
+              canvas.repaint();
+              break;
+            case '9':
+              switch ( renderMode ) {
+                case RENDER_MODE_ZBUFFER:
+                  renderMode = RENDER_MODE_RAYTRACING;
+                  break;
+                default:
+                  renderMode = RENDER_MODE_ZBUFFER;
+                  break;
+              }
+              canvas.repaint();
+              break;
             case 't':
               if ( firstThingSelected >= 0 ) {
                   SimpleBody gi;
@@ -688,17 +828,17 @@ public class JoglDrawingArea implements
                   if ( normalMap == null ) {
                       try {
                           normalMap = new NormalMap();
-                          //String imageFilename = "../../../etc/bumpmaps/blinn1.bw";
+                          //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
                           String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth_bump.bw";
                           source = ImagePersistence.importIndexedColor(new File(imageFilename));
                           normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
 
                           exported = normalMap.exportToRgbImage();
-                          ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
+                          //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                       }
                       catch ( Exception ee ) {
-              System.err.println(ee);
-              ee.printStackTrace();
+                          System.err.println(ee);
+                          ee.printStackTrace();
                       }
                       gi.setNormalMap(normalMap);
                     }

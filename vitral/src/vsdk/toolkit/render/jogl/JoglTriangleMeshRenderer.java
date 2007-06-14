@@ -227,6 +227,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             drawRangeWithoutTexture(gl, mesh, start, end, flipNormals);
             start = end;
         }
+    if ( end <= mesh.getTriangles().length ) {
+            Material m = new Material();
+            JoglMaterialRenderer.activate(gl, m);
+            drawRangeWithoutTexture(gl, mesh, start, mesh.getTriangles().length, flipNormals);
+    }
     }
 
     /**

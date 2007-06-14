@@ -525,42 +525,52 @@ public class TriangleMesh extends Surface {
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
         //-----------------------------------------------------------------
-        Vector3D v0, v1, v2;  // Positions of the three triangle points
+        Vector3D p0, p1, p2;  // Positions of the three triangle points
         Vector3D n0, n1, n2;  // Normals of the three triangle points
+        double u0, v0, u1, v1, u2, v2; // Texture coordinates
 
-        //if ( withNormalInterpolation ) {
-            v0 = vertexes[triangles[selectedTriangle].p0].position;
-            v1 = vertexes[triangles[selectedTriangle].p1].position;
-            v2 = vertexes[triangles[selectedTriangle].p2].position;
+        //if ( withInterpolation ) {
+            p0 = vertexes[triangles[selectedTriangle].p0].position;
+            p1 = vertexes[triangles[selectedTriangle].p1].position;
+            p2 = vertexes[triangles[selectedTriangle].p2].position;
+
+            // Obtain barycentric coordinates for point p
+            // Method taken from wikipedia
+            double A, B, C, D, E, F, G, H, I;
+            double lambda0, lambda1, lambda2;
+
+            A = p0.x - p2.x;
+            B = p1.x - p2.x;
+            C = p2.x - lastInfo.p.x;
+            D = p0.y - p2.y;
+            E = p1.y - p2.y;
+            F = p2.y - lastInfo.p.y;
+            G = p0.z - p2.z;
+            H = p1.z - p2.z;
+            I = p2.z - lastInfo.p.z;
+
+            // Point interpolation of three vertex positions
+            lambda0 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
+            lambda1 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
+            lambda2 = 1-lambda0-lambda1;
 
             // Normal interpolation
             n0 = vertexes[triangles[selectedTriangle].p0].normal;
             n1 = vertexes[triangles[selectedTriangle].p1].normal;
             n2 = vertexes[triangles[selectedTriangle].p2].normal;
+            lastInfo.n = n0.multiply(lambda0).
+                add(n1.multiply(lambda1).
+                add(n2.multiply(lambda2)));
 
-            // Obtain barycentric coordinates for point p
-            // Method taken from wikipedia
-            double A, B, C, D, E, F, G, H, I;
-            double lambda1, lambda2, lambda3;
-
-            A = v0.x - v2.x;
-            B = v1.x - v2.x;
-            C = v2.x - lastInfo.p.x;
-            D = v0.y - v2.y;
-            E = v1.y - v2.y;
-            F = v2.y - lastInfo.p.y;
-            G = v0.z - v2.z;
-            H = v1.z - v2.z;
-            I = v2.z - lastInfo.p.z;
-
-            // Recalculate n as the barycentric normal 
-            // interpolation of three vertex normals
-            lambda1 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
-            lambda2 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
-            lambda3 = 1-lambda1-lambda2;
-            lastInfo.n = n0.multiply(lambda1).
-                add(n1.multiply(lambda2).
-                add(n2.multiply(lambda3)));
+            // Texture map coordinates interpolation
+            u0 = vertexes[triangles[selectedTriangle].p0].u;
+            v0 = vertexes[triangles[selectedTriangle].p0].v;
+            u1 = vertexes[triangles[selectedTriangle].p1].u;
+            v1 = vertexes[triangles[selectedTriangle].p1].v;
+            u2 = vertexes[triangles[selectedTriangle].p2].u;
+            v2 = vertexes[triangles[selectedTriangle].p2].v;
+            lastInfo.u = u0*lambda0 + u1*lambda1 + u2*lambda2;
+            lastInfo.v = v0*lambda0 + v1*lambda1 + v2*lambda2;
         //}
 
         lastInfo.n.normalize();
@@ -573,12 +583,7 @@ public class TriangleMesh extends Surface {
         }
 
         //-----------------------------------------------------------------
-        outData.p.x = lastInfo.p.x;
-        outData.p.y = lastInfo.p.y;
-        outData.p.z = lastInfo.p.z;
-        outData.n.x = lastInfo.n.x;
-        outData.n.y = lastInfo.n.y;
-        outData.n.z = lastInfo.n.z;
+        outData.clone(lastInfo);
 
         //-----------------------------------------------------------------
         if ( materials != null ) {
@@ -589,6 +594,16 @@ public class TriangleMesh extends Surface {
                 if ( selectedTriangle >= materialRanges[i][0] &&
                      selectedTriangle < materialRanges[i+1][0] ) {
                     outData.material = materials[materialRanges[i+1][1]];
+                    break;
+                }
+            }
+        }
+    outData.texture = null;
+        if ( textureRanges != null ) {
+            for ( int i = 0; i < textureRanges.length-1 ; i++ ) {
+                if ( selectedTriangle >= textureRanges[i][0] &&
+                     selectedTriangle < textureRanges[i+1][0] ) {
+                    outData.texture = textures[textureRanges[i+1][1]-1];
                     break;
                 }
             }
