@@ -1,9 +1,13 @@
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.environment.geometry.RayableObject;
 
 public class Scene
 {
@@ -21,10 +25,12 @@ public class Scene
     //- 4. Objects ---------------------------------------------------------
     public SimpleCorridor corridor;
     public boolean showCorridor;
+    public ArrayList<RayableObject> things;
 
     Scene()
     {
         //-----------------------------------------------------------------
+        things = new ArrayList<RayableObject>();
         camera = new Camera();
         activeCamera = camera;
 
@@ -69,5 +75,17 @@ public class Scene
         //-----------------------------------------------------------------
         corridor = new SimpleCorridor();
         showCorridor = true;
+    }
+
+    public void print()
+    {
+        System.out.println("= SCENE REPORT ============================================================");
+        System.out.println("Current camera:\n" +  activeCamera);
+        System.out.println("Things in scene: " + things.size());
+        int c = 0;
+        for ( Iterator i = things.iterator(); i.hasNext(); c++ ) {
+            System.out.println("  - Thing[" + c + "]: " + ((RayableObject)i.next()).getGeometry().getClass().getName());
+    }
+        System.out.println("= END OF REPORT ===========================================================");
     }
 }

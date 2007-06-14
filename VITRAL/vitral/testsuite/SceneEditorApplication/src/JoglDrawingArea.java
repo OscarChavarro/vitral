@@ -1,5 +1,9 @@
 import java.io.File;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -33,15 +37,32 @@ public class JoglDrawingArea implements
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
     KeyListener
 {
+    public static final int CAMERA_INTERACTION_MODE = 1;
+    public static final int SELECT_INTERACTION_MODE = 2;
+    public static final int TRANSLATE_INTERACTION_MODE = 3;
+    public static final int ROTATE_INTERACTION_MODE = 4;
+    public static final int SCALE_INTERACTION_MODE = 5;
+
     public GLCanvas canvas;
 
     private CameraController cameraController;
 
     private Scene theScene;
 
+    public int interactionMode;
+
+    private Cursor camrotateCursor;
+    private Cursor camtranslateCursor;
+    private Cursor camadvanceCursor;
+    private Cursor selectCursor;
+
     public JoglDrawingArea(Scene theScene)
     {
         this.theScene = theScene;
+
+        interactionMode = CAMERA_INTERACTION_MODE;
+
+    createCursors();
 
         //cameraController = new CameraControllerGravZero(theScene.camera);
         //cameraController = new CameraControllerBlender(theScene.camera);
@@ -56,6 +77,24 @@ public class JoglDrawingArea implements
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+    }
+
+    private void createCursors()
+    {
+      Toolkit awtToolkit = Toolkit.getDefaultToolkit();
+      Image i;
+
+      i = awtToolkit.getImage("./etc/cursors/cursor_camrotate.gif");
+      camrotateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraRotation");
+
+      i = awtToolkit.getImage("./etc/cursors/cursor_camtranslate.gif");
+      camtranslateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraTranslation");
+
+      i = awtToolkit.getImage("./etc/cursors/cursor_camadvance.gif");
+      camadvanceCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraAdvance");
+
+      selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+
     }
 
     public void rotateBackground()
@@ -77,9 +116,7 @@ public class JoglDrawingArea implements
 
         gl.glLoadIdentity();
 
-        if ( theScene.showCorridor ) {
-            theScene.corridor.drawGL(gl);
-    }
+        JoglSceneRenderer.draw(gl, theScene);
 
         gl.glLineWidth((float)3.0);
         gl.glBegin(GL.GL_LINES);
@@ -141,38 +178,87 @@ public class JoglDrawingArea implements
 
   public void mouseEntered(MouseEvent e) {
       canvas.requestFocusInWindow();
+
+      // WARNING / TODO
+      // There should be a cameraController.getFutureAction(e) that calculates
+      // the proper icon for display ... here an Aquynza operation is
+      // assumed and hard-coded
+      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+          canvas.setCursor(camrotateCursor);
+      }
+      else {
+          canvas.setCursor(selectCursor);
+      }
   }
 
   public void mouseExited(MouseEvent e) {
-    //System.out.println("Mouse exited");
+      //System.out.println("Mouse exited");
   }
 
   public void mousePressed(MouseEvent e) {
-      if ( cameraController.processMousePressedEventAwt(e) ) {
+      // WARNING / TODO
+      // There should be a cameraController.getFutureAction(e) that calculates
+      // the proper icon for display ... here an Aquynza operation is
+      // assumed and hard-coded
+      int m = e.getModifiersEx();
+
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           (m & e.BUTTON1_DOWN_MASK) != 0 ) {
+          canvas.setCursor(camrotateCursor);
+      }
+      else if ( interactionMode == CAMERA_INTERACTION_MODE &&
+                (m & e.BUTTON2_DOWN_MASK) != 0 ) {
+          canvas.setCursor(camtranslateCursor);
+      }
+      else if ( interactionMode == CAMERA_INTERACTION_MODE &&
+                (m & e.BUTTON3_DOWN_MASK) != 0 ) {
+          canvas.setCursor(camadvanceCursor);
+      }
+      else {
+          canvas.setCursor(selectCursor);
+      }
+
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMousePressedEventAwt(e) ) {
           canvas.repaint();
       }
   }
 
   public void mouseReleased(MouseEvent e) {
-      if ( cameraController.processMouseReleasedEventAwt(e) ) {
+      // WARNING / TODO
+      // There should be a cameraController.getFutureAction(e) that calculates
+      // the proper icon for display ... here an Aquynza operation is
+      // assumed and hard-coded
+      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+          canvas.setCursor(camrotateCursor);
+      }
+      else {
+          canvas.setCursor(selectCursor);
+      }
+
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMouseReleasedEventAwt(e) ) {
           canvas.repaint();
       }
   }
 
   public void mouseClicked(MouseEvent e) {
-      if ( cameraController.processMouseClickedEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMouseClickedEventAwt(e) ) {
           canvas.repaint();
       }
   }
 
   public void mouseMoved(MouseEvent e) {
-      if ( cameraController.processMouseMovedEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMouseMovedEventAwt(e) ) {
           canvas.repaint();
       }
   }
 
   public void mouseDragged(MouseEvent e) {
-      if ( cameraController.processMouseDraggedEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMouseDraggedEventAwt(e) ) {
           canvas.repaint();
       }
   }
@@ -182,7 +268,8 @@ public class JoglDrawingArea implements
   */
   public void mouseWheelMoved(MouseWheelEvent e) {
       System.out.println(".");
-      if ( cameraController.processMouseWheelEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processMouseWheelEventAwt(e) ) {
           canvas.repaint();
       }
   }
@@ -192,13 +279,15 @@ public class JoglDrawingArea implements
           System.exit(0);
       }
 
-      if ( cameraController.processKeyPressedEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processKeyPressedEventAwt(e) ) {
           canvas.repaint();
       }
   }
 
   public void keyReleased(KeyEvent e) {
-      if ( cameraController.processKeyReleasedEventAwt(e) ) {
+      if ( interactionMode == CAMERA_INTERACTION_MODE && 
+           cameraController.processKeyReleasedEventAwt(e) ) {
           canvas.repaint();
       }
   }
