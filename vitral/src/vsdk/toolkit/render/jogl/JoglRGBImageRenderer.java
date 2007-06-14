@@ -71,7 +71,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         if ( glu == null ) {
             glu = new GLU();
         }
-    */
+        */
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
@@ -107,8 +107,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
                 TextureData textureData;
                 textureData = new TextureData(
-           3, // int internalFormat (number of components)
-           x_tam, // int width
+                   3, // int internalFormat (number of components)
+                   x_tam, // int width
                    y_tam, // int height
                    0, // int border
                    gl.GL_RGB, // int pixelFormat
@@ -120,26 +120,26 @@ public class JoglRGBImageRenderer extends JoglRenderer
                    null // TextureData.Flusher flusher
                 );
                 item.renderer = TextureIO.newTexture(textureData);
-        }
-        catch ( Exception e ) {
+            }
+            catch ( Exception e ) {
                 System.err.println(e);
-        }
+            }
             /*
             //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 3, x_tam, y_tam, gl.GL_RGB, 
             //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
             gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, gl.GL_RGB, 
                             gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
-        */
+            */
         }
 
         //- 4. Use the image's glList -------------------------------------
-    item.renderer.bind();
+        item.renderer.bind();
         item.renderer.enable();
         /*
         if ( item != null ) {
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
-    */
+        */
     }
 
     public static void draw(GL gl, RGBImage img)

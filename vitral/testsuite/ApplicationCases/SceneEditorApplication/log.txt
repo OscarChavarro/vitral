@@ -154,3 +154,12 @@ Dec 17 2006, Oscar Chavarro:
 
 Dec 18 2006, Oscar Chavarro:
   - 10min: Swing building of selector dialog
+
+Dec 20 2006, Oscar Chavarro:
+  - 25min: testing texture mapping
+  - 1h37min: Painting JOGL Sphere by hand... (no GLUT)  :-)
+  - 52min: Texture mapping on raytracer... :-)
+  - 27min: Bilinear interpolation in Image.getColorRgbBiLinear
+  - 50min: Normal map
+  - 6:30pm->
+

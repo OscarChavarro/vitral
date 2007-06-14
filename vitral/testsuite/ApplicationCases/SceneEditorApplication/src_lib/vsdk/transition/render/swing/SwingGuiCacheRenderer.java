@@ -159,7 +159,7 @@ public class SwingGuiCacheRenderer
         if ( group == null ) {
             frame.setBackground(new Color(1.0f, 0.0f, 0.0f));
             return frame;
-    }
+        }
 
         Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
         frame.setBorder(empty);

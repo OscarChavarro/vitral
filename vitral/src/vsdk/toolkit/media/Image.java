@@ -6,6 +6,8 @@
 //= References:                                                             =
 //= [BRES1965] Bresenham, J.E. "Algorithm for computer control of a digital =
 //=            plotter" IBM Syst. J. 4, 1 (1965), 25-30.                    =
+//= [BLINN78b] Blinn, James F. "Simulation of wrinkled surfaces", SIGGRAPH  =
+//=          proceedings, 1978.                                             =
 //===========================================================================
 
 package vsdk.toolkit.media;
@@ -22,6 +24,9 @@ bi-linear interpolation evaluation on Rgb space.
 
 public abstract class Image extends Entity
 {
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20061220L;
+
     /**
     Given the width and height of the desired new size for this image, this
     method is responsable of allocating the necesary memory to keep such
@@ -77,7 +82,18 @@ public abstract class Image extends Entity
     */
     public ColorRgb getColorRgbNearest(double x, double y)
     {
-        return new ColorRgb();
+        double u = x - Math.floor(x);
+        double v = y - Math.floor(y);
+
+        int i = (int)Math.floor(u * ((double)(getXSize()-1)));
+        int j = (int)Math.floor(v * ((double)(getYSize()-1)));
+
+        RGBPixel p = getPixelRgb(i, j);
+        ColorRgb c = new ColorRgb();
+        c.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        c.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        c.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        return c;
     }
 
     /**
@@ -85,11 +101,64 @@ public abstract class Image extends Entity
     method returns a rgb color corresponding to a bi-linear interpolation
     of the 4 neighboring pixels of the float position.
 
-    @todo: implement this method.
+    Current implementation is based on bilinear interpolation algorithm
+    proposed for the bumpmap equivalent in [BLINN78b].
     */
     public ColorRgb getColorRgbBiLinear(double x, double y)
     {
-        return new ColorRgb();
+        //-----------------------------------------------------------------
+        double u = x - Math.floor(x);
+        double v = y - Math.floor(y);
+        double U = u * ((double)(getXSize()-2));
+        double V = v * ((double)(getYSize()-2));
+        int i = (int)Math.floor(U);
+        int j = (int)Math.floor(V);
+        double du = U - (double)i;
+        double dv = V - (double)j;
+        RGBPixel p;
+
+        //-----------------------------------------------------------------
+        p = getPixelRgb(i, j);
+        ColorRgb F00 = new ColorRgb();
+        F00.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        F00.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        F00.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
+        p = getPixelRgb(i+1, j);
+        ColorRgb F10 = new ColorRgb();
+        F10.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        F10.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        F10.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
+        p = getPixelRgb(i, j+1);
+        ColorRgb F01 = new ColorRgb();
+        F01.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        F01.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        F01.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
+        p = getPixelRgb(i+1, j+1);
+        ColorRgb F11 = new ColorRgb();
+        F11.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        F11.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        F11.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
+        //-----------------------------------------------------------------
+        ColorRgb FU0 = new ColorRgb();
+        FU0.r = F00.r + du * (F10.r-F00.r);
+        FU0.g = F00.g + du * (F10.g-F00.g);
+        FU0.b = F00.b + du * (F10.b-F00.b);
+
+        ColorRgb FU1 = new ColorRgb();
+        FU1.r = F01.r + du * (F11.r-F01.r);
+        FU1.g = F01.g + du * (F11.g-F01.g);
+        FU1.b = F01.b + du * (F11.b-F01.b);
+
+        ColorRgb FVAL = new ColorRgb();
+        FVAL.r = FU0.r + dv * (FU1.r-FU0.r);
+        FVAL.g = FU0.g + dv * (FU1.g-FU0.g);
+        FVAL.b = FU0.b + dv * (FU1.b-FU0.b);
+
+        return FVAL;
     }
 
     /**

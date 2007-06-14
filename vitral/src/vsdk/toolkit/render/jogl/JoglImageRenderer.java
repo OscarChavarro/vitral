@@ -36,32 +36,32 @@ public class JoglImageRenderer extends JoglRenderer
     {
         if ( img instanceof RGBAImage ) {
             JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
-    }
+        }
         else if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.activate(gl, (RGBImage)img);
-    }
-    else {
+        }
+        else {
             String c = img.getClass().getName();
 
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.activate",
             "Image GL activation not implemented for subclass " + c);
-    }
+        }
     }
 
     public static void draw(GL gl, Image img)
     {
         if ( img instanceof RGBAImage ) {
             JoglRGBAImageRenderer.draw(gl, (RGBAImage)img);
-    }
+        }
         else if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.draw(gl, (RGBImage)img);
-    }
-    else {
+        }
+        else {
             String c = img.getClass().getName();
 
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.draw",
             "Image GL drawing not implemented for subclass " + c);
-    }
+        }
     }
 
 }

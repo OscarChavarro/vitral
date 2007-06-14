@@ -209,8 +209,8 @@ public class ParametricCurve extends Curve {
 
     public void addPoint(Vector3D[] point, int type) {
         if ( type == BREAK && points.size() < 1 ) {
-        return;
-    }
+            return;
+        }
         points.add(point);
         types.add(new Integer(type));
     }
@@ -225,8 +225,8 @@ public class ParametricCurve extends Curve {
         for ( i = 1; i < types.size(); i++ ) {
             if ( types.get(i).intValue() == BREAK ) {
                 sum++;
+            }
         }
-    }
 
         return sum;
     }
@@ -336,7 +336,7 @@ public class ParametricCurve extends Curve {
         Vector3D[] endingSegmentControl = points.get(nseg);
         Vector3D p;
 
-    Vector3D qp0, qp1, qp2;
+        Vector3D qp0, qp1, qp2;
         qp0 = startingSegmentControl[0];
         qp1 = endingSegmentControl[1];
         qp2 = endingSegmentControl[0];
@@ -354,7 +354,7 @@ public class ParametricCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-    p = qp0.add((qp1.substract(qp0)).multiply(2/3));
+        p = qp0.add((qp1.substract(qp0)).multiply(2/3));
         result = result.add(p.multiply(vt));
 
         // p2
@@ -480,15 +480,15 @@ public class ParametricCurve extends Curve {
         int pout, i;
 
         pout = 0;
-    for ( i = 0; i < types.size() && i < pin; i++ ) {
-        if ( types.get(i) == BREAK ) {
+        for ( i = 0; i < types.size() && i < pin; i++ ) {
+            if ( types.get(i) == BREAK ) {
                 pout = -1;
+            }
+            else {
+                pout++;
+            }
         }
-        else {
-            pout++;
-        }
-    }
-    return pout;
+        return pout;
     }
 
     /**

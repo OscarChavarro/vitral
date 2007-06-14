@@ -16,7 +16,7 @@ import javax.media.opengl.GL;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.Material;
@@ -30,7 +30,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     @todo program this!
     */
     public static void drawWithSelection(GL gl, TriangleMesh mesh,
-                                         QualitySelection quality, 
+                                         RendererConfiguration quality, 
                                          boolean flip,
                                          ArrayList<int[]> selectedTriangles) {
         draw(gl, mesh, quality, flip);
@@ -43,7 +43,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     @todo Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
     */
     public static void
-    draw(GL gl, TriangleMesh mesh, QualitySelection quality, boolean flip) {
+    draw(GL gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
         boolean withTextures = false;
         if ( mesh.getTextures() != null && mesh.getTextures().length > 0 ) {
             withTextures = true;
@@ -58,29 +58,9 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
 
         if ( quality.isSurfacesSet() ) {
-            int shadingType = quality.getShadingType();
-
-            gl.glPolygonOffset(0.0f, 0.0f);
-
-            switch ( shadingType ) {
-              case QualitySelection.SHADING_TYPE_NOLIGHT:
-                gl.glDisable(gl.GL_LIGHTING);
-                gl.glShadeModel(gl.GL_FLAT);
-                // Warning: Change with configured color for ambient lightning
-                gl.glColor3d(1, 1, 1);
-                break;
-              case QualitySelection.SHADING_TYPE_FLAT:
-                gl.glEnable(gl.GL_LIGHTING);
-                gl.glShadeModel(gl.GL_FLAT);
-                break;
-              case QualitySelection.SHADING_TYPE_PHONG:
-              case QualitySelection.SHADING_TYPE_GOURAUD: default:
-                gl.glEnable(gl.GL_LIGHTING);
-                gl.glShadeModel(gl.GL_SMOOTH);
-                break;
-            }
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glPolygonOffset(0.0f, 0.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
                 drawSurfacesWithTexture(gl, mesh, flip);
@@ -91,11 +71,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
         if ( quality.isWiresSet() ) {
             gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
             gl.glShadeModel(gl.GL_FLAT);
 
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
             gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-
             gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
 
@@ -128,6 +108,9 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
         if ( quality.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, mesh, quality);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, mesh, quality);
         }
     }
 
@@ -168,8 +151,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void drawVertexNormal(GL gl, Vertex vertex) {
         double l = 0.2;
-    p = vertex.getPosition();
-    n = vertex.getNormal();
+        p = vertex.getPosition();
+        n = vertex.getNormal();
 
         gl.glVertex3d(p.x + (n.x * l/100),
                       p.y + (n.y * l/100),
@@ -355,8 +338,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               else {
                 gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
-        //gl.glTexCoord2d(0, 0);
-        //gl.glNormal3d(0, 0, 1);
+            //gl.glTexCoord2d(0, 0);
+            //gl.glNormal3d(0, 0, 1);
             gl.glTexCoord2d(v0.u, v0.v);
             gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
             if ( !flipNormals ) {

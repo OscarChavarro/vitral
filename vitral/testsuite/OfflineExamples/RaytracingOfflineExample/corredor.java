@@ -24,7 +24,7 @@ public class corredor {
         }
         catch(Exception error){
             System.out.println(error);
-        proceso = null;
+            proceso = null;
         }
         return proceso;
     }
@@ -36,18 +36,18 @@ public class corredor {
         InputStream salida = proceso.getInputStream();
         byte arr[] = new byte[512];
 
-    try {
+        try {
             do {
                 n = salida.read(arr);
                 for ( i = 0; i < arr.length && i < n; i++ ) {
                     System.out.print((char)arr[i]);
                 }
-        } while ( n > 0 );
-    }
-    catch(IOException error) {
-        System.out.println("ERROR intentando leer salida standard del comando!");
+            } while ( n > 0 );
+        }
+        catch(IOException error) {
+            System.out.println("ERROR intentando leer salida standard del comando!");
             System.out.println(error);
-    }
+        }
 
     }
 
@@ -59,7 +59,7 @@ public class corredor {
     public static void main(String parametros[]) 
     {
         corredor a = new corredor();
-    String comando = "ls -al /";
+        String comando = "ls -al /";
 
         Process proceso = a.lanzarProcesoDelSistemaOperacional(comando);
 

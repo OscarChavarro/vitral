@@ -25,9 +25,9 @@ public class CubemapBackground extends Background {
                              RGBAImage front,
                              RGBAImage right,
                              RGBAImage back,
-                 RGBAImage left,
-                 RGBAImage down,
-                 RGBAImage up) {
+                             RGBAImage left,
+                             RGBAImage down,
+                             RGBAImage up) {
         super();
 
         this.camera = camera;
@@ -57,45 +57,45 @@ public class CubemapBackground extends Background {
         if ( phi > 3*Math.PI/4 ) {
             // Down
             i = backgroundImages[4];
-    }
-    else if ( phi > Math.PI/4 ) {
+        }
+        else if ( phi > Math.PI/4 ) {
             // Front, right, back or left
             v = (phi - Math.PI/4) / (Math.PI/2);
             if ( theta > -Math.PI/4 && theta < Math.PI/4 && d.x > 0 ) {
                 // Right
                 i = backgroundImages[1];
                 u = 1 - (theta+Math.PI/4)/(Math.PI/2);
-        }
+            }
             else if ( theta > 0 -Math.PI/4 && theta < Math.PI/4 && d.x < 0 ) {
                 // Left
                 i = backgroundImages[3];
                 u = (theta+Math.PI/4)/(Math.PI/2);
-        }
+            }
             else if ( (theta >= Math.PI/4 && d.y > 0) ||
                       d.y > 0 && d.x < VSDK.EPSILON ) {
                 // Front
                 if ( theta < 0 ) theta = Math.PI/2;
                 u = (theta - Math.PI/4) / (Math.PI/2);
                 if ( d.x > 0 ) {
-            u = (1 - u);
-        }
+                    u = (1 - u);
+                }
                 i = backgroundImages[0];
-        }
-        else {
+            }
+            else {
                 // Back
                 theta *= -1;
                 u = (theta - Math.PI/4) / (Math.PI/2);
                 if ( d.x > 0 ) {
-            u = (1 - u);
-        }
+                    u = (1 - u);
+                }
                 u = (1 - u);
                 i = backgroundImages[2];
+            }
         }
-    }
-    else {
+        else {
             // Up
             i = backgroundImages[5];
-    }
+        }
 
         p = i.getPixel((int)(u*(i.getXSize()-1)), (int)(v*(i.getYSize()-1)));
 

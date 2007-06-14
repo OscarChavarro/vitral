@@ -27,7 +27,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vertex;
@@ -37,7 +37,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.QualitySelectionController;
+import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
@@ -57,9 +57,9 @@ public class IlluminationTest
     private Light light2;
     private Light light3;
     private CameraController cameraController;
-    private QualitySelection qualitySelection1;
-    private QualitySelection qualitySelection2;
-    private QualitySelectionController qualityController;
+    private RendererConfiguration qualitySelection1;
+    private RendererConfiguration qualitySelection2;
+    private RendererConfigurationController qualityController;
     private GLCanvas canvas;
     private Vector3D lightPosition;
     private boolean showVectors;
@@ -263,9 +263,9 @@ public class IlluminationTest
         camera = new Camera();
         cameraController = new CameraControllerAquynza(camera);
 
-        qualitySelection1 = new QualitySelection();
-        qualitySelection2 = new QualitySelection();
-        qualityController = new QualitySelectionController(qualitySelection1);
+        qualitySelection1 = new RendererConfiguration();
+        qualitySelection2 = new RendererConfiguration();
+        qualityController = new RendererConfigurationController(qualitySelection1);
 
         lightPosition = new Vector3D(0, 0, 3);
         light1 = new Light(Light.POINT, lightPosition, 

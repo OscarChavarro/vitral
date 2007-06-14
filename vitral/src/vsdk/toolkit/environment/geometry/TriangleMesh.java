@@ -309,15 +309,15 @@ public class TriangleMesh extends Surface {
             v = c.position.substract(a.position);
             triangles[i].normal = u.crossProduct(v);
             triangles[i].normal.normalize();
-        if ( triangles[i].normal.dotProduct(a.normal) < 0 ) {
-        a.normal = a.normal.multiply(-1);
-        }
-        if ( triangles[i].normal.dotProduct(b.normal) < 0 ) {
-        b.normal = b.normal.multiply(-1);
-        }
-        if ( triangles[i].normal.dotProduct(c.normal) < 0 ) {
-        c.normal = c.normal.multiply(-1);
-        }
+            if ( triangles[i].normal.dotProduct(a.normal) < 0 ) {
+                a.normal = a.normal.multiply(-1);
+            }
+            if ( triangles[i].normal.dotProduct(b.normal) < 0 ) {
+                b.normal = b.normal.multiply(-1);
+            }
+            if ( triangles[i].normal.dotProduct(c.normal) < 0 ) {
+                c.normal = c.normal.multiply(-1);
+            }
         }
 
     }
@@ -581,18 +581,18 @@ public class TriangleMesh extends Surface {
         outData.n.z = lastInfo.n.z;
 
         //-----------------------------------------------------------------
-    if ( materials != null ) {
+        if ( materials != null ) {
             outData.material = materials[0];
-    }
+        }
         if ( materialRanges != null ) {
             for ( int i = 0; i < materialRanges.length-1 ; i++ ) {
-        if ( selectedTriangle >= materialRanges[i][0] &&
+                if ( selectedTriangle >= materialRanges[i][0] &&
                      selectedTriangle < materialRanges[i+1][0] ) {
                     outData.material = materials[materialRanges[i+1][1]];
-            break;
+                    break;
+                }
+            }
         }
-        }
-    }
     }
 
     /**

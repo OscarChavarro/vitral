@@ -103,15 +103,15 @@ public class Arrow extends Solid {
             inOutRay.t = baseRay.t;
             lastElement = baseCylinder;
             return true;
-    }
-    else if ( (!baseTest && headTest) || 
+        }
+        else if ( (!baseTest && headTest) || 
                   (baseTest && headTest && (headRay.t < baseRay.t) ) ) {
             inOutRay.origin = baseRay.origin;
             inOutRay.direction = headRay.direction;
             inOutRay.t = headRay.t;
             lastElement = headCone;
             return true;
-    }
+        }
 
         return false;
     }
@@ -127,7 +127,7 @@ public class Arrow extends Solid {
         if ( lastElement == headCone ) {
             // Modify answer!
             outData.p.z += baseLength;
-    }
+        }
     }
 
     public double[] getMinMax()

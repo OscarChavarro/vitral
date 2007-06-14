@@ -12,7 +12,7 @@ import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
@@ -70,7 +70,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     }
 
     public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
-                                       Camera c, QualitySelection q,
+                                       Camera c, RendererConfiguration q,
                                        ColorRgb color) {
         // Now we draw the points
         if (patch.type == ParametricCurve.BEZIER) {
@@ -143,7 +143,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     Geometry object.
     */
     public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
-                           QualitySelection q) {
+                           RendererConfiguration q) {
         drawSurfaceGrid(gl, p.evaluateSurface(), 1, 1, 0, 0);
         if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
@@ -154,7 +154,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     }
 
     public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
-                           QualitySelection q, int tilingU, int tilling_y,
+                           RendererConfiguration q, int tilingU, int tilling_y,
                            float inicialTextCoorU,
                            float inicialTextCoorV) {
 

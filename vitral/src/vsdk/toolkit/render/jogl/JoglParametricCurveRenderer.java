@@ -17,7 +17,7 @@ import javax.media.opengl.glu.GLUtessellatorCallback;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 
@@ -83,7 +83,7 @@ implements GLUtessellatorCallback
             estring = glu.gluErrorString(errnum);
         }
         catch ( Exception e ) {
-        estring = "" + e;
+            estring = "" + e;
         }
 
         System.err.println("Tessellation Error: " + estring);
@@ -122,7 +122,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     @todo Do not turn off lighting here, that's a wrongly supposed used.
     */
     static public void draw(GL gl, ParametricCurve curve, 
-                            Camera c, QualitySelection q,
+                            Camera c, RendererConfiguration q,
                             ColorRgb color) {
         int i;
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
@@ -160,7 +160,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     }
 
     static public void draw(GL gl, ParametricCurve curve,
-                            Camera c, QualitySelection q) {
+                            Camera c, RendererConfiguration q) {
         draw(gl, curve, c, q, new ColorRgb(1, 1, 1));
     }
 

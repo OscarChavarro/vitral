@@ -124,7 +124,7 @@ public class Universe
 
                   imprimirMensaje("sphere");
                   thing = new SimpleBody();
-          thing.setGeometry(new Sphere(r));
+                  thing.setGeometry(new Sphere(r));
                   thing.setMaterial(material_actual);
 
                   R = new Matrix4x4();
@@ -136,7 +136,7 @@ public class Universe
                   thing.setPosition(c);
                   arr_cosas.add(thing);
                 }
-            else if ( st.sval.equals("cube") ) {
+                else if ( st.sval.equals("cube") ) {
                   Vector3D c = new Vector3D((float) leerNumero(st), 
                                             (float) leerNumero(st), 
                                             (float) leerNumero(st));
@@ -144,7 +144,7 @@ public class Universe
 
                   imprimirMensaje("cube");
                   thing = new SimpleBody();
-          thing.setGeometry(new Box(r, r, r));
+                  thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
@@ -155,7 +155,7 @@ public class Universe
                   thing.setPosition(c);
                   arr_cosas.add(thing);
                 } 
-            else if ( st.sval.equals("cylinder") ) {
+                else if ( st.sval.equals("cylinder") ) {
                   Vector3D c = new Vector3D((float) leerNumero(st), 
                                             (float) leerNumero(st), 
                                             (float) leerNumero(st));
@@ -165,7 +165,7 @@ public class Universe
 
                   imprimirMensaje("cylinder");
                   thing = new SimpleBody();
-          thing.setGeometry(new Cone(r1, r2, h));
+                  thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
@@ -180,7 +180,7 @@ public class Universe
                 else if (st.sval.equals("triangles")) {
                   imprimirMensaje("triangles");
                   thing = new SimpleBody();
-          thing.setGeometry(new MESH(st));
+                  thing.setGeometry(new MESH(st));
                   thing.setMaterial(material_actual);
                   arr_cosas.add(thing);
                 } 
@@ -224,7 +224,7 @@ public class Universe
 
             RGBAImage front, right, back, left, down, up;
 
-            try {
+                    try {
 
             System.out.print("  - Loading background images: 1");
             front = ImagePersistence.importRGBA(
@@ -250,11 +250,11 @@ public class Universe
                 new CubemapBackground(camara, 
                                       front, right, back, left, down, up);
 
-            }
-            catch (Exception e) {
-            System.err.println("Error armando el cubemap!");
-            System.exit(0);
-            }
+                    }
+                    catch (Exception e) {
+                        System.err.println("Error armando el cubemap!");
+                        System.exit(0);
+                    }
 
                 }
                 else if (st.sval.equals("light")) {
@@ -298,7 +298,7 @@ public class Universe
                   yaw_actual = leerNumero(st);
                   pitch_actual = leerNumero(st);
                   roll_actual = leerNumero(st);
-        }
+                }
                 else if ( st.sval.equals("surface") ) {
                   imprimirMensaje("surface");
                   float r = leerNumero(st);

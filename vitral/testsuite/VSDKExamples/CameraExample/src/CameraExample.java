@@ -14,6 +14,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import java.applet.Applet;
 
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
@@ -21,7 +22,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
-public class CameraExample extends JFrame implements 
+public class CameraExample extends Applet implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
@@ -30,18 +31,6 @@ public class CameraExample extends JFrame implements
     private SimpleCorridor corridor;
 
     public CameraExample() {
-        super("VITRAL concept test - JOGL Hello World");
-
-        canvas = new GLCanvas();
-
-        canvas.addGLEventListener(this);
-        canvas.addMouseListener(this);
-        canvas.addMouseMotionListener(this);
-        canvas.addKeyListener(this);
-
-        this.add(canvas, BorderLayout.CENTER);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         camera = new Camera();
 
         //cameraController = new CameraControllerBlender(camera);
@@ -50,14 +39,36 @@ public class CameraExample extends JFrame implements
         corridor = new SimpleCorridor();
     }
 
-    public Dimension getPreferredSize() {
-        return new Dimension (640, 480);
+    private GLCanvas createGUI()
+    {
+        canvas = new GLCanvas();
+        canvas.addGLEventListener(this);
+        canvas.addMouseListener(this);
+        canvas.addMouseMotionListener(this);
+        canvas.addKeyListener(this);
+
+        return canvas;
     }
-    
+
     public static void main (String[] args) {
-        JFrame f = new CameraExample();
-        f.pack();
-        f.setVisible(true);
+        CameraExample instance = new CameraExample();
+        JFrame frame = new JFrame("VITRAL concept test - JOGL Hello World");
+
+        GLCanvas canvas = instance.createGUI();
+
+        frame.add(canvas, BorderLayout.CENTER);
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Dimension size = new Dimension(640, 480);
+        frame.setMinimumSize(size);
+        frame.setSize(size);
+        frame.setVisible(true);
+    }
+
+    public void init()
+    {
+        setLayout(new BorderLayout());
+        add("Center", createGUI());
     }
     
     private void drawObjectsGL(GL gl)

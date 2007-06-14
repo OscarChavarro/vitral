@@ -81,7 +81,7 @@ public class HelloWorldJAI extends JPanel {
         // Create a frame to contain the panel.
         int width = canvas.image2.getWidth();
         int height = canvas.image2.getHeight();
-    JFrame widgetMainWindow;
+        JFrame widgetMainWindow;
 
         widgetMainWindow = new JFrame("VITRAL concept test - JAI Hello World");
         widgetMainWindow.add(canvas);

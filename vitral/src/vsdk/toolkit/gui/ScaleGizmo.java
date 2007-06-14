@@ -48,27 +48,27 @@ public class ScaleGizmo extends Gizmo {
             switch ( unicode_id ) {
               // Position
               case 'x':
-        s.x /= deltaMov;
+                s.x /= deltaMov;
                 updateNeeded = true;
                 break;
               case 'X':
-        s.x *= deltaMov;
+                s.x *= deltaMov;
                 updateNeeded = true;
                 break;
               case 'y':
-        s.y /= deltaMov;
+                s.y /= deltaMov;
                 updateNeeded = true;
                 break;
               case 'Y':
-        s.y *= deltaMov;
+                s.y *= deltaMov;
                 updateNeeded = true;
                 break;
               case 'z':
-        s.z /= deltaMov;
+                s.z /= deltaMov;
                 updateNeeded = true;
                 break;
               case 'Z':
-        s.z *= deltaMov;
+                s.z *= deltaMov;
                 updateNeeded = true;
                 break; 
             }
@@ -77,17 +77,17 @@ public class ScaleGizmo extends Gizmo {
             switch ( keycode ) {
               case KeyEvent.VK_UP:
               case KeyEvent.VK_RIGHT:
-        s.x *= deltaMov;
-        s.y *= deltaMov;
-        s.z *= deltaMov;
+                s.x *= deltaMov;
+                s.y *= deltaMov;
+                s.z *= deltaMov;
                 updateNeeded = true;
                 break;
 
               case KeyEvent.VK_LEFT:
               case KeyEvent.VK_DOWN:
-        s.x /= deltaMov;
-        s.y /= deltaMov;
-        s.z /= deltaMov;
+                s.x /= deltaMov;
+                s.y /= deltaMov;
+                s.z /= deltaMov;
                 updateNeeded = true;
                 break;
             }

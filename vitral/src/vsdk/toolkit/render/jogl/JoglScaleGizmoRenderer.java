@@ -31,10 +31,10 @@ public class JoglScaleGizmoRenderer extends JoglRenderer
         JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(1, 1, 0);
         gl.glBegin(gl.GL_LINES);
-          gl.glVertex3d(-0.2, -0.2, 0);
-          gl.glVertex3d(0.2, 0.2, 0);
-          gl.glVertex3d(-0.2, 0.2, 0);
-          gl.glVertex3d(0.2, -0.2, 0);
+            gl.glVertex3d(-0.2, -0.2, 0);
+            gl.glVertex3d(0.2, 0.2, 0);
+            gl.glVertex3d(-0.2, 0.2, 0);
+            gl.glVertex3d(0.2, -0.2, 0);
         gl.glEnd();
         gl.glPopMatrix();
     }

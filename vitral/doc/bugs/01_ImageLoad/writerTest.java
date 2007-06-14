@@ -14,7 +14,7 @@ public class writerTest {
                 escritor.write(0x02);
                 escritor.write(0x03);
             }
-    }
+        }
         catch (Exception e) {
             return;
         }

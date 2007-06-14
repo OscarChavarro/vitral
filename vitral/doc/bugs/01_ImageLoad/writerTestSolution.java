@@ -19,7 +19,7 @@ public class writerTestSolution {
                 escritor.write(0x03);
             }
             escritor.close();
-    }
+        }
         catch (Exception e) {
             return;
         }

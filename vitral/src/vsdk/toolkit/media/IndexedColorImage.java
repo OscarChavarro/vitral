@@ -34,10 +34,10 @@ public class IndexedColorImage extends Image
         data = null;
         if ( colorTable != null ) {
             this.colorTable = colorTable;
-    }
-    else {
+        }
+        else {
             this.colorTable = new RGBColorPalette();
-    }
+        }
     }
 
     /**
@@ -119,9 +119,9 @@ public class IndexedColorImage extends Image
 
         _static_color = colorTable.evalLinear(val);
         RGBPixel p = new RGBPixel();
-    p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
         p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
-    p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
         return p;
     }
 

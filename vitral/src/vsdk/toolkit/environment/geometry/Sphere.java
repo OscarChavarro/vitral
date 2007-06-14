@@ -7,6 +7,7 @@
 
 package vsdk.toolkit.environment.geometry;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -96,6 +97,7 @@ public class Sphere extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
+        //-----------------------------------------------------------------
         outData.p.x = inRay.origin.x + inT*inRay.direction.x;
         outData.p.y = inRay.origin.y + inT*inRay.direction.y;
         outData.p.z = inRay.origin.z + inT*inRay.direction.z;
@@ -104,16 +106,44 @@ public class Sphere extends Solid {
         outData.n.y = outData.p.y;
         outData.n.z = outData.p.z;
         outData.n.normalize();
+
+        //-----------------------------------------------------------------
+        double theta;
+        double phi;
+
+        phi = Math.acos(outData.n.z);
+        if ( outData.n.x > VSDK.EPSILON ) {
+            theta = Math.atan(outData.n.y / outData.n.x) + 3*Math.PI/2;
+          }
+          else if ( outData.n.x < VSDK.EPSILON ) {
+            // OJO: Habra una manera mas eficiente de lograr este intervalo?
+            theta = Math.atan(outData.n.y / outData.n.x) + 3*Math.PI/2;
+            theta += Math.PI;
+            if ( theta > 2*Math.PI ) theta -= 2*Math.PI;
+          }
+          else {
+            theta = 0.0;
+        }
+        // Suponiendo que theta esta en [0, 2*PI] y phi en [0, PI]...
+        outData.u = ((theta+Math.PI/2)/(2*Math.PI));
+        outData.v = phi / Math.PI;
+
+        //-----------------------------------------------------------------
+    outData.t.x = -Math.cos(theta);
+        outData.t.y = -Math.sin(theta);
+    outData.t.z = 0;
+
+        //-----------------------------------------------------------------
     }
 
     public double[] getMinMax()
     {
         for ( int i = 0; i < 3; i++ ) {
-        _static_minmax[i] = -_radio;
-    }
+            _static_minmax[i] = -_radio;
+        }
         for ( int i = 3; i < 6; i++ ) {
-        _static_minmax[i] = _radio;
-    }
+            _static_minmax[i] = _radio;
+        }
         return _static_minmax;
     }
 

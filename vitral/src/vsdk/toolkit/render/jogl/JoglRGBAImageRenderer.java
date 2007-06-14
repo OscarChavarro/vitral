@@ -70,7 +70,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         if ( glu == null ) {
             glu = new GLU();
         }
-    */
+        */
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
@@ -107,8 +107,8 @@ public class JoglRGBAImageRenderer extends JoglRenderer
 
                 TextureData textureData;
                 textureData = new TextureData(
-           3, // int internalFormat (number of components)
-           x_tam, // int width
+                   3, // int internalFormat (number of components)
+                   x_tam, // int width
                    y_tam, // int height
                    0, // int border
                    gl.GL_RGBA, // int pixelFormat
@@ -121,10 +121,10 @@ public class JoglRGBAImageRenderer extends JoglRenderer
                 );
 
                 item.renderer = TextureIO.newTexture(textureData);
-        }
-        catch ( Exception e ) {
+            }
+            catch ( Exception e ) {
                 System.err.println(e);
-        }
+            }
 
             //----
             /*
@@ -140,8 +140,8 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         }
 
         //- 4. Use the image's glList -------------------------------------
-    item.renderer.bind();
-    item.renderer.enable();
+        item.renderer.bind();
+        item.renderer.enable();
         /*
         if ( item != null ) {
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);

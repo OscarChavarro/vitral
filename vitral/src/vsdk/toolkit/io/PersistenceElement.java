@@ -72,87 +72,87 @@ public abstract class PersistenceElement {
     }
 
     private static int byteArray2intDirect(byte[] arr, int start) {
-    int low = arr[start] & 0xff;
-    int high = arr[start+1] & 0xff;
-    return (int)( high << 8 | low );
+        int low = arr[start] & 0xff;
+        int high = arr[start+1] & 0xff;
+        return (int)( high << 8 | low );
     }
 
     private static int byteArray2intInvert(byte[] arr, int start) {
-    int low = arr[start] & 0xff;
-    int high = arr[start+1] & 0xff;
-    return (int)( low << 8 | high );
+        int low = arr[start] & 0xff;
+        int high = arr[start+1] & 0xff;
+        return (int)( low << 8 | high );
     }
 
     private static long byteArray2longDirect(byte[] arr, int start) {
-    int i = 0;
-    int len = 4;
-    int cnt = 0;
-    byte[] tmp = new byte[len];
-    for ( i = start; i < (start + len); i++ ) {
-        tmp[cnt] = arr[i];
-        cnt++;
-    }
-    long accum = 0;
-    i = 0;
-    for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
-        accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
-        i++;
-    }
-    return accum;
+        int i = 0;
+        int len = 4;
+        int cnt = 0;
+        byte[] tmp = new byte[len];
+        for ( i = start; i < (start + len); i++ ) {
+            tmp[cnt] = arr[i];
+            cnt++;
+        }
+        long accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return accum;
     }
 
     private static long byteArray2longInvert(byte[] arr, int start) {
-    int i = 0;
-    int len = 4;
-    int cnt = 3;
-    byte[] tmp = new byte[len];
-    for ( i = start; i < (start + len); i++ ) {
-        tmp[cnt] = arr[i];
-        cnt--;
-    }
-    long accum = 0;
-    i = 0;
-    for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
-        accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
-        i++;
-    }
-    return accum;
+        int i = 0;
+        int len = 4;
+        int cnt = 3;
+        byte[] tmp = new byte[len];
+        for ( i = start; i < (start + len); i++ ) {
+            tmp[cnt] = arr[i];
+            cnt--;
+        }
+        long accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return accum;
     }
 
     private static float byteArray2floatDirect(byte[] arr, int start) {
-    int i = 0;
-    int len = 4;
-    int cnt;
-    byte[] tmp = new byte[len];
+        int i = 0;
+        int len = 4;
+        int cnt;
+        byte[] tmp = new byte[len];
 
-    for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
-        tmp[cnt] = arr[i];
-    }
-    int accum = 0;
-    i = 0;
-    for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
-        accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
-        i++;
-    }
-    return Float.intBitsToFloat(accum);
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            tmp[cnt] = arr[i];
+        }
+        int accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return Float.intBitsToFloat(accum);
     }
 
     private static float byteArray2floatInvert(byte[] arr, int start) {
-    int i = 0;
-    int len = 4;
-    int cnt = 3;
-    byte[] tmp = new byte[len];
-    for ( i = start; i < (start + len); i++ ) {
-        tmp[cnt] = arr[i];
-        cnt--;
-    }
-    int accum = 0;
-    i = 0;
-    for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
-        accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
-        i++;
-    }
-    return Float.intBitsToFloat(accum);
+        int i = 0;
+        int len = 4;
+        int cnt = 3;
+        byte[] tmp = new byte[len];
+        for ( i = start; i < (start + len); i++ ) {
+            tmp[cnt] = arr[i];
+            cnt--;
+        }
+        int accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 32; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return Float.intBitsToFloat(accum);
     }
 
     /**
@@ -161,9 +161,9 @@ public abstract class PersistenceElement {
     */
     public static int byteArray2intBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2intDirect(arr, start);
-    }
-    return byteArray2intInvert(arr, start);
+            return byteArray2intDirect(arr, start);
+        }
+        return byteArray2intInvert(arr, start);
     }
 
     /**
@@ -172,9 +172,9 @@ public abstract class PersistenceElement {
     */
     public static int byteArray2intLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2intInvert(arr, start);
-    }
-    return byteArray2intDirect(arr, start);
+            return byteArray2intInvert(arr, start);
+        }
+        return byteArray2intDirect(arr, start);
     }
 
 
@@ -184,9 +184,9 @@ public abstract class PersistenceElement {
     */
     public static long byteArray2longBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2longDirect(arr, start);
-    }
-    return byteArray2longInvert(arr, start);
+            return byteArray2longDirect(arr, start);
+        }
+        return byteArray2longInvert(arr, start);
     }
 
     /**
@@ -195,9 +195,9 @@ public abstract class PersistenceElement {
     */
     public static long byteArray2longLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2longInvert(arr, start);
-    }
-    return byteArray2longDirect(arr, start);
+            return byteArray2longInvert(arr, start);
+        }
+        return byteArray2longDirect(arr, start);
     }
 
     /**
@@ -206,9 +206,9 @@ public abstract class PersistenceElement {
     */
     public static float byteArray2floatBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2longDirect(arr, start);
-    }
-    return byteArray2longInvert(arr, start);
+            return byteArray2longDirect(arr, start);
+        }
+        return byteArray2longInvert(arr, start);
     }
 
     /**
@@ -217,9 +217,9 @@ public abstract class PersistenceElement {
     */
     public static float byteArray2floatLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-        return byteArray2floatInvert(arr, start);
-    }
-    return byteArray2floatDirect(arr, start);
+            return byteArray2floatInvert(arr, start);
+        }
+        return byteArray2floatDirect(arr, start);
     }
 
     protected static int readIntLE(InputStream is) throws Exception
@@ -268,7 +268,7 @@ public abstract class PersistenceElement {
             letter = (char)character[0];
             if ( character[0] != 0x00 ) {
                 msg = msg + letter;
-        }
+            }
         } while ( character[0] != 0x00 );
         return msg;
     }

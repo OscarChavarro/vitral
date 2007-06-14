@@ -3,7 +3,7 @@ import java.io.File;
 import java.util.Iterator;
 
 import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vector4D;
@@ -17,14 +17,14 @@ import vsdk.toolkit.media.Calligraphic2DBuffer;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 
-public class WireframeExample {
+public class WireframeOfflineExample {
     private Camera camera;
     private TriangleMeshGroup meshGroup;
-    private QualitySelection qualitySelection;
+    private RendererConfiguration qualitySelection;
     private Calligraphic2DBuffer lineSet;
     private RGBImage img;
 
-    public WireframeExample() {
+    public WireframeOfflineExample() {
         //-----------------------------------------------------------------
         camera = new Camera();
         camera.setPosition(new Vector3D(6.61, 2.92, 3.47));
@@ -34,7 +34,7 @@ public class WireframeExample {
         camera.setRotation(R);
         camera.updateViewportResize(640, 480);
 
-        qualitySelection = new QualitySelection();
+        qualitySelection = new RendererConfiguration();
         qualitySelection.setSurfaces(false);
         qualitySelection.setWires(true);
 
@@ -143,7 +143,7 @@ public class WireframeExample {
     }
 
     public static void main (String[] args) {
-        WireframeExample instance = new WireframeExample();
+        WireframeOfflineExample instance = new WireframeOfflineExample();
         instance.display();
     }
 

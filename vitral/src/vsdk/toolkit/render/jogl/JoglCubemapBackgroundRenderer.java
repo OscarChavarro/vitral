@@ -49,7 +49,7 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
         RGBAImage images[] = background.getImages();
 
         JoglCameraRenderer.activateCenter(gl, background.getCamera());
-    
+        
         gl.glColor3d(1, 1, 1);
 
         gl.glEnable(gl.GL_TEXTURE_2D);

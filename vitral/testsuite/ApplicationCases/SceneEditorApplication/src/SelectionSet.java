@@ -10,7 +10,7 @@ public class SelectionSet
 
     public SelectionSet(ArrayList externalList)
     {
-    elements = externalList;
+        elements = externalList;
         selection = new ArrayList<Boolean>();
         sync();
     }
@@ -22,67 +22,67 @@ public class SelectionSet
     public void sync()
     {
         if ( elements.size() == selection.size() ) {
-        return;
-    }
+            return;
+        }
         while ( elements.size() > selection.size() ) {
             selection.add(new Boolean(false));
-    }
+        }
         while ( elements.size() < selection.size() ) {
             selection.remove(selection.size()-1);
-    }
+        }
     }
 
     public String toString()
     {
-    String msg = "Selection set: [";
+        String msg = "Selection set: [";
         int i;
 
-    for ( i = 0; i < selection.size(); i++ ) {
-        msg = msg + (selection.get(i).booleanValue()?"*":"-");
-    }
-    msg = msg + "]";
-    return msg;
+        for ( i = 0; i < selection.size(); i++ ) {
+            msg = msg + (selection.get(i).booleanValue()?"*":"-");
+        }
+        msg = msg + "]";
+        return msg;
     }
 
     public boolean isSelected(int i) {
         if ( i < 0 || i >= selection.size() || 
              !selection.get(i).booleanValue() 
            ) {
-        return false;
-    }
-    return true;
+            return false;
+        }
+        return true;
     }
 
     public int firstSelected()
     {
         int index = -1;
-    int i;
+        int i;
 
-    for ( i = 0; i < selection.size(); i++ ) {
-        if ( selection.get(i).booleanValue() ) {
+        for ( i = 0; i < selection.size(); i++ ) {
+            if ( selection.get(i).booleanValue() ) {
                 index = i;
-        break;
+                break;
+            }
         }
-    }
-    return index;
+        return index;
     }
 
     public void selectAll()
     {
-    int i;
+        int i;
 
-    for ( i = 0; i < selection.size(); i++ ) {
+        for ( i = 0; i < selection.size(); i++ ) {
             selection.set(i, new Boolean(true));
-    }
+        }
     }
 
     public void unselectAll()
     {
-    int i;
+        int i;
 
-    for ( i = 0; i < selection.size(); i++ ) {
+        for ( i = 0; i < selection.size(); i++ ) {
             selection.set(i, new Boolean(false));
-    }
+        }
     }
 
     public void select(int i)
@@ -105,29 +105,29 @@ public class SelectionSet
         if ( i < 0 || i >= selection.size() ) return;
         if ( isSelected(i) ) {
             selection.set(i, new Boolean(false));
-      }
-      else {
+          }
+          else {
             selection.set(i, new Boolean(true));
-    }
+        }
     }
 
     public void selectPrevious()
     {
         sync();
         if ( selection.size() < 1 ) {
-        return;
-    }
-    int f;
+            return;
+        }
+        int f;
         f = firstSelected();
         if ( f < 0 ) {
             select(selection.size()-1);
-        return;
-    }
+            return;
+        }
         unselect(f);
-    f--;
+        f--;
         if ( f < 0 ) {
-        return;
-    }
+            return;
+        }
         select(f);
     }
 
@@ -135,19 +135,19 @@ public class SelectionSet
     {
         sync();
         if ( selection.size() < 1 ) {
-        return;
-    }
-    int f;
+            return;
+        }
+        int f;
         f = firstSelected();
-    if ( f < 0 ) {
-        select(0);
-        return;
-    }
+        if ( f < 0 ) {
+            select(0);
+            return;
+        }
         unselect(f);
-    f++;
+        f++;
         if ( f >= selection.size() ) {
-        return;
-    }
+            return;
+        }
         select(f);
     }
 
@@ -155,13 +155,13 @@ public class SelectionSet
     {
         int i;
         int acum = 0;
-    sync();
+        sync();
         for ( i = 0; i < selection.size(); i++ ) {
-        if ( isSelected(i) ) {
+            if ( isSelected(i) ) {
                 acum++;
+            }
         }
-    }
-    return acum;
+        return acum;
     }
 
     public int size()

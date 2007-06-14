@@ -424,6 +424,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
+    m.setDoubleSided(false);
         return m;
     }
 
@@ -440,7 +441,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         thing.setName("Geometric object " + acumObject);
         parent.theScene.things.add(thing);
 
-    acumObject++;
+        acumObject++;
         parent.theScene.selectedThings.sync();
     }
 

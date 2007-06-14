@@ -155,13 +155,13 @@ public class ImagePersistence extends PersistenceElement
 
         if( type.equals("bw") ) {
             img = ImagePersistenceSGI.readImageSGI(imagen.getAbsolutePath());
-        if ( img instanceof IndexedColorImage ) {
+            if ( img instanceof IndexedColorImage ) {
                 retImage = (IndexedColorImage)img;
-        }
-        else {
+            }
+            else {
                 throw new ImageNotRecognizedException("Convertion needed", 
                 imagen);
-        }
+            }
             return retImage;
         }
         throw new ImageNotRecognizedException("Image not recognized", imagen);

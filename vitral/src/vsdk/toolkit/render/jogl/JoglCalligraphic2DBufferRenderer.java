@@ -20,11 +20,11 @@ public class JoglCalligraphic2DBufferRenderer extends JoglRenderer
         Vector3D p1 = new Vector3D();
 
         gl.glBegin(gl.GL_LINES);
-    for ( i = 0; i < vectors.getNumLines(); i++ ) {
+        for ( i = 0; i < vectors.getNumLines(); i++ ) {
             vectors.get2DLine(i, p0, p1);
             gl.glVertex3d(p0.x, p0.y, p0.z);
             gl.glVertex3d(p1.x, p1.y, p1.z);
-    }
+        }
         gl.glEnd();
     }
 }

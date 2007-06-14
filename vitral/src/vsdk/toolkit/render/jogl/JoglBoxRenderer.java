@@ -12,7 +12,7 @@ import javax.media.opengl.glu.GLUquadric;
 import com.sun.opengl.util.GLUT;
 
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Box;
 
@@ -24,7 +24,7 @@ public class JoglBoxRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Box box, Camera c, QualitySelection q)
+    public static void draw(GL gl, Box box, Camera c, RendererConfiguration q)
     {
         if (glut == null) {
             glut = new GLUT();
@@ -35,18 +35,18 @@ public class JoglBoxRenderer extends JoglRenderer {
         gl.glPushMatrix();
         gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
-        glut.glutSolidCube(1);
+            glut.glutSolidCube(1);
         }
 
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);
-        glut.glutWireCube(1);
+            glut.glutWireCube(1);
         }
         gl.glPopMatrix();
 
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, box, q);
-    }
+        }
         if ( q.isSelectionCornersSet() ) {
             JoglGeometryRenderer.drawSelectionCorners(gl, box, q);
         }

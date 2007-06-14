@@ -20,7 +20,7 @@ import javax.media.opengl.GLEventListener;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vector4D;
 import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Camera;
@@ -47,7 +47,7 @@ public class WireframeExample extends JFrame implements
 
     private TriangleMeshGroup meshGroup;
 
-    private QualitySelection qualitySelection;
+    private RendererConfiguration qualitySelection;
     private Calligraphic2DBuffer lineSet;
     private RGBImage img;
 
@@ -77,7 +77,7 @@ public class WireframeExample extends JFrame implements
         camera.setRotation(R);
 
         cameraController = new CameraControllerAquynza(camera);
-        qualitySelection = new QualitySelection();
+        qualitySelection = new RendererConfiguration();
         qualitySelection.setSurfaces(false);
         //qualitySelection.setShadingType(qualitySelection.SHADING_TYPE_NOLIGHT);
         qualitySelection.setWires(true);
@@ -245,12 +245,12 @@ public class WireframeExample extends JFrame implements
                     img.drawLine(x0, y0, x1, y1, pixel);
                 }
                 JoglRGBImageRenderer.draw(gl, img);
-        }
-        else {
+            }
+            else {
                 gl.glLineWidth(1.0f);
                 gl.glColor3d(1, 1, 1);
                 JoglCalligraphic2DBufferRenderer.draw(gl, lineSet);
-        }
+            }
 
             lineSet.init();
         }

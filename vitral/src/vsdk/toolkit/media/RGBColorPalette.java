@@ -176,9 +176,9 @@ public class RGBColorPalette extends Entity {
         for ( i = 0; i < colors.size(); i++ ) {
             currentDistance = colors.get(i).distance(c);
             if ( currentDistance < minDistance ) {
-        minDistance = currentDistance;
+                minDistance = currentDistance;
                 index = i;
-        }
+            }
         }
         return index;
     }

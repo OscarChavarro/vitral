@@ -21,7 +21,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
         if ( lightNumber >= supportedLightsInOpenGL || lightNumber < 0 ) {
             return;
-    }
+        }
         gl.glDisable(gl.GL_LIGHT0 + lightNumber);
     }
 
@@ -34,7 +34,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
         if ( lightNumber >= supportedLightsInOpenGL || lightNumber < 0 ) {
             return;
-    }
+        }
 
         lightPosition[3]=1.0f;
 /*
@@ -86,9 +86,9 @@ public class JoglLightRenderer extends JoglRenderer {
     {
         int i;
 
-    for ( i = 0; i < supportedLightsInOpenGL; i++ ) {
-        gl.glDisable(gl.GL_LIGHT0 + i);
-    }
+        for ( i = 0; i < supportedLightsInOpenGL; i++ ) {
+            gl.glDisable(gl.GL_LIGHT0 + i);
+        }
     }
     
 }

@@ -32,11 +32,11 @@ public class GuiCache
     {
         String msg;
 
-    msg = messagesTable.get(id);
+        msg = messagesTable.get(id);
 
         if ( msg == null ) {
             return id;
-    }
+        }
         return msg;
     }
 
@@ -63,13 +63,13 @@ public class GuiCache
                 break;
             }
         }
-    return command;
+        return command;
     }
 
     public GuiButtonGroupCache getButtonGroup(String name) {
         if ( name == null ) {
             return null;
-    }
+        }
 
         GuiButtonGroupCache group = null, candidate;
         Iterator i;
@@ -81,7 +81,7 @@ public class GuiCache
                 break;
             }
         }
-    return group;
+        return group;
     }
 
 

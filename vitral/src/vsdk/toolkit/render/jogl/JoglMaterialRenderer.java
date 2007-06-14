@@ -23,9 +23,9 @@ public class JoglMaterialRenderer extends JoglRenderer {
                     "Trying to activate null reference to Material." + 
                     " Avoiding further reporting.");
                 errorReported = true;
+            }
+            return;
         }
-        return;
-    }
 
         float opacity = (float)m.getOpacity();
 
@@ -51,11 +51,11 @@ public class JoglMaterialRenderer extends JoglRenderer {
 
         if ( m.isDoubleSided() ) {
             gl.glDisable(gl.GL_CULL_FACE);
-      }
-      else {
+          }
+          else {
             gl.glEnable(gl.GL_CULL_FACE);
-        gl.glCullFace(gl.GL_BACK);
-    }
+            gl.glCullFace(gl.GL_BACK);
+        }
 
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_AMBIENT, ambient, 0);
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE, diffuse, 0);

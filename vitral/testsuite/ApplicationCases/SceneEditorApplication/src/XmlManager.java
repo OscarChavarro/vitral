@@ -59,7 +59,7 @@ public class XmlManager {
             //- 3. Add Element to Document ------------------------------------
             if ( xmlElement != null ) {
                 document.appendChild(xmlElement);
-        }
+            }
 
             document.normalizeDocument();
 

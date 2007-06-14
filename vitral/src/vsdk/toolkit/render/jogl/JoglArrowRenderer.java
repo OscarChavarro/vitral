@@ -10,7 +10,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
 
@@ -47,7 +47,7 @@ public class JoglArrowRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Arrow arrow, Camera c, QualitySelection q)
+    public static void draw(GL gl, Arrow arrow, Camera c, RendererConfiguration q)
     {
         if (glu == null) {
             glu = new GLU();

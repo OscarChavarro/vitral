@@ -11,10 +11,10 @@ public class SwingSelectorDialog extends JDialog
 {
     public SwingSelectorDialog()
     {
-    super();
+        super();
 
         //-----------------------------------------------------------------
-    JPanel mainFrameWidget = new JPanel();
+        JPanel mainFrameWidget = new JPanel();
         Dimension size = new Dimension(526, 530);
         setMinimumSize(size);
         setSize(size);
@@ -29,13 +29,13 @@ public class SwingSelectorDialog extends JDialog
         //mainFrameWidget.add(rightAreaWidget, BorderLayout.EAST);
 
         //-----------------------------------------------------------------
-    JButton b = new JButton("Test bottom");
+        JButton b = new JButton("Test bottom");
         bottomAreaWidget.add(b);
 
-    b = new JButton("Test central");
+        b = new JButton("Test central");
         centralAreaWidget.add(b);
 
-    //b = new JButton("Test right");
+        //b = new JButton("Test right");
         //rightAreaWidget.add(b);
 
         add(mainFrameWidget);

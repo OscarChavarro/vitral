@@ -9,7 +9,7 @@ import java.util.ArrayList;
 // AWT/Swing classes
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Image;
+//import java.awt.Image; // Do not define! conflicts with VSDK's Image
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -33,8 +33,11 @@ import javax.media.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.QualitySelection;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -47,10 +50,11 @@ import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.gui.QualitySelectionController;
+import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
+import vsdk.toolkit.io.image.ImagePersistence;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
@@ -64,9 +68,9 @@ public class JoglDrawingArea implements
 
     public GLCanvas canvas;
 
-    private QualitySelection qualitySelection;
+    private RendererConfiguration qualitySelection;
     private CameraController cameraController;
-    private QualitySelectionController qualityController;
+    private RendererConfigurationController qualityController;
     private TranslateGizmo translationGizmo;
     private RotateGizmo rotateGizmo;
     private ScaleGizmo scaleGizmo;
@@ -101,7 +105,7 @@ public class JoglDrawingArea implements
         translationGizmo = new TranslateGizmo(theScene.camera);
 
         qualitySelection = parent.theScene.qualityTemplate;
-        qualityController = new QualitySelectionController(qualitySelection);
+        qualityController = new RendererConfigurationController(qualitySelection);
 
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
@@ -123,7 +127,7 @@ public class JoglDrawingArea implements
     private void createCursors()
     {
       Toolkit awtToolkit = Toolkit.getDefaultToolkit();
-      Image i;
+      java.awt.Image i;
 
       i = awtToolkit.getImage("./etc/cursors/cursor_camrotate.gif");
       camrotateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraRotation");
@@ -327,17 +331,17 @@ public class JoglDrawingArea implements
                   interactionMode == ROTATE_INTERACTION_MODE || 
                   interactionMode == SCALE_INTERACTION_MODE 
                  ) {
-      boolean composite = false;
+          boolean composite = false;
           if ( ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
-          composite = true;
+              composite = true;
           }
           int f = theScene.selectedThings.firstSelected();
           theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
-      if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
+          if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
                interactionMode == TRANSLATE_INTERACTION_MODE &&
                translationGizmo.isActive() ) {
-          theScene.selectedThings.select(f);
-      }
+              theScene.selectedThings.select(f);
+          }
           reportObjectSelection();
           canvas.repaint();
       }
@@ -532,10 +536,6 @@ public class JoglDrawingArea implements
            cameraController.processKeyPressedEventAwt(e) ) {
           canvas.repaint();
       }
-      if ( qualityController.processKeyPressedEventAwt(e) ) {
-          System.out.println(qualitySelection);
-          canvas.repaint();
-      }
       else if ( interactionMode == SELECT_INTERACTION_MODE ) {
           if ( unicode_id == e.CHAR_UNDEFINED ) {
             switch ( keycode ) {
@@ -623,6 +623,11 @@ public class JoglDrawingArea implements
       // Global commands
       if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
 
+      if ( qualityController.processKeyPressedEventAwt(e) ) {
+          System.out.println(qualitySelection);
+          canvas.repaint();
+      }
+
       if ( keycode == KeyEvent.VK_DELETE ) {
           int  i;
           for ( i = theScene.things.size()-1; i >= 0; i-- ) {
@@ -650,6 +655,66 @@ public class JoglDrawingArea implements
 
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
+            case 't':
+              if ( firstThingSelected >= 0 ) {
+                  SimpleBody gi;
+                  Image texture;
+                  gi = theScene.things.get(firstThingSelected);
+                  texture = gi.getTexture();
+                  if ( texture == null ) {
+                      System.out.println("PONGO TEXTURA");
+                      String imageFilename = "../../../etc/images/render.jpg";
+                      try {
+                          texture = 
+                           ImagePersistence.importRGB(new File(imageFilename));
+                      }
+                      catch ( Exception ee ) {}
+                      gi.setTexture(texture);
+                  }
+                  else {
+                      System.out.println("QUITO TEXTURA");
+                      gi.setTexture(null);
+                  }
+              }
+              canvas.repaint();
+              break;
+            case 'b':
+              if ( firstThingSelected >= 0 ) {
+                  SimpleBody gi;
+                  IndexedColorImage source = null;
+                  NormalMap normalMap = new NormalMap();
+                  RGBImage exported;
+                  gi = theScene.things.get(firstThingSelected);
+
+                  try {
+                      String imageFilename = "../../../etc/bumpmaps/blinn1.bw";
+                      source = ImagePersistence.importIndexedColor(new File(imageFilename));
+                      normalMap.importBumpMap(source, new Vector3D(1, 1, 0));
+                      exported = normalMap.exportToRgbImage();
+                      ImagePersistence.exportJPG(new File("./output.jpg"), exported);
+                  }
+                  catch ( Exception ee ) {}
+
+                  /*
+                  texture = gi.getTexture();
+                  if ( texture == null ) {
+                      System.out.println("PONGO TEXTURA");
+                      String imageFilename = "../../../etc/images/render.jpg";
+                      try {
+                          texture = 
+                           ImagePersistence.importRGB(new File(imageFilename));
+                      }
+                      catch ( Exception ee ) {}
+                      gi.setTexture(texture);
+                  }
+                  else {
+                      System.out.println("QUITO TEXTURA");
+                      gi.setTexture(null);
+                  }
+                  */
+              }
+              canvas.repaint();
+              break;
             case 'h':
               //-------------------------------------------------------------
               if ( parent.selectorDialog == null ) {
@@ -733,7 +798,6 @@ public class JoglDrawingArea implements
       else {
           canvas.setCursor(selectCursor);
       }
-
   }
 
   private void applyTransformToSelectedObjects(Vector3D position,

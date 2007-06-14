@@ -1,17 +1,17 @@
 package vsdk.toolkit.gui;
 
 import java.awt.event.KeyEvent;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 
-public class QualitySelectionController extends Controller {
+public class RendererConfigurationController extends Controller {
 
-  private QualitySelection qualitySelection;
+  private RendererConfiguration qualitySelection;
 
-  public QualitySelectionController() {
+  public RendererConfigurationController() {
 
   }
 
-  public QualitySelectionController(QualitySelection qualitySelection) {
+  public RendererConfigurationController(RendererConfiguration qualitySelection) {
     this.qualitySelection = qualitySelection;
   }
 

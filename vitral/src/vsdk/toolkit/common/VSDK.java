@@ -116,8 +116,8 @@ public class VSDK
         int i;
 
         for ( i = 0; i < PRIMITIVE_TYPE_COUNT; i++ ) {
-        primitiveCount[i] = 0;
-    }
+            primitiveCount[i] = 0;
+        }
     }
 
     public static void resetIntersectionCounters()
@@ -125,8 +125,8 @@ public class VSDK
         int i;
 
         for ( i = 0; i < INTERSECTION_TYPE_COUNT; i++ ) {
-        intersectionCount[i] = 0;
-    }
+            intersectionCount[i] = 0;
+        }
     }
 
     public static void acumulatePrimitiveCount(int type, int count)
@@ -153,7 +153,7 @@ public class VSDK
     {
         if ( Math.abs(a - b) < EPSILON ) {
             return true;
-    }
+        }
         return false;
     }
 
@@ -215,17 +215,17 @@ public class VSDK
         System.err.println("= VSDK Exception report                                                   =");
         if ( o != null ) {
             System.err.println(" - An exception has been thrown in the \"" + o.getClass().getName() + "\" class");
-    }
-    else {
+        }
+        else {
             System.err.println(" - An exception has been thrown from a static context");
-    }
+        }
         System.err.println(" - Exception located at method " + method);
         System.err.println(" - Exception message:\n" + message);
         System.err.println("===========================================================================");
         if ( level == FATAL_ERROR ) {
             System.err.println("Program excecution suspended!");
             System.exit(1);
-    }
+        }
     }
 
 }

@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.IOException;
 
 // VSDK classes
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
@@ -66,17 +67,18 @@ public class RaytracerSimple {
 
         //- 3. Calcular la imagen / procesar la escena --------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();
+        RendererConfiguration q = new RendererConfiguration();
 
         visualizationEngine = new Raytracer();
         la_escena.camara.updateViewportResize(la_imagen_resultado.getXSize(), 
                                               la_imagen_resultado.getYSize());
 
         long initialTime = System.currentTimeMillis();
-        visualizationEngine.execute(la_imagen_resultado,
+        visualizationEngine.execute(la_imagen_resultado, q,
                                 la_escena.arr_cosas,
                                 la_escena.arr_luces, 
                                 la_escena.fondo,
-                la_escena.camara, reporter, null);
+                                la_escena.camara, reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 
@@ -93,7 +95,7 @@ public class RaytracerSimple {
             System.out.println(" OK!");
 
             System.out.println("An image has been created in the file output.jpg");
-    }
+        }
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Destruir la imagen
         la_imagen_resultado.finalize();
@@ -115,16 +117,16 @@ public class RaytracerSimple {
         boolean save = true;
 
         for ( int i = 0; i < args.length; i++ ) {
-        if ( args[i].equals("nosave") ) {
+            if ( args[i].equals("nosave") ) {
                 save = false;
+            }
         }
-    }
 
         if ( args.length < 1 ) {
             instance.offlineExcecution("./etc/object.ray", save);
           }
           else {
-        instance.offlineExcecution(args[0], save);
+            instance.offlineExcecution(args[0], save);
         }
     }
 

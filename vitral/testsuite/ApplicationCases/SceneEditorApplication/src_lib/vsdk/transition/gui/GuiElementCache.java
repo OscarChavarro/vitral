@@ -22,14 +22,14 @@ public abstract class GuiElementCache
             case '7': i = 7; break;
             case '8': i = 8; break;
             case '9': i = 9; break;
-         case 'a': case 'A': i = 10; break;
-         case 'b': case 'B': i = 11; break;
-         case 'c': case 'C': i = 12; break;
-         case 'd': case 'D': i = 13; break;
-         case 'e': case 'E': i = 14; break;
-         case 'f': case 'F': i = 15; break;
-    }
-    return i;
+            case 'a': case 'A': i = 10; break;
+            case 'b': case 'B': i = 11; break;
+            case 'c': case 'C': i = 12; break;
+            case 'd': case 'D': i = 13; break;
+            case 'e': case 'E': i = 14; break;
+            case 'f': case 'F': i = 15; break;
+        }
+        return i;
     }
 
     /**
@@ -51,49 +51,49 @@ public abstract class GuiElementCache
         char c;
 
         for ( i = 0; i < codedName.length(); i++ ) {
-        c = codedName.charAt(i);
+            c = codedName.charAt(i);
             if ( c == '&' ) continue;
 
             if ( c == '\t' ) {
                 break;
-        }
+            }
 
-        if ( c == '#' ) {
+            if ( c == '#' ) {
                 // Process UNICODE escape sequences...
                 int start = i;
-        i++;
+                i++;
                 int num1=0, num2=0, num3=0, num4=0, num;
                 for ( ; i < codedName.length(); i++ ) {
                     c = codedName.charAt(i);
-            if ( c == '#' ) {
+                    if ( c == '#' ) {
                         simplifiedName = simplifiedName + c;
-            break;
-            }
-            num = fromHex(c);
-            if ( num < 0 ) {
-                break;
-            }
-            if ( i == start+1 ) { 
+                        break;
+                    }
+                    num = fromHex(c);
+                    if ( num < 0 ) {
+                        break;
+                    }
+                    if ( i == start+1 ) { 
                         num1 = num;
-            }
-            else if ( i == start+2 ) {
+                    }
+                    else if ( i == start+2 ) {
                         num2 = num;
-            }
-            else if ( i == start+3 ) {
+                    }
+                    else if ( i == start+3 ) {
                         num3 = num;
-            }
-            else if ( i == start+4 ) {
+                    }
+                    else if ( i == start+4 ) {
                         num4 = num;
-            c = (char)(num1 << 12 | num2 << 8 | num3 << 4 | num4);
+                        c = (char)(num1 << 12 | num2 << 8 | num3 << 4 | num4);
                         simplifiedName = simplifiedName + c;
-            break;
+                        break;
+                    }
+                }
+            }
+            else {
+                simplifiedName = simplifiedName + c;
             }
         }
-        }
-        else {
-                simplifiedName = simplifiedName + c;
-        }
-    }
 
         return simplifiedName;
     }
@@ -117,14 +117,14 @@ public abstract class GuiElementCache
         char c;
 
         for ( i = 0; i < codedName.length()-1; i++ ) {
-        c = codedName.charAt(i);
+            c = codedName.charAt(i);
             if ( c == '&' ) {
                 i++;
-            c = codedName.charAt(i);
+                c = codedName.charAt(i);
                 return c;
-        }
+            }
             simplifiedName = simplifiedName + c;
-    }
+        }
 
         return '\0';
     }
@@ -149,14 +149,14 @@ public abstract class GuiElementCache
         char c;
 
         for ( i = 0; i < codedName.length(); i++ ) {
-        c = codedName.charAt(i);
+            c = codedName.charAt(i);
             if ( c == '\t' ) break;
-    }
+        }
 
         for ( i++ ;i < codedName.length(); i++ ) {
-        c = codedName.charAt(i);
+            c = codedName.charAt(i);
             accelerator = accelerator + c;
-    }
+        }
 
         if ( accelerator.length() <= 0 ) return null;
 

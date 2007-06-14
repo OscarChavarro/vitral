@@ -35,10 +35,10 @@ public class TargaImage extends PersistenceElement
         private DirectColorModel cm;
         public byte[] pixels;
 
-    /**
-    Constructs a TGAImage given the File image
-    @param srcFile The tga image file
-    */
+        /**
+        Constructs a TGAImage given the File image
+        @param srcFile The tga image file
+        */
         public TargaImage(File srcFile)throws ImageNotRecognizedException
         {
             try
@@ -237,13 +237,13 @@ public class TargaImage extends PersistenceElement
 
         }
 
-    /**
-    This method returns the pixel depth, which can be 24 (a red green and blue 
-    component per pixel each consisting of 8 bits) or 32 (a red green, blue 
-    and alpha component per pixel each consisting of 8 bits).
-    
-    @return the pixel depth of this targa image
-    */
+        /**
+        This method returns the pixel depth, which can be 24 (a red green and blue 
+        component per pixel each consisting of 8 bits) or 32 (a red green, blue 
+        and alpha component per pixel each consisting of 8 bits).
+        
+        @return the pixel depth of this targa image
+        */
         public int getPixelDepth()
         {
                 return this.pixelDepth;
@@ -265,41 +265,41 @@ public class TargaImage extends PersistenceElement
                 System.out.println("imageDescriptor: "+imageDescriptor);        
         }
     
-    /**
-    Returns the height in pixels of this targa image
-    @return The height of this tagra image
-    */
+        /**
+        Returns the height in pixels of this targa image
+        @return The height of this tagra image
+        */
         public int getHeight()
         {
                 return this.height;     
         }
 
-    /**
-    Returns the width in pixels of this targa image
-    @return The width of this tagra image
-    */
+        /**
+        Returns the width in pixels of this targa image
+        @return The width of this tagra image
+        */
         public int getWidth()
         {
                 return this.width;
         }
         
-    /**
-    This method returns an array of bytes that represents the raw pixel data of this 
-    image. If the image's height is 32, the width is 64 and the depth value is 32, 
-    it returns an array of 32*64*4 bytes, because it has 32*64 pixels and 32 bits (4 bytes)
-    of data per pixel.
-    
-    @return The pixel data for this targa image
-    */
+        /**
+        This method returns an array of bytes that represents the raw pixel data of this 
+        image. If the image's height is 32, the width is 64 and the depth value is 32, 
+        it returns an array of 32*64*4 bytes, because it has 32*64 pixels and 32 bits (4 bytes)
+        of data per pixel.
+        
+        @return The pixel data for this targa image
+        */
         public byte[] getTexture()
         {
                 return this.pixels;     
         }
         
         /**
-    Returns the size of this tagra image in a Dimension object
-    @return The size of this targa image
-    */
+        Returns the size of this tagra image in a Dimension object
+        @return The size of this targa image
+        */
         public Dimension getSize() 
         {
                 return new Dimension(width, height);

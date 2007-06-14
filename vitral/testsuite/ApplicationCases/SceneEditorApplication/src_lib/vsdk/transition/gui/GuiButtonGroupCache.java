@@ -88,7 +88,7 @@ public class GuiButtonGroupCache
 
         if ( command != null ) {
             commandReferenceList.add(command);
-    }
+        }
     }
 }
 

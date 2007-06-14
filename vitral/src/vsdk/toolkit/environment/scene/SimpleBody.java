@@ -10,6 +10,7 @@ import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
 
@@ -17,21 +18,32 @@ public class SimpleBody extends Entity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
+    //=======================================================================
+    //- Model (1/6): body form ----------------------------------------
     private Geometry geometry;
+
+    //- Model (2/6): body geometric transformations -------------------
     private Vector3D position;
     private Vector3D scale;
-
-    /// This string should be used for specific application defined
-    /// functionality. Can be null.
-    private String name;
-
     /// Warning: The translation value in this matrix must be <0, 0, 0>
     private Matrix4x4 rotation;
-
     /// Warning: The translation value in this matrix must be <0, 0, 0>
     private Matrix4x4 rotation_i;
 
-    private Material material;
+    //- Model (3/6): body visual data ---------------------------------
+    private Material globalMaterial;
+    private Image globalTextureMap;
+    private Image globalBumpMap;
+
+    //- Model (4/6): body physical data -------------------------------
+
+    //- Model (5/6): body structural relationships --------------------
+
+    //- Model (6/6): body semantic data -------------------------------
+    /// This string should be used for specific application defined
+    /// functionality. Can be null.
+    private String name;
+    //=======================================================================
 
     public SimpleBody()
     {
@@ -40,7 +52,7 @@ public class SimpleBody extends Entity {
         rotation_i = new Matrix4x4();
         position = new Vector3D(0, 0, 0);
         scale = new Vector3D(1, 1, 1);
-        material = new Material();
+        globalMaterial = new Material();
     }
 
     public String getName()
@@ -95,12 +107,22 @@ public class SimpleBody extends Entity {
 
     public Material getMaterial()
     {
-        return material;
+        return globalMaterial;
     }
 
     public void setMaterial(Material m)
     {
-        material = m;
+        globalMaterial = m;
+    }
+
+    public Image getTexture()
+    {
+        return globalTextureMap;
+    }
+
+    public void setTexture(Image in)
+    {
+        globalTextureMap = in;
     }
 
     public Vector3D getPosition()

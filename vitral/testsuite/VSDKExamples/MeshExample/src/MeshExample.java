@@ -27,7 +27,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
@@ -35,7 +35,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.QualitySelectionController;
+import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
@@ -53,8 +53,8 @@ public class MeshExample
     private Camera camera;
     private Light light;
     private CameraController cameraController;
-    private QualitySelection qualitySelection;
-    private QualitySelectionController qualityController;
+    private RendererConfiguration qualitySelection;
+    private RendererConfigurationController qualityController;
     private GLCanvas canvas;
 
     private TriangleMeshGroup meshGroup;
@@ -127,8 +127,8 @@ public class MeshExample
         camera = new Camera();
         cameraController = new CameraControllerAquynza(camera);
 
-        qualitySelection = new QualitySelection();
-        qualityController = new QualitySelectionController(qualitySelection);
+        qualitySelection = new RendererConfiguration();
+        qualityController = new RendererConfigurationController(qualitySelection);
 
         light = new Light(Light.DIRECTIONAL, new Vector3D(10, 20, 50), new ColorRgb(1, 1, 1));
     }

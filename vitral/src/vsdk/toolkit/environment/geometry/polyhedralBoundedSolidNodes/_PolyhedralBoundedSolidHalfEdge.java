@@ -52,7 +52,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
 
         if ( this == parentEdge.rightHalf ) {
             return parentEdge.leftHalf;
-    }
+        }
         return parentEdge.rightHalf;
     }
 }

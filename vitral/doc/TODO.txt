@@ -23,3 +23,6 @@
     class ...
   - To complete the implementation of IndexedColorImage (getpixel/setpixel
     methods for RGB version)
+  - In SceneEditorApplication, keyPressed event is not processing correctly:
+    only accepts 2nd key after some other event as mouse click or cursor
+    re-entry to working canvas window

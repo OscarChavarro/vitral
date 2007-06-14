@@ -26,6 +26,8 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
@@ -57,22 +59,26 @@ public class Raytracer extends RenderingElement {
     }
 
     /*
-    @param p the point of intersection
-    @param n unit-length surface normal
+    @param info.p the point of intersection
+    @param info.n unit-length surface normal
     @param v unit-length vector towards the ray's origin
+
+    Note: The info datastructure must contain point and normal in world
+    coordinates.
 
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations. (This must be taken
     into account in the reflection and refraction calculations)
     */
-    private ColorRgb evaluateIlluminationModel(Vector3D p, Vector3D n, Vector3D v, 
+    private ColorRgb evaluateIlluminationModel(
+        GeometryIntersectionInformation info, Vector3D v, 
         ArrayList lights, ArrayList objects, Background background,
-        Material material) {
-
+        Material material, RendererConfiguration inQualitySelection) {
+        //-----------------------------------------------------------------
         SimpleBody nearestObject;
         ColorRgb result = new ColorRgb();
-        ColorRgb backgroundColor = background.colorInDireccion(n);
+        ColorRgb backgroundColor = background.colorInDireccion(info.n);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -81,6 +87,9 @@ public class Raytracer extends RenderingElement {
         Vector3D po;
         Matrix4x4 R, Ri;
 
+        //- Normal perturbation / bump mapping ----------------------------
+
+        //-----------------------------------------------------------------
         for ( Iterator i = lights.iterator(); i.hasNext(); ) {
             Light light = (Light)i.next();
             lightEmission = light.getSpecular();
@@ -94,9 +103,9 @@ public class Raytracer extends RenderingElement {
               else {
                 Vector3D l;
                 if ( light.tipo_de_luz == Light.POINT ) {
-                    l = new Vector3D(light.lvec.x - p.x, 
-                                     light.lvec.y - p.y, 
-                                     light.lvec.z - p.z);
+                    l = new Vector3D(light.lvec.x - info.p.x, 
+                                     light.lvec.y - info.p.y, 
+                                     light.lvec.z - info.p.z);
                     l.normalize();
                   } 
                   else {
@@ -105,16 +114,20 @@ public class Raytracer extends RenderingElement {
 
                 // Check if the surface point is in shadow
                 Vector3D poffset = 
-                    new Vector3D(p.x + VSDK.EPSILON*l.x, p.y + VSDK.EPSILON*l.y, p.z + VSDK.EPSILON*l.z);
+                    new Vector3D(info.p.x + VSDK.EPSILON*l.x, info.p.y + VSDK.EPSILON*l.y, info.p.z + VSDK.EPSILON*l.z);
                 Ray rayo_sombra = new Ray(poffset, l);
                 nearestObject = selectNearestThingInRayDirection(rayo_sombra, objects);
                 if ( nearestObject != null ) {
                     continue;
                 }
 
-                double lambert = n.dotProduct(l);
+                double lambert = info.n.dotProduct(l);
                 if ( lambert > 0 ) {
                     diffuse = material.getDiffuse();
+                    if ( info.texture != null ) {
+                        diffuse.modulate(
+                            info.texture.getColorRgbBiLinear(info.u, info.v));
+            }
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
                         result.r += lambert*diffuse.r*lightEmission.r;
                         result.g += lambert*diffuse.g*lightEmission.g;
@@ -124,9 +137,9 @@ public class Raytracer extends RenderingElement {
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
 
-                        static_tmp.x = lambert*n.x - l.x;
-                        static_tmp.y = lambert*n.y - l.y;
-                        static_tmp.z = lambert*n.z - l.z;
+                        static_tmp.x = lambert*info.n.x - l.x;
+                        static_tmp.y = lambert*info.n.y - l.y;
+                        static_tmp.z = lambert*info.n.z - l.z;
                         double spec = 
                             v.dotProduct(static_tmp);
 
@@ -146,22 +159,21 @@ public class Raytracer extends RenderingElement {
         // Compute illumination due to reflection
         double kr = material.getReflectionCoefficient();
         if ( kr > 0 ) {
-            double t = v.dotProduct(n);
+            double t = v.dotProduct(info.n);
             if ( t > 0 ) {
                 t *= 2;
-                Vector3D reflect = new Vector3D(t*n.x - v.x, 
-                                                t*n.y - v.y, 
-                                                t*n.z - v.z);
-                Vector3D poffset = new Vector3D(p.x + VSDK.EPSILON*reflect.x, 
-                                                p.y + VSDK.EPSILON*reflect.y, 
-                                                p.z + VSDK.EPSILON*reflect.z);
+                Vector3D reflect = new Vector3D(t*info.n.x - v.x, 
+                                                t*info.n.y - v.y, 
+                                                t*info.n.z - v.z);
+                Vector3D poffset = new Vector3D(info.p.x + VSDK.EPSILON*reflect.x, 
+                                                info.p.y + VSDK.EPSILON*reflect.y, 
+                                                info.p.z + VSDK.EPSILON*reflect.z);
                 Ray rayo_reflejado = new Ray(poffset, reflect);
                 nearestObject = 
                     selectNearestThingInRayDirection(rayo_reflejado, objects);
                 if ( nearestObject != null ) {
                     Vector3D rv = new Vector3D();
-                    Vector3D rp, rn;
-                    GeometryIntersectionInformation info = 
+                    GeometryIntersectionInformation subInfo = 
                         new GeometryIntersectionInformation();
 
                     //--------------------------------------------------------
@@ -175,10 +187,19 @@ public class Raytracer extends RenderingElement {
                     myRay.t = rayo_reflejado.t;
 
                     nearestObject.getGeometry().doExtraInformation(
-                        myRay, myRay.t, info);
+                        myRay, myRay.t, subInfo);
 
-                    rp = R.multiply(info.p).add(po);
-                    rn = R.multiply(info.n);
+                    if ( !inQualitySelection.isTextureSet() ) {
+                        subInfo.texture = null;
+                    }
+                    else {
+                        if ( subInfo.texture == null ) {
+                            subInfo.texture = nearestObject.getTexture();
+                        }
+                    }
+
+                    subInfo.p = R.multiply(subInfo.p).add(po);
+                    subInfo.n = R.multiply(subInfo.n);
 
                     //--------------------------------------------------------
 
@@ -186,8 +207,9 @@ public class Raytracer extends RenderingElement {
                     rv.y = -rayo_reflejado.direction.y;
                     rv.z = -rayo_reflejado.direction.z;                    
                     ColorRgb rcolor =
-                        evaluateIlluminationModel(rp, rn, rv, lights, objects, 
-                            background, material);
+                        evaluateIlluminationModel(subInfo, rv, lights, objects, 
+                          background, material, 
+                                                  inQualitySelection);
 
                     result.r += kr*rcolor.r;
                     result.g += kr*rcolor.g;
@@ -251,11 +273,11 @@ public class Raytracer extends RenderingElement {
     and its combination with geometric transformations.
     */
     private ColorRgb followRayPath(Ray inRay, ArrayList in_objetos, 
-                         ArrayList in_luces, Background in_background)
+                  ArrayList in_luces, Background in_background,
+                                  RendererConfiguration inQualitySelection)
     {
         ColorRgb c;
         Vector3D v = new Vector3D();
-        Vector3D p, n;
         SimpleBody nearestObject;
         Ray myRay;
         Vector3D po;
@@ -278,13 +300,22 @@ public class Raytracer extends RenderingElement {
             nearestObject.getGeometry().doExtraInformation(myRay, 
                                                                   myRay.t,
                                                                   info);
+        if ( !inQualitySelection.isTextureSet() ) {
+        info.texture = null;
+        }
+        else {
+                if ( info.texture == null ) {
+            info.texture = nearestObject.getTexture();
+        }
+        }
+
             //------------------------------------------------------------
             v.x = -inRay.direction.x;
             v.y = -inRay.direction.y;
             v.z = -inRay.direction.z;
 
-            p = R.multiply(info.p).add(po);
-            n = R.multiply(info.n);
+            info.p = R.multiply(info.p).add(po);
+            info.n = R.multiply(info.n);
 
             Material material;
             if ( info.material != null ) {
@@ -295,7 +326,8 @@ public class Raytracer extends RenderingElement {
             }
 
             c = evaluateIlluminationModel(
-                    p, n, v, in_luces, in_objetos, in_background, material);
+        info, v, in_luces, in_objetos, in_background, material,
+                inQualitySelection);
           }
           else {
             c = in_background.colorInDireccion(inRay.direction);
@@ -304,18 +336,21 @@ public class Raytracer extends RenderingElement {
     }
 
     public void execute(RGBImage inoutViewport, 
+                        RendererConfiguration inQualitySelection,
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
                         Background in_background,
                         Camera in_camara,
                         ProgressMonitor report)
     {
-        execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
+        execute(inoutViewport, inQualitySelection,
+                inSimpleBodyArray, in_arr_luces,
                 in_background, in_camara, report, null, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
     public void execute(RGBImage inoutViewport, 
+                        RendererConfiguration inQualitySelection,
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
                         Background in_background,
@@ -323,7 +358,8 @@ public class Raytracer extends RenderingElement {
                         ProgressMonitor report,
                         ZBuffer depthmap)
     {
-        execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
+        execute(inoutViewport, inQualitySelection, inSimpleBodyArray, 
+                in_arr_luces,
                 in_background, in_camara, report, depthmap, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
@@ -375,6 +411,7 @@ public class Raytracer extends RenderingElement {
           completa de Oscar Chavarro.
     */
     public void execute(RGBImage inoutViewport,
+                        RendererConfiguration inQualitySelection,
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
                         Background in_background,
@@ -401,7 +438,8 @@ public class Raytracer extends RenderingElement {
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
                 color = followRayPath(rayo, inSimpleBodyArray,
-                    in_arr_luces, in_background);
+                      in_arr_luces, in_background, 
+                                      inQualitySelection);
                 if ( depthmap != null ) {
                     depthmap.setZ(x, y, (float)rayo.t);
                 }

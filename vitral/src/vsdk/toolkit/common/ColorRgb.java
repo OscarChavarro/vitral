@@ -70,6 +70,21 @@ public class ColorRgb extends Entity
         this.b = b;
     }
 
+    /**
+    Given other color, this color gets combined with the another one.
+    */
+    public void modulate(ColorRgb other)
+    {
+        /*
+        this.r = (this.r + other.r) / 2.0;
+        this.g = (this.g + other.g) / 2.0;
+        this.b = (this.b + other.b) / 2.0;
+        */
+        this.r = (this.r * other.r);
+        this.g = (this.g * other.g);
+        this.b = (this.b * other.b);
+    }
+
     /** This method returns a copy of the value r. Note that this method does
     NOT constitues an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot

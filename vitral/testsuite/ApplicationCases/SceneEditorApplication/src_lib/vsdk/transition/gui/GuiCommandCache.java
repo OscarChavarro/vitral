@@ -62,7 +62,7 @@ public class GuiCommandCache
     {
         if ( icon == null || iconTransparency == null ) {
             return;
-    }
+        }
 
         int xlimit, ylimit, x, y;
 
@@ -73,18 +73,18 @@ public class GuiCommandCache
         RGBAPixel out;
         int r, g, b, a;
 
-    for ( y = 0; y < ylimit; y++ ) {
-          for ( x = 0; x < xlimit; x++ ) {
-            in = iconTransparency.getPixel(x, y);
+        for ( y = 0; y < ylimit; y++ ) {
+            for ( x = 0; x < xlimit; x++ ) {
+                in = iconTransparency.getPixel(x, y);
                 r = VSDK.signedByte2unsignedInteger(in.r);
                 g = VSDK.signedByte2unsignedInteger(in.g);
                 b = VSDK.signedByte2unsignedInteger(in.b);
                 a = (r + g + b) / 3;
-            out = icon.getPixel(x, y);
+                out = icon.getPixel(x, y);
                 out.a = VSDK.unsigned8BitInteger2signedByte(a);
                 icon.putPixel(x, y, out);
+            }
         }
-    }
     }
 
     public void setId(String i)
@@ -111,10 +111,10 @@ public class GuiCommandCache
     {
         if ( help != null ) {
             help = help + h;
-    }
-    else {
+        }
+        else {
             help = h;
-    }
+        }
     }
 
     public void setIcon(RGBAImage i)
@@ -134,12 +134,12 @@ public class GuiCommandCache
         msg = msg + "    . Brief description: " + briefDescription + "\n";
         if ( icon == null ) {
             msg = msg + "    . No icon image\n";
-      }
-      else {
-          msg = msg + "    . Icon image of size (" + icon.getXSize() +
-          ", " + icon.getYSize() + ")\n";
-    }
-    return msg;
+          }
+          else {
+              msg = msg + "    . Icon image of size (" + icon.getXSize() +
+                  ", " + icon.getYSize() + ")\n";
+        }
+        return msg;
     }
 
 }

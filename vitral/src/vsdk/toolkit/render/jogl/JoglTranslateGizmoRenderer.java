@@ -14,7 +14,7 @@ import javax.media.opengl.GL;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
@@ -41,17 +41,17 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         lp2.y -= 20;
         if ( light1 == null ) {
             light1 = new Light(Light.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
-    }
+        }
         if ( light2 == null ) {
             light2 = new Light(Light.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
-    }
+        }
         light1.setPosition(lp1);
         light2.setPosition(lp2);
         JoglLightRenderer.activate(gl, light1);
         JoglLightRenderer.activate(gl, light2);
 
         //-----------------------------------------------------------------
-        QualitySelection q = new QualitySelection();
+        RendererConfiguration q = new RendererConfiguration();
         ArrayList<SimpleBody> things = gizmo.getElements();
 
         q.setSurfaces(true);
@@ -81,8 +81,8 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
                 gl.glPopMatrix();
+            }
         }
-    }
 
         //-----------------------------------------------------------------
         JoglLightRenderer.turnOffAllLights(gl);

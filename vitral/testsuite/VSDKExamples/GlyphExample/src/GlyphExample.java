@@ -32,7 +32,7 @@ import javax.media.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
@@ -129,7 +129,7 @@ public class GlyphExample extends JFrame implements
         gl.glEnd();
 
         //-----------------------------------------------------------------
-        QualitySelection q = new QualitySelection();
+        RendererConfiguration q = new RendererConfiguration();
         q.setBoundingVolume(true);
         double minmax[] = new double[6];
 

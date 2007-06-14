@@ -217,7 +217,7 @@ class MyPanel extends JPanel implements ActionListener
         palette = new RGBColorPalette();
         switch ( type ) {
           case 1:
-        palette.init(256);
+            palette.init(256);
             break;
           case 2:
             try {
@@ -263,10 +263,10 @@ class MyPanel extends JPanel implements ActionListener
         else if ( label == "Reset to grayscale256" ) {
             initPalette(1, null);
             repaint();
-    }
+        }
         else if ( label == "Exit" ) {
             System.exit(0);
-    }
+        }
     }
 }
 

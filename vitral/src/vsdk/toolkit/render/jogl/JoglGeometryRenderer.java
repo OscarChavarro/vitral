@@ -9,7 +9,7 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
@@ -24,7 +24,30 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
 public class JoglGeometryRenderer extends JoglRenderer 
 {
-    public static void drawMinMaxBox(GL gl, Geometry g, QualitySelection q)
+    public static void prepareSurfaceQuality(GL gl, RendererConfiguration quality)
+    {
+        int shadingType = quality.getShadingType();
+
+        switch ( shadingType ) {
+          case RendererConfiguration.SHADING_TYPE_NOLIGHT:
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glShadeModel(gl.GL_FLAT);
+            // Warning: Change with configured color for ambient lightning
+            gl.glColor3d(1, 1, 1);
+            break;
+          case RendererConfiguration.SHADING_TYPE_FLAT:
+            gl.glEnable(gl.GL_LIGHTING);
+            gl.glShadeModel(gl.GL_FLAT);
+            break;
+          case RendererConfiguration.SHADING_TYPE_PHONG:
+          case RendererConfiguration.SHADING_TYPE_GOURAUD: default:
+            gl.glEnable(gl.GL_LIGHTING);
+            gl.glShadeModel(gl.GL_SMOOTH);
+            break;
+        }
+    }
+
+    public static void drawMinMaxBox(GL gl, Geometry g, RendererConfiguration q)
     {
         double [] minmax;
 
@@ -61,11 +84,11 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
-    public static void drawSelectionCorners(GL gl, Geometry g, QualitySelection q)
+    public static void drawSelectionCorners(GL gl, Geometry g, RendererConfiguration q)
     {
         double [] minmax;
-    double borderPercent = 0.01;
-    double linePercent = 0.25;
+        double borderPercent = 0.01;
+        double linePercent = 0.25;
         minmax = g.getMinMax();
 
         Vector3D min, max, delta;
@@ -145,32 +168,32 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
-    public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
+    public static void draw(GL gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
             VSDK.reportMessage(null, VSDK.WARNING,
-                   "JoglGeometryRenderer.draw",
+                               "JoglGeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;
-    }
+        }
 
         if ( g instanceof Sphere ) {
             JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
-    }
+        }
         else if ( g instanceof Box ) {
             JoglBoxRenderer.draw(gl, (Box)g, c, q);
-    }
+        }
         else if ( g instanceof Cone ) {
             JoglConeRenderer.draw(gl, (Cone)g, c, q);
-    }
+        }
         else if ( g instanceof Arrow ) {
             JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
         else if ( g instanceof ParametricCurve ) {
-        JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
+            JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
         else if ( g instanceof ParametricBiCubicPatch ) {
-        JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
+            JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);

@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import javax.media.opengl.GL;
 
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
@@ -18,7 +18,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     Geometry object.
     */
     public static void
-    draw(GL gl, TriangleMeshGroup meshGroup, QualitySelection quality) {
+    draw(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
         TriangleMesh mesh = null;
         Iterator<TriangleMesh> i;
 
@@ -29,6 +29,9 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
             JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);
             quality.setSelectionCorners(c);
         }
+        if ( quality.isBoundingVolumeSet() ) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, mesh, quality);
+        }
         if ( quality.isSelectionCornersSet() ) {
             JoglGeometryRenderer.drawSelectionCorners(gl, meshGroup, quality);
         }
@@ -38,10 +41,10 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     @todo program this!
     */
     public static void drawWithSelection(GL gl, TriangleMeshGroup meshGroup,
-                                         QualitySelection quality,
+                                         RendererConfiguration quality,
                                          int selectedMesh,
                                          ArrayList<int[]> selectedTriangles) {
-    ;
+        ;
     }
 
 }

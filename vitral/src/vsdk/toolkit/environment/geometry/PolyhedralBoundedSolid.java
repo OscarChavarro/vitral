@@ -41,7 +41,7 @@ public class PolyhedralBoundedSolid extends Solid {
     doIntersection(Ray inout_rayo) {
         VSDK.reportMessage(this, VSDK.WARNING, "doIntersection",
             "Method not implemented");
-    return false;
+        return false;
     }
 
     public void
@@ -55,11 +55,11 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         double minmax[] = new double[6];
         for ( int i = 0; i < 3; i++ ) {
-        minmax[i] = -1.0;
-    }
+            minmax[i] = -1.0;
+        }
         for ( int i = 3; i < 6; i++ ) {
-        minmax[i] = 1.0;
-    }
+            minmax[i] = 1.0;
+        }
 
         VSDK.reportMessage(this, VSDK.WARNING, "getMinMax",
             "Method not implemented");

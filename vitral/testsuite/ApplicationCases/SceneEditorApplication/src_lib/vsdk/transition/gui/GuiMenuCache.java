@@ -40,8 +40,8 @@ public class GuiMenuCache extends GuiElementCache
         int j;
 
         for ( j = 0; j < level; j++ ) {
-        leadingSpace = leadingSpace + "  ";
-    }
+            leadingSpace = leadingSpace + "  ";
+        }
 
         String msg = leadingSpace + "Menu \"" + name + "\"\n";
 

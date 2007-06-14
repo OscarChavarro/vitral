@@ -3,7 +3,8 @@ import java.util.Iterator;
 import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
@@ -13,11 +14,14 @@ import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
+import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 public class JoglSceneRenderer
 {
     public static void draw(GL gl, Scene s)
     {
+        Image texture;
+
         switch ( s.selectedBackground ) {
           case 1:
             if ( s.cubemapBackground == null ) {
@@ -62,7 +66,7 @@ public class JoglSceneRenderer
 
         int j = 0;
         for ( Iterator i = s.things.iterator(); i.hasNext(); j++ ) {
-            QualitySelection quality;
+            RendererConfiguration quality;
             gi = ((SimpleBody)i.next());
             p = gi.getPosition();
             scale = gi.getScale();
@@ -85,6 +89,17 @@ public class JoglSceneRenderer
 
             gl.glColor3d(1, 1, 1);
             JoglMaterialRenderer.activate(gl, gi.getMaterial());
+
+            texture = gi.getTexture();
+
+        if ( quality.isTextureSet() && (texture != null) ) {
+                gl.glEnable(gl.GL_TEXTURE_2D);
+                JoglImageRenderer.activate(gl, texture);
+        }
+        else {
+                gl.glDisable(gl.GL_TEXTURE_2D);
+        }
+
             JoglGeometryRenderer.draw(gl, gi.getGeometry(),
                                       s.activeCamera, quality);
 

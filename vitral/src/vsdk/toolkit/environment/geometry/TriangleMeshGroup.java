@@ -31,19 +31,19 @@ public class TriangleMeshGroup extends Surface {
         meshes = new ArrayList<TriangleMesh> ();
         MinMax = null;
         lastInfo = new GeometryIntersectionInformation();
-    boundingVolume = null;
+        boundingVolume = null;
     }
 
     public TriangleMeshGroup(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
         lastInfo = new GeometryIntersectionInformation();
-    boundingVolume = null;
+        boundingVolume = null;
     }
 
     public TriangleMeshGroup(TriangleMeshGroup group) {
         this.meshes = group.getMeshes();
         lastInfo = new GeometryIntersectionInformation();
-    boundingVolume = null;
+        boundingVolume = null;
     }
 
     public ArrayList<TriangleMesh> getMeshes() {
@@ -51,13 +51,13 @@ public class TriangleMeshGroup extends Surface {
     }
 
     public void setMeshes(ArrayList<TriangleMesh> meshes) {
-    boundingVolume = null;
+        boundingVolume = null;
         this.meshes = meshes;
     }
 
     public void addMesh(TriangleMesh mesh) {
         this.meshes.add(mesh);
-    boundingVolume = null;
+        boundingVolume = null;
     }
 
     public TriangleMesh getMeshAt(int index) {
@@ -167,10 +167,10 @@ public class TriangleMeshGroup extends Surface {
             boundingVolume = new SimpleBody();
             boundingVolume.setPosition(center);
             boundingVolume.setGeometry(new Box(size));
-    }
+        }
         if ( !boundingVolume.doIntersection(inOut_Ray) ) {
-        return false;
-    }
+            return false;
+        }
 
         // Chain of responsability behavior design pattern with TriangleMesh
         for ( i= 0; i< meshes.size(); i++ ) {
@@ -190,7 +190,7 @@ public class TriangleMeshGroup extends Surface {
                     lastInfo.n.x = Info.n.x;
                     lastInfo.n.y = Info.n.y;
                     lastInfo.n.z = Info.n.z;
-            lastInfo.material = Info.material;
+                    lastInfo.material = Info.material;
                     inOut_Ray.t = ray.t;
 
                     // Stores the intersected mesh and the triangle intersected inside that mesh

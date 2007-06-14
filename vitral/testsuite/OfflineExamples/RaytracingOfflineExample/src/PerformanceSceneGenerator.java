@@ -38,11 +38,11 @@ public class PerformanceSceneGenerator
             if ( x > 3 ) {
                 x = -3.1;
                 y += 0.3;
-        }
+            }
             elem = "sphere " + x + " " + y + " " + z + " " + r + "\n";
             arr = elem.getBytes();
             w.write(arr, 0, arr.length);
-    }
+        }
     }
 
     public static void main(String args[])
@@ -51,7 +51,7 @@ public class PerformanceSceneGenerator
             System.err.println("Usage: specify:");
             System.err.println("<number of elements to create> <output file>\n");
             return;
-    }
+        }
 
         long numElements = Long.parseLong(args[0]);
 
@@ -65,10 +65,10 @@ public class PerformanceSceneGenerator
             createScene(numElements, writer);
             writer.flush();
             writer.close();
-    }
-    catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             System.err.println("Cannot create file!");
-    }
+        }
 
     }
 }

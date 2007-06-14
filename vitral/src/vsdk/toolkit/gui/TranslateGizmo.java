@@ -665,7 +665,7 @@ public class TranslateGizmo extends Gizmo {
 
       active = false;
       if ( selection != NULL_GROUP ) {
-      active = true;
+          active = true;
       }
 
       return selection;
@@ -773,9 +773,9 @@ public class TranslateGizmo extends Gizmo {
               oldmousey = e.getY();
               p = o;
             }
-        else {
+            else {
               p = r.direction.multiply(r.t).add(r.origin);
-      }
+          }
       }
       else if ( interactionTechnique == 1 ) {
           boolean accountForU = false;
@@ -830,7 +830,7 @@ public class TranslateGizmo extends Gizmo {
           }
           oldp = v.multiply(r2.t).add(r2.origin);
           p = v.multiply(2*(r.t-r2.t)).add(r.origin);
-      //deltapos = v.multiply(r.t);
+          //deltapos = v.multiply(r.t);
       }
 
       setPosition(p);

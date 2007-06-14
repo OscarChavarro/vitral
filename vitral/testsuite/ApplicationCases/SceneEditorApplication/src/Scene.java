@@ -5,7 +5,7 @@ import java.util.Iterator;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -41,7 +41,7 @@ public class Scene
     public SelectionSet selectedThings;
 
     // Others
-    public QualitySelection qualityTemplate;
+    public RendererConfiguration qualityTemplate;
 
     Scene()
     {
@@ -71,7 +71,7 @@ public class Scene
         showCorridor = false;
         showGrid = true;
 
-        qualityTemplate = new QualitySelection();
+        qualityTemplate = new RendererConfiguration();
         qualityTemplate.setSurfaces(true);
         qualityTemplate.setWires(false);
     }
@@ -126,20 +126,20 @@ public class Scene
         Iterator i;
         int index = 0;
 
-    if ( !composite ) {
+        if ( !composite ) {
             selectedThings.unselectAll();
-    }
+        }
         for ( i = things.iterator(); i.hasNext(); index++ ) {
             gi = (SimpleBody)i.next();
             if ( gi.doIntersection(r) && r.t < nearestDistance ) {
                 nearestDistance = r.t;
-        if ( !composite ) {
+                if ( !composite ) {
                     selectedThings.unselectAll();
                     selectedThings.select(index);
-        }
-        else {
+                }
+                else {
                     selectedThings.change(index);
-        }
+                }
             }
         }
     }
@@ -189,7 +189,8 @@ public class Scene
 
         visualizationEngine = new Raytracer();
         long initialTime = System.currentTimeMillis();
-        visualizationEngine.execute(out_Viewport, things, lights, 
+        visualizationEngine.execute(out_Viewport, qualityTemplate,
+                                    things, lights, 
                                     activeBackground, activeCamera,
                                     reporter, null);
         long finalTime = System.currentTimeMillis();

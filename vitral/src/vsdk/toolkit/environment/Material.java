@@ -107,12 +107,12 @@ public class Material extends Entity
     
     public boolean isDoubleSided()
     {
-    return doubleSided;
+        return doubleSided;
     }
 
     public void setDoubleSided(boolean doubleSided)
     {
-    this.doubleSided = doubleSided;
+        this.doubleSided = doubleSided;
     }
 
     public ColorRgb getAmbient()
@@ -167,7 +167,7 @@ public class Material extends Entity
                "  - Diffuse " + diffuse + "\n" +
                "  - Ambient " + ambient + "\n" +
                "  - Phong exponent: " + phongExponent + "\n" +
-           (isDoubleSided()?"  - Double sided\n":"  - Single sided\n") +
+               (isDoubleSided()?"  - Double sided\n":"  - Single sided\n") +
                "\n";
     }
 }

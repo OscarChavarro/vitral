@@ -44,7 +44,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
             giro.axisRotation(a, 1, 0, 0);
             p = giro.multiply(agujay);
             gl.glVertex3d(p.x, p.y, p.z);
-    }
+        }
         gl.glEnd();
         gl.glPopMatrix();
 
@@ -56,7 +56,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
             giro.axisRotation(a, 0, 1, 0);
             p = giro.multiply(agujax);
             gl.glVertex3d(p.x, p.y, p.z);
-    }
+        }
         gl.glEnd();
         gl.glPopMatrix();
 
@@ -68,7 +68,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
             giro.axisRotation(a, 0, 0, 1);
             p = giro.multiply(agujax);
             gl.glVertex3d(p.x, p.y, p.z);
-    }
+        }
         gl.glEnd();
         gl.glPopMatrix();
 

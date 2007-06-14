@@ -10,13 +10,13 @@
 package vsdk.toolkit.common;
 
 /**
-The QualitySelection class is used to indicate some attributes in which a 
-geometry is to be displayed in screen. The QualitySelection class is not
+The RendererConfiguration class is used to indicate some attributes in which a 
+geometry is to be displayed in screen. The RendererConfiguration class is not
 responsible of display any data, it is just an a suggestion on how to draw it.
 
 @todo: Rename to 'RenderConfiguration' or something similar...
 */
-public class QualitySelection extends Entity {
+public class RendererConfiguration extends Entity {
 
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
@@ -58,9 +58,9 @@ public class QualitySelection extends Entity {
     }
 
     /**
-    Constructs a default QualitySelection object that will display the surfaces
+    Constructs a default RendererConfiguration object that will display the surfaces
     */
-    public QualitySelection() {
+    public RendererConfiguration() {
         shadingType = SHADING_TYPE_GOURAUD;
 
         surfaces = true;
@@ -236,7 +236,7 @@ public class QualitySelection extends Entity {
     {
         String msg;
 
-        msg = "<QualitySelection>:\n";
+        msg = "<RendererConfiguration>:\n";
 
         msg = msg + "  - Shading type: ";
         switch ( shadingType ) {

@@ -13,7 +13,7 @@ import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Cone;
 
@@ -52,7 +52,7 @@ public class JoglConeRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Cone cone, Camera c, QualitySelection q)
+    public static void draw(GL gl, Cone cone, Camera c, RendererConfiguration q)
     {
         if (glu == null) {
             glu = new GLU();
@@ -62,7 +62,7 @@ public class JoglConeRenderer extends JoglRenderer {
         if ( q.isSurfacesSet() ) {
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             drawParts(gl, cone);
-    }
+        }
 
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);

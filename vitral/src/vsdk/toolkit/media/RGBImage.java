@@ -69,7 +69,7 @@ public class RGBImage extends Image
               data[i] = 0;
           }
         }
-        catch (Exception e) {
+        catch ( Exception e ) {
           data = null;
           return false;
         }

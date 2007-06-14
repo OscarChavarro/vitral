@@ -1,1 +1,1 @@
-java -classpath ./classes HelloWorldJAI ../../etc/images/render.jpg
+java -classpath ./classes HelloWorldJAI ../../../etc/images/render.jpg
