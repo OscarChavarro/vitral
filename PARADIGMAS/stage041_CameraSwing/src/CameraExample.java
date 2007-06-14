@@ -27,10 +27,10 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import vitral.toolkits.environment.Camera;
-import vitral.framework.gui.CameraController;
-import vitral.framework.gui.CameraControllerAquynza;
-import vitral.framework.gui.CameraControllerBlender;
-import vitral.framework.gui.CameraControllerGravZero;
+import vitral.toolkits.gui.CameraController;
+import vitral.toolkits.gui.CameraControllerAquynza;
+import vitral.toolkits.gui.CameraControllerBlender;
+import vitral.toolkits.gui.CameraControllerGravZero;
 
 public class CameraExample extends JFrame implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {

@@ -1,4 +1,4 @@
-package vitral.framework.gui;
+package vitral.toolkits.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;

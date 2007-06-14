@@ -1,4 +1,4 @@
-package vitral.framework.gui;
+package vitral.toolkits.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -7,22 +7,20 @@ import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.common.Matrix4x4;
 import vitral.toolkits.environment.Camera;
 
-public class CameraControllerGravZero implements CameraController 
-{
+public class CameraControllerAquynza
+    implements CameraController {
 
     private Camera camera;
     private int oldMouseX;
-    private int oldMouseY; 
-    
-    public CameraControllerGravZero(Camera camera) 
-    {
+    private int oldMouseY;
+
+    public CameraControllerAquynza(Camera camera) {
         this.camera = camera;
         oldMouseX = 0;
         oldMouseY = 0;
     }
 
-    public boolean processMouseEventAwt(MouseEvent mouseEvent) 
-    {
+    public boolean processMouseEventAwt(MouseEvent mouseEvent) {
       return true;
     }
 
@@ -62,12 +60,10 @@ public class CameraControllerGravZero implements CameraController
         return val;
     }
   
-    public boolean processKeyPressedEventAwt(KeyEvent keyEvent) 
-    {
-        double movX=0;
-        double movY=0;
-        double movZ=0;
-        
+    public boolean processKeyPressedEventAwt(KeyEvent keyEvent) {
+        // Local copy of the Camera's internal parameters
+        Vector3D eyePosition;
+        Vector3D focusedPosition;
         Matrix4x4 R; // Camera rotation matrix
         int projectionMode;
         double fov;
@@ -79,14 +75,17 @@ public class CameraControllerGravZero implements CameraController
         char unicode_id;
         int keycode;
         double deltaMov = 0.25;
-        double yaw=0;
-        double pitch=0;
-        double roll=0;
-        double angleInc=7;
+        double yaw;
+        double pitch;
+        double roll;
+        double angleInc;
         boolean updated = false;
         double EPSILON = 0.0001;
 
         // 1. Obtain a copy of the camera's internal parameters
+        eyePosition = camera.getPosition();
+        focusedPosition = camera.getFocusedPosition();
+        R = camera.getRotation();
         projectionMode = camera.getProjectionMode();
         fov = camera.getFov();
         orthogonalZoom = camera.getOrthogonalZoom();
@@ -97,27 +96,37 @@ public class CameraControllerGravZero implements CameraController
         unicode_id = keyEvent.getKeyChar();
         keycode = keyEvent.getKeyCode();
 
+        yaw = R.obtainEulerYawAngle();
+        pitch = R.obtainEulerPitchAngle();
+        roll = R.obtainEulerRollAngle();
+  
+        if ( fov > 90 ) angleInc = Math.toRadians(10);
+        else if ( fov > 45 ) angleInc = Math.toRadians(5);
+        else if ( fov > 15 ) angleInc = Math.toRadians(2.5);
+        else if ( fov > 5 ) angleInc = Math.toRadians(1);
+        else angleInc = Math.toRadians(0.1);
+
         // 3. Event processing: update the copy of the camera's internal parameters
         if ( unicode_id == keyEvent.CHAR_UNDEFINED ) {
             switch ( keycode ) {
               case KeyEvent.VK_UP:
-                pitch = -angleInc;
-                yaw=roll=0;
+                pitch -= angleInc;
+                if ( pitch < Math.toRadians(-90) ) pitch = Math.toRadians(-90);
                 updated = true;
                 break;
               case KeyEvent.VK_DOWN:
-                pitch = angleInc;
-                yaw=roll=0;
+                pitch += angleInc;
+                if ( pitch > Math.toRadians(90) ) pitch = Math.toRadians(90);
                 updated = true;
                 break;
               case KeyEvent.VK_LEFT:
-                yaw = angleInc;
-                pitch=roll=0;
+                yaw += angleInc;
+                while ( yaw >= Math.toRadians(360) ) yaw -= Math.toRadians(360);
                 updated = true;
                 break;
               case KeyEvent.VK_RIGHT:
-                yaw = -angleInc;
-                pitch=roll=0;
+                yaw -= angleInc;
+                while ( yaw < 0 ) yaw += Math.toRadians(360);
                 updated = true;
                 break;
             }
@@ -126,39 +135,39 @@ public class CameraControllerGravZero implements CameraController
         else {
             switch ( unicode_id ) {
               // Position
-              case 'a':
-                movX = deltaMov; 
+              case 'x':
+                eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
                 updated = true;
                 break;
-              case 'd':
-                movX = -deltaMov; 
+              case 'X':
+                eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
                 updated = true;
                 break;
-              case 'q':
-                movY = -deltaMov; 
+              case 'y':
+                eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;
                 updated = true;
                 break;
-              case 'e':
-                movY = deltaMov; 
+              case 'Y':
+                eyePosition.y += deltaMov; focusedPosition.y += deltaMov;
                 updated = true;
                 break;
-              case 'w':
-                movZ = deltaMov; 
+              case 'z':
+                eyePosition.z -= deltaMov; focusedPosition.z -= deltaMov;
                 updated = true;
                 break;
-              case 's':
-                movZ = -deltaMov; 
+              case 'Z':
+                eyePosition.z += deltaMov; focusedPosition.z += deltaMov;
                 updated = true;
                 break; 
               // Rotation
-              case 'z':
-                roll = -7;
-                pitch=yaw=0;
+              case 'S':
+                roll -= Math.toRadians(5);
+                while ( roll < 0 ) roll += Math.toRadians(360);
                 updated = true;
                 break;
-              case 'x':
-                roll = 7;
-                pitch=yaw=0;
+              case 's':
+                roll += Math.toRadians(5);
+                while ( roll > Math.toRadians(360) ) roll -= Math.toRadians(360);
                 updated = true;
                 break;
   
@@ -174,7 +183,7 @@ public class CameraControllerGravZero implements CameraController
                 }
                 updated = true;
                 break;
-              case 'S':
+              case 'a':
                 if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
                     orthogonalZoom *= 2;
                   }
@@ -224,9 +233,10 @@ public class CameraControllerGravZero implements CameraController
         }
 
         // 4. Update camera's internal parameters from local copy
-        R=camera.getRotation(pitch, yaw, roll);
-        
-        camera.translate(movX, movY, movZ);
+        R.eulerAnglesRotation(yaw, pitch, roll);
+  
+        camera.setPosition(eyePosition);
+        camera.setFocusedPosition(focusedPosition);
         camera.setRotation(R);
         camera.setOrthogonalZoom(orthogonalZoom);
         camera.setFov(fov);
@@ -257,71 +267,10 @@ public class CameraControllerGravZero implements CameraController
     {
         return false;
     }
-    
-    boolean shift=true;
-    
+
     public boolean processMouseMovedEventAwt(MouseEvent e)
-    {   
-        if(e.isShiftDown())
-        {
-            shift=true;
-            java.awt.Component component=(java.awt.Component)e.getSource();
-            component.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
-            
-            return false;
-        }
-        
-        if(shift)
-        {
-            java.awt.image.BufferedImage cursor = new java.awt.image.BufferedImage(16,16,java.awt.image.BufferedImage.TYPE_INT_ARGB);
-            java.awt.Cursor transparentCursor = java.awt.Toolkit.getDefaultToolkit().createCustomCursor(cursor,new java.awt.Point(0,0),"TransparentCursor");
-            java.awt.Component component=(java.awt.Component)e.getSource();
-            component.setCursor(transparentCursor);
-            shift=false;
-        }
-        //------------------------------------------------------------
-        int deltaX;
-        int deltaY;
-        boolean updated = true;
-
-        deltaX = e.getX() - oldMouseX;
-        deltaY = e.getY() - oldMouseY;
-        
-        if ( deltaX > 5 ) deltaX = 5;
-        if ( deltaX < -5 ) deltaX = -5;
-        if ( deltaY > 5 ) deltaY = 5;
-        if ( deltaY < -5 ) deltaY = -5;
-
-        //------------------------------------------------------------
-        Matrix4x4 R; // Camera rotation matrix
-
-        R = camera.getRotation(deltaY, -deltaX, 0);
-
-        camera.setRotation(R);
-
-        //------------------------------------------------------------
-        
-
-        camera.setRotation(R);
-        
-        try
-        {
-            java.awt.Component component=(java.awt.Component)e.getSource();
-            java.awt.Point posComp=component.getLocationOnScreen();
-            
-            java.awt.Robot r=new java.awt.Robot();
-            r.mouseMove(posComp.x+((int)component.getWidth()/2),posComp.y+((int)component.getHeight()/2));
-            
-            java.awt.Point p=((java.awt.Component)e.getSource()).getMousePosition();
-            
-            oldMouseX=p.x;
-            oldMouseY=p.y;
-        }
-        catch(java.awt.AWTException awte)
-        {
-        
-        }
-        return updated;
+    {
+        return false;
     }
 
     public boolean processMouseDraggedEventAwt(MouseEvent e)
@@ -329,7 +278,7 @@ public class CameraControllerGravZero implements CameraController
         //------------------------------------------------------------
         int deltaX;
         int deltaY;
-        boolean updated = true;
+        boolean updated = false;
         double senseFactor = 0.04;
 
         deltaX = e.getX() - oldMouseX;
@@ -342,17 +291,65 @@ public class CameraControllerGravZero implements CameraController
 
         //------------------------------------------------------------
         Matrix4x4 R; // Camera rotation matrix
+        Matrix4x4 DR;
+        Vector3D eyePosition;
+        Vector3D focusedPosition;
+        double ax, ay;
 
         // Obtain a copy of the camera's internal parameters
+        eyePosition = camera.getPosition();
+        focusedPosition = camera.getFocusedPosition();
 
-        R = camera.getRotation(0,0, deltaX);
+        Vector3D u, v, w;
+        int modifiers;
+
+        modifiers = e.getModifiersEx();
+
+        R = camera.getRotation();
+        u = new Vector3D(R.M[0][0], R.M[1][0], R.M[2][0]);
+        v = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
+        w = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
+
+        if ( (modifiers & e.BUTTON1_DOWN_MASK) != 0 ) {
+            // Turn
+            ax = -Math.min(2, 0.01*deltaX);
+            ay = Math.min(2, 0.01*deltaY);
+
+            DR = new Matrix4x4();
+            DR.axisRotation(ay, v.x, v.y, v.z);
+            R = DR.multiply(R);
+
+            DR.axisRotation(ax, w.x, w.y, w.z);
+            R = DR.multiply(R);
+
+            updated = true;
+    }
+        else if ( (modifiers & e.BUTTON2_DOWN_MASK) != 0 ) {
+            // Move
+            eyePosition = eyePosition.substract(v.multiply(senseFactor*((double)deltaX)));
+            eyePosition = eyePosition.substract(w.multiply(senseFactor*((double)deltaY)));
+            focusedPosition = focusedPosition.substract(v.multiply(senseFactor*((double)deltaX)));
+            focusedPosition = focusedPosition.substract(w.multiply(senseFactor*((double)deltaY)));
+            updated = true;
+    }
+        else if ( (modifiers & e.BUTTON3_DOWN_MASK) != 0 ) {
+        // Advance
+            eyePosition = eyePosition.substract(u.multiply(senseFactor*((double)deltaY)));
+            ax = Math.min(2, 0.01*deltaX);
+            DR = new Matrix4x4();
+            DR.axisRotation(ax, u.x, u.y, u.z);
+            R = DR.multiply(R);
+            updated = true;
+    }
 
         // Update camera's internal parameters from local copy
         //R.eulerAnglesRotation(yaw, pitch, roll);
+        camera.setPosition(eyePosition);
+        camera.setFocusedPosition(focusedPosition);
         camera.setRotation(R);
 
         //------------------------------------------------------------
-        oldMouseX = e.getX();
+        oldMouseX = e.getX();  
         oldMouseY = e.getY();
         return updated;
     }
