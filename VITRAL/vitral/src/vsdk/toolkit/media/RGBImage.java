@@ -8,11 +8,7 @@
 
 package vsdk.toolkit.media;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-
-public class RGBImage 
+public class RGBImage extends Image
 {
     private RGBPixel data[];
     private int xSize;
@@ -98,11 +94,31 @@ public class RGBImage
         data[index].b = p.b;
     }
 
+    public void putPixelRgb(int x, int y, RGBPixel p)
+    {
+        int index = xSize*y + x;
+        data[index].r = p.r;
+        data[index].g = p.g;
+        data[index].b = p.b;
+    }
+
     /**
     Este m&eacute;todo retorna las coordenadas de color (r, g, b) para el pixel
     de la posicion (x, y) de la imagen.
     */
     public RGBPixel getPixel(int x, int y)
+    {
+        RGBPixel p = new RGBPixel();
+        int index = xSize*y + x;
+
+        p.r = data[index].r;
+        p.g = data[index].g;
+        p.b = data[index].b;
+
+        return p;
+    }
+
+    public RGBPixel getPixelRgb(int x, int y)
     {
         RGBPixel p = new RGBPixel();
         int index = xSize*y + x;
@@ -153,44 +169,6 @@ public class RGBImage
                 putPixel(j, i, r, g, b);
             }
         }
-    }
-
-    /**
-    Este m&eacute;todo escribe los contenidos de la imagen actual en un
-    archivo de imagen en formato PPM RGB (i.e. P6). Retorna true si todo
-    sale bien o false si algo falla (i.e. como un problema de permisos o
-    que se acabe el espacio en el dispositivo de almacenamiento `fd`).
-    */
-    public boolean exportPPM(File fd)
-    {
-        try {
-            BufferedOutputStream escritor;
-
-            escritor = new BufferedOutputStream(new FileOutputStream(fd));
-
-            String linea1 = "P6\n";
-            String linea2 = xSize + " " + ySize + "\n";
-            String linea3 = "255\n";
-            byte arr[];
-
-            arr = linea1.getBytes();
-            escritor.write(arr, 0, arr.length);
-            arr = linea2.getBytes();
-            escritor.write(arr, 0, arr.length);
-            arr = linea3.getBytes();
-            escritor.write(arr, 0, arr.length);
-
-            for ( int i = 0; i < xSize*ySize; i++ ) {
-                escritor.write(data[i].r);
-                escritor.write(data[i].g);
-                escritor.write(data[i].b);
-            }
-            escritor.close();
-        }
-        catch (Exception e) {
-            return false;
-        }
-        return true;
     }
 
     public int getXSize()

@@ -1,8 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="idjo6ezemgw87gcemgw8g9m">
+    <link uin="id40h7lemmkro68emmksgxu.linkid86wubemmkro68emmkwlgm">
+        <participant role="Supplier" referencedUin="design:view:::idg9bq3emmkro68emmksg4b"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkid4vd3iemmkro68emmkwlgm">
+        <participant role="Supplier" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkidj0zhqemmkro68emmkwlh2">
+        <participant role="Supplier" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkidixtkxemmkro68emmkwlhh">
+        <participant role="Supplier" referencedUin="design:view:::id8oq39emmkro68emmksg25"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkidf3zqeemmkro68emmkwlhh">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkidb1ozoemmkro68emmkwlhx">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkidh2hjpemmkro68emmkwlic">
+        <participant role="Supplier" referencedUin="design:view:::id5nxn4emmkro68emmksgat"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id40h7lemmkro68emmksgxu.linkid18oukemmkro68emmkwlis">
+        <participant role="Supplier" referencedUin="design:view:::id7j8xhemmkro68emmksgt2"/>
+        <participant role="Client" referencedUin="design:view:::id40h7lemmkro68emmksgxu"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <view uin="id40h7lemmkro68emmksgxu">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglZBufferRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,10,168,105"/>
+        </reference>
+        <reference df-class-name="reference56" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBAImageRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,150,180,146"/>
+        </reference>
+        <reference df-class-name="reference57" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglCameraRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="210,10,140,169"/>
+        </reference>
+        <reference df-class-name="reference58" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,330,200,121"/>
+        </reference>
+        <reference df-class-name="reference59" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBAImageRendererImageAssociation">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="370,10,200,111"/>
+        </reference>
+        <reference df-class-name="reference60" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglConeRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="370,170,147,130"/>
+        </reference>
+        <reference df-class-name="reference61" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="230,350,161,89"/>
+        </reference>
+        <reference df-class-name="reference62" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglSphereRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="411,350,130,98"/>
+        </reference>
+        <reference df-class-name="reference63" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglMaterialRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,490,135,89"/>
+        </reference>
+        <reference df-class-name="reference64" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="165,490,200,89"/>
+        </reference>
+        <reference df-class-name="reference65" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglBoxRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="590,10,111,98"/>
+        </reference>
+        <reference df-class-name="reference66" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglArrowRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="537,170,147,130"/>
+        </reference>
+        <reference df-class-name="reference67" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="385,490,200,89"/>
+        </reference>
+        <reference df-class-name="reference68" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglMatrixRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="561,350,125,105"/>
+        </reference>
+        <reference df-class-name="reference69" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,610,178,114"/>
+        </reference>
+        <reference df-class-name="reference70" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="721,10,173,329"/>
+        </reference>
+        <reference df-class-name="reference71" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricCubicCurveRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="605,490,200,217"/>
+        </reference>
+        <reference df-class-name="reference72" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,770,197,89"/>
+        </reference>
+        <reference df-class-name="reference73" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglGeometryRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="227,750,144,105"/>
+        </reference>
+        <reference df-class-name="reference74" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBImageRendererImageAssociation">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,890,200,111"/>
+        </reference>
+        <reference df-class-name="reference75" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBImageRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="391,750,180,146"/>
+        </reference>
+        <reference df-class-name="reference76" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="706,370,156,89"/>
+        </reference>
+        <reference df-class-name="reference77" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglLightRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="591,750,183,130"/>
+        </reference>
         <property name="$defaultDiagram" value=""/>
     </view>
 </nodeSet>

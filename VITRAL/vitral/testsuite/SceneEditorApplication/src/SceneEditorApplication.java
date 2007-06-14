@@ -1,7 +1,3 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world 
-// type programs so the user/programmer can be exposed to all the complexity
-// involved. This will help him to dominate the involved libraries.
-
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
@@ -50,7 +46,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.RGBColorPaletteBuilder;
 
@@ -486,9 +482,9 @@ class ButtonsPanel extends JPanel implements ActionListener
 
     private void addThing(Geometry g)
     {
-        RayableObject thing;
+        SimpleThing thing;
 
-        thing = new RayableObject();
+        thing = new SimpleThing();
         thing.setGeometry(g);
         thing.setPosition(new Vector3D());
         thing.setRotation(new Matrix4x4());
@@ -538,11 +534,13 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Create TriangleMesh" ) {
             TriangleMeshGroup mg = null;
             try {
-                mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
+                mg = ReaderObj.read("../../etc/geometry/trivial.obj");
+                //mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
         }
         catch ( Exception e ) {
                 return;
         }
+            //addThing((TriangleMesh)mg.getMeshAt(1));
             addThing(mg);
         }
         else if ( label == "Create Light" ) {

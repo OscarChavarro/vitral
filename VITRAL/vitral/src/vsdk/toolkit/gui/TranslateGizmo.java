@@ -26,7 +26,7 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 
 public class TranslateGizmo {
   /// Internal transfirmation state
@@ -42,7 +42,7 @@ public class TranslateGizmo {
   /// Geometric model based in primitive instancing: primitive instances
   /// This list is always of size 12, and its elements follow the order 
   /// indicated in the values of the *_ELEMENT constants of this class.
-  ArrayList<RayableObject> elementInstances;
+  ArrayList<SimpleThing> elementInstances;
 
   /// Internal element selection state
   public static final int X_AXIS_ELEMENT = 1;
@@ -98,9 +98,9 @@ public class TranslateGizmo {
       cylinderModel = new Cone(SEGMENT_WIDTH, SEGMENT_WIDTH, SEGMENT_LENGHT);
       boxModel = new Box(BOX_SIDE, BOX_SIDE, BOX_HEIGHT);
 
-      elementInstances = new ArrayList<RayableObject>();
+      elementInstances = new ArrayList<SimpleThing>();
       for ( int i = 0; i < 12; i++ ) {
-          RayableObject r = new RayableObject();
+          SimpleThing r = new SimpleThing();
           elementInstances.add(r);
       }
 
@@ -123,7 +123,7 @@ public class TranslateGizmo {
       return camera;
   }
 
-  public ArrayList<RayableObject> getElements()
+  public ArrayList<SimpleThing> getElements()
   {
       return elementInstances;
   }
@@ -210,7 +210,7 @@ public class TranslateGizmo {
       index = 1;
       for ( i = elementInstances.iterator(); 
             index <= 12 && i.hasNext(); index++ ) {
-          RayableObject r = (RayableObject)i.next();
+          SimpleThing r = (SimpleThing)i.next();
           r.setGeometry(null);
           switch ( index ) {
             case X_AXIS_ELEMENT:
@@ -638,7 +638,7 @@ public class TranslateGizmo {
       for ( Iterator i = elementInstances.iterator(); 
             index <= 9 && i.hasNext(); index++ ) {
           r.t = Double.MAX_VALUE;
-          RayableObject gi = (RayableObject)i.next();
+          SimpleThing gi = (SimpleThing)i.next();
 
           if ( gi.getGeometry() != null && gi.doIntersection(r) ) {
               nearestDistance = r.t;

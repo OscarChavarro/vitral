@@ -12,7 +12,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
 
-public class Cone extends Geometry {
+public class Cone extends Solid {
     private double r1; // Radius at the base
     private double r2; // Radius at the top
     private double h;  // Height
@@ -209,6 +209,8 @@ public class Cone extends Geometry {
     }
 
     /**
+     Check the general interface contract in superclass method
+     Geometry.doIntersection.
     */
     public boolean
     doIntersection(Ray inOutRay) {

@@ -8,7 +8,7 @@
 
 package vsdk.toolkit.common;
 
-public class QualitySelection {
+public class QualitySelection extends Entity {
 
     public static final int SHADING_TYPE_FLAT     = 1;
     public static final int SHADING_TYPE_GOURAUD  = 2;

@@ -5,7 +5,7 @@ import javax.media.opengl.GL;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
@@ -27,7 +27,7 @@ public class JoglSceneRenderer
             break;
         }
 
-        JoglCameraRenderer.activateGL(gl, s.activeCamera);
+        JoglCameraRenderer.activate(gl, s.activeCamera);
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glLoadIdentity();
@@ -36,7 +36,7 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        RayableObject gi;
+        SimpleThing gi;
         Vector3D p;
         Vector3D scale;
 
@@ -55,7 +55,7 @@ public class JoglSceneRenderer
         int j = 0;
         for ( Iterator i = s.things.iterator(); i.hasNext(); j++ ) {
             QualitySelection quality;
-            gi = ((RayableObject)i.next());
+            gi = ((SimpleThing)i.next());
             p = gi.getPosition();
             scale = gi.getScale();
 
@@ -73,7 +73,7 @@ public class JoglSceneRenderer
             gl.glPushMatrix();
             gl.glLoadIdentity();
             gl.glTranslated(p.x, p.y, p.z);
-            JoglMatrixRenderer.activateGL(gl, gi.getRotation());
+            JoglMatrixRenderer.activate(gl, gi.getRotation());
 
             gl.glScaled(scale.x, scale.y, scale.z);
 

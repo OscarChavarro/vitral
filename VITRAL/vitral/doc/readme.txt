@@ -19,6 +19,13 @@ IMPLEMENTATION (SIZE RESTRICTION, DISTRIBUTION AND DEPLOYMENT)
     basic documentation and SMALL samples. This package should be as small
     as posible, and avoid the inclusion of big data files.
 
+IMPLEMENTATION (PACKAGE USAGE AT THE TOOLKIT LEVEL)
+  - In the sage of clarity, sentences like import package.*; shoul be avoided.
+    As in the toolkit classes, as in the testsuite examples, all used classes
+    should be imported using its full name, to help the application
+    developer be aware of the complexity of the application, and the
+    used classes.
+
 IMPLEMENTATION ON OPENGL/JOGL
   - glLight operations are restricted to inside og Light renderer classes
   - glLoadIdentity should be avoided in application code, preferring a 

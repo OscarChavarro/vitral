@@ -1,12 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="ida0zx7emgw87gcemgw8fp8">
+    <link uin="id2azw3emmkro68emmksfmy.linkid4scmgemmkro68emmkwkgl">
+        <participant role="Supplier" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkidcxdwpemmkro68emmkwkh1">
+        <participant role="Supplier" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid93nuoemmkro68emmkwkh1">
+        <participant role="Supplier" referencedUin="design:view:::idg9bq3emmkro68emmksg4b"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid98yk6emmkro68emmkwkhg">
+        <participant role="Supplier" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid9ydbvemmkro68emmkwkhg">
+        <participant role="Supplier" referencedUin="design:view:::idbc9themmkro68emmksgpl"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkideeumbemmkro68emmkwkhw">
+        <participant role="Supplier" referencedUin="design:view:::id8oq39emmkro68emmksg25"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid1z354emmkro68emmkwkhw">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid5u3z0emmkro68emmkwkic">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid94jzeemmkro68emmkwkir">
+        <participant role="Supplier" referencedUin="design:view:::id5nxn4emmkro68emmksgat"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkidfv3w8emmkro68emmkwkir">
+        <participant role="Supplier" referencedUin="design:view:::id7j8xhemmkro68emmksgt2"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkidb8uchemmlctqwemmnc6kr">
+        <participant role="Supplier" referencedUin="design:view:::unknown_view"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid1yowjemmlctqwemmnj3j0">
+        <participant role="Supplier" referencedUin="design:view:::unknown_view"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid27xacemmlctqwemmnj61q">
+        <participant role="Supplier" referencedUin="design:view:::unknown_view"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid61an1emmlctqwemmnj8rd">
+        <participant role="Supplier" referencedUin="design:view:::unknown_view"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+    </link>
+    <link uin="id2azw3emmkro68emmksfmy.linkid9vmqvemmlctqwemmnkgk7">
+        <participant role="Supplier" referencedUin="design:view:::unknown_view"/>
+        <participant role="Client" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <property name="$metaclass" value="Dependency Link"/>
+    </link>
+    <view uin="id2azw3emmkro68emmksfmy">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
-        <reference df-class-name="reference" referencedUin="design:view:::id4babmemgw87gcemgw8fqj">
+        <reference df-class-name="reference" referencedUin="design:view:::idby95uemmkro68emmksfsl">
             <property name="$shortcutReference" value="true"/>
             <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit"/>
-            <property name="bounds" value="10,10,85,184"/>
+            <property name="bounds" value="320,200,300,290"/>
+            <property name="bounds_setted_by_user" value="true"/>
         </reference>
         <property name="$defaultDiagram" value=""/>
     </view>

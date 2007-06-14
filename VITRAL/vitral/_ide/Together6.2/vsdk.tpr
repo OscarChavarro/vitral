@@ -32,14 +32,18 @@ cross-target=1.5
 [parser]
 java.java14syntax=false
 [editor]
-recent.file.0=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Background.java
-recent.file.1=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Light.java
-recent.file.2=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Camera.java
-recent.file.3=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\RayableObject.java
-recent.file.4=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Material.java
-recent.file.5=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\CubemapBackground.java
+recent.file.0=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\SimpleBackground.java
+recent.file.1=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Geometry.java
+recent.file.2=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Surface.java
+recent.file.3=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Solid.java
+recent.file.4=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Box.java
+recent.file.5=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\TriangleMeshGroup.java
+recent.file.6=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Cone.java
+recent.file.7=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\Curve.java
+recent.file.8=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\ParametricCubicCurve.java
+recent.file.9=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\TriangleMesh.java
 [workspace]
-Designer.vsdk={{0,2,-1,0,0,0,0,0,0,1,0,80,75,17,-1,-1,-1,-1}${0,1,-1,0,0,0,0,0,0,1,0,80,75,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,5,-1,0,0,0,0,0,0,1,0,50,50,17,-1,-1,-1,-1}${0,0,-1,0,0,0,0,1,0,1,1,97,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+Designer.vsdk={{0,2,-1,0,0,0,0,1,0,1,1,80,75,17,-1,-1,-1,-1}${0,1,-1,0,0,0,0,0,0,1,0,80,75,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,5,-1,0,0,0,0,0,0,1,0,50,50,17,-1,-1,-1,-1}${0,0,-1,0,0,0,0,1,0,1,0,97,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
 names.Designer={vsdk}
 [lastOpenProjectName]
 Designer=vsdk
@@ -47,3 +51,9 @@ Designer=vsdk
 homedir=C:\\Archivos de programa\\Java\\jdk1.5.0_06
 [vcs]
 provider.class=CVS LAN
+[print]
+diagram=all
+preview.autoupdate=true
+preview.scale=1
+[newDiagramExpert]
+includeInCurrentDiagram=false

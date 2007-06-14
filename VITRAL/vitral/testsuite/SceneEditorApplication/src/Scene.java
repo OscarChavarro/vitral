@@ -8,13 +8,13 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.render.Raytracer;
 
 public class Scene
@@ -35,13 +35,13 @@ public class Scene
     public SimpleCorridor corridor;
     public boolean showCorridor;
     public boolean showGrid;
-    public ArrayList<RayableObject> things;
+    public ArrayList<SimpleThing> things;
     public int selectedThingIndex; // Negative when none selected
 
     Scene()
     {
         //-----------------------------------------------------------------
-        things = new ArrayList<RayableObject>();
+        things = new ArrayList<SimpleThing>();
         lights = new ArrayList<Light>();
 
         Matrix4x4 R = new Matrix4x4();
@@ -61,22 +61,22 @@ public class Scene
 
         try {
             System.out.print("Loading background: 1");
-            front = RGBAImageBuilder.buildImage(
+            front = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno0_small.jpg"));
             System.out.print("2");
-            right = RGBAImageBuilder.buildImage(
+            right = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno1_small.jpg"));
             System.out.print("3");
-            back = RGBAImageBuilder.buildImage(
+            back = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno2_small.jpg"));
             System.out.print("4");
-            left = RGBAImageBuilder.buildImage(
+            left = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno3_small.jpg"));
             System.out.print("5");
-            down = RGBAImageBuilder.buildImage(
+            down = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno4_small.jpg"));
             System.out.print("6");
-            up = RGBAImageBuilder.buildImage(
+            up = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno5_small.jpg"));
             System.out.println(" OK!");
 
@@ -100,7 +100,7 @@ public class Scene
     public void selectObjectWithMouse(int x, int y)
     {
         Ray r;
-        RayableObject gi;
+        SimpleThing gi;
 
         activeCamera.updateVectors();
         r = activeCamera.generateRay(x, y);
@@ -112,7 +112,7 @@ public class Scene
 
         selectedThingIndex = -1;
         for ( i = things.iterator(); i.hasNext(); index++ ) {
-            gi = (RayableObject)i.next();
+            gi = (SimpleThing)i.next();
             if ( gi.doIntersection(r) && r.t < nearestDistance ) {
                 nearestDistance = r.t;
                 selectedThingIndex = index;
@@ -127,7 +127,7 @@ public class Scene
         System.out.println("Things in scene: " + things.size());
         int c = 0;
         for ( Iterator i = things.iterator(); i.hasNext(); c++ ) {
-            System.out.println("  - Thing[" + c + "]: " + ((RayableObject)i.next()).getGeometry().getClass().getName());
+            System.out.println("  - Thing[" + c + "]: " + ((SimpleThing)i.next()).getGeometry().getClass().getName());
     }
         System.out.println("= END OF REPORT ===========================================================");
     }

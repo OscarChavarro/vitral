@@ -1,6 +1,6 @@
 package vsdk.toolkit.common;
 
-public class Quaternion
+public class Quaternion extends Entity
 {
     public Vector3D direction;
     public double magnitude;

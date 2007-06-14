@@ -1,8 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="idc3h3xemgw87gcemgw8g8r">
+    <link uin="id9v7f5emmkro68emmksgw3.linkid8syogemmkro68emmkwleg">
+        <participant role="Supplier" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <participant role="Client" referencedUin="design:view:::id9v7f5emmkro68emmksgw3"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9v7f5emmkro68emmksgw3.linkid38ekyemmkro68emmkwlev">
+        <participant role="Supplier" referencedUin="design:view:::id7j8xhemmkro68emmksgt2"/>
+        <participant role="Client" referencedUin="design:view:::id9v7f5emmkro68emmksgw3"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9v7f5emmkro68emmksgw3.linkidci9p1emmkro68emmkwlfb">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::id9v7f5emmkro68emmksgw3"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9v7f5emmkro68emmksgw3.linkid95jxeemmkro68emmkwlfr">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::id9v7f5emmkro68emmksgw3"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <view uin="id9v7f5emmkro68emmksgw3">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.render.awt.AwtRGBImageRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,10,146,121"/>
+        </reference>
+        <reference df-class-name="reference54" referencedUin="jdt:e_class:src:vsdk.toolkit.render.awt.AwtRGBColorPaletteRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,170,181,121"/>
+        </reference>
+        <reference df-class-name="reference55" referencedUin="jdt:e_class:src:vsdk.toolkit.render.awt.AwtRGBAImageRenderer">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="176,10,154,121"/>
+        </reference>
         <property name="$defaultDiagram" value=""/>
     </view>
 </nodeSet>

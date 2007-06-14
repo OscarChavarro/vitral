@@ -1,40 +1,223 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="id1gdneemgw87gcemgw8fs9">
+    <link uin="iddz1ezemmkro68emmksfyo.linkid69excemmkro68emmkwkrv">
+        <participant role="Supplier" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <participant role="Client" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="iddz1ezemmkro68emmksfyo.linkid8dwaqemmkro68emmkwkrv">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="iddz1ezemmkro68emmksfyo.linkidgnppxemmkro68emmkwksb">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <view uin="iddz1ezemmkro68emmksfyo">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
-        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Quaternion">
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ColorRgb">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,160,129,217"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.ColorRgb:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="74,160"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="470,112"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference11" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Triangle">
+        <reference df-class-name="reference30" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Matrix4x4">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="780,30,193,418"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Matrix4x4:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="780,178"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="543,96"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference12" referencedUin="jdt:e_class:src:vsdk.toolkit.common.VSDK">
+        <reference df-class-name="reference31" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Ray">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="740,490,121,162"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Ray:origin">
+                <property name="sourceAnchor" value="820,652"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="820,730"/>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Ray:direction">
+                <property name="sourceAnchor" value="790,652"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="790,730"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Ray:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="800,490"/>
+                <property name="bendpoints" value="700,370"/>
+                <property name="targetAnchor" value="530,112"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference13" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vertex">
+        <reference df-class-name="reference32" referencedUin="jdt:e_class:src:vsdk.toolkit.common.VSDK">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="980,10,195,162"/>
         </reference>
-        <reference df-class-name="reference14" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ColorRgb">
+        <reference df-class-name="reference33" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Triangle">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="240,260,129,258"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Triangle:normal">
+                <property name="sourceAnchor" value="369,480"/>
+                <property name="bendpoints" value="420,480,450,670"/>
+                <property name="targetAnchor" value="755,730"/>
+                <property name="bounds_setted_by_user" value="true"/>
+                <reference referencedUin="linklabel:supplierRole:jdt:l_ast:src:vsdk.toolkit.common.Triangle:normal">
+                    <property name="bounds" value="759,710,47,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:clientCardinality:jdt:l_ast:src:vsdk.toolkit.common.Triangle:normal">
+                    <property name="bounds" value="373,460,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:supplierCardinality:jdt:l_ast:src:vsdk.toolkit.common.Triangle:normal">
+                    <property name="bounds" value="678,722,28,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Triangle:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="304,260"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="488,112"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference15" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitor">
+        <reference df-class-name="reference34" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitor">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="1065,180,109,137"/>
         </reference>
-        <reference df-class-name="reference16" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitorConsole">
+        <reference df-class-name="reference35" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Quaternion">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="440,350,121,146"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Quaternion:direction">
+                <property name="sourceAnchor" value="520,496"/>
+                <property name="bendpoints" value="520,580"/>
+                <property name="targetAnchor" value="780,730"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Quaternion:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="506,350"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="506,112"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference17" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Ray">
+        <reference df-class-name="reference36" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vertex">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="210,540,185,313"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Vertex:normal">
+                <property name="sourceAnchor" value="395,818"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="720,838"/>
+                <reference referencedUin="linklabel:supplierRole:jdt:l_ast:src:vsdk.toolkit.common.Vertex:normal">
+                    <property name="bounds" value="669,838,47,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:clientCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:normal">
+                    <property name="bounds" value="399,798,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:supplierCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:normal">
+                    <property name="bounds" value="701,817,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Vertex:tangent">
+                <property name="sourceAnchor" value="395,754"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="720,754"/>
+                <reference referencedUin="linklabel:supplierRole:jdt:l_ast:src:vsdk.toolkit.common.Vertex:tangent">
+                    <property name="bounds" value="667,754,49,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:clientCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:tangent">
+                    <property name="bounds" value="399,734,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:supplierCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:tangent">
+                    <property name="bounds" value="701,734,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Vertex:position">
+                <property name="sourceAnchor" value="395,840"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="720,880"/>
+                <reference referencedUin="linklabel:supplierRole:jdt:l_ast:src:vsdk.toolkit.common.Vertex:position">
+                    <property name="bounds" value="664,880,52,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:clientCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:position">
+                    <property name="bounds" value="399,820,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:supplierCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:position">
+                    <property name="bounds" value="701,858,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.common.Vertex:binormal">
+                <property name="sourceAnchor" value="395,796"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="720,796"/>
+                <reference referencedUin="linklabel:supplierRole:jdt:l_ast:src:vsdk.toolkit.common.Vertex:binormal">
+                    <property name="bounds" value="659,796,57,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:clientCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:binormal">
+                    <property name="bounds" value="399,776,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+                <reference referencedUin="linklabel:supplierCardinality:jdt:l_ast:src:vsdk.toolkit.common.Vertex:binormal">
+                    <property name="bounds" value="701,776,15,16"/>
+                    <property name="bounds_setted_by_user" value="true"/>
+                </reference>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Vertex:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="302,540"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="497,112"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference18" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Matrix4x4">
+        <reference df-class-name="reference37" referencedUin="jdt:e_class:src:vsdk.toolkit.common.QualitySelection">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="0,420,200,594"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.QualitySelection:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="100,420"/>
+                <property name="bendpoints" value="200,310,240,190"/>
+                <property name="targetAnchor" value="479,112"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference19" referencedUin="jdt:e_class:src:vsdk.toolkit.common.QualitySelection">
+        <reference df-class-name="reference38" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitorConsole">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="1040,377,159,194"/>
+            <reference referencedUin="jdt:l_impl:src:vsdk.toolkit.common.ProgressMonitorConsole:vsdk.toolkit.common.ProgressMonitor">
+                <property name="sourceAnchor" value="1119,377"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="1119,317"/>
+            </reference>
         </reference>
-        <reference df-class-name="reference20" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vector3D">
+        <reference df-class-name="reference39" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vector3D">
             <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="720,730,147,306"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.common.Vector3D:vsdk.toolkit.common.Entity">
+                <property name="sourceAnchor" value="810,730"/>
+                <property name="bendpoints" value="660,570"/>
+                <property name="targetAnchor" value="518,112"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference1" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Entity">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="460,10,83,102"/>
         </reference>
         <property name="$defaultDiagram" value=""/>
     </view>

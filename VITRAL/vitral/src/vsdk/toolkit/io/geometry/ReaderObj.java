@@ -1,6 +1,9 @@
 package vsdk.toolkit.io.geometry;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -10,7 +13,7 @@ import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
@@ -171,7 +174,7 @@ public class ReaderObj {
       return null;
     }
     try {
-      return RGBAImageBuilder.buildImage(new File(dirObj +
+      return ImagePersistence.importRGBA(new File(dirObj +
                                                   System.getProperty("file.separator") +
                                                   nomImage));
     }
@@ -277,7 +280,6 @@ public class ReaderObj {
     }
 
     m.calculateNormals();
-    m.calculateMinMaxPositions();
 
     return m;
   }

@@ -1,7 +1,3 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world type programs
-// so the user/programmer can be exposed to all the complexity involved. This will help him
-// to dominate the involved libraries.
-
 import java.io.File;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -22,7 +18,7 @@ import javax.swing.JFrame;
 
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
@@ -62,7 +58,7 @@ public class ImageExample extends JFrame implements
 
         corridor = new SimpleCorridor();
         try {
-            img = RGBAImageBuilder.buildImage(new File("./etc/render.jpg"));
+            img = ImagePersistence.importRGBA(new File("./etc/render.jpg"));
         }
         catch (Exception e) {
             System.err.println(e);
@@ -108,7 +104,7 @@ public class ImageExample extends JFrame implements
 
         // Draw polygon with image
         gl.glEnable(gl.GL_TEXTURE_2D);
-        JoglRGBAImageRenderer.activateGL(gl, img);
+        JoglRGBAImageRenderer.activate(gl, img);
 
         // WARNING: It is not supposed to be, but this code requires to call this in THIS place
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
@@ -154,7 +150,7 @@ public class ImageExample extends JFrame implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activateGL(gl, camera);
+        JoglCameraRenderer.activate(gl, camera);
 
         drawObjectsGL(gl);
     }

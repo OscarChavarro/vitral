@@ -5,7 +5,8 @@ package vsdk.toolkit.common;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.VSDK;
 
-public class Ray {
+public class Ray  extends Entity
+{
     public Vector3D origin;
     public Vector3D direction;
     public double t;

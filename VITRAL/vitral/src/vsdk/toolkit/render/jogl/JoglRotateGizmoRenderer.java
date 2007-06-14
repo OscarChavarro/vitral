@@ -25,7 +25,7 @@ public class JoglRotateGizmoRenderer
         R.M[2][3] = position.z;
 
         gl.glLineWidth(3);
-        JoglMatrixRenderer.drawGL(gl, R);
+        JoglMatrixRenderer.draw(gl, R);
         gl.glLineWidth(1);
 
         double a;
@@ -37,7 +37,7 @@ public class JoglRotateGizmoRenderer
         giro = new Matrix4x4();
 
         gl.glPushMatrix();
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(1, 0, 0);
         gl.glBegin(gl.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
@@ -49,7 +49,7 @@ public class JoglRotateGizmoRenderer
         gl.glPopMatrix();
 
         gl.glPushMatrix();
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(0, 1, 0);
         gl.glBegin(gl.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
@@ -61,7 +61,7 @@ public class JoglRotateGizmoRenderer
         gl.glPopMatrix();
 
         gl.glPushMatrix();
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(0, 0, 1);
         gl.glBegin(gl.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {

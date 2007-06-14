@@ -1,7 +1,3 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world type programs
-// so the user/programmer can be exposed to all the complexity involved. This will help him
-// to dominate the involved libraries.
-
 import java.io.File;
 import java.io.FileReader;
 import java.awt.BorderLayout;

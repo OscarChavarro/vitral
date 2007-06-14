@@ -3,7 +3,7 @@
 //= Module history:                                                         =
 //= - August 22 2005 - David Diaz: Original base version                    =
 //= - November 15 2005 - Oscar Chavarro: Migrated to JOGL Beta Version      =
-//= - November 28 2005 - Oscar Chavarro: Added activateGLCenter method      =
+//= - November 28 2005 - Oscar Chavarro: Added activateCenter method        =
 //= - February 27 2006 - Oscar Chavarro: Added drawGL method                =
 //===========================================================================
 
@@ -20,23 +20,23 @@ public class JoglCameraRenderer
     /**
     stereoMode must have one of the STEREO_MODE values
     */
-    public static void activateGL(GL gl, int stereoMode, Camera cam)
+    public static void activate(GL gl, int stereoMode, Camera cam)
     {
         Matrix4x4 R;
 
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
         R = cam.calculateProjectionMatrix(stereoMode);
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
 
-    public static void activateGL(GL gl, Camera cam)
+    public static void activate(GL gl, Camera cam)
     {
-        activateGL(gl, Camera.STEREO_MODE_CENTER, cam);
+        activate(gl, Camera.STEREO_MODE_CENTER, cam);
     }
 
-    public static void activateGLCenter(GL gl, Camera cam)
+    public static void activateCenter(GL gl, Camera cam)
     {
         Matrix4x4 R;
         Camera camera2 = new Camera(cam);
@@ -51,11 +51,11 @@ public class JoglCameraRenderer
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
         R = camera2.calculateProjectionMatrix(Camera.STEREO_MODE_CENTER);
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
 
-    private static void drawBaseGL(GL gl)
+    private static void drawBase(GL gl)
     {
         gl.glLineWidth((float)1.0);
         gl.glBegin(GL.GL_LINES);
@@ -73,7 +73,7 @@ public class JoglCameraRenderer
         gl.glEnd();
     }
 
-    public static void drawVolumeGL(GL gl, Camera cam)
+    public static void drawVolume(GL gl, Camera cam)
     {
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
         gl.glDisable(gl.GL_LIGHTING);
@@ -168,7 +168,7 @@ public class JoglCameraRenderer
 
     }
 
-    public static void drawGL(GL gl, Camera cam)
+    public static void draw(GL gl, Camera cam)
     {
         gl.glPushMatrix();
         //Matrix4x4 R = cam.calculateProjectionMatrix(cam.STEREO_MODE_CENTER);
@@ -179,9 +179,9 @@ public class JoglCameraRenderer
         R.M[1][3] = p.y;
         R.M[2][3] = p.z;
 
-        JoglMatrixRenderer.activateGL(gl, R);
-        //drawBaseGL(gl);
-        drawVolumeGL(gl, cam);
+        JoglMatrixRenderer.activate(gl, R);
+        //drawBase(gl);
+        drawVolume(gl, cam);
         gl.glPopMatrix();
     }
 }

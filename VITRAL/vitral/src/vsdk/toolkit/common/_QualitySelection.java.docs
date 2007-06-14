@@ -1,0 +1,413 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - October 11 2005 - Gabriel Sarmiento & Lina Rojas: Original base       =
+//=                     version                                             =
+//= - November 1 2005 - Oscar Chavarro: Quality check - comments added      =
+//===========================================================================
+
+package vsdk.toolkit.common;
+
+/**
+ * The class QualitySelection indicatres the quality with which a 3D object is to be 
+ * displayed in screen. The QualitySelection object itsel doesn't display the datra, it 
+ * is simply an object that suggests how to draw data.
+ */
+public class QualitySelection {
+
+    /**
+     * Indicates that the lighting calculation for a 3D object is to be done with the face 
+     * normals
+     */
+    public static final int SHADING_TYPE_FLAT     = 1;
+    /**
+     * TODO: document 
+     */
+    public static final int SHADING_TYPE_GOURAUD  = 2;
+    /**
+     * Indicates that the lighting calculation for a 3D object is to be done with the vertex 
+     * normals
+     */
+    public static final int SHADING_TYPE_PHONG    = 3;
+
+    // Indicates the type of shading algorithm to apply in shaders. This must
+    // be one of the values defined in the constants SHADING_TYPE_* of this
+    // class.
+    private int shadingType;
+
+    private boolean surfaces;
+    private boolean wires;
+    private boolean boundingVolume;
+    private boolean texture;
+    private boolean bumpMap;
+    private boolean points;
+    private boolean normals;
+    private boolean trianglesNormals;
+
+    //Added 28/04/2006
+    private boolean lit;
+    //End Added 28/04/2006
+
+    // To be used in future: depending of the rendering implementation for
+    // each geometry, this can be used to specify the desired amount of
+    // primitives to generate in dynamic or progressive geometry rendering
+    // algorithms.
+    private int lodHint;
+
+    /**
+     * Constructs a default QualitySelection object that will display the surfaces
+     */
+    public QualitySelection() {
+        shadingType = SHADING_TYPE_FLAT;
+
+        surfaces = true;
+        wires = false;
+        boundingVolume = false;
+        texture = false;
+        bumpMap = false;
+        points = false;
+        normals = false;
+        trianglesNormals = false;
+    }
+
+    /**
+     * Contructs a QualitySelection object with the specified parameers
+     * @param surfaces Indicates wether or not the surface of the object is to be displayed
+     * @param wires Indicates wether or not the edges of the faces that compose the object 
+     * are to be displayed
+     * @param boundingVolume Indicates wether or not the bounding volume of the object is to 
+     * be displayed
+     * @param texture Indicates wether or not the object is to be displayed using texture 
+     * mapping
+     * @param bumpMap Indicates wether or not the object is to be displayed using bump mapping
+     * @param points Indicates wether or not the vertexes of the object are to be displayed
+     * @param normals Indicates wether or not the normals of the object are to be displayed
+     * @param trianglesNormals Indicates wether or not the face normals of the object are to 
+     * be displayed
+     * @param shadingType Indicates the behavior of the lighting calculation for this object
+     */
+    public QualitySelection(boolean surfaces,
+                            boolean wires,
+                            boolean boundingVolume,
+                            boolean texture,
+                            boolean bumpMap,
+                            boolean points,
+                            boolean normals,
+                            boolean trianglesNormals, 
+                            int shadingType)
+    {
+        this.surfaces = surfaces;
+        this.wires = wires;
+        this.boundingVolume = boundingVolume;
+        this.texture = texture;
+        this.bumpMap = bumpMap;
+        this.points = points;
+        this.normals = normals;
+        this.shadingType = shadingType;
+        this.trianglesNormals = trianglesNormals;
+    }
+
+    /**
+     * Selects wether or not to display the surface of the object
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setSurfaces(boolean b)
+    {
+        this.surfaces = b;
+    }
+
+    /**
+     * Selects wether or not to display the wireframe of the object
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setWires(boolean b)
+    {
+        this.wires = b;
+    }
+
+    /**
+     * Selects wether or not to display the bounding volume of the object
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setBoundingVolume(boolean b)
+    {
+        this.boundingVolume = b;
+    }
+
+    /**
+     * Selects wether or not to display the object with texture mapping
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setTexture(boolean b)
+    {
+        this.texture = b;
+    }
+
+    /**
+     * Selects wether or not to display the object with bump mapping
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setBumpMap(boolean b)
+    {
+        this.bumpMap = b;
+    }
+
+    /**
+     * Selects wether or not to display the object's vertexes
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setPoints(boolean b)
+    {
+        this.points = b;
+    }
+
+    /**
+     * Selects wether or not to display the object's vertex normals
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setNormals(boolean b)
+    {
+        this.normals = b;
+    }
+
+    /**
+     * Selects wether or not to display the object's face normals
+     * @param b The selection value, true indicates that the quality should be displayed and 
+     * false indicates that it shoulden't
+     */
+    public void setTrianglesNormals(boolean b)
+    {
+        this.trianglesNormals = b;
+    }
+
+    /**
+     * Selects The behavior of the lighting calculation for the object to display
+     * @param b The shading type: 
+     * SHADING_TYPE_FLAT indicates that the behavior of the lighting calculation for this 
+     * object is to be done with the face normals, 
+     * SHADING_TYPE_PHONG indicates that the behavior of the lighting calculation for this 
+     * object is to be done with the vertex normals.
+     */
+    public void setShadingType(int shadingType)
+    {
+        this.shadingType = shadingType;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the surfaces of the 
+     * objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isSurfacesSet()
+    {
+        return this.surfaces;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the wireframe of the 
+     * objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isWiresSet()
+    {
+        return this.wires;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the bounding volume 
+     * of the objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isBoundingVolumeSet()
+    {
+        return this.boundingVolume;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the objects affected by 
+     * this QualitySelection with texture mapping
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isTextureSet()
+    {
+        return this.texture;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the objects affected by 
+     * this QualitySelection with bump mapping
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isBumpMapSet()
+    {
+        return this.bumpMap;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the vertexes of the 
+     * objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isPointsSet()
+    {
+        return this.points;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the vertex normals of the 
+     * objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isNormalsSet()
+    {
+        return this.normals;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to draw the face normals of the 
+     * objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isTrianglesNormalsSet()
+    {
+        return this.trianglesNormals;
+    }
+
+    /**
+     * Returns the shading type to use in the lighting calculation of the objects affested by 
+     * this QualitySelection
+     * @return The shading type to use in the lighting calculation
+     * SHADING_TYPE_FLAT indicates that the behavior of the lighting calculation for this 
+     * object is to be done with the face normals, 
+     * SHADING_TYPE_PHONG indicates that the behavior of the lighting calculation for this 
+     * object is to be done with the vertex normals.
+     */
+    public int getShadingType()
+    {
+        return this.shadingType;
+    }
+
+    /**
+     * Changes the value, if previously the surfaces of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeSurfaces()
+    {
+        surfaces = !surfaces;
+    }
+
+    /**
+     * Changes the value, if previously the wire of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeWires()
+    {
+        wires = !wires;
+    }
+
+    /**
+     * Changes the value, if previously the bounding volume of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeBoundingVolume()
+    {
+        boundingVolume = !boundingVolume;
+    }
+
+    /**
+     * Changes the value, if previously the texture of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeTexture()
+    {
+        texture = !texture;
+    }
+
+    /**
+     * Changes the value, if previously the bump maps of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeBumpMap()
+    {
+        bumpMap = !bumpMap;
+    }
+
+    /**
+     * Changes the value, if previously the points of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changePoints()
+    {
+        points = !points;
+    }
+
+    /**
+     * Changes the value, if previously the vertex normals of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeNormals()
+    {
+        normals = !normals;
+    }
+
+    /**
+     * Changes the value, if previously the face normals of the objects affected by this 
+     * QualitySelection were drawed after calling this method they won't.
+     */
+    public void changeTrianglesNormals()
+    {
+        this.trianglesNormals = !this.trianglesNormals;
+    }
+
+    /**
+     * This methods switchs this quality selection option on the lighting 
+     * calculation for its affected objects trough SHADING_TYPE_FLAT, 
+     * SHADING_TYPE_GOURAUD and SHADING_TYPE_PHONG
+     * */
+    public void changeShadingType()
+    {
+        shadingType++;
+        if ( shadingType == 4 ) {
+            shadingType = 0;
+        }
+    }
+    
+    //Added 28/04/2006
+    /**
+     * Changes the value, if previously the lighting calculations for the objects affected by this 
+     * QualitySelection were performed after calling this method they won't.
+     */
+    public void changeLit()
+    {
+        lit=!lit;
+    }
+
+    /**
+     * This method indicates wether or not to carry out the lighting calculations for the objects 
+     * affected by this QualitySelection
+     * @param lit A boolean value that specifies wether or not to carry out the lighting calculations
+     * */
+    public void setLit(boolean lit)
+    {
+        this.lit=lit;
+    }
+
+    /**
+     * Returns a boolean value that indicates wether or not to perform the lighting calculations on 
+     * the objects affected by this QualitySelection 
+     * @return true if the quality is set and false otherwise.
+     */
+    public boolean isLit()
+    {
+        return lit;
+    }
+    //End Added 28/04/2006
+
+}

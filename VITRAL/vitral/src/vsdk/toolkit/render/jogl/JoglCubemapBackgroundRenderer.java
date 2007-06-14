@@ -48,7 +48,7 @@ public class JoglCubemapBackgroundRenderer
         //- Put image background ------------------------------------------
         RGBAImage images[] = background.getImages();
 
-        JoglCameraRenderer.activateGLCenter(gl, background.getCamera());
+        JoglCameraRenderer.activateCenter(gl, background.getCamera());
     
         gl.glColor3d(1, 1, 1);
 
@@ -56,7 +56,7 @@ public class JoglCubemapBackgroundRenderer
 
 
         // Front
-        JoglRGBAImageRenderer.activateGL(gl, images[0]);
+        JoglRGBAImageRenderer.activate(gl, images[0]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
@@ -75,7 +75,7 @@ public class JoglCubemapBackgroundRenderer
         gl.glEnd();
 
         // Right
-        JoglRGBAImageRenderer.activateGL(gl, images[1]);
+        JoglRGBAImageRenderer.activate(gl, images[1]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
@@ -95,7 +95,7 @@ public class JoglCubemapBackgroundRenderer
         gl.glEnd();
 
         // Back
-        JoglRGBAImageRenderer.activateGL(gl, images[2]);
+        JoglRGBAImageRenderer.activate(gl, images[2]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
@@ -115,7 +115,7 @@ public class JoglCubemapBackgroundRenderer
         gl.glEnd();
 
         // Left
-        JoglRGBAImageRenderer.activateGL(gl, images[3]);
+        JoglRGBAImageRenderer.activate(gl, images[3]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
@@ -135,7 +135,7 @@ public class JoglCubemapBackgroundRenderer
         gl.glEnd();
 
         // Down
-        JoglRGBAImageRenderer.activateGL(gl, images[4]);
+        JoglRGBAImageRenderer.activate(gl, images[4]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
@@ -155,7 +155,7 @@ public class JoglCubemapBackgroundRenderer
         gl.glEnd();
 
         // Up
-        JoglRGBAImageRenderer.activateGL(gl, images[5]);
+        JoglRGBAImageRenderer.activate(gl, images[5]);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, 
                            gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 

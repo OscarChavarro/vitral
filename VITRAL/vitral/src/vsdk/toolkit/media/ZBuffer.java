@@ -8,12 +8,14 @@
 package vsdk.toolkit.media;
 
 import java.util.ArrayList;
+
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBColorPalette;
 
-public class ZBuffer {
+public class ZBuffer extends Entity {
     private float[] depth;
     private int xSize;
     private int ySize;

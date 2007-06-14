@@ -1,18 +1,46 @@
-import java.io.*;
+// Basic java classes
+import java.io.File;
+import java.io.IOException;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+// AWT GUI java classes
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
-import util.filters.*;
-import vsdk.toolkit.common.*;
-import vsdk.toolkit.environment.*;
-import vsdk.toolkit.environment.geometry.*;
-import vsdk.toolkit.gui.*;
-import vsdk.toolkit.io.geometry.*;
-import vsdk.toolkit.render.jogl.*;
+// Swing GUI java classes
+import javax.swing.JFrame;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+
+// JOGL classes
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLEventListener;
+
+// VSDK classes
+import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.gui.CameraController;
+import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.QualitySelectionController;
+import vsdk.toolkit.io.geometry.ReaderObj;
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
+import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
+
+// Application classes
+import util.filters.ObjectFilter;
 
 /**
  */
@@ -83,7 +111,7 @@ public class MeshExample
 
     private void drawObjectsGL(GL gl) {
         gl.glLoadIdentity();
-        JoglMeshGroupRenderer.draw(gl, meshGroup, qualitySelection);
+        JoglTriangleMeshGroupRenderer.draw(gl, meshGroup, qualitySelection);
         gl.glEnd();
     }
 
@@ -97,7 +125,7 @@ public class MeshExample
         gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
         
-        JoglCameraRenderer.activateGL(gl, camera);
+        JoglCameraRenderer.activate(gl, camera);
         JoglLightRenderer.activate(gl, light);
 
         drawObjectsGL(gl);

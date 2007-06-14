@@ -25,10 +25,10 @@ public class JoglScaleGizmoRenderer
         R.M[2][3] = position.z;
 
         gl.glLineWidth(3);
-        JoglMatrixRenderer.drawGL(gl, R);
+        JoglMatrixRenderer.draw(gl, R);
 
         gl.glPushMatrix();
-        JoglMatrixRenderer.activateGL(gl, R);
+        JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(1, 1, 0);
         gl.glBegin(gl.GL_LINES);
           gl.glVertex3d(-0.2, -0.2, 0);

@@ -10,7 +10,8 @@ package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.VSDK;
 
-public class Vector3D {
+public class Vector3D extends Entity 
+{
     /// Yes, they are public due to efficiency issues
     public double x, y, z;
 

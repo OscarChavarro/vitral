@@ -1,10 +1,12 @@
 //===========================================================================
 package vsdk.toolkit.environment;
 
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 
-public abstract class Background {
+public abstract class Background extends Entity
+{
     public Background() {
         ;
     }

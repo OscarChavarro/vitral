@@ -1,23 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="idd5suqemgw87gcemgw8g28">
+    <link uin="id7ekkjemmkro68emmksgin.linkid1f7lpemmkro68emmkwdy8">
+        <participant role="Supplier" referencedUin="design:view:::id8oq39emmkro68emmksg25"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id7ekkjemmkro68emmksgin.linkid4ll84emmkro68emmkwl1f">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id7ekkjemmkro68emmksgin.linkid8vc4remmkro68emmkwl1v">
+        <participant role="Supplier" referencedUin="design:view:::idg9bq3emmkro68emmksg4b"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id7ekkjemmkro68emmksgin.linkidgflw0emmkro68emmkwl2a">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id7ekkjemmkro68emmksgin.linkid3po65emmkro68emmkwl2q">
+        <participant role="Supplier" referencedUin="design:view:::idbc9themmkro68emmksgpl"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id7ekkjemmkro68emmksgin.linkid3e0u2emmkro68emmkwl36">
+        <participant role="Supplier" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <participant role="Client" referencedUin="design:view:::id7ekkjemmkro68emmksgin"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <view uin="id7ekkjemmkro68emmksgin">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
-        <reference df-class-name="reference" referencedUin="design:view:::iddenusemgw87gcemgw8g3z">
-            <property name="$shortcutReference" value="true"/>
-            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.geometry"/>
-        </reference>
-        <reference df-class-name="reference4" referencedUin="design:view:::iddmbcnemgw87gcemgw8g34">
+        <reference df-class-name="reference" referencedUin="design:view:::iddj5qeemmkro68emmksglo">
             <property name="$shortcutReference" value="true"/>
             <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.audio"/>
+            <property name="bounds" value="10,10,83,95"/>
         </reference>
-        <reference df-class-name="reference8" referencedUin="design:view:::id4oussemgw87gcemgw8g4u">
-            <property name="$shortcutReference" value="true"/>
-            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.image"/>
-        </reference>
-        <reference df-class-name="reference10" referencedUin="design:view:::idhtnbtemgw87gcemgw8g5p">
+        <reference df-class-name="reference4" referencedUin="design:view:::idey3etemmkro68emmksgrb">
             <property name="$shortcutReference" value="true"/>
             <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.video"/>
+            <property name="bounds" value="113,10,83,95"/>
+        </reference>
+        <reference df-class-name="reference6" referencedUin="design:view:::id7cjvmemmkro68emmksgnu">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.geometry"/>
+            <property name="bounds" value="10,150,83,104"/>
+        </reference>
+        <reference df-class-name="reference9" referencedUin="design:view:::idbc9themmkro68emmksgpl">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.image"/>
+            <property name="bounds" value="216,10,193,152"/>
         </reference>
         <property name="$defaultDiagram" value=""/>
     </view>

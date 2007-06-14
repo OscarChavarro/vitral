@@ -2,12 +2,13 @@
 
 package vsdk.toolkit.environment;
 
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 
 // All the public variables here are ugly, but I
 // wanted Lights and Surfaces to be "friends"
-public class Light
+public class Light extends Entity
 {
     public static final int AMBIENT = 0;
     public static final int DIRECTIONAL = 1;

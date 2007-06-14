@@ -1,6 +1,3 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world type programs
-// so the user/programmer can be exposed to all the complexity involved. This will help him
-// to dominate the involved libraries.
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -96,7 +93,7 @@ public class CameraExample extends JFrame implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        vsdk.toolkit.render.jogl.JoglCameraRenderer.activateGL(gl, camera);
+        vsdk.toolkit.render.jogl.JoglCameraRenderer.activate(gl, camera);
 
         drawObjectsGL(gl);
     }

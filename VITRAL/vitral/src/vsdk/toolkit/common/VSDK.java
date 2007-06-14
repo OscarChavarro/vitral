@@ -11,6 +11,32 @@ import java.text.FieldPosition;
 
 import vsdk.toolkit.common.Vector3D;
 
+/**
+!\mainpage VSDK Toolkit documentation.
+
+\section intro Introduction: the VSDK Architecture and design specification
+
+This is an automatically generated page from the VSDK source code. It is not
+editable.  You can browse the literate programming style documentation, but
+remember to take a look first at the document describing the VSDK toolkit:<P>
+
+<A HREF="../ArchitectureAndDesignSpecification.html">Architecture and design specification of the VSDK toolkit</A>.
+
+\section model The VSDK toolkit data model
+
+At some point in the future, the data model implemented on the toolkit will be 
+described in an external document, and that document will be linked here. At
+the moment such a detailed description is not available.
+
+\section next What to do next?
+
+The recomended steps are: 1. Install the VSDK toolkit. 2. Take a look at the
+samples in the testsuite directory. 3. Have this API documentation available
+and look at specific method description for help. 4. Have in hand a good
+computer graphics textbook.
+
+*/
+
 public class VSDK
 {
     public static final double EPSILON = 1e-6;

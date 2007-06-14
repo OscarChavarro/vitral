@@ -2,7 +2,8 @@
 
 package vsdk.toolkit.common;
 
-public class Triangle {
+public class Triangle extends Entity 
+{
   private int point0;
   private int point1;
   private int point2;
@@ -12,24 +13,15 @@ public class Triangle {
   private int vt2;
 
   /**
-   * @directed
-   * @supplierRole normal
-   * @supplierCardinality 0..1
-   * @clientCardinality 1
-   * @link aggregation*/
+   */
   public Vector3D normal;
 
   /**
-   *
    */
   public Triangle() {
   }
 
   /**
-   *
-   * @param point0 long
-   * @param point1 long
-   * @param point2 long
    */
   public Triangle(int point0, int point1, int point2) {
     this.point0 = point0;
@@ -53,24 +45,18 @@ public class Triangle {
   }
 
   /**
-   *
-   * @return long
    */
   public int getPoint0() {
     return this.point0;
   }
 
   /**
-   *
-   * @return long
    */
   public int getPoint1() {
     return this.point1;
   }
 
   /**
-   *
-   * @return long
    */
   public int getPoint2() {
     return this.point2;
@@ -93,24 +79,18 @@ public int getVt0()
 
 
   /**
-   *
-   * @param point0 long
    */
   public void setPoint0(int point0) {
     this.point0 = point0;
   }
 
   /**
-   *
-   * @param point1 long
    */
   public void setPoint1(int point1) {
     this.point1 = point1;
   }
 
   /**
-   *
-   * @param point2 long
    */
   public void setPoint2(int point2) {
     this.point2 = point2;

@@ -2,10 +2,6 @@
  * GravZeroAdapter.java
  *
  * Created on 1 de septiembre de 2005, 06:30 PM
- *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
  */
 
 package vsdk.toolkit.gui.adapters;
@@ -14,27 +10,23 @@ package vsdk.toolkit.gui.adapters;
  *
  * Created on 25 de agosto de 2005, 01:08 PM
  *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
  */
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.gui.*;
+import vsdk.toolkit.gui.CameraController;
 
 import vsdk.toolkit.common.Vector3D;
 
-import javax.swing.*;
-import javax.swing.event.*; 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import javax.swing.JComponent;
 import java.awt.Component;
 
 
-/**
- *
- * @author usuario
- */
 public class ControllerAdapter implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener 
 {
     private CameraController cameraController;

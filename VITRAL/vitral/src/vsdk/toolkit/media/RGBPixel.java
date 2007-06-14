@@ -7,6 +7,8 @@
 
 package vsdk.toolkit.media;
 
+import vsdk.toolkit.common.Entity;
+
 /**
 Respect to data representation:
 
@@ -20,7 +22,7 @@ performance issues in a lot of algorithms, as this avoids indirections.
 Nevertheless, get and set methods are provided.
 */
 
-public class RGBPixel {
+public class RGBPixel extends Entity {
     public byte r;
     public byte g;
     public byte b;

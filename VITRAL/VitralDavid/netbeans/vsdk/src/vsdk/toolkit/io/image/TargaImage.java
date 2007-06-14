@@ -1,0 +1,274 @@
+package vsdk.toolkit.io.image;
+
+import java.io.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.math.*;
+
+public class TargaImage 
+{
+        private static final int NO_TRANSPARENCY = 255;
+        private static final int FULL_TRANSPARENCY = 0;
+    
+        private short idLength;
+        private short colorMapType;
+        private short imageType;
+        private int cMapStart;
+        private int cMapLength;
+        private short cMapDepth;
+        private int xOffset;
+        private int yOffset;
+        private int width;
+        private int height;
+        private short pixelDepth;
+        private short imageDescriptor;
+        private DirectColorModel cm;
+        public byte[] pixels;
+
+        public TargaImage(File srcFile)throws ImageNotRecognizedException
+        {
+            try
+            {
+                open(srcFile);
+            }
+            catch(IOException ioe)
+            {
+                throw new ImageNotRecognizedException("I/O Error while reading the image", srcFile);
+            }
+        }
+    
+        private void open(File srcFile) throws ImageNotRecognizedException, IOException 
+        {
+                byte red = 0;
+                byte green = 0;
+                byte blue = 0;
+                byte alpha = FULL_TRANSPARENCY;
+                int srcLine = 0;
+        
+                FileInputStream fis = new FileInputStream(srcFile);
+                BufferedInputStream bis = new BufferedInputStream(fis, 8192);
+                DataInputStream dis = new DataInputStream(bis);
+        
+                idLength = (short) dis.read();
+                colorMapType = (short) dis.read();
+                imageType = (short) dis.read();
+                cMapStart = (int) flipEndian(dis.readShort());
+                cMapLength = (int) flipEndian(dis.readShort());
+                cMapDepth = (short) dis.read();
+                xOffset = (int) flipEndian(dis.readShort());
+                yOffset = (int) flipEndian(dis.readShort());
+                width = (int) flipEndian(dis.readShort());
+                height = (int) flipEndian(dis.readShort());
+                pixelDepth = (short) dis.read();
+        
+                if (pixelDepth == 24) 
+                {
+                        cm = new DirectColorModel(24, 0xFF0000, 0xFF00, 0xFF);
+                        pixels = new byte[width * height*3];
+                        System.out.println("tam: "+(width * height*3));
+                } 
+                else
+                { 
+                        if (pixelDepth == 32) 
+                        {
+                                cm = new DirectColorModel(32, 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
+                                pixels = new byte[width * height*4];
+                                System.out.println("tam: "+(width * height*4));
+                        }
+                        else
+                        {
+                                System.out.println("No se pudo leer el archivo");       
+                        }
+                }
+        
+                imageDescriptor = (short) dis.read();
+        
+                if (idLength > 0) 
+                {
+                        bis.skip(idLength);
+                }
+        
+                printInfo();
+        
+                switch(imageType)
+                {
+                        case 1:
+                                throw new ImageNotRecognizedException("Por el momento no se puede cargar imagenes descomprimidas que usan color map", srcFile);
+                        case 2: //descomprimidas, true type
+                                
+                                System.out.println("Imagen descomprimida usando true color");           
+                    
+                                System.out.println((height - 1)*width);
+
+                                for (int i = 0; i < (height - 1); i++) 
+                                {
+                                        srcLine = i * width;
+                                        for (int j = 0; j < width; j++) 
+                                        {
+                                                blue = dis.readByte();
+                                                green = dis.readByte();
+                                                red = dis.readByte();
+                                                if (pixelDepth == 32) 
+                                                {
+                                                        alpha = dis.readByte();
+                                                        pixels[srcLine*4 + 4*j + 0]=red;
+                                                        pixels[srcLine*4 + 4*j + 1]=green;
+                                                        pixels[srcLine*4 + 4*j + 2]=blue;
+                                                        pixels[srcLine*4 + 4*j + 3]=alpha;
+                                        
+                                                } 
+                                                else 
+                                                {
+                                                        pixels[srcLine*3 + 3*j + 0]=red;
+                                                        pixels[srcLine*3 + 3*j + 1]=green;
+                                                        pixels[srcLine*3 + 3*j + 2]=blue;
+
+                                                }
+                                        }
+                                }
+                                System.out.println("Termino de leer la imagen");                
+                        break;
+                
+                        case 3:
+                                throw new ImageNotRecognizedException("Por el momento no se puede cargar imagenes descomprimidas en blanco y negro", srcFile);
+                        case 9:
+                                throw new ImageNotRecognizedException("Por el momento no se puede cargar imagenes comprimidas que usan color map", srcFile);
+                        case 10:
+                                System.out.println("Imagen comprimida usando true color");
+                                int pixel=0;
+                                int pixIndex=0;
+                                int tam=this.height*this.width;
+
+                                byte trunc=0x7f;
+                                byte repetitionCount;
+                                while(pixel<tam)
+                                {
+                                        repetitionCount=dis.readByte();
+                                        if(repetitionCount<=0)
+                                        {       
+                                                //RLE PACKET
+                                                repetitionCount=(byte)(repetitionCount & trunc);
+                                                blue = dis.readByte();
+                                                green = dis.readByte();
+                                                red = dis.readByte();
+
+                                                if (pixelDepth == 32) 
+                                                {
+                                                        alpha = dis.readByte();
+                                                }
+                                                for(int i=0; i<=repetitionCount; i++)
+                                                {
+                                                        this.pixels[pixIndex]=red;
+                                                        pixIndex++;
+                                                        this.pixels[pixIndex]=green;
+                                                        pixIndex++;
+                                                        this.pixels[pixIndex]=blue;
+                                                        pixIndex++;
+                                                        if(this.pixelDepth==32)
+                                                        {
+                                                                this.pixels[pixIndex]=alpha;
+                                                                pixIndex++;
+                                                        }
+                                                        
+                                                        pixel++;
+                                                        
+                                                        if(pixel==tam)
+                                                        {
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                        else
+                                        {
+                                                //RAW PACKET
+                                                for(int i=0; i<=repetitionCount; i++)
+                                                {
+                                                        blue = dis.readByte();
+                                                        green = dis.readByte();
+                                                        red = dis.readByte();
+                                                        if (pixelDepth == 32) 
+                                                        {
+                                                                alpha = dis.readByte();
+                                                        }
+                                                        this.pixels[pixIndex]=red;              
+                                                        pixIndex++;                                                                                     
+                                                        this.pixels[pixIndex]=green;                                                                                                    
+                                                        pixIndex++;                                                                                     
+                                                        this.pixels[pixIndex]=blue;                                                                                                     
+                                                        pixIndex++;                                                                                     
+                                                        if (pixelDepth == 32) 
+                                                        {
+                                                                this.pixels[pixIndex]=alpha;                                                                                                    
+                                                                pixIndex++;                                                                                     
+                                                        }
+                                                        pixel++;
+                                                        
+                                                        if(pixel==tam)
+                                                        {
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                }
+                                System.out.println("Termino de cargar la imagen");
+                        break;
+
+                        case 11:
+                                throw new ImageNotRecognizedException("Por el momento no se puede cargar imagenes comprimidas en blanco y negro", srcFile);
+                        default:
+                                throw new ImageNotRecognizedException("No se reconoce el tipo de imagen en el archivo.", srcFile);
+                }
+        
+                fis.close();
+
+        }
+
+        public int getPixelDepth()
+        {
+                return this.pixelDepth;
+        }
+    
+        public void printInfo()
+        {
+                System.out.println("idLength: "+idLength);      
+                System.out.println("colorMapType: "+colorMapType);      
+                System.out.println("imageType: "+imageType);    
+                System.out.println("cMapStart: "+cMapStart);    
+                System.out.println("cMapLength: "+cMapLength);  
+                System.out.println("cMapDepth: "+cMapDepth);    
+                System.out.println("xOffset: "+xOffset);        
+                System.out.println("yOffset: "+yOffset);        
+                System.out.println("width: "+width);    
+                System.out.println("height: "+height);  
+                System.out.println("pixelDepth: "+pixelDepth);  
+                System.out.println("imageDescriptor: "+imageDescriptor);        
+        }
+    
+        public int getHeight()
+        {
+                return this.height;     
+        }
+
+        public int getWidth()
+        {
+                return this.width;
+        }
+        
+        public byte[] getTexture()
+        {
+                return this.pixels;     
+        }
+        
+    
+        public Dimension getSize() 
+        {
+                return new Dimension(width, height);
+        }
+
+        /* ----------------------------------------------------- flipEndian */ 
+        private short flipEndian(short signedShort) 
+        {
+                int input = signedShort & 0xFFFF;
+                return (short) (input << 8 | (input & 0xFF00) >>> 8);
+        }
+}

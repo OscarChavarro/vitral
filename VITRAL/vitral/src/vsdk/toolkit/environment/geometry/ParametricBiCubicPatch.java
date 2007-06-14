@@ -18,7 +18,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 
-public class ParametricBiCubicPatch extends Geometry {
+public class ParametricBiCubicPatch extends Surface {
   public Matrix4x4 Gx_MATRIX = new Matrix4x4();
   public Matrix4x4 Gy_MATRIX = new Matrix4x4();
   public Matrix4x4 Gz_MATRIX = new Matrix4x4();
@@ -293,6 +293,10 @@ public class ParametricBiCubicPatch extends Geometry {
     return gridPoints;
   }
 
+    /**
+     Check the general interface contract in superclass method
+     Geometry.doIntersection.
+    */
     public boolean doIntersection(Ray r)
     {
         return false;

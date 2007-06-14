@@ -1,0 +1,1247 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:st1="urn:schemas-microsoft-com:office:smarttags"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List
+href="ArchitectureAndDesignSpecification_archivos/filelist.xml">
+<link rel=Edit-Time-Data
+href="ArchitectureAndDesignSpecification_archivos/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>VSDK – Vitral Software Development Kit</title>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="country-region"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="place"/>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>a</o:Author>
+  <o:LastAuthor>a</o:LastAuthor>
+  <o:Revision>3</o:Revision>
+  <o:TotalTime>404</o:TotalTime>
+  <o:Created>2006-05-03T03:23:00Z</o:Created>
+  <o:LastSaved>2006-05-03T03:23:00Z</o:LastSaved>
+  <o:Pages>8</o:Pages>
+  <o:Words>3335</o:Words>
+  <o:Characters>18347</o:Characters>
+  <o:Company>b</o:Company>
+  <o:Lines>152</o:Lines>
+  <o:Paragraphs>43</o:Paragraphs>
+  <o:CharactersWithSpaces>21639</o:CharactersWithSpaces>
+  <o:Version>11.5606</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:HyphenationZone>21</w:HyphenationZone>
+  <w:PunctuationKerning/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]--><!--[if !mso]><object
+ classid="clsid:38481807-CA0E-42D2-BF39-B33AF135CC4D" id=ieooui></object>
+<style>
+st1\:*{behavior:url(#ieooui) }
+</style>
+<![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:justify;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	text-align:justify;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	text-align:justify;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	font-style:italic;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 73.3pt 70.85pt 63.0pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:9261453;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-907127982 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1
+	{mso-list-id:196701118;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1247554050 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2
+	{mso-list-id:381172420;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1904262672 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:39.25pt;
+	mso-level-number-position:left;
+	margin-left:39.25pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3
+	{mso-list-id:1023285751;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1463941790 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l4
+	{mso-list-id:1276015061;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-2014672082 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l5
+	{mso-list-id:1618640418;
+	mso-list-type:hybrid;
+	mso-list-template-ids:2099293238 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l5:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l6
+	{mso-list-id:1666281948;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-993863724 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l6:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l7
+	{mso-list-id:1776899578;
+	mso-list-type:hybrid;
+	mso-list-template-ids:833512228 201981953 201981955 201981957 201981953 201981955 201981957 201981953 201981955 201981957;}
+@list l7:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Tabla normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+table.MsoTableGrid
+	{mso-style-name:"Tabla con cuadrícula";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	border:solid windowtext 1.0pt;
+	mso-border-alt:solid windowtext .5pt;
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-border-insideh:.5pt solid windowtext;
+	mso-border-insidev:.5pt solid windowtext;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2050"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=ES style='tab-interval:35.4pt'>
+
+<div class=Section1>
+
+<p class=MsoNormal align=center style='text-align:center'><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='font-size:16.0pt;mso-ansi-language:EN-US'>VSDK
+– <span class=SpellE>Vitral</span> Software Development Kit<o:p></o:p></span></b></p>
+
+<p class=MsoNormal align=center style='text-align:center'><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='font-size:16.0pt;mso-ansi-language:EN-US'>TOOLKIT
+LEVEL - Architecture and Design Document<o:p></o:p></span></b></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Document
+History<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
+ mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt;mso-border-insideh:
+ .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Date<o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span class=SpellE><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Autor</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>(s)<o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.1pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Comments<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>February
+  16 2006<o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.05pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Oscar <span
+  class=SpellE>Chavarro</span><o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Preliminary
+  version<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>April 29
+  2006<o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.05pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Oscar <span
+  class=SpellE>Chavarro</span><o:p></o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Update<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.05pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes'>
+  <td width=240 valign=top style='width:144.05pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.05pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width=240 valign=top style='width:144.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>Toolkit overview<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The “<span
+class=SpellE>Vitral</span> Software Development Kit” (VSDK) toolkit is a
+software product, part of the computer graphics <span class=SpellE>testbed</span>
+of the computer graphics laboratory/research group “<span class=SpellE>Takina</span>”,
+of the <span class=SpellE>Pontificia</span> Universidad <span class=SpellE>Javeriana</span>
+(PUJ) at Bogotá <st1:country-region w:st="on"><st1:place w:st="on">Colombia</st1:place></st1:country-region>.
+The toolkit is a current java implementation of the <span class=SpellE>group´s</span>
+computer graphics architecture “VITRAL”, <span class=GramE>that points</span>
+forward supporting all of its defined requirements.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The VSDK
+toolkit is build on top of Java because this is the most popular programming
+language in the PUJ engineering faculty, so local community will accept it
+easily. This toolkit is intended to constitute the common development platform
+for all computer graphics teaching and research activities inside the group,
+and perhaps to be considered as a programming alternative outside this scope,
+for the developing of computer graphics applications.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+detected advantages of the VSDK toolkit as compared with current existing
+similar alternatives as SDL, <span class=SpellE>vrjuggler</span>, Avocado,
+Crystal Space and others, are the following:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l4 level1 lfo5;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>It is written in Java (this, of
+     course, is an advantage only for the people who likes this language), so
+     can benefit from this <span class=SpellE>language´s</span> advantages.
+     Namely, the authors believe that Java is a very simple language, so the
+     VSDK toolkit will be very programmer-friendly, as opposed to current C++
+     systems, which requires a higher programming learning curve. Other
+     consequences could be portability, ease of maintaining and acceptance
+     probabilities inside an ever growing Java community.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l4 level1 lfo5;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>If follows a clear software engineering
+     process, which means well defined requirements, architecture and so on. It
+     is expected that the VSDK toolkit be a piece of software with a fair good
+     quality.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l4 level1 lfo5;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>It uses a clear object oriented
+     programming schema, with standardized names and style, but over all,
+     follows a clear correspondence between computer graphics concepts and its
+     implementation, making it ideal for accompanying computer graphics
+     textbooks, guides and courses.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l4 level1 lfo5;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The authors and the <span
+     class=SpellE>Takina</span> group members will understand it </span><span
+     lang=EN-US style='font-family:Wingdings;mso-ascii-font-family:"Times New Roman";
+     mso-hansi-font-family:"Times New Roman";mso-ansi-language:EN-US;
+     mso-char-type:symbol;mso-symbol-font-family:Wingdings'><span
+     style='mso-char-type:symbol;mso-symbol-font-family:Wingdings'>J</span></span><span
+     lang=EN-US style='mso-ansi-language:EN-US'> … because this kind of systems
+     are in no way obvious or simple, the “reinvent your wheel” approach,
+     besides its pains, will pay in some way. It is expected that the
+     availability of this toolkit and the local proficiency on its use will
+     help in future computer graphics research, and will ease the start of a
+     future phase in which real contributions (in the sense of new knowledge)
+     could be made. The VSDK toolkit is really the local <span class=SpellE>testbed</span>
+     for the <span class=SpellE>Takina</span> research efforts.<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It must be
+noted that the VSDK is made up of two main pieces: this toolkit and a higher
+level of abstraction framework.<span style='mso-spacerun:yes'>  </span>The
+framework is currently an experimental set of ideas and proposals, build on top
+of these toolkit that integrates the toolkit in a distributed computing
+environment, but it is outside the scope of this document.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
+applications could be written on top of the VSDK toolkit, or on top of its
+framework, following in that way the full VSDK architecture specification.
+Inside the VSDK toolkit distribution, however, only toolkit level applications
+are maintained.<o:p></o:p></span></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>Toolkit distribution and
+file organization<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The VSDK toolkit
+is distributed in the form of two compressed files: VSDK_&lt;<span
+class=SpellE>dateversion</span>&gt;.<span class=SpellE>tar.gz</span> and
+VSDK_DATA_&lt;<span class=SpellE>dateversion</span>&gt;.<span class=SpellE>tar.gz</span>.
+The distribution follows a de-facto POSIX organization, with the following
+directory names:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>_<span class=SpellE>ide</span></span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'>: the toolkit is independent of the IDE used,
+so all the IDE-specific files are enclosed inside this directory. There is a
+sub-directory for each IDE tool, like “Together” or “<span class=SpellE>Jbuilder</span>”.
+The IDE tools must be configured to put all its data inside this directory, and
+do no touch in any way the other directories. Most of the files here are
+temporary, which means that are not necessary for the software distribution,
+but only for the particular <span class=SpellE>IDEs</span>. This implies that
+in the distribution, it is common to found most files deleted, and only the
+main project definition <span class=GramE>files for each IDE is</span> always
+kept.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>classes</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>: this directory is meant to contain the
+compiled java modules (.class files). In the case of the main toolkit library,
+this directory is temporary, and its contents can be deleted at any time
+without affecting the distribution.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>doc</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>: this directory contains the usual files found
+on “doc”, “html” and “man” directories in UNIX systems. This document, other
+toolkit related documents, development logs (Personal Software Process
+documents), standards, guides, bug tracks, diagrams and APIs are found inside
+this directory.<span style='mso-spacerun:yes'>  </span>None of these files
+should be deleted, as they form an integral part of the toolkit.<span
+style='mso-spacerun:yes'>  </span>Note that this directory also contains
+“source code” specs for automatic documentation generation tools like <span
+class=SpellE>doxygen</span> [<span style='background:yellow;mso-highlight:yellow'>DOXYGEN</span>],
+and current results of it.<span style='mso-spacerun:yes'>  </span>In the case
+of automatically generated documentation, the files could be deleted, but
+usually, the last version is kept.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>etc</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>: this directory contains the usual files found
+on “etc”, “shared” and “data” directories in UNIX systems, which means
+configuration files and data files. The directory is organized in
+subdirectories for each data type.<span style='mso-spacerun:yes'>  </span>Note
+that this is the bigger directory in terms of data storage size, and it is
+distributed broken in two distribution files. In the main VSDK compressed file
+are only available the smaller data files, intended for quick <span
+class=SpellE>testsuite</span> use.<span style='mso-spacerun:yes'>  </span>In
+the VSDK-DATA are distributed the larger files, intended for practical use on
+applications, benchmarking-type examples and specific techniques tests that
+uses massive information, as terrain rendering.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>lib</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>: this is the directory meant to contain the
+VSDK .jar files, or java library files.<span style='mso-spacerun:yes'> 
+</span>Its contents could be deleted in a source-only distribution, but usually
+contains the current toolkit version libraries compiled in.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE><b style='mso-bidi-font-weight:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>src</span></b></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: this is the directory where the
+source code for the toolkit implementation lies.<span
+style='mso-spacerun:yes'>  </span>It is organized in a sub-directory structure
+related to packages / class categories, as mentioned later in this document.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:39.25pt;text-indent:-18.0pt;mso-list:
+l2 level1 lfo3;tab-stops:list 39.25pt'><![if !supportLists]><span lang=EN-US
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE><b style='mso-bidi-font-weight:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>testsuite</span></b></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: this directory contains small
+programs, written using the VSDK toolkit. They are in nature catalogued in 4
+groups: “Hello world” examples for underlying technologies, VSDK code examples,
+computer graphics techniques written using VSDK and sample VSDK functional
+applications.<span style='mso-spacerun:yes'>  </span>The first <span
+class=GramE>group of programs are</span> identified by names with a preceding
+“_” (underscore) character. The other <span class=GramE>group of programs are</span>
+identified by name due to a postfix of its type (for example, a
+Cohen-Sutherland line clipping technique example is in a directory called “<span
+class=SpellE>CohenSutherlandClippingTechnique</span>”). All of the
+subdirectories in the <span class=SpellE>testsuite</span> directory contains a
+program with this standard name identification, and a sub-structure of
+directories similar to the one of the main VSDK distribution, in other words,
+all this directories contains sub-directories like “<span class=SpellE>src</span>”,
+“classes” and so on.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>Toolkit compilation and
+installation procedures<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The toolkit
+depends on some underlying <span class=GramE>systems, that</span> must be
+installed prior to the installation or compilation of the VSDK.<span
+style='mso-spacerun:yes'>  </span>These pre-requisite systems can be necessary,
+recommended or optional as follows:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Necessary pre-requisites:
+     currently, the only pre-requisite is a Java Virtual Machine for the java
+     toolkit implementation. A JRE can be use for running applications, but a
+     complete JSDK is recommended if application development is needed.<span
+     style='mso-spacerun:yes'>  </span>Current VSDK implementation is meant to
+     run on version 1.5 of the JVM, and will not function on early releases.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Recommended pre-requisites: the
+     only really recommended system for VSDK toolkit is JOGL. Note that JOGL is
+     not available an all Java platforms, particularly on <span class=SpellE>PDAs</span>.
+     On most PCs and UNIX/Linux systems can be installed, and it is recommended
+     as VSDK toolkit rendering subsystem makes intensive use of it.<span
+     style='mso-spacerun:yes'>  </span>Note that JOGL requires a previous
+     OpenGL executing environment. No OpenGL development environment is needed
+     by VSDK or JOGL.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Optional software: any java IDE
+     like Borland <span class=SpellE>JBuilder</span>, Borland Together,
+     Eclipse, <span class=SpellE>JCreator</span> software can be used with
+     VSDK.<span style='mso-spacerun:yes'>  </span>For configuring each IDE tool
+     a procedure is recommended, in which the “_<span class=SpellE>ide</span>”
+     directory layout is conserved. Note that the VSDK toolkit can be used
+     without any IDE, but some users prefer to have their aid.<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span lang=EN-US style='mso-ansi-language:
+EN-US'>This ideas</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+are expressed graphically in the UML package diagram shown in figure <span
+style='background:yellow;mso-highlight:yellow'>1</span>. Note that the toolkit
+can have various types of builds, depending of the underlying available
+pre-requisites.<span style='mso-spacerun:yes'>  </span>In the absence of IDE
+tools, there are always a set of scripts, supplied in DOS/Windows batch files
+(.bat) and Unix BASH shell scripts (.<span class=SpellE>sh</span>).<span
+style='mso-spacerun:yes'>  </span>All the user needs to <span class=SpellE>testdrive</span>
+the VSDK toolkit is to execute those scripts, usually the ones for compiling
+first, following for the ones for running.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+ coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+ filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><v:shape id="_x0000_i1025" type="#_x0000_t75" style='width:140.4pt;
+ height:216.6pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image001.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=187 height=289
+src="ArchitectureAndDesignSpecification_archivos/image002.jpg" v:shapes="_x0000_i1025"><![endif]><span
+style='mso-spacerun:yes'> </span><!--[if gte vml 1]><v:shape id="_x0000_i1026"
+ type="#_x0000_t75" style='width:134.4pt;height:213pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image003.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=179 height=284
+src="ArchitectureAndDesignSpecification_archivos/image004.jpg" v:shapes="_x0000_i1026"><![endif]><span
+style='mso-spacerun:yes'> </span><!--[if gte vml 1]><v:shape id="_x0000_i1027"
+ type="#_x0000_t75" style='width:109.2pt;height:180.6pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image005.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=146 height=241
+src="ArchitectureAndDesignSpecification_archivos/image006.jpg" v:shapes="_x0000_i1027"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><i style='mso-bidi-font-style:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>                         </span>(a)<span
+style='mso-spacerun:yes'>                                             </span><span
+style='mso-spacerun:yes'> </span><span class=GramE>(b)<span
+style='mso-spacerun:yes'>                                       </span>(c)</span><o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>1</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'> <span class=GramE>VSDK
+toolkit underlying packages dependencies.</span> (a) VSDK toolkit dependencies
+for a platform in which JOGL is available, and Java implementation is complete.
+(b) VSDK toolkit dependencies in a platform configuration without JOGL, but
+with a complete java implementation. (c) Minimal VSDK dependencies: a JVM
+profile with java <span class=SpellE><span class=GramE>lang</span></span> and
+java math packages.<o:p></o:p></span></i></p>
+
+<p class=MsoNormal><i style='mso-bidi-font-style:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As the VSDK
+toolkit can be configured to use or not a changing set of pre-requisites,
+different compilation scripts are provided for the main library build. The way
+in which this modularity is accomplished is by encapsulating the use of
+underlying systems inside specific VSDK toolkit packages.<span
+style='mso-spacerun:yes'>  </span>For example, only the <span class=SpellE>vsdk.toolkit.render.jogl</span>
+package depends on JOGL, so when JOGL is not available or enabled, all that
+must be done is compiling <span class=GramE>all the</span> toolkit except this
+packages.<span style='mso-spacerun:yes'>  </span>Note that current version of
+the VSDK toolkit does not depend on swing, but only on <span class=SpellE>awt</span>
+(in the packages <span class=SpellE>render.awt</span> and <span class=SpellE><span
+class=GramE><span style='background:yellow;mso-highlight:yellow'>gui</span></span></span>).<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This
+situation could be different at the <span class=SpellE>testsuite</span>
+level.<span style='mso-spacerun:yes'>  </span>The <span class=SpellE>testsuite</span>
+programs may need JOGL and/or Swing, or other underlying systems like JMF, but
+these are only needed for specific examples. Some of the examples and
+applications provided in <span class=SpellE>testsuite</span> can be executed
+using the minimal VSDK toolkit configuration.<o:p></o:p></span></p>
+
+<p class=MsoNormal><i style='mso-bidi-font-style:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></i></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>Toolkit architecture,
+design patterns and organization standard<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As part of
+the object oriented development environment in which the VSDK toolkit is built,
+there are some design and architectural patterns used. Other organization
+standards are proposed for the implementation details and coding, and these
+decisions affect most practical aspects in the use of the toolkit. So, as
+important as these are, they are briefly <span class=GramE>cover</span> here,
+so the toolkit user can form an idea of the VSDK “spirit”.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>Model – View - Controller<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first
+great design consideration taken for the organization of the toolkit, is to
+adapt easily to a Model View Controller schema, thus defining 3 sets of
+packages:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l5 level1 lfo1;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Model related packages: common,
+     media and environment. <span class=GramE>These contains</span> model
+     exclusive classes, which DO NOT depend on other Technologies than Java
+     Virtual Machine and operating systems. These packages define all of the
+     data structures needed to build the models. These are self container
+     classes.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l5 level1 lfo1;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>View related packages:<span
+     style='mso-spacerun:yes'>  </span><span class=SpellE>render.jogl</span>, <span
+     class=SpellE>render.awt</span> and possibly other display technology
+     dependant classes, which constitutes observer patterns for the model.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l5 level1 lfo1;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Controller related packages: <span
+     class=SpellE><span class=GramE><span style='background:yellow;mso-highlight:
+     yellow'>gui</span></span></span> and <span style='background:yellow;
+     mso-highlight:yellow'>devices</span> provides interaction technologies
+     dependant classes which are useful for controlling the model.<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>Composite<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+Composite pattern as <span class=SpellE>presentend</span> in [<span
+style='background:yellow;mso-highlight:yellow'>GAMMA</span>] is commonly used
+for implementation of tree-like structures, as in the case of constructive
+solid geometry. <o:p></o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>??? <span class=GramE>Composite?</span>
+<span class=GramE>Strategy?</span> <span class=GramE>Visitor?</span> <span
+class=GramE>Other?</span><o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The <span
+class=GramE>classes inside the render packages are static, and contains</span>
+methods that receives as parameter elements of the model and renders it to
+build a bigger rendering pipeline in a modularized way. They have in common a
+read-only access to the model, but a high level of coupling. They need to know
+most of the internal state of the model class in order to render it. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='background:yellow;mso-highlight:
+yellow;mso-ansi-language:EN-US'>TODO: name this pattern.</span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>Reflection / observer<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>All of the
+classes in the model packages <span class=GramE>implements</span> a reflection
+or introspection mechanism which allows a higher level system to query
+information about its operations and information, and to query and update its
+internal values. This forms the way in which presentation systems can access
+the model in a generalized way, and eases the implementation of some forms of
+persistence and network distribution and control.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='background:yellow;mso-highlight:
+yellow;mso-ansi-language:EN-US'>TODO: explain more.</span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>Chain of responsibility<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As the
+complex model of a computer graphics application is broken in several smaller
+pieces, some of them inside this VSDK toolkit model, common operations like
+persistence, presentation (i.e. GUI manipulation and control) and rendering /
+visualization could be broken in a similar fashion, leading to a set of object
+that together could respond to a request.<span style='mso-spacerun:yes'> 
+</span>This delegation schema is presented in [<span style='background:yellow;
+mso-highlight:yellow'>GAMMA</span>] as a “chain of responsibility”.<span
+style='mso-spacerun:yes'>  </span>In particular, three set of classes are
+designed to form a part of chains of responsibilities:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l7 level1 lfo8;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The model classes<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l7 level1 lfo8;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Classes in the render package<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l7 level1 lfo8;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Classes in the <span
+     class=SpellE>io</span> package<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='background:yellow;mso-highlight:
+yellow;mso-ansi-language:EN-US'>TODO: Explain more and/or exemplify</span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>Toolkit packages<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The VSDK
+toolkit is organized in packages, which depends on each other as shown <span
+class=GramE>in<span style='mso-spacerun:yes'>  </span>figure</span> <span
+style='background:yellow;mso-highlight:yellow'>2</span>. The environment, media
+and common packages contains the basic data structures used by the toolkit to
+construct virtual environments. The <span class=SpellE><span class=GramE>io</span></span>,
+render and <span class=SpellE><span style='background:yellow;mso-highlight:
+yellow'>gui</span></span> packages contains utility algorithms to help in
+building complete <span class=SpellE>usuful</span> applications.<span
+style='mso-spacerun:yes'>  </span>Here is a brief description of what is
+contained in each of these packages:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The common package contains
+     very basic constructs, the classes for mathematical matrix/vector
+     manipulation needed in computer graphics algorithms and some utilities
+     common to all the system.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The media package contains the
+     representation classes for multimedia material, as image, video and common
+     computer graphics media (i.e. textures, <span class=SpellE>depthmaps</span>,
+     palettes and so on).<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The environment package is the
+     central package of the toolkit. This package contains most of the <span
+     class=SpellE>toolkit´s</span> main features and is the core of the
+     geometrical representation. This toolkit contains the <span class=GramE>entities
+     that builds</span> up a virtual 3D world. This package can be seen as a
+     “model” role in the MVC architecture pattern.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The <span class=SpellE><span
+     class=GramE>io</span></span> package contains classes intended to
+     implement the persistence of the classes in the environment package. Note
+     that is organized in sub-packages for each type of media.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The <span style='background:
+     yellow;mso-highlight:yellow'>GUI</span> package contains as for now
+     utilities for aiding the human-machine-interaction in interactive
+     applications. Usually contains algorithms that receive notification events
+     for common GUI devices (i.e. mouse and keyboard) and from these events
+     affects the current state <span class=GramE>of<span
+     style='mso-spacerun:yes'>  </span>model</span> elements from the
+     environment.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo2;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>The render package contains
+     algorithms for building visualizations of the model found in environment.
+     This package can be seen as a “view” role in the MVC architecture pattern.
+     This package is organized in sub-packages for each underlying rendering
+     technology. Currently implemented are JOGL (OpenGL) and AWT operations.<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shape id="_x0000_i1028"
+ type="#_x0000_t75" style='width:321pt;height:342.6pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image007.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=428 height=457
+src="ArchitectureAndDesignSpecification_archivos/image008.jpg" v:shapes="_x0000_i1028"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>2</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'> Toolkit packages
+dependency relations.<o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
+following sections, a detailed description of each package will be presented.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The common package<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The common
+package classes have four main uses:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Represent data and operations
+     of basic mathematical entities used in computer graphics. <span
+     class=GramE>These includes</span> the classes Vector3D, Matrix4x4,
+     Quaternion and Ray.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Represent common basic data in
+     computer graphics. There includes the classes <span class=SpellE>ColorRgb</span>,
+     Triangle, Vertex and <span class=SpellE>QualitySelection</span>.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Provide common utility code.
+     This includes the interface <span class=SpellE>ProgressMonitor</span> and
+     the class <span class=SpellE>ProgressMonitorConsole</span>.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Establish basic foundation for
+     the toolkit, and common structure of its model. These are the class <span
+     style='background:yellow;mso-highlight:yellow'>VSDK</span> and the
+     Reflection/Observer/<span class=SpellE>Serializaion</span> mechanism
+     structural class/interface Entity.<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1029" type="#_x0000_t75" style='width:424.8pt;height:367.8pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image009.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=566 height=490
+src="ArchitectureAndDesignSpecification_archivos/image010.jpg" v:shapes="_x0000_i1029"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>3</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span><span class=GramE>The <span class=SpellE>vsdk.toolkit.common</span>
+package classes.</span><o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This is the
+only package of the VSDK where classes with public attributes are allowed. Note
+that these classes must be considered as simple “structures” (like in C/C++),
+more than complete “classes” (as in strict object oriented theory). The reason
+for making attributes public is that these classes are so fundamental and
+commonly used, that the access to its attributes is usually much repeated,
+making a key part of efficient implementation of algorithms. Another valid
+argument to defend the <span class=SpellE>existances</span> of public
+attributes is that these are very simple entities, so they will not evolve and
+will not change its internal representation in the future.<span
+style='mso-spacerun:yes'>  </span>For example, a matrix is a matrix, period.<span
+style='mso-spacerun:yes'>  </span>It is not bad to have its double
+2-dimensional vector exposed, will never change.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The Entity
+class provides the <span class=SpellE>Serializable</span> interface to <span
+class=GramE>all of the</span> VSDK toolkit classes that extends Entity.<span
+style='mso-spacerun:yes'>  </span>Note that all the sub-classes of Entity are
+part of the data model in the VSDK toolkit.<o:p></o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The media package<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The media
+package contains the model part and basic operations of common multimedia
+content like image, video and sound. Note that there is not any persistence or
+rendering code here.<span style='mso-spacerun:yes'>  </span>These models only
+have the minimum necessary for making computer graphics algorithm work in main
+memory, at the very common level.<span style='mso-spacerun:yes'>  </span>The
+most typical of these classes is the <span style='background:yellow;mso-highlight:
+yellow'>Image</span> one. Note that images are in the heart of computer
+graphics.<span style='mso-spacerun:yes'>  </span>They are the result of
+visualization processes, they are used as textures, <span class=GramE>they</span>
+are analyzed in artificial vision or image processing, and are the center, in
+some way, of all the current raster technologies. From an image, one can manage
+display <span class=GramE>hardware,</span> one can print it, send it over the
+net as part of a distributed algorithm and so on. These are the kind of classes
+included in this package.<span style='mso-spacerun:yes'>  </span>Note that the
+persistence and rendering are located in the <span class=SpellE><span
+class=GramE>io</span></span> and render packages respectively.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shape id="_x0000_i1030"
+ type="#_x0000_t75" style='width:424.8pt;height:323.4pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image011.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=566 height=431
+src="ArchitectureAndDesignSpecification_archivos/image012.jpg" v:shapes="_x0000_i1030"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>4</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>The <span class=SpellE>vsdk.toolkit.media</span>
+package classes currently implemented.<o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
+in the current implementation of image models, the low cohesion alternative was
+chosen.<span style='mso-spacerun:yes'>  </span>That is that there is not a
+single complex image class representing all cases of color space alternatives, number
+of channels or precision. All classes for image representation have a single
+internal image format, based on its own pixel format class. The classes must
+define the abstract methods of the Image <span class=SpellE>superclass</span>,
+and with it will be conformant to various algorithms which uses images, like
+textured <span class=SpellE>raytracing</span>. Each <span class=GramE>classes</span>
+defines a standard <span class=SpellE>putPixel/getPixel</span> methods for the
+RGB case, and additionally defines its own versions of <span class=SpellE>putPixel/getPixel</span>
+methods for its specific pixel formats. Note that the pixel and color classes
+are responsible of color model conversions, and image classes can define
+alternative <span class=SpellE>putPixel/getPixel</span> formats depending of
+the color spaces.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The <span
+class=SpellE><span style='background:yellow;mso-highlight:yellow'>ZBuffer</span></span>
+class (<span class=SpellE><span style='background:yellow;mso-highlight:yellow'>DepthMap</span></span>?)
+can be used as a <span class=SpellE>depthmap</span> in <span class=SpellE>ZBuffer</span>
+like algorithms, as a light buffer / light maps for <span class=SpellE>multipass</span>
+pixel-space shadow generation algorithms and it is very basic to most computer
+graphics techniques.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The palette
+classes are also common for computer graphics techniques, like color
+interpolation and scientific visualization.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The environment packages<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+environment package and its sub-packages are the fundamental and central <span
+class=GramE>classes that constitutes</span> the VSDK toolkit core geometric
+model.<span style='mso-spacerun:yes'>  </span>There are 5 groups of classes
+inside <span class=GramE>this packages</span>:<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Cameras<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Backgrounds<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Lights<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Materials<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Geometries<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-ansi-language:EN-US'>Scene constructs<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The 5 group
+of classes in those packages are used to model virtual reality worlds in main
+memory. In current implementation this elements are not thread-safe, neither
+re-entrant. This implies that Threads should not be used in distributed
+implementation, but heavy process should be used instead.<span
+style='mso-spacerun:yes'>  </span><span class=GramE>These classes are based
+upon the functionalities of the common and media packages, and inherits</span> from
+the Entity class.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As current
+implementation version, Cameras, Lights and Materials are simple classes, and
+there is a hierarchy of Backgrounds. The most complex functionality of this
+package is the geometric representation of objects (which are preferred to be
+called “Things”, for not confusing them with object-oriented programming
+terms).<span style='mso-spacerun:yes'>  </span>The geometries are grouped in a
+separate sub-package called geometry.<span style='mso-spacerun:yes'> 
+</span>Note that the Geometry class defines some basic operations common in its
+sub-classes, as the <span class=SpellE>doIntersection</span> method.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shape id="_x0000_i1031"
+ type="#_x0000_t75" style='width:369pt;height:321.6pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image013.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=492 height=429
+src="ArchitectureAndDesignSpecification_archivos/image014.jpg" v:shapes="_x0000_i1031"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>5</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>The <span class=SpellE>vsdk.toolkit.enviroment</span>
+package classes currently implemented.<o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1032" type="#_x0000_t75" style='width:459pt;height:279pt'>
+ <v:imagedata src="ArchitectureAndDesignSpecification_archivos/image015.png"
+  o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=612 height=372
+src="ArchitectureAndDesignSpecification_archivos/image016.jpg" v:shapes="_x0000_i1032"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><i style='mso-bidi-font-style:normal'><span
+lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='background:yellow;
+mso-highlight:yellow'>6</span>.</span></i></span><i style='mso-bidi-font-style:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>The <span class=SpellE>vsdk.toolkit.geometry</span>
+sub-package classes currently implemented.<o:p></o:p></span></i></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The <span class=SpellE><span
+class=GramE>io</span></span> packages<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The classes
+located under some sub-package of the <span class=SpellE><span class=GramE>io</span></span>
+package are classes that implements operations of persistence. The public
+methods of these classes are static, so <span class=GramE>this classes</span>
+usually do not need to be instantiated. The methods usually receive as
+parameters a reference to an Entity (a modeling class) and some other parameter
+to identify the source or target for data storage.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The <span class=SpellE><span
+class=GramE>gui</span></span> package<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This is an
+experimental package, and its name and/or location could change.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span lang=EN-US style='mso-ansi-language:EN-US'>The render packages<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The render
+package contains static classes that receives as parameters references to model
+objects, and perform rendering operations on it.<span
+style='mso-spacerun:yes'>  </span>Usually, these rendering operations are
+partial, so the complete rendering pipeline should be implemented in a higher
+level, using these algorithms as part of a chain of responsibility.<o:p></o:p></span></p>
+
+<h1><span lang=EN-US style='mso-ansi-language:EN-US'>References<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>[<span
+style='background:yellow;mso-highlight:yellow'>DOXYGEN</span>]<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>[<span
+style='background:yellow;mso-highlight:yellow'>GAMMA</span>]<o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

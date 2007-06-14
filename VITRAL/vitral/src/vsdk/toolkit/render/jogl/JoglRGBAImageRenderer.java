@@ -41,7 +41,7 @@ public class JoglRGBAImageRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static void activateGL(GL gl, RGBAImage img)
+    public static void activate(GL gl, RGBAImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();

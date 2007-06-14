@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 
-public class Sphere extends Geometry {
+public class Sphere extends Solid {
     private double _radio;
     private double _radio_al_cuadrado;
     private Vector3D _static_delta;
@@ -25,6 +25,9 @@ public class Sphere extends Geometry {
     }
 
     /**
+     Check the general interface contract in superclass method
+     Geometry.doIntersection.
+
     Dado un Ray `inout_rayo`, esta operaci&oacute;n determina si el rayo se
     intersecta con la superficie de este objeto o no. Si el rayo no intersecta
     al objeto se retorna 0, y de lo contrario se retorna la distancia desde

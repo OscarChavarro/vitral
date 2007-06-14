@@ -22,7 +22,7 @@ cd ..
 cd MeshExample
 ./run.sh
 cd ..
-cd CohenSutherlandClipping
+cd CohenSutherlandClippingTechnique
 ./run.sh
 cd ..
 cd SceneEditorApplication

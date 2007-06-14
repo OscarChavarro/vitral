@@ -1,8 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nodeSet version="1.0">
-    <view uin="id3amrzemgw87gcemgw8fyr">
+    <link uin="id9gyodemmkro68emmksg7c.linkidi6hueemmkro68emmkwkvc">
+        <participant role="Supplier" referencedUin="design:view:::id2azw3emmkro68emmksfmy"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9gyodemmkro68emmksg7c.linkid7j76memmkro68emmkwkvs">
+        <participant role="Supplier" referencedUin="design:view:::idg9bq3emmkro68emmksg4b"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9gyodemmkro68emmksg7c.linkid1vc9qemmkro68emmkwkvs">
+        <participant role="Supplier" referencedUin="design:view:::id3rsnwemmkro68emmks4j7"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9gyodemmkro68emmksg7c.linkidodlsemmkro68emmkwkw8">
+        <participant role="Supplier" referencedUin="design:view:::id8oq39emmkro68emmksg25"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9gyodemmkro68emmksg7c.linkidgbj5cemmkro68emmkwkw8">
+        <participant role="Supplier" referencedUin="design:view:::iddz1ezemmkro68emmksfyo"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <link uin="id9gyodemmkro68emmksg7c.linkidje2kzemmkro68emmkwkwn">
+        <participant role="Supplier" referencedUin="design:view:::idby95uemmkro68emmksfsl"/>
+        <participant role="Client" referencedUin="design:view:::id9gyodemmkro68emmksg7c"/>
+        <property name="$metaclass" value="Dependency Link"/>
+        <property name="@automatic" value=""/>
+    </link>
+    <view uin="id9gyodemmkro68emmksg7c">
         <property name="$metaclass" value="Package Diagram"/>
         <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.scene.SimpleThing">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,10,167,242"/>
+        </reference>
         <property name="$defaultDiagram" value=""/>
     </view>
 </nodeSet>

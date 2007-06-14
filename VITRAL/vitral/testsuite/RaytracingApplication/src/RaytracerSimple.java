@@ -21,6 +21,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.common.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.io.image.ImagePersistence;
 
 public class RaytracerSimple {
 //- Atributos ---------------------------------------------------------------
@@ -79,7 +80,7 @@ public class RaytracerSimple {
         File fd = new File("./output.ppm");
 
         System.out.print("Exporting result image to file: ");
-        if ( !la_imagen_resultado.exportPPM(fd) )
+        if ( !ImagePersistence.exportPPM(fd, la_imagen_resultado) )
         {
             System.err.println("Error grabando la imagen!!");
             System.exit(1);

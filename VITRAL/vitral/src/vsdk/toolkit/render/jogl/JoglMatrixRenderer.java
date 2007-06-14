@@ -22,7 +22,7 @@ public class JoglMatrixRenderer {
     This method acumulates the matrix represented in `A` in the currently
     selected matrix stack inside the JOGL state machine.
     */
-    public static void activateGL(GL gl, Matrix4x4 A)
+    public static void activate(GL gl, Matrix4x4 A)
     {
         double Mgl[] = new double[16];
         int row, column, pos;
@@ -53,7 +53,7 @@ public class JoglMatrixRenderer {
 
     THIS METHOD WILL BE CHANGED TO ALLOW CUSTOMIZATION
     */
-    public static void drawGL(GL gl, Matrix4x4 A)
+    public static void draw(GL gl, Matrix4x4 A)
     {
         gl.glPushMatrix();
         gl.glDisable(gl.GL_LIGHTING);

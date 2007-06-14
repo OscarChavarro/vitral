@@ -18,7 +18,7 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 public class JoglTranslateGizmoRenderer
@@ -51,7 +51,7 @@ public class JoglTranslateGizmoRenderer
 
         //-----------------------------------------------------------------
         QualitySelection q = new QualitySelection();
-        ArrayList<RayableObject> things = gizmo.getElements();
+        ArrayList<SimpleThing> things = gizmo.getElements();
 
         q.setSurfaces(true);
         q.setWires(false);
@@ -66,7 +66,7 @@ public class JoglTranslateGizmoRenderer
         gl.glShadeModel(gl.GL_SMOOTH);
 
         for ( Iterator i = things.iterator(); i.hasNext(); ) {
-            RayableObject r = (RayableObject)i.next();
+            SimpleThing r = (SimpleThing)i.next();
             Geometry g = r.getGeometry();
             Vector3D position;
 
@@ -76,7 +76,7 @@ public class JoglTranslateGizmoRenderer
                 gl.glLoadIdentity();
                 position = r.getPosition();
                 gl.glTranslated(position.x, position.y, position.z);
-                JoglMatrixRenderer.activateGL(gl, r.getRotation());
+                JoglMatrixRenderer.activate(gl, r.getRotation());
 
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);

@@ -24,11 +24,10 @@ import javax.media.opengl.GLEventListener;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
@@ -146,7 +145,7 @@ public class JoglDrawingArea implements
         if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
             if ( theScene.selectedThingIndex >= 0 ) {
               Vector3D position;
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -165,7 +164,7 @@ public class JoglDrawingArea implements
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
             if ( theScene.selectedThingIndex >= 0 ) {
               Vector3D position;
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -177,7 +176,7 @@ public class JoglDrawingArea implements
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
             if ( theScene.selectedThingIndex >= 0 ) {
               Vector3D position;
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -334,7 +333,7 @@ public class JoglDrawingArea implements
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                 theScene.selectedThingIndex >= 0 ) {
           Vector3D position;
-          RayableObject gi;
+          SimpleThing gi;
 
           gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -375,7 +374,7 @@ public class JoglDrawingArea implements
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                 theScene.selectedThingIndex >= 0 ) {
           Vector3D position;
-          RayableObject gi;
+          SimpleThing gi;
 
           gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -415,7 +414,7 @@ public class JoglDrawingArea implements
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                 theScene.selectedThingIndex >= 0 ) {
           Vector3D position;
-          RayableObject gi;
+          SimpleThing gi;
 
           gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -455,7 +454,7 @@ public class JoglDrawingArea implements
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                 theScene.selectedThingIndex >= 0 ) {
           Vector3D position;
-          RayableObject gi;
+          SimpleThing gi;
 
           gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -538,7 +537,7 @@ public class JoglDrawingArea implements
           if ( theScene.selectedThingIndex >= 0 ) {
               Matrix4x4 composed;
               Vector3D position;
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
 
@@ -568,7 +567,7 @@ public class JoglDrawingArea implements
       }
       else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
           if ( theScene.selectedThingIndex >= 0 ) {
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
               Matrix4x4 R = gi.getRotation();
@@ -587,7 +586,7 @@ public class JoglDrawingArea implements
       }
       else if ( interactionMode == SCALE_INTERACTION_MODE ) {
           if ( theScene.selectedThingIndex >= 0 ) {
-              RayableObject gi;
+              SimpleThing gi;
 
               gi = theScene.things.get(theScene.selectedThingIndex);
               Vector3D s = gi.getScale();
@@ -671,7 +670,7 @@ public class JoglDrawingArea implements
       else {
           statusMessage.setText("Thing [" + theScene.selectedThingIndex + 
                                 "] selected, which is a [" + 
-((RayableObject)(theScene.things.get(theScene.selectedThingIndex))).getGeometry().getClass().getName() 
+((SimpleThing)(theScene.things.get(theScene.selectedThingIndex))).getGeometry().getClass().getName() 
                                 + "]");
       }
   }

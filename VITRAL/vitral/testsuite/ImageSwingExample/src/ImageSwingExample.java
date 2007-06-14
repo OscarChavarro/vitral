@@ -1,16 +1,7 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world type programs
-// so the user/programmer can be exposed to all the complexity involved. This will help him
-// to dominate the involved libraries.
-
 import java.io.File;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,8 +13,15 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 public class ImageSwingExample extends JFrame implements 
@@ -162,7 +160,7 @@ class MyPanel extends JPanel
     public MyPanel()
     {
         try {
-            img = RGBAImageBuilder.buildImage(new File("./etc/entorno1.jpg"));
+            img = ImagePersistence.importRGBA(new File("./etc/entorno1.jpg"));
         }
         catch (Exception e) {
             System.err.println(e);

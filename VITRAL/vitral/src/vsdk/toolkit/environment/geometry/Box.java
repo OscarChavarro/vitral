@@ -12,7 +12,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
 
-public class Box extends Geometry {
+public class Box extends Solid {
     private Vector3D size;
 
     GeometryIntersectionInformation lastInfo;
@@ -30,6 +30,8 @@ public class Box extends Geometry {
     }
 
     /**
+     Check the general interface contract in superclass method
+     Geometry.doIntersection.
     */
     public boolean
     doIntersection(Ray inOutRay) {

@@ -10,7 +10,7 @@ cd ..
 cd CameraSwingExample
 ./compile.sh
 cd ..
-cd CohenSutherlandClipping
+cd CohenSutherlandClippingTechnique
 ./compile.sh
 cd ..
 cd ImageExample

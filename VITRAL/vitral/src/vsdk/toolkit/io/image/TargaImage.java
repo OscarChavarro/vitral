@@ -1,9 +1,13 @@
 package vsdk.toolkit.io.image;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.math.*;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import java.awt.Dimension;
+import java.awt.image.DirectColorModel;
 
 public class TargaImage 
 {

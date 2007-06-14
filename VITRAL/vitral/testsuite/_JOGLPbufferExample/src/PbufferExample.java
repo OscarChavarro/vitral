@@ -5,6 +5,8 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
+import vsdk.toolkit.io.image.ImagePersistence;
+
 /*
 import com.sun.opengl.utils.BufferUtils;
 import java.nio.ByteBuffer;
@@ -50,7 +52,7 @@ public class PbufferExample implements GLEventListener {
         gl.glFlush();
         
         image=JoglRGBAImageRenderer.getImageJOGL(gl);
-        image.exportPPM(new File("./output.ppm"));
+        ImagePersistence.exportPPM(new File("./output.ppm"), image);
     }
   
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {

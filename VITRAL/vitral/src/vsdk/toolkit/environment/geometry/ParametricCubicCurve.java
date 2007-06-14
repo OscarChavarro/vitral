@@ -27,7 +27,7 @@ that each control point is stored in the `points` ArrayList, and depending
 of its type, the number of Vector3d's that forms it varies.
 */
 
-public class ParametricCubicCurve extends Geometry {
+public class ParametricCubicCurve extends Curve {
     // Model matrices for evaluating curve parametric equations like
     // described in [FOLE1992].11.2.
     public static Matrix4x4 HERMITE_MATRIX = null;

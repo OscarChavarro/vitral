@@ -20,13 +20,13 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
+import vsdk.toolkit.io.image.ImagePersistence;
 
 public class Universe
 {
@@ -34,7 +34,7 @@ public class Universe
     private static final boolean depurar = false;
 
     // El modelo del mundo
-    public ArrayList<RayableObject> arr_cosas;
+    public ArrayList<SimpleThing> arr_cosas;
     public ArrayList<Light> arr_luces;
     public Background fondo;
     public Camera camara;
@@ -50,7 +50,7 @@ public class Universe
         int CHUNKSIZE = 100; // Incremento de arreglos
 
         // Arreglo de Geometrys
-        arr_cosas = new ArrayList<RayableObject>();  
+        arr_cosas = new ArrayList<SimpleThing>();  
         // Arreglo de LIGHTes
         arr_luces = new ArrayList<Light>();
 
@@ -107,7 +107,7 @@ public class Universe
         material_actual.setReflectionCoefficient(0);
         material_actual.setRefractionCoefficient(0);
         material_actual.setPhongExponent(10);
-        RayableObject thing;
+        SimpleThing thing;
         Matrix4x4 R, Ri;
         double yaw_actual = 0;
         double pitch_actual = 0;
@@ -123,7 +123,7 @@ public class Universe
                   float r = (float)leerNumero(st);
 
                   imprimirMensaje("sphere");
-                  thing = new RayableObject();
+                  thing = new SimpleThing();
           thing.setGeometry(new Sphere(r));
                   thing.setMaterial(material_actual);
 
@@ -143,7 +143,7 @@ public class Universe
                   float r = (float)leerNumero(st);
 
                   imprimirMensaje("cube");
-                  thing = new RayableObject();
+                  thing = new SimpleThing();
           thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
@@ -164,7 +164,7 @@ public class Universe
                   float h = (float)leerNumero(st);
 
                   imprimirMensaje("cylinder");
-                  thing = new RayableObject();
+                  thing = new SimpleThing();
           thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
@@ -179,7 +179,7 @@ public class Universe
                 /*
                 else if (st.sval.equals("triangles")) {
                   imprimirMensaje("triangles");
-                  thing = new RayableObject();
+                  thing = new SimpleThing();
           thing.setGeometry(new MESH(st));
                   thing.setMaterial(material_actual);
                   arr_cosas.add(thing);
@@ -227,22 +227,22 @@ public class Universe
             try {
 
             System.out.print("  - Loading background images: 1");
-            front = RGBAImageBuilder.buildImage(
+            front = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno0_small.jpg"));
             System.out.print("2");
-            right = RGBAImageBuilder.buildImage(
+            right = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno1_small.jpg"));
             System.out.print("3");
-            back = RGBAImageBuilder.buildImage(
+            back = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno2_small.jpg"));
             System.out.print("4");
-            left = RGBAImageBuilder.buildImage(
+            left = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno3_small.jpg"));
             System.out.print("5");
-            down = RGBAImageBuilder.buildImage(
+            down = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno4_small.jpg"));
             System.out.print("6");
-            up = RGBAImageBuilder.buildImage(
+            up = ImagePersistence.importRGBA(
                         new File("./etc/cubemaps/dorise1/entorno5_small.jpg"));
             System.out.println(" OK!");
 

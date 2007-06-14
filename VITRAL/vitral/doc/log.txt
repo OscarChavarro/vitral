@@ -51,3 +51,11 @@ Changes in 2006 april 6 revition
 Changes in 2006 april 28 revition
   - Integrated the models of ParametricCubicCurve and ParametricCubicPatches
   - Mesh revition. Now it is called TriangleMesh / TriangleMeshGroup
+  - A RayableObject is not a Geometry, but something that contains one.
+    It is not inside the geometry package... And now is a SimpleThing.
+  - RGBAImageBuilder renamed to ImagePersistence, and added exporting PPM
+    format. Images doesn't manage persistence anymore by themselves.
+  - Entity! All modelling classes are Serializable and reflectionable...
+  - Jogl*Renderer classes with draw/activate names normalized. There is no
+    more activateGL or drawGL versions
+

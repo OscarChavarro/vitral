@@ -28,7 +28,7 @@ class in an not evolvable structure, and IT MUST BE KEEP AS IS, due to
 performance issues in a lot of algorithms, as this avoids indirections.
 Nevertheless, get and set methods are provided.
 */
-public class ColorRgb
+public class ColorRgb extends Entity
 {
     /// Contains the red component of a color 
     public double r;

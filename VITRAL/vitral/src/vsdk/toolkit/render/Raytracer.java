@@ -12,6 +12,7 @@ package vsdk.toolkit.render;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ProgressMonitor;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -24,7 +25,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
-import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.environment.scene.SimpleThing;
 
 
 /**
@@ -36,8 +37,8 @@ cual puede ser cambiada por otro algoritmo de visualizaci&oacute;n (i.e.
 zbuffer o radiosidad), pero manteniendo el mismo modelo de escena 3D.
 */
 public class Raytracer {
-    private static final float TINY = 0.001f;
     private Vector3D static_tmp;
+    private static final double TINY = 0.0001;
 
     public Raytracer()
     {
@@ -46,21 +47,21 @@ public class Raytracer {
     }
 
     /*
-    the point of intersection (p)
-    a unit-length surface normal (n)
-    a unit-length vector towards the ray's origin (v)
+    @param p the point of intersection
+    @param n unit-length surface normal
+    @param v unit-length vector towards the ray's origin
 
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations. (This must be taken
     into account in the reflection and refraction calculations)
     */
-    public ColorRgb modelo_de_iluminacion(Vector3D p, Vector3D n, Vector3D v, 
+    private ColorRgb evaluateIlluminationModel(Vector3D p, Vector3D n, Vector3D v, 
         ArrayList lights, ArrayList objects, Background fondo,
         Material m) {
 
-        ColorRgb resultado = new ColorRgb();
-        RayableObject nearestObject;
+        SimpleThing nearestObject;
+        ColorRgb result = new ColorRgb();
         ColorRgb color_de_fondo = fondo.colorInDireccion(n);
         ColorRgb ambient;
         ColorRgb diffuse;
@@ -70,34 +71,33 @@ public class Raytracer {
         Vector3D po;
         Matrix4x4 R, Ri;
 
-        for ( Iterator i = lights.iterator();
-              i.hasNext(); ) {
-            Light luz = (Light)i.next();
-            lightEmission = luz.getSpecular();
-            if ( luz.tipo_de_luz == Light.AMBIENT ) {
+        for ( Iterator i = lights.iterator(); i.hasNext(); ) {
+            Light light = (Light)i.next();
+            lightEmission = light.getSpecular();
+
+            if ( light.tipo_de_luz == Light.AMBIENT ) {
                 ambient = m.getAmbient();
-                resultado.r += ambient.r*lightEmission.r;
-                resultado.g += ambient.g*lightEmission.g;
-                resultado.b += ambient.b*lightEmission.b;
+                result.r += ambient.r*lightEmission.r;
+                result.g += ambient.g*lightEmission.g;
+                result.b += ambient.b*lightEmission.b;
               } 
               else {
                 Vector3D l;
-                if ( luz.tipo_de_luz == Light.POINT ) {
-                    l = new Vector3D(luz.lvec.x - p.x, 
-                                   luz.lvec.y - p.y, 
-                                   luz.lvec.z - p.z);
+                if ( light.tipo_de_luz == Light.POINT ) {
+                    l = new Vector3D(light.lvec.x - p.x, 
+                                     light.lvec.y - p.y, 
+                                     light.lvec.z - p.z);
                     l.normalize();
                   } 
                   else {
-                    l = new Vector3D(-luz.lvec.x, -luz.lvec.y, -luz.lvec.z);
+                    l = new Vector3D(-light.lvec.x, -light.lvec.y, -light.lvec.z);
                 }
 
                 // Check if the surface point is in shadow
                 Vector3D poffset = 
-                    new Vector3D(p.x + TINY*l.x, p.y + TINY*l.y, p.z + TINY*l.z);
+                    new Vector3D(p.x + VSDK.EPSILON*l.x, p.y + VSDK.EPSILON*l.y, p.z + VSDK.EPSILON*l.z);
                 Ray rayo_sombra = new Ray(poffset, l);
-                nearestObject =
-                    trazar_rayo_en_escena(rayo_sombra, objects);
+                nearestObject = selectNearestThingInRayDirection(rayo_sombra, objects);
                 if ( nearestObject != null ) {
                     continue;
                 }
@@ -106,9 +106,9 @@ public class Raytracer {
                 if ( lambert > 0 ) {
                     diffuse = m.getDiffuse();
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
-                        resultado.r += lambert*diffuse.r*lightEmission.r;
-                        resultado.g += lambert*diffuse.g*lightEmission.g;
-                        resultado.b += lambert*diffuse.b*lightEmission.b;
+                        result.r += lambert*diffuse.r*lightEmission.r;
+                        result.g += lambert*diffuse.g*lightEmission.g;
+                        result.b += lambert*diffuse.b*lightEmission.b;
                     }
                     specular = m.getSpecular();
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
@@ -124,14 +124,14 @@ public class Raytracer {
                             // OJO: Raro...
                             spec = ((specular.r + specular.g + specular.b)/3)*(
                                 (float) Math.pow((double) spec, (double)m.getPhongExponent()));
-                            resultado.r += spec*lightEmission.r;
-                            resultado.g += spec*lightEmission.g;
-                            resultado.b += spec*lightEmission.b;
+                            result.r += spec*lightEmission.r;
+                            result.g += spec*lightEmission.g;
+                            result.b += spec*lightEmission.b;
                         }
                     }
                 }
-            }
-        }
+              } // else case of "if ( light.tipo_de_luz == Light.AMBIENT )" conditional
+        } // for ( Iterator i = lights.iterator(); i.hasNext(); )
 
         // Compute illumination due to reflection
         double kr = m.getReflectionCoefficient();
@@ -142,12 +142,12 @@ public class Raytracer {
                 Vector3D reflect = new Vector3D(t*n.x - v.x, 
                                                 t*n.y - v.y, 
                                                 t*n.z - v.z);
-                Vector3D poffset = new Vector3D(p.x + TINY*reflect.x, 
-                                                p.y + TINY*reflect.y, 
-                                                p.z + TINY*reflect.z);
+                Vector3D poffset = new Vector3D(p.x + VSDK.EPSILON*reflect.x, 
+                                                p.y + VSDK.EPSILON*reflect.y, 
+                                                p.z + VSDK.EPSILON*reflect.z);
                 Ray rayo_reflejado = new Ray(poffset, reflect);
                 nearestObject = 
-                    trazar_rayo_en_escena(rayo_reflejado, objects);
+                    selectNearestThingInRayDirection(rayo_reflejado, objects);
                 if ( nearestObject != null ) {
                     Vector3D rv = new Vector3D();
                     Vector3D rp, rn;
@@ -176,54 +176,56 @@ public class Raytracer {
                     rv.y = -rayo_reflejado.direction.y;
                     rv.z = -rayo_reflejado.direction.z;                    
                     ColorRgb rcolor =
-                        modelo_de_iluminacion(rp, rn, rv, lights, objects, fondo, m);
+                        evaluateIlluminationModel(rp, rn, rv, lights, objects, fondo, m);
 
-                    resultado.r += kr*rcolor.r;
-                    resultado.g += kr*rcolor.g;
-                    resultado.b += kr*rcolor.b;
+                    result.r += kr*rcolor.r;
+                    result.g += kr*rcolor.g;
+                    result.b += kr*rcolor.b;
                   } 
                   else {
-                    resultado.r += kr*color_de_fondo.r;
-                    resultado.g += kr*color_de_fondo.g;
-                    resultado.b += kr*color_de_fondo.b;
+                    result.r += kr*color_de_fondo.r;
+                    result.g += kr*color_de_fondo.g;
+                    result.b += kr*color_de_fondo.b;
                 }
             }
         }
 
         // Add code for refraction here
-        // <No implementado>
+        // <TODO>
 
-        // Clamp resultado to MAX 1.0 intensity.
-        resultado.r = (resultado.r > 1) ? 1 : resultado.r;
-        resultado.g = (resultado.g > 1) ? 1 : resultado.g;
-        resultado.b = (resultado.b > 1) ? 1 : resultado.b;
-        return resultado;
+        // Clamp result to MAX 1.0 intensity.
+        result.r = (result.r > 1) ? 1 : result.r;
+        result.g = (result.g > 1) ? 1 : result.g;
+        result.b = (result.b > 1) ? 1 : result.b;
+
+        return result;
     }
 
     /**
-    This method intersect the `inRay` with all of the geometries contained
-    in `inRayableObjectArray`. If none of the geometries is intersected
-    `null` is returned, otherwise a reference to the containing RayableObject
+    This method intersect the `inOut_Ray` with all of the geometries contained
+    in `inSimpleThingArray`. If none of the geometries is intersected
+    `null` is returned, otherwise a reference to the containing SimpleThing
     is returned.
 
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
-    public RayableObject 
-    trazar_rayo_en_escena(Ray inOut_Ray, ArrayList inRayableObjectArray) {
+    private SimpleThing 
+    selectNearestThingInRayDirection(Ray inOut_Ray, ArrayList inSimpleThingArray) {
         Iterator i;
-        RayableObject gi;
-        RayableObject nearestObject;
+        SimpleThing gi;
+        SimpleThing nearestObject;
         double nearestDistance;
 
         nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
-        for ( i = inRayableObjectArray.iterator(); i.hasNext(); ) {
+        for ( i = inSimpleThingArray.iterator(); i.hasNext(); ) {
             inOut_Ray.t = Double.MAX_VALUE;
-            gi = (RayableObject)i.next();
+            gi = (SimpleThing)i.next();
             if ( gi.doIntersection(inOut_Ray) && 
-                 inOut_Ray.t < nearestDistance ) {
+                 inOut_Ray.t < nearestDistance &&
+                 inOut_Ray.t > VSDK.EPSILON ) {
                 nearestDistance = inOut_Ray.t;
                 nearestObject = gi;
             }
@@ -237,20 +239,20 @@ public class Raytracer {
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
-    private ColorRgb seguimiento_rayo(Ray inRay, ArrayList in_objetos, 
+    private ColorRgb followRayPath(Ray inRay, ArrayList in_objetos, 
                          ArrayList in_luces, Background in_fondo)
     {
         ColorRgb c;
         Vector3D v = new Vector3D();
         Vector3D p, n;
-        RayableObject nearestObject;
+        SimpleThing nearestObject;
         Ray myRay;
         Vector3D po;
         Matrix4x4 R, Ri;
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
 
-        nearestObject = trazar_rayo_en_escena(inRay, in_objetos);
+        nearestObject = selectNearestThingInRayDirection(inRay, in_objetos);
         if ( nearestObject != null ) {
             //------------------------------------------------------------
             po = nearestObject.getPosition();
@@ -273,7 +275,7 @@ public class Raytracer {
             p = R.multiply(info.p).add(po);
             n = R.multiply(info.n);
 
-            c = modelo_de_iluminacion(
+            c = evaluateIlluminationModel(
                 p, n, v, in_luces, in_objetos, in_fondo, 
                 nearestObject.getMaterial());
           }
@@ -287,12 +289,12 @@ public class Raytracer {
     Macroalgoritmo de control para raytracing. Este m&eacute;todo recibe
     el modelo de una escena 3D previamente construida en memoria y una
     imagen, y modifica la imagen de tal forma que contiene una visualizacion
-    de la escena, resultado de aplicar la t&eacute;cnica de raytracing.
+    de la escena, result de aplicar la t&eacute;cnica de raytracing.
 
     PAR&Aacute;METROS:
     - `inout_viewport`: imagen RGB en donde el algoritmo calcular&aacute; su
-       resultado.
-    - `in_objetos`: arreglo din&aacute;mico de RayableObjects que constituyen los
+       result.
+    - `in_objetos`: arreglo din&aacute;mico de SimpleThings que constituyen los
        objetos visibles de la escena.
     - `in_luces`: arreglo din&aacute;mico de Light'es (luces puntuales)
     - `in_fondo`: especificaci&oacute;n de un color de fondo para la escena
@@ -320,7 +322,7 @@ public class Raytracer {
           completa de Oscar Chavarro.
     */
     public void execute(RGBImage inoutViewport, 
-                         ArrayList inRayableObjectArray,
+                         ArrayList inSimpleThingArray,
                          ArrayList in_arr_luces,
                          Background in_fondo,
                          Camera in_camara,
@@ -340,10 +342,10 @@ public class Raytracer {
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
-                color = seguimiento_rayo(rayo, inRayableObjectArray, 
+                color = followRayPath(rayo, inSimpleThingArray, 
                     in_arr_luces, in_fondo);
 
-                //- Exporto el resultado de color del pixel ----------------
+                //- Exporto el result de color del pixel ----------------
                 inoutViewport.putPixel(x, y, (byte)(255 * color.r), 
                                               (byte)(255 * color.g), 
                                               (byte)(255 * color.b));

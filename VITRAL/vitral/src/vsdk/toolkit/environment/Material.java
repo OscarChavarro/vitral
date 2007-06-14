@@ -9,9 +9,10 @@
 
 package vsdk.toolkit.environment;
 
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 
-public class Material
+public class Material extends Entity
 {
     private ColorRgb ambient; 
     private ColorRgb diffuse; 

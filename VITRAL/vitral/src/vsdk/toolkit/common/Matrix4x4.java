@@ -4,21 +4,47 @@
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - August 24 2005 - David Diaz / Cesar Bustacara: Design changes to      =
 //=   decouple JOGL from the Matrix data model                              =
+//= - May 2 2006 - David Diaz / Oscar Chavarro: documentation added         =
 //===========================================================================
 
 package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.VSDK;
 
-public class Matrix4x4 {
+/**
+This class is a data structure that represents a 4x4 matrix
+ */
+
+public class Matrix4x4 extends Entity
+{
+    /** This is a 4 by 4 array of type double that represents the data of the 
+        matrix */
     public double M[][];
 
+    /**
+    This constructor builds the 4x4 identity matrix:<p>
+\f[
+\left[
+   \begin{array}{cccc}
+      1 & 0 & 0 & 0 \\
+      0 & 1 & 0 & 0 \\
+      0 & 0 & 1 & 0 \\
+      0 & 0 & 0 & 1
+   \end{array}
+\right]
+\f]
+    */
     public Matrix4x4()
     {
         M = new double[4][4];
         identity();
     }
 
+    /**
+     This constructor builds a matrix given an existing matrix, and copies
+     its contents to the newly created one.
+     @param B The matrix used to build this matrix data from
+     */
     public Matrix4x4(Matrix4x4 B)
     {
         M = new double[4][4];
@@ -31,6 +57,19 @@ public class Matrix4x4 {
         }
     }
 
+    /**
+    This methods changes current matrix to be the 4x4 identity matrix:<p>
+\f[
+\left[
+   \begin{array}{cccc}
+      1 & 0 & 0 & 0 \\
+      0 & 1 & 0 & 0 \\
+      0 & 0 & 1 & 0 \\
+      0 & 0 & 0 & 1
+   \end{array}
+\right]
+\f]
+    */
     public void identity()
     {
         M[0][0]=1.0;M[0][1]=0.0;M[0][2]=0.0;M[0][3]=0.0;
@@ -39,6 +78,20 @@ public class Matrix4x4 {
         M[3][0]=0.0;M[3][1]=0.0;M[3][2]=0.0;M[3][3]=1.0;
     }
 
+    /**
+     This method calculates new values for current matrix to make it represent
+     an orthogonal projection matrix.
+     @param leftPlaneDistance
+     @param rightPlaneDistance
+     @param downPlaneDistance
+     @param upPlaneDistance
+     @param nearPlaneDistance
+     @param farPlaneDistance
+
+     /todo
+     Complete the documentation, including the formulae for the generated 
+     matrix.
+     */
     public void orthogonalProjection(
         double leftPlaneDistance, double rightPlaneDistance,
         double downPlaneDistance, double upPlaneDistance,
@@ -74,6 +127,22 @@ public class Matrix4x4 {
         M[3][3] = 1;
     }
 
+    /**
+     This method calculates new values for current matrix to make it represent
+     a paralel projection matrix, with a corresponding visualization volume
+     (i.e. the frustum).
+     projection matrix
+     @param leftDistance
+     @param rightDistance
+     @param downDistance
+     @param upDistance
+     @param nearPlaneDistance
+     @param farPlaneDistance
+
+     /todo
+     Complete the documentation, including the formulae for the generated 
+     matrix.
+     */
     public void frustumProjection(
                  double leftDistance, double rightDistance,
                  double downDistance, double upDistance,
@@ -107,7 +176,14 @@ public class Matrix4x4 {
         M[3][3] = 0;
     }
 
-
+    /**
+     This method calculates new values for current matrix to make it represent
+     a translation matrix. The matrix is similar to an identity matrix, with
+     recieved values in place to make the matrix a translation one.
+     @param transx The translation distance in the x axis
+     @param transy The translation distance in the y axis
+     @param transz The translation distance in the z axis
+     */
     public void
     translation(double transx, double transy, double transz)
     {
@@ -117,6 +193,13 @@ public class Matrix4x4 {
         M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
     }
 
+    /**
+     This method calculates new values for current matrix to make it represent
+     a translation matrix. The position of translation for the matrix is the
+     one indicated by the recieved vector.
+     @param T A Vector3D that contains a position to calculate the 
+     translation matrix values which transform the origin to this vector.
+     */
     public void
     translation(Vector3D T)
     {
@@ -126,6 +209,13 @@ public class Matrix4x4 {
         M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
     }
 
+    /**
+     This method constructs in `this` object a matrix that rotates a point in 
+     the x, y and z axis, yaw, pitch and roll radians respectivelly.
+     @param yaw The radians to rotate in the x axis
+     @param pitch The radians to rotate in the y axis
+     @param roll The radians to rotate in the z axis
+     */
     public void
     eulerAnglesRotation(double yaw, double pitch, double roll)
     {
@@ -142,12 +232,28 @@ public class Matrix4x4 {
         this.M = R3.multiply(R2.multiply(R1)).M;
     }
 
+    /**
+     This method calculates new values for current matrix into a rotation 
+     matrix that rotates a point in space arround a defined axis by some angle 
+     in radians. The axis is specified as a vector.
+     @param angle The angle in radians for the matrix
+     @param axis The axis to which the point in space will rotate arround
+     */
     public void
     axisRotation(double angle, Vector3D axis)
     {
         axisRotation(angle, axis.x, axis.y, axis.z);
     }
 
+    /**
+     This method calculates new values for current matrix into a rotation 
+     matrix that rotates a point in space arround a defined axis by some angle
+     in radians. The axis is specified as separate vector coordinates.
+     @param angle The angle in radians for the matrix
+     @param x X value of the axis to which the point in space will rotate arround
+     @param y Y value of the axis to which the point in space will rotate arround
+     @param z Z value of the axis to which the point in space will rotate arround
+     */
     public void
     axisRotation(double angle, double x, double y, double z)
     {
@@ -202,6 +308,9 @@ public class Matrix4x4 {
         M[3][3] = 1;
     }
 
+    /**
+     Converts current matrix into it's invert matrix.
+     */
     public void invert()
     {
         double R[][] = new double[4][4];
@@ -238,6 +347,13 @@ public class Matrix4x4 {
         }
     }
 
+    /**
+     Multiply this matrix by a scalar, note that this method doesn't modify 
+     this matrix. 
+     @param a The scalar by whom this matrix will be multiplied
+     @return A new Matrix3D that contains the value of current matrix 
+      multiplied by the input parameter.
+     */
     public final Matrix4x4 multiply(double a)
     {
         Matrix4x4 R = new Matrix4x4();
@@ -251,6 +367,13 @@ public class Matrix4x4 {
         return R;
     }
 
+    /**
+     Multiply a Vector3D by this matrix. Neither this matrix nor the Vector3D 
+     parameter will be modified by this method.  It returns a new Vector3D that
+     represents the input vector multiplied by current matrix.
+     @param E The vector to multiply by this matrix
+     @return the result of the Vector3D by this matrix multiplication
+     */
     public final Vector3D multiply(Vector3D E)
     {
         Vector3D R = new Vector3D();
@@ -262,7 +385,13 @@ public class Matrix4x4 {
         return R;
     }
 
-    public Matrix4x4 multiply(Matrix4x4 segunda)
+    /**
+     This method multiplies an input matrix by this matrix, the result is a 
+     new matrix and current matrix is not modified.
+     @param second The matrix by whom this matrix will be multiplied
+     @return The matrix result of the multiplication.
+     */
+    public Matrix4x4 multiply(Matrix4x4 second)
     {
         Matrix4x4 R = new Matrix4x4();
         int row_a, column_b, row_b;
@@ -272,7 +401,7 @@ public class Matrix4x4 {
             for( column_b = 0; column_b < 4; column_b++ ) {
                 acumulado = 0;
                 for( row_b = 0; row_b < 4; row_b++ ) {
-                    acumulado += M[row_a][row_b]*segunda.M[row_b][column_b];
+                    acumulado += M[row_a][row_b]*second.M[row_b][column_b];
                 }
                 R.M[row_a][column_b] = acumulado;
             }
@@ -280,6 +409,10 @@ public class Matrix4x4 {
         return R;
     }
 
+    /**
+     This method computes the determinant of this matrix.
+     @return this matrix determinant
+     */
     public double determinant()
     {
         return M[0][0]*(M[1][1]*M[2][2]-M[2][1]*M[1][2]) - 
@@ -287,6 +420,12 @@ public class Matrix4x4 {
                M[0][2]*(M[1][0]*M[2][1]-M[2][0]*M[1][1]);
     }
 
+    /**
+     This method creates an String representation of this matrix, suitable
+     for human interpretation. Note that the matrix values are formated,
+     so precision is lost in sake of readability.
+     @return The String representation of this matrix
+     */
     public String toString()
     {
         String msg;
@@ -304,6 +443,14 @@ public class Matrix4x4 {
         return msg;
     }
 
+    /**
+     This method creates a Quaterion equivalent to current matrix. Note that
+     the resulting Quaternion will be of unit lenght if current matrix is a
+     rotation one. If not, Quaternion normalization could fix a damaged 
+     rotation matrix, as long resulting Quaternion is not 0, which happens
+     if current matrix is nos linearly independent.
+     @return The Quaterion representation of this matrix.
+     */
     public Quaternion exportToQuaternion()
     {
         Quaternion quat = new Quaternion();
@@ -354,6 +501,12 @@ public class Matrix4x4 {
         return quat;
     }
 
+    /**
+     This method import the information of the input Quaterion into this 
+     matrix. Note that if input Quaternion is of unit lenght, the resulting
+     matrix will be a rotation matrix.
+     @param a The input Quaterion
+     */
     public void importFromQuaternion(Quaternion a)
     {
         double sx, sy, sz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
@@ -391,6 +544,11 @@ public class Matrix4x4 {
         M[3][3] = 1;
     }
 
+    /**
+     This method returns the yaw angle of this matrix, as interpreted if
+     current matrix is a rotation one.
+     @return The yaw angle of this matrix
+     */
     public double obtainEulerYawAngle()
     {
         Vector3D dir = new Vector3D(1, 0, 0);
@@ -416,6 +574,12 @@ public class Matrix4x4 {
 
         return yaw;
     }
+
+    /**
+     This method returns the pitch angle of this matrix, as interpreted if
+     current matrix is a rotation one.
+     @return The pitch angle of this matrix
+     */
     public double obtainEulerPitchAngle()
     {
         Vector3D dir = new Vector3D(1, 0, 0);
@@ -424,6 +588,12 @@ public class Matrix4x4 {
         dir.normalize();
         return Math.toRadians(90) - Math.acos(dir.z);
     }
+
+    /**
+     This method returns the roll angle of this matrix, as interpreted if
+     current matrix is a rotation one.
+     @return The roll angle of this matrix
+     */
     public double obtainEulerRollAngle()
     {
         Matrix4x4 R1, R2, R3;

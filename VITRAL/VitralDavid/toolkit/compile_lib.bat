@@ -1,0 +1,10 @@
+md classes
+md lib
+cls
+cd src
+javac -Xlint:unchecked -classpath .;..\lib\jogl.zip -d ../classes vsdk\toolkit\common\*.java vsdk\toolkit\environment\*.java vsdk\toolkit\environment\geometry\*.java vsdk\toolkit\gui\adapters\*.java vsdk\toolkit\gui\*.java vsdk\toolkit\media\*.java vsdk\toolkit\io\geometry\*.java vsdk\toolkit\io\image\*.java vsdk\toolkit\render\*.java vsdk\toolkit\render\jogl\*.java vsdk\toolkit\render\awt\*.java vsdk\framework\presentation\frames\*.java vsdk\framework\presentation\panels\*.java vsdk\framework\presentation\util\*.java vsdk\framework\presentation\*.java vsdk\framework\render\*.java vsdk\framework\render\util\*.java vsdk\framework\render\event\*.java 
+cd ..
+cd classes
+jar cf ../lib/vsdk_frwk.jar vsdk
+cd ..
+pause

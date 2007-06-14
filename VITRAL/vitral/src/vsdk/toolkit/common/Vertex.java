@@ -2,39 +2,21 @@ package vsdk.toolkit.common;
 
 import java.util.ArrayList;
 
-public class Vertex {
+public class Vertex extends Entity
+{
   /**
-   * @link aggregation
-   * @clientCardinality 1
-   * @supplierCardinality 1
-   * @directed
-   * @supplierRole position*/
+   */
   private Vector3D position;
 
   /**
-   * @link aggregation
-   * @directed
-   * @supplierRole normal
-   * @clientCardinality 1
-   * @supplierCardinality 1
    */
   private Vector3D normal;
 
   /**
-   * @link aggregation
-   * @directed
-   * @supplierRole binormal
-   * @clientCardinality 1
-   * @supplierCardinality 1
    */
   private Vector3D binormal;
 
   /**
-   * @link aggregation
-   * @directed
-   * @supplierRole tangent
-   * @clientCardinality 1
-   * @supplierCardinality 1
    */
   private Vector3D tangent;
 
@@ -42,10 +24,6 @@ public class Vertex {
   private double v;
 
   /**
-   * @directed
-   * @supplierCardinality 0..*
-   * @clientCardinality 1
-   * @supplierRole incidentTriangles
    */
   private ArrayList<Triangle> incidentTriangles;
 

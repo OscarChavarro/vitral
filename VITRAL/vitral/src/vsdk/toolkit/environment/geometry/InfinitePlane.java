@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.Geometry;
 
-public class InfinitePlane extends Geometry {
+public class InfinitePlane extends HalfSpace {
     // This is the infinite plane with canonical equation ax + bx + cx + d = 0
     private double a;
     private double b;

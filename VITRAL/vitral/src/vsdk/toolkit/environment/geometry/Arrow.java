@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 
-public class Arrow extends Geometry {
+public class Arrow extends Solid {
 
     private double baseLength;
     private double headLength;
@@ -77,6 +77,10 @@ public class Arrow extends Geometry {
         headCone.setBaseRadius(val);
     }
 
+    /**
+     Check the general interface contract in superclass method
+     Geometry.doIntersection.
+    */
     public boolean
     doIntersection(Ray inOutRay) {
         boolean headTest, baseTest;

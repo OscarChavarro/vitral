@@ -18,12 +18,14 @@
 package vsdk.toolkit.environment;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
-public class Camera {
+public class Camera extends Entity
+{
     // Basic Camera Model
     private Vector3D up;
     private Vector3D front;
