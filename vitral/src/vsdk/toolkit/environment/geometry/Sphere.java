@@ -129,8 +129,8 @@ public class Sphere extends Solid {
         outData.v = phi / Math.PI;
 
         //-----------------------------------------------------------------
-    outData.t.x = -Math.cos(theta);
-        outData.t.y = -Math.sin(theta);
+    outData.t.x = Math.sin(theta-Math.PI/2);
+        outData.t.y = -Math.cos(theta-Math.PI/2);
     outData.t.z = 0;
 
         //-----------------------------------------------------------------

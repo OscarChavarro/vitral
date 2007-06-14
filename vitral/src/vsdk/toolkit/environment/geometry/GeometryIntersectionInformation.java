@@ -9,6 +9,7 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 
 /**
@@ -34,19 +35,33 @@ public class GeometryIntersectionInformation extends Entity {
     // This can be null.
     public Image texture; // Internal geometry selected texture map
 
+    // This can be null.
+    public NormalMap normalMap; // Internal geometry selected texture map
+
     public GeometryIntersectionInformation() 
     {
         p = new Vector3D();
         n = new Vector3D();
         t = new Vector3D();
         material = null;
+        texture = null;
+        normalMap = null;
     }
 
     public GeometryIntersectionInformation(GeometryIntersectionInformation b) 
     {
-        p = new Vector3D(b.p);
-        n = new Vector3D(b.n);
-        material = null;
+    clone(b);
+    }
+
+    public void clone(GeometryIntersectionInformation other)
+    {
+        this.p = new Vector3D(other.p);
+        this.n = new Vector3D(other.n);
+        this.u = other.u;
+        this.v = other.v;
+        this.material = other.material;
+        this.texture = other.texture;
+        this.normalMap = other.normalMap;
     }
 }
 

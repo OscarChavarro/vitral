@@ -1,6 +1,11 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
+//= [BLIN1978b] Blinn, James F. "Simulation of wrinkled surfaces", SIGGRAPH =
+//=          proceedings, 1978.                                             =
+//= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =
+//=          principles and practice" - second edition, Addison Wesley,     =
+//=          1992.                                                          =
 //= [WHIT1980] Whitted, Turner. "An Improved Illumination Model for Shaded  =
 //=            Display", 1980.                                              =
 //=-------------------------------------------------------------------------=
@@ -43,6 +48,8 @@ import vsdk.toolkit.gui.ProgressMonitor;
 /**
 This class provides an encaptulation for a rendering algorithm, 
 implementing simple recursive raytracing as presented in [WHIT1980].
+Includes a normal perturbation for the simulation of wrinkled surfaces,
+as described in [BLIN1978b].
 This class is appropiate to play a role of "concrete strategy" in
 a "Strategy" design pattern.
 
@@ -88,7 +95,44 @@ public class Raytracer extends RenderingElement {
         Matrix4x4 R, Ri;
 
         //- Normal perturbation / bump mapping ----------------------------
+        // This code follows the variable name convention used on equation
+        // [FOLE1992].16.23, section [FOLE1992].16.3.3.
+        //-----------------------------------------------------------------
+        if ( info.normalMap != null ) {
+            // Information inherent to current geometry
+            Vector3D N;                      // Normal vector on surface
+            Vector3D Ps;                     // Tangent vector on surface
+            Vector3D Pt;                     // Binormal vector on surface
+            // Information extracted from precomputed normal map (after F)
+            Vector3D normalVariation;        // Normal variation for point
+                                             // at texture coordinates (u, v)
+            double Bu;                       // dF/du for bumpmap F
+            double Bv;                       // dF/dv for bumpmap F
+            // Auxiliary variables
+            Vector3D normalPerturbation;
+            Vector3D NxPt;
+            Vector3D NxPs;
 
+            normalVariation = info.normalMap.getNormal(info.u, info.v);
+            if ( normalVariation != null ) {
+                // Evaluation of [BLIN1978b]/[FOLE1992].16.23 equation
+                N = info.n;    N.normalize();
+                Ps = info.t;    Ps.normalize();
+                Pt = N.crossProduct(Ps);
+                NxPt = N.crossProduct(Pt);
+                NxPs = N.crossProduct(Ps);
+                Bu = -normalVariation.x;
+                Bv = -normalVariation.y;
+                // Note: this only works when `N` is a unit vector. If not,
+                //      `normalPerturbation` must be divided by N's length
+                normalPerturbation =
+                    NxPt.multiply(Bu).substract(NxPs.multiply(Bv));
+                info.n = info.n.add(normalPerturbation);
+                info.n.normalize();
+            }
+        }
+
+        //-----------------------------------------------------------------
         //-----------------------------------------------------------------
         for ( Iterator i = lights.iterator(); i.hasNext(); ) {
             Light light = (Light)i.next();
@@ -127,7 +171,7 @@ public class Raytracer extends RenderingElement {
                     if ( info.texture != null ) {
                         diffuse.modulate(
                             info.texture.getColorRgbBiLinear(info.u, info.v));
-            }
+                    }
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
                         result.r += lambert*diffuse.r*lightEmission.r;
                         result.g += lambert*diffuse.g*lightEmission.g;
@@ -189,6 +233,7 @@ public class Raytracer extends RenderingElement {
                     nearestObject.getGeometry().doExtraInformation(
                         myRay, myRay.t, subInfo);
 
+                    //-----
                     if ( !inQualitySelection.isTextureSet() ) {
                         subInfo.texture = null;
                     }
@@ -196,6 +241,11 @@ public class Raytracer extends RenderingElement {
                         if ( subInfo.texture == null ) {
                             subInfo.texture = nearestObject.getTexture();
                         }
+                    }
+
+                    //-----
+                    if ( !inQualitySelection.isBumpMapSet() ) {
+                        subInfo.normalMap = nearestObject.getNormalMap();
                     }
 
                     subInfo.p = R.multiply(subInfo.p).add(po);
@@ -208,7 +258,7 @@ public class Raytracer extends RenderingElement {
                     rv.z = -rayo_reflejado.direction.z;                    
                     ColorRgb rcolor =
                         evaluateIlluminationModel(subInfo, rv, lights, objects, 
-                          background, material, 
+                                                  background, material, 
                                                   inQualitySelection);
 
                     result.r += kr*rcolor.r;
@@ -273,7 +323,7 @@ public class Raytracer extends RenderingElement {
     and its combination with geometric transformations.
     */
     private ColorRgb followRayPath(Ray inRay, ArrayList in_objetos, 
-                  ArrayList in_luces, Background in_background,
+                                  ArrayList in_luces, Background in_background,
                                   RendererConfiguration inQualitySelection)
     {
         ColorRgb c;
@@ -300,14 +350,20 @@ public class Raytracer extends RenderingElement {
             nearestObject.getGeometry().doExtraInformation(myRay, 
                                                                   myRay.t,
                                                                   info);
-        if ( !inQualitySelection.isTextureSet() ) {
-        info.texture = null;
-        }
-        else {
+            //-----
+            if ( !inQualitySelection.isTextureSet() ) {
+                info.texture = null;
+            }
+            else {
                 if ( info.texture == null ) {
-            info.texture = nearestObject.getTexture();
-        }
-        }
+                    info.texture = nearestObject.getTexture();
+                }
+            }
+
+            //-----
+            if ( !inQualitySelection.isBumpMapSet() ) {
+                info.normalMap = nearestObject.getNormalMap();
+            }
 
             //------------------------------------------------------------
             v.x = -inRay.direction.x;
@@ -326,7 +382,7 @@ public class Raytracer extends RenderingElement {
             }
 
             c = evaluateIlluminationModel(
-        info, v, in_luces, in_objetos, in_background, material,
+                info, v, in_luces, in_objetos, in_background, material,
                 inQualitySelection);
           }
           else {
@@ -438,7 +494,7 @@ public class Raytracer extends RenderingElement {
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
                 color = followRayPath(rayo, inSimpleBodyArray,
-                      in_arr_luces, in_background, 
+                                      in_arr_luces, in_background, 
                                       inQualitySelection);
                 if ( depthmap != null ) {
                     depthmap.setZ(x, y, (float)rayo.t);

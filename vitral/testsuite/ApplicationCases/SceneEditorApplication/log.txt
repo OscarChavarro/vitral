@@ -161,5 +161,5 @@ Dec 20 2006, Oscar Chavarro:
   - 52min: Texture mapping on raytracer... :-)
   - 27min: Bilinear interpolation in Image.getColorRgbBiLinear
   - 50min: Normal map
-  - 6:30pm->
-
+  - 1h30min: Bumpmapping in raytracing. Pending to check normal map and process
+    computation. Actually given some errors...

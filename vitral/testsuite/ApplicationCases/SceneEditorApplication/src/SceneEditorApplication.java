@@ -422,9 +422,10 @@ class ButtonsPanel extends JPanel implements ActionListener
         Material m = new Material();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
         m.setSpecular(new ColorRgb(1, 1, 1));
     m.setDoubleSided(false);
+    m.setPhongExponent(100);
         return m;
     }
 
@@ -476,7 +477,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             addThing(new Box(1, 1, 1));
         }
         else if ( label.equals("IDC_CREATE_BOX") ) {
-            addThing(new Box(1, 2, 3));
+            addThing(new Box(1, 3, 2));
         }
         else if ( label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));

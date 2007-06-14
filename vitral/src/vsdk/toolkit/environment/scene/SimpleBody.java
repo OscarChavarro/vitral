@@ -11,6 +11,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
 
@@ -33,7 +34,7 @@ public class SimpleBody extends Entity {
     //- Model (3/6): body visual data ---------------------------------
     private Material globalMaterial;
     private Image globalTextureMap;
-    private Image globalBumpMap;
+    private NormalMap globalNormalMap;
 
     //- Model (4/6): body physical data -------------------------------
 
@@ -53,6 +54,8 @@ public class SimpleBody extends Entity {
         position = new Vector3D(0, 0, 0);
         scale = new Vector3D(1, 1, 1);
         globalMaterial = new Material();
+        globalTextureMap = null;
+        globalNormalMap = null;
     }
 
     public String getName()
@@ -123,6 +126,16 @@ public class SimpleBody extends Entity {
     public void setTexture(Image in)
     {
         globalTextureMap = in;
+    }
+
+    public NormalMap getNormalMap()
+    {
+        return globalNormalMap;
+    }
+
+    public void setNormalMap(NormalMap in)
+    {
+        globalNormalMap = in;
     }
 
     public Vector3D getPosition()

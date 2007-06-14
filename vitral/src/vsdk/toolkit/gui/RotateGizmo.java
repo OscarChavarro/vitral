@@ -36,7 +36,7 @@ public class RotateGizmo extends Gizmo {
   {
       char unicode_id;
       int keycode;
-      double deltaMov = Math.toRadians(15.0);
+      double deltaMov = Math.toRadians(1.0);
       boolean updateNeeded = false;
 
       unicode_id = keyEvent.getKeyChar();

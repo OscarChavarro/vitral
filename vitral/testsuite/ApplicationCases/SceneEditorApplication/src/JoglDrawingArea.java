@@ -662,8 +662,7 @@ public class JoglDrawingArea implements
                   gi = theScene.things.get(firstThingSelected);
                   texture = gi.getTexture();
                   if ( texture == null ) {
-                      System.out.println("PONGO TEXTURA");
-                      String imageFilename = "../../../etc/images/render.jpg";
+                      String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth.png";
                       try {
                           texture = 
                            ImagePersistence.importRGB(new File(imageFilename));
@@ -672,7 +671,6 @@ public class JoglDrawingArea implements
                       gi.setTexture(texture);
                   }
                   else {
-                      System.out.println("QUITO TEXTURA");
                       gi.setTexture(null);
                   }
               }
@@ -682,36 +680,31 @@ public class JoglDrawingArea implements
               if ( firstThingSelected >= 0 ) {
                   SimpleBody gi;
                   IndexedColorImage source = null;
-                  NormalMap normalMap = new NormalMap();
+                  NormalMap normalMap;
                   RGBImage exported;
                   gi = theScene.things.get(firstThingSelected);
 
-                  try {
-                      String imageFilename = "../../../etc/bumpmaps/blinn1.bw";
-                      source = ImagePersistence.importIndexedColor(new File(imageFilename));
-                      normalMap.importBumpMap(source, new Vector3D(1, 1, 0));
-                      exported = normalMap.exportToRgbImage();
-                      ImagePersistence.exportJPG(new File("./output.jpg"), exported);
-                  }
-                  catch ( Exception ee ) {}
-
-                  /*
-                  texture = gi.getTexture();
-                  if ( texture == null ) {
-                      System.out.println("PONGO TEXTURA");
-                      String imageFilename = "../../../etc/images/render.jpg";
+                  normalMap = gi.getNormalMap();
+                  if ( normalMap == null ) {
                       try {
-                          texture = 
-                           ImagePersistence.importRGB(new File(imageFilename));
+                          normalMap = new NormalMap();
+                          //String imageFilename = "../../../etc/bumpmaps/blinn1.bw";
+                          String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth_bump.bw";
+                          source = ImagePersistence.importIndexedColor(new File(imageFilename));
+                          normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
+
+                          exported = normalMap.exportToRgbImage();
+                          ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                       }
-                      catch ( Exception ee ) {}
-                      gi.setTexture(texture);
+                      catch ( Exception ee ) {
+              System.err.println(ee);
+              ee.printStackTrace();
+                      }
+                      gi.setNormalMap(normalMap);
+                    }
+                    else {
+                      gi.setNormalMap(null);
                   }
-                  else {
-                      System.out.println("QUITO TEXTURA");
-                      gi.setTexture(null);
-                  }
-                  */
               }
               canvas.repaint();
               break;

@@ -48,27 +48,34 @@ public class ImagePersistenceSGI extends PersistenceElement
         boolean flag;
         readBytes(is, buffer);
 
+        if ( y >= img.getYSize() ) return;
+
         for ( pos = 0; pos < length; pos++ ) {
             flag = ((buffer[pos] & 0x80) != 0x00)?true:false;
-            buffer[pos] <<= 1;
-            buffer[pos] >>= 1;
+            //buffer[pos] <<= 1;
+            //buffer[pos] >>= 1;
+            buffer[pos] = VSDK.unsigned8BitInteger2signedByte(VSDK.signedByte2unsignedInteger(buffer[pos]) & 0x7F);
             count = VSDK.signedByte2unsignedInteger(buffer[pos]);
             if ( flag ) {
                 // Copy next count bytes
                 for ( i = 0; i < count; i++ ) {
                     pos++;
+                    if ( x >= img.getXSize() || pos >= length ) {
+                        return;
+            }
                     img.putPixel(x, y, buffer[pos]);
                     x++;
-                    if ( x >= img.getXSize() ) return;
                 }
             }
             else {
                 // RLE Processing: next byte count times
                 pos++;
                 for ( i = 0; i < count; i++ ) {
+                    if ( x >= img.getXSize() || pos >= length ) {
+                        return;
+            }
                     img.putPixel(x, y, buffer[pos]);
                     x++;
-                    if ( x >= img.getXSize() ) return;
                 }
             }
         }

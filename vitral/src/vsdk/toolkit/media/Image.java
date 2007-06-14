@@ -6,7 +6,7 @@
 //= References:                                                             =
 //= [BRES1965] Bresenham, J.E. "Algorithm for computer control of a digital =
 //=            plotter" IBM Syst. J. 4, 1 (1965), 25-30.                    =
-//= [BLINN78b] Blinn, James F. "Simulation of wrinkled surfaces", SIGGRAPH  =
+//= [BLIN1978b] Blinn, James F. "Simulation of wrinkled surfaces", SIGGRAPH =
 //=          proceedings, 1978.                                             =
 //===========================================================================
 

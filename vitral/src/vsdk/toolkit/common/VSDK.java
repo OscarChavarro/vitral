@@ -174,7 +174,7 @@ public class VSDK
     */
     public static String formatDouble(double a)
     {
-        DecimalFormat f = new DecimalFormat("0.##");
+        DecimalFormat f = new DecimalFormat("0.00");
 
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
