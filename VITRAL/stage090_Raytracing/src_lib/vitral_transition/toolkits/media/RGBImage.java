@@ -4,13 +4,13 @@ package vitral_transition.toolkits.media;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import vitral_transition.toolkits.media.RGBPixel;
+import vitral.toolkits.media.RGBPixel;
 
-public class RGBImage {
-
+public class RGBImage 
+{
     private RGBPixel data[];
-    private int x_tam;
-    private int y_tam;
+    private int xSize;
+    private int ySize;
 
     /**
     Constructora de imagen. OJO: No la inicializa, antes de usarla debe
@@ -18,8 +18,8 @@ public class RGBImage {
     */
     public RGBImage()
     {
-        x_tam = 0;
-        y_tam = 0;
+        xSize = 0;
+        ySize = 0;
         data = null;
     }
 
@@ -30,13 +30,13 @@ public class RGBImage {
     public void dispose()
     {
         if ( data != null ) {
-            for ( int i = 0; i < x_tam*y_tam; i++ ) {
+            for ( int i = 0; i < xSize*ySize; i++ ) {
                 if ( data[i] != null ) {
                     data[i] = null;
                 }
             }
-            x_tam = 0;
-            y_tam = 0;
+            xSize = 0;
+            ySize = 0;
             data = null;
             System.gc();
         }
@@ -67,8 +67,8 @@ public class RGBImage {
           data = null;
           return false;
         }
-        x_tam = ancho;        
-        y_tam = alto;        
+        xSize = ancho;        
+        ySize = alto;        
         return true;
     }
 
@@ -78,7 +78,7 @@ public class RGBImage {
     */
     public void putpixel(int x, int y, byte r, byte g, byte b)
     {
-        int index = x_tam*y + x;
+        int index = xSize*y + x;
         data[index].r = r;
         data[index].g = g;
         data[index].b = b;
@@ -91,7 +91,7 @@ public class RGBImage {
     public RGBPixel getpixel(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = x_tam*y + x;
+        int index = xSize*y + x;
         p.r = data[index].r;
         p.g = data[index].g;
         p.b = data[index].b;
@@ -112,8 +112,8 @@ public class RGBImage {
         byte g;
         byte b;
 
-        for ( i = 0; i < y_tam ; i++ ) {
-            for ( j = 0; j < x_tam ; j++ ) {
+        for ( i = 0; i < ySize ; i++ ) {
+            for ( j = 0; j < xSize ; j++ ) {
                 if ( ((i % 2 != 0) && (j % 2 == 0)) || 
                      ((j % 2 != 0) && (i % 2 == 0)) ) {
                     r = (byte)255;
@@ -125,12 +125,12 @@ public class RGBImage {
                     g = 0;
                     b = 0;
                 }
-                if ( i == y_tam/2 ) {
+                if ( i == ySize/2 ) {
                     r = (byte)255;
                     g = 0;
                     b = 0;
                 }
-                if ( j == x_tam/2) {
+                if ( j == xSize/2) {
                     r = 0;
                     g = (byte)255;
                     b = 0;
@@ -152,7 +152,7 @@ public class RGBImage {
             FileOutputStream escritor = new FileOutputStream(fd);
 
             String linea1 = "P6\n";
-            String linea2 = x_tam + " " + y_tam + "\n";
+            String linea2 = xSize + " " + ySize + "\n";
             String linea3 = "255\n";
             byte arr[];
 
@@ -163,7 +163,7 @@ public class RGBImage {
             arr = linea3.getBytes();
             escritor.write(arr, 0, arr.length);
 
-            for ( int i = 0; i < x_tam*y_tam; i++ ) {
+            for ( int i = 0; i < xSize*ySize; i++ ) {
                 escritor.write(data[i].r);
                 escritor.write(data[i].g);
                 escritor.write(data[i].b);
@@ -175,14 +175,14 @@ public class RGBImage {
         return true;
     }
 
-    public int xtam()
+    public int getXSize()
     {
-        return x_tam;
+        return xSize;
     }
 
-    public int ytam()
+    public int getYSize()
     {
-        return y_tam;
+        return ySize;
     }
 }
 

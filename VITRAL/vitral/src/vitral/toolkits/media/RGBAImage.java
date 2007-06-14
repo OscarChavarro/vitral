@@ -15,7 +15,6 @@ import vitral.toolkits.media.RGBAPixel;
 
 public class RGBAImage 
 {
-
     private RGBAPixel data[];
     private int xSize;
     private int ySize;
@@ -252,7 +251,7 @@ public class RGBAImage
             }
         }
     }
-    
+
     public byte[] getRawImage()
     {
         byte[] pixels=new byte[this.xSize*this.ySize*4];

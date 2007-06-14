@@ -68,8 +68,8 @@ public class RaytracerSimple {
 
         // 2.2. Procesar la escena
         el_visualizador = new RaytracerMIT();
-        la_escena.camara.updateViewportResize(la_imagen_resultado.xtam(), 
-                                         la_imagen_resultado.ytam());
+        la_escena.camara.updateViewportResize(la_imagen_resultado.getXSize(), 
+                                         la_imagen_resultado.getYSize());
         el_visualizador.ejecutar(la_imagen_resultado,
                                  la_escena.arr_cosas,
                                  la_escena.arr_luces, 

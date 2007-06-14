@@ -16,7 +16,7 @@ import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.common.Matrix4x4;
 import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.environment.Camera;
-import vitral_transition.toolkits.environment.Light2;
+import vitral.toolkits.environment.Light;
 import vitral.toolkits.environment.Material;
 import vitral.toolkits.environment.SimpleBackground;
 import vitral.toolkits.geometry.RayableObject;
@@ -31,7 +31,7 @@ public class Universe
 
     // El modelo del mundo
     public Vector<RayableObject> arr_cosas;
-    public Vector<Light2> arr_luces;
+    public Vector<Light> arr_luces;
     public SimpleBackground fondo;
     public Camera camara;
 
@@ -46,7 +46,7 @@ public class Universe
         // Arreglo de Geometrys
         arr_cosas = new Vector<RayableObject>(CHUNKSIZE, CHUNKSIZE);  
         // Arreglo de LIGHTes
-        arr_luces = new Vector<Light2>(CHUNKSIZE, CHUNKSIZE);
+        arr_luces = new Vector<Light>(CHUNKSIZE, CHUNKSIZE);
     }
 
     public void dispose()
@@ -113,8 +113,10 @@ public class Universe
                   thing = new RayableObject();
           thing.setGeometry(new Sphere(r));
                   thing.setMaterial(material_actual);
+
                   R = new Matrix4x4();
                   // Pending to add rotation code
+
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
                   Ri.invert();
@@ -134,6 +136,8 @@ public class Universe
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
                   // Pending to add rotation code
+                  R.eulerAnglesRotation(Math.PI/4, 0, 0);
+
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
                   Ri.invert();
@@ -191,21 +195,21 @@ public class Universe
                   }
                   if ( st.sval.equals("ambient") ) {
                       imprimirMensaje("ambient");
-                      arr_luces.addElement(new Light2(Light2.AMBIENTE, null, r,g,b));
+                      arr_luces.addElement(new Light(Light.AMBIENTE, null, new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       imprimirMensaje("directional");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light2(Light2.DIRECCIONAL, v, r,g,b));
+                      arr_luces.addElement(new Light(Light.DIRECCIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       imprimirMensaje("point");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light2(Light2.PUNTUAL, v, r, g, b));
+                      arr_luces.addElement(new Light(Light.PUNTUAL, v, new ColorRgb(r, g, b)));
                     } 
                     else {
                       System.err.println("ERROR: in line " + 

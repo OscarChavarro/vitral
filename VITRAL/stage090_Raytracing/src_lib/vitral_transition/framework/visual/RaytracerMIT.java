@@ -1,4 +1,11 @@
 //===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//= - February 13 2006 - Oscar Chavarro: updated raytracing code to manage  =
+//=   rayable objects, with geometries implementing intersection operation  =
+//=   in an object-coordinate basis.                                        =
+//===========================================================================
 
 package vitral_transition.framework.visual;
 
@@ -10,8 +17,8 @@ import vitral.toolkits.common.Matrix4x4;
 import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.common.Ray;
 import vitral.toolkits.environment.Camera;
+import vitral.toolkits.environment.Light;
 import vitral.toolkits.environment.Material;
-import vitral_transition.toolkits.environment.Light2;
 import vitral.toolkits.environment.Background;
 import vitral.toolkits.geometry.Geometry;
 import vitral.toolkits.geometry.GeometryIntersectionInformation;
@@ -52,27 +59,29 @@ public class RaytracerMIT {
         Material m) {
 
         ColorRgb resultado = new ColorRgb();
-        RayableObject objeto_mas_cercano;
+        RayableObject nearestObject;
         ColorRgb color_de_fondo = fondo.colorInDireccion(n);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
+        ColorRgb lightEmission;
         Ray myRay;
         Vector3D po;
         Matrix4x4 R, Ri;
 
         for ( Enumeration lightSources = lights.elements();
               lightSources.hasMoreElements(); ) {
-            Light2 luz = (Light2)lightSources.nextElement();
-            if ( luz.tipo_de_luz == Light2.AMBIENTE ) {
+            Light luz = (Light)lightSources.nextElement();
+            lightEmission = luz.getSpecular();
+            if ( luz.tipo_de_luz == Light.AMBIENTE ) {
                 ambient = m.getAmbient();
-                resultado.r += ambient.r*luz.ir;
-                resultado.g += ambient.g*luz.ig;
-                resultado.b += ambient.b*luz.ib;
+                resultado.r += ambient.r*lightEmission.r;
+                resultado.g += ambient.g*lightEmission.g;
+                resultado.b += ambient.b*lightEmission.b;
               } 
               else {
                 Vector3D l;
-                if ( luz.tipo_de_luz == Light2.PUNTUAL ) {
+                if ( luz.tipo_de_luz == Light.PUNTUAL ) {
                     l = new Vector3D(luz.lvec.x - p.x, 
                                    luz.lvec.y - p.y, 
                                    luz.lvec.z - p.z);
@@ -86,9 +95,9 @@ public class RaytracerMIT {
                 Vector3D poffset = 
                     new Vector3D(p.x + TINY*l.x, p.y + TINY*l.y, p.z + TINY*l.z);
                 Ray rayo_sombra = new Ray(poffset, l);
-                objeto_mas_cercano =
+                nearestObject =
                     trazar_rayo_en_escena(rayo_sombra, objects);
-                if ( objeto_mas_cercano != null ) {
+                if ( nearestObject != null ) {
                     continue;
                 }
 
@@ -96,9 +105,9 @@ public class RaytracerMIT {
                 if ( lambert > 0 ) {
                     diffuse = m.getDiffuse();
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
-                        resultado.r += lambert*diffuse.r*luz.ir;
-                        resultado.g += lambert*diffuse.g*luz.ig;
-                        resultado.b += lambert*diffuse.b*luz.ib;
+                        resultado.r += lambert*diffuse.r*lightEmission.r;
+                        resultado.g += lambert*diffuse.g*lightEmission.g;
+                        resultado.b += lambert*diffuse.b*lightEmission.b;
                     }
                     specular = m.getSpecular();
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
@@ -114,9 +123,9 @@ public class RaytracerMIT {
                             // OJO: Raro...
                             spec = ((specular.r + specular.g + specular.b)/3)*(
                                 (float) Math.pow((double) spec, (double)m.getPhongExponent()));
-                            resultado.r += spec*luz.ir;
-                            resultado.g += spec*luz.ig;
-                            resultado.b += spec*luz.ib;
+                            resultado.r += spec*lightEmission.r;
+                            resultado.g += spec*lightEmission.g;
+                            resultado.b += spec*lightEmission.b;
                         }
                     }
                 }
@@ -136,25 +145,25 @@ public class RaytracerMIT {
                                                 p.y + TINY*reflect.y, 
                                                 p.z + TINY*reflect.z);
                 Ray rayo_reflejado = new Ray(poffset, reflect);
-                objeto_mas_cercano = 
+                nearestObject = 
                     trazar_rayo_en_escena(rayo_reflejado, objects);
-                if ( objeto_mas_cercano != null ) {
+                if ( nearestObject != null ) {
                     Vector3D rv = new Vector3D();
                     Vector3D rp, rn;
                     GeometryIntersectionInformation info = 
                         new GeometryIntersectionInformation();
 
                     //--------------------------------------------------------
-                    po = objeto_mas_cercano.getPosition();
-                    R = objeto_mas_cercano.getRotation();
-                    Ri = objeto_mas_cercano.getRotationInverse();
+                    po = nearestObject.getPosition();
+                    R = nearestObject.getRotation();
+                    Ri = nearestObject.getRotationInverse();
                     myRay = new Ray ( 
                         Ri.multiply(rayo_reflejado.origin.substract(po) ),
                         Ri.multiply(rayo_reflejado.direction)
                     );
                     myRay.t = rayo_reflejado.t;
 
-                    objeto_mas_cercano.getGeometry().doExtraInformation(
+                    nearestObject.getGeometry().doExtraInformation(
                         myRay, myRay.t, info);
 
                     rp = R.multiply(info.p).add(po);
@@ -191,41 +200,44 @@ public class RaytracerMIT {
     }
 
     /**
-    Si el `in_rayo` se intersecta con al menos uno de los `in_arr_objetos`,
-    se retorna una referencia al objeto mas cercano de los intersectados.
-    De lo contrario se retorna null.
+    This method intersect the `inRay` with all of the geometries contained
+    in `inRayableObjectArray`. If none of the geometries is intersected
+    `null` is returned, otherwise a reference to the containing RayableObject
+    is returned.
 
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
     public RayableObject 
-    trazar_rayo_en_escena(Ray inRay, Vector in_arr_objetos) {
+    trazar_rayo_en_escena(Ray inRay, Vector inRayableObjectArray) {
         Enumeration i;
         RayableObject gi;
-        RayableObject objeto_mas_cercano;
+        RayableObject nearestObject;
         Ray myRay;
         Vector3D po;
+        Matrix4x4 R, Ri;
 
         inRay.t = INFINITO;
-        objeto_mas_cercano = null;
+        nearestObject = null;
 
-        for ( i = in_arr_objetos.elements(); i.hasMoreElements(); ) {
+        for ( i = inRayableObjectArray.elements(); i.hasMoreElements(); ) {
             gi = (RayableObject)i.nextElement();
             po = gi.getPosition();
+            Ri = gi.getRotationInverse();
 
             myRay = new Ray ( 
-                gi.getRotationInverse().multiply(inRay.origin.substract(po) ),
-                gi.getRotationInverse().multiply(inRay.direction)
+                Ri.multiply(inRay.origin.substract(po)),
+                Ri.multiply(inRay.direction)
             );
             myRay.t = inRay.t;
 
             if ( gi.getGeometry().doIntersection(myRay) ) {
-                objeto_mas_cercano = gi;
+                nearestObject = gi;
             }
             inRay.t = myRay.t;
         }
-        return objeto_mas_cercano;
+        return nearestObject;
     }
 
     /**
@@ -239,26 +251,26 @@ public class RaytracerMIT {
         ColorRgb c;
         Vector3D v = new Vector3D();
         Vector3D p, n;
-        RayableObject objeto_mas_cercano;
+        RayableObject nearestObject;
         Ray myRay;
         Vector3D po;
         Matrix4x4 R, Ri;
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
 
-        objeto_mas_cercano = trazar_rayo_en_escena(inRay, in_objetos);
-        if ( objeto_mas_cercano != null ) {
+        nearestObject = trazar_rayo_en_escena(inRay, in_objetos);
+        if ( nearestObject != null ) {
             //------------------------------------------------------------
-            po = objeto_mas_cercano.getPosition();
-            R = objeto_mas_cercano.getRotation();
-            Ri = objeto_mas_cercano.getRotationInverse();
+            po = nearestObject.getPosition();
+            R = nearestObject.getRotation();
+            Ri = nearestObject.getRotationInverse();
             myRay = new Ray ( 
                 Ri.multiply(inRay.origin.substract(po) ),
                 Ri.multiply(inRay.direction)
             );
             myRay.t = inRay.t;
 
-            objeto_mas_cercano.getGeometry().doExtraInformation(myRay, 
+            nearestObject.getGeometry().doExtraInformation(myRay, 
                                                                 myRay.t,
                                                                 info);
             //------------------------------------------------------------
@@ -271,7 +283,7 @@ public class RaytracerMIT {
 
             c = modelo_de_iluminacion(
                 p, n, v, in_luces, in_objetos, in_fondo, 
-                objeto_mas_cercano.getMaterial());
+                nearestObject.getMaterial());
           }
           else {
             c = in_fondo.colorInDireccion(inRay.direction);
@@ -315,8 +327,8 @@ public class RaytracerMIT {
           considerarse que es una re-escritura y re-estructuraci&oacute;n 
           completa de Oscar Chavarro.
     */
-    public void ejecutar(RGBImage inout_viewport, 
-                         Vector in_arr_objetos,
+    public void ejecutar(RGBImage inoutViewport, 
+                         Vector inRayableObjectArray,
                          Vector in_arr_luces,
                          Background in_fondo,
                          Camera in_camara)
@@ -331,20 +343,20 @@ public class RaytracerMIT {
 
         System.out.print("[");
 
-        for ( y = 0; y < inout_viewport.ytam(); y++ ) {
+        for ( y = 0; y < inoutViewport.getYSize(); y++ ) {
             if ( y % 10 == 0 ) {
                 System.out.print(".");
             }
-            for ( x = 0; x < inout_viewport.xtam(); x++ ) {
+            for ( x = 0; x < inoutViewport.getXSize(); x++ ) {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
-                color = seguimiento_rayo(rayo, in_arr_objetos, 
+                color = seguimiento_rayo(rayo, inRayableObjectArray, 
                     in_arr_luces, in_fondo);
 
                 //- Exporto el resultado de color del pixel ----------------
-                inout_viewport.putpixel(x, y, (byte)(255 * color.r), 
+                inoutViewport.putpixel(x, y, (byte)(255 * color.r), 
                                               (byte)(255 * color.g), 
                                               (byte)(255 * color.b));
             }
