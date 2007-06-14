@@ -66,7 +66,7 @@ public abstract class PersistenceElement {
         int length = bytesBuffer.length;
         do {
             numRead = is.read(bytesBuffer, 
-                              offset, (int)(length-offset));
+                              offset, (length-offset));
             offset += numRead;
         } while( offset < length && numRead >= 0 ); 
     }
@@ -74,13 +74,13 @@ public abstract class PersistenceElement {
     private static int byteArray2intDirect(byte[] arr, int start) {
         int low = arr[start] & 0xff;
         int high = arr[start+1] & 0xff;
-        return (int)( high << 8 | low );
+        return ( high << 8 | low );
     }
 
     private static int byteArray2intInvert(byte[] arr, int start) {
         int low = arr[start] & 0xff;
         int high = arr[start+1] & 0xff;
-        return (int)( low << 8 | high );
+        return ( low << 8 | high );
     }
 
     private static long byteArray2longDirect(byte[] arr, int start) {

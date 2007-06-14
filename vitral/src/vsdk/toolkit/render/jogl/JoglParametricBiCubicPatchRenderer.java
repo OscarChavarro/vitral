@@ -23,15 +23,15 @@ import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
 public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
     public static void drawSurfaceGrid(GL gl, double[][][] points,
-                                       float tilingU, float tilingV, 
-                                       float inicialTextCoorU,
-                                       float inicialTextCoorV) {
+                                       double tilingU, double tilingV, 
+                                       double inicialTextCoorU,
+                                       double inicialTextCoorV) {
 
         gl.glBegin(gl.GL_QUADS);
-        for (int i = 0; i < points.length - 1; i++) {
-            float sizeDivTv = (float) (tilingV / (points.length-1));
+        for ( int i = 0; i < points.length - 1; i++ ) {
+            double sizeDivTv = (tilingV / (points.length-1));
             for (int j = 0; j < points[0].length - 1; j++) {
-                float sizeDivTu = (float) (tilingU /( points[0].length-1));
+                double sizeDivTu = (tilingU /( points[0].length-1));
                 // Now we draw some lines
                 Vector3D p1 = new Vector3D(points[i][j][0], points[i][j][1],
                                            points[i][j][2]);
@@ -44,20 +44,20 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                 Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
                 normal = normal.multiply( -1);
                 normal.normalize();
-                gl.glTexCoord3f( (j * sizeDivTu) + inicialTextCoorU,
+                gl.glTexCoord3d( (j * sizeDivTu) + inicialTextCoorU,
                                  (i * sizeDivTv) + inicialTextCoorV, 0);
                 gl.glNormal3d(normal.x, normal.y, normal.z);
                 gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glTexCoord3f( (j * sizeDivTu) + inicialTextCoorU,
+                gl.glTexCoord3d( (j * sizeDivTu) + inicialTextCoorU,
                                  ( (i + 1) * sizeDivTv) + inicialTextCoorV, 0);
 
                 gl.glNormal3d(normal.x, normal.y, normal.z);
                 gl.glVertex3d(p2.x, p2.y, p2.z);
-                gl.glTexCoord3f( ( (j + 1) * sizeDivTu) + inicialTextCoorU,
+                gl.glTexCoord3d( ( (j + 1) * sizeDivTu) + inicialTextCoorU,
                                  ( (i + 1) * sizeDivTv) + inicialTextCoorV, 0);
                 gl.glNormal3d(normal.x, normal.y, normal.z);
                 gl.glVertex3d(p3.x, p3.y, p3.z);
-                gl.glTexCoord3f( ( (j + 1) * sizeDivTu) + inicialTextCoorU,
+                gl.glTexCoord3d( ( (j + 1) * sizeDivTu) + inicialTextCoorU,
                                  (i * sizeDivTv) + inicialTextCoorV, 0);
                 gl.glNormal3d(normal.x, normal.y, normal.z);
                 gl.glVertex3d(points[i][j + 1][0], points[i][j + 1][1],
@@ -155,8 +155,8 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
     public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
                            RendererConfiguration q, int tilingU, int tilling_y,
-                           float inicialTextCoorU,
-                           float inicialTextCoorV) {
+                           double inicialTextCoorU,
+                           double inicialTextCoorV) {
 
         drawSurfaceGrid(gl, p.evaluateSurface(), tilingU, tilling_y,
                         inicialTextCoorU, inicialTextCoorV);

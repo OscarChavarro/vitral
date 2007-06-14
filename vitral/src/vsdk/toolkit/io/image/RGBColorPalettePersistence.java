@@ -69,13 +69,13 @@ public class RGBColorPalettePersistence extends PersistenceElement {
                 switch ( startline ) {
                   case 0:
                     col = new ColorRgb();
-                    col.r = ((double)(parser.nval))/255.0;
+                    col.r = (parser.nval)/255.0;
                     break;
                   case 1:
-                    col.g = ((double)(parser.nval))/255.0;
+                    col.g = (parser.nval)/255.0;
                     break;
                   case 2:
-                    col.b = ((double)(parser.nval))/255.0;
+                    col.b = (parser.nval)/255.0;
                     p.addColor(col);
                     break;
                 }

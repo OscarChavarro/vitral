@@ -199,7 +199,7 @@ public class Raytracer extends RenderingElement {
                         if ( spec > 0 ) {
                             // OJO: Raro...
                             spec = ((specular.r + specular.g + specular.b)/3)*(
-                                (float) Math.pow((double) spec, (double)material.getPhongExponent()));
+                                Math.pow(spec, material.getPhongExponent()));
                             result.r += spec*lightEmission.r;
                             result.g += spec*lightEmission.g;
                             result.b += spec*lightEmission.b;

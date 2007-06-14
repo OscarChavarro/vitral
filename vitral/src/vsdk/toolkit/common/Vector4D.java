@@ -85,7 +85,7 @@ NOT DEFINED YET!
     public final void normalize() {
         double t = x*x + y*y + z*z + w*w;
         if ( Math.abs(t) < VSDK.EPSILON ) return;
-        if (t != 0 && t != 1) t = (double) (1 / Math.sqrt(t));
+        if (t != 0 && t != 1) t = (1.0 / Math.sqrt(t));
         x *= t;
         y *= t;
         z *= t;
@@ -105,7 +105,7 @@ NOT DEFINED YET!
      * @return double
      */
     public final double length() {
-        return (double)Math.sqrt(x*x + y*y + z*z + w*w);
+        return Math.sqrt(x*x + y*y + z*z + w*w);
     }
 
     public final Vector4D add(Vector4D b)

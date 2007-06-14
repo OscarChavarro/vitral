@@ -28,9 +28,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.awt.image.ColorModel;
 
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import com.sun.image.codec.jpeg.JPEGCodec;
-
 // This class is used, but explicit import conflicts with VSDK
 //import java.awt.Image;
 
@@ -269,6 +266,9 @@ public class ImagePersistence extends PersistenceElement
     binary JPEG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+
+    @todo implement a non SUN specific code! this generates two ugly
+    warnings on JDK 1.6.
     */    
     public static boolean exportJPG(File fd, vsdk.toolkit.media.Image img)
     {
@@ -284,15 +284,17 @@ public class ImagePersistence extends PersistenceElement
                 for ( x = 0; x < xSize; x++ ) {
                     p = img.getPixelRgb(x, y);
                     bimg.setRGB(x, y, 
-                      ((int)VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
-                      ((int)VSDK.signedByte2unsignedInteger(p.g)) * 256 +
-                      ((int)VSDK.signedByte2unsignedInteger(p.b))
+                      (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.b))
                     );
                 }
             }
 
             FileOutputStream fos = new FileOutputStream(fd);
-            JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);
+            com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+
+            jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
             jpeg.encode(bimg);
             fos.close();
         }

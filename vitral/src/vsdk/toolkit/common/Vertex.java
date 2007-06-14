@@ -166,7 +166,7 @@ public class Vertex extends Entity
     }
 
     public Triangle getIncidentTriangleAt(int index) {
-        return (Triangle) incidentTriangles.get(index);
+        return incidentTriangles.get(index);
     }
 
     /**

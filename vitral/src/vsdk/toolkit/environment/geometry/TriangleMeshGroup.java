@@ -61,7 +61,7 @@ public class TriangleMeshGroup extends Surface {
     }
 
     public TriangleMesh getMeshAt(int index) {
-        return (TriangleMesh)this.meshes.get(index);
+        return this.meshes.get(index);
     }
 
     public double[] getMinMax() {

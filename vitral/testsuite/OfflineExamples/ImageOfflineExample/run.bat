@@ -1,2 +1,2 @@
-java -classpath ./classes;../../lib/vsdk.jar ImageOfflineExample
+java -classpath ./classes;../../../lib/vsdk.jar ImageOfflineExample
 pause

@@ -69,7 +69,7 @@ public class Vector3D extends Entity
     public final void normalize() {
         double t = x*x + y*y + z*z;
         if ( Math.abs(t) < VSDK.EPSILON ) return;
-        if (t != 0 && t != 1) t = (double) (1 / Math.sqrt(t));
+        if (t != 0 && t != 1) t = (1.0 / Math.sqrt(t));
         x *= t;
         y *= t;
         z *= t;
@@ -80,7 +80,7 @@ public class Vector3D extends Entity
      * @return double
      */
     public final double length() {
-        return (double)Math.sqrt(x*x + y*y + z*z);
+        return Math.sqrt(x*x + y*y + z*z);
     }
 
     public final Vector3D add(Vector3D b)

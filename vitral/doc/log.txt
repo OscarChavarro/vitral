@@ -173,3 +173,7 @@ Changes in 2006 december 18 to 21 revition
   - Raytracer takes into account a RendererConfiguration
   - First test in CameraExample towards dual application/applet running mode
   - First texture mapping tests based on Spheres and boxes
+
+Changes in 2006 december 24 revition
+  - Ported to JDK1.6, some minor warnings fixed
+

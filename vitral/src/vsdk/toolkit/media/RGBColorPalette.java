@@ -90,7 +90,7 @@ public class RGBColorPalette extends Entity {
     public ColorRgb getColorAt(int i)
     {
         if ( i < 0 || i >= colors.size() ) return null;
-        return (ColorRgb)colors.get(i);
+        return colors.get(i);
     }
 
     public void setColorAt(int i, ColorRgb c)
@@ -131,7 +131,7 @@ public class RGBColorPalette extends Entity {
         if ( i < 0 ) i = 0;
         if ( i >= N ) i = N-1;
 
-        return (ColorRgb)colors.get(i);
+        return colors.get(i);
     }
 
     /**

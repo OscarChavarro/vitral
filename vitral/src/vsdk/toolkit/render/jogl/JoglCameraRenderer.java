@@ -92,7 +92,7 @@ public class JoglCameraRenderer extends JoglRenderer
 
         if ( cam.getProjectionMode() != cam.PROJECTION_MODE_ORTHOGONAL ) {
             yn = 2 * npd * Math.tan(Math.toRadians(cam.getFov()) / 2);
-            xn = yn * (cam.getViewportXSize()/(double)cam.getViewportYSize());
+            xn = yn * (cam.getViewportXSize() / cam.getViewportYSize());
         }
         else {
             if ( cam.getViewportXSize() > cam.getViewportYSize() ) {
