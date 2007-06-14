@@ -182,7 +182,9 @@ public class RGBAImage
     public boolean exportPPM(File fd)
     {
         try {
-            FileOutputStream escritor = new FileOutputStream(fd);
+            BufferedOutputStream escritor;
+
+            escritor = new BufferedOutputStream(new FileOutputStream(fd));
 
             String linea1 = "P6\n";
             String linea2 = xSize + " " + ySize + "\n";
@@ -201,6 +203,7 @@ public class RGBAImage
                 escritor.write(data[i].g);
                 escritor.write(data[i].b);
             }
+            escritor.close();
         }
         catch (Exception e) {
             return false;
@@ -229,7 +232,7 @@ public class RGBAImage
     }
     
     /** ?? */
-    public void loadImage(byte[] d, int pixelDepth, int xTam, int yTam)
+    public void setRawImage(byte[] d, int pixelDepth, int xTam, int yTam)
     {
         this.init(xTam, yTam);
         this.pixelDepth=pixelDepth;

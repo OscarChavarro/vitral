@@ -37,25 +37,28 @@ public class RGBAImageBuilder
     */
     public static RGBAImage buildImage(File imagen) throws ImageNotRecognizedException
     {
-        String type=accept(imagen);
-        RGBAImage retImage=new RGBAImage();
-        if(type.equals("tga")) {
-            TargaImage t=new TargaImage(imagen);
-            retImage.loadImage(t.getTexture(), t.getPixelDepth(), t.getWidth(), t.getHeight());
+        String type = accept(imagen);
+        RGBAImage retImage = new RGBAImage();
+
+        if( type.equals("tga") ) {
+            TargaImage t = new TargaImage(imagen);
+            retImage.setRawImage(t.getTexture(), t.getPixelDepth(), t.getWidth(), t.getHeight());
             return retImage;
         }
-        if(type.equals("jpg") || type.equals("png") || type.equals("jpeg") || type.equals("gif"))  {
-            Toolkit tools=Toolkit.getDefaultToolkit();
-            Image i=tools.getImage(imagen.getAbsolutePath());
+        if( type.equals("jpg") || type.equals("png") || 
+            type.equals("jpeg") || type.equals("gif") )  {
+System.out.println(".");
+            Toolkit awtTools = Toolkit.getDefaultToolkit();
+            Image i = awtTools.getImage(imagen.getAbsolutePath());
+            BufferedImage bi = toBufferedImage(i);
             
-            BufferedImage bi=toBufferedImage(i);
-            
-            int w=bi.getWidth();
-            int h=bi.getHeight();
+            int w = bi.getWidth();
+            int h = bi.getHeight();
             //System.out.println("w: "+w+"; h: "+h);
-            int[] pix=new int[w*h];
-            
-            pix=bi.getRGB(0,0,w,h, pix,0,w);
+System.out.println("[");
+            int[] pix = new int[w*h];
+
+            pix = bi.getRGB(0, 0, w, h, pix, 0, w);
             
             int pixelDepth=24;
             if(hasAlpha(i))
@@ -65,7 +68,10 @@ public class RGBAImageBuilder
             byte[] data=new byte[w*h*pixelDepth];
             
             transferPixels(pix, data, w, h, pixelDepth); 
-            retImage.loadImage(data, pixelDepth, w, h);
+            retImage.setRawImage(data, pixelDepth, w, h);
+
+System.out.println("]");
+
             return retImage;
         }
         throw new ImageNotRecognizedException("Image not recognized", imagen);

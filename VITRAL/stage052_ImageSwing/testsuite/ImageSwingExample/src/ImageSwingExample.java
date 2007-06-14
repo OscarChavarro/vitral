@@ -23,7 +23,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 
 import vitral.toolkits.media.RGBAImage;
-import vitral.toolkits.media.RGBAPixel;
 import vitral.toolkits.media.RGBAImageBuilder;
 import vitral.toolkits.visual.awt.AwtRGBAImageRenderer;
 
@@ -173,7 +172,7 @@ class MyPanel extends JPanel
 
     public void paint(Graphics dc)
     {
-        AwtRGBAImageRenderer.draw(dc, img);
+        AwtRGBAImageRenderer.draw(dc, img, 100, 50);
     }
 }
 

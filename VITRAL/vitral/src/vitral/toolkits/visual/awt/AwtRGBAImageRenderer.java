@@ -26,11 +26,9 @@ public class AwtRGBAImageRenderer
         return y;
     }
 
-    public static void draw(Graphics dc, RGBAImage img)
+    public static void draw(Graphics dc, RGBAImage img, int x0, int y0)
     {
         int x, y;
-        int x0 = 10;
-        int y0 = 10;
         RGBAPixel pixel;
 
         for ( y = 0; y < img.getYSize(); y++ ) {
@@ -44,6 +42,11 @@ public class AwtRGBAImageRenderer
                 dc.drawLine(x+x0, y+y0, x+x0, y+y0);
             }
         }
+    }
+
+    public static void draw(Graphics dc, RGBAImage img)
+    {
+        draw(dc, img, 0, 0);
     }
 }
 
