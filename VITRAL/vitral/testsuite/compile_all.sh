@@ -19,6 +19,9 @@ cd ..
 cd ImageSwingExample
 ./compile.sh
 cd ..
+cd PaletteSwingExample
+./compile.sh
+cd ..
 cd MeshExample
 ./compile.sh
 cd ..

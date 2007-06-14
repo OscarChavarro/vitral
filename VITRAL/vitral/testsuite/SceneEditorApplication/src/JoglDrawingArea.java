@@ -32,6 +32,9 @@ import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
+import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
+import vsdk.toolkit.media.RGBColorPalette;
+import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
@@ -62,13 +65,19 @@ public class JoglDrawingArea implements
 
     public int interactionMode;
 
+    public boolean wantToGetColor;
+    public boolean wantToGetDepth;
+
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
     private Cursor camadvanceCursor;
     private Cursor selectCursor;
 
-    public JoglDrawingArea(Scene theScene, JLabel statusMessage)
+    SceneEditorApplication parent;
+
+    public JoglDrawingArea(Scene theScene, JLabel statusMessage, SceneEditorApplication parent)
     {
+        this.parent = parent;
         this.theScene = theScene;
         this.statusMessage = statusMessage;
 
@@ -92,6 +101,9 @@ public class JoglDrawingArea implements
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+
+        wantToGetColor = false;
+        wantToGetDepth = false;
     }
 
     private void createCursors()
@@ -198,8 +210,42 @@ public class JoglDrawingArea implements
         GL gl = drawable.getGL();
 
         drawObjectsGL(gl);
+
+        if ( wantToGetColor ) {
+            parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage);
+        }
+        else {
+                parent.imageControlWindow.setImage(parent.zbufferImage);
+        }
+            parent.imageControlWindow.redrawImage();
+            parent.statusMessage.setText("ZBuffer Color Image obtained!");
+            wantToGetColor = false;
     }
-   
+        if ( wantToGetDepth ) {
+            RGBColorPalette p = null;
+            try {
+                p = vsdk.toolkit.io.image.RGBColorPaletteBuilder.importGimpPalette(new java.io.FileReader("../../etc/palettes/Topographic.gpl"));
+            }
+            catch (Exception e) {
+                System.err.println(e);
+                System.exit(0);
+            }
+
+            parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(p);
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage);
+        }
+        else {
+                parent.imageControlWindow.setImage(parent.zbufferImage);
+        }
+            parent.imageControlWindow.redrawImage();
+            parent.statusMessage.setText("ZBuffer depth map obtained!");
+            wantToGetDepth = false;
+    }
+    }
+
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
         ;

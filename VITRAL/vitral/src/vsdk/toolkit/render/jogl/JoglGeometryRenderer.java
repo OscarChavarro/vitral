@@ -14,6 +14,8 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.Mesh;
+import vsdk.toolkit.environment.geometry.MeshGroup;
 import vsdk.toolkit.environment.geometry.Sphere;
 
 public class JoglGeometryRenderer
@@ -68,6 +70,12 @@ public class JoglGeometryRenderer
     }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Arrow" ) {
             JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+        }
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.Mesh" ) {
+            JoglMeshRenderer.draw(gl, (Mesh)g, q, false);
+        }
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.MeshGroup" ) {
+          JoglMeshGroupRenderer.draw(gl, (MeshGroup)g,q);
         }
     }
 }

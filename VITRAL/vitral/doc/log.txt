@@ -39,3 +39,11 @@ Changes in 2006 march 19 revition
   - Raytracing application example was set for full code reuse, now the
     raytracer is generic and lies in the main toolkit render package
   - SceneEditor application example in its first fully functional version :-)
+
+Changes in 2006 march 31 revition
+  - RGBColorPalette
+
+Changes in 2006 april 6 revition
+  - RGBColorPalette completed, and AwtRGBColorPalette functions and sample
+    working fine.
+  - Exporting from ZBuffer to RGBImages now uses palettes :-)

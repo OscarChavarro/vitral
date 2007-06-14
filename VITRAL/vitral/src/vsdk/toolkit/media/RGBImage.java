@@ -202,6 +202,26 @@ public class RGBImage
     {
         return ySize;
     }
+
+    public byte[] getRawImage()
+    {
+        byte[] pixels=new byte[this.xSize*this.ySize*3];
+
+        int i, j;
+        int acum = 0;
+        for ( i = ySize-1; i >= 0 ; i-- ) {
+            for ( j = 0; j < xSize ; j++ ) {
+                pixels[acum]=this.data[i*xSize+j].r;
+                acum++;
+                pixels[acum]=this.data[i*xSize+j].g;
+                acum++;
+                pixels[acum]=this.data[i*xSize+j].b;
+                acum++;
+            }
+        }
+        return pixels;
+    }
+
 }
 
 //===========================================================================

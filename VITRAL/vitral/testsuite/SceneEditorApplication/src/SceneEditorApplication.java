@@ -43,9 +43,12 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Mesh;
+import vsdk.toolkit.environment.geometry.MeshGroup;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.io.geometry.ReaderObj;
 
 // Internal classes
 import gui.GuiCache;
@@ -54,6 +57,7 @@ public class SceneEditorApplication {
     // Application model
     public Scene theScene;
     public RGBImage raytracedImage;
+    public RGBImage zbufferImage;
     public int raytracedImageWidth;
     public int raytracedImageHeight;
 
@@ -173,7 +177,7 @@ public class SceneEditorApplication {
 
         menubar = buildMenu();
         JPanel statusBar = createStatusBar();
-        drawingArea = new JoglDrawingArea(theScene, statusMessage);
+        drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
         Dimension minleft = new Dimension(160, 120);
@@ -467,6 +471,17 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Create Arrow" ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
+        else if ( label == "Create Mesh" ) {
+            MeshGroup mg = null;
+            try {
+                mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
+        }
+        catch ( Exception e ) {
+                return;
+        }
+        Mesh mesh = mg.getMeshAt(1);
+            addThing(mesh);
+        }
         else if ( label == "Create Light" ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.lights.add(light);
@@ -515,13 +530,24 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
         }
+        else if ( label == "Obtain Zbuffer Image" ) {
+            parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");
+            parent.drawingArea.wantToGetColor = true;
+        }
+        else if ( label == "Obtain Zbuffer Depthmap" ) {
+            parent.statusMessage.setText("Pending to obtaining ZBuffer Depth ...");
+            parent.drawingArea.wantToGetDepth = true;
+        }
         else if ( label == "Raytrace Scene" ) {
             parent.statusMessage.setText("Computing raytracing, this may take some time ...");
             parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
+            parent.theScene.raytrace(parent.raytracedImage);
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage);
         }
-            parent.theScene.raytrace(parent.raytracedImage);
+        else {
+                parent.imageControlWindow.setImage(parent.raytracedImage);
+        }
             parent.imageControlWindow.redrawImage();
         }
 

@@ -16,6 +16,9 @@ cd ..
 cd ImageSwingExample
 ./run.sh
 cd ..
+cd PaletteSwingExample
+./run.sh
+cd ..
 cd MeshExample
 ./run.sh
 cd ..

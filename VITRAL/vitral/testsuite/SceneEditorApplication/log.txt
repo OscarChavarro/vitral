@@ -70,3 +70,6 @@ March 28 2006, Oscar Chavarro: 69min
 March 29 2006, Oscar Chavarro: 
   - 43min: Creating Arrow geometry classes: model, Jogl Renderer,
     intersection and minmax operations and test schema in the scene application
+
+April 6 2006, Oscar Chavarro:
+  - 7:23pm-> Zbuffer access operations

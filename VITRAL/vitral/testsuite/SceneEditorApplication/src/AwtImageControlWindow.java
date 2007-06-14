@@ -46,6 +46,12 @@ public class AwtImageControlWindow
         windowWidget.setVisible(true);
     }
 
+    public void setImage(RGBImage i)
+    {
+        controlledImage = i;
+        workArea.setImage(i);
+    }
+
     public void redrawImage()
     {
         windowWidget.setVisible(true);
@@ -101,6 +107,11 @@ class ImageDisplayPanel extends JPanel
         setMinimumSize(d);        
         setSize(d);        
         imageToPaint = img;
+    }
+
+    public void setImage(RGBImage i)
+    {
+        imageToPaint = i;
     }
 
     public void paint(Graphics g)

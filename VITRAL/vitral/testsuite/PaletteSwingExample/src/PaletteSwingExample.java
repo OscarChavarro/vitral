@@ -3,10 +3,12 @@
 // to dominate the involved libraries.
 
 import java.io.File;
+import java.io.FileReader;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -22,23 +24,70 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.io.image.RGBAImageBuilder;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.media.RGBColorPalette;
+import vsdk.toolkit.io.image.RGBColorPaletteBuilder;
+import vsdk.toolkit.render.awt.AwtRGBColorPaletteRenderer;
 
-public class ImageSwingExample extends JFrame implements 
+abstract class SuffixAwareFilter
+    extends javax.swing.filechooser.FileFilter {
+
+  public String getSuffix(File f) {
+    String s = f.getPath(), suffix = null;
+    int i = s.lastIndexOf('.');
+
+    if (i > 0 && i < s.length() - 1) {
+      suffix = s.substring(i + 1).toLowerCase();
+    }
+
+    return suffix;
+  }
+
+  public boolean accept(File f) {
+    return f.isDirectory();
+  }
+
+}
+
+class MyFilter
+    extends SuffixAwareFilter {
+  private String suffix;
+  private String description;
+
+  public MyFilter(String suffix, String description) {
+    this.suffix = suffix;
+    this.description = description;
+  }
+
+  public boolean accept(File f) {
+    boolean accept = super.accept(f);
+    if (!accept) {
+      String _suffix = getSuffix(f);
+      if (suffix != null) {
+        accept = suffix.equals(_suffix);
+      }
+    }
+    return accept;
+  }
+
+  public String getDescription() {
+    return description + " (*." + suffix + ")";
+  }
+}
+
+
+public class PaletteSwingExample extends JFrame implements 
     MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private ButtonsPanel controls;
     private JMenuBar menubar;
     private MyPanel canvas;
 
-    public ImageSwingExample() {
-        super("VITRAL concept test - Image in swing test");
+    public PaletteSwingExample() {
+        super("VITRAL concept test - Color Palette in swing test");
 
         controls = new ButtonsPanel();
-        menubar = this.buildMenu();
         canvas = new MyPanel();
+        menubar = this.buildMenu();
 
         this.add(canvas, BorderLayout.CENTER);
         this.add(controls, BorderLayout.SOUTH);
@@ -50,7 +99,7 @@ public class ImageSwingExample extends JFrame implements
     }
     
     public static void main (String[] args) {
-        JFrame f = new ImageSwingExample();
+        JFrame f = new PaletteSwingExample();
         f.pack();
         f.setVisible(true);
     }
@@ -120,11 +169,14 @@ public class ImageSwingExample extends JFrame implements
         popup = new JMenu("File");
         menubar.add(popup);
 
+        option = popup.add(new JMenuItem("Reset to grayscale256"));
+        option.addActionListener(canvas);
+
+        option = popup.add(new JMenuItem("Open"));
+        option.addActionListener(canvas);
+
         option = popup.add(new JMenuItem("Exit"));
-        option.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }});
+        option.addActionListener(canvas);
 
         popup.getPopupMenu().setLightWeightPopupEnabled(false);
 
@@ -155,25 +207,69 @@ class ButtonsPanel extends JPanel implements ActionListener
 
 //===========================================================================
 
-class MyPanel extends JPanel
+class MyPanel extends JPanel implements ActionListener
 {
-    private RGBAImage img;
+    private RGBColorPalette palette;
 
     public MyPanel()
     {
-        try {
-            img = RGBAImageBuilder.buildImage(new File("./etc/entorno1.jpg"));
-        }
-        catch (Exception e) {
-            System.err.println(e);
-            System.exit(0);
+        initPalette(1, null);
+    }
+
+    public void initPalette(int type, String filename)
+    {
+        palette = new RGBColorPalette();
+        switch ( type ) {
+          case 1:
+        palette.init(256);
+            break;
+          case 2:
+            try {
+                palette = RGBColorPaletteBuilder.importGimpPalette(new FileReader(filename));
+            }
+            catch (Exception e) {
+                System.err.println(e);
+                System.exit(0);
+            }
+            break;
         }
     }
 
     public void paint(Graphics dc)
     {
         super.paint(dc);
-        AwtRGBAImageRenderer.draw(dc, img, 100, 50);
+        AwtRGBColorPaletteRenderer.drawFlatVertical(dc, palette, 100, 50, 10, 256);
+        AwtRGBColorPaletteRenderer.drawShadedVertical(dc, palette, 120, 50, 10, 256);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        String label = e.getActionCommand();
+
+        if ( label == "Open" ) {
+            JFileChooser jfc = null;
+            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/palettes");
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
+            jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
+            int opc = jfc.showOpenDialog(new JPanel());
+            if (opc == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File file = jfc.getSelectedFile();
+                    initPalette(2, file.getAbsolutePath());
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to read file");
+                    return;
+                }
+            }
+
+        }
+        else if ( label == "Reset to grayscale256" ) {
+            initPalette(1, null);
+    }
+        else if ( label == "Exit" ) {
+            System.exit(0);
+    }
     }
 }
 

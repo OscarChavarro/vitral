@@ -8,7 +8,10 @@
 package vsdk.toolkit.media;
 
 import java.util.ArrayList;
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBColorPalette;
 
 public class ZBuffer {
     private float[] depth;
@@ -66,16 +69,42 @@ public class ZBuffer {
         depth[pos] = v;
     }
 
-    public RGBAImage exportRGBAImage() {
-        RGBAImage image = new RGBAImage();
+    public RGBImage exportRGBImage(RGBColorPalette p) {
+        RGBImage image = new RGBImage();
         image.init(xSize, ySize);
         int pos = 0;
+
+        ColorRgb c;
+
         for (int y = 0; y <image.getYSize(); y++) {
             for (int x = 0; x < image.getXSize(); x++) {
                 float f = depth[pos];
-                int v = (int) (f * 256);
-                byte b = (byte) v;
-                image.putPixel(x, y, b, b, b);
+                if ( f < 0.0 ) f = 0.0f;
+                if ( f > 1.0 ) f = 1.0f;
+                c = p.evalLinear(f);
+                image.putPixel(x, y, 
+                    (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
+                pos++;
+            }
+        }
+        return image;
+    }
+
+    public RGBAImage exportRGBAImage(RGBColorPalette p) {
+        RGBAImage image = new RGBAImage();
+        image.init(xSize, ySize);
+        int pos = 0;
+
+        ColorRgb c;
+
+        for (int y = 0; y <image.getYSize(); y++) {
+            for (int x = 0; x < image.getXSize(); x++) {
+                float f = depth[pos];
+                if ( f < 0.0 ) f = 0.0f;
+                if ( f > 1.0 ) f = 1.0f;
+                c = p.evalLinear(f);
+                image.putPixel(x, y, 
+                    (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
                 pos++;
             }
         }

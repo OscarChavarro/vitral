@@ -19,6 +19,9 @@ cd ..
 cd ImageSwingExample
 compile
 cd ..
+cd PaletteSwingExample
+compile
+cd ..
 cd MeshExample
 compile
 cd ..
