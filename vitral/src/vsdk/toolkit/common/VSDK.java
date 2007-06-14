@@ -86,6 +86,10 @@ public class VSDK
     public static final int CONE = 2;
     public static final int INTERSECTION_TYPE_COUNT = 3;
 
+    // Sizeof sizes
+    public static final int sizeofInt = 4;
+    public static final int sizeofReference = 4;
+
     // Primitive accounting data structures (not thread safe)
     private static int primitiveCount[];
     private static int intersectionCount[];

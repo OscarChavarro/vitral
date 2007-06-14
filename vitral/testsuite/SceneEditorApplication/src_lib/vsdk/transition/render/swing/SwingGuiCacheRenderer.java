@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 // GUI JDK classes (Awt + Swing)
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
@@ -154,6 +155,11 @@ public class SwingGuiCacheRenderer
         frame = new JPanel();
         GuiButtonGroupCache group;
         group = context.getButtonGroup(name);
+
+        if ( group == null ) {
+            frame.setBackground(new Color(1.0f, 0.0f, 0.0f));
+            return frame;
+    }
 
         Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
         frame.setBorder(empty);

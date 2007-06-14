@@ -31,6 +31,9 @@ cd ..
 cd CohenSutherlandClippingTechnique
 ./run.sh
 cd ..
+cd IlluminationTest
+./run.sh
+cd ..
 cd SceneEditorApplication
 ./run.sh
 cd ..

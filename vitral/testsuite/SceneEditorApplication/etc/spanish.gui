@@ -21,7 +21,7 @@ MENU "GLOBAL" {
         MENUITEM SEPARATOR
         MENUITEM "&Salir", IDC_FILE_QUIT
     }
-    POPUP "&Edicion" {
+    POPUP "&Edici贸n" {
         MENUITEM "&Seleccionar", IDC_EDIT_SELECT, GRAYED
         MENUITEM "Seleccionar &Todo\tCtrl+T", IDC_EDIT_SELECT_ALL, GRAYED
         MENUITEM SEPARATOR
@@ -47,8 +47,8 @@ MENU "GLOBAL" {
     }
     POPUP "&Personalizar" {
         POPUP "&Idioma" {
-            MENUITEM "&Ingl閟 (English)", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
-            MENUITEM "&Espa駉l", IDC_CUSTOMIZE_LANGUAGE_SPANISH
+            MENUITEM "&Ingl茅s (English)", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
+            MENUITEM "&Espa帽ol", IDC_CUSTOMIZE_LANGUAGE_SPANISH
         }
         POPUP "Apariencia de la &GUI" {
             MENUITEM "&Motif", IDC_CUSTOMIZE_LAF_MOTIF
@@ -70,7 +70,7 @@ MENU "GLOBAL" {
         MENUITEM "S&istema de control", IDC_INS_SYSTEM_C, GRAYED
     }
 */
-    POPUP "&Simulaci髇" {
+    POPUP "&Simulaci贸n" {
         MENUITEM "&Play/Stop", IDC_PLAY
         MENUITEM "&Tiempo de discretizacion...", IDC_DELTA_T
     }
@@ -183,20 +183,20 @@ COMMAND IDC_FILE_SAVE {
 }
 
 COMMAND IDC_TOOLS_SELECT {
-    name "Selecci髇", 
+    name "Selecci贸n", 
     brief "Selecciona objetos",
     icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
     iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
 }
 
 COMMAND IDC_TOOLS_TRANSLATE {
-    name "Translaci髇",
+    name "Translaci贸n",
     icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
     iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
 }
 
 COMMAND IDC_TOOLS_ROTATE {
-    name "Rotaci髇",
+    name "Rotaci贸n",
     icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
     iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
 }
@@ -208,7 +208,7 @@ COMMAND IDC_TOOLS_SCALE {
 }
 
 COMMAND IDC_TOOLS_CAMERA {
-    name "Control de c醡ara",
+    name "Control de c谩mara",
     icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
     iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
 }
@@ -238,7 +238,7 @@ COMMAND IDC_CREATE_ARROW {
 }
 
 COMMAND IDC_CREATE_TRIANGLEMESH {
-    name "Crear Malla de Tri醤gulos"
+    name "Crear Malla de Tri谩ngulos"
 }
 
 COMMAND IDC_CREATE_PARAMETRICCUBICCURVE {
@@ -395,28 +395,28 @@ BUTTON_GROUP "RENDER" {
 }
 
 MESSAGES {
-    IDM_EXIT, "Cierra la aplicaci髇"
-    IDM_CREATION_TAB, "Creaci髇"
+    IDM_EXIT, "Cierra la aplicaci贸n"
+    IDM_CREATION_TAB, "Creaci贸n"
     IDM_OTHERS_TAB, "Elementos de escena"
     IDM_GUI_TAB, "Control de GUI"
-    IDM_RENDER_TAB, "Visualizaci髇"
+    IDM_RENDER_TAB, "Visualizaci贸n"
 
     IDM_PENDING_ZBUFFER_COLOR_IMAGE, 
-        "En espera del c醠culo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ..."
+        "En espera del c谩lculo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ..."
     IDM_PENDING_ZBUFFER_DEPTH,
-        "En espera del c醠culo de la matriz de profundidad (ZBuffer) ..."
+        "En espera del c谩lculo de la matriz de profundidad (ZBuffer) ..."
     IDM_COMPUTING_RAYTRACING,
-        "Calculando raytracing, puede durar alg鷑 tiempo ..."
+        "Calculando raytracing, puede durar alg煤n tiempo ..."
     IDM_CAMERA_MODE,
-        "Modo de interacci髇 de c醡ara - arrastre el rat髇 sobre la escena manteniendo pulsado diferentes botones para alterar la c醡ara actual."
+        "Modo de interacci贸n de c谩mara - arrastre el rat贸n sobre la escena manteniendo pulsado diferentes botones para alterar la c谩mara actual."
     IDM_SELECTION_MODE,
-        "Modo de interacci髇 de selecci髇 - pulse botones del rat髇 para seleccionar objetos, o las flechas IZQ./DER. para seleccionarlos secuencialmente."
+        "Modo de interacci贸n de selecci贸n - pulse botones del rat贸n para seleccionar objetos, o las flechas IZQ./DER. para seleccionarlos secuencialmente."
     IDM_TRANSLATION_MODE,
-        "Modo de interacci髇 de translaci髇 - pulse el rat髇 para seleccionar objetos, las teclas X, Y y Z o el modificador para mover el objeto."
+        "Modo de interacci贸n de translaci贸n - pulse el rat贸n para seleccionar objetos, las teclas X, Y y Z o el modificador para mover el objeto."
     IDM_ROTATION_MODE,
-        "Modo de interacci髇 de rotaci髇 - pulse el rat髇 para seleccionar objetos, las teclas X, Y y Z o el modificador para rotar el objeto."
+        "Modo de interacci贸n de rotaci贸n - pulse el rat贸n para seleccionar objetos, las teclas X, Y y Z o el modificador para rotar el objeto."
     IDM_SCALE_MODE,
-        "Modo de interacci髇 de escalamiento - pulse el rat髇 para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto."
+        "Modo de interacci贸n de escalamiento - pulse el rat贸n para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto."
     IDM_INTRO_MESSAGE,
         "Ejemplo de editor 3D VSDK - derechos reservados, Pontificia Universidad Javeriana, 2005-2006"
 }

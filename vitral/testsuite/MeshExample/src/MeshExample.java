@@ -76,15 +76,31 @@ public class MeshExample
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 file = jfc.getSelectedFile();
             }
-    }
-    else {
+        }
+        else {
             file = new File(fileName);
-    }
+        }
 
         //-----------------------------------------------------------------
         if ( file != null ) {
             try {
                 meshGroup = ReaderObj.read(file.getAbsolutePath());
+
+// Trivial mesh creation (need to change TriangleMeshGroup by TriangleMesh):
+/*
+        Vertex v[] = new Vertex[3];
+        v[0] = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 1));
+        v[1] = new Vertex(new Vector3D(1, 0, 0), new Vector3D(0, 0, 1));
+        v[2] = new Vertex(new Vector3D(1, 1, 0), new Vector3D(0, 0, 1));
+
+        Triangle t[] = new Triangle[1];
+        t[0] = new Triangle(0, 1, 2);
+
+        mesh = new TriangleMesh();
+        mesh.setVertexes(v);
+        mesh.setTriangles(t);
+        mesh.calculateNormals();
+*/
             }
             catch (IOException ex) {
                 System.err.println("Failed to read file");
@@ -92,10 +108,10 @@ public class MeshExample
                 return;
             }
         }
-    else {
+        else {
             System.err.println("File not specified");
-         return;
-    }
+            return;
+        }
 
         //-----------------------------------------------------------------
         canvas = new GLCanvas();

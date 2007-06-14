@@ -38,7 +38,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.gui.CameraControllerGravZero;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
@@ -72,7 +71,6 @@ public class ImageExample extends JFrame implements
 
         camera = new Camera();
 
-        //cameraController = new CameraControllerGravZero(camera);
         //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 

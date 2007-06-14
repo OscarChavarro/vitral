@@ -12,11 +12,9 @@ public class RGBAImage extends Image
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    private RGBAPixel data[];
+    private byte data[];
     private int xSize;
     private int ySize;
-
-    private int pixelDepth;
 
     /**
     Check the general signature contract in superclass method
@@ -27,28 +25,18 @@ public class RGBAImage extends Image
         xSize = 0;
         ySize = 0;
         data = null;
-
-        pixelDepth=24;
     }
 
     /**
-    Esta es la destructora de la clase.  Si es usted tan gentil, por favor 
-    llame este metodo al final del alcance de su objeto.
+    This is the class destructor.
     */
-    public void dispose()
+    public void finalize()
     {
         if ( data != null ) {
-            for ( int i = 0; i < xSize*ySize; i++ ) {
-                if ( data[i] != null ) {
-                    data[i] = null;
-                }
-            }
             xSize = 0;
             ySize = 0;
             data = null;
             System.gc();
-
-            pixelDepth=24;
         }
     }
 
@@ -68,9 +56,9 @@ public class RGBAImage extends Image
     public boolean init(int width, int height)
     {
         try {
-          data = new RGBAPixel[width * height];
-          for ( int i = 0; i < width*height; i++ ) {
-              data[i] = new RGBAPixel();
+          data = new byte[width * height * 4];
+          for ( int i = 0; i < width*height*4; i++ ) {
+              data[i] = 0;
           }
         }
         catch (Exception e) {
@@ -88,29 +76,29 @@ public class RGBAImage extends Image
     */
     public void putPixel(int x, int y, byte r, byte g, byte b)
     {
-        int index = xSize*y + x;
-        data[index].r = r;
-        data[index].g = g;
-        data[index].b = b;
-        data[index].a = 0;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
+        data[index] = r;
+        data[index+1] = g;
+        data[index+2] = b;
+        data[index+3] = 0;
     }
     
     public void putPixel(int x, int y, byte r, byte g, byte b, byte a)
     {
-        int index = xSize*y + x;
-        data[index].r = r;
-        data[index].g = g;
-        data[index].b = b;
-        data[index].a = a;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
+        data[index] = r;
+        data[index+1] = g;
+        data[index+2] = b;
+        data[index+3] = a;
     }
 
     public void putPixel(int x, int y, RGBAPixel p)
     {
-        int index = xSize*y + x;
-        data[index].r = p.r;
-        data[index].g = p.g;
-        data[index].b = p.b;
-        data[index].a = p.a;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
+        data[index] = p.r;
+        data[index+1] = p.g;
+        data[index+2] = p.b;
+        data[index+3] = p.a;
     }
 
     /**
@@ -119,11 +107,11 @@ public class RGBAImage extends Image
     */
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
-        int index = xSize*y + x;
-        data[index].r = p.r;
-        data[index].g = p.g;
-        data[index].b = p.b;
-        data[index].a = Byte.MAX_VALUE;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
+        data[index] = p.r;
+        data[index+1] = p.g;
+        data[index+2] = p.b;
+        data[index+3] = Byte.MAX_VALUE;
     }
 
     /**
@@ -133,12 +121,12 @@ public class RGBAImage extends Image
     public RGBAPixel getPixel(int x, int y)
     {
         RGBAPixel p = new RGBAPixel();
-        int index = xSize*y + x;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
 
-        p.r = data[index].r;
-        p.g = data[index].g;
-        p.b = data[index].b;
-        p.a = data[index].a;
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
+        p.a = data[index+3];
 
         return p;
     }
@@ -150,11 +138,11 @@ public class RGBAImage extends Image
     public RGBPixel getPixelRgb(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = xSize*y + x;
+        int index = ((xSize*(ySize-1-y)) + x)*4;
 
-        p.r = data[index].r;
-        p.g = data[index].g;
-        p.b = data[index].b;
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
 
         return p;
     }
@@ -179,29 +167,14 @@ public class RGBAImage extends Image
     
     public byte[] getRawImage()
     {
-        byte[] pixels=new byte[this.xSize*this.ySize*4];
+        return data;
+    }
 
-        int i, j;
-        int acum = 0;
-        for ( i = ySize-1; i >= 0 ; i-- ) {
-            for ( j = 0; j < xSize ; j++ ) {
-                pixels[acum]=this.data[i*xSize+j].r;
-                acum++;
-                pixels[acum]=this.data[i*xSize+j].g;
-                acum++;
-                pixels[acum]=this.data[i*xSize+j].b;
-                acum++;
-                if ( pixelDepth == 32 ) {
-                    pixels[acum]=this.data[i].a;
-                    acum++;
-                  }
-                  else {
-                    pixels[acum]=0;
-                    acum++;
-                }
-            }
-        }
-        return pixels;
+    public void setRawImage(int xSize, int ySize, byte[] data)
+    {
+        this.xSize = xSize;
+        this.ySize = ySize;
+        this.data = data;
     }
     
 }

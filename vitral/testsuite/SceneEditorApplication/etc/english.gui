@@ -117,7 +117,7 @@ MENU "GLOBAL" {
     POPUP "&Customize" {
         POPUP "&Language" {
             MENUITEM "&English", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
-            MENUITEM "&Spanish (Español)", IDC_CUSTOMIZE_LANGUAGE_SPANISH
+            MENUITEM "&Spanish (Espa#00f1ol)", IDC_CUSTOMIZE_LANGUAGE_SPANISH
         }
         POPUP "Look And &Feel" {
             MENUITEM "&Motif", IDC_CUSTOMIZE_LAF_MOTIF

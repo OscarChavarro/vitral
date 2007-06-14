@@ -41,7 +41,6 @@ import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.gui.CameraControllerGravZero;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
@@ -88,7 +87,6 @@ public class JoglDrawingArea implements
 
         createCursors();
 
-        //cameraController = new CameraControllerGravZero(theScene.camera);
         //cameraController = new CameraControllerBlender(theScene.camera);
         cameraController = new CameraControllerAquynza(theScene.camera);
         translationGizmo = new TranslateGizmo(theScene.camera);

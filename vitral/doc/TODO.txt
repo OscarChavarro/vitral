@@ -19,3 +19,5 @@
   - Rename QualitySelection class to RenderConfiguration, and include
     managing of user interaction level colors
   - Implement intersection operation for parametric bi-cubic patches
+  - Change all object.getClass().getName().equals tests to object instanceof
+    class ...

@@ -2,6 +2,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - April 8 2006 - Oscar Chavarro: Original base version                  =
+//= - November 1 2006 - Alfonso Barbosa, Diana Reyes: added classifyPoint   =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -57,16 +58,42 @@ public class InfinitePlane extends HalfSpace {
             if ( doIntersection(r) ) {
                 inout_rayo.t = -r.t;
                 return true;
-        }
-        else {
+            }
+            else {
                 return false;
+            }
         }
-    }
         double t = -(a*inout_rayo.origin.x + b*inout_rayo.origin.y + c*inout_rayo.origin.z + d)/denominator;
 
         inout_rayo.t = t;
 
         return true;
+    }
+
+    public int classifyPoint(Vector3D p) {
+        return classifyPoint(p.x, p.y, p.z);
+    }
+
+
+    /**
+    Por a given point <x, y, z>, calculates if it lies inside, outside or 
+    on surface with respect to current plane.
+    @return: 0 if point is on the plane surface, 1 if point is outside or
+    -1 if point is inside the plane.
+    Note that current interpretation of the plane is done as a semispace,
+    where "outside" means the direction pointed by plane's normal.
+    */
+    public int classifyPoint(double x, double y, double z) {
+        double num = a*x + b*y + c*z + d;
+        int op = 0;
+
+        if( num > VSDK.EPSILON ) {
+            op = 1;
+        }
+        else if( num < -VSDK.EPSILON ) {
+            op = -1;
+        }
+        return op;
     }
 
     /**
@@ -89,11 +116,11 @@ public class InfinitePlane extends HalfSpace {
     {
         double minmax[] = new double[6];
         for ( int i = 0; i < 3; i++ ) {
-        minmax[i] = Double.MIN_VALUE;
-    }
+            minmax[i] = Double.MIN_VALUE;
+        }
         for ( int i = 3; i < 6; i++ ) {
-        minmax[i] = Double.MAX_VALUE;
-    }
+            minmax[i] = Double.MAX_VALUE;
+        }
         return minmax;
     }
 

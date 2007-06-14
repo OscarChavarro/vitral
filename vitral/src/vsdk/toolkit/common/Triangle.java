@@ -22,6 +22,7 @@ public class Triangle extends Entity
   /**
    */
   public Triangle() {
+      normal = new Vector3D(0, 0, 0);
   }
 
   /**
@@ -30,12 +31,14 @@ public class Triangle extends Entity
     this.point0 = point0;
     this.point1 = point1;
     this.point2 = point2;
+    normal = new Vector3D(0, 0, 0);
   }
 
   public Triangle(int point0, int point1, int point2, int vt0, int vt1, int vt2) {
     this.point0 = point0;
     this.point1 = point1;
     this.point2 = point2;
+    normal = new Vector3D(0, 0, 0);
     this.vt0 = vt0;
     this.vt1 = vt1;
     this.vt2 = vt2;

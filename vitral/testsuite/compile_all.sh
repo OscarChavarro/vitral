@@ -16,9 +16,6 @@ cd ..
 cd GlyphExample
 ./compile.sh
 cd ..
-cd CohenSutherlandClippingTechnique
-./compile.sh
-cd ..
 cd ImageExample
 ./compile.sh
 cd ..
@@ -34,7 +31,14 @@ cd ..
 cd MeshExample
 ./compile.sh
 cd ..
+cd CohenSutherlandClippingTechnique
+./compile.sh
+cd ..
+cd IlluminationTest
+./compile.sh
+cd ..
 cd SceneEditorApplication
+./compile_lib.sh
 ./compile.sh
 cd ..
 cd RaytracingApplication

@@ -40,7 +40,7 @@ public class RaytracerSimple {
     }
 
     private void
-    pintar_offline(String nombre_de_archivo)
+    offlineExcecution(String nombre_de_archivo, boolean save)
     {
         //- 1. Leer la escena ---------------------------------------------
         System.out.println("Loading scene from " + nombre_de_archivo + ": ");
@@ -70,28 +70,33 @@ public class RaytracerSimple {
         visualizationEngine = new Raytracer();
         la_escena.camara.updateViewportResize(la_imagen_resultado.getXSize(), 
                                               la_imagen_resultado.getYSize());
+
+        long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(la_imagen_resultado,
                                 la_escena.arr_cosas,
                                 la_escena.arr_luces, 
                                 la_escena.fondo,
-                    la_escena.camara, reporter, null);
+                la_escena.camara, reporter, null);
+        long finalTime = System.currentTimeMillis();
+        System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 
         //- 4. Exportar la imagen a un archivo ----------------------------
-        File fd = new File("./output.jpg");
+        if ( save == true ) {
+            File fd = new File("./output.jpg");
 
-        System.out.print("Exporting result image to file: ");
-        if ( !ImagePersistence.exportJPG(fd, la_imagen_resultado) )
-        {
-            System.err.println("Error grabando la imagen!!");
-            System.exit(1);
-        }
-        System.out.println(" OK!");
+            System.out.print("Exporting result image to file: ");
+            if ( !ImagePersistence.exportJPG(fd, la_imagen_resultado) )
+            {
+                System.err.println("Error grabando la imagen!!");
+                System.exit(1);
+            }
+            System.out.println(" OK!");
 
-        System.out.println("An image has been created in the file output.jpg");
-
+            System.out.println("An image has been created in the file output.jpg");
+    }
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Destruir la imagen
-        la_imagen_resultado.dispose();
+        la_imagen_resultado.finalize();
         la_imagen_resultado = null;
 
         // 5.2. Destruir la escena
@@ -106,13 +111,20 @@ public class RaytracerSimple {
     public static void
     main(String args[])
     {
-        RaytracerSimple instancia = new RaytracerSimple();
+        RaytracerSimple instance = new RaytracerSimple();
+        boolean save = true;
+
+        for ( int i = 0; i < args.length; i++ ) {
+        if ( args[i].equals("nosave") ) {
+                save = false;
+        }
+    }
 
         if ( args.length < 1 ) {
-            instancia.pintar_offline("./etc/object.ray");
+            instance.offlineExcecution("./etc/object.ray", save);
           }
           else {
-            instancia.pintar_offline(args[0]);
+        instance.offlineExcecution(args[0], save);
         }
     }
 

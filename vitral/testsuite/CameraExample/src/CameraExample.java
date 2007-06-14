@@ -19,7 +19,6 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.gui.CameraControllerGravZero;
 
 public class CameraExample extends JFrame implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -44,7 +43,6 @@ public class CameraExample extends JFrame implements
 
         camera = new Camera();
 
-        //cameraController = new CameraControllerGravZero(camera);
         //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 

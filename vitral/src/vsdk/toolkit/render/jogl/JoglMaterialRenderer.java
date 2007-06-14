@@ -6,14 +6,27 @@
 
 package vsdk.toolkit.render.jogl;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
 import javax.media.opengl.GL;
 
 public class JoglMaterialRenderer extends JoglRenderer {
+    private static boolean errorReported = false;
 
     public static void activate(GL gl, Material m)
     {
+        if ( m == null ) {
+            if ( errorReported == false ) {
+                VSDK.reportMessage(null, VSDK.WARNING, 
+                    "JoglMaterialRenderer.activate", 
+                    "Trying to activate null reference to Material." + 
+                    " Avoiding further reporting.");
+                errorReported = true;
+        }
+        return;
+    }
+
         float opacity = (float)m.getOpacity();
 
         if ( opacity > 1.0f ) opacity = 1.0f;

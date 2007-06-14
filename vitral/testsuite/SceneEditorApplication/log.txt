@@ -131,3 +131,7 @@ Aug 12 2006, Oscar Chavarro:
   - 20min: message constants hashmap on GuiCache
   - 2h23min: internationalization session on gui files (english->spanish)
     and ButtonGroup styles on Swing
+
+Aug 20 2006, Oscar Chavarro:
+  - 1h: Unicode escape sequences added to GUI menus, and first working tests
+    for Japanese GUIs :)

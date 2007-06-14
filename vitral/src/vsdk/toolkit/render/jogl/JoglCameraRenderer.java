@@ -113,13 +113,21 @@ public class JoglCameraRenderer extends JoglRenderer
         }
 
         //- Genere las primitivas que muestran el volumen de visualizacion --
+        double delta = 0.1;
         gl.glColor3d(1, 0.5, 0.5);   // Origen de la camara
-        gl.glBegin(gl.GL_POINTS);
+        gl.glLineWidth((float)1.0);
+        gl.glBegin(gl.GL_LINES);
             gl.glVertex3d(0, 0, 0);
+            gl.glVertex3d(delta, 0, 0);
+            gl.glVertex3d(0, -delta, 0);
+            gl.glVertex3d(0, delta, 0);
+            gl.glVertex3d(0, 0, -delta);
+            gl.glVertex3d(0, 0, delta);
         gl.glEnd();
 
         gl.glDisable(gl.GL_LIGHTING);
         gl.glColor3f(0, 1, 1);       // Plano de proyeccion
+        gl.glLineWidth((float)2.0);
         gl.glBegin(gl.GL_LINE_LOOP);
             gl.glVertex3d(npd, -xn/2, -yn/2);
             gl.glVertex3d(npd, xn/2, -yn/2);

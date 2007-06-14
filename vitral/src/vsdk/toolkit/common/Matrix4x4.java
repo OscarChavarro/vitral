@@ -5,6 +5,8 @@
 //= - August 24 2005 - David Diaz / Cesar Bustacara: Design changes to      =
 //=   decouple JOGL from the Matrix data model                              =
 //= - May 2 2006 - David Diaz / Oscar Chavarro: documentation added         =
+//= - November 3 2006 - Oscar Chavarro: New versions of determinant and     =
+//=   invert that takes into account 4x4 matrices, not just the 3x3 case    =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -132,9 +134,8 @@ public class Matrix4x4 extends Entity
 
     /**
      This method calculates new values for current matrix to make it represent
-     a paralel projection matrix, with a corresponding visualization volume
+     a perspective projection matrix, with a corresponding visualization volume
      (i.e. the frustum).
-     projection matrix
      @param leftDistance
      @param rightDistance
      @param downDistance
@@ -316,29 +317,23 @@ public class Matrix4x4 extends Entity
      */
     public void invert()
     {
-        double R[][] = new double[4][4];
-
-        R[0][0] = M[1][1]*M[2][2] - M[2][1]*M[1][2];
-        R[0][1] = M[0][2]*M[2][1] - M[2][2]*M[0][1];
-        R[0][2] = M[0][1]*M[1][2] - M[1][1]*M[0][2];
-        R[0][3] = 0;
-
-        R[1][0] = M[1][2]*M[2][0] - M[2][2]*M[1][0];
-        R[1][1] = M[0][0]*M[2][2] - M[2][0]*M[0][2];
-        R[1][2] = M[0][2]*M[1][0] - M[1][2]*M[0][0];
-        R[1][3] = 0;
-
-        R[2][0] = M[1][0]*M[2][1] - M[2][0]*M[1][1];
-        R[2][1] = M[0][1]*M[2][0] - M[2][1]*M[0][0];
-        R[2][2] = M[0][0]*M[1][1] - M[1][0]*M[0][1];
-        R[2][3] = 0;
-
-        R[3][0] = 0;
-        R[3][1] = 0;
-        R[3][2] = 0;
-        R[3][3] = 1;
-
-        M = R;
+    Matrix4x4 N = new Matrix4x4(this);
+       M[0][0] = N.M[1][2]*N.M[2][3]*N.M[3][1] - N.M[1][3]*N.M[2][2]*N.M[3][1] + N.M[1][3]*N.M[2][1]*N.M[3][2] - N.M[1][1]*N.M[2][3]*N.M[3][2] - N.M[1][2]*N.M[2][1]*N.M[3][3] + N.M[1][1]*N.M[2][2]*N.M[3][3];
+       M[0][1] = N.M[0][3]*N.M[2][2]*N.M[3][1] - N.M[0][2]*N.M[2][3]*N.M[3][1] - N.M[0][3]*N.M[2][1]*N.M[3][2] + N.M[0][1]*N.M[2][3]*N.M[3][2] + N.M[0][2]*N.M[2][1]*N.M[3][3] - N.M[0][1]*N.M[2][2]*N.M[3][3];
+       M[0][2] = N.M[0][2]*N.M[1][3]*N.M[3][1] - N.M[0][3]*N.M[1][2]*N.M[3][1] + N.M[0][3]*N.M[1][1]*N.M[3][2] - N.M[0][1]*N.M[1][3]*N.M[3][2] - N.M[0][2]*N.M[1][1]*N.M[3][3] + N.M[0][1]*N.M[1][2]*N.M[3][3];
+       M[0][3] = N.M[0][3]*N.M[1][2]*N.M[2][1] - N.M[0][2]*N.M[1][3]*N.M[2][1] - N.M[0][3]*N.M[1][1]*N.M[2][2] + N.M[0][1]*N.M[1][3]*N.M[2][2] + N.M[0][2]*N.M[1][1]*N.M[2][3] - N.M[0][1]*N.M[1][2]*N.M[2][3];
+       M[1][0] = N.M[1][3]*N.M[2][2]*N.M[3][0] - N.M[1][2]*N.M[2][3]*N.M[3][0] - N.M[1][3]*N.M[2][0]*N.M[3][2] + N.M[1][0]*N.M[2][3]*N.M[3][2] + N.M[1][2]*N.M[2][0]*N.M[3][3] - N.M[1][0]*N.M[2][2]*N.M[3][3];
+       M[1][1] = N.M[0][2]*N.M[2][3]*N.M[3][0] - N.M[0][3]*N.M[2][2]*N.M[3][0] + N.M[0][3]*N.M[2][0]*N.M[3][2] - N.M[0][0]*N.M[2][3]*N.M[3][2] - N.M[0][2]*N.M[2][0]*N.M[3][3] + N.M[0][0]*N.M[2][2]*N.M[3][3];
+       M[1][2] = N.M[0][3]*N.M[1][2]*N.M[3][0] - N.M[0][2]*N.M[1][3]*N.M[3][0] - N.M[0][3]*N.M[1][0]*N.M[3][2] + N.M[0][0]*N.M[1][3]*N.M[3][2] + N.M[0][2]*N.M[1][0]*N.M[3][3] - N.M[0][0]*N.M[1][2]*N.M[3][3];
+       M[1][3] = N.M[0][2]*N.M[1][3]*N.M[2][0] - N.M[0][3]*N.M[1][2]*N.M[2][0] + N.M[0][3]*N.M[1][0]*N.M[2][2] - N.M[0][0]*N.M[1][3]*N.M[2][2] - N.M[0][2]*N.M[1][0]*N.M[2][3] + N.M[0][0]*N.M[1][2]*N.M[2][3];
+       M[2][0] = N.M[1][1]*N.M[2][3]*N.M[3][0] - N.M[1][3]*N.M[2][1]*N.M[3][0] + N.M[1][3]*N.M[2][0]*N.M[3][1] - N.M[1][0]*N.M[2][3]*N.M[3][1] - N.M[1][1]*N.M[2][0]*N.M[3][3] + N.M[1][0]*N.M[2][1]*N.M[3][3];
+       M[2][1] = N.M[0][3]*N.M[2][1]*N.M[3][0] - N.M[0][1]*N.M[2][3]*N.M[3][0] - N.M[0][3]*N.M[2][0]*N.M[3][1] + N.M[0][0]*N.M[2][3]*N.M[3][1] + N.M[0][1]*N.M[2][0]*N.M[3][3] - N.M[0][0]*N.M[2][1]*N.M[3][3];
+       M[2][2] = N.M[0][1]*N.M[1][3]*N.M[3][0] - N.M[0][3]*N.M[1][1]*N.M[3][0] + N.M[0][3]*N.M[1][0]*N.M[3][1] - N.M[0][0]*N.M[1][3]*N.M[3][1] - N.M[0][1]*N.M[1][0]*N.M[3][3] + N.M[0][0]*N.M[1][1]*N.M[3][3];
+       M[2][3] = N.M[0][3]*N.M[1][1]*N.M[2][0] - N.M[0][1]*N.M[1][3]*N.M[2][0] - N.M[0][3]*N.M[1][0]*N.M[2][1] + N.M[0][0]*N.M[1][3]*N.M[2][1] + N.M[0][1]*N.M[1][0]*N.M[2][3] - N.M[0][0]*N.M[1][1]*N.M[2][3];
+       M[3][0] = N.M[1][2]*N.M[2][1]*N.M[3][0] - N.M[1][1]*N.M[2][2]*N.M[3][0] - N.M[1][2]*N.M[2][0]*N.M[3][1] + N.M[1][0]*N.M[2][2]*N.M[3][1] + N.M[1][1]*N.M[2][0]*N.M[3][2] - N.M[1][0]*N.M[2][1]*N.M[3][2];
+       M[3][1] = N.M[0][1]*N.M[2][2]*N.M[3][0] - N.M[0][2]*N.M[2][1]*N.M[3][0] + N.M[0][2]*N.M[2][0]*N.M[3][1] - N.M[0][0]*N.M[2][2]*N.M[3][1] - N.M[0][1]*N.M[2][0]*N.M[3][2] + N.M[0][0]*N.M[2][1]*N.M[3][2];
+       M[3][2] = N.M[0][2]*N.M[1][1]*N.M[3][0] - N.M[0][1]*N.M[1][2]*N.M[3][0] - N.M[0][2]*N.M[1][0]*N.M[3][1] + N.M[0][0]*N.M[1][2]*N.M[3][1] + N.M[0][1]*N.M[1][0]*N.M[3][2] - N.M[0][0]*N.M[1][1]*N.M[3][2];
+       M[3][3] = N.M[0][1]*N.M[1][2]*N.M[2][0] - N.M[0][2]*N.M[1][1]*N.M[2][0] + N.M[0][2]*N.M[1][0]*N.M[2][1] - N.M[0][0]*N.M[1][2]*N.M[2][1] - N.M[0][1]*N.M[1][0]*N.M[2][2] + N.M[0][0]*N.M[1][1]*N.M[2][2];
 
         double a = 1/determinant();
         int row, column;
@@ -407,6 +402,25 @@ public class Matrix4x4 extends Entity
     }
 
     /**
+     Multiply a Vector3D by this matrix. Neither this matrix nor the Vector3D 
+     parameter will be modified by this method.  It returns a new Vector3D that
+     represents the input vector multiplied by current matrix.
+     @param E The vector to multiply by this matrix
+     @return the result of the Vector3D by this matrix multiplication
+     */
+    public final Vector4D multiply(Vector4D E)
+    {
+        Vector4D R = new Vector4D();
+
+        R.x = M[0][0] * E.x + M[0][1] * E.y + M[0][2] * E.z + M[0][3];
+        R.y = M[1][0] * E.x + M[1][1] * E.y + M[1][2] * E.z + M[1][3];
+        R.z = M[2][0] * E.x + M[2][1] * E.y + M[2][2] * E.z + M[2][3];
+        R.w = M[3][0] * E.x + M[3][1] * E.y + M[3][2] * E.z + M[3][3];
+
+        return R;
+    }
+
+    /**
      This method multiplies an input matrix by this matrix, the result is a 
      new matrix and current matrix is not modified.
      @param second The matrix by whom this matrix will be multiplied
@@ -430,15 +444,36 @@ public class Matrix4x4 extends Entity
         return R;
     }
 
+    private double determinant3x3(double a, double b, double c,
+                                  double d, double e, double f,
+                                  double g, double h, double i )
+    {
+        return a*e*i + d*h*c + g*b*f - c*e*g - f*h*a - i*b*d;
+    }
+
     /**
      This method computes the determinant of this matrix.
      @return this matrix determinant
      */
     public double determinant()
     {
+/*
         return M[0][0]*(M[1][1]*M[2][2]-M[2][1]*M[1][2]) - 
                M[0][1]*(M[1][0]*M[2][2]-M[2][0]*M[1][2]) + 
                M[0][2]*(M[1][0]*M[2][1]-M[2][0]*M[1][1]);
+*/
+    return M[0][0]*determinant3x3(M[1][1], M[1][2], M[1][3],
+                                  M[2][1], M[2][2], M[2][3],
+                                  M[3][1], M[3][2], M[3][3]) -
+           M[0][1]*determinant3x3(M[1][0], M[1][2], M[1][3],
+                                  M[2][0], M[2][2], M[2][3],
+                                  M[3][0], M[3][2], M[3][3]) +
+           M[0][2]*determinant3x3(M[1][0], M[1][1], M[1][3],
+                                  M[2][0], M[2][1], M[2][3],
+                                  M[3][0], M[3][1], M[3][3]) -
+           M[0][3]*determinant3x3(M[1][0], M[1][1], M[1][2],
+                                  M[2][0], M[2][1], M[2][2],
+                                  M[3][0], M[3][1], M[3][2]);
     }
 
     /**

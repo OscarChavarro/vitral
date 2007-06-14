@@ -7,6 +7,31 @@ public abstract class GuiElementCache
     public abstract String toString();
     public abstract String toString(int level);
 
+    private int fromHex(char c)
+    {
+        int i = -1;
+
+        switch ( c ) {
+            case '0': i = 0; break;
+            case '1': i = 1; break;
+            case '2': i = 2; break;
+            case '3': i = 3; break;
+            case '4': i = 4; break;
+            case '5': i = 5; break;
+            case '6': i = 6; break;
+            case '7': i = 7; break;
+            case '8': i = 8; break;
+            case '9': i = 9; break;
+         case 'a': case 'A': i = 10; break;
+         case 'b': case 'B': i = 11; break;
+         case 'c': case 'C': i = 12; break;
+         case 'd': case 'D': i = 13; break;
+         case 'e': case 'E': i = 14; break;
+         case 'f': case 'F': i = 15; break;
+    }
+    return i;
+    }
+
     /**
     Given a Windows32 SDK API / Aquynza style coded name, this method
     generates the simplified name, separating from it its mnemonic and
@@ -32,7 +57,42 @@ public abstract class GuiElementCache
             if ( c == '\t' ) {
                 break;
         }
-            simplifiedName = simplifiedName + c;
+
+        if ( c == '#' ) {
+                // Process UNICODE escape sequences...
+                int start = i;
+        i++;
+                int num1=0, num2=0, num3=0, num4=0, num;
+                for ( ; i < codedName.length(); i++ ) {
+                    c = codedName.charAt(i);
+            if ( c == '#' ) {
+                        simplifiedName = simplifiedName + c;
+            break;
+            }
+            num = fromHex(c);
+            if ( num < 0 ) {
+                break;
+            }
+            if ( i == start+1 ) { 
+                        num1 = num;
+            }
+            else if ( i == start+2 ) {
+                        num2 = num;
+            }
+            else if ( i == start+3 ) {
+                        num3 = num;
+            }
+            else if ( i == start+4 ) {
+                        num4 = num;
+            c = (char)(num1 << 12 | num2 << 8 | num3 << 4 | num4);
+                        simplifiedName = simplifiedName + c;
+            break;
+            }
+        }
+        }
+        else {
+                simplifiedName = simplifiedName + c;
+        }
     }
 
         return simplifiedName;

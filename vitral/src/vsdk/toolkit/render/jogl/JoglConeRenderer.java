@@ -12,6 +12,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Cone;
@@ -24,21 +25,24 @@ public class JoglConeRenderer extends JoglRenderer {
     private static void drawParts(GL gl, Cone cone)
     {
         double r1, r2, h;
+        int slices = 16;
 
         r1 = cone.getBaseRadius();
         r2 = cone.getTopRadius();
         h = cone.getHeight();
 
-        glu.gluCylinder(gluQuadric, r1, r2, h, 16, 1);
+        VSDK.acumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
+
+        glu.gluCylinder(gluQuadric, r1, r2, h, slices, 1);
         gl.glPushMatrix();
         gl.glRotated(180, 1, 0, 0);
-        glu.gluDisk(gluQuadric, 0, r1, 16, 1);
+        glu.gluDisk(gluQuadric, 0, r1, slices, 1);
         gl.glPopMatrix();
 
         if ( r2 > 0.0 ) {
             gl.glPushMatrix();
             gl.glTranslated(0, 0, h);
-            glu.gluDisk(gluQuadric, 0, r1, 16, 1);
+            glu.gluDisk(gluQuadric, 0, r1, slices, 1);
             gl.glPopMatrix();
         }
 

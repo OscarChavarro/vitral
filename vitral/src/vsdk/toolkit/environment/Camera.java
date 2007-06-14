@@ -13,6 +13,9 @@
 //= - November 24 2005 - Oscar Chavarro: new generateRay algorithm, now     =
 //=   consistent with JOGL/OpenGL transformation interpretation.            =
 //= - April 7 2006 - Oscar Chavarro: calculateUPlaneAtPixel, proyectPoint   =
+//= - November 5 2006 - Oscar Chavarro: plane calculation methods updated   =
+//= - November 5 2006 - Oscar Chavarro: added Cohen-Sutherland line         =
+//=   clipping functionality                                                =
 //===========================================================================
 
 package vsdk.toolkit.environment;
@@ -42,6 +45,13 @@ public class Camera extends Entity
     private double farPlaneDistance;
 
     // Global constants
+    public static final int OPCODE_FAR = (0x01 << 1);
+    public static final int OPCODE_NEAR = (0x01 << 2);
+    public static final int OPCODE_RIGHT = (0x01 << 3);
+    public static final int OPCODE_LEFT = (0x01 << 4);
+    public static final int OPCODE_UP = (0x01 << 5);
+    public static final int OPCODE_DOWN = (0x01 << 6);
+
     public static final int STEREO_MODE_CENTER = 1;
     public static final int STEREO_MODE_LEFT_EYE = 2;
     public static final int STEREO_MODE_RIGHT_EYE = 3;
@@ -294,7 +304,6 @@ public class Camera extends Entity
         _dir = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
         rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
-        // End of AQUYNZA code version
     }
 
     /**
@@ -377,115 +386,22 @@ public class Camera extends Entity
         return R;
     }
     
-    /*
-     *This method returns a matrix that can be applied to the camera to rotate it on their local coordinates
-DEPRECATED
-     */
-    public Matrix4x4 getRotation(double dx, double dy, double dz)
-    {
-       //se hallan los valores de sen y cos; se divide entre 57.29 para convertir de grados a radianes
-        double sino[]={Math.sin(dx/57.29577951), Math.sin(dy/57.29577951), Math.sin(dz/57.29577951)};
-        double cosi[]={Math.cos(dx/57.29577951), Math.cos(dy/57.29577951), Math.cos(dz/57.29577951)};
-        double cosiComp[]={1.0-cosi[0], 1.0-cosi[1], 1.0-cosi[2]};//este es el complemento del coseno
-        
-        // Esta es la matriz en la representacion del toolkit
-        Matrix4x4 rStraf=new Matrix4x4();
-        rStraf.M[0][0]=cosiComp[0]*left.x*left.x+cosi[0];           rStraf.M[0][1]=cosiComp[0]*left.x*left.y-sino[0]*left.z;    rStraf.M[0][2]=cosiComp[0]*left.x*left.z+sino[0]*left.y;    rStraf.M[0][3]=0;
-        rStraf.M[1][0]=cosiComp[0]*left.x*left.y+sino[0]*left.z;    rStraf.M[1][1]=cosiComp[0]*left.y*left.y +cosi[0];          rStraf.M[1][2]=cosiComp[0]*left.y*left.z-sino[0]*left.x;    rStraf.M[1][3]=0;
-        rStraf.M[2][0]=cosiComp[0]*left.x*left.z-sino[0]*left.y;    rStraf.M[2][1]=cosiComp[0]*left.y*left.z+sino[0]*left.x;    rStraf.M[2][2]=cosiComp[0]*left.z*left.z+cosi[0];           rStraf.M[2][3]=0;
-        rStraf.M[3][0]=0;                                           rStraf.M[3][1]=0;                                           rStraf.M[3][2]=0;                                           rStraf.M[3][3]=1;
-        
-
-//Esta es la matriz en la representacion del toolkit
-        Matrix4x4 rUp=new Matrix4x4();
-        rUp.M[0][0]=cosiComp[1]*up.x*up.x+cosi[1];         rUp.M[0][1]=cosiComp[1]*up.x*up.y-sino[1]*up.z;    rUp.M[0][2]=cosiComp[1]*up.x*up.z+sino[1]*up.y;    rUp.M[0][3]=0;
-        rUp.M[1][0]=cosiComp[1]*up.x*up.y+sino[1]*up.z;    rUp.M[1][1]=cosiComp[1]*up.y*up.y+cosi[1];         rUp.M[1][2]=cosiComp[1]*up.y*up.z-sino[1]*up.x;    rUp.M[1][3]=0;
-        rUp.M[2][0]=cosiComp[1]*up.x*up.z-sino[1]*up.y;    rUp.M[2][1]=cosiComp[1]*up.y*up.z+sino[1]*up.x;    rUp.M[2][2]=cosiComp[1]*up.z*up.z+cosi[1];         rUp.M[2][3]=0;
-        rUp.M[3][0]=0;                                     rUp.M[3][1]=0;                                     rUp.M[3][2]=0;                                     rUp.M[3][3]=1;
-
-        // esta es la representacion de esa matriz en opengl
-        Matrix4x4 rFr=new Matrix4x4();
-
-        rFr.M[0][0]=cosiComp[2]*front.x*front.x+cosi[2];            rFr.M[0][1]=cosiComp[2]*front.x*front.y-sino[2]*front.z;    rFr.M[0][2]=cosiComp[2]*front.x*front.z+sino[2]*front.y;    rFr.M[0][3]=0;
-        rFr.M[1][0]=cosiComp[2]*front.x*front.y+sino[2]*front.z;    rFr.M[1][1]=cosiComp[2]*front.y*front.y+cosi[2];            rFr.M[1][2]=cosiComp[2]*front.y*front.z-sino[2]*front.x;    rFr.M[1][3]=0;
-        rFr.M[2][0]=cosiComp[2]*front.x*front.z-sino[2]*front.y;    rFr.M[2][1]=cosiComp[2]*front.y*front.z+sino[2]*front.x;    rFr.M[2][2]=cosiComp[2]*front.z*front.z+cosi[2];            rFr.M[2][3]=0;
-        rFr.M[3][0]=0;                                              rFr.M[3][1]=0;                                              rFr.M[3][2]=0;                                              rFr.M[3][3]=1;
-        
-        // Aca se halla la matriz de rotacion
-        Matrix4x4 rotacion=new Matrix4x4();
-        rotacion.identity();
-        rotacion=rotacion.multiply(rStraf);
-        rotacion=rotacion.multiply(rUp);
-        rotacion=rotacion.multiply(rFr);
-
-        // Aca se actualizan los vectores        
-        Vector3D frontAux=rotacion.multiply(front);
-        Vector3D leftAux=rotacion.multiply(left);
-        Vector3D upAux=rotacion.multiply(up);
-        frontAux.normalize();
-        leftAux.normalize();
-        upAux.normalize();
-
-        // Aca se arma la nueva matriz de rotacion        
-        Matrix4x4 retRot=new Matrix4x4();
-        retRot.M[0][0]=frontAux.x;
-        retRot.M[0][1]=leftAux.x;
-        retRot.M[0][2]=upAux.x;
-        retRot.M[0][3]=0;
-
-        retRot.M[1][0]=frontAux.y;
-        retRot.M[1][1]=leftAux.y;
-        retRot.M[1][2]=upAux.y;
-        retRot.M[1][3]=0;
-
-        retRot.M[2][0]=frontAux.z;
-        retRot.M[2][1]=leftAux.z;
-        retRot.M[2][2]=upAux.z;
-        retRot.M[2][3]=0;
-
-        retRot.M[3][0]=0;
-        retRot.M[3][1]=0;
-        retRot.M[3][2]=0;
-        retRot.M[3][3]=1;
-        
-        return retRot;
-    }
-    
-    /*
-     *This method translate the camera on its local coordinates
-     *
-     *@param dx double Translation relative to the x axis on camera coordinates
-     *@param dy double Translation relative to the y axis on camera coordinates
-     *@param dz double Translation relative to the z axis on camera coordinates
-     *
-DEPRECATED
-     */
-    public void translate(double dx, double dy, double dz)
-    {
-        Vector3D frontAux=front.multiply(dz);
-        Vector3D upAux=up.multiply(dy);
-        Vector3D leftAux=left.multiply(dx);
-        
-        eyePosition=eyePosition.add(frontAux);
-        eyePosition=eyePosition.add(upAux);
-        eyePosition=eyePosition.add(leftAux);
-    }
-
     public Matrix4x4 calculateProjectionMatrix(int stereoMode)
     {
         //- 1. Calculate the base projection matrix -------------------------
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
         Matrix4x4 P = new Matrix4x4();
 
+        aspect = viewport_xsize / viewport_ysize; 
         switch ( projectionMode ) {
           case Camera.PROJECTION_MODE_ORTHOGONAL:
-            P.orthogonalProjection(-1/orthogonalZoom, 1/orthogonalZoom,
+            P.orthogonalProjection(-aspect/orthogonalZoom,
+                                    aspect/orthogonalZoom,
                                    -1/orthogonalZoom, 1/orthogonalZoom,
                                    nearPlaneDistance, farPlaneDistance);
             break;
           case Camera.PROJECTION_MODE_PERSPECTIVE:
-            aspect = viewport_xsize / viewport_ysize; 
-            upDistance = nearPlaneDistance * Math.tan(fov * Math.PI / 360);
+            upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
@@ -510,7 +426,6 @@ DEPRECATED
         R1.invert();
 
         T1.translation(-eyePosition.x, -eyePosition.y, -eyePosition.z);
-
         R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
         R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
 
@@ -547,29 +462,31 @@ DEPRECATED
         msg = "<Camera>:\n";
 
         if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
-            msg = msg + "  - Camara en modo de proyeccion PERSPECTIVA\n";
+            msg = msg + "  - Camera in PERSPECTIVE projection mode\n";
           }
           else if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            msg = msg + "  - Camara en modo de proyeccion PARALELA\n";
+            msg = msg + "  - Camera in PARALEL projection mode\n";
+            msg = msg + "  - Orthogonal zoom = " + orthogonalZoom + "\n";
           }
           else {
-            msg = msg + "  - Camara en modo de proyeccion DESCONOCIDO\n";
+            msg = msg + "  - UNKNOWN Camera projection mode!\n";
           }
         ;
 
-        msg = msg + "  - posicion(x, y, z) = " + eyePosition + "\n";
-        msg = msg + "  - puntoFocal(x, y, z) = " + eyePosition.add(front.multiply(focalDistance)) + "\n";
+        msg = msg + "  - eyePosition(x, y, z) = " + eyePosition + "\n";
+        msg = msg + "  - focusedPointPosition(x, y, z) = " + eyePosition.add(front.multiply(focalDistance)) + "\n";
 
         //------------------------------------------------------------
-        Matrix4x4 R;
+        Matrix4x4 R, TP;
         double yaw, pitch, roll;
 
-        R = getRotation();//calculateProjectionMatrix(STEREO_MODE_CENTER);
+        TP = calculateProjectionMatrix(STEREO_MODE_CENTER);
+        R = getRotation();
         yaw = R.obtainEulerYawAngle();
         pitch = R.obtainEulerPitchAngle();
         roll = R.obtainEulerRollAngle();
 
-        msg = msg + "  - Rotacion yaw/pitch/roll: <" +
+        msg = msg + "  - Rotation yaw/pitch/roll: <" +
             VSDK.formatDouble(yaw) + ", " +
             VSDK.formatDouble(pitch) + ", " +
             VSDK.formatDouble(roll) + "> RAD (<" +
@@ -579,20 +496,45 @@ DEPRECATED
 
         //------------------------------------------------------------
         updateVectors();
-        msg = msg + "  - Marco de referencia:\n";
+        msg = msg + "  - Reference frame:\n";
         msg = msg + "    . Vector UP = " + up + " (longitud " + VSDK.formatDouble(up.length()) + ")\n";
         msg = msg + "    . Vector FRONT = " + front + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
         msg = msg + "    . Vector LEFT = " + left + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
-        msg = msg + "  - Marco de referencia con escapa:\n";
+        msg = msg + "  - Reference frame with scales:\n";
         msg = msg + "    . Vector UP' = " + upWithScale + " (longitud " + VSDK.formatDouble(upWithScale.length()) + ")\n";
         msg = msg + "    . Vector FRONT' = " + _dir + " (longitud " + VSDK.formatDouble(_dir.length()) + ")\n";
         msg = msg + "    . Vector RIGHT' = " + rightWithScale + " (longitud " + VSDK.formatDouble(rightWithScale.length()) + ")\n";
         msg = msg + "  - fov = " + VSDK.formatDouble(fov) + "\n";
         msg = msg + "  - nearPlaneDistance = " + VSDK.formatDouble(nearPlaneDistance) + "\n";
         msg = msg + "  - farPlaneDistance = " + VSDK.formatDouble(farPlaneDistance) + "\n";
-        msg = msg + "  - Viewport = (" + VSDK.formatDouble(viewport_xsize) + ", " + VSDK.formatDouble(viewport_ysize) + ")\n";
-        msg = msg + "  - Matriz de transformacion:\n" + R + "\n";
+        msg = msg + "  - Viewport size in pixels = (" + VSDK.formatDouble(viewport_xsize) + ", " + VSDK.formatDouble(viewport_ysize) + ")\n";
+        msg = msg + "  - Transformation * projection matrix:" + TP;
 
+        //------------------------------------------------------------
+        Matrix4x4 P;
+        double leftDistance, rightDistance, upDistance, downDistance, aspect;
+
+        P = new Matrix4x4();
+        aspect = viewport_xsize / viewport_ysize; 
+        if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
+            upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
+            downDistance = -upDistance;
+            leftDistance = aspect * downDistance;
+            rightDistance = aspect * upDistance;
+            P.frustumProjection(leftDistance, rightDistance,
+                                downDistance, upDistance,
+                                nearPlaneDistance, farPlaneDistance);
+            msg = msg + "  - Projection matrix:" + P;
+          }
+          else if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            P.orthogonalProjection(-aspect/orthogonalZoom, 
+                                    aspect/orthogonalZoom,
+                                   -1/orthogonalZoom, 1/orthogonalZoom,
+                                   nearPlaneDistance, farPlaneDistance);
+            msg = msg + "  - Projection matrix:" + P;
+        }
+
+        //------------------------------------------------------------
         return msg;
     }
 
@@ -611,6 +553,18 @@ DEPRECATED
         // 1. Calculate the angle between the front vector and the plane
         updateVectors();
         double u = ((double)x - viewport_xsize/2.0) / viewport_xsize;
+        return calculateUPlane(u);
+    }
+
+    /**
+    PRE: updateVectors() must be called before this method if camera model
+    is new or recently changed.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateUPlane(double u)
+    {
         Vector3D du = rightWithScale.multiply(u);
         Vector3D f = new Vector3D(front);
         Vector3D dir = du.add(_dir);
@@ -655,6 +609,18 @@ DEPRECATED
         // 1. Calculate the angle between the front vector and the plane
         updateVectors();
         double v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
+        return calculateVPlane(v);
+    }
+
+    /**
+    PRE: updateVectors() must be called before this method if camera model
+    is new or recently changed.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateVPlane(double v)
+    {
         Vector3D dv = upWithScale.multiply(v);
         Vector3D f = new Vector3D(front);
         Vector3D dir = dv.add(_dir);
@@ -682,6 +648,256 @@ DEPRECATED
         plane = new InfinitePlane(n, eyePosition);
 
         return plane;
+    }
+
+    /**
+    PRE: updateVectors() must be called before this method if camera model
+    is new or recently changed.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateNearPlane()
+    {
+        InfinitePlane plane;
+
+        Vector3D f = new Vector3D(front);
+        f.normalize();
+        Vector3D back = f.multiply(-1);
+        f = f.multiply(nearPlaneDistance);
+        Vector3D c = eyePosition.add(f);
+
+        plane = new InfinitePlane(back, c);
+
+        return plane;
+    }
+
+    /**
+    PRE: updateVectors() must be called before this method if camera model
+    is new or recently changed.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateFarPlane()
+    {
+        InfinitePlane plane;
+
+        Vector3D f = new Vector3D(front);
+        f.normalize();
+        f = f.multiply(farPlaneDistance);
+        Vector3D c = eyePosition.add(f);
+        plane = new InfinitePlane(front, c);
+
+        return plane;
+    }
+
+    /**
+    Given a point in "clipping coordinates space", this method calculates
+    a six bit opcode, as explained in [FOLE1992].6.5.3, suitable for use in the
+    Cohen-Suterland line clipping algorithm, taking the input point in
+    homogeneous space, as noted in [FOLE1992].6.5.4.
+
+    Note that the "clipping coodinate space" is the result of transforming
+    world coordinate space with the composed transform-project matrix for
+    current camera, as returned by the `calculateProjectionMatrix` method.
+
+    Note that in VSDK, the clipping space correspond to the frustum for
+    the minmax cube from <-1, -1, -1> to <1, 1, 1>.
+
+    WARNING: This algoritm FAILS when the point to be tested is in the
+    plane passing through eye position of the camera and paralel to near 
+    plane! In this case, W gets 0 value, and points are not correctly
+    classified.
+    @todo: check this method... currently disabled due to non working cases!
+    */
+/*
+    private int calculateOutcodeBits(Vector4D p)
+    {
+        int bits = 0x00;
+
+        if ( p.w > 0 ) {
+            if ( p.x >  p.w ) bits |= OPCODE_RIGHT;
+            if ( p.x < -p.w ) bits |= OPCODE_LEFT;
+            if ( p.y >  p.w ) bits |= OPCODE_UP;
+            if ( p.y < -p.w ) bits |= OPCODE_DOWN;
+            if ( p.z >  p.w ) bits |= OPCODE_FAR;
+            if ( p.z < -p.w ) bits |= OPCODE_NEAR;
+        }
+        else {
+            if ( p.x > -p.w ) bits |= OPCODE_RIGHT;
+            if ( p.x <  p.w ) bits |= OPCODE_LEFT;
+            if ( p.y > -p.w ) bits |= OPCODE_UP;
+            if ( p.y <  p.w ) bits |= OPCODE_DOWN;
+            if ( p.z > -p.w ) bits |= OPCODE_FAR;
+            if ( p.z <  p.w ) bits |= OPCODE_NEAR;
+        }
+        return bits;
+    }
+*/
+
+    /**
+    Given a point in world space, this method calculates a six bit opcode,
+    as explained in [FOLE1992].6.5.3, suitable for use in the Cohen-Suterland
+    line clipping algorithm. The camera view volume should be represented
+    by its six bounding planes.
+    */
+    private int calculateOutcodeBits(Vector3D p,
+                                     InfinitePlane right, InfinitePlane left,
+                                     InfinitePlane up, InfinitePlane down,
+                                     InfinitePlane far, InfinitePlane near)
+    {
+        int bits = 0x00;
+
+        if ( right.classifyPoint(p) > 0.0 ) bits |= OPCODE_RIGHT;
+        if ( left.classifyPoint(p) > 0.0 ) bits |= OPCODE_LEFT;
+        if ( up.classifyPoint(p) > 0.0) bits |= OPCODE_UP;
+        if ( down.classifyPoint(p) > 0.0 ) bits |= OPCODE_DOWN;
+        if ( far.classifyPoint(p) > 0.0 ) bits |= OPCODE_FAR;
+        if ( near.classifyPoint(p) > 0.0 ) bits |= OPCODE_NEAR;
+
+        return bits;
+    }
+
+    /**
+    This method implements the Cohen-Sutherland line clipping algorithm with
+    respect to the view volume defined by current camera. Recieves the two
+    line endpoints and return true if any part of this line lies inside the
+    view volume.  In the case the line crosses the view volume, the new
+    resulting endpoints are calculated and returned.
+
+    This algorithm structure follows the one proposed in [FOLE1992].3.12.3,
+    generalizing it to the 3D case, as noted in [FOLE1992].6.5.3.
+    */
+    public boolean clipLineCohenSutherland(Vector3D point0, Vector3D point1,
+                             Vector3D clippedPoint0, Vector3D clippedPoint1)
+    {
+        //- Local variables definition ------------------------------------
+        int outcode0;                // 6bit containment code for point0
+        int outcode1;                // 6bit containment code for point1
+        int outcodeout;              // Selected endpoint code for iteration
+        Vector3D clippingMidPoint;   // Selected endpoint clipped for iteration
+        Ray testRay;                 // Ray use for general line/plane clipping
+        Vector3D dirFromP0ToP1;      // Temporary for testRay construction
+        InfinitePlane rightPlane;    // 6 planes defining current camera
+        InfinitePlane leftPlane;     //   view volume. Note that intersection
+        InfinitePlane upPlane;       //   tests are done against these planes
+        InfinitePlane downPlane;     //   using general case non-optimal
+        InfinitePlane nearPlane;     //   intersections! This sould be
+        InfinitePlane farPlane;      //   optimized
+        InfinitePlane clippingPlane; // Selected plane for each iteration
+
+        //- Algorithm initial state ---------------------------------------
+        clippedPoint0.x = point0.x;
+        clippedPoint0.y = point0.y;
+        clippedPoint0.z = point0.z;
+        clippedPoint1.x = point1.x;
+        clippedPoint1.y = point1.y;
+        clippedPoint1.z = point1.z;
+        updateVectors();
+        clippingMidPoint = new Vector3D();
+        rightPlane = calculateUPlane(0.5);
+        leftPlane = calculateUPlane(-0.5);
+        upPlane = calculateVPlane(0.5);
+        downPlane = calculateVPlane(-0.5);
+        nearPlane = calculateNearPlane();
+        farPlane = calculateFarPlane();
+        clippingPlane = null;
+        outcode0 = calculateOutcodeBits(point0, rightPlane, leftPlane, 
+                                      upPlane, downPlane, nearPlane, farPlane);
+        outcode1 = calculateOutcodeBits(point1, rightPlane, leftPlane,
+                                      upPlane, downPlane, nearPlane, farPlane);
+        dirFromP0ToP1 = point1.substract(point0);
+        dirFromP0ToP1.normalize();
+
+        //- Main Cohen-Sutherland iteration cycle (incremental clipping) --
+        boolean linePasses = false; // Algorithm return value
+        boolean done = false;       // Iteration exit condition
+        do {
+            //- Trivial cases: trivial accept and trivial reject ----------
+            if ( outcode0 == 0x0 && outcode1 == 0x0 ) {
+                linePasses = true;
+                done = true;
+            }
+            else if ( (outcode0 & outcode1) != 0x0 ) {
+                linePasses = false;
+                done = true;
+            }
+            //- Iterative cases: clipping with each of the 6 planes -------
+            else {
+                if ( dirFromP0ToP1.length() < VSDK.EPSILON ) {
+                    // continue;
+                    return false;
+                }
+                //--------------------------------------------------
+                if ( outcode0 != 0 ) {
+                    outcodeout = outcode0;
+                  }
+                  else {
+                    outcodeout = outcode1;
+                }
+                testRay = new Ray(point0, dirFromP0ToP1);
+
+                //--------------------------------------------------
+                clippingPlane = null;
+                if ( (OPCODE_UP & outcodeout) != 0x0 ) {
+                    clippingPlane = upPlane;
+                }
+                else if ( (OPCODE_DOWN & outcodeout) != 0x0 ) {
+                    clippingPlane = downPlane;
+                }
+                else if ( (OPCODE_LEFT & outcodeout) != 0x0 ) {
+                    clippingPlane = leftPlane;
+                }
+                else if ( (OPCODE_RIGHT & outcodeout) != 0x0 ) {
+                    clippingPlane = rightPlane;
+                }
+                else if ( (OPCODE_NEAR & outcodeout) != 0x0 ) {
+                    // Warning: Why test with the contrary plane?
+                    clippingPlane = farPlane;
+                }
+                else if ( (OPCODE_FAR & outcodeout) != 0x0 ) {
+                    // Warning: Why test with the contrary plane?
+                    clippingPlane = nearPlane;
+                }
+                else {
+                    System.out.println("Non implemented case!");
+                }
+
+                if ( clippingPlane != null ) {
+                    if ( !clippingPlane.doIntersection(testRay) ) {
+                        VSDK.reportMessage(this, VSDK.WARNING, 
+                            "clipLineCohenSutherland", 
+                            "Unusal ray assembly, check code and data");
+                    }
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t));
+                    linePasses = true;
+                }
+
+                //--------------------------------------------------
+                Vector3D p = new Vector3D();
+                if ( outcodeout == outcode0 ) {
+                    clippedPoint0.x = clippingMidPoint.x;
+                    clippedPoint0.y = clippingMidPoint.y;
+                    clippedPoint0.z = clippingMidPoint.z;
+                    outcode0 = calculateOutcodeBits(clippedPoint0,
+                        rightPlane, leftPlane, upPlane, 
+                        downPlane, nearPlane, farPlane);
+                  }
+                  else {
+                    clippedPoint1.x = clippingMidPoint.x;
+                    clippedPoint1.y = clippingMidPoint.y;
+                    clippedPoint1.z = clippingMidPoint.z;
+                    outcode1 = calculateOutcodeBits(clippedPoint1,
+                        rightPlane, leftPlane, upPlane, 
+                        downPlane, nearPlane, farPlane);
+
+                }
+            }
+        } while ( !done );
+
+        return linePasses;
     }
 
     /**
@@ -720,7 +936,7 @@ DEPRECATED
 
         if ( !plane.doIntersection(r) ) {
             return false;
-    }
+        }
 
         // 4. Calculate projected global coordinates XYZ
         Vector3D projected = r.origin.add(r.direction.multiply(r.t)).substract(center);
@@ -728,7 +944,7 @@ DEPRECATED
         // 5. Scale point to viewport
         outProjected.x = (projected.dotProduct(rightCopy)/2+0.5)*viewport_xsize;
         outProjected.y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewport_ysize;
-    outProjected.z = 0.0;
+        outProjected.z = 0.0;
 
         return true;
     }

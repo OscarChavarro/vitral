@@ -10,6 +10,8 @@
 //=   rayable objects, with geometries implementing intersection operation  =
 //=   in an object-coordinate basis.                                        =
 //= - May 16 2006 - Alfonso Barbosa: modify to manage ZBuffers              =
+//= - November 1 2006 - Alfonso Barbosa / Diana Reyes: exceute generalized  =
+//=   for inclusion of sub-viewport spec.                                   =
 //===========================================================================
 
 package vsdk.toolkit.render;
@@ -289,6 +291,31 @@ public class Raytracer {
         return c;
     }
 
+    public void execute(RGBImage inoutViewport, 
+                        ArrayList inSimpleBodyArray,
+                        ArrayList in_arr_luces,
+                        Background in_fondo,
+                        Camera in_camara,
+                        ProgressMonitor report)
+    {
+        execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
+                in_fondo, in_camara, report, null, 0, 0,
+                inoutViewport.getXSize(), inoutViewport.getYSize());
+    }
+
+    public void execute(RGBImage inoutViewport, 
+                        ArrayList inSimpleBodyArray,
+                        ArrayList in_arr_luces,
+                        Background in_fondo,
+                        Camera in_camara,
+                        ProgressMonitor report,
+                        ZBuffer depthmap)
+    {
+        execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
+                in_fondo, in_camara, report, depthmap, 0, 0,
+                inoutViewport.getXSize(), inoutViewport.getYSize());
+    }
+
     /**
     Macroalgoritmo de control para raytracing. Este m&eacute;todo recibe
     el modelo de una escena 3D previamente construida en memoria y una
@@ -335,36 +362,41 @@ public class Raytracer {
           considerarse que es una re-escritura y re-estructuraci&oacute;n 
           completa de Oscar Chavarro.
     */
-    public void execute(RGBImage inoutViewport, 
-                         ArrayList inSimpleBodyArray,
-                         ArrayList in_arr_luces,
-                         Background in_fondo,
-                         Camera in_camara,
-             ProgressMonitor report,
-                         ZBuffer depthmap)
+    public void execute(RGBImage inoutViewport,
+                        ArrayList inSimpleBodyArray,
+                        ArrayList in_arr_luces,
+                        Background in_fondo,
+                        Camera in_camara,
+                        ProgressMonitor report,
+                        ZBuffer depthmap,
+                        int limx1, int limy1,
+                        int limx2, int limy2)
     {
         int x, y;
+        int relativeX;
+        int relativeY;
         Ray rayo;
         ColorRgb color;
 
         in_camara.updateVectors();
 
         report.begin();
-        for ( y = 0; y < inoutViewport.getYSize(); y++ ) {
+        for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
             report.update(0, inoutViewport.getYSize(), y);
-            for ( x = 0; x < inoutViewport.getXSize(); x++ ) {
+            for ( x = limx1, relativeX = 0; x < limx2; x++, relativeX++ ) {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
-                color = followRayPath(rayo, inSimpleBodyArray, 
+                color = followRayPath(rayo, inSimpleBodyArray,
                     in_arr_luces, in_fondo);
                 if ( depthmap != null ) {
                     depthmap.setZ(x, y, (float)rayo.t);
                 }
                 //- Exporto el result de color del pixel ----------------
-                inoutViewport.putPixel(x, y, (byte)(255 * color.r), 
-                                              (byte)(255 * color.g), 
+                inoutViewport.putPixel(relativeX, relativeY,
+                                              (byte)(255 * color.r),
+                                              (byte)(255 * color.g),
                                               (byte)(255 * color.b));
             }
         }

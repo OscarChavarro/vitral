@@ -44,6 +44,16 @@ public class QualitySelection extends Entity {
     // algorithms.
     private int lodHint;
 
+    public void setLodHint(int l)
+    {
+        lodHint = l;
+    }
+
+    public int getLodHint()
+    {
+        return lodHint;
+    }
+
     /**
     Constructs a default QualitySelection object that will display the surfaces
     */

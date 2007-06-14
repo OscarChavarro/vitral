@@ -474,6 +474,23 @@ public class ParametricCurve extends Curve {
         return result;
     }
 
+    private int
+    calculatePointPosition(int pin)
+    {
+        int pout, i;
+
+        pout = 0;
+    for ( i = 0; i < types.size() && i < pin; i++ ) {
+        if ( types.get(i) == BREAK ) {
+                pout = -1;
+        }
+        else {
+            pout++;
+        }
+    }
+    return pout;
+    }
+
     /**
     This method calculates the interpolation points for the segment that ends
     in the point `endingPointForSegment`.<P>
@@ -489,17 +506,25 @@ public class ParametricCurve extends Curve {
                                                boolean withBrokenRects) {
         ArrayList<Vector3D> pol = new ArrayList<Vector3D> ();
 
-        if ( endingPointForSegment <= 2 &&
-             types.get(endingPointForSegment) == UNRBSPLINE ) {
+        // `relativePoint` is used to estimate current starting point
+        // for curve. Starting points are -1 for break points (i.e. no curve),
+        // and some curves needs previous N relative points, so this is
+        // used to prevent computation of undefined curve segments.
+        int relativePoint = calculatePointPosition(endingPointForSegment);
+
+        if ( (relativePoint <= 2 &&
+             types.get(endingPointForSegment) == UNRBSPLINE) 
+             || relativePoint < 0 ) {
             // The Uniform Non Rational B Splines require a least 3 control
             // points, which do not form a curve segment.
+            // A break control point doesn't define any points
             return pol;
         }
 
         if ( (types.get(endingPointForSegment) == CORNER && !withBrokenRects) 
-             || endingPointForSegment == 0 ||
+             || relativePoint <= 0 ||
              (types.get(endingPointForSegment) == UNRBSPLINE &&
-              endingPointForSegment < 3)) {
+              relativePoint < 3)) {
             pol.add(points.get(endingPointForSegment - 1)[0]);
             pol.add(points.get(endingPointForSegment)[0]);
         }

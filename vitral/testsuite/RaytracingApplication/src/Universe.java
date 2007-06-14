@@ -83,7 +83,7 @@ public class Universe
             System.err.println("ERROR: number expected in line "+st.lineno());
             throw new IOException(st.toString());
         }
-        return (float)st.nval;
+        return (float)(st.nval);
     }
 
     public void

@@ -15,6 +15,16 @@ public class JoglLightRenderer extends JoglRenderer {
 
     public static int supportedLightsInOpenGL = 8;
 
+    public static void deactivate(GL gl, Light l)
+    {
+        int lightNumber = l.getId();
+
+        if ( lightNumber >= supportedLightsInOpenGL || lightNumber < 0 ) {
+            return;
+    }
+        gl.glDisable(gl.GL_LIGHT0 + lightNumber);
+    }
+
     public static void activate(GL gl, Light l)
     {
         float[] lightPosition=l.getPosition().toFloatVect();
@@ -26,6 +36,7 @@ public class JoglLightRenderer extends JoglRenderer {
             return;
     }
 
+        lightPosition[3]=1.0f;
 /*
         if ( l.getLightType() == Light.DIRECTIONAL ) { // Why?
             lightPosition[3]=0;

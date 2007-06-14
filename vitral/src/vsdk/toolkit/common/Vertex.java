@@ -44,9 +44,9 @@ public class Vertex extends Entity
   public Vertex(double x, double y, double z)
   {
     this.position = new Vector3D(x, y, z);
-    normal = null;
-    binormal = null;
-    tangent = null;
+    normal = new Vector3D(1, 0, 0);
+    binormal = new Vector3D(0, 1, 0);
+    tangent = new Vector3D(0, 0, 1);
     incidentTriangles = null;
     u = 0.0;
     v = 0.0;
@@ -55,9 +55,9 @@ public class Vertex extends Entity
   public Vertex(Vector3D position)
   {
     this.position = position;
-    normal = null;
-    binormal = null;
-    tangent = null;
+    normal = new Vector3D(1, 0, 0);
+    binormal = new Vector3D(0, 1, 0);
+    tangent = new Vector3D(0, 0, 1);
     incidentTriangles = null;
     u = 0.0;
     v = 0.0;
@@ -68,6 +68,10 @@ public class Vertex extends Entity
     this.position = position;
     this.normal = normal;
     this.normal.normalize();
+
+    binormal = new Vector3D(0, 1, 0);
+    tangent = new Vector3D(0, 0, 1);
+
     binormal = null;
     tangent = null;
     incidentTriangles = null;

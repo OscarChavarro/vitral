@@ -46,13 +46,13 @@ public class Light extends Entity
 
     public int getId()
     {
-        return lightNumber;
+        return id;
     }
 
     public void setId(int i)
     {
         id = i;
-        lightNumber = i+1;
+        //lightNumber = i+1;
     }
 
     public void setAmbient(ColorRgb a)

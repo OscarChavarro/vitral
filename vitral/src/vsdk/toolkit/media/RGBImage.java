@@ -8,12 +8,14 @@
 
 package vsdk.toolkit.media;
 
+import vsdk.toolkit.common.VSDK;
+
 public class RGBImage extends Image
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    private RGBPixel data[];
+    private byte[] data;
     private int xSize;
     private int ySize;
 
@@ -29,22 +31,22 @@ public class RGBImage extends Image
     }
 
     /**
-    Esta es la destructora de la clase.  Si es usted tan gentil, por favor 
-    llame este metodo al final del alcance de su objeto.
+    This is the class destructor.
     */
-    public void dispose()
+    public void finalize()
     {
+    System.out.println("Finalizing RGBImage!");
         if ( data != null ) {
-            for ( int i = 0; i < xSize*ySize; i++ ) {
-                if ( data[i] != null ) {
-                    data[i] = null;
-                }
-            }
             xSize = 0;
             ySize = 0;
             data = null;
             System.gc();
         }
+    }
+
+    public int getSizeInBytes()
+    {
+        return xSize*ySize*3 + 2*VSDK.sizeofInt + VSDK.sizeofReference;
     }
 
     /**
@@ -63,9 +65,9 @@ public class RGBImage extends Image
     public boolean init(int width, int height)
     {
         try {
-          data = new RGBPixel[width * height];
-          for ( int i = 0; i < width*height; i++ ) {
-              data[i] = new RGBPixel();
+          data = new byte[width * height * 3];
+          for ( int i = 0; i < width*height*3; i++ ) {
+              data[i] = 0;
           }
         }
         catch (Exception e) {
@@ -83,18 +85,18 @@ public class RGBImage extends Image
     */
     public void putPixel(int x, int y, byte r, byte g, byte b)
     {
-        int index = xSize*y + x;
-        data[index].r = r;
-        data[index].g = g;
-        data[index].b = b;
+        int index = (xSize*(ySize-1-y) + x)*3;
+        data[index] = r;
+        data[index+1] = g;
+        data[index+2] = b;
     }
 
     public void putPixel(int x, int y, RGBPixel p)
     {
-        int index = xSize*y + x;
-        data[index].r = p.r;
-        data[index].g = p.g;
-        data[index].b = p.b;
+        int index = (xSize*(ySize-1-y) + x)*3;
+        data[index] = p.r;
+        data[index+1] = p.g;
+        data[index+2] = p.b;
     }
 
     /**
@@ -103,10 +105,10 @@ public class RGBImage extends Image
     */
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
-        int index = xSize*y + x;
-        data[index].r = p.r;
-        data[index].g = p.g;
-        data[index].b = p.b;
+        int index = (xSize*(ySize-1-y) + x)*3;
+        data[index] = p.r;
+        data[index+1] = p.g;
+        data[index+2] = p.b;
     }
 
     /**
@@ -116,11 +118,11 @@ public class RGBImage extends Image
     public RGBPixel getPixel(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = xSize*y + x;
+        int index = (xSize*(ySize-1-y) + x)*3;
 
-        p.r = data[index].r;
-        p.g = data[index].g;
-        p.b = data[index].b;
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
 
         return p;
     }
@@ -132,11 +134,11 @@ public class RGBImage extends Image
     public RGBPixel getPixelRgb(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = xSize*y + x;
+        int index = (xSize*(ySize-1-y) + x)*3;
 
-        p.r = data[index].r;
-        p.g = data[index].g;
-        p.b = data[index].b;
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
 
         return p;
     }
@@ -161,21 +163,14 @@ public class RGBImage extends Image
 
     public byte[] getRawImage()
     {
-        byte[] pixels=new byte[this.xSize*this.ySize*3];
+        return data;
+    }
 
-        int i, j;
-        int acum = 0;
-        for ( i = ySize-1; i >= 0 ; i-- ) {
-            for ( j = 0; j < xSize ; j++ ) {
-                pixels[acum]=this.data[i*xSize+j].r;
-                acum++;
-                pixels[acum]=this.data[i*xSize+j].g;
-                acum++;
-                pixels[acum]=this.data[i*xSize+j].b;
-                acum++;
-            }
-        }
-        return pixels;
+    public void setRawImage(int xSize, int ySize, byte[] data)
+    {
+        this.xSize = xSize;
+        this.ySize = ySize;
+        this.data = data;
     }
 
 }

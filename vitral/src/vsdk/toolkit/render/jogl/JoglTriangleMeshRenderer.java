@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.media.Image;
@@ -36,7 +37,10 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     */
     public static void
     draw(GL gl, TriangleMesh mesh, QualitySelection quality, boolean flip) {
-        boolean withTextures = (mesh.getTextures().length > 0)?true:false;
+        boolean withTextures = false;
+        if ( mesh.getTextures() != null && mesh.getTextures().length > 0 ) {
+            withTextures = true;
+    }
 
         gl.glEnable(gl.GL_NORMALIZE);
         //-----------------------------------------------------------------
@@ -197,6 +201,12 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void drawSurfacesWithoutTexture(GL gl, 
                                      TriangleMesh mesh, boolean flipNormals) {
+        if ( mesh.getTriangles() == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "JoglTriangleMeshRenderer.activate",
+                   "Trying to draw mesh without triangles?");
+            return;
+    }
         drawRangeWithoutTexture(gl, mesh, 0, mesh.getTriangles().length, flipNormals);
     }
 

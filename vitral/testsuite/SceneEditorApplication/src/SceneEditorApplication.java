@@ -20,7 +20,7 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.border.Border; 
+import javax.swing.border.Border;
 import javax.swing.BorderFactory; 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -414,25 +414,6 @@ class ButtonsPanel extends JPanel implements ActionListener
         //-------------------------------------------------------------------
     }
 
-    private void configureButton(JButton b)
-    {
-        Dimension d = b.getMaximumSize();
-
-        d.width = Short.MAX_VALUE;
-        b.setAlignmentX(0.5f);
-        b.setMaximumSize(d);
-        b.addActionListener(this);
-        add(b);
-    }
-
-    private void configureButton2(JButton b)
-    {
-        b.setAlignmentX(0);
-        b.setAlignmentY(0);
-        b.addActionListener(this);
-        add(b);
-    }
-
     private Material defaultMaterial()
     {
         Material m = new Material();
@@ -519,6 +500,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             curve.addPoint(pointParameters, curve.BEZIER);
 
             addThing(curve);
+
 /*
             try {
                 XmlManager.exportXml(curve, "curveTest.xml",
@@ -527,7 +509,6 @@ class ButtonsPanel extends JPanel implements ActionListener
                 System.out.println("EXPORT:XmlException:" +ex1);
             }
 */
-
 /*
             // Case 2: curve read from a previous existing data file
             try {
