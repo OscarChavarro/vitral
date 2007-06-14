@@ -21,7 +21,7 @@ public class RGBColorPalette extends Entity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    private ArrayList<ColorRgb> colors;
+    protected ArrayList<ColorRgb> colors;
 
     /**
     Builds a default color pallete: the 256 tones gray scale
@@ -166,6 +166,22 @@ public class RGBColorPalette extends Entity {
         return c;
     }
 
+    public int selectNearestIndexToRgb(ColorRgb c)
+    {
+        double minDistance = Double.MAX_VALUE;
+        int i;
+        double currentDistance;
+        int index = 0;
+
+        for ( i = 0; i < colors.size(); i++ ) {
+            currentDistance = colors.get(i).distance(c);
+            if ( currentDistance < minDistance ) {
+        minDistance = currentDistance;
+                index = i;
+        }
+        }
+        return index;
+    }
 }
 
 //===========================================================================

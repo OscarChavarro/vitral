@@ -243,7 +243,7 @@ public abstract class PersistenceElement {
     protected static long readLongBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForLong);
-        return byteArray2longLE(bytesForLong, 0);
+        return byteArray2longBE(bytesForLong, 0);
     }
     protected static float readFloatLE(InputStream is) throws Exception
     {

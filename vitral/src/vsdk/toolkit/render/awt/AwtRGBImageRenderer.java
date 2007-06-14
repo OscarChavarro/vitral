@@ -24,7 +24,7 @@ public class AwtRGBImageRenderer extends AwtRenderer
 
         for ( y = 0; y < img.getYSize(); y++ ) {
             for ( x = 0; x < img.getXSize(); x++ ) {
-                pixel = img.getPixel(x, y);
+                pixel = img.getPixelRgb(x, y);
                 dc.setColor(
                     new Color( VSDK.signedByte2unsignedInteger(pixel.r), 
                                VSDK.signedByte2unsignedInteger(pixel.g), 

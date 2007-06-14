@@ -1,9 +1,22 @@
 //===========================================================================
-//= This example serves as a testbed for basic RGB image manipulation       =
+//= This example serves as a testbed for basic RGB image manipulation,      =
+//= dependent of Java's Swing, but not dependent on JOGL/OpenGL.            =
+//=-------------------------------------------------------------------------=
+//= Proposed exercises based on this program:                               =
+//=   - Change default RGBImage management to generate an equivalent code   =
+//=     that manages other types of Image, such as RGBAImage or             =
+//=     IndexedColorImage                                                   =
+//=   - Study basic image persistence/loading, producing an equivalent code =
+//=     that does not use any vsdk.toolkit.io.image.* persistence class.    =
+//=   - Use the provided `performImageOperation1` method to study basic     =
+//=     image processing operations like thresholding, color inversion      =
+//=     (negative image generation), 90 degrees rotations and others.       =
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - August 2 2006 - Oscar Chavarro: comments added                        =
+//= - December 18 2006 - Oscar Chavarro: minor changes to ease Image format =
+//=   changes.                                                              =
 //===========================================================================
 
 // Basic JDK classes
@@ -33,7 +46,9 @@ import javax.swing.JPanel;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;                      // Utilities
-import vsdk.toolkit.media.RGBImage;                   // Model
+import vsdk.toolkit.media.Image;                      // Model
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;        // Persistence
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;   // Viewer
 
@@ -184,20 +199,20 @@ class MyButtonsPanel extends JPanel implements ActionListener
         }
     }
 
-    private void performImageOperation1(RGBImage img)
+    private void performImageOperation1(Image img)
     {
         int x, y;
         int xSize, ySize;
-        byte r, g, b;
+        RGBPixel p = new RGBPixel();
 
         xSize = img.getXSize();
         ySize = img.getYSize();
         for ( y = 0; y < ySize/2; y++ ) {
             for ( x = 0; x < xSize/2; x++ ) {
-                r = VSDK.unsigned8BitInteger2signedByte(255);
-                g = VSDK.unsigned8BitInteger2signedByte(0);
-                b = VSDK.unsigned8BitInteger2signedByte(0);
-                img.putPixel(x, y, r, g, b);
+                p.r = VSDK.unsigned8BitInteger2signedByte(255);
+                p.g = VSDK.unsigned8BitInteger2signedByte(0);
+                p.b = VSDK.unsigned8BitInteger2signedByte(0);
+                img.putPixelRgb(x, y, p);
             }
         }
     }
@@ -213,6 +228,16 @@ class MyCanvasPanel extends JPanel
     public MyCanvasPanel() {
         try {
             img = ImagePersistence.importRGB(new File(imageFilename));
+
+            /*
+            // If using IndexedColorImage, try this code, and think on it...
+            GrayScalePalette p = new GrayScalePalette();
+            //p.setColorAt(254, 1, 0, 0); // Try to enable this 2 lines...
+            //p.setColorAt(255, 0, 1, 0); // explain performance change!
+            img = new IndexedColorImage(p);
+            img.init(640, 480);
+            img.createTestPattern();
+            */
         }
         catch ( Exception e ) {
             System.err.println("Error: could not read the image file \"" + imageFilename + "\".");

@@ -11,9 +11,10 @@
 
 package vsdk.toolkit.io.image;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import java.awt.HeadlessException;
@@ -40,6 +41,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.io.PersistenceElement;
@@ -125,6 +127,41 @@ public class ImagePersistence extends PersistenceElement
 
             AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
+            return retImage;
+        }
+        throw new ImageNotRecognizedException("Image not recognized", imagen);
+    }
+
+    /**
+    Given the filename of an input data file which contains an image, this
+    method tries to recognize the file format and load the contents of it
+    to the image.
+
+    @todo Do not assume the file format only from the filename extension,
+    but trying to detect file headers.
+
+    @param imagen - The file respesenting the image
+    @return An IndexedColorImage entity that contains the image loaded in memory.
+
+    Will change:
+      - Choose a better name for this method
+      - Do not recieve a File, but a Stream of bytes
+    */
+    public static IndexedColorImage importIndexedColor(File imagen) throws ImageNotRecognizedException
+    {
+        String type = extractExtensionFromFile(imagen);
+        IndexedColorImage retImage;
+        Image img;
+
+        if( type.equals("bw") ) {
+            img = ImagePersistenceSGI.readImageSGI(imagen.getAbsolutePath());
+        if ( img instanceof IndexedColorImage ) {
+                retImage = (IndexedColorImage)img;
+        }
+        else {
+                throw new ImageNotRecognizedException("Convertion needed", 
+                imagen);
+        }
             return retImage;
         }
         throw new ImageNotRecognizedException("Image not recognized", imagen);

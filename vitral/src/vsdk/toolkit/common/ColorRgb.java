@@ -159,6 +159,15 @@ public class ColorRgb extends Entity
                      VSDK.formatDouble(b) + ">";
     }
 
+    /**
+    Given current color space (RGB coordinates), this method returns the
+    euclidean distance between two points in such space: `this` and `other`.
+    */
+    public double distance(ColorRgb other) {
+        return Math.sqrt((this.r - other.r)*(this.r - other.r) +
+                         (this.g - other.g)*(this.g - other.g) +
+                         (this.b - other.b)*(this.b - other.b));
+    }
 }
 
 //===========================================================================

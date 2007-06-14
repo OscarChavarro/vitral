@@ -163,3 +163,9 @@ Changes in 2006 december 16 to 17 revition
   - Added details to Reader3ds
   - object.getClass().getName().equals(...) hierarchy detection update to
     the use of "instanceof" Java operator
+  - Advances in SceneEditorApplication
+
+Changes in 2006 december 18 to 19 revition
+  - Continued implementation of IndexedColorImage and related classes
+  - First version of ImagePersistenceSGI class for reading sgi format images
+    (only grayscale images managed)

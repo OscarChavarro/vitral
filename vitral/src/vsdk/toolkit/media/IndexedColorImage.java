@@ -7,6 +7,7 @@
 package vsdk.toolkit.media;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.ColorRgb;
 
 public class IndexedColorImage extends Image
 {
@@ -16,17 +17,42 @@ public class IndexedColorImage extends Image
     private byte data[];
     private int xSize;
     private int ySize;
+    private RGBColorPalette colorTable;
+
+    private ColorRgb _static_color;
 
     /**
     Check the general signature contract in superclass method
     Image.init.
+    If the recieved colorTable is null, this method creates a 256 level
+    grayscale palette.
+    */
+    public IndexedColorImage(RGBColorPalette colorTable)
+    {
+        xSize = 0;
+        ySize = 0;
+        data = null;
+        if ( colorTable != null ) {
+            this.colorTable = colorTable;
+    }
+    else {
+            this.colorTable = new RGBColorPalette();
+    }
+    }
+
+    /**
+    Check the general signature contract in superclass method
+    Image.init.
+    This method creates a 256 level grayscale palette.
     */
     public IndexedColorImage()
     {
         xSize = 0;
         ySize = 0;
         data = null;
+        this.colorTable = new RGBColorPalette();
     }
+
     /**
     This is the class destructor.
     */
@@ -87,15 +113,32 @@ public class IndexedColorImage extends Image
 
     public RGBPixel getPixelRgb(int x, int y)
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "getPixelRgb",
-        "Method not implemented");
-        return null;
+        int index = xSize*y + x;
+        double val;
+        val = (double)(VSDK.signedByte2unsignedInteger(data[index])) / 255.0;
+
+        _static_color = colorTable.evalLinear(val);
+        RGBPixel p = new RGBPixel();
+    p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
+    p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
+        return p;
+    }
+
+    public RGBColorPalette getColorTable()
+    {
+        return colorTable;
     }
 
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "putPixelRgb",
-        "Method not implemented");
+        ColorRgb c = new ColorRgb();
+        c.r = (double)(VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        c.g = (double)(VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        c.b = (double)(VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
+        int index = colorTable.selectNearestIndexToRgb(c);
+        putPixel(x, y, index);
     }
 }
 
