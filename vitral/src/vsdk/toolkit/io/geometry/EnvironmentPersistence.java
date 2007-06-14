@@ -23,7 +23,6 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
-import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class EnvironmentPersistence extends PersistenceElement {

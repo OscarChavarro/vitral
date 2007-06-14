@@ -5,6 +5,7 @@ import java.util.Iterator;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -38,6 +39,9 @@ public class Scene
     public ArrayList<SimpleBody> things;
     public int selectedThingIndex; // Negative when none selected
 
+    // Others
+    public QualitySelection qualityTemplate;
+
     Scene()
     {
         //-----------------------------------------------------------------
@@ -65,6 +69,10 @@ public class Scene
         corridor = new SimpleCorridor();
         showCorridor = false;
         showGrid = true;
+
+        qualityTemplate = new QualitySelection();
+        qualityTemplate.setSurfaces(true);
+        qualityTemplate.setWires(false);
     }
 
     public boolean

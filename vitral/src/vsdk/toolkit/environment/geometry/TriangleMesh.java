@@ -581,7 +581,9 @@ public class TriangleMesh extends Surface {
         outData.n.z = lastInfo.n.z;
 
         //-----------------------------------------------------------------
-        outData.material = materials[0];
+    if ( materials != null ) {
+            outData.material = materials[0];
+    }
         if ( materialRanges != null ) {
             for ( int i = 0; i < materialRanges.length-1 ; i++ ) {
         if ( selectedTriangle >= materialRanges[i][0] &&

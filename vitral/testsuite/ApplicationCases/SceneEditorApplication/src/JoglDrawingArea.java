@@ -28,6 +28,7 @@ import javax.media.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
@@ -41,6 +42,7 @@ import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
+import vsdk.toolkit.gui.QualitySelectionController;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
@@ -57,7 +59,9 @@ public class JoglDrawingArea implements
 
     public GLCanvas canvas;
 
+    private QualitySelection qualitySelection;
     private CameraController cameraController;
+    private QualitySelectionController qualityController;
     private TranslateGizmo translationGizmo;
     private RotateGizmo rotateGizmo;
     private ScaleGizmo scaleGizmo;
@@ -90,6 +94,10 @@ public class JoglDrawingArea implements
         //cameraController = new CameraControllerBlender(theScene.camera);
         cameraController = new CameraControllerAquynza(theScene.camera);
         translationGizmo = new TranslateGizmo(theScene.camera);
+
+        qualitySelection = parent.theScene.qualityTemplate;
+        qualityController = new QualitySelectionController(qualitySelection);
+
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
 
@@ -509,6 +517,10 @@ public class JoglDrawingArea implements
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processKeyPressedEventAwt(e) ) {
+          canvas.repaint();
+      }
+      if ( qualityController.processKeyPressedEventAwt(e) ) {
+          System.out.println(qualitySelection);
           canvas.repaint();
       }
       else if ( interactionMode == SELECT_INTERACTION_MODE ) {

@@ -67,9 +67,7 @@ public class JoglSceneRenderer
             p = gi.getPosition();
             scale = gi.getScale();
 
-            quality = new QualitySelection();
-            quality.setSurfaces(true);
-            quality.setWires(false);
+            quality = s.qualityTemplate;
 
             if ( j == s.selectedThingIndex ) {
                 quality.setBoundingVolume(true);

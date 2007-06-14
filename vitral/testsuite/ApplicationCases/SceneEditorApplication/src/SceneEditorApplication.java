@@ -594,7 +594,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                     repaint();
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to read file");
+                    System.out.println("Failed to read file...\n" + ex);
                     return;
                 }
             }

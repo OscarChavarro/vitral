@@ -179,6 +179,18 @@ public class VSDK
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
 
+    /**
+    Given a byte, it formats it to print as two hexagesimal nibbles
+    */
+    public static String formatByteAsHex(byte a)
+    {
+        char guarismos[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        int i = signedByte2unsignedInteger(a);
+        byte nibbleH = (byte)(i >> 4), nibbleL = (byte)(i & 0x0F);
+
+        return "" + guarismos[nibbleH] + guarismos[nibbleL];
+    }
+
     /** Converts integers in the domain [-128, 127] to integers in the range
     [0, 256] */
     public static int signedByte2unsignedInteger(byte in) {

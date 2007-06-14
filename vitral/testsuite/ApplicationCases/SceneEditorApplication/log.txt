@@ -135,3 +135,6 @@ Aug 12 2006, Oscar Chavarro:
 Aug 20 2006, Oscar Chavarro:
   - 1h: Unicode escape sequences added to GUI menus, and first working tests
     for Japanese GUIs :)
+
+Nov 10 2006, Oscar Chavarro:
+  - 10min: added quality selection management
