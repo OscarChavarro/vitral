@@ -157,8 +157,8 @@ public class MeshExample
         gl.glEnd();
 
         // Draw mesh
-        gl.glEnable(gl.GL_CULL_FACE);
-        gl.glCullFace(gl.GL_BACK);
+        gl.glDisable(gl.GL_CULL_FACE);
+        //gl.glCullFace(gl.GL_BACK);
         JoglTriangleMeshGroupRenderer.draw(gl, meshGroup, qualitySelection);
     }
 

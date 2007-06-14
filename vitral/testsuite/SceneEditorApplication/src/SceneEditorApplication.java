@@ -191,7 +191,7 @@ public class SceneEditorApplication {
     {
         JPanel panel;
 
-        statusMessage = new JLabel("VSDK Editor example - copyright Pontificia Universidad Javeriana");
+        statusMessage = new JLabel(gui.getMessage("IDM_INTRO_MESSAGE"));
         Border border = BorderFactory.createLoweredBevelBorder();
         statusMessage.setBorder(border);
 
@@ -218,22 +218,26 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 1);
         sp = new JScrollPane(panel);
-        container.addTab("Creation", null, sp, "Object creation operations");
+        container.addTab(gui.getMessage("IDM_CREATION_TAB"), 
+            null, sp, "Object creation operations");
 
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 2);
         sp = new JScrollPane(panel);
-        container.addTab("GUI Control", null, sp, "GUI Control");
+        container.addTab(gui.getMessage("IDM_GUI_TAB"), 
+            null, sp, "GUI Control");
 
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 3);
         sp = new JScrollPane(panel);
-        container.addTab("Scene components", null, sp, "Control the scene components");
+        container.addTab(gui.getMessage("IDM_OTHERS_TAB"), 
+            null, sp, "Control the scene components");
 
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 4);
         sp = new JScrollPane(panel);
-        container.addTab("Render", null, sp, "Control the scene components");
+        container.addTab(gui.getMessage("IDM_RENDER_TAB"), 
+            null, sp, "Control the scene components");
         //-----------------------------------------------------------------
 
         return container;
@@ -365,125 +369,49 @@ class ButtonsPanel extends JPanel implements ActionListener
         this.parent = parent;
 
         if ( group < 100 ) {
+            // This is a button group inside right tab panels
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             Border empty = BorderFactory.createEmptyBorder(10, 10, 10, 10);
             this.setBorder(empty);
         }
         else {
-            //this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-            this.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            // This is a button group part of an icon bar
+            this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+            this.setBorder(empty);
         }
 
         //-------------------------------------------------------------------
-        JButton b = null;
+        JPanel internal = null;
 
         switch ( group ) {
           case 1:
-            b = new JButton("Create Sphere");
-            configureButton(b);
-
-            b = new JButton("Create Cone");
-            configureButton(b);
-
-            b = new JButton("Create Cylinder");
-            configureButton(b);
-
-            b = new JButton("Create Cube");
-            configureButton(b);
-
-            b = new JButton("Create Box");
-            configureButton(b);
-
-            b = new JButton("Create Arrow");
-            configureButton(b);
-
-            b = new JButton("Create TriangleMesh");
-            configureButton(b);
-
-            b = new JButton("Create ParametricCurve");
-            configureButton(b);
-
-            b = new JButton("Create ParametricBiCubicPatch");
-            configureButton(b);
-
-            b = new JButton("Create Light");
-            configureButton(b);
-
+            internal = 
+            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "CREATION", this);
             break;
-
           case 2:
-            b = new JButton("Motif");
-            configureButton(b);
-
-            b = new JButton("Java");
-            configureButton(b);
-
-            b = new JButton("Windows");
-            configureButton(b);
-
-            b = new JButton("GTK+");
-            configureButton(b);
-
+            internal = 
+            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "GUI", this);
             break;
-
           case 3:
-            b = new JButton("Cycle background");
-            configureButton(b);
-
-            b = new JButton("Toggle test corridor");
-            configureButton(b);
-
-            b = new JButton("Toggle grid");
-            configureButton(b);
-
-            b = new JButton("Print scene report in console");
-            configureButton(b);
-
+            internal = 
+            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "OTHER", this);
             break;
-
           case 4:
-            b = new JButton("Select palette for depthmap display");
-            configureButton(b);
-
-            b = new JButton("Obtain Zbuffer Depthmap");
-            configureButton(b);
-
-            b = new JButton("Obtain Zbuffer Image");
-            configureButton(b);
-
-            b = new JButton("Raytrace Scene");
-            configureButton(b);
-
+            internal = 
+            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "RENDER", this);
             break;
-
           case 101:
-            b = new JButton("New");
-            configureButton2(b);
-
-            b = new JButton("Load");
-            configureButton2(b);
-
-            b = new JButton("Save");
-            configureButton2(b);
-
-            b = new JButton("CameraMode");
-            configureButton2(b);
-
-            b = new JButton("SelectMode");
-            configureButton2(b);
-
-            b = new JButton("TranslateMode");
-            configureButton2(b);
-
-            b = new JButton("RotateMode");
-            configureButton2(b);
-
-            b = new JButton("ScaleMode");
-            configureButton2(b);
-
+            internal = 
+            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "GLOBAL", this);
             break;
-
         }
+
+        if ( internal != null ) {
+            this.add(internal, BorderLayout.WEST);
+        }
+
+        //-------------------------------------------------------------------
     }
 
     private void configureButton(JButton b)
@@ -531,6 +459,14 @@ class ButtonsPanel extends JPanel implements ActionListener
     public void actionPerformed(ActionEvent ev) {
         String label = ev.getActionCommand();
 
+        // This makes event compatible with ButtonGroup scheme of event
+        // handling
+        if ( ev.getSource().getClass().getName().equals(
+             "javax.swing.JButton") ) {
+            JButton origin = (JButton)ev.getSource();
+            label = origin.getName();
+        }
+
         Light light;
 
         //- FILE ----------------------------------------------------------
@@ -539,32 +475,25 @@ class ButtonsPanel extends JPanel implements ActionListener
         }
         //- EDIT ----------------------------------------------------------
         //- CREATE --------------------------------------------------------
-        else if ( label.equals("Create Sphere") ||
-                  label.equals("IDC_CREATE_SPHERE") ) {
+        else if ( label.equals("IDC_CREATE_SPHERE") ) {
             addThing(new Sphere(1));
         }
-        else if ( label.equals("Create Cone") ||
-                  label.equals("IDC_CREATE_CONE") ) {
+        else if ( label.equals("IDC_CREATE_CONE") ) {
             addThing(new Cone(1, 0, 2));
         }
-        else if ( label.equals("Create Cylinder") ||
-                  label.equals("IDC_CREATE_CYLINDER") ) {
+        else if ( label.equals("IDC_CREATE_CYLINDER") ) {
             addThing(new Cone(1, 1, 2));
         }
-        else if ( label.equals("Create Cube") ||
-                  label.equals("IDC_CREATE_CUBE") ) {
+        else if ( label.equals("IDC_CREATE_CUBE") ) {
             addThing(new Box(1, 1, 1));
         }
-        else if ( label.equals("Create Box") ||
-                  label.equals("IDC_CREATE_BOX") ) {
+        else if ( label.equals("IDC_CREATE_BOX") ) {
             addThing(new Box(1, 2, 3));
         }
-        else if ( label.equals("Create Arrow") ||
-                  label.equals("IDC_CREATE_ARROW") ) {
+        else if ( label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
-        else if ( label.equals("Create ParametricCurve") ||
-                  label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
+        else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
             ParametricCurve curve;
 
             // Case 1: curve hard-coded in source
@@ -611,10 +540,9 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
 */
         }
-        else if ( label.equals("Create ParametricBiCubicPatch") ||
-                  label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
+        else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
-/*
+
             // Case 1: Patch hard-coded in source
             ParametricCurve border = new ParametricCurve();
             Vector3D pointParameters[];
@@ -647,7 +575,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             patch = new ParametricBiCubicPatch(ParametricBiCubicPatch.QUAD,
                                                border);
             addThing(patch);
-
+/*
             try {
                 XmlManager.exportXml(patch, "patchTest.xml",
                                      "../../etc/xml/vsdk.dtd");
@@ -656,7 +584,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                  System.out.println("EXPORT:XmlException:" +ex2);
             }
 */
-
+/*
             // Case 2: patch read from a previous existing data file
             try {
                 patch = (ParametricBiCubicPatch) XmlManager.importXml(
@@ -666,10 +594,9 @@ class ButtonsPanel extends JPanel implements ActionListener
               catch (XmlException ex1) {
                 System.out.println("IMPORT:XmlException:" +ex1);
             }
-
+*/
         }
-        else if ( label.equals("Create TriangleMesh") ||
-                  label.equals("IDC_CREATE_TRIANGLEMESH") ) {
+        else if ( label.equals("IDC_CREATE_TRIANGLEMESH") ) {
             JFileChooser jfc = null;
             jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/geometry");
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
@@ -691,8 +618,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                 }
             }
         }
-        else if ( label.equals("Create Light") ||
-                  label.equals("IDC_CREATE_OMNILIGHT") ) {
+        else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.lights.add(light);
         }
@@ -720,19 +646,19 @@ class ButtonsPanel extends JPanel implements ActionListener
                 }
             }
         }
-        else if ( label.equals("Obtain Zbuffer Image") ||
-                  label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
-            parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");
+        else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
             parent.drawingArea.wantToGetColor = true;
         }
-        else if ( label.equals("Obtain Zbuffer Depthmap") ||
-                  label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
-            parent.statusMessage.setText("Pending to obtaining ZBuffer Depth ...");
+        else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
             parent.drawingArea.wantToGetDepth = true;
         }
-        else if ( label.equals("Raytrace Scene") ||
-                  label.equals("IDC_RENDERING_RAYTRACING") ) {
-            parent.statusMessage.setText("Computing raytracing, this may take some time ...");
+        else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
             parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
             parent.theScene.raytrace(parent.raytracedImage);
             if ( parent.imageControlWindow == null ) {
@@ -744,20 +670,16 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.imageControlWindow.redrawImage();
         }
         //- CUSTOMIZE -----------------------------------------------------
-        else if ( label.equals("Motif") || 
-                  label.equals("IDC_CUSTOMIZE_LAF_MOTIF") ) {
+        else if ( label.equals("IDC_CUSTOMIZE_LAF_MOTIF") ) {
             parent.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
         }
-        else if ( label.equals("Java") ||
-                  label.equals("IDC_CUSTOMIZE_LAF_JAVA") ) {
+        else if ( label.equals("IDC_CUSTOMIZE_LAF_JAVA") ) {
             parent.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         }
-        else if ( label.equals("GTK+") ||
-                  label.equals("IDC_CUSTOMIZE_LAF_GTK") ) {
+        else if ( label.equals("IDC_CUSTOMIZE_LAF_GTK") ) {
             parent.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         }
-        else if ( label.equals("Windows") ||
-                  label.equals("IDC_CUSTOMIZE_LAF_WINDOWS") ) {
+        else if ( label.equals("IDC_CUSTOMIZE_LAF_WINDOWS") ) {
             parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         }
         else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_ENGLISH") ) {
@@ -767,10 +689,10 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.setGuiLanguage("./etc/spanish.gui");
         }
         //-----------------------------------------------------------------
-        else if ( label == "Cycle background" ) {
+        else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {
             parent.drawingArea.rotateBackground();
         }
-        else if ( label == "Toggle test corridor" ) {
+        else if ( label.equals("IDC_OTHERS_TOGGLE_TEST_CORRIDOR") ) {
             if ( parent.theScene.showCorridor == true ) {
                 parent.theScene.showCorridor = false;
             }
@@ -778,7 +700,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                 parent.theScene.showCorridor = true;
             }
         }
-        else if ( label == "Toggle grid" ) {
+        else if ( label.equals("IDC_OTHERS_TOGGLE_GRID") ) {
             if ( parent.theScene.showGrid == true ) {
                 parent.theScene.showGrid = false;
             }
@@ -786,32 +708,37 @@ class ButtonsPanel extends JPanel implements ActionListener
                 parent.theScene.showGrid = true;
             }
         }
-        else if ( label == "Print scene report in console" ) {
+        else if ( label.equals("IDC_OTHERS_PRINT_SCENE_ON_CONSOLE") ) {
             parent.theScene.print();
         }
         //-----------------------------------------------------------------
-        else if ( label == "CameraMode" ) {
-            parent.statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
+        else if ( label.equals("IDC_TOOLS_CAMERA") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_CAMERA_MODE"));
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.CAMERA_INTERACTION_MODE;
         }
-        else if ( label == "SelectMode" ) {
-            parent.statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
+        else if ( label.equals("IDC_TOOLS_SELECT") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_SELECTION_MODE"));
             parent.drawingArea.interactionMode = 
             parent.drawingArea.SELECT_INTERACTION_MODE;
         }
-        else if ( label == "TranslateMode" ) {
-            parent.statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+        else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_TRANSLATION_MODE"));
             parent.drawingArea.interactionMode = 
             parent.drawingArea.TRANSLATE_INTERACTION_MODE;
         }
-        else if ( label == "RotateMode" ) {
-            parent.statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
+        else if ( label.equals("IDC_TOOLS_ROTATE") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_ROTATION_MODE"));
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.ROTATE_INTERACTION_MODE;
         }
-        else if ( label == "ScaleMode" ) {
-            parent.statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
+        else if ( label.equals("IDC_TOOLS_SCALE") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_SCALE_MODE"));
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
         }

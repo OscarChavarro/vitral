@@ -18,3 +18,4 @@
     using VSDK class
   - Rename QualitySelection class to RenderConfiguration, and include
     managing of user interaction level colors
+  - Implement intersection operation for parametric bi-cubic patches

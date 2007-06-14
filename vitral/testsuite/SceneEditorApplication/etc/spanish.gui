@@ -45,7 +45,19 @@ MENU "GLOBAL" {
         MENUITEM SEPARATOR
         MENUITEM "!&Imprimir todo!", IDC_PRINT_ALL
     }
-/*
+    POPUP "&Personalizar" {
+        POPUP "&Idioma" {
+            MENUITEM "&Inglés (English)", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
+            MENUITEM "&Español", IDC_CUSTOMIZE_LANGUAGE_SPANISH
+        }
+        POPUP "Apariencia de la &GUI" {
+            MENUITEM "&Motif", IDC_CUSTOMIZE_LAF_MOTIF
+            MENUITEM "&Java metal", IDC_CUSTOMIZE_LAF_JAVA
+            MENUITEM "&Gtk+", IDC_CUSTOMIZE_LAF_GTK
+            MENUITEM "&Microsoft Windows", IDC_CUSTOMIZE_LAF_WINDOWS
+        }
+    }
+    /*
     POPUP "&Insertar" {
         MENUITEM "&Esfera", IDC_INS_SPHERE
         MENUITEM "&Octree", IDC_INS_, GRAYED
@@ -58,11 +70,11 @@ MENU "GLOBAL" {
         MENUITEM "S&istema de control", IDC_INS_SYSTEM_C, GRAYED
     }
 */
-    POPUP "&Simulacion" {
+    POPUP "&Simulación" {
         MENUITEM "&Play/Stop", IDC_PLAY
         MENUITEM "&Tiempo de discretizacion...", IDC_DELTA_T
     }
-    POPUP "\aA&yuda" {
+    POPUP "A&yuda" {
         MENUITEM "&Acerca de...", IDC_AYUDA_ACERCADE
     }
 
@@ -139,36 +151,156 @@ lanzar acciones.
 NOTA: El directorio de los iconos es "./etc/icons"
 ---------------------------------------------------------------------------*/
 
-COMANDO IDC_FILE_SALIR {
-    nombre "Salir", icono "f_quit.ppm",
-    resumen "Termina los procesos de edicion y simulacion AQUYNZA",
-    ayuda "La opcion salir termina los procesos de edicion y/o simulacion y "
-    ayuda "da por concluida la ejecucion de la aplicacion.  Este comando "
-    ayuda "solicita confirmacion si la sesion de edicion actual no ha sido "
-    ayuda "guardada.  Para terminar la sesion de edicion y dejar corriendo "
-    ayuda "una simulacion en modo batch (procesamiento por lotes), vea el "
-    ayuda "comando <eat>."
+COMMAND IDC_FILE_SALIR {
+    name "Salir"//, icon "f_quit.ppm",
+    brief "Termina los procesos de edicion y simulacion AQUYNZA",
+    help "La opcion salir termina los procesos de edicion y/o simulacion y "
+    help "da por concluida la ejecucion de la aplicacion.  Este comando "
+    help "solicita confirmacion si la sesion de edicion actual no ha sido "
+    help "guardada.  Para terminar la sesion de edicion y dejar corriendo "
+    help "una simulacion en modo batch (procesamiento por lotes), vea el "
+    help "comando <eat>."
 }
 
-COMANDO IDC_FILE_NEW {
-    nombre "Nuevo", icono "f_new.ppm",
-    resumen "Cierra la sesion actual (si la hay) y empieza una nueva",
-    ayuda "El comando solicita confirmacion si la sesion actual no ha sido "
-    ayuda "grabada. En la version profesional de Nukak puede especificarse "
-    ayuda "la edicion distribuida."
+COMMAND IDC_FILE_NEW {
+    name "Nuevo"//, icon "f_new.ppm",
+    brief "Cierra la sesion actual (si la hay) y empieza una nueva",
+    help "El comando solicita confirmacion si la sesion actual no ha sido "
+    help "grabada. En la version profesional de Nukak puede especificarse "
+    help "la edicion distribuida."
 }
 
-COMANDO IDC_FILE_LOAD {
-    nombre "Leer", icono "f_load.ppm",
-    resumen "Lee un entorno AQUYNZA previamente creado",
-    ayuda "<Aun no disponible>"
+COMMAND IDC_FILE_LOAD {
+    name "Leer"//, icon "f_load.ppm",
+    brief "Lee un entorno AQUYNZA previamente creado",
+    help "<Aun no disponible>"
 }
 
-COMANDO IDC_FILE_SAVE {
-    nombre "Grabar", icono "f_save.ppm",
-    resumen "Graba el entorno actual AQUYNZA",
-    ayuda "<Aun no disponible>"
+COMMAND IDC_FILE_SAVE {
+    name "Grabar"//, icon "f_save.ppm",
+    brief "Graba el entorno actual AQUYNZA",
+    help "<Aun no disponible>"
 }
+
+COMMAND IDC_TOOLS_SELECT {
+    name "Selección", 
+    brief "Selecciona objetos",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
+}
+
+COMMAND IDC_TOOLS_TRANSLATE {
+    name "Translación",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
+}
+
+COMMAND IDC_TOOLS_ROTATE {
+    name "Rotación",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
+}
+
+COMMAND IDC_TOOLS_SCALE {
+    name "Escalamiento",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1024.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1024Mask.png"
+}
+
+COMMAND IDC_TOOLS_CAMERA {
+    name "Control de cámara",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
+}
+
+COMMAND IDC_CREATE_SPHERE {
+    name "Crear Esfera"
+}
+
+COMMAND IDC_CREATE_CONE {
+    name "Crear Cono"
+}
+
+COMMAND IDC_CREATE_CYLINDER {
+    name "Crear Cilindro"
+}
+
+COMMAND IDC_CREATE_CUBE {
+    name "Crear Cubo"
+}
+
+COMMAND IDC_CREATE_BOX {
+    name "Crear Caja"
+}
+
+COMMAND IDC_CREATE_ARROW {
+    name "Crear Flecha"
+}
+
+COMMAND IDC_CREATE_TRIANGLEMESH {
+    name "Crear Malla de Triángulos"
+}
+
+COMMAND IDC_CREATE_PARAMETRICCUBICCURVE {
+    name "Crear Curva"
+}
+
+COMMAND IDC_CREATE_PARAMETRICBICUBICPATCH {
+    name "Crear Parche"
+}
+
+COMMAND IDC_CREATE_OMNILIGHT {
+    name "Crear Luz"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_MOTIF {
+    name "Motif"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_JAVA {
+    name "Java"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_WINDOWS {
+    name "Windows"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_GTK {
+    name "GTK+"
+}
+
+COMMAND IDC_OTHERS_CYCLE_BACKGROUND {
+    name "Rotar fondo"
+}
+
+COMMAND IDC_OTHERS_TOGGLE_TEST_CORRIDOR {
+    name "Activar/desactivar corredor"
+}
+
+COMMAND IDC_OTHERS_TOGGLE_GRID {
+    name "Activar/desactivar grilla"
+}
+
+COMMAND IDC_OTHERS_PRINT_SCENE_ON_CONSOLE {
+    name "Imprimir en consola reporte de escena"
+}
+
+COMMAND IDC_RENDERING_SELECTPALETTEDEPTH {
+    name "Seleccionar la paleta de color para el mapa de profundidad (ZBuffer)"
+}
+
+COMMAND IDC_RENDERING_OBTAINZBUFFERDEPTHMAP {
+    name "Obtener mapa de profundidad (ZBuffer)"
+}
+
+COMMAND IDC_RENDERING_OBTAINZBUFFERIMAGE {
+    name "Obtener imagen (ZBuffer)"
+}
+
+COMMAND IDC_RENDERING_RAYTRACING {
+    name "Visualizar usando trazado de rayos (Raytracing)"
+}
+
 
 //===========================================================================
 //= ESPECIFICACION DE GRUPOS DE BOTONES                                     =
@@ -186,12 +318,107 @@ parametro `tam` debe ser seguido por un entero e indica el grosor o la
 altura de los grupos (en botones), y es opcional (por defecto tam es 2).
 ---------------------------------------------------------------------------*/
 
-BOTONERA "GLOBAL" {
-    ESTILO { CON_TITULO, ACTIVABLE, tam 2 }
-    GRUPO "Archivo ã‚¦ã‚§ãƒ–" { // Some japanese characters...
-        IDC_FILE_NEW, IDC_FILE_LOAD, IDC_FILE_SAVE,
-        IDC_FILE_SALIR
+BUTTON_GROUP "GLOBAL" {
+    showTitle false, side 1
+    title "Barra global",
+    showIcons on,
+    showText off,
+    direction horizontal
+    BUTTONS  {
+        IDC_TOOLS_SELECT,
+        IDC_TOOLS_TRANSLATE, IDC_TOOLS_ROTATE, IDC_TOOLS_SCALE,
+        IDC_TOOLS_CAMERA
     }
+}
+
+BUTTON_GROUP "CREATION" {
+    showTitle true, side 1
+    title "Global bar",
+    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_CREATE_SPHERE, 
+        IDC_CREATE_CONE, 
+        IDC_CREATE_CYLINDER, 
+        IDC_CREATE_CUBE, 
+        IDC_CREATE_BOX, 
+        IDC_CREATE_ARROW, 
+        IDC_CREATE_TRIANGLEMESH, 
+        IDC_CREATE_PARAMETRICCUBICCURVE, 
+        IDC_CREATE_PARAMETRICBICUBICPATCH, 
+        IDC_CREATE_OMNILIGHT
+    }
+}
+
+BUTTON_GROUP "GUI" {
+    showTitle true, side 1
+    title "Global bar",
+    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_CUSTOMIZE_LAF_MOTIF,
+        IDC_CUSTOMIZE_LAF_JAVA,
+        IDC_CUSTOMIZE_LAF_WINDOWS,
+        IDC_CUSTOMIZE_LAF_GTK
+    }
+}
+
+
+BUTTON_GROUP "OTHER" {
+    showTitle true, side 1
+    title "Global bar",
+    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_OTHERS_CYCLE_BACKGROUND,
+        IDC_OTHERS_TOGGLE_TEST_CORRIDOR,
+        IDC_OTHERS_TOGGLE_GRID,
+        IDC_OTHERS_PRINT_SCENE_ON_CONSOLE,
+    }
+}
+
+BUTTON_GROUP "RENDER" {
+    showTitle true, side 1
+    title "Global bar",
+    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_RENDERING_SELECTPALETTEDEPTH,
+        IDC_RENDERING_OBTAINZBUFFERDEPTHMAP,
+        IDC_RENDERING_OBTAINZBUFFERIMAGE,
+        IDC_RENDERING_RAYTRACING
+    }
+}
+
+MESSAGES {
+    IDM_EXIT, "Cierra la aplicación"
+    IDM_CREATION_TAB, "Creación"
+    IDM_OTHERS_TAB, "Elementos de escena"
+    IDM_GUI_TAB, "Control de GUI"
+    IDM_RENDER_TAB, "Visualización"
+
+    IDM_PENDING_ZBUFFER_COLOR_IMAGE, 
+        "En espera del cálculo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ..."
+    IDM_PENDING_ZBUFFER_DEPTH,
+        "En espera del cálculo de la matriz de profundidad (ZBuffer) ..."
+    IDM_COMPUTING_RAYTRACING,
+        "Calculando raytracing, puede durar algún tiempo ..."
+    IDM_CAMERA_MODE,
+        "Modo de interacción de cámara - arrastre el ratón sobre la escena manteniendo pulsado diferentes botones para alterar la cámara actual."
+    IDM_SELECTION_MODE,
+        "Modo de interacción de selección - pulse botones del ratón para seleccionar objetos, o las flechas IZQ./DER. para seleccionarlos secuencialmente."
+    IDM_TRANSLATION_MODE,
+        "Modo de interacción de translación - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para mover el objeto."
+    IDM_ROTATION_MODE,
+        "Modo de interacción de rotación - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para rotar el objeto."
+    IDM_SCALE_MODE,
+        "Modo de interacción de escalamiento - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto."
+    IDM_INTRO_MESSAGE,
+        "Ejemplo de editor 3D VSDK - derechos reservados, Pontificia Universidad Javeriana, 2005-2006"
 }
 
 //===========================================================================

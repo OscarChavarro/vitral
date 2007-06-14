@@ -8,6 +8,7 @@ package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
@@ -61,6 +62,12 @@ public class JoglGeometryRenderer extends JoglRenderer
 
     public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
     {
+        if ( g == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING,
+                   "JoglGeometryRenderer.draw",
+                               "null Geometry reference recieved");
+            return;
+    }
         String geometryType = g.getClass().getName();
 
         if ( geometryType == "vsdk.toolkit.environment.geometry.Sphere" ) {

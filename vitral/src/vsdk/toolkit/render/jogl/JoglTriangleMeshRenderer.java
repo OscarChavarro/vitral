@@ -197,8 +197,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void drawSurfacesWithoutTexture(GL gl, 
                                      TriangleMesh mesh, boolean flipNormals) {
-        drawRange(gl, mesh, 
-                                   0, mesh.getTriangles().length, flipNormals);
+        drawRangeWithoutTexture(gl, mesh, 0, mesh.getTriangles().length, flipNormals);
     }
 
     private static void drawSurfacesWithTexture(GL gl, TriangleMesh mesh, boolean flip) {
@@ -220,14 +219,14 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
                 else {
                     gl.glDisable(gl.GL_TEXTURE_2D);
                 }
-                drawRange(gl, mesh, mesh.getTextTriRelAt(i, j, 0),
+                drawRangeWithTexture(gl, mesh, mesh.getTextTriRelAt(i, j, 0),
                                            mesh.getTextTriRelAt(i, j, 1), flip);
             }
         }
     }
 
     private static void
-    drawRange(GL gl, TriangleMesh mesh, 
+    drawRangeWithTexture(GL gl, TriangleMesh mesh, 
                                int ini, int fin, boolean flipNormals) {
         Vertex v0, v1, v2;
 
@@ -282,6 +281,66 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             }
             gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).x,
                             mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).y);
+            gl.glVertex3d(v2.
+                          getPosition().x,
+                          v2.
+                          getPosition().y,
+                          v2.
+                          getPosition().z);
+        }
+        gl.glEnd();
+    }
+
+    private static void
+    drawRangeWithoutTexture(GL gl, TriangleMesh mesh, 
+                               int ini, int fin, boolean flipNormals) {
+        Vertex v0, v1, v2;
+
+        gl.glBegin(gl.GL_TRIANGLES);
+        for ( int i = ini; i < fin; i++ ) {
+            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0());
+            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1());
+            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2());
+
+            if ( !flipNormals ) {
+                gl.glNormal3d(v0.getNormal().x,
+                              v0.getNormal().y,
+                              v0.getNormal().z);
+              }
+              else {
+                gl.glNormal3d(-v0.getNormal().x,
+                              -v0.getNormal().y,
+                              -v0.getNormal().z);
+            }
+            gl.glVertex3d(v0.getPosition().x,
+                          v0.getPosition().y,
+                          v0.getPosition().z);
+
+            if ( !flipNormals ) {
+                gl.glNormal3d(v1.getNormal().x,
+                              v1.getNormal().y,
+                              v1.getNormal().z);
+            }
+            else {
+                gl.glNormal3d(-v1.getNormal().x,
+                              -v1.getNormal().y,
+                              -v1.getNormal().z);
+            }
+
+            gl.glVertex3d(v1.getPosition().x,
+                          v1.getPosition().y,
+                          v1.getPosition().z);
+
+            if ( !flipNormals ) {
+                gl.glNormal3d(v2.getNormal().x,
+                              v2.getNormal().y,
+                              v2.getNormal().z);
+              }
+              else {
+                gl.glNormal3d(-v2.getNormal().x,
+                              -v2.getNormal().y,
+                              -v2.getNormal().z);
+            }
             gl.glVertex3d(v2.
                           getPosition().x,
                           v2.

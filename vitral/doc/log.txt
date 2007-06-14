@@ -105,3 +105,7 @@ Changes in 2006 august 6 revition
 Changes in 2006 august 6 revition
   - Mesh classes, including model, JOGL renderer and persistence revisited.
     This now seems to work quite well :-)
+
+Changes in 2006 august 12 revition
+  - Fixed a bug in TriangleMesh code that made some objects to die
+  - Awt renderer convertion functions upgraded for images

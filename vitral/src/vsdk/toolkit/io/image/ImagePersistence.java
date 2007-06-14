@@ -41,7 +41,8 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.render.awt.AwtImageRenderer;
+import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
+import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 /**
 This class is a front end front which images of various formats can be
@@ -83,8 +84,8 @@ public class ImagePersistence
             Toolkit awtTools = Toolkit.getDefaultToolkit();
             java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
             BufferedImage bi = toBufferedImage(image);
-            
-            AwtImageRenderer.importRGBImageFromAwtBufferedImage(bi, retImage);
+
+            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
         }
@@ -122,7 +123,7 @@ public class ImagePersistence
             java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
             BufferedImage bi = toBufferedImage(image);
 
-            AwtImageRenderer.importRGBImageFromAwtBufferedImage(bi, retImage);
+            AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
         }

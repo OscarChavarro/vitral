@@ -117,5 +117,17 @@ Jul 19 2006, Oscar Chavarro:
   - 1h: swing study on menu management and mnemonics
   - 1h11min: building gui menu files for spanish and english
 
-Jul 20 2006, Oscar Chavarro:
-  - 
+Aug 9 2006, Oscar Chavarro:
+  - 1h: Adding GuiCommandCache class and persistence (input)
+  - 30min: Adding GuiButtonGroupCache class and persistence (input)
+
+Aug 11 2006, Oscar Chavarro:
+  - 30min: Adding GuiButtonGroupCache gui creation
+
+Aug 12 2006, Oscar Chavarro:
+  - 1h: Adding image icon managing for GuiButtonGroupCache
+  - 40min: Adding image icon transparency to GuiButtonGroupCache :)
+  - 30min: Swing adjustment of JPanels used for icon bars
+  - 20min: message constants hashmap on GuiCache
+  - 2h23min: internationalization session on gui files (english->spanish)
+    and ButtonGroup styles on Swing

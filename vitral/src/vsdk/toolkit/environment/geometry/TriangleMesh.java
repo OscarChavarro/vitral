@@ -12,31 +12,56 @@ package vsdk.toolkit.environment.geometry;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.Triangle;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Material;
 
+/**
+This class represents a "basic" triangle mesh. Its model is based in a set
+of vertexes and triangles (the edges are not store explicitly, and there
+can not be an edge not forming part of a triangle).
+
+This basic triangle mesh model can be associated with one and only one
+material (this could change in future), but can have multiple textures,
+and each texture can be mapped to a different set of triangles.
+
+As every model class or `Entity` in VSDK, this class only can represent
+(store in memory) the mesh model. It doesn´t provide persistence or rendering
+functionality, and this could be found at `io` and `render` packages.
+Nevertheles, this class will be highly coupled with both of those, so
+making any change here will impact highly that code.
+
+This class does not ensure nor impose data integrity, and this will be the 
+sole responsability of the cooperating utilities and applications.
+
+@todo Document more this class (include samples and data structure diagrams)
+@todo Generalize the material usage model, to conform similarly to current
+      texture usage (i.e. allow multiple materials per mesh)
+@todo Make sure this is always using good names with complete words on it
+      (rename methods and attributes)
+@todo Extend the model to allow dangling edges
+*/
 public class TriangleMesh extends Surface {
     /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    public static final long serialVersionUID = 20060807L;
 
-    // Mesh data model
+    // Basic mesh data model
     private String name = "default";
     private Vertex[] vertexes;
     private Triangle[] triangles;
 
     // Auxiliary components for data model, should be extracted from here?
-    private RGBAImage[] textures;
+    private Material material;
+    private Image[] textures;
     private int[][][] texTriRel;
     private Vector3D[] verTex;
-    private Material material;
 
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
-    private double[] MinMax;
+    private double[] minMax;
     private GeometryIntersectionInformation lastInfo;
     private int selectedTriangle;
 
@@ -47,7 +72,7 @@ public class TriangleMesh extends Surface {
     public TriangleMesh(Vertex[] vertexes, Triangle[] triangles) {
         this.vertexes = vertexes;
         this.triangles = triangles;
-        MinMax = null;
+        minMax = null;
         lastInfo = new GeometryIntersectionInformation();
     }
 
@@ -71,15 +96,11 @@ public class TriangleMesh extends Surface {
         return this.triangles[index];
     }
 
-    public double getMinMaxAt(int index) {
-        return this.MinMax[index];
-    }
-
-    public RGBAImage[] getTextures() {
+    public Image[] getTextures() {
         return this.textures;
     }
 
-    public RGBAImage getTextureAt(int index) {
+    public Image getTextureAt(int index) {
         return this.textures[index];
     }
 
@@ -119,7 +140,7 @@ public class TriangleMesh extends Surface {
         this.triangles = triangles;
     }
 
-    public void setTextures(RGBAImage[] textures) {
+    public void setTextures(Image[] textures) {
         this.textures = textures;
     }
 
@@ -140,7 +161,7 @@ public class TriangleMesh extends Surface {
     }
 
     public void setTexturesSize(int size) {
-        this.textures = new RGBAImage[size];
+        this.textures = new Image[size];
     }
 
     public void setVerTextureSize(int size) {
@@ -175,8 +196,8 @@ public class TriangleMesh extends Surface {
         this.triangles[index] = triangle;
     }
 
-    public void setTextureAt(int index, RGBAImage rgbaImage) {
-        this.textures[index] = rgbaImage;
+    public void setTextureAt(int index, Image image) {
+        this.textures[index] = image;
     }
 
     public void calculateNormals() {
@@ -230,8 +251,8 @@ public class TriangleMesh extends Surface {
 
     /** Needed for supplying the Geometry.getMinMax operation */
     private void calculateMinMaxPositions() {
-        if ( MinMax == null ) {
-            MinMax = new double[6];
+        if ( minMax == null ) {
+            minMax = new double[6];
 
             double minX = Double.MAX_VALUE;
             double minY = Double.MAX_VALUE;
@@ -253,12 +274,12 @@ public class TriangleMesh extends Surface {
                 if ( y > maxY ) maxY = y;
                 if ( z > maxZ ) maxZ = z;
             }
-            MinMax[0] = minX;
-            MinMax[1] = minY;
-            MinMax[2] = minZ;
-            MinMax[3] = maxX;
-            MinMax[4] = maxY;
-            MinMax[5] = maxZ;
+            minMax[0] = minX;
+            minMax[1] = minY;
+            minMax[2] = minZ;
+            minMax[3] = maxX;
+            minMax[4] = maxY;
+            minMax[5] = maxZ;
         }
     }
 
@@ -277,21 +298,8 @@ public class TriangleMesh extends Surface {
     purposes.
     */
     public String toString() {
-        return ("TriangleMesh < #T:" + triangles.length + " - #V" +
-                vertexes.length + " - #N:" + " >");
-    }
-
-    /**
-    @deprecated
-    */
-    public void printTriangleMesh() {
-        System.out.println(this.toString());
-        for (int i = 0; i < vertexes.length; i++) {
-            System.out.println(vertexes[i]);
-        }
-        for (int i = 0; i < triangles.length; i++) {
-            System.out.println(triangles[i]);
-        }
+        return ("TriangleMesh < #Triangles:" + triangles.length + 
+                            " - #Vertexes:" + vertexes.length + " >");
     }
 
     /**
@@ -446,10 +454,10 @@ public class TriangleMesh extends Surface {
     Geometry.getMinMax.
     */
     public double[] getMinMax() {
-        if ( MinMax == null ) {
+        if ( minMax == null ) {
             calculateMinMaxPositions();
         }
-        return MinMax;
+        return minMax;
     }
 
 }
