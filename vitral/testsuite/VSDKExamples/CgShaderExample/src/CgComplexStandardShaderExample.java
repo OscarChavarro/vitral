@@ -28,6 +28,7 @@ import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
 import com.sun.opengl.cg.CGparameter;
+import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -40,6 +41,7 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -52,11 +54,11 @@ import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglNormalMapRenderer;
-import vsdk.toolkit.render.jogl.JoglSphereRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 
-public class CgComplexStandardShaderExample implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public class CgComplexStandardShaderExample
+    implements GLEventListener, MouseListener, MouseMotionListener, 
+               MouseWheelListener, KeyListener
 {
     //- GUI ----------------------------------------------------------------
     private static GLCanvas canvas;
@@ -72,19 +74,26 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
     private int normalMapList;
     private int textureMapList;
 
+    //- Animation & state control ------------------------------------------
+    private int needPaint = 3;
+    private boolean firstTimer = true;
+    private boolean retextureNeeded = false;
+    private boolean withRotationAnimation = false;
+    private boolean withLightAnimation = false;
+    private double lightAngle = 0;
+
     //- Scene elements -----------------------------------------------------
-    private Camera camera;
-    private Material material;
-    private Light light;
+    private Camera camera;                   // 1. Camera
+    private Light light;                     // 2. Light
+    private Material material;               // 3. Surface propierties
     private RGBImage textureMap;
     private NormalMap normalMap;
+    private RGBImage convertedNormalMap = null;
     private RendererConfiguration quality;
-    private double xrotation;
+    private double xrotation;                // 4. Geometrical transformations
     private double yrotation;
     private double zrotation;
-    private Sphere sphere;
-
-    RGBImage exported;
+    private Geometry geometry;                   // 5. Geometry
 
     //----------------------------------------------------------------------
 
@@ -93,6 +102,20 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
     }
 
     public void init() {
+        System.out.println(
+        "Key controls:\n"+
+        "  - Camera: <cursor arrows>, x/X, y/Y, z/Z, s/S, a/A, f/F, n/N, i\n"+
+        "  - Rendering quality: g, <function keys>\n"+
+        "  - Animation control: <space>, r\n"+
+        "  - Light control: 0, 9, h, k, j, u\n"+
+        "  - Rotation control: 1, 2, 3, 4, 5, 6\n"+
+        "  - Exit: <escape>\n"+
+        "Mouse controls:\n"+
+        "  - Drag+button1: camera orientation\n"+
+        "  - Drag+button2: camera panning\n"+
+        "  - Drag+button3: camera advance & roll\n"
+        );
+        System.out.print("Initializing... ");
         //- Initialize scene elements--------------------------------------
         // 1: Camera
         camera = new Camera();
@@ -100,23 +123,34 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         Matrix4x4 R = new Matrix4x4();
         R.eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
         camera.setRotation(R);
+        camera.setFov(30.0);
 
         // 2: Lights
         light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
 
-        // 3.1. Object attribute -> texture map & bumpmap
-        String imageFilename = "../../../etc/textures/earth.png";
+        // 3.1. Object attribute -> material propierties
+        material = new Material();
+        material.setAmbient(new ColorRgb(0, 0, 0));
+        material.setDiffuse(new ColorRgb(1, 1, 1));
+        material.setSpecular(new ColorRgb(1, 1, 1));
+        material.setPhongExponent(40);
+
+        // 3.2. Object attribute -> texture map & bumpmap
+        String imageFilename = null;
         try {
+            //-------------------------------------------------------
+            imageFilename = "../../../etc/textures/miniearth.png";
             textureMap = ImagePersistence.importRGB(new File(imageFilename));
 
+            //-------------------------------------------------------
             normalMap = new NormalMap();
-            imageFilename = "../../../etc/bumpmaps/blinn2.bw";
-            //imageFilename = "../../../etc/bumpmaps/earth.bw";
+            //imageFilename = "../../../etc/bumpmaps/blinn2.bw";
+            imageFilename = "../../../etc/bumpmaps/earth.bw";
             IndexedColorImage source = ImagePersistence.importIndexedColor(new File(imageFilename));
             normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
-
-            exported = normalMap.exportToRgbImage();
-            ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
+            convertedNormalMap = normalMap.exportToRgbImage();
+            normalMap = null;
+            //ImagePersistence.exportPPM(new File("./outputmap.ppm"), convertedNormalMap);
         }
         catch (Exception e) {
             System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
@@ -125,47 +159,67 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
             System.exit(0);
         }
 
-        // 3.2. Object attribute -> material propierties
-        material = new Material();
-        material.setAmbient(new ColorRgb(0, 0, 0));
-        material.setDiffuse(new ColorRgb(1, 1, 1));
-        material.setSpecular(new ColorRgb(1, 1, 1));
-        material.setPhongExponent(40);
-
         // 3.3. Object attribute -> how it will render
         quality = new RendererConfiguration();
         quality.setBumpMap(true);
 
-        // 3.4. Object attribute -> geometrical transformations
+        // 4. Object attribute -> geometrical transformations
         xrotation = 0;
         yrotation = 0;
         zrotation = 0;
 
-        // 3.5. Object attribute -> geometry
-        sphere = new Sphere(1.0);
+        // 5. Object attribute -> geometry
+        geometry = new Sphere(1.0);
 
-        //-----------------------------------------------------------------
+        //- Initialize GUI helpers ----------------------------------------
         cameraController = new CameraControllerAquynza(camera);
         qualityController = new RendererConfigurationController(quality);
 
         //-----------------------------------------------------------------
+        System.gc();
+        System.out.println("Ok!");
     }
 
-    public void init(GLAutoDrawable drawable) {
-        JoglRenderer.tryToEnableNvidiaCg();
+    public void createCgElements(GL gl) {
+        if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
+            System.out.println("Nvidia Cg not available. Turning off GPU support!");
+            NvidiaGpuActive = false;
+            enableTexture(gl, false);
+            return;
+        }
+        enableTexture(gl, true);
         try {
-            NvidiaGpuVertexProgramTexture =
-                JoglRenderer.loadNvidiaGpuVertexShader(
-                    new FileInputStream("./etc/PhongTextureVertexShader.cg"));
-            NvidiaGpuPixelProgramTexture =
-                JoglRenderer.loadNvidiaGpuPixelShader(
-                    new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+            //-----------------------------------------------------------------
             NvidiaGpuVertexProgramTextureBump =
-                JoglRenderer.loadNvidiaGpuVertexShader(
-                    new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
             NvidiaGpuPixelProgramTextureBump =
-                JoglRenderer.loadNvidiaGpuPixelShader(
-                    new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
+            NvidiaGpuVertexProgramTexture =
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+            NvidiaGpuPixelProgramTexture =
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+
+            //-----------------------------------------------------------------
+            CGparameter param;
+
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTexture,
+                "textureMap");
+            CgGL.cgGLSetTextureParameter(param, textureMapList);
+
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump,
+                "normalMap");
+            CgGL.cgGLSetTextureParameter(param, normalMapList);
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump,
+                "textureMap");
+            CgGL.cgGLSetTextureParameter(param, textureMapList);
+
+            //-----------------------------------------------------------------
+            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
+                NvidiaGpuPixelProgramTexture);
         }
         catch ( Exception e ) {
             System.err.println("Error loading shaders!");
@@ -173,8 +227,38 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         }
     }
 
+    public void init(GLAutoDrawable drawable) {
+        // Not used in VitralSDK style applications... check 'firstTimer'
+    }
+
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        if ( withRotationAnimation ) {
+            zrotation += 0.5*2;
+            needPaint = 1;
+        }
+
+        if ( withLightAnimation ) {
+            Vector3D lightPosition = new Vector3D(1, -3, 1);
+            Vector3D axis = new Vector3D(0, -1, 0);
+            Matrix4x4 R = new Matrix4x4();
+            lightAngle += Math.toRadians(1.0*2);
+            R.axisRotation(lightAngle, axis);
+            lightPosition = R.multiply(lightPosition);
+            light.setPosition(lightPosition);
+            needPaint = 1;
+        }
+
+        if ( needPaint <= 0 ) {
+            return;
+        }
+        needPaint--;
+
+        if ( firstTimer ) {
+            firstTimer = false;
+            createCgElements(gl);
+        }
 
         //-----------------------------------------------------------------
         gl.glEnable(GL.GL_DEPTH_TEST);
@@ -194,11 +278,19 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         CGprogram currentPixelProgram = null;
         CGparameter param = null;
 
+        if ( (!quality.isBumpMapSet() || !NvidiaGpuActive) && 
+             retextureNeeded ) {
+            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
+                NvidiaGpuPixelProgramTexture);
+            retextureNeeded = false;
+        }
+
         enableTexture(gl, NvidiaGpuActive && quality.isBumpMapSet());
 
         if ( NvidiaGpuActive ) {
             //- Global per-frame shader activation ----------------------------
             JoglRenderer.enableNvidiaCgProfiles();
+            JoglRenderer.setRenderingWithNvidiaGpu(true);
             if ( quality.isBumpMapSet() ) {
                 currentVertexProgram = NvidiaGpuVertexProgramTextureBump;
                 currentPixelProgram = NvidiaGpuPixelProgramTextureBump;
@@ -207,9 +299,8 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
                 currentVertexProgram = NvidiaGpuVertexProgramTexture;
                 currentPixelProgram = NvidiaGpuPixelProgramTexture;
             }
-
-            CgGL.cgGLBindProgram(currentVertexProgram);
-            CgGL.cgGLBindProgram(currentPixelProgram);
+            JoglRenderer.bindNvidiaGpuShaders(
+                currentVertexProgram, currentPixelProgram);
 
             //- Shader configuration from scene data --------------------------
             JoglRenderer.activateNvidiaGpuParameters(gl, quality,
@@ -220,16 +311,14 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
                 currentVertexProgram, currentPixelProgram);
             JoglMaterialRenderer.activateNvidiaGpuParameters(gl, material,
                 currentVertexProgram, currentPixelProgram);
-            JoglGeometryRenderer.activateNvidiaGpuParameters(gl, sphere,
+            JoglGeometryRenderer.activateNvidiaGpuParameters(gl, geometry,
                 camera, currentVertexProgram, currentPixelProgram);
 
             //- Multiple texture management for pixel shaders -----------------
             param = CgGL.cgGetNamedParameter(currentPixelProgram, "textureMap");
-            CgGL.cgGLSetTextureParameter(param, textureMapList);
             CgGL.cgGLEnableTextureParameter(param);
             if ( quality.isBumpMapSet() ) {
                 param = CgGL.cgGetNamedParameter(currentPixelProgram, "normalMap");
-                CgGL.cgGLSetTextureParameter(param, normalMapList);
                 CgGL.cgGLEnableTextureParameter(param);
             }  
         }
@@ -244,7 +333,8 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
             }
         }
 
-        JoglSphereRenderer.draw(gl, sphere, camera, quality);
+
+        JoglGeometryRenderer.draw(gl, geometry, camera, quality);
 
         if ( NvidiaGpuActive ) {
             // Disable textures
@@ -260,18 +350,20 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
             // gets unconfigured is texture state! More should be researched on
             // this topic!
             if ( quality.isBumpMapSet() ) {
-                JoglRenderer.enableNvidiaCgProfiles();
-                CgGL.cgGLBindProgram(NvidiaGpuPixelProgramTexture);
-                param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTexture, "textureMap");
-                CgGL.cgGLEnableTextureParameter(param);
-                JoglRenderer.disableNvidiaCgProfiles();
+                retextureNeeded = true;
             }
+            JoglRenderer.setRenderingWithNvidiaGpu(false);
         }
+
         gl.glLoadIdentity();
         JoglLightRenderer.draw(gl, light);
     }
 
     void enableTexture(GL gl, boolean withMap) {
+        //-----------------------------------------------------------------
+        gl.glEnable(gl.GL_TEXTURE_2D);
+        textureMapList = JoglImageRenderer.activate(gl, textureMap);
+
         //- Basic OpenGL texture state setup ------------------------------
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
            GL.GL_GENERATE_MIPMAP_SGIS, GL.GL_TRUE);
@@ -284,13 +376,22 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
            GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 
-        //-----------------------------------------------------------------
-        textureMapList = JoglImageRenderer.activate(gl, textureMap);
+        /*
+        gl.glTexParameteri(GL.GL_TEXTURE_2D,
+           GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+        gl.glTexParameteri(GL.GL_TEXTURE_2D,
+           GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+        gl.glTexParameteri(GL.GL_TEXTURE_2D,
+           GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
+        gl.glTexParameteri(GL.GL_TEXTURE_2D,
+           GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+           GL.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+        */
 
         //-----------------------------------------------------------------
         if ( withMap ) {
-            //normalMapList = JoglNormalMapRenderer.activate(gl, normalMap);
-            normalMapList = JoglImageRenderer.activate(gl, exported);
+            normalMapList = JoglImageRenderer.activate(gl, convertedNormalMap);
         }
     }
 
@@ -306,6 +407,7 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         
         gl.glViewport(x, y, width, height); 
         camera.updateViewportResize(width, height);
+        needPaint = 1;
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -318,30 +420,35 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
 
     public void mousePressed(MouseEvent e) {
         if ( cameraController.processMousePressedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
         if ( cameraController.processMouseReleasedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
         if ( cameraController.processMouseClickedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
         if ( cameraController.processMouseMovedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
         if ( cameraController.processMouseDraggedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -352,6 +459,7 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
         if ( cameraController.processMouseWheelEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -361,10 +469,12 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
             System.exit(0);
         }
         if ( cameraController.processKeyPressedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
         if ( qualityController.processKeyPressedEventAwt(e) ) {
             System.out.println(quality);
+            needPaint = 1;
             canvas.repaint();
         }
 
@@ -385,14 +495,18 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
             case '9': lightPosition.y -= 0.1; break;
             case '0': lightPosition.y += 0.1; break;
             case 'g': NvidiaGpuActive = !NvidiaGpuActive; break;
+            case 'r': withRotationAnimation = !withRotationAnimation; break;
+            case ' ': withLightAnimation = !withLightAnimation; break;
           }
           light.setPosition(lightPosition);
+          needPaint = 1;
           canvas.repaint();
         }
     }
 
     public void keyReleased(KeyEvent e) {
         if ( cameraController.processKeyReleasedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -421,11 +535,14 @@ public class CgComplexStandardShaderExample implements GLEventListener, MouseLis
         canvas.addMouseMotionListener(instance);
         canvas.addKeyListener(instance);
         canvas.addGLEventListener(instance);
+        Animator animator = new Animator(canvas);
 
         frame.add(canvas);
         frame.setSize(1150, 1150);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        canvas.requestFocusInWindow();
+        animator.start();
     }
 }
 

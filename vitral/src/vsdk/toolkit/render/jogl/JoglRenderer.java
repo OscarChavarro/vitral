@@ -10,13 +10,14 @@ package vsdk.toolkit.render.jogl;
 // Java base classes
 import java.io.InputStream;
 
-// Java GUI classes
+// JOGL clases
 import javax.media.opengl.GL;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
+import com.sun.opengl.cg.CGparameter;
 
-// JOGL clases
+// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
@@ -53,9 +54,9 @@ public abstract class JoglRenderer extends RenderingElement {
     private static CGcontext nvidiaGpuContext = null;
     private static int nvidiaGpuVertexProfile = -1;
     private static int nvidiaGpuPixelProfile = -1;
-
-/*
     private static boolean renderingWithNvidiaGpuFlag = false;
+    private static CGprogram currentVertexShader = null;
+    private static CGprogram currentPixelShader = null;
 
     public static boolean renderingWithNvidiaGpu()
     {
@@ -67,9 +68,42 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !getNvidiaCgAvailability() ) {
             renderingWithNvidiaGpuFlag = false;
         }
-        renderingWithNvidiaGpuFlag = requested;
+    else {
+            renderingWithNvidiaGpuFlag = requested;
     }
-*/
+        return renderingWithNvidiaGpuFlag;
+    }
+
+    public static void
+    bindNvidiaGpuShaders(CGprogram vertexShader, CGprogram pixelShader)
+    {
+        currentVertexShader = vertexShader;
+    currentPixelShader = pixelShader;
+    if ( currentVertexShader != null ) {
+            CgGL.cgGLBindProgram(currentVertexShader);
+    }
+    if ( currentPixelShader != null ) {
+            CgGL.cgGLBindProgram(currentPixelShader);
+    }
+    }
+
+    public static CGparameter
+    accessNvidiaGpuVertexParameter(String name)
+    {
+    if ( currentVertexShader != null ) {
+            return CgGL.cgGetNamedParameter(currentVertexShader, name);
+    }
+    return null;
+    }
+
+    public static CGparameter
+    accessNvidiaGpuPixelParameter(String name)
+    {
+    if ( currentPixelShader != null ) {
+            return CgGL.cgGetNamedParameter(currentPixelShader, name);
+    }
+    return null;
+    }
 
     public static boolean verifyOpenGLAvailability()
     {
@@ -171,7 +205,7 @@ public abstract class JoglRenderer extends RenderingElement {
         }
 
         //-----------------------------------------------------------------
-        // OJO: No prender esto!
+        // Warning: do not use this!
         //CgGL.cgGLSetManageTextureParameters(nvidiaGpuContext, true);
         nvidiaCgAvailable = true;
         return true;
@@ -221,7 +255,6 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !CgGL.cgIsProgramCompiled(shader) ) {
             CgGL.cgCompileProgram(shader);
         }
-        CgGL.cgGLEnableProfile(nvidiaGpuVertexProfile);
         CgGL.cgGLLoadProgram(shader);
 
         return shader;
@@ -253,7 +286,6 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !CgGL.cgIsProgramCompiled(shader) ) {
             CgGL.cgCompileProgram(shader);
         }
-        CgGL.cgGLEnableProfile(nvidiaGpuPixelProfile);
         CgGL.cgGLLoadProgram(shader);
 
         return shader;
@@ -268,6 +300,32 @@ public abstract class JoglRenderer extends RenderingElement {
         CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
             pixelShader, "withTexture"), withTexture);
     }
+
+    /**
+    When using Nvidia Gpu fragment shaders with multiple textures (samplers),
+    there is a problem drawing objects with default fixed function OpenGL/
+    JOGL, and is that the default texture for fixed function is changed.
+    This method is not fair, but a desperate measure for returning
+    fixed function OpenGL/JOGL to the default texture.
+    Current implementation requires an standarized VitralSDK pixel shader
+    NOT USING more than one texture.  It has been observed that just
+    enabling and disabling such a shader, turns default OpenGL/JOGL default
+    texture for fixed function pipeline to that texture associated with
+    "textureMap" sampler in current shader.  Use this function in the
+    initialization of shaders, and each time Nvidia GPU use is turned off.
+    */
+    public static void
+    setDefaultTextureForFixedFunctionOpenGL(CGprogram pixelShader)
+    {
+        CGparameter param;
+
+        JoglRenderer.enableNvidiaCgProfiles();
+        CgGL.cgGLBindProgram(pixelShader);
+        param = CgGL.cgGetNamedParameter(pixelShader, "textureMap");
+        CgGL.cgGLEnableTextureParameter(param);
+        JoglRenderer.disableNvidiaCgProfiles();
+    }
+
 }
 
 //===========================================================================

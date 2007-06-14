@@ -135,13 +135,15 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         }
 
         //- 4. Use the image's glList -------------------------------------
-        if ( glListIsCompiled == false ) {
+//        if ( glListIsCompiled == false ) {
             item.renderer.bind();
             item.renderer.enable();
+/*
           }
           else {
             gl.glCallList(item.glList);
         }
+*/
         /*
         if ( item != null ) {
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);

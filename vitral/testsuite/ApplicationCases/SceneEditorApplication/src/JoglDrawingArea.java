@@ -802,7 +802,7 @@ public class JoglDrawingArea implements
                   gi = theScene.things.get(firstThingSelected);
                   texture = gi.getTexture();
                   if ( texture == null ) {
-                      String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth.png";
+                      String imageFilename = "../../../etc/textures/miniearth.png";
                       try {
                           texture = 
                            ImagePersistence.importRGB(new File(imageFilename));

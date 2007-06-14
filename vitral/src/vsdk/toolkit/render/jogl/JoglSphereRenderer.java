@@ -8,8 +8,12 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL clases
 import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGparameter;
 
+// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -67,6 +71,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     binormals
     */
     private static void drawVertexNormals(GL gl, double r, int slices, int stacks) {
+        JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
@@ -108,6 +113,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     private static void drawPoints(GL gl, double r, int slices, int stacks) {
+        JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glColor3d(1, 0, 0);
@@ -138,14 +144,38 @@ public class JoglSphereRenderer extends JoglRenderer {
     drawVertex(GL gl, double theta, double phi, double s, double t,
                Vector3D P, Vector3D N, Vector3D T, Vector3D B)
     {
+        //- Calculate vertex parameters -----------------------------------
         sphereNormal(N, theta, phi);
         spherePosition(P, theta, phi);
         sphereTangent(T, theta, phi);
         sphereBinormal(B, theta, phi);
+
+        //- Pass standard vertex parameters to OpenGL ---------------------
         gl.glTexCoord2d(1.0-s, t);
         gl.glNormal3d(N.x, N.y, N.z);
-        //cgGLSetParameter3dv(tangentParam, &T.x); 
-        //cgGLSetParameter3dv(binormalParam, &B.x); 
+
+        //- If inside a Cg schema, pass non standard OpenGL parameters ----
+    if ( renderingWithNvidiaGpu() ) {
+        CGparameter tangentParam;
+        CGparameter binormalParam;
+        double vectorarray[];
+
+            tangentParam = accessNvidiaGpuVertexParameter("TObject");
+            if ( tangentParam != null ) {
+                vectorarray = T.exportToDoubleArrayVect();
+                CgGL.cgGLSetParameter3dv(tangentParam, vectorarray, 0);
+        }
+            binormalParam = accessNvidiaGpuVertexParameter("BObject");
+            if ( binormalParam != null ) {
+        B.x = 1;
+        B.y = 0;
+        B.z = 0;
+                vectorarray = B.exportToDoubleArrayVect();
+                CgGL.cgGLSetParameter3dv(binormalParam, vectorarray, 0);
+        }
+    }
+
+        //-----------------------------------------------------------------
         gl.glVertex3d(P.x, P.y, P.z);
     }
 
@@ -225,6 +255,7 @@ public class JoglSphereRenderer extends JoglRenderer {
             drawSphereElements(gl, s.getRadius(), slices, stacks);
         }
         if ( q.isWiresSet() ) {
+            JoglRenderer.disableNvidiaCgProfiles();
             gl.glDisable(gl.GL_LIGHTING);
             gl.glDisable(gl.GL_CULL_FACE);
             gl.glShadeModel(gl.GL_FLAT);

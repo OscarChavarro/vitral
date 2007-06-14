@@ -30,13 +30,49 @@ half4 main(uniform sampler2D textureMap,
            in half3 cameraPositionView  : TEXCOORD3,
            in half3 lightPositionView   : TEXCOORD4,
            in half3 Ka                  : TEXCOORD5,
+           in half3 TView               : TEXCOORD6,
+           in half3 BView               : TEXCOORD7,
            in half3 Kd                  : COLOR0,
            in half3 Ks                  : COLOR1) : COLOR
 {
-    half3 finalColor;
-    finalColor = (half3)tex2D(normalMap, uvTextureCoordinate).xyz *
-                 (half3)tex2D(textureMap, uvTextureCoordinate).xyz;
+    //-----------------------------------------------------------------------
+    // Prepare basic illumination model variables.
+    half3 N = normalize(NView);
+    half3 Ps = normalize(TView);
+    half3 Pt = normalize(BView);
+    half3 L = normalize(lightPositionView - PView);
+    half3 V = normalize(cameraPositionView - PView);
+    half3 H = normalize(L + V);
 
+    //-----------------------------------------------------------------------
+    // Evaluation of Blinn's wrinkle surface model for normal perturbation.
+    // Note that Blinn's equation is not here, because this is a different
+    // formulation based on previous normal/tangent/binormal vector transform
+    // obtained from vertex shader.
+    half Bu = ((half)tex2D(normalMap, uvTextureCoordinate).x) * 2 - 1;
+    half Bv = ((half)tex2D(normalMap, uvTextureCoordinate).y) * 2 - 1;
+    N = N + (Bu*Ps + Bv*Pt);
+    N = normalize(N);
+
+    //-----------------------------------------------------------------------
+    half NdotL = dot(N, L);
+    half NdotH = dot(N, H);
+    half3 clampedTerms = lit(NdotL, NdotH, phongExponent);
+
+    // Apply illumination model's equations
+    half3 diffuseComponent;
+    diffuseComponent = Kd * clampedTerms.y;
+
+    if ( withTexture > 0.0 ) {
+        diffuseComponent = diffuseComponent *
+            (half3)tex2D(textureMap, uvTextureCoordinate).xyz;
+    }
+    half3 specularComponent = Ks * clampedTerms.z;
+    half3 finalColor =
+      Ka + lightColor * (diffuseComponent + specularComponent);
+
+    //-----------------------------------------------------------------------
+    // Return final color, setting alpha value to 1
     return half4(finalColor, 1);
 }
 

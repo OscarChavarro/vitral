@@ -20,6 +20,8 @@ void main(uniform float4x4 modelViewProjectionLocal,
           in float3 ambientColor              : TEXCOORD1,
           in float3 diffuseColor              : TEXCOORD2,
           in float3 specularColor             : TEXCOORD3,
+          in float3 TObject                   : TEXCOORD4,
+          in float3 BObject                   : TEXCOORD5,
           out float4 projectedVertexPosition  : POSITION,
           out float3 PView                    : TEXCOORD0,
           out float3 NView                    : TEXCOORD1,
@@ -28,7 +30,9 @@ void main(uniform float4x4 modelViewProjectionLocal,
           out float3 lightPositionView        : TEXCOORD4,
           out float3 Ka                       : TEXCOORD5,
           out float3 Kd                       : COLOR0,
-          out float3 Ks                       : COLOR1)
+          out float3 Ks                       : COLOR1,
+          out float3 TView                    : TEXCOORD6,
+          out float3 BView                    : TEXCOORD7)
 {
     // Compute homogeneous position of vertex for rasterizer
     projectedVertexPosition = mul(modelViewProjectionLocal, PObject);
@@ -36,6 +40,9 @@ void main(uniform float4x4 modelViewProjectionLocal,
     // Transform positions and normals from model-space to view-space
     PView = mul(modelViewLocal, PObject).xyz;
     NView = mul(modelViewLocalIT, float4(NObject, 0)).xyz;
+    TView = mul(modelViewLocalIT, float4(TObject, 0)).xyz;
+    BView = mul(modelViewLocalIT, float4(BObject, 0)).xyz;
+
     cameraPositionView =
         mul(modelViewGlobal, float4(cameraPositionGlobal, 1)).xyz;
     lightPositionView =

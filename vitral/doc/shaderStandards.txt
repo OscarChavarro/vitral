@@ -189,8 +189,14 @@ The following are the standarized VitralSDK aids that provides restricted
 access to predefined Nvidia Cg shaders that follows the guidelines stated
 in this document, but that also offers greater ease of development,
 portability and generality:
-    - activateNvidiaGpuParameters method in JoglCameraRenderer,
+    - activateNvidiaGpuParameters method in JoglRenderer, JoglCameraRenderer,
       JoglMaterialRenderer, JoglLightRenderer and JoglGeometryRenderer.
+      Those are used to ease the passing of uniform parameters from
+      VitralSDK scene elements to Nvidia Cg shaders.  Note that they assume
+      standarized parameter names.
+    - setDefaultTextureForFixedFunctionOpenGL in JoglRenderer, is a
+      not-so-fair desperate measure to reprogram default texture in fixed
+      function OpenGL/JOGL when using shaders with multiple samplers.
 
 NVIDIA SET OF STANDARD PREDEFINED SHADERS
 -----------------------------------------

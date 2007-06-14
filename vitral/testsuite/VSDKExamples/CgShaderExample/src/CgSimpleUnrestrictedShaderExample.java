@@ -62,17 +62,18 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
     private boolean NvidiaGpuActive = true;
     private CGprogram NvidiaGpuVertexProgramTexture;
     private CGprogram NvidiaGpuPixelProgramTexture;
+    private boolean firstTimer = true;
 
     //- Scene elements -----------------------------------------------------
-    private Camera camera;
-    private Material material;
-    private Light light;
+    private Camera camera;                   // 1. Camera
+    private Light light;                     // 2. Light
+    private Material material;               // 3. Surface propierties
     private RGBImage textureMap;
     private RendererConfiguration quality;
-    private double xrotation;
+    private double xrotation;                // 4. Geometrical transformations
     private double yrotation;
     private double zrotation;
-    private Sphere sphere;
+    private Sphere sphere;                   // 5. Geometry
 
     //----------------------------------------------------------------------
 
@@ -114,12 +115,12 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         // 3.3. Object attribute -> how it will render
         quality = new RendererConfiguration();
 
-        // 3.4. Object attribute -> geometrical transformations
+        // 4. Object attribute -> geometrical transformations
         xrotation = 0;
         yrotation = 0;
         zrotation = 0;
 
-        // 3.5. Object attribute -> geometry
+        // 5. Object attribute -> geometry
         sphere = new Sphere(1.0);
 
         //-----------------------------------------------------------------
@@ -129,8 +130,12 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         //-----------------------------------------------------------------
     }
 
-    public void init(GLAutoDrawable drawable) {
-        JoglRenderer.tryToEnableNvidiaCg();
+    public void createCgElements() {
+        if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
+        System.out.println("Nvidia Cg not available. Turning off GPU support!");
+        NvidiaGpuActive = false;
+        return;
+    }
         try {
             NvidiaGpuVertexProgramTexture =
                 JoglRenderer.loadNvidiaGpuVertexShader(
@@ -145,8 +150,17 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         }
     }
 
+    public void init(GLAutoDrawable drawable) {
+        // Not used in VitralSDK style applications... check 'firstTimer'
+    }
+
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        if ( firstTimer ) {
+            firstTimer = false;
+            createCgElements();
+    }
 
         //-----------------------------------------------------------------
         gl.glEnable(GL.GL_DEPTH_TEST);

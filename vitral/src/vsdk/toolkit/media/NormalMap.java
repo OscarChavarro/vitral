@@ -131,6 +131,10 @@ public class NormalMap extends Entity
                 n = getNormal(x, y);
                 n.normalize();
 
+                n.x = (n.x+1)/2;
+                n.y = (n.y+1)/2;
+                n.z = (n.z+1)/2;
+
         rr = (int)(n.x * 255.0);
         gg = (int)(n.y * 255.0);
         bb = (int)(n.z * 255.0);

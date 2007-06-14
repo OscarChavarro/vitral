@@ -183,3 +183,5 @@ Changes in 2006 december 28-30 revition
   - toFloatVect method generalized to float and double and renamed to 'exportToArray',
     available in ColorRgb, Vector3D, Vector4D and Matrix4x4.
 
+Changes in 2007 january 2 revition
+  - First functional and correct Nvidia Cg shader for bump-mapping! :-)

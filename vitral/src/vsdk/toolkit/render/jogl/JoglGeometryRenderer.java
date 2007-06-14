@@ -57,6 +57,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         minmax = g.getMinMax();
 
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
+        JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
@@ -103,6 +104,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         delta = delta.multiply(linePercent);
 
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
+        JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume

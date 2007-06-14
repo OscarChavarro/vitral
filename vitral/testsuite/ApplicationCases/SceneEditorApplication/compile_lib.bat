@@ -1,3 +1,4 @@
+md classes
 cd src_lib
 javac -Xlint:unchecked -classpath .;..\..\..\..\lib\vsdk.jar -d ..\lib vsdk\transition\gui\*.java vsdk\transition\io\presentation\*.java vsdk\transition\render\swing\*.java
 cd ..

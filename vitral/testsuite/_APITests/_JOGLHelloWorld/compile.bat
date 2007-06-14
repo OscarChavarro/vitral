@@ -1,3 +1,4 @@
+md classes
 cls
 cd src
 javac -d ../classes HelloWorldJOGL.java
