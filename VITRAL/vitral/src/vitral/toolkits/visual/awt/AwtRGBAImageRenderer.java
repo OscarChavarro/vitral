@@ -1,0 +1,52 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - November 28 2005 - Oscar Chavarro: Original base version              =
+//===========================================================================
+
+package vitral.toolkits.visual.awt;
+
+import java.awt.Color;
+import java.awt.Graphics;
+
+import vitral.toolkits.media.RGBAImage;
+import vitral.toolkits.media.RGBAPixel;
+
+public class AwtRGBAImageRenderer
+{
+    /** Converts integers in the domain [-128, 127] to integers in the range
+    [0, 256] */
+    private static int scaleValue(byte x)
+    {
+        int y;
+
+        y = (int)x;
+        if (y < 0) y = 256 + y;
+
+        return y;
+    }
+
+    public static void draw(Graphics dc, RGBAImage img)
+    {
+        int x, y;
+        int x0 = 10;
+        int y0 = 10;
+        RGBAPixel pixel;
+
+        for ( y = 0; y < img.getYSize(); y++ ) {
+            for ( x = 0; x < img.getXSize(); x++ ) {
+                pixel = img.getPixel(x, y);
+                dc.setColor(
+                    new Color( scaleValue(pixel.r), 
+                               scaleValue(pixel.g), 
+                               scaleValue(pixel.b) )
+                );
+                dc.drawLine(x+x0, y+y0, x+x0, y+y0);
+            }
+        }
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
