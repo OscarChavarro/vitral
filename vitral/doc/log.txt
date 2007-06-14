@@ -296,3 +296,7 @@ Changes in 2007 june 4 revition
   - SearchEngineFor3DModels compatible with machines without Pbuffer
   - SearchEngineFor3DModels computes Fourier coefficients for radial functions
     over projected views' distance fields
+
+Changes in 2007 june 5-6 revition
+  - First implementation of 2D sketch functionality in the
+    SearchEngineFor3DModels application :)

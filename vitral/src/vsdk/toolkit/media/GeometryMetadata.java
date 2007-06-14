@@ -49,29 +49,34 @@ public class GeometryMetadata extends MediaEntity
     */
     public double doMinskowskiDistance(GeometryMetadata other, double s, String subGroup)
     {
-        if ( this.descriptorsList.size() !=
-             other.descriptorsList.size() ) {
-            return Double.MAX_VALUE;
-        }
         int i, j;
         ShapeDescriptor a = null, b = null, aa, bb;
         double av[], bv[];
         double acum = 0;
 
+        //-----------------------------------------------------------------
         for ( i = 0; i < this.descriptorsList.size(); i++ ) {
             aa = this.descriptorsList.get(i);
-            bb = other.descriptorsList.get(i);
         if ( aa.getLabel().equals(subGroup) ) {
                 a = aa;
         }
+        }
+        if ( a == null ) {
+            return Double.MAX_VALUE;
+        }
+
+        //-----------------------------------------------------------------
+        for ( i = 0; i < other.descriptorsList.size(); i++ ) {
+            bb = other.descriptorsList.get(i);
         if ( bb.getLabel().equals(subGroup) ) {
                 b = bb;
         }
         }
-
-        if ( a == null || b == null ) {
+        if ( b == null ) {
             return Double.MAX_VALUE;
         }
+
+        //-----------------------------------------------------------------
         av = a.getFeatureVector();
         bv = b.getFeatureVector();
         if ( av.length != bv.length ) {

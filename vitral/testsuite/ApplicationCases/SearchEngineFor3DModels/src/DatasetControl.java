@@ -44,10 +44,12 @@ import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.SphericalHarmonicShapeDescriptor;
@@ -65,10 +67,14 @@ public class DatasetControl implements GLEventListener
     private JoglProjectedViewRenderer projectedViewRenderer = null;
     private String args[];
     private GLCanvas canvas;
+    private IndexedColorImage radialFunction;
 
     private DatasetControl(String args[])
     {
         this.args = args;
+        radialFunction = new IndexedColorImage();
+        radialFunction.init(64, 64);
+
         projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
         offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
     }
@@ -255,18 +261,9 @@ public class DatasetControl implements GLEventListener
         ArrayList<ShapeDescriptor> descriptorsList)
     {
         Image distanceField;
-        int i, j, k, val;
-        double r, u, v, tetha;
-        ColorRgb c;
-        IndexedColorImage radialFunction;
+        int i;
 
-        radialFunction = new IndexedColorImage();
-        radialFunction.init(64, 64);
-        double sphericalHarmonicsR[] = new double[16];
-        double sphericalHarmonicsI[] = new double[16];
         SphericalHarmonicShapeDescriptor featureVector;
-        boolean status;
-        double hi, hr;
 
         for ( i = 1; i <= 13; i++ ) {
             //- Generate distance field for i-th projection -------------------
@@ -304,39 +301,57 @@ public class DatasetControl implements GLEventListener
             //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./test" + i + ".ppm"), distanceField);
 
             //- Calculate Fourier coefficients for radial functions -----------
-            featureVector = new SphericalHarmonicShapeDescriptor("PROJECTED_VIEW_" + i);
-            for ( j = 0; j < 32; j++ ) {
-                // r varies from 0 to 0.5
-                r = (((double)j)/(((double)distanceFieldSide)));
-                for ( k = 0; k < 64; k++ ) {
-                    tetha = 2*Math.PI * ((double)k) / 64.0;
-                    u = 0.5 + r * Math.cos(tetha);
-                    v = 0.5 - r * Math.sin(tetha);
-                    c = distanceField.getColorRgbBiLinear(u, v);
-                    val = (int)(((c.r + c.g + c.b)/3.0) * 255.0);
-                    radialFunction.putPixel(k, 32, VSDK.unsigned8BitInteger2signedByte(val));
-                }
-                status = SpharmonicKitWrapper.calculateSphericalHarmonics(
-                    radialFunction.getRawImage(), sphericalHarmonicsR, sphericalHarmonicsI);
-
-                if ( !status ) {
-                    return false;
-                }
-                else {
-                    for ( k = 0; k < sphericalHarmonicsR.length; k++ ) {
-                        hr = sphericalHarmonicsR[k];
-                        hi = sphericalHarmonicsI[k];
-                        featureVector.setFeature(j, k, hr, hi); 
-                    }
-                }
-
-                //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new File("circle"+(100+i)+"_" + (100+j) + ".ppm"), radialFunction);
-
+            featureVector = analyzeImageHarmonics(distanceField, i);
+            if ( featureVector == null ) {
+                return false;
             }
             descriptorsList.add(featureVector);
 
         }
         return true;
+    }
+
+    private SphericalHarmonicShapeDescriptor analyzeImageHarmonics(Image distanceField, int i)
+    {
+        SphericalHarmonicShapeDescriptor featureVector;
+        featureVector = new SphericalHarmonicShapeDescriptor("PROJECTED_VIEW_" + i);
+        double hi, hr;
+        int j, k, val;
+        double sphericalHarmonicsR[] = new double[16];
+        double sphericalHarmonicsI[] = new double[16];
+        boolean status;
+        ColorRgb c;
+        double r, u, v, tetha;
+
+        for ( j = 0; j < 32; j++ ) {
+            // r varies from 0 to 0.5
+            r = (((double)j)/(((double)distanceFieldSide)));
+            for ( k = 0; k < 64; k++ ) {
+                tetha = 2*Math.PI * ((double)k) / 64.0;
+                u = 0.5 + r * Math.cos(tetha);
+                v = 0.5 - r * Math.sin(tetha);
+                c = distanceField.getColorRgbBiLinear(u, v);
+                val = (int)(((c.r + c.g + c.b)/3.0) * 255.0);
+                radialFunction.putPixel(k, 32, VSDK.unsigned8BitInteger2signedByte(val));
+            }
+            status = SpharmonicKitWrapper.calculateSphericalHarmonics(
+                radialFunction.getRawImage(), sphericalHarmonicsR, sphericalHarmonicsI);
+             if ( !status ) {
+                return null;
+            }
+            else {
+                for ( k = 0; k < sphericalHarmonicsR.length; k++ ) {
+                    hr = sphericalHarmonicsR[k];
+                    hi = sphericalHarmonicsI[k];
+                    featureVector.setFeature(j, k, hr, hi); 
+                }
+            }
+
+            //ImagePersistence.exportPPM(new File("radialF"+(100+i)+":"+(100+j)+".ppm"), radialFunction);
+        }
+        //ImagePersistence.exportPPM(new File("field"+(100+i)+".ppm"), distanceField);
+
+        return featureVector;
     }
 
     /**
@@ -472,6 +487,74 @@ public class DatasetControl implements GLEventListener
         return results;
     }
 
+    private ArrayList <String> matchSketch(
+        GL gl,
+        String imageFilename,
+        ArrayList<GeometryMetadata> descriptorsArray,
+        double tolerance)
+    {
+        int i, j;
+        double Ls;
+
+        ArrayList <String> results = new ArrayList <String>();
+        System.out.println("Searching for sketches from image " + imageFilename);
+
+        RGBImage img = null;
+        IndexedColorImage distanceField = new IndexedColorImage();
+        try {
+            img = ImagePersistence.importRGB(new File(imageFilename));
+        }
+        catch (Exception e) {
+            System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
+            System.err.println("Check you have access to that file from current working directory.");
+            System.err.println(e);
+            return results;
+        }
+
+        if ( img.getXSize() != 64 || img.getYSize() != 64 ) {
+            return results;
+        }
+        distanceField.init(64, 64);
+        int x, y, val;
+        RGBPixel p;
+        for ( x = 0; x < img.getXSize(); x++ ) {
+            for ( y = 0; y < img.getYSize(); y++ ) {
+                p = img.getPixel(x, y);
+                val = ((VSDK.signedByte2unsignedInteger(p.r)) +
+                       (VSDK.signedByte2unsignedInteger(p.g)) +
+                       (VSDK.signedByte2unsignedInteger(p.b))) / 3;
+                distanceField.putPixel(x, y,
+                    VSDK.unsigned8BitInteger2signedByte(val));
+            }
+        }
+
+        SphericalHarmonicShapeDescriptor featureVector;
+        featureVector = analyzeImageHarmonics(distanceField, 0);
+        if ( featureVector == null ) {
+            return results;
+        }
+        GeometryMetadata metadata = new GeometryMetadata();
+        metadata.getDescriptors().add(featureVector);
+
+        String name;
+        for ( i = 0; i < descriptorsArray.size(); i++ ) {
+            // Takes into consideration the euclidean distance as indicated
+            // in [FUNK2003].4 (L2 Minskowski distance).
+            for ( j = 1; j <= 13; j++ ) {
+                name = "PROJECTED_VIEW_" + j;
+                featureVector.setLabel(name);
+                Ls = metadata.doMinskowskiDistance(descriptorsArray.get(i), 2, name);
+                System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
+                    " to " + descriptorsArray.get(i).getFilename() + " : " + j);
+                if ( Ls < tolerance ) {
+                    results.add(descriptorsArray.get(i).getFilename() + ", view: " + j + " (" + Ls + ")");
+                }
+            }
+        }
+
+        return results;
+    }
+
     private void
     readDatabase(ArrayList<GeometryMetadata> descriptorsArray)
     {
@@ -561,7 +644,7 @@ public class DatasetControl implements GLEventListener
 
         if ( args.length < 1 ) {
             System.err.println("Usage: java DatasetControl command files...");
-            System.err.println("Commands are: add, searchModel");
+            System.err.println("Commands are: add, searchModel, searchSketch");
             System.exit(0);
         }
         if ( args[0].equals("add") ) {
@@ -573,6 +656,16 @@ public class DatasetControl implements GLEventListener
             ArrayList <String> similarModels;
             readDatabase(descriptorsArray);
             similarModels = matchModel(gl, args[1], descriptorsArray, 1);
+            System.out.println("Founded " + similarModels.size() +
+                " similar objects:");
+            for ( int i = 0; i < similarModels.size(); i++ ) {
+                System.out.println("  - " + similarModels.get(i));
+            }
+        }
+        else if ( args[0].equals("searchSketch") ) {
+            ArrayList <String> similarModels;
+            readDatabase(descriptorsArray);
+            similarModels = matchSketch(gl, args[1], descriptorsArray, 0.05);
             System.out.println("Founded " + similarModels.size() +
                 " similar objects:");
             for ( int i = 0; i < similarModels.size(); i++ ) {
@@ -615,23 +708,26 @@ public class DatasetControl implements GLEventListener
     public static void main(String args[])
     {
         DatasetControl instance = new DatasetControl(args);
-        if ( instance.offlineRenderer.isPbufferSupported() ) {
+        if ( instance.offlineRenderer.isPbufferSupported() ||
+             (args.length > 0 && !args[0].equals("add")) ) {
             instance.runApplication(null);
         }
         else {
-            // Create application based GUI
-            JFrame frame;
-            Dimension size;
+            if ( args.length > 0 && args[0].equals("add") ) {
+                // Create application based GUI
+                JFrame frame;
+                Dimension size;
 
-            instance.canvas = new GLCanvas();
-            instance.canvas.addGLEventListener(instance);
-            frame = new JFrame("VITRAL offline renderer window - do not hide");
-            frame.add(instance.canvas, BorderLayout.CENTER);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            size = new Dimension(instance.distanceFieldSide*2, instance.distanceFieldSide*2);
-            frame.setMinimumSize(size);
-            frame.setSize(size);
-            frame.setVisible(true);
+                instance.canvas = new GLCanvas();
+                instance.canvas.addGLEventListener(instance);
+                frame = new JFrame("VITRAL offline renderer window - do not hide");
+                frame.add(instance.canvas, BorderLayout.CENTER);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                size = new Dimension(instance.distanceFieldSide*2, instance.distanceFieldSide*2);
+                frame.setMinimumSize(size);
+                frame.setSize(size);
+                frame.setVisible(true);
+            }
         }
     }
 }
