@@ -199,3 +199,7 @@ Changes in 2007 january 21 revition
 
 Changes in 2007 february 22 revition
   - First skeleton to support VoxelVolume
+
+Changes in 2007 april 8 revition
+  - First succesful tests for the operators mks, mev and mef in the polyhedral
+    boundary representation based upon Mantylla text.

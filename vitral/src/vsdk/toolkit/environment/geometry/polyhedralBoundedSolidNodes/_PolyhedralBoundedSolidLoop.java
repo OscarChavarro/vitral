@@ -11,6 +11,7 @@
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
+import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Entity;
 
 /**
@@ -37,11 +38,44 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
     /// reference.
     public _PolyhedralBoundedSolidHalfEdge boundaryStartHalfEdge;
 
+    public CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdgesList;
+
     //=================================================================
     public _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace parent)
     {
         parentFace = parent;
         parentFace.boundariesList.add(this);
+        halfEdgesList =
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
+
+    }
+
+    public void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        halfEdgesList.locateWindowAtElem(he);
+    halfEdgesList.removeElemAtWindow();
+    }
+
+    /** Locates a half edge that goes from vertex with id `a` to vertex with
+    id `b`.  Returns null if no such half edge exists in this loop. */
+    public _PolyhedralBoundedSolidHalfEdge halfEdgeVertices(int a, int b)
+    {
+        _PolyhedralBoundedSolidHalfEdge he, oldhe;
+        he = boundaryStartHalfEdge;
+        do {
+        oldhe = he;
+            he = he.next();
+            if ( he == null ) {
+                // Loop is not closed!
+                break;
+            }
+
+            if ( oldhe.startingVertex.id == a && he.startingVertex.id == b) {
+        return oldhe;
+        }
+
+        } while( he != boundaryStartHalfEdge );
+    return null;
     }
 
     public String toString()

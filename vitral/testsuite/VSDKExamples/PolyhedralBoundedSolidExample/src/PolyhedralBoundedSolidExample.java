@@ -22,6 +22,8 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.render.jogl.JoglRenderer;
@@ -51,33 +53,54 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge he0, he1;
+        _PolyhedralBoundedSolidFace face;
+        _PolyhedralBoundedSolidLoop loop;
 
-    solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1, 1, 1); // mvfs
+        solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1, 1, 1); // mvfs
 
-    he0 = solid.halfEdgesList.get(0);
-        solid.lmev(he0, he0, 2, new Vector3D(1, 0.1, 0.1));
+        face = solid.polygonsList.get(0);
+        loop = loop = face.boundariesList.get(0);
 
-    he0 = solid.halfEdgesList.get(1);
-        solid.lmev(he0, he0, 3, new Vector3D(1, 1, 0.1));
-
-    he0 = solid.halfEdgesList.get(2);
+        he0 = loop.halfEdgeVertices(1, 1);
         solid.lmev(he0, he0, 4, new Vector3D(0.1, 1, 0.1));
 
-    he0 = solid.halfEdgesList.get(3);
-    he1 = solid.halfEdgesList.get(0);
+        he0 = loop.halfEdgeVertices(4, 1);
+        solid.lmev(he0, he0, 3, new Vector3D(1, 1, 0.1));
+
+        he0 = loop.halfEdgeVertices(3, 4);
+        solid.lmev(he0, he0, 2, new Vector3D(1, 0.1, 0.1));
+
+        he0 = loop.halfEdgeVertices(1, 4);
+        he1 = loop.halfEdgeVertices(2, 3);
         solid.lmef(he0, he1, 2);
 
-    he0 = solid.halfEdgesList.get(1);
-    he1 = solid.halfEdgesList.get(1);
-        solid.lmev(he0, he1, 5, new Vector3D(0.1, 0.1, 1));
+        he0 = loop.halfEdgeVertices(1, 2);
+        solid.lmev(he0, he0, 5, new Vector3D(0.1, 0.1, 1));
 
-    he0 = solid.halfEdgesList.get(9);
-    he1 = solid.halfEdgesList.get(9);
-        solid.lmev(he0, he1, 6, new Vector3D(1, 0.1, 1));
+        he0 = loop.halfEdgeVertices(2, 3);
+        solid.lmev(he0, he0, 6, new Vector3D(1, 0.1, 1));
 
-    he0 = solid.halfEdgesList.get(10);
-    he1 = solid.halfEdgesList.get(2);
+        he0 = loop.halfEdgeVertices(5, 1);
+        he1 = loop.halfEdgeVertices(6, 2);
         solid.lmef(he0, he1, 3);
+
+        he0 = loop.halfEdgeVertices(3, 4);
+        solid.lmev(he0, he0, 7, new Vector3D(1, 1, 1));
+
+        he0 = loop.halfEdgeVertices(6, 2);
+        he1 = loop.halfEdgeVertices(7, 3);
+        solid.lmef(he0, he1, 4);
+
+        he0 = loop.halfEdgeVertices(4, 1);
+        solid.lmev(he0, he0, 8, new Vector3D(0.1, 1, 1));
+
+        he0 = loop.halfEdgeVertices(7, 3);
+        he1 = loop.halfEdgeVertices(8, 4);
+        solid.lmef(he0, he1, 5);
+
+        he0 = loop.halfEdgeVertices(5, 6);
+        he1 = loop.halfEdgeVertices(8, 4);
+        solid.lmef(he0, he1, 6);
 
         //-----------------------------------------------------------------
     }
@@ -94,7 +117,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     }
 
     public static void main (String[] args) {
-    JoglRenderer.verifyOpenGLAvailability();
+        JoglRenderer.verifyOpenGLAvailability();
         PolyhedralBoundedSolidExample instance = new PolyhedralBoundedSolidExample();
         JFrame frame = new JFrame("VITRAL concept test - Polyhedral bounded solid example");
 
@@ -235,8 +258,8 @@ public class PolyhedralBoundedSolidExample extends Applet implements
           switch ( unicode_id ) {
             case '1': faceIndex --; break;
             case '2': faceIndex ++; break;
-      }
-      if ( faceIndex < 0 ) faceIndex = 0;
+          }
+          if ( faceIndex < 0 ) faceIndex = 0;
           canvas.repaint();
       }
   }

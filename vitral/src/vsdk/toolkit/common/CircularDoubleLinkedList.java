@@ -177,6 +177,15 @@ public class CircularDoubleLinkedList<E>
         lastAccessedIndex = i;
         return window.data;
     }
+
+    public void removeElemAtWindow()
+    {
+    if ( window == null ) return;
+        if ( window == head ) head = window.next;
+        window.previous.next = window.next;
+        window.next.previous = window.previous;
+        window = null;
+    }
 }
 
 //===========================================================================

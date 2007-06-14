@@ -68,9 +68,9 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
     */
     public _PolyhedralBoundedSolidHalfEdge previous()
     {
-        parentLoop.parentFace.parentSolid.halfEdgesList.locateWindowAtElem(this);
-        parentLoop.parentFace.parentSolid.halfEdgesList.previous();
-    return parentLoop.parentFace.parentSolid.halfEdgesList.getWindow();
+        parentLoop.halfEdgesList.locateWindowAtElem(this);
+        parentLoop.halfEdgesList.previous();
+    return parentLoop.halfEdgesList.getWindow();
     }
 
     /**
@@ -78,18 +78,9 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
     */
     public _PolyhedralBoundedSolidHalfEdge next()
     {
-        parentLoop.parentFace.parentSolid.halfEdgesList.locateWindowAtElem(this);
-        parentLoop.parentFace.parentSolid.halfEdgesList.next();
-    return parentLoop.parentFace.parentSolid.halfEdgesList.getWindow();
-    }
-
-    public _PolyhedralBoundedSolidHalfEdge nextSameLoop()
-    {
-    _PolyhedralBoundedSolidHalfEdge next = this;
-        do {
-            next = next.next();
-        } while ( parentLoop != next.parentLoop );
-    return next;
+        parentLoop.halfEdgesList.locateWindowAtElem(this);
+        parentLoop.halfEdgesList.next();
+    return parentLoop.halfEdgesList.getWindow();
     }
 
     private int
@@ -105,37 +96,6 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
             return RIGHT_SIDE;
     }
         return NO_SIDE;
-    }
-
-    /**
-    Locates the next halfedge in the same side as current halfedge, in other
-    words the next halfedge in the same face.
-
-    Can return null if:
-      - Current halfedge is not associated with an edge
-      - Current halfedge is not well associated with is edge (i.e. if for
-        some weird reason it is neither left or right in its edge).
-    */
-    public _PolyhedralBoundedSolidHalfEdge nextSameSide()
-    {
-    int mySide = determineSideness();
-    _PolyhedralBoundedSolidHalfEdge next;
-
-        if ( mySide == NO_SIDE ) {
-        return null;
-    }
-
-        parentLoop.parentFace.parentSolid.halfEdgesList.locateWindowAtElem(this);
-        parentLoop.parentFace.parentSolid.halfEdgesList.next();
-    next = parentLoop.parentFace.parentSolid.halfEdgesList.getWindow();
-        int otherSide = next.determineSideness();
-        if ( mySide == otherSide ) {
-        return next;
-    }
-    else if ( otherSide != NO_SIDE ) {
-            return next.mirrorHalfEdge();
-    }
-    return null;
     }
 
     /**

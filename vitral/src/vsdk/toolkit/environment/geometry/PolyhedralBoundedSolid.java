@@ -11,6 +11,8 @@
 
 package vsdk.toolkit.environment.geometry;
 
+import java.util.ArrayList;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
@@ -43,7 +45,6 @@ public class PolyhedralBoundedSolid extends Solid {
 
     //= Main boundary representation solid data structure =============
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList;
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdgesList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
 
@@ -52,8 +53,6 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         polygonsList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
-        halfEdgesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
         edgesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
@@ -66,8 +65,6 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         polygonsList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
-        halfEdgesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
         edgesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
@@ -124,7 +121,7 @@ public class PolyhedralBoundedSolid extends Solid {
           else {
             he =
                 new _PolyhedralBoundedSolidHalfEdge(v, where.parentLoop, this);
-            halfEdgesList.insertBefore(he, where);
+            where.parentLoop.halfEdgesList.insertBefore(he, where);
             he.startingVertex = v;
         }
         he.parentEdge = e;
@@ -174,7 +171,7 @@ public class PolyhedralBoundedSolid extends Solid {
         newVertex = new _PolyhedralBoundedSolidVertex(this, p, vertexId);
         newHalfEdge =
             new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop, this);
-        halfEdgesList.add(newHalfEdge);
+        newLoop.halfEdgesList.add(newHalfEdge);
         newLoop.boundaryStartHalfEdge = newHalfEdge;
     }
 
@@ -219,7 +216,7 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge x, y;
             x = addhe(newEdge, oldVertex, he1, PLUS);
             y = addhe(newEdge, newVertex, he1, MINUS);
-            halfEdgesList.swapElements(x, y);
+            //halfEdgesList.swapElements(x, y);
         }
         newVertex.emanatingHalfEdge = he2.previous();
         he2.startingVertex.emanatingHalfEdge = he2;
@@ -248,24 +245,35 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
+        _PolyhedralBoundedSolidLoop oldLoop;
         _PolyhedralBoundedSolidEdge newEdge;
         _PolyhedralBoundedSolidHalfEdge he, nhe1, nhe2, temp;
 
         newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, faceId);
+    oldLoop = he1.parentLoop;
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
 
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> migratedHalfEdges;
+    migratedHalfEdges = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+
         he = he1;
         while ( he != he2 ) {
-            he.parentLoop = newLoop;
-            he = he.nextSameLoop();
+        migratedHalfEdges.add(he);
+            he = he.next();
             if ( he == he1 ) break;
         }
 
+    int i;
+    for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
+        he = migratedHalfEdges.get(i);
+            he.parentLoop = newLoop;
+        oldLoop.unlistHalfEdge(he);
+        newLoop.halfEdgesList.add(he);
+    }
+
         nhe1 = addhe(newEdge, he2.startingVertex, he1, MINUS);
         nhe2 = addhe(newEdge, he1.startingVertex, he2, PLUS);
-
-        halfEdgesList.swapElements(nhe1, nhe2);
 
         newLoop.boundaryStartHalfEdge = nhe1;
         he2.parentLoop.boundaryStartHalfEdge = nhe2;
