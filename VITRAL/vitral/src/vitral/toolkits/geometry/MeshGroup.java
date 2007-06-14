@@ -2,9 +2,7 @@ package vitral.toolkits.geometry;
 
 import java.util.Vector;
 import java.util.Enumeration;
-import javax.media.opengl.GL;
 import vitral.toolkits.common.QualitySelection;
-import vitral.toolkits.visual.jogl.JoglMeshRenderer;
 
 /**
  * <p>Title: </p>
