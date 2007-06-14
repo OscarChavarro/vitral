@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
 public class CameraExample extends Applet implements 
@@ -51,6 +52,7 @@ public class CameraExample extends Applet implements
     }
 
     public static void main (String[] args) {
+    JoglRenderer.verifyOpenGLAvailability();
         CameraExample instance = new CameraExample();
         JFrame frame = new JFrame("VITRAL concept test - JOGL Hello World");
 

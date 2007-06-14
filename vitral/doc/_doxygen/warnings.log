@@ -12,9 +12,9 @@
 
 /media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
 /media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:49: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
+/media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:54: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 
-/media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/media/IndexedColorImage.java:96: Warning: The following parameters of vsdk::toolkit::media::IndexedColorImage::putPixelRgb(int x, int y, RGBPixel p) are not documented:
+/media/datos1/users/jedilink/academico/Javeriana/VITRAL/vitral/src/vsdk/toolkit/media/IndexedColorImage.java:133: Warning: The following parameters of vsdk::toolkit::media::IndexedColorImage::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 

@@ -16,7 +16,7 @@ algorithms and data structures (i.e. a class) with the specific functionality
 of providing persistence operations for a data Entity.
 
 The PersistenceElement abstract class provides an interface for *Persistence
-style classes. This serves two purposes:
+style classes. This serves three purposes:
   - To help in design level organization of persistence classes (this eases the
     study of the class hierarchy)
   - To provide a place to locate possible future operations, common to
@@ -26,6 +26,8 @@ style classes. This serves two purposes:
     numeric data types. Note that this code is NOT portable, as it needs
     explicit programmer configuration for little-endian or big-endian
     hardware platform.
+  - To provide means of accessing some operating system's native library
+    files and other basic file system managment.
 */
 
 public abstract class PersistenceElement {
@@ -271,6 +273,57 @@ public abstract class PersistenceElement {
             }
         } while ( character[0] != 0x00 );
         return msg;
+    }
+
+    /**
+    Given the name of a native library, this method tries to determine
+    wheter it is available or not.  Takes into account the cross-platform
+    differences, and it is supposed to check if a System.loadLibrary
+    call for givel library will succeed or not.
+
+    Use this method to anticipate any problem before it fails, so a better
+    user feedback instruction can be given instead of waiting for an exception
+    to be thrown.  Some libraries, as JOGL fails to return to the application
+    the exception of a failed System.loadLibrary, so this method is useful
+    in bettering the user feedback for this kind of circumstance.
+    */
+    public static boolean verifyLibrary(String libname) {
+        String nativeLibname = System.mapLibraryName(libname);
+        String paths = System.getProperty("java.library.path");
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if ( os.startsWith("linux") || os.startsWith("solaris") ||
+             os.startsWith("unix") ) {
+            paths = paths.concat(":/lib");
+            paths = paths.concat(":/usr/lib");
+            paths = paths.concat(":/usr/local/lib");
+            paths = paths.concat(":/usr/X11R6/lib");
+            paths = paths.concat(":/usr/X11R6/lib64");
+            paths = paths.concat(":/usr/openwin/lib");
+            paths = paths.concat(":/usr/dt/lib");
+            paths = paths.concat(":/lib64");
+            paths = paths.concat(":/usr/lib64");
+            paths = paths.concat(":/usr/local/lib64");
+            paths = paths.concat(":" + System.getenv("LD_LIBRARY_PATH"));
+        }
+
+        String separator = File.pathSeparator;                
+        StringTokenizer st = new StringTokenizer(paths, separator);
+        String token;
+        String concat = File.separator;
+        while ( st.hasMoreTokens() ) {
+            token = st.nextToken();
+            File directory = new File(token);
+            if ( !directory.isDirectory()  ) {
+                continue;
+            }
+            File file = new File(token + concat + nativeLibname);
+            if ( file.exists() ) {
+                return true;
+            }
+                        
+        }
+        return false;
     }
 }
 

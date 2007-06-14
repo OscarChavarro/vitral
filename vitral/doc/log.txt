@@ -177,3 +177,5 @@ Changes in 2006 december 18 to 21 revition
 Changes in 2006 december 24 revition
   - Ported to JDK1.6, some minor warnings fixed
 
+Changes in 2006 december 28 revition
+  - First tests of Nvidia Cg support :-)

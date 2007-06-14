@@ -49,7 +49,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static void activate(GL gl, RGBAImage img)
+    public static int activate(GL gl, RGBAImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -100,11 +100,6 @@ public class JoglRGBAImageRenderer extends JoglRenderer
 
             //----
             try {
-/*
-                item.renderer = TextureIO.newTexture(
-                new FileInputStream("./etc/render.png"), true, TextureIO.PNG);
-*/
-
                 TextureData textureData;
                 textureData = new TextureData(
                    3, // int internalFormat (number of components)
@@ -147,6 +142,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
         */
+    return item.glList;
     }
 
     public static void draw(GL gl, RGBAImage img)

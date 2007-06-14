@@ -44,13 +44,13 @@ public class JoglRGBImageRenderer extends JoglRenderer
     account to pass the image data to the graphics hardware only once. Note that
     this method creates and use an OpenGL/JOGL compilation list for each image,
     to ensure optimal performance.
-
+    @return The OpenGL display list associated with this visualization
     \todo
     In applications with changing images, the memory list of compiled lists
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static void activate(GL gl, RGBImage img)
+    public static int activate(GL gl, RGBImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -95,16 +95,11 @@ public class JoglRGBImageRenderer extends JoglRenderer
             compiledImages.add(item);
 
             //----
-            gl.glGenTextures(1, lists, 0);
-            item.glList=lists[0];
+            //gl.glGenTextures(1, lists, 0);
+            //item.glList=lists[0];
             //gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
 
             try {
-/*
-                item.renderer = TextureIO.newTexture(
-                new FileInputStream("./etc/render.png"), true, TextureIO.PNG);
-*/
-
                 TextureData textureData;
                 textureData = new TextureData(
                    3, // int internalFormat (number of components)
@@ -120,6 +115,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
                    null // TextureData.Flusher flusher
                 );
                 item.renderer = TextureIO.newTexture(textureData);
+                item.glList = item.renderer.getTextureObject();
             }
             catch ( Exception e ) {
                 System.err.println(e);
@@ -133,13 +129,19 @@ public class JoglRGBImageRenderer extends JoglRenderer
         }
 
         //- 4. Use the image's glList -------------------------------------
-        item.renderer.bind();
-        item.renderer.enable();
+    if ( glListIsCompiled == false ) {
+            item.renderer.bind();
+            item.renderer.enable();
+    }
+    else {
+        gl.glCallList(item.glList);
+    }
         /*
         if ( item != null ) {
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
         */
+    return item.glList;
     }
 
     public static void draw(GL gl, RGBImage img)

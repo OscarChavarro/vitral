@@ -32,13 +32,13 @@ public class JoglImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static void activate(GL gl, Image img)
+    public static int activate(GL gl, Image img)
     {
         if ( img instanceof RGBAImage ) {
-            JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
+            return JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
         }
         else if ( img instanceof RGBImage ) {
-            JoglRGBImageRenderer.activate(gl, (RGBImage)img);
+            return JoglRGBImageRenderer.activate(gl, (RGBImage)img);
         }
         else {
             String c = img.getClass().getName();
@@ -46,6 +46,7 @@ public class JoglImageRenderer extends JoglRenderer
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.activate",
             "Image GL activation not implemented for subclass " + c);
         }
+    return -1;
     }
 
     public static void draw(GL gl, Image img)
