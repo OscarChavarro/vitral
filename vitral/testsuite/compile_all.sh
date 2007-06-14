@@ -45,6 +45,9 @@ cd ..
 cd MeshExample
 ./compile.sh
 cd ..
+cd PolyhedralBoundedSolidExample
+./compile.sh
+cd ..
 cd CgShaderExample
 ./compile1.sh
 ./compile2.sh

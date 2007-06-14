@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
-import javax.media.opengl.glu.GLUtessellatorCallback;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
@@ -21,94 +20,9 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 
-class _CurveTesselatorProcessorRoutines extends JoglRenderer 
-implements GLUtessellatorCallback
-{
-    private GL gl;
-    private GLU glu;
-    public _CurveTesselatorProcessorRoutines(GL gl, GLU glu) {
-        this.gl = gl;
-        this.glu = glu;
-    }
-
-    public void begin(int type) {
-        gl.glBegin(type);
-    }
-
-    public void end() {
-        gl.glEnd();
-    }
-
-    public void vertex(Object vertexData) {
-        double[] pointer;
-        if ( vertexData instanceof double[] ) {
-            pointer = (double[]) vertexData;
-            gl.glVertex3dv(pointer, 0);
-        }
-
-    }
-
-    public void vertexData(Object vertexData, Object polygonData) {
-    }
-
-    /* combineCallback is used to create a new vertex when edges intersect.
-    coordinate location is trivial to calculate, but weight[4] may be
-    used to average color, normal, or texture coordinate data. In this
-    program, color is weighted. */
-    public void combine(double[] coords, Object[] data, 
-                        float[] weight, Object[] outData) {
-        double[] vertex = new double[6];
-        int i;
-
-        vertex[0] = coords[0];
-        vertex[1] = coords[1];
-        vertex[2] = coords[2];
-        for (i = 3; i < 6/* 7OutOfBounds from C! */; i++)
-            vertex[i] = weight[0]
-                * ((double[]) data[0])[i] + weight[1]
-                * ((double[]) data[1])[i] + weight[2]
-                * ((double[]) data[2])[i] + weight[3]
-                * ((double[]) data[3])[i];
-        outData[0] = vertex;
-    }
-
-    public void combineData(double[] coords, Object[] data, //
-                            float[] weight, Object[] outData, Object polygonData) {
-    }
-
-    public void error(int errnum) {
-        String estring = null;
-
-        try {
-            estring = glu.gluErrorString(errnum);
-        }
-        catch ( Exception e ) {
-            estring = "" + e;
-        }
-
-        System.err.println("Tessellation Error: " + estring);
-        //System.exit(0);
-    }
-
-    public void beginData(int type, Object polygonData) {
-    }
-
-    public void endData(Object polygonData) {
-    }
-
-    public void edgeFlag(boolean boundaryEdge) {
-    }
-
-    public void edgeFlagData(boolean boundaryEdge, Object polygonData) {
-    }
-
-    public void errorData(int errnum, Object polygonData) {
-    }
-}
-
 public class JoglParametricCurveRenderer extends JoglRenderer {
     private static GLU glu;
-    private static _CurveTesselatorProcessorRoutines tesselatorProcessor;
+    private static _JoglPolygonTesselatorRoutines tesselatorProcessor;
 
     static {
         glu = null;
@@ -339,24 +253,31 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         if ( tesselatorProcessor == null ) {
             glu = new GLU();
             tesselatorProcessor = 
-                new _CurveTesselatorProcessorRoutines(gl, glu);
+                new _JoglPolygonTesselatorRoutines(gl, glu);
         }
 
         GLUtessellator tesselator;
+        int i, j;
+    int totalNumberOfPoints;
+        double list[][];
+    Vector3D first;
+    boolean beginning;
+    int count;
 
         tesselator = glu.gluNewTess();
-        glu.gluTessCallback(tesselator, glu.GLU_TESS_VERTEX, tesselatorProcessor);
-        glu.gluTessCallback(tesselator, glu.GLU_TESS_BEGIN, tesselatorProcessor);
-        glu.gluTessCallback(tesselator, glu.GLU_TESS_END, tesselatorProcessor);
-        glu.gluTessCallback(tesselator, glu.GLU_TESS_ERROR, tesselatorProcessor);
+        glu.gluTessCallback(tesselator,
+           glu.GLU_TESS_VERTEX, tesselatorProcessor);
+        glu.gluTessCallback(tesselator,
+           glu.GLU_TESS_BEGIN, tesselatorProcessor);
+        glu.gluTessCallback(tesselator,
+           glu.GLU_TESS_END, tesselatorProcessor);
+        glu.gluTessCallback(tesselator,
+           glu.GLU_TESS_ERROR, tesselatorProcessor);
 
         glu.gluTessBeginPolygon(tesselator, null);
 
-        int i;
-
         //-----------------------------------------------------------------
-        int totalNumberOfPoints = 0;
-        double list[][];
+        totalNumberOfPoints = 0;
 
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( curve.types.get(i).intValue() == curve.BREAK ) {
@@ -370,13 +291,13 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         list = new double[totalNumberOfPoints][3];
 
         //-----------------------------------------------------------------
-        int count = 0;
+        count = 0;
 
         glu.gluTessBeginContour(tesselator);
         //gl.glBegin(gl.GL_LINE_LOOP);
 
-        Vector3D first = new Vector3D();
-        boolean beginning = true;
+        first = new Vector3D();
+        beginning = true;
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( curve.types.get(i).intValue() == curve.BREAK ) {
                 i++;
@@ -392,7 +313,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
             ArrayList polyline = curve.calculatePoints(i, false);
 
             // Insert into current contour the polyline
-            for ( int j = 0; j < polyline.size(); j++ ) {
+            for ( j = 0; j < polyline.size(); j++ ) {
                 Vector3D vec = (Vector3D) polyline.get(j);
                 if ( !beginning ) {
                     Vector3D prev = new Vector3D(list[count-1][0], 

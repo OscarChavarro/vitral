@@ -64,6 +64,27 @@ public class _PolyhedralBoundedSolidFace extends Entity {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
     }
 
+    /**
+    Find the halfedge from vertex `vn1` to vertex `vn2`. 
+    Returns null if halfedge not found, or current founded halfedge otherwise.
+    Build based over function `fhe` in program [MANT1988].11.9.
+    */
+    public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1, int vn2)
+    {
+        _PolyhedralBoundedSolidLoop loop;
+    _PolyhedralBoundedSolidHalfEdge he;
+    int i;
+
+    for ( i = 0; i < boundariesList.size(); i++ ) {
+        loop = boundariesList.get(i);
+        he = loop.halfEdgeVertices(vn1, vn2);
+            if ( he != null ) {
+        return he;
+        }
+    }
+    return null;
+    }
+
     public String toString()
     {
         String msg;

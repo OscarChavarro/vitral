@@ -12,6 +12,8 @@ package vsdk.toolkit.render.jogl;
 
 // JOGL clases
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUtessellator;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGparameter;
 
@@ -29,6 +31,12 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 
 public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 {
+    private static GLU glu;
+    private static _JoglPolygonTesselatorRoutines tesselatorProcessor;
+    static {
+        glu = null;
+        tesselatorProcessor = null;
+    }
 
     private static double
     curveFactor(double param, double factor)
@@ -37,7 +45,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         return 0.1 * factor * Math.sin(0.5*percent*Math.PI);
     }
 
-    public static void
+    private static void
     drawHalfEdge(GL gl, _PolyhedralBoundedSolidHalfEdge he, 
                  Vector3D startP, Vector3D endP, InfinitePlane loopPlane)
     {
@@ -68,11 +76,6 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             }
         gl.glEnd();
         P = startP.add(v.multiply(factor).add(u.multiply(0)));
-/*
-        gl.glTranslated(P.x, P.y, P.z);
-        gl.glRotated(20, n.x, n.y, n.z);
-        gl.glTranslated(-P.x, -P.y, -P.z);
-*/
         Vector3D Pi = u.multiply(factor*0.1);
         gl.glTranslated(Pi.x, Pi.y, Pi.z);
 
@@ -102,7 +105,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
           case 4:  r = 1; g = 0; b = 1; break;
           case 5:  r = 0.5; g = 0; b = 0; break;
           case 6:  r = 0; g = 0.5; b = 0; break;
-          default: r = 1; g = 1; b = 1; break;
+          default: r = .5; g = .5; b = .5; break;
         }
         gl.glColor3d(r, g, b);
     }
@@ -111,6 +114,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     draw(GL gl, PolyhedralBoundedSolid solid,
          Camera c, RendererConfiguration q, int faceIndex)
     {
+        //-----------------------------------------------------------------
         int i, j;
 
         JoglRenderer.disableNvidiaCgProfiles();
@@ -133,62 +137,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;
 
-        //-----------------------------------------------------------------
-        System.out.println("= PRINTING THE MAIN SOLID STRUCTURE ===========================================");
-        System.out.println("Solid with " + 
-            solid.verticesList.size() + " vertices:");
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
-            _PolyhedralBoundedSolidVertex v;
-            v = solid.verticesList.get(i);
-            System.out.println("  - " + v);
-        }
-
-        System.out.println("Solid with " +
-                           solid.edgesList.size() + " edges:");
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
-            System.out.println("  - Edge " + i + ": " + e);
-        }
-        System.out.println("Solid with " + 
-            solid.polygonsList.size() + " faces:");
-
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            System.out.println("  - " + face);
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
-
-                System.out.println("    . Loop " + j + ", with halfedges: ");
-                loop = face.boundariesList.get(j);
-
-
-                System.out.println("HeID | StartVertex | End Vertex | nccw He | pccwHe");
-                System.out.println("-----+-------------+------------+---------+-------");
-
-                he = loop.boundaryStartHalfEdge;
-                heStart = he;
-                do {
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        System.out.println("  - (not closed loop)");
-                        break;
-                    }
-
-                    System.out.printf("%4d | %11d | %10d | %7d | %6d",
-                        he.id, he.startingVertex.id,
-                        he.next().startingVertex.id,
-                        he.next().id, he.previous().id);
-                    System.out.println("");
-
-                } while( he != heStart );
-            }
-        }
-
-        //-----------------------------------------------------------------
-        loopPlane =
-            new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
+        //- Draw face boundaries, one for each loop -----------------------
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
 
@@ -211,6 +160,15 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         break;
                     }
 
+                    // Calculate containing plane equation for current edge
+                    p0 = he.startingVertex.position;
+                    p1 = he.next().startingVertex.position;
+                    p2 = he.next().next().startingVertex.position;
+                    a = p1.substract(p0);    a.normalize();
+                    b = p2.substract(p0);    b.normalize();
+                    n = a.crossProduct(b);   n.normalize();
+                    loopPlane = new InfinitePlane(n, p0);
+
                     // Draw halfedges
                     if ( i == faceIndex ) {
                         gl.glLineWidth(2);
@@ -219,124 +177,118 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         gl.glLineWidth(1);
                     }
                     setColor(gl, i);
-                    drawHalfEdge(gl, he, he.startingVertex.position,
-                                 he.next().startingVertex.position,
-                                 loopPlane) ;
+                    drawHalfEdge(gl, he, p0, p1, loopPlane);
 
                     // Draw edges (repeated!, this could be done better)
                     gl.glLineWidth(1);
-            gl.glColor3d(0, 0, 0);
-            gl.glBegin(gl.GL_LINES);
-            gl.glVertex3d(he.startingVertex.position.x,
-                  he.startingVertex.position.y,
-                  he.startingVertex.position.z);
-            gl.glVertex3d(he.next().startingVertex.position.x,
-                  he.next().startingVertex.position.y,
-                  he.next().startingVertex.position.z);
-            gl.glEnd();
+                    gl.glColor3d(0, 0, 0);
+                    gl.glBegin(gl.GL_LINES);
+                    gl.glVertex3d(he.startingVertex.position.x,
+                                  he.startingVertex.position.y,
+                                  he.startingVertex.position.z);
+                    gl.glVertex3d(he.next().startingVertex.position.x,
+                                  he.next().startingVertex.position.y,
+                                  he.next().startingVertex.position.z);
+                    gl.glEnd();
                 } while( he != heStart );
             }
         }
-        //-----------------------------------------------------------------
-/*
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
 
-            if ( i == faceIndex ) {
-                gl.glLineWidth(2);
-            }
-            else {
-                gl.glLineWidth(1);
-                continue;
-            }
+        //- Prepare tesselator --------------------------------------------
+        //double list[] = new double [3];
+        if ( tesselatorProcessor == null ) {
+            glu = new GLU();
+            tesselatorProcessor = 
+                new _JoglPolygonTesselatorRoutines(gl, glu);
+        }
+
+        GLUtessellator tesselator;
+
+        //- Draw solid faces one by one -----------------------------------
+        gl.glCullFace(gl.GL_BACK);
+        gl.glEnable(gl.GL_CULL_FACE);
+
+        //-----------------------------------------------------------------
+        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+            // Logic
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            //if ( i != faceIndex ) continue;
+            setColor(gl, i);
+
+            // Count used vertex for current face
+            int totalNumberOfPoints = 0;
 
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
                 loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null  ) {
+                        // Loop is not closed!
+                        break;
+                    }
+                    // Counting
+                    totalNumberOfPoints++;
+                } while( he != heStart );
+            }
+
+            // Tesselator preparation for current face
+            int count;
+            double list[][]; // JOGL GLU Tesselator needs a vertex memory
+
+            tesselator = glu.gluNewTess();
+            list = new double[totalNumberOfPoints][3];
+            count = 0;
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_VERTEX, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_BEGIN, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_END, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_ERROR, tesselatorProcessor);
+            glu.gluTessBeginPolygon(tesselator, null);
+
+            // Face polygon generation via JOGL GLU tesselator
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
 
+                glu.gluTessBeginContour(tesselator);
 
-                loopPlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
-                //- First pass: determine face plane -------------------------
-                int k = 0;
+                loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
                 heStart = he;
                 do {
-                    //-----
-                    switch ( k ) {
-                      case 0: p0 = he.startingVertex.position; break;
-                      case 1: p1 = he.startingVertex.position; break;
-                      case 2: p2 = he.startingVertex.position; break;
-                    }
-                    //-----
-                    he = he.nextSameLoop();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        System.out.println("  - (not closed loop)");
-                        break;
-                    }
-                    System.out.println("      . HE " + he.id);
-                    k++;
-                } while( he != heStart );
-                if ( k >= 3 ) {
-                    a = p1.substract(p0);    a.normalize();
-                    b = p2.substract(p0);    b.normalize();
-                    n = a.crossProduct(b);   n.normalize();
-                    loopPlane = new InfinitePlane(n, p0);
-                }
-
-                //- Second pass: draw face -----------------------------------
-                he = loop.boundaryStartHalfEdge;
-                heStart = he;
-                hePrev = null;
-                do {
-                    //-----
-                    he = he.nextSameLoop();
+                    // Logic
+                    he = he.next();
                     if ( he == null ) {
                         // Loop is not closed!
                         break;
                     }
-                    if ( hePrev != null ) {
-                        drawHalfEdge(gl, hePrev,
-                                     hePrev.startingVertex.position,
-                                     he.startingVertex.position, loopPlane);
-                    }
-                    hePrev = he;
-                    k++;
+
+                    // Draw polygon parts
+                    p0 = he.startingVertex.position;
+                    list[count][0] = p0.x;
+                    list[count][1] = p0.y;
+                    list[count][2] = p0.z;
+                    glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                    count++;
+
                 } while( he != heStart );
-                if ( he != null ) {
-                    he = he.nextSameLoop();
-                    drawHalfEdge(gl, hePrev,
-                                 hePrev.startingVertex.position,
-                                 he.startingVertex.position, loopPlane);
-                }
+
+                glu.gluTessEndContour(tesselator);
             }
+
+            glu.gluTessEndPolygon(tesselator);
+            glu.gluDeleteTess(tesselator);
         }
 
         //-----------------------------------------------------------------
-        loopPlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
-            startP = e.leftHalf.startingVertex.position;
-            endP = e.rightHalf.startingVertex.position;
-            //gl.glLineWidth(1.0f);
-            //drawHalfEdge(gl, e.leftHalf, startP, endP, loopPlane);
-
-            //if ( selectedHe == e.rightHalf ) {
-            //    gl.glLineWidth(2.0f);
-            //  }
-            //  else {
-            //    gl.glLineWidth(1.0f);
-            //}
-            //drawHalfEdge(gl, e.rightHalf, endP, startP, loopPlane);
-            gl.glLineWidth(3.0f);
-            gl.glColor3d(0, 0, 0);
-            gl.glBegin(gl.GL_LINES);
-                gl.glVertex3d(startP.x, startP.y, startP.z);
-                gl.glVertex3d(endP.x, endP.y, endP.z);
-            gl.glEnd();
-        }
-*/
     }
 }
 

@@ -51,56 +51,41 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         quality = new RendererConfiguration();
         cameraController = new CameraControllerAquynza(camera);
 
-        //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge he0, he1;
-        _PolyhedralBoundedSolidFace face;
-        _PolyhedralBoundedSolidLoop loop;
+        //- Cube building -------------------------------------------------
+        solid = new PolyhedralBoundedSolid();
+    solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
+        solid.mev(1, 1, 1, 1, 1, 4, new Vector3D(0.1, 1, 0.1));
+        solid.mev(1, 1, 4, 1, 1, 3, new Vector3D(1, 1, 0.1));
+        solid.mev(1, 1, 3, 4, 4, 2, new Vector3D(1, 0.1, 0.1));
+        solid.mef(1, 1, 1, 4, 2, 3, /*NewFaceId*/ 2);
+        solid.mev(1, 1, 1, 2, 2, 5, new Vector3D(0.1, 0.1, 1));
+        solid.mev(1, 1, 2, 3, 3, 6, new Vector3D(1, 0.1, 1));
+        solid.mef(1, 1, 5, 1, 6, 2, /*NewFaceId*/ 3);
+        solid.mev(1, 1, 3, 4, 4, 7, new Vector3D(1, 1, 1));
+        solid.mef(1, 1, 6, 2, 7, 3, /*NewFaceId*/ 4);
+        solid.mev(1, 1, 4, 1, 1, 8, new Vector3D(0.1, 1, 1));
+        solid.mef(1, 1, 7, 3, 8, 4, /*NewFaceId*/ 5);
+        solid.mef(1, 1, 5, 6, 8, 4, /*NewFaceId*/ 6);
 
-        solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1, 1, 1); // mvfs
+        //- Cube modification to holed box --------------------------------
+        solid.mev(6, 6, 5, 6, 6, 9, new Vector3D(0.3, 0.3, 1));
+        solid.kemr(6, 6, 5, 9, 9, 5);
+        solid.mev(6, 6, 9, 9, 9, 10, new Vector3D(0.8, 0.3, 1));
+        solid.mev(6, 6, 10, 9, 9, 11, new Vector3D(0.8, 0.8, 1));
+        solid.mev(6, 6, 11, 10, 10, 12, new Vector3D(0.3, 0.8, 1));
+        solid.mef(6, 6, 9, 10, 12, 11, /*NewFaceId*/ 7);
 
-        face = solid.polygonsList.get(0);
-        loop = loop = face.boundariesList.get(0);
+        //- Box extrusion -------------------------------------------------
+        solid.mev(7, 7, 9, 10, 10, 13, new Vector3D(0.3, 0.3, 0.1));
+        solid.mev(7, 7, 10, 11, 11, 14, new Vector3D(0.8, 0.3, 0.1));
+        solid.mef(7, 7, 13, 9, 14, 10, /*NewFaceId*/ 8);
+        solid.mev(7, 7, 11, 12, 12, 15, new Vector3D(0.8, 0.8, 0.1));
+        solid.mef(7, 7, 14, 10, 15, 11, /*NewFaceId*/ 9);
+        solid.mev(7, 7, 12, 9, 9, 16, new Vector3D(0.3, 0.8, 0.1));
+        solid.mef(7, 7, 15, 11, 16, 12, /*NewFaceId*/ 10);
+        solid.mef(7, 7, 13, 14, 16, 12, /*NewFaceId*/ 11);
 
-        he0 = loop.halfEdgeVertices(1, 1);
-        solid.lmev(he0, he0, 4, new Vector3D(0.1, 1, 0.1));
-
-        he0 = loop.halfEdgeVertices(4, 1);
-        solid.lmev(he0, he0, 3, new Vector3D(1, 1, 0.1));
-
-        he0 = loop.halfEdgeVertices(3, 4);
-        solid.lmev(he0, he0, 2, new Vector3D(1, 0.1, 0.1));
-
-        he0 = loop.halfEdgeVertices(1, 4);
-        he1 = loop.halfEdgeVertices(2, 3);
-        solid.lmef(he0, he1, 2);
-
-        he0 = loop.halfEdgeVertices(1, 2);
-        solid.lmev(he0, he0, 5, new Vector3D(0.1, 0.1, 1));
-
-        he0 = loop.halfEdgeVertices(2, 3);
-        solid.lmev(he0, he0, 6, new Vector3D(1, 0.1, 1));
-
-        he0 = loop.halfEdgeVertices(5, 1);
-        he1 = loop.halfEdgeVertices(6, 2);
-        solid.lmef(he0, he1, 3);
-
-        he0 = loop.halfEdgeVertices(3, 4);
-        solid.lmev(he0, he0, 7, new Vector3D(1, 1, 1));
-
-        he0 = loop.halfEdgeVertices(6, 2);
-        he1 = loop.halfEdgeVertices(7, 3);
-        solid.lmef(he0, he1, 4);
-
-        he0 = loop.halfEdgeVertices(4, 1);
-        solid.lmev(he0, he0, 8, new Vector3D(0.1, 1, 1));
-
-        he0 = loop.halfEdgeVertices(7, 3);
-        he1 = loop.halfEdgeVertices(8, 4);
-        solid.lmef(he0, he1, 5);
-
-        he0 = loop.halfEdgeVertices(5, 6);
-        he1 = loop.halfEdgeVertices(8, 4);
-        solid.lmef(he0, he1, 6);
+        //- Topology joining from 0-genus to 1-genus ----------------------
 
         //-----------------------------------------------------------------
     }
@@ -258,6 +243,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
           switch ( unicode_id ) {
             case '1': faceIndex --; break;
             case '2': faceIndex ++; break;
+            case 'I': System.out.println(solid); break;
           }
           if ( faceIndex < 0 ) faceIndex = 0;
           canvas.repaint();

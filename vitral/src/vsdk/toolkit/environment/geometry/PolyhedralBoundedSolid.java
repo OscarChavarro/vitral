@@ -13,6 +13,9 @@ package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
 
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
@@ -49,7 +52,7 @@ public class PolyhedralBoundedSolid extends Solid {
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
 
     //=================================================================
-    public PolyhedralBoundedSolid(Vector3D firstPoint, int vertexId, int faceId)
+    public PolyhedralBoundedSolid()
     {
         polygonsList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
@@ -57,26 +60,16 @@ public class PolyhedralBoundedSolid extends Solid {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
-        mvfs(new Vector3D(firstPoint), vertexId, faceId);
-    }
-
-    public PolyhedralBoundedSolid(double firstPointX, double firstPointY,
-                                  double firstPointZ, int vertexId, int faceId)
-    {
-        polygonsList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
-        edgesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
-        verticesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
-        Vector3D firstPoint;
-        firstPoint = new Vector3D(firstPointX, firstPointY, firstPointZ);
-        mvfs(firstPoint, vertexId, faceId);
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
 
-    private _PolyhedralBoundedSolidFace
+    /**
+    Find the face identified with `id`. Returns null if face not found,
+    or current founded face otherwise.
+    Build based over function `fface` in program [MANT1988].11.9.
+    */
+    public _PolyhedralBoundedSolidFace
     findFace(int id)
     {
         int i;
@@ -159,7 +152,7 @@ public class PolyhedralBoundedSolid extends Solid {
     useful as the initial state of creating a boundary model with a sequence
     of Euler operations.
     */
-    private void mvfs(Vector3D p, int vertexId, int faceId)
+    public void mvfs(Vector3D p, int vertexId, int faceId)
     {
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
@@ -197,6 +190,12 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidVertex newVertex;
         _PolyhedralBoundedSolidEdge newEdge;
 
+        if ( he1 == null && he2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lmev",
+            "Calling with empty halfedges!");
+            return;
+        }
+
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
         newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexID);
 
@@ -213,7 +212,7 @@ public class PolyhedralBoundedSolid extends Solid {
             addhe(newEdge, newVertex, he1, MINUS);
         }
         else {
-        _PolyhedralBoundedSolidHalfEdge x, y;
+            _PolyhedralBoundedSolidHalfEdge x, y;
             x = addhe(newEdge, oldVertex, he1, PLUS);
             y = addhe(newEdge, newVertex, he1, MINUS);
             //halfEdgesList.swapElements(x, y);
@@ -223,7 +222,7 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    lmef: LowlevelMakeEdgeFace (face splitting operator)
+    lmef: LowlevelMakeEdgeFace (face splitting operator).
     Operator lmef adds a new edge between halfedges `he1` and `he2`,
     and "splits" their common face into two faces such that `he1` will
     occur in the new face `f`, and `he2` remains in the old face. The
@@ -250,27 +249,27 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he, nhe1, nhe2, temp;
 
         newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, faceId);
-    oldLoop = he1.parentLoop;
+        oldLoop = he1.parentLoop;
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
 
         ArrayList<_PolyhedralBoundedSolidHalfEdge> migratedHalfEdges;
-    migratedHalfEdges = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        migratedHalfEdges = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
 
         he = he1;
         while ( he != he2 ) {
-        migratedHalfEdges.add(he);
+            migratedHalfEdges.add(he);
             he = he.next();
             if ( he == he1 ) break;
         }
 
-    int i;
-    for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
-        he = migratedHalfEdges.get(i);
+        int i;
+        for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
+            he = migratedHalfEdges.get(i);
             he.parentLoop = newLoop;
-        oldLoop.unlistHalfEdge(he);
-        newLoop.halfEdgesList.add(he);
-    }
+            oldLoop.unlistHalfEdge(he);
+            newLoop.halfEdgesList.add(he);
+        }
 
         nhe1 = addhe(newEdge, he2.startingVertex, he1, MINUS);
         nhe2 = addhe(newEdge, he1.startingVertex, he2, PLUS);
@@ -279,6 +278,83 @@ public class PolyhedralBoundedSolid extends Solid {
         he2.parentLoop.boundaryStartHalfEdge = nhe2;
 
         return newFace;
+    }
+
+    /**
+    lkemr: LowlevelKillEdgeMakeRing (loop splitting operator).
+    Operator lkemr removes the edge of `he1` and `he2`, and divides their
+    common loop into two components (i.e., it creates a new "ring").  If
+    the original loop was "outer", the component of `he1.startingVertex`
+    becomes the new "outer" loop. (If this default is inappropiate, you
+    can simply swap the arguments of lkemr, or use lringmv to make the
+    desired loop "outer").  It is assumed that
+    he1.parentEdge == he2.parentEdge and 
+    he1.parentLoop == he2.parentLoop.
+
+    As described in section [MANT1988].9.2.3, the operator splits a loop
+    into two new ones by removing and edge that appears twice in it. Hence
+    the operator divides a connected bounding curve of a face into two
+    bounding curves, and has the net effect of removing one edge and adding
+    one ring to the PolyhedralBoundedSolid data structure. The special
+    cases that one or both of the resulting loops are empty are also
+    included. Note that current code follows section [MANT1988].11.3.4
+    and the structure of sample program [MANT1988].11.8.
+    */
+    public void lkemr(
+        _PolyhedralBoundedSolidHalfEdge he1,
+        _PolyhedralBoundedSolidHalfEdge he2)
+    {
+        //-----------------------------------------------------------------
+        _PolyhedralBoundedSolidHalfEdge he3 = null, he4;
+        _PolyhedralBoundedSolidLoop newLoop;
+        _PolyhedralBoundedSolidLoop oldLoop;
+        _PolyhedralBoundedSolidEdge killedEdge;
+
+        oldLoop = he1.parentLoop;
+        newLoop = new _PolyhedralBoundedSolidLoop(oldLoop.parentFace);
+        killedEdge = he1.parentEdge;
+
+        //-----------------------------------------------------------------
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> migratedHalfEdges;
+        migratedHalfEdges = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+
+        he4 = he1.next();
+        do {
+            migratedHalfEdges.add(he4);
+            if ( he4 == he2 ) break;
+        } while ( (he4 = he4.next()) != he2 );
+
+        //-----------------------------------------------------------------
+        int i;
+        for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
+            he3 = migratedHalfEdges.get(i);
+            oldLoop.halfEdgesList.locateWindowAtElem(he3);
+            oldLoop.halfEdgesList.removeElemAtWindow();
+            newLoop.halfEdgesList.add(he3);
+            he3.parentLoop = newLoop;
+        }
+        oldLoop.boundaryStartHalfEdge = oldLoop.halfEdgesList.get(0);
+        newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
+        //-----------------------------------------------------------------
+        // delhe(h1)
+        oldLoop.halfEdgesList.locateWindowAtElem(he1);
+        oldLoop.halfEdgesList.removeElemAtWindow();
+
+        // delhe(h2)
+        oldLoop.halfEdgesList.locateWindowAtElem(he2);
+        oldLoop.halfEdgesList.removeElemAtWindow();
+
+        if ( newLoop.halfEdgesList.size() <= 1 ) {
+            newLoop.boundaryStartHalfEdge.parentEdge = null;
+            newLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
+        }
+        if ( oldLoop.halfEdgesList.size() <= 1 ) {
+            oldLoop.boundaryStartHalfEdge.parentEdge = null;
+            oldLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
+        }
+
+        edgesList.locateWindowAtElem(killedEdge);
+        edgesList.removeElemAtWindow();
     }
 
     //= HIGH LEVEL EULER OPERATIONS ===================================
@@ -301,24 +377,114 @@ public class PolyhedralBoundedSolid extends Solid {
     @return true if operation succeded, false otherway
     */
     public boolean mev(int f1, int f2,
-                   int v1, int v2, int v3, int v4, double p)
+                   int v1, int v2, int v3, int v4, Vector3D p)
     {
-        _PolyhedralBoundedSolidFace face1, face2;
+        _PolyhedralBoundedSolidFace oldface1, oldface2;
         _PolyhedralBoundedSolidHalfEdge he1, he2;
 
-        face1 = findFace(f1);
-        if ( face1 == null ) {
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f1 + " not found.");
             return false;
         }
-        face2 = findFace(f2);
-        if ( face2 == null ) {
+        oldface2 = findFace(f2);
+        if ( oldface2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f2 + " not found.");
             return false;
         }
-//        he1 = findHalfEdge(face1, v1, v2);
+        he1 = oldface1.findHalfEdge(v1, v2);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
+            return false;
+        }
+        he2 = oldface2.findHalfEdge(v1, v3);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Edge " + v1 + " - " + v3 + " not found in face " + f2 + ".");
+            return false;
+        }
+    lmev(he1, he2, v4, p);
+        return true;
+    }
+
+    /**
+    mev: (High level version) MakeEdgeFace (face splitting operation).
+    Executes a `lmef` in halfedges v1-v2, v3-v4 in respective faces `f1`
+    and `f2`, and assigns to the new face the `newfaceid`.
+    */
+    public boolean mef(int f1, int f2,
+                       int v1, int v2, int v3, int v4, int newfaceid)
+    {
+        _PolyhedralBoundedSolidFace oldface1, oldface2;
+        _PolyhedralBoundedSolidHalfEdge he1, he2;
+
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Face " + f1 + " not found.");
+            return false;
+        }
+        oldface2 = findFace(f2);
+        if ( oldface2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Face " + f2 + " not found.");
+            return false;
+        }
+        he1 = oldface1.findHalfEdge(v1, v2);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
+            return false;
+        }
+        he2 = oldface2.findHalfEdge(v3, v4);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
+            return false;
+        }
+    lmef(he1, he2, newfaceid);
+        return true;
+    }
+
+    /**
+    kemr: (High level version) KillEdgeMakeRing (loop splitting operation).
+    Executes a `lkemr` in halfedges v1-v2, v3-v4 in respective faces `f1`
+    and `f2`.
+    */
+    public boolean kemr(int f1, int f2,
+                       int v1, int v2, int v3, int v4)
+    {
+        _PolyhedralBoundedSolidFace oldface1, oldface2;
+        _PolyhedralBoundedSolidHalfEdge he1, he2;
+
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Face " + f1 + " not found.");
+            return false;
+        }
+        oldface2 = findFace(f2);
+        if ( oldface2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Face " + f2 + " not found.");
+            return false;
+        }
+        he1 = oldface1.findHalfEdge(v1, v2);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
+            return false;
+        }
+        he2 = oldface2.findHalfEdge(v3, v4);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
+            return false;
+        }
+    lkemr(he1, he2);
         return true;
     }
 
@@ -354,6 +520,93 @@ public class PolyhedralBoundedSolid extends Solid {
         return minmax;
     }
 
+    //= TEXTUAL QUERY OPERATIONS ======================================
+
+    private String intPreSpaces(int val, int fieldSize)
+    {
+        DecimalFormat f = new DecimalFormat("0");
+        String cad;
+
+        cad = f.format(val, new StringBuffer(""), new FieldPosition(0)).toString();
+
+        int remain = fieldSize - cad.length();
+
+        for ( ; remain > 0; remain-- ) {
+            cad = " " + cad;
+        }
+        return cad;
+    }
+
+    public String toString()
+    {
+        String msg = "";
+        int i, j;
+
+        msg += "= POLYHEDRAL BOUNDED SOLID STRUCTURE ==========================================\n";
+        msg += "Solid with " + verticesList.size() + " vertices:\n";
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v;
+            v = verticesList.get(i);
+            msg += "  - " + v + "\n";
+        }
+
+        msg += "Solid with " + edgesList.size() + " edges:\n";
+        for ( i = 0; i < edgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = edgesList.get(i);
+            msg += "  - " + e + "\n";
+        }
+        msg += "Solid with " + polygonsList.size() + " faces:\n";
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            msg += "  - " + face + "\n";
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                msg += "    . Loop " + j + ", with halfedges: \n";
+                loop = face.boundariesList.get(j);
+
+
+                msg += "      | HeID | StartVertex | End Vertex | nccw He | pccwHe | parentEdge\n";
+                msg += "      +------+-------------+------------+---------+--------+-----------\n";
+
+                he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    msg += "<Loop without starting halfedge!>\n";
+                    continue;
+                }
+                heStart = he;
+                do {
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        msg += "      |  - (not closed loop)\n";
+                        break;
+                    }
+
+                    /*
+                    System.out.printf("      %4d | %11d | %10d | %7d | %6d | %10d",
+                        he.id, he.startingVertex.id,
+                        he.next().startingVertex.id,
+                        he.next().id, he.previous().id, he.parentEdge.id);
+                    */
+                    msg += "      | " +
+                        intPreSpaces(he.id, 4) + " | " +
+                        intPreSpaces(he.startingVertex.id, 11) + " | " +
+                        intPreSpaces(he.next().startingVertex.id, 10) + " | " +
+                        intPreSpaces(he.next().id, 7) + " | " +
+                        intPreSpaces(he.previous().id, 6) + " | ";
+                    msg += (he.parentEdge!=null)?
+                        intPreSpaces(he.parentEdge.id, 10):"    <null>";
+                    msg += "\n";
+
+                } while( he != heStart );
+            }
+        }
+        msg += "= END OF POLYHEDRAL BOUNDED SOLID STRUCTURE ===================================\n";
+        return msg;
+    }
 }
 
 //===========================================================================

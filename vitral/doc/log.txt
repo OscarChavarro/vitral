@@ -203,3 +203,11 @@ Changes in 2007 february 22 revition
 Changes in 2007 april 8 revition
   - First succesful tests for the operators mks, mev and mef in the polyhedral
     boundary representation based upon Mantylla text.
+
+Changes in 2007 april 21 revition
+  - Face triangle tesselation in JoglPolyhedralBoundedSolidRenderer, now
+    compatible with multiple loop face polyhedra.
+  - First succesful tests for the operator lkemr in the polyhedral boundary
+    representation based upon Mantylla text.
+  - Implemented mev, mef and kemr high level euler operators in polyhedral
+    boundary representation based upon Mantylla text.

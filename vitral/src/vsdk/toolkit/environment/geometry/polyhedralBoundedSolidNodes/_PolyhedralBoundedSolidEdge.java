@@ -39,18 +39,25 @@ public class _PolyhedralBoundedSolidEdge extends Entity {
     /// Note that half edge in this side is considered negatively oriented.
     public _PolyhedralBoundedSolidHalfEdge leftHalf;
 
+    //
+    public int id;
+    private static int currentId = 1;
+
     //=================================================================
     public _PolyhedralBoundedSolidEdge(PolyhedralBoundedSolid parentSolid)
     {
         parentSolid.edgesList.add(this);
     rightHalf = null;
     leftHalf = null;
+
+        id = currentId;
+    currentId++;
     }
 
     public String toString()
     {
         String msg;
-        msg = "Edge, half1: ";
+        msg = "Edge id " + id + ". Half1: ";
         if ( leftHalf == null ) {
         msg = msg + "null. ";
     }
@@ -58,7 +65,7 @@ public class _PolyhedralBoundedSolidEdge extends Entity {
             msg = msg + "vertex " + leftHalf.startingVertex.id;
     }
 
-        msg = msg + " / half2: ";
+        msg = msg + " / Half2: ";
 
         if ( rightHalf == null ) {
         msg = msg + "null. ";

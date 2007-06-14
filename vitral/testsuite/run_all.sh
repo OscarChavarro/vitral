@@ -45,6 +45,9 @@ cd ..
 cd MeshExample
 ./run.sh
 cd ..
+cd PolyhedralBoundedSolidExample
+./run.sh
+cd ..
 cd CgShaderExample
 ./run.sh
 cd ..

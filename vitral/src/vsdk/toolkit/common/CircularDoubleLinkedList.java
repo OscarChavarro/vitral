@@ -161,7 +161,7 @@ public class CircularDoubleLinkedList<E>
     {
         if ( index < 0 || index >= currentSize ) {
             // Report index out of bounds exception!
-            System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - " + index);
+            System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - Trying index " + index + " in a list with " + currentSize + " elements.");
             System.exit(1);
             return null;
         }
@@ -185,6 +185,7 @@ public class CircularDoubleLinkedList<E>
         window.previous.next = window.next;
         window.next.previous = window.previous;
         window = null;
+    currentSize--;
     }
 }
 

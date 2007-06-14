@@ -47,7 +47,6 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
         parentFace.boundariesList.add(this);
         halfEdgesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
-
     }
 
     public void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
