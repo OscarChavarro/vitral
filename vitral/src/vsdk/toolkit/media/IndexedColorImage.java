@@ -92,6 +92,11 @@ public class IndexedColorImage extends Image
         return ySize;
     }
 
+    public byte[] getRawImage()
+    {
+        return data;
+    }
+
     public void putPixel(int x, int y, byte val)
     {
         int index = xSize*y + x;

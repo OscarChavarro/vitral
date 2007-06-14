@@ -17,3 +17,6 @@ With respect to original distribution, this has the following changes:
     the .dat files.
   - Makefile and directory structure modified to fix under a POSIX organization
     of folders bin, src, tmp, doc ...
+  - A java native method for interfacing from java is included. Note that
+    java source is embebbed into VitralSDK main source folder distribution,
+    so this project need to be now inside the VitralSDK

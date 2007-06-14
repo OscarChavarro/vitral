@@ -53,14 +53,22 @@ extern void TransMult( double *, double *,
 
 #ifndef FFTPACK
 
-extern void FST_semi_disk(double *, double *, 
+extern 
+#ifdef __cplusplus
+"C"
+#endif
+void FST_semi_disk(double *, double *, 
 			  double *, double *,
 			  int ,
 			  double *,
 			  int,
 			  double *);
 
-extern void InvFST_semi_disk( double *, double *, 
+extern
+#ifdef __cplusplus
+"C"
+#endif
+void InvFST_semi_disk( double *, double *, 
 			      double *, double *, 
 			      int , 
 			      double *,

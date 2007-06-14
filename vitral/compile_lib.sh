@@ -15,6 +15,10 @@ if [ ! -d ./classes ]; then
     mkdir ./classes
 fi
 
+if [ ! -d ./lib ]; then
+    mkdir ./lib
+fi
+
 clear
 cd src
 javac -Xlint -classpath . -d ../classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES
@@ -22,6 +26,7 @@ cd ..
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
+cd pkgs/SpharmonicKit27;make;cd ../..
 
 #===========================================================================
 #= EOF                                                                     =

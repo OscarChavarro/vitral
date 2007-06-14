@@ -36,14 +36,29 @@
 ############################################################################
 ############################################################################
 
+#===========================================================================
+
+JDKHOME=/usr/local/jdk1.6.0_01
+PLATFORM=linux
+SRC_DIR = ./src
+LIB_DIR = ../../lib
+CLASSES_DIR = ./classes
+TMP_DIR = ./tmp
+LIBTOOL = g++ -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
+JC = javac -classpath ../../../lib/vsdk.jar -d ../$(CLASSES_DIR)
+JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
+
+#===========================================================================
+
 CC = gcc
+CCP = g++
 
 # define WALLCLOCK on the CFLAGS line if want to time
 # walltime and not cpu time (cpu time is default); also
 # define optimization flags suitable for your platform
 
 # CFLAGS = -O3 -fp_reorder -DWALLCLOCK
-CFLAGS = -O2 -ansi -Wall -I./src_lib
+CFLAGS = -O2 -ansi -Wall -fPIC -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
 LDFLAGS = -lm
 
 # for naive
@@ -97,13 +112,50 @@ FSTHYBRIDXOBJ = $(FLTHYBRIDOBJ) \
 
 # first some shortcuts
 
-all: bin/generateSphericalHarmonics bin/convertFileToBynaryArray
+all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.so bin/generateSphericalHarmonics bin/convertFileToBynaryArray
+
+check:
+	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
+	echo "ERROR: JDK not found!";                                      \
+	echo "Check you have Sun Microsystems' Java implementation and";   \
+	echo "edit this Makefile to modify the JDKHOME variable, or";      \
+	echo "invoke make like this:";                                     \
+	echo "	make JDKHOME=/path/to/jdk PLATFORM=yourplatformname";      \
+	echo "where platform is linux, solaris or other (Java specific)";  \
+	exit 1;                                                            \
+	fi
+	@if [ ! -x $(JDKHOME)/include/$(PLATFORM) ]; then                  \
+	echo "ERROR: PLATFORM not configured or not found!";               \
+	echo "Edit this Makefile to modify the PLATFORM variable, or";     \
+	echo "invoke make like this:";                                     \
+	echo "	make JDKHOME=/path/to/jdk PLATFORM=yourplatformname";      \
+	echo "where platform is linux, solaris or other (Java specific)";  \
+	exit 1;                                                            \
+	fi
 
 clean: 
-	@rm -f tmp/*.o bin/generateSphericalHarmonics `find . -name "*~"`
+	@rm -rf $(LIB_DIR)/*.so
+	@rm -rf $(CLASSES_DIR)/*
+	@rm -rf $(TMP_DIR)/*
+	@rm -f bin/generateSphericalHarmonics bin/convertFileToBynaryArray `find . -name "*~"`
+
+#===========================================================================
+
+$(TMP_DIR)/SpharmonicKitWrapper.o: $(SRC_DIR)/SpharmonicKitWrapper.C
+	cd $(CLASSES_DIR);$(JH) -jni vsdk.toolkit.processing.SpharmonicKitWrapper
+	cd $(CLASSES_DIR);$(JH) vsdk.toolkit.processing.SpharmonicKitWrapper
+	$(CCP) $(CFLAGS) -I$(TMP_DIR) -o $(TMP_DIR)/SpharmonicKitWrapper.o -c $(SRC_DIR)/SpharmonicKitWrapper.C
+
+$(LIB_DIR)/libspharmonickit.so: $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
+	$(LIBTOOL) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libspharmonickit.so -o $(LIB_DIR)/libspharmonickit.so $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
+
+$(CLASSES_DIR)/main.class: $(SRC_DIR)/main.java
+	cd $(SRC_DIR);$(JC) -classpath ../../../lib/vsdk.jar main.java
+
+#===========================================================================
 
 bin/generateSphericalHarmonics: $(FSTSEMIOBJ) tmp/FST_semi_disk.o tmp/generateSphericalHarmonics.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o bin/generateSphericalHarmonics $(FSTSEMIOBJ) tmp/FST_semi_disk.o tmp/generateSphericalHarmonics.o
+	$(LIBTOOL) $(CFLAGS) $(LDFLAGS) -o bin/generateSphericalHarmonics $(FSTSEMIOBJ) tmp/FST_semi_disk.o tmp/generateSphericalHarmonics.o
 
 bin/convertFileToBynaryArray: tmp/convertFileToBynaryArray.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o bin/convertFileToBynaryArray tmp/convertFileToBynaryArray.o
@@ -163,7 +215,7 @@ tmp/weights.o: src_lib/weights.c
 	$(CC) $(CFLAGS) -o tmp/weights.o -c src_lib/weights.c
 
 tmp/generateSphericalHarmonics.o: src/generateSphericalHarmonics.c src_lib/FST_semi_disk.h src_lib/cospmls.h src_lib/primitive_FST.h
-	$(CC) $(CFLAGS) -o tmp/generateSphericalHarmonics.o -c src/generateSphericalHarmonics.c
+	$(CCP) $(CFLAGS) -o tmp/generateSphericalHarmonics.o -c src/generateSphericalHarmonics.c
 
 tmp/convertFileToBynaryArray.o: src/convertFileToBynaryArray.c
 	$(CC) $(CFLAGS) -o tmp/convertFileToBynaryArray.o -c src/convertFileToBynaryArray.c

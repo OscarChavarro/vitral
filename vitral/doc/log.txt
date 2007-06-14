@@ -260,3 +260,7 @@ Changes in 2007 may 15 revition
 Changes in 2007 may 17-18 revition
   - Fixed a bug in Matrix4x4.invert
   - Geometry.doVoxelization and optimized version for TriangleMesh
+
+Changes in 2007 may 20-22 revition
+  - Added the SpharmonicKit package to compute spherical harmonics (native
+    JNI method tested only in linux)

@@ -18,33 +18,60 @@ import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.SphericalHarmonicShapeDescriptor;
+import vsdk.toolkit.processing.SpharmonicKitWrapper;
 
 public class DatasetControl
 {
-    private static Process runOperatingSystemCommand(String command) 
+    /**
+    Given a sphere's texture map codified for ocuppancy test, this method
+    computes a spherical harmonic (Fourier transform) and inserts the first
+    coefficient in to the shape description.
+    */
+    private static boolean
+    computeSphericalHarmonicsCoefficients(IndexedColorImage texture,
+                           SphericalHarmonicShapeDescriptor featureVector,
+                           int groupIndex, double r)
     {
-        Process process;
-        Runtime runtime;
+        byte image[];
+        double sphericalHarmonicsR[];
+        double sphericalHarmonicsI[];
+        int i;
 
-        runtime = Runtime.getRuntime();
-        try {
-            process = runtime.exec(command);
+        sphericalHarmonicsR = new double[16];
+        sphericalHarmonicsI = new double[16];
+        image = texture.getRawImage();
+
+        double hr, hi;
+        boolean status = 
+        SpharmonicKitWrapper.calculateSphericalHarmonics(
+            image, sphericalHarmonicsR, sphericalHarmonicsI);
+
+        if ( !status ) {
+            return false;
         }
-        catch( Exception error ){
-            System.out.println(error);
-            process = null;
+        else {
+            for ( i = 0; i < sphericalHarmonicsR.length; i++ ) {
+                hr = sphericalHarmonicsR[i];
+                hi = sphericalHarmonicsI[i];
+                featureVector.setFeature(groupIndex, i, hr, hi); 
+            }
         }
-        return process;
+
+        return true;
     }
 
+    /**
+    Given a voxelized geometry, current method extract from it the
+    shape descriptor using a spherical harmonic technique.
+    */
     private static boolean processSphericalHarmonics(VoxelVolume vv,
         int groupIndex, SphericalHarmonicShapeDescriptor featureVector)
     {
         double r = ((double)groupIndex) / 31.0;
         Sphere sphere;
-        RGBAImage texture;
+        IndexedColorImage texture;
         double tetha, phi;
         int s, t;
         int voxelValue;
@@ -52,7 +79,7 @@ public class DatasetControl
 
         sphere = new Sphere(r);
 
-        texture = new RGBAImage();
+        texture = new IndexedColorImage();
         texture.init(64, 64);
 
         //- Build sphere's texture map from voxel grid --------------------
@@ -65,51 +92,18 @@ public class DatasetControl
                 p.setSphericalCoordinates(r, tetha, phi);
                 voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
                 if ( voxelValue < 128 ) {
-                    texture.putPixel(s, t, (byte)255, (byte)255, (byte)255, (byte)0);
+                    texture.putPixel(s, t, (byte)255);
                 }
                 else {
-                    texture.putPixel(s, t, (byte)0, (byte)0, (byte)0, (byte)255);
+                    texture.putPixel(s, t, (byte)0);
                 }
             }
         }
 
-        //- Generate spherical harmonics for current sphere's texture map -
-        String inputFilename = "input_" + VSDK.formatDouble(r) + ".ppm";
-        String outputFilename = "output_" + VSDK.formatDouble(r);
-        ImagePersistence.exportPPM(new File(inputFilename), texture);
-        runOperatingSystemCommand("../../../pkgs/SpharmonicKit27/bin/generateSphericalHarmonics " + inputFilename);
-        runOperatingSystemCommand("mv output.ppm " + outputFilename + ".ppm");
-        runOperatingSystemCommand("mv output.txt " + outputFilename + ".txt");
-        runOperatingSystemCommand("sync");
-    //try{Thread.sleep(100);}catch ( Exception e ) {}
-        
-        //-----------------------------------------------------------------
-        BufferedReader br;
-        String lineOfText;
-        int h; // harmonic
-        double hr; // real part of harmonic amplitude
-        double hi; // imaginary part of harmonic amplitude
-        StringTokenizer auxStringTokenizer;
-
-        try {
-            br = new BufferedReader(new FileReader(outputFilename + ".txt"));
-            for ( h = 0; h < 16 && (lineOfText = br.readLine()) != null; h++ ) {
-                auxStringTokenizer = new StringTokenizer(lineOfText, ", ");
-                hr = Double.parseDouble(auxStringTokenizer.nextToken());
-                hi = Double.parseDouble(auxStringTokenizer.nextToken());
-                featureVector.setFeature(groupIndex, h, hr, hi); 
-            }
-            br.close();
-        }
-        catch (Exception e) {
-            System.out.println("Retrying incomplete files at " + groupIndex);
+        if ( !computeSphericalHarmonicsCoefficients(
+                  texture, featureVector, groupIndex, r) ) {
             return false;
         }
-
-        //-----------------------------------------------------------------
-        runOperatingSystemCommand("rm -f " + outputFilename + ".ppm");
-        runOperatingSystemCommand("rm -f " + outputFilename + ".txt");
-        runOperatingSystemCommand("rm -f " + inputFilename);
 
         //-----------------------------------------------------------------
         return true;
@@ -149,7 +143,10 @@ public class DatasetControl
             SphericalHarmonicShapeDescriptor featureVector;
             featureVector = new SphericalHarmonicShapeDescriptor();
             for ( i = 0; i < 32; i++ ) {
-                while ( !processSphericalHarmonics(vv, i, featureVector) );
+                if ( !processSphericalHarmonics(vv, i, featureVector) ) {
+                    System.err.println("Error processing spherical harmonics.");
+                    System.exit(1);
+                }
             }
             System.out.println(featureVector);
         }
@@ -173,9 +170,14 @@ public class DatasetControl
             return;
         }
         if ( args[0].equals("add") ) {
+            // Import shape descriptions from file
+
+            // Add new model descriptions
             for ( i = 1; i < args.length; i++ ) {
                 addModel(args[i]);
             }
+
+            // Export shape descriptions to file
         }
         else if ( args[0].equals("searchModel") ) {
             searchModel(args[1]);

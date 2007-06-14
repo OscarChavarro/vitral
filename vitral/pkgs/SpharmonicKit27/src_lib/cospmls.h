@@ -43,8 +43,12 @@
 
 extern int Power2Ceiling( int ) ;
 
-extern int TableSize( int ,
-		      int ) ;
+extern
+#ifdef __cplusplus
+"C"
+#endif
+int TableSize( int , int ) ;
+
 
 extern int Spharmonic_TableSize( int ) ;
 

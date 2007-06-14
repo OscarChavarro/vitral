@@ -12,6 +12,8 @@
 
 package vsdk.toolkit.media;
 
+import vsdk.toolkit.common.VSDK;
+
 /**
 Stores the feature vector for a 32 concentric spheres
 around a volume as described in [FUNK2003]
@@ -48,7 +50,7 @@ public class SphericalHarmonicShapeDescriptor extends ShapeDescriptor
         msg = "SphericalHarmonics amplitudes for " + numberOfSpheres + " spheres and " + numberOfHarmonics + " harmonics:\n";
         int i;
         for ( i = 0; i < numberOfSpheres*numberOfHarmonics; i++ ) {
-            msg += "  - " + featureVector[i] + "\n";
+            msg += "  - " + VSDK.formatDouble(featureVector[i]) + "\n";
         }
         return msg;
     }

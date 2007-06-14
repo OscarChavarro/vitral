@@ -7179,7 +7179,7 @@ void myread(void *buffer, int chunk_size, int repetitions, unsigned char *data)
 {
     unsigned char *ptr = (unsigned char *)buffer;
     int size = chunk_size*repetitions;
-    printf("Reading %d bytes...\n", size);
+	/*printf("Reading %d bytes...\n", size);*/
 	/*fread(buffer, chunk_size, repetitions, globalfd);*/
     int i;
     for ( i = 0; i < size; i++ ) {
