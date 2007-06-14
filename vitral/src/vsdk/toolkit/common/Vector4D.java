@@ -118,9 +118,15 @@ NOT DEFINED YET!
         return new Vector4D(x - b.x, y - b.y, z - b.z, w - b.w);
     }
 
-    public float[] toFloatVect()
+    public float[] exportFloatToArray()
     {
         float[] ret={(float)x, (float)y, (float)z, (float)w};
+        return ret;
+    }
+
+    public double[] exportToDoubleArray()
+    {
+        double[] ret={x, y, z, w};
         return ret;
     }
 

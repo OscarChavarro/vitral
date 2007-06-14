@@ -24,17 +24,19 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -43,55 +45,57 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglSphereRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 
-public class CgShaderExample implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public class CgSimpleUnrestrictedShaderExample implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
+    //- GUI ----------------------------------------------------------------
     private static GLCanvas canvas;
-    private GLU glu = new GLU();
-
-    private boolean NvidiaGpuEnabled = true;
-    private CGprogram NvidiaGpuVertexProgram;
-    private CGprogram NvidiaGpuFragmentProgram;
-
-    private Camera camera;
     private CameraController cameraController;
-    private RendererConfiguration quality;
     private RendererConfigurationController qualityController;
-    private RGBImage img;
-    private Sphere sphere;
 
+    //- GPU control --------------------------------------------------------
+    private boolean NvidiaGpuActive = true;
+    private CGprogram NvidiaGpuVertexProgramTexture;
+    private CGprogram NvidiaGpuPixelProgramTexture;
+
+    //- Scene elements -----------------------------------------------------
+    private Camera camera;
+    private Material material;
+    private Light light;
+    private RGBImage textureMap;
+    private RendererConfiguration quality;
     private double xrotation;
     private double yrotation;
     private double zrotation;
-    private Vector3D lightPosition;
+    private Sphere sphere;
 
-    public CgShaderExample(boolean appletMode) {
+    //----------------------------------------------------------------------
+
+    public CgSimpleUnrestrictedShaderExample(boolean appletMode) {
         if ( !appletMode ) init();
     }
 
     public void init() {
-        xrotation = 0;
-        yrotation = 0;
-        zrotation = 0;
-        lightPosition = new Vector3D(0, -4, 0);
+        //- Initialize scene elements--------------------------------------
+        // 1: Camera
         camera = new Camera();
         camera.setPosition(new Vector3D(0, -4, 0));
         Matrix4x4 R = new Matrix4x4();
         R.eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
         camera.setRotation(R);
-        cameraController = new CameraControllerAquynza(camera);
 
-        quality = new RendererConfiguration();
-        qualityController = new RendererConfigurationController(quality);
+        // 2: Lights
+        light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
 
-        sphere = new Sphere(1.0);
-
+        // 3.1. Object attribute -> texture map
         String imageFilename = "../../../etc/textures/earth.png";
         try {
-            img = ImagePersistence.importRGB(new File(imageFilename));
+            textureMap = ImagePersistence.importRGB(new File(imageFilename));
         }
         catch (Exception e) {
             System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
@@ -100,23 +104,44 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
             System.exit(0);
         }
 
+        // 3.2. Object attribute -> material propierties
+        material = new Material();
+        material.setAmbient(new ColorRgb(0, 0, 0));
+        material.setDiffuse(new ColorRgb(1, 1, 1));
+        material.setSpecular(new ColorRgb(1, 1, 1));
+        material.setPhongExponent(40);
+
+        // 3.3. Object attribute -> how it will render
+        quality = new RendererConfiguration();
+
+        // 3.4. Object attribute -> geometrical transformations
+        xrotation = 0;
+        yrotation = 0;
+        zrotation = 0;
+
+        // 3.5. Object attribute -> geometry
+        sphere = new Sphere(1.0);
+
+        //-----------------------------------------------------------------
+        cameraController = new CameraControllerAquynza(camera);
+        qualityController = new RendererConfigurationController(quality);
+
+        //-----------------------------------------------------------------
     }
 
     public void init(GLAutoDrawable drawable) {
-        if ( NvidiaGpuEnabled ) {
-            JoglRenderer.tryToEnableNvidiaCg();
-            try {
-                NvidiaGpuVertexProgram =
-                    JoglRenderer.loadNvidiaGpuVertexShader(
-                        new FileInputStream("./etc/vertexShader.cg"));
-                NvidiaGpuFragmentProgram =
-                    JoglRenderer.loadNvidiaGpuPixelShader(
-                        new FileInputStream("./etc/fragmentShader.cg"));
-            }
-            catch ( Exception e ) {
-                System.out.println("Error loading shaders!");
-                System.exit(1);
-            }
+        JoglRenderer.tryToEnableNvidiaCg();
+        try {
+            NvidiaGpuVertexProgramTexture =
+                JoglRenderer.loadNvidiaGpuVertexShader(
+                    new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+            NvidiaGpuPixelProgramTexture =
+                JoglRenderer.loadNvidiaGpuPixelShader(
+                    new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+        }
+        catch ( Exception e ) {
+            System.out.println("Error loading shaders!");
+            System.exit(1);
         }
     }
 
@@ -137,11 +162,26 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
-        if ( NvidiaGpuEnabled ) {
+        if ( NvidiaGpuActive ) {
             //- Global per-frame shader activation ----------------------------
             JoglRenderer.enableNvidiaCgProfiles();
-            CgGL.cgGLBindProgram(NvidiaGpuVertexProgram);
-            CgGL.cgGLBindProgram(NvidiaGpuFragmentProgram);
+            CGprogram currentVertexProgram; // Use this variables to choose
+            CGprogram currentPixelProgram;  // between various shaders...
+            currentVertexProgram = NvidiaGpuVertexProgramTexture;
+            currentPixelProgram = NvidiaGpuPixelProgramTexture;
+
+            CgGL.cgGLBindProgram(currentVertexProgram);
+            CgGL.cgGLBindProgram(currentPixelProgram);
+
+            //- Shader configuration for special features ---------------------
+            // (This should be managed by JoglRenderer, usually with the help
+            // of RendererConfiguration)
+        {
+            double withTexture = 0.0;
+            if ( quality.isTextureSet() ) withTexture = 1.0;
+            CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
+                currentPixelProgram, "withTexture"), withTexture);
+        }
 
             //- Shader configuration from camera data -------------------------
             // (This should be managed by JoglCameraRenderer)
@@ -154,41 +194,42 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
 
             MProjection = camera.calculateViewVolumeMatrix();
             MModelviewGlobal = camera.calculateTransformationMatrix();
-            matrixarray = MModelviewGlobal.exportToArrayRowOrder();
+            matrixarray = MModelviewGlobal.exportToDoubleArrayRowOrder();
             CgGL.cgGLSetMatrixParameterdr(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram,
+                CgGL.cgGetNamedParameter(currentVertexProgram,
                     "modelViewGlobal"), matrixarray, 0);
             CgGL.cgGLSetParameter3dv(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram,
+                CgGL.cgGetNamedParameter(currentVertexProgram,
                     "cameraPositionGlobal"), vectorarray, 0);
             }
 
             //- Shader configuration from light data --------------------------
             // (This should be managed by JoglLightRenderer)
             {
-            double lpos[] = {lightPosition.x, lightPosition.y, lightPosition.z};
+            Vector3D lp = light.getPosition();
+            double lpos[] = {lp.x, lp.y, lp.z};
             double lightColor[] = {1.0, 1.0, 1.0};
 
             CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "lightPositionGlobal"), lpos, 0);
+                currentVertexProgram, "lightPositionGlobal"), lpos, 0);
             CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
-                NvidiaGpuFragmentProgram, "lightColor"), lightColor, 0);
+                currentPixelProgram, "lightColor"), lightColor, 0);
             }
 
             //- Shader configuration from material data -----------------------
             // (This should be managed by JoglMaterialRenderer)
             {
-            double Ka[] = {0.1, 0.1, 0.1};
-            double Kd[] = {1.0, 1.0, 1.0};
-            double Ks[] = {0.8, 0.8, 0.8};
+            double Ka[] = material.getAmbient().exportToDoubleArrayVect();
+            double Kd[] = material.getDiffuse().exportToDoubleArrayVect();
+            double Ks[] = material.getSpecular().exportToDoubleArrayVect();
             CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "ambientColor"), Ka, 0);
+                currentVertexProgram, "ambientColor"), Ka, 0);
             CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "diffuseColor"), Kd, 0);
+                currentVertexProgram, "diffuseColor"), Kd, 0);
             CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "specularColor"), Ks, 0);
+                currentVertexProgram, "specularColor"), Ks, 0);
             CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
-                NvidiaGpuFragmentProgram, "phongExponent"), 40);
+                currentPixelProgram, "phongExponent"), material.getPhongExponent());
             }
 
             //- Shader configuration from current object ----------------------
@@ -207,20 +248,30 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
             MModelviewLocalIT = MModelviewLocal.inverse();
             MModelviewLocalIT.transpose();
 
-            matrixarray = MCombined.exportToArrayRowOrder();
+            matrixarray = MCombined.exportToDoubleArrayRowOrder();
             CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "modelViewProjectionLocal"),
+                currentVertexProgram, "modelViewProjectionLocal"),
                 matrixarray, 0);
 
-            matrixarray = MModelviewLocal.exportToArrayRowOrder();
+            matrixarray = MModelviewLocal.exportToDoubleArrayRowOrder();
             CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "modelViewLocal"),
+                currentVertexProgram, "modelViewLocal"),
                 matrixarray, 0);
 
-            matrixarray = MModelviewLocalIT.exportToArrayRowOrder();
+            matrixarray = MModelviewLocalIT.exportToDoubleArrayRowOrder();
             CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-                NvidiaGpuVertexProgram, "modelViewLocalIT"),
+                currentVertexProgram, "modelViewLocalIT"),
                 matrixarray, 0);
+            }
+        }
+        else {
+            JoglLightRenderer.activate(gl, light);
+            JoglMaterialRenderer.activate(gl, material);
+            if ( quality.isTextureSet() ) {
+                gl.glEnable(gl.GL_TEXTURE_2D);
+            }
+            else {
+                gl.glDisable(gl.GL_TEXTURE_2D);
             }
         }
 
@@ -228,10 +279,11 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         enableTexture(gl);
         JoglSphereRenderer.draw(gl, sphere, camera, quality);
 
-        if ( NvidiaGpuEnabled ) {
+        if ( NvidiaGpuActive ) {
             JoglRenderer.disableNvidiaCgProfiles();
         }
-
+    gl.glLoadIdentity();
+        JoglLightRenderer.draw(gl, light);
     }
 
     void enableTexture(GL gl) {
@@ -249,7 +301,7 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
            GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 
-        glList = JoglImageRenderer.activate(gl, img);
+        glList = JoglImageRenderer.activate(gl, textureMap);
     }
 
     public void
@@ -328,6 +380,7 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
 
         int unicode_id = e.getKeyChar();
         if ( unicode_id != e.CHAR_UNDEFINED ) {
+          Vector3D lightPosition = light.getPosition();
           switch ( unicode_id ) {
             case '1': xrotation -= 1.0; break;
             case '2': xrotation += 1.0; break;
@@ -341,7 +394,9 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
             case 'j': lightPosition.z -= 0.1; break;
             case '9': lightPosition.y -= 0.1; break;
             case '0': lightPosition.y += 0.1; break;
+            case 'g': NvidiaGpuActive = !NvidiaGpuActive; break;
           }
+          light.setPosition(lightPosition);
           canvas.repaint();
         }
     }
@@ -367,7 +422,7 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         JoglRenderer.verifyNvidiaCgAvailability();
 
         //-----------------------------------------------------------------
-        CgShaderExample instance = new CgShaderExample(false);
+        CgSimpleUnrestrictedShaderExample instance = new CgSimpleUnrestrictedShaderExample(false);
 
         JFrame frame = new JFrame("Vitral SDK / Nvidia Cg demo");
         canvas = new GLCanvas();

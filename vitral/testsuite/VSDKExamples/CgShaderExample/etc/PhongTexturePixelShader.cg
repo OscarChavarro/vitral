@@ -12,10 +12,17 @@
 Note that first sampler2D is by default associated with default OpenGL
 texture map (the one currently binded).  Aditional sampler2D maps can
 be explicity specified using the cgGLEnableTextureParameter function.
+
+Remember that in Cg, the `lit` function gives:
+    clampedTerms.y = (NdolL > 0)?NdolL:0.0;
+    clampedTerms.z = (NdolL > 0 && NdotH > 0)?pow(NdotH, phongExponent):0.0;
+and is recommended to use it as can give access to optimized operations in
+the GPU.
 */
 half4 main(uniform sampler2D textureMap,
            uniform half3 lightColor,
            uniform half3 phongExponent,
+           uniform half withTexture,
            in float3 PView              : TEXCOORD0,
            in half3 NView               : TEXCOORD1,
            in half2 uvTextureCoordinate : TEXCOORD2,
@@ -33,14 +40,20 @@ half4 main(uniform sampler2D textureMap,
     half3 H = normalize(L + V);
     half NdotL = dot(N, L);
     half NdotH = dot(N, H);
+    half3 clampedTerms = lit(NdotL, NdotH, phongExponent);
 
     //-----------------------------------------------------------------------
     // Apply illumination model's equations
-    half3 diffuseComponent =
-        Kd * (half3)tex2D(textureMap, uvTextureCoordinate).xyz * NdotL;
-    half3 specularComponent = Ks * pow(NdotH, phongExponent);
+    half3 diffuseComponent;
+    diffuseComponent = Kd * clampedTerms.y;
+
+    if ( withTexture > 0.0 ) {
+        diffuseComponent = diffuseComponent *
+            (half3)tex2D(textureMap, uvTextureCoordinate).xyz;
+    }
+    half3 specularComponent = Ks * clampedTerms.z;
     half3 finalColor =
-        Ka + lightColor * (diffuseComponent + specularComponent);
+      Ka + lightColor * (diffuseComponent + specularComponent);
 
     //-----------------------------------------------------------------------
     // Return final color, setting alpha value to 1

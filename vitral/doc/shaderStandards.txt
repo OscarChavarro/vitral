@@ -185,6 +185,13 @@ Just using those methods and common Vitral SDK helpers like "Camera" and
 exposing only Cg use.  For an even easier way of taking advantage of
 Nvidia Cg, the use of standarized VitralSDK shaders is recommended.
 
+The following are the standarized VitralSDK aids that provides restricted
+access to predefined Nvidia Cg shaders that follows the guidelines stated
+in this document, but that also offers greater ease of development,
+portability and generality:
+    - activateNvidiaGpuParameters method in JoglCameraRenderer,
+      JoglMaterialRenderer, JoglLightRenderer and JoglGeometryRenderer.
+
 NVIDIA SET OF STANDARD PREDEFINED SHADERS
 -----------------------------------------
 

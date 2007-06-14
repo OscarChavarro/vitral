@@ -6,10 +6,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGprogram;
+
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Light;
-import javax.media.opengl.GL;
 
 public class JoglLightRenderer extends JoglRenderer {
 
@@ -27,7 +30,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
     public static void activate(GL gl, Light l)
     {
-        float[] lightPosition=l.getPosition().toFloatVect();
+        float[] lightPosition=l.getPosition().exportToFloatArrayVect();
         float global_ambient[] = {0, 0, 0, 1};
         float global_twoside[] = {gl.GL_TRUE};  // WARNING: This is inefficient!
         int lightNumber = l.getId();
@@ -42,7 +45,8 @@ public class JoglLightRenderer extends JoglRenderer {
             lightPosition[3]=0;
         }
 */
-
+    gl.glPushMatrix();
+    gl.glLoadIdentity();
         gl.glLightModelfv(gl.GL_LIGHT_MODEL_AMBIENT, global_ambient, 0);   // OJO! Esta
         gl.glLightModelfv(gl.GL_LIGHT_MODEL_TWO_SIDE, global_twoside, 0);  // cableado!
         gl.glLightModeli(gl.GL_LIGHT_MODEL_LOCAL_VIEWER, gl.GL_TRUE); // OJO: ?
@@ -50,15 +54,29 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glEnable(gl.GL_LIGHT0 + lightNumber);
 
         gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_POSITION, lightPosition, 0);
-        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_AMBIENT, l.getAmbient().toFloatVect(), 0);
-        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_DIFFUSE, l.getDiffuse().toFloatVect(), 0);
-        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_SPECULAR, l.getSpecular().toFloatVect(), 0);
+        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_AMBIENT, l.getAmbient().exportToFloatArrayVect(), 0);
+        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_DIFFUSE, l.getDiffuse().exportToFloatArrayVect(), 0);
+        gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_SPECULAR, l.getSpecular().exportToFloatArrayVect(), 0);
         
 /*
         gl.glLightf(gl.GL_LIGHT0 + lightNumber, gl.GL_CONSTANT_ATTENUATION, constantAtenuation);
         gl.glLightf(gl.GL_LIGHT0 + lightNumber, gl.GL_LINEAR_ATTENUATION, linearAtenuation);
         gl.glLightf(gl.GL_LIGHT0 + lightNumber, gl.GL_QUADRATIC_ATTENUATION, quadricAtenuation);
 */
+    gl.glPopMatrix();
+    }
+
+    public static void activateNvidiaGpuParameters(GL gl, Light light,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Vector3D lp = light.getPosition();
+        double lpos[] = {lp.x, lp.y, lp.z};
+        double lightColor[] = {1.0, 1.0, 1.0};
+
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "lightPositionGlobal"), lpos, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            pixelShader, "lightColor"), lightColor, 0);
     }
 
     public static void draw(GL gl, Light l)
@@ -69,9 +87,10 @@ public class JoglLightRenderer extends JoglRenderer {
 
         gl.glPushMatrix();
         gl.glDisable(gl.GL_LIGHTING);
+    gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(2.0f);
         gl.glBegin(gl.GL_LINES);
-            gl.glColor3d(c.r, c.g, c.g);
+            gl.glColor3d(c.r, c.g, c.b);
             gl.glVertex3d(p.x - delta, p.y, p.z);
             gl.glVertex3d(p.x + delta, p.y, p.z);
             gl.glVertex3d(p.x, p.y - delta, p.z);

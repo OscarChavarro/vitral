@@ -7,13 +7,18 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Java base classes
 import java.io.InputStream;
 
+// Java GUI classes
+import javax.media.opengl.GL;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
 
+// JOGL clases
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.render.RenderingElement;
 
@@ -59,10 +64,10 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static boolean setRenderingWithNvidiaGpu(boolean requested)
     {
-    if ( !getNvidiaCgAvailability() ) {
+        if ( !getNvidiaCgAvailability() ) {
             renderingWithNvidiaGpuFlag = false;
-    }
-    renderingWithNvidiaGpuFlag = requested;
+        }
+        renderingWithNvidiaGpuFlag = requested;
     }
 */
 
@@ -166,24 +171,28 @@ public abstract class JoglRenderer extends RenderingElement {
         }
 
         //-----------------------------------------------------------------
+        // OJO: No prender esto!
+        //CgGL.cgGLSetManageTextureParameters(nvidiaGpuContext, true);
         nvidiaCgAvailable = true;
         return true;
     }
 
     public static void enableNvidiaCgProfiles()
     {
-        if ( !getNvidiaCgAvailability() ) {
+        if ( getNvidiaCgAvailability() ) {
             CgGL.cgGLEnableProfile(nvidiaGpuVertexProfile);
             CgGL.cgGLEnableProfile(nvidiaGpuPixelProfile);
-    }
+        }
     }
 
     public static void disableNvidiaCgProfiles()
     {
-        if ( !getNvidiaCgAvailability() ) {
+        if ( getNvidiaCgAvailability() ) {
+            CgGL.cgGLUnbindProgram(nvidiaGpuVertexProfile);
+            CgGL.cgGLUnbindProgram(nvidiaGpuPixelProfile);
             CgGL.cgGLDisableProfile(nvidiaGpuVertexProfile);
             CgGL.cgGLDisableProfile(nvidiaGpuPixelProfile);
-    }
+        }
     }
 
     public static CGprogram loadNvidiaGpuVertexShader(InputStream is)
@@ -250,6 +259,15 @@ public abstract class JoglRenderer extends RenderingElement {
         return shader;
     }
 
+    public static void activateNvidiaGpuParameters(GL gl,
+        RendererConfiguration quality,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        double withTexture = 0.0;
+        if ( quality.isTextureSet() ) withTexture = 1.0;
+        CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
+            pixelShader, "withTexture"), withTexture);
+    }
 }
 
 //===========================================================================

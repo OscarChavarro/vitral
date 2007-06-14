@@ -156,9 +156,15 @@ public class ColorRgb extends Entity
     values. It is supposed to help operations in APIs like OpenGL/JOGL where
     this representation form is commonly used.
     */
-    public float[] toFloatVect()
+    public float[] exportToFloatArrayVect()
     {
         float[] ret={(float)r, (float)g, (float)b, 1};
+        return ret;
+    }
+
+    public double[] exportToDoubleArrayVect()
+    {
+        double[] ret={r, g, b, 1};
         return ret;
     }
 

@@ -506,13 +506,25 @@ public class Matrix4x4 extends Entity
         return msg;
     }
 
-    public double[] exportToArrayRowOrder()
+    public double[] exportToDoubleArrayRowOrder()
     {
         double array[] = new double[16];
         int i, j, k;
         for ( i = 0, k = 0; i < 4; i++ ) {
             for ( j = 0; j < 4; j++, k++ ) {
                 array[k] = M[i][j];
+            }
+        }
+        return array;
+    }
+
+    public float[] exportToFloatArrayRowOrder()
+    {
+        float array[] = new float[16];
+        int i, j, k;
+        for ( i = 0, k = 0; i < 4; i++ ) {
+            for ( j = 0; j < 4; j++, k++ ) {
+                array[k] = (float)M[i][j];
             }
         }
         return array;

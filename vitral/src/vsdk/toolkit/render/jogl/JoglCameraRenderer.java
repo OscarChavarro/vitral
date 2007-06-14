@@ -10,6 +10,8 @@
 package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
@@ -192,6 +194,27 @@ public class JoglCameraRenderer extends JoglRenderer
         drawVolume(gl, cam);
         gl.glPopMatrix();
     }
+
+    public static void activateNvidiaGpuParameters(GL gl, Camera camera,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Matrix4x4 MProjection;
+        Matrix4x4 MModelviewGlobal;
+        Vector3D cp = camera.getPosition();
+        double matrixarray[];
+        double vectorarray[] = {cp.x, cp.y, cp.z};
+
+        MProjection = camera.calculateViewVolumeMatrix();
+        MModelviewGlobal = camera.calculateTransformationMatrix();
+        matrixarray = MModelviewGlobal.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(
+            CgGL.cgGetNamedParameter(vertexShader,
+                "modelViewGlobal"), matrixarray, 0);
+        CgGL.cgGLSetParameter3dv(
+            CgGL.cgGetNamedParameter(vertexShader,
+                "cameraPositionGlobal"), vectorarray, 0);
+    }
+
 }
 
 //===========================================================================

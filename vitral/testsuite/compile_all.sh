@@ -45,6 +45,9 @@ cd ..
 cd MeshExample
 ./compile.sh
 cd ..
+cd CgShaderExample
+./compile.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques

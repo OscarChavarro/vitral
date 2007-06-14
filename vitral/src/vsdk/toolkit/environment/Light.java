@@ -44,8 +44,11 @@ public class Light extends Entity
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
+    lvec = new Vector3D();
         if ( type != AMBIENT ) {
-            lvec = pos;
+            lvec.x = pos.x;
+            lvec.y = pos.y;
+            lvec.z = pos.z;
             if ( type == DIRECTIONAL ) 
             {
                 lvec.normalize();
@@ -91,7 +94,7 @@ public class Light extends Entity
 
     public void setPosition(Vector3D pos)
     {
-        lvec = new Vector3D(pos);
+        lvec.clone(pos);
     }
     
     public ColorRgb getAmbient()

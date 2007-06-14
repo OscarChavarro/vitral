@@ -829,7 +829,7 @@ public class JoglDrawingArea implements
                       try {
                           normalMap = new NormalMap();
                           //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
-                          String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth_bump.bw";
+                          String imageFilename = "../../../etc/bumpmaps/earth.bw";
                           source = ImagePersistence.importIndexedColor(new File(imageFilename));
                           normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
 

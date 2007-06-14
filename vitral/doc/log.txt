@@ -177,5 +177,9 @@ Changes in 2006 december 18 to 21 revition
 Changes in 2006 december 24 revition
   - Ported to JDK1.6, some minor warnings fixed
 
-Changes in 2006 december 28 revition
+Changes in 2006 december 28-30 revition
   - First tests of Nvidia Cg support :-)
+  - Minor adjustments to Jogl*Renderer classes
+  - toFloatVect method generalized to float and double and renamed to 'exportToArray',
+    available in ColorRgb, Vector3D, Vector4D and Matrix4x4.
+

@@ -6,10 +6,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGprogram;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
-import javax.media.opengl.GL;
 
 public class JoglMaterialRenderer extends JoglRenderer {
     private static boolean errorReported = false;
@@ -40,13 +43,13 @@ public class JoglMaterialRenderer extends JoglRenderer {
         }
 
         float phongExp = (float)m.getPhongExponent();
-        float ambient[] = m.getAmbient().toFloatVect();
+        float ambient[] = m.getAmbient().exportToFloatArrayVect();
         ambient[3] = opacity;
-        float diffuse[] = m.getDiffuse().toFloatVect();
+        float diffuse[] = m.getDiffuse().exportToFloatArrayVect();
         diffuse[3] = opacity;
-        float specular[]  = m.getSpecular().toFloatVect();
+        float specular[]  = m.getSpecular().exportToFloatArrayVect();
         specular[3] = opacity;
-        //float emission[] = m.getEmission().toFloatVect();
+        //float emission[] = m.getEmission().exportToFloatArrayVect();
         //emission[3] = opacity;
 
         if ( m.isDoubleSided() ) {
@@ -62,6 +65,22 @@ public class JoglMaterialRenderer extends JoglRenderer {
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_SPECULAR, specular, 0);
         //gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_EMISSION, emission, 0); // Do not set! take care!
         gl.glMaterialf(gl.GL_FRONT_AND_BACK, gl.GL_SHININESS, phongExp);
+    }
+
+    public static void activateNvidiaGpuParameters(GL gl, Material material,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        double Ka[] = material.getAmbient().exportToDoubleArrayVect();
+        double Kd[] = material.getDiffuse().exportToDoubleArrayVect();
+        double Ks[] = material.getSpecular().exportToDoubleArrayVect();
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "ambientColor"), Ka, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "diffuseColor"), Kd, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "specularColor"), Ks, 0);
+        CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
+            pixelShader, "phongExponent"), material.getPhongExponent());
     }
 
 }

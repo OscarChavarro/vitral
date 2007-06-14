@@ -3,7 +3,7 @@
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - November 15 2005 - Oscar Chavarro: quality check                      =
-//= - March 17 2006 - Oscar Chavarro: added toFloatVect method              =
+//= - March 17 2006 - Oscar Chavarro: added exportToFloatArrayVect method   =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -55,6 +55,16 @@ public class Vector3D extends Entity
     }
 
     /**
+    Make this vector internal values equal to the other's.
+    */
+    public final void clone(Vector3D other)
+    {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+    }
+
+    /**
      *
      * @param B Vector3D
      * @return double
@@ -93,9 +103,15 @@ public class Vector3D extends Entity
         return new Vector3D(x - b.x, y - b.y, z - b.z);
     }
 
-    public float[] toFloatVect()
+    public float[] exportToFloatArrayVect()
     {
         float[] ret={(float)x, (float)y, (float)z, 1};
+        return ret;
+    }
+
+    public double[] exportToDoubleArrayVect()
+    {
+        double[] ret={x, y, z, 1};
         return ret;
     }
 

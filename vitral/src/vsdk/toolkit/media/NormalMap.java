@@ -66,9 +66,7 @@ public class NormalMap extends Entity
         if ( i < 0 || j < 0 || i >= xSize || j >= ySize ) return;
         int index = j * xSize + i;
         Vector3D elem = data.get(index);
-        elem.x = n.x;
-        elem.y = n.y;
-        elem.z = n.z;
+    elem.clone(n);
     }
 
     public Vector3D getNormal(int u, int v)

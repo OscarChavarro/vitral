@@ -7,10 +7,13 @@
 package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
@@ -202,6 +205,39 @@ public class JoglGeometryRenderer extends JoglRenderer
             JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
         }
     }
+
+    public static void activateNvidiaGpuParameters(GL gl, Geometry g,
+        Camera camera, CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Matrix4x4 MProjection;
+        Matrix4x4 MModelviewGlobal;
+        Matrix4x4 MModelviewLocal, MModelviewLocalIT, MCombined;
+        double matrixarray[];
+
+        MProjection = camera.calculateViewVolumeMatrix();
+        MModelviewGlobal = camera.calculateTransformationMatrix();
+        MModelviewLocal = MModelviewGlobal.multiply(
+            JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
+        MCombined = MProjection.multiply(MModelviewLocal);
+        MModelviewLocalIT = MModelviewLocal.inverse();
+        MModelviewLocalIT.transpose();
+
+        matrixarray = MCombined.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewProjectionLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocal.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocalIT.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocalIT"),
+            matrixarray, 0);
+    }
+
 }
 
 //===========================================================================

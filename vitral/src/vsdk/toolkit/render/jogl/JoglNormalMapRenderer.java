@@ -1,10 +1,7 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - November 25 2005 - Oscar Chavarro: Original base version              =
-//= - December 7 2005 - Fabio Aroca / Eduardo Mendoza: importJOGLimage and  =
-//=   getImageJOGL methods added                                            =
-//= - March 14 2006 - Oscar Chavarro: quality check                         =
+//= - December 30 2006 - Oscar Chavarro: Original base version              =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
@@ -22,18 +19,20 @@ import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 import com.sun.opengl.util.texture.TextureData;
 
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.media.NormalMap;
 
-class _JoglRGBImageRendererImageAssociation extends JoglRenderer
+class _JoglNormalMapRendererImageAssociation extends JoglRenderer
 {
     public int glList;
     public Texture renderer;
-    public RGBImage image;
+    public NormalMap image;
 }
 
-public class JoglRGBImageRenderer extends JoglRenderer 
+public class JoglNormalMapRenderer extends JoglRenderer 
 {
-    private static ArrayList<_JoglRGBImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererImageAssociation>();
+    private static ArrayList<_JoglNormalMapRendererImageAssociation> compiledImages = new ArrayList<_JoglNormalMapRendererImageAssociation>();
     //private static GLU glu = null;
 
     /**
@@ -50,18 +49,18 @@ public class JoglRGBImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static int activate(GL gl, RGBImage img)
+    public static int activate(GL gl, NormalMap map)
     {
         //- 1. Initialization of texture parameters -----------------------
-        int x_tam = img.getXSize();
-        int y_tam = img.getYSize();
+        int xSize = map.getXSize();
+        int ySize = map.getYSize();
         int lists[] = new int[1];
 
         /*
-        if ( (x_tam % 4) == 0 ) {
+        if ( (xSize % 4) == 0 ) {
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 4);
           }
-          else if ( (x_tam % 2) == 0 ) {
+          else if ( (xSize % 2) == 0 ) {
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 2);
           }
           else {
@@ -75,12 +74,12 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglNormalMapRendererImageAssociation item = null;
 
         Iterator it = compiledImages.iterator();
         while ( it.hasNext() ) {
-            item = (_JoglRGBImageRendererImageAssociation)it.next();
-            if ( item.image == img ) {
+            item = (_JoglNormalMapRendererImageAssociation)it.next();
+            if ( item.image == map ) {
                 glListIsCompiled = true;
                 break;
             }
@@ -89,8 +88,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
         //- 3. If there is no glList, create it ---------------------------
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBImageRendererImageAssociation();
-            item.image = img;
+            item = new _JoglNormalMapRendererImageAssociation();
+            item.image = map;
             item.glList = 1;
             compiledImages.add(item);
 
@@ -100,18 +99,40 @@ public class JoglRGBImageRenderer extends JoglRenderer
             //gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
 
             try {
+                //
+                byte byteArr[] = new byte[4*xSize*ySize];
+                int i;
+                long high, low;
+                int u;
+                int v;
+                Vector3D sample;
+
+                for ( u = 0, i = 0; u < xSize; u++ ) {
+                    for ( v = 0; v < ySize; v++, i += 4 ) {
+                        sample = map.getNormal(((double)u)/((double)xSize-1),
+                                               ((double)v)/((double)ySize-1));
+                        high = (int)(32767.0*sample.x);
+                        low = (int)(32767.0*sample.y);
+                        byteArr[i] = VSDK.unsigned8BitInteger2signedByte((int)(high & 0xFF00) >> 8);
+                        byteArr[i+1] = VSDK.unsigned8BitInteger2signedByte((int)(high & 0x00FF));
+                        byteArr[i+2] = VSDK.unsigned8BitInteger2signedByte((int)(low & 0xFF00) >> 8);
+                        byteArr[i+3] = VSDK.unsigned8BitInteger2signedByte((int)(low & 0x00FF));
+                    }
+                }
+
+                //
                 TextureData textureData;
                 textureData = new TextureData(
-                   3, // int internalFormat (number of components)
-                   x_tam, // int width
-                   y_tam, // int height
+                   gl.GL_SIGNED_HILO_NV, // int internalFormat (number of components)
+                   xSize, // int width
+                   ySize, // int height
                    0, // int border
-                   gl.GL_RGB, // int pixelFormat
-                   gl.GL_UNSIGNED_BYTE, // int pixelType
-                   true, // boolean mipmap
+                   gl.GL_HILO_NV, // int pixelFormat
+                   gl.GL_SHORT, // int pixelType
+                   false, // boolean mipmap
                    false, // boolean dataIsCompressed
                    false, // boolean mustFlipVertically
-                   ByteBuffer.wrap(img.getRawImage()), // Buffer buffer
+                   ByteBuffer.wrap(byteArr), // Buffer buffer
                    null // TextureData.Flusher flusher
                 );
                 item.renderer = TextureIO.newTexture(textureData);
@@ -121,10 +142,10 @@ public class JoglRGBImageRenderer extends JoglRenderer
                 System.err.println(e);
             }
             /*
-            //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 3, x_tam, y_tam, gl.GL_RGB, 
-            //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, gl.GL_RGB, 
-                            gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
+            //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 3, xSize, ySize, gl.GL_RGB, 
+            //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(map.getRawImage()));
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 3, xSize, ySize, 0, gl.GL_RGB, 
+                            gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(map.getRawImage()));
             */
         }
 
@@ -132,8 +153,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
         if ( glListIsCompiled == false ) {
             item.renderer.bind();
             item.renderer.enable();
-          }
-          else {
+        }
+        else {
             gl.glCallList(item.glList);
         }
         /*
@@ -142,53 +163,6 @@ public class JoglRGBImageRenderer extends JoglRenderer
         }
         */
         return item.glList;
-    }
-
-    public static void draw(GL gl, RGBImage img)
-    {
-        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
-        gl.glRasterPos2f(-1, -1);
-        gl.glDrawPixels(img.getXSize(), img.getYSize(), 
-                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, 
-                        ByteBuffer.wrap(img.getRawImage()));
-    }
-
-    public static ByteBuffer importJOGLimage(GL gl) {
-        int[] view= new int[4];
-        //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
-        int width = view[2], height = view[3];
-
-        ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
-        gl.glReadBuffer(GL.GL_FRONT_LEFT);
-        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
-                        bb);
-        gl.glFlush();
-        return bb;
-    }
-
-    public static RGBImage getImageJOGL(GL gl) {
-        RGBImage image = new RGBImage();
-        int[] view= new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
-        int width = view[2], height = view[3];
-
-        image.init(width, height);
-
-        // TODO: Check if this can be done without duplication!
-        ByteBuffer bb = importJOGLimage(gl).duplicate();
-
-        int pos = 0;
-
-        for (int y =image.getYSize()-1; y >=0; y--) {
-            for (int x = 0; x < image.getXSize(); x++) {
-                image.putPixel(x,y, bb.get(pos), bb.get(pos + 1),
-                               bb.get(pos + 2));
-                pos += 3;
-            }
-        }
-        return image;
     }
 
 }
