@@ -13,7 +13,6 @@ import java.io.FileInputStream;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import javax.media.opengl.GL;
 
 // import javax.media.opengl.glu.GLU;
@@ -77,9 +76,9 @@ public class JoglRGBImageRenderer extends JoglRenderer
         boolean glListIsCompiled = false;
         _JoglRGBImageRendererImageAssociation item = null;
 
-        Iterator it = compiledImages.iterator();
-        while ( it.hasNext() ) {
-            item = (_JoglRGBImageRendererImageAssociation)it.next();
+        int i;
+        for ( i = 0; i < compiledImages.size(); i++ ) {
+            item = compiledImages.get(i);
             if ( item.image == img ) {
                 glListIsCompiled = true;
                 break;

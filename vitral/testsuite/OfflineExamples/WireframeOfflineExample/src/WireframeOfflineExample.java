@@ -1,6 +1,5 @@
 //===========================================================================
 import java.io.File;
-import java.util.Iterator;
 
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -68,10 +67,9 @@ public class WireframeOfflineExample {
         lineSet.add2DLine(pp0.x, pp0.y, pp1.x, pp1.y);
     }
 
-    /** Called by drawable to initiate drawing */
     public void display() {
         TriangleMesh mesh = null;
-        Iterator<TriangleMesh> i;
+    int i;
         Vertex[] arrVertexes;
         Triangle[] arrTriangles;
         int t;
@@ -84,8 +82,8 @@ public class WireframeOfflineExample {
         cp1 = new Vector3D();
         R = camera.calculateProjectionMatrix(camera.STEREO_MODE_CENTER);
 
-        for ( i = meshGroup.getMeshes().iterator(); i.hasNext(); ) {
-            mesh = (TriangleMesh)i.next();
+        for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
+            mesh = meshGroup.getMeshes().get(i);
             arrVertexes = mesh.getVertexes();
             arrTriangles = mesh.getTriangles();
             for ( t = 0; t < arrTriangles.length; t++ ) {

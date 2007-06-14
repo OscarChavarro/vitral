@@ -25,7 +25,6 @@
 package vsdk.toolkit.render;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
@@ -84,7 +83,8 @@ public class Raytracer extends RenderingElement {
     */
     private ColorRgb evaluateIlluminationModel(
         GeometryIntersectionInformation info, Vector3D v, 
-        ArrayList lights, ArrayList objects, Background background,
+        ArrayList <Light> lights, ArrayList <SimpleBody> objects,
+        Background background,
         Material material, RendererConfiguration inQualitySelection) {
         //-----------------------------------------------------------------
         SimpleBody nearestObject;
@@ -143,8 +143,9 @@ public class Raytracer extends RenderingElement {
 
         //-----------------------------------------------------------------
         //-----------------------------------------------------------------
-        for ( Iterator i = lights.iterator(); i.hasNext(); ) {
-            Light light = (Light)i.next();
+        int i;
+        for ( i = 0; i< lights.size(); i++ ) {
+            Light light = lights.get(i);
             lightEmission = light.getSpecular();
 
             if ( light.tipo_de_luz == Light.AMBIENT ) {
@@ -207,7 +208,7 @@ public class Raytracer extends RenderingElement {
                     }
                 }
               } // else case of "if ( light.tipo_de_luz == Light.AMBIENT )" conditional
-        } // for ( Iterator i = lights.iterator(); i.hasNext(); )
+        } // for ( i = 0; i< lights.size(); i++ )
 
         // Compute illumination due to reflection
         double kr = material.getReflectionCoefficient();
@@ -304,17 +305,17 @@ public class Raytracer extends RenderingElement {
     and its combination with geometric transformations.
     */
     private SimpleBody 
-    selectNearestThingInRayDirection(Ray inOut_Ray, ArrayList inSimpleBodyArray) {
-        Iterator i;
+    selectNearestThingInRayDirection(Ray inOut_Ray, ArrayList <SimpleBody> inSimpleBodyArray) {
+        int i;
         SimpleBody gi;
         SimpleBody nearestObject;
         double nearestDistance;
 
         nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
-        for ( i = inSimpleBodyArray.iterator(); i.hasNext(); ) {
+        for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {
             inOut_Ray.t = Double.MAX_VALUE;
-            gi = (SimpleBody)i.next();
+            gi = inSimpleBodyArray.get(i);
             if ( gi.doIntersection(inOut_Ray) && 
                  inOut_Ray.t < nearestDistance &&
                  inOut_Ray.t > VSDK.EPSILON ) {
@@ -331,8 +332,10 @@ public class Raytracer extends RenderingElement {
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
-    private ColorRgb followRayPath(Ray inRay, ArrayList in_objetos, 
-                                  ArrayList in_luces, Background in_background,
+    private ColorRgb followRayPath(Ray inRay,
+                                  ArrayList <SimpleBody> in_objetos, 
+                                  ArrayList <Light> in_luces,
+                                  Background in_background,
                                   RendererConfiguration inQualitySelection)
     {
         ColorRgb c;
@@ -402,8 +405,8 @@ public class Raytracer extends RenderingElement {
 
     public void execute(RGBImage inoutViewport, 
                         RendererConfiguration inQualitySelection,
-                        ArrayList inSimpleBodyArray,
-                        ArrayList in_arr_luces,
+                        ArrayList <SimpleBody> inSimpleBodyArray,
+                        ArrayList <Light> in_arr_luces,
                         Background in_background,
                         Camera in_camara,
                         ProgressMonitor report)
@@ -416,8 +419,8 @@ public class Raytracer extends RenderingElement {
 
     public void execute(RGBImage inoutViewport, 
                         RendererConfiguration inQualitySelection,
-                        ArrayList inSimpleBodyArray,
-                        ArrayList in_arr_luces,
+                        ArrayList <SimpleBody> inSimpleBodyArray,
+                        ArrayList <Light> in_arr_luces,
                         Background in_background,
                         Camera in_camara,
                         ProgressMonitor report,
@@ -477,12 +480,12 @@ public class Raytracer extends RenderingElement {
     */
     public void execute(RGBImage inoutViewport,
                         RendererConfiguration inQualitySelection,
-                        ArrayList inSimpleBodyArray,
-                        ArrayList in_arr_luces,
-                        Background in_background,
-                        Camera in_camara,
-                        ProgressMonitor report,
-                        ZBuffer depthmap,
+                        ArrayList <SimpleBody> inSimpleBodyArray,
+                        ArrayList <Light> inLightsArray,
+                        Background inBackground,
+                        Camera inCamera,
+                        ProgressMonitor liveReport,
+                        ZBuffer outDepthmap,
                         int limx1, int limy1,
                         int limx2, int limy2)
     {
@@ -492,21 +495,21 @@ public class Raytracer extends RenderingElement {
         Ray rayo;
         ColorRgb color;
 
-        in_camara.updateVectors();
+        inCamera.updateVectors();
 
-        report.begin();
+        liveReport.begin();
         for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
-            report.update(0, inoutViewport.getYSize(), y);
+            liveReport.update(0, inoutViewport.getYSize(), y);
             for ( x = limx1, relativeX = 0; x < limx2; x++, relativeX++ ) {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
-                rayo = in_camara.generateRay(x, y);
+                rayo = inCamera.generateRay(x, y);
                 color = followRayPath(rayo, inSimpleBodyArray,
-                                      in_arr_luces, in_background, 
+                                      inLightsArray, inBackground, 
                                       inQualitySelection);
-                if ( depthmap != null ) {
-                    depthmap.setZ(x, y, (float)rayo.t);
+                if ( outDepthmap != null ) {
+                    outDepthmap.setZ(x, y, (float)rayo.t);
                 }
                 //- Exporto el result de color del pixel ----------------
                 inoutViewport.putPixel(relativeX, relativeY,
@@ -515,7 +518,7 @@ public class Raytracer extends RenderingElement {
                                               (byte)(255 * color.b));
             }
         }
-        report.end();
+        liveReport.end();
     }
 
 }

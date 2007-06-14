@@ -7,7 +7,6 @@
 package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -159,7 +158,7 @@ public class TranslateGizmo extends Gizmo {
     int modelType)
   {
       int index;
-      Iterator i;
+      int i;
       Material red = createMaterial(1, 0, 0);
       Material green = createMaterial(0, 1, 0);
       Material blue = createMaterial(0, 0, 1);
@@ -211,9 +210,8 @@ public class TranslateGizmo extends Gizmo {
       boxModel.setSize(scale*BOX_SIDE, scale*BOX_SIDE, scale*BOX_HEIGHT);
 
       index = 1;
-      for ( i = elementInstances.iterator(); 
-            index <= 12 && i.hasNext(); index++ ) {
-          SimpleBody r = (SimpleBody)i.next();
+      for ( i = 0; index <= 12 && i < elementInstances.size(); index++, i++ ) {
+          SimpleBody r = elementInstances.get(i);
           r.setGeometry(null);
           switch ( index ) {
             case X_AXIS_ELEMENT:
@@ -634,14 +632,13 @@ public class TranslateGizmo extends Gizmo {
       Ray r = camera.generateRay(x, y);
       double nearestDistance = Double.MAX_VALUE;
       int nearestElement = -1;
-      int index = 1;
+      int index = 1, i;
 
       /* Note that box elements are only for display, they do not affect
       gravity selections */
-      for ( Iterator i = elementInstances.iterator(); 
-            index <= 9 && i.hasNext(); index++ ) {
+      for ( i = 0; index <= 9 && i < elementInstances.size(); index++, i++ ) {
           r.t = Double.MAX_VALUE;
-          SimpleBody gi = (SimpleBody)i.next();
+          SimpleBody gi = elementInstances.get(i);
 
           if ( gi.getGeometry() != null && gi.doIntersection(r) ) {
               nearestDistance = r.t;

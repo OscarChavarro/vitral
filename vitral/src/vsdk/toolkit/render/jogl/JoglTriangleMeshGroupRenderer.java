@@ -3,7 +3,6 @@
 package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.media.opengl.GL;
 
@@ -20,10 +19,10 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     public static void
     draw(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
         TriangleMesh mesh = null;
-        Iterator<TriangleMesh> i;
+    int i;
 
-        for ( i = meshGroup.getMeshes().iterator(); i.hasNext(); ) {
-            mesh = i.next();
+        for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
+            mesh = meshGroup.getMeshes().get(i);
             boolean c = quality.isSelectionCornersSet()?true:false;
             quality.setSelectionCorners(false);
             JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);

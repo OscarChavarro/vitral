@@ -7,7 +7,6 @@
 package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.media.opengl.GL;
 
@@ -66,8 +65,9 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         gl.glEnable(gl.GL_LIGHTING);
         gl.glShadeModel(gl.GL_SMOOTH);
 
-        for ( Iterator i = things.iterator(); i.hasNext(); ) {
-            SimpleBody r = (SimpleBody)i.next();
+    int i;
+        for ( i = 0; i < things.size(); i++ ) {
+            SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
             Vector3D position;
 

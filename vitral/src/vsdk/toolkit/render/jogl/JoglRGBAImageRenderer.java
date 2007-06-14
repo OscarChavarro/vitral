@@ -13,7 +13,6 @@ import java.io.FileInputStream;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import javax.media.opengl.GL;
 //import javax.media.opengl.glu.GLU;
 
@@ -76,9 +75,9 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         boolean glListIsCompiled = false;
         _JoglRGBAImageRendererImageAssociation item = null;
 
-        Iterator it = compiledImages.iterator();
-        while ( it.hasNext() ) {
-            item = (_JoglRGBAImageRendererImageAssociation)it.next();
+        int i;
+        for ( i = 0; i < compiledImages.size(); i++ ) {
+            item = compiledImages.get(i);
             if ( item.image == img ) {
                 glListIsCompiled = true;
                 break;
@@ -149,7 +148,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
         */
-    return item.glList;
+        return item.glList;
     }
 
     public static void draw(GL gl, RGBAImage img)
