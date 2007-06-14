@@ -52,6 +52,37 @@ public class CircularDoubleLinkedList<E>
         currentSize++;
     }
 
+    public void insertBefore(E newElem, E pivot)
+    {
+        locateWindowAtElem(pivot);
+        _CircularDoubleLinkedListNode<E> newContainer;
+
+        newContainer = new _CircularDoubleLinkedListNode<E>();
+        newContainer.data = newElem;
+        lastAccessedIndex = -1;
+
+        if ( head == null ) {
+            head = newContainer;
+            newContainer.next = newContainer;
+            newContainer.previous = newContainer;
+        }
+        else if ( window == null || window == head ) {
+        window = head;
+            head = newContainer;
+            newContainer.previous = window.previous;
+            newContainer.next = window;
+            window.previous.next = newContainer;
+            window.previous = newContainer;
+    }
+    else {
+            newContainer.previous = window.previous;
+            newContainer.next = window;
+            window.previous.next = newContainer;
+            window.previous = newContainer;
+    }
+    currentSize++;
+    }
+
     public void locateWindowAtIndex(int index)
     {
         if ( index < 0 || index >= currentSize ) {
@@ -74,9 +105,10 @@ public class CircularDoubleLinkedList<E>
               i++, window = window.next ) {
             if ( window.data == e ) {
                 lastAccessedIndex = i;
-                break;
+                return;
             }
         }
+        window = null;
     }
 
     public void swapElements(E e1, E e2)
@@ -85,6 +117,8 @@ public class CircularDoubleLinkedList<E>
         _CircularDoubleLinkedListNode<E> window1 = window;
         locateWindowAtElem(e2);
         _CircularDoubleLinkedListNode<E> window2 = window;
+
+    if ( window1 == null || window2 == null ) return;
         E temp = window1.data;
 
         window1.data = window2.data;

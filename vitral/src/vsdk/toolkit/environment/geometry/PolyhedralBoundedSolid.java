@@ -87,9 +87,9 @@ public class PolyhedralBoundedSolid extends Solid {
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             facei = polygonsList.get(i);
-        if ( facei.id == id ) {
-        return facei;
-        }
+            if ( facei.id == id ) {
+                return facei;
+            }
         }
         return null;
     }
@@ -122,14 +122,13 @@ public class PolyhedralBoundedSolid extends Solid {
             he = where;
           }
           else {
-              he =
+            he =
                 new _PolyhedralBoundedSolidHalfEdge(v, where.parentLoop, this);
-              _PolyhedralBoundedSolidHalfEdge other = he.previous();
-              halfEdgesList.swapElements(he, other);
+            halfEdgesList.insertBefore(he, where);
+            he.startingVertex = v;
         }
         he.parentEdge = e;
-        he.startingVertex = v;
-    he.parentLoop = where.parentLoop;
+        he.parentLoop = where.parentLoop;
 
         if ( sign == PolyhedralBoundedSolid.PLUS ) {
             e.leftHalf = he;
@@ -175,6 +174,7 @@ public class PolyhedralBoundedSolid extends Solid {
         newVertex = new _PolyhedralBoundedSolidVertex(this, p, vertexId);
         newHalfEdge =
             new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop, this);
+        halfEdgesList.add(newHalfEdge);
         newLoop.boundaryStartHalfEdge = newHalfEdge;
     }
 
@@ -207,13 +207,20 @@ public class PolyhedralBoundedSolid extends Solid {
         while ( he != he2 ) {
             he.startingVertex = newVertex;
             he = he.mirrorHalfEdge().next();
-        if ( he == he1 ) break;
+            if ( he == he1 ) break;
         }
 
-    _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
-        addhe(newEdge, oldVertex, he2, PLUS);
-        addhe(newEdge, newVertex, he1, MINUS);
-
+        _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
+        if ( he1.parentEdge != null ) {
+            addhe(newEdge, oldVertex, he2, PLUS);
+            addhe(newEdge, newVertex, he1, MINUS);
+        }
+        else {
+        _PolyhedralBoundedSolidHalfEdge x, y;
+            x = addhe(newEdge, oldVertex, he1, PLUS);
+            y = addhe(newEdge, newVertex, he1, MINUS);
+            halfEdgesList.swapElements(x, y);
+        }
         newVertex.emanatingHalfEdge = he2.previous();
         he2.startingVertex.emanatingHalfEdge = he2;
     }
@@ -251,8 +258,8 @@ public class PolyhedralBoundedSolid extends Solid {
         he = he1;
         while ( he != he2 ) {
             he.parentLoop = newLoop;
-            he = he.next();
-        if ( he == he1 ) break;
+            he = he.nextSameLoop();
+            if ( he == he1 ) break;
         }
 
         nhe1 = addhe(newEdge, he2.startingVertex, he1, MINUS);
@@ -296,15 +303,15 @@ public class PolyhedralBoundedSolid extends Solid {
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f1 + " not found.");
             return false;
-    }
+        }
         face2 = findFace(f2);
         if ( face2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f2 + " not found.");
             return false;
-    }
+        }
 //        he1 = findHalfEdge(face1, v1, v2);
-    return true;
+        return true;
     }
 
     //=================================================================

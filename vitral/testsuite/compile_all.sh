@@ -46,7 +46,8 @@ cd MeshExample
 ./compile.sh
 cd ..
 cd CgShaderExample
-./compile.sh
+./compile1.sh
+./compile2.sh
 cd ..
 cd ..
 #---------------------------------------------------------------------------

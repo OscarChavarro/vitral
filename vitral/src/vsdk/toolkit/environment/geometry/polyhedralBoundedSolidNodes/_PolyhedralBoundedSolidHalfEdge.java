@@ -46,6 +46,10 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
     /// Defined as presented in [MANT1988].10.2.1
     public _PolyhedralBoundedSolidVertex startingVertex;
 
+    //
+    public int id;
+    private static int currentId = 1;
+
     //=================================================================
     public _PolyhedralBoundedSolidHalfEdge(_PolyhedralBoundedSolidVertex v,
         _PolyhedralBoundedSolidLoop parentLoop,
@@ -53,8 +57,10 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
     {
     startingVertex = v;
     this.parentLoop = parentLoop;
-        parentSolid.halfEdgesList.add(this);
     parentEdge = null;
+
+        id = currentId;
+    currentId++;
     }
 
     /**
@@ -75,6 +81,15 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
         parentLoop.parentFace.parentSolid.halfEdgesList.locateWindowAtElem(this);
         parentLoop.parentFace.parentSolid.halfEdgesList.next();
     return parentLoop.parentFace.parentSolid.halfEdgesList.getWindow();
+    }
+
+    public _PolyhedralBoundedSolidHalfEdge nextSameLoop()
+    {
+    _PolyhedralBoundedSolidHalfEdge next = this;
+        do {
+            next = next.next();
+        } while ( parentLoop != next.parentLoop );
+    return next;
     }
 
     private int
@@ -142,7 +157,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
     public String toString()
     {
         String msg;
-        msg = "HalfEdge: parent face " + parentLoop.parentFace.id + ". ";
+        msg = "HalfEdge id " + id + ". Parent face " + parentLoop.parentFace.id + ". ";
         if ( parentEdge == null ) {
             msg = msg + "without parent edge. ";
       }
@@ -160,7 +175,8 @@ public class _PolyhedralBoundedSolidHalfEdge extends Entity {
             ;
             msg = msg + ". ";
     }
-    msg = msg + "Starting at vertex " + startingVertex.id + ".";
+    msg = msg + "Starting at vertex " + startingVertex.id + ". ";
+    msg = msg + "Next halfedge: " + next().id + ".";
         return msg;
     }
 }

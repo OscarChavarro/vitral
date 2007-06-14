@@ -34,7 +34,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     curveFactor(double param, double factor)
     {
         double percent = param/factor;
-        return 0.1 * factor * Math.sin(percent*Math.PI);
+        return 0.1 * factor * Math.sin(0.5*percent*Math.PI);
     }
 
     public static void
@@ -52,7 +52,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
         n = loopPlane.getNormal();
         v = endP.substract(startP);
-        factor = v.length();
+        factor = v.length()/2;
         v.normalize();
         u = v.crossProduct(n);
         double delta = factor/((double)N);
@@ -60,7 +60,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         if ( he.parentEdge == null ) {
             gl.glColor3d(1, 1, 1);
           }
-          else if ( he.parentEdge.rightHalf == he ) {
+          else if ( he.parentEdge.leftHalf == he ) {
             gl.glColor3d(1, 0, 0);
           }
           else {
@@ -79,9 +79,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             }
         gl.glEnd();
         P = startP.add(v.multiply(factor).add(u.multiply(0)));
+/*
         gl.glTranslated(P.x, P.y, P.z);
         gl.glRotated(20, n.x, n.y, n.z);
         gl.glTranslated(-P.x, -P.y, -P.z);
+*/
+    Vector3D Pi = u.multiply(factor*0.1);
+        gl.glTranslated(Pi.x, Pi.y, Pi.z);
+
         gl.glBegin(gl.GL_LINES);
             gl.glVertex3d(P.x, P.y, P.z);
             P = startP.add(v.multiply(factor*0.9).add(u.multiply(factor*0.05)));
@@ -99,7 +104,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
     public static void
     draw(GL gl, PolyhedralBoundedSolid solid,
-         Camera c, RendererConfiguration q, int heIndex)
+         Camera c, RendererConfiguration q, int faceIndex)
     {
         int i, j;
 
@@ -119,57 +124,24 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glEnd();
 
         Vector3D startP, endP;
-        Vector3D p0, p1, p2, n, a, b;
-        _PolyhedralBoundedSolidHalfEdge startHe, selectedHe = null;
+        Vector3D p0 = null, p1 = null, p2 = null, n, a, b;
+        _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;
 
         //-----------------------------------------------------------------
         System.out.println("= PRINTING MAIN SOLID STRUCTURE ===========================================");
         System.out.println("Solid with " + 
-        solid.verticesList.size() + " vertices:");
-    for ( i = 0; i < solid.verticesList.size(); i++ ) {
-        _PolyhedralBoundedSolidVertex v;
-        v = solid.verticesList.get(i);
+            solid.verticesList.size() + " vertices:");
+        for ( i = 0; i < solid.verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v;
+            v = solid.verticesList.get(i);
             System.out.println("  - " + v);
-    }
-        System.out.println("Solid with " + 
-            solid.polygonsList.size() + " faces:");
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            System.out.println("  - " + face);
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-        System.out.println("    . Loop " + j + ": ");
-                _PolyhedralBoundedSolidLoop loop;
-        loop = face.boundariesList.get(j);
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
-                he = loop.boundaryStartHalfEdge;
-        heStart = he;
-                int k = 0;
-                do {
-            if ( heIndex == k ) {
-            System.out.print("  (*) ");
-                        selectedHe = he;
-            }
-            else {
-            System.out.print("      ");
-            }
-                    System.out.println(". " + he);
-            he = he.nextSameSide();
-                    if ( he == null ) {
-                        // Loop is not closed!
-            System.out.println("  - (not closed loop)");
-                        break;
-            }
-            k++;
-        } while( he != heStart );
         }
-        }
-
         System.out.println("Solid with " + 
             solid.halfEdgesList.size() + " half edges:");
         for ( i = 0; i < solid.halfEdgesList.size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge he = solid.halfEdgesList.get(i);
-            System.out.println("  - HalfEdge " + i + ": " + he);
+            System.out.println("  - " + he);
         }
 
         System.out.println("Solid with " +
@@ -178,30 +150,104 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
             System.out.println("  - Edge " + i + ": " + e);
         }
+        System.out.println("Solid with " + 
+            solid.polygonsList.size() + " faces:");
+
+        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            System.out.println("  - " + face);
+
+
+            if ( i == faceIndex ) {
+        gl.glLineWidth(2);
+        }
+        else {
+        gl.glLineWidth(1);
+        continue;
+        }
+
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                System.out.println("    . Loop " + j + ": ");
+                _PolyhedralBoundedSolidLoop loop;
+                loop = face.boundariesList.get(j);
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+
+                loopPlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
+                //- First pass: determine face plane -------------------------
+                int k = 0;
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    //-----
+                    switch ( k ) {
+                      case 0: p0 = he.startingVertex.position; break;
+                      case 1: p1 = he.startingVertex.position; break;
+                      case 2: p2 = he.startingVertex.position; break;
+                    }
+                    //-----
+                    he = he.nextSameLoop();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        System.out.println("  - (not closed loop)");
+                        break;
+                    }
+            System.out.println("      . HE " + he.id);
+                    k++;
+                } while( he != heStart );
+                if ( k >= 3 ) {
+                    a = p1.substract(p0);    a.normalize();
+                    b = p2.substract(p0);    b.normalize();
+                    n = a.crossProduct(b);   n.normalize();
+                    loopPlane = new InfinitePlane(n, p0);
+                }
+
+                //- Second pass: draw face -----------------------------------
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                hePrev = null;
+                do {
+                    //-----
+                    he = he.nextSameLoop();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+                    if ( hePrev != null ) {
+                        drawHalfEdge(gl, hePrev,
+                                     hePrev.startingVertex.position,
+                                     he.startingVertex.position, loopPlane);
+                    }
+                    hePrev = he;
+                    k++;
+                } while( he != heStart );
+        if ( he != null ) {
+                    he = he.nextSameLoop();
+                    drawHalfEdge(gl, hePrev,
+                                 hePrev.startingVertex.position,
+                                 he.startingVertex.position, loopPlane);
+        }
+            }
+        }
 
         //-----------------------------------------------------------------
         loopPlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
         for ( i = 0; i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
-            startP = e.rightHalf.startingVertex.position;
-            endP = e.leftHalf.startingVertex.position;
-
-        if ( selectedHe == e.leftHalf ) {
-                gl.glLineWidth(2.0f);
-          }
-          else {
-                gl.glLineWidth(1.0f);
-        }
+            startP = e.leftHalf.startingVertex.position;
+            endP = e.rightHalf.startingVertex.position;
+/*
+            gl.glLineWidth(1.0f);
             drawHalfEdge(gl, e.leftHalf, startP, endP, loopPlane);
 
-        if ( selectedHe == e.rightHalf ) {
+            if ( selectedHe == e.rightHalf ) {
                 gl.glLineWidth(2.0f);
-          }
-          else {
+              }
+              else {
                 gl.glLineWidth(1.0f);
-        }
+            }
             drawHalfEdge(gl, e.rightHalf, endP, startP, loopPlane);
-
+*/
             gl.glLineWidth(3.0f);
             gl.glColor3d(0, 0, 0);
             gl.glBegin(gl.GL_LINES);

@@ -33,7 +33,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
     private Camera camera;
     private PolyhedralBoundedSolid solid;
-    private int heIndex = 0;
+    private int faceIndex = 0;
 
     private RendererConfiguration quality;
     private CameraController cameraController;
@@ -57,21 +57,27 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     he0 = solid.halfEdgesList.get(0);
         solid.lmev(he0, he0, 2, new Vector3D(1, 0.1, 0.1));
 
-/*
-    he0 = solid.halfEdgesList.get(0);
+    he0 = solid.halfEdgesList.get(1);
         solid.lmev(he0, he0, 3, new Vector3D(1, 1, 0.1));
 
     he0 = solid.halfEdgesList.get(2);
         solid.lmev(he0, he0, 4, new Vector3D(0.1, 1, 0.1));
 
-    he0 = solid.halfEdgesList.get(4);
-    he1 = solid.halfEdgesList.get(5);
+    he0 = solid.halfEdgesList.get(3);
+    he1 = solid.halfEdgesList.get(0);
         solid.lmef(he0, he1, 2);
 
-    he0 = solid.halfEdgesList.get(6);
-    he1 = solid.halfEdgesList.get(6);
-        solid.lmev(he0, he1, new Vector3D(0.1, 0.1, 1));
-*/
+    he0 = solid.halfEdgesList.get(1);
+    he1 = solid.halfEdgesList.get(1);
+        solid.lmev(he0, he1, 5, new Vector3D(0.1, 0.1, 1));
+
+    he0 = solid.halfEdgesList.get(9);
+    he1 = solid.halfEdgesList.get(9);
+        solid.lmev(he0, he1, 6, new Vector3D(1, 0.1, 1));
+
+    he0 = solid.halfEdgesList.get(10);
+    he1 = solid.halfEdgesList.get(2);
+        solid.lmef(he0, he1, 3);
 
         //-----------------------------------------------------------------
     }
@@ -131,7 +137,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
-        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality, heIndex);
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality, faceIndex);
     }
 
     /** Called by drawable to initiate drawing */
@@ -227,10 +233,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
       int unicode_id = e.getKeyChar();
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
-            case '1': heIndex --; break;
-            case '2': heIndex ++; break;
+            case '1': faceIndex --; break;
+            case '2': faceIndex ++; break;
       }
-      if ( heIndex < 0 ) heIndex = 0;
+      if ( faceIndex < 0 ) faceIndex = 0;
           canvas.repaint();
       }
   }

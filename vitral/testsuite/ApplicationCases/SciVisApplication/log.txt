@@ -1,0 +1,17 @@
+August 20 2006, Oscar Chavarro:
+  - 38min: Starting a new internationalized Swing application from scratch
+  - 1h: Implementing basic model classes Study and TimeTake, with javadoc
+
+August 21 2006, Oscar Chavarro:
+  - 1h7min: Implementing basic model classes TimeTake and SegmentedImageGroup
+
+August 22 2006, Oscar Chavarro:
+  - 1h28min: Adding testing GUI management for current loaded Study
+    (main panels and spin buttons for time and slice movement)
+
+September 3 2006, Oscar Chavarro:
+  - 1h45m: Changing design: CachedInformation abstract class incorporated
+    and first Slice Image managing, no caching
+  - 19min: RGBImage internal representation changed to byte array
+  - 12min: implementing Entity::getSizeInBytes
+  - 23min: starting the implementation cache managing schema
