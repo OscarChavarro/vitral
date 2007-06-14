@@ -276,4 +276,12 @@ Changes in 2007 may 24 revition
 
 Changes in 2007 may 26 revition
   - JoglSimpleBodyRenderer and JoglSimpleBodyGroupRenderer. Some new
-    organitation of SceneEditorApplication
+    organization of SceneEditorApplication
+
+Changes in 2007 may 29-30 revition
+  - Offline rendering generation (Pbuffer based technique) of orthogonal views
+    for a selected object in SceneEditorApplication
+  - First version of interface ImageProcessing!
+  - ImageProcessing.gammaCorrection, ImageProcessing.processDistanceField
+  - ReaderObj normalizes typical .obj aligment (Y is up) to typical
+    Aquynza/VitralSDK alignment (Z is up)

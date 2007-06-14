@@ -38,7 +38,7 @@
 
 #===========================================================================
 
-JDKHOME=/usr/local/jdk1.6.0_01
+JDKHOME=/usr/local/jdk1.6.0
 PLATFORM=linux
 SRC_DIR = ./src
 LIB_DIR = ../../lib

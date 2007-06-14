@@ -76,8 +76,8 @@ public class Vertex extends FundamentalEntity
     }
 
     public Vertex(Vector3D position, Vector3D normal) {
-        this.position = position;
-        this.normal = normal;
+        this.position = new Vector3D(position);
+        this.normal = new Vector3D(normal);
         this.normal.normalize();
 
         binormal = new Vector3D(0, 1, 0);
@@ -85,6 +85,18 @@ public class Vertex extends FundamentalEntity
         incidentTriangles = null;
         u = 0.0;
         v = 0.0;
+    }
+
+    public Vertex(Vector3D position, Vector3D normal, double u, double v) {
+        this.position = new Vector3D(position);
+        this.normal = new Vector3D(normal);
+        this.normal.normalize();
+
+        binormal = new Vector3D(0, 1, 0);
+        tangent = new Vector3D(0, 0, 1);
+        incidentTriangles = null;
+        this.u = u;
+        this.v = v;
     }
 
     public Vertex(Vector3D position, Vector3D normal, Vector3D binormal,

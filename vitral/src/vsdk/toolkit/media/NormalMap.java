@@ -16,6 +16,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 
 public class NormalMap extends MediaEntity
 {
@@ -130,7 +131,7 @@ public class NormalMap extends MediaEntity
                 n = getNormal(x, y);
                 n.normalize();
 
-                n.x = (n.x+1)/2;
+                n.x = (n.x+1)/2; // This ensures Nvidia compatibility!
                 n.y = (n.y+1)/2;
                 n.z = (n.z+1)/2;
 
@@ -145,6 +146,54 @@ public class NormalMap extends MediaEntity
                 b = VSDK.unsigned8BitInteger2signedByte(bb);
 
                 output.putPixel(x, y, r, g, b);
+            }
+        }
+        return output;
+    }
+
+    /**
+    @warning This method converts double values to signed bytes. However,
+    it is interesting to note that java language aparently makes a weird
+    conversion from double to int when casting directly (sometimes
+    produces negative integers from positive floats). Note that this
+    method checkes this explicity.  Is there a better/clearer way to
+    assure the correctness of this conversion?
+    */
+    public RGBAImage exportToRgbaImage()
+    {
+        RGBAImage output = new RGBAImage();
+
+        if ( !output.init(xSize, ySize) ) {
+            return null;
+        }
+
+        int x, y;
+        Vector3D n;
+        byte r, g, b, a;
+    int rr, gg, bb;
+
+    a = VSDK.unsigned8BitInteger2signedByte(255);
+
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                n = getNormal(x, y);
+                n.normalize();
+
+                n.x = (n.x+1)/2; // This ensures Nvidia compatibility!
+                n.y = (n.y+1)/2;
+                n.z = (n.z+1)/2;
+
+        rr = (int)(n.x * 255.0);
+        gg = (int)(n.y * 255.0);
+        bb = (int)(n.z * 255.0);
+        if ( rr < 0 ) rr += 256;
+        if ( gg < 0 ) gg += 256;
+        if ( bb < 0 ) bb += 256;
+                r = VSDK.unsigned8BitInteger2signedByte(rr);
+                g = VSDK.unsigned8BitInteger2signedByte(gg);
+                b = VSDK.unsigned8BitInteger2signedByte(bb);
+
+                output.putPixel(x, y, r, g, b, a);
             }
         }
         return output;
@@ -173,14 +222,48 @@ public class NormalMap extends MediaEntity
                 n = getNormal(x, y);
                 n.normalize();
 
-                n.x = (n.x+1)/2;
-                n.y = (n.y+1)/2;
-                n.z = (n.z+1)/2;
-
-                val = (int)(k.dotProduct(n) * 255.0);
+                val = (int)((1.0-k.dotProduct(n)) * 255.0);
                 col = VSDK.unsigned8BitInteger2signedByte(val);
-
                 output.putPixel(x, y, col, col, col);
+            }
+        }
+        return output;
+    }
+
+    /**
+    Similar to exportToRgbaImage, but each pixel is equivalent to a magnitude
+    of displacement from <0, 0, 1> normal
+    */
+    public RGBAImage exportToRgbaImageGradient()
+    {
+        RGBAImage output = new RGBAImage();
+
+        if ( !output.init(xSize, ySize) ) {
+            return null;
+        }
+
+        int x, y;
+        Vector3D n;
+    int val;
+        byte col;
+    Vector3D k = new Vector3D(0, 0, 1);
+
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                n = getNormal(x, y);
+                n.normalize();
+
+                val = (int)((1.0-k.dotProduct(n)) * 255.0);
+                col = VSDK.unsigned8BitInteger2signedByte(val);
+                output.putPixel(x, y, col, col, col, 
+                      VSDK.unsigned8BitInteger2signedByte(128));
+/*
+        if ( val > 250 ) {
+                    output.putPixel(x, y, (byte)0, (byte)0, (byte)0, (byte)0);
+        }
+        else {
+                    output.putPixel(x, y, (byte)0, (byte)0, (byte)0, (byte)255);        }
+*/
             }
         }
         return output;
@@ -243,11 +326,14 @@ public class NormalMap extends MediaEntity
         }
 
         //- 3. Copia de las derivadas para los bordes de la imagen ----------
+        // @todo: check why are two pixels down and left needed!
         for( u = 0; u < xSize; u++ ) {
             putNormal(u, 0, getNormal(u, 1));
+            putNormal(u, ySize-2, getNormal(u, ySize-3));
             putNormal(u, ySize-1, getNormal(u, ySize-2));
         }
         for( v = 0; v < ySize; v++ ) {
+            putNormal(1, v, getNormal(2, v));
             putNormal(0, v, getNormal(1, v));
             putNormal(xSize-1, v, getNormal(xSize-2, v));
         }

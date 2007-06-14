@@ -144,6 +144,51 @@ public class IndexedColorImage extends Image
         int index = colorTable.selectNearestIndexToRgb(c);
         putPixel(x, y, index);
     }
+
+    public RGBImage exportToRgbImage()
+    {
+        RGBImage copy;
+    int xSize = getXSize();
+    int ySize = getYSize();
+    int x, y;
+    int source;
+    RGBPixel target = new RGBPixel();
+
+        copy = new RGBImage();
+    copy.init(xSize, ySize);
+    for ( x = 0; x < xSize; x++ ) {
+          for ( y = 0; y < ySize; y++ ) {
+        source = getPixel(x, y);
+        target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
+        copy.putPixel(x, y, target);
+        }
+    }
+    return copy;
+    }
+
+    public RGBAImage exportToRgbaImage()
+    {
+        RGBAImage copy;
+    int xSize = getXSize();
+    int ySize = getYSize();
+    int x, y;
+    int source;
+    RGBAPixel target = new RGBAPixel();
+
+        copy = new RGBAImage();
+    copy.init(xSize, ySize);
+    target.a = VSDK.unsigned8BitInteger2signedByte(128);
+    for ( x = 0; x < xSize; x++ ) {
+          for ( y = 0; y < ySize; y++ ) {
+        source = getPixel(x, y);
+        target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
+        copy.putPixel(x, y, target);
+        }
+    }
+
+    return copy;
+    }
+
 }
 
 //===========================================================================

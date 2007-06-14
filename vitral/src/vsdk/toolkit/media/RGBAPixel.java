@@ -10,6 +10,8 @@
 
 package vsdk.toolkit.media;
 
+import vsdk.toolkit.common.VSDK;
+
 /**
 Respect to data representation:
 
@@ -126,7 +128,11 @@ public class RGBAPixel extends MediaEntity {
     */
     public String toString()
     {
-        return "<" + r + ", " + g + ", " + b + " / (" + a + ")>";
+        return "<" +
+            VSDK.signedByte2unsignedInteger(r) + ", " +
+            VSDK.signedByte2unsignedInteger(g) + ", " +
+            VSDK.signedByte2unsignedInteger(b) + " / (" +
+            VSDK.signedByte2unsignedInteger(a) + ")>";
     }
 }
 

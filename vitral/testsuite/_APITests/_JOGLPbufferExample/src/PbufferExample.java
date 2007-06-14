@@ -14,26 +14,26 @@ import java.nio.ByteBuffer;
 
 import java.io.File;
 
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 
 public class PbufferExample implements GLEventListener {
     private static int imageWidth = 320;
     private static int imageHeight = 240;
     private GLPbuffer  pbuffer;
-    private RGBAImage  image;
+    private RGBImage  image;
 
     public PbufferExample() {
         // Create a GLCapabilities object for the pbuffer
         GLCapabilities pbCaps = new GLCapabilities();
         pbCaps.setDoubleBuffered(false);
-    try {
+        try {
             pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
-      }
+          }
           catch ( Exception e ) {
-          System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
-          System.exit(1);
-    }
+              System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
+              System.exit(1);
+        }
         pbuffer.addGLEventListener(this);
         pbuffer.display();
     }
@@ -56,7 +56,7 @@ public class PbufferExample implements GLEventListener {
         gl.glEnd();
         gl.glFlush();
         
-        image=JoglRGBAImageRenderer.getImageJOGL(gl);
+        image=JoglRGBImageRenderer.getImageJOGL(gl);
         ImagePersistence.exportJPG(new File("./output.jpg"), image);
     }
 

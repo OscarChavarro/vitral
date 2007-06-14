@@ -59,6 +59,8 @@ public class JoglSceneRenderer
     {
         int i, j;
         Image texture;
+        SimpleBodyGroup ggi;
+        RendererConfiguration quality;
 
         //-----------------------------------------------------------------
         drawBackground(gl, s);
@@ -71,13 +73,6 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        if ( s.lights.size() > 0 ) {
-            gl.glEnable(gl.GL_LIGHTING);
-        }
-        else {
-            gl.glDisable(gl.GL_LIGHTING);
-        }
-
         //- Draw lights ---------------------------------------------------
         for ( i = 0; i < s.lights.size(); i++ ) {
             Light l = s.lights.get(i);
@@ -88,31 +83,18 @@ public class JoglSceneRenderer
             JoglLightRenderer.draw(gl, s.lights.get(i));
         }
 
-        //- Draw visual debug entities ------------------------------------
-        SimpleBodyGroup ggi;
-        RendererConfiguration quality;
-
-        for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
-            quality = s.qualityTemplate;
-            if ( s.selectedDebugThingGroups.isSelected(i) ) {
-                quality.setSelectionCorners(true);
-            }
-            else {
-                quality.setSelectionCorners(false);
-            }
-            ggi = s.debugThingGroups.get(i);
-         //if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
-                gl.glDisable(gl.GL_DEPTH_TEST);
-        //}
-            JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
-        gl.glEnable(gl.GL_DEPTH_TEST);
-        }
-
         //- Draw scene bodies ---------------------------------------------
         SimpleBody gi;
 
+        if ( s.lights.size() > 0 ) {
+            gl.glEnable(gl.GL_LIGHTING);
+        }
+        else {
+            gl.glDisable(gl.GL_LIGHTING);
+        }
+
         for ( i = 0; i < s.things.size(); i++ ) {
-            quality = s.qualityTemplate;
+            quality = s.qualityTemplate.clone();
 
             if ( s.selectedThings.isSelected(i) ) {
                 quality.setSelectionCorners(true);
@@ -126,6 +108,25 @@ public class JoglSceneRenderer
 
         //- Draw reference grid plane -------------------------------------
         if ( s.showGrid ) drawGridRectangle(gl);
+
+        //- Draw visual debug entities (usually transparent) --------------
+        for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
+            quality = s.qualityTemplate.clone();
+            quality.setShadingType(quality.SHADING_TYPE_NOLIGHT);
+            if ( s.selectedDebugThingGroups.isSelected(i) ) {
+                quality.setSelectionCorners(true);
+            }
+            else {
+                quality.setSelectionCorners(false);
+            }
+            ggi = s.debugThingGroups.get(i);
+         if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
+                gl.glDisable(gl.GL_DEPTH_TEST);
+        }
+            JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
+        gl.glEnable(gl.GL_DEPTH_TEST);
+        }
+
 
     }
 

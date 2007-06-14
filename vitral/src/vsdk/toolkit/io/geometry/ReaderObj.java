@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
@@ -395,14 +396,18 @@ public class ReaderObj extends PersistenceElement
         //- Build the mesh vertexes ---------------------------------------
         Vertex newVertexArray[];
         int ti, ni;
+        Vector3D p, n;
+        Matrix4x4 R = new Matrix4x4();
 
+        R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
         newVertexArray = new Vertex[finalVertexes.size()];
         for ( i = 0; i < finalVertexes.size(); i++ ) {
             newVertexArray[i] = new Vertex();
             // Position
-            newVertexArray[i].setPosition(
-                vertexPositionsArray.get(
-                    finalVertexes.get(i).vertexPositionIndex-1));
+            p = vertexPositionsArray.get(
+                finalVertexes.get(i).vertexPositionIndex-1);
+            p = R.multiply(p);
+            newVertexArray[i].setPosition(p);
             // Texture coordinates
             ti = finalVertexes.get(i).vertexTextureCoordinateIndex - 1;
             if ( ti >= 0 ) {
@@ -415,7 +420,9 @@ public class ReaderObj extends PersistenceElement
             // Normals
             ni = finalVertexes.get(i).vertexNormalIndex - 1;
             if ( ni >= 0 && ni < vertexNormalsArray.size() ) {
-                newVertexArray[i].setNormal(vertexNormalsArray.get(ni));
+                n = vertexNormalsArray.get(ni);
+                n = R.multiply(n);
+                newVertexArray[i].setNormal(n);
             }
             else {
                 newVertexArray[i].setNormal(new Vector3D(0, 0, 0));
