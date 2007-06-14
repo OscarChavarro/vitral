@@ -291,7 +291,10 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Create Sphere");
             configureButton(b);
 
-            b = new JButton("Create Cone/Cylinder");
+            b = new JButton("Create Cone");
+            configureButton(b);
+
+            b = new JButton("Create Cylinder");
             configureButton(b);
 
             b = new JButton("Create Cube");
@@ -448,8 +451,11 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Create Sphere" ) {
             addThing(new Sphere(1));
         }
-        else if ( label == "Create Cone/Cylinder" ) {
+        else if ( label == "Create Cone" ) {
             addThing(new Cone(1, 0, 2));
+        }
+        else if ( label == "Create Cylinder" ) {
+            addThing(new Cone(1, 1, 2));
         }
         else if ( label == "Create Cube" ) {
             addThing(new Box(1, 1, 1));

@@ -63,3 +63,6 @@ March 20 2006, Oscar Chavarro: 106min
   - 32min: Integration of Box, and reconvertion from Cube
 
 <<TOTAL>> 1322 min (22h02min)
+
+March 28 2006, Oscar Chavarro:
+  - 1h09min: Implementing cylinder case intersection in class Cone
