@@ -24,18 +24,20 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
-public class JoglPerspectiveViewRenderer {
+public class JoglProjectedViewRenderer {
     public Image image;
     private SimpleBodyGroup bodies;
     private RendererConfiguration quality;
     private Camera camera;
     private int side = 0;
     private boolean isTransparent;
+    private int xSize;
+    private int ySize;
 
-    public JoglPerspectiveViewRenderer(boolean transparent) {
+    public JoglProjectedViewRenderer(int xSize, int ySize, boolean transparent) {
         bodies = null;
         quality = new RendererConfiguration();
         quality.setWires(false);
@@ -46,6 +48,8 @@ public class JoglPerspectiveViewRenderer {
         camera.setNearPlaneDistance(2);
         camera.setFarPlaneDistance(20);
         isTransparent = transparent;
+        this.xSize = xSize;
+        this.ySize = ySize;
     }
 
     /**
@@ -114,43 +118,43 @@ public class JoglPerspectiveViewRenderer {
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(-45), -cornerAngle, 0);
-        break;
+            break;
           case 8:
             position = new Vector3D(0, 10, -10);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(45), 0);
-        break;
+            break;
           case 9:
             position = new Vector3D(-10, 0, -10);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(0), Math.toRadians(45), 0);
-        break;
+            break;
           case 10:
             position = new Vector3D(0, -10, -10);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(45), 0);
-        break;
+            break;
           case 11:
             position = new Vector3D(10, 0, -10);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(180), Math.toRadians(45), 0);
-        break;
+            break;
           case 12:
             position = new Vector3D(10, -10, 0);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(135), 0, 0);
-        break;
+            break;
           case 13:
             position = new Vector3D(10, 10, 0);
             position.normalize();
             position = position.multiply(10);
             R.eulerAnglesRotation(Math.toRadians(180+45), 0, 0);
-        break;
+            break;
           default:
             break;
         }
@@ -159,6 +163,8 @@ public class JoglPerspectiveViewRenderer {
     }
 
     public void draw(GL gl) {
+        gl.glViewport(0, 0, xSize, ySize);
+
         //-----------------------------------------------------------------
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -177,10 +183,7 @@ public class JoglPerspectiveViewRenderer {
             gl.glEnd();
         }
         else {
-            int i;
-        for ( i = 0; i < bodies.getBodies().size(); i++ ) {
-                JoglSimpleBodyRenderer.draw(gl, bodies.getBodies().get(i), camera, quality);
-        }
+            JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
         }
         
         gl.glFlush();

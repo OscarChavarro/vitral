@@ -33,6 +33,7 @@ import javax.media.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Quaternion;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Triangle;
@@ -99,7 +100,7 @@ public class JoglDrawingArea implements
     public boolean wantToGetContourns;
     public boolean wantToDebugProjectedViews;
 
-    private JoglPerspectiveViewRenderer perspectiveViewRenderer;
+    private JoglProjectedViewRenderer projectedViewRenderer;
     private JoglOfflineRenderer offlineRenderer;
 
     private Cursor camrotateCursor;
@@ -123,6 +124,7 @@ public class JoglDrawingArea implements
     SceneEditorApplication parent;
 
     private boolean doDistanceField;
+    private int distanceFieldSide;
 
     public JoglDrawingArea(Scene theScene, JLabel statusMessage, SceneEditorApplication parent)
     {
@@ -170,11 +172,27 @@ public class JoglDrawingArea implements
         wantToGetColor = false;
         wantToGetDepth = false;
         wantToGetContourns = false;
-    wantToDebugProjectedViews = false;
+        wantToDebugProjectedViews = false;
 
-        perspectiveViewRenderer = new JoglPerspectiveViewRenderer(true);
-        offlineRenderer = null;
+        //-----------------------------------------------------------------
         doDistanceField = false;
+        distanceFieldSide = 320;
+
+        if ( doDistanceField ) {
+            projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, true);
+        }
+        else {
+            projectedViewRenderer = new JoglProjectedViewRenderer(640, 640, true);
+        }
+
+        if ( offlineRenderer == null ) {
+            if ( doDistanceField ) {
+                offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
+              }
+              else {
+                offlineRenderer = new JoglOfflineRenderer(640, 640, projectedViewRenderer);
+            }
+        }
     }
 
     private void createCursors()
@@ -264,31 +282,17 @@ public class JoglDrawingArea implements
         gl.glEnable(gl.GL_DEPTH_TEST);
     }
 
-    private Image createProjectedView(GL gl, JoglOfflineRenderer offlineRenderer, SimpleBodyGroup referenceBodies, int cam)
+    private Image createProjectedView(GL gl, SimpleBodyGroup referenceBodies, int cam)
     {
         //- Will render a normalized body inside the unit cube ------------
-        SimpleBody referenceBody;
         double minmax[];
-        SimpleBody framedBody = null;
         SimpleBodyGroup bodySet = new SimpleBodyGroup();
+        int i;
 
-    Vector3D p;
-    {
-            referenceBody = referenceBodies.getBodies().get(0);
-            minmax = referenceBody.getGeometry().getMinMax();
-
-            if ( cam == 1 ) {
-                framedBody = theScene.addThing(referenceBody.getGeometry());
-              }
-              else {
-                framedBody = new SimpleBody();
-                framedBody.setGeometry(referenceBody.getGeometry());
-                framedBody.setPosition(new Vector3D());
-                framedBody.setRotation(new Matrix4x4());
-                framedBody.setRotationInverse(new Matrix4x4());
-                framedBody.setMaterial(theScene.defaultMaterial());
-            }
-
+        Vector3D p;
+        {
+            //-----------------------------------------------------------------
+            minmax = referenceBodies.getMinMax();
             Vector3D min, max, s;
             min = new Vector3D(minmax[0], minmax[1], minmax[2]);
             max = new Vector3D(minmax[3], minmax[4], minmax[5]);
@@ -304,33 +308,75 @@ public class JoglDrawingArea implements
             p = max.add(min);
             p = p.multiply(-1/maxsize);
 
-            framedBody.setPosition(p);
-            framedBody.setScale(s);
-            bodySet.getBodies().add(framedBody);
-    }
+            bodySet.setPosition(p);
+            bodySet.setScale(s);
+            //-----------------------------------------------------------------
+            SimpleBody referenceBody;
+            SimpleBody framedBody;
+
+            for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
+                referenceBody = referenceBodies.getBodies().get(i);
+                framedBody = new SimpleBody();
+                framedBody.setGeometry(referenceBody.getGeometry());
+                framedBody.setPosition(referenceBody.getPosition());
+                framedBody.setRotation(referenceBody.getRotation());
+                framedBody.setRotationInverse(referenceBody.getRotationInverse());
+                framedBody.setMaterial(theScene.defaultMaterial());
+                bodySet.getBodies().add(framedBody);
+            }
+            //-----------------------------------------------------------------
+            Matrix4x4 Mset = bodySet.getTransformationMatrix(), R, Ri, Mbody, S, M;
+            SimpleBody copiedBody;
+            Quaternion q;
+
+            for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
+                referenceBody = referenceBodies.getBodies().get(i);
+                if ( cam == 1 ) {
+                    copiedBody = theScene.addThing(referenceBody.getGeometry());
+                    Mbody = referenceBody.getTransformationMatrix();
+                    M = Mset.multiply(Mbody);
+                    p = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
+                    M.M[0][3] = M.M[1][3] = M.M[2][3] = 0.0;
+                    q = M.exportToQuaternion();
+                    q.normalize();
+                    R = new Matrix4x4();
+                    R.importFromQuaternion(q);
+                    Ri = R.inverse();
+                    S = Ri.multiply(M);
+                    s = new Vector3D(M.M[0][0], M.M[1][1], M.M[2][2]);
+
+                    copiedBody.setPosition(p);
+                    copiedBody.setScale(s);
+                    copiedBody.setRotation(R);
+                }
+            }
+
+            //-----------------------------------------------------------------
+        }
 
         //- Render will proceed in a PBuffer ------------------------------
         IndexedColorImage distanceFieldIndexed;
 
-        perspectiveViewRenderer.configureScene(bodySet, cam);
+        projectedViewRenderer.configureScene(bodySet, cam);
         if ( offlineRenderer.isPbufferSupported() ) {
             offlineRenderer.execute();
             offlineRenderer.waitForMe();
-    }
-    else {
-            perspectiveViewRenderer.draw(gl);
-    }
+        }
+        else {
+            this.viewportResizeNeeded = true;
+            projectedViewRenderer.draw(gl);
+        }
 
         //-----------------------------------------------------------------
         Image finalImage;
         if ( !doDistanceField ) {
-            finalImage = perspectiveViewRenderer.image;
+            finalImage = projectedViewRenderer.image;
         }
         else {
             System.out.print("Processing maps for view " + cam + "... ");
             distanceFieldIndexed = new IndexedColorImage();
-            distanceFieldIndexed.init(64, 64);
-            ImageProcessing.processDistanceField(perspectiveViewRenderer.image, distanceFieldIndexed, 1);
+            distanceFieldIndexed.init(distanceFieldSide, distanceFieldSide);
+            ImageProcessing.processDistanceFieldWithArray(projectedViewRenderer.image, distanceFieldIndexed, 1);
             ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);
 
             RGBAImage distanceFieldRgba;
@@ -349,12 +395,14 @@ public class JoglDrawingArea implements
             System.out.println("Ok!");
         }
 
+        //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./test" + cam + ".ppm"), finalImage);
+
         //- Obtain Pbuffer's rendered image -------------------------------
         return finalImage;
     }
 
     private SimpleBodyGroup
-    addDebugProjectedView(GL gl, JoglOfflineRenderer offlineRenderer, SimpleBodyGroup referenceBodies)
+    addDebugProjectedView(GL gl, SimpleBodyGroup referenceBodies)
     {
         SimpleBody boxBody;
         Image texture;
@@ -484,7 +532,7 @@ public class JoglDrawingArea implements
             }
 
             //-----------------------------------------------------------------
-            texture = createProjectedView(gl, offlineRenderer, referenceBodies, i);
+            texture = createProjectedView(gl, referenceBodies, i);
             if ( texture == null ) {
                 return null;
             }
@@ -545,24 +593,15 @@ public class JoglDrawingArea implements
     private void debugProjectedViewsIfNeeded(GL glAppContext)
     {
         //-----------------------------------------------------------------
-    if ( wantToDebugProjectedViews == false ) {
-        return;
-    }
-        wantToDebugProjectedViews = false;
-
-        //-----------------------------------------------------------------
-        if ( offlineRenderer == null ) {
-            if ( doDistanceField ) {
-                offlineRenderer = new JoglOfflineRenderer(64, 64, perspectiveViewRenderer);
-              }
-              else {
-                offlineRenderer = new JoglOfflineRenderer(640, 640, perspectiveViewRenderer);
-            }
+        if ( wantToDebugProjectedViews == false ) {
+            return;
         }
+        wantToDebugProjectedViews = false;
 
         //-----------------------------------------------------------------
         int selectedThing = theScene.selectedThings.firstSelected();
         SimpleBody referenceBody = null;
+        int i;
 
         if ( selectedThing >= 0 ) {
             referenceBody = theScene.things.get(selectedThing);
@@ -575,8 +614,16 @@ public class JoglDrawingArea implements
             SimpleBodyGroup group;
             SimpleBodyGroup bodySet;
             bodySet = new SimpleBodyGroup();
-            bodySet.getBodies().add(referenceBody);
-            group = addDebugProjectedView(glAppContext, offlineRenderer, bodySet);
+
+            for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
+                if ( theScene.selectedThings.isSelected(i) ) {
+                    referenceBody = theScene.things.get(i);
+                    bodySet.getBodies().add(referenceBody);
+                }
+            }
+
+            group = addDebugProjectedView(glAppContext, bodySet);
+
             if ( group != null ) {
                 theScene.debugThingGroups.add(group);
             }
@@ -604,19 +651,19 @@ public class JoglDrawingArea implements
     private void copyZBufferIfNeeded(GL gl)
     {
         if ( wantToGetDepth ) {
-        if ( wantToGetContourns ) {
-        IndexedColorImage zbuffer;
-        NormalMap nm;
-        zbuffer = JoglZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
-        nm = new NormalMap();
-        nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
+            if ( wantToGetContourns ) {
+                IndexedColorImage zbuffer;
+                NormalMap nm;
+                zbuffer = JoglZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+                nm = new NormalMap();
+                nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
                 parent.zbufferImage = nm.exportToRgbImageGradient();
-          }
-          else {
+              }
+              else {
                 parent.zbufferImage =
                     JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
                         parent.palette);
-        }
+            }
 
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
@@ -686,7 +733,7 @@ public class JoglDrawingArea implements
                 parent.raytracedImageHeight = viewportYframe;
             }
 
-        parent.doRaytracedImage();
+            parent.doRaytracedImage();
             gl.glMatrixMode(gl.GL_PROJECTION);
             gl.glPushMatrix();
             gl.glLoadIdentity();
@@ -1025,21 +1072,21 @@ public class JoglDrawingArea implements
           if ( unicode_id == e.CHAR_UNDEFINED ) {
             switch ( keycode ) {
               case KeyEvent.VK_LEFT:
-        if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
                     theScene.selectedThings.selectPrevious();
-        }
-        if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-            theScene.selectedDebugThingGroups.selectPrevious();
-        }
+                }
+                if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                    theScene.selectedDebugThingGroups.selectPrevious();
+                }
                 reportObjectSelection();
                 break;
               case KeyEvent.VK_RIGHT:
-        if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
                     theScene.selectedThings.selectNext();
-        }
-        if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-            theScene.selectedDebugThingGroups.selectNext();
-        }
+                }
+                if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                    theScene.selectedDebugThingGroups.selectNext();
+                }
                 reportObjectSelection();
                 break;
             }
@@ -1126,28 +1173,28 @@ public class JoglDrawingArea implements
       if ( keycode == KeyEvent.VK_DELETE ) {
           int  i;
 
-      //-----------------------------------------------------------------
+          //-----------------------------------------------------------------
           for ( i = theScene.things.size()-1; i >= 0; i-- ) {
               if ( theScene.selectedThings.isSelected(i) ) {
                   theScene.things.remove(i);
               }
           }
           theScene.selectedThings.sync();
-      //-----------------------------------------------------------------
+          //-----------------------------------------------------------------
           for ( i = theScene.debugThingGroups.size()-1; i >= 0; i-- ) {
               if ( theScene.selectedDebugThingGroups.isSelected(i) ) {
                   theScene.debugThingGroups.remove(i);
               }
           }
           theScene.selectedThings.sync();
-      //-----------------------------------------------------------------
+          //-----------------------------------------------------------------
           canvas.repaint();
       }
 
       if ( keycode == KeyEvent.VK_F10 ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
-        parent.doRaytracedImage();
+            parent.doRaytracedImage();
 
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
@@ -1265,8 +1312,8 @@ public class JoglDrawingArea implements
                   theta -= Math.toRadians(15);
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
-          System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
-                    Math.toDegrees(theta), Math.toDegrees(phi));
+                  System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
+                                    Math.toDegrees(theta), Math.toDegrees(phi));
                   canvas.repaint();
               }
               break;
@@ -1279,8 +1326,8 @@ public class JoglDrawingArea implements
                   theta += Math.toRadians(15);
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
-          System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
-                    Math.toDegrees(theta), Math.toDegrees(phi));
+                  System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
+                                    Math.toDegrees(theta), Math.toDegrees(phi));
                   canvas.repaint();
               }
               break;
@@ -1478,7 +1525,7 @@ public class JoglDrawingArea implements
       theScene.selectedThings.sync();
       n = theScene.selectedThings.numberOfSelections();
       if ( n == 0 ) {
-      msg += "All things are UNSELECTED";
+          msg += "All things are UNSELECTED";
       }
       else if ( n == 1 ) {
           int f = theScene.selectedThings.firstSelected();
@@ -1494,7 +1541,7 @@ public class JoglDrawingArea implements
       theScene.selectedDebugThingGroups.sync();
       n = theScene.selectedDebugThingGroups.numberOfSelections();
       if ( n == 0 ) {
-      msg += "; All visual debug groups are UNSELECTED";
+          msg += "; All visual debug groups are UNSELECTED";
       }
       else if ( n == 1 ) {
           int f = theScene.selectedDebugThingGroups.firstSelected();

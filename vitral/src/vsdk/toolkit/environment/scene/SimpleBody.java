@@ -153,6 +153,15 @@ public class SimpleBody extends Entity {
         return scale;
     }
 
+    public Matrix4x4 getTransformationMatrix()
+    {
+    Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
+        S.scale(scale);
+        T.translation(position);
+    M = T.multiply(rotation.multiply(S));
+    return M;
+    }
+
     public void setScale(Vector3D s)
     {
         scale = s;

@@ -24,18 +24,23 @@ import java.util.StringTokenizer;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.SphericalHarmonicShapeDescriptor;
 import vsdk.toolkit.processing.SpharmonicKitWrapper;
+import vsdk.toolkit.processing.ImageProcessing;
 
 /**
 Current application is the VitralSDK implementation of a search engine for
@@ -43,6 +48,10 @@ Current application is the VitralSDK implementation of a search engine for
 */
 public class DatasetControl
 {
+    private static JoglOfflineRenderer offlineRenderer = null;
+    private static int distanceFieldSide = 64;
+    private static JoglProjectedViewRenderer projectedViewRenderer = null;
+
     /**
     Given a sphere's texture map codified for ocuppancy test, this method
     computes a spherical harmonic (Fourier transform) and inserts the first
@@ -137,6 +146,109 @@ public class DatasetControl
         return true;
     }
 
+    private static Image
+    createProjectedView(SimpleBodyGroup referenceBodies, int cam)
+    {
+        //- Will render a normalized body inside the unit cube ------------
+        double minmax[];
+        SimpleBodyGroup bodySet = new SimpleBodyGroup();
+        int i;
+
+        Vector3D p;
+        {
+            //-----------------------------------------------------------------
+            minmax = referenceBodies.getMinMax();
+            Vector3D min, max, s;
+            min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+            max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+            s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
+
+            double maxsize = s.x;
+            if ( s.y > maxsize ) maxsize = s.y;
+            if ( s.z > maxsize ) maxsize = s.z;
+            // The 95% scale factor is to allow a full render of the object to
+            // fit inside the rendered view
+            s.x = s.y = s.z = (2/maxsize) * 0.95;
+
+            p = max.add(min);
+            p = p.multiply(-1/maxsize);
+
+            bodySet.setPosition(p);
+            bodySet.setScale(s);
+            //-----------------------------------------------------------------
+            SimpleBody referenceBody;
+            SimpleBody framedBody;
+
+            for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
+                referenceBody = referenceBodies.getBodies().get(i);
+                framedBody = new SimpleBody();
+                framedBody.setGeometry(referenceBody.getGeometry());
+                framedBody.setPosition(referenceBody.getPosition());
+                framedBody.setRotation(referenceBody.getRotation());
+                framedBody.setRotationInverse(referenceBody.getRotationInverse());
+                framedBody.setMaterial(new Material());
+                bodySet.getBodies().add(framedBody);
+            }
+            //-----------------------------------------------------------------
+        }
+
+        //- Render will proceed in a PBuffer ------------------------------
+        IndexedColorImage distanceFieldIndexed;
+
+    if ( projectedViewRenderer == null ) {
+            projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
+    }
+
+        projectedViewRenderer.configureScene(bodySet, cam);
+
+    if ( offlineRenderer == null ) {
+            offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
+    }
+
+        //if ( offlineRenderer.isPbufferSupported() ) {
+            offlineRenderer.execute();
+            offlineRenderer.waitForMe();
+        //}
+        //else {
+        //    this.viewportResizeNeeded = true;
+        //    projectedViewRenderer.draw(gl);
+        //}
+
+        //-----------------------------------------------------------------
+        Image finalImage;
+        //finalImage = projectedViewRenderer.image;
+        System.out.print("    . Processing projected view " + cam + "... ");
+        distanceFieldIndexed = new IndexedColorImage();
+        distanceFieldIndexed.init(distanceFieldSide, distanceFieldSide);
+        ImageProcessing.processDistanceFieldWithArray(projectedViewRenderer.image, distanceFieldIndexed, 1);
+        ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);
+
+        RGBAImage distanceFieldRgba;
+        distanceFieldRgba = distanceFieldIndexed.exportToRgbaImage();
+        finalImage = distanceFieldRgba;
+        System.out.println("Ok!");
+
+        //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./test" + cam + ".ppm"), finalImage);
+
+        //- Obtain Pbuffer's rendered image -------------------------------
+        return finalImage;
+    }
+
+    private static void
+    processProjectedViews(SimpleBodyGroup referenceBodies)
+    {
+        Image texture;
+    int i;
+
+        for ( i = 1; i <= 13; i++ ) {
+            texture = createProjectedView(referenceBodies, i);
+            if ( texture == null ) {
+        System.err.println("Error processing projected texture!");
+                System.exit(1);
+            }
+        }
+    }
+
     /**
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
@@ -167,7 +279,7 @@ public class DatasetControl
             System.out.println("  - Processing " + things.size() + " geometries...");
             for ( i = 0; i < things.size(); i++ ) {
                 referenceGeometry = things.get(i).getGeometry();
-                System.out.println("    . " +
+                System.out.println("    . Voxelizing a " +
                     referenceGeometry.getClass().getName());
 
                 //- Calculate transform matrix --------------------------------
@@ -183,6 +295,8 @@ public class DatasetControl
 
             //- Calculate average distance from nonzero voxels to cm ----------
             // This accounts for scale normalization as in [FUNK2003].4.1.
+            System.out.print("    . Processing spherical harmonics ... ");
+
             cm = vv.doCenterOfMass();
         int numberOfNonZeroVoxels = 0;
         double d; // Distance between a given voxel and center of mass
@@ -213,6 +327,19 @@ public class DatasetControl
                 }
             }
             metadata.getDescriptors().add(featureVector);
+        System.out.println("Ok!");
+
+            //- Projection views image descriptor extraction --------------
+            SimpleBodyGroup bodySet;
+            SimpleBody referenceBody;
+
+            bodySet = new SimpleBodyGroup();
+            for ( i = 0; i < things.size(); i++ ) {
+                referenceBody = things.get(i);
+                bodySet.getBodies().add(referenceBody);
+            }
+
+            processProjectedViews(bodySet);
         }
         catch ( Exception e ) {
             System.err.println("ERROR: Can not open file " + filename);

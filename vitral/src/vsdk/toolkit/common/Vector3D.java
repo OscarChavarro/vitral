@@ -54,6 +54,10 @@ public class Vector3D extends FundamentalEntity
         return new Vector3D(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x);
     }
 
+    public final Vector3D modulate(Vector3D B) {
+        return new Vector3D(x*B.x, y*B.y, z*B.z);
+    }
+
     /**
     Make this vector internal values equal to the other's.
     */

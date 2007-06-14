@@ -115,6 +115,15 @@ public class SimpleBodyGroup extends Entity {
         scale = s;
     }
 
+    public Matrix4x4 getTransformationMatrix()
+    {
+    Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
+        S.scale(scale);
+        T.translation(position);
+    M = T.multiply(rotation.multiply(S));
+    return M;
+    }
+
     /**
     Given a Ray in world coordinates, this method calculates the intersection
     with a Geometry located at the position and with the rotation stored
