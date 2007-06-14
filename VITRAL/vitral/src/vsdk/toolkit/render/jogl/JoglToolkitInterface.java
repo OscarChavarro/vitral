@@ -48,7 +48,7 @@ public class JoglToolkitInterface
     public static void setLight(GL gl, Light light, int lightNumber, float constantAtenuation, float linearAtenuation, float quadricAtenuation)
     {
         float[] lightPosition=toVect(light.lvec);
-        if(light.tipo_de_luz==Light.DIRECCIONAL)
+        if(light.tipo_de_luz==Light.DIRECTIONAL)
         {
             lightPosition[3]=0;
         }
@@ -66,7 +66,7 @@ public class JoglToolkitInterface
     public static void setLight(GL gl, Light light, int lightNumber)
     {
         float[] lightPosition=toVect(light.lvec);
-        if(light.tipo_de_luz==Light.DIRECCIONAL)
+        if(light.tipo_de_luz==Light.DIRECTIONAL)
         {
             lightPosition[3]=0;
         }

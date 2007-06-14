@@ -3,6 +3,7 @@
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - November 15 2005 - Oscar Chavarro: quality check                      =
+//= - March 17 2006 - Oscar Chavarro: added toFloatVect method              =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -85,6 +86,12 @@ public class Vector3D {
     public final Vector3D substract(Vector3D b)
     {
         return new Vector3D(x - b.x, y - b.y, z - b.z);
+    }
+
+    public float[] toFloatVect()
+    {
+        float[] ret={(float)x, (float)y, (float)z, 1};
+        return ret;
     }
 
     public String toString()

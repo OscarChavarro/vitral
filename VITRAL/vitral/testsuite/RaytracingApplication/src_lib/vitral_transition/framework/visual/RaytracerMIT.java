@@ -73,7 +73,7 @@ public class RaytracerMIT {
               lightSources.hasMoreElements(); ) {
             Light luz = (Light)lightSources.nextElement();
             lightEmission = luz.getSpecular();
-            if ( luz.tipo_de_luz == Light.AMBIENTE ) {
+            if ( luz.tipo_de_luz == Light.AMBIENT ) {
                 ambient = m.getAmbient();
                 resultado.r += ambient.r*lightEmission.r;
                 resultado.g += ambient.g*lightEmission.g;
@@ -81,7 +81,7 @@ public class RaytracerMIT {
               } 
               else {
                 Vector3D l;
-                if ( luz.tipo_de_luz == Light.PUNTUAL ) {
+                if ( luz.tipo_de_luz == Light.POINT ) {
                     l = new Vector3D(luz.lvec.x - p.x, 
                                    luz.lvec.y - p.y, 
                                    luz.lvec.z - p.z);

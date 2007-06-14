@@ -18,7 +18,7 @@ public class JoglTranslateGizmoRenderer
     {
         Matrix4x4 R;
 
-        R = new Matrix4x4(gizmo.getTransformationMatrix());
+        R = new Matrix4x4(); //gizmo.getTransformationMatrix());
 
         R.M[0][3] = position.x;
         R.M[1][3] = position.y;

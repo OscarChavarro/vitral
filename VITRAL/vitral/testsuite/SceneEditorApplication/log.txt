@@ -37,3 +37,6 @@ March 15 2006, Oscar Chavarro: 320
   - 1h40min -> Implemented basic Jogl gizmos renderers  :-)
 
 <<TOTAL>> 883 min (14h43min)
+
+March 16 2006, Oscar Chavarro:
+  - 1h5min Adding lights to the model (incomplete)

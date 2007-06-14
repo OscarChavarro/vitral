@@ -29,9 +29,6 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.RayableObject;
-import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
@@ -172,10 +169,6 @@ public class JoglDrawingArea implements
 
     private void drawObjectsGL(GL gl)
     {
-        gl.glEnable(gl.GL_DEPTH_TEST);
-
-        gl.glLoadIdentity();
-
         JoglSceneRenderer.draw(gl, theScene);
 
         gl.glLineWidth((float)3.0);
@@ -200,19 +193,6 @@ public class JoglDrawingArea implements
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
-
-        switch ( theScene.selectedBackground ) {
-          case 1:
-            JoglCubemapBackgroundRenderer.draw(gl, theScene.cubemapBackground);
-            break;
-          case 0: default:
-            JoglSimpleBackgroundRenderer.draw(gl, theScene.simpleBackground);
-            break;
-        }
-
-        gl.glColor3d(1, 1, 1);
-
-        JoglCameraRenderer.activateGL(gl, theScene.activeCamera);
 
         drawObjectsGL(gl);
     }

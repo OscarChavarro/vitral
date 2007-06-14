@@ -36,7 +36,7 @@ public class ObjectImportScene
 
   /** Creates a new instance of ObjectImportScene */
   public ObjectImportScene() {
-    light = new Light(Light.DIRECCIONAL, new Vector3D(0, -1, 1),
+    light = new Light(Light.DIRECTIONAL, new Vector3D(0, -1, 1),
                       new ColorRgb(1, 1, 1));
     light.setAmbient(new ColorRgb(1, 1, 1));
     light.setDiffuse(new ColorRgb(1, 1, 1));

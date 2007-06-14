@@ -271,21 +271,21 @@ public class Universe
                   }
                   if ( st.sval.equals("ambient") ) {
                       imprimirMensaje("ambient");
-                      arr_luces.addElement(new Light(Light.AMBIENTE, null, new ColorRgb(r,g,b)));
+                      arr_luces.addElement(new Light(Light.AMBIENT, null, new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       imprimirMensaje("directional");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light(Light.DIRECCIONAL, v, new ColorRgb(r,g,b)));
+                      arr_luces.addElement(new Light(Light.DIRECTIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       imprimirMensaje("point");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light(Light.PUNTUAL, v, new ColorRgb(r, g, b)));
+                      arr_luces.addElement(new Light(Light.POINT, v, new ColorRgb(r, g, b)));
                     } 
                     else {
                       System.err.println("ERROR: in line " + 

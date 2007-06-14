@@ -135,6 +135,11 @@ public class Material
     {
         return alpha;
     }
+
+    public String toString()
+    {
+        return "Material:\n  - Specular " + specular + "\n  - Diffuse " + diffuse + "\n  - Ambient " + ambient + "\n\n";
+    }
 }
 
 //===========================================================================

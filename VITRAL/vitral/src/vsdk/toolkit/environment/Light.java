@@ -9,9 +9,11 @@ import vsdk.toolkit.common.ColorRgb;
 // wanted Lights and Surfaces to be "friends"
 public class Light
 {
-    public static final int AMBIENTE = 0;
-    public static final int DIRECCIONAL = 1;
-    public static final int PUNTUAL = 2;
+    public static final int AMBIENT = 0;
+    public static final int DIRECTIONAL = 1;
+    public static final int POINT = 2;
+
+    private static int lightNumber = 0;
 
     public int tipo_de_luz;
     public Vector3D lvec;             // the position of a point light or
@@ -19,13 +21,14 @@ public class Light
     private ColorRgb ambient;
     private ColorRgb diffuse;
     private ColorRgb specular;         // Emission color of the light source
+    private int id;
 
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
-        if ( type != AMBIENTE ) {
+        if ( type != AMBIENT ) {
             lvec = pos;
-            if ( type == DIRECCIONAL ) 
+            if ( type == DIRECTIONAL ) 
             {
                 lvec.normalize();
             }
@@ -33,6 +36,13 @@ public class Light
         ambient=new ColorRgb(0,0,0);
         diffuse=new ColorRgb(1,1,1);
         specular=emission;
+        id = lightNumber;
+        lightNumber++;
+    }
+
+    public int getId()
+    {
+        return lightNumber;
     }
 
     public void setAmbient(ColorRgb a)
@@ -49,6 +59,11 @@ public class Light
     {
         specular=new ColorRgb(s);
     }
+
+    public Vector3D getPosition()
+    {
+        return lvec;
+    }
     
     public ColorRgb getAmbient()
     {
@@ -63,6 +78,11 @@ public class Light
     public ColorRgb getSpecular()
     {
         return new ColorRgb(specular);
+    }
+
+    public int getLightType()
+    {
+        return tipo_de_luz;
     }
 
 }

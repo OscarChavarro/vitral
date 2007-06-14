@@ -6,6 +6,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.RayableObject;
@@ -17,6 +18,7 @@ public class Scene
     public Camera activeCamera;
 
     //- 2. Lights ----------------------------------------------------------
+    public ArrayList<Light> lights;
 
     //- 3. Background ------------------------------------------------------
     public SimpleBackground simpleBackground;
@@ -33,6 +35,7 @@ public class Scene
     {
         //-----------------------------------------------------------------
         things = new ArrayList<RayableObject>();
+        lights = new ArrayList<Light>();
         camera = new Camera();
         activeCamera = camera;
         selectedThingIndex = -1;

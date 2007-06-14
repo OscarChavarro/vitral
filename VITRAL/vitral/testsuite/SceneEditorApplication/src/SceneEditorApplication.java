@@ -34,10 +34,12 @@ import javax.swing.UIManager;
 import javax.media.opengl.GLCanvas;
 
 // VSDK Classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.RayableObject;
 
@@ -285,6 +287,9 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Create Mesh");
             configureButton(b);
 
+            b = new JButton("Create Light");
+            configureButton(b);
+
             break;
 
           case 2:
@@ -363,10 +368,21 @@ class ButtonsPanel extends JPanel implements ActionListener
         add(b);
     }
 
+    private Material defaultMaterial()
+    {
+        Material m = new Material();
+
+        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        return m;
+    }
+
     public void actionPerformed(ActionEvent ev) {
         String label = ev.getActionCommand();
 
         RayableObject thing;
+        Light light;
 
         if ( label == "Motif" ) {
             parent.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
@@ -389,8 +405,12 @@ class ButtonsPanel extends JPanel implements ActionListener
             thing.setPosition(new Vector3D());
             thing.setRotation(new Matrix4x4());
             thing.setRotationInverse(new Matrix4x4());
-            thing.setMaterial(new Material());
+            thing.setMaterial(defaultMaterial());
             parent.theScene.things.add(thing);
+        }
+        else if ( label == "Create Light" ) {
+            light = new Light(Light.POINT, new Vector3D(10, 9, 8), new ColorRgb(1, 1, 1));
+            parent.theScene.lights.add(light);
         }
         else if ( label == "Toggle test corridor" ) {
             if ( parent.theScene.showCorridor == true ) {

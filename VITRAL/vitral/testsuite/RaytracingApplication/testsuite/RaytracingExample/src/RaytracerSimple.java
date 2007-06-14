@@ -84,7 +84,7 @@ public class RaytracerSimple {
         }
         System.out.println("Se ha generado una imagen llamada output.ppm");
         System.out.println("En Unix / Linux puede verla con el comando");
-        System.out.println("  display salida.ppm");
+        System.out.println("  display output.ppm");
 
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Destruir la imagen

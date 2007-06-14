@@ -4,6 +4,7 @@
 //= - September 15 2005 - David Diaz: Original base version                 =
 //= - November 1 2005 - Oscar Chavarro: Quality check - comments added      =
 //= - November 15 2005 - Oscar Chavarro: set/get methods added              =
+//= - March 17 2006 - Oscar Chavarro: added toFloatVect method              =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -130,6 +131,17 @@ public class ColorRgb
     public void setB(double b)
     {
         this.b = b;
+    }
+
+    /**
+    This method exports the color components to an static array of float
+    values. It is supposed to help operations in APIs like OpenGL/JOGL where
+    this representation form is commonly used.
+    */
+    public float[] toFloatVect()
+    {
+        float[] ret={(float)r, (float)g, (float)b, 1};
+        return ret;
     }
 
     /**
