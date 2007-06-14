@@ -188,3 +188,7 @@ Changes in 2007 january 2 revition
 
 Changes in 2007 january 3 revition
   - First implementation for low level Euler operator in PolyhedralBoundedSolid
+
+Changes in 2007 january 17 revition
+  - CameraExample and CameraSwingExample templates expanded to dual
+    application / applet operation and quality checked for code comments.

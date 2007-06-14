@@ -1,37 +1,58 @@
+//===========================================================================
 
+// Basic Java classes
+
+// Awt / swing classes
+import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelListener;
-import java.awt.event.MouseMotionListener;
+
+// JOGL classes
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
+// VitralSDK classes
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 
-public class CameraSwingExample extends JFrame implements 
-    GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
+/**
+Note that this program is designed to work as a java application, or as a
+java applet.  If current class does not extends from Applet, and `init` method
+is deleted, this will continue working as a simple java application.
 
+This is a simple programme recommended for use as a template in the development
+of VitralSDK programs by incremental modification.
+*/
+public class CameraSwingExample extends Applet implements
+    GLEventListener,
+    KeyListener, MouseListener, MouseMotionListener, MouseWheelListener
+{
+
+//= PROGRAM PART 1/5: ATTRIBUTES ============================================
+
+    public boolean appletMode;
     private Camera camera;
     private CameraController cameraController;
     private GLCanvas canvas;
@@ -39,24 +60,24 @@ public class CameraSwingExample extends JFrame implements
     private ButtonsPanel controls;
     private JMenuBar menubar;
 
+//= PROGRAM PART 2/5: CONSTRUCTORS ==========================================
+
+    /**
+    When running this class inside a browser (in applet mode) there is no
+    warranty of calling this method, or calling before init. It is recommended
+    that real initialization be done in another `createModel` method, and
+    that such method be called explicity from entry point function.
+    */
     public CameraSwingExample() {
-        super("VITRAL concept test - JOGL Hello World");
+        // Empty! call `createModel` explicity from entry point function!
+        ;
+    }
 
-        canvas = new GLCanvas();
-
-        canvas.addGLEventListener(this);
-        canvas.addMouseListener(this);
-        canvas.addMouseMotionListener(this);
-        canvas.addKeyListener(this);
-
-        controls = new ButtonsPanel();
-        menubar = this.buildMenu();
-
-        this.add(canvas, BorderLayout.CENTER);
-        this.add(controls, BorderLayout.SOUTH);
-        this.setJMenuBar(menubar);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+    /**
+    Real constructor
+    */
+    private void createModel()
+    {
         camera = new Camera();
 
         //cameraController = new CameraControllerBlender(camera);
@@ -65,16 +86,56 @@ public class CameraSwingExample extends JFrame implements
         corridor = new SimpleCorridor();
     }
 
-    public Dimension getPreferredSize() {
-        return new Dimension (640, 480);
+    private void createGUI()
+    {
+        canvas = new GLCanvas();
+        canvas.addGLEventListener(this);
+        canvas.addMouseListener(this);
+        canvas.addMouseMotionListener(this);
+        canvas.addKeyListener(this);
+
+        controls = new ButtonsPanel(this);
+        menubar = buildMenu();
     }
-    
+
+//= PROGRAM PART 3/5: ENTRY POINTS ==========================================
+
     public static void main (String[] args) {
-        JFrame f = new CameraSwingExample();
-        f.pack();
-        f.setVisible(true);
+        // Common VitralSDK initialization
+        JoglRenderer.verifyOpenGLAvailability();
+        CameraSwingExample instance = new CameraSwingExample();
+        instance.appletMode = false;
+        instance.createModel();
+
+        // Create application based GUI
+        JFrame frame;
+    Dimension size;
+
+        instance.createGUI();
+        frame = new JFrame("VITRAL concept test - Camera control example");
+        frame.add(instance.canvas, BorderLayout.CENTER);
+        frame.add(instance.controls, BorderLayout.SOUTH);
+        frame.setJMenuBar(instance.menubar);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        size = new Dimension(640, 480);
+        frame.setMinimumSize(size);
+        frame.setSize(size);
+        frame.setVisible(true);
+        instance.canvas.requestFocusInWindow();
     }
-    
+
+    public void init()
+    {
+        appletMode = true;
+        createModel();
+        setLayout(new BorderLayout());
+    createGUI();
+    add("North", menubar);
+        add("Center", canvas);
+        add("South", controls);
+    }
+
+//= PROGRAM PART 4/5: JOGL-OPENGL PROCEDURES ================================    
     private void drawObjectsGL(GL gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -134,78 +195,82 @@ public class CameraSwingExample extends JFrame implements
         camera.updateViewportResize(width, height);
     }   
 
-  public void mouseEntered(MouseEvent e) {
-      canvas.requestFocusInWindow();
-  }
+//= PART 5/5: GUI PROCEDURES ================================================
 
-  public void mouseExited(MouseEvent e) {
-    //System.out.println("Mouse exited");
-  }
+    public void mouseEntered(MouseEvent e) {
+        canvas.requestFocusInWindow();
+    }
 
-  public void mousePressed(MouseEvent e) {
-      if ( cameraController.processMousePressedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mouseExited(MouseEvent e) {
+      //System.out.println("Mouse exited");
+    }
 
-  public void mouseReleased(MouseEvent e) {
-      if ( cameraController.processMouseReleasedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mousePressed(MouseEvent e) {
+        if ( cameraController.processMousePressedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseClicked(MouseEvent e) {
-      if ( cameraController.processMouseClickedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mouseReleased(MouseEvent e) {
+        if ( cameraController.processMouseReleasedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseMoved(MouseEvent e) {
-      if ( cameraController.processMouseMovedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mouseClicked(MouseEvent e) {
+        if ( cameraController.processMouseClickedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseDragged(MouseEvent e) {
-      if ( cameraController.processMouseDraggedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mouseMoved(MouseEvent e) {
+        if ( cameraController.processMouseMovedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  /**
-  WARNING: It is not working... check pending
-  */
-  public void mouseWheelMoved(MouseWheelEvent e) {
-      System.out.println(".");
-      if ( cameraController.processMouseWheelEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void mouseDragged(MouseEvent e) {
+        if ( cameraController.processMouseDraggedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void keyPressed(KeyEvent e) {
-      if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-          System.exit(0);
-      }
+    /**
+    WARNING: It is not working... check pending
+    */
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        System.out.println(".");
+        if ( cameraController.processMouseWheelEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-      if ( cameraController.processKeyPressedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void keyPressed(KeyEvent e) {
+        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+            if ( !appletMode ) {
+                System.exit(0);
+            }
+        }
 
-  public void keyReleased(KeyEvent e) {
-      if ( cameraController.processKeyReleasedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+        if ( cameraController.processKeyPressedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  /**
-  Do NOT call your controller from the `keyTyped` method, or the controller
-  will be invoked twice for each key. Call it only from the `keyPressed` and
-  `keyReleased` method
-  */
-  public void keyTyped(KeyEvent e) {
-      ;
-  }
+    public void keyReleased(KeyEvent e) {
+        if ( cameraController.processKeyReleasedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
+
+    /**
+    Do NOT call your controller from the `keyTyped` method, or the controller
+    will be invoked twice for each key. Call it only from the `keyPressed` and
+    `keyReleased` method
+    */
+    public void keyTyped(KeyEvent e) {
+        ;
+    }
 
     public JMenuBar buildMenu()
     {
@@ -220,7 +285,9 @@ public class CameraSwingExample extends JFrame implements
         option = popup.add(new JMenuItem("Exit"));
         option.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                if ( !appletMode ) {
+                    System.exit(0);
+        }
             }});
 
         popup.getPopupMenu().setLightWeightPopupEnabled(false);
@@ -232,8 +299,12 @@ public class CameraSwingExample extends JFrame implements
 
 class ButtonsPanel extends JPanel implements ActionListener
 {
-    public ButtonsPanel()
+    private CameraSwingExample parent;
+
+    public ButtonsPanel(CameraSwingExample parent)
     {
+        this.parent = parent;
+
         JButton b = null;
 
         b = new JButton("Exit");
@@ -245,7 +316,13 @@ class ButtonsPanel extends JPanel implements ActionListener
         String label = ev.getActionCommand();
 
         if ( label == "Exit" ) {
-            System.exit(1);
+            if ( !parent.appletMode ) {
+                System.exit(1);
+            }
         }
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
