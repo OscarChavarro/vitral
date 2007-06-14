@@ -41,6 +41,11 @@ public class VSDK
 {
     public static final double EPSILON = 1e-6;
 
+    public static final int WARNING = 1;
+    public static final int ERROR = 2;
+    public static final int DEBUG = 3;
+    public static final int VERBOSE = 4;
+
     public static boolean equals(double a, double b)
     {
         if ( Math.abs(a - b) < EPSILON ) {
@@ -71,6 +76,8 @@ public class VSDK
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
 
+    /** Converts integers in the domain [-128, 127] to integers in the range
+    [0, 256] */
     public static int signedByte2unsignedInteger(byte in) {
         int a;
 
@@ -80,11 +87,23 @@ public class VSDK
 
     }
 
+    public static byte unsigned8BitInteger2signedByte(int in) {
+        if ( in > 255 ) in = 255;
+        if ( in < 0 ) in = 0;
+        if ( in > 127 ) in -= 256;
+        return (byte)in;
+    }
+
     public static void reportMessage(Object o, int level, String method, String message)
     {
         System.err.println("===========================================================================");
         System.err.println("= VSDK Exception report                                                   =");
-        System.err.println(" - An exception has been thrown in the \"" + o.getClass().getName() + "\" class");
+        if ( o != null ) {
+            System.err.println(" - An exception has been thrown in the \"" + o.getClass().getName() + "\" class");
+    }
+    else {
+            System.err.println(" - An exception has been thrown from a static context");
+    }
         System.err.println(" - Exception located at method " + method);
         System.err.println(" - Exception message:\n" + message);
         System.err.println("===========================================================================");

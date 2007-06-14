@@ -94,3 +94,10 @@ Changes in 2006 august 1 revition
   - Fixed a bug in Jogl Image renderers that caused large textures not to
     appear on Windows. Now glTexImage2D is not used directly, but with
     com.sun.opengl.util.texture.Texture rendering utility
+
+Changes in 2006 august 2 revition
+  - ImagePersistence.exportJPG added
+  - ImageOfflineExample added
+
+Changes in 2006 august 6 revition
+  - Image JOGL Renderers revised

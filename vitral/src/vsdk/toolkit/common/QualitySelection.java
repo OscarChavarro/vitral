@@ -4,6 +4,7 @@
 //= - October 11 2005 - Gabriel Sarmiento & Lina Rojas: Original base       =
 //=                     version                                             =
 //= - November 1 2005 - Oscar Chavarro: Quality check - comments added      =
+//= - August 6 2006 - Oscar Chavarro: toString method added                 =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -209,4 +210,41 @@ public class QualitySelection extends Entity {
         }
     }
 
+    public String toString()
+    {
+        String msg;
+
+        msg = "<QualitySelection>:\n";
+
+        msg = msg + "  - Shading type: ";
+        switch ( shadingType ) {
+        case SHADING_TYPE_FLAT:
+        msg = msg + "FLAT\n";
+        break;
+        case SHADING_TYPE_GOURAUD:
+        msg = msg + "GOURAUD\n";
+        break;
+        case SHADING_TYPE_PHONG:
+        msg = msg + "PHONG\n";
+        break;
+      default:
+        msg = msg + "INVALID!\n";
+        break;
+    }
+
+        msg = msg + "  - Draw points: " + (points?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw wires: " + (wires?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw surfaces: " + (surfaces?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw bounding volume: " + (boundingVolume?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw normals: " + (normals?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw triangles normals: " + (trianglesNormals?"ON":"OFF") + "\n";
+        msg = msg + "  - With texture: " + (texture?"ON":"OFF") + "\n";
+        msg = msg + "  - With bump map: " + (bumpMap?"ON":"OFF") + "\n";
+
+        return msg;
+    }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

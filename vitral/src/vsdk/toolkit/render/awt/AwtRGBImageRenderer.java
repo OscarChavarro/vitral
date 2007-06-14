@@ -8,24 +8,15 @@ package vsdk.toolkit.render.awt;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 
 public class AwtRGBImageRenderer
 {
-    /** Converts integers in the domain [-128, 127] to integers in the range
-    [0, 256] */
-    private static int scaleValue(byte x)
-    {
-        int y;
-
-        y = (int)x;
-        if (y < 0) y = 256 + y;
-
-        return y;
-    }
-
     public static void draw(Graphics dc, RGBImage img, int x0, int y0)
     {
         int x, y;
@@ -35,9 +26,9 @@ public class AwtRGBImageRenderer
             for ( x = 0; x < img.getXSize(); x++ ) {
                 pixel = img.getPixel(x, y);
                 dc.setColor(
-                    new Color( scaleValue(pixel.r), 
-                               scaleValue(pixel.g), 
-                               scaleValue(pixel.b) )
+                    new Color( VSDK.signedByte2unsignedInteger(pixel.r), 
+                               VSDK.signedByte2unsignedInteger(pixel.g), 
+                               VSDK.signedByte2unsignedInteger(pixel.b) )
                 );
                 dc.drawLine(x+x0, y+y0, x+x0, y+y0);
             }

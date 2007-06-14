@@ -1,3 +1,8 @@
+//===========================================================================
+//= This example shows the use of texturing in JOGL based VSDK applications =
+//= applying JoglImageRenderer class methods.                               =
+//===========================================================================
+
 import java.nio.ByteBuffer;
 import com.sun.opengl.util.BufferUtil;
 
@@ -27,14 +32,14 @@ import com.sun.opengl.util.texture.TextureIO;
 // VSDK classes
 
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.CameraControllerGravZero;
-import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
+import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
 public class ImageExample extends JFrame implements
@@ -44,7 +49,7 @@ public class ImageExample extends JFrame implements
     private CameraController cameraController;
     private GLCanvas canvas;
     private SimpleCorridor corridor;
-    private RGBAImage img;
+    private RGBImage img;
 
     private static int checkImageWidth = 128;
     private static int checkImageHeight = 128;
@@ -72,10 +77,13 @@ public class ImageExample extends JFrame implements
         cameraController = new CameraControllerAquynza(camera);
 
         corridor = new SimpleCorridor();
+        String imageFilename = "../../etc/images/render.jpg";
         try {
-            img = ImagePersistence.importRGBA(new File("./etc/render.jpg"));
+            img = ImagePersistence.importRGB(new File(imageFilename));
         }
         catch (Exception e) {
+            System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
+            System.err.println("Check you have access to that file from current working directory.");
             System.err.println(e);
             System.exit(0);
         }
@@ -97,7 +105,7 @@ public class ImageExample extends JFrame implements
         // Preparation
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glDisable(gl.GL_LIGHTING);
-        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
 
         gl.glLoadIdentity();
 
@@ -106,7 +114,7 @@ public class ImageExample extends JFrame implements
 
         // Draw reference frame
         gl.glLineWidth((float)3.0);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);
@@ -121,23 +129,23 @@ public class ImageExample extends JFrame implements
         gl.glEnd();
 
         // Prepare to draw polygon with image
-        gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-        gl.glPolygonMode(GL.GL_BACK, GL.GL_LINE);
-        gl.glShadeModel(GL.GL_FLAT);
-        gl.glEnable(GL.GL_TEXTURE_2D);
+        gl.glPolygonMode(gl.GL_FRONT, gl.GL_FILL);
+        gl.glPolygonMode(gl.GL_BACK, gl.GL_LINE);
+        gl.glShadeModel(gl.GL_FLAT);
+        gl.glEnable(gl.GL_TEXTURE_2D);
 
         // First: activate texture, Second: set texture parameters
-        JoglRGBAImageRenderer.activate(gl, img);
+        JoglImageRenderer.activate(gl, img);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-        gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
+        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
 
         // Draw textured geometry
         double dx = (double)img.getXSize()/(double)img.getYSize();
 
-        gl.glBegin(GL.GL_QUADS);
+        gl.glBegin(gl.GL_QUADS);
             gl.glNormal3d(0, 0, 1);
             gl.glColor3d(1, 1, 1);
 
@@ -164,7 +172,7 @@ public class ImageExample extends JFrame implements
         // version, and not be under the influence of glTexParameteri 
         // configurations
         gl.glDisable(gl.GL_TEXTURE_2D);
-        JoglRGBAImageRenderer.draw(gl, img);
+        JoglImageRenderer.draw(gl, img);
     }
 
     /** Called by drawable to initiate drawing */
@@ -175,10 +183,10 @@ public class ImageExample extends JFrame implements
 
         gl.glDisable(gl.GL_BLEND);
         gl.glEnable(gl.GL_DEPTH_TEST);
-        gl.glDepthFunc(GL.GL_LESS);
+        gl.glDepthFunc(gl.GL_LESS);
         gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
         drawObjectsGL(gl);
@@ -280,3 +288,7 @@ public class ImageExample extends JFrame implements
   }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

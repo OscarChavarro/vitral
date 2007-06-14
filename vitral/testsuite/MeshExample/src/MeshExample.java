@@ -199,14 +199,16 @@ public class MeshExample
     }
 
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
             System.exit(0);
         }
-
-        if (cameraController.processKeyPressedEventAwt(e)) {
+        if ( e.getKeyCode() == KeyEvent.VK_I ) {
+            System.out.println(qualitySelection);
+        }
+        if ( cameraController.processKeyPressedEventAwt(e) ) {
             canvas.repaint();
         }
-        if (qualityController.processKeyPressedEventAwt(e)) {
+        if ( qualityController.processKeyPressedEventAwt(e) ) {
             canvas.repaint();
         }
     }

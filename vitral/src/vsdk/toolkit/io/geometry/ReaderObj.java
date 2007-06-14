@@ -139,20 +139,16 @@ public class ReaderObj
                 }
             }
             /******************inicializar textura*********************/
-            if (cad.startsWith("usemap "))
+            if ( cad.startsWith("usemap ") )
             {
-                if(!texturasHash.containsKey(cad))
-                {
-                    //System.out.println("doesn't contains key: "+cad);
-                    RGBAImage texture=obtenerTextura(cad, fileName);
-                    if(texture==null)
-                    {
-                        //System.out.println("tex null");
+                if ( !texturasHash.containsKey(cad) ) {
+                    RGBAImage texture = obtainTextureFromFile(cad, fileName);
+                    if ( texture == null ) {
+                        System.out.println("tex null");
                         textAct=0;
                     }
-                    else
-                    {
-                        //System.out.println("tex ok");
+                    else {
+                        System.out.println("tex ok");
                         texturasList.add(texture);
                         relCarTex.add(new ArrayList<int[]>());
                         textAct=texturasList.size();
@@ -226,7 +222,7 @@ public class ReaderObj
         return mgRet;
     }
     
-    private static RGBAImage obtenerTextura(String cad, String fileName)
+    private static RGBAImage obtainTextureFromFile(String cad, String fileName)
     {
         StringTokenizer st=new StringTokenizer(cad, " ");
         st.nextToken();//usemap

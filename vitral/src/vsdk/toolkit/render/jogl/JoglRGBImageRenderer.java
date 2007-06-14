@@ -119,7 +119,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
                    ByteBuffer.wrap(img.getRawImage()), // Buffer buffer
                    null // TextureData.Flusher flusher
                 );
-
+                item.renderer = TextureIO.newTexture(textureData);
         }
         catch ( Exception e ) {
                 System.err.println(e);

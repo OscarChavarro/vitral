@@ -4,6 +4,9 @@ cd ..
 cd _JOGLPbufferExample
 ./run.sh
 cd ..
+cd _JAIHelloWorld
+./run.sh
+cd ..
 cd CameraExample
 ./run.sh
 cd ..
@@ -14,6 +17,9 @@ cd ImageExample
 ./run.sh
 cd ..
 cd ImageSwingExample
+./run.sh
+cd ..
+cd ImageOfflineExample
 ./run.sh
 cd ..
 cd PaletteSwingExample

@@ -262,6 +262,7 @@ class MyPanel extends JPanel implements ActionListener
         }
         else if ( label == "Reset to grayscale256" ) {
             initPalette(1, null);
+            repaint();
     }
         else if ( label == "Exit" ) {
             System.exit(0);

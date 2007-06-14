@@ -13,3 +13,4 @@
     the exceptions when requested file does not exist. Should not cause
     the program to die (check SceneEditorApplication)
   - ZBuffer internal representation should be based on doubles, not floats
+  - Check tga format import functionality

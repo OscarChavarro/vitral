@@ -1,6 +1,9 @@
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world type programs
-// so the user/programmer can be exposed to all the complexity involved. This will help him
-// to dominate the involved libraries.
+//===========================================================================
+
+// VITRAL recomendation: Use explicit class imports (not .*) in hello world 
+// type programs so the user/programmer can be exposed to all the complexity 
+// involved. This will help him to dominate the involved libraries.
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -73,3 +76,7 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
         gl.glViewport(0, 0, width, height); 
     }   
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

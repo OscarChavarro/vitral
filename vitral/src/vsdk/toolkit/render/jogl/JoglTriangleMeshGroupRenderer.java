@@ -1,11 +1,15 @@
+//===========================================================================
+
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
-import vsdk.toolkit.common.QualitySelection;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.media.opengl.GL;
+
+import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
 public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
 
@@ -200,3 +204,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

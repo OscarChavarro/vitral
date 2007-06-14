@@ -51,7 +51,7 @@ public class PbufferExample implements GLEventListener {
         gl.glFlush();
         
         image=JoglRGBAImageRenderer.getImageJOGL(gl);
-        ImagePersistence.exportPPM(new File("./output.ppm"), image);
+        ImagePersistence.exportJPG(new File("./output.jpg"), image);
     }
 
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {

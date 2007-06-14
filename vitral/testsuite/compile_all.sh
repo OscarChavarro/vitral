@@ -4,6 +4,9 @@ cd ..
 cd _JOGLPbufferExample
 ./compile.sh
 cd ..
+cd _JAIHelloWorld
+./compile.sh
+cd ..
 cd CameraExample
 ./compile.sh
 cd ..
@@ -20,6 +23,9 @@ cd ImageExample
 ./compile.sh
 cd ..
 cd ImageSwingExample
+./compile.sh
+cd ..
+cd ImageOfflineExample
 ./compile.sh
 cd ..
 cd PaletteSwingExample

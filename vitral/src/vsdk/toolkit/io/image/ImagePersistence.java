@@ -4,6 +4,9 @@
 //= - September 2 2005 - David Diaz: Original base version                  =
 //= - November 24 2005 - Oscar Chavarro: check pending:                     =
 //= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
+//= - August 6 2006                                                         =
+//=   - Oscar Chavarro: managed RGB and RGBA cases independently            =
+//=   - Oscar Chavarro: Awt BufferedImage convertion moved to render.awt    =
 //===========================================================================
 
 package vsdk.toolkit.io.image;
@@ -25,15 +28,20 @@ import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.awt.image.ColorModel;
 
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.image.codec.jpeg.JPEGCodec;
+
 // This class is used, but explicit import conflicts with VSDK
 //import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.render.awt.AwtImageRenderer;
 
 /**
 This class is a front end front which images of various formats can be
@@ -67,7 +75,7 @@ public class ImagePersistence
 
         if( type.equals("tga") ) {
             TargaImage t = new TargaImage(imagen);
-            retImage.setRawImage(t.getTexture(), t.getPixelDepth(), t.getWidth(), t.getHeight());
+//PENDING
             return retImage;
         }
         if( type.equals("jpg") || type.equals("png") || 
@@ -76,42 +84,45 @@ public class ImagePersistence
             java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
             BufferedImage bi = toBufferedImage(image);
             
-            int w = bi.getWidth();
-            int h = bi.getHeight();
-            //System.out.println("w: "+w+"; h: "+h);
-            retImage.init(w, h);
-            int x, y;
-            int pixel;
-            byte r, g, b, a;
+            AwtImageRenderer.importRGBImageFromAwtBufferedImage(bi, retImage);
 
-            //DataBuffer salvage = bi.getRaster().getDataBuffer();
+            return retImage;
+        }
+        throw new ImageNotRecognizedException("Image not recognized", imagen);
+    }
 
-            for ( y = 0; y < h; y++ ) {
-                for ( x = 0; x < w; x++ ) {
-                    // Warning: This method call is so slow...
-                    pixel = bi.getRGB(x, y);
-                    a = (byte)((pixel & 0xFF000000) >> 24);
-                    r = (byte)((pixel & 0x00FF0000) >> 16);
-                    g = (byte)((pixel & 0x0000FF00) >> 8);
-                    b = (byte)((pixel & 0x000000FF));
-                    retImage.putPixel(x, y, r, g, b, a);
-                }
-            }
-/*
-            int[] pix = new int[w*h];
+    /**
+    Given the filename of an input data file which contains an image, this
+    method tries to recognize the file format and load the contents of it
+    to the image.
 
-            pix = bi.getRGB(0, 0, w, h, pix, 0, w);
-            
-            int pixelDepth=24;
-            if(hasAlpha(i))
-            {
-                pixelDepth=32;
-            }
-            byte[] data=new byte[w*h*pixelDepth];
-            
-            transferPixels(pix, data, w, h, pixelDepth); 
-            retImage.setRawImage(data, pixelDepth, w, h);
-*/
+    @todo Do not assume the file format only from the filename extension,
+    but trying to detect file headers.
+
+    @param imagen - The file respesenting the image
+    @return An RGBImage entity that contains the image loaded in memory.
+
+    Will change:
+      - Choose a better name for this method
+      - Do not recieve a File, but a Stream of bytes
+    */
+    public static RGBImage importRGB(File imagen) throws ImageNotRecognizedException
+    {
+        String type = accept(imagen);
+        RGBImage retImage = new RGBImage();
+
+        if( type.equals("tga") ) {
+            TargaImage t = new TargaImage(imagen);
+//PENDING
+            return retImage;
+        }
+        if( type.equals("jpg") || type.equals("png") || 
+            type.equals("jpeg") || type.equals("gif") )  {
+            Toolkit awtTools = Toolkit.getDefaultToolkit();
+            java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
+            BufferedImage bi = toBufferedImage(image);
+
+            AwtImageRenderer.importRGBImageFromAwtBufferedImage(bi, retImage);
 
             return retImage;
         }
@@ -227,7 +238,45 @@ public class ImagePersistence
         String ext=st.nextToken();
         return ext;
     }
-    
+
+    /**
+    This method writes the contents of the specified image to a file in 
+    binary JPEG image format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */    
+    public static boolean exportJPG(File fd, vsdk.toolkit.media.Image img)
+    {
+        try {
+            BufferedImage bimg;
+            int x, y, xSize, ySize;
+            RGBPixel p;
+
+            xSize = img.getXSize();
+            ySize = img.getYSize();
+            bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+            for ( y = 0; y < ySize; y++ ) {
+                for ( x = 0; x < xSize; x++ ) {
+                    p = img.getPixelRgb(x, y);
+                    bimg.setRGB(x, y, 
+                      ((int)VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                      ((int)VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                      ((int)VSDK.signedByte2unsignedInteger(p.b))
+                    );
+                }
+            }
+
+            FileOutputStream fos = new FileOutputStream(fd);
+            JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);
+            jpeg.encode(bimg);
+            fos.close();
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+        return true;
+    }
+
     /**
     This method writes the contents of the specified image to a file in 
     binary RGB PPM format (i.e. P6 PNG sub-format). Returns true if everything

@@ -177,46 +177,6 @@ public class RGBAImage extends Image
         return ySize;
     }
     
-    /**
-    DO NOT USED! This is always set to 32 bits per pixel
-    @deprecated
-    */
-    public void setPixelDepth(int pixelDepth)
-    {
-        this.pixelDepth=pixelDepth;
-    }
-    
-    /**
-    DO NOT USED! This is always set to 32 bits per pixel
-    @deprecated
-    */
-    public int getPixelDepth()
-    {
-        return this.pixelDepth;
-    }
-    
-    /** ?? */
-    public void setRawImage(byte[] d, int pixelDepth, int xTam, int yTam)
-    {
-        this.init(xTam, yTam);
-        this.pixelDepth=pixelDepth;
-        int dPos=0;
-        for(int i=0; i<this.data.length; i++)
-        {
-            this.data[i].r=d[dPos];
-            dPos++;
-            this.data[i].g=d[dPos];
-            dPos++;
-            this.data[i].b=d[dPos];
-            dPos++;
-            if(pixelDepth==32)
-            {
-                this.data[i].a=d[dPos];
-                dPos++;
-            }
-        }
-    }
-
     public byte[] getRawImage()
     {
         byte[] pixels=new byte[this.xSize*this.ySize*4];

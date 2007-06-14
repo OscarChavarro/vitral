@@ -77,10 +77,10 @@ public class RaytracerSimple {
                     la_escena.camara, reporter, null);
 
         //- 4. Exportar la imagen a un archivo ----------------------------
-        File fd = new File("./output.ppm");
+        File fd = new File("./output.jpg");
 
         System.out.print("Exporting result image to file: ");
-        if ( !ImagePersistence.exportPPM(fd, la_imagen_resultado) )
+        if ( !ImagePersistence.exportJPG(fd, la_imagen_resultado) )
         {
             System.err.println("Error grabando la imagen!!");
             System.exit(1);
