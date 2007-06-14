@@ -682,11 +682,21 @@ public class JoglDrawingArea implements
           if ( unicode_id == e.CHAR_UNDEFINED ) {
             switch ( keycode ) {
               case KeyEvent.VK_LEFT:
-                theScene.selectedThings.selectPrevious();
+        if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                    theScene.selectedThings.selectPrevious();
+        }
+        if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+            theScene.selectedDebugThingGroups.selectPrevious();
+        }
                 reportObjectSelection();
                 break;
               case KeyEvent.VK_RIGHT:
-                theScene.selectedThings.selectNext();
+        if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                    theScene.selectedThings.selectNext();
+        }
+        if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+            theScene.selectedDebugThingGroups.selectNext();
+        }
                 reportObjectSelection();
                 break;
             }
@@ -772,12 +782,22 @@ public class JoglDrawingArea implements
 
       if ( keycode == KeyEvent.VK_DELETE ) {
           int  i;
+
+      //-----------------------------------------------------------------
           for ( i = theScene.things.size()-1; i >= 0; i-- ) {
               if ( theScene.selectedThings.isSelected(i) ) {
                   theScene.things.remove(i);
               }
           }
           theScene.selectedThings.sync();
+      //-----------------------------------------------------------------
+          for ( i = theScene.debugThingGroups.size()-1; i >= 0; i-- ) {
+              if ( theScene.selectedDebugThingGroups.isSelected(i) ) {
+                  theScene.debugThingGroups.remove(i);
+              }
+          }
+          theScene.selectedThings.sync();
+      //-----------------------------------------------------------------
           canvas.repaint();
       }
 
@@ -1108,20 +1128,41 @@ public class JoglDrawingArea implements
 
   private void reportObjectSelection()
   {
+      String msg = "";
+      int n;
+
+      //-----------------------------------------------------------------
       theScene.selectedThings.sync();
-      int n = theScene.selectedThings.numberOfSelections();
+      n = theScene.selectedThings.numberOfSelections();
       if ( n == 0 ) {
-          statusMessage.setText("All things are UNSELECTED");
+      msg += "All things are UNSELECTED";
       }
       else if ( n == 1 ) {
           int f = theScene.selectedThings.firstSelected();
-          statusMessage.setText("Thing [" + f + "] selected, which is a [" + 
+          msg = "Thing [" + f + "] selected, which is a [" + 
      ((SimpleBody)(theScene.things.get(f))).getGeometry().getClass().getName() 
-                                + "]");
+          + "]";
       }
       else {
-          statusMessage.setText(n + " things selected");
+          msg += "" + n + " things selected";
       }
+
+      //-----------------------------------------------------------------
+      theScene.selectedDebugThingGroups.sync();
+      n = theScene.selectedDebugThingGroups.numberOfSelections();
+      if ( n == 0 ) {
+      msg += "; All visual debug groups are UNSELECTED";
+      }
+      else if ( n == 1 ) {
+          int f = theScene.selectedDebugThingGroups.firstSelected();
+          msg += "; Debug group [" + f + "] selected.";
+      }
+      else {
+          msg += "; " + n + " debug groups selected";
+      }
+
+      //-----------------------------------------------------------------
+      statusMessage.setText(msg);
   }
 
   public void keyReleased(KeyEvent e) {

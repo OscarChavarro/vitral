@@ -20,6 +20,79 @@ public class JoglBoxRenderer extends JoglRenderer {
 
     private static GLUT glut = null;
 
+    private static void drawSolidUnitCube(GL gl)
+    {
+        double l = 0.5;
+
+        gl.glBegin(gl.GL_QUADS);
+            // Down
+        gl.glNormal3d(0, 0, -1);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(-l, -l, -l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(-l, l, -l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(l, l, -l);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(l, -l, -l);
+
+            // Up
+        gl.glNormal3d(0, 0, 1);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(-l, -l, l);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(l, -l, l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(l, l, l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(-l, l, l);
+
+        // Front
+        gl.glNormal3d(0, -1, 0);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(-l, -l, l);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(-l, -l, -l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(l, -l, -l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(l, -l, l);
+
+        // Left
+        gl.glNormal3d(-1, 0, 0);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(-l, l, l);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(-l, l, -l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(-l, -l, -l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(-l, -l, l);
+
+        // Back
+        gl.glNormal3d(0, 1, 0);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(l, l, l);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(l, l, -l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(-l, l, -l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(-l, l, l);
+
+        // Right
+        gl.glNormal3d(1, 0, 0);
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex3d(l, -l, l);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex3d(l, -l, -l);
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex3d(l, l, -l);
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex3d(l, l, l);
+    gl.glEnd();
+    }
+
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
@@ -36,7 +109,8 @@ public class JoglBoxRenderer extends JoglRenderer {
     gl.glEnable(gl.GL_NORMALIZE);
         gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
-            glut.glutSolidCube(1);
+            gl.glEnable(gl.GL_LIGHTING);
+            drawSolidUnitCube(gl);
         }
 
         if ( q.isWiresSet() ) {

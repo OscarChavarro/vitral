@@ -273,3 +273,7 @@ Changes in 2007 may 24 revition
     spheres centered at object center of mass (not geometric center)
   - Normalmap gradient technique for generating contourns drawings (from
     Zbuffer) incorporated into SceneEditorApplication
+
+Changes in 2007 may 26 revition
+  - JoglSimpleBodyRenderer and JoglSimpleBodyGroupRenderer. Some new
+    organitation of SceneEditorApplication

@@ -66,6 +66,7 @@ import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
@@ -471,10 +472,77 @@ class ButtonsPanel extends JPanel implements ActionListener
         return thing;
     }
 
-    private void addDebugSphere(SimpleBody voxelBody, int groupIndex,
-        Vector3D cm)
+    private RGBAImage createProjectedView(SimpleBody referenceBody)
     {
-        double r = ((double)groupIndex) / 31.0;
+        //- Will render a normalized body inside the unit cube ------------
+    double minmax[] = referenceBody.getGeometry().getMinMax();
+        //SimpleBody framedBody = new SimpleBody();
+        SimpleBody framedBody = addThing(referenceBody.getGeometry());
+        Vector3D min, max, s;
+        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        s = new Vector3D(max.x - min.x, max.y - min.y, max.y - min.y);
+
+        double maxsize = s.x;
+    if ( s.y > maxsize ) maxsize = s.y;
+    if ( s.z > maxsize ) maxsize = s.z;
+    s.x = s.y = s.z = 2/maxsize;
+
+        framedBody.setPosition(max.add(min).multiply(-1/2));
+        framedBody.setScale(s);
+
+        //- Render will proceed in a PBuffer ------------------------------
+
+        //- Obtain Pbuffer's rendered image -------------------------------
+    RGBAImage texture;
+        texture = new RGBAImage();
+        texture.init(64, 64);
+        texture.createTestPattern();
+    return texture;    
+    }
+
+    private SimpleBodyGroup addDebugProjectedView(SimpleBody referenceBody)
+    {
+        Geometry referenceGeometry = null;
+        referenceGeometry = referenceBody.getGeometry();
+        SimpleBody boxBody;
+        Geometry box;
+        RGBAImage texture;
+        Matrix4x4 R;
+        SimpleBodyGroup group;
+
+        group = new SimpleBodyGroup();
+
+        R = new Matrix4x4();
+        R.eulerAnglesRotation(0, Math.toRadians(45), Math.toRadians(10));
+
+        box = new Box(1, 1, VSDK.EPSILON);
+        boxBody = new SimpleBody();
+        boxBody.setGeometry(box);
+        boxBody.setPosition(new Vector3D());
+        boxBody.setRotation(R);
+        boxBody.setRotationInverse(R.inverse());
+        boxBody.setMaterial(defaultMaterial());
+        boxBody.getMaterial().setDoubleSided(true);
+        boxBody.getMaterial().setDiffuse(new ColorRgb(1, 1, 1));
+        boxBody.setName("Proyected view box");
+
+        //-----------------------------------------------------------------
+        texture = createProjectedView(referenceBody);
+    if ( texture == null ) {
+        return null;
+    }
+        //-----------------------------------------------------------------
+        boxBody.setTexture(texture);
+
+        group.getBodies().add(boxBody);
+        return group;
+    }
+
+    private SimpleBody addDebugSphere(SimpleBody voxelBody, int groupIndex,
+                                      Vector3D cm, double averageDistance)
+    {
+        double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
         VoxelVolume vv = (VoxelVolume)voxelBody.getGeometry();
         Sphere sphere;
         RGBAImage texture;
@@ -483,20 +551,25 @@ class ButtonsPanel extends JPanel implements ActionListener
         int s, t;
         int voxelValue;
         Vector3D p = new Vector3D();
-    Vector3D pos;
-    Vector3D scale, cm2;
+        Vector3D pos;
+        Vector3D scale, cm2;
         Matrix4x4 S = new Matrix4x4();
 
         sphere = new Sphere(r);
-        body = addThing(sphere);
+        body = new SimpleBody();
+        body.setGeometry(sphere);
+        body.setMaterial(defaultMaterial());
         body.getMaterial().setDoubleSided(true);
-    scale = voxelBody.getScale();
-    S.scale(scale.x, scale.y, scale.z);
-    scale = scale.multiply(r);
+        scale = voxelBody.getScale();
+        S.scale(scale.x, scale.y, scale.z);
+        scale = scale.multiply(r);
         body.setScale(scale);
-    cm2 = S.multiply(cm);
-    pos = voxelBody.getPosition().add(cm2);
+        cm2 = S.multiply(cm);
+        pos = voxelBody.getPosition().add(cm2);
         body.setPosition(pos);
+        body.setRotation(new Matrix4x4());
+        body.setRotationInverse(new Matrix4x4());
+        body.setName("Debug sphere for harmonics " + groupIndex);
 
         texture = new RGBAImage();
         texture.init(64, 64);
@@ -509,10 +582,10 @@ class ButtonsPanel extends JPanel implements ActionListener
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
                 p.setSphericalCoordinates(r, tetha, phi);
-        p = cm.add(p);
+                p = cm.add(p);
                 voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
                 if ( voxelValue < 128 ) {
-                    texture.putPixel(s, t, (byte)255, (byte)255, (byte)255, (byte)0);
+                    texture.putPixel(s, t, (byte)0, (byte)0, (byte)0, (byte)0);
                 }
                 else {
                     texture.putPixel(s, t, (byte)0, (byte)0, (byte)0, (byte)255);
@@ -522,7 +595,7 @@ class ButtonsPanel extends JPanel implements ActionListener
 
         //-----------------------------------------------------------------
         body.setTexture(texture);
-
+        return body;
     }
 
     public void actionPerformed(ActionEvent ev) {
@@ -578,33 +651,85 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
             else {
                 //- Calculate the VoxelVolume's center of mass ---------------
-                Vector3D cm =
-                    ((VoxelVolume)referenceGeometry).doCenterOfMass();
+                VoxelVolume vv = (VoxelVolume)referenceGeometry;
+                Vector3D cm = vv.doCenterOfMass();
+
+                //- Calculate average distance from nonzero voxels to cm -----
+                // This accounts for scale normalization as in [FUNK2003].4.1.
+                int numberOfNonZeroVoxels = 0;
+                double d; // Distance between a given voxel and center of mass
+                Vector3D p; // Position of voxel
+                double averageDistance = 0;
+                int x, y, z;
+
+                for ( x = 0; x < vv.getXSize(); x++ ) {
+                    for ( y = 0; y < vv.getYSize(); y++ ) {
+                        for ( z = 0; z < vv.getZSize(); z++ ) {
+                            if ( vv.getVoxel(x, y, z) != 0 ) {
+                                p = vv.getVoxelPosition(x, y, z);
+                                averageDistance += VSDK.vectorDistance(cm, p);
+                                numberOfNonZeroVoxels++;
+                            }
+                        }
+                    }
+                }
+                averageDistance /= (double)numberOfNonZeroVoxels;
+
                 //- Create spheres -------------------------------------------
+                SimpleBody body;
+                SimpleBodyGroup group = new SimpleBodyGroup();
                 int i;
                 for ( i = 0; i < 32; i++ ) {
-                    addDebugSphere(voxelBody, i, cm);
+                    body = addDebugSphere(voxelBody, i, cm, averageDistance);
+                    group.getBodies().add(body);
                 }
+                parent.theScene.debugThingGroups.add(group);
+                // Subspheres account for translation & scale
+                group.setRotation(voxelBody.getRotation());
             }
 
+        }
+        else if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
+            int selectedThing = parent.theScene.selectedThings.firstSelected();
+            SimpleBody referenceBody = null;
+
+            if ( selectedThing >= 0 ) {
+                referenceBody = parent.theScene.things.get(selectedThing);
+            }
+
+            if ( referenceBody == null ) {
+                parent.statusMessage.setText("ERROR: An object must be selected for projected views debugging to be created");
+            }
+            else {
+                SimpleBodyGroup group;
+                group = addDebugProjectedView(referenceBody);
+        if ( group != null ) {
+                    parent.theScene.debugThingGroups.add(group);
+        }
+        else {
+                    parent.statusMessage.setText("ERROR: cannot create Pbuffer, you need recent 3D hardware acceleration for this function");
+        }
+            }
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -
             int selectedThing = parent.theScene.selectedThings.firstSelected();
             Geometry referenceGeometry = null;
+            SimpleBody thing = null;
 
             if ( selectedThing < 0 ) {
                 referenceGeometry = new Sphere(0.5);
             }
             else {
-                referenceGeometry = parent.theScene.things.get(selectedThing).getGeometry();
+                thing = parent.theScene.things.get(selectedThing);
+                referenceGeometry = thing.getGeometry();
             }
 
             //- Calculate transform matrix ------------------------------------
             double minmax[] = referenceGeometry.getMinMax();
             Matrix4x4 M; // Transform from voxelspace to geometry minmax space
 
-        M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
+            M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
 
             //- Auxiliary variables -------------------------------------------
             int nx = 64, ny = 64, nz = 64;
@@ -617,11 +742,16 @@ class ButtonsPanel extends JPanel implements ActionListener
             referenceGeometry.doVoxelization(vv, M, reporter);
 
             //- Append newly created volume to scene, matching reference form -
-            SimpleBody thing = addThing(vv);
+            SimpleBody newThing = addThing(vv);
             Vector3D pos = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
-            thing.setPosition(pos);
+            if ( thing != null ) {
+                pos = pos.add(thing.getPosition());
+                newThing.setRotation(thing.getRotation());
+                newThing.setScale(thing.getScale());
+            }
+            newThing.setPosition(pos);
             Vector3D size = new Vector3D(M.M[0][0], M.M[1][1], M.M[2][2]);
-            thing.setScale(size);
+            newThing.setScale(size);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
             PolyhedralBoundedSolid brep =

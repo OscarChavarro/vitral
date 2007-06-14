@@ -1,11 +1,15 @@
 //===========================================================================
 import javax.media.opengl.GL;
 
+import java.util.ArrayList;
+
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglFixedBackgroundRenderer;
@@ -15,6 +19,8 @@ import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 
 public class JoglSceneRenderer
 {
@@ -51,9 +57,10 @@ public class JoglSceneRenderer
 
     public static void draw(GL gl, Scene s)
     {
-        int i;
+        int i, j;
         Image texture;
 
+        //-----------------------------------------------------------------
         drawBackground(gl, s);
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
@@ -64,10 +71,6 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        SimpleBody gi;
-        Vector3D p;
-        Vector3D scale;
-
         if ( s.lights.size() > 0 ) {
             gl.glEnable(gl.GL_LIGHTING);
         }
@@ -75,6 +78,7 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
         }
 
+        //- Draw lights ---------------------------------------------------
         for ( i = 0; i < s.lights.size(); i++ ) {
             Light l = s.lights.get(i);
             JoglLightRenderer.activate(gl, l);
@@ -84,15 +88,30 @@ public class JoglSceneRenderer
             JoglLightRenderer.draw(gl, s.lights.get(i));
         }
 
-        // Draw reference grid plane
-        if ( s.showGrid ) drawGridRectangle(gl);
+        //- Draw visual debug entities ------------------------------------
+        SimpleBodyGroup ggi;
+        RendererConfiguration quality;
+
+        for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
+            quality = s.qualityTemplate;
+            if ( s.selectedDebugThingGroups.isSelected(i) ) {
+                quality.setSelectionCorners(true);
+            }
+            else {
+                quality.setSelectionCorners(false);
+            }
+            ggi = s.debugThingGroups.get(i);
+         //if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
+                gl.glDisable(gl.GL_DEPTH_TEST);
+        //}
+            JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
+        gl.glEnable(gl.GL_DEPTH_TEST);
+        }
+
+        //- Draw scene bodies ---------------------------------------------
+        SimpleBody gi;
 
         for ( i = 0; i < s.things.size(); i++ ) {
-            RendererConfiguration quality;
-            gi = s.things.get(i);
-            p = gi.getPosition();
-            scale = gi.getScale();
-
             quality = s.qualityTemplate;
 
             if ( s.selectedThings.isSelected(i) ) {
@@ -101,33 +120,12 @@ public class JoglSceneRenderer
             else {
                 quality.setSelectionCorners(false);
             }
-
-            gl.glPushMatrix();
-            gl.glLoadIdentity();
-            gl.glTranslated(p.x, p.y, p.z);
-            JoglMatrixRenderer.activate(gl, gi.getRotation());
-
-            gl.glScaled(scale.x, scale.y, scale.z);
-
-            gl.glColor3d(1, 1, 1);
-            JoglMaterialRenderer.activate(gl, gi.getMaterial());
-
-            texture = gi.getTexture();
-
-        if ( quality.isTextureSet() && (texture != null) ) {
-                gl.glEnable(gl.GL_TEXTURE_2D);
-                JoglImageRenderer.activate(gl, texture);
-        }
-        else {
-                gl.glDisable(gl.GL_TEXTURE_2D);
+            gi = s.things.get(i);
+            JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
         }
 
-            JoglGeometryRenderer.draw(gl, gi.getGeometry(),
-                                      s.activeCamera, quality);
-
-            gl.glPopMatrix();
-
-        }
+        //- Draw reference grid plane -------------------------------------
+        if ( s.showGrid ) drawGridRectangle(gl);
 
     }
 

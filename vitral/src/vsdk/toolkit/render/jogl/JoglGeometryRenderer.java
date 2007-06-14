@@ -52,12 +52,8 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
     }
 
-    public static void drawMinMaxBox(GL gl, Geometry g, RendererConfiguration q)
+    public static void drawMinMaxBox(GL gl, double minmax[], RendererConfiguration q)
     {
-        double [] minmax;
-
-        minmax = g.getMinMax();
-
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
         JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
@@ -90,12 +86,15 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
-    public static void drawSelectionCorners(GL gl, Geometry g, RendererConfiguration q)
+    public static void drawMinMaxBox(GL gl, Geometry g, RendererConfiguration q)
     {
-        double [] minmax;
+        drawMinMaxBox(gl, g.getMinMax(), q);
+    }
+
+    public static void drawSelectionCorners(GL gl, double minmax[], RendererConfiguration q)
+    {
         double borderPercent = 0.01;
         double linePercent = 0.25;
-        minmax = g.getMinMax();
 
         Vector3D min, max, delta;
         min = new Vector3D(minmax[0], minmax[1], minmax[2]);
@@ -173,6 +172,11 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glEnd();
 
         gl.glPopAttrib();
+    }
+
+    public static void drawSelectionCorners(GL gl, Geometry g, RendererConfiguration q)
+    {
+    drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
     public static void draw(GL gl, Geometry g, Camera c, RendererConfiguration q)

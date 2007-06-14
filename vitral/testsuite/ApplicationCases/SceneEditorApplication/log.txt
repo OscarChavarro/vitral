@@ -170,3 +170,8 @@ Dec 22 2006, Oscar Chavarro:
 
 May 3 2006, Oscar Chavarro:
   - 3h: Added visual debug ray control
+
+May 26 2006, Oscar Chavarro:
+  - 50min: Separating spherical harmonics debug entities into a simple group,
+    and generilizing selection strategy for next object / previous object
+    and selection report label.

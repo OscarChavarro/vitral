@@ -17,6 +17,7 @@ import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.Raytracer;
 
 public class Scene
@@ -39,8 +40,10 @@ public class Scene
     public boolean showCorridor;
     public boolean showGrid;
     public ArrayList<SimpleBody> things;
+    public ArrayList<SimpleBodyGroup> debugThingGroups;
 
     public SelectionSet selectedThings;
+    public SelectionSet selectedDebugThingGroups;
 
     // Others
     public RendererConfiguration qualityTemplate;
@@ -50,6 +53,7 @@ public class Scene
         //-----------------------------------------------------------------
         things = new ArrayList<SimpleBody>();
         lights = new ArrayList<Light>();
+        debugThingGroups = new ArrayList<SimpleBodyGroup>();
 
         Matrix4x4 R = new Matrix4x4();
         R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
@@ -59,6 +63,7 @@ public class Scene
 
         activeCamera = camera;
         selectedThings = new SelectionSet(things);
+    selectedDebugThingGroups = new SelectionSet(debugThingGroups);
 
         //-----------------------------------------------------------------
         simpleBackground = new SimpleBackground();

@@ -27,7 +27,13 @@ public class PbufferExample implements GLEventListener {
         // Create a GLCapabilities object for the pbuffer
         GLCapabilities pbCaps = new GLCapabilities();
         pbCaps.setDoubleBuffered(false);
-        pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+    try {
+            pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+      }
+          catch ( Exception e ) {
+          System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
+          System.exit(1);
+    }
         pbuffer.addGLEventListener(this);
         pbuffer.display();
     }
