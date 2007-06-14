@@ -15,11 +15,13 @@ generar_archivo(int i)
     fprintf(fd, "up 0 0 1\n");
     fprintf(fd, "lookat 0 0 0\n");
     fprintf(fd, "fov 45\n");
-    fprintf(fd, "background 0.078 0.361 0.753\n");
+//    fprintf(fd, "background 0.078 0.361 0.753\n");
+    fprintf(fd, "backgroundcubemap\n");
     fprintf(fd, "rotation 0 %0.2f 0\n", a);
     fprintf(fd, "surface 1 0.75 0.33 0.15 1.0 0.0 1 0 0 1\n");
     fprintf(fd, "sphere 0 0 -100 99.5\n");
     fprintf(fd, "surface 0.5 0.45 0.35 0.3 1.0 1 3 0.5 0.0 1.0\n");
+//    fprintf(fd, "cube 0 0 0 1\n");
     fprintf(fd, "cylinder 0 0 0 0.5 0 1\n");
     fprintf(fd, "light 1 1 1 ambient\n");
     fprintf(fd, "light 0.4 0.4 0.4 point 4 3 2\n");

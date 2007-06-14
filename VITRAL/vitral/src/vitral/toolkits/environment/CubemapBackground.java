@@ -2,14 +2,17 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - November 27 2005 - Oscar Chavarro: Original base version              =
+//= - February 15 2006 - Oscar Chavarro: Implemented true colorInDirection  =
 //===========================================================================
 
 package vitral.toolkits.environment;
 
+import vitral.toolkits.common.VSDK;
 import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.environment.Camera;
 import vitral.toolkits.media.RGBAImage;
+import vitral.toolkits.media.RGBAPixel;
 
 public class CubemapBackground extends Background {
     private RGBAImage [] backgroundImages;
@@ -41,9 +44,62 @@ public class CubemapBackground extends Background {
     public ColorRgb colorInDireccion(Vector3D d)
     {
         ColorRgb _color = new ColorRgb();
-        _color.r = 0;
-        _color.g = 1;
-        _color.b = 0;
+        RGBAPixel p;
+        double theta, phi, u = 0, v = 0;
+        RGBAImage i;
+
+        phi = Math.acos(d.z);
+        theta = Math.asin(d.y/Math.sin(phi));
+
+        if ( phi > 3*Math.PI/4 ) {
+            // Down
+            i = backgroundImages[4];
+    }
+    else if ( phi > Math.PI/4 ) {
+            // Front, right, back or left
+            v = (phi - Math.PI/4) / (Math.PI/2);
+            if ( theta > -Math.PI/4 && theta < Math.PI/4 && d.x > 0 ) {
+                // Right
+                i = backgroundImages[1];
+                u = 1 - (theta+Math.PI/4)/(Math.PI/2);
+        }
+            else if ( theta > 0 -Math.PI/4 && theta < Math.PI/4 && d.x < 0 ) {
+                // Left
+                i = backgroundImages[3];
+                u = (theta+Math.PI/4)/(Math.PI/2);
+        }
+            else if ( (theta >= Math.PI/4 && d.y > 0) ||
+                      d.y > 0 && d.x < VSDK.EPSILON ) {
+                // Front
+                if ( theta < 0 ) theta = Math.PI/2;
+                u = (theta - Math.PI/4) / (Math.PI/2);
+                if ( d.x > 0 ) {
+            u = (1 - u);
+        }
+                i = backgroundImages[0];
+        }
+        else {
+                // Back
+                theta *= -1;
+                u = (theta - Math.PI/4) / (Math.PI/2);
+                if ( d.x > 0 ) {
+            u = (1 - u);
+        }
+                u = (1 - u);
+                i = backgroundImages[2];
+        }
+    }
+    else {
+            // Up
+            i = backgroundImages[5];
+    }
+
+        p = i.getPixel((int)(u*(i.getXSize()-1)), (int)(v*(i.getYSize()-1)));
+
+        _color.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
+        _color.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
+        _color.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+
         return _color;
     }
 

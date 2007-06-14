@@ -43,17 +43,7 @@ public class RaytracerSimple {
     private void
     pintar_offline(String nombre_de_archivo)
     {
-        //- 1. Crear una imagen -------------------------------------------
-        File fd = new File("./salida.ppm");
-
-        la_imagen_resultado = new RGBImage();
-        if ( !la_imagen_resultado.init(2048, 1536) ) {
-            System.err.println("Error creando la imagen!!");
-            System.exit(1);
-        }
-
-        //- 2. Calcular la imagen -----------------------------------------
-        // 2.1. Leer la escena
+        //- 1. Leer la escena ---------------------------------------------
         System.out.println("Leyendo " + nombre_de_archivo);
         InputStream is = null;
         try {
@@ -66,7 +56,17 @@ public class RaytracerSimple {
             System.exit(-1);
         }
 
-        // 2.2. Procesar la escena
+        //- 2. Crear una imagen -------------------------------------------
+        File fd = new File("./salida.ppm");
+
+        la_imagen_resultado = new RGBImage();
+        if ( !la_imagen_resultado.init(
+                  la_escena.viewportXSize, la_escena.viewportYSize) ) {
+            System.err.println("Error creando la imagen!!");
+            System.exit(1);
+        }
+
+        //- 3. Calcular la imagen / procesar la escena --------------------
         el_visualizador = new RaytracerMIT();
         la_escena.camara.updateViewportResize(la_imagen_resultado.getXSize(), 
                                          la_imagen_resultado.getYSize());
@@ -76,7 +76,7 @@ public class RaytracerSimple {
                                  la_escena.fondo,
                                  la_escena.camara);
 
-        //- 3. Exportar la imagen a un archivo ----------------------------
+        //- 4. Exportar la imagen a un archivo ----------------------------
         if ( !la_imagen_resultado.exportar_ppm(fd) )
         {
             System.err.println("Error grabando la imagen!!");
@@ -86,17 +86,17 @@ public class RaytracerSimple {
         System.out.println("En Unix / Linux puede verla con el comando");
         System.out.println("  display salida.ppm");
 
-        //- 4. Destruir las estructuras de datos --------------------------
-        // 4.1. Destruir la imagen
+        //- 5. Destruir las estructuras de datos --------------------------
+        // 5.1. Destruir la imagen
         la_imagen_resultado.dispose();
         la_imagen_resultado = null;
 
-        // 4.2. Destruir la escena
+        // 5.2. Destruir la escena
         el_visualizador = null;
         la_escena.dispose();
         la_escena = null;
 
-        // 4.3. Sugerir al recolector de basura de Java que libere la memoria
+        // 5.3. Sugerir al recolector de basura de Java que libere la memoria
         System.gc();
     }
 

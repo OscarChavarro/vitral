@@ -6,6 +6,9 @@
 
 package vitral.toolkits.common;
 
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+
 import vitral.toolkits.common.Vector3D;
 
 public class VSDK
@@ -31,6 +34,26 @@ public class VSDK
     {
         return a*a;
     }
+
+    /**
+    Given a double number, it formats it to print in a given precision
+    */
+    public static String formatDouble(double a)
+    {
+        DecimalFormat f = new DecimalFormat("0.##");
+
+        return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
+    }
+
+    public static int signedByte2unsignedInteger(byte in) {
+        int a;
+
+        a = (int)in;
+        if ( a < 0 ) a += 256;
+        return a;
+
+    }
+
 }
 
 //===========================================================================

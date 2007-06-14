@@ -1,0 +1,35 @@
+#
+# This file is the result of feeding "balls" from Eric Haines'
+# SPD through nff2shade.awk and then hand-tweaking things.
+#
+
+viewport 640 480
+
+eye 2.1 1.3 -0.4
+up 0 0 1
+lookat 0 0 0.1
+fov 45
+
+#eye 0 -2 0
+#up 0 0 1
+#lookat 0 0 0
+#fov 120
+
+#background 0.078 0.361 0.753
+
+backgroundcubemap
+
+rotation 0 0.4 0
+
+# here's a hack
+# changed to use smaller radius
+surface 1 0.75 0.33 0.15 1.0 0.0 1 0 0 1
+sphere 0 0 -100 99.5
+
+surface 0.5 0.45 0.35 0.3 1.0 1 3 0.5 0.0 1.0
+cube 0 0 0 1
+#sphere 0 0 0 0.5
+light 1 1 1 ambient
+light 0.4 0.4 0.4 point 4 3 2
+light 0.4 0.4 0.4 point 1 -4 4
+light 0.4 0.4 0.4 point -3 1 5

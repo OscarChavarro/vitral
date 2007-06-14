@@ -8,8 +8,7 @@
 
 package vitral.toolkits.common;
 
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
+import vitral.toolkits.common.VSDK;
 
 /**
 Respect to data representation:
@@ -140,17 +139,9 @@ public class ColorRgb
     */
     public String toString()
     {
-        return "<" + f(r) + ", " + f(g) + ", " + f(b) + ">";
-    }
-
-    /**
-    Given a double number, it formats it to print in a given precision
-    */
-    private String f(double a)
-    {
-        DecimalFormat f = new DecimalFormat("0.##");
-
-        return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
+        return "<" + VSDK.formatDouble(r) + ", " + 
+                     VSDK.formatDouble(g) + ", " + 
+                     VSDK.formatDouble(b) + ">";
     }
 
 }

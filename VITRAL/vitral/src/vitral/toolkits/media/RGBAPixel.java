@@ -67,6 +67,11 @@ public class RGBAPixel {
     {
         return a;
     }
+
+    public String toString()
+    {
+        return "<" + r + ", " + g + ", " + b + ">";
+    }
 }
 
 //===========================================================================

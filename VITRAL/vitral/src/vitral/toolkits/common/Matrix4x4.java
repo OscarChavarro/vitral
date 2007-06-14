@@ -8,8 +8,7 @@
 
 package vitral.toolkits.common;
 
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
+import vitral.toolkits.common.VSDK;
 
 public class Matrix4x4 {
     public double M[][];
@@ -282,16 +281,6 @@ public class Matrix4x4 {
                M[0][2]*(M[1][0]*M[2][1]-M[2][0]*M[1][1]);
     }
 
-    /**
-    Given a double number, it formats it to print in a given precision
-    */
-    private String f(double a)
-    {
-        DecimalFormat f = new DecimalFormat("0.##");
-
-        return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
-    }
-
     public String toString()
     {
         String msg;
@@ -301,7 +290,7 @@ public class Matrix4x4 {
 
         for ( row = 0; row < 4; row++, pos++ ) {
             for ( pos = 0, column = 0; column < 4; column++ ) {
-                msg = msg + f(M[row][column]) + " ";
+                msg = msg + VSDK.formatDouble(M[row][column]) + " ";
             }
             msg = msg + "\n";
         }

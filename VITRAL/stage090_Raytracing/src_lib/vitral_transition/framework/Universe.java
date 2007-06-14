@@ -3,13 +3,14 @@
 package vitral_transition.framework;
 
 // Paquetes de java utilizados para la agregacion multiple
-import java.util.Vector;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.StreamTokenizer;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StreamTokenizer;
+import java.util.Vector;
 
 // Paquetes internos al sistema de raytracing / modelamiento
 import vitral.toolkits.common.Vector3D;
@@ -18,12 +19,16 @@ import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.environment.Camera;
 import vitral.toolkits.environment.Light;
 import vitral.toolkits.environment.Material;
+import vitral.toolkits.environment.Background;
 import vitral.toolkits.environment.SimpleBackground;
+import vitral.toolkits.environment.CubemapBackground;
 import vitral.toolkits.geometry.RayableObject;
 import vitral.toolkits.geometry.Geometry;
 import vitral.toolkits.geometry.Sphere;
 import vitral.toolkits.geometry.Cube;
 import vitral.toolkits.geometry.Cylinder;
+import vitral.toolkits.media.RGBAImage;
+import vitral.toolkits.media.RGBAImageBuilder;
 
 public class Universe
 {
@@ -33,14 +38,16 @@ public class Universe
     // El modelo del mundo
     public Vector<RayableObject> arr_cosas;
     public Vector<Light> arr_luces;
-    public SimpleBackground fondo;
+    public Background fondo;
     public Camera camara;
+    public int viewportXSize;
+    public int viewportYSize;
 
     public Universe()
     {
         camara = new Camera();
         fondo = new SimpleBackground();
-        fondo.setColor(0, 0, 0);
+        ((SimpleBackground)fondo).setColor(0, 0, 0);
 
         int CHUNKSIZE = 100; // Incremento de arreglos
 
@@ -48,6 +55,10 @@ public class Universe
         arr_cosas = new Vector<RayableObject>(CHUNKSIZE, CHUNKSIZE);  
         // Arreglo de LIGHTes
         arr_luces = new Vector<Light>(CHUNKSIZE, CHUNKSIZE);
+
+        viewportXSize = 320;
+        viewportYSize = 240;
+
     }
 
     public void dispose()
@@ -176,6 +187,12 @@ public class Universe
                   arr_cosas.addElement(thing);
                 } 
                 */
+                else if (st.sval.equals("viewport")) {
+                  imprimirMensaje("viewport");
+
+                  viewportXSize = (int)leerNumero(st);
+                  viewportYSize = (int)leerNumero(st);
+                }
                 else if (st.sval.equals("eye")) {
                   imprimirMensaje("eye");
                   camara.setPosition(new Vector3D(leerNumero(st), 
@@ -201,9 +218,46 @@ public class Universe
                 else if (st.sval.equals("background")) {
                   imprimirMensaje("background");
                   fondo = new SimpleBackground();
-                  fondo.setColor(leerNumero(st), 
+                  ((SimpleBackground)fondo).setColor(leerNumero(st), 
                                  leerNumero(st), 
                                  leerNumero(st));
+                }
+                else if (st.sval.equals("backgroundcubemap")) {
+
+            RGBAImage front, right, back, left, down, up;
+
+            try {
+
+            System.out.print("Loading background: 1");
+            front = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno0_small.jpg"));
+            System.out.print("2");
+            right = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno1_small.jpg"));
+            System.out.print("3");
+            back = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno2_small.jpg"));
+            System.out.print("4");
+            left = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno3_small.jpg"));
+            System.out.print("5");
+            down = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno4_small.jpg"));
+            System.out.print("6");
+            up = RGBAImageBuilder.buildImage(
+                        new File("./etc/cubemaps/dorise1/entorno5_small.jpg"));
+            System.out.println(" OK!");
+
+            fondo = 
+                new CubemapBackground(camara, 
+                                      front, right, back, left, down, up);
+
+            }
+            catch (Exception e) {
+            System.err.println("Error armando el cubemap!");
+            System.exit(0);
+            }
+
                 }
                 else if (st.sval.equals("light")) {
                   imprimirMensaje("light");
