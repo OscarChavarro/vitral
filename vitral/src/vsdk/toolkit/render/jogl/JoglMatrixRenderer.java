@@ -19,6 +19,25 @@ coordinates geometrical transformation represented in the
 public class JoglMatrixRenderer extends JoglRenderer {
 
     /**
+    matrixId must be one of the internal JOGL/OpenGL variable names associated
+    with matrices, like GL.GL_PROJECTION_MATRIX or GL.GL_MODELVIEW_MATRIX
+    */
+    public static Matrix4x4 importJOGL(GL gl, int matrixId) {
+        double Mgl[] = new double[16];
+
+        int row, column, pos;
+
+        gl.glGetDoublev(matrixId, Mgl, 0);
+        Matrix4x4 R = new Matrix4x4();
+        for ( pos = 0, column = 0; column < 4; column++ ) {
+            for ( row = 0; row < 4; row++, pos++ ) {
+                R.M[row][column] = Mgl[pos];
+            }
+        }
+    return R;
+    }
+
+    /**
     This method acumulates the matrix represented in `A` in the currently
     selected matrix stack inside the JOGL state machine.
     */

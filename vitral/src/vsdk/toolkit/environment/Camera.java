@@ -400,9 +400,12 @@ public class Camera extends Entity
         return R;
     }
     
-    public Matrix4x4 calculateProjectionMatrix(int stereoMode)
+    /**
+    Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    */
+    public Matrix4x4 calculateViewVolumeMatrix()
     {
-        //- 1. Calculate the base projection matrix -------------------------
+        //- Calculate the base projection matrix ----------------------------
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
         Matrix4x4 P = new Matrix4x4();
 
@@ -424,8 +427,19 @@ public class Camera extends Entity
                                 nearPlaneDistance, farPlaneDistance);
             break;
         }
+    return P;
+    }
 
-        //- 2. Take into account the camera position and orientation -------
+    public Matrix4x4 calculateTransformationMatrix()
+    {
+    return calculateTransformationMatrix(STEREO_MODE_CENTER);
+    }
+    /**
+    Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    */
+    public Matrix4x4 calculateTransformationMatrix(int stereoMode)
+    {
+        //- Take into account the camera position and orientation ----------
         Matrix4x4 R;
         Matrix4x4 R1;
         Matrix4x4 T1 = new Matrix4x4();
@@ -459,7 +473,16 @@ public class Camera extends Entity
             Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
             R.multiply(Tstereo);
         }
+    return R;
+    }
 
+    /**
+    Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    */
+    public Matrix4x4 calculateProjectionMatrix(int stereoMode)
+    {
+        Matrix4x4 P = calculateViewVolumeMatrix();
+        Matrix4x4 R = calculateTransformationMatrix(stereoMode);
         return P.multiply(R);
     }
 

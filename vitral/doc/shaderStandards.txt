@@ -1,0 +1,226 @@
+===========================================================================
+= VitralSDK shader programming guidelines                                 =
+===========================================================================
+
+From the shader programming perspective, the VitralSDK toolkit should be
+concieved simply as a set of "black box" type of software components that
+aids in traditional shader programming. For example, in OpenGL/JOGL, one
+can program a camera using standard functions like glFrustum or 
+gluPerspective, but VitralSDK offers a "Camera" class and a 
+"JoglCameraRenderer" class with methods that allows more convenient
+onject oriented programming. Note that any of such components use is
+optional, and the application programmer can choose to use basic functions
+or its VitralSDK counterparts at any time, even in a mixed way.
+
+Following the same programming phylosophy, VitralSDK offers aids to
+programming multiple shading languages, like Nvidia's Cg, OpenGL's SL or
+Renderman's shading language. The application programmer can choose to use
+the VitralSDK's basic supported predefined shaders, or to use directly its
+preferred shader API.
+
+This document describes a set of assumpsions with respect to shader
+technology use, that VitralSDK follows to standarize its use, achieving
+maximum shader technology independence, portability and ease of use.
+Note that, however, specific shader effects could be difficult to be
+supported by this general VitralSDK use, and one can be forced to implement
+them directly.
+
+===========================================================================
+= The specific technology - non fully VitralSDK integrated style examples =
+===========================================================================
+
+For each shader language technology available, VitralSDK should include an
+example, under testsuite/VSDKExamples directory in its main distribution.
+Those examples are characterized by the following general principles:
+
+  - There is one example for each specific shader technology.  For example,
+    for the case of Nvidia Cg, there is a "CgShaderExample". As more
+    shader language platforms start to be integrated in the VitralSDK
+    toolkit, one such example should be added.
+  - The example is always functionally the same: one simple application
+    allowing simple object + camera + light movement, to see in action
+    a simple shader, usually a bump mapper or a simply phong shading
+    model. There are very little variations between examples.
+  - The example is programmed over simple common VitralSDK toolkit components,
+    like basic math classes (i.e. Vector3D and Matrix4x4), basic
+    media and environment classes (i.e. RGBImage, Camera, Light, Sphere) 
+    and basic GUI management classes (i.e. GUI specific classes like 
+    controllers and rendering specific classes).  This is aimed to ease 
+    the learning process for programmers already familiarized with VitralSDK 
+    toolkit. Note that before studying this examples, a programmer should be 
+    already familiar with VitralSDK.
+  - The example does NOT use standard VitralSDK shader language framework.
+    Note that from this perspective, the examples will result more complex
+    as compared to other applications, like the example
+    ApplicationCases/SceneEditorApplication, but will expose specific
+    shader technology integration internals, and as such, will constitute
+    a sample for building custom shader schema.
+  - The example will include standard VitralSDK shaders following the
+    guides from this document, although it its not necessary to do so
+    for the example programs.
+
+Studying well the shader examples must be the first step to follow for
+anyone wishing to implement shaders in VitralSDK, and being successfull
+in complying the complex software requirements stated for the VitralSDK
+architecture.
+
+===========================================================================
+= Standard naming for shaders parameters                                  =
+===========================================================================
+
+Shader programs could appear a little cryptic if some definitions about
+variables names and meaning is not before defined. It is important to
+take care about variable naming, as VitralSDK toolkit will make assumptions
+about it.  In other words, in order to make a complying shader, its
+parameters must be named in an special way to be able to integrate with
+the general VitralSDK shader framework.  Any shader not following the naming
+standard will work only on its specifically developed application (as the
+shader example) but will lack of VitralSDK's generality.
+
+In general, the common variable names are composed of a concept name and a
+coordinate context name.  For example, a vector perpendicular to a surface,
+commonly known as a "normal", as the concept "normal", and its name is
+"N".  If this normal is expressed in global world coordinates, its context
+is "Global", so a tipical variable name will be "NGlobal". If the same
+normal is transform in to view coordinates, its variable will be "NView", 
+and so on.
+
+The following are typical coordinates context names:
+  - "Global": for world coordinates
+  - "Local": for coordinates relative to a local context, like object's
+             coordinates
+  - "View": for coordinates relative to a camera projection, or a viewport.
+
+The most common concepts, and its related common letter follows the letters
+used in [FOLE1992] (which is the main VitralSDK reference text), and they
+are:
+  - P: "Position", a vector containing a 3D position of a point.
+  - N: "Normal", a vector containing a 3D normal, usually must be normalized
+  - L: "Light direction", a usually normalized vector representing
+       the direction from a point P to a light source
+  - V: "View direction", a usually normalized vector representing
+       the direction from a point P to the eye position
+  - H: "Halfway vector", a usually normalized vector representing
+       the "direction of maximum highlights" as defined in [FOLE1992].16.1.4
+  - Ka: "Ambient light contribution constant", a magnitude or color for
+       ambient light term
+  - Kd: "Diffuse light contribution constant", a magnitude or color for
+       diffuse light term
+  - Ks: "Specular light contribution constant", a magnitude or color for
+       specular light term
+
+Other typical variables, will not used a simplified letter, but has a
+more nmemotecnic identifier, as:
+  - cameraPosition
+  - lightPosition
+and so on...
+
+===========================================================================
+= Standard parameter names and registry association for Nvidia Cg shaders =
+===========================================================================
+
+For Nvidia vertex shaders, all of the following variables should be defined,
+inclusive if they are not used at all.  That must be such way because
+standard VitralSDK shader framework will always try to set them using
+"CgGL.cgGetNamedParameter" call.
+
+Following the minimum input parameters for an Nvidia Cg vertex shader
+compliant with VitralSDK shader framework:
+
+  uniform float4x4 modelViewProjectionLocal
+  uniform float4x4 modelViewLocal
+  uniform float4x4 modelViewLocalIT
+  uniform float4x4 modelViewGlobal
+  uniform float3 cameraPositionGlobal
+  uniform float3 lightPositionGlobal
+  in float4 PObject                   : POSITION
+  in float3 NObject                   : NORMAL
+  in float2 uvVertexTextureCoordinate : TEXCOORD0
+  in float3 ambientColor              : TEXCOORD1
+  in float3 diffuseColor              : TEXCOORD2
+  in float3 specularColor             : TEXCOORD3
+
+Note that "PObject", "NObject" and "uvVertexTextureCoordinate" are
+associated with standard register POSITION, NORMAL and TEXCOORD0, 
+so they are automatically fed by OpenGL with the calls glVertex*,
+glNormal* and glTexCoord*. Other parameters must be identified by name.
+
+Following the minimum input paramenters for an Nvidia Cg fragment/pixel
+shader compliant with VitralSDK shader framework:
+
+  uniform sampler2D textureMap
+  uniform half3 lightColor
+  uniform half3 phongExponent
+
+The first sampler2D is associated by OpenGL to the currently binded texture.
+Other textures must be defined by name.
+
+===========================================================================
+= NVidia Cg support code in VitralSDK toolkit                             =
+===========================================================================
+
+For understanding and testing current VitralSDK shader implementation of
+Nvidia Cg, remember to check the example program
+testsuite/VSDKExamples/CgShaderExample, and compare it with simple
+examples provided by jogl demos.
+
+The following are the general VitralSDK aids to make general unrestricted
+Nvidia Cg shader programming:
+  - JoglRenderer.verifyOpenGLAvailability(); and
+    JoglRenderer.verifyNvidiaCgAvailability();
+    Checks wisely for a correct installed OpenGL / JOGL / Cg environment.
+  - JoglRenderer.tryToEnableNvidiaCg();
+    Check wisely for a correct installed and working Cg toolkit, and turns
+    it on.
+  - JoglRenderer.loadNvidiaGpuVertexShader(); and 
+    JoglRenderer.loadNvidiaGpuPixelShader(); methods loads and compiles
+    shaders.
+  - JoglRenderer.getNvidiaCgAvailability();
+    Could be checked at any time to guard Cg operations. It is used by
+    internal VitralSDK classes to append Nvidia Cg commands, under a
+    technology independent and portable programming schema.
+
+Just using those methods and common Vitral SDK helpers like "Camera" and
+"RGBImage", a normal OpenGL / JOGL program will appear quite simple,
+exposing only Cg use.  For an even easier way of taking advantage of
+Nvidia Cg, the use of standarized VitralSDK shaders is recommended.
+
+NVIDIA SET OF STANDARD PREDEFINED SHADERS
+-----------------------------------------
+
+VitralSDK predefined shaders are organized upon posible variations of a
+RendererConfiguration. For each posible combination of its attributes,
+there is a pair of vertex/pixel shader.  Each .cg file is under ./etc/shaders
+directory in the main VitralSDK distribution, and its name follows a code
+of RendererConfiguration combinations.
+
+For example, a RendererConfiguration supporting phong shading, but no texture
+and no bump mapping, it is called:
+    PhongVertexShader.cg / PhongPixelShader.cg
+a similar one supporting Goraud color interpolation instead of Phong, will
+be called
+    GoraudVertexShader.cg / GoraudPixelShader.cg
+
+A RendererConfiguration supporting phong shading and texture mapping, but no
+bumpmap, it is called:
+    PhongTextureVertexShader.cg / PhongTexturePixelShader.cg
+
+and another one supporting more features will be called like:
+    PhongTextureBumpVertexShader.cg / PhongTextureBumpPixelShader.cg
+or
+    AnisotropicTextureVertexShader.cg / AnisotropicTexturePixelShader.cg
+
+The VitralSDK toolkit manages all the details needed to offer a final
+application programmer support for requested features (using common
+RendererConfiguration interface).
+
+===========================================================================
+= References                                                              =
+===========================================================================
+
+[FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, principles
+    and practice" - second edition, Addison Wesley, 1992.
+
+===========================================================================
+= EOF                                                                     =
+===========================================================================

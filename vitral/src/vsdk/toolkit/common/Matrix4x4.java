@@ -312,6 +312,13 @@ public class Matrix4x4 extends Entity
         M[3][3] = 1;
     }
 
+    public Matrix4x4 inverse()
+    {
+        Matrix4x4 i = new Matrix4x4(this);
+        i.invert();
+    return i;
+    }
+
     /**
      Converts current matrix into it's invert matrix.
      */
@@ -497,6 +504,18 @@ public class Matrix4x4 extends Entity
         }
         msg = msg + "------------------------------\n";
         return msg;
+    }
+
+    public double[] exportToArrayRowOrder()
+    {
+        double array[] = new double[16];
+        int i, j, k;
+        for ( i = 0, k = 0; i < 4; i++ ) {
+            for ( j = 0; j < 4; j++, k++ ) {
+                array[k] = M[i][j];
+            }
+        }
+        return array;
     }
 
     /**

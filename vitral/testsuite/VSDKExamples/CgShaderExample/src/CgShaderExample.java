@@ -8,7 +8,6 @@
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.File;
-import java.nio.FloatBuffer;
 
 // Java GUI classes
 import java.awt.event.MouseEvent;
@@ -33,6 +32,7 @@ import com.sun.opengl.cg.CGprogram;
 // VitralSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Sphere;
@@ -40,10 +40,12 @@ import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglSphereRenderer;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 
 public class CgShaderExample implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
@@ -56,6 +58,8 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
 
     private Camera camera;
     private CameraController cameraController;
+    private RendererConfiguration quality;
+    private RendererConfigurationController qualityController;
     private RGBImage img;
     private Sphere sphere;
 
@@ -80,10 +84,12 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         camera.setRotation(R);
         cameraController = new CameraControllerAquynza(camera);
 
+        quality = new RendererConfiguration();
+        qualityController = new RendererConfigurationController(quality);
+
         sphere = new Sphere(1.0);
 
-        String imageFilename = "earth.gif";
-        //String imageFilename = "../../../../../../aquynza/samples/bumpmaps/earth.png";
+        String imageFilename = "../../../etc/textures/earth.png";
         try {
             img = ImagePersistence.importRGB(new File(imageFilename));
         }
@@ -99,7 +105,18 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
     public void init(GLAutoDrawable drawable) {
         if ( NvidiaGpuEnabled ) {
             JoglRenderer.tryToEnableNvidiaCg();
-            LoadCgPrograms();
+            try {
+                NvidiaGpuVertexProgram =
+                    JoglRenderer.loadNvidiaGpuVertexShader(
+                        new FileInputStream("./etc/vertexShader.cg"));
+                NvidiaGpuFragmentProgram =
+                    JoglRenderer.loadNvidiaGpuPixelShader(
+                        new FileInputStream("./etc/fragmentShader.cg"));
+            }
+            catch ( Exception e ) {
+                System.out.println("Error loading shaders!");
+                System.exit(1);
+            }
         }
     }
 
@@ -108,90 +125,113 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
 
         //-----------------------------------------------------------------
         gl.glEnable(GL.GL_DEPTH_TEST);
-        gl.glClearColor(.25f, .25f, .25f, 1.0f);
+        gl.glClearColor(0, 0, 0, 1.0f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
         //-----------------------------------------------------------------
-        //JoglCameraRenderer.activate(gl, camera);
-        
-        Vector3D cameraPosition = camera.getPosition();
-        Vector3D cameraFocus = camera.getFocusedPosition();
-        Vector3D cameraUp = camera.getUp();
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glLoadIdentity();
-        glu.gluPerspective(camera.getFov(), camera.getViewportXSize() / camera.getViewportYSize(), 
-                           camera.getNearPlaneDistance(), camera.getFarPlaneDistance());
-
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-        gl.glLoadIdentity();
-        glu.gluLookAt(
-            cameraPosition.x, cameraPosition.y, cameraPosition.z,
-            cameraFocus.x, cameraFocus.y, cameraFocus.z, 
-            cameraUp.x, cameraUp.y, cameraUp.z);
+        JoglCameraRenderer.activate(gl, camera);
 
         //-----------------------------------------------------------------
+        gl.glLoadIdentity();
         gl.glRotated(xrotation, 1, 0, 0);
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
         if ( NvidiaGpuEnabled ) {
-            // Bind uniform parameters to vertex shader
-            CgGL.cgGLSetStateMatrixParameter(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "ModelViewProj"),
-                CgGL.CG_GL_MODELVIEW_PROJECTION_MATRIX,
-                CgGL.CG_GL_MATRIX_IDENTITY);
-            CgGL.cgGLSetStateMatrixParameter(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "ModelView"),
-                CgGL.CG_GL_MODELVIEW_MATRIX,
-                CgGL.CG_GL_MATRIX_IDENTITY);
-            CgGL.cgGLSetStateMatrixParameter(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "ModelViewIT"),
-                CgGL.CG_GL_MODELVIEW_MATRIX,
-                CgGL.CG_GL_MATRIX_INVERSE_TRANSPOSE);
-            Vector3D cp = camera.getPosition();
-            float campos[] = { (float)cp.x, (float)cp.y, (float)cp.z};
-            CgGL.cgGLSetParameter3fv(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "PCamera1"), campos, 0);
-            float lpos[] = { (float)lightPosition.x, (float)lightPosition.y, (float)lightPosition.z};
-            CgGL.cgGLSetParameter3fv(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "PLight1"), lpos, 0);
-
-            // We can also go ahead and bind varying parameters to vertex shader
-            // that we just want to have the same value for all vertices.
-            float Kd[] = { 1.0f, 1.0f, 1.0f }, Ks[] = { 0.8f, 0.8f, 0.8f };
-            CgGL.cgGLSetParameter3fv(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "diffuse"), Kd, 0);
-            CgGL.cgGLSetParameter3fv(
-                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram, "specular"), Ks, 0);
-
-            // Now bind uniform parameters to fragment shader
-            float lightColor[] = { 1, 1, 1 };
-            CgGL.cgGLSetParameter3fv(
-                CgGL.cgGetNamedParameter(NvidiaGpuFragmentProgram, "lightColor"), 
-                                     lightColor, 0);
-            CgGL.cgGLSetParameter1f(
-                CgGL.cgGetNamedParameter(NvidiaGpuFragmentProgram, "shininess"), 40);
+            //- Global per-frame shader activation ----------------------------
+            JoglRenderer.enableNvidiaCgProfiles();
             CgGL.cgGLBindProgram(NvidiaGpuVertexProgram);
             CgGL.cgGLBindProgram(NvidiaGpuFragmentProgram);
 
+            //- Shader configuration from camera data -------------------------
+            // (This should be managed by JoglCameraRenderer)
+            {
+            Matrix4x4 MProjection;
+            Matrix4x4 MModelviewGlobal;
+            Vector3D cp = camera.getPosition();
+            double matrixarray[];
+            double vectorarray[] = {cp.x, cp.y, cp.z};
+
+            MProjection = camera.calculateViewVolumeMatrix();
+            MModelviewGlobal = camera.calculateTransformationMatrix();
+            matrixarray = MModelviewGlobal.exportToArrayRowOrder();
+            CgGL.cgGLSetMatrixParameterdr(
+                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram,
+                    "modelViewGlobal"), matrixarray, 0);
+            CgGL.cgGLSetParameter3dv(
+                CgGL.cgGetNamedParameter(NvidiaGpuVertexProgram,
+                    "cameraPositionGlobal"), vectorarray, 0);
+            }
+
+            //- Shader configuration from light data --------------------------
+            // (This should be managed by JoglLightRenderer)
+            {
+            double lpos[] = {lightPosition.x, lightPosition.y, lightPosition.z};
+            double lightColor[] = {1.0, 1.0, 1.0};
+
+            CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "lightPositionGlobal"), lpos, 0);
+            CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+                NvidiaGpuFragmentProgram, "lightColor"), lightColor, 0);
+            }
+
+            //- Shader configuration from material data -----------------------
+            // (This should be managed by JoglMaterialRenderer)
+            {
+            double Ka[] = {0.1, 0.1, 0.1};
+            double Kd[] = {1.0, 1.0, 1.0};
+            double Ks[] = {0.8, 0.8, 0.8};
+            CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "ambientColor"), Ka, 0);
+            CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "diffuseColor"), Kd, 0);
+            CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "specularColor"), Ks, 0);
+            CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
+                NvidiaGpuFragmentProgram, "phongExponent"), 40);
+            }
+
+            //- Shader configuration from current object ----------------------
+            // (This should be managed by JoglGeometryRenderer)
+            {
+            Matrix4x4 MProjection;
+            Matrix4x4 MModelviewGlobal;
+            Matrix4x4 MModelviewLocal, MModelviewLocalIT, MCombined;
+            double matrixarray[];
+
+            MProjection = camera.calculateViewVolumeMatrix();
+            MModelviewGlobal = camera.calculateTransformationMatrix();
+            MModelviewLocal = MModelviewGlobal.multiply(
+                JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
+            MCombined = MProjection.multiply(MModelviewLocal);
+            MModelviewLocalIT = MModelviewLocal.inverse();
+            MModelviewLocalIT.transpose();
+
+            matrixarray = MCombined.exportToArrayRowOrder();
+            CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "modelViewProjectionLocal"),
+                matrixarray, 0);
+
+            matrixarray = MModelviewLocal.exportToArrayRowOrder();
+            CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "modelViewLocal"),
+                matrixarray, 0);
+
+            matrixarray = MModelviewLocalIT.exportToArrayRowOrder();
+            CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+                NvidiaGpuVertexProgram, "modelViewLocalIT"),
+                matrixarray, 0);
+            }
         }
 
         // And go ahead and draw the scene geometry
         enableTexture(gl);
-        JoglSphereRenderer.draw(gl, sphere, new vsdk.toolkit.environment.Camera(), new vsdk.toolkit.common.RendererConfiguration());
-    }
+        JoglSphereRenderer.draw(gl, sphere, camera, quality);
 
-    void LoadCgPrograms() {
-        try {
-            NvidiaGpuVertexProgram = JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/vertexShader.cg"));
-            NvidiaGpuFragmentProgram = JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/fragmentShader.cg"));
+        if ( NvidiaGpuEnabled ) {
+            JoglRenderer.disableNvidiaCgProfiles();
         }
-        catch ( Exception e ) {
-            System.out.println("Error loading shaders!");
-            System.exit(1);
-        }
+
     }
 
     void enableTexture(GL gl) {
@@ -281,6 +321,10 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         if ( cameraController.processKeyPressedEventAwt(e) ) {
             canvas.repaint();
         }
+        if ( qualityController.processKeyPressedEventAwt(e) ) {
+            System.out.println(quality);
+            canvas.repaint();
+        }
 
         int unicode_id = e.getKeyChar();
         if ( unicode_id != e.CHAR_UNDEFINED ) {
@@ -296,7 +340,7 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
             case 'u': lightPosition.z += 0.1; break;
             case 'j': lightPosition.z -= 0.1; break;
             case '9': lightPosition.y -= 0.1; break;
-            case '0': lightPosition.y += 0.1; break;            
+            case '0': lightPosition.y += 0.1; break;
           }
           canvas.repaint();
         }
@@ -334,7 +378,7 @@ public class CgShaderExample implements GLEventListener, MouseListener, MouseMot
         canvas.addGLEventListener(instance);
 
         frame.add(canvas);
-        frame.setSize(750, 750);
+        frame.setSize(1150, 1150);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }

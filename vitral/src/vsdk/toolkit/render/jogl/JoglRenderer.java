@@ -170,6 +170,22 @@ public abstract class JoglRenderer extends RenderingElement {
         return true;
     }
 
+    public static void enableNvidiaCgProfiles()
+    {
+        if ( !getNvidiaCgAvailability() ) {
+            CgGL.cgGLEnableProfile(nvidiaGpuVertexProfile);
+            CgGL.cgGLEnableProfile(nvidiaGpuPixelProfile);
+    }
+    }
+
+    public static void disableNvidiaCgProfiles()
+    {
+        if ( !getNvidiaCgAvailability() ) {
+            CgGL.cgGLDisableProfile(nvidiaGpuVertexProfile);
+            CgGL.cgGLDisableProfile(nvidiaGpuPixelProfile);
+    }
+    }
+
     public static CGprogram loadNvidiaGpuVertexShader(InputStream is)
     {
         if ( !getNvidiaCgAvailability() ) {

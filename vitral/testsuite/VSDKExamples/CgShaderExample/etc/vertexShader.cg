@@ -1,36 +1,49 @@
 //===========================================================================
+//= This vertex shader follows the parameters indicated in the VitralSDK    =
+//= shader programming guidelines, as documented in the file                =
+//= ./doc/shaderStandards.txt inside the main VitralSDK distribution        =
+//= directory.  Please refer to that file to get a clear understanding of   =
+//= variable names and common programming patterns used.                    =
+//= Note that any variable name or registry assigment change could make the =
+//= shader incompatible with main VitralSDK shader framework!               =
+//===========================================================================
 
-void main(uniform float4x4 ModelViewProj,
-          uniform float4x4 ModelView,
-          uniform float4x4 ModelViewIT,
-		  uniform float3 PCamera1,
-		  uniform float3 PLight1,
-          in float4 Pobject      : POSITION,
-          in float3 Nobject      : NORMAL,
-          in float2 TexUV        : TEXCOORD0,
-          in float3 diffuse      : TEXCOORD1,
-          in float3 specular     : TEXCOORD2,
-          out float4 HPosition   : POSITION,
-          out float3 Peye        : TEXCOORD0,
-          out float3 Neye        : TEXCOORD1,
-          out float2 uv          : TEXCOORD2,
-		  out float3 PCamera2    : TEXCOORD3,
-		  out float3 PLight2     : TEXCOORD4,
-          out float3 Kd          : COLOR0,
-          out float3 Ks          : COLOR1)
+void main(uniform float4x4 modelViewProjectionLocal,
+          uniform float4x4 modelViewLocal,
+          uniform float4x4 modelViewLocalIT,
+          uniform float4x4 modelViewGlobal,
+          uniform float3 cameraPositionGlobal,
+          uniform float3 lightPositionGlobal,
+          in float4 PObject                   : POSITION,
+          in float3 NObject                   : NORMAL,
+          in float2 uvVertexTextureCoordinate : TEXCOORD0,
+          in float3 ambientColor              : TEXCOORD1,
+          in float3 diffuseColor              : TEXCOORD2,
+          in float3 specularColor             : TEXCOORD3,
+          out float4 projectedVertexPosition  : POSITION,
+          out float3 PView                    : TEXCOORD0,
+          out float3 NView                    : TEXCOORD1,
+          out float2 uvTextureCoordinate      : TEXCOORD2,
+          out float3 cameraPositionView       : TEXCOORD3,
+          out float3 lightPositionView        : TEXCOORD4,
+          out float3 Ka                       : TEXCOORD5,
+          out float3 Kd                       : COLOR0,
+          out float3 Ks                       : COLOR1)
 {
+    // Compute homogeneous position of vertex for rasterizer
+    projectedVertexPosition = mul(modelViewProjectionLocal, PObject);
 
-    // compute homogeneous position of vertex for rasterizer
-    HPosition = mul(ModelViewProj, Pobject);
-
-    // transform position and normal from model-space to view-space
-    Peye = mul(ModelView, Pobject).xyz;
-    Neye = mul(ModelViewIT, float4(Nobject, 0)).xyz;
-    PCamera2 = mul(ModelView, float4(PCamera1, 1)).xyz;
-    PLight2 = mul(ModelView, float4(PLight1, 1)).xyz;
-    uv = TexUV;
-    Kd = diffuse;
-    Ks = specular;
+    // Transform positions and normals from model-space to view-space
+    PView = mul(modelViewLocal, PObject).xyz;
+    NView = mul(modelViewLocalIT, float4(NObject, 0)).xyz;
+    cameraPositionView =
+        mul(modelViewGlobal, float4(cameraPositionGlobal, 1)).xyz;
+    lightPositionView =
+        mul(modelViewGlobal, float4(lightPositionGlobal, 1)).xyz;
+    uvTextureCoordinate = uvVertexTextureCoordinate;
+    Ka = ambientColor;
+    Kd = diffuseColor;
+    Ks = specularColor;
 }
 
 //===========================================================================
