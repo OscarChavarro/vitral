@@ -157,7 +157,8 @@ public class Scene
 
         visualizationEngine = new Raytracer();
         visualizationEngine.execute(out_Viewport, things, lights, 
-                                activeBackground, activeCamera, reporter);
+                    activeBackground, activeCamera,
+                                    reporter, null);
 
         //-----------------------------------------------------------------
         activeCamera.updateViewportResize(originalWidth, originalHeight);

@@ -1,6 +1,10 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
+//= [WAYN1990] Knapp Wayne. "Ray with Bicubic Patch Intersection Problem",  =
+//=            Ray Tracing News, volume 3, number 3, july 13 1990.          =
+//=            available at                                                 =
+//=         http://jedi.ks.uiuc.edu/~johns/raytracer/rtn/rtnv3n3.html#art19 =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 //=-------------------------------------------------------------------------=
@@ -62,7 +66,7 @@ public class ParametricBiCubicPatch extends Surface {
         type = type;
     }
 
-    public void makeGeomMatrixXYZ_Bezier() {
+    private void buildGeometryMatricesXYZ_Bezier() {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
@@ -79,7 +83,7 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    public void makeGeomMatrixXYZ_Hermite() {
+    private void buildGeometryMatricesXYZ_Hermite() {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
@@ -144,7 +148,7 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    public void makeGeomMatrixXYZ_Quad() {
+    private void buildGeometryMatricesXYZ_Quad() {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
@@ -207,80 +211,91 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
+    /**
+    This methods evaluates equation set 11.76 in [FOLE1992] for a given set
+    of approximationSteps^2 points, and in the code, the variables names
+    follows the following notation:
+    <UL>
+      <LI> S_MATRIX  Column vector for storing s parameter polinomial
+      <LI> M_MATRIX  Patch's blending function
+      <LI> Gx_MATRIX Geometry matrix for x
+      <LI> Gy_MATRIX Geometry matrix for y
+      <LI> Gz_MATRIX Geometry matrix for z
+      <LI> Mt_MATRIX M's transpose
+      <LI> Tt_MATRIX Row vector for storing t parameter polinomial
+    </UL>
+    */
     public double[][][] evaluateSurface() {
+        //- Build matrices M, Gx, Gy, Gz and Mt ---------------------------
+        Matrix4x4 M_MATRIX = new Matrix4x4();
+        Matrix4x4 Mt_MATRIX = new Matrix4x4();
+
+        if ( this.type == ParametricCubicCurve.BEZIER ) {
+            buildGeometryMatricesXYZ_Bezier();
+            M_MATRIX = ParametricCubicCurve.BEZIER_MATRIX;
+        }
+        else if ( this.type == ParametricCubicCurve.HERMITE ) {
+            buildGeometryMatricesXYZ_Hermite();
+            M_MATRIX = ParametricCubicCurve.HERMITE_MATRIX;
+        }
+        else if ( this.type == ParametricBiCubicPatch.QUAD ) {
+            buildGeometryMatricesXYZ_Quad();
+            M_MATRIX = ParametricCubicCurve.BEZIER_MATRIX;
+        }
+        Mt_MATRIX = new Matrix4x4(M_MATRIX);
+        Mt_MATRIX.transpose();
+
+        //-----------------------------------------------------------------
+        // In the current dimension
         double[][][] gridPoints;
 
         gridPoints = new double[approximationSteps][approximationSteps][3];
-        Matrix4x4 modelMatrix = new Matrix4x4();
-        Matrix4x4 modelMatrixTras = new Matrix4x4();
-        if ( this.type == ParametricCubicCurve.BEZIER ) {
-            this.makeGeomMatrixXYZ_Bezier();
-            modelMatrix = ParametricCubicCurve.BEZIER_MATRIX;
-            modelMatrixTras = ParametricCubicCurve.BEZIER_MATRIX;
-        }
-        else if ( this.type == ParametricCubicCurve.HERMITE ) {
-            this.makeGeomMatrixXYZ_Hermite();
-            modelMatrix = ParametricCubicCurve.HERMITE_MATRIX;
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    modelMatrixTras.M[i][j] =
-                        ParametricCubicCurve.HERMITE_MATRIX.M[j][i];
-                }
-            }
-        }
-        else if ( this.type == ParametricBiCubicPatch.QUAD ) {
-            this.makeGeomMatrixXYZ_Quad();
-            modelMatrix = ParametricCubicCurve.BEZIER_MATRIX;
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    modelMatrixTras.M[i][j] =
-                        ParametricCubicCurve.BEZIER_MATRIX.M[j][i];
-                }
-            }
 
-        }
+        Matrix4x4 S_MATRIX = new Matrix4x4();
+        Matrix4x4 Tt_MATRIX = new Matrix4x4();
 
-        Matrix4x4 pre = new Matrix4x4();
-        Matrix4x4 post = new Matrix4x4();
-
-        // In the current dimension
-        for ( int d = 0; d < 3; d++ ) { // for each dimension...
-            // Precompute the patch's matrix
-            Matrix4x4 matrixM = new Matrix4x4();
+        for ( int d = 0; d < 3; d++ ) { // for each equation...
+            // Select the geometry matrix for current dimension
+            Matrix4x4 M_G_Mt_MATRIX = new Matrix4x4();
 
             if ( d == 0 ) {
-                matrixM =
-                    modelMatrix.multiply(Gx_MATRIX).multiply(modelMatrixTras);
+                // x(s, t)
+                M_G_Mt_MATRIX =
+                    M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
             }
             else if ( d == 1 ) {
-                matrixM =
-                    modelMatrix.multiply(Gy_MATRIX).multiply(modelMatrixTras);
+                // y(s, t)
+                M_G_Mt_MATRIX =
+                    M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
             }
             else {
-                matrixM = modelMatrix.multiply(Gz_MATRIX).multiply(modelMatrixTras);
+                // y(s, t)
+                M_G_Mt_MATRIX = 
+                    M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
             }
 
+            // Evaluate current dimension in the generic equational form
             for ( int i = 0; i < approximationSteps; i++ ) {
-                double u = (double) i / (approximationSteps - 1);
+                double s = (double) i / (approximationSteps - 1);
 
-                pre.M[0][0] = u * u * u;
-                pre.M[0][1] = u * u;
-                pre.M[0][2] = u;
-                pre.M[0][3] = 1;
+                S_MATRIX.M[0][0] = s * s * s;
+                S_MATRIX.M[0][1] = s * s;
+                S_MATRIX.M[0][2] = s;
+                S_MATRIX.M[0][3] = 1;
 
-                Matrix4x4 tmp = pre.multiply(matrixM);
+                Matrix4x4 S_M_G_Mt_MATRIX = S_MATRIX.multiply(M_G_Mt_MATRIX);
 
                 for ( int j = 0; j < approximationSteps; j++ ) {
-                    double v = (double) j / (approximationSteps - 1);
+                    double t = (double) j / (approximationSteps - 1);
 
-                    post.M[0][0] = v * v * v;
-                    post.M[1][0] = v * v;
-                    post.M[2][0] = v;
-                    post.M[3][0] = 1;
+                    Tt_MATRIX.M[0][0] = t * t * t;
+                    Tt_MATRIX.M[1][0] = t * t;
+                    Tt_MATRIX.M[2][0] = t;
+                    Tt_MATRIX.M[3][0] = 1;
 
-                    Matrix4x4 tmp2 = tmp.multiply(post);
+                    Matrix4x4 Q_MATRIX = S_M_G_Mt_MATRIX.multiply(Tt_MATRIX);
                     // The result is a 1x1 matrix.
-                    gridPoints[i][j][d] = tmp2.M[0][0];
+                    gridPoints[i][j][d] = Q_MATRIX.M[0][0];
                 }
             }
         }
@@ -302,6 +317,15 @@ public class ParametricBiCubicPatch extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
 
+    Check the discution in [WAYN1990] about solvin this problem. Two main
+    strategies are known for solving this: a numeric root finding,
+    trying different values for Ray.t until a given error tolerance is
+    reached and converting the patch to a mesh and test the mesh.
+
+    This method implements the numerical approach, while an explicit
+    convertion to a Mesh could be managed by the user/programmer directly.
+    WARNING: The numerical approach is really, really slow... 
+
     @todo implement the method
     */
     public void doExtraInformation(Ray inRay, double intT, 
@@ -313,7 +337,7 @@ public class ParametricBiCubicPatch extends Surface {
     Returns an approximate bounding volume minmax for current patch, from
     the minmax of its contour curve.
 
-    @todo check if the contour curve asumption is valid
+    @bug current contour curve asumption is not valid
     */
     public double[] getMinMax() {
         return contourCurve.getMinMax();

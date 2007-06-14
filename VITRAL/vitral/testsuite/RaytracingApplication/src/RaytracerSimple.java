@@ -74,7 +74,7 @@ public class RaytracerSimple {
                                 la_escena.arr_cosas,
                                 la_escena.arr_luces, 
                                 la_escena.fondo,
-                                la_escena.camara, reporter);
+                    la_escena.camara, reporter, null);
 
         //- 4. Exportar la imagen a un archivo ----------------------------
         File fd = new File("./output.ppm");

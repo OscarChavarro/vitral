@@ -1,10 +1,15 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [WHIT1980] Whitted, Turner. "An Improved Illumination Model for Shaded  =
+//=            Display", 1980.                                              =
+//=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - February 13 2006 - Oscar Chavarro: updated raytracing code to manage  =
 //=   rayable objects, with geometries implementing intersection operation  =
 //=   in an object-coordinate basis.                                        =
+//= - May 16 2006 - Alfonso Barbosa: modify to manage ZBuffers              =
 //===========================================================================
 
 package vsdk.toolkit.render;
@@ -19,6 +24,7 @@ import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
@@ -29,12 +35,10 @@ import vsdk.toolkit.environment.scene.SimpleThing;
 
 
 /**
-Esta clase solo provee un m&eacute;todo que encapsula un algoritmo de
-control de visualizaci&oacute;n. Su raz&oacute;n de ser (y por la cual
-NO poner ese m&eacute;todo en la clase cliente que la utiliza) es facilitar
-la abstracci&oacute;n de la operaci&oacute;n de visualizaci&oacute;n, la
-cual puede ser cambiada por otro algoritmo de visualizaci&oacute;n (i.e.
-zbuffer o radiosidad), pero manteniendo el mismo modelo de escena 3D.
+This class provides an encaptulation for a rendering algorithm, 
+implementing simple recursive raytracing as presented in [WHIT1980].
+This class is appropiate to play a role of "concrete strategy" in
+a "Strategy" design pattern.
 */
 public class Raytracer {
     private Vector3D static_tmp;
@@ -302,12 +306,22 @@ public class Raytracer {
     - `in_camara`: especificaci&oacute;n de la transformaci&oacute;n de
       proyecci&oacute;n 3D a 2D que se lleva a cabo en el proceso de 
       visualizaci&oacute;n.
+    - `depthmap`: can be null or a reference to a ZBuffer. If it is null,
+      nothing is done with this parameter. If it is not null, the associated
+      ZBuffer is filled with depth values corresponding to distances 
+      calculated in world space coordinates from ray intersections.
+      Note that depth values are not scaled neither clamped to any specific
+      range, so post-processing should be done if wanting to combine that
+      with other depth maps, as those generated from OpenGL's ZBuffer.
+
 
     PRE:
     - Todas las referencias estan creadas, asi sea que apunten a estructuras
       vac&iacute;as.
     - La imagen `inout_viewport` esta creada, y es de el tama&ntilde;o que
       el usuario desea para su visualizaci&oacute;n.
+    - In the case the ZBuffer depthmap is not null, the ZBuffer must be
+      initialized to the same size of the image inoutViewport.
 
     POST:
     - `inout_viewport` contiene una representaci&oacute;n visual de la
@@ -326,7 +340,8 @@ public class Raytracer {
                          ArrayList in_arr_luces,
                          Background in_fondo,
                          Camera in_camara,
-                         ProgressMonitor report)
+             ProgressMonitor report,
+                         ZBuffer depthmap)
     {
         int x, y;
         Ray rayo;
@@ -344,7 +359,9 @@ public class Raytracer {
                 rayo = in_camara.generateRay(x, y);
                 color = followRayPath(rayo, inSimpleThingArray, 
                     in_arr_luces, in_fondo);
-
+                if ( depthmap != null ) {
+                    depthmap.setZ(x, y, (float)rayo.t);
+                }
                 //- Exporto el result de color del pixel ----------------
                 inoutViewport.putPixel(x, y, (byte)(255 * color.r), 
                                               (byte)(255 * color.g), 

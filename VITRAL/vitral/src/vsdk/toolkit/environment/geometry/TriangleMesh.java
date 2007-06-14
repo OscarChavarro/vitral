@@ -141,12 +141,16 @@ public class TriangleMesh extends Surface {
         this.textures = new RGBAImage[size];
     }
 
-    public void setVerTexureSize(int size) {
+    public void setVerTextureSize(int size) {
         this.verTex = new Vector3D[size];
     }
 
     public void setTexTriRelSize(int size) {
         this.texTriRel = new int[size][][];
+    }
+
+    public void setTexTriRel(int r[][][]) {
+        this.texTriRel = r;
     }
 
     public void setTexTriRelSizeAt(int index, int size) {

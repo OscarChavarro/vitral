@@ -59,10 +59,14 @@ Changes in 2006 april 28 revition
   - Jogl*Renderer classes with draw/activate names normalized. There is no
     more activateGL or drawGL versions
 
-Changes in 2006 may5 revition
+Changes in 2006 may 5 revition
   - Minor updates to ParametricCubicCurve code
   - JoglParametricCubicCurve.drawCurve is now JoglParametricCubicCurve.draw
   - First XML persistence classes for curves and patches
   - Draw methods for curve renderers normalized to manage cameras and 
     quality selection
   - ParametricCubicCurveRenderer::getMinMax working
+
+Changes in 2006 may 19 revition
+  - Basic ReaderObj functionality fixed by David Diaz
+  - XML persistence classes for curves and patches fixed by Gina Chiquillo

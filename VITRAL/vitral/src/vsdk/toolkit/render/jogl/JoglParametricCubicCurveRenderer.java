@@ -27,11 +27,11 @@ public class JoglParametricCubicCurveRenderer {
     static public void draw(GL gl, ParametricCubicCurve curve, 
                             Camera c, QualitySelection q,
                             ColorRgb color) {
-
+    int i;
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
         gl.glDisable(GL.GL_LIGHTING);
 
-        for ( int i = 1; i < curve.types.size(); i++ ) {
+        for ( i = 1; i < curve.types.size(); i++ ) {
         // Build a polyline for approximating the [i] curve segment
             ArrayList polyline = curve.calculatePoints(i, false);
             gl.glColor3d(color.r, color.g, color.b);

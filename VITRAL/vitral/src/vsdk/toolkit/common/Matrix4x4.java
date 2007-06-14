@@ -348,6 +348,24 @@ public class Matrix4x4 extends Entity
     }
 
     /**
+     Converts current matrix into it's transpose matrix.
+     */
+    public void transpose()
+    {
+        double R[][] = new double[4][4];
+
+        int row, column;
+
+        for ( row = 0; row < 4; row++ ) {
+            for ( column = 0; column < 4; column++ ) {
+                R[row][column] = M[column][row];
+            }
+        }
+
+        M = R;
+    }
+
+    /**
      Multiply this matrix by a scalar, note that this method doesn't modify 
      this matrix. 
      @param a The scalar by whom this matrix will be multiplied

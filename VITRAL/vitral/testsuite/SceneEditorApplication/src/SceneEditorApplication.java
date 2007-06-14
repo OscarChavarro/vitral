@@ -51,6 +51,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
 import vsdk.toolkit.environment.scene.SimpleThing;
+import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.RGBColorPaletteBuilder;
 
@@ -567,20 +568,30 @@ class ButtonsPanel extends JPanel implements ActionListener
             curve.addPoint(pointParameters, curve.BEZIER);
 
             addThing(curve);
-
-            vsdk.toolkit.io.geometry.ParametricCubicCurvePersistence.exportXml(
-                curve, "curveTest.xml", "../../etc/xml/vsdk.dtd");
+/*
+            try {
+                XmlManager.exportXml(curve, "curveTest.xml",
+                                     "../../etc/xml/vsdk.dtd");
+            } catch (XmlException ex1) {
+                System.out.println("EXPORT:XmlException:" +ex1);
+            }
+*/
 
 /*
             // Case 2: curve read from a previous existing data file
-            curve = 
-            vsdk.toolkit.io.geometry.ParametricCubicCurvePersistence.importXml(
-            "curveTest.xml");
+            try {
+                curve = (ParametricCubicCurve)XmlManager.importXml(
+                          "curveTest.xml");
+                addThing(curve);
+              }
+              catch (XmlException ex1) {
+                System.out.println("IMPORT:XmlException:" + ex1);
+            }
 */
         }
         else if ( label == "Create ParametricBiCubicPatch" ) {
             ParametricBiCubicPatch patch;
-
+/*
             // Case 1: Patch hard-coded in source
             ParametricCubicCurve border = new ParametricCubicCurve();
             Vector3D pointParameters[];
@@ -614,24 +625,47 @@ class ButtonsPanel extends JPanel implements ActionListener
                                                border);
             addThing(patch);
 
-         vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence.exportXml(
-                patch, "patchTest.xml", "../../etc/xml/vsdk.dtd");
-
-/*
-            // Case 2: patch read from a previous existing data file
-            patch = vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence.importXml("patchTest.xml");
+            try {
+                XmlManager.exportXml(patch, "patchTest.xml",
+                                     "../../etc/xml/vsdk.dtd");
+              }
+              catch (XmlException ex2) {
+                 System.out.println("EXPORT:XmlException:" +ex2);
+            }
 */
+
+            // Case 2: patch read from a previous existing data file
+            try {
+                patch = (ParametricBiCubicPatch) XmlManager.importXml(
+                         "patchTest.xml");
+                addThing(patch);
+              }
+              catch (XmlException ex1) {
+                System.out.println("IMPORT:XmlException:" +ex1);
+            }
+
         }
         else if ( label == "Create TriangleMesh" ) {
-            TriangleMeshGroup mg = null;
-            try {
-                //mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
-                mg = ReaderObj.read("../../etc/geometry/trivial.obj");
+            JFileChooser jfc = null;
+            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/geometry");
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
+            jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
+            int opc = jfc.showOpenDialog(new JPanel());
+            if (opc == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File file = jfc.getSelectedFile();
+
+                    TriangleMeshGroup mg = null;
+                    mg = ReaderObj.read(file.getAbsolutePath());
+                    addThing(mg);
+
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to read file");
+                    return;
+                }
             }
-            catch ( Exception e ) {
-                return;
-            }
-            addThing(mg);
         }
         else if ( label == "Create Light" ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
@@ -691,9 +725,9 @@ class ButtonsPanel extends JPanel implements ActionListener
                 try {
                     File file = jfc.getSelectedFile();
 
-
-                    parent.palette = RGBColorPaletteBuilder.importGimpPalette(new java.io.FileReader(file.getAbsolutePath()));
-
+                    parent.palette = 
+                        RGBColorPaletteBuilder.importGimpPalette(
+                            new java.io.FileReader(file.getAbsolutePath()));
 
                     repaint();
                 }
@@ -702,7 +736,6 @@ class ButtonsPanel extends JPanel implements ActionListener
                     return;
                 }
             }
-
         }
         else if ( label == "Obtain Zbuffer Image" ) {
             parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");

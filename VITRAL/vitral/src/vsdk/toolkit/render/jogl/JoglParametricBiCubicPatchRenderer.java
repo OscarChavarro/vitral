@@ -2,7 +2,8 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - April 20 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2005 - Gina Chiquillo / Oscar Chavarro: quality check        =
+//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
+//= - May 16 2006 - Gina Chiquillo: added generation of texture coords.     =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
@@ -18,152 +19,117 @@ import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 
 public class JoglParametricBiCubicPatchRenderer {
 
-//se que no va aqui epor por hora....
-  static void setMaterial(float[] colorGL, GL gl) {
+    public static void
+    drawSurfaceGrid(GL gl, double[][][] points, double tilingU, double tilingV) {
 
-    float[] ambB = new float[] {
-        0.0f, 0.0f, 0.0f, 0.0f};
-    gl.glMaterialfv(GL.GL_BACK, GL.GL_AMBIENT, ambB, 0);
-    gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, ambB, 0);
-    gl.glMaterialfv(GL.GL_BACK, GL.GL_SPECULAR, ambB, 0);
-    gl.glMaterialf(GL.GL_BACK, GL.GL_SHININESS, 0.2f * 128.0f);
+        gl.glBegin(gl.GL_QUADS);
+        for (int i = 0; i < points.length - 1; i++) {
+            double sizeDivTx = (double) (tilingU / points.length);
+            for (int j = 0; j < points[0].length - 1; j++) {
+                double sizeDivTy = (double) (tilingV / points[0].length);
+                // Now we draw some lines
+                Vector3D p1 = new Vector3D(points[i][j][0], points[i][j][1],
+                                           points[i][j][2]);
+                Vector3D p2 = new Vector3D(points[i + 1][j][0], 
+                                           points[i + 1][j][1],
+                                           points[i + 1][j][2]);
+                Vector3D p3 = new Vector3D(points[i + 1][j + 1][0],
+                                           points[i + 1][j + 1][1],
+                                           points[i + 1][j + 1][2]);
 
-    float amb[] = {
-        1.0f, 1.0f, 1.0f, 1.0f};
+                Vector3D normal = p2.substract(p1).crossProduct(
+                                                            p3.substract(p1));
+                normal = normal.multiply( -1);
+                normal.normalize();
+                gl.glTexCoord3d(i * sizeDivTx, j * sizeDivTy, 0);
+                gl.glNormal3d(normal.x, normal.y, normal.z);
+                gl.glVertex3d(p1.x, p1.y, p1.z);
+                gl.glTexCoord3d( (i + 1) * sizeDivTx, j * sizeDivTy, 0);
+                gl.glNormal3d(normal.x, normal.y, normal.z);
+                gl.glVertex3d(p2.x, p2.y, p2.z);
+                gl.glTexCoord3d( (i + 1) * sizeDivTx, (j + 1) * sizeDivTy, 0);
+                gl.glNormal3d(normal.x, normal.y, normal.z);
+                gl.glVertex3d(p3.x, p3.y, p3.z);
+                gl.glTexCoord3d(i * sizeDivTx, (j + 1) * sizeDivTy, 0);
+                gl.glNormal3d(normal.x, normal.y, normal.z);
+                gl.glVertex3d(points[i][j + 1][0], 
+                              points[i][j + 1][1],
+                              points[i][j + 1][2]);
 
-    amb[0] = colorGL[0];
-    amb[1] = colorGL[1];
-    amb[2] = colorGL[2];
-
-    float diff[] = {
-        0.5f, 0.5f, 0.5f, 0.5f};
-    float spec[] = {
-        0.5f, 0.5f, 0.5f, 1.0f};
-    float shine = 0.8f;
-    gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT, amb, 0);
-    gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, amb, 0);
-    gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, amb, 0);
-    gl.glMaterialf(GL.GL_FRONT, GL.GL_SHININESS, shine * 128.0f);
-
-  }
-
-  public static void drawSurfaceGrid(GL gl, double[][][] points, int view,
-                                     ColorRgb color) {
-
-    if (view == 0) {
-      gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
-      gl.glDisable(gl.GL_LIGHTING);
-      gl.glLineWidth(1);
-      gl.glColor3f(0.8f, 0.8f, 0.4f);
-    }
-    else if (view == 1) {
-
-      // gl.glEnable(gl.GL_LIGHTING);
-      setMaterial(color.toFloatVect(), gl);
-      //  gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
-      gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-      gl.glPolygonMode(GL.GL_BACK, GL.GL_LINE);
-    }
-
-    gl.glBegin(gl.GL_QUADS);
-    for (int i = 0; i < points.length - 1; i++) {
-      for (int j = 0; j < points[0].length - 1; j++) {
-        // Now we draw some lines
-        Vector3D p1 = new Vector3D(points[i][j][0], points[i][j][1],
-                                   points[i][j][2]);
-        Vector3D p2 = new Vector3D(points[i + 1][j][0], points[i + 1][j][1],
-                                   points[i + 1][j][2]);
-        Vector3D p3 = new Vector3D(points[i + 1][j + 1][0],
-                                   points[i + 1][j + 1][1],
-                                   points[i + 1][j + 1][2]);
-
-        Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-        normal = normal.multiply( -1);
-        normal.normalize();
-
-        gl.glNormal3d(normal.x, normal.y, normal.z);
-        gl.glVertex3d(p1.x, p1.y, p1.z);
-        gl.glNormal3d(normal.x, normal.y, normal.z);
-        gl.glVertex3d(p2.x, p2.y, p2.z);
-        gl.glNormal3d(normal.x, normal.y, normal.z);
-        gl.glVertex3d(p3.x, p3.y, p3.z);
-        gl.glNormal3d(normal.x, normal.y, normal.z);
-        gl.glVertex3d(points[i][j + 1][0], points[i][j + 1][1],
-                      points[i][j + 1][2]);
-
-      }
-    }
-    gl.glEnd();
-
-  }
-
-  public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
-                                     Camera c, QualitySelection q,
-                                     ColorRgb color) {
-    // Now we draw the points
-    if (patch.type == ParametricCubicCurve.BEZIER) {
-      gl.glDisable(gl.GL_LIGHTING);
-      gl.glColor3d(1, 1, 1);
-      gl.glLineWidth(1);
-      for (int i = 0; i < 4; i++) {
-        gl.glBegin(gl.GL_LINE_STRIP);
-        for (int j = 0; j < 4; j++) {
-          gl.glVertex3d(patch.Gx_MATRIX.M[i][j], patch.Gy_MATRIX.M[i][j],
-                        patch.Gz_MATRIX.M[i][j]);
+            }
         }
         gl.glEnd();
-      }
-      for (int i = 0; i < 4; i++) {
-        gl.glBegin(gl.GL_LINE_STRIP);
-        for (int j = 0; j < 4; j++) {
-          gl.glVertex3d(patch.Gx_MATRIX.M[j][i], patch.Gy_MATRIX.M[j][i],
-                        patch.Gz_MATRIX.M[j][i]);
+
+    }
+
+    public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
+                                       Camera c, QualitySelection q,
+                                       ColorRgb color) {
+            // Now we draw the points
+        if (patch.type == ParametricCubicCurve.BEZIER) {
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glColor3d(color.r, color.g, color.b);
+            gl.glLineWidth(1);
+            for (int i = 0; i < 4; i++) {
+                gl.glBegin(gl.GL_LINE_STRIP);
+                for (int j = 0; j < 4; j++) {
+                    gl.glVertex3d(patch.Gx_MATRIX.M[i][j], patch.Gy_MATRIX.M[i][j],
+                                  patch.Gz_MATRIX.M[i][j]);
+                }
+                gl.glEnd();
+            }
+            for (int i = 0; i < 4; i++) {
+                gl.glBegin(gl.GL_LINE_STRIP);
+                for (int j = 0; j < 4; j++) {
+                    gl.glVertex3d(patch.Gx_MATRIX.M[j][i], patch.Gy_MATRIX.M[j][i],
+                                  patch.Gz_MATRIX.M[j][i]);
+                }
+                gl.glEnd();
+            }
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+
+            JoglParametricCubicCurveRenderer.drawPoints(gl, patch.contourCurve.points);
+
         }
-        gl.glEnd();
-      }
-      gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+        else if (patch.type == ParametricCubicCurve.HERMITE) {
+                // Now we draw the points
+            ParametricCubicCurve c1 = new ParametricCubicCurve();
+            c1.addPoint(patch.contourCurve.getPoint(0), c1.HERMITE);
+            c1.addPoint(patch.contourCurve.getPoint(1), c1.HERMITE);
+            c1.addPoint(patch.contourCurve.getPoint(3), c1.HERMITE);
 
-      JoglParametricCubicCurveRenderer.drawPoints(gl, patch.contourCurve.points);
+            JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
+                                                  new ColorRgb(1, 0.4, 0.5));
+            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
 
+            c1 = new ParametricCubicCurve();
+            Vector3D[] v3 = new Vector3D[] {
+                patch.contourCurve.getPoint(4)[0], patch.contourCurve.getPoint(4)[2],
+                patch.contourCurve.getPoint(4)[1]};
+            c1.addPoint(v3, c1.HERMITE);
+
+            v3 = new Vector3D[] {
+                patch.contourCurve.getPoint(2)[0], patch.contourCurve.getPoint(2)[2],
+                patch.contourCurve.getPoint(2)[1]};
+            c1.addPoint(v3, c1.HERMITE);
+            v3 = new Vector3D[] {
+                patch.contourCurve.getPoint(3)[0], patch.contourCurve.getPoint(3)[2],
+                patch.contourCurve.getPoint(3)[1]};
+            c1.addPoint(v3, c1.HERMITE);
+            JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
+                                                  new ColorRgb(0.5, 0.5, 0.8));
+            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
+
+        }
+        else {
+
+                // Now we draw the points
+            JoglParametricCubicCurveRenderer.draw(gl, patch.contourCurve, c, q,
+                                                  new ColorRgb(1, 1, 1));
+            JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl,
+                                                                    patch.contourCurve);
+        }
     }
-    else if (patch.type == ParametricCubicCurve.HERMITE) {
-      // Now we draw the points
-      ParametricCubicCurve c1 = new ParametricCubicCurve();
-      c1.addPoint(patch.contourCurve.getPoint(0), c1.HERMITE);
-      c1.addPoint(patch.contourCurve.getPoint(1), c1.HERMITE);
-      c1.addPoint(patch.contourCurve.getPoint(3), c1.HERMITE);
-
-      JoglParametricCubicCurveRenderer.draw(gl, c1, c, q, 
-                                            new ColorRgb(1, 0.4, 0.5));
-        JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
-
-      c1 = new ParametricCubicCurve();
-      Vector3D[] v3 = new Vector3D[] {
-          patch.contourCurve.getPoint(4)[0], patch.contourCurve.getPoint(4)[2],
-          patch.contourCurve.getPoint(4)[1]};
-      c1.addPoint(v3, c1.HERMITE);
-
-      v3 = new Vector3D[] {
-          patch.contourCurve.getPoint(2)[0], patch.contourCurve.getPoint(2)[2],
-          patch.contourCurve.getPoint(2)[1]};
-      c1.addPoint(v3, c1.HERMITE);
-      v3 = new Vector3D[] {
-          patch.contourCurve.getPoint(3)[0], patch.contourCurve.getPoint(3)[2],
-          patch.contourCurve.getPoint(3)[1]};
-      c1.addPoint(v3, c1.HERMITE);
-      JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
-                                            new ColorRgb(0.5, 0.5, 0.8));
-       JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
-
-    }
-    else {
-
-      // Now we draw the points
-    JoglParametricCubicCurveRenderer.draw(gl, patch.contourCurve, c, q, 
-                                              new ColorRgb(1, 1, 1));
-      JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, patch.contourCurve);
-    }
-  }
 
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
@@ -175,12 +141,22 @@ public class JoglParametricBiCubicPatchRenderer {
 
     @todo Implement triangle count!
     */
-    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c, QualitySelection q)
-    {
-        drawSurfaceGrid(gl, p.evaluateSurface(), 1, new ColorRgb(0.4f, 0.2f, 0.6f));
-        if ( q.isBoundingVolumeSet() ) {
+    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c,
+                           QualitySelection q) {
+        drawSurfaceGrid(gl, p.evaluateSurface(),1,1);
+        if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
+        }
+        return 0;
     }
+
+    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c,
+                           QualitySelection q, int tilingU, int tilling_y) {
+
+        drawSurfaceGrid(gl, p.evaluateSurface(), tilingU, tilling_y);
+        if (q.isBoundingVolumeSet()) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
+        }
         return 0;
     }
 

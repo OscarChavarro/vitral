@@ -10,3 +10,6 @@
   - Rename drawGL and activateGL to draw and activate in jogl...
   - TranslationGizmo has one error: when interacting with axes in a camera
     who's front vector is aligned with j vector...
+  - Persistence schema for curves and patches are not handling correctly
+    the exceptions when requested file does not exist. Should not cause
+    the program to die (check SceneEditorApplication)

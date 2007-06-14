@@ -369,31 +369,31 @@ public class ParametricCubicCurve extends Curve {
     }
 
     /**
-    This method returns the minmax of current curve, for those curves whose
-    bounding volume is greater than the minmax of its control points.
-
-    @todo if any curve gets outside its convex hull, this method fails in
-    giving the exact bounding volume
+    This method returns an aproximate minmax of current curve, based on a
+    sampling (evaluation) of points.
     */
     public double[] getMinMax()
     {
         double minmax[] = new double[6];
-        int i;
+        int i, j;
 
         for ( i = 0; i < 3; i++ ) minmax[i] = Double.MAX_VALUE;
         for ( ; i < 6; i++ ) minmax[i] = Double.MIN_VALUE;
 
-        Vector3D[] p;
+        Vector3D p;
 
-    for ( i = 0; i < points.size(); i++ ) {
-        p = points.get(i);
-            if ( p[0].x < minmax[0] ) minmax[0] = p[0].x;
-            if ( p[0].y < minmax[1] ) minmax[1] = p[0].y;
-            if ( p[0].z < minmax[2] ) minmax[2] = p[0].z;
-            if ( p[0].x > minmax[3] ) minmax[3] = p[0].x;
-            if ( p[0].y > minmax[4] ) minmax[4] = p[0].y;
-            if ( p[0].z > minmax[5] ) minmax[5] = p[0].z;
-    }
+        for ( i = 1; i < types.size(); i++ ) {
+            ArrayList polyline = calculatePoints(i, false);
+            for ( j = 0; j < polyline.size(); j++ ) {
+                p = (Vector3D)polyline.get(j);
+                if ( p.x < minmax[0] ) minmax[0] = p.x;
+                if ( p.y < minmax[1] ) minmax[1] = p.y;
+                if ( p.z < minmax[2] ) minmax[2] = p.z;
+                if ( p.x > minmax[3] ) minmax[3] = p.x;
+                if ( p.y > minmax[4] ) minmax[4] = p.y;
+                if ( p.z > minmax[5] ) minmax[5] = p.z;
+            }
+        }
         return minmax;
     }
 
