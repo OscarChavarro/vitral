@@ -10,6 +10,7 @@ import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -65,6 +66,9 @@ public class JoglGeometryRenderer
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Cone" ) {
             JoglConeRenderer.draw(gl, (Cone)g, c, q);
     }
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.Arrow" ) {
+            JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+        }
     }
 }
 

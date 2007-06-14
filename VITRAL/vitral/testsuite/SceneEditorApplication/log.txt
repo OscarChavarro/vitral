@@ -62,7 +62,11 @@ March 20 2006, Oscar Chavarro: 106min
            its base)
   - 32min: Integration of Box, and reconvertion from Cube
 
-<<TOTAL>> 1322 min (22h02min)
-
-March 28 2006, Oscar Chavarro:
+March 28 2006, Oscar Chavarro: 69min
   - 1h09min: Implementing cylinder case intersection in class Cone
+
+<<TOTAL>> 1391 min (23h11min)
+
+March 29 2006, Oscar Chavarro: 
+  - 43min: Creating Arrow geometry classes: model, Jogl Renderer,
+    intersection and minmax operations and test schema in the scene application

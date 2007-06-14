@@ -40,6 +40,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -462,6 +463,9 @@ class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label == "Create Box" ) {
             addThing(new Box(1, 2, 3));
+        }
+        else if ( label == "Create Arrow" ) {
+            addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
         else if ( label == "Create Light" ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
