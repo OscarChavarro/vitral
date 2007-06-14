@@ -177,7 +177,7 @@ public class JoglDrawingArea implements
     public void rotateBackground()
     {
         theScene.selectedBackground++;
-        if ( theScene.selectedBackground > 1 ) {
+        if ( theScene.selectedBackground > 2 ) {
             theScene.selectedBackground = 0;
         }
     }
@@ -279,12 +279,10 @@ public class JoglDrawingArea implements
         GL gl = drawable.getGL();
 
         //-----------------------------------------------------------------
+        gl.glClearColor(0, 0, 0, 1);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         if ( viewportResizeNeeded ) {
             if ( viewportFullSize ) {
-                if ( viewportXpos != 0 || viewportYpos != 0 ) {
-                    gl.glClearColor(0, 0, 0, 1);
-                    gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-                }
                 gl.glViewport(viewportXpos, viewportYpos,
                               viewportXsize, viewportYsize); 
                 theScene.activeCamera.updateViewportResize(
@@ -293,6 +291,7 @@ public class JoglDrawingArea implements
               }
               else {
                 int w, h;
+
                 if ( viewportXframe < viewportXsize ) {
                     w = viewportXframe;
                 }
@@ -307,10 +306,6 @@ public class JoglDrawingArea implements
                 }
                 viewportXpos = (viewportXsize - w) / 2;
                 viewportYpos = (viewportYsize - h) / 2;
-                if ( viewportXpos != 0 || viewportYpos != 0 ) {
-                    gl.glClearColor(0, 0, 0, 1);
-                    gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-                }
                 gl.glViewport(viewportXpos, viewportYpos, w, h);
                 theScene.activeCamera.updateViewportResize(w, h);
                 viewportResizeNeeded = false;
@@ -331,8 +326,8 @@ public class JoglDrawingArea implements
                 parent.raytracedImageWidth = viewportXframe;
                 parent.raytracedImageHeight = viewportYframe;
             }
-            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
-            parent.theScene.raytrace(parent.raytracedImage);
+
+        parent.doRaytracedImage();
             gl.glMatrixMode(gl.GL_PROJECTION);
             gl.glPushMatrix();
             gl.glLoadIdentity();
@@ -773,8 +768,8 @@ public class JoglDrawingArea implements
       if ( keycode == KeyEvent.VK_F10 ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
-            parent.theScene.raytrace(parent.raytracedImage);
+        parent.doRaytracedImage();
+
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
             }

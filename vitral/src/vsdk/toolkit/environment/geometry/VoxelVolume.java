@@ -9,6 +9,7 @@ package vsdk.toolkit.environment.geometry;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.IndexedColorImage;
 
 /**
@@ -41,6 +42,24 @@ public class VoxelVolume extends Solid {
         data = null;
     }
 
+    public int getXSize()
+    {
+        if ( data == null || data.size() < 0 ) return 0;
+    return data.get(0).getXSize();
+    }
+
+    public int getYSize()
+    {
+        if ( data == null || data.size() < 0 ) return 0;
+    return data.get(0).getXSize();
+    }
+
+    public int getZSize()
+    {
+        if ( data == null || data.size() < 0 ) return 0;
+    return data.size();
+    }
+
     public boolean init(int xSize, int ySize, int zSize)
     {
         int z;
@@ -70,6 +89,20 @@ public class VoxelVolume extends Solid {
     catch ( Exception e ) {
         //
     }
+    }
+
+    /**
+    Given current voxelset geometric space (cube from <-1, -1, -1> to
+    <1, 1, 1>), current voxelset size, and cell position to a voxel; this
+    methods gives the position of the voxel center in world coordinates.
+    */
+    public Vector3D getVoxelPosition(int x, int y, int z)
+    {
+        Vector3D p = new Vector3D();
+        p.x = ((double)x) / ((double)getXSize())*2 - 1;
+        p.y = ((double)y) / ((double)getYSize())*2 - 1;
+        p.z = ((double)z) / ((double)getZSize())*2 - 1;
+    return p;
     }
 
     public int getVoxel(int x, int y, int z)

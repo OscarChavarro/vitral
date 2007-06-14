@@ -8,6 +8,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
+import vsdk.toolkit.render.jogl.JoglFixedBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
@@ -20,12 +21,23 @@ public class JoglSceneRenderer
     public static void drawBackground(GL gl, Scene s)
     {
         switch ( s.selectedBackground ) {
-          case 1:
+          case 2:
             if ( s.cubemapBackground == null ) {
                 s.buildCubemap();
             }
             if ( s.cubemapBackground != null ) {
                 JoglCubemapBackgroundRenderer.draw(gl, s.cubemapBackground);
+            }
+            else {
+                JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
+            }
+            break;
+          case 1:
+            if ( s.fixedBackground == null ) {
+                s.buildFixedmap();
+            }
+            if ( s.fixedBackground != null ) {
+                JoglFixedBackgroundRenderer.draw(gl, s.fixedBackground);
             }
             else {
                 JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);

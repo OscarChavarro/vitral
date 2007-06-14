@@ -26,8 +26,8 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
-import com.sun.opengl.cg.CGprogram;
 import com.sun.opengl.cg.CGparameter;
+import com.sun.opengl.cg.CGprogram;
 import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
@@ -36,8 +36,8 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.NormalMap;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -56,8 +56,14 @@ import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 
+/**
+This program is an extended variation of the program
+CgSimpleUnrestrictedShaderExample with two additions:
+  - Bumpmmaping support
+  - Standard use of VitralSDK for standard shader support
+*/
 public class CgComplexStandardShaderExample
-    implements GLEventListener, MouseListener, MouseMotionListener, 
+    implements GLEventListener, MouseListener, MouseMotionListener,
                MouseWheelListener, KeyListener
 {
     //- GUI ----------------------------------------------------------------
@@ -76,8 +82,8 @@ public class CgComplexStandardShaderExample
     private int textureMapList;
 
     //- Animation & state control ------------------------------------------
-    private int needPaint = 3;
     private boolean firstTimer = true;
+    private int needPaint = 3;
     private boolean retextureNeeded = false;
     private boolean withRotationAnimation = false;
     private boolean withLightAnimation = false;
@@ -103,6 +109,7 @@ public class CgComplexStandardShaderExample
     }
 
     public void init() {
+        //- Print users' manual -------------------------------------------
         System.out.println(
         "Key controls:\n"+
         "  - Camera: <cursor arrows>, x/X, y/Y, z/Z, s/S, a/A, f/F, n/N, i\n"+
@@ -117,6 +124,7 @@ public class CgComplexStandardShaderExample
         "  - Drag+button3: camera advance & roll\n"
         );
         System.out.print("Initializing... ");
+
         //- Initialize scene elements--------------------------------------
         // 1: Camera
         camera = new Camera();
@@ -192,18 +200,18 @@ public class CgComplexStandardShaderExample
         enableTexture(gl, true);
         try {
             //-----------------------------------------------------------------
-            NvidiaGpuVertexProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
-            NvidiaGpuPixelProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
             NvidiaGpuVertexProgramTexture =
               JoglRenderer.loadNvidiaGpuVertexShader(
                 new FileInputStream("./etc/PhongTextureVertexShader.cg"));
             NvidiaGpuPixelProgramTexture =
               JoglRenderer.loadNvidiaGpuPixelShader(
                 new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+            NvidiaGpuVertexProgramTextureBump =
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
+            NvidiaGpuPixelProgramTextureBump =
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
 
             //-----------------------------------------------------------------
             CGparameter param;
@@ -378,18 +386,8 @@ public class CgComplexStandardShaderExample
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
            GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 
-        /*
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-           GL.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
-        */
+        //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+        //   GL.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
 
         //-----------------------------------------------------------------
         if ( withMap ) {

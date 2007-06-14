@@ -331,6 +331,9 @@ public class Raytracer extends RenderingElement {
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
+
+    Note that this method can return null, that means a transparent pixel
+    should be used.
     */
     private ColorRgb followRayPath(Ray inRay,
                                   ArrayList <SimpleBody> in_objetos, 
@@ -438,7 +441,7 @@ public class Raytracer extends RenderingElement {
     imagen, y modifica la imagen de tal forma que contiene una visualizacion
     de la escena, result de aplicar la t&eacute;cnica de raytracing.
 
-    PAR&Aacute;METROS:
+    PARAMETERS
     - `inout_viewport`: imagen RGB en donde el algoritmo calcular&aacute; su
        result.
     - `in_objetos`: arreglo din&aacute;mico de SimpleBodys que constituyen los
@@ -456,6 +459,7 @@ public class Raytracer extends RenderingElement {
       Note that depth values are not scaled neither clamped to any specific
       range, so post-processing should be done if wanting to combine that
       with other depth maps, as those generated from OpenGL's ZBuffer.
+    - `liveReport` can be null. In that case no report is updated.
 
 
     PRE:
@@ -497,9 +501,13 @@ public class Raytracer extends RenderingElement {
 
         inCamera.updateVectors();
 
-        liveReport.begin();
+        if ( liveReport != null ) {
+            liveReport.begin();
+        }
         for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
-            liveReport.update(0, inoutViewport.getYSize(), y);
+            if ( liveReport != null ) {
+                liveReport.update(0, inoutViewport.getYSize(), y);
+            }
             for ( x = limx1, relativeX = 0; x < limx2; x++, relativeX++ ) {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
@@ -512,13 +520,17 @@ public class Raytracer extends RenderingElement {
                     outDepthmap.setZ(x, y, (float)rayo.t);
                 }
                 //- Exporto el result de color del pixel ----------------
-                inoutViewport.putPixel(relativeX, relativeY,
+                if ( color != null ) {
+                    inoutViewport.putPixel(relativeX, relativeY,
                                               (byte)(255 * color.r),
                                               (byte)(255 * color.g),
                                               (byte)(255 * color.b));
+                }
             }
         }
-        liveReport.end();
+        if ( liveReport != null ) {
+            liveReport.end();
+        }
     }
 
 }

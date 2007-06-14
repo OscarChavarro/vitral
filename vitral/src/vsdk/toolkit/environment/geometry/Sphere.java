@@ -15,14 +15,14 @@ public class Sphere extends Solid {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    private double _radio;
-    private double _radio_al_cuadrado;
+    private double _radius;
+    private double _radius_squared;
     private Vector3D _static_delta;
     private double [] _static_minmax;
 
     public Sphere(double r) {
-        _radio = r;
-        _radio_al_cuadrado = _radio*_radio;
+        _radius = r;
+        _radius_squared = _radius*_radius;
         _static_delta = new Vector3D();
         _static_minmax = new double[6];
     }
@@ -60,7 +60,7 @@ public class Sphere extends Solid {
                 de tipo Vector3D dentro del m&eacute;todo.  Esto no es bueno 
                 porque gasta memoria, pero ... que m&aacute;s podr&aacute; 
                 hacerse? Al menos el tiempo de ejecuci&oacute;n se mantiene 
-                igual respecto al c&oacute;digo original de MIT.
+G                igual respecto al c&oacute;digo original de MIT.
                 NOTA: Comparar este m&eacute;todo modificado con la 
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */
@@ -70,7 +70,7 @@ public class Sphere extends Solid {
         double v = inout_rayo.direction.dotProduct(_static_delta);
 
         // Test if the inout_rayo actually intersects the sphere
-        double t = _radio_al_cuadrado + v*v 
+        double t = _radius_squared + v*v 
                   - _static_delta.x*_static_delta.x 
                   - _static_delta.y*_static_delta.y 
                   - _static_delta.z*_static_delta.z;
@@ -135,26 +135,38 @@ public class Sphere extends Solid {
         //-----------------------------------------------------------------
     }
 
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+        double l = p.length();
+        if ( l < _radius - distanceTolerance ) {
+            return INSIDE;
+        }
+        else if ( l > _radius + distanceTolerance ) {
+            return OUTSIDE;
+        }
+        return LIMIT;
+    }
+
     public double[] getMinMax()
     {
         for ( int i = 0; i < 3; i++ ) {
-            _static_minmax[i] = -_radio;
+            _static_minmax[i] = -_radius;
         }
         for ( int i = 3; i < 6; i++ ) {
-            _static_minmax[i] = _radio;
+            _static_minmax[i] = _radius;
         }
         return _static_minmax;
     }
 
     public double getRadius()
     {
-        return _radio;
+        return _radius;
     }
 
     public void setRadius(double r)
     {
-        _radio = r;
-        _radio_al_cuadrado = r*r;
+        _radius = r;
+        _radius_squared = r*r;
     }
 
 }

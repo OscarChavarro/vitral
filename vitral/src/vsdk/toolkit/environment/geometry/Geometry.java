@@ -24,6 +24,10 @@ geometric algorithm, including but not limited to rendering operations.<P>
 */
 public abstract class Geometry extends Entity {
 
+    public static final int INSIDE = 1;
+    public static final int LIMIT = 0;
+    public static final int OUTSIDE = -1;
+
     /**
     Takes in a Ray and checks wheter or not that Ray intersects the current 
     Geometry.  The coordinates of the Ray are interpreted as global 
@@ -133,6 +137,19 @@ public abstract class Geometry extends Entity {
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         return null;
+    }
+
+    /**
+    Given a point `p`, this method classifies if point lies `INSIDE` current
+    geometry, `OUTSIDE` current geometry or `LIMIT` if it is near the geometry
+    at some specified `distanceTolerance`.
+
+    Note that the `INSIDE` and `OUTSIDE` cases are only feasible in `Solid`s,
+    while `LIMIT` cases can be defined in 0D, 1D and 2D geometries.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+    return OUTSIDE;
     }
 }
 

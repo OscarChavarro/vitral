@@ -27,6 +27,7 @@ import javax.media.opengl.GLEventListener;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
+import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -37,21 +38,31 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
+import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglSphereRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 
-public class CgSimpleUnrestrictedShaderExample implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+/**
+This program constitutes a template for VitralSDK based applications which
+make use of Nvidia Cg shaders. Note that current code does not use standard
+VitralSDK material handling, but all shader management is standalone and
+contained here.  Use this program as a base for custom developed programs
+and shaders.
+*/
+public class CgSimpleUnrestrictedShaderExample
+    implements GLEventListener, MouseListener, MouseMotionListener,
+               MouseWheelListener, KeyListener
 {
     //- GUI ----------------------------------------------------------------
     private static GLCanvas canvas;
@@ -60,9 +71,17 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
 
     //- GPU control --------------------------------------------------------
     private boolean NvidiaGpuActive = true;
+    private boolean NvidiaGpuAvailable = true;
     private CGprogram NvidiaGpuVertexProgramTexture;
     private CGprogram NvidiaGpuPixelProgramTexture;
+
+    //- Animation & state control ------------------------------------------
     private boolean firstTimer = true;
+    private int needPaint = 3;
+    private boolean retextureNeeded = false;
+    private boolean withRotationAnimation = false;
+    private boolean withLightAnimation = false;
+    private double lightAngle = 0;
 
     //- Scene elements -----------------------------------------------------
     private Camera camera;                   // 1. Camera
@@ -73,7 +92,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
     private double xrotation;                // 4. Geometrical transformations
     private double yrotation;
     private double zrotation;
-    private Sphere sphere;                   // 5. Geometry
+    private Geometry geometry;                   // 5. Geometry
 
     //----------------------------------------------------------------------
 
@@ -82,6 +101,22 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
     }
 
     public void init() {
+        //- Print users' manual -------------------------------------------
+        System.out.println(
+        "Key controls:\n"+
+        "  - Camera: <cursor arrows>, x/X, y/Y, z/Z, s/S, a/A, f/F, n/N, i\n"+
+        "  - Rendering quality: g, <function keys>\n"+
+        "  - Animation control: <space>, r\n"+
+        "  - Light control: 0, 9, h, k, j, u\n"+
+        "  - Rotation control: 1, 2, 3, 4, 5, 6\n"+
+        "  - Exit: <escape>\n"+
+        "Mouse controls:\n"+
+        "  - Drag+button1: camera orientation\n"+
+        "  - Drag+button2: camera panning\n"+
+        "  - Drag+button3: camera advance & roll\n"
+        );
+        System.out.print("Initializing... ");
+
         //- Initialize scene elements--------------------------------------
         // 1: Camera
         camera = new Camera();
@@ -89,13 +124,23 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         Matrix4x4 R = new Matrix4x4();
         R.eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
         camera.setRotation(R);
+        camera.setFov(30.0);
 
         // 2: Lights
         light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
 
-        // 3.1. Object attribute -> texture map
-        String imageFilename = "../../../etc/textures/earth.png";
+        // 3.1. Object attribute -> material propierties
+        material = new Material();
+        material.setAmbient(new ColorRgb(0, 0, 0));
+        material.setDiffuse(new ColorRgb(1, 1, 1));
+        material.setSpecular(new ColorRgb(1, 1, 1));
+        material.setPhongExponent(40);
+
+        // 3.2. Object attribute -> texture map
+        String imageFilename = null;
         try {
+            //-------------------------------------------------------
+            imageFilename = "../../../etc/textures/miniearth.png";
             textureMap = ImagePersistence.importRGB(new File(imageFilename));
         }
         catch (Exception e) {
@@ -104,13 +149,6 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
             System.err.println(e);
             System.exit(0);
         }
-
-        // 3.2. Object attribute -> material propierties
-        material = new Material();
-        material.setAmbient(new ColorRgb(0, 0, 0));
-        material.setDiffuse(new ColorRgb(1, 1, 1));
-        material.setSpecular(new ColorRgb(1, 1, 1));
-        material.setPhongExponent(40);
 
         // 3.3. Object attribute -> how it will render
         quality = new RendererConfiguration();
@@ -121,31 +159,35 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         zrotation = 0;
 
         // 5. Object attribute -> geometry
-        sphere = new Sphere(1.0);
+        geometry = new Sphere(1.0);
 
-        //-----------------------------------------------------------------
+        //- Initialize GUI helpers ----------------------------------------
         cameraController = new CameraControllerAquynza(camera);
         qualityController = new RendererConfigurationController(quality);
 
         //-----------------------------------------------------------------
+        System.gc();
+        System.out.println("Ok!");
     }
 
     public void createCgElements() {
         if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
             System.out.println("Nvidia Cg not available. Turning off GPU support!");
             NvidiaGpuActive = false;
+            NvidiaGpuAvailable = false;
             return;
         }
         try {
+            //-----------------------------------------------------------------
             NvidiaGpuVertexProgramTexture =
-                JoglRenderer.loadNvidiaGpuVertexShader(
-                    new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
             NvidiaGpuPixelProgramTexture =
-                JoglRenderer.loadNvidiaGpuPixelShader(
-                    new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
         }
         catch ( Exception e ) {
-            System.out.println("Error loading shaders!");
+            System.err.println("Error loading shaders!");
             System.exit(1);
         }
     }
@@ -156,6 +198,27 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
 
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        if ( withRotationAnimation ) {
+            zrotation += 0.5*2;
+            needPaint = 1;
+        }
+
+        if ( withLightAnimation ) {
+            Vector3D lightPosition = new Vector3D(1, -3, 1);
+            Vector3D axis = new Vector3D(0, -1, 0);
+            Matrix4x4 R = new Matrix4x4();
+            lightAngle += Math.toRadians(1.0*2);
+            R.axisRotation(lightAngle, axis);
+            lightPosition = R.multiply(lightPosition);
+            light.setPosition(lightPosition);
+            needPaint = 1;
+        }
+
+        if ( needPaint <= 0 ) {
+            return;
+        }
+        needPaint--;
 
         if ( firstTimer ) {
             firstTimer = false;
@@ -291,7 +354,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
 
         // And go ahead and draw the scene geometry
         enableTexture(gl);
-        JoglSphereRenderer.draw(gl, sphere, camera, quality);
+        JoglGeometryRenderer.draw(gl, geometry, camera, quality);
 
         if ( NvidiaGpuActive ) {
             JoglRenderer.disableNvidiaCgProfiles();
@@ -303,7 +366,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
     void enableTexture(GL gl) {
         int glList;
 
-        // Basic OpenGL texture state setup
+        //- Basic OpenGL texture state setup ------------------------------
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
            GL.GL_GENERATE_MIPMAP_SGIS, GL.GL_TRUE);
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
@@ -330,6 +393,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         
         gl.glViewport(x, y, width, height); 
         camera.updateViewportResize(width, height);
+        needPaint = 1;
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -342,30 +406,35 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
 
     public void mousePressed(MouseEvent e) {
         if ( cameraController.processMousePressedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
         if ( cameraController.processMouseReleasedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
         if ( cameraController.processMouseClickedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
         if ( cameraController.processMouseMovedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
         if ( cameraController.processMouseDraggedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -376,6 +445,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
         if ( cameraController.processMouseWheelEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -385,10 +455,12 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
             System.exit(0);
         }
         if ( cameraController.processKeyPressedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
         if ( qualityController.processKeyPressedEventAwt(e) ) {
             System.out.println(quality);
+            needPaint = 1;
             canvas.repaint();
         }
 
@@ -408,15 +480,27 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
             case 'j': lightPosition.z -= 0.1; break;
             case '9': lightPosition.y -= 0.1; break;
             case '0': lightPosition.y += 0.1; break;
-            case 'g': NvidiaGpuActive = !NvidiaGpuActive; break;
+            case 'g':
+              if ( NvidiaGpuAvailable ) {
+                  NvidiaGpuActive = !NvidiaGpuActive;
+              }
+              else {
+                  NvidiaGpuActive = false;
+                  System.out.println("Nvidia Cg not available. Turning on GPU support not available!");
+              }
+              break;
+            case 'r': withRotationAnimation = !withRotationAnimation; break;
+            case ' ': withLightAnimation = !withLightAnimation; break;
           }
           light.setPosition(lightPosition);
+          needPaint = 1;
           canvas.repaint();
         }
     }
 
     public void keyReleased(KeyEvent e) {
         if ( cameraController.processKeyReleasedEventAwt(e) ) {
+            needPaint = 1;
             canvas.repaint();
         }
     }
@@ -445,11 +529,14 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         canvas.addMouseMotionListener(instance);
         canvas.addKeyListener(instance);
         canvas.addGLEventListener(instance);
+        Animator animator = new Animator(canvas);
 
         frame.add(canvas);
         frame.setSize(1150, 1150);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        canvas.requestFocusInWindow();
+        animator.start();
     }
 }
 

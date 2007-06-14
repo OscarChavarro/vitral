@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
+import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.Raytracer;
 
@@ -30,6 +31,7 @@ public class Scene
     //- 3. Background ------------------------------------------------------
     public SimpleBackground simpleBackground;
     public CubemapBackground cubemapBackground;
+    public FixedBackground fixedBackground;
     public int selectedBackground;
 
     //- 4. Objects ---------------------------------------------------------
@@ -63,6 +65,7 @@ public class Scene
         simpleBackground.setColor(0.49, 0.49, 0.49);
 
         cubemapBackground = null;
+        fixedBackground = null;
 
         selectedBackground = 0;
 
@@ -105,6 +108,26 @@ public class Scene
             cubemapBackground = 
                 new CubemapBackground(camera, 
                                       front, right, back, left, down, up);
+        }
+        catch (Exception e) {
+            System.err.println(e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean
+    buildFixedmap()
+    {
+        RGBAImage img;
+
+        try {
+            System.out.print("Loading background: ");
+            img = ImagePersistence.importRGBA(
+                        new File("../../../etc/cubemaps/dorise1/entorno0.jpg"));
+            System.out.println("OK!");
+
+            fixedBackground = new FixedBackground(camera, img);
         }
         catch (Exception e) {
             System.err.println(e);
@@ -171,7 +194,7 @@ public class Scene
 
         Background activeBackground;
         switch ( selectedBackground ) {
-          case 1:
+          case 2:
             if ( cubemapBackground == null ) {
                 buildCubemap();
             }
@@ -182,6 +205,17 @@ public class Scene
                 activeBackground = simpleBackground;
             }
             break;
+      case 1:
+        if ( fixedBackground == null ) {
+                buildFixedmap();
+            }
+            if ( fixedBackground != null ) {
+                activeBackground = fixedBackground;
+            }
+            else {
+                activeBackground = simpleBackground;
+            }
+        break;
           case 0: default:
             activeBackground = simpleBackground;
             break;

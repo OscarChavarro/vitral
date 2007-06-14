@@ -36,15 +36,6 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
         gl.glFrontFace(gl.GL_CCW);
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
 
-        // Not needed when image background is implemented ...
-        gl.glColor3d(0, 0, 0);
-        gl.glBegin(gl.GL_QUADS);
-            gl.glVertex2f(1, 1);
-            gl.glVertex2f(-1, 1);
-            gl.glVertex2f(-1, -1);
-            gl.glVertex2f(1, -1);
-        gl.glEnd();
-
         //- Put image background ------------------------------------------
         RGBAImage images[] = background.getImages();
 

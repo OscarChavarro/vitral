@@ -360,6 +360,16 @@ public class SceneEditorApplication {
         createGUI();
     }
 
+    public void doRaytracedImage()
+    {
+        raytracedImage.init(raytracedImageWidth, raytracedImageHeight);
+        if ( theScene.selectedBackground == 1 ) {
+            //raytracedImage = theScene.fixedBackground.getImage().exportToRgbImage();
+            theScene.fixedBackground.getImage().resize(raytracedImage);
+        }
+        theScene.raytrace(raytracedImage);
+    }
+
     public static void main (String[] args) {
         // Note that this is a thread-safe invocation of the GUI
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -432,7 +442,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         Material m = new Material();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
+        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
         m.setDoubleSided(false);
         m.setPhongExponent(100);
@@ -494,6 +504,21 @@ class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             VoxelVolume vv = new VoxelVolume();
+            int nx = 64, ny = 64, nz = 64;
+            int x, y, z;
+            Vector3D p = new Vector3D();
+
+            vv.init(nx, ny, nz);
+            for ( x = 0; x < nx; x++ ) {
+                for ( y = 0; y < ny; y++ ) {
+                    for ( z = 0; z < nz; z++ ) {
+                        p = vv.getVoxelPosition(x, y, z);
+                        if ( p.length() > 0.9 && p.length() < 1 ) {
+                            vv.putVoxel(x, y, z, (byte)-1);
+                        }
+                    }
+                }
+            }
             addThing(vv);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
@@ -693,8 +718,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
-            parent.theScene.raytrace(parent.raytracedImage);
+            parent.doRaytracedImage();
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
             }
@@ -776,14 +800,14 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
         }
-    else if ( label.equals("IDC_TOOLS_RAY") ) {
+        else if ( label.equals("IDC_TOOLS_RAY") ) {
             if ( parent.withVisualDebugRay ) {
                 parent.withVisualDebugRay = false;
-        }
-        else {
+            }
+            else {
                 parent.withVisualDebugRay = true;
+            }
         }
-    }
 
         //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();

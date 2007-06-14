@@ -33,6 +33,7 @@ public class JoglBoxRenderer extends JoglRenderer {
         Vector3D size = box.getSize();
 
         gl.glPushMatrix();
+    gl.glEnable(gl.GL_NORMALIZE);
         gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
             glut.glutSolidCube(1);

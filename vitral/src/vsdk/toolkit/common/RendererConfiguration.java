@@ -269,6 +269,23 @@ public class RendererConfiguration extends FundamentalEntity {
 
         return msg;
     }
+
+    public RendererConfiguration clone()
+    {
+        RendererConfiguration copy = new RendererConfiguration();
+        copy.shadingType = shadingType;
+        copy.surfaces = surfaces;
+        copy.wires = wires;
+        copy.boundingVolume = boundingVolume;
+        copy.selectionCorners = selectionCorners;
+        copy.texture = texture;
+        copy.bumpMap = bumpMap;
+        copy.points = points;
+        copy.normals = normals;
+        copy.trianglesNormals = trianglesNormals;
+        copy.lodHint = lodHint;
+    return copy;
+    }
 }
 
 //===========================================================================

@@ -19,7 +19,7 @@ Changes in 2006 march 14 revition
     & Eduardo Mendoza main work, allowing for distributed rendering based
     on ZBuffer algorithms and other manipulations for depth maps.
   - New organization of packages and classes inside packages. Below are
-the old names and the new names for packages:
+    the old names and the new names for packages:
     . vitral is no longer called such that, it is now "vsdk" which stands for
       "Vitral Software Development Kit".
     . Inside the VSDK architecture, the current toolkit is one, so the main
@@ -234,3 +234,16 @@ Changes in 2007 may 2 revition
 
 Changes in 2007 may 4 revition
   - ReaderObj modified to handle obj files with negative index integers
+
+Changes in 2007 may 8 revition
+  - Minor checks and modifications to CgShader examples
+
+Changes in 2007 may 9 revition
+  - New FixedBackground
+  - SceneEditorApplication upgraded to support testing of FixedBackground
+  - Image clonning operations added
+  - Raytracer revisited: progress monitor use not mandatory, background
+    colorInRayDirection can be return null color to denote transparency
+    (raytracer modifies existing image, useful for augmented reality 
+    applications based in raytracing)
+  - First working and tested implementation of VoxelVolume
