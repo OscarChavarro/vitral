@@ -30,6 +30,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.common.PersistenceElement;
 
 //===========================================================================
 
@@ -40,7 +41,7 @@ information in an Alias Wavefront Object file (.obj) and VSDK's TriangleMesh
 representation. It is used only by the ReaderObj class for format conversion
 of geometric data.
 */
-class _ReaderObjVertex
+class _ReaderObjVertex extends PersistenceElement
 {
     public int vertexPositionIndex;
     public int vertexNormalIndex;
@@ -93,7 +94,7 @@ The original Wavefront format is not well standarized, so many variations
 could exist. This code currently manages only triangle faces, and interprets
 other polygons to triangle fans.
 */
-public class ReaderObj
+public class ReaderObj extends PersistenceElement
 {
     /**
     This method reads an Alias/Wavefront .obj file in ASCII form from the 

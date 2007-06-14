@@ -43,6 +43,7 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.common.PersistenceElement;
 
 /**
 This class is a front end front which images of various formats can be
@@ -52,7 +53,7 @@ exported and/or imported to/from files.
       pattern... possibly some of that combined with a Facade design 
       pattern?
  */
-public class ImagePersistence
+public class ImagePersistence extends PersistenceElement
 {
     /**
     Given the filename of an input data file which contains an image, this

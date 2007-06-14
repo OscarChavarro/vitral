@@ -17,7 +17,7 @@ advance to the containing applicacion in a technology independent way
 a simple reference implementation for console applications is provided in
 this package.
 */
-public interface ProgressMonitor {
+public abstract class ProgressMonitor extends PresentationElement {
     public abstract void begin();
     public abstract void end();
     public abstract void update(double minValue, double maxValue, double currentValue);

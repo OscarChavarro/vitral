@@ -8,8 +8,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 
-public class CameraControllerAquynza
-    implements CameraController {
+public class CameraControllerAquynza extends CameraController {
 
     private Camera camera;
     private int oldMouseX;

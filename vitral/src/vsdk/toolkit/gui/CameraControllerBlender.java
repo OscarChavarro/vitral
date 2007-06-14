@@ -7,8 +7,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 
-public class CameraControllerBlender
-    implements CameraController {
+public class CameraControllerBlender extends CameraController {
 
     private Camera camera;
 

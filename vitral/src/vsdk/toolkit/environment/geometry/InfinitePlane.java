@@ -78,7 +78,7 @@ public class InfinitePlane extends HalfSpace {
     /**
     Por a given point <x, y, z>, calculates if it lies inside, outside or 
     on surface with respect to current plane.
-    @return: 0 if point is on the plane surface, 1 if point is outside or
+    @return 0 if point is on the plane surface, 1 if point is outside or
     -1 if point is inside the plane.
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.

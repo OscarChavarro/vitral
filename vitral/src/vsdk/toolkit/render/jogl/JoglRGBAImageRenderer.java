@@ -23,7 +23,7 @@ import com.sun.opengl.util.texture.TextureIO;
 
 import vsdk.toolkit.media.RGBAImage;
 
-class _JoglRGBAImageRendererImageAssociation
+class _JoglRGBAImageRendererImageAssociation extends JoglRenderer
 {
     public int glList;
     public Texture renderer;

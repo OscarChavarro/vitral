@@ -8,11 +8,13 @@
 package vsdk.toolkit.io.image;
 import java.io.File;
 
+import vsdk.toolkit.common.VSDKException;
+
 /**
 This class represents the exception in which an image can not be handled
 by an image persistence operation.
 */
-public class ImageNotRecognizedException extends Exception
+public class ImageNotRecognizedException extends VSDKException
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

@@ -21,3 +21,5 @@
   - Implement intersection operation for parametric bi-cubic patches
   - Change all object.getClass().getName().equals tests to object instanceof
     class ...
+  - To complete the implementation of IndexedColorImage (getpixel/setpixel
+    methods for RGB version)

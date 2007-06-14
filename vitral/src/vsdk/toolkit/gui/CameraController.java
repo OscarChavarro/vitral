@@ -12,28 +12,28 @@ import java.awt.event.KeyEvent;
 
 import vsdk.toolkit.environment.Camera;
 
-public interface CameraController {
-  public boolean processMouseEventAwt(MouseEvent mouseEvent);
+public abstract class CameraController extends Controller {
+  public abstract boolean processMouseEventAwt(MouseEvent mouseEvent);
 
-  public boolean processKeyPressedEventAwt(KeyEvent keyEvent);
+  public abstract boolean processKeyPressedEventAwt(KeyEvent keyEvent);
 
-  public boolean processKeyReleasedEventAwt(KeyEvent keyEvent);
+  public abstract boolean processKeyReleasedEventAwt(KeyEvent keyEvent);
 
-  public boolean processMousePressedEventAwt(MouseEvent e);
+  public abstract boolean processMousePressedEventAwt(MouseEvent e);
 
-  public boolean processMouseReleasedEventAwt(MouseEvent e);
+  public abstract boolean processMouseReleasedEventAwt(MouseEvent e);
 
-  public boolean processMouseClickedEventAwt(MouseEvent e);
+  public abstract boolean processMouseClickedEventAwt(MouseEvent e);
 
-  public boolean processMouseMovedEventAwt(MouseEvent e);
+  public abstract boolean processMouseMovedEventAwt(MouseEvent e);
 
-  public boolean processMouseDraggedEventAwt(MouseEvent e);
+  public abstract boolean processMouseDraggedEventAwt(MouseEvent e);
 
-  public boolean processMouseWheelEventAwt(MouseWheelEvent e);
+  public abstract boolean processMouseWheelEventAwt(MouseWheelEvent e);
 
-  public Camera getCamera();
+  public abstract Camera getCamera();
 
-  public void setCamera(Camera camera);
+  public abstract void setCamera(Camera camera);
 }
 
 //===========================================================================

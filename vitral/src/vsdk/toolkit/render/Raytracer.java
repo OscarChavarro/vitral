@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.RenderingElement;
 import vsdk.toolkit.common.ProgressMonitor;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -37,14 +38,13 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
-
 /**
 This class provides an encaptulation for a rendering algorithm, 
 implementing simple recursive raytracing as presented in [WHIT1980].
 This class is appropiate to play a role of "concrete strategy" in
 a "Strategy" design pattern.
 */
-public class Raytracer {
+public class Raytracer extends RenderingElement {
     private Vector3D static_tmp;
     private static final double TINY = 0.0001;
 

@@ -7,8 +7,9 @@
 package vsdk.toolkit.io;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import vsdk.toolkit.common.VSDKException;
 
-public class XmlException extends Exception {
+public class XmlException extends VSDKException {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 

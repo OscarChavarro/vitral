@@ -17,8 +17,9 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
+import vsdk.toolkit.common.PersistenceElement;
 
-public class ParametricBiCubicPatchPersistence {
+public class ParametricBiCubicPatchPersistence extends PersistenceElement {
   public static String rootName = "ParametricBiCubicPatch";
   private static String patchAttributesNames[] = {
       "type", "approximationSteps"};

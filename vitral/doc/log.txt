@@ -152,3 +152,7 @@ Changes in 2006 november 19 revition
   - Updates to TriangleMesh internal representation and ReaderObj /
     JoglTriangleMeshRenderer to simplify design.
   - Raytracer now support objects with sub-materials
+
+Changes in 2006 december 8 revition
+  - Organizer abstract classes incorporated for exceptions, renderers, gizmos,
+    controllers and persistence classes

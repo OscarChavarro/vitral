@@ -15,12 +15,13 @@ import java.io.StreamTokenizer;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBColorPalette;
+import vsdk.toolkit.common.PersistenceElement;
 
 /**
 This class contains the persistence operations to load and save
 RGBColorPalettes
 */
-public class RGBColorPalettePersistence {
+public class RGBColorPalettePersistence extends PersistenceElement {
 
     /** 
     This method reads a text formated stream in the style of GIMP

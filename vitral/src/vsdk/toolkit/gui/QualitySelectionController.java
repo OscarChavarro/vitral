@@ -3,7 +3,7 @@ package vsdk.toolkit.gui;
 import java.awt.event.KeyEvent;
 import vsdk.toolkit.common.QualitySelection;
 
-public class QualitySelectionController {
+public class QualitySelectionController extends Controller {
 
   private QualitySelection qualitySelection;
 

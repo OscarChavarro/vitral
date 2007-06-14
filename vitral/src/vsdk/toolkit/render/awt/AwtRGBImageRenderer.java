@@ -15,7 +15,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 
-public class AwtRGBImageRenderer
+public class AwtRGBImageRenderer extends AwtRenderer
 {
     public static void draw(Graphics dc, RGBImage img, int x0, int y0)
     {

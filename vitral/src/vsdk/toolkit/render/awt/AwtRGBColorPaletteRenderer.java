@@ -12,7 +12,7 @@ import java.awt.Graphics;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBColorPalette;
 
-public class AwtRGBColorPaletteRenderer
+public class AwtRGBColorPaletteRenderer extends AwtRenderer
 {
     private static float convert(double in)
     {

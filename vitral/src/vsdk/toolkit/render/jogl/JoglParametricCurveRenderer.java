@@ -21,7 +21,8 @@ import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 
-class _CurveTesselatorProcessorRoutines implements GLUtessellatorCallback
+class _CurveTesselatorProcessorRoutines extends JoglRenderer 
+implements GLUtessellatorCallback
 {
     private GL gl;
     private GLU glu;

@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.common;
 
-public class ProgressMonitorConsole implements ProgressMonitor {
+public class ProgressMonitorConsole extends ProgressMonitor {
 
     private double currentPercent;
     private double jumpPercent;

@@ -11,7 +11,7 @@ import javax.media.opengl.GL;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
-public class JoglCalligraphic2DBufferRenderer
+public class JoglCalligraphic2DBufferRenderer extends JoglRenderer
 {
     public static void draw(GL gl, Calligraphic2DBuffer vectors)
     {

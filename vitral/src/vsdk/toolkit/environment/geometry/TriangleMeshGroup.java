@@ -70,15 +70,14 @@ public class TriangleMeshGroup extends Surface {
     }
 
     /**
-     *
-     *    0 - min (x)
-     *    1 - min (y)
-     *    2 - min (z)
-     *    3 - max (x)
-     *    4 - max (y)
-     *    5 - max (z)
-     * @return double[]
-     */
+    Calculates the MinMax. Note that for each position in this array:
+        0 - min (x)
+        1 - min (y)
+        2 - min (z)
+        3 - max (x)
+        4 - max (y)
+        5 - max (z)
+    */
     public void calculateMinMaxPositions() {
         if ( MinMax == null ) {
             MinMax = new double[6];

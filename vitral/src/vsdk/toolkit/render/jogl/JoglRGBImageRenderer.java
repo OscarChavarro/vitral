@@ -24,7 +24,7 @@ import com.sun.opengl.util.texture.TextureData;
 
 import vsdk.toolkit.media.RGBImage;
 
-class _JoglRGBImageRendererImageAssociation
+class _JoglRGBImageRendererImageAssociation extends JoglRenderer
 {
     public int glList;
     public Texture renderer;

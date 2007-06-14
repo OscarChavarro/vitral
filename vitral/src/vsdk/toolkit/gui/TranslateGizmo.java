@@ -28,7 +28,7 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
-public class TranslateGizmo {
+public class TranslateGizmo extends Gizmo {
   /// Internal transfirmation state
   private Matrix4x4 T;
 

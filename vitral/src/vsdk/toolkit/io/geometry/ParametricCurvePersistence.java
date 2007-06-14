@@ -21,8 +21,9 @@ import org.w3c.dom.Element;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
+import vsdk.toolkit.common.PersistenceElement;
 
-public class ParametricCurvePersistence {
+public class ParametricCurvePersistence extends PersistenceElement {
     public static final String rootName = "ParametricCurve";
     private static final String[] nodesNames = {
         "Point",

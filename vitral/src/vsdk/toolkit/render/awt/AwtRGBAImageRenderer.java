@@ -14,7 +14,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBAPixel;
 
-public class AwtRGBAImageRenderer
+public class AwtRGBAImageRenderer extends AwtRenderer
 {
     public static void draw(Graphics dc, RGBAImage img, int x0, int y0)
     {

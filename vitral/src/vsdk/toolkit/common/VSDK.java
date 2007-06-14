@@ -15,6 +15,15 @@ import vsdk.toolkit.common.Vector3D;
 /**
 !\mainpage VSDK Toolkit documentation.
 
+.
+
+VSDK stands for "VITRAL Software Development Kit", and it is a software
+platform for computer graphics, virtual reality and augmented reality
+application development. Here is the main software documentation for current
+VSDK implementation.  VITRAL is a trademark of the TAKINA research group, and
+identifies the computer graphics laboratory in the Pontificia Universidad
+Javeriana of Bogot&aacute; Colombia.
+
 \section intro Introduction: the VSDK Architecture and design specification
 
 This is an automatically generated page from the VSDK source code. It is not
@@ -68,8 +77,9 @@ public class VSDK
     // Error reporting levels
     public static final int WARNING = 1;
     public static final int ERROR = 2;
-    public static final int DEBUG = 3;
-    public static final int VERBOSE = 4;
+    public static final int FATAL_ERROR = 3;
+    public static final int DEBUG = 4;
+    public static final int VERBOSE = 5;
 
     // Primitive types
     public static final int POINT = 0;
@@ -200,6 +210,10 @@ public class VSDK
         System.err.println(" - Exception located at method " + method);
         System.err.println(" - Exception message:\n" + message);
         System.err.println("===========================================================================");
+        if ( level == FATAL_ERROR ) {
+            System.err.println("Program excecution suspended!");
+            System.exit(1);
+    }
     }
 
 }
