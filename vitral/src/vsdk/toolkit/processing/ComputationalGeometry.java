@@ -8,7 +8,8 @@
 //=     Distance Fields From Triangle Meshes",  Technical report            =
 //=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
 //===========================================================================
-package vsdk.toolkit.environment.geometry;
+
+package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
@@ -18,7 +19,7 @@ import vsdk.toolkit.environment.geometry.InfinitePlane;
 /**
 This class contains common computational geometry operations.
 */
-public class ComputationalGeometry
+public class ComputationalGeometry extends ProcessingElement
 {
     private static InfinitePlane workPlane;
 
@@ -154,6 +155,45 @@ public class ComputationalGeometry
             }
         }
         return Geometry.OUTSIDE;
+    }
+
+    public static void triangleMinMax(
+        Vector3D p0, Vector3D p1, Vector3D p2, double minMax[])
+    {
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+
+        if ( p0.x < minX ) minX = p0.x;
+        if ( p0.y < minY ) minY = p0.y;
+        if ( p0.z < minZ ) minZ = p0.z;
+        if ( p0.x > maxX ) maxX = p0.x;
+        if ( p0.y > maxY ) maxY = p0.y;
+        if ( p0.z > maxZ ) maxZ = p0.z;
+
+        if ( p1.x < minX ) minX = p1.x;
+        if ( p1.y < minY ) minY = p1.y;
+        if ( p1.z < minZ ) minZ = p1.z;
+        if ( p1.x > maxX ) maxX = p1.x;
+        if ( p1.y > maxY ) maxY = p1.y;
+        if ( p1.z > maxZ ) maxZ = p1.z;
+
+        if ( p2.x < minX ) minX = p2.x;
+        if ( p2.y < minY ) minY = p2.y;
+        if ( p2.z < minZ ) minZ = p2.z;
+        if ( p2.x > maxX ) maxX = p2.x;
+        if ( p2.y > maxY ) maxY = p2.y;
+        if ( p2.z > maxZ ) maxZ = p2.z;
+
+        minMax[0] = minX;
+        minMax[1] = minY;
+        minMax[2] = minZ;
+        minMax[3] = maxX;
+        minMax[4] = maxY;
+        minMax[5] = maxZ;
     }
 }
 

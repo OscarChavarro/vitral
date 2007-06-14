@@ -333,7 +333,7 @@ public class Matrix4x4 extends FundamentalEntity
     {
         Matrix4x4 i = new Matrix4x4(this);
         i.invert();
-    return i;
+        return i;
     }
 
     /**
@@ -341,32 +341,34 @@ public class Matrix4x4 extends FundamentalEntity
      */
     public void invert()
     {
-        Matrix4x4 N = new Matrix4x4(this);
-       M[0][0] = N.M[1][2]*N.M[2][3]*N.M[3][1] - N.M[1][3]*N.M[2][2]*N.M[3][1] + N.M[1][3]*N.M[2][1]*N.M[3][2] - N.M[1][1]*N.M[2][3]*N.M[3][2] - N.M[1][2]*N.M[2][1]*N.M[3][3] + N.M[1][1]*N.M[2][2]*N.M[3][3];
-       M[0][1] = N.M[0][3]*N.M[2][2]*N.M[3][1] - N.M[0][2]*N.M[2][3]*N.M[3][1] - N.M[0][3]*N.M[2][1]*N.M[3][2] + N.M[0][1]*N.M[2][3]*N.M[3][2] + N.M[0][2]*N.M[2][1]*N.M[3][3] - N.M[0][1]*N.M[2][2]*N.M[3][3];
-       M[0][2] = N.M[0][2]*N.M[1][3]*N.M[3][1] - N.M[0][3]*N.M[1][2]*N.M[3][1] + N.M[0][3]*N.M[1][1]*N.M[3][2] - N.M[0][1]*N.M[1][3]*N.M[3][2] - N.M[0][2]*N.M[1][1]*N.M[3][3] + N.M[0][1]*N.M[1][2]*N.M[3][3];
-       M[0][3] = N.M[0][3]*N.M[1][2]*N.M[2][1] - N.M[0][2]*N.M[1][3]*N.M[2][1] - N.M[0][3]*N.M[1][1]*N.M[2][2] + N.M[0][1]*N.M[1][3]*N.M[2][2] + N.M[0][2]*N.M[1][1]*N.M[2][3] - N.M[0][1]*N.M[1][2]*N.M[2][3];
-       M[1][0] = N.M[1][3]*N.M[2][2]*N.M[3][0] - N.M[1][2]*N.M[2][3]*N.M[3][0] - N.M[1][3]*N.M[2][0]*N.M[3][2] + N.M[1][0]*N.M[2][3]*N.M[3][2] + N.M[1][2]*N.M[2][0]*N.M[3][3] - N.M[1][0]*N.M[2][2]*N.M[3][3];
-       M[1][1] = N.M[0][2]*N.M[2][3]*N.M[3][0] - N.M[0][3]*N.M[2][2]*N.M[3][0] + N.M[0][3]*N.M[2][0]*N.M[3][2] - N.M[0][0]*N.M[2][3]*N.M[3][2] - N.M[0][2]*N.M[2][0]*N.M[3][3] + N.M[0][0]*N.M[2][2]*N.M[3][3];
-       M[1][2] = N.M[0][3]*N.M[1][2]*N.M[3][0] - N.M[0][2]*N.M[1][3]*N.M[3][0] - N.M[0][3]*N.M[1][0]*N.M[3][2] + N.M[0][0]*N.M[1][3]*N.M[3][2] + N.M[0][2]*N.M[1][0]*N.M[3][3] - N.M[0][0]*N.M[1][2]*N.M[3][3];
-       M[1][3] = N.M[0][2]*N.M[1][3]*N.M[2][0] - N.M[0][3]*N.M[1][2]*N.M[2][0] + N.M[0][3]*N.M[1][0]*N.M[2][2] - N.M[0][0]*N.M[1][3]*N.M[2][2] - N.M[0][2]*N.M[1][0]*N.M[2][3] + N.M[0][0]*N.M[1][2]*N.M[2][3];
-       M[2][0] = N.M[1][1]*N.M[2][3]*N.M[3][0] - N.M[1][3]*N.M[2][1]*N.M[3][0] + N.M[1][3]*N.M[2][0]*N.M[3][1] - N.M[1][0]*N.M[2][3]*N.M[3][1] - N.M[1][1]*N.M[2][0]*N.M[3][3] + N.M[1][0]*N.M[2][1]*N.M[3][3];
-       M[2][1] = N.M[0][3]*N.M[2][1]*N.M[3][0] - N.M[0][1]*N.M[2][3]*N.M[3][0] - N.M[0][3]*N.M[2][0]*N.M[3][1] + N.M[0][0]*N.M[2][3]*N.M[3][1] + N.M[0][1]*N.M[2][0]*N.M[3][3] - N.M[0][0]*N.M[2][1]*N.M[3][3];
-       M[2][2] = N.M[0][1]*N.M[1][3]*N.M[3][0] - N.M[0][3]*N.M[1][1]*N.M[3][0] + N.M[0][3]*N.M[1][0]*N.M[3][1] - N.M[0][0]*N.M[1][3]*N.M[3][1] - N.M[0][1]*N.M[1][0]*N.M[3][3] + N.M[0][0]*N.M[1][1]*N.M[3][3];
-       M[2][3] = N.M[0][3]*N.M[1][1]*N.M[2][0] - N.M[0][1]*N.M[1][3]*N.M[2][0] - N.M[0][3]*N.M[1][0]*N.M[2][1] + N.M[0][0]*N.M[1][3]*N.M[2][1] + N.M[0][1]*N.M[1][0]*N.M[2][3] - N.M[0][0]*N.M[1][1]*N.M[2][3];
-       M[3][0] = N.M[1][2]*N.M[2][1]*N.M[3][0] - N.M[1][1]*N.M[2][2]*N.M[3][0] - N.M[1][2]*N.M[2][0]*N.M[3][1] + N.M[1][0]*N.M[2][2]*N.M[3][1] + N.M[1][1]*N.M[2][0]*N.M[3][2] - N.M[1][0]*N.M[2][1]*N.M[3][2];
-       M[3][1] = N.M[0][1]*N.M[2][2]*N.M[3][0] - N.M[0][2]*N.M[2][1]*N.M[3][0] + N.M[0][2]*N.M[2][0]*N.M[3][1] - N.M[0][0]*N.M[2][2]*N.M[3][1] - N.M[0][1]*N.M[2][0]*N.M[3][2] + N.M[0][0]*N.M[2][1]*N.M[3][2];
-       M[3][2] = N.M[0][2]*N.M[1][1]*N.M[3][0] - N.M[0][1]*N.M[1][2]*N.M[3][0] - N.M[0][2]*N.M[1][0]*N.M[3][1] + N.M[0][0]*N.M[1][2]*N.M[3][1] + N.M[0][1]*N.M[1][0]*N.M[3][2] - N.M[0][0]*N.M[1][1]*N.M[3][2];
-       M[3][3] = N.M[0][1]*N.M[1][2]*N.M[2][0] - N.M[0][2]*N.M[1][1]*N.M[2][0] + N.M[0][2]*N.M[1][0]*N.M[2][1] - N.M[0][0]*N.M[1][2]*N.M[2][1] - N.M[0][1]*N.M[1][0]*N.M[2][2] + N.M[0][0]*N.M[1][1]*N.M[2][2];
-
         double a = 1/determinant();
+        Matrix4x4 N = cofactors(), N2;
+        N.transpose();
+        N2 = N.multiply(a);
+        this.M = N2.M;
+    }
+
+    public Matrix4x4 cofactors()
+    {
+        Matrix4x4 N = new Matrix4x4();
         int row, column;
+        double minor3x3[] = new double[9];
+        double sign;
 
         for ( row = 0; row < 4; row++ ) {
             for ( column = 0; column < 4; column++ ) {
-                M[row][column] = a*M[row][column];
+                fillMinor(minor3x3, row, column);
+        if ( (row+column) % 2 == 0 ) {
+                    sign = 1;
+        }
+        else {
+                    sign = -1;
+        }
+                N.M[row][column] =
+                    sign*determinant3x3(minor3x3);
             }
         }
+    return N;
     }
 
     /**
@@ -468,11 +470,30 @@ public class Matrix4x4 extends FundamentalEntity
         return R;
     }
 
-    private double determinant3x3(double a, double b, double c,
-                                  double d, double e, double f,
-                                  double g, double h, double i )
+    private double determinant3x3(double minor3x3[])
     {
-        return a*e*i + d*h*c + g*b*f - c*e*g - f*h*a - i*b*d;
+        //return a*e*i + d*h*c + g*b*f - c*e*g - f*h*a - i*b*d;
+        return minor3x3[0]*minor3x3[4]*minor3x3[8] 
+             + minor3x3[3]*minor3x3[7]*minor3x3[2] 
+             + minor3x3[6]*minor3x3[1]*minor3x3[5] 
+             - minor3x3[2]*minor3x3[4]*minor3x3[6] 
+             - minor3x3[5]*minor3x3[7]*minor3x3[0] 
+             - minor3x3[8]*minor3x3[1]*minor3x3[3];
+    }
+
+    private void fillMinor(double minor3x3[], int rowPivot, int columnPivot)
+    {
+        int i, j;
+        int index = 0;
+
+        for ( i = 0; i < 4; i++ ) {
+            for ( j = 0; j < 4; j++ ) {
+                if ( i != rowPivot && j != columnPivot ) {
+                    minor3x3[index] = M[i][j];
+                    index++;
+                }
+            }
+        }
     }
 
     /**
@@ -481,23 +502,17 @@ public class Matrix4x4 extends FundamentalEntity
      */
     public double determinant()
     {
-/*
-        return M[0][0]*(M[1][1]*M[2][2]-M[2][1]*M[1][2]) - 
-               M[0][1]*(M[1][0]*M[2][2]-M[2][0]*M[1][2]) + 
-               M[0][2]*(M[1][0]*M[2][1]-M[2][0]*M[1][1]);
-*/
-    return M[0][0]*determinant3x3(M[1][1], M[1][2], M[1][3],
-                                  M[2][1], M[2][2], M[2][3],
-                                  M[3][1], M[3][2], M[3][3]) -
-           M[0][1]*determinant3x3(M[1][0], M[1][2], M[1][3],
-                                  M[2][0], M[2][2], M[2][3],
-                                  M[3][0], M[3][2], M[3][3]) +
-           M[0][2]*determinant3x3(M[1][0], M[1][1], M[1][3],
-                                  M[2][0], M[2][1], M[2][3],
-                                  M[3][0], M[3][1], M[3][3]) -
-           M[0][3]*determinant3x3(M[1][0], M[1][1], M[1][2],
-                                  M[2][0], M[2][1], M[2][2],
-                                  M[3][0], M[3][1], M[3][2]);
+        double minor3x3[] = new double[9];
+        int i, j;
+        double acum = 0;
+        int sign;
+
+        i = 0;
+        for ( j = 0, sign = 1; j < 4; j++, sign *= -1 ) {
+            fillMinor(minor3x3, i, j);
+            acum += ((double)sign)*determinant3x3(minor3x3)*M[i][j];
+        }
+        return acum;
     }
 
     /**

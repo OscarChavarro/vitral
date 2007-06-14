@@ -1,17 +1,17 @@
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:41: Warning: argument `inOut_ray' of command @param is not found in the argument list of InfinitePlane::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 27 in file /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:41: Warning: argument `inOut_ray' of command @param is not found in the argument list of InfinitePlane::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 33 in file /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:41: Warning: The following parameters of vsdk::toolkit::environment::geometry::InfinitePlane::doIntersection(Ray inout_rayo) are not documented:
   parameter inout_rayo
 
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/PolyhedralBoundedSolid.java:693: Warning: argument `inOut_ray' of command @param is not found in the argument list of PolyhedralBoundedSolid::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 27 in file /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/PolyhedralBoundedSolid.java:693: Warning: argument `inOut_ray' of command @param is not found in the argument list of PolyhedralBoundedSolid::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 33 in file /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/PolyhedralBoundedSolid.java:693: Warning: The following parameters of vsdk::toolkit::environment::geometry::PolyhedralBoundedSolid::doIntersection(Ray inout_rayo) are not documented:
   parameter inout_rayo
 
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:53: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 

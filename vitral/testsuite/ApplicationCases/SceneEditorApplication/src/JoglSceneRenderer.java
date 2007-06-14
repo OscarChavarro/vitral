@@ -80,6 +80,13 @@ public class JoglSceneRenderer
             JoglLightRenderer.activate(gl, l);
         }
 
+        for ( i = 0; i < s.lights.size(); i++ ) {
+            JoglLightRenderer.draw(gl, s.lights.get(i));
+        }
+
+        // Draw reference grid plane
+        if ( s.showGrid ) drawGridRectangle(gl);
+
         for ( i = 0; i < s.things.size(); i++ ) {
             RendererConfiguration quality;
             gi = s.things.get(i);
@@ -121,13 +128,6 @@ public class JoglSceneRenderer
             gl.glPopMatrix();
 
         }
-
-        for ( i = 0; i < s.lights.size(); i++ ) {
-            JoglLightRenderer.draw(gl, s.lights.get(i));
-        }
-
-        // Draw reference grid plane
-        if ( s.showGrid ) drawGridRectangle(gl);
 
     }
 

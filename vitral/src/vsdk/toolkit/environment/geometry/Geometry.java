@@ -8,7 +8,9 @@ package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.gui.ProgressMonitor;
 
 /**
 Every geometric entity (prefer not to call it "Object", for not confusing
@@ -149,8 +151,70 @@ public abstract class Geometry extends Entity {
     */
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
-    return OUTSIDE;
+        return OUTSIDE;
     }
+
+    /**
+    This method implements a general voxelization strategy based on 
+    containment test. Note that in the case of multiple fragment geometries
+    (i.e. meshes and polylines) this method is usually inefficient, and
+    for that cases voxelization should be explicit, and overload this method.
+    Current method is usually well behaved for basic solid models.
+    Note that `reporter` can be null.
+    */
+    public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    {
+        int nx = vv.getXSize();
+        int ny = vv.getYSize();
+        int nz = vv.getZSize();
+        int nmax;
+        double minmax[] = getMinMax();
+        double greaterScale, sx, sy, sz;
+
+        sx = minmax[3]-minmax[0];
+        sy = minmax[4]-minmax[1];
+        sz = minmax[5]-minmax[2];
+        greaterScale = sx;
+        if ( sy > greaterScale ) {
+            greaterScale = sy;
+        }
+        if ( sz > greaterScale ) {
+            greaterScale = sz;
+        }
+
+        nmax = nx;
+        if ( ny > nmax ) nmax = ny;
+        if ( nz > nmax ) nmax = nz;
+        int containmentStatus;
+        int x, y, z;
+        Vector3D p = new Vector3D();
+        Vector3D transformedP;
+
+        if ( reporter != null ) {
+            reporter.begin();
+        }
+        for ( x = 0; x < nx; x++ ) {
+            for ( y = 0; y < ny; y++ ) {
+                if ( reporter != null ) {
+                    reporter.update(0, nx*ny, x*ny);
+                }
+                for ( z = 0; z < nz; z++ ) {
+                    p = vv.getVoxelPosition(x, y, z);
+                    transformedP = M.multiply(p);
+                    containmentStatus = doContainmentTest(
+                            transformedP, (1/((double)nmax) * greaterScale));
+                    if ( containmentStatus == INSIDE ||
+                         containmentStatus == LIMIT ) {
+                        vv.putVoxel(x, y, z, (byte)-1);
+                    }
+                }
+            }
+        }
+        if ( reporter != null ) {
+            reporter.end();
+        }
+    }
+
 }
 
 //===========================================================================

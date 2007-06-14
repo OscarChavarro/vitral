@@ -85,7 +85,8 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         }
 
         //- 3. If there is no glList, create it ---------------------------
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
             item = new _JoglRGBAImageRendererImageAssociation();

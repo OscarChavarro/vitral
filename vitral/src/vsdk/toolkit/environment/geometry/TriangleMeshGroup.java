@@ -11,8 +11,10 @@ package vsdk.toolkit.environment.geometry;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.gui.ProgressMonitor;
 
 public class TriangleMeshGroup extends Surface {
     /// Check the general attribute description in superclass Entity.
@@ -248,6 +250,19 @@ public class TriangleMeshGroup extends Surface {
         return "TriangleMeshGroup < #Mesh: " + this.meshes.size() + " >";
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doVoxelization.
+    */
+    public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    {
+    int i;
+
+        // Chain of responsability behavior design pattern with TriangleMesh
+        for ( i= 0; i< meshes.size(); i++ ) {
+            meshes.get(i).doVoxelization(vv, M, reporter);
+    }
+    }
 
 
 }

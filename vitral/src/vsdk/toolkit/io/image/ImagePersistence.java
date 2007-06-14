@@ -249,8 +249,8 @@ public class ImagePersistence extends PersistenceElement
     {
         try {
             BufferedOutputStream writer;
-
-            writer = new BufferedOutputStream(new FileOutputStream(fd));
+        FileOutputStream fos = new FileOutputStream(fd);
+            writer = new BufferedOutputStream(fos);
 
             String linea1 = "P6\n";
             String linea2 = img.getXSize() + " " + img.getYSize() + "\n";
@@ -277,6 +277,7 @@ public class ImagePersistence extends PersistenceElement
 
             writer.flush();
             writer.close();
+        fos.close();
         }
         catch (Exception e) {
             return false;
