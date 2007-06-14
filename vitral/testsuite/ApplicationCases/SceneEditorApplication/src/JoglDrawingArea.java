@@ -365,6 +365,7 @@ public class JoglDrawingArea implements
         else {
             this.viewportResizeNeeded = true;
             projectedViewRenderer.draw(gl);
+            //canvas.swapBuffers();
         }
 
         //-----------------------------------------------------------------

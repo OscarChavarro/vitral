@@ -286,8 +286,13 @@ Changes in 2007 may 29-30 revition
   - ReaderObj normalizes typical .obj aligment (Y is up) to typical
     Aquynza/VitralSDK alignment (Z is up)
 
-Changes in 2007 june 2 revition
+Changes in 2007 june 3 revition
   - Offline rendering generation (Pbuffer based technique) of orthogonal views
     for a selected object in SceneEditorApplication, now complemented with
     use of main GL context for use in computers without 3D acceleration
   - ImageProcessing.processDistanceFieldWithArray
+
+Changes in 2007 june 4 revition
+  - SearchEngineFor3DModels compatible with machines without Pbuffer
+  - SearchEngineFor3DModels computes Fourier coefficients for radial functions
+    over projected views' distance fields

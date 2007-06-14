@@ -27,8 +27,9 @@ public class SphericalHarmonicShapeDescriptor extends ShapeDescriptor
     private static final int numberOfSpheres = 32;
     private static final int numberOfHarmonics = 16;
 
-    public SphericalHarmonicShapeDescriptor()
+    public SphericalHarmonicShapeDescriptor(String label)
     {
+    super(label);
         featureVector = new double[numberOfSpheres*numberOfHarmonics];
     }
 

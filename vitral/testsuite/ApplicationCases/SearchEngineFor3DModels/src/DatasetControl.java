@@ -20,7 +20,19 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.util.StringTokenizer;
 
+// Awt / swing classes
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.JFrame;
+
+// JOGL classes
+import javax.media.opengl.GL;
+import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLAutoDrawable;
+
 // VSDK Classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
@@ -46,18 +58,27 @@ import vsdk.toolkit.processing.ImageProcessing;
 Current application is the VitralSDK implementation of a search engine for
 3d models, as proposed in [FUNK2003].
 */
-public class DatasetControl
+public class DatasetControl implements GLEventListener
 {
-    private static JoglOfflineRenderer offlineRenderer = null;
-    private static int distanceFieldSide = 64;
-    private static JoglProjectedViewRenderer projectedViewRenderer = null;
+    private JoglOfflineRenderer offlineRenderer = null;
+    private int distanceFieldSide = 64;
+    private JoglProjectedViewRenderer projectedViewRenderer = null;
+    private String args[];
+    private GLCanvas canvas;
+
+    private DatasetControl(String args[])
+    {
+        this.args = args;
+        projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
+        offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
+    }
 
     /**
     Given a sphere's texture map codified for ocuppancy test, this method
     computes a spherical harmonic (Fourier transform) and inserts the first
     coefficient in to the shape description.
     */
-    private static boolean
+    private boolean
     computeSphericalHarmonicsCoefficients(IndexedColorImage texture,
                            SphericalHarmonicShapeDescriptor featureVector,
                            int groupIndex, double r)
@@ -97,7 +118,7 @@ public class DatasetControl
     in to spheres with (texture) maps associated with it, as described in
     [FUNK2003].4.2.
     */
-    private static boolean processSphericalHarmonics(VoxelVolume vv,
+    private boolean processSphericalHarmonics(VoxelVolume vv,
         int groupIndex, SphericalHarmonicShapeDescriptor featureVector,
         Vector3D cm, double averageDistance)
     {
@@ -141,13 +162,12 @@ public class DatasetControl
         }
 
         //-----------------------------------------------------------------
-    //ImagePersistence.exportJPG(new File("sphere"+(100+groupIndex)+".jpg"),
-        //    texture);
+        //vsdk.toolkit.io.image.ImagePersistence.exportJPG(new File("sphere"+(100+groupIndex)+".jpg"), texture);
         return true;
     }
 
-    private static Image
-    createProjectedView(SimpleBodyGroup referenceBodies, int cam)
+    private Image
+    createProjectedView(GL gl, SimpleBodyGroup referenceBodies, int cam)
     {
         //- Will render a normalized body inside the unit cube ------------
         double minmax[];
@@ -155,64 +175,54 @@ public class DatasetControl
         int i;
 
         Vector3D p;
-        {
-            //-----------------------------------------------------------------
-            minmax = referenceBodies.getMinMax();
-            Vector3D min, max, s;
-            min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-            max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-            s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
 
-            double maxsize = s.x;
-            if ( s.y > maxsize ) maxsize = s.y;
-            if ( s.z > maxsize ) maxsize = s.z;
-            // The 95% scale factor is to allow a full render of the object to
-            // fit inside the rendered view
-            s.x = s.y = s.z = (2/maxsize) * 0.95;
+        //-----------------------------------------------------------------
+        minmax = referenceBodies.getMinMax();
+        Vector3D min, max, s;
+        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
 
-            p = max.add(min);
-            p = p.multiply(-1/maxsize);
+        double maxsize = s.x;
+        if ( s.y > maxsize ) maxsize = s.y;
+        if ( s.z > maxsize ) maxsize = s.z;
+        // The 95% scale factor is to allow a full render of the object to
+        // fit inside the rendered view
+        s.x = s.y = s.z = (2/maxsize) * 0.95;
 
-            bodySet.setPosition(p);
-            bodySet.setScale(s);
-            //-----------------------------------------------------------------
-            SimpleBody referenceBody;
-            SimpleBody framedBody;
+        p = max.add(min);
+        p = p.multiply(-1/maxsize);
 
-            for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
-                referenceBody = referenceBodies.getBodies().get(i);
-                framedBody = new SimpleBody();
-                framedBody.setGeometry(referenceBody.getGeometry());
-                framedBody.setPosition(referenceBody.getPosition());
-                framedBody.setRotation(referenceBody.getRotation());
-                framedBody.setRotationInverse(referenceBody.getRotationInverse());
-                framedBody.setMaterial(new Material());
-                bodySet.getBodies().add(framedBody);
-            }
-            //-----------------------------------------------------------------
+        bodySet.setPosition(p);
+        bodySet.setScale(s);
+
+        //-----------------------------------------------------------------
+        SimpleBody referenceBody;
+        SimpleBody framedBody;
+
+        for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
+            referenceBody = referenceBodies.getBodies().get(i);
+            framedBody = new SimpleBody();
+            framedBody.setGeometry(referenceBody.getGeometry());
+            framedBody.setPosition(referenceBody.getPosition());
+            framedBody.setRotation(referenceBody.getRotation());
+            framedBody.setRotationInverse(referenceBody.getRotationInverse());
+            framedBody.setMaterial(new Material());
+            bodySet.getBodies().add(framedBody);
         }
 
         //- Render will proceed in a PBuffer ------------------------------
         IndexedColorImage distanceFieldIndexed;
 
-    if ( projectedViewRenderer == null ) {
-            projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
-    }
-
         projectedViewRenderer.configureScene(bodySet, cam);
-
-    if ( offlineRenderer == null ) {
-            offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
-    }
-
-        //if ( offlineRenderer.isPbufferSupported() ) {
+        if ( offlineRenderer.isPbufferSupported() ) {
             offlineRenderer.execute();
             offlineRenderer.waitForMe();
-        //}
-        //else {
-        //    this.viewportResizeNeeded = true;
-        //    projectedViewRenderer.draw(gl);
-        //}
+        }
+        else {
+            projectedViewRenderer.draw(gl);
+            canvas.swapBuffers();
+        }
 
         //-----------------------------------------------------------------
         Image finalImage;
@@ -223,9 +233,7 @@ public class DatasetControl
         ImageProcessing.processDistanceFieldWithArray(projectedViewRenderer.image, distanceFieldIndexed, 1);
         ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);
 
-        RGBAImage distanceFieldRgba;
-        distanceFieldRgba = distanceFieldIndexed.exportToRgbaImage();
-        finalImage = distanceFieldRgba;
+        finalImage = distanceFieldIndexed;
         System.out.println("Ok!");
 
         //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./test" + cam + ".ppm"), finalImage);
@@ -234,26 +242,108 @@ public class DatasetControl
         return finalImage;
     }
 
-    private static void
-    processProjectedViews(SimpleBodyGroup referenceBodies)
+    /**
+    For each one of the 13 views as described in [FUNK2003].5, and figure
+    [FUNK2003].8. this method executes the following steps:
+      - Calculate the distance field for the given view
+      - Extracts 32 radial functions from the distance field
+      - Computes the first 16 harmonics for each radial function
+        (trigonometrics decomposition)
+    */
+    private boolean
+    processProjectedViews(GL gl, SimpleBodyGroup referenceBodies,
+        ArrayList<ShapeDescriptor> descriptorsList)
     {
-        Image texture;
-    int i;
+        Image distanceField;
+        int i, j, k, val;
+        double r, u, v, tetha;
+        ColorRgb c;
+        IndexedColorImage radialFunction;
+
+        radialFunction = new IndexedColorImage();
+        radialFunction.init(64, 64);
+        double sphericalHarmonicsR[] = new double[16];
+        double sphericalHarmonicsI[] = new double[16];
+        SphericalHarmonicShapeDescriptor featureVector;
+        boolean status;
+        double hi, hr;
 
         for ( i = 1; i <= 13; i++ ) {
-            texture = createProjectedView(referenceBodies, i);
-            if ( texture == null ) {
-        System.err.println("Error processing projected texture!");
+            //- Generate distance field for i-th projection -------------------
+            distanceField = createProjectedView(gl, referenceBodies, i);
+            if ( distanceField == null ) {
+                System.err.println("Error processing projected texture!");
                 System.exit(1);
             }
+
+            //- Code to debug distance field to radial functions ... ----------
+            /*
+            int x, y;
+
+            for ( x = 0; x < 64; x++ ) {
+                for ( y = 0; y < 64; y++ ) {
+                    val = 100;
+                    if ( x < 32 && y < 32 ) {
+                        val = 0;
+                    }
+                    else if ( x >= 32 && y < 32 ) {
+                        val = 255/3;
+                    }
+                    else if ( x < 32 && y >= 32 ) {
+                        val = 255/2;
+                    }
+                    else if ( x >= 32 && y >= 32 ) {
+                        val = 255;
+                    }
+                    //r = Math.sqrt((32.0-(double)x)*(32.0-(double)x)+(32.0-(double)y)*(32.0-(double)y));
+                    //val = 255 - (int)(r * (255.0/32.0));
+                    ((IndexedColorImage)distanceField).putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(val));
+                }
+            }
+            */
+            //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./test" + i + ".ppm"), distanceField);
+
+            //- Calculate Fourier coefficients for radial functions -----------
+            featureVector = new SphericalHarmonicShapeDescriptor("PROJECTED_VIEW_" + i);
+            for ( j = 0; j < 32; j++ ) {
+                // r varies from 0 to 0.5
+                r = (((double)j)/(((double)distanceFieldSide)));
+                for ( k = 0; k < 64; k++ ) {
+                    tetha = 2*Math.PI * ((double)k) / 64.0;
+                    u = 0.5 + r * Math.cos(tetha);
+                    v = 0.5 - r * Math.sin(tetha);
+                    c = distanceField.getColorRgbBiLinear(u, v);
+                    val = (int)(((c.r + c.g + c.b)/3.0) * 255.0);
+                    radialFunction.putPixel(k, 32, VSDK.unsigned8BitInteger2signedByte(val));
+                }
+                status = SpharmonicKitWrapper.calculateSphericalHarmonics(
+                    radialFunction.getRawImage(), sphericalHarmonicsR, sphericalHarmonicsI);
+
+                if ( !status ) {
+                    return false;
+                }
+                else {
+                    for ( k = 0; k < sphericalHarmonicsR.length; k++ ) {
+                        hr = sphericalHarmonicsR[k];
+                        hi = sphericalHarmonicsI[k];
+                        featureVector.setFeature(j, k, hr, hi); 
+                    }
+                }
+
+                //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new File("circle"+(100+i)+"_" + (100+j) + ".ppm"), radialFunction);
+
+            }
+            descriptorsList.add(featureVector);
+
         }
+        return true;
     }
 
     /**
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
     */
-    public static GeometryMetadata analyzeModel(String filename)
+    public GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection)
     {
         //- Variables -----------------------------------------------------
         ArrayList<SimpleBody> things;
@@ -261,7 +351,7 @@ public class DatasetControl
         VoxelVolume vv;
         Geometry referenceGeometry;
         Vector3D cm; // Center of mass for vv, in VoxelVolume coordinates
-    int x, y, z;
+        int x, y, z;
 
         vv = new VoxelVolume();
         // Spherical harmonic bandwitdh config. as defined at [FUNK2003].4.1.
@@ -298,9 +388,9 @@ public class DatasetControl
             System.out.print("    . Processing spherical harmonics ... ");
 
             cm = vv.doCenterOfMass();
-        int numberOfNonZeroVoxels = 0;
-        double d; // Distance between a given voxel and center of mass
-        Vector3D p; // Position of voxel
+            int numberOfNonZeroVoxels = 0;
+            double d; // Distance between a given voxel and center of mass
+            Vector3D p; // Position of voxel
             double averageDistance = 0;
 
             for ( x = 0; x < vv.getXSize(); x++ ) {
@@ -308,17 +398,17 @@ public class DatasetControl
                     for ( z = 0; z < vv.getZSize(); z++ ) {
                         if ( vv.getVoxel(x, y, z) != 0 ) {
                             p = vv.getVoxelPosition(x, y, z);
-                averageDistance += VSDK.vectorDistance(cm, p);
-                numberOfNonZeroVoxels++;
-            }
+                            averageDistance += VSDK.vectorDistance(cm, p);
+                            numberOfNonZeroVoxels++;
+                        }
                     }
                 }
             }
-        averageDistance /= (double)numberOfNonZeroVoxels;
+            averageDistance /= (double)numberOfNonZeroVoxels;
 
             //- Spherical harmonic shape descriptor extraction ------------
             SphericalHarmonicShapeDescriptor featureVector;
-            featureVector = new SphericalHarmonicShapeDescriptor();
+            featureVector = new SphericalHarmonicShapeDescriptor("SPHERICAL_HARMONIC_3D");
             for ( i = 0; i < 32; i++ ) {
                 if ( !processSphericalHarmonics(vv, i, featureVector, cm,
                           averageDistance) ) {
@@ -327,19 +417,19 @@ public class DatasetControl
                 }
             }
             metadata.getDescriptors().add(featureVector);
-        System.out.println("Ok!");
+            System.out.println("Ok!");
 
             //- Projection views image descriptor extraction --------------
             SimpleBodyGroup bodySet;
             SimpleBody referenceBody;
 
             bodySet = new SimpleBodyGroup();
-            for ( i = 0; i < things.size(); i++ ) {
+            for ( i = 0; i < things.size() && withProjection; i++ ) {
                 referenceBody = things.get(i);
                 bodySet.getBodies().add(referenceBody);
             }
 
-            processProjectedViews(bodySet);
+            processProjectedViews(gl, bodySet, metadata.getDescriptors());
         }
         catch ( Exception e ) {
             System.err.println("ERROR: Can not open file " + filename);
@@ -355,12 +445,13 @@ public class DatasetControl
     return the -tolerance closest models. For example, for an equal behavior
     to the search engine described in [FUNK2003], this value should be -16.0.
     */
-    private static ArrayList <String> matchModel(
+    private ArrayList <String> matchModel(
+        GL gl,
         String filename,
         ArrayList<GeometryMetadata> descriptorsArray,
         double tolerance)
     {
-        GeometryMetadata m = analyzeModel(filename);
+        GeometryMetadata m = analyzeModel(gl, filename, false);
         int i;
         double Ls;
 
@@ -370,7 +461,7 @@ public class DatasetControl
         for ( i = 0; i < descriptorsArray.size(); i++ ) {
             // Takes into consideration the euclidean distance as indicated
             // in [FUNK2003].4 (L2 Minskowski distance).
-            Ls = m.doMinskowskiDistance(descriptorsArray.get(i), 2);
+            Ls = m.doMinskowskiDistance(descriptorsArray.get(i), 2, "SPHERICAL_HARMONIC_3D");
             System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
                 " to " + descriptorsArray.get(i).getFilename());
             if ( Ls < tolerance ) {
@@ -381,58 +472,7 @@ public class DatasetControl
         return results;
     }
 
-    /**
-    Returns null if gets error... can also return Exception
-    */
-    private static GeometryMetadata
-    readEntry(BufferedInputStream reader) throws Exception {
-        GeometryMetadata m;
-        byte subChunkId;
-        byte chunkId;
-        int bytesToSkip;
-        double vector[];
-        int i;
-        ShapeDescriptor shapeDescriptor;
-
-        chunkId = ShapeDescriptorPersistence.importByte(reader);
-        switch ( chunkId ) {
-          case ShapeDescriptorPersistence.TYPE_STRING:
-            m = new GeometryMetadata();
-            m.setFilename(ShapeDescriptorPersistence.readAsciiString(reader));
-            do {
-                subChunkId = ShapeDescriptorPersistence.importByte(reader);
-                switch( subChunkId ) {
-                  case ShapeDescriptorPersistence.TYPE_ENDING:
-                    break;
-                  case ShapeDescriptorPersistence.TYPE_SPHERICAL_HARMONIC:
-                    bytesToSkip = ShapeDescriptorPersistence.readIntBE(reader);
-                    vector = new double[bytesToSkip/4];
-                    for ( i = 0; i < vector.length; i++ ) {
-                        vector[i] =
-                            ShapeDescriptorPersistence.readFloatBE(reader);
-                    }
-                    shapeDescriptor = new SphericalHarmonicShapeDescriptor();
-                    shapeDescriptor.setFeatureVector(vector);
-                    m.getDescriptors().add(shapeDescriptor);
-                    reader.skip(bytesToSkip - vector.length*4);
-                    break;
-                  default:
-                    bytesToSkip = ShapeDescriptorPersistence.readIntBE(reader);
-                    System.out.println("Skipping bytes: " + bytesToSkip);
-                    reader.skip(bytesToSkip);
-                    break;
-                }
-            } while ( subChunkId != ShapeDescriptorPersistence.TYPE_ENDING );
-            break;
-          default:
-            System.err.println("ERROR importing database (wrong format " +
-                chunkId + ")!");
-            return null;
-        }
-        return m;
-    }
-
-    private static void
+    private void
     readDatabase(ArrayList<GeometryMetadata> descriptorsArray)
     {
         File fd = new File("etc/metadata.bin");
@@ -445,7 +485,7 @@ public class DatasetControl
             reader = new BufferedInputStream(fis);
 
             while ( reader.available() > 0 ) {
-                m = readEntry(reader);
+                m = ShapeDescriptorPersistence.importGeometryMetadata(reader);
                 if ( m != null ) {
                     descriptorsArray.add(m);
                 }
@@ -460,7 +500,7 @@ public class DatasetControl
         }
     }
 
-    private static void
+    private void
     saveDatabase(ArrayList<GeometryMetadata> descriptorsArray)
     {
         GeometryMetadata m;
@@ -469,21 +509,13 @@ public class DatasetControl
         File fd = new File("etc/metadata.bin");
         FileOutputStream fos;
         BufferedOutputStream writer;
-        ArrayList<ShapeDescriptor> list;
 
         try {
             fos = new FileOutputStream(fd);
             writer = new BufferedOutputStream(fos);
             for ( i = 0; i < descriptorsArray.size(); i++ ) {
                 m = descriptorsArray.get(i);
-                ShapeDescriptorPersistence.exportByte(writer, 
-                    ShapeDescriptorPersistence.TYPE_STRING);
-                ShapeDescriptorPersistence.writeAsciiString(
-                    writer, m.getFilename());
-                list = m.getDescriptors();
-                ShapeDescriptorPersistence.exportDescriptorMetadata(
-                    writer, list);
-                ShapeDescriptorPersistence.exportEnding(writer);
+                ShapeDescriptorPersistence.exportGeometryMetadata(writer, m);
             }
             writer.flush();
             writer.close();
@@ -497,7 +529,7 @@ public class DatasetControl
     /**
     This method implements the indexing step as described in [FUNK2003].3.2.
     */
-    public static void indexFiles(String filenamesList[],
+    public void indexFiles(GL gl, String filenamesList[],
         ArrayList<GeometryMetadata> descriptorsArray)
     {
         int i, j;
@@ -515,14 +547,14 @@ public class DatasetControl
             }
 
             // Insert new model in database
-            m = analyzeModel(filenamesList[i]);
+            m = analyzeModel(gl, filenamesList[i], true);
             if ( m != null ) {
                 descriptorsArray.add(m);
             }
         }
     }
 
-    public static void main(String args[])
+    public void runApplication(GL gl)
     {
         ArrayList<GeometryMetadata> descriptorsArray;
         descriptorsArray = new ArrayList<GeometryMetadata>();
@@ -530,17 +562,17 @@ public class DatasetControl
         if ( args.length < 1 ) {
             System.err.println("Usage: java DatasetControl command files...");
             System.err.println("Commands are: add, searchModel");
-            return;
+            System.exit(0);
         }
         if ( args[0].equals("add") ) {
             readDatabase(descriptorsArray);
-            indexFiles(args, descriptorsArray);
+            indexFiles(gl, args, descriptorsArray);
             saveDatabase(descriptorsArray);
         }
         else if ( args[0].equals("searchModel") ) {
             ArrayList <String> similarModels;
             readDatabase(descriptorsArray);
-            similarModels = matchModel(args[1], descriptorsArray, 1);
+            similarModels = matchModel(gl, args[1], descriptorsArray, 1);
             System.out.println("Founded " + similarModels.size() +
                 " similar objects:");
             for ( int i = 0; i < similarModels.size(); i++ ) {
@@ -549,6 +581,57 @@ public class DatasetControl
         }
         else {
             System.err.println("Invalid command " + args[0]);
+        }
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void init(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
+        ;
+    }
+
+    /** Called to indicate the drawing surface has been moved and/or resized */
+    public void reshape (GLAutoDrawable drawable,
+                         int x,
+                         int y,
+                         int width,
+                         int height) {
+        GL gl = drawable.getGL();
+        gl.glViewport(0, 0, width, height); 
+    }   
+
+    /** Called by drawable to initiate drawing */
+    public void display(GLAutoDrawable drawable) {
+        GL gl = drawable.getGL();
+
+        runApplication(gl);
+        System.exit(1);
+    }
+
+    public static void main(String args[])
+    {
+        DatasetControl instance = new DatasetControl(args);
+        if ( instance.offlineRenderer.isPbufferSupported() ) {
+            instance.runApplication(null);
+        }
+        else {
+            // Create application based GUI
+            JFrame frame;
+            Dimension size;
+
+            instance.canvas = new GLCanvas();
+            instance.canvas.addGLEventListener(instance);
+            frame = new JFrame("VITRAL offline renderer window - do not hide");
+            frame.add(instance.canvas, BorderLayout.CENTER);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            size = new Dimension(instance.distanceFieldSide*2, instance.distanceFieldSide*2);
+            frame.setMinimumSize(size);
+            frame.setSize(size);
+            frame.setVisible(true);
         }
     }
 }

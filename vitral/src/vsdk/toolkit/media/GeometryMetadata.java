@@ -47,29 +47,40 @@ public class GeometryMetadata extends MediaEntity
     distance in the Nth-dimensional space.  If s == 2, this method returns
     the euclidean distance in the Nth-dimensional space.
     */
-    public double doMinskowskiDistance(GeometryMetadata other, double s)
+    public double doMinskowskiDistance(GeometryMetadata other, double s, String subGroup)
     {
         if ( this.descriptorsList.size() !=
              other.descriptorsList.size() ) {
             return Double.MAX_VALUE;
         }
         int i, j;
-        ShapeDescriptor a, b;
+        ShapeDescriptor a = null, b = null, aa, bb;
         double av[], bv[];
         double acum = 0;
 
         for ( i = 0; i < this.descriptorsList.size(); i++ ) {
-            a = this.descriptorsList.get(i);
-            b = other.descriptorsList.get(i);
-            av = a.getFeatureVector();
-            bv = b.getFeatureVector();
-            if ( av.length != bv.length ) {
-                return Double.MAX_VALUE;
-            }
-            for ( j = 0; j < av.length; j++ ) {
-                acum += Math.pow(Math.abs(av[j] - bv[j]), s);
-            }
+            aa = this.descriptorsList.get(i);
+            bb = other.descriptorsList.get(i);
+        if ( aa.getLabel().equals(subGroup) ) {
+                a = aa;
         }
+        if ( bb.getLabel().equals(subGroup) ) {
+                b = bb;
+        }
+        }
+
+        if ( a == null || b == null ) {
+            return Double.MAX_VALUE;
+        }
+        av = a.getFeatureVector();
+        bv = b.getFeatureVector();
+        if ( av.length != bv.length ) {
+            return Double.MAX_VALUE;
+        }
+        for ( j = 0; j < av.length; j++ ) {
+            acum += Math.pow(Math.abs(av[j] - bv[j]), s);
+        }
+
         return Math.pow(acum, 1/s);
     }
 
