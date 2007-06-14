@@ -159,7 +159,7 @@ public class JoglDrawingArea implements
               composed.M[2][3] = position.z;
               translationGizmo.setTransformationMatrix(composed);
 
-              JoglTranslateGizmoRenderer.draw(gl, translationGizmo, position);
+              JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
             }
         }
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
@@ -331,12 +331,79 @@ public class JoglDrawingArea implements
            cameraController.processMouseReleasedEventAwt(e) ) {
           canvas.repaint();
       }
+      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                theScene.selectedThingIndex >= 0 ) {
+          Vector3D position;
+          RayableObject gi;
+
+          gi = theScene.things.get(theScene.selectedThingIndex);
+
+          Matrix4x4 composed;
+
+          position = gi.getPosition();
+          composed = new Matrix4x4(gi.getRotation());
+          composed.M[0][3] = position.x;
+          composed.M[1][3] = position.y;
+          composed.M[2][3] = position.z;
+
+          translationGizmo.setCamera(theScene.activeCamera);
+          translationGizmo.setTransformationMatrix(composed);
+          if ( translationGizmo.processMouseReleasedEventAwt(e) ) {
+              composed = translationGizmo.getTransformationMatrix();
+              position.x = composed.M[0][3];
+              position.y = composed.M[1][3];
+              position.z = composed.M[2][3];
+              composed.M[0][3] = 0;
+              composed.M[1][3] = 0;
+              composed.M[2][3] = 0;
+              gi.setPosition(position);
+              gi.setRotation(composed);
+              composed = new Matrix4x4(composed);
+              composed.invert();
+              gi.setRotationInverse(composed);
+              canvas.repaint();
+          }
+      }
+
   }
 
   public void mouseClicked(MouseEvent e) {
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMouseClickedEventAwt(e) ) {
           canvas.repaint();
+      }
+      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                theScene.selectedThingIndex >= 0 ) {
+          Vector3D position;
+          RayableObject gi;
+
+          gi = theScene.things.get(theScene.selectedThingIndex);
+
+          Matrix4x4 composed;
+
+          position = gi.getPosition();
+          composed = new Matrix4x4(gi.getRotation());
+          composed.M[0][3] = position.x;
+          composed.M[1][3] = position.y;
+          composed.M[2][3] = position.z;
+
+          translationGizmo.setCamera(theScene.activeCamera);
+          translationGizmo.setTransformationMatrix(composed);
+          if ( translationGizmo.processMouseClickedEventAwt(e) ) {
+              composed = translationGizmo.getTransformationMatrix();
+              position.x = composed.M[0][3];
+              position.y = composed.M[1][3];
+              position.z = composed.M[2][3];
+              composed.M[0][3] = 0;
+              composed.M[1][3] = 0;
+              composed.M[2][3] = 0;
+              gi.setPosition(position);
+              gi.setRotation(composed);
+              composed = new Matrix4x4(composed);
+              composed.invert();
+              gi.setRotationInverse(composed);
+              canvas.repaint();
+          }
       }
   }
 
@@ -345,12 +412,78 @@ public class JoglDrawingArea implements
            cameraController.processMouseMovedEventAwt(e) ) {
           canvas.repaint();
       }
+      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                theScene.selectedThingIndex >= 0 ) {
+          Vector3D position;
+          RayableObject gi;
+
+          gi = theScene.things.get(theScene.selectedThingIndex);
+
+          Matrix4x4 composed;
+
+          position = gi.getPosition();
+          composed = new Matrix4x4(gi.getRotation());
+          composed.M[0][3] = position.x;
+          composed.M[1][3] = position.y;
+          composed.M[2][3] = position.z;
+
+          translationGizmo.setCamera(theScene.activeCamera);
+          translationGizmo.setTransformationMatrix(composed);
+          if ( translationGizmo.processMouseMovedEventAwt(e) ) {
+              composed = translationGizmo.getTransformationMatrix();
+              position.x = composed.M[0][3];
+              position.y = composed.M[1][3];
+              position.z = composed.M[2][3];
+              composed.M[0][3] = 0;
+              composed.M[1][3] = 0;
+              composed.M[2][3] = 0;
+              gi.setPosition(position);
+              gi.setRotation(composed);
+              composed = new Matrix4x4(composed);
+              composed.invert();
+              gi.setRotationInverse(composed);
+              canvas.repaint();
+          }
+      }
   }
 
   public void mouseDragged(MouseEvent e) {
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMouseDraggedEventAwt(e) ) {
           canvas.repaint();
+      }
+      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                theScene.selectedThingIndex >= 0 ) {
+          Vector3D position;
+          RayableObject gi;
+
+          gi = theScene.things.get(theScene.selectedThingIndex);
+
+          Matrix4x4 composed;
+
+          position = gi.getPosition();
+          composed = new Matrix4x4(gi.getRotation());
+          composed.M[0][3] = position.x;
+          composed.M[1][3] = position.y;
+          composed.M[2][3] = position.z;
+
+          translationGizmo.setCamera(theScene.activeCamera);
+          translationGizmo.setTransformationMatrix(composed);
+          if ( translationGizmo.processMouseDraggedEventAwt(e) ) {
+              composed = translationGizmo.getTransformationMatrix();
+              position.x = composed.M[0][3];
+              position.y = composed.M[1][3];
+              position.z = composed.M[2][3];
+              composed.M[0][3] = 0;
+              composed.M[1][3] = 0;
+              composed.M[2][3] = 0;
+              gi.setPosition(position);
+              gi.setRotation(composed);
+              composed = new Matrix4x4(composed);
+              composed.invert();
+              gi.setRotationInverse(composed);
+              canvas.repaint();
+          }
       }
   }
 

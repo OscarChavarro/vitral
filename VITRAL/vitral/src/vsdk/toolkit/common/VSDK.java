@@ -13,7 +13,7 @@ import vsdk.toolkit.common.Vector3D;
 
 public class VSDK
 {
-    public static final double EPSILON = Double.MIN_VALUE*10;
+    public static final double EPSILON = 1e-6;
 
     public static boolean equals(double a, double b)
     {

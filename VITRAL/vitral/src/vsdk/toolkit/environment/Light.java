@@ -45,6 +45,12 @@ public class Light
         return lightNumber;
     }
 
+    public void setId(int i)
+    {
+        id = i;
+        lightNumber = i+1;
+    }
+
     public void setAmbient(ColorRgb a)
     {
         this.ambient=new ColorRgb(a);
@@ -63,6 +69,11 @@ public class Light
     public Vector3D getPosition()
     {
         return lvec;
+    }
+
+    public void setPosition(Vector3D pos)
+    {
+        lvec = new Vector3D(pos);
     }
     
     public ColorRgb getAmbient()

@@ -447,7 +447,7 @@ public class ReaderObj {
           StringTokenizer stMat = new StringTokenizer(cad, " ");
           stMat.nextToken(); //d
 
-          matAct.setAlpha(Float.parseFloat(stMat.nextToken()));
+          matAct.setOpacity(Float.parseFloat(stMat.nextToken()));
         }
         if (cad.startsWith("newmtl")) {
           StringTokenizer stMat = new StringTokenizer(cad, " ");

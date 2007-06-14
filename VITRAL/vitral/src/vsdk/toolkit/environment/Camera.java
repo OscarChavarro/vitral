@@ -12,6 +12,7 @@
 //=   of coordinate base system and access maintaining ortoghonality.       =
 //= - November 24 2005 - Oscar Chavarro: new generateRay algorithm, now     =
 //=   consistent with JOGL/OpenGL transformation interpretation.            =
+//= - April 7 2006 - Oscar Chavarro: calculateUPlaneAtPixel, proyectPoint   =
 //===========================================================================
 
 package vsdk.toolkit.environment;
@@ -20,6 +21,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
 
 public class Camera {
     // Basic Camera Model
@@ -60,7 +62,7 @@ public class Camera {
     private double viewport_ysize;
 
     // Vectores privados que se preprocesan para agilizar los calculos
-    private Vector3D dx, dy, _dir, upWithScale, leftWithScale;
+    private Vector3D dx, dy, _dir, upWithScale, rightWithScale;
     
     public Camera() 
     {
@@ -281,23 +283,12 @@ public class Camera {
     {
         up.normalize();
         left.normalize();
-
-        /*
-        // MIT raytracer code version
-        double fl = (double)(viewport_xsize / (2*Math.tan((0.5*fov)*Math.PI/180)));
-        _dir = new Vector3D();
-        _dir.x = front.x * fl + 0.5f * (viewport_xsize*left.x + viewport_ysize*up.x);
-        _dir.y = front.y * fl + 0.5f * (viewport_xsize*left.y + viewport_ysize*up.y);
-        _dir.z = front.z * fl + 0.5f * (viewport_xsize*left.z + viewport_ysize*up.z);
-        // End of MIT raytracer code version
-        */
-
-        // AQUYNZA code version
         front.normalize();
+
         double fovFactor = viewport_xsize/viewport_ysize;
         _dir = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
-        leftWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
+        rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
         // End of AQUYNZA code version
     }
 
@@ -310,7 +301,7 @@ public class Camera {
     (i.e. ray casting, ray tracing, radiosity), object selection and others (simulation,
     colition detection, visual debugging). As it is important to improve the efficiency of
     this method, some precalculated values are stored in the class attributes `_dir`,
-    `upWithScale` and `leftWithScale`, which values are stored in the `updateVectors`
+    `upWithScale` and `rightWithScale`, which values are stored in the `updateVectors`
     method, leading to the precondition:
 
     PRE:
@@ -320,17 +311,6 @@ public class Camera {
     */
     public final Ray generateRay(int x, int y)
     {
-        /*
-        // MIT raytracer code version
-        Vector3D dir = new Vector3D(
-            -x*left.x - y*up.x + _dir.x,
-            -x*left.y - y*up.y + _dir.y,
-            -x*left.z - y*up.z + _dir.z
-        );
-        // End of MIT raytracer code version
-        */
-
-        // AQUYNZA code version
         double u, v;
         double mi_x, mi_y;
 
@@ -339,10 +319,9 @@ public class Camera {
         v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
 
         // 2. Calculate the ray direction
-        Vector3D dx = upWithScale.multiply(v);
-        Vector3D dy = leftWithScale.multiply(u);
-        Vector3D dir = dx.add(dy).add(_dir);
-        // End of AQUYNZA code version
+        Vector3D dv = upWithScale.multiply(v);
+        Vector3D du = rightWithScale.multiply(u);
+        Vector3D dir = dv.add(du).add(_dir);
 
         // 3. Build up and return a ray with origin in the eye position and with calculated direction
         Ray ray;
@@ -395,14 +374,7 @@ public class Camera {
     
     /*
      *This method returns a matrix that can be applied to the camera to rotate it on their local coordinates
-     *
-     *@param dx double Rotation relative to the x axis on camera coordinates
-     *@param dy double Rotation relative to the y axis on camera coordinates
-     *@param dz double Rotation relative to the z axis on camera coordinates
-     *
-     *@see setRotation
-     *
-     *@returns A matrix that represents the rotation of the input parameters
+DEPRECATED
      */
     public Matrix4x4 getRotation(double dx, double dy, double dz)
     {
@@ -411,18 +383,6 @@ public class Camera {
         double cosi[]={Math.cos(dx/57.29577951), Math.cos(dy/57.29577951), Math.cos(dz/57.29577951)};
         double cosiComp[]={1.0-cosi[0], 1.0-cosi[1], 1.0-cosi[2]};//este es el complemento del coseno
         
-//      Esta es la matriz teorica de rotacion que gira n grados en el eje left de la camara (si)
-//      double[] rotStraf=new Double[]={ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
-//                                       (cosiComp[0]*left.x*left.y+sino[0]*left.z), (cosiComp[0]*left.y*left.y +cosi[0])      , (cosiComp[0]*left.y*left.z-sino[0]*left.x), 0,
-//                                       (cosiComp[0]*left.x*left.z-sino[0]*left.z), (cosiComp[0]*left.y*left.z+sino[0]*left.x), (cosiComp[0]*left.z*left.z+cosi[0]),        0,
-//                                                  0,                                                   0,                                             0,                   1};
-
-//esta es la representacion de esa matriz para opengl 
-//      double[] rotStraf=new Double[]{ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
-//                                      (cosiComp[0]*left.x*left.y+sino[0]*left.z), (cosiComp[0]*left.y*left.y +cosi[0]),       (cosiComp[0]*left.y*left.z-sino[0]*left.x), 0,
-//                                      (cosiComp[0]*left.x*left.z-sino[0]*left.y), (cosiComp[0]*left.y*left.z+sino[0]*left.x), (cosiComp[0]*left.z*left.z+cosi[0]),        0,
-//                                                       0,                                            0,                                      0,                           1};
-
         // Esta es la matriz en la representacion del toolkit
         Matrix4x4 rStraf=new Matrix4x4();
         rStraf.M[0][0]=cosiComp[0]*left.x*left.x+cosi[0];           rStraf.M[0][1]=cosiComp[0]*left.x*left.y-sino[0]*left.z;    rStraf.M[0][2]=cosiComp[0]*left.x*left.z+sino[0]*left.y;    rStraf.M[0][3]=0;
@@ -431,36 +391,12 @@ public class Camera {
         rStraf.M[3][0]=0;                                           rStraf.M[3][1]=0;                                           rStraf.M[3][2]=0;                                           rStraf.M[3][3]=1;
         
 
-//      Esta es la matriz teorica de rotacion que gira n grados en el eje up de la camara (no)
-//      double[] rotUp = new Double[]{  (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
-//                                      (cosiComp[1]*up.x*up.y+sino[1]*up.z), (cosiComp[1]*up.y*up.y +cosi[1])    , (cosiComp[1]*up.y*up.z-sino[1]*up.x), 0,
-//                                      (cosiComp[1]*up.x*up.z-sino[1]*up.z), (cosiComp[1]*up.y*up.z+sino[1]*up.x), (cosiComp[1]*up.z*up.z+cosi[1]),      0,
-//                                                     0,                                      0,                                    0,                   1};
-
-//esta es la representacion de esa matriz para opengl
-//      double[] rotUp = new Double[]{   (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
-//                                       (cosiComp[1]*up.x*up.y+sino[1]*up.z), (cosiComp[1]*up.y*up.y+cosi[1]),      (cosiComp[1]*up.y*up.z-sino[1]*up.x), 0,
-//                                       (cosiComp[1]*up.x*up.z-sino[1]*up.y), (cosiComp[1]*up.y*up.z+sino[1]*up.x), (cosiComp[1]*up.z*up.z+cosi[1]),      0,
-//                                                     0,                                      0,                                      0,                  1};
-
 //Esta es la matriz en la representacion del toolkit
         Matrix4x4 rUp=new Matrix4x4();
         rUp.M[0][0]=cosiComp[1]*up.x*up.x+cosi[1];         rUp.M[0][1]=cosiComp[1]*up.x*up.y-sino[1]*up.z;    rUp.M[0][2]=cosiComp[1]*up.x*up.z+sino[1]*up.y;    rUp.M[0][3]=0;
         rUp.M[1][0]=cosiComp[1]*up.x*up.y+sino[1]*up.z;    rUp.M[1][1]=cosiComp[1]*up.y*up.y+cosi[1];         rUp.M[1][2]=cosiComp[1]*up.y*up.z-sino[1]*up.x;    rUp.M[1][3]=0;
         rUp.M[2][0]=cosiComp[1]*up.x*up.z-sino[1]*up.y;    rUp.M[2][1]=cosiComp[1]*up.y*up.z+sino[1]*up.x;    rUp.M[2][2]=cosiComp[1]*up.z*up.z+cosi[1];         rUp.M[2][3]=0;
         rUp.M[3][0]=0;                                     rUp.M[3][1]=0;                                     rUp.M[3][2]=0;                                     rUp.M[3][3]=1;
-
-//      Esta es la matriz de rotacion que gira n grados en el eje front de la camara (no se)
-//      double[] rotFront = new Double[]{ (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
-//                                        (cosiComp[2]*front.x*front.y+sino[2]*front.z), (cosiComp[2]*front.y*front.y +cosi[2])       , (cosiComp[2]*front.y*front.z-sino[2]*front.x), 0,
-//                                        (cosiComp[2]*front.x*front.z-sino[2]*front.z), (cosiComp[2]*front.y*front.z+sino[2]*front.x), (cosiComp[2]*front.z*front.z+cosi[2]),         0,
-//                                                               0                                               0,                                         0,                         1};
-
-//esta es la representacion de esa matriz para opengl
-//      double[] rotFront = new Double[]{  (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
-//                                         (cosiComp[2]*front.x*front.y+sino[2]*front.z), (cosiComp[2]*front.y*front.y+cosi[2]),         (cosiComp[2]*front.y*front.z-sino[2]*front.x), 0,
-//                                         (cosiComp[2]*front.x*front.z-sino[2]*front.y), (cosiComp[2]*front.y*front.z+sino[2]*front.x), (cosiComp[2]*front.z*front.z+cosi[2]),         0,
-//                                                               0,                                               0,                                         0,                         1};
 
         // esta es la representacion de esa matriz en opengl
         Matrix4x4 rFr=new Matrix4x4();
@@ -517,6 +453,7 @@ public class Camera {
      *@param dy double Translation relative to the y axis on camera coordinates
      *@param dz double Translation relative to the z axis on camera coordinates
      *
+DEPRECATED
      */
     public void translate(double dx, double dy, double dz)
     {
@@ -633,15 +570,157 @@ public class Camera {
         //------------------------------------------------------------
         updateVectors();
         msg = msg + "  - Marco de referencia:\n";
-        msg = msg + "    . Vector UP = " + up + "( longitud " + up.length() + ")\n";
-        msg = msg + "    . Vector FRONT = " + front + " (longitud " + front.length() + ")\n";
-        msg = msg + "    . Vector LEFT = " + left + " (longitud " + front.length() + ")\n";
-        msg = msg + "  - fov = " + fov + "\n";
-        msg = msg + "  - nearPlaneDistance = " + nearPlaneDistance + "\n";
-        msg = msg + "  - farPlaneDistance = " + farPlaneDistance + "\n";
+        msg = msg + "    . Vector UP = " + up + " (longitud " + VSDK.formatDouble(up.length()) + ")\n";
+        msg = msg + "    . Vector FRONT = " + front + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
+        msg = msg + "    . Vector LEFT = " + left + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
+        msg = msg + "  - Marco de referencia con escapa:\n";
+        msg = msg + "    . Vector UP' = " + upWithScale + " (longitud " + VSDK.formatDouble(upWithScale.length()) + ")\n";
+        msg = msg + "    . Vector FRONT' = " + _dir + " (longitud " + VSDK.formatDouble(_dir.length()) + ")\n";
+        msg = msg + "    . Vector RIGHT' = " + rightWithScale + " (longitud " + VSDK.formatDouble(rightWithScale.length()) + ")\n";
+        msg = msg + "  - fov = " + VSDK.formatDouble(fov) + "\n";
+        msg = msg + "  - nearPlaneDistance = " + VSDK.formatDouble(nearPlaneDistance) + "\n";
+        msg = msg + "  - farPlaneDistance = " + VSDK.formatDouble(farPlaneDistance) + "\n";
+        msg = msg + "  - Viewport = (" + VSDK.formatDouble(viewport_xsize) + ", " + VSDK.formatDouble(viewport_ysize) + ")\n";
         msg = msg + "  - Matriz de transformacion:\n" + R + "\n";
 
         return msg;
+    }
+
+    /**
+    Given `this` camera and the pixel (x, y) in its viewport, this method
+    calculates an infinite plane that pass by the corresponding proyector
+    ray origin and by the proyection plane (u, v) point, where (u, v) is
+    the proyection of pixel (x, y). The plane is perpendicular to the v
+    direction.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateUPlaneAtPixel(int x, int y)
+    {
+        // 1. Calculate the angle between the front vector and the plane
+        updateVectors();
+        double u = ((double)x - viewport_xsize/2.0) / viewport_xsize;
+        Vector3D du = rightWithScale.multiply(u);
+        Vector3D f = new Vector3D(front);
+        Vector3D dir = du.add(_dir);
+
+        f.normalize();
+
+        double alpha;
+
+        dir.normalize();
+
+        alpha = Math.acos(f.dotProduct(dir));
+        if ( u > 0 ) alpha *= -1;
+
+        // 2. Calculate the plane normal
+        Matrix4x4 R = new Matrix4x4();
+        Vector3D n;
+
+        R.axisRotation(alpha, up);
+        n = R.multiply(du);
+        n.normalize();
+
+        // 3. Build the plane and return
+        InfinitePlane plane;
+
+        plane = new InfinitePlane(n, eyePosition);
+
+        return plane;
+    }
+
+    /**
+    Given `this` camera and the pixel (x, y) in its viewport, this method
+    calculates an infinite plane that pass by the corresponding proyector
+    ray origin and by the proyection plane (u, v) point, where (u, v) is
+    the proyection of pixel (x, y). The plane is perpendicular to the v
+    direction.
+
+    WARNING: This is currently considering only the perspective case!
+    TODO: The paralel projection case!
+    */
+    public InfinitePlane calculateVPlaneAtPixel(int x, int y)
+    {
+        // 1. Calculate the angle between the front vector and the plane
+        updateVectors();
+        double v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
+        Vector3D dv = upWithScale.multiply(v);
+        Vector3D f = new Vector3D(front);
+        Vector3D dir = dv.add(_dir);
+
+        f.normalize();
+
+        double alpha;
+
+        dir.normalize();
+
+        alpha = Math.acos(f.dotProduct(dir));
+        if ( v > 0 ) alpha *= -1;
+
+        // 2. Calculate the plane normal
+        Matrix4x4 R = new Matrix4x4();
+        Vector3D n;
+
+        R.axisRotation(alpha, left);
+        n = R.multiply(dv);
+        n.normalize();
+
+        // 3. Build the plane and return
+        InfinitePlane plane;
+
+        plane = new InfinitePlane(n, eyePosition);
+
+        return plane;
+    }
+
+    /**
+    Given a point in world coordinates, this method calculates a pixel
+    coordinates in viewport space (in the form <u, v, 0>). Returns true
+    if the pixel lies inside the viewport, false otherwise.
+
+    TODO: Current implementation is suspicious. It should use a simple
+    multiplication of point with projection matrix... but this idea is not
+    working.
+    */
+    public boolean projectPoint(Vector3D inPoint, Vector3D outProjected)
+    {
+        // 1. Calculate vectors
+        updateVectors();
+        Vector3D upCopy = new Vector3D(up);
+        Vector3D rightCopy = new Vector3D(left.multiply(-1));
+        double fovFactor = viewport_xsize/viewport_ysize;
+        double scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
+
+        upCopy.normalize();
+        upCopy = upCopy.multiply(scaleFactor);
+        rightCopy.normalize();
+        rightCopy = rightCopy.multiply(scaleFactor).multiply(1/fovFactor);
+
+        // 2. Calculate projector
+        Vector3D p = getPosition();
+        Ray r = new Ray(p, inPoint.substract(p));
+        if ( r.direction.length() < VSDK.EPSILON ) return false;
+
+        // 3. Calculate projection plane
+        Vector3D center = new Vector3D(front);
+        center.normalize();
+        center = center.add(p);
+        InfinitePlane plane = new InfinitePlane(front.multiply(-1), center);
+
+        if ( !plane.doIntersection(r) ) {
+            return false;
+    }
+
+        // 4. Calculate projected global coordinates XYZ
+        Vector3D projected = r.origin.add(r.direction.multiply(r.t)).substract(center);
+
+        // 5. Scale point to viewport
+        outProjected.x = (projected.dotProduct(rightCopy)/2+0.5)*viewport_xsize;
+        outProjected.y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewport_ysize;
+    outProjected.z = 0.0;
+
+        return true;
     }
 }
 

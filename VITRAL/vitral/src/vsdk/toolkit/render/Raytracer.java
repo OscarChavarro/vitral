@@ -36,7 +36,6 @@ cual puede ser cambiada por otro algoritmo de visualizaci&oacute;n (i.e.
 zbuffer o radiosidad), pero manteniendo el mismo modelo de escena 3D.
 */
 public class Raytracer {
-    private static final float INFINITO = Float.MAX_VALUE;
     private static final float TINY = 0.001f;
     private Vector3D static_tmp;
 
@@ -218,10 +217,10 @@ public class Raytracer {
         RayableObject nearestObject;
         double nearestDistance;
 
-        nearestDistance = INFINITO;
+        nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
         for ( i = inRayableObjectArray.iterator(); i.hasNext(); ) {
-            inOut_Ray.t = INFINITO;
+            inOut_Ray.t = Double.MAX_VALUE;
             gi = (RayableObject)i.next();
             if ( gi.doIntersection(inOut_Ray) && 
                  inOut_Ray.t < nearestDistance ) {

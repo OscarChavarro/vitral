@@ -14,17 +14,28 @@ public class JoglMaterialRenderer {
 
     public static void activate(GL gl, Material m)
     {
+        float opacity = (float)m.getOpacity();
+
+        if ( opacity > 1.0f ) opacity = 1.0f;
+        if ( opacity < 0.0f ) opacity = 0.0f;
+        if ( opacity < 1.0f - Float.MIN_VALUE ) {
+            gl.glEnable(gl.GL_BLEND);
+            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+          }
+          else {
+            gl.glDisable(gl.GL_BLEND);
+        }
+
         float phongExp = (float)m.getPhongExponent();
         float ambient[] = m.getAmbient().toFloatVect();
-        ambient[3] = (float)m.getAlpha();
+        ambient[3] = opacity;
         float diffuse[] = m.getDiffuse().toFloatVect();
-        diffuse[3] = (float)m.getAlpha();
+        diffuse[3] = opacity;
         float specular[]  = m.getSpecular().toFloatVect();
-        specular[3] = (float)m.getAlpha();
+        specular[3] = opacity;
         //float emission[] = m.getEmission().toFloatVect();
-        //emission[3] = (float)m.getAlpha();
+        //emission[3] = opacity;
 
-        gl.glDisable(gl.GL_BLEND);
         gl.glDisable(gl.GL_CULL_FACE);
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_AMBIENT, ambient, 0);
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE, diffuse, 0);

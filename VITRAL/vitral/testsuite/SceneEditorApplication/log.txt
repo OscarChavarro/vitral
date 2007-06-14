@@ -65,17 +65,36 @@ March 20 2006, Oscar Chavarro: 106min
 March 28 2006, Oscar Chavarro: 69min
   - 1h09min: Implementing cylinder case intersection in class Cone
 
-<<TOTAL>> 1391 min (23h11min)
-
-March 29 2006, Oscar Chavarro: 
+March 29 2006, Oscar Chavarro: 43min
   - 43min: Creating Arrow geometry classes: model, Jogl Renderer,
     intersection and minmax operations and test schema in the scene application
 
-April 6 2006, Oscar Chavarro:
+April 6 2006, Oscar Chavarro: 175min
   - 1:30min: Zbuffer access operations with palette color encoding
   - 25min: Palette selection option and testing
   - 1h Gizmo design (no coding, just analysis)
 
-April 7 2006, Oscar Chavarro:
+April 7 2006, Oscar Chavarro: 115min
   - 1h55min: Basic TranslateGizmo geometric model  :-)
-  - 4:XXpm ->
+
+April 8 2006, Oscar Chavarro: 416min
+  - 1h:35min: TranslationGizmo geometry basic model complete, and consistent
+    with ray intersection operations for element selection.
+  - 50min: TranslationGizmo element selection behavior
+  - 23min: InfinitePlane class
+  - 17min: Camera::calculateUPlaneAtPixel
+  - 55min: Mouse drag behavior for TranslationGizmo axes from mouse deltaX
+  - 1h: Cursor feedback interaccion research... changing cursor position
+  - 1h56min: Camera::projectPoint() and restrained Robot cursor positioning
+
+<<TOTAL>> 2140 min (35h40min)
+
+April 9 2006, Oscar Chavarro:
+  - 52min: Mouse drag behavior for TranslationGizmo axes from mouse deltaY with
+    selection to combine with deltaX. Working for individual axes, but not
+    for positions outside axes...
+  - 1h40min: studing and analysing TranslationGizmo integration of axis
+    interaction techniques. Fixing some bugs in ray calculations.  :-)
+  - 8min: TranslationGizmo: plane elements interaction technique.  :-)
+  - 30min: TranslationGizmo: Automatic resizing
+  - 30min: JoglTranslationGizmoRenderer updated to manage its own lighting

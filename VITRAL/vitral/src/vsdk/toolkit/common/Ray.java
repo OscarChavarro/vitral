@@ -3,6 +3,7 @@
 package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.VSDK;
 
 public class Ray {
     public Vector3D origin;
@@ -25,7 +26,7 @@ public class Ray {
 
     public String toString()
     {
-        return "Ray Origin: " + origin + "; Direction: " + direction + " T: " + t;
+        return "Ray Origin: " + origin + "; Direction: " + direction + " T: " + VSDK.formatDouble(t);
     }
 }
 

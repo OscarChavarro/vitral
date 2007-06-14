@@ -143,6 +143,12 @@ public class Matrix4x4 {
     }
 
     public void
+    axisRotation(double angle, Vector3D axis)
+    {
+        axisRotation(angle, axis.x, axis.y, axis.z);
+    }
+
+    public void
     axisRotation(double angle, double x, double y, double z)
     {
         double mag, s, c;

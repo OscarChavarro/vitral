@@ -22,7 +22,7 @@ public class Material
 
     private String name="default";
     
-    private double alpha;
+    private double opacity;
     private double phongExponent;
     
     /** Creates a new instance of MaterialGL */
@@ -33,7 +33,7 @@ public class Material
         specular=new ColorRgb(); 
         emission=new ColorRgb(); 
         reflectionCoefficient = 0;
-        alpha = 1;
+        opacity = 1;
         phongExponent = 128;
     }
     
@@ -44,7 +44,7 @@ public class Material
         diffuse=new ColorRgb(m.getDiffuse()); 
         specular=new ColorRgb(m.getSpecular()); 
         emission=new ColorRgb(m.getEmission()); 
-        alpha=m.getAlpha();
+        opacity=m.getOpacity();
         phongExponent=m.phongExponent;
     }
     
@@ -93,9 +93,9 @@ public class Material
         this.refractionCoefficient=kr;
     }
     
-    public void setAlpha(double a)
+    public void setOpacity(double a)
     {
-        this.alpha=a;
+        this.opacity=a;
     }
     
     public ColorRgb getAmbient()
@@ -133,9 +133,9 @@ public class Material
         return refractionCoefficient;
     }
     
-    public double getAlpha()
+    public double getOpacity()
     {
-        return alpha;
+        return opacity;
     }
 
     public String toString()

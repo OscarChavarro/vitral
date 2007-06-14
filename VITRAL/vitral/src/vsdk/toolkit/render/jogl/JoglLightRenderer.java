@@ -70,6 +70,15 @@ public class JoglLightRenderer {
         gl.glEnd();
         gl.glPopMatrix();
     }
+
+    public static void turnOffAllLights(GL gl)
+    {
+        int i;
+
+    for ( i = 0; i < supportedLightsInOpenGL; i++ ) {
+        gl.glDisable(gl.GL_LIGHT0 + i);
+    }
+    }
     
 }
 

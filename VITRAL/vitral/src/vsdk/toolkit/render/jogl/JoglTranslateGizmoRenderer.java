@@ -12,29 +12,42 @@ import java.util.Iterator;
 import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 public class JoglTranslateGizmoRenderer
 {
-
-    public static void draw(GL gl, TranslateGizmo gizmo, Vector3D position)
+    public static Light light1 = null;
+    public static Light light2 = null;
+    public static void draw(GL gl, TranslateGizmo gizmo)
     {
-        Matrix4x4 R;
+        JoglLightRenderer.turnOffAllLights(gl);
+        Vector3D lp1;
+        Vector3D lp2;
 
-        R = new Matrix4x4(); //gizmo.getTransformationMatrix());
-
-        R.M[0][3] = position.x;
-        R.M[1][3] = position.y;
-        R.M[2][3] = position.z;
-
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glLineWidth(3);
-        JoglMatrixRenderer.drawGL(gl, R);
+        lp1 = new Vector3D(gizmo.getPosition());
+        lp1.x += 20;
+        lp1.y += 20;
+        lp1.z += 20;
+        lp2 = new Vector3D(gizmo.getPosition());
+        lp2.x -= 20;
+        lp2.y -= 20;
+        if ( light1 == null ) {
+            light1 = new Light(Light.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
+    }
+        if ( light2 == null ) {
+            light2 = new Light(Light.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
+    }
+        light1.setPosition(lp1);
+        light2.setPosition(lp2);
+        JoglLightRenderer.activate(gl, light1);
+        JoglLightRenderer.activate(gl, light2);
 
         //-----------------------------------------------------------------
         QualitySelection q = new QualitySelection();
@@ -50,17 +63,21 @@ public class JoglTranslateGizmoRenderer
         q.setShadingType(q.SHADING_TYPE_GOURAUD);
 
         gl.glEnable(gl.GL_LIGHTING);
+        gl.glShadeModel(gl.GL_SMOOTH);
 
         for ( Iterator i = things.iterator(); i.hasNext(); ) {
             RayableObject r = (RayableObject)i.next();
             Geometry g = r.getGeometry();
+            Vector3D position;
 
             if ( g != null ) {
                 gl.glPushMatrix();
+
                 gl.glLoadIdentity();
                 position = r.getPosition();
                 gl.glTranslated(position.x, position.y, position.z);
                 JoglMatrixRenderer.activateGL(gl, r.getRotation());
+
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
                 gl.glPopMatrix();
@@ -68,6 +85,7 @@ public class JoglTranslateGizmoRenderer
     }
 
         //-----------------------------------------------------------------
+        JoglLightRenderer.turnOffAllLights(gl);
     }
 }
 
