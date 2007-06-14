@@ -52,7 +52,7 @@ public class SimpleBodyGroup extends Entity {
 
     public ArrayList <SimpleBody> getBodies()
     {
-    return bodies;
+        return bodies;
     }
 
     public String getName()
@@ -129,9 +129,9 @@ public class SimpleBodyGroup extends Entity {
     {
         Ray myRay;
         boolean answer;
-    int i;
+        int i;
 
-    inOutRay.t = Double.MAX_VALUE;
+        inOutRay.t = Double.MAX_VALUE;
 
         myRay = new Ray (
             rotation_i.multiply(inOutRay.origin.substract(position)),
@@ -141,77 +141,99 @@ public class SimpleBodyGroup extends Entity {
 
         answer = false;
 
-    for ( i = 0; i < bodies.size(); i++ ) {
+        for ( i = 0; i < bodies.size(); i++ ) {
             if ( bodies.get(i).getGeometry().doIntersection(myRay) ) {
                 answer = true;
-        if ( myRay.t < inOutRay.t ) {
+                if ( myRay.t < inOutRay.t ) {
                     inOutRay.t = myRay.t;
-        }
+                }
             }
-    }
+        }
         return answer;
     }
 
     public double[] getMinMax()
     {
-    int i;
-        double[] MinMax = new double[6];
-        boolean first = true;
-        double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE,
-            minZ = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE, maxY = Double.MIN_VALUE,
-            maxZ = Double.MIN_VALUE;
-    Vector3D min = new Vector3D();
-    Vector3D max = new Vector3D();
-    SimpleBody bi;
-    Matrix4x4 T = new Matrix4x4(), R, S = new Matrix4x4(), M;
+        //-----------------------------------------------------------------
+        int i;
+        SimpleBody bi;
+        Matrix4x4 T = new Matrix4x4(), R, S = new Matrix4x4(), M;
+        Vector3D p = new Vector3D(), p2;
+        ArrayList<Vector3D> points = new ArrayList<Vector3D>();
+        double[] minmaxSub;
 
         for ( i = 0; i < bodies.size(); i++ ) {
-        bi = bodies.get(i);
-            double[] minmax_mesh = bi.getGeometry().getMinMax();
+            bi = bodies.get(i);
+            minmaxSub = bi.getGeometry().getMinMax();
             R = bi.getRotation();
             T.translation(bi.getPosition());
             S.scale(bi.getScale()); 
-        M = S.multiply(R).multiply(T);
+            M = T.multiply(R).multiply(S);
 
-            min.x = minmax_mesh[0];
-            min.y = minmax_mesh[1];
-            min.z = minmax_mesh[2];
-            max.x = minmax_mesh[3];
-            max.y = minmax_mesh[4];
-            max.z = minmax_mesh[5];
+            p.x = minmaxSub[0];
+            p.y = minmaxSub[1];
+            p.z = minmaxSub[2];
+            p2 = M.multiply(p);
+            points.add(p2);
 
-            min = M.multiply(min);
-            max = M.multiply(max);
+            p.x = minmaxSub[3];
+            p.y = minmaxSub[1];
+            p.z = minmaxSub[2];
+            p2 = M.multiply(p);
+            points.add(p2);
 
-            if (first) {
-                minX = min.x;
-                maxX = max.x;
-                minY = min.y;
-                maxY = max.y;
-                minZ = min.z;
-                maxZ = max.z;
-                first = false;
-            }
+            p.x = minmaxSub[0];
+            p.y = minmaxSub[4];
+            p.z = minmaxSub[2];
+            p2 = M.multiply(p);
+            points.add(p2);
 
-            if (min.x < minX) {
-                minX = min.x;
-            }
-            if (min.y < minY) {
-                minY = min.y;
-            }
-            if (min.z < minZ) {
-                minZ = min.z;
-            }
-            if (max.x > maxX) {
-                maxX = max.x;
-            }
-            if (max.y > maxY) {
-                maxY = max.y;
-            }
-            if (max.z > maxZ) {
-                maxZ = max.z;
-            }
+            p.x = minmaxSub[3];
+            p.y = minmaxSub[4];
+            p.z = minmaxSub[2];
+            p2 = M.multiply(p);
+            points.add(p2);
+
+            p.x = minmaxSub[0];
+            p.y = minmaxSub[1];
+            p.z = minmaxSub[5];
+            p2 = M.multiply(p);
+            points.add(p2);
+
+            p.x = minmaxSub[3];
+            p.y = minmaxSub[1];
+            p.z = minmaxSub[5];
+            p2 = M.multiply(p);
+            points.add(p2);
+
+            p.x = minmaxSub[0];
+            p.y = minmaxSub[4];
+            p.z = minmaxSub[5];
+            p2 = M.multiply(p);
+            points.add(p2);
+
+            p.x = minmaxSub[3];
+            p.y = minmaxSub[4];
+            p.z = minmaxSub[5];
+            p2 = M.multiply(p);
+            points.add(p2);
+        }
+
+        //-----------------------------------------------------------------
+        double[] MinMax = new double[6];
+        double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE,
+            minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE, maxY = -Double.MAX_VALUE,
+            maxZ = -Double.MAX_VALUE;
+
+        for ( i = 0; i < points.size(); i++ ) {
+            p = points.get(i);
+            if ( p.x < minX ) minX = p.x;
+            if ( p.y < minY ) minY = p.y;
+            if ( p.z < minZ ) minZ = p.z;
+            if ( p.x > maxX ) maxX = p.x;
+            if ( p.y > maxY ) maxY = p.y;
+            if ( p.z > maxZ ) maxZ = p.z;
         }
         MinMax[0] = minX;
         MinMax[1] = minY;
