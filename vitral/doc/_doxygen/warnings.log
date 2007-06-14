@@ -7,6 +7,6 @@
 
 /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
 /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:72: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:44: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:45: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 

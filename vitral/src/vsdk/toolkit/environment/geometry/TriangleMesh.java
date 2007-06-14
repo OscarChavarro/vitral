@@ -48,6 +48,9 @@ sole responsability of the cooperating utilities and applications.
 @todo Extend the model to allow dangling edges
 */
 public class TriangleMesh extends Surface {
+
+//= Class attributes ========================================================
+
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060807L;
 
@@ -56,10 +59,19 @@ public class TriangleMesh extends Surface {
     private Vertex[] vertexes;
     private Triangle[] triangles;
 
-    // Auxiliary components for data model, should be extracted from here?
+    // Auxiliary components for data model
     private Material[] materials;
     private Image[] textures;
-    private int[][][] texTriRel;
+
+    /**
+    The `textureSpanRanges` is a dynamic 3D multilist with size
+    [Nt+1]*[Ni]*[2], when a Triangle mesh has Nt textures in its `textures`
+    array. For each texture, there are Ni spans of triangles (Note that each
+    Ni could be different). For each span of triangles (a group associated
+    with a single texture) there are 2 indexes to the triangles array: span
+    start and span end.
+    */
+    private int[][][] textureSpanRanges;
     private Vector3D[] verTex;
 
     // Auxiliary data structures for storage of parcial results and 
@@ -68,6 +80,8 @@ public class TriangleMesh extends Surface {
     private int selectedTriangle;
     private SimpleBody boundingVolume;
     private GeometryIntersectionInformation lastInfo;
+
+//= Basic class management methods ==========================================
 
     public TriangleMesh() {
         lastInfo = new GeometryIntersectionInformation();
@@ -112,18 +126,6 @@ public class TriangleMesh extends Surface {
 
     public Image getTextureAt(int index) {
         return this.textures[index];
-    }
-
-    public int[][][] getTextTriRel() {
-        return this.texTriRel;
-    }
-
-    public int[][] getTexTriRelAt(int index) {
-        return this.texTriRel[index];
-    }
-
-    public int getTextTriRelAt(int i, int j, int k) {
-        return this.texTriRel[i][j][k];
     }
 
     public Vector3D[] getVerTexture() {
@@ -180,26 +182,6 @@ public class TriangleMesh extends Surface {
         boundingVolume = null;
     }
 
-    public void setTexTriRelSize(int size) {
-        this.texTriRel = new int[size][][];
-        boundingVolume = null;
-    }
-
-    public void setTexTriRel(int r[][][]) {
-        this.texTriRel = r;
-        boundingVolume = null;
-    }
-
-    public void setTexTriRelSizeAt(int index, int size) {
-        this.texTriRel[index] = new int[size][2];
-        boundingVolume = null;
-    }
-
-    public void setTextTriRelAt(int i, int j, int[] ttr) {
-        this.texTriRel[i][j] = ttr;
-        boundingVolume = null;
-    }
-
     public void setVertexAt(int index, Vertex vertex) {
         this.vertexes[index] = vertex;
         boundingVolume = null;
@@ -219,6 +201,42 @@ public class TriangleMesh extends Surface {
         this.textures[index] = image;
         boundingVolume = null;
     }
+
+//= Methods for managing texturesSpanRanges =================================
+
+    public int[][][] getTextTriRel() {
+        return this.textureSpanRanges;
+    }
+
+    public int[][] getTexTriRelAt(int index) {
+        return this.textureSpanRanges[index];
+    }
+
+    public int getTextTriRelAt(int i, int j, int k) {
+        return this.textureSpanRanges[i][j][k];
+    }
+
+    public void setTexTriRelSize(int size) {
+        this.textureSpanRanges = new int[size][][];
+        boundingVolume = null;
+    }
+
+    public void setTexTriRel(int r[][][]) {
+        this.textureSpanRanges = r;
+        boundingVolume = null;
+    }
+
+    public void setTexTriRelSizeAt(int index, int size) {
+        this.textureSpanRanges[index] = new int[size][2];
+        boundingVolume = null;
+    }
+
+    public void setTextTriRelAt(int i, int j, int[] ttr) {
+        this.textureSpanRanges[i][j] = ttr;
+        boundingVolume = null;
+    }
+
+//= Fundamental geometry operations methods =================================
 
     public void calculateNormals() {
         boundingVolume = null;

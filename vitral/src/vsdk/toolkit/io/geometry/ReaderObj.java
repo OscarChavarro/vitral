@@ -160,7 +160,7 @@ public class ReaderObj
                         textAct=texturesList.indexOf(texture)+1;
                     }
                 }
-                ArrayList<int[]> actRanges=relCarTex.get(textAct);
+                ArrayList<int[]> actRanges = relCarTex.get(textAct);
                 int[] newRange=new int[2];
                 newRange[0]=faces.size();
                 actRanges.add(newRange);
@@ -182,17 +182,17 @@ public class ReaderObj
                 StringTokenizer auxNomObj;
                 auxNomObj = new StringTokenizer(lineOfText, " ");
                 auxNomObj.nextToken();
-                nomObj=auxNomObj.nextToken();
-                faces=new ArrayList<int[][]>();
-                texturesList=new ArrayList<RGBAImage>();
-                materialsList=new ArrayList<Material>();
-                relCarTex=new ArrayList<ArrayList<int[]>>();
-                inicial=new ArrayList<int[]>();
-                int[] rangoInicial=new int[2];
-                rangoInicial[0]=rangoInicial[1]=0;
+                nomObj = auxNomObj.nextToken();
+                faces = new ArrayList<int[][]>();
+                texturesList = new ArrayList<RGBAImage>();
+                materialsList = new ArrayList<Material>();
+                relCarTex = new ArrayList<ArrayList<int[]>>();
+                inicial = new ArrayList<int[]>();
+                int[] rangoInicial = new int[2];
+                rangoInicial[0] = rangoInicial[1]=0;
                 inicial.add(rangoInicial);
                 relCarTex.add(inicial);
-                textAct=0;
+                textAct = 0;
             }
         }
 
@@ -261,8 +261,9 @@ public class ReaderObj
         cambiosVertTex = new HashMap<Integer, Integer>();
         int indexVert = 0;
         int indexVertTex = 0;
+        int i;
 
-        for( int i = 0; i < m.getTriangles().length; i++ ) {
+        for( i = 0; i < m.getTriangles().length; i++ ) {
             int[] p1 = faces.get(i)[0];
             int[] p2 = faces.get(i)[1];
             int[] p3 = faces.get(i)[2];
@@ -274,91 +275,90 @@ public class ReaderObj
             }
             p1[0] = cambiosVert.get(p1[0]);
             
-            if( !cambiosVertTex.containsKey(p1[1]) && p1[1] != -1 ) {
+            if ( !cambiosVertTex.containsKey(p1[1]) && p1[1] != -1 ) {
                 cambiosVertTex.put(p1[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p1[1]);
             }
-            if( p1[1]!=-1 ) {
+            if ( p1[1]!=-1 ) {
                 p1[1]=cambiosVertTex.get(p1[1]);
             }
             
-            if( !cambiosVert.containsKey(p2[0]) ) {
+            if ( !cambiosVert.containsKey(p2[0]) ) {
                 cambiosVert.put(p2[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p2[0]);
             }
             p2[0] = cambiosVert.get(p2[0]);
             
-            if( !cambiosVertTex.containsKey(p2[1]) && p2[1] != -1 ) {
+            if ( !cambiosVertTex.containsKey(p2[1]) && p2[1] != -1 ) {
                 cambiosVertTex.put(p2[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p2[1]);
             }
-            if( p2[1] != -1 ) {
+            if ( p2[1] != -1 ) {
                 p2[1]=cambiosVertTex.get(p2[1]);
             }
             
-            if( !cambiosVert.containsKey(p3[0]) ) {
+            if ( !cambiosVert.containsKey(p3[0]) ) {
                 cambiosVert.put(p3[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p3[0]);
             }
             p3[0] = cambiosVert.get(p3[0]);
             
-            if( !cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1 ) {
+            if ( !cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1 ) {
                 cambiosVertTex.put(p3[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p3[1]);
             }
-            if( p3[1] != -1 ) {
+            if ( p3[1] != -1 ) {
                 p3[1] = cambiosVertTex.get(p3[1]);
             }
         }
-        
+ 
         m.setVertexes(new Vertex[usedVertexes.size()]);
-        for ( int i = 0; i < usedVertexes.size(); i++ ) {
-            m.getVertexes()[i]=new Vertex();
-            m.getVertexes()[i].setPosition(new Vector3D());
+        for ( i = 0; i < usedVertexes.size(); i++ ) {
+            m.getVertexes()[i] = new Vertex();
             m.getVertexes()[i].setPosition(
                 vertexes.get(usedVertexes.get(i)-1));
         }
         
         m.setVerTexture(new Vector3D[usedTexVertexes.size()]);
-        for ( int i = 0; i < m.getVerTexture().length; i++ ) {
+        for ( i = 0; i < m.getVerTexture().length; i++ ) {
             m.getVerTexture()[i]=vertexesTex.get(usedTexVertexes.get(i)-1);
         }
         
-        for ( int i = 0; i < m.getTriangles().length; i++ ) {
+        for ( i = 0; i < m.getTriangles().length; i++ ) {
             m.getTriangles()[i]=new Triangle();
             m.getTriangles()[i].setPoint0(faces.get(i)[0][0]);
             m.getTriangles()[i].setPoint1(faces.get(i)[1][0]);
             m.getTriangles()[i].setPoint2(faces.get(i)[2][0]);
-            
+
             m.getTriangles()[i].setVt0(faces.get(i)[0][1]);
             m.getTriangles()[i].setVt1(faces.get(i)[1][1]);
             m.getTriangles()[i].setVt2(faces.get(i)[2][1]);
         }
         
         m.setTextures(new RGBAImage[textures.size()]);
-        for ( int i = 0; i < m.getTextures().length; i++ ) {
+        for ( i = 0; i < m.getTextures().length; i++ ) {
             m.getTextures()[i]=textures.get(i);
         }
 
         m.setMaterials(new Material[materials.size()]);
-        for ( int i = 0; i < m.getMaterials().length; i++ ) {
+        for ( i = 0; i < m.getMaterials().length; i++ ) {
             m.getMaterials()[i]=materials.get(i);
         }
 
         m.setTexTriRel(new int[relCarTex.size()][][]);
-        for ( int i = 0; i < m.getTextTriRel().length; i++ ) {
+        for ( i = 0; i < m.getTextTriRel().length; i++ ) {
             ArrayList<int[]> actRanges = relCarTex.get(i);
-            m.getTextTriRel()[i]=new int[actRanges.size()][2];
+            m.getTextTriRel()[i] = new int[actRanges.size()][2];
             for( int j = 0; j < m.getTextTriRel()[i].length; j++ ) {
-                m.getTextTriRel()[i][j]=actRanges.get(j);
+                m.getTextTriRel()[i][j] = actRanges.get(j);
             }
-        }
-        
+        }        
+
         m.calculateNormals();
         
         return m;
@@ -376,19 +376,19 @@ public class ReaderObj
     /**
     This method reads a polygon from a face line. The returned array of arrays
     has a row element for each vertex polygon. Note that this method is
-    compatible with polygon of any number of vertexes.
+    compatible with triangles only.
     */
     private static ArrayList<int[][]> readPolygon(String lineOfText) {
         ArrayList<int[][]> ret = new ArrayList<int[][]>();
         StringTokenizer st = new StringTokenizer(lineOfText, " \n\r\t");
-        st.nextToken(); //the f token
+        st.nextToken(); // The "f" token
         int numberOfTokens = st.countTokens();
         int[] p0 = null;
         int[] p1 = null;
         int[] p2 = null;
         int[][]aux = null;
         int i;
-        
+
         for( i = 0; i < numberOfTokens; i++ ) {
             String token = st.nextToken();
             int[] indexes = readFaceVertex(token);
@@ -398,7 +398,7 @@ public class ReaderObj
                 continue;
             }
             if( i == 1 ) {
-                p1=indexes;
+                p1 = indexes;
                 continue;
             }
             p2 = indexes;
@@ -409,71 +409,71 @@ public class ReaderObj
             aux[2] = copyLength3IntArray(p2);
             ret.add(aux);
 
-            p1 = new int[3];
-            p1[0] = p2[0];
-            p1[1] = p2[1];
-            p1[2] = p2[2];
+            p1 = copyLength3IntArray(p2); // Why?
         }
         return ret;
     }
-    
+
+    /**
+    Returns three indices: vertex, texture coorinates, normal
+    */    
     private static int[] readFaceVertex(String lineOfText)
     {
-        int[] ret=new int[3];
+        int[] ret = new int[3];
         StringTokenizer st=new StringTokenizer(lineOfText, "/");
         if ( st.countTokens() == 2 ) {
             if( lineOfText.endsWith("/") ) {
-                //Has vertex and texture
+                // Has vertex and texture
                 try {
-                    ret[0]=Integer.parseInt(st.nextToken());
+                    ret[0] = Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe) {
-                    ret[0]=-1;
+                catch ( NumberFormatException nfe ) {
+                    ret[0] = -1;
                 }
                 try {
-                    ret[1]=Integer.parseInt(st.nextToken());
+                    ret[1] = Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe) {
-                    ret[1]=-1;
+                catch ( NumberFormatException nfe ) {
+                    ret[1] = -1;
                 }
-                ret[2]=-1;
+                ret[2] = -1;
               }
               else {
-                //Has vertex and normal
+                // Has vertex and normal
                 try {
-                    ret[0]=Integer.parseInt(st.nextToken());
+                    ret[0] = Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe) {
-                    ret[0]=-1;
+                catch ( NumberFormatException nfe ) {
+                    ret[0] = -1;
                 }
                 ret[1]=-1;
                 try {
-                    ret[2]=Integer.parseInt(st.nextToken());
+                    ret[2] = Integer.parseInt(st.nextToken());
                 }
-                catch(NumberFormatException nfe) {
-                    ret[2]=-1;
+                catch ( NumberFormatException nfe ) {
+                    ret[2] = -1;
                 }
             }
           }
           else {
             // Has all
             try {
-                ret[0]=Integer.parseInt(st.nextToken());
+                ret[0] = Integer.parseInt(st.nextToken());
             }
-            catch(NumberFormatException nfe) {
-                ret[0]=-1;
-            }
-            try {
-                ret[1]=Integer.parseInt(st.nextToken());
-            }
-            catch(NumberFormatException nfe) {
-                ret[1]=-1;
+            catch ( NumberFormatException nfe ) {
+                ret[0] = -1;
             }
             try {
-                ret[2]=Integer.parseInt(st.nextToken());
+                ret[1] = Integer.parseInt(st.nextToken());
             }
-            catch(NumberFormatException nfe) {
-                ret[2]=-1;
+            catch ( NumberFormatException nfe ) {
+                ret[1] = -1;
+            }
+            try {
+                ret[2] = Integer.parseInt(st.nextToken());
+            }
+            catch ( NumberFormatException nfe ) {
+                ret[2] = -1;
             }
           }
         ;

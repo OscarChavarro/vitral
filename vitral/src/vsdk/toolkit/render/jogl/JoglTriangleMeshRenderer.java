@@ -40,9 +40,25 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         boolean withTextures = false;
         if ( mesh.getTextures() != null && mesh.getTextures().length > 0 ) {
             withTextures = true;
-    }
+        }
 
         gl.glEnable(gl.GL_NORMALIZE);
+
+
+        //-----------------------------------------------------------------
+        System.out.println("TexTriRel dim: " + mesh.getTextTriRel().length);
+        for ( int i = 0; i < mesh.getTextTriRel().length; i++ ) {
+            System.out.println("  - TexTriRel[" + i + "] size: " + 
+                mesh.getTexTriRelAt(i).length);
+            for ( int j = 0; j < mesh.getTexTriRelAt(i).length; j++ ) {
+                System.out.println("    . TexTriRel[" + i + "][" + j + "] size: " + mesh.getTexTriRelAt(i)[j].length);
+                System.out.print("[" + mesh.getTexTriRelAt(i)[j][0] + 
+                " - " + mesh.getTexTriRelAt(i)[j][1]
+                 + "]");
+            }
+            System.out.println(" ");
+        }
+
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
             // Prepare bump mapping and shaders...
@@ -204,31 +220,37 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         if ( mesh.getTriangles() == null ) {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "JoglTriangleMeshRenderer.activate",
-                   "Trying to draw mesh without triangles?");
+                               "Trying to draw mesh without triangles?");
             return;
-    }
+        }
         drawRangeWithoutTexture(gl, mesh, 0, mesh.getTriangles().length, flipNormals);
     }
 
-    private static void drawSurfacesWithTexture(GL gl, TriangleMesh mesh, boolean flip) {
+    private static void
+    drawSurfacesWithTexture(GL gl, TriangleMesh mesh, boolean flip) {
         Image[] textureArray = mesh.getTextures();
         int i, j;
 
         for ( i = 0; i < mesh.getTextTriRel().length; i++ ) {
+            if ( i >= 1 ) {
+                gl.glEnable(gl.GL_TEXTURE_2D);
+                JoglImageRenderer.activate(gl, textureArray[i - 1]);
+                // Warning: Shoult this be here? or not ...
+                gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+                gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+                gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+                gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+                gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+                    gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+            }
+            else {
+                gl.glDisable(gl.GL_TEXTURE_2D);
+            }
             for ( j = 0; j < mesh.getTexTriRelAt(i).length; j++ ) {
-                if ( i >= 1 ) {
-                    gl.glEnable(gl.GL_TEXTURE_2D);
-                    JoglImageRenderer.activate(gl, textureArray[i - 1]);
-                    // Warning: Shoult this be here? or not ...
-                    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-                    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-                    gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-                    gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-                    gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
-                }
-                else {
-                    gl.glDisable(gl.GL_TEXTURE_2D);
-                }
                 drawRangeWithTexture(gl, mesh,
                                      mesh.getTextTriRelAt(i, j, 0),
                                      mesh.getTextTriRelAt(i, j, 1), flip);
@@ -238,126 +260,83 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void
     drawRangeWithTexture(GL gl, TriangleMesh mesh, 
-                         int ini, int fin, boolean flipNormals) {
+                         int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
 
         gl.glBegin(gl.GL_TRIANGLES);
-        for ( int i = ini; i < fin; i++ ) {
-            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0());
-            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1());
-            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2());
+        for ( int i = start; i < end; i++ ) {
+            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).p0);
+            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).p1);
+            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).p2);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v0.getNormal().x,
-                              v0.getNormal().y,
-                              v0.getNormal().z);
+                gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
               }
               else {
-                gl.glNormal3d(-v0.getNormal().x,
-                              -v0.getNormal().y,
-                              -v0.getNormal().z);
+                gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
             gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt0()).x,
                             mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt0()).y);
-            gl.glVertex3d(v0.getPosition().x,
-                          v0.getPosition().y,
-                          v0.getPosition().z);
+            gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v1.getNormal().x,
-                              v1.getNormal().y,
-                              v1.getNormal().z);
+                gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
             }
             else {
-                gl.glNormal3d(-v1.getNormal().x,
-                              -v1.getNormal().y,
-                              -v1.getNormal().z);
+                gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
             }
             gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt1()).x,
                             mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt1()).y);
 
-            gl.glVertex3d(v1.getPosition().x,
-                          v1.getPosition().y,
-                          v1.getPosition().z);
+            gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v2.getNormal().x,
-                              v2.getNormal().y,
-                              v2.getNormal().z);
+                gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
               }
               else {
-                gl.glNormal3d(-v2.getNormal().x,
-                              -v2.getNormal().y,
-                              -v2.getNormal().z);
+                gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
             }
             gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).x,
                             mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).y);
-            gl.glVertex3d(v2.
-                          getPosition().x,
-                          v2.
-                          getPosition().y,
-                          v2.
-                          getPosition().z);
+            gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
         }
         gl.glEnd();
     }
 
     private static void
     drawRangeWithoutTexture(GL gl, TriangleMesh mesh, 
-                               int ini, int fin, boolean flipNormals) {
+                            int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
 
         gl.glBegin(gl.GL_TRIANGLES);
-        for ( int i = ini; i < fin; i++ ) {
-            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0());
-            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1());
-            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2());
+        for ( int i = start; i < end; i++ ) {
+            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).p0);
+            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).p1);
+            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).p2);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v0.getNormal().x,
-                              v0.getNormal().y,
-                              v0.getNormal().z);
+                gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
               }
               else {
-                gl.glNormal3d(-v0.getNormal().x,
-                              -v0.getNormal().y,
-                              -v0.getNormal().z);
+                gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
-            gl.glVertex3d(v0.getPosition().x,
-                          v0.getPosition().y,
-                          v0.getPosition().z);
+            gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v1.getNormal().x,
-                              v1.getNormal().y,
-                              v1.getNormal().z);
+                gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
             }
             else {
-                gl.glNormal3d(-v1.getNormal().x,
-                              -v1.getNormal().y,
-                              -v1.getNormal().z);
+                gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
             }
-
-            gl.glVertex3d(v1.getPosition().x,
-                          v1.getPosition().y,
-                          v1.getPosition().z);
+            gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v2.getNormal().x,
-                              v2.getNormal().y,
-                              v2.getNormal().z);
+                gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
               }
               else {
-                gl.glNormal3d(-v2.getNormal().x,
-                              -v2.getNormal().y,
-                              -v2.getNormal().z);
+                gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
             }
-            gl.glVertex3d(v2.
-                          getPosition().x,
-                          v2.
-                          getPosition().y,
-                          v2.
-                          getPosition().z);
+            gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
         }
         gl.glEnd();
     }
