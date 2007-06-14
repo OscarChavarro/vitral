@@ -810,7 +810,7 @@ public class PolyhedralBoundedSolid extends Solid {
         //- 4. Check if all points are near face plane --------------------
         for ( i = 1; i < points.size(); i++ ) {
             p0 = points.get(i);
-            if ( facePlane.classifyPoint(p0) != 0 ) {
+            if ( facePlane.doContainmentTest(p0, VSDK.EPSILON) != LIMIT ) {
                 return false;
             }
         }

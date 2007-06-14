@@ -85,6 +85,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         }
 
         //- 3. If there is no glList, create it ---------------------------
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         if ( glListIsCompiled == false ) {
             //----
             item = new _JoglRGBAImageRendererImageAssociation();
@@ -101,17 +102,17 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             try {
                 TextureData textureData;
                 textureData = new TextureData(
-                   3, // int internalFormat (number of components)
-                   x_tam, // int width
-                   y_tam, // int height
-                   0, // int border
-                   gl.GL_RGBA, // int pixelFormat
+                   4,              // int internalFormat (number of components)
+                   x_tam,          // int width
+                   y_tam,          // int height
+                   0,              // int border
+                   gl.GL_RGBA,     // int pixelFormat
                    gl.GL_UNSIGNED_BYTE, // int pixelType
-                   true, // boolean mipmap
-                   false, // boolean dataIsCompressed
-                   false, // boolean mustFlipVertically
+                   true,           // boolean mipmap
+                   false,          // boolean dataIsCompressed
+                   false,          // boolean mustFlipVertically
                    ByteBuffer.wrap(img.getRawImage()), // Buffer buffer
-                   null // TextureData.Flusher flusher
+                   null            // TextureData.Flusher flusher
                 );
 
                 item.renderer = TextureIO.newTexture(textureData);
@@ -148,6 +149,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
         */
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         return item.glList;
     }
 

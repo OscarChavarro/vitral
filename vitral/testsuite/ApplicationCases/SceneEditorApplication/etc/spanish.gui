@@ -248,6 +248,10 @@ COMMAND IDC_CREATE_VOLUME {
     name "Crear volumen (voxels)"
 }
 
+COMMAND IDC_CREATE_SPHERE_HARMONIC {
+    name "Depurar Armonico Esferico de Voxels"
+}
+
 COMMAND IDC_CREATE_BREP {
     name "Crear solido (BREP)"
 }
@@ -360,6 +364,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_BOX, 
         IDC_CREATE_ARROW, 
         IDC_CREATE_VOLUME, 
+        IDC_CREATE_SPHERE_HARMONIC,
         IDC_CREATE_BREP, 
         IDC_IMPORT_OBJECTS_FROM_FILE, 
         IDC_CREATE_PARAMETRICCUBICCURVE, 

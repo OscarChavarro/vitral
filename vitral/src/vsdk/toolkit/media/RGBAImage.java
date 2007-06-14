@@ -79,7 +79,7 @@ public class RGBAImage extends Image
         data[index] = r;
         data[index+1] = g;
         data[index+2] = b;
-        data[index+3] = 0;
+        data[index+3] = (byte)-1;
     }
     
     public void putPixel(int x, int y, byte r, byte g, byte b, byte a)

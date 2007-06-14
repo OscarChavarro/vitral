@@ -71,31 +71,24 @@ public class InfinitePlane extends HalfSpace {
     }
 
     /**
-    @deprecated
-    */
-    public int classifyPoint(Vector3D p) {
-        return classifyPoint(p.x, p.y, p.z);
-    }
-
-
-    /**
-    Por a given point <x, y, z>, calculates if it lies inside, outside or 
-    on surface with respect to current plane.
+    Por a given point `p`, calculates if it lies inside, outside or 
+    on surface with respect to current plane, taking the plane as an
+    infinite halfspace, not as a surface.
     @return 0 if point is on the plane surface, 1 if point is outside or
     -1 if point is inside the plane.
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.
-    @deprecated
     */
-    public int classifyPoint(double x, double y, double z) {
-        double num = a*x + b*y + c*z + d;
-        int op = 0;
+    public int doContainmentTestHalfSpace(Vector3D p,
+                                          double distanceTolerance) {
+        double num = a*p.x + b*p.y + c*p.z + d;
+        int op = LIMIT;
 
-        if( num > VSDK.EPSILON ) {
-            op = 1;
+        if( num > distanceTolerance ) {
+            op = OUTSIDE;
         }
-        else if( num < -VSDK.EPSILON ) {
-            op = -1;
+        else if( num < -distanceTolerance ) {
+            op = INSIDE;
         }
         return op;
     }

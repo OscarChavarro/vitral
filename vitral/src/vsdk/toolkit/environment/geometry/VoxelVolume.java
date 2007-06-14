@@ -105,6 +105,24 @@ public class VoxelVolume extends Solid {
     return p;
     }
 
+    /**
+    Given current voxelset geometric space (cube from <-1, -1, -1> to
+    <1, 1, 1>), current voxelset size, and cell position to a voxel; this
+    methods gives the voxel value with a position corresponding to coordinate
+    <x, y, z> (inside voxel space cube).
+    */
+    public int getVoxelAtPosition(double x, double y, double z)
+    {
+    if ( x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1 ) return 0;
+        int i, j, k;
+
+        i = (int)(((x + 1)/2) * ((double)getXSize()) - 0.5);
+    j = (int)(((y + 1)/2) * ((double)getYSize()) - 0.5);
+    k = (int)(((z + 1)/2) * ((double)getZSize()) - 0.5);
+
+    return getVoxel(i, j, k);
+    }
+
     public int getVoxel(int x, int y, int z)
     {
         try {

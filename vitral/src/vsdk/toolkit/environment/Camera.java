@@ -25,6 +25,7 @@ import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
 public class Camera extends Entity
@@ -427,12 +428,12 @@ public class Camera extends Entity
                                 nearPlaneDistance, farPlaneDistance);
             break;
         }
-    return P;
+        return P;
     }
 
     public Matrix4x4 calculateTransformationMatrix()
     {
-    return calculateTransformationMatrix(STEREO_MODE_CENTER);
+        return calculateTransformationMatrix(STEREO_MODE_CENTER);
     }
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
@@ -473,7 +474,7 @@ public class Camera extends Entity
             Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
             R.multiply(Tstereo);
         }
-    return R;
+        return R;
     }
 
     /**
@@ -786,12 +787,30 @@ public class Camera extends Entity
     {
         int bits = 0x00;
 
-        if ( right.classifyPoint(p) > 0.0 ) bits |= OPCODE_RIGHT;
-        if ( left.classifyPoint(p) > 0.0 ) bits |= OPCODE_LEFT;
-        if ( up.classifyPoint(p) > 0.0) bits |= OPCODE_UP;
-        if ( down.classifyPoint(p) > 0.0 ) bits |= OPCODE_DOWN;
-        if ( far.classifyPoint(p) > 0.0 ) bits |= OPCODE_FAR;
-        if ( near.classifyPoint(p) > 0.0 ) bits |= OPCODE_NEAR;
+        if ( right.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE ) {
+            bits |= OPCODE_RIGHT;
+        }
+        if ( left.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE ) {
+            bits |= OPCODE_LEFT;
+        }
+        if ( up.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE) {
+            bits |= OPCODE_UP;
+        }
+        if ( down.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE ) {
+            bits |= OPCODE_DOWN;
+        }
+        if ( far.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE ) {
+            bits |= OPCODE_FAR;
+        }
+        if ( near.doContainmentTestHalfSpace(p, VSDK.EPSILON) ==
+             Geometry.OUTSIDE ) {
+            bits |= OPCODE_NEAR;
+        }
 
         return bits;
     }

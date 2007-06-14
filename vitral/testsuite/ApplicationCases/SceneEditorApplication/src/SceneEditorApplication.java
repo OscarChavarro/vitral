@@ -43,7 +43,10 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -133,6 +136,7 @@ public class SceneEditorApplication {
     public GuiCache gui;
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
+    public JPanel statusBarPanel;
     public SwingImageControlWindow imageControlWindow;
     public SwingSelectorDialog selectorDialog;
     public ButtonsPanel executorPanel;
@@ -200,21 +204,20 @@ public class SceneEditorApplication {
 
     private JPanel createStatusBar()
     {
-        JPanel panel;
+        JPanel statusBarPanel;
 
         statusMessage = new JLabel(gui.getMessage("IDM_INTRO_MESSAGE"));
         Border border = BorderFactory.createLoweredBevelBorder();
         statusMessage.setBorder(border);
 
-        panel = new JPanel();
-        panel.setLayout(new GridLayout());
+        statusBarPanel = new JPanel();
+        statusBarPanel.setLayout(new GridLayout());
 
         border = BorderFactory.createEmptyBorder(3, 3, 3, 3);
-        panel.setBorder(border);
+        statusBarPanel.setBorder(border);
+        statusBarPanel.add(statusMessage);
 
-        panel.add(statusMessage);
-
-        return panel;
+        return statusBarPanel;
     }
 
     private JTabbedPane createPanel()
@@ -293,7 +296,7 @@ public class SceneEditorApplication {
 
         //-----------------------------------------------------------------
         JSplitPane splitPane;
-        JPanel statusBar = createStatusBar();
+        statusBarPanel = createStatusBar();
 
         drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
         Component left = drawingArea.getCanvas();
@@ -322,7 +325,7 @@ public class SceneEditorApplication {
         iconsAndWorkAreasPanel.add(splitPane);
 
         mainWindowWidget.add(iconsAndWorkAreasPanel, BorderLayout.CENTER);
-        mainWindowWidget.add(statusBar, BorderLayout.SOUTH);
+        mainWindowWidget.add(statusBarPanel, BorderLayout.SOUTH);
         mainWindowWidget.setJMenuBar(menubar);
 
         //-----------------------------------------------------------------
@@ -503,6 +506,60 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
+        else if ( label.equals("IDC_CREATE_SPHERE_HARMONIC") ) {
+        SimpleBody voxelBody = null;
+            int selectedThing = parent.theScene.selectedThings.firstSelected();
+
+            Geometry referenceGeometry = null;
+
+        if ( selectedThing >= 0 ) {
+        voxelBody = parent.theScene.things.get(selectedThing);
+                referenceGeometry = voxelBody.getGeometry();
+        }
+
+            if ( referenceGeometry == null ||
+                 !(referenceGeometry instanceof VoxelVolume) ) {
+                parent.statusMessage.setText("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
+            }
+        else {             
+                double r = 0.7;
+                VoxelVolume vv = (VoxelVolume)referenceGeometry;
+        Sphere sphere;
+                RGBAImage texture;
+        SimpleBody body;
+        double tetha, phi;
+        int s, t;
+        int voxelValue;
+        Vector3D p = new Vector3D();
+
+        sphere = new Sphere(r);
+                body = addThing(sphere);
+        body.setPosition(new Vector3D(voxelBody.getPosition()));
+        body.setScale(new Vector3D(voxelBody.getScale()).multiply(r));
+
+        texture = new RGBAImage();
+        texture.init(64, 64);
+
+        for ( s = 0; s < texture.getXSize(); s++ ) {
+                for ( t = 0; t < texture.getYSize(); t++ ) {
+                tetha =
+                     ((double)s) / ((double)texture.getXSize()) * Math.PI * 2;
+                phi =
+                     ((double)t) / ((double)texture.getYSize()) * Math.PI;
+            p.setSphericalCoordinates(r, tetha, phi);
+            voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
+            if ( voxelValue < 128 ) {
+                texture.putPixel(s, t, (byte)-1, (byte)0, (byte)0, (byte)-1);
+            }
+            else {
+                texture.putPixel(s, t, (byte)0, (byte)0, (byte)0, (byte)0);
+            }
+            }
+        }
+                body.setTexture(texture);
+        }
+
+    }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //-----------------------------------------------------------------
             int selectedThing = parent.theScene.selectedThings.firstSelected();
@@ -556,15 +613,18 @@ class ButtonsPanel extends JPanel implements ActionListener
             if ( ny > nmax ) nmax = ny;
             if ( nz > nmax ) nmax = nz;
 
+            ProgressMonitorConsole reporter = new ProgressMonitorConsole();
+            reporter.begin();
             vv.init(nx, ny, nz);
             for ( x = 0; x < nx; x++ ) {
                 for ( y = 0; y < ny; y++ ) {
+                    reporter.update(0, nx*ny, x*ny);
                     for ( z = 0; z < nz; z++ ) {
                         p = vv.getVoxelPosition(x, y, z);
                         transformedP = M.multiply(p);
                         containmentStatus =
                             referenceGeometry.doContainmentTest(
-                                transformedP, (2/((double)nmax) * greaterScale));
+                                transformedP, (1/((double)nmax) * greaterScale));
                         if ( containmentStatus == referenceGeometry.INSIDE ||
                              containmentStatus == referenceGeometry.LIMIT ) {
                             vv.putVoxel(x, y, z, (byte)-1);
@@ -572,6 +632,8 @@ class ButtonsPanel extends JPanel implements ActionListener
                     }
                 }
             }
+            reporter.end();
+
             SimpleBody thing = addThing(vv);
             Vector3D pos = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
             thing.setPosition(pos);

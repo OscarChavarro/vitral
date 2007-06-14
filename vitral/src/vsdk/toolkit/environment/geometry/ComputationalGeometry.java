@@ -2,6 +2,11 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - May 10 2007 - Oscar Chavarro: Original base version                   =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [BAER2002] Baeentzen, Jakob Andreas. Aanaes, Henrik. "Generating Signed =
+//=     Distance Fields From Triangle Meshes",  Technical report            =
+//=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
 //===========================================================================
 package vsdk.toolkit.environment.geometry;
 
@@ -21,35 +26,132 @@ public class ComputationalGeometry
         workPlane = new InfinitePlane(1, 1, 1, 0);
     }
 
+    /**
+    Given a line that passes between points `p0` and `p2`, this method 
+    determines if point `p` falls under `distanceTolerance` in such line.
+    */
+    public static int lineContainmentTest(Vector3D p0, Vector3D p1,
+                                   Vector3D p, double distanceTolerance) {
+        double d;
+        Vector3D a, b;
+        Vector3D lineVector = p1.substract(p0);
+
+        double denominator = lineVector.length();
+        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
+
+        a = p1.substract(p0);
+        b = p0.substract(p);
+        double numerator = a.crossProduct(b).length();
+        d = (numerator / denominator);
+
+        if ( d <= distanceTolerance ) return Geometry.LIMIT;
+        return Geometry.OUTSIDE;
+    }
+
+    /**
+    Given a line that passes between points `p0` and `p2`, this method 
+    determines if point `p` falls under `distanceTolerance` in such line.
+    */
+    public static int lineSegmentContainmentTest(Vector3D p0, Vector3D p1,
+                                   Vector3D p, double distanceTolerance) {
+        double d;
+        Vector3D a, b;
+        Vector3D lineVector = p1.substract(p0);
+    Vector3D pointVector = p.substract(p0);
+
+        double denominator = lineVector.length();
+        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
+
+        a = p1.substract(p0);
+        b = p0.substract(p);
+        double numerator = a.crossProduct(b).length();
+        d = (numerator / denominator);
+
+        if ( d <= distanceTolerance ) {
+            double t = pointVector.dotProduct(lineVector) / lineVector.length();
+        if ( t < 0 || t > 1 ) return Geometry.OUTSIDE;
+
+            return Geometry.LIMIT;
+    }
+        return Geometry.OUTSIDE;
+    }
+
+    /**
+    This method calculates containment test for triangle defined by its
+    3 vertex positions.  It implements a region classification based
+    strategy proposed in [BAER2002].  For a given triangle and with respect
+    to triangle's containing plane, a poing lies in one of 7 regions:
+       - R1: inside triangle
+       - R2: outside triangle, near edge 1
+       - R3: outside triangle, near edge 2
+       - R4: outside triangle, near edge 3
+       - R5: outside triangle, near vertex 1
+       - R6: outside triangle, near vertex 2
+       - R7: outside triangle, near vertex 3
+    */
     public static int triangleContainmentTest(
         Vector3D p0, Vector3D p1, Vector3D p2, Vector3D p,
         double distanceTolerance)
     {
-    Vector3D n, a, b;
+        Vector3D n, a, b;
 
-    a = p1.substract(p0);
-    b = p2.substract(p0);
-    n = a.crossProduct(b);
-    n.normalize();
+        a = p1.substract(p0);
+        b = p2.substract(p0);
+        n = a.crossProduct(b);
+        n.normalize();
 
         workPlane.setFromPointNormal(p0, n);
 
         if ( workPlane.doContainmentTest(p, distanceTolerance) == 
              Geometry.LIMIT ) {
-            // Barycentric coordinates test containment technique
+            // Barycentric coordinates test containment technique (Region 1)
             Vector3D c = p.substract(p0);
-        double dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
-        dot00 = a.dotProduct(a);
-        dot01 = a.dotProduct(b);
-        dot02 = a.dotProduct(c);
-        dot11 = b.dotProduct(b);
-        dot12 = b.dotProduct(c);
+            double dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
+            dot00 = a.dotProduct(a);
+            dot01 = a.dotProduct(b);
+            dot02 = a.dotProduct(c);
+            dot11 = b.dotProduct(b);
+            dot12 = b.dotProduct(c);
             invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
             u = (dot11 * dot02 - dot01 * dot12) * invDenom;
             v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-            if ( (u > 0) && (v > 0) && (u + v < 1) ) {
+            if ( (u >= 0) && (v >= 0) && (u + v <= 1) ) {
+                // R1
                 return Geometry.LIMIT;
-        }
+            }
+            else if ( (u <= 0) && (v >= 0) && (u + v <= 1) ) {
+                // R2
+                return
+                    lineSegmentContainmentTest(p0, p2, p, distanceTolerance);
+            }
+            else if ( (u >= 0) && (v <= 0) && (u + v <= 1) ) {
+                // R3
+                return
+                    lineSegmentContainmentTest(p0, p1, p, distanceTolerance);
+            }
+            else if ( (u >= 0) && (v >= 0) && (u + v >= 1) ) {
+                // R4
+                return
+                    lineSegmentContainmentTest(p1, p2, p, distanceTolerance);
+            }
+            else if ( (u <= 0) && (v <= 0) ) {
+                // R5
+                if ( VSDK.vectorDistance(p, p0) < distanceTolerance ) {
+                    return Geometry.LIMIT;
+                }
+            }
+            else if ( (u <= 0) && (v >= 1) ) {
+                // R6
+                if ( VSDK.vectorDistance(p, p2) < distanceTolerance ) {
+                    return Geometry.LIMIT;
+                }
+            }
+            else {
+                // R7
+                if ( VSDK.vectorDistance(p, p1) < distanceTolerance ) {
+                    return Geometry.LIMIT;
+                }
+            }
         }
         return Geometry.OUTSIDE;
     }

@@ -75,6 +75,7 @@ MENU "GLOBAL" {
             MENUITEM "Box", IDC_CREATE_BOX
             MENUITEM "Arrow", IDC_CREATE_ARROW
             MENUITEM "Volume", IDC_CREATE_VOXELSET
+            MENUITEM "Spherical Harmonic Debug from voxel", IDC_CREATE_SPHERE_HARMONIC
             MENUITEM SEPARATOR
             MENUITEM "CSG", IDC_CREATE_CSG, GRAYED
         }
@@ -301,6 +302,10 @@ COMMAND IDC_CREATE_VOLUME {
     name "Create Volume (voxels)"
 }
 
+COMMAND IDC_CREATE_SPHERE_HARMONIC {
+    name "Debug Spherical Harmonic Voxel"
+}
+
 COMMAND IDC_CREATE_BREP {
     name "Create Solid (BREP)"
 }
@@ -412,6 +417,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_BOX, 
         IDC_CREATE_ARROW, 
         IDC_CREATE_VOLUME, 
+        IDC_CREATE_SPHERE_HARMONIC,
         IDC_CREATE_BREP, 
         IDC_IMPORT_OBJECTS_FROM_FILE, 
         IDC_CREATE_PARAMETRICCUBICCURVE, 

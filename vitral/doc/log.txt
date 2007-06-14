@@ -247,3 +247,7 @@ Changes in 2007 may 9 revition
     (raytracer modifies existing image, useful for augmented reality 
     applications based in raytracing)
   - First working and tested implementation of VoxelVolume
+
+Changes in 2007 may 11-13 revition
+  - First implementation of doContainmentTest in ParametricCubicCurve, Sphere
+    and TriangleMesh/TriangleMeshGroup classes

@@ -331,9 +331,9 @@ public class TriangleMesh extends Surface {
             double minX = Double.MAX_VALUE;
             double minY = Double.MAX_VALUE;
             double minZ = Double.MAX_VALUE;
-            double maxX = Double.MIN_VALUE;
-            double maxY = Double.MIN_VALUE;
-            double maxZ = Double.MIN_VALUE;
+            double maxX = -Double.MAX_VALUE;
+            double maxY = -Double.MAX_VALUE;
+            double maxZ = -Double.MAX_VALUE;
             int i;
 
             for ( i = 0; i < vertexes.length; i++ ) {
@@ -628,7 +628,7 @@ public class TriangleMesh extends Surface {
                 vertexes[triangles[i].p0].position,
                 vertexes[triangles[i].p1].position,
                 vertexes[triangles[i].p2].position,
-        p,
+                p,
                 distanceTolerance);
             if ( status != OUTSIDE ) {
                 return LIMIT;
