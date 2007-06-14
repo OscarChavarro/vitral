@@ -1,0 +1,1195 @@
+//===========================================================================
+
+package vitral.framework.visual;
+
+import java.util.Vector;
+import java.util.Enumeration;
+
+import vitral.toolkits.common.VECTOR;
+import vitral.toolkits.common.COLOR;
+import vitral.toolkits.entorno.RAYO;
+import vitral.toolkits.entorno.CAMARA;
+import vitral.toolkits.entorno.MATERIAL;
+import vitral.toolkits.entorno.LUZ;
+import vitral.toolkits.geom.GEOMETRIA;
+import vitral.toolkits.media.IMAGEN_RGB;
+import vitral.framework.UNIVERSO;
+
+/**
+Esta clase solo provee un m&eacute;todo que encapsula un algoritmo de
+control de visualizaci&oacute;n. Su raz&oacute;n de ser (y por la cual
+NO poner ese m&eacute;todo en la clase cliente que la utiliza) es facilitar
+la abstracci&oacute;n de la operaci&oacute;n de visualizaci&oacute;n, la
+cual puede ser cambiada por otro algoritmo de visualizaci&oacute;n (i.e.
+zbuffer o radiosidad), pero manteniendo el mismo modelo de escena 3D.
+*/
+public class RAYTRACER_MIT {
+    private static final float INFINITO = Float.MAX_VALUE;
+    private static final float TINY = 0.001f;
+    private VECTOR static_tmp;
+
+    public RAYTRACER_MIT()
+    {
+        // Machete similar al descrito en ESFERA::intersect
+        static_tmp = new VECTOR();
+    }
+
+    //   the point of intersection (p)
+    //   a unit-length surface normal (n)
+    //   a unit-length vector towards the ray's origin (v)
+    public COLOR modelo_de_iluminacion(VECTOR p, VECTOR n, VECTOR v, 
+        Vector lights, Vector objects, COLOR color_de_fondo,
+        MATERIAL m) {
+
+        COLOR resultado = new COLOR();
+        GEOMETRIA objeto_mas_cercano;
+
+        for ( Enumeration lightSources = lights.elements();
+              lightSources.hasMoreElements(); ) {
+            LUZ luz = (LUZ)lightSources.nextElement();
+            if ( luz.tipo_de_luz == LUZ.AMBIENTE ) {
+                resultado.r += m.ka*m.ir*luz.ir;
+                resultado.g += m.ka*m.ig*luz.ig;
+                resultado.b += m.ka*m.ib*luz.ib;
+              } 
+              else {
+                VECTOR l;
+                if ( luz.tipo_de_luz == LUZ.PUNTUAL ) {
+                    l = new VECTOR(luz.lvec.x - p.x, 
+                                   luz.lvec.y - p.y, 
+                                   luz.lvec.z - p.z);
+                    l.normalizar();
+                  } 
+                  else {
+                    l = new VECTOR(-luz.lvec.x, -luz.lvec.y, -luz.lvec.z);
+                }
+
+                // Check if the surface point is in shadow
+                VECTOR poffset = 
+                    new VECTOR(p.x + TINY*l.x, p.y + TINY*l.y, p.z + TINY*l.z);
+                RAYO rayo_sombra = new RAYO(poffset, l);
+                objeto_mas_cercano =
+                    trazar_rayo_en_escena(rayo_sombra, objects);
+                if ( objeto_mas_cercano != null ) {
+                    continue;
+                }
+
+                float lambert = n.producto_punto(l);
+                if ( lambert > 0 ) {
+                    if ( m.kd > 0 ) {
+                        float diffuse = m.kd*lambert;
+                        resultado.r += diffuse*m.ir*luz.ir;
+                        resultado.g += diffuse*m.ig*luz.ig;
+                        resultado.b += diffuse*m.ib*luz.ib;
+                    }
+                    if ( m.ks > 0 ) {
+                        lambert *= 2;
+
+                        static_tmp.x = lambert*n.x - l.x;
+                        static_tmp.y = lambert*n.y - l.y;
+                        static_tmp.z = lambert*n.z - l.z;
+                        float spec = 
+                            v.producto_punto(static_tmp);
+
+                        if ( spec > 0 ) {
+                            spec = m.ks*((float) Math.pow((double) spec, 
+                                       (double)m.ns));
+                            resultado.r += spec*luz.ir;
+                            resultado.g += spec*luz.ig;
+                            resultado.b += spec*luz.ib;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Compute illumination due to reflection
+        if ( m.kr > 0 ) {
+            float t = v.producto_punto(n);
+            if ( t > 0 ) {
+                t *= 2;
+                VECTOR reflect = new VECTOR(t*n.x - v.x, 
+                                                t*n.y - v.y, 
+                                                t*n.z - v.z);
+                VECTOR poffset = new VECTOR(p.x + TINY*reflect.x, 
+                                                p.y + TINY*reflect.y, 
+                                                p.z + TINY*reflect.z);
+                RAYO rayo_reflejado = new RAYO(poffset, reflect);
+                objeto_mas_cercano = 
+                    trazar_rayo_en_escena(rayo_reflejado, objects);
+                if ( objeto_mas_cercano != null ) {
+                    VECTOR rp = new VECTOR();
+                    VECTOR rn = new VECTOR();
+                    VECTOR rv = new VECTOR();
+
+                    objeto_mas_cercano.informacion_extra(
+                        rayo_reflejado, rayo_reflejado.t, rp, rn);
+                    rv.x = -rayo_reflejado.direction.x;
+                    rv.y = -rayo_reflejado.direction.y;
+                    rv.z = -rayo_reflejado.direction.z;                    
+                    COLOR rcolor =
+                        modelo_de_iluminacion(rp, rn, rv, lights, objects, color_de_fondo, m);
+
+                    resultado.r += m.kr*rcolor.r;
+                    resultado.g += m.kr*rcolor.g;
+                    resultado.b += m.kr*rcolor.b;
+                  } 
+                  else {
+                    resultado.r += m.kr*color_de_fondo.r;
+                    resultado.g += m.kr*color_de_fondo.g;
+                    resultado.b += m.kr*color_de_fondo.b;
+                }
+            }
+        }
+
+        // Add code for refraction here
+        // <No implementado>
+
+        // Clamp resultado to MAX 1.0 intensity.
+        resultado.r = (resultado.r > 1f) ? 1f : resultado.r;
+        resultado.g = (resultado.g > 1f) ? 1f : resultado.g;
+        resultado.b = (resultado.b > 1f) ? 1f : resultado.b;
+        return resultado;
+    }
+
+    /**
+    Si el `in_rayo` se intersecta con al menos uno de los `in_arr_objetos`,
+    se retorna una referencia al objeto mas cercano de los intersectados.
+    De lo contrario se retorna null.
+    */
+    public GEOMETRIA 
+    trazar_rayo_en_escena(RAYO in_rayo, Vector in_arr_objetos) {
+        Enumeration i;
+        GEOMETRIA gi;
+        GEOMETRIA objeto_mas_cercano;
+
+        in_rayo.t = INFINITO;
+        objeto_mas_cercano = null;
+
+        for ( i = in_arr_objetos.elements(); i.hasMoreElements(); ) {
+            gi = (GEOMETRIA)i.nextElement();
+            if ( gi.interseccion(in_rayo) ) {
+                objeto_mas_cercano = gi;
+            }
+        }
+        return objeto_mas_cercano;
+    }
+
+    private COLOR seguimiento_rayo(RAYO rayo, Vector in_objetos, 
+                         Vector in_luces, COLOR in_fondo)
+    {
+        COLOR c;
+        VECTOR p = new VECTOR();
+        VECTOR n = new VECTOR();
+        VECTOR v = new VECTOR();
+        GEOMETRIA objeto_mas_cercano;
+
+        objeto_mas_cercano = trazar_rayo_en_escena(rayo, in_objetos);
+        if ( objeto_mas_cercano != null ) {
+            objeto_mas_cercano.informacion_extra(rayo, rayo.t,
+                                                      p, n);
+            v.x = -rayo.direction.x;
+            v.y = -rayo.direction.y;
+            v.z = -rayo.direction.z;
+            c = modelo_de_iluminacion(
+                p, n, v, in_luces, in_objetos, in_fondo, 
+                objeto_mas_cercano.material);
+          }
+          else {
+            c = in_fondo;
+        }
+        return c;
+    }
+
+/*
+    // SIN MODELO DE ILUMINACION: SOLO LUZ AMBIENTE (Borrar luego de aqui,
+    // dejar solo en el estudio paso a paso de las etapas!
+    private COLOR seguimiento_rayo(RAYO rayo, Vector in_objetos, 
+                         Vector in_luces, COLOR in_fondo)
+    {
+        COLOR c;
+        GEOMETRIA objeto_mas_cercano;
+
+        c = in_fondo;
+        objeto_mas_cercano = trazar_rayo_en_escena(rayo, in_objetos);
+        if ( objeto_mas_cercano != null ) {
+            c.r = objeto_mas_cercano.material.ir;
+            c.g = objeto_mas_cercano.material.ig;
+            c.b = objeto_mas_cercano.material.ib;
+        }
+        return c;
+    }
+*/
+
+    /**
+    Macroalgoritmo de control para raytracing. Este m&eacute;todo recibe
+    el modelo de una escena 3D previamente construida en memoria y una
+    imagen, y modifica la imagen de tal forma que contiene una visualizacion
+    de la escena, resultado de aplicar la t&eacute;cnica de raytracing.
+
+    PAR&Aacute;METROS:
+    - `inout_viewport`: imagen RGB en donde el algoritmo calcular&aacute; su
+       resultado.
+    - `in_objetos`: arreglo din&aacute;mico de GEOMETRIAs que constituyen los
+       objetos visibles de la escena.
+    - `in_luces`: arreglo din&aacute;mico de LUZes (luces puntuales)
+    - `in_fondo`: especificaci&oacute;n de un color de fondo para la escena
+      (i.e. el color que se ve si no se ve ning&uacute;n objeto!)
+    - `in_camara`: especificaci&oacute;n de la transformaci&oacute;n de
+      proyecci&oacute;n 3D a 2D que se lleva a cabo en el proceso de 
+      visualizaci&oacute;n.
+
+    PRE:
+    - Todas las referencias estan creadas, asi sea que apunten a estructuras
+      vac&iacute;as.
+    - La imagen `inout_viewport` esta creada, y es de el tama&ntilde;o que
+      el usuario desea para su visualizaci&oacute;n.
+
+    POST:
+    - `inout_viewport` contiene una representaci&oacute;n visual de la
+       escena 3D (`in_objetos`, `in_luces`, `in_fondo`), tal que corresponde a
+       una proyecci&oacute;n 3D a 2D controlada por la c&aacute;mara
+       virtual `in_camara`.
+
+    NOTA: Este algoritmo se inicio como una modificacion del raytracer del
+          curso 6.837 (computaci&oacute;n gr&aacute;fica) de MIT, original
+          de Leonard McMillan y Tomas Lozano Perez, pero puede considerarse
+          que es una re-escritura y re-estructuraci&oacute;n completa de
+          Oscar Chavarro / FUSM.
+    */
+    public void ejecutar(IMAGEN_RGB inout_viewport, UNIVERSO in_escena)
+    {
+        int x, y;
+        RAYO rayo;
+        COLOR color;
+
+        System.out.print("[");
+        in_escena.camara.preprocesar_vista();
+        for ( y = 0; y < inout_viewport.ytam(); y++ ) {
+            if ( y % 10 == 0 ) {
+                System.out.print(".");
+            }
+            for ( x = 0; x < inout_viewport.xtam(); x++ ) {
+                //- Trazado individual de un rayo --------------------------
+                // Es importante que la operacion generar_rayo sea inline
+                // (i.e. "final")
+                rayo = in_escena.camara.generar_rayo(x, y);
+                color = seguimiento_rayo(rayo, in_escena.arr_cosas, 
+                    in_escena.arr_luces, in_escena.color_de_fondo);
+
+                //- Exporto el resultado de color del pixel ----------------
+                inout_viewport.putpixel(x, y, (byte)(255 * color.r), 
+                                              (byte)(255 * color.g), 
+                                              (byte)(255 * color.b));
+            }
+        }
+        System.out.println("]");
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.framework;
+
+// Paquetes de java utilizados para la agregacion multiple
+import java.util.Vector;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.StreamTokenizer;
+import java.io.IOException;
+
+// Paquetes internos al sistema de raytracing / modelamiento
+import vitral.toolkits.common.VECTOR;
+import vitral.toolkits.common.COLOR;
+import vitral.toolkits.entorno.CAMARA;
+import vitral.toolkits.entorno.LUZ;
+import vitral.toolkits.entorno.MATERIAL;
+import vitral.toolkits.geom.ESFERA;
+
+public class UNIVERSO
+{
+    // Variables especificas para la depuracion / desarrollo
+    private static final boolean depurar = false;
+
+    // El modelo del mundo
+    public Vector arr_cosas;
+    public Vector arr_luces;
+    public COLOR color_de_fondo;
+    public CAMARA camara;
+
+    public UNIVERSO()
+    {
+        camara = new CAMARA();
+        color_de_fondo = new COLOR();
+        color_de_fondo.r = 0;
+        color_de_fondo.g = 0;
+        color_de_fondo.b = 0;
+        int CHUNKSIZE = 100; // Incremento de arreglos
+
+        // Arreglo de GEOMETRIAs
+        arr_cosas = new Vector(CHUNKSIZE, CHUNKSIZE);  
+        // Arreglo de LUZes
+        arr_luces = new Vector(CHUNKSIZE, CHUNKSIZE);
+    }
+
+    public void dispose()
+    {
+        // OJO: Falta ver si la destruccion de la escena esta OK...
+        camara = null;
+        color_de_fondo = null;
+        arr_cosas = null;
+        arr_luces = null;
+    }
+
+    private void
+    imprimirMensaje(String m)
+    {
+        if ( depurar ) {
+            System.out.println(m);
+        }
+    }
+
+    private float
+    leerNumero(StreamTokenizer st) throws IOException {
+        if (st.nextToken() != StreamTokenizer.TT_NUMBER) {
+            System.err.println("ERROR: number expected in line "+st.lineno());
+            throw new IOException(st.toString());
+        }
+        return (float)st.nval;
+    }
+
+    public void
+    leerArchivoDeEscena(InputStream is) throws IOException {
+        Reader parsero = new BufferedReader(new InputStreamReader(is));
+        StreamTokenizer st = new StreamTokenizer(parsero);
+        st.commentChar('#');
+        boolean fin_de_lectura = false;
+        MATERIAL material_actual;
+
+        // Material por defecto...
+        material_actual = new MATERIAL(0.8f, 0.2f, 0.9f, 
+                                       0.2f, 0.4f, 0.4f, 
+                                       10.0f, 0f, 0f, 1f);
+
+        while ( !fin_de_lectura ) {
+          switch ( st.nextToken() ) {
+            case StreamTokenizer.TT_WORD:
+              if (st.sval.equals("sphere")) {
+                  VECTOR c = new VECTOR((float) leerNumero(st), 
+                                        (float) leerNumero(st), 
+                                        (float) leerNumero(st));
+                  float r = (float)leerNumero(st);
+
+                  imprimirMensaje("sphere");
+                  arr_cosas.addElement(new ESFERA(material_actual, c, r));
+                } 
+                /*
+                else if (st.sval.equals("triangles")) {
+                  imprimirMensaje("triangles");
+                  arr_cosas.addElement(new MESH(material_actual, st));
+                } 
+                */
+                else if (st.sval.equals("eye")) {
+                  imprimirMensaje("eye");
+                  camara.posicion = new VECTOR(leerNumero(st), 
+                                                  leerNumero(st), 
+                                                  leerNumero(st));
+                }
+                else if (st.sval.equals("lookat")) {
+                  imprimirMensaje("lookat");
+                  camara.puntoObservado = new VECTOR(leerNumero(st), 
+                                                        leerNumero(st), 
+                                                        leerNumero(st));
+                }
+                else if (st.sval.equals("up")) {
+                  imprimirMensaje("up");
+                  camara.up = new VECTOR(leerNumero(st), 
+                                            leerNumero(st), 
+                                            leerNumero(st));
+                }
+                else if (st.sval.equals("fov")) {
+                  imprimirMensaje("fov");
+                  camara.fov = leerNumero(st);
+                }
+                else if (st.sval.equals("background")) {
+                  imprimirMensaje("background");
+                  color_de_fondo = new COLOR();
+                  color_de_fondo.r = (float)leerNumero(st);
+                  color_de_fondo.g = (float)leerNumero(st);
+                  color_de_fondo.b = (float)leerNumero(st);
+                }
+                else if (st.sval.equals("light")) {
+                  imprimirMensaje("light");
+                  float r = leerNumero(st);
+                  float g = leerNumero(st);
+                  float b = leerNumero(st);
+                  if ( st.nextToken() != StreamTokenizer.TT_WORD ) {
+                      System.err.println("ERROR: in line "+st.lineno() + 
+                                         " at "+st.sval);
+                      throw new IOException(st.toString());
+                  }
+                  if ( st.sval.equals("ambient") ) {
+                      imprimirMensaje("ambient");
+                      arr_luces.addElement(new LUZ(LUZ.AMBIENTE, null, r,g,b));
+                    }
+                    else if ( st.sval.equals("directional") ) {
+                      imprimirMensaje("directional");
+                      VECTOR v = new VECTOR(leerNumero(st), 
+                                            leerNumero(st), 
+                                            leerNumero(st));
+                      arr_luces.addElement(new LUZ(LUZ.DIRECCIONAL, v, r,g,b));
+                    } 
+                    else if ( st.sval.equals("point") ) {
+                      imprimirMensaje("point");
+                      VECTOR v = new VECTOR(leerNumero(st), 
+                                            leerNumero(st), 
+                                            leerNumero(st));
+                      arr_luces.addElement(new LUZ(LUZ.PUNTUAL, v, r, g, b));
+                    } 
+                    else {
+                      System.err.println("ERROR: in line " + 
+                                         st.lineno()+" at "+st.sval);
+                      throw new IOException(st.toString());
+                    }
+                  ;
+                }
+                else if ( st.sval.equals("surface") ) {
+                  imprimirMensaje("surface");
+                  float r = leerNumero(st);
+                  float g = leerNumero(st);
+                  float b = leerNumero(st);
+                  float ka = leerNumero(st);
+                  float kd = leerNumero(st);
+                  float ks = leerNumero(st);
+                  float ns = leerNumero(st);
+                  float kr = leerNumero(st);
+                  float kt = leerNumero(st);
+                  float index = leerNumero(st);
+                  material_actual = new MATERIAL(r, g, b, 
+                                                ka, kd, ks, 
+                                                ns, kr, kt, index);
+                }
+              ;
+              break;
+            default:
+              fin_de_lectura = true;
+              break;
+          } // switch
+        } // while
+        is.close();
+        if ( st.ttype != StreamTokenizer.TT_EOF ) {
+            System.err.println("ERROR: in line "+st.lineno()+" at "+st.sval);
+            throw new IOException(st.toString());
+        }
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.common;
+
+public class VECTOR {
+    public float x, y, z;
+
+    public VECTOR() {
+        x = 0;
+        y = 0;
+        z = 0;
+    }
+
+    public VECTOR(float x, float y, float z) {
+        this.x = x; this.y = y; this.z = z;
+    }
+
+    public final VECTOR producto_cruz(VECTOR B) {
+        return new VECTOR(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x);
+    }
+
+    public final float producto_punto(VECTOR B) {
+        return (x*B.x + y*B.y + z*B.z);
+    }
+
+    public final void normalizar( ) {
+        float t = x*x + y*y + z*z;
+        if (t != 0 && t != 1) t = (float) (1 / Math.sqrt(t));
+        x *= t; // Falta implementar VECTOR::escalar(float m);
+        y *= t;
+        z *= t;
+    }
+
+    public final float norma() {
+        return (float)Math.sqrt(x*x + y*y + z*z);
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.common;
+
+public class COLOR {
+    public float r;
+    public float g;
+    public float b;
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.entorno;
+
+import vitral.toolkits.common.VECTOR;
+
+public class RAYO {
+    public VECTOR origin;
+    public VECTOR direction;
+    public float t;
+
+    public RAYO(VECTOR eye, VECTOR dir) {
+        origin = new VECTOR(eye.x, eye.y, eye.z);
+        direction = new VECTOR(dir.x, dir.y, dir.z);
+        direction.normalizar();
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.entorno;
+
+public class MATERIAL {
+    public float ir, ig, ib;        // Color intrinseco de la superficie
+    public float ka, kd, ks, ns;    // Constantes para el modelo phong
+    public float kt, kr, nt;
+
+    public MATERIAL(float rval, float gval, float bval, float a, float d, 
+                    float s, float n, float r, float t, float index) {
+        ir = rval; ig = gval; ib = bval;
+        ka = a; kd = d; ks = s; ns = n;
+        kr = r; kt = t;
+        nt = index;
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.entorno;
+
+import vitral.toolkits.common.VECTOR;
+
+// All the public variables here are ugly, but I
+// wanted Lights and Surfaces to be "friends"
+public class LUZ {
+    public static final int AMBIENTE = 0;
+    public static final int DIRECCIONAL = 1;
+    public static final int PUNTUAL = 2;
+
+    public int tipo_de_luz;
+    public VECTOR lvec;             // the position of a point light or
+                                    // the direction to a directional light
+    public float ir, ig, ib;        // color of the light source
+
+    public LUZ(int type, VECTOR v, float r, float g, float b) {
+        tipo_de_luz = type;
+        ir = r;
+        ig = g;
+        ib = b;
+        if ( type != AMBIENTE ) {
+            lvec = v;
+            if ( type == DIRECCIONAL ) {
+                lvec.normalizar();
+            }
+        }
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.entorno;
+
+import vitral.toolkits.common.VECTOR;
+
+public class CAMARA {
+    // Modelo basico de la camara
+    public VECTOR posicion;
+    public VECTOR puntoObservado;
+    public VECTOR up;
+    public float fov;
+
+    // Vectores privados que se preprocesan para agilizar los calculos
+    private VECTOR dx, dy, _dir;
+
+    /**
+    Una `CAMARA` debe saber de qu&eacute; tama&ntilde;o es el viewport para
+    el cual est&aacute; generando una proyecci&oacute;n, para poder modificar
+    sus par&aacute;metros internos en funci&oacute;n del &aacute;ngulo de
+    vision (`fov`) y de la actual proporci&oacute;n de ancho/alto del
+    viewport. Las variables internas `ventana_xtam` y `ventana_ytam`
+    representan el tama&nacute;o en pixels para el viewport, y son valores
+    que solo pueden ser cambiados por el m&eacute;todo 
+    `CAMARA::procesar_resize`. Estos dos valores son para uso interno de
+    la clase c&aacute;mara y no pueden ser consultados (i.e. son una copia
+    de la configuraci&oacute;n del viewport, que debe ser administrado por
+    la aplicaci&oacute;n que use `CAMARA`s).
+    */
+    private float ventana_xtam;
+    /// Ver la documentaci&oacute;n de `ventana_xtam`
+    private float ventana_ytam;
+
+    public CAMARA() {
+        // Modelo de camara por defecto propuesto por el raytracer original
+        // de MIT
+        posicion = new VECTOR(0,0,10);
+        puntoObservado = new VECTOR(0,0,0);
+        up = new VECTOR(0,1,0);
+        fov = 30;
+        ventana_xtam = 320;
+        ventana_ytam = 320;
+
+        // OJO: dx, dy y _dir no estan inicializados!
+    }
+
+    public void procesar_resize(int dx, int dy)
+    {
+        ventana_xtam = dx;
+        ventana_ytam = dy;
+    }
+
+    /**
+    PRE:
+      - puntoObservado y posicion tienen que ser diferentes!
+    POST:
+      - dx queda normalizado
+      - dy queda normalizado
+      - _dir ... no se ha entendido bien!
+    */
+    public void preprocesar_vista()
+    {
+        // Compute mapping from screen coordinate to a ray direction
+        VECTOR _dir_no_normalizado = new VECTOR(puntoObservado.x - posicion.x, 
+                                                puntoObservado.y - posicion.y, 
+                                                puntoObservado.z - posicion.z);
+        float fl = (float)(ventana_xtam / (2*Math.tan((0.5*fov)*Math.PI/180)));
+
+        dx = _dir_no_normalizado.producto_cruz(up);
+        dx.normalizar();
+
+        dy = _dir_no_normalizado.producto_cruz(dx);
+        dy.normalizar();
+
+        _dir = _dir_no_normalizado;
+        _dir.normalizar();
+        _dir.x = _dir.x * fl - 0.5f * (ventana_xtam*dx.x + 
+                                       ventana_ytam*dy.x);
+        _dir.y = _dir.y * fl - 0.5f * (ventana_xtam*dx.y + 
+                                       ventana_ytam*dy.y);
+        _dir.z = _dir.z * fl - 0.5f * (ventana_xtam*dx.z + 
+                                       ventana_ytam*dy.z);
+    }
+
+    public final RAYO generar_rayo(int x, int y)
+    {
+        // OJO: Es posible que esto este siendo lento por asignar a memoria
+        //      dinamica estas dos variables. Notese que podrian ser estaticos
+        //      y reutilizarse...
+        // Notese como se utiliza un vector preprocesado `dy` para calcular
+        // las coordenadas en la pantalla que aumentan hacia abajo
+        VECTOR dir = new VECTOR(
+            x*dx.x + y*dy.x + _dir.x,
+            x*dx.y + y*dy.y + _dir.y,
+            x*dx.z + y*dy.z + _dir.z);
+
+        // La direccion de este rayo es un vector unitario, dado que en la
+        // version actual de RAYO::RAYO se normaliza...
+        RAYO ray = new RAYO(posicion, dir);
+
+        return ray;
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.geom;
+
+import vitral.toolkits.common.COLOR;
+import vitral.toolkits.common.VECTOR;
+import vitral.toolkits.entorno.RAYO;
+import vitral.toolkits.entorno.MATERIAL;
+
+// An object must implement a GEOMETRIA interface in order to
+// be ray traced. Using this interface it is straight forward
+// to add new objects
+public abstract class GEOMETRIA {
+    public MATERIAL material = null;
+
+    public abstract boolean interseccion(RAYO r);
+    public abstract void informacion_extra(RAYO ray, float t, 
+                                           VECTOR p, VECTOR n);
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+
+package vitral.toolkits.geom;
+
+import vitral.toolkits.common.COLOR;
+import vitral.toolkits.common.VECTOR;
+import vitral.toolkits.entorno.RAYO;
+import vitral.toolkits.entorno.MATERIAL;
+import vitral.toolkits.geom.GEOMETRIA;
+
+public class ESFERA extends GEOMETRIA {
+    private VECTOR _centro;
+    private float _radio;
+    private float _radio_al_cuadrado;
+    private VECTOR _static_delta;
+
+    public ESFERA(MATERIAL s, VECTOR c, float r) {
+        material = s;
+        _centro = c;
+        _radio = r;
+        _radio_al_cuadrado = _radio*_radio;
+        _static_delta = new VECTOR();
+    }
+
+    /**
+    Dado un RAYO `inout_rayo`, esta operaci&oacute;n determina si el rayo se
+    intersecta con la superficie de este objeto o no. Si el rayo no intersecta
+    al objeto se retorna 0, y de lo contrario se retorna la distancia desde
+    el origen del rayo hasta el punto de interseccion.
+
+    En caso de intersecci&oacute;n, se modifica `inout_rayo.t` para que 
+    contenga la distancia entre el punto de intersecci&oacute;n y el origen
+    del `inout_rayo`.
+    */
+    public boolean
+    interseccion(RAYO inout_rayo) {
+        /* OJO: Como en Java, a diferencia de C no hay sino objetos por
+                referencia, no se puede hacer una declaraci&oacute;n 
+                est&aacute;tica de un objeto, y poder hacerla es importante 
+                porque la constructora VECTOR::VECTOR se ejecuta muchas veces, 
+                y no se debe gastar tiempo creando objetos (i.e. haciento 
+                VECTOR delta; delta = new VECTOR(); ...).  El c&oacute;digo
+                original de MIT resolvi&oacute; &eacute;sto usando unos 
+                flotantes float dx, dy, dz; e implementando una versi&oacute;n
+                adicional de VECTOR::producto_punto() que recibe 3 floats.  
+                Se considera que esa soluci&oacute;n es "fea" y que al ofrecer
+                el nuevo m&eacute;todo `VECTOR::producto_punto` se le 
+                desorganiza la mente al usuario/programador.  Por eso, se 
+                resolvi&oacute; implementar otra soluci&oacute;n (tal vez 
+                igual de fea): a&ntilde;adir un nuevo atributo de clase en
+                ESFERA, y utilizarlo como su fuese una variable est&aacute;tica
+                de tipo VECTOR dentro del m&eacute;todo.  Esto no es bueno 
+                porque gasta memoria, pero ... que m&aacute;s podr&aacute; 
+                hacerse? Al menos el tiempo de ejecuci&oacute;n se mantiene 
+                igual respecto al c&oacute;digo original de MIT.
+                NOTA: Comparar este m&eacute;todo modificado con la 
+                      versi&oacute;n original en la etapa 1, con la 
+                      ayuda de un profiler. ... */
+        _static_delta.x = _centro.x - inout_rayo.origin.x;
+        _static_delta.y = _centro.y - inout_rayo.origin.y;
+        _static_delta.z = _centro.z - inout_rayo.origin.z;
+        float v = inout_rayo.direction.producto_punto(_static_delta);
+
+        // Do the following quick check to see if there is even a chance
+        // that an intersection here might be closer than a previous one
+        if ( v - _radio > inout_rayo.t ) {
+            return false;
+        }
+
+        // Test if the inout_rayo actually intersects the sphere
+        float t = _radio_al_cuadrado + v*v 
+                  - _static_delta.x*_static_delta.x 
+                  - _static_delta.y*_static_delta.y 
+                  - _static_delta.z*_static_delta.z;
+        if ( t < 0 ) {
+            return false;
+        }
+
+        // Test if the intersection is in the positive
+        // inout_rayo direction and it is the closest so far
+        t = v - ((float) Math.sqrt(t));
+        if ( (t > inout_rayo.t) || (t < 0) ) {
+            return false;
+        }
+
+        inout_rayo.t = t;
+        return true;
+    }
+
+    /**
+    Dado un `in_rayo` que se intersecta con este objeto (a una distancia `in_t`
+    desde su origen), este m&eacute;todo escribe en los vectores `out_p` y 
+    `out_n` la siguiente informacio&nacute;n:
+      - out_p: las coordenadas del punto en el que el `in_rayo` intersecta al 
+           objeto.
+      - out_n: un vector unitario con la normal de la superficie del objeto en
+           el punto de intersecci&oacute;n `out_p`.
+
+    PRE: Las referencias a VECTOR out_p y out_n YA deben existir. El 
+         m&eacute;todo solo coloca informaci&oacute;n dentro de ellos.
+    */
+    public void informacion_extra(RAYO in_rayo, float in_t, 
+                                  VECTOR out_p, VECTOR out_n) {
+        out_p.x = in_rayo.origin.x + in_t*in_rayo.direction.x;
+        out_p.y = in_rayo.origin.y + in_t*in_rayo.direction.y;
+        out_p.z = in_rayo.origin.z + in_t*in_rayo.direction.z;
+
+        out_n.x = out_p.x - _centro.x;
+        out_n.y = out_p.y - _centro.y;
+        out_n.z = out_p.z - _centro.z;
+        out_n.normalizar();
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+package vitral.toolkits.media;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+
+import vitral.toolkits.media.PIXEL_RGB;
+
+public class IMAGEN_RGB {
+
+    private PIXEL_RGB data[];
+    private int x_tam;
+    private int y_tam;
+
+    /**
+    Constructora de imagen. OJO: No la inicializa, antes de usarla debe
+    llamarse el m&eacute;todo init.
+    */
+    public IMAGEN_RGB()
+    {
+        x_tam = 0;
+        y_tam = 0;
+        data = null;
+    }
+
+    /**
+    Esta es la destructora de la clase.  Si es usted tan gentil, por favor 
+    llame este metodo al final del alcance de su objeto.
+    */
+    public void dispose()
+    {
+        if ( data != null ) {
+            for ( int i = 0; i < x_tam*y_tam; i++ ) {
+                if ( data[i] != null ) {
+                    data[i] = null;
+                }
+            }
+            x_tam = 0;
+            y_tam = 0;
+            data = null;
+            System.gc();
+        }
+    }
+
+    /**
+    Inicializaci&oacute;n del contenido de una imagen.
+
+    Recibe el ancho y el alto que debe tener esta IMAGEN_RGB (n&oacute;tese
+    que una imagen puede asi cambiar de tama&ntilde;o en cualquier momento)
+    y asigna la memoria necesaria para hacerlo.
+
+    OJO: NO inicializa la imagen, solo asigna la memoria necesaria.
+
+    Este m&eacute;todo retorna true si todo sale bien, o false si no
+    se pudo asignar la cantidad de memoria necesaria para almacenar la
+    imagen del tama&ntilde;o seleccionado.
+    */
+    public boolean init(int ancho, int alto)
+    {
+        try {
+          data = new PIXEL_RGB[ancho * alto];
+          for ( int i = 0; i < ancho*alto; i++ ) {
+              data[i] = new PIXEL_RGB();
+          }
+        }
+        catch (Exception e) {
+          data = null;
+          return false;
+        }
+        x_tam = ancho;        
+        y_tam = alto;        
+        return true;
+    }
+
+    /**
+    Este m&eacute;todo cambia la posicion (x, y) de la matriz de imagen y
+    escribe en ella un pixel con coordenadas (r, g, b).
+    */
+    public void putpixel(int x, int y, byte r, byte g, byte b)
+    {
+        int index = x_tam*y + x;
+        data[index].r = r;
+        data[index].g = g;
+        data[index].b = b;
+    }
+
+    /**
+    Este m&eacute;todo retorna las coordenadas de color (r, g, b) para el pixel
+    de la posicion (x, y) de la imagen.
+    */
+    public PIXEL_RGB getpixel(int x, int y)
+    {
+        PIXEL_RGB p = new PIXEL_RGB();
+        int index = x_tam*y + x;
+        p.r = data[index].r;
+        p.g = data[index].g;
+        p.b = data[index].b;
+
+        return new PIXEL_RGB();
+    }
+
+    /**
+    Este m&eacute;todo genera un patron de prueba visual tipo ajedrez, con
+    un par de lineas de colores atravezandolo por el centro.  Puede utilizarse
+    para probar otras operaciones de imagenes, o para inicializarlas.
+    */
+    public void crear_patron_de_prueba()
+    {
+        int i;
+        int j;
+        byte r;
+        byte g;
+        byte b;
+
+        for ( i = 0; i < y_tam ; i++ ) {
+            for ( j = 0; j < x_tam ; j++ ) {
+                if ( ((i % 2 != 0) && (j % 2 == 0)) || 
+                     ((j % 2 != 0) && (i % 2 == 0)) ) {
+                    r = (byte)255;
+                    g = (byte)255;
+                    b = (byte)255;
+                  }
+                  else {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                }
+                if ( i == y_tam/2 ) {
+                    r = (byte)255;
+                    g = 0;
+                    b = 0;
+                }
+                if ( j == x_tam/2) {
+                    r = 0;
+                    g = (byte)255;
+                    b = 0;
+                }
+                putpixel(j, i, r, g, b);
+            }
+        }
+    }
+
+    /**
+    Este m&eacute;todo escribe los contenidos de la imagen actual en un
+    archivo de imagen en formato PPM RGB (i.e. P6). Retorna true si todo
+    sale bien o false si algo falla (i.e. como un problema de permisos o
+    que se acabe el espacio en el dispositivo de almacenamiento `fd`).
+    */
+    public boolean exportar_ppm(File fd)
+    {
+        try {
+            FileOutputStream escritor = new FileOutputStream(fd);
+
+            String linea1 = "P6\n";
+            String linea2 = x_tam + " " + y_tam + "\n";
+            String linea3 = "255\n";
+            byte arr[];
+
+            arr = linea1.getBytes();
+            escritor.write(arr, 0, arr.length);
+            arr = linea2.getBytes();
+            escritor.write(arr, 0, arr.length);
+            arr = linea3.getBytes();
+            escritor.write(arr, 0, arr.length);
+
+            for ( int i = 0; i < x_tam*y_tam; i++ ) {
+                escritor.write(data[i].r);
+                escritor.write(data[i].g);
+                escritor.write(data[i].b);
+            }
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public int xtam()
+    {
+        return x_tam;
+    }
+
+    public int ytam()
+    {
+        return y_tam;
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+//===========================================================================
+package vitral.toolkits.media;
+
+public class PIXEL_RGB {
+    public byte r;
+    public byte g;
+    public byte b;
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
+           /***************************************************
+            *   An instructional Ray-Tracing Renderer written
+            *   for MIT 6.837  Fall '98 by Leonard McMillan.
+            *   Modified by Tomas Lozano-Perez for Fall '01
+            *   Modified by Oscar Chavarro for Spring '04 
+            *   FUSM 05061.
+            ****************************************************/
+
+//===========================================================================
+
+// Paquetes de java utilizados para el manejo de archivos
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+
+// Paquetes de java utilizados para la agregacion multiple
+import java.util.Vector;
+
+// Paquetes internos al sistema de raytracing / modelamiento
+import vitral.toolkits.media.IMAGEN_RGB;
+import vitral.framework.visual.RAYTRACER_MIT;
+import vitral.framework.UNIVERSO;
+import vitral.toolkits.entorno.CAMARA;
+
+public class RaytracerSimple {
+//- Atributos ---------------------------------------------------------------
+
+    // Modelo de la aplicacion
+    private UNIVERSO la_escena;
+    private IMAGEN_RGB la_imagen_resultado;
+    private RAYTRACER_MIT el_visualizador;
+
+//- Metodos -----------------------------------------------------------------
+
+    public RaytracerSimple()
+    {
+        // Inicializacion del modelo (independiente de swing)
+        la_escena = new UNIVERSO();
+    }
+
+    private void
+    pintar_offline(String nombre_de_archivo)
+    {
+        //- 1. Crear una imagen -------------------------------------------
+        File fd = new File("./salida.ppm");
+
+        la_imagen_resultado = new IMAGEN_RGB();
+        if ( !la_imagen_resultado.init(640, 480) ) {
+            System.err.println("Error creando la imagen!!");
+            System.exit(1);
+        }
+
+        //- 2. Calcular la imagen -----------------------------------------
+        // 2.1. Leer la escena
+        System.out.println("Leyendo " + nombre_de_archivo);
+        InputStream is = null;
+        try {
+            is = new FileInputStream(new File(nombre_de_archivo));
+            la_escena.leerArchivoDeEscena(is);
+            is.close();
+          }
+          catch (IOException e) {
+            System.err.println("Error leyendo " + nombre_de_archivo);
+            System.exit(-1);
+        }
+
+        // 2.2. Procesar la escena
+        el_visualizador = new RAYTRACER_MIT();
+        la_escena.camara.procesar_resize(la_imagen_resultado.xtam(), 
+                                         la_imagen_resultado.ytam());
+        el_visualizador.ejecutar(la_imagen_resultado, la_escena);
+
+        //- 3. Exportar la imagen a un archivo ----------------------------
+        if ( !la_imagen_resultado.exportar_ppm(fd) )
+        {
+            System.err.println("Error grabando la imagen!!");
+            System.exit(1);
+        }
+        System.out.println("Se ha generado una imagen llamada salida.ppm");
+        System.out.println("En Unix / Linux puede verla con el comando");
+        System.out.println("  display salida.ppm");
+
+        //- 4. Destruir las estructuras de datos --------------------------
+        // 4.1. Destruir la imagen
+        la_imagen_resultado.dispose();
+        la_imagen_resultado = null;
+
+        // 4.2. Destruir la escena
+        el_visualizador = null;
+        la_escena.dispose();
+        la_escena = null;
+
+        // 4.3. Sugerir al recolector de basura de Java que libere la memoria
+        System.gc();
+    }
+
+    public static void
+    main(String args[])
+    {
+        RaytracerSimple instancia = new RaytracerSimple();
+
+        if ( args.length < 1 ) {
+            instancia.pintar_offline("./etc/balls.ray");
+          }
+          else {
+            instancia.pintar_offline(args[0]);
+        }
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

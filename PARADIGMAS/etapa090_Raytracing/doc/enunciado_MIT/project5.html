@@ -1,0 +1,254 @@
+<html><!-- #BeginTemplate "/Templates/page_template.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>Project 5</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" mm:layoutgroup="true">
+  <tr> 
+    <td height="100" valign="top" width="800">&nbsp;</td>
+    <td width="1"></td>
+  </tr>
+  <tr> 
+    <td colspan="2" valign="top" height="596"> 
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr> 
+          <td width="153" height="40" valign="top">&nbsp;</td>
+          <td width="648" valign="top"> 
+            <h2 align="center"><!-- #BeginEditable "titleCell" --><font face="Georgia, Times New Roman, Times, serif">Project 
+              5</font><!-- #EndEditable --></h2>
+          </td>
+        </tr>
+        <tr> 
+          <td height="555" valign="top">
+            <table width="100%" border="0" cellpadding="10" cellspacing="0">
+              <tr> 
+                <td width="140" valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../news.html">News</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../course-info.html">Course 
+                    Information</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../calendar.html">Calendar</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../staff.html">Staff</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td height="48" valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../notes.html">Lecture 
+                    Notes</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td height="48" valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><font face="Georgia, Times New Roman, Times, serif"><a href="project5.html">Projects</a></font></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td height="48" valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../students.html">Students</a></font></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td height="48" valign="top"> 
+                  <h4><font face="Georgia, Times New Roman, Times, serif"><a href="../faq.html">FAQ</a></font></h4>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top"> <!-- #BeginEditable "textCell" --> 
+            <center>
+              <h1><font color=red>Ray Tracing</font> </h1>
+            </center>
+            <p> <a href="../project4.html">Project 4</a> in case you need it. 
+            <h2>Objective</h2>
+            <p>In this last project you are asked to make some extensions to the 
+              ray tracer given in class. In particular, you should add refraction 
+              to the illumination model, finish adding triangle meshes, and add 
+              a cylinder and/or cone primitive. Ray Tracing is one of the easiest 
+              ways of generating visually stunning pictures. </p>
+
+            <p><img src="Results.jpg" width="1057" height="293"> </p>
+	    <font color=red>Hesky Fisher pointed out that the "break"
+	    statement when checking for shadows in
+	    <tt>Surface.java</tt> was a bit hasty; it should have been
+	    a "continue", that is, we have found that the pixel is
+	    shadowed relative to that light source, but we need to
+	    keep looking at the other light sources.  With that change,
+	    we get the results below (note the change in the <tt>balls.ray</tt>
+	    case.  Also, you might run into numerical problems with
+	    the <tt>balls.ray</tt> test case because of the "table"
+	    sphere with the huge radius.  In which case, reload the
+	    test case (below) where we've reduced the radius and the
+	    z-offset.</font>
+            <p><img src="Results2.jpg" width="1057" height="293"> </p>
+
+            <h2>Checkpoint (Due Wednesday November 28 at 8pm)</h2>
+            Add refraction to the illumination model. Demonstrate it using the 
+            <tt>sboard.ray</tt> test file. Here's a few things to keep in mind: 
+            <ul>
+              <li>The last two parameters of the surface model <i>k<sub>t</sub></i> 
+                and <i>n<sub>t</sub></i> should be interpreted as follows; <i>k<sub>t</sub></i> 
+                is the fraction of the transmitted ray's intensity that is reflected 
+                to the eye, <i>n<sub>t</sub></i> is the ratio of the surrounding 
+                material's index of refraction to the object's index of refraction. 
+                For example, if you want to simulate a spherical water drop the 
+                index of refraction for water is approximately 1.33 (glass is 
+                approximately 1.5). If we assume the surrounding material is air 
+                then its index of refraction is 1. So when a ray strikes the outside 
+                of the object the term used in the equation given in class is 
+                computed as follows.<br>
+                <center>
+                  <img
+src="formula.gif" width=181 height=81 border=0> 
+                </center>
+                <br>
+                And when a ray inside of an object exits it then the term used 
+                in the equations is computed as follows.<br>
+                <center>
+                  <img src="formula2.gif" width=176
+height=81 border=0> 
+                </center>
+              <li>The Ray class should be extended to keep track of whether the 
+                ray is entering or exiting the object at an intersection. This 
+                info needs to be passed to the Surface shader so it knows whether 
+                to use <i>n<sub>t</sub></i> or its inverse. We assume that transparent 
+                objects won't intersect and so transitions are always from air 
+                or into air. 
+              <li>Consider what happens when the ray starts inside of a sphere 
+                (as it will in this project). Will the sphere intersection code 
+                still work? 
+              <li>Note that the raytracer as currently written will continue tracing 
+                rays forever until one fails to run into something. What's going 
+                to happen inside a transparent sphere? Or, if you put two mirrors 
+                in front of each other? Maybe you should limit the depth of the 
+                Ray tree to some fixed maximum depth, e.g. 10. 
+              <li> You might want to speed up the shadow test, which currently 
+                tests every object for each shadow ray, even after it has found 
+                an intersection. Does it make a difference? 
+              <li>What does a crystal ball look like? <br>
+                <br>
+                <center>
+                  <img src="whitted.jpg" width=320 height=240 border=0> 
+                </center>
+                <br>
+                Your mileage may vary... 
+            </ul>
+            <h2>Project5 (Due Wednesday December 5 at 8pm)</h2>
+            <ol>
+              <li> Finish coding the Triangle <tt>intersect</tt> and <tt>Shade</tt> 
+                methods in <tt>Triangle.java</tt>. Test the results with one of 
+                the test cases involving polygon meshes, show us the cow test 
+                case. 
+              <li> Add your own primitive. For example, one of: 
+                <ul>
+                  <li>cone tipX tipY tipZ baseX baseY baseZ baseRadius 
+                  <li>cylinder topX topY topZ baseX baseY baseZ Radius 
+                </ul>
+            </ol>
+            <h2>Extra Credit</h2>
+            <ul>
+              <li>Add more primitives, e.g. torus. 
+              <li>Add texture mapping, e.g. create a Raster from an image and 
+                map it onto the surface of a sphere. 
+              <li>Add bump mapping. 
+              <li>Incorporate bounding volumes or spatial subdivision 
+            </ul>
+            <h2>Files</h2>
+            The following files define the Ray Tracer: 
+            <ul>
+              <li> <a href="RayTrace.java">RayTrace.java</a> This is the top-level 
+                of the ray tracer. 
+              <li> <a href="RayTraceApplet.java">RayTraceApplet.java</a> Code 
+                for the applet that calls the ray tracer. 
+              <li> <a href="Light.java">Light.java</a> The Light class. 
+              <li> <a href="Surface.java">Surface.java</a> The Surface class, 
+                contains the critical Shade method. You need to add refraction 
+                here. 
+              <li> <a href="Ray.java">Ray.java</a> The Ray class. 
+              <li> <a href="Renderable.java">Renderable.java</a> The Renderable 
+                interface. 
+              <li> <a href="Sphere.java">Sphere.java</a> The Sphere class, check 
+                the intersect method. 
+              <li> <a href="Triangle.java">Triangle.java</a> The Triangle class, 
+                complete the intersect and Shade methods. 
+              <li> <a href="TriangleMesh.java">TriangleMesh.java</a> The TriangleMesh 
+                class. 
+              <li> <a href="Vector3D.java">Vector3D.java</a> The Vector3D class, 
+                with methods for common vector operations. 
+              <li> <a href="balls.ray">balls.ray</a> Input file with reflective 
+                spheres. 
+              <li> <a href="sboard.ray">sboard.ray</a> Input file with transparent 
+                sphere and a "checkerboard" made of spheres. 
+              <li> <a href="cow.ray">cow.ray</a> The purple cow on a reflective 
+                surface. 
+              <li> <a href="test.ray">test.ray</a> A small triangle mesh and a 
+                transparent sphere. May be useful for debugging. 
+            </ul>
+            <h2>Ground Rules</h2>
+            <ul>
+              <li>Feel free to discuss assignments and your approach with others. 
+              <li>Don't use code from previous semesters. 
+              <li>The design and code must be your own. 
+              <li>Cite any models, images, ideas, or algorithms that you do not 
+                develop yourself. 
+              <li>The assignment and the checkpoint are due before 8pm of the 
+                days indicated. 
+              <li>A working version of your applet and source code must be linked 
+                to your course home page. 
+              <li>All source code must also be submitted via Athena's turnin procedure. 
+                <ol>
+                  <li>Develop your projects in directories named project1, project2, 
+                    etc. (depending on the project number) 
+                  <li>Before turning in, put your project in a tar archive using 
+                    tar command on athena: 
+                    <pre>tar -cvf projectX.tar projectX</pre>
+                    <ul>
+                      <li>here projectX.tar is the archive name, and projectX 
+                        is your project directory. 
+                      <li>X is the project number. 
+                      <li>make sure you are in the parent directory of projectX 
+                    </ul>
+                  <li>Use turnin command to turn in the tar file 
+                    <pre>turnin -c 6.837 X projectX.tar</pre>
+                    Make sure you include the course number (-c 6.837) and the 
+                    project number (X). 
+                  <li>For example, to turn in project 5: 
+                    <ul>
+                      <li>make sure your project is in the directory named 'project4' 
+                      <li>go to the parent directory of project5 
+                      <li>type 'tar -cvf project5.tar project5' to create the 
+                        tar archive 
+                      <li>type 'turnin -c 6.837 5 project5.tar' to turn in the 
+                        archive 
+                    </ul>
+                  <li><font color=red>Check this page frequently for updates and 
+                    clarifications. </font> 
+                </ol>
+            </ul>
+            <!-- #EndEditable --></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td height="38"></td>
+    <td></td>
+  </tr>
+</table>
+</body>
+<!-- #EndTemplate --></html>

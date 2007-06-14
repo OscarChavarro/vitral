@@ -1,0 +1,8 @@
+El tiempo es peor que el original por haber encapsulado un codigo en
+CAMARA::generar_rayo.  Para recuperarlo solo hay que hacer ese metodo
+inline (como se hace eso en java?)... o copy-pastear el contenido para
+hacerlo inline "manualmente".
+
+real    0m3.870s
+user    0m2.030s
+sys     0m0.330s

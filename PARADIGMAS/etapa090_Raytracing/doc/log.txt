@@ -1,0 +1,61 @@
+Cosas ejecutadas o en proceso:
+  - A partir del codigo original publicado en MIT, hacer que el 
+    raytracer corra.  Para eso toca desactivar el codigo de TriangleMesh y
+    Triangle, porque no esta implementado, y hacer una pagina .html que
+    invoque el applet en "RayTraceApplet.java".
+    (Todo esto se hizo en un tiempo indeterminado, pero presumiblemente
+    corto) --- 2 horas?
+  - Construyendo Makefile y dando forma basica al proyecto (untabify,
+    make docs, renombramiento basico de clases, ubicacion en paquetes y
+    eliminacion de metodos no usados en VECTOR): 2h15min
+  - Arreglando warning de deprecation en APLICACION: 40min
+  - Estudiando la estructura del programa: creada la clase CAMARA,
+    entendido a fondo el modulo principal APLICACION 1h20min
+
+Diciembre 29 de 2003:
+  - Retomado el raytracer en etapa 2
+
+Enero 11 de 2004 (3h 20min):
+  - Creando y probando una clase IMAGEN propia, con algoritmo de prueba,
+    putpixel/getpixel/init y exportar_ppm: 50min
+  - Integrando el raytracer al modo imagen: 60 min
+  - Cambios leves y graduales a la estructura para acercar el disenno mas
+    a AQUYNZA (pero sin cambos funcionales de fondo), documentacion: 
+    1h30min
+
+Enero 12 de 2004 (4h 10min):
+  - Cambiar el uso de java.awt.Color por COLOR: 1h
+  - Re-estructurando el RAYTRACER para seguir un macroalgoritmo de control
+    AQUYNZA: 1h50 
+  - Construyendo modelo UML (ingenieria reversa)
+    . primera version: 30min
+  - A partir de la primera version del diagrama UML se decidio implementar
+    una clase UNIVERSO: 30min
+  - Construyendo modelo UML (ingenieria reversa)
+    . segunda version: 20min
+
+Enero 23 de 2004:
+  - Escribiendo el articulo: 3h
+
+Enero 25 de 2004:
+  - Escribiendo el articulo: 4h
+
+Cosas pendientes:
+  * Mover MATERIAL::ejecutar_modelo_de_iluminacion a RAYTRACER_* ... por
+    ahora es mejor dejar las cosas 100% al estilo AQUYNZA.
+
+  - Aclarar en el documento que "el raytracing es un algoritmo que recibe un 
+    UNIVERSO o escena y retornna una IMAGEN..."
+
+  - Tener dos versiones: una con todo de tipo float (original de MIT) y 
+    otra con todo double (a la AQUYNZA), y hacer comparaciones de desempenno.
+
+  - "Hacer la tarea" que dejaron en MIT, implementando las 
+    operaciones faltantes para triangulos. Deben funcionar los ejemplos
+    "test" y "cow".
+
+  - Reimplementar el mismo raytracer (igualito a lo que haya en 
+    la java) en C++. OJO: La idea es NO usar AQUYNZA C++, sino hacer
+    codigo C++ desde 0's, y que quede igual al codigo java de la etapa 2.
+
+  - Annadir a IMAGEN_RGB, un metodo exportar_swing o exportar_awt que la pinte

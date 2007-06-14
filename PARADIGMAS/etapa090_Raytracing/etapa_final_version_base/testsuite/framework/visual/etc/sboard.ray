@@ -1,0 +1,41 @@
+eye 0 2 10
+lookat 0 0 0
+up 0 1 0
+fov 30
+background 0.2 0.8 0.9
+light 1 1 1 ambient
+light 1 1 1 directional -1 -2 -1
+light 0.5 0.5 0.5 point -1 2 -1
+
+surface 0.7 0.2 0.8 0.5 0.4 0.2 10.0 0.0 0.0 1.0
+sphere -2 -3 -2 1.5
+sphere  0 -3 -2 1.5
+sphere  2 -3 -2 1.5
+sphere -1 -3 -1 1.5
+sphere  1 -3 -1 1.5
+sphere -2 -3  0 1.5
+sphere  0 -3  0 1.5
+sphere  2 -3  0 1.5
+sphere -1 -3  1 1.5
+sphere  1 -3  1 1.5
+sphere -2 -3  2 1.5
+sphere  0 -3  2 1.5
+sphere  2 -3  2 1.5
+
+surface 0.7 0.2 0.2 0.5 0.4 0.2 3.0 0.0 0.0 1.0
+sphere -1 -3 -2 1.5
+sphere  1 -3 -2 1.5
+sphere -2 -3 -1 1.5
+sphere  0 -3 -1 1.5
+sphere  2 -3 -1 1.5
+sphere -1 -3  0 1.5
+sphere  1 -3  0 1.5
+sphere -2 -3  1 1.5
+sphere  0 -3  1 1.5
+sphere  2 -3  1 1.5
+sphere -1 -3  2 1.5
+sphere  1 -3  2 1.5
+
+surface 0.4 0.4 0.4 0.1 0.1 0.6 100.0 0.25 0.75 0.666
+sphere  0 0 0 1
+

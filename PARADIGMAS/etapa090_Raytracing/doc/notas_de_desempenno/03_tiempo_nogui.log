@@ -1,0 +1,8 @@
+real    0m3.251s
+user    0m1.380s
+sys     0m0.240s
+
+
+Cambiado el uso de la clase Color por COLOR (que tiene a r, g y b como
+atributos publicos, y se puede estar ahorrando las llamadas a los
+metodos "get", solo si ellos no estan inline o final...)
