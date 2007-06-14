@@ -1,11 +1,12 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//= - February 12 2006 - Oscar Chavarro: Original base version              =
 //===========================================================================
 
 package vitral.toolkits.geometry;
 
+import vitral.toolkits.common.VSDK;
 import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.geometry.Geometry;
 import vitral.toolkits.geometry.GeometryIntersectionInformation;
@@ -44,7 +45,6 @@ public class Cube extends Geometry {
     doIntersection(Ray inOutRay) {
         double t, min_t = Double.MAX_VALUE;
         double l2 = side/2;  // OJO: Esto deberia venir precalculado
-        double EPSILON = Double.MIN_VALUE*10;
         Vector3D p = new Vector3D();
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
@@ -52,10 +52,10 @@ public class Cube extends Geometry {
         inOutRay.direction.normalize();
 
         // Plano superior: Z = side/2
-        if ( Math.abs(inOutRay.direction.z) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.z) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Z=side/2
             t = (l2-inOutRay.origin.z)/inOutRay.direction.z;
-            if ( t > -EPSILON ) {
+            if ( t > -VSDK.EPSILON ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.x >= -l2 && p.x <= l2 && 
                      p.y >= -l2 && p.y <= l2 ) {
@@ -67,10 +67,10 @@ public class Cube extends Geometry {
         }
 
         // Plano inferior: Z = -side/2
-        if ( Math.abs(inOutRay.direction.z) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.z) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Z=-side/2
             t = (-l2-inOutRay.origin.z)/inOutRay.direction.z;
-            if ( t > -EPSILON && t < min_t ) {
+            if ( t > -VSDK.EPSILON && t < min_t ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.x >= -l2 && p.x <= l2 && 
                      p.y >= -l2 && p.y <= l2 ) {
@@ -82,10 +82,10 @@ public class Cube extends Geometry {
         }
 
         // Plano frontal: Y = side/2
-        if ( Math.abs(inOutRay.direction.y) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.y) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Y=side/2
             t = (l2-inOutRay.origin.y)/inOutRay.direction.y;
-            if ( t > -EPSILON && t < min_t ) {
+            if ( t > -VSDK.EPSILON && t < min_t ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.x >= -l2 && p.x <= l2 && 
                      p.z >= -l2 && p.z <= l2 ) {
@@ -98,10 +98,10 @@ public class Cube extends Geometry {
         }
 
         // Plano posterior: Y = -side/2
-        if ( Math.abs(inOutRay.direction.y) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.y) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Y=-side/2
             t = (-l2-inOutRay.origin.y)/inOutRay.direction.y;
-            if ( t > -EPSILON && t < min_t ) {
+            if ( t > -VSDK.EPSILON && t < min_t ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.x >= -l2 && p.x <= l2 && 
                      p.z >= -l2 && p.z <= l2 ) {
@@ -114,10 +114,10 @@ public class Cube extends Geometry {
         }
 
         // Plano X = side/2
-        if ( Math.abs(inOutRay.direction.x) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.x) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano X=side/2
             t = (l2-inOutRay.origin.x)/inOutRay.direction.x;
-            if ( t > -EPSILON && t < min_t ) {
+            if ( t > -VSDK.EPSILON && t < min_t ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.y >= -l2 && p.y <= l2 && 
                      p.z >= -l2 && p.z <= l2 ) {
@@ -130,10 +130,10 @@ public class Cube extends Geometry {
         }
 
         // Plano X = -side/2
-        if ( Math.abs(inOutRay.direction.x) > EPSILON ) {
+        if ( Math.abs(inOutRay.direction.x) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano X=-side/2
             t = (-l2-inOutRay.origin.x)/inOutRay.direction.x;
-            if ( t > -EPSILON && t < min_t ) {
+            if ( t > -VSDK.EPSILON && t < min_t ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
                 if ( p.y >= -l2 && p.y <= l2 && 
                      p.z >= -l2 && p.z <= l2 ) {

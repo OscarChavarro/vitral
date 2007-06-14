@@ -47,7 +47,7 @@ public class RaytracerSimple {
         File fd = new File("./salida.ppm");
 
         la_imagen_resultado = new RGBImage();
-        if ( !la_imagen_resultado.init(320, 240) ) {
+        if ( !la_imagen_resultado.init(2048, 1536) ) {
             System.err.println("Error creando la imagen!!");
             System.exit(1);
         }

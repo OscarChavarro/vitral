@@ -23,6 +23,7 @@ import vitral.toolkits.geometry.RayableObject;
 import vitral.toolkits.geometry.Geometry;
 import vitral.toolkits.geometry.Sphere;
 import vitral.toolkits.geometry.Cube;
+import vitral.toolkits.geometry.Cylinder;
 
 public class Universe
 {
@@ -99,6 +100,9 @@ public class Universe
         material_actual.setPhongExponent(10);
         RayableObject thing;
         Matrix4x4 R, Ri;
+        double yaw_actual = 0;
+        double pitch_actual = 0;
+        double roll_actual = 0;
 
         while ( !fin_de_lectura ) {
           switch ( st.nextToken() ) {
@@ -115,8 +119,7 @@ public class Universe
                   thing.setMaterial(material_actual);
 
                   R = new Matrix4x4();
-                  // Pending to add rotation code
-
+                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
                   Ri.invert();
@@ -135,9 +138,7 @@ public class Universe
           thing.setGeometry(new Cube(r));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
-                  // Pending to add rotation code
-                  R.eulerAnglesRotation(Math.PI/4, 0, 0);
-
+                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
                   Ri.invert();
@@ -145,6 +146,27 @@ public class Universe
                   thing.setPosition(c);
                   arr_cosas.addElement(thing);
                 } 
+            else if ( st.sval.equals("cylinder") ) {
+                  Vector3D c = new Vector3D((float) leerNumero(st), 
+                                            (float) leerNumero(st), 
+                                            (float) leerNumero(st));
+                  float r1 = (float)leerNumero(st);
+                  float r2 = (float)leerNumero(st);
+                  float h = (float)leerNumero(st);
+
+                  imprimirMensaje("cylinder");
+                  thing = new RayableObject();
+          thing.setGeometry(new Cylinder(r1, r2, h));
+                  thing.setMaterial(material_actual);
+                  R = new Matrix4x4();
+                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
+                  thing.setRotation(R);
+                  Ri = new Matrix4x4(R);
+                  Ri.invert();
+                  thing.setRotationInverse(Ri);
+                  thing.setPosition(c);
+                  arr_cosas.addElement(thing);
+                }
                 /*
                 else if (st.sval.equals("triangles")) {
                   imprimirMensaje("triangles");
@@ -218,6 +240,13 @@ public class Universe
                     }
                   ;
                 }
+
+                else if ( st.sval.equals("rotation") ) {
+                  imprimirMensaje("rotation");
+                  yaw_actual = leerNumero(st);
+                  pitch_actual = leerNumero(st);
+                  roll_actual = leerNumero(st);
+        }
                 else if ( st.sval.equals("surface") ) {
                   imprimirMensaje("surface");
                   float r = leerNumero(st);

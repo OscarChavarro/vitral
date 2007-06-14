@@ -16,6 +16,13 @@ public class Ray {
         direction.normalize();
     }
 
+    public Ray(Ray b)
+    {
+        origin = new Vector3D(b.origin);
+        direction = new Vector3D(b.direction);
+        t = b.t;
+    }
+
     public String toString()
     {
         return "Ray Origin: " + origin + "; Direction: " + direction + " T: " + t;
