@@ -14,3 +14,7 @@
     the program to die (check SceneEditorApplication)
   - ZBuffer internal representation should be based on doubles, not floats
   - Check tga format import functionality
+  - Implement primitive and intersection accounting on render operations,
+    using VSDK class
+  - Rename QualitySelection class to RenderConfiguration, and include
+    managing of user interaction level colors

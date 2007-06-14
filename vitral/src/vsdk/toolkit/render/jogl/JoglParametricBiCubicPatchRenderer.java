@@ -141,21 +141,16 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
-    @return Approximate number of triangles. If non-triangles primitives like
-    quads are rendered, this counts as the corresponding number of triangles.
-    1D and 0D primitives are not counted.
-    @todo Implement triangle count!
     */
-    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c,
+    public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
                            QualitySelection q) {
         drawSurfaceGrid(gl, p.evaluateSurface(), 1, 1, 0, 0);
         if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
         }
-        return 0;
     }
 
-    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c,
+    public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
                            QualitySelection q, int tilingU, int tilling_y,
                            float inicialTextCoorU,
                            float inicialTextCoorV) {
@@ -165,7 +160,6 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
         }
-        return 0;
     }
 }
 

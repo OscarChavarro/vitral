@@ -2,6 +2,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - February 13 2006 - Oscar Chavarro: Original base version              =
+//= - August 7 2006 - Oscar Chavarro: Accounting functionality started      =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -35,16 +36,104 @@ samples in the testsuite directory. 3. Have this API documentation available
 and look at specific method description for help. 4. Have in hand a good
 computer graphics textbook.
 
+\section VSDK The vsdk.toolkit.common.VSDK utility class
+
+All classes in the VSDK toolkit have access to an static class called VSDK,
+which is governed by the SINGLETON design pattern behavior. That is, it is
+an static class that lives only once per virtual machine.  Some operations
+in this class are not thread safe, so thread partitioning of VSDK toolkit
+based applications is not recommended. Instead, heavy process partition is
+recommended, as specified by the VSDK framework.
+
+The VSDK class provides the following services:
+  - It contains common mathematical constants used by VSDK, but not
+    defined in Java's Math class
+  - It provides common mathematical methods useful for VSDK, not
+    defined in Java's Math class, as such vector distance, data type
+    conversions and data formatting, tuned for VSDK
+  - It provides a basic error reporting mechanism, for easing the
+    error handling and internationalization of messages
+  - It provides to a heavy process (i.e. a JVM) the ability to count
+    primitives and ray intersection on various types of objects. This
+    service is to be used by rendering operations (specially those on
+    toolkit.render and toolkit.environment.geometry packages), useful
+    for benchmarking purposes
 */
 
 public class VSDK
 {
+    // Common mathematical constants
     public static final double EPSILON = 1e-6;
 
+    // Error reporting levels
     public static final int WARNING = 1;
     public static final int ERROR = 2;
     public static final int DEBUG = 3;
     public static final int VERBOSE = 4;
+
+    // Primitive types
+    public static final int POINT = 0;
+    public static final int LINE = 1;
+    public static final int TRIANGLE = 2;
+    public static final int TRIANGLE_STRIP = 3;
+    public static final int QUAD = 4;
+    public static final int QUAD_STRIP = 5;
+    public static final int PRIMITIVE_TYPE_COUNT = 6;
+
+    // Ray intersection count types
+    public static final int PLANE = 0;
+    public static final int SPHERE = 1;
+    public static final int CONE = 2;
+    public static final int INTERSECTION_TYPE_COUNT = 3;
+
+    // Primitive accounting data structures (not thread safe)
+    private static int primitiveCount[];
+    private static int intersectionCount[];
+
+    static {
+        primitiveCount = new int[PRIMITIVE_TYPE_COUNT];
+        intersectionCount = new int[INTERSECTION_TYPE_COUNT];
+        resetPrimitiveCounters();
+        resetIntersectionCounters();
+    }
+
+    public static void resetPrimitiveCounters()
+    {
+        int i;
+
+        for ( i = 0; i < PRIMITIVE_TYPE_COUNT; i++ ) {
+        primitiveCount[i] = 0;
+    }
+    }
+
+    public static void resetIntersectionCounters()
+    {
+        int i;
+
+        for ( i = 0; i < INTERSECTION_TYPE_COUNT; i++ ) {
+        intersectionCount[i] = 0;
+    }
+    }
+
+    public static void acumulatePrimitiveCount(int type, int count)
+    {
+        primitiveCount[type] += count;
+    }
+
+    public static void acumulateIntersectionCount(int type, int count)
+    {
+        intersectionCount[type] += count;
+    }
+
+    public static int getPrimitiveCount(int type)
+    {
+        return primitiveCount[type];
+    }
+
+    public static int getIntersectionCount(int type)
+    {
+        return intersectionCount[type];
+    }
 
     public static boolean equals(double a, double b)
     {

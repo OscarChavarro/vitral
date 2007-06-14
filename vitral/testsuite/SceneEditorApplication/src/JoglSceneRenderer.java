@@ -109,6 +109,7 @@ public class JoglSceneRenderer
         double maxy = (((double)ny)/2) * dy;
 
         gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
         gl.glBegin(GL.GL_LINES);
         gl.glColor3d(0.37, 0.37, 0.37);

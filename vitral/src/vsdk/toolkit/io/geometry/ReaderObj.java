@@ -8,60 +8,62 @@
 
 package vsdk.toolkit.io.geometry;
 
-import java.io.*;
-import java.util.NoSuchElementException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Triangle;
+import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
-import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 /**
-The class ReaderObj provides wavefront obj loading functionality. Wavefront obj is a 
-3d object format used to describe polygon meshes; it is capable of storing vertex, 
-vertex normal, vetrex texture, faces, material and texture information. 
+The class ReaderObj provides wavefront obj loading functionality. Wavefront
+obj is a 3d object format used to describe polygon meshes; it is capable of
+storing vertex, vertex normal, vetrex texture, faces, material and texture 
+information. 
 By the use of extensions, it has the potential to describe more information.
-The original Wavefront format is not well standarized, so many variations could
-exist. This code currently manages only triangle faces.
+The original Wavefront format is not well standarized, so many variations
+could exist. This code currently manages only triangle faces.
 */
-
 public class ReaderObj
 {
     /**
-     This method reads an Alias/Wavefront .obj file in ASCII form from the 
-     file name. A wavefront obj file can have many objects within, so this 
-     method returns a group of objects rather than a single one.
+    This method reads an Alias/Wavefront .obj file in ASCII form from the 
+    file name. A wavefront obj file can have many objects within, so this 
+    method returns a group of objects rather than a single one.
 
-     Even though a wavefront obj file has many objects, all the objects in 
-     the file share a common set of vertexes; this loader only stores for a Mesh
-     the vertexes that it uses, not all the array of vertexes.
+    Even though a wavefront obj file has many objects, all the objects in 
+    the file share a common set of vertexes; this loader only stores for a 
+    TriangleMesh the vertexes that it uses, not all the array of vertexes.
 
-     For a mesh to have a material, the matrial file has to be in the same folder 
-     as the mesh file; the same statement can be given about the texture.
+    For a mesh to have a material, the matrial file has to be in the same
+    folder as the mesh file; the same statement can be given about the
+    texture.
 
-     @todo should not recieve a filename, but a previously opened stream, to
-     make it independent of filesystems, and generalize it to URLs or whatever
-     connection.
-     */
-
+    @todo should not recieve a filename, but a previously opened stream, to
+    make it independent of filesystems, and generalize it to URLs or whatever
+    connection.
+    */
     public static TriangleMeshGroup read(String fileName) throws IOException
     {
-        ArrayList<TriangleMesh> ret=new ArrayList<TriangleMesh>();
-        
+        ArrayList<TriangleMesh> meshGroup=new ArrayList<TriangleMesh>();
         ArrayList<Vector3D> vertexes=new ArrayList<Vector3D>();
         ArrayList<Vector3D> normals=new ArrayList<Vector3D>();
         ArrayList<Vector3D> vertexesTex=new ArrayList<Vector3D>();
         ArrayList<int[][]> faces=new ArrayList<int[][]>();
-        
+
         HashMap<String, RGBAImage> texturasHash=new HashMap<String, RGBAImage>();
         ArrayList<RGBAImage> texturasList=new ArrayList<RGBAImage>();
         
@@ -139,57 +141,47 @@ public class ReaderObj
                 }
             }
             /******************inicializar textura*********************/
-            if ( cad.startsWith("usemap ") )
-            {
+            if ( cad.startsWith("usemap ") ) {
                 if ( !texturasHash.containsKey(cad) ) {
                     RGBAImage texture = obtainTextureFromFile(cad, fileName);
                     if ( texture == null ) {
-                        System.out.println("tex null");
-                        textAct=0;
+                        textAct = 0;
                     }
                     else {
-                        System.out.println("tex ok");
                         texturasList.add(texture);
                         relCarTex.add(new ArrayList<int[]>());
-                        textAct=texturasList.size();
+                        textAct = texturasList.size();
                     }
                     texturasHash.put(cad, texture);
                 }
-                else
-                {
-                    //System.out.println("contains key: "+cad);
-                    RGBAImage texture=texturasHash.get(cad);
-                    if(texture==null)
-                    {
-                        //System.out.println("tex null");
+                else {
+                    RGBAImage texture = texturasHash.get(cad);
+                    if( texture == null ) {
                         textAct=0;
                     }
-                    else if(!texturasList.contains(texture))
-                    {
-                        //System.out.println("tex ok, list doesn't contains it");
+                    else if( !texturasList.contains(texture) ) {
                         texturasList.add(texture);
                         relCarTex.add(new ArrayList<int[]>());
                         textAct=texturasList.size();
                     }
-                    else
-                    {
-                        //System.out.println("tex ok, list contains it");
+                    else {
                         textAct=texturasList.indexOf(texture)+1;
                     }
                 }
-                //System.out.println("texAct: "+textAct);
                 ArrayList<int[]> actRanges=relCarTex.get(textAct);
                 int[] newRange=new int[2];
                 newRange[0]=faces.size();
                 actRanges.add(newRange);
             }
             /******************armar objeto*********************/
-            if (cad.startsWith("o "))
+            if ( cad.startsWith("o ") || cad.startsWith("g ") )
             {
-                TriangleMesh object=armarObjeto(vertexes, normals, vertexesTex, faces, texturasList, relCarTex);
-                object.setName(nomObj);
-                object.setMaterial(new Material(matAct));
-                ret.add(object);
+                if ( vertexes.size() > 0 ) {
+                    TriangleMesh object=armarObjeto(vertexes, normals, vertexesTex, faces, texturasList, relCarTex);
+                    object.setName(nomObj);
+                    object.setMaterial(new Material(matAct));
+                    meshGroup.add(object);
+        }
                 
                 StringTokenizer auxNomObj=new StringTokenizer(cad, " ");
                 auxNomObj.nextToken();
@@ -209,123 +201,121 @@ public class ReaderObj
                 
             }
         }
-        TriangleMesh object=armarObjeto(vertexes, normals, vertexesTex, faces, texturasList, relCarTex);
-        object.setMaterial(new Material(matAct));
-        object.setName(nomObj);
-        ret.add(object);
-        
+
+        if ( vertexes.size() > 0 ) {
+            TriangleMesh object;
+            object = armarObjeto(vertexes, normals, vertexesTex, 
+                                 faces, texturasList, relCarTex);
+            object.setMaterial(new Material(matAct));
+            object.setName(nomObj);
+            meshGroup.add(object);
+        }
+
         TriangleMeshGroup mgRet=new TriangleMeshGroup();
-        for(TriangleMesh mAux:ret)
-        {
-            mgRet.addMesh(mAux);
+        for( TriangleMesh mAux:meshGroup ) {
+            Vertex[] test = mAux.getVertexes();
+            if ( test.length > 0 ) {
+                mgRet.addMesh(mAux);
+        }
         }
         return mgRet;
     }
     
     private static RGBAImage obtainTextureFromFile(String cad, String fileName)
     {
-        StringTokenizer st=new StringTokenizer(cad, " ");
-        st.nextToken();//usemap
-        String dirObj=new File(fileName).getParentFile().getAbsolutePath();
-        String nomImage=st.nextToken();
-        if(nomImage.equals("(null)"))
-        {
+        StringTokenizer st = new StringTokenizer(cad, " ");
+        st.nextToken(); //usemap
+        String dirObj = new File(fileName).getParentFile().getAbsolutePath();
+        String nomImage = st.nextToken();
+        if ( nomImage.equals("(null)") ) {
             return null;
         }
         try
         {
-            return ImagePersistence.importRGBA(new File(dirObj+System.getProperty("file.separator")+nomImage));
+            return ImagePersistence.importRGBA(
+              new File(dirObj+System.getProperty("file.separator")+nomImage));
         }
-        catch(ImageNotRecognizedException inre)
-        {
+        catch(ImageNotRecognizedException inre) {
             return null;
         }
     }
     
-    private static TriangleMesh armarObjeto(ArrayList<Vector3D> vertexes, ArrayList<Vector3D> normals,
-            ArrayList<Vector3D>vertexesTex, ArrayList<int[][]> faces,
-            ArrayList<RGBAImage> texturas, ArrayList<ArrayList<int[]>> relCarTex)
+    private static TriangleMesh armarObjeto(
+        ArrayList<Vector3D> vertexes, 
+        ArrayList<Vector3D> normals,
+        ArrayList<Vector3D>vertexesTex,
+        ArrayList<int[][]> faces,
+        ArrayList<RGBAImage> texturas,
+        ArrayList<ArrayList<int[]>> relCarTex)
     {
-        TriangleMesh m=new TriangleMesh();
-        
+        TriangleMesh m = new TriangleMesh();
+
         m.setTriangles(new Triangle[faces.size()]);
-        
+
         ArrayList<Integer> usedVertexes=new ArrayList<Integer>();
         ArrayList<Integer> usedTexVertexes=new ArrayList<Integer>();
         
         HashMap<Integer, Integer> cambiosVert=new HashMap<Integer, Integer>();
         HashMap<Integer, Integer> cambiosVertTex=new HashMap<Integer, Integer>();
-        
         int indexVert=0;
         int indexVertTex=0;
         
-        for(int i=0; i<m.getTriangles().length; i++)
-        {
+        for( int i=0; i<m.getTriangles().length; i++ ) {
             int[] p1=faces.get(i)[0];
             int[] p2=faces.get(i)[1];
             int[] p3=faces.get(i)[2];
             
-            if(!cambiosVert.containsKey(p1[0]))
-            {
+            if ( !cambiosVert.containsKey(p1[0]) ) {
                 cambiosVert.put(p1[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p1[0]);
             }
             p1[0]=cambiosVert.get(p1[0]);
             
-            if(!cambiosVertTex.containsKey(p1[1]) && p1[1]!=-1)
-            {
+            if(!cambiosVertTex.containsKey(p1[1]) && p1[1]!=-1) {
                 cambiosVertTex.put(p1[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p1[1]);
             }
-            if(p1[1]!=-1)
-            {
+            if(p1[1]!=-1) {
                 p1[1]=cambiosVertTex.get(p1[1]);
             }
             
-            if(!cambiosVert.containsKey(p2[0]))
-            {
+            if(!cambiosVert.containsKey(p2[0])) {
                 cambiosVert.put(p2[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p2[0]);
             }
             p2[0]=cambiosVert.get(p2[0]);
             
-            if(!cambiosVertTex.containsKey(p2[1]) && p2[1]!=-1)
-            {
+            if(!cambiosVertTex.containsKey(p2[1]) && p2[1]!=-1) {
                 cambiosVertTex.put(p2[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p2[1]);
             }
-            if(p2[1]!=-1)
-            {
+            if(p2[1]!=-1) {
                 p2[1]=cambiosVertTex.get(p2[1]);
             }
             
-            if(!cambiosVert.containsKey(p3[0]))
-            {
+            if(!cambiosVert.containsKey(p3[0])) {
                 cambiosVert.put(p3[0], indexVert);
                 indexVert++;
                 usedVertexes.add(p3[0]);
             }
             p3[0]=cambiosVert.get(p3[0]);
             
-            if(!cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1)
-            {
+            if(!cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1) {
                 cambiosVertTex.put(p3[1], indexVertTex);
                 indexVertTex++;
                 usedTexVertexes.add(p3[1]);
             }
-            if(p3[1]!=-1)
-            {
+            if(p3[1]!=-1) {
                 p3[1]=cambiosVertTex.get(p3[1]);
             }
         }
         
         m.setVertexes(new Vertex[usedVertexes.size()]);
-        for(int i=0; i<usedVertexes.size(); i++)
-        {
+        for(int i=0; i<usedVertexes.size(); i++) {
             m.getVertexes()[i]=new Vertex();
             m.getVertexes()[i].setPosition(new Vector3D());
             m.getVertexes()[i].setPosition(vertexes.get(usedVertexes.get(i)-1));
@@ -350,8 +340,7 @@ public class ReaderObj
         }
         
         m.setTextures(new RGBAImage[texturas.size()]);
-        for(int i=0; i<m.getTextures().length; i++)
-        {
+        for(int i=0; i<m.getTextures().length; i++) {
             m.getTextures()[i]=texturas.get(i);
         }
         

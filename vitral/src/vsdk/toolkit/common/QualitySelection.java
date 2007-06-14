@@ -9,11 +9,17 @@
 
 package vsdk.toolkit.common;
 
+/**
+The QualitySelection class is used to indicate some attributes in which a 
+geometry is to be displayed in screen. The QualitySelection class is not
+responsible of display any data, it is just an a suggestion on how to draw it.
+*/
 public class QualitySelection extends Entity {
 
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
+    public static final int SHADING_TYPE_NOLIGHT  = 0;
     public static final int SHADING_TYPE_FLAT     = 1;
     public static final int SHADING_TYPE_GOURAUD  = 2;
     public static final int SHADING_TYPE_PHONG    = 3;
@@ -38,19 +44,43 @@ public class QualitySelection extends Entity {
     // algorithms.
     private int lodHint;
 
+    /**
+    Constructs a default QualitySelection object that will display the surfaces
+    */
     public QualitySelection() {
-        shadingType = SHADING_TYPE_FLAT;
+        shadingType = SHADING_TYPE_GOURAUD;
 
         surfaces = true;
         wires = false;
         boundingVolume = false;
-        texture = false;
+        texture = true;
         bumpMap = false;
         points = false;
         normals = false;
         trianglesNormals = false;
     }
 
+    /**
+    Contructs a QualitySelection object with the specified parameers
+    @param surfaces Indicates wether or not the surface of the object is to be 
+           displayed
+    @param wires Indicates wether or not the edges of the faces that compose 
+           the object are to be displayed
+    @param boundingVolume Indicates wether or not the bounding volume of the 
+           object is to be displayed
+    @param texture Indicates wether or not the object is to be displayed using 
+           texture mapping
+    @param bumpMap Indicates wether or not the object is to be displayed using 
+           bump mapping
+    @param points Indicates wether or not the vertexes of the object are to be 
+           displayed
+    @param normals Indicates wether or not the normals of the object are to be 
+           displayed
+    @param trianglesNormals Indicates wether or not the face normals of the 
+           object are to be displayed
+    @param shadingType Indicates the behavior of the lighting calculation for 
+           this object
+    */
     public QualitySelection(boolean surfaces,
                             boolean wires,
                             boolean boundingVolume,
@@ -72,6 +102,11 @@ public class QualitySelection extends Entity {
         this.trianglesNormals = trianglesNormals;
     }
 
+    /**
+    Selects wether or not to display the surface of the object
+    @param b The selection value, true indicates that the quality should be 
+    displayed and false indicates that it shouldn't
+    */
     public void setSurfaces(boolean b)
     {
         this.surfaces = b;
@@ -218,19 +253,22 @@ public class QualitySelection extends Entity {
 
         msg = msg + "  - Shading type: ";
         switch ( shadingType ) {
-        case SHADING_TYPE_FLAT:
-        msg = msg + "FLAT\n";
-        break;
-        case SHADING_TYPE_GOURAUD:
-        msg = msg + "GOURAUD\n";
-        break;
-        case SHADING_TYPE_PHONG:
-        msg = msg + "PHONG\n";
-        break;
-      default:
-        msg = msg + "INVALID!\n";
-        break;
-    }
+          case SHADING_TYPE_NOLIGHT:
+            msg = msg + "LIGHTING DISABLED (ONLY AMBIENT COLOR)\n";
+            break;
+          case SHADING_TYPE_FLAT:
+            msg = msg + "FLAT\n";
+            break;
+          case SHADING_TYPE_GOURAUD:
+            msg = msg + "GOURAUD\n";
+            break;
+          case SHADING_TYPE_PHONG:
+            msg = msg + "PHONG\n";
+            break;
+          default:
+            msg = msg + "INVALID!\n";
+            break;
+        }
 
         msg = msg + "  - Draw points: " + (points?"ON":"OFF") + "\n";
         msg = msg + "  - Draw wires: " + (wires?"ON":"OFF") + "\n";

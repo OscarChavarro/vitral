@@ -101,3 +101,7 @@ Changes in 2006 august 2 revition
 
 Changes in 2006 august 6 revition
   - Image JOGL Renderers revised
+
+Changes in 2006 august 6 revition
+  - Mesh classes, including model, JOGL renderer and persistence revisited.
+    This now seems to work quite well :-)

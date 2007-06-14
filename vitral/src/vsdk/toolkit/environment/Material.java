@@ -32,10 +32,10 @@ public class Material extends Entity
     /** Creates a new instance of MaterialGL */
     public Material() 
     {
-        ambient=new ColorRgb(); 
-        diffuse=new ColorRgb(); 
-        specular=new ColorRgb(); 
-        emission=new ColorRgb(); 
+        ambient=new ColorRgb(0.1, 0.1, 0.1);
+        diffuse=new ColorRgb(0.9, 0.5, 0.5);
+        specular=new ColorRgb(1, 1, 1);
+        emission=new ColorRgb(0, 0, 0);
         reflectionCoefficient = 0;
         opacity = 1;
         phongExponent = 128;

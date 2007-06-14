@@ -1,0 +1,15 @@
+newmtl test1
+Ka  0.1  0.1  0.1
+Kd  0.9  0.5  0.5
+Ks  1 1 1
+illum 2
+Ns 100.2235
+Tr 0.4300
+
+newmtl test2
+Ka  0.1  0.1  0.1
+Kd  1 1 1
+Ks  1 1 1
+illum 2
+Ns 100.2235
+Tr 0.4300

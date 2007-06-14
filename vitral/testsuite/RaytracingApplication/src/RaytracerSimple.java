@@ -87,7 +87,7 @@ public class RaytracerSimple {
         }
         System.out.println(" OK!");
 
-        System.out.println("An image has been created in the file output.ppm");
+        System.out.println("An image has been created in the file output.jpg");
 
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Destruir la imagen

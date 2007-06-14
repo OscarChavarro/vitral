@@ -67,6 +67,7 @@ public class Vertex extends Entity
   {
     this.position = position;
     this.normal = normal;
+    this.normal.normalize();
     binormal = null;
     tangent = null;
     incidentTriangles = null;
