@@ -1,4 +1,14 @@
 //===========================================================================
+//= A 3D Search Engine based on Vitral SDK toolkit platform                 =
+//=-------------------------------------------------------------------------=
+//= Oscar Chavarro, May 23 2007                                             =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
+//=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
+//=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
+//=     January 2003. Pp. 83-105                                            =
+//===========================================================================
 
 // Java basic classes
 import java.io.File;
@@ -23,10 +33,15 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.SphericalHarmonicShapeDescriptor;
 import vsdk.toolkit.processing.SpharmonicKitWrapper;
 
+/**
+Current application is the VitralSDK implementation of a search engine for
+3d models, as proposed in [FUNK2003].
+*/
 public class DatasetControl
 {
     /**
@@ -69,15 +84,20 @@ public class DatasetControl
 
     /**
     Given a voxelized geometry, current method extract from it the
-    shape descriptor using a spherical harmonic technique.
+    a (partial) shape descriptor using a spherical harmonic technique.
+    This algorithm implements the radial decomposition of a voxel volume
+    in to spheres with (texture) maps associated with it, as described in
+    [FUNK2003].4.2.
     */
     private static boolean processSphericalHarmonics(VoxelVolume vv,
         int groupIndex, SphericalHarmonicShapeDescriptor featureVector)
     {
+        // (r, tetha, phi)
         double r = ((double)groupIndex) / 31.0;
+        double tetha, phi;
+
         Sphere sphere;
         IndexedColorImage texture;
-        double tetha, phi;
         int s, t;
         int voxelValue;
         Vector3D p = new Vector3D();
@@ -114,15 +134,27 @@ public class DatasetControl
         return true;
     }
 
+    /**
+    This 3D model indexing method implements the analysis technique presented
+    in [FUNK2003].4.
+    @todo change transformation strategy to that described at [FUNK2003].4.1.
+    */
     public static GeometryMetadata analyzeModel(String filename)
     {
-        ArrayList<SimpleBody> things = new ArrayList<SimpleBody>();
-        int i;
-        VoxelVolume vv = new VoxelVolume();
-        vv.init(64, 64, 64);
+        //- Variables -----------------------------------------------------
+        ArrayList<SimpleBody> things;
+        int i, R;
+        VoxelVolume vv;
         Geometry referenceGeometry;
-        GeometryMetadata metadata = new GeometryMetadata();
 
+        vv = new VoxelVolume();
+        // Spherical harmonic bandwitdh config. as defined at [FUNK2003].4.1.
+        R = 32;
+        // Voxel grid config. as defined at [FUNK2003].4.1.
+        vv.init(2*R, 2*R, 2*R);
+
+        GeometryMetadata metadata = new GeometryMetadata();
+        things = new ArrayList<SimpleBody>();
         System.out.println("Analizing model " + filename);
         try {
             File fd = new File(filename);
@@ -137,10 +169,11 @@ public class DatasetControl
                 //- Calculate transform matrix --------------------------------
                 double minmax[] = referenceGeometry.getMinMax();
                 // Transform from voxelspace to geometry minmax space
+// TODO:
                 Matrix4x4 M;
                 M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
 
-                //- Primitive rasterization -----------------------------------
+                //- Primitive rasterization ([FUNK2003].4.1.) -----------------
                 ProgressMonitorConsole reporter = new ProgressMonitorConsole();
                 referenceGeometry.doVoxelization(vv, M, reporter);
             }
@@ -164,6 +197,12 @@ public class DatasetControl
         return metadata;
     }
 
+    /**
+    This method implements the matching step as described in [FUNK2003].3.2.
+    @todo: at a negative tolerance, this method should not use "tolerance" but
+    return the -tolerance closest models. For example, for an equal behavior
+    to the search engine described in [FUNK2003], this value should be -16.0.
+    */
     private static ArrayList <String> matchModel(
         String filename,
         ArrayList<GeometryMetadata> descriptorsArray,
@@ -177,7 +216,8 @@ public class DatasetControl
         System.out.println("Searching for closest 3D model to " + filename);
 
         for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            // Takes into consideration the euclidean distance
+            // Takes into consideration the euclidean distance as indicated
+            // in [FUNK2003].4 (L2 Minskowski distance).
             Ls = m.doMinskowskiDistance(descriptorsArray.get(i), 2);
             System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
                 " to " + descriptorsArray.get(i).getFilename());
@@ -302,15 +342,17 @@ public class DatasetControl
         }
     }
 
-    public static void addFiles(String filenamesList[],
+    /**
+    This method implements the indexing step as described in [FUNK2003].3.2.
+    */
+    public static void indexFiles(String filenamesList[],
         ArrayList<GeometryMetadata> descriptorsArray)
     {
         int i, j;
         GeometryMetadata m, other;
 
-        // Add new model descriptions
         for ( i = 1; i < filenamesList.length; i++ ) {
-            // If that model was before in database, delete
+            // If that model was before in database, delete it
             for ( j = 0; j < descriptorsArray.size(); j++ ) {
                 other = descriptorsArray.get(j);
                 if ( other.getFilename().equals(filenamesList[i]) ) {
@@ -340,7 +382,7 @@ public class DatasetControl
         }
         if ( args[0].equals("add") ) {
             readDatabase(descriptorsArray);
-            addFiles(args, descriptorsArray);
+            indexFiles(args, descriptorsArray);
             saveDatabase(descriptorsArray);
         }
         else if ( args[0].equals("searchModel") ) {

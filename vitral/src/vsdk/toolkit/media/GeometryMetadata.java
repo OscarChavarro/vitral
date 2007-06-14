@@ -1,31 +1,51 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - May 23 2007 - Oscar Chavarro: Original base version                   =
+//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [BUST2005] Bustos, Benjamin. Keim, Daniel A. Saupe, Dietmar. Schreck,   =
 //=     Tobias. Vranic, Dejan V. "Feature-Based Similarity Search in 3D     =
 //=     Databases". ACM Computing Surveys, Vol. 37, No 4, December 2005,    =
 //=     pp. 345-387.                                                        =
+//= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
+//=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
+//=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
+//=     January 2003. Pp. 83-105                                            =
 //===========================================================================
+
+package vsdk.toolkit.media;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.media.ShapeDescriptor;
-
-public class GeometryMetadata
+/**
+This class is a container for a set of different ShapeDescriptor's for an
+associated Geometry. This class is designed to contain non-geometric data
+associated with geometry, or "metadata".  Such a metadata is usefull for
+indexing, querying and matching of 3D models, as described in [FUNK2003].
+*/
+public class GeometryMetadata extends MediaEntity
 {
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20070523L;
+
     private String objectFilename;
     private ArrayList<ShapeDescriptor> descriptorsList;
 
     /**
     Given a pair of GeometryMetadata elements, this method computes the
-    MinskowskiDistance between feature vectors, if shape descriptors are
-    "comparable".
+    MinskowskiDistance between feature vectors as described in [BUST2005],
+    if shape descriptors are "comparable".
 
     Two sets of shape descriptors are "comparable" if they are of the same
     type, in the same order and with the same number of features.
 
     If given shape descriptors are not comparable, this method return infinite
     distance.
+    @param other geometry metadata to be compared with current (`this`) set
+    @param s Minskowski factor. If s == 1, this method returns the Manhattan
+    distance in the Nth-dimensional space.  If s == 2, this method returns
+    the euclidean distance in the Nth-dimensional space.
     */
     public double doMinskowskiDistance(GeometryMetadata other, double s)
     {

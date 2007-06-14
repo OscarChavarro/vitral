@@ -51,7 +51,6 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBColorPalette;
-import vsdk.toolkit.media.SphericalHarmonicShapeDescriptor;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -472,7 +471,8 @@ class ButtonsPanel extends JPanel implements ActionListener
         return thing;
     }
 
-    private void addDebugSphere(SimpleBody voxelBody, int groupIndex, SphericalHarmonicShapeDescriptor featureVector)
+    private void addDebugSphere(SimpleBody voxelBody, int groupIndex,
+        Vector3D cm)
     {
         double r = ((double)groupIndex) / 31.0;
         VoxelVolume vv = (VoxelVolume)voxelBody.getGeometry();
@@ -483,12 +483,20 @@ class ButtonsPanel extends JPanel implements ActionListener
         int s, t;
         int voxelValue;
         Vector3D p = new Vector3D();
+    Vector3D pos;
+    Vector3D scale;
+        Matrix4x4 S = new Matrix4x4();
 
         sphere = new Sphere(r);
         body = addThing(sphere);
         body.getMaterial().setDoubleSided(true);
-        body.setPosition(new Vector3D(voxelBody.getPosition()));
-        body.setScale(new Vector3D(voxelBody.getScale()).multiply(r));
+    scale = voxelBody.getScale();
+    S.scale(scale.x, scale.y, scale.z);
+    scale = scale.multiply(r);
+        body.setScale(scale);
+    cm = S.multiply(cm);
+    pos = voxelBody.getPosition().add(cm);
+        body.setPosition(pos);
 
         texture = new RGBAImage();
         texture.init(64, 64);
@@ -501,6 +509,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
                 p.setSphericalCoordinates(r, tetha, phi);
+        p = p.add(cm);
                 voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
                 if ( voxelValue < 128 ) {
                     texture.putPixel(s, t, (byte)255, (byte)255, (byte)255, (byte)0);
@@ -568,13 +577,14 @@ class ButtonsPanel extends JPanel implements ActionListener
                 parent.statusMessage.setText("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
             }
             else {
-                SphericalHarmonicShapeDescriptor featureVector;
-                featureVector = new SphericalHarmonicShapeDescriptor();
+                //- Calculate the VoxelVolume's center of mass ---------------
+                Vector3D cm =
+                    ((VoxelVolume)referenceGeometry).doCenterOfMass();
+                //- Create spheres -------------------------------------------
                 int i;
                 for ( i = 0; i < 32; i++ ) {
-                    addDebugSphere(voxelBody, i, featureVector);
+                    addDebugSphere(voxelBody, i, cm);
                 }
-                System.out.println(featureVector);
             }
 
         }

@@ -303,6 +303,35 @@ public class VoxelVolume extends Solid {
         M = T2.multiply(S.multiply(T1));
     return M;
     }
+
+    /**
+    Check the general interface contract in superclass method
+    Solid.doCenterOfMass
+    */
+    public Vector3D doCenterOfMass() {
+    Vector3D cm, p;
+        cm = new Vector3D(0, 0, 0);
+    double mi; // Maximum mass of one voxel (linear to voxel density)
+        double M = 0;  // Total mass for current voxel volume
+    int x, y, z;
+
+    for ( x = 0; x < getXSize(); x++ ) {
+          for ( y = 0; y < getYSize(); y++ ) {
+            for ( z = 0; z < getZSize(); z++ ) {
+                    // mi goes from 0 to 1
+                mi = (double)(getVoxel(x, y, z)) / 255.0;
+            M += mi;
+            p = getVoxelPosition(x, y, z);
+                    cm.x += mi * p.x;
+                    cm.y += mi * p.y;
+                    cm.z += mi * p.z;
+        }
+        }
+    }
+
+    return cm.multiply(1/M);
+    }
+
 }
 
 //===========================================================================

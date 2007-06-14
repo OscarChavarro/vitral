@@ -267,3 +267,7 @@ Changes in 2007 may 20-22 revition
 
 Changes in 2007 may 23 revition
   - First working implementation of a Search Engine for 3D models! :)
+
+Changes in 2007 may 24 revition
+  - Spherical harmonics feature vector shape descriptor modified to have
+    spheres centered at object center of mass (not geometric center)

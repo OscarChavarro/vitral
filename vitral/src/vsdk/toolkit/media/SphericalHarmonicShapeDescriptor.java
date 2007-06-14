@@ -5,9 +5,9 @@
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
-//=     Joyce. Halderman, Alex. Dobkin, David. "A Search Engine for 3D      =
-//=     Models", ACM Transactions on Graphics, Vol 22. No1. January 2003.   =
-//=     Pp. 83-105                                                          =
+//=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
+//=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
+//=     January 2003. Pp. 83-105                                            =
 //===========================================================================
 
 package vsdk.toolkit.media;
@@ -21,7 +21,7 @@ around a volume as described in [FUNK2003]
 public class SphericalHarmonicShapeDescriptor extends ShapeDescriptor
 {
     /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061220L;
+    public static final long serialVersionUID = 20070523L;
 
     private double featureVector[];
     private static final int numberOfSpheres = 32;
