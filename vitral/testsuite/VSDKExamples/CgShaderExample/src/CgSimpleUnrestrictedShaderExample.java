@@ -132,10 +132,10 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
 
     public void createCgElements() {
         if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
-        System.out.println("Nvidia Cg not available. Turning off GPU support!");
-        NvidiaGpuActive = false;
-        return;
-    }
+            System.out.println("Nvidia Cg not available. Turning off GPU support!");
+            NvidiaGpuActive = false;
+            return;
+        }
         try {
             NvidiaGpuVertexProgramTexture =
                 JoglRenderer.loadNvidiaGpuVertexShader(
@@ -160,7 +160,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         if ( firstTimer ) {
             firstTimer = false;
             createCgElements();
-    }
+        }
 
         //-----------------------------------------------------------------
         gl.glEnable(GL.GL_DEPTH_TEST);
@@ -190,12 +190,12 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
             //- Shader configuration for special features ---------------------
             // (This should be managed by JoglRenderer, usually with the help
             // of RendererConfiguration)
-        {
+            {
             double withTexture = 0.0;
             if ( quality.isTextureSet() ) withTexture = 1.0;
             CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
                 currentPixelProgram, "withTexture"), withTexture);
-        }
+            }
 
             //- Shader configuration from camera data -------------------------
             // (This should be managed by JoglCameraRenderer)
@@ -296,7 +296,7 @@ public class CgSimpleUnrestrictedShaderExample implements GLEventListener, Mouse
         if ( NvidiaGpuActive ) {
             JoglRenderer.disableNvidiaCgProfiles();
         }
-    gl.glLoadIdentity();
+        gl.glLoadIdentity();
         JoglLightRenderer.draw(gl, light);
     }
 

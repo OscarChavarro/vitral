@@ -128,6 +128,13 @@ public abstract class JoglRenderer extends RenderingElement {
         return true;
     }
 
+    /**
+    This method searches for the dinamic link library packed shared objects
+    (.dll or .so.*) needed for Nvidia Cg to work. Returns true if libraries
+    are found in standard system locations, false otherwise.
+
+    Note that OpenGL doesn't need to be started before calling this method.
+    */
     public static boolean verifyNvidiaCgAvailability()
     {
         if ( !PersistenceElement.verifyLibrary("Cg") ) {

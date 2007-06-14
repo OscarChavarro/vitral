@@ -231,3 +231,6 @@ Changes in 2007 may 2 revition
     coordinate translations
   - Added visual debug ray control to SceneEditorApplication
   - CubemapBackground.colorInDireccion correctly implemented
+
+Changes in 2007 may 4 revition
+  - ReaderObj modified to handle obj files with negative index integers

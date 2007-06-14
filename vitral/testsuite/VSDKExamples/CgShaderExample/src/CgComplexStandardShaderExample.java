@@ -48,13 +48,13 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 
 public class CgComplexStandardShaderExample
     implements GLEventListener, MouseListener, MouseMotionListener, 
@@ -67,6 +67,7 @@ public class CgComplexStandardShaderExample
 
     //- GPU control --------------------------------------------------------
     private boolean NvidiaGpuActive = true;
+    private boolean NvidiaGpuAvailable = true;
     private CGprogram NvidiaGpuVertexProgramTexture;
     private CGprogram NvidiaGpuPixelProgramTexture;
     private CGprogram NvidiaGpuVertexProgramTextureBump;
@@ -184,6 +185,7 @@ public class CgComplexStandardShaderExample
         if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
             System.out.println("Nvidia Cg not available. Turning off GPU support!");
             NvidiaGpuActive = false;
+            NvidiaGpuAvailable = false;
             enableTexture(gl, false);
             return;
         }
@@ -494,7 +496,15 @@ public class CgComplexStandardShaderExample
             case 'j': lightPosition.z -= 0.1; break;
             case '9': lightPosition.y -= 0.1; break;
             case '0': lightPosition.y += 0.1; break;
-            case 'g': NvidiaGpuActive = !NvidiaGpuActive; break;
+            case 'g':
+              if ( NvidiaGpuAvailable ) {
+                  NvidiaGpuActive = !NvidiaGpuActive;
+              }
+              else {
+                  NvidiaGpuActive = false;
+                  System.out.println("Nvidia Cg not available. Turning on GPU support not available!");
+              }
+              break;
             case 'r': withRotationAnimation = !withRotationAnimation; break;
             case ' ': withLightAnimation = !withLightAnimation; break;
           }

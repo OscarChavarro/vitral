@@ -7,6 +7,7 @@
 //= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
 //= - November 19 2006 - Oscar Chavarro: re-structured and tested - using   =
 //=       private class _ReaderObjVertex and simplified TriangleMesh design =
+//= - May 4 2007 - Oscar Chavarro: added support for not well formed objs   =
 //===========================================================================
 
 package vsdk.toolkit.io.geometry;
@@ -413,7 +414,7 @@ public class ReaderObj extends PersistenceElement
             }
             // Normals
             ni = finalVertexes.get(i).vertexNormalIndex - 1;
-            if ( ni >= 0 ) {
+            if ( ni >= 0 && ni < vertexNormalsArray.size() ) {
                 newVertexArray[i].setNormal(vertexNormalsArray.get(ni));
             }
             else {
@@ -504,12 +505,14 @@ public class ReaderObj extends PersistenceElement
         newTriangleMesh.setTextureRanges(textureRanges);
 
         //- Finalize mesh and add to group --------------------------------
-        //newTriangleMesh.calculateNormals();
+        if ( vertexNormalsArray.size() < 0 ) {
+            newTriangleMesh.calculateNormals();
+        }
         newTriangleMesh.reorientateNormals();
         newTriangleMesh.setName(nextGeometricObjectName);
         meshGroup.add(newTriangleMesh);
     }
-    
+
     private static void quickSortTriangleRange(int a[][], int izq, int der)
     {
         int i = izq;
@@ -604,25 +607,39 @@ public class ReaderObj extends PersistenceElement
     }
 
     /**
+    In some obj files (particulary those exported from 3DSMax) some array
+    indexes contains negative numbers. This method is supposed to parse integer
+    numbers from a string token, and returning the absolute value of it.
+    */
+    private static int readIndexInteger(String inToken)
+    {
+        int val = Integer.parseInt(inToken);
+        if ( val < 0 ) val *= -1;
+        return val;
+    }
+
+    /**
     Returns three indices: vertex position, texture coordinates and normal,
     as a vertex
     */    
     private static _ReaderObjVertex readFaceVertex(String lineOfText)
     {
         _ReaderObjVertex ret = new _ReaderObjVertex();
+
         StringTokenizer st=new StringTokenizer(lineOfText, "/");
+
         if ( st.countTokens() == 2 ) {
             if( lineOfText.endsWith("/") ) {
                 // Has vertex and texture
                 try {
-                    ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
+                    ret.vertexPositionIndex = readIndexInteger(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
                     ret.vertexPositionIndex = -1;
                 }
                 try {
                     ret.vertexTextureCoordinateIndex =
-                        Integer.parseInt(st.nextToken());
+                        readIndexInteger(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
                     ret.vertexTextureCoordinateIndex = -1;
@@ -632,14 +649,14 @@ public class ReaderObj extends PersistenceElement
               else {
                 // Has vertex and normal
                 try {
-                    ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
+                    ret.vertexPositionIndex = readIndexInteger(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
                     ret.vertexPositionIndex = -1;
                 }
                 ret.vertexTextureCoordinateIndex=-1;
                 try {
-                    ret.vertexNormalIndex = Integer.parseInt(st.nextToken());
+                    ret.vertexNormalIndex = readIndexInteger(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
                     ret.vertexNormalIndex = -1;
@@ -649,20 +666,20 @@ public class ReaderObj extends PersistenceElement
           else {
             // Has all
             try {
-                ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
+                ret.vertexPositionIndex = readIndexInteger(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
                 ret.vertexPositionIndex = -1;
             }
             try {
                 ret.vertexTextureCoordinateIndex =
-                    Integer.parseInt(st.nextToken());
+                    readIndexInteger(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
                 ret.vertexTextureCoordinateIndex = -1;
             }
             try {
-                ret.vertexNormalIndex = Integer.parseInt(st.nextToken());
+                ret.vertexNormalIndex = readIndexInteger(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
                 ret.vertexNormalIndex = -1;
@@ -710,10 +727,10 @@ public class ReaderObj extends PersistenceElement
         try {
             BufferedReader in=new BufferedReader(new FileReader(nomArc));
             String lineOfText="";
-            
+
             Material activeMaterial=new Material();
             activeMaterial.setName("default");
-            
+
             while( (lineOfText = in.readLine()) != null ) {
                 if ( lineOfText.startsWith("Ns") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
