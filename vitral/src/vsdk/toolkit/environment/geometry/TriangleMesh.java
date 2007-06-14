@@ -7,6 +7,7 @@
 //=       back facing triangles                                             =
 //= - November 6 2006 - Oscar Chavarro: introduced bounding box and normal  =
 //=       interpolation                                                     =
+//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -63,16 +64,29 @@ public class TriangleMesh extends Surface {
     private Material[] materials;
     private Image[] textures;
 
-    /**
-    The `textureSpanRanges` is a dynamic 3D multilist with size
-    [Nt+1]*[Ni]*[2], when a Triangle mesh has Nt textures in its `textures`
-    array. For each texture, there are Ni spans of triangles (Note that each
-    Ni could be different). For each span of triangles (a group associated
-    with a single texture) there are 2 indexes to the triangles array: span
-    start and span end.
-    */
-    private int[][][] textureSpanRanges;
     private Vector3D[] verTex;
+
+    /**
+    textureRanges is a 2D array which contents mappings between the
+    `triangles` and `textures` sets. Each pair 
+    <textureRanges[i][0], textureRanges[i][1]> means that the triangles
+    from textureRanges[i-1][0] to textureRanges[i][0] (from triangle 0 
+    when i = 0), are associated with the texture textureRanges[i][1]
+    (or no texure for unspecified range or when textureRanges[i][1]
+    contains a value out of textures array bounds).
+    */
+    private int[][] textureRanges;
+
+    /**
+    materialRanges is a 2D array which contents mappings between the
+    `triangles` and `materials` sets. Each pair 
+    <materialRanges[i][0], materialRanges[i][1]> means that the triangles
+    from materialRanges[i-1][0] to materialRanges[i][0] (from triangle 0 
+    when i = 0), are associated with the material materialRanges[i][1]
+    (or no texure for unspecified range or when materialRanges[i][1]
+    contains a value out of materials array bounds).
+    */
+    private int[][] materialRanges;
 
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
@@ -202,38 +216,42 @@ public class TriangleMesh extends Surface {
         boundingVolume = null;
     }
 
-//= Methods for managing texturesSpanRanges =================================
+//= Methods for managing textureRanges ======================================
 
-    public int[][][] getTextTriRel() {
-        return this.textureSpanRanges;
+    public int[][] getTextureRanges() {
+        return textureRanges;
     }
 
-    public int[][] getTexTriRelAt(int index) {
-        return this.textureSpanRanges[index];
+    /**
+    Note this always returns an array with two (2) integers: the first one
+    is an index to `triangles` array, the second one is an index to the
+    `textures` array.
+    */
+    public int[] getTextureRangeAt(int spanRange) {
+        return textureRanges[spanRange];
     }
 
-    public int getTextTriRelAt(int i, int j, int k) {
-        return this.textureSpanRanges[i][j][k];
+    public void setTextureRanges(int ranges[][]) {
+        textureRanges = ranges;
     }
 
-    public void setTexTriRelSize(int size) {
-        this.textureSpanRanges = new int[size][][];
-        boundingVolume = null;
+//= Methods for managing materialRanges =====================================
+
+    public int[][] getMaterialRanges() {
+        return materialRanges;
     }
 
-    public void setTexTriRel(int r[][][]) {
-        this.textureSpanRanges = r;
-        boundingVolume = null;
+    /**
+    Note this always returns an array with two (2) integers: the first one
+    is an index to `triangles` array, the second one is an index to the
+    `materials` array.
+    */
+    public int[] getMaterialRangeAt(int spanRange) {
+        return materialRanges[spanRange];
     }
 
-    public void setTexTriRelSizeAt(int index, int size) {
-        this.textureSpanRanges[index] = new int[size][2];
-        boundingVolume = null;
-    }
-
-    public void setTextTriRelAt(int i, int j, int[] ttr) {
-        this.textureSpanRanges[i][j] = ttr;
-        boundingVolume = null;
+    public void setMaterialRanges(int ranges[][]) {
+        materialRanges = ranges;
     }
 
 //= Fundamental geometry operations methods =================================
@@ -500,7 +518,7 @@ public class TriangleMesh extends Surface {
                             add(n1.multiply(lambda2).
                             add(n2.multiply(lambda3)));
                         n.normalize();
-                //}
+                        //}
 
                         // Normal is always pointed "outwards" with respect to 
                         // the triangle (this manages the issue of back-facing

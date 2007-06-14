@@ -4,6 +4,7 @@
 //= - August 8 2005 - David Diaz, Lina Rojas, Gabriel Sarmiento: Original   =
 //=                                                            base version =
 //= - August 7 2006 - Oscar Chavarro: re-structured and tested              =
+//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
@@ -17,6 +18,7 @@ import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.Material;
 
 public class JoglTriangleMeshRenderer extends JoglRenderer {
     /**
@@ -43,21 +45,6 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
 
         gl.glEnable(gl.GL_NORMALIZE);
-
-
-        //-----------------------------------------------------------------
-        System.out.println("TexTriRel dim: " + mesh.getTextTriRel().length);
-        for ( int i = 0; i < mesh.getTextTriRel().length; i++ ) {
-            System.out.println("  - TexTriRel[" + i + "] size: " + 
-                mesh.getTexTriRelAt(i).length);
-            for ( int j = 0; j < mesh.getTexTriRelAt(i).length; j++ ) {
-                System.out.println("    . TexTriRel[" + i + "][" + j + "] size: " + mesh.getTexTriRelAt(i)[j].length);
-                System.out.print("[" + mesh.getTexTriRelAt(i)[j][0] + 
-                " - " + mesh.getTexTriRelAt(i)[j][1]
-                 + "]");
-            }
-            System.out.println(" ");
-        }
 
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
@@ -223,39 +210,120 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
                                "Trying to draw mesh without triangles?");
             return;
         }
-        drawRangeWithoutTexture(gl, mesh, 0, mesh.getTriangles().length, flipNormals);
+        int materialRanges[][] = mesh.getMaterialRanges();
+
+        if ( materialRanges == null ) {
+            drawRangeWithoutTexture(gl, mesh,
+                                   0, mesh.getTriangles().length, flipNormals);
+            return;
+        }
+
+        int start = 0;
+        int end = 0;
+        int materialIndex;
+        Material materialsArray[] = mesh.getMaterials();
+        for ( int i = 0; i < materialRanges.length; i++ ) {
+            end = materialRanges[i][0];
+            materialIndex = materialRanges[i][1];
+            if ( materialIndex >= 0 ) {
+                JoglMaterialRenderer.activate(gl,
+                    materialsArray[materialIndex]);
+            }
+            drawRangeWithoutTexture(gl, mesh, start, end, flipNormals);
+            start = end;
+        }
     }
 
+    /**
+    Note that current implementation only works for a TriangleMesh that
+    contains both getMaterials() and getMaterialRanges() defined!
+
+    Main algorithm is a mixed iterative advanced over 
+    texturesRanges and materialsRanges arrays.
+    */
     private static void
     drawSurfacesWithTexture(GL gl, TriangleMesh mesh, boolean flip) {
-        Image[] textureArray = mesh.getTextures();
-        int i, j;
+        // Support variables
+        Image[] texturesArray = mesh.getTextures();
+        Material materialsArray[] = mesh.getMaterials();
+        int texturesRanges[][] = mesh.getTextureRanges();
+        int materialsRanges[][] = mesh.getMaterialRanges();
 
-        for ( i = 0; i < mesh.getTextTriRel().length; i++ ) {
-            if ( i >= 1 ) {
-                gl.glEnable(gl.GL_TEXTURE_2D);
-                JoglImageRenderer.activate(gl, textureArray[i - 1]);
-                // Warning: Shoult this be here? or not ...
-                gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-                gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-                gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-                gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-                gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-                    gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
-            }
-            else {
-                gl.glDisable(gl.GL_TEXTURE_2D);
-            }
-            for ( j = 0; j < mesh.getTexTriRelAt(i).length; j++ ) {
-                drawRangeWithTexture(gl, mesh,
-                                     mesh.getTextTriRelAt(i, j, 0),
-                                     mesh.getTextTriRelAt(i, j, 1), flip);
-            }
+        // Main cycle variables / cycle initialization
+        int start = 0;
+        int end = 0;
+        int it = 0;
+        int im =  0;
+        int currentTextureIndex;
+        int currentMaterialIndex;
+        int previousTextureIndex = -1;
+        int previousMaterialIndex = -1;
+
+        if ( materialsRanges == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "JoglTriangleMeshRenderer.drawSurfacesWithTexture",
+                "Non implemented support for null materialsRanges.");
+            return;
         }
+
+        do {
+            //- Cycle body ----------------------------------------------------
+            end = Math.min(texturesRanges[it][0], materialsRanges[im][0]);
+            currentTextureIndex = texturesRanges[it][1]-1;
+            currentMaterialIndex = materialsRanges[im][1];
+
+            if ( currentMaterialIndex != previousMaterialIndex ) {
+                if ( currentMaterialIndex >= 0 ) {
+                    JoglMaterialRenderer.activate(gl,
+                        materialsArray[currentMaterialIndex]);
+                }
+                previousMaterialIndex = currentMaterialIndex;
+            }
+            if ( currentTextureIndex != previousTextureIndex ) {
+                if ( currentTextureIndex >= 0 ) {
+                    gl.glEnable(gl.GL_TEXTURE_2D);
+                    JoglImageRenderer.activate(gl,
+                        texturesArray[currentTextureIndex]);
+                    // Warning: Shoult this be here? or not ...
+                    gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                        gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+                    gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                        gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+                    gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                        gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+                    gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                        gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+                    gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+                        gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+                }
+                else {
+                    gl.glDisable(gl.GL_TEXTURE_2D);
+                }
+                previousTextureIndex = currentTextureIndex;
+            }
+
+            if ( currentTextureIndex >= 0 ) {
+                drawRangeWithTexture(gl, mesh, start, end, flip);
+              }
+              else {
+                drawRangeWithoutTexture(gl, mesh, start, end, flip);
+            }
+
+            //- Cycle advancment ----------------------------------------------
+            if ( texturesRanges[it][0] < materialsRanges[im][0] &&
+                 it < texturesRanges.length ) {
+                it++;
+            }
+            else if ( texturesRanges[it][0] > materialsRanges[im][0] &&
+                 im < materialsRanges.length ) {
+                im++;
+            }
+            else if ( texturesRanges[it][0] == materialsRanges[im][0] ) {
+                if ( it < texturesRanges.length ) it++;
+                if ( im < materialsRanges.length ) im++;
+            }
+            start = end;
+        } while ( it < texturesRanges.length && im < materialsRanges.length );
     }
 
     private static void

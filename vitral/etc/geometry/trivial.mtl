@@ -1,4 +1,12 @@
-newmtl test1
+newmtl testWhite
+Ka  0.1  0.1  0.1
+Kd  1 1 1
+Ks  1 1 1
+illum 2
+Ns 100.2235
+Tr 0.4300
+
+newmtl testRed
 Ka  0.1  0.1  0.1
 Kd  0.9  0.5  0.5
 Ks  1 1 1
@@ -6,9 +14,17 @@ illum 2
 Ns 100.2235
 Tr 0.4300
 
-newmtl test2
+newmtl testGreen
 Ka  0.1  0.1  0.1
-Kd  1 1 1
+Kd  0.5 0.9 0.5
+Ks  1 1 1
+illum 2
+Ns 100.2235
+Tr 0.4300
+
+newmtl testBlue
+Ka  0.1  0.1  0.1
+Kd  0.5  0.5  0.9
 Ks  1 1 1
 illum 2
 Ns 100.2235

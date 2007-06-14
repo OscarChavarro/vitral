@@ -25,6 +25,14 @@ v 0.1 -1.1 0
 v 1 -1.1 0
 v 0.55 -0.2 0
 
+v 1 -0.2 0
+v 2 -0.2 0
+v 1.5 -1.1 0
+
+v 1 -1.19 0
+v 2 -1.19 0
+v 1.5 -2 0
+
 #---------------------------------------------------------------------------
 vt 0 0 0
 vt 1 0 0
@@ -37,16 +45,18 @@ vn 0 0 -1
 o group1
 
 # Normal triangle
+usemtl testRed
 f 1/1/1 2/2/1 3/3/1
 # Inverted normal triangle
-usemtl test1
+usemtl testGreen
 f 4/1/2 6/2/2 5/3/2
 # Double inverted normal triangle
+usemtl testBlue
 f 7/1/2 8/2/2 9/3/2
 
 #---------------------------------------------------------------------------
 o group2
-usemtl test2
+usemtl testWhite
 
 # Normal triangle
 f 10/1/1 11/2/1 12/3/1
@@ -56,5 +66,9 @@ f 13/1/2 15/2/2 14/3/2
 # Double inverted normal triangle
 usemap render.jpg
 f 16/1/2 17/2/2 18/3/2
+usemtl testBlue
+f 19/1/1 21/2/1 20/3/1
+usemap trivial.jpg
+f 22/1/1 24/2/1 23/3/1
 
 #---------------------------------------------------------------------------

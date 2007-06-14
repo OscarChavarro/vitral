@@ -4,6 +4,7 @@
 //= - August 8 2005 - David Diaz: Original base version                     =
 //= - May 18 2006 - David Diaz: bug fixes                                   =
 //= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
+//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
 //===========================================================================
 
 package vsdk.toolkit.io.geometry;
@@ -58,167 +59,270 @@ public class ReaderObj
     */
     public static TriangleMeshGroup read(String fileName) throws IOException
     {
-        ArrayList<TriangleMesh> meshGroup=new ArrayList<TriangleMesh>();
-        ArrayList<Vector3D> vertexes=new ArrayList<Vector3D>();
-        ArrayList<Vector3D> normals=new ArrayList<Vector3D>();
-        ArrayList<Vector3D> vertexesTex=new ArrayList<Vector3D>();
-        ArrayList<int[][]> faces=new ArrayList<int[][]>();
+        //- Geometric data and geometric attributes extracted from file ---
+        ArrayList<Vector3D> vertexPositionsArray;
+        ArrayList<Vector3D> vertexNormalsArray;
+        ArrayList<Vector3D> vertexTextureCoordinatesArray;
 
-        HashMap<String, RGBAImage> texturasHash;
-        texturasHash=new HashMap<String, RGBAImage>();
-        ArrayList<RGBAImage> texturesList=new ArrayList<RGBAImage>();
-        ArrayList<Material> materialsList=new ArrayList<Material>();
-        
-        ArrayList<ArrayList<int[]>> relCarTex;
-        relCarTex = new ArrayList<ArrayList<int[]>>();
-        ArrayList<int[]> inicial=new ArrayList<int[]>();
-        inicial.add(new int[2]);
-        relCarTex.add(inicial);
-        
+        vertexPositionsArray = new ArrayList<Vector3D>();
+        vertexNormalsArray = new ArrayList<Vector3D>();
+        vertexTextureCoordinatesArray = new ArrayList<Vector3D>();
+
+        //- Topology data extracted from file -----------------------------
+        ArrayList<int[][]> facesArray;
+
+        facesArray = new ArrayList<int[][]>();
+
+        //- Accumulated states for currently builded geometric object -----
+        String nextGeometricObjectName;
+        ArrayList<RGBAImage> nextTexturesArray;
+        ArrayList<Material> nextMaterialsArray;
+
+        nextGeometricObjectName = "OBJ_default_material";
+        nextTexturesArray = new ArrayList<RGBAImage>();
+        nextMaterialsArray = new ArrayList<Material>();        
+
+        //- Aditional support data structures -----------------------------
+        ArrayList<TriangleMesh> meshGroup;
+        ArrayList<ArrayList<int[]>> texture_span_triangleRange_table;
+        ArrayList<int[]> inicial;
+        ArrayList<int[]> material_triangleRange_table;
+        HashMap<String, RGBAImage> texturesHashMap;
         HashMap<String, Material> materialsHashMap;
-        materialsHashMap = new HashMap<String, Material>();
-        String nomObj = "default";
-        
-        int textAct = 0;
+        int textAct;
 
-        BufferedReader m;
-        int cont = 0;
+        meshGroup = new ArrayList<TriangleMesh>();
+        texturesHashMap = new HashMap<String, RGBAImage>();
+        materialsHashMap = new HashMap<String, Material>();        
+        textAct = 0;
+
+        texture_span_triangleRange_table = new ArrayList<ArrayList<int[]>>();
+        inicial = new ArrayList<int[]>();
+        inicial.add(new int[2]);
+        texture_span_triangleRange_table.add(inicial);
+
+        material_triangleRange_table = new ArrayList<int[]>();
+
+        //- Geometry object processing from file / control -------------------
+        BufferedReader br;
         String lineOfText;
-        m = new BufferedReader(new FileReader(fileName));
 
-        Vector3D buffer;
-        ArrayList<int[][]> bufferT;
-        int num = 0;
+        br = new BufferedReader(new FileReader(fileName));
 
-        //- Crear Mallas -----------------------------------------------------
-        while ( (lineOfText = m.readLine()) != null ) {
+        while ( (lineOfText = br.readLine()) != null ) {
             // Build material library
             if ( lineOfText.startsWith("mtllib ") ) {
                 materialsHashMap = readMaterials(lineOfText, fileName);
             }
             // Change active material
             if ( lineOfText.startsWith("usemtl ") ) {
-                materialsList.add(materialsHashMap.get(lineOfText));
+                //
+                String auxMaterialName;
+                StringTokenizer auxStringTokenizer;
+                auxStringTokenizer = new StringTokenizer(lineOfText, " ");
+                auxStringTokenizer.nextToken();
+                auxMaterialName = auxStringTokenizer.nextToken();
+                nextMaterialsArray.add(materialsHashMap.get(auxMaterialName));
+                //
+                int auxMaterialRange[];
+                auxMaterialRange = new int[2];
+                auxMaterialRange[0] = facesArray.size();
+                auxMaterialRange[1] = nextMaterialsArray.size()-1;
+                material_triangleRange_table.add(auxMaterialRange);
             }
             // Add a vertex
             if ( lineOfText.startsWith("v ") ) {
-                buffer = readVertex(lineOfText);
-                vertexes.add(buffer);
+                vertexPositionsArray.add(readVertex(lineOfText));
             }
             // Add a normal
             if ( lineOfText.startsWith("vn ") ) {
-                buffer = readVertex(lineOfText);
-                normals.add(buffer);
+                vertexNormalsArray.add(readVertex(lineOfText));
             }
             // Add a texture coordinate
             if ( lineOfText.startsWith("vt ") ) {
-                buffer = readVertexTexture(lineOfText);
-                vertexesTex.add(buffer);
+                vertexTextureCoordinatesArray.add(
+                    readVertexTexture(lineOfText));
             }
             // Read faces (only triangles)
             if ( lineOfText.startsWith("f ") ) {
                 try {
                     // Note that only first 3 vertexes for each polygon are
                     // processed
-                    bufferT = readPolygon(lineOfText);
-                    for( int[][] elem : bufferT ) {
-                        faces.add(elem);
+                    ArrayList<int[][]> auxTriangle;
+
+                    auxTriangle = readTriangle(lineOfText);
+                    for( int[][] elem : auxTriangle ) {
+                        facesArray.add(elem);
                     }
-                    ArrayList<int[]> actRanges = relCarTex.get(textAct);
+                    ArrayList<int[]> actRanges;
+                    actRanges = texture_span_triangleRange_table.get(textAct);
                     int[] lastRange = actRanges.get(actRanges.size()-1);
-                    lastRange[1] = faces.size();
+                    lastRange[1] = facesArray.size();
                 }
-                catch(NoSuchElementException nsee) {
+                catch( NoSuchElementException nsee ) {
                 }
             }
-            // Inicializar textura
+            // File specified textures management
             if ( lineOfText.startsWith("usemap ") ) {
-                if ( !texturasHash.containsKey(lineOfText) ) {
-                    RGBAImage texture;
-                    texture = obtainTextureFromFile(lineOfText, fileName);
-                    if ( texture == null ) {
+                // Put texture in hash map or select it from hash map
+                String auxTextureName;
+                StringTokenizer auxStringTokenizer;
+                auxStringTokenizer = new StringTokenizer(lineOfText, " ");
+                auxStringTokenizer.nextToken();
+                auxTextureName = auxStringTokenizer.nextToken();
+                if ( !texturesHashMap.containsKey(auxTextureName) ) {
+                    RGBAImage auxTexture;
+                    auxTexture = obtainTextureFromFile(lineOfText, fileName);
+                    if ( auxTexture == null ) {
                         textAct = 0;
                     }
                     else {
-                        texturesList.add(texture);
-                        relCarTex.add(new ArrayList<int[]>());
-                        textAct = texturesList.size();
+                        nextTexturesArray.add(auxTexture);
+                        texture_span_triangleRange_table.add(
+                            new ArrayList<int[]>());
+                        textAct = nextTexturesArray.size();
                     }
-                    texturasHash.put(lineOfText, texture);
+                    texturesHashMap.put(auxTextureName, auxTexture);
                 }
                 else {
-                    RGBAImage texture = texturasHash.get(lineOfText);
-                    if( texture == null ) {
-                        textAct=0;
+                    RGBAImage auxTexture = texturesHashMap.get(auxTextureName);
+                    if( auxTexture == null ) {
+                        textAct = 0;
                     }
-                    else if( !texturesList.contains(texture) ) {
-                        texturesList.add(texture);
-                        relCarTex.add(new ArrayList<int[]>());
-                        textAct=texturesList.size();
+                    else if( !nextTexturesArray.contains(auxTexture) ) {
+                        nextTexturesArray.add(auxTexture);
+                        texture_span_triangleRange_table.add(
+                            new ArrayList<int[]>());
+                        textAct = nextTexturesArray.size();
                     }
                     else {
-                        textAct=texturesList.indexOf(texture)+1;
+                        textAct=nextTexturesArray.indexOf(auxTexture)+1;
                     }
                 }
-                ArrayList<int[]> actRanges = relCarTex.get(textAct);
+                // Add selected texture to current object texture definition
+                ArrayList<int[]> actRanges;
+                actRanges = texture_span_triangleRange_table.get(textAct);
                 int[] newRange=new int[2];
-                newRange[0]=faces.size();
+                newRange[0] = facesArray.size();
                 actRanges.add(newRange);
             }
             // Armar objeto
             if ( lineOfText.startsWith("o ") || lineOfText.startsWith("g ") ) {
-                if ( vertexes.size() > 0 ) {
-                    TriangleMesh object;
-                    if ( materialsList.size() == 0 ) {
-                        materialsList.add(new Material());
-            }
-                    object = buildGeometry(vertexes, normals,
-                                           vertexesTex, faces,
-                                           texturesList, relCarTex,
-                                           materialsList);
-                    object.setName(nomObj);
-                    meshGroup.add(object);
+                if ( vertexPositionsArray.size() > 0 ) {
+                    addMeshToGroup(meshGroup,
+                                   nextGeometricObjectName,
+                                   vertexPositionsArray,
+                                   vertexNormalsArray,
+                                   vertexTextureCoordinatesArray,
+                                   facesArray,
+                                   nextTexturesArray,
+                                   texture_span_triangleRange_table,
+                                   nextMaterialsArray,
+                                   material_triangleRange_table);
                 }
-                StringTokenizer auxNomObj;
-                auxNomObj = new StringTokenizer(lineOfText, " ");
-                auxNomObj.nextToken();
-                nomObj = auxNomObj.nextToken();
-                faces = new ArrayList<int[][]>();
-                texturesList = new ArrayList<RGBAImage>();
-                materialsList = new ArrayList<Material>();
-                relCarTex = new ArrayList<ArrayList<int[]>>();
+
+                // Process next object name
+                StringTokenizer auxStringTokenizer;
+                auxStringTokenizer = new StringTokenizer(lineOfText, " ");
+                auxStringTokenizer.nextToken();
+                nextGeometricObjectName = auxStringTokenizer.nextToken();
+
+                // Clear accumulated states variables
+                nextTexturesArray = new ArrayList<RGBAImage>();
+                nextMaterialsArray = new ArrayList<Material>();
+                facesArray = new ArrayList<int[][]>();
+                material_triangleRange_table = new ArrayList<int[]>();
+                texture_span_triangleRange_table =
+                    new ArrayList<ArrayList<int[]>>();
                 inicial = new ArrayList<int[]>();
                 int[] rangoInicial = new int[2];
-                rangoInicial[0] = rangoInicial[1]=0;
+                rangoInicial[0] = rangoInicial[1] = 0;
                 inicial.add(rangoInicial);
-                relCarTex.add(inicial);
+                texture_span_triangleRange_table.add(inicial);
                 textAct = 0;
             }
         }
 
         // Build the last mesh from remaining vertexes, if any
-        if ( vertexes.size() > 0 ) {
-            TriangleMesh object;
-            if ( materialsList.size() == 0 ) {
-                materialsList.add(new Material());
-        }
-            object = buildGeometry(vertexes, normals, vertexesTex, 
-                                   faces, texturesList, relCarTex,
-                                   materialsList);
-            object.setName(nomObj);
-            meshGroup.add(object);
+        if ( vertexPositionsArray.size() > 0 ) {
+            addMeshToGroup(meshGroup,
+                           nextGeometricObjectName,
+                           vertexPositionsArray,
+                           vertexNormalsArray,
+                           vertexTextureCoordinatesArray,
+                           facesArray,
+                           nextTexturesArray, texture_span_triangleRange_table,
+                           nextMaterialsArray, material_triangleRange_table);
         }
 
-        TriangleMeshGroup mgRet=new TriangleMeshGroup();
-        for( TriangleMesh mAux:meshGroup ) {
-            Vertex[] test = mAux.getVertexes();
-            if ( test.length > 0 ) {
-                mgRet.addMesh(mAux);
+        //-----------------------------------------------------------------
+        TriangleMeshGroup finalTriangleMeshGroup = new TriangleMeshGroup();
+        for( TriangleMesh auxTriangleMesh:meshGroup ) {
+            Vertex[] auxTriangleMeshVertexArray;
+            auxTriangleMeshVertexArray = auxTriangleMesh.getVertexes();
+            if ( auxTriangleMeshVertexArray.length > 0 ) {
+                finalTriangleMeshGroup.addMesh(auxTriangleMesh);
             }
         }
-        return mgRet;
+        return finalTriangleMeshGroup;
+    }
+
+    private static void
+    addMeshToGroup(
+        ArrayList<TriangleMesh> meshGroup,
+        String nextGeometricObjectName,
+        ArrayList<Vector3D> vertexPositionsArray,
+        ArrayList<Vector3D> vertexNormalsArray,
+        ArrayList<Vector3D> vertexTextureCoordinatesArray,
+        ArrayList<int[][]> facesArray,
+        ArrayList<RGBAImage> nextTexturesArray,
+        ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
+        ArrayList<Material> nextMaterialsArray,
+        ArrayList<int[]> material_triangleRange_table
+    )
+    {
+        TriangleMesh newTriangleMesh;
+        if ( nextMaterialsArray.size() == 0 ) {
+            nextMaterialsArray.add(new Material());
+        }
+        newTriangleMesh = buildGeometry(
+                               vertexPositionsArray,
+                               vertexNormalsArray,
+                               vertexTextureCoordinatesArray,
+                               facesArray,
+                               nextTexturesArray,
+                               texture_span_triangleRange_table,
+                               nextMaterialsArray,
+                               material_triangleRange_table);
+        newTriangleMesh.setName(nextGeometricObjectName);
+        meshGroup.add(newTriangleMesh);
     }
     
+    private static void quickSortTriangleRange(int a[][], int izq, int der)
+    {
+        int i = izq;
+        int j = der;
+        int pivote = a[(izq+der)/2][0];
+        int aux0;
+        int aux1;
+        do {
+            while ( a[i][0] < pivote ) i++;
+            while ( a[j][0] > pivote ) j--;
+            if ( i <= j ) {
+                aux0 = a[i][0];
+                a[i][0] = a[j][0];
+                a[j][0] = aux0;
+                aux1 = a[i][1];
+                a[i][1] = a[j][1];
+                a[j][1] = aux1;
+                i++;
+                j--;
+            }
+        } while ( i <= j );
+        if ( izq < j ) quickSortTriangleRange(a, izq, j);
+        if ( i < der ) quickSortTriangleRange(a, i, der);
+    }
+
     private static RGBAImage
     obtainTextureFromFile(String lineOfText, String fileName)
     {
@@ -238,19 +342,20 @@ public class ReaderObj
             return null;
         }
     }
-    
+
     private static TriangleMesh buildGeometry(
-        ArrayList<Vector3D> vertexes, 
-        ArrayList<Vector3D> normals,
-        ArrayList<Vector3D> vertexesTex,
-        ArrayList<int[][]> faces,
+        ArrayList<Vector3D> vertexPositionsArray, 
+        ArrayList<Vector3D> vertexNormalsArray,
+        ArrayList<Vector3D> vertexTextureCoordinatesArray,
+        ArrayList<int[][]> facesArray,
         ArrayList<RGBAImage> textures,
-        ArrayList<ArrayList<int[]>> relCarTex,
-        ArrayList<Material> materials)
+        ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
+        ArrayList<Material> nextMaterialsArray,
+        ArrayList<int[]> material_triangleRange_table)
     {
         TriangleMesh m = new TriangleMesh();
 
-        m.setTriangles(new Triangle[faces.size()]);
+        m.setTriangles(new Triangle[facesArray.size()]);
 
         ArrayList<Integer> usedVertexes = new ArrayList<Integer>();
         ArrayList<Integer> usedTexVertexes = new ArrayList<Integer>();
@@ -264,9 +369,9 @@ public class ReaderObj
         int i;
 
         for( i = 0; i < m.getTriangles().length; i++ ) {
-            int[] p1 = faces.get(i)[0];
-            int[] p2 = faces.get(i)[1];
-            int[] p3 = faces.get(i)[2];
+            int[] p1 = facesArray.get(i)[0];
+            int[] p2 = facesArray.get(i)[1];
+            int[] p3 = facesArray.get(i)[2];
 
             if ( !cambiosVert.containsKey(p1[0]) ) {
                 cambiosVert.put(p1[0], indexVert);
@@ -321,44 +426,89 @@ public class ReaderObj
         for ( i = 0; i < usedVertexes.size(); i++ ) {
             m.getVertexes()[i] = new Vertex();
             m.getVertexes()[i].setPosition(
-                vertexes.get(usedVertexes.get(i)-1));
+                vertexPositionsArray.get(usedVertexes.get(i)-1));
         }
         
         m.setVerTexture(new Vector3D[usedTexVertexes.size()]);
         for ( i = 0; i < m.getVerTexture().length; i++ ) {
-            m.getVerTexture()[i]=vertexesTex.get(usedTexVertexes.get(i)-1);
+            m.getVerTexture()[i]=vertexTextureCoordinatesArray.get(usedTexVertexes.get(i)-1);
         }
         
         for ( i = 0; i < m.getTriangles().length; i++ ) {
             m.getTriangles()[i]=new Triangle();
-            m.getTriangles()[i].setPoint0(faces.get(i)[0][0]);
-            m.getTriangles()[i].setPoint1(faces.get(i)[1][0]);
-            m.getTriangles()[i].setPoint2(faces.get(i)[2][0]);
+            m.getTriangles()[i].setPoint0(facesArray.get(i)[0][0]);
+            m.getTriangles()[i].setPoint1(facesArray.get(i)[1][0]);
+            m.getTriangles()[i].setPoint2(facesArray.get(i)[2][0]);
 
-            m.getTriangles()[i].setVt0(faces.get(i)[0][1]);
-            m.getTriangles()[i].setVt1(faces.get(i)[1][1]);
-            m.getTriangles()[i].setVt2(faces.get(i)[2][1]);
+            m.getTriangles()[i].setVt0(facesArray.get(i)[0][1]);
+            m.getTriangles()[i].setVt1(facesArray.get(i)[1][1]);
+            m.getTriangles()[i].setVt2(facesArray.get(i)[2][1]);
         }
         
+        //- Process textures ----------------------------------------------
+        Material materials[];
+        materials = new Material[nextMaterialsArray.size()];
+
+        for ( i = 0; i < materials.length; i++ ) {
+            materials[i] = nextMaterialsArray.get(i);
+            if ( materials[i] == null ) {
+                materials[i] = new Material();
+            }
+        }
+        m.setMaterials(materials);
+
+        //-----------------------------------------------------------------
+        int auxMaterialRange[];
+        auxMaterialRange = new int[2];
+        auxMaterialRange[0] = facesArray.size();
+        auxMaterialRange[1] = nextMaterialsArray.size()-1;
+        material_triangleRange_table.add(auxMaterialRange);
+
+        int materialRanges[][];
+
+        materialRanges = new int[material_triangleRange_table.size()][2];
+        for ( i = 1; i < material_triangleRange_table.size(); i++ ) {
+            materialRanges[i][0] = material_triangleRange_table.get(i)[0];
+            materialRanges[i][1] = material_triangleRange_table.get(i-1)[1];
+        }
+        m.setMaterialRanges(materialRanges);
+
+        //- Process textures ----------------------------------------------
         m.setTextures(new RGBAImage[textures.size()]);
         for ( i = 0; i < m.getTextures().length; i++ ) {
             m.getTextures()[i]=textures.get(i);
         }
 
-        m.setMaterials(new Material[materials.size()]);
-        for ( i = 0; i < m.getMaterials().length; i++ ) {
-            m.getMaterials()[i]=materials.get(i);
-        }
-
-        m.setTexTriRel(new int[relCarTex.size()][][]);
-        for ( i = 0; i < m.getTextTriRel().length; i++ ) {
-            ArrayList<int[]> actRanges = relCarTex.get(i);
-            m.getTextTriRel()[i] = new int[actRanges.size()][2];
-            for( int j = 0; j < m.getTextTriRel()[i].length; j++ ) {
-                m.getTextTriRel()[i][j] = actRanges.get(j);
+        //- Process texture ranges ----------------------------------------
+        int numTextureSpans = 0;
+        for ( int textureIndex = 0;
+              textureIndex < texture_span_triangleRange_table.size();
+              textureIndex++ ) {
+            for( int j = 0;
+                 j < texture_span_triangleRange_table.get(textureIndex).size();
+                 j++ ) {
+                numTextureSpans++;
             }
         }        
 
+        int textureRanges[][] = new int[numTextureSpans][2];
+        i = 0;
+        for ( int textureIndex = 0;
+              textureIndex < texture_span_triangleRange_table.size();
+              textureIndex++ ) {
+            for( int j = 0;
+                 j < texture_span_triangleRange_table.get(textureIndex).size();
+                 j++ ) {
+                textureRanges[i][0] =
+                  texture_span_triangleRange_table.get(textureIndex).get(j)[1];
+                textureRanges[i][1] = textureIndex;
+                i++;
+            }
+        }
+        quickSortTriangleRange(textureRanges, 0, textureRanges.length-1);
+        m.setTextureRanges(textureRanges);
+
+        //- Process normals -----------------------------------------------
         m.calculateNormals();
         
         return m;
@@ -378,7 +528,7 @@ public class ReaderObj
     has a row element for each vertex polygon. Note that this method is
     compatible with triangles only.
     */
-    private static ArrayList<int[][]> readPolygon(String lineOfText) {
+    private static ArrayList<int[][]> readTriangle(String lineOfText) {
         ArrayList<int[][]> ret = new ArrayList<int[][]>();
         StringTokenizer st = new StringTokenizer(lineOfText, " \n\r\t");
         st.nextToken(); // The "f" token
@@ -564,13 +714,12 @@ public class ReaderObj
                 if ( lineOfText.startsWith("newmtl") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken();//newmtl
-                    ret.put("usemtl "+activeMaterial.getName(),
-                            activeMaterial);
+                    ret.put(activeMaterial.getName(), activeMaterial);
                     activeMaterial = new Material();
                     activeMaterial.setName(stMat.nextToken());
                 }
             }
-            ret.put("usemtl "+activeMaterial.getName(), activeMaterial);
+            ret.put(activeMaterial.getName(), activeMaterial);
         }
         catch( IOException ioe ) {
         }

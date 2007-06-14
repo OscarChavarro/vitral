@@ -138,3 +138,11 @@ Changes in 2006 november 6 revition
   - Added bounding volumes in TriangleMesh and TriangleMeshGroup for
     doIntersection operation
   - Added normal interpolation in TriangleMesh doIntersection operation
+
+Changes in 2006 november 13 revition
+  - Changed internal representation of triangle group to texture span range
+    representation in TriangleMesh, JoglTriangleMeshRenderer and ReaderObj
+  - Added support for multiple materials in a single TriangleMesh :)
+    This implied the development of a new algorithm for TriangleMesh
+    traversal that uses a mixtured texture/material spans in
+    JoglTriangleMeshRenderer.

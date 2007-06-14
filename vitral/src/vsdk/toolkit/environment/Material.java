@@ -24,7 +24,7 @@ public class Material extends Entity
     private double reflectionCoefficient;
     private double refractionCoefficient; // Also known as "transmition"
 
-    private String name="default";
+    private String name="VSDK_default_material";
     
     private double opacity;
     private double phongExponent;
