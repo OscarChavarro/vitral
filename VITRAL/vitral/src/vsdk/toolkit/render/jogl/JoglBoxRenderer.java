@@ -20,7 +20,15 @@ public class JoglBoxRenderer {
 
     private static GLUT glut = null;
 
-    public static void draw(GL gl, Box box, Camera c, QualitySelection q)
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+
+    @return Approximate number of triangles. If non-triangles primitives like
+    quads are rendered, this counts as the corresponding number of triangles.
+    1D and 0D primitives are not counted.
+    */
+    public static int draw(GL gl, Box box, Camera c, QualitySelection q)
     {
         if (glut == null) {
             glut = new GLUT();
@@ -43,6 +51,8 @@ public class JoglBoxRenderer {
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, box, q);
     }
+
+        return 12;
     }
 
 }

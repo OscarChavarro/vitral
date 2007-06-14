@@ -3,7 +3,7 @@
 //= Module history:                                                         =
 //= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
 //= - May 2 2006 - Oscar Chavarro: quality check, doIntersection doc/test   =
-//= - May 2 2006 - Oscar Chavarro: fixed doIntersection error when testing  =
+//= - May 3 2006 - Oscar Chavarro: fixed doIntersection error when testing  =
 //=       back facing triangles                                             =
 //===========================================================================
 
@@ -11,31 +11,31 @@ package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.Material;
 
 public class TriangleMesh extends Surface {
-    private String name = "default";
 
+    // Mesh data model
+    private String name = "default";
     private Vertex[] vertexes;
     private Triangle[] triangles;
 
-    private double[] MinMax;
-
+    // Auxiliary components for data model, should be extracted from here?
     private RGBAImage[] textures;
     private int[][][] texTriRel;
-
     private Vector3D[] verTex;
-
     private Material material;
 
+    // Auxiliary data structures for storage of parcial results and 
+    // preprocessing
+    private double[] MinMax;
     private GeometryIntersectionInformation lastInfo;
-
     private int selectedTriangle;
 
     public TriangleMesh() {
@@ -67,13 +67,6 @@ public class TriangleMesh extends Surface {
 
     public Triangle getTriangleAt(int index) {
         return this.triangles[index];
-    }
-
-    public double[] getMinMax() {
-        if ( MinMax == null ) {
-            calculateMinMaxPositions();
-        }
-        return this.MinMax;
     }
 
     public double getMinMaxAt(int index) {
@@ -113,7 +106,6 @@ public class TriangleMesh extends Surface {
     }
 
     public void setName(String name) {
-
         this.name = name;
     }
 
@@ -129,8 +121,7 @@ public class TriangleMesh extends Surface {
         this.textures = textures;
     }
 
-    public void setVerTexure(Vector3D[] verTex) {
-
+    public void setVerTexture(Vector3D[] verTex) {
         this.verTex = verTex;
     }
 
@@ -207,8 +198,7 @@ public class TriangleMesh extends Surface {
         }
 
         ArrayList<ArrayList<vsdk.toolkit.common.Triangle>> vecinos;
-        vecinos = new ArrayList<ArrayList<vsdk.toolkit.common.Triangle>> (vertexes.
-                                                                          length);
+        vecinos = new ArrayList<ArrayList<vsdk.toolkit.common.Triangle>> (vertexes.length);
 
         for (int i = 0; i < vertexes.length; i++) {
             vecinos.add(new ArrayList<Triangle> ());
@@ -230,61 +220,32 @@ public class TriangleMesh extends Surface {
             vertexes[i].getNormal().normalize();
             vertexes[i].setIncidentTriangles(vecinos.get(i));
         }
-
     }
 
-    /**
-       MinMax[0]: min x
-       MinMax[1]: min y
-       MinMax[2]: min z
-       MinMax[3]: max x
-       MinMax[4]: max y
-       MinMax[5]: max z
-    */
+    /** Needed for supplying the Geometry.getMinMax operation */
     private void calculateMinMaxPositions() {
         if ( MinMax == null ) {
             MinMax = new double[6];
 
-            boolean first = true;
+            double minX = Double.MAX_VALUE;
+            double minY = Double.MAX_VALUE;
+            double minZ = Double.MAX_VALUE;
+            double maxX = Double.MIN_VALUE;
+            double maxY = Double.MIN_VALUE;
+            double maxZ = Double.MIN_VALUE;
+            int i;
 
-            double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE,
-                minZ = Double.MAX_VALUE;
-            double maxX = Double.MIN_VALUE, maxY = Double.MIN_VALUE,
-                maxZ = Double.MIN_VALUE;
-
-            for (int i = 0; i < vertexes.length; i++) {
+            for ( i = 0; i < vertexes.length; i++ ) {
                 double x = vertexes[i].getPosition().x;
                 double y = vertexes[i].getPosition().y;
                 double z = vertexes[i].getPosition().z;
 
-                if (first) {
-                    minX = x;
-                    maxX = x;
-                    minY = y;
-                    maxY = y;
-                    minZ = z;
-                    maxZ = z;
-                    first = false;
-                }
-
-                if (x < minX) {
-                    minX = x;
-                }
-                if (y < minY) {
-                    minY = y;
-                }
-                if (z < minZ) {
-                    minZ = z;
-                }
-                if (x > maxX) {
-                    maxX = x;
-                }
-                if (y > maxY) {
-                    maxY = y;
-                }
-                if (z > maxZ) {
-                    maxZ = z;
-                }
+                if ( x < minX ) minX = x;
+                if ( y < minY ) minY = y;
+                if ( z < minZ ) minZ = z;
+                if ( x > maxX ) maxX = x;
+                if ( y > maxY ) maxY = y;
+                if ( z > maxZ ) maxZ = z;
             }
             MinMax[0] = minX;
             MinMax[1] = minY;
@@ -295,11 +256,23 @@ public class TriangleMesh extends Surface {
         }
     }
 
+    /**
+    This method is supposed to be a friend of TriangleMesh related objects.
+    The method is used to query the last intersected triangle, after a
+    positive called to the doIntersection method.
+    */
+    public int doIntersectionInformation() {
+        return selectedTriangle;
+    }
+
     public String toString() {
         return ("TriangleMesh < #T:" + triangles.length + " - #V" +
                 vertexes.length + " - #N:" + " >");
     }
 
+    /**
+    @deprecated
+    */
     public void printTriangleMesh() {
         System.out.println(this.toString());
         for (int i = 0; i < vertexes.length; i++) {
@@ -356,6 +329,12 @@ public class TriangleMesh extends Surface {
 \f]
      <LI>Scalar value d in that equation can be solve replacing the coordinates
      of any of the Triangle points into the plane equation.
+     <LI>To check if an intersected point lies inside the triangle, a left/right
+     test is done with each one of the three directed edge vectors. If all three
+     tests pass, then the point is inside the triangle.
+     <LI>If the normal and the direction of the ray are in the same direction
+     (more than 90 degrees of vector angle) then the normal is inverted to manage
+      meshes with reversed triangles.
      </UL>
     */
     public boolean
@@ -365,9 +344,9 @@ public class TriangleMesh extends Surface {
         double min_t;         // Shortest distance founded so far
         Vector3D v0, v1, v2;  // Positions of the three triangle points
         Vector3D u, v, n;     // Edge vectors and normal
-        Vector3D p;           // Point of intersection between ray and with plane
+        Vector3D p;           // Point of intersection between ray and plane
         double t, a, b, d;    // Coefficients for solving equation (2)
-        double s1, s2, s3;    // Side test for each of the three triangle borders
+        double s1, s2, s3;    // Side test for each of triangle border
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
@@ -381,13 +360,15 @@ public class TriangleMesh extends Surface {
             v1 = vertexes[triangles[i].getPoint1()].getPosition();
             v2 = vertexes[triangles[i].getPoint2()].getPosition();
 
-            // The vectors u & v are two triangle edges, and define the normal (1)
+            // The vectors u & v are two triangle edges, and define the 
+            // normal (1)
             u = v1.substract(v0);
-            v = v2.substract(v0);
-            n = u.crossProduct(v);
+            v = v2.substract(v1);
+            n = v.crossProduct(u);
             n.normalize();
 
-            // This is the result of replacing point v0 on plane equation, solving for d
+            // This is the result of replacing point v0 on plane equation, 
+            // solving for d
             d = -n.dotProduct(v0);
 
             // Calculate numerator and denominator for equation (2)
@@ -410,17 +391,17 @@ public class TriangleMesh extends Surface {
                 s3 = (v0.substract(v2)).crossProduct(p.substract(v2)).dotProduct(n);
 
                 if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
-             (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
+                     (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
                     if ( t < min_t ) {
-
-                        // Normal is always pointed "outwards" with respect to the 
-                        // triangle (this manages the issue of back-facing normals)
+                        // Normal is always pointed "outwards" with respect to 
+                        // the triangle (this manages the issue of back-facing
+                        // normals)
                         if ( n.dotProduct(inOut_Ray.direction) < 0 ) {
                             lastInfo.n = n;
-              }
-              else {
+                          }
+                          else {
                             lastInfo.n = n.multiply(-1);
-            }
+                        }
 
                         lastInfo.p = p;
                         inOut_Ray.t = t;
@@ -435,6 +416,10 @@ public class TriangleMesh extends Surface {
         return intersection;
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
+    */
     public void doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
         outData.p.x = lastInfo.p.x;
@@ -445,8 +430,15 @@ public class TriangleMesh extends Surface {
         outData.n.z = lastInfo.n.z;
     }
 
-    public int doIntersectionInformation() {
-        return selectedTriangle;
+    /**
+     Check the general interface contract in superclass method
+     Geometry.getMinMax.
+    */
+    public double[] getMinMax() {
+        if ( MinMax == null ) {
+            calculateMinMaxPositions();
+        }
+        return MinMax;
     }
 
 }

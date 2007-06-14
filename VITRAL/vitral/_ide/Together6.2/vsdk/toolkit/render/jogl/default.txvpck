@@ -61,11 +61,11 @@
         </reference>
         <reference df-class-name="reference57" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglCameraRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="210,10,140,169"/>
+            <property name="bounds" value="210,10,134,169"/>
         </reference>
         <reference df-class-name="reference58" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="10,330,200,121"/>
+            <property name="bounds" value="10,330,200,137"/>
         </reference>
         <reference df-class-name="reference59" referencedUin="jdt:e_class:src:vsdk.toolkit.render.jogl.JoglRGBAImageRendererImageAssociation">
             <property name="$shortcutReference" value="true"/>

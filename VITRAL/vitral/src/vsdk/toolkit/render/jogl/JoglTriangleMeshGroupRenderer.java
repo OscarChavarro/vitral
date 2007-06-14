@@ -9,7 +9,17 @@ import java.util.ArrayList;
 
 public class JoglTriangleMeshGroupRenderer {
 
-    public static void draw(GL gl, TriangleMeshGroup meshGroup, QualitySelection quality) {
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+
+    @return Approximate number of triangles. If non-triangles primitives like
+    quads are rendered, this counts as the corresponding number of triangles.
+    1D and 0D primitives are not counted.
+
+    @todo Implement triangle count!
+    */
+    public static int draw(GL gl, TriangleMeshGroup meshGroup, QualitySelection quality) {
     TriangleMesh mesh = null;
     for (Iterator<TriangleMesh> i = meshGroup.getMeshes().iterator(); i.hasNext(); ) {
         mesh = (TriangleMesh) i.next();
@@ -90,7 +100,7 @@ public class JoglTriangleMeshGroupRenderer {
         //  drawShading(gl, quality.getShading());
 
     }
-
+    return 0;
     }
 
     public static void drawWithSelection(GL gl, TriangleMeshGroup meshGroup,

@@ -1,35 +1,9 @@
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Arrow.java:81: Warning: argument `inOut_ray' of command @param is not found in the argument list of Arrow::doIntersection(Ray inOutRay) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Arrow.java:81: Warning: The following parameters of vsdk::toolkit::environment::geometry::Arrow::doIntersection(Ray inOutRay) are not documented:
-  parameter inOutRay
-
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Box.java:35: Warning: argument `inOut_ray' of command @param is not found in the argument list of Box::doIntersection(Ray inOutRay) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Box.java:35: Warning: The following parameters of vsdk::toolkit::environment::geometry::Box::doIntersection(Ray inOutRay) are not documented:
-  parameter inOutRay
-
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Cone.java:214: Warning: argument `inOut_ray' of command @param is not found in the argument list of Cone::doIntersection(Ray inOutRay) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Cone.java:214: Warning: The following parameters of vsdk::toolkit::environment::geometry::Cone::doIntersection(Ray inOutRay) are not documented:
-  parameter inOutRay
-
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:37: Warning: argument `inOut_ray' of command @param is not found in the argument list of InfinitePlane::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:69: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:69: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:69: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:37: Warning: argument `inOut_ray' of command @param is not found in the argument list of InfinitePlane::doIntersection(Ray inout_rayo) inherited from member doIntersection at line 27 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
 /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/InfinitePlane.java:37: Warning: The following parameters of vsdk::toolkit::environment::geometry::InfinitePlane::doIntersection(Ray inout_rayo) are not documented:
   parameter inout_rayo
 
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/ParametricBiCubicPatch.java:297: Warning: argument `inOut_ray' of command @param is not found in the argument list of ParametricBiCubicPatch::doIntersection(Ray r) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/ParametricBiCubicPatch.java:297: Warning: The following parameters of vsdk::toolkit::environment::geometry::ParametricBiCubicPatch::doIntersection(Ray r) are not documented:
-  parameter r
-
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/ParametricCubicCurve.java:303: Warning: argument `inOut_ray' of command @param is not found in the argument list of ParametricCubicCurve::doIntersection(Ray r) inherited from member doIntersection at line 18 in file /home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/ParametricCubicCurve.java:303: Warning: The following parameters of vsdk::toolkit::environment::geometry::ParametricCubicCurve::doIntersection(Ray r) are not documented:
-  parameter r
-
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
-/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:60: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:69: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/grupo_vitral/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:69: Warning: Unexpected tag </img> found

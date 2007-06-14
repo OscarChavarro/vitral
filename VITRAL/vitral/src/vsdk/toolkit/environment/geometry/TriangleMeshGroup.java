@@ -174,6 +174,10 @@ public class TriangleMeshGroup extends Surface {
         return intersection;
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
+    */
     public void doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
         outData.p.x = lastInfo.p.x;

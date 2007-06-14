@@ -301,6 +301,8 @@ public class Cone extends Solid {
     }
 
     /**
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
     */
     public void doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData)

@@ -55,9 +55,9 @@
         </reference>
         <reference df-class-name="reference41" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.TriangleMeshGroup">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="360,420,200,306"/>
+            <property name="bounds" value="360,420,200,290"/>
             <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.TriangleMeshGroup:lastInfo">
-                <property name="sourceAnchor" value="460,726"/>
+                <property name="sourceAnchor" value="460,710"/>
                 <property name="bendpoints" value=""/>
                 <property name="targetAnchor" value="730,990"/>
             </reference>
@@ -74,7 +74,7 @@
         </reference>
         <reference df-class-name="reference42" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.TriangleMesh">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="150,420,200,690"/>
+            <property name="bounds" value="150,420,200,658"/>
             <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.TriangleMesh:lastInfo">
                 <property name="sourceAnchor" value="350,1050"/>
                 <property name="bendpoints" value=""/>
@@ -209,7 +209,7 @@
         </reference>
         <reference df-class-name="reference49" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Geometry">
             <property name="$shortcutReference" value="true"/>
-            <property name="bounds" value="40,19,168,153"/>
+            <property name="bounds" value="40,19,200,169"/>
         </reference>
         <reference df-class-name="reference50" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.GeometryIntersectionInformation">
             <property name="$shortcutReference" value="true"/>
@@ -219,9 +219,9 @@
             <property name="$shortcutReference" value="true"/>
             <property name="bounds" value="80,280,83,86"/>
             <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Surface:vsdk.toolkit.environment.geometry.Geometry">
-                <property name="sourceAnchor" value="109,280"/>
+                <property name="sourceAnchor" value="114,280"/>
                 <property name="bendpoints" value=""/>
-                <property name="targetAnchor" value="109,172"/>
+                <property name="targetAnchor" value="114,188"/>
             </reference>
         </reference>
         <reference df-class-name="reference3" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.HalfSpace">
@@ -239,7 +239,7 @@
             <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Solid:vsdk.toolkit.environment.geometry.Geometry">
                 <property name="sourceAnchor" value="960,290"/>
                 <property name="bendpoints" value=""/>
-                <property name="targetAnchor" value="158,172"/>
+                <property name="targetAnchor" value="177,188"/>
             </reference>
         </reference>
         <reference df-class-name="reference5" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Curve">
@@ -248,7 +248,7 @@
             <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Curve:vsdk.toolkit.environment.geometry.Geometry">
                 <property name="sourceAnchor" value="-399,290"/>
                 <property name="bendpoints" value=""/>
-                <property name="targetAnchor" value="74,172"/>
+                <property name="targetAnchor" value="77,188"/>
             </reference>
         </reference>
         <property name="$defaultDiagram" value=""/>

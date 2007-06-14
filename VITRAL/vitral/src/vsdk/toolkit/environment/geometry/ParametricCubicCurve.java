@@ -19,31 +19,36 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 /**
-This class can represent a set of curve segments, forming a poly-curve. Each
+This class can represents a set of curve segments, forming a poly-curve. Each
 segment is a parametric cubic curve with a set of points in the form
 <x(t), y(t), z(t)> for t in the interval [0.0, 1.0]. The behavior of each
 segment can vary depending of the type of its defining control points. Note
 that each control point is stored in the `points` ArrayList, and depending
-of its type, the number of Vector3d's that forms it varies.
+of its type, the number of Vector3d's that forms it varies, and its
+specific interpretation varies.
+
+@todo Document in detail the interpretation of point data for each curve type.
+@todo Pending to implement some other curve types, like Catmull-Rom.
 */
 
 public class ParametricCubicCurve extends Curve {
     // Model matrices for evaluating curve parametric equations like
     // described in [FOLE1992].11.2.
+    public static Matrix4x4 LINEAR_MATRIX = null;
     public static Matrix4x4 HERMITE_MATRIX = null;
     public static Matrix4x4 BEZIER_MATRIX = null;
     public static Matrix4x4 UNRBSPLINE_MATRIX = null;
     public static Matrix4x4 CATMULL_ROM_MATRIX = null;
 
-    // Constants used for identification of knots
-    public static final int CORNER = 1;
+    // Constants used for identification of defining points
+    public static final int CORNER = 1; // Usual name for linear polycurves
     public static final int HERMITE = 2;
     public static final int BEZIER = 3;
     public static final int UNRBSPLINE = 4;
     public static final int NUNRBSPLINE = 5;
     public static final int CATMULLROM = 6;
 
-    // Curve model: a set of points, each having a type of knot interpretation
+    // Curve model: a set of points, each having a type of data interpretation
     public ArrayList<Vector3D[]> points;
     public ArrayList<Integer> types;
 
@@ -51,20 +56,35 @@ public class ParametricCubicCurve extends Curve {
     private static final int INITIAL_APPROXIMATION_STEPS = 50;
     private int approximationSteps;
 
-
     /**
     This constructor takes care for the initialization of the matrices needed
     for the definition of the different types of curve model supported. Note
     that the matrices values are formally derived in [FOLE1992].11.2 section.
+    <P>
+
+    The resulting curve created is the empty curve.
+
+    @todo Leave the UNRBSPLINE_MATRIX and CATMULL_ROM_MATRIX matrices 
+    initialized to standard teoretical values, with their scalar constants 
+    applied. This implies updating the evaluation methods.
     */
     public ParametricCubicCurve() {
         //- Matrix initialization -----------------------------------------
+        // All the matrixes are computed only for the first time this
+        // class is instantiated. Note that this makes the Matrix4x4
+        // creation efficient, but also makes this class non-re-entrant,
+        // and not thread-safe.
         if ( HERMITE_MATRIX == null ) {
-            // All the matrixes are computed only for the first time this
-            // class is instantiated. Note that this makes the Matrix4x4
-            // creation efficient, but also makes this class non-re-entrant,
-            // and not thread-safe.
             double[][] m;
+
+            // This equation was derived as the answer of exercise 11.3 in
+            // [FOLE1992], from equation base 11.11
+            m = new double[][] { { 0.0,  0.0,  0.0,  1.0},
+                                 { 0.0,  0.0,  1.0,  1.0},
+                                 {-1.0,  1.0,  0.0,  0.0},
+                                 { 1.0,  0.0,  0.0,  0.0} };
+            LINEAR_MATRIX = new Matrix4x4();
+            LINEAR_MATRIX.M = m;
 
             // Equation 11.19 in [FOLE1992]
             m = new double[][] { { 2.0, -2.0,  1.0,  1.0},
@@ -99,7 +119,7 @@ public class ParametricCubicCurve extends Curve {
             CATMULL_ROM_MATRIX.M = m;
         }
 
-        //-----------------------------------------------------------------
+        //- Empty curve model creation ------------------------------------
         points = new ArrayList<Vector3D[]> ();
         types = new ArrayList<Integer> ();
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
@@ -107,7 +127,7 @@ public class ParametricCubicCurve extends Curve {
 
     public int getApproximationSteps()
     {
-    return approximationSteps;
+        return approximationSteps;
     }
 
     public void setApproximationSteps(int n)
@@ -131,8 +151,7 @@ public class ParametricCubicCurve extends Curve {
 
     public int getPointSize() {
        return this.points.size();
-   }
-
+    }
 
     public void removePoint(int pos) {
         points.remove(pos);
@@ -141,10 +160,15 @@ public class ParametricCubicCurve extends Curve {
 
     public void setPointAt(Vector3D[] p, int pos) {
        points.set(pos, p);
-   }
+    }
 
-
-    public Vector3D evaluate(int n_seg,  float t) {
+    /**
+    Given current ParametricCubicCurve, this method takes the scalar 
+    parameter t, which must be inside the interval [0.0, 1.0], and 
+    returns the Vector3D resulting from the evaluation of the n_seg
+    segment of the polycurve.
+    */
+    public Vector3D evaluate(int n_seg,  double t) {
         if (types.get(n_seg).intValue() == CORNER ) {
             return evaluateLinear(n_seg, t);
         }
@@ -160,91 +184,127 @@ public class ParametricCubicCurve extends Curve {
         return null;
     }
 
-    /**
-    TODO!
-    */
-    private Vector3D evaluateLinear(int nseg, float t) {
-        return null;
+    private Vector3D evaluateLinear(int nseg, double t) {
+        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
+        Vector3D[] endingSegmentPoint = points.get(nseg);
+        Vector3D p;
+
+        // p1
+        Vector3D result = startingSegmentPoint[0];
+        double vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += LINEAR_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+        }
+        result = result.multiply(vt);
+
+        // p2
+        vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += LINEAR_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+        }
+        p = endingSegmentPoint[0];
+        result = result.add(p.multiply(vt));
+
+        // 0
+        vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += LINEAR_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+        }
+        p = new Vector3D(0, 0, 0);
+        result = result.add(p.multiply(vt));
+
+        // 0
+        vt = 0;
+        for ( int i = 0; i < 4; i++ ) {
+            vt += LINEAR_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+        }
+        p = new Vector3D(0, 0, 0);
+        result = result.add(p.multiply(vt));
+
+        return result;
     }
 
-    private Vector3D evaluateHermite(int nseg, float t) {
+    private Vector3D evaluateHermite(int nseg, double t) {
+        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
+        Vector3D[] endingSegmentPoint = points.get(nseg);
 
-        Vector3D[] pointB = points.get(nseg - 1);
-        Vector3D[] pointA = points.get(nseg);
-        //p1
-        Vector3D result = pointB[0];
+        // p1
+        Vector3D result = startingSegmentPoint[0];
         double vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
-        //p4
+        // p4
         vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        Vector3D p = pointA[0];
+        Vector3D p = endingSegmentPoint[0];
         result = result.add(p.multiply(vt));
 
-        //r1
+        // r1
         vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
         }
-        p = pointB[2];
+        p = startingSegmentPoint[2];
         result = result.add(p.multiply(vt));
 
-        //r4
+        // r4
         vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += HERMITE_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
         }
-        p = pointA[1];
+        p = endingSegmentPoint[1];
         result = result.add(p.multiply(vt));
 
         return result;
     }
 
-    private Vector3D evaluateBezier(int nseg, float t) {
-        Vector3D[] pointB = points.get(nseg - 1);
-        //p1
-        Vector3D result = pointB[0];
+    private Vector3D evaluateBezier(int nseg, double t) {
+        Vector3D[] startingSegmentPoint = points.get(nseg - 1);
+        Vector3D[] endingSegmentPoint = points.get(nseg);
+        Vector3D p;
+
+        // p1
+        Vector3D result = startingSegmentPoint[0];
         double vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
-        //p2
+        // p2
         vt = 0;
-        for (int i = 0; i < 4; i++) {
+        for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        Vector3D p = pointB[2];
+        p = startingSegmentPoint[2];
         result = result.add(p.multiply(vt));
-        //p3
+
+        // p3
         vt = 0;
 
-        Vector3D[] pointA = points.get(nseg);
         for (int i = 0; i < 4; i++) {
             vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
         }
-        p = pointA[1];
+        p = endingSegmentPoint[1];
         result = result.add(p.multiply(vt));
-        //p4
+
+        // p4
         vt = 0;
         for (int i = 0; i < 4; i++) {
             vt += BEZIER_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
         }
-        p = pointA[0];
+        p = endingSegmentPoint[0];
         result = result.add(p.multiply(vt));
 
-        //  System.out.print(result.toString());
         return result;
     }
 
-    private Vector3D evaluateBspline(int nseg, float t) {
+    private Vector3D evaluateBspline(int nseg, double t) {
         if (points.size() < 4) {
             return null;
         }
@@ -263,9 +323,17 @@ public class ParametricCubicCurve extends Curve {
 
     /**
     This method calculates the interpolation points for the segment that ends
-    in the point `endingPointForSegment`.
+    in the point `endingPointForSegment`.<P>
+
+    Note that as evaluation is able to manage the linear/corner case under
+    the same numerical schema that is used for other curve types, the polyline
+    can be interpreted as multiple segments for applications requiring.
+    However, in cases as simple drawing, this leads to unnecessary line
+    primitives. Due to that situation, the user can specify if breaking
+    rects or not.
     */
-    public ArrayList<Vector3D> calculatePoints(int endingPointForSegment) {
+    public ArrayList<Vector3D> calculatePoints(int endingPointForSegment,
+                                               boolean withBrokenRects) {
         ArrayList<Vector3D> pol = new ArrayList<Vector3D> ();
 
         if ( endingPointForSegment <= 2 &&
@@ -273,10 +341,10 @@ public class ParametricCubicCurve extends Curve {
             // The Uniform Non Rational B Splines require a least 3 control
             // points, which do not form a curve segment.
             return pol;
-    }
+        }
 
-        if ( types.get(endingPointForSegment) == CORNER ||
-             endingPointForSegment == 0 ||
+        if ( (types.get(endingPointForSegment) == CORNER && !withBrokenRects) 
+             || endingPointForSegment == 0 ||
              (types.get(endingPointForSegment) == UNRBSPLINE &&
               endingPointForSegment < 3)) {
             pol.add(points.get(endingPointForSegment)[0]);
@@ -289,7 +357,8 @@ public class ParametricCubicCurve extends Curve {
             }
             pol.add(q);
             for ( int i = 1; i <= approximationSteps; i++ ) {
-                q = evaluate(endingPointForSegment,  i / (float) approximationSteps);
+                q = evaluate(endingPointForSegment, 
+                             (double)i / (double)approximationSteps);
                 if (q != null) {
                     pol.add(q);
                 }
@@ -299,24 +368,31 @@ public class ParametricCubicCurve extends Curve {
         return pol;
     }
 
-    public boolean doIntersection(Ray r)
-    {
-        return false;
-    }
+    /**
+    This method returns the minmax of current curve, for those curves whose
+    bounding volume is greater than the minmax of its control points.
 
-    public void doExtraInformation(Ray inRay, double intT, 
-                                      GeometryIntersectionInformation outData)
-    {
-        return;
-    }
-
-    /** TODO: This method must check min max values based on control point
-    min max */
+    @todo if any curve gets outside its convex hull, this method fails in
+    giving the exact bounding volume
+    */
     public double[] getMinMax()
     {
         double minmax[] = new double[6];
-        for ( int i = 0; i < 6; i++ ) {
-        minmax[i] = 0.0;
+        int i;
+
+        for ( i = 0; i < 3; i++ ) minmax[i] = Double.MAX_VALUE;
+        for ( ; i < 6; i++ ) minmax[i] = Double.MIN_VALUE;
+
+        Vector3D[] p;
+
+    for ( i = 0; i < points.size(); i++ ) {
+        p = points.get(i);
+            if ( p[0].x < minmax[0] ) minmax[0] = p[0].x;
+            if ( p[0].y < minmax[1] ) minmax[1] = p[0].y;
+            if ( p[0].z < minmax[2] ) minmax[2] = p[0].z;
+            if ( p[0].x > minmax[3] ) minmax[3] = p[0].x;
+            if ( p[0].y > minmax[4] ) minmax[4] = p[0].y;
+            if ( p[0].z > minmax[5] ) minmax[5] = p[0].z;
     }
         return minmax;
     }

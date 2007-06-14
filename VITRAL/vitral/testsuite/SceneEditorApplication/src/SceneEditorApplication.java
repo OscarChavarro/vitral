@@ -39,13 +39,17 @@ import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Sphere;
+
 import vsdk.toolkit.environment.scene.SimpleThing;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.RGBColorPaletteBuilder;
@@ -371,6 +375,12 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Create TriangleMesh");
             configureButton(b);
 
+            b = new JButton("Create ParametricCubicCurve");
+            configureButton(b);
+
+            b = new JButton("Create ParametricBiCubicPatch");
+            configureButton(b);
+
             b = new JButton("Create Light");
             configureButton(b);
 
@@ -531,16 +541,96 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Create Arrow" ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
+        else if ( label == "Create ParametricCubicCurve" ) {
+            ParametricCubicCurve curve;
+
+            // Case 1: curve hard-coded in source
+            Vector3D pointParameters[];
+
+            curve = new ParametricCubicCurve();
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(0, 0, 0);
+            pointParameters[1] = new Vector3D(0, 0, 0); // Not used
+            pointParameters[2] = new Vector3D(0, 1, 0);
+            curve.addPoint(pointParameters, curve.BEZIER);
+
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(1, 1, 0);
+            pointParameters[1] = new Vector3D(0, 1, 0);
+            pointParameters[2] = new Vector3D(2, 1, 0);
+            curve.addPoint(pointParameters, curve.BEZIER);
+
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(2, 0, 1);
+            pointParameters[1] = new Vector3D(1.5, -0.5, 0);
+            pointParameters[2] = new Vector3D(0, 0, 0); // Not used
+            curve.addPoint(pointParameters, curve.BEZIER);
+
+            addThing(curve);
+
+            vsdk.toolkit.io.geometry.ParametricCubicCurvePersistence.exportXml(
+                curve, "curveTest.xml", "../../etc/xml/vsdk.dtd");
+
+/*
+            // Case 2: curve read from a previous existing data file
+            curve = 
+            vsdk.toolkit.io.geometry.ParametricCubicCurvePersistence.importXml(
+            "curveTest.xml");
+*/
+        }
+        else if ( label == "Create ParametricBiCubicPatch" ) {
+            ParametricBiCubicPatch patch;
+
+            // Case 1: Patch hard-coded in source
+            ParametricCubicCurve border = new ParametricCubicCurve();
+            Vector3D pointParameters[];
+            pointParameters = new Vector3D[3];
+
+            pointParameters[0] = new Vector3D(0, 0, 0);
+            pointParameters[1] = new Vector3D(0.5, 0, 0);
+            pointParameters[2] = new Vector3D(0, 0, 0.5);
+            border.addPoint(pointParameters, border.BEZIER);
+
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(0.5, 0, 1);
+            pointParameters[1] = new Vector3D(0, 0, 1);
+            pointParameters[2] = new Vector3D(1, 0, 1);
+            border.addPoint(pointParameters, border.BEZIER);
+
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(0.5, 1, 1);
+            pointParameters[1] = new Vector3D(1, 1, 1);
+            pointParameters[2] = new Vector3D(0, 1, 1);
+            border.addPoint(pointParameters, border.BEZIER);
+
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(0, 1, 0);
+            pointParameters[1] = new Vector3D(0, 1, 0.5);
+            pointParameters[2] = new Vector3D(0.5, 1, 0);
+            border.addPoint(pointParameters, border.BEZIER);
+
+            border.addPoint(border.getPoint(0), border.BEZIER);
+            patch = new ParametricBiCubicPatch(ParametricBiCubicPatch.QUAD,
+                                               border);
+            addThing(patch);
+
+         vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence.exportXml(
+                patch, "patchTest.xml", "../../etc/xml/vsdk.dtd");
+
+/*
+            // Case 2: patch read from a previous existing data file
+            patch = vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence.importXml("patchTest.xml");
+*/
+        }
         else if ( label == "Create TriangleMesh" ) {
             TriangleMeshGroup mg = null;
             try {
-                mg = ReaderObj.read("../../etc/geometry/trivial.obj");
                 //mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
-        }
-        catch ( Exception e ) {
+                mg = ReaderObj.read("../../etc/geometry/trivial.obj");
+            }
+            catch ( Exception e ) {
                 return;
-        }
-            //addThing((TriangleMesh)mg.getMeshAt(1));
+            }
             addThing(mg);
         }
         else if ( label == "Create Light" ) {
@@ -628,10 +718,10 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.theScene.raytrace(parent.raytracedImage);
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage);
-        }
-        else {
+            }
+            else {
                 parent.imageControlWindow.setImage(parent.raytracedImage);
-        }
+            }
             parent.imageControlWindow.redrawImage();
         }
 

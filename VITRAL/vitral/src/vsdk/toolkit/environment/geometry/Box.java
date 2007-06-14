@@ -148,16 +148,8 @@ public class Box extends Solid {
     }
 
     /**
-    Dado un `in_rayo` que se intersecta con este objeto (a una distancia `in_t`
-    desde su origin), este m&eacute;todo escribe en los vectores `out_p` y 
-    `out_n` la siguiente informacio&nacute;n:
-      - out_p: las coordenadas del punto en el que el `in_rayo` intersecta al 
-           objeto.
-      - out_n: un vector unitario con la normal de la superficie del objeto en
-           el punto de intersecci&oacute;n `out_p`.
-
-    PRE: Las referencias a Vector3D out_p y out_n YA deben existir. El 
-         m&eacute;todo solo coloca informaci&oacute;n dentro de ellos.
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
     */
     public void doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {

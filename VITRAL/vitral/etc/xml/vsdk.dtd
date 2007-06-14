@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!ELEMENT Vector3D (#PCDATA)>
+
+<!ELEMENT Point (Vector3D+)>
+<!ATTLIST Point type CDATA #REQUIRED>
+
+<!ELEMENT ParametricCubicCurve (Point+)>
+<!ATTLIST ParametricCubicCurve approximationSteps CDATA #IMPLIED>
+
+<!ELEMENT ParametricBiCubicPatch (ParametricCubicCurve)>
+<!ATTLIST ParametricBiCubicPatch approximationSteps CDATA #IMPLIED>
+<!ATTLIST ParametricBiCubicPatch type CDATA #REQUIRED>

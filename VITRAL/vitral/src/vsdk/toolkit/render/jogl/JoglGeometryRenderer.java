@@ -14,9 +14,11 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
+import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.Sphere;
 
 public class JoglGeometryRenderer
 {
@@ -55,28 +57,36 @@ public class JoglGeometryRenderer
         gl.glPopAttrib();
     }
 
-    public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
+    public static int draw(GL gl, Geometry g, Camera c, QualitySelection q)
     {
         String geometryType = g.getClass().getName();
+        int triangles = 0;
 
         if ( geometryType == "vsdk.toolkit.environment.geometry.Sphere" ) {
-            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+            triangles = JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
     }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Box" ) {
-            JoglBoxRenderer.draw(gl, (Box)g, c, q);
+            triangles = JoglBoxRenderer.draw(gl, (Box)g, c, q);
     }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Cone" ) {
-            JoglConeRenderer.draw(gl, (Cone)g, c, q);
+            triangles = JoglConeRenderer.draw(gl, (Cone)g, c, q);
     }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.Arrow" ) {
-            JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+            triangles = JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+        }
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricCubicCurve" ) {
+        JoglParametricCubicCurveRenderer.draw(gl, (ParametricCubicCurve)g, c, q);
+        }
+        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricBiCubicPatch" ) {
+        triangles = JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.TriangleMesh" ) {
-            JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+            triangles = JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
         }
         else if ( geometryType == "vsdk.toolkit.environment.geometry.TriangleMeshGroup" ) {
-          JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
+            triangles = JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
         }
+        return triangles;
     }
 }
 

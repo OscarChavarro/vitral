@@ -98,3 +98,7 @@ April 9 2006, Oscar Chavarro:
   - 8min: TranslationGizmo: plane elements interaction technique.  :-)
   - 30min: TranslationGizmo: Automatic resizing
   - 30min: JoglTranslationGizmoRenderer updated to manage its own lighting
+
+May 3 2006, Oscar Chavarro:
+  - 20min: Adding ParametricCubicCurve sample
+  - 25min: Adding ParametricBiCubicPatch sample

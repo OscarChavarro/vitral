@@ -43,7 +43,17 @@ public class JoglArrowRenderer {
         gl.glPopMatrix();
     }
 
-    public static void draw(GL gl, Arrow arrow, Camera c, QualitySelection q)
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+
+    @return Approximate number of triangles. If non-triangles primitives like
+    quads are rendered, this counts as the corresponding number of triangles.
+    1D and 0D primitives are not counted.
+
+    @todo Implement triangle count!
+    */
+    public static int draw(GL gl, Arrow arrow, Camera c, QualitySelection q)
     {
         if (glu == null) {
             glu = new GLU();
@@ -62,6 +72,8 @@ public class JoglArrowRenderer {
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, arrow, q);
         }
+
+        return 0;
     }
 
 }

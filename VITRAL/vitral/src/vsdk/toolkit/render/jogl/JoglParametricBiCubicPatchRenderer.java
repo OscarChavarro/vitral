@@ -7,9 +7,12 @@
 
 package vsdk.toolkit.render.jogl;
 
-import vsdk.toolkit.common.Vector3D;
 import javax.media.opengl.GL;
+
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCubicCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 
@@ -95,6 +98,7 @@ public class JoglParametricBiCubicPatchRenderer {
   }
 
   public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
+                                     Camera c, QualitySelection q,
                                      ColorRgb color) {
     // Now we draw the points
     if (patch.type == ParametricCubicCurve.BEZIER) {
@@ -124,14 +128,13 @@ public class JoglParametricBiCubicPatchRenderer {
     }
     else if (patch.type == ParametricCubicCurve.HERMITE) {
       // Now we draw the points
-      //  JoglParametricCubicCurveRenderer.drawCurve(gl, surface.contourCurve);
       ParametricCubicCurve c1 = new ParametricCubicCurve();
       c1.addPoint(patch.contourCurve.getPoint(0), c1.HERMITE);
       c1.addPoint(patch.contourCurve.getPoint(1), c1.HERMITE);
       c1.addPoint(patch.contourCurve.getPoint(3), c1.HERMITE);
 
-      JoglParametricCubicCurveRenderer.drawCurve(gl, c1,
-                                                 new ColorRgb(1, 0.4, 0.5));
+      JoglParametricCubicCurveRenderer.draw(gl, c1, c, q, 
+                                            new ColorRgb(1, 0.4, 0.5));
         JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
 
       c1 = new ParametricCubicCurve();
@@ -148,19 +151,38 @@ public class JoglParametricBiCubicPatchRenderer {
           patch.contourCurve.getPoint(3)[0], patch.contourCurve.getPoint(3)[2],
           patch.contourCurve.getPoint(3)[1]};
       c1.addPoint(v3, c1.HERMITE);
-      JoglParametricCubicCurveRenderer.drawCurve(gl, c1,
-                                                 new ColorRgb(0.5, 0.5, 0.8));
+      JoglParametricCubicCurveRenderer.draw(gl, c1, c, q,
+                                            new ColorRgb(0.5, 0.5, 0.8));
        JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, c1);
 
     }
     else {
 
       // Now we draw the points
-      JoglParametricCubicCurveRenderer.drawCurve(gl, patch.contourCurve,
-                                                 new ColorRgb(1, 1, 1));
+    JoglParametricCubicCurveRenderer.draw(gl, patch.contourCurve, c, q, 
+                                              new ColorRgb(1, 1, 1));
       JoglParametricCubicCurveRenderer.drawControlPointsCurve(gl, patch.contourCurve);
     }
   }
+
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+
+    @return Approximate number of triangles. If non-triangles primitives like
+    quads are rendered, this counts as the corresponding number of triangles.
+    1D and 0D primitives are not counted.
+
+    @todo Implement triangle count!
+    */
+    public static int draw(GL gl, ParametricBiCubicPatch p, Camera c, QualitySelection q)
+    {
+        drawSurfaceGrid(gl, p.evaluateSurface(), 1, new ColorRgb(0.4f, 0.2f, 0.6f));
+        if ( q.isBoundingVolumeSet() ) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
+    }
+        return 0;
+    }
 
 }
 

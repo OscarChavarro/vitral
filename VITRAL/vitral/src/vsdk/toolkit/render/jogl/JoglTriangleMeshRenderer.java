@@ -64,7 +64,17 @@ public class JoglTriangleMeshRenderer {
     gl.glEnd();
   }
 
-  public static void draw(GL gl, TriangleMesh mesh, QualitySelection quality,
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+
+    @return Approximate number of triangles. If non-triangles primitives like
+    quads are rendered, this counts as the corresponding number of triangles.
+    1D and 0D primitives are not counted.
+
+    @todo Implement triangle count!
+    */
+  public static int draw(GL gl, TriangleMesh mesh, QualitySelection quality,
                           boolean flip) {
     if (quality.isSurfacesSet()) {
       int qt = quality.getShadingType();
@@ -102,6 +112,8 @@ public class JoglTriangleMeshRenderer {
     }
 
     drawShading(gl, quality.getShadingType());
+
+    return 0;
   }
 
   public static void drawSurfacesSmooth(GL gl, TriangleMesh mesh, boolean flip) {
