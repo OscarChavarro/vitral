@@ -11,7 +11,7 @@
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
-import vsdk.toolkit.common.Entity;
+import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
@@ -36,7 +36,7 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-public class _PolyhedralBoundedSolidFace extends Entity {
+public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20061118L;
 
