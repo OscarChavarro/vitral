@@ -46,6 +46,29 @@ public class _PolyhedralBoundedSolidEdge extends Entity {
     rightHalf = null;
     leftHalf = null;
     }
+
+    public String toString()
+    {
+        String msg;
+        msg = "Edge, half1: ";
+        if ( leftHalf == null ) {
+        msg = msg + "null. ";
+    }
+    else {
+            msg = msg + "vertex " + leftHalf.startingVertex.id;
+    }
+
+        msg = msg + " / half2: ";
+
+        if ( rightHalf == null ) {
+        msg = msg + "null. ";
+    }
+    else {
+            msg = msg + "vertex " + rightHalf.startingVertex.id;
+    }
+
+        return msg;
+    }
 }
 
 //===========================================================================

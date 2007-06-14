@@ -41,6 +41,9 @@ public class _PolyhedralBoundedSolidFace extends Entity {
     public static final long serialVersionUID = 20061118L;
 
     /// Defined as presented in [MANT1988].10.2.1
+    public int id;
+
+    /// Defined as presented in [MANT1988].10.2.1
     public PolyhedralBoundedSolid parentSolid;
 
     /// Each face should have at least one loop, corresponding to the
@@ -50,37 +53,22 @@ public class _PolyhedralBoundedSolidFace extends Entity {
     /// Defined as presented in [MANT1988].10.2.1
     public InfinitePlane containingPlane;
 
-    // To erase later
-    private static int count = 1;
-    public int id;
-    //
-
     //=================================================================
 
-    public _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid parent)
+    public _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid parent, int id)
     {
+        this.id = id;
         parentSolid = parent;
         parentSolid.polygonsList.add(this);
         boundariesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
-
-        // To erase later
-        id = count;
-    count++;
-        //
     }
 
     public String toString()
     {
         String msg;
 
-        msg = "Face id [" + id + "], " + boundariesList.size() + " loops: ";
-
-    for ( int i = 0; i < boundariesList.size(); i++ ) {
-        msg = msg + boundariesList.get(i).id;
-        if ( i < boundariesList.size()-1 ) msg = msg + ", ";
-    }
-        msg = msg + ".";
+        msg = "Face id [" + id + "], " + boundariesList.size() + " loops.";
 
         return msg;
     }

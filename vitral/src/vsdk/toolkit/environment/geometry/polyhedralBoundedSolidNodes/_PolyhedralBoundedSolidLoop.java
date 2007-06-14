@@ -37,28 +37,18 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
     /// reference.
     public _PolyhedralBoundedSolidHalfEdge boundaryStartHalfEdge;
 
-    // To erase later
-    private static int count = 1;
-    public int id;
-    //
-
     //=================================================================
     public _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace parent)
     {
         parentFace = parent;
         parentFace.boundariesList.add(this);
-
-        // To erase later
-        id = count;
-    count++;
-        //
     }
 
     public String toString()
     {
         String msg;
 
-        msg = "Loop id [" + id + "], parent face " + parentFace.id;
+        msg = "Loop, parent face " + parentFace.id;
 
         return msg;
     }

@@ -25,33 +25,34 @@ public class _PolyhedralBoundedSolidVertex extends Entity {
     public static final long serialVersionUID = 20061118L;
 
     /// Defined as presented in [MANT1988].10.2.1
+    public int id;
+
+    /// Defined as presented in [MANT1988].10.2.1
     public Vector3D position;
 
     /// Defined as presented in [MANT1988].10.2.2
     public _PolyhedralBoundedSolidHalfEdge emanatingHalfEdge;
 
-    // To erase later
-    private static int count = 1;
-    public int id;
-    //
-
     //=================================================================
     public _PolyhedralBoundedSolidVertex(PolyhedralBoundedSolid parentSolid,
-                                         Vector3D position)
+                                         Vector3D position, int id)
     {
+        this.id = id;
         emanatingHalfEdge = null;
         this.position = new Vector3D(position);
     parentSolid.verticesList.add(this);
-
-        // To erase later
-        id = count;
-    count++;
     }
 
     public String toString()
     {
         String msg;
-        msg = "vertex id " + id + ", position " + position;
+        msg = "vertex id " + id + ". Position " + position + ". ";
+        if ( emanatingHalfEdge == null ) {
+        msg = msg + "No associated halfedge.";
+    }
+    else {
+        msg = msg + "Associated halfedge to vertex id " + emanatingHalfEdge.startingVertex.id;
+    }
         return msg;
     }
 }

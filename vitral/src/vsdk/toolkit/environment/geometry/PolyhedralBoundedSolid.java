@@ -48,7 +48,7 @@ public class PolyhedralBoundedSolid extends Solid {
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
 
     //=================================================================
-    public PolyhedralBoundedSolid(Vector3D firstPoint)
+    public PolyhedralBoundedSolid(Vector3D firstPoint, int vertexId, int faceId)
     {
         polygonsList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
@@ -58,11 +58,11 @@ public class PolyhedralBoundedSolid extends Solid {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
-        mvfs(new Vector3D(firstPoint));
+        mvfs(new Vector3D(firstPoint), vertexId, faceId);
     }
 
     public PolyhedralBoundedSolid(double firstPointX, double firstPointY,
-                                  double firstPointZ)
+                                  double firstPointZ, int vertexId, int faceId)
     {
         polygonsList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
@@ -74,10 +74,25 @@ public class PolyhedralBoundedSolid extends Solid {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
         Vector3D firstPoint;
         firstPoint = new Vector3D(firstPointX, firstPointY, firstPointZ);
-        mvfs(firstPoint);
+        mvfs(firstPoint, vertexId, faceId);
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
+
+    private _PolyhedralBoundedSolidFace
+    findFace(int id)
+    {
+        int i;
+        _PolyhedralBoundedSolidFace facei;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            facei = polygonsList.get(i);
+        if ( facei.id == id ) {
+        return facei;
+        }
+        }
+        return null;
+    }
 
     /**
     addhe: addHalfEdge.
@@ -109,10 +124,12 @@ public class PolyhedralBoundedSolid extends Solid {
           else {
               he =
                 new _PolyhedralBoundedSolidHalfEdge(v, where.parentLoop, this);
-
+              _PolyhedralBoundedSolidHalfEdge other = he.previous();
+              halfEdgesList.swapElements(he, other);
         }
         he.parentEdge = e;
         he.startingVertex = v;
+    he.parentLoop = where.parentLoop;
 
         if ( sign == PolyhedralBoundedSolid.PLUS ) {
             e.leftHalf = he;
@@ -146,16 +163,16 @@ public class PolyhedralBoundedSolid extends Solid {
     useful as the initial state of creating a boundary model with a sequence
     of Euler operations.
     */
-    private void mvfs(Vector3D p)
+    private void mvfs(Vector3D p, int vertexId, int faceId)
     {
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
         _PolyhedralBoundedSolidHalfEdge newHalfEdge;
         _PolyhedralBoundedSolidVertex newVertex;
 
-        newFace = new _PolyhedralBoundedSolidFace(this);
+        newFace = new _PolyhedralBoundedSolidFace(this, faceId);
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
-        newVertex = new _PolyhedralBoundedSolidVertex(this, p);
+        newVertex = new _PolyhedralBoundedSolidVertex(this, p, vertexId);
         newHalfEdge =
             new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop, this);
         newLoop.boundaryStartHalfEdge = newHalfEdge;
@@ -177,19 +194,20 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public void lmev(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2,
-                     Vector3D p)
+                     int vertexID, Vector3D p)
     {
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidVertex newVertex;
         _PolyhedralBoundedSolidEdge newEdge;
 
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
-        newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p);
+        newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexID);
 
         he = he1;
         while ( he != he2 ) {
             he.startingVertex = newVertex;
             he = he.mirrorHalfEdge().next();
+        if ( he == he1 ) break;
         }
 
     _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
@@ -218,14 +236,15 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public _PolyhedralBoundedSolidFace lmef(
         _PolyhedralBoundedSolidHalfEdge he1,
-        _PolyhedralBoundedSolidHalfEdge he2)
+        _PolyhedralBoundedSolidHalfEdge he2,
+         int faceId)
     {
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
         _PolyhedralBoundedSolidEdge newEdge;
         _PolyhedralBoundedSolidHalfEdge he, nhe1, nhe2, temp;
 
-        newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid);
+        newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, faceId);
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
 
@@ -233,6 +252,7 @@ public class PolyhedralBoundedSolid extends Solid {
         while ( he != he2 ) {
             he.parentLoop = newLoop;
             he = he.next();
+        if ( he == he1 ) break;
         }
 
         nhe1 = addhe(newEdge, he2.startingVertex, he1, MINUS);
@@ -244,6 +264,47 @@ public class PolyhedralBoundedSolid extends Solid {
         he2.parentLoop.boundaryStartHalfEdge = nhe2;
 
         return newFace;
+    }
+
+    //= HIGH LEVEL EULER OPERATIONS ===================================
+
+    /**
+    mev: (High level version) MakeEdgeVertex (vertex splitting operation).
+    Operator `mev` divides the cicle of edges around the vertex `v1` so
+    that all edges from `v1` -> `v2` (inclusive) to `v1` -> `v3` (exclusive)
+    will become adjacent to a new vertex `v4`.  The vertices `v1` and `v4`
+    are joined with a new edge.  Coordinates defined in `p` are assigned
+    to `v4`.
+    Similarly to the corresponding low level operator `lmev`, various
+    special cases are possible.  Of particular use is the "line-drawing"
+    case that `f1` = `f2` and `v2` = `v3`.  In this case, a new edge to a
+    new vertex will be added within the face. We shall call such "dangling"
+    edges <I>struts</I>.  This case occurs so frequently that it is included
+    a "convenience" procedure `smev` that performs this operation.  The
+    procedure assumes that `v1` appears just once in `f1`; hence, the
+    argument `v2` can be left out.
+    @return true if operation succeded, false otherway
+    */
+    public boolean mev(int f1, int f2,
+                   int v1, int v2, int v3, int v4, double p)
+    {
+        _PolyhedralBoundedSolidFace face1, face2;
+        _PolyhedralBoundedSolidHalfEdge he1, he2;
+
+        face1 = findFace(f1);
+        if ( face1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Face " + f1 + " not found.");
+            return false;
+    }
+        face2 = findFace(f2);
+        if ( face2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Face " + f2 + " not found.");
+            return false;
+    }
+//        he1 = findHalfEdge(face1, v1, v2);
+    return true;
     }
 
     //=================================================================

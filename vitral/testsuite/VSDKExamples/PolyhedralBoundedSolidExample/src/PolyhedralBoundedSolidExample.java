@@ -33,6 +33,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
     private Camera camera;
     private PolyhedralBoundedSolid solid;
+    private int heIndex = 0;
 
     private RendererConfiguration quality;
     private CameraController cameraController;
@@ -49,17 +50,29 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         cameraController = new CameraControllerAquynza(camera);
 
         //-----------------------------------------------------------------
-    solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1); // mvfs
-    _PolyhedralBoundedSolidHalfEdge he1 = solid.halfEdgesList.get(0);
-        solid.lmev(he1, he1, new Vector3D(1, 0.1, 0.1));
+        _PolyhedralBoundedSolidHalfEdge he0, he1;
+
+    solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1, 1, 1); // mvfs
+
+    he0 = solid.halfEdgesList.get(0);
+        solid.lmev(he0, he0, 2, new Vector3D(1, 0.1, 0.1));
+
 /*
-    _PolyhedralBoundedSolidHalfEdge he2 = solid.halfEdgesList.get(1);
-        solid.lmev(he2, he2, new Vector3D(1, 1, 0.1));
-    _PolyhedralBoundedSolidHalfEdge he3 = solid.halfEdgesList.get(2);
-        solid.lmev(he3, he3, new Vector3D(0.1, 1, 0.1));
-    _PolyhedralBoundedSolidHalfEdge he4 = solid.halfEdgesList.get(3);
-        solid.lmef(he1, he4);
+    he0 = solid.halfEdgesList.get(0);
+        solid.lmev(he0, he0, 3, new Vector3D(1, 1, 0.1));
+
+    he0 = solid.halfEdgesList.get(2);
+        solid.lmev(he0, he0, 4, new Vector3D(0.1, 1, 0.1));
+
+    he0 = solid.halfEdgesList.get(4);
+    he1 = solid.halfEdgesList.get(5);
+        solid.lmef(he0, he1, 2);
+
+    he0 = solid.halfEdgesList.get(6);
+    he1 = solid.halfEdgesList.get(6);
+        solid.lmev(he0, he1, new Vector3D(0.1, 0.1, 1));
 */
+
         //-----------------------------------------------------------------
     }
 
@@ -118,7 +131,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
-        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality, heIndex);
     }
 
     /** Called by drawable to initiate drawing */
@@ -208,8 +221,16 @@ public class PolyhedralBoundedSolidExample extends Applet implements
       if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
           System.exit(0);
       }
-
       if ( cameraController.processKeyPressedEventAwt(e) ) {
+          canvas.repaint();
+      }
+      int unicode_id = e.getKeyChar();
+      if ( unicode_id != e.CHAR_UNDEFINED ) {
+          switch ( unicode_id ) {
+            case '1': heIndex --; break;
+            case '2': heIndex ++; break;
+      }
+      if ( heIndex < 0 ) heIndex = 0;
           canvas.repaint();
       }
   }
