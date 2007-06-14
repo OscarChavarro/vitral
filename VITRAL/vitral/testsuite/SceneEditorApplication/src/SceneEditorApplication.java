@@ -46,8 +46,8 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
-import vsdk.toolkit.environment.geometry.Mesh;
-import vsdk.toolkit.environment.geometry.MeshGroup;
+import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.RayableObject;
@@ -372,7 +372,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             b = new JButton("Create Arrow");
             configureButton(b);
 
-            b = new JButton("Create Mesh");
+            b = new JButton("Create TriangleMesh");
             configureButton(b);
 
             b = new JButton("Create Light");
@@ -535,16 +535,15 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Create Arrow" ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
-        else if ( label == "Create Mesh" ) {
-            MeshGroup mg = null;
+        else if ( label == "Create TriangleMesh" ) {
+            TriangleMeshGroup mg = null;
             try {
                 mg = ReaderObj.read("../../etc/geometry/hidrante.obj");
         }
         catch ( Exception e ) {
                 return;
         }
-        Mesh mesh = mg.getMeshAt(1);
-            addThing(mesh);
+            addThing(mg);
         }
         else if ( label == "Create Light" ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));

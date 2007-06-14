@@ -47,3 +47,7 @@ Changes in 2006 april 6 revition
   - RGBColorPalette completed, and AwtRGBColorPalette functions and sample
     working fine.
   - Exporting from ZBuffer to RGBImages now uses palettes :-)
+
+Changes in 2006 april 28 revition
+  - Integrated the models of ParametricCubicCurve and ParametricCubicPatches
+  - Mesh revition. Now it is called TriangleMesh / TriangleMeshGroup

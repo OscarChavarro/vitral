@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="idew4t5emgw87gcemgw8fzn">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::idc49ybemgw87gcemgw8g0y">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.gui.adapters"/>
+        </reference>
+        <reference df-class-name="reference27" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.CameraControllerGravZero">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference28" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.RotateGizmo">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference29" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.ScaleGizmo">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference30" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.CameraControllerBlender">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference31" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.TranslateGizmo">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference32" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.CameraControllerAquynza">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference33" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.CameraController">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference34" referencedUin="jdt:e_class:src:vsdk.toolkit.gui.QualitySelectionController">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

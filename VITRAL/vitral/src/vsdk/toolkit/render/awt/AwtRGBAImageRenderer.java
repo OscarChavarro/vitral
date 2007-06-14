@@ -15,7 +15,7 @@ import vsdk.toolkit.media.RGBAPixel;
 public class AwtRGBAImageRenderer
 {
     /** Converts integers in the domain [-128, 127] to integers in the range
-    [0, 256] */
+    [0, 255] */
     private static int scaleValue(byte x)
     {
         int y;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="idf5v8cemgw87gcemgw8g7g">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::idjo6ezemgw87gcemgw8g9m">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.render.jogl"/>
+        </reference>
+        <reference df-class-name="reference3" referencedUin="design:view:::idc3h3xemgw87gcemgw8g8r">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.render.awt"/>
+        </reference>
+        <reference df-class-name="reference21" referencedUin="jdt:e_class:src:vsdk.toolkit.render.Raytracer">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

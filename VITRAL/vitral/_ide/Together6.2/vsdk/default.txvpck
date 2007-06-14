@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="ida0zx7emgw87gcemgw8fp8">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::id4babmemgw87gcemgw8fqj">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit"/>
+            <property name="bounds" value="10,10,85,184"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

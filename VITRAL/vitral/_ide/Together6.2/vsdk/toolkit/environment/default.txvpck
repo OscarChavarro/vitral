@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="id24323emgw87gcemgw8fwl">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::id8i8g8emgw87gcemgw8fxw">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.environment.geometry"/>
+            <property name="bounds" value="910,440,200,248"/>
+        </reference>
+        <reference df-class-name="reference6" referencedUin="design:view:::id3amrzemgw87gcemgw8fyr">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.environment.scene"/>
+            <property name="bounds" value="910,-100,83,95"/>
+        </reference>
+        <reference df-class-name="reference35" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.SimpleBackground">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,175,166,130"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.SimpleBackground:vsdk.toolkit.environment.Background">
+                <property name="sourceAnchor" value="158,175"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="158,125"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference36" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.Light">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="159,381,137,290"/>
+        </reference>
+        <reference df-class-name="reference37" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.CubemapBackground">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="190,180,200,162"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.CubemapBackground:camera">
+                <property name="sourceAnchor" value="390,261"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="430,261"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.CubemapBackground:vsdk.toolkit.environment.Background">
+                <property name="sourceAnchor" value="249,180"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="249,125"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference38" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.Material">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="900,50,183,281"/>
+        </reference>
+        <reference df-class-name="reference39" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.Camera">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="430,-81,310,786"/>
+            <property name="bounds_setted_by_user" value="true"/>
+        </reference>
+        <reference df-class-name="reference40" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.Background">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="140,20,168,105"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

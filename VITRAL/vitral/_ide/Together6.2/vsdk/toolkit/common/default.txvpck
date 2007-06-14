@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="id1gdneemgw87gcemgw8fs9">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Quaternion">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference11" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Triangle">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference12" referencedUin="jdt:e_class:src:vsdk.toolkit.common.VSDK">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference13" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vertex">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference14" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ColorRgb">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference15" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitor">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference16" referencedUin="jdt:e_class:src:vsdk.toolkit.common.ProgressMonitorConsole">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference17" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Ray">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference18" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Matrix4x4">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference19" referencedUin="jdt:e_class:src:vsdk.toolkit.common.QualitySelection">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <reference df-class-name="reference20" referencedUin="jdt:e_class:src:vsdk.toolkit.common.Vector3D">
+            <property name="$shortcutReference" value="true"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

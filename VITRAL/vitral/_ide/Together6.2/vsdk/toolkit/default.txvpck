@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="id4babmemgw87gcemgw8fqj">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::id1gdneemgw87gcemgw8fs9">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.common"/>
+            <property name="bounds" value="300,600,159,264"/>
+        </reference>
+        <reference df-class-name="reference1" referencedUin="design:view:::idf5v8cemgw87gcemgw8g7g">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.render"/>
+            <property name="bounds" value="480,70,83,129"/>
+        </reference>
+        <reference df-class-name="reference2" referencedUin="design:view:::idd5suqemgw87gcemgw8g28">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io"/>
+            <property name="bounds" value="90,50,83,152"/>
+        </reference>
+        <reference df-class-name="reference5" referencedUin="design:view:::idhsj1femgw87gcemgw8g6l">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.media"/>
+            <property name="bounds" value="530,440,115,184"/>
+        </reference>
+        <reference df-class-name="reference7" referencedUin="design:view:::idew4t5emgw87gcemgw8fzn">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.gui"/>
+            <property name="bounds" value="790,-120,170,225"/>
+        </reference>
+        <reference df-class-name="reference9" referencedUin="design:view:::id24323emgw87gcemgw8fwl">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.environment"/>
+            <property name="bounds" value="300,200,142,209"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

@@ -89,7 +89,7 @@ public class JoglRGBAImageRenderer
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
             //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, x_tam, y_tam, gl.GL_RGBA, 
             //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 4, x_tam, y_tam, 0, gl.GL_RGBA, 
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 4, x_tam, y_tam, 0, gl.GL_RGBA,
                             gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
         }
 

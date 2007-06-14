@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="id8i8g8emgw87gcemgw8fxw">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.InfinitePlane">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="10,296,200,258"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.InfinitePlane:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="110,296"/>
+                <property name="bendpoints" value="709,239"/>
+                <property name="targetAnchor" value="709,147"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference41" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.MeshGroup">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="876,296,200,274"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.MeshGroup:lastInfo">
+                <property name="sourceAnchor" value="935,570"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="935,1044"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.MeshGroup:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="976,296"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="793,147"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference42" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Mesh">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="230,296,200,658"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Mesh:lastInfo">
+                <property name="sourceAnchor" value="330,954"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="810,1044"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Mesh:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="330,296"/>
+                <property name="bendpoints" value="730,249"/>
+                <property name="targetAnchor" value="730,147"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference43" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Cone">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="1421,296,200,322"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Cone:lastInfo">
+                <property name="sourceAnchor" value="1521,618"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="965,1044"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Cone:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="1521,296"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="835,147"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference44" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.RayableObject">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="442,10,167,226"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.RayableObject:geometry">
+                <property name="sourceAnchor" value="609,78"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="689,78"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference45" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Box">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="656,296,200,210"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Box:lastInfo">
+                <property name="sourceAnchor" value="825,506"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="825,1044"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Box:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="772,296"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="772,147"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference46" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Geometry">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="689,10,168,137"/>
+        </reference>
+        <reference df-class-name="reference47" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.GeometryIntersectionInformation">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="795,1044,200,130"/>
+        </reference>
+        <reference df-class-name="reference48" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Arrow">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="1096,296,165,258"/>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Arrow:headCone">
+                <property name="sourceAnchor" value="1261,424"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="1421,424"/>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Arrow:lastElement">
+                <property name="sourceAnchor" value="1261,360"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="1421,360"/>
+            </reference>
+            <reference referencedUin="jdt:l_ast:src:vsdk.toolkit.environment.geometry.Arrow:baseCylinder">
+                <property name="sourceAnchor" value="1261,489"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="1421,489"/>
+            </reference>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Arrow:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="1178,296"/>
+                <property name="bendpoints" value=""/>
+                <property name="targetAnchor" value="814,147"/>
+            </reference>
+        </reference>
+        <reference df-class-name="reference49" referencedUin="jdt:e_class:src:vsdk.toolkit.environment.geometry.Sphere">
+            <property name="$shortcutReference" value="true"/>
+            <property name="bounds" value="450,296,186,226"/>
+            <reference referencedUin="jdt:l_gnt:src:vsdk.toolkit.environment.geometry.Sphere:vsdk.toolkit.environment.geometry.Geometry">
+                <property name="sourceAnchor" value="543,296"/>
+                <property name="bendpoints" value="751,258"/>
+                <property name="targetAnchor" value="751,147"/>
+                <property name="bounds_setted_by_user" value="true"/>
+            </reference>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

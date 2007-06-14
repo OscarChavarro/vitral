@@ -27,7 +27,7 @@ public class MeshExample
     private QualitySelectionController qualityController;
     private GLCanvas canvas;
 
-    private MeshGroup meshGroup;
+    private TriangleMeshGroup meshGroup;
 
     public MeshExample() {
         super("VITRAL mesh test - JOGL");

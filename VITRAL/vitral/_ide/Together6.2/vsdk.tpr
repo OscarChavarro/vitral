@@ -1,0 +1,49 @@
+[Project]
+Language=java
+Project.JDK=C:\\Archivos de programa\\Java\\jdk1.5.0_06
+Root.0=$TGH$/lib/javax.jar
+Root.0.access=import
+Root.1=Z:/VITRAL/vitral/src
+Root.1.access=readonly
+Root.1.file_types=element;java_source;diagram;vb_files;cpp_source;idl_source;csharp_source;vbnet_source;cpp_header;java_class
+Root.1.package_prefix=
+Root.1.srcControlEnabled=false
+Root.1.srcControlProject=
+Root.2=$PROJECT_DIR$
+Root.2.access=writable
+Root.2.file_types=element;;diagram;vb_files;cpp_source;idl_source;csharp_source;vbnet_source;cpp_header;java_class
+Root.2.package_prefix=
+Root.2.srcControlEnabled=false
+Root.2.srcControlProject=
+Root.3=C:\\Archivos de programa\\Java\\jdk1.5.0_06\\jre\\lib\\rt.jar
+Root.3.access=import
+Root.3.non_removable=
+Root.4=C:\\Archivos de programa\\Java\\jdk1.5.0_06\\jre\\lib\\ext\\jogl.jar
+Root.4.access=import
+Root.4.non_removable=
+Version=3.0
+projectfile.encoding=Cp1252
+[builder]
+userCompilingTool_enabled=false
+[compiler]
+cross-bootclasspath=C:\\Archivos de programa\\Java\\jdk1.5.0_06\\jre\\lib\\rt.jar;C:\\Archivos de programa\\Java\\jdk1.5.0_06\\jre\\lib\\ext\\jogl.jar
+cross-compilation_enabled=true
+cross-target=1.5
+[parser]
+java.java14syntax=false
+[editor]
+recent.file.0=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Background.java
+recent.file.1=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Light.java
+recent.file.2=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Camera.java
+recent.file.3=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\geometry\\RayableObject.java
+recent.file.4=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\Material.java
+recent.file.5=Z:\\VITRAL\\vitral\\src\\vsdk\\toolkit\\environment\\CubemapBackground.java
+[workspace]
+Designer.vsdk={{0,2,-1,0,0,0,0,0,0,1,0,80,75,17,-1,-1,-1,-1}${0,1,-1,0,0,0,0,0,0,1,0,80,75,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,3,-1,0,0,0,0,1,0,1,0,66,50,17,-1,-1,-1,-1}${0,-1,-1,0,0,0,0,0,0,1,0,5,5,5,-1,-1,-1,-1}${0,5,-1,0,0,0,0,0,0,1,0,50,50,17,-1,-1,-1,-1}${0,0,-1,0,0,0,0,1,0,1,1,97,5,5,-1,-1,-1,-1}${0,7,-1,0,0,0,0,0,0,1,0,50,50,75,-1,-1,-1,-1}}
+names.Designer={vsdk}
+[lastOpenProjectName]
+Designer=vsdk
+[jdkit]
+homedir=C:\\Archivos de programa\\Java\\jdk1.5.0_06
+[vcs]
+provider.class=CVS LAN

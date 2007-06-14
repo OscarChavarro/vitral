@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeSet version="1.0">
+    <view uin="idd5suqemgw87gcemgw8g28">
+        <property name="$metaclass" value="Package Diagram"/>
+        <property name="@__options" value=""/>
+        <reference df-class-name="reference" referencedUin="design:view:::iddenusemgw87gcemgw8g3z">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.geometry"/>
+        </reference>
+        <reference df-class-name="reference4" referencedUin="design:view:::iddmbcnemgw87gcemgw8g34">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.audio"/>
+        </reference>
+        <reference df-class-name="reference8" referencedUin="design:view:::id4oussemgw87gcemgw8g4u">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.image"/>
+        </reference>
+        <reference df-class-name="reference10" referencedUin="design:view:::idhtnbtemgw87gcemgw8g5p">
+            <property name="$shortcutReference" value="true"/>
+            <property name="@__fqn" value="uml:package:vsdk:src:vsdk.toolkit.io.video"/>
+        </reference>
+        <property name="$defaultDiagram" value=""/>
+    </view>
+</nodeSet>

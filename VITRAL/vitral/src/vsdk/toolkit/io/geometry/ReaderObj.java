@@ -11,13 +11,13 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
-import vsdk.toolkit.environment.geometry.Mesh;
+import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.geometry.MeshGroup;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
 public class ReaderObj {
-  public static MeshGroup read(String fileName) throws IOException {
-   MeshGroup meshGroup = new MeshGroup();
+  public static TriangleMeshGroup read(String fileName) throws IOException {
+   TriangleMeshGroup meshGroup = new TriangleMeshGroup();
 
     ArrayList<Vector3D> vertexes = new ArrayList<Vector3D> ();
     ArrayList<Vector3D> normals = new ArrayList<Vector3D> ();
@@ -128,7 +128,7 @@ public class ReaderObj {
       }
       /******************armar objeto*********************/
       if (cad.startsWith("o ")) {
-        Mesh object = armarObjeto(vertexes, normals, vertexesTex, faces,
+        TriangleMesh object = armarObjeto(vertexes, normals, vertexesTex, faces,
                                   texturasList, relCarTex);
         object.setName( nomObj ) ;
         object.setMaterial(new Material(matAct));
@@ -153,7 +153,7 @@ public class ReaderObj {
 
       }
     }
-    Mesh object = armarObjeto(vertexes, normals, vertexesTex, faces,
+    TriangleMesh object = armarObjeto(vertexes, normals, vertexesTex, faces,
                               texturasList, relCarTex);
     object.setMaterial(new Material(matAct));
     object.setName(nomObj);
@@ -180,13 +180,13 @@ public class ReaderObj {
     }
   }
 
-  private static Mesh armarObjeto(ArrayList<Vector3D> vertexes,
+  private static TriangleMesh armarObjeto(ArrayList<Vector3D> vertexes,
                                   ArrayList<Vector3D> normals,
                                   ArrayList<Vector3D> vertexesTex,
                                   ArrayList<int[][]> faces,
                                   ArrayList<RGBAImage> texturas,
                                   ArrayList<ArrayList<int[]>> relCarTex) {
-    Mesh m = new Mesh();
+    TriangleMesh m = new TriangleMesh();
 
     m.setTrianglesSize(faces.size());
 
@@ -322,7 +322,7 @@ public class ReaderObj {
   }
 
   /*
-      private Mesh readTriangles(String cad, Mesh obj)
+      private TriangleMesh readTriangles(String cad, TriangleMesh obj)
       {
           Vector<Triangle> triangles = new Vector<Triangle> ();
           Vector3D[] position = new Vector3D[3];
