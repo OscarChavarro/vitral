@@ -29,6 +29,27 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
 
+class _ReaderObjVertex
+{
+    public int vertexPositionIndex;
+    public int vertexNormalIndex;
+    public int vertexTextureCoordinateIndex;
+    public boolean equals(Object alien)
+    {
+        System.out.println("Comparando...!");
+        if ( !(alien instanceof _ReaderObjVertex) ) return false;
+        _ReaderObjVertex other = (_ReaderObjVertex)alien;
+
+        if ( other.vertexPositionIndex != this.vertexPositionIndex ||
+             other.vertexNormalIndex != this.vertexNormalIndex ||
+             other.vertexTextureCoordinateIndex != 
+             this.vertexTextureCoordinateIndex ) {
+            return false;
+    }
+    return true;
+    }
+}
+
 /**
 The class ReaderObj provides wavefront obj loading functionality. Wavefront
 obj is a 3d object format used to describe polygon meshes; it is capable of
@@ -70,8 +91,10 @@ public class ReaderObj
 
         //- Topology data extracted from file -----------------------------
         ArrayList<int[][]> facesArray;
+        ArrayList<_ReaderObjVertex> unifiedVertexesArray;
 
         facesArray = new ArrayList<int[][]>();
+        unifiedVertexesArray = new ArrayList<_ReaderObjVertex>();
 
         //- Accumulated states for currently builded geometric object -----
         String nextGeometricObjectName;
@@ -149,11 +172,22 @@ public class ReaderObj
                     // Note that only first 3 vertexes for each polygon are
                     // processed
                     ArrayList<int[][]> auxTriangle;
-                    auxTriangle = readTriangle(lineOfText);
+                    auxTriangle = readPolygonAsTriangleFan(lineOfText);
                     int auxVertexData[][];
+
+                    System.out.println("Reading triangle: " + auxTriangle.size());
+
                     for( int i = 0; i < auxTriangle.size(); i++ ) {
                         auxVertexData = auxTriangle.get(i);
                         facesArray.add(auxVertexData);
+
+                        // 
+                        _ReaderObjVertex uv = new _ReaderObjVertex();
+                        uv.vertexPositionIndex = 0;
+                        uv.vertexNormalIndex = 1;
+                        uv.vertexTextureCoordinateIndex = 2;
+                        unifiedVertexesArray.add(uv);
+
                     }
 
                     //
@@ -528,11 +562,18 @@ public class ReaderObj
     }
     
     /**
-    This method reads a polygon from a face line. The returned array of arrays
-    has a row element for each vertex polygon. Note that this method is
-    compatible with triangles only.
+    This method reads a polygon from a face line. It returns a set of triangles
+    as an ArrayList of matrices. For each matrix, there is the information of
+    a single triangle, where there are 3 rows (one for each triangle vertex)
+    and each row has three elements: vertex position index, texture coordinates
+    and vertex normal.
+    Note that the triangle set is builded as a triangle fan: the first vertex
+    (p0) is a pivot which is fixed for all triangles, the second point 
+    determines the first triangle edge, and for each following vertex,
+    a new triangle is builded.
     */
-    private static ArrayList<int[][]> readTriangle(String lineOfText) {
+    private static ArrayList<int[][]>
+    readPolygonAsTriangleFan(String lineOfText) {
         ArrayList<int[][]> ret = new ArrayList<int[][]>();
         StringTokenizer st = new StringTokenizer(lineOfText, " \n\r\t");
         st.nextToken(); // The "f" token
@@ -549,21 +590,21 @@ public class ReaderObj
 
             if( i == 0 ) {
                 p0 = indexes;
-                continue;
             }
-            if( i == 1 ) {
+            else if( i == 1 ) {
                 p1 = indexes;
-                continue;
             }
-            p2 = indexes;
+            else {
+                p2 = indexes;
 
-            aux = new int[3][];
-            aux[0] = copyLength3IntArray(p0);
-            aux[1] = copyLength3IntArray(p1);
-            aux[2] = copyLength3IntArray(p2);
-            ret.add(aux);
+                aux = new int[3][];
+                aux[0] = copyLength3IntArray(p0);
+                aux[1] = copyLength3IntArray(p1);
+                aux[2] = copyLength3IntArray(p2);
+                ret.add(aux);
 
-            p1 = copyLength3IntArray(p2); // Why?
+                p1 = copyLength3IntArray(p2); // Why?
+        }
         }
         return ret;
     }
