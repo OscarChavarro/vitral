@@ -89,12 +89,12 @@ public class ReaderObj
         ArrayList<int[]> material_triangleRange_table;
         HashMap<String, RGBAImage> texturesHashMap;
         HashMap<String, Material> materialsHashMap;
-        int textAct;
+        int textureIndex;
 
         meshGroup = new ArrayList<TriangleMesh>();
         texturesHashMap = new HashMap<String, RGBAImage>();
         materialsHashMap = new HashMap<String, Material>();        
-        textAct = 0;
+        textureIndex = 0;
 
         texture_span_triangleRange_table = new ArrayList<ArrayList<int[]>>();
         inicial = new ArrayList<int[]>();
@@ -149,13 +149,17 @@ public class ReaderObj
                     // Note that only first 3 vertexes for each polygon are
                     // processed
                     ArrayList<int[][]> auxTriangle;
-
                     auxTriangle = readTriangle(lineOfText);
-                    for( int[][] elem : auxTriangle ) {
-                        facesArray.add(elem);
+                    int auxVertexData[][];
+                    for( int i = 0; i < auxTriangle.size(); i++ ) {
+                        auxVertexData = auxTriangle.get(i);
+                        facesArray.add(auxVertexData);
                     }
+
+                    //
                     ArrayList<int[]> actRanges;
-                    actRanges = texture_span_triangleRange_table.get(textAct);
+                    actRanges =
+                        texture_span_triangleRange_table.get(textureIndex);
                     int[] lastRange = actRanges.get(actRanges.size()-1);
                     lastRange[1] = facesArray.size();
                 }
@@ -174,34 +178,34 @@ public class ReaderObj
                     RGBAImage auxTexture;
                     auxTexture = obtainTextureFromFile(lineOfText, fileName);
                     if ( auxTexture == null ) {
-                        textAct = 0;
+                        textureIndex = 0;
                     }
                     else {
                         nextTexturesArray.add(auxTexture);
                         texture_span_triangleRange_table.add(
                             new ArrayList<int[]>());
-                        textAct = nextTexturesArray.size();
+                        textureIndex = nextTexturesArray.size();
                     }
                     texturesHashMap.put(auxTextureName, auxTexture);
                 }
                 else {
                     RGBAImage auxTexture = texturesHashMap.get(auxTextureName);
                     if( auxTexture == null ) {
-                        textAct = 0;
+                        textureIndex = 0;
                     }
                     else if( !nextTexturesArray.contains(auxTexture) ) {
                         nextTexturesArray.add(auxTexture);
                         texture_span_triangleRange_table.add(
                             new ArrayList<int[]>());
-                        textAct = nextTexturesArray.size();
+                        textureIndex = nextTexturesArray.size();
                     }
                     else {
-                        textAct=nextTexturesArray.indexOf(auxTexture)+1;
+                        textureIndex=nextTexturesArray.indexOf(auxTexture)+1;
                     }
                 }
                 // Add selected texture to current object texture definition
                 ArrayList<int[]> actRanges;
-                actRanges = texture_span_triangleRange_table.get(textAct);
+                actRanges = texture_span_triangleRange_table.get(textureIndex);
                 int[] newRange=new int[2];
                 newRange[0] = facesArray.size();
                 actRanges.add(newRange);
@@ -235,11 +239,11 @@ public class ReaderObj
                 texture_span_triangleRange_table =
                     new ArrayList<ArrayList<int[]>>();
                 inicial = new ArrayList<int[]>();
-                int[] rangoInicial = new int[2];
-                rangoInicial[0] = rangoInicial[1] = 0;
-                inicial.add(rangoInicial);
+                int[] auxInitialRange = new int[2];
+                auxInitialRange[0] = auxInitialRange[1] = 0;
+                inicial.add(auxInitialRange);
                 texture_span_triangleRange_table.add(inicial);
-                textAct = 0;
+                textureIndex = 0;
             }
         }
 
