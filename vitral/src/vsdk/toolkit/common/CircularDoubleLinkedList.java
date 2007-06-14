@@ -1,0 +1,150 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - January 3 2007 - Oscar Chavarro: Original base version                =
+//===========================================================================
+
+package vsdk.toolkit.common;
+
+class _CircularDoubleLinkedListNode<E>
+{
+    public E data;
+    public _CircularDoubleLinkedListNode<E> next;
+    public _CircularDoubleLinkedListNode<E> previous;
+}
+
+public class CircularDoubleLinkedList<E>
+{
+    private _CircularDoubleLinkedListNode<E> head;
+    private _CircularDoubleLinkedListNode<E> window;
+    private int lastAccessedIndex;
+    private int currentSize;
+
+    public CircularDoubleLinkedList()
+    {
+        head = null;
+        window = null;
+        currentSize = 0;
+        lastAccessedIndex = -1;
+    }
+
+    public int size()
+    {
+        return currentSize;
+    }
+
+    public void add(E e)
+    {
+        _CircularDoubleLinkedListNode<E> newContainer;
+        newContainer = new _CircularDoubleLinkedListNode<E>();
+        newContainer.data = e;
+        if ( head == null ) {
+            head = newContainer;
+            newContainer.next = newContainer;
+            newContainer.previous = newContainer;
+        }
+        else {
+            newContainer.previous = head.previous;
+            newContainer.next = head;
+            head.previous.next = newContainer;
+            head.previous = newContainer;
+        }
+        currentSize++;
+    }
+
+    public void locateWindowAtIndex(int index)
+    {
+        if ( index < 0 || index >= currentSize ) {
+            return;
+        }
+        int i;
+        for ( i = 0, window = head;
+              i < currentSize && i < index;
+              i++, window = window.next );
+        lastAccessedIndex = i;
+    }
+
+    public void locateWindowAtElem(E e)
+    {
+        int i;
+
+        lastAccessedIndex = -1;
+        for ( i = 0, window = head;
+              i < currentSize;
+              i++, window = window.next ) {
+            if ( window.data == e ) {
+                lastAccessedIndex = i;
+                break;
+            }
+        }
+    }
+
+    public void swapElements(E e1, E e2)
+    {
+        locateWindowAtElem(e1);
+        _CircularDoubleLinkedListNode<E> window1 = window;
+        locateWindowAtElem(e2);
+        _CircularDoubleLinkedListNode<E> window2 = window;
+        E temp = window1.data;
+
+        window1.data = window2.data;
+        window2.data = temp;
+    }
+
+    public E next()
+    {
+        lastAccessedIndex = -1;
+        if ( window == null ) {
+            window = head;
+        }
+        E elem = window.data;
+        window = window.next;
+        return elem;
+    }
+
+    public E getWindow()
+    {
+    if ( head == null ) return null;
+        lastAccessedIndex = -1;
+        if ( window == null ) {
+            window = head;
+        }
+        return window.data;
+    }
+
+    public E previous()
+    {
+        lastAccessedIndex = -1;
+        if ( window == null ) {
+            window = head;
+        }
+        E elem = window.data;
+        window = window.previous;
+        return elem;
+    }
+
+    public E get(int index)
+    {
+        if ( index < 0 || index >= currentSize ) {
+            // Report index out of bounds exception!
+            System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - " + index);
+            System.exit(1);
+            return null;
+        }
+        if ( lastAccessedIndex >= 0 && lastAccessedIndex == (index-1) &&
+             lastAccessedIndex < (currentSize-1) ) {
+            lastAccessedIndex++;
+            window = window.next;
+            return window.data;
+        }
+        int i;
+        for ( i = 0, window = head;
+              i < currentSize && i < index; i++, window = window.next );
+        lastAccessedIndex = i;
+        return window.data;
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

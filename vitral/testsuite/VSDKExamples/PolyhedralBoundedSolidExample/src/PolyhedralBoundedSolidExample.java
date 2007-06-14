@@ -16,28 +16,51 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import java.applet.Applet;
 
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
 
-public class CameraExample extends Applet implements 
+public class PolyhedralBoundedSolidExample extends Applet implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
+    private PolyhedralBoundedSolid solid;
+
+    private RendererConfiguration quality;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private SimpleCorridor corridor;
 
-    public CameraExample() {
+    public PolyhedralBoundedSolidExample() {
         camera = new Camera();
+        camera.setPosition(new Vector3D(0.5, -1, 2));
+        Matrix4x4 R = new Matrix4x4();
+        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-45), 0);
+        camera.setRotation(R);
 
-        //cameraController = new CameraControllerBlender(camera);
+        quality = new RendererConfiguration();
         cameraController = new CameraControllerAquynza(camera);
 
-        corridor = new SimpleCorridor();
+        //-----------------------------------------------------------------
+    solid = new PolyhedralBoundedSolid(0.1, 0.1, 0.1); // mvfs
+    _PolyhedralBoundedSolidHalfEdge he1 = solid.halfEdgesList.get(0);
+        solid.lmev(he1, he1, new Vector3D(1, 0.1, 0.1));
+/*
+    _PolyhedralBoundedSolidHalfEdge he2 = solid.halfEdgesList.get(1);
+        solid.lmev(he2, he2, new Vector3D(1, 1, 0.1));
+    _PolyhedralBoundedSolidHalfEdge he3 = solid.halfEdgesList.get(2);
+        solid.lmev(he3, he3, new Vector3D(0.1, 1, 0.1));
+    _PolyhedralBoundedSolidHalfEdge he4 = solid.halfEdgesList.get(3);
+        solid.lmef(he1, he4);
+*/
+        //-----------------------------------------------------------------
     }
 
     private GLCanvas createGUI()
@@ -53,8 +76,8 @@ public class CameraExample extends Applet implements
 
     public static void main (String[] args) {
     JoglRenderer.verifyOpenGLAvailability();
-        CameraExample instance = new CameraExample();
-        JFrame frame = new JFrame("VITRAL concept test - Camera control example");
+        PolyhedralBoundedSolidExample instance = new PolyhedralBoundedSolidExample();
+        JFrame frame = new JFrame("VITRAL concept test - Polyhedral bounded solid example");
 
         GLCanvas canvas = instance.createGUI();
 
@@ -80,8 +103,6 @@ public class CameraExample extends Applet implements
 
         gl.glLoadIdentity();
 
-        corridor.drawGL(gl);
-
         gl.glLineWidth((float)3.0);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
@@ -96,13 +117,15 @@ public class CameraExample extends Applet implements
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
+
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
     }
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        gl.glClearColor(0, 0, 0, 1);
+        gl.glClearColor(1, 1, 1, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 

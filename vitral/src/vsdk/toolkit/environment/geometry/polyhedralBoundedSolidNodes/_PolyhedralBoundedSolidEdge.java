@@ -2,6 +2,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - November 18 2006 - Oscar Chavarro: Original base version              =
+//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
@@ -11,6 +12,7 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.Entity;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
 /**
 As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidEdge` makes a
@@ -36,6 +38,14 @@ public class _PolyhedralBoundedSolidEdge extends Entity {
     /// Reference to `right` half edge, as defined in [MANT1988].10.2.2.
     /// Note that half edge in this side is considered negatively oriented.
     public _PolyhedralBoundedSolidHalfEdge leftHalf;
+
+    //=================================================================
+    public _PolyhedralBoundedSolidEdge(PolyhedralBoundedSolid parentSolid)
+    {
+        parentSolid.edgesList.add(this);
+    rightHalf = null;
+    leftHalf = null;
+    }
 }
 
 //===========================================================================

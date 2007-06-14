@@ -2,6 +2,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - November 18 2006 - Oscar Chavarro: Original base version              =
+//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
@@ -11,14 +12,13 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.environment.geometry.InfinitePlane;
 
 /**
 As noted in [MANT1988].10.2.1, a `_PolyhedralBoundedSolidLoop` describes
 one connected boundary inside a `_PolyhedralBoundedSolidFace`.
 
 Note that in the sake of simplify and eficiency current programming 
-implementation this class exhibit public access attributes. It is important
+implementation of this class exhibit public access attributes. It is important
 to note that those attributes will only be accessed directly from related 
 classes in the same package
 (vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes) and
@@ -37,8 +37,31 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
     /// reference.
     public _PolyhedralBoundedSolidHalfEdge boundaryStartHalfEdge;
 
-    /// Defined as presented in [MANT1988].10.2.1
-    public InfinitePlane containingPlane;
+    // To erase later
+    private static int count = 1;
+    public int id;
+    //
+
+    //=================================================================
+    public _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace parent)
+    {
+        parentFace = parent;
+        parentFace.boundariesList.add(this);
+
+        // To erase later
+        id = count;
+    count++;
+        //
+    }
+
+    public String toString()
+    {
+        String msg;
+
+        msg = "Loop id [" + id + "], parent face " + parentFace.id;
+
+        return msg;
+    }
 }
 
 //===========================================================================

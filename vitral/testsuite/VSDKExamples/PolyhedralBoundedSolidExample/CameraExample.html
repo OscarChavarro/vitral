@@ -1,0 +1,20 @@
+<html>
+  <head>
+      <title>VitralSDK PolyhedralBoundedSolid Example</title>
+  </head>
+  <body> 
+      <h1>VitralSDK PolyhedralBoundedSolid Example</h1>
+      <hr>
+      <applet code=PolyhedralBoundedSolidExample.class codebase=classes archive=vsdk.jar width=640 height=480>
+	alt="Your browser understands the &lt;APPLET&gt; tag but isn't running the applet, for some reason."
+	Your browser is completely ignoring the &lt;APPLET&gt; tag!
+      </applet>
+      <hr>
+Note that if this applet is not working, can be due to a different set of causes, mostly:
+<UL>
+<LI>vsdk.jar library package must be copied (not linked) co the classes directory
+<LI>In Unix/Linux operating systems, do not use symbolic links, as applet subsystem gives security exceptions
+<LI>In windows based browsers, the JOGL library must be previously signed (to study better).  One way to sign it is to test the examples in the JOGL page.
+</UL>
+  </body>
+</html>	  

@@ -2,6 +2,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - November 18 2006 - Oscar Chavarro: Original base version              =
+//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
@@ -12,6 +13,7 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
 /**
 As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidVertex` contains
@@ -27,6 +29,31 @@ public class _PolyhedralBoundedSolidVertex extends Entity {
 
     /// Defined as presented in [MANT1988].10.2.2
     public _PolyhedralBoundedSolidHalfEdge emanatingHalfEdge;
+
+    // To erase later
+    private static int count = 1;
+    public int id;
+    //
+
+    //=================================================================
+    public _PolyhedralBoundedSolidVertex(PolyhedralBoundedSolid parentSolid,
+                                         Vector3D position)
+    {
+        emanatingHalfEdge = null;
+        this.position = new Vector3D(position);
+    parentSolid.verticesList.add(this);
+
+        // To erase later
+        id = count;
+    count++;
+    }
+
+    public String toString()
+    {
+        String msg;
+        msg = "vertex id " + id + ", position " + position;
+        return msg;
+    }
 }
 
 //===========================================================================

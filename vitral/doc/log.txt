@@ -185,3 +185,6 @@ Changes in 2006 december 28-30 revition
 
 Changes in 2007 january 2 revition
   - First functional and correct Nvidia Cg shader for bump-mapping! :-)
+
+Changes in 2007 january 3 revition
+  - First implementation for low level Euler operator in PolyhedralBoundedSolid
