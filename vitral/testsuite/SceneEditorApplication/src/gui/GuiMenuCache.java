@@ -1,136 +1,71 @@
 package gui;
 
-import java.io.StreamTokenizer;
-import java.util.Vector;
-import java.util.Enumeration;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class GuiMenuCache extends GuiElementCache
 {
-    private GuiCache parent;
-    private Vector <GuiElementCache> children;
+    private ArrayList <GuiElementCache> children;
     private String name;
+    private char mnemonic;
+    private String accelerator;
 
-    public GuiMenuCache(GuiCache parent)
+    public GuiMenuCache(GuiCache c)
     {
-        this.parent = parent;
-        children = new Vector<GuiElementCache>();
+        context = c;
+        children = new ArrayList<GuiElementCache>();
         name = null;
     }
 
-    public void read(StreamTokenizer parser) throws Exception
+    public ArrayList <GuiElementCache> getChildren()
     {
-        int tokenType;
-        int level = 0;
+        return children;
+    }
 
-        System.out.println("- MENU ----------------------------------");
+    public void setName(String n)
+    {
+        name = processSimplifiedName(n);
+        mnemonic = processMnemonic(n);
+        accelerator = processAccelerator(n);
+    }
 
-        do {
-            try {
-                tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
-                throw e;
-            }
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                //System.out.println("NUMBER " + parser.sval);
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( parser.sval.equals("POPUP") ) {
-                    GuiMenuCache popup = new GuiMenuCache(parent);
-                    try {
-                      popup.read(parser);
-                    }
-                    catch (Exception e) {
-                        throw e;
-                    }
-                    children.add(popup);
-                }
+    public void addChild(GuiElementCache i)
+    {
+        children.add(i);
+    }
 
-                else if ( parser.sval.equals("MENUITEM") ) {
-                    GuiMenuItemCache item = new GuiMenuItemCache(parent);
-                    try {
-                      item.read(parser);
-                    }
-                    catch (Exception e) {
-                        throw e;
-                    }
-                    children.add(item);
-                }
+    public String toString(int level)
+    {
+        String leadingSpace = "";
+        int j;
 
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    name = new String(parser.sval);
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                        //System.out.println("{ MARK");
-                        level++;
-                      }
-                      else if ( content == '}' ) {
-                        //System.out.println("} MARK");
-                        level--;
-                        if ( level == 0 ) {
-                            tokenType = StreamTokenizer.TT_EOF;
-                        }
-                      }
-                      else {
-                        throw new ExceptionGuiCacheParseError();
-                    }
-                }
-                break;
-            }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+        for ( j = 0; j < level; j++ ) {
+        leadingSpace = leadingSpace + "  ";
+    }
 
-        if ( name == null ) {
-            throw new ExceptionGuiCacheBadName();
+        String msg = leadingSpace + "Menu \"" + name + "\"\n";
+
+        Iterator i;
+
+        for ( i = children.iterator(); i.hasNext(); ) {
+            msg = msg + ((GuiElementCache)i.next()).toString(level+1);
         }
+
+        return msg;
     }
 
     public String toString()
     {
-        return "Menu " + name;
+        return toString(0);
     }
 
-    public JMenuBar exportSwingMenubar()
+    public String getName()
     {
-        JMenu popup;
-        JMenuItem option;
-        JMenuBar menubar;
-
-        menubar = new JMenuBar();
-
-        System.out.println("---------------------------------------------------------------------------");
-        Enumeration i;
-
-        for ( i = children.elements(); i.hasMoreElements(); ) {
-            System.out.println((GuiElementCache)i.nextElement());
-        }
-
-        popup = new JMenu("WOW");
-        menubar.add(popup);
-        option = popup.add(new JMenuItem("COOL"));
-        option.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }});
-
-        popup.getPopupMenu().setLightWeightPopupEnabled(false);
-
-        System.out.println("---------------------------------------------------------------------------");
-
-        return menubar;
+        return name;
     }
 
+    public char getMnemonic()
+    {
+        return mnemonic;
+    }
 }

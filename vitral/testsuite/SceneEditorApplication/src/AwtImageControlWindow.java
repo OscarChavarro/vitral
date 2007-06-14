@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import javax.swing.border.Border; 
 import javax.swing.BorderFactory; 
 import javax.swing.JFrame;
@@ -18,7 +19,9 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
 // Application classes
+import io.presentation.GuiCachePersistence;
 import gui.GuiCache;
+import render.swing.SwingGuiCacheRenderer;
 
 public class AwtImageControlWindow
 {
@@ -27,13 +30,16 @@ public class AwtImageControlWindow
     private RGBImage controlledImage;
     private ImageDisplayPanel workArea;
 
-    public AwtImageControlWindow(RGBImage image){
+    public AwtImageControlWindow(RGBImage image, 
+                                 GuiCache gui, ActionListener executor) {
         controlledImage = image;
 
         windowWidget = new JFrame("Image control tool");
         windowWidget.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE );
 
-        JMenuBar menubar = buildMenu();
+        JMenuBar menubar;
+        menubar = SwingGuiCacheRenderer.buildMenubar(gui, null, executor);
+
         JPanel statusBar = createStatusBar();
         workArea = new ImageDisplayPanel(controlledImage);
 
@@ -56,24 +62,6 @@ public class AwtImageControlWindow
     {
         windowWidget.setVisible(true);
         workArea.repaint();
-    }
-
-    private JMenuBar buildMenu()
-    {
-        JMenuBar menubar;
-        GuiCache guiReader = null;
-
-        try {
-            guiReader = new GuiCache(new FileReader("./etc/spanish.gui"));
-        }
-        catch (Exception e) {
-            System.err.println("Fatal error: can not open GUI file");
-            System.exit(0);
-        }
-
-        menubar = guiReader.exportSwingMenubar();
-
-        return menubar;
     }
 
     private JPanel createStatusBar()

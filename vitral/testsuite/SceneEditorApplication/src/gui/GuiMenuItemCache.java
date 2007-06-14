@@ -1,78 +1,101 @@
 package gui;
 
-import java.io.StreamTokenizer;
-import java.util.Vector;
-
 public class GuiMenuItemCache extends GuiElementCache
 {
-    private GuiCache parent;
     private String name;
+    private String commandName;
+    private boolean isSeparatorFlag;
+    private char mnemonic;
+    private String accelerator;
 
-    public GuiMenuItemCache(GuiCache parent)
+    public boolean isSeparator()
     {
-        this.parent = parent;
-        name = null;
+        return isSeparatorFlag;
     }
 
-    public void read(StreamTokenizer parser) throws Exception
+    public GuiMenuItemCache(GuiCache c)
     {
-        int tokenType;
+        context = c;
+        name = null;
+        commandName = null;
+        isSeparatorFlag = false;
+        mnemonic = 0;
+    }
 
-        System.out.println(" - MENUITEM");
+    public void setName(String n)
+    {
+        name = processSimplifiedName(n);
+        mnemonic = processMnemonic(n);
+        accelerator = processAccelerator(n);
+    }
 
-        do {
-            try {
-                tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
-                throw e;
-            }
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                //System.out.println("NUMBER " + parser.sval);
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( parser.sval.equals("MENUITEM") ||
-                     parser.sval.equals("POPUP") ) {
-                    parser.pushBack();
-                    return;
-                }
-                System.out.println("    . MODIFIER [" + parser.sval + "]");
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    System.out.println("    . STRING [" + parser.sval + "]");
-                    name = new String(parser.sval);
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                        throw new ExceptionGuiCacheParseError();
-                        //System.out.println("{ MARK");
-                      }
-                      else if ( content == '}' ) {
-                        //System.out.println("} MARK");
-                          return;
-                      }
-                      else {
-                        throw new ExceptionGuiCacheParseError();
-                    }
-                }
-                break;
-            }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+    public String getName()
+    {
+        if ( name == null ) return "No Name";
+        return name;
+    }
 
-        if ( name == null ) {
-            throw new ExceptionGuiCacheBadName();
+    public String getCommandName()
+    {
+        if ( commandName == null ) return "IDC_NO_COMMAND";
+        return commandName;
+    }
+
+    public void setCommandName(String a)
+    {
+        commandName = a;
+    }
+
+    public void addModifier(String m)
+    {
+        if ( m.equals("CHECKED") ) {
+            ;
         }
+        else if ( m.equals("GRAYED") ) {
+            ;
+        }
+        else if ( m.equals("UNCHEKED") ) {
+            ;
+        }
+        else if ( m.equals("SEPARATOR") ) {
+            isSeparatorFlag = true;
+        }
+        else {
+            setCommandName(m);
+        }
+    }
+
+    public String toString(int level)
+    {
+        String leadingSpace = "";
+        int j;
+
+        for ( j = 0; j < level; j++ ) {
+            leadingSpace = leadingSpace + "  ";
+        }
+
+        String msg = leadingSpace + " - MenuItem ";
+
+        if ( isSeparatorFlag ) {
+            msg = msg + "--- SEPARATOR ---";
+          }
+          else {
+            msg = msg + "\"" + name + "\"";
+        }
+
+        msg = msg + "\n";
+
+        return msg;
     }
 
     public String toString()
     {
-        return "MenuItem " + name;
+        return toString(0);
+    }
+
+    public char getMnemonic()
+    {
+        return mnemonic;
     }
 
 }

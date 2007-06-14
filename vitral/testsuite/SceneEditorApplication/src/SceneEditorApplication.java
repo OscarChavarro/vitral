@@ -1,3 +1,11 @@
+//===========================================================================
+//= This is the main class for a simple 3D editor application, and serves   =
+//= as the main testbed integration for functionalities in the VSDK toolkit =
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - Since august 2005 - Oscar Chavarro                                    =
+//===========================================================================
+
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
@@ -57,6 +65,8 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 
 // Internal classes
 import gui.GuiCache;
+import io.presentation.GuiCachePersistence;
+import render.swing.SwingGuiCacheRenderer;
 
 abstract class SuffixAwareFilter
     extends javax.swing.filechooser.FileFilter {
@@ -114,11 +124,14 @@ public class SceneEditorApplication {
     public RGBColorPalette palette;
 
     // Application GUI
+    public GuiCache gui;
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
     public AwtImageControlWindow imageControlWindow;
+    public ButtonsPanel executorPanel;
     private JFrame mainWindowWidget;
     private String lookAndFeel;
+    public String languageGuiFile;
 
     public void setLookAndFeel(String lookAndFeel)
     {
@@ -141,6 +154,17 @@ public class SceneEditorApplication {
         SwingUtilities.updateComponentTreeUI(mainWindowWidget);
         mainWindowWidget.pack();
         */
+    }
+
+    /**
+    Could be better: if the Swing GUI is not destroyed, but all labels are
+    renamed... but ... what if language files are not exactly equal?
+    */
+    public void setGuiLanguage(String lang)
+    {
+        this.languageGuiFile = lang;
+        destroyGUI();
+        createGUI();
     }
 
     private void createModel()
@@ -234,11 +258,28 @@ public class SceneEditorApplication {
         Dimension d = tk.getScreenSize();
 
         //-----------------------------------------------------------------
-        JMenuBar menubar;
-        JSplitPane splitPane;
+        try {
+            gui = GuiCachePersistence.importAquynzaGui(
+                                new FileReader(languageGuiFile)  );
+        }
+        catch (Exception e) {
+            System.err.println("Fatal error: can not open GUI file");
+            System.exit(0);
+        }
+        //System.out.println(gui);
 
-        menubar = buildMenu();
+        //-----------------------------------------------------------------
+        executorPanel = new ButtonsPanel(this, 101);
+
+        //-----------------------------------------------------------------
+        JMenuBar menubar;
+
+        menubar = SwingGuiCacheRenderer.buildMenubar(gui, null, executorPanel);
+
+        //-----------------------------------------------------------------
+        JSplitPane splitPane;
         JPanel statusBar = createStatusBar();
+
         drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
@@ -262,7 +303,7 @@ public class SceneEditorApplication {
         iconsAndWorkAreasPanel = new JPanel();
         iconsAndWorkAreasPanel.setLayout(
             new BoxLayout(iconsAndWorkAreasPanel, BoxLayout.Y_AXIS));
-        iconsAndWorkAreasPanel.add(new ButtonsPanel(this, 101));
+        iconsAndWorkAreasPanel.add(executorPanel);
         iconsAndWorkAreasPanel.add(splitPane);
 
         mainWindowWidget.add(iconsAndWorkAreasPanel, BorderLayout.CENTER);
@@ -297,27 +338,10 @@ public class SceneEditorApplication {
 
     public SceneEditorApplication() {
         lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
+        languageGuiFile = "./etc/english.gui";
 
         createModel();
         createGUI();
-    }
-
-    public JMenuBar buildMenu()
-    {
-        JMenuBar menubar;
-        GuiCache guiReader = null;
-
-        try {
-            guiReader = new GuiCache(new FileReader("./etc/spanish.gui"));
-        }
-        catch (Exception e) {
-            System.err.println("Fatal error: can not open GUI file");
-            System.exit(0);
-        }
-
-        menubar = guiReader.exportSwingMenubar();
-
-        return menubar;
     }
 
     public static void main (String[] args) {
@@ -509,40 +533,38 @@ class ButtonsPanel extends JPanel implements ActionListener
 
         Light light;
 
-        if ( label == "Motif" ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+        //- FILE ----------------------------------------------------------
+        if ( label.equals("IDC_FILE_QUIT") ) {
+            System.exit(0);
         }
-        else if ( label == "Java" ) {
-            parent.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        }
-        else if ( label == "GTK+" ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-        }
-        else if ( label == "Windows" ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        }
-        else if ( label == "Cycle background" ) {
-            parent.drawingArea.rotateBackground();
-        }
-        else if ( label == "Create Sphere" ) {
+        //- EDIT ----------------------------------------------------------
+        //- CREATE --------------------------------------------------------
+        else if ( label.equals("Create Sphere") ||
+                  label.equals("IDC_CREATE_SPHERE") ) {
             addThing(new Sphere(1));
         }
-        else if ( label == "Create Cone" ) {
+        else if ( label.equals("Create Cone") ||
+                  label.equals("IDC_CREATE_CONE") ) {
             addThing(new Cone(1, 0, 2));
         }
-        else if ( label == "Create Cylinder" ) {
+        else if ( label.equals("Create Cylinder") ||
+                  label.equals("IDC_CREATE_CYLINDER") ) {
             addThing(new Cone(1, 1, 2));
         }
-        else if ( label == "Create Cube" ) {
+        else if ( label.equals("Create Cube") ||
+                  label.equals("IDC_CREATE_CUBE") ) {
             addThing(new Box(1, 1, 1));
         }
-        else if ( label == "Create Box" ) {
+        else if ( label.equals("Create Box") ||
+                  label.equals("IDC_CREATE_BOX") ) {
             addThing(new Box(1, 2, 3));
         }
-        else if ( label == "Create Arrow" ) {
+        else if ( label.equals("Create Arrow") ||
+                  label.equals("IDC_CREATE_ARROW") ) {
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
-        else if ( label == "Create ParametricCubicCurve" ) {
+        else if ( label.equals("Create ParametricCubicCurve") ||
+                  label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
             ParametricCubicCurve curve;
 
             // Case 1: curve hard-coded in source
@@ -589,7 +611,8 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
 */
         }
-        else if ( label == "Create ParametricBiCubicPatch" ) {
+        else if ( label.equals("Create ParametricBiCubicPatch") ||
+                  label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
 /*
             // Case 1: Patch hard-coded in source
@@ -645,7 +668,8 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
 
         }
-        else if ( label == "Create TriangleMesh" ) {
+        else if ( label.equals("Create TriangleMesh") ||
+                  label.equals("IDC_CREATE_TRIANGLEMESH") ) {
             JFileChooser jfc = null;
             jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/geometry");
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
@@ -667,9 +691,84 @@ class ButtonsPanel extends JPanel implements ActionListener
                 }
             }
         }
-        else if ( label == "Create Light" ) {
+        else if ( label.equals("Create Light") ||
+                  label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.lights.add(light);
+        }
+        //- RENDERING -----------------------------------------------------
+        else if ( label.equals("Select palette for depthmap display") ||
+                  label.equals("IDC_RENDERING_SELECTPALETTEDEPTH") ) {
+            JFileChooser jfc = null;
+            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/palettes");
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
+            jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
+            int opc = jfc.showOpenDialog(new JPanel());
+            if (opc == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File file = jfc.getSelectedFile();
+
+                    parent.palette = 
+                        RGBColorPalettePersistence.importGimpPalette(
+                            new java.io.FileReader(file.getAbsolutePath()));
+
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to read file");
+                    return;
+                }
+            }
+        }
+        else if ( label.equals("Obtain Zbuffer Image") ||
+                  label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
+            parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");
+            parent.drawingArea.wantToGetColor = true;
+        }
+        else if ( label.equals("Obtain Zbuffer Depthmap") ||
+                  label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
+            parent.statusMessage.setText("Pending to obtaining ZBuffer Depth ...");
+            parent.drawingArea.wantToGetDepth = true;
+        }
+        else if ( label.equals("Raytrace Scene") ||
+                  label.equals("IDC_RENDERING_RAYTRACING") ) {
+            parent.statusMessage.setText("Computing raytracing, this may take some time ...");
+            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
+            parent.theScene.raytrace(parent.raytracedImage);
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+            }
+            else {
+                parent.imageControlWindow.setImage(parent.raytracedImage);
+            }
+            parent.imageControlWindow.redrawImage();
+        }
+        //- CUSTOMIZE -----------------------------------------------------
+        else if ( label.equals("Motif") || 
+                  label.equals("IDC_CUSTOMIZE_LAF_MOTIF") ) {
+            parent.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+        }
+        else if ( label.equals("Java") ||
+                  label.equals("IDC_CUSTOMIZE_LAF_JAVA") ) {
+            parent.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        }
+        else if ( label.equals("GTK+") ||
+                  label.equals("IDC_CUSTOMIZE_LAF_GTK") ) {
+            parent.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+        }
+        else if ( label.equals("Windows") ||
+                  label.equals("IDC_CUSTOMIZE_LAF_WINDOWS") ) {
+            parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        }
+        else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_ENGLISH") ) {
+            parent.setGuiLanguage("./etc/english.gui");
+        }
+        else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_SPANISH") ) {
+            parent.setGuiLanguage("./etc/spanish.gui");
+        }
+        //-----------------------------------------------------------------
+        else if ( label == "Cycle background" ) {
+            parent.drawingArea.rotateBackground();
         }
         else if ( label == "Toggle test corridor" ) {
             if ( parent.theScene.showCorridor == true ) {
@@ -690,6 +789,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label == "Print scene report in console" ) {
             parent.theScene.print();
         }
+        //-----------------------------------------------------------------
         else if ( label == "CameraMode" ) {
             parent.statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
             parent.drawingArea.interactionMode = 
@@ -715,49 +815,12 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
         }
-        else if ( label == "Select palette for depthmap display" ) {
-            JFileChooser jfc = null;
-            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../etc/palettes");
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
-            int opc = jfc.showOpenDialog(new JPanel());
-            if (opc == JFileChooser.APPROVE_OPTION) {
-                try {
-                    File file = jfc.getSelectedFile();
 
-                    parent.palette = 
-                        RGBColorPalettePersistence.importGimpPalette(
-                            new java.io.FileReader(file.getAbsolutePath()));
-
-                    repaint();
-                }
-                catch (Exception ex) {
-                    System.out.println("Failed to read file");
-                    return;
-                }
-            }
-        }
-        else if ( label == "Obtain Zbuffer Image" ) {
-            parent.statusMessage.setText("Pending to obtaining ZBuffer Color Image ...");
-            parent.drawingArea.wantToGetColor = true;
-        }
-        else if ( label == "Obtain Zbuffer Depthmap" ) {
-            parent.statusMessage.setText("Pending to obtaining ZBuffer Depth ...");
-            parent.drawingArea.wantToGetDepth = true;
-        }
-        else if ( label == "Raytrace Scene" ) {
-            parent.statusMessage.setText("Computing raytracing, this may take some time ...");
-            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
-            parent.theScene.raytrace(parent.raytracedImage);
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage);
-            }
-            else {
-                parent.imageControlWindow.setImage(parent.raytracedImage);
-            }
-            parent.imageControlWindow.redrawImage();
-        }
-
+        //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

@@ -80,6 +80,16 @@ public class VSDK
 
     }
 
+    public static void reportMessage(Object o, int level, String method, String message)
+    {
+        System.err.println("===========================================================================");
+        System.err.println("= VSDK Exception report                                                   =");
+        System.err.println(" - An exception has been thrown in the \"" + o.getClass().getName() + "\" class");
+        System.err.println(" - Exception located at method " + method);
+        System.err.println(" - Exception message:\n" + message);
+        System.err.println("===========================================================================");
+    }
+
 }
 
 //===========================================================================

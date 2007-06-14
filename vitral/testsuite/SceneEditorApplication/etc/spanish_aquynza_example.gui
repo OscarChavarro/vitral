@@ -2,16 +2,28 @@
 //= spanish.gui                                                             =
 //=-------------------------------------------------------------------------=
 //= Este archivo contiene la especificacion de la interface grafica de      =
-//= usuario del editor de ejemplo SceneEditor (VSDK) en la version en       =
-//= en castellano.                                                          =
+//= usuario AQUYNZA para la version en castellano.                          =
 //=-------------------------------------------------------------------------=
 //= Oscar J. Chavarro G.  -JEDILINK-            ojchavarro@javeriana.edu.co =
-//= Grupo de investigacion de informatica grafica TAKINA/VITRAL             =
+//= Grupo de investigacion de informatica grafica VITRAL                    =
 //===========================================================================
 
 //===========================================================================
 //= MENUS DE LA APLICACION                                                  =
 //===========================================================================
+
+/*---------------------------------------------------------------------------
+Notese que aqui se definen varios menus, y cada uno tiene un nombre propio.
+Ese nombre se utiliza en el proceso de construccion de la interfase para
+asociar cada menu a un contexto de la aplicacion (i.e. cada VISTA posee
+una lista de nombres de menu, y su menu de contexto sera la concatenacion
+de los menus que especifica y estan definidos aqui).
+
+Los atajos (i.e. aceleradores o shortcut's) de teclado se definen dentro del
+nombre de opcion o menu como parte del nombre y despues de un "\t".  El
+menu de ayuda (que se coloca a la derecha de una barra de menu) se identifica
+de manera similar con "\a".
+---------------------------------------------------------------------------*/
 
 MENU "GLOBAL" {
     POPUP "&Archivo" {

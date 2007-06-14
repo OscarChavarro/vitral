@@ -102,3 +102,20 @@ April 9 2006, Oscar Chavarro:
 May 3 2006, Oscar Chavarro:
   - 20min: Adding ParametricCubicCurve sample
   - 25min: Adding ParametricBiCubicPatch sample
+
+Jul 17 2006, Oscar Chavarro:
+  - 1h10min: Checking current GUI structure, and fixing minor bugs in file
+    import logic
+
+Jul 18 2006, Oscar Chavarro:
+  - 1h42min: Migrating GuiCache to GuiCachePersistence scheme 
+    (Builder design pattern) and separating swing functionality
+  - 1h: Implementing first version of swing menu construction from GuiCache
+
+Jul 19 2006, Oscar Chavarro:
+  - 53min: event managing for menus in swing
+  - 1h: swing study on menu management and mnemonics
+  - 1h11min: building gui menu files for spanish and english
+
+Jul 20 2006, Oscar Chavarro:
+  - 

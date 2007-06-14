@@ -1,9 +1,8 @@
 //===========================================================================
 //= spanish.gui                                                             =
 //=-------------------------------------------------------------------------=
-//= Este archivo contiene la especificacion de la interface grafica de      =
-//= usuario del editor de ejemplo SceneEditor (VSDK) en la version en       =
-//= en castellano.                                                          =
+//= This file contains the GUI spec for the SceneEditor example application =
+//= (VSDK) in its english version.                                          =
 //=-------------------------------------------------------------------------=
 //= Oscar J. Chavarro G.  -JEDILINK-            ojchavarro@javeriana.edu.co =
 //= Grupo de investigacion de informatica grafica TAKINA/VITRAL             =
@@ -14,22 +13,78 @@
 //===========================================================================
 
 MENU "GLOBAL" {
-    POPUP "&Archivo" {
-        MENUITEM "&Nuevo...\tCtrl+N", IDC_FILE_NEW
-        MENUITEM "&Leer...\tCtrl+L", IDC_FILE_LOAD
-        MENUITEM "&Grabar...\tCtrl+G", IDC_FILE_SAVE
+    POPUP "&File" {
+        MENUITEM "&New...\tCtrl+N", IDC_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O", IDC_FILE_OPEN
+        MENUITEM "&Merge...", IDC_FILE_MERGE
+        POPUP "Open Recent" {
+            //DYNAMIC_INCLUDE "recentfiles"
+        }
         MENUITEM SEPARATOR
-        MENUITEM "&Salir", IDC_FILE_QUIT
-    }
-    POPUP "&Edicion" {
-        MENUITEM "&Seleccionar", IDC_EDIT_SELECT, GRAYED
-        MENUITEM "Seleccionar &Todo\tCtrl+T", IDC_EDIT_SELECT_ALL, GRAYED
+        MENUITEM "&Save\tCtrl+S", IDC_FILE_SAVE
+        MENUITEM "Save &As...", IDC_FILE_SAVE_AS
+        MENUITEM "Save Selecte&d...", IDC_FILE_SAVE_SELECTED
         MENUITEM SEPARATOR
-        MENUITEM "&Cortar\tCtrl+X", IDC_EDIT_CUT, GRAYED
-        MENUITEM "&Copiar\tCtrl+C", IDC_EDIT_COPY, GRAYED
-        MENUITEM "&Pegar\tCtrl+V", IDC_EDIT_PASTE, GRAYED
+        MENUITEM "&Import...", IDC_FILE_IMPORT
+        MENUITEM "&Export...", IDC_FILE_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Project Propierties...", IDC_FILE_PROPIERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "&Exit", IDC_FILE_QUIT
     }
-    POPUP "&Ver" {
+    POPUP "&Edit" {
+        MENUITEM "&Undo", IDC_EDIT_UNDO
+        MENUITEM "&Redo", IDC_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "&Delete\tDelete", IDC_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All\tCtrl+A", IDC_EDIT_SELECT_ALL
+        MENUITEM "Select &None\tCtrl+D", IDC_EDIT_SELECT_NONE
+        MENUITEM "Select &Invert \tCtrl+I", IDC_EDIT_SELECT_INVERT
+        POPUP "Select &By" {
+            MENUITEM "&Color", IDC_EDIT_SELECT_BYCOLOR
+            MENUITEM "&Name", IDC_EDIT_SELECT_BYNAME
+            MENUITEM SEPARATOR
+            MENUITEM "Rectangular Region", IDC_EDIT_SELECT_RECTANGULAR
+            MENUITEM "Circular Region", IDC_EDIT_SELECT_CIRCULAR
+            MENUITEM "Fence Region", IDC_EDIT_SELECT_FENCE
+            MENUITEM "Lasso Region", IDC_EDIT_SELECT_LASSO
+        }
+        MENUITEM SEPARATOR
+        MENUITEM "&Cut\tCtrl+X", IDC_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C", IDC_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V", IDC_EDIT_PASTE
+    }
+    POPUP "&Create" {
+        POPUP "0D bodies" {
+            MENUITEM "Particle", IDC_CREATE_PARTICLE, GRAYED
+            MENUITEM "Particle System", IDC_CREATE_PARTICLE_SYSTEM, GRAYED
+        }
+        POPUP "1D bodies" {
+            MENUITEM "Parametric Cubic Curve", IDC_CREATE_PARAMETRICCUBICCURVE
+        }
+        POPUP "2D bodies" {
+            MENUITEM "Parametric Bi-Cubic Patch", IDC_CREATE_PARAMETRICBICUBICPATCH
+            MENUITEM "Triangle Mesh From File ...", IDC_CREATE_TRIANGLEMESH
+        }
+        POPUP "3D bodies" {
+            MENUITEM "Sphere", IDC_CREATE_SPHERE
+            MENUITEM "Cone", IDC_CREATE_CONE
+            MENUITEM "Cylinder", IDC_CREATE_CYLINDER
+            MENUITEM "Cube", IDC_CREATE_CUBE
+            MENUITEM "Box", IDC_CREATE_BOX
+            MENUITEM "Arrow", IDC_CREATE_ARROW
+            MENUITEM SEPARATOR
+            MENUITEM "CSG", IDC_CREATE_CSG, GRAYED
+        }
+        MENUITEM SEPARATOR
+        POPUP "Lights" {
+            MENUITEM "Omni Light", IDC_CREATE_OMNILIGHT
+        }
+        POPUP "Cameras" {
+        }
+    }
+    POPUP "&View" {
         POPUP "&Visualizador" {
             //INCLUDE "VISUALIZADOR"
         }
@@ -45,25 +100,27 @@ MENU "GLOBAL" {
         MENUITEM SEPARATOR
         MENUITEM "!&Imprimir todo!", IDC_PRINT_ALL
     }
-/*
-    POPUP "&Insertar" {
-        MENUITEM "&Esfera", IDC_INS_SPHERE
-        MENUITEM "&Octree", IDC_INS_, GRAYED
-        MENUITEM "&GCS", IDC_INS_, GRAYED
-        MENUITEM "&Frontera", IDC_INS_, GRAYED
+    POPUP "&Rendering" {
+        MENUITEM "Render Using &Raytracing\tF9", IDC_RENDERING_RAYTRACING
+        MENUITEM "Render Using &ZBuffer (OpenGL/JOGL)", IDC_RENDERING_OBTAINZBUFFERIMAGE
         MENUITEM SEPARATOR
-        MENUITEM "&Actuador", IDC_INS_ACTUATOR, GRAYED
-        MENUITEM "&Sensor", IDC_INS_SENSOR
-        MENUITEM "&Control", IDC_INS_CONTROL, GRAYED
-        MENUITEM "S&istema de control", IDC_INS_SYSTEM_C, GRAYED
+        MENUITEM "Select &Palette For Depthmap Display", IDC_RENDERING_SELECTPALETTEDEPTH
+        MENUITEM "Obtain &ZBuffer Depthmap Image", IDC_RENDERING_OBTAINZBUFFERDEPTHMAP
     }
-*/
-    POPUP "&Simulacion" {
-        MENUITEM "&Play/Stop", IDC_PLAY
-        MENUITEM "&Tiempo de discretizacion...", IDC_DELTA_T
+    POPUP "&Customize" {
+        POPUP "&Language" {
+            MENUITEM "&English", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
+            MENUITEM "&Spanish (Español)", IDC_CUSTOMIZE_LANGUAGE_SPANISH
+        }
+        POPUP "Look And &Feel" {
+            MENUITEM "&Motif", IDC_CUSTOMIZE_LAF_MOTIF
+            MENUITEM "&Java metal", IDC_CUSTOMIZE_LAF_JAVA
+            MENUITEM "&Gtk+", IDC_CUSTOMIZE_LAF_GTK
+            MENUITEM "&Microsoft Windows", IDC_CUSTOMIZE_LAF_WINDOWS
+        }
     }
-    POPUP "\aA&yuda" {
-        MENUITEM "&Acerca de...", IDC_AYUDA_ACERCADE
+    POPUP "&Help" {
+        MENUITEM "&About...", IDC_AYUDA_ACERCADE
     }
 
 }

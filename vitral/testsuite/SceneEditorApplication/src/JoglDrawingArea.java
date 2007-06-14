@@ -193,7 +193,7 @@ public class JoglDrawingArea implements
         if ( wantToGetColor ) {
             parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage);
+                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
         }
         else {
                 parent.imageControlWindow.setImage(parent.zbufferImage);
@@ -208,7 +208,7 @@ public class JoglDrawingArea implements
         if ( wantToGetDepth ) {
             parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(parent.palette);
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage);
+                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
         }
         else {
                 parent.imageControlWindow.setImage(parent.zbufferImage);
