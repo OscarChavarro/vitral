@@ -2,6 +2,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
@@ -10,12 +11,14 @@ import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.FixedBackground;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.Raytracer;
@@ -47,6 +50,7 @@ public class Scene
 
     // Others
     public RendererConfiguration qualityTemplate;
+    private int acumObject = 1;
 
     Scene()
     {
@@ -139,6 +143,36 @@ public class Scene
             return false;
         }
         return true;
+    }
+
+    public Material defaultMaterial()
+    {
+        Material m = new Material();
+
+        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
+        m.setPhongExponent(100);
+        return m;
+    }
+
+    public SimpleBody addThing(Geometry g)
+    {
+        SimpleBody thing;
+
+        thing = new SimpleBody();
+        thing.setGeometry(g);
+        thing.setPosition(new Vector3D());
+        thing.setRotation(new Matrix4x4());
+        thing.setRotationInverse(new Matrix4x4());
+        thing.setMaterial(defaultMaterial());
+        thing.setName("Geometric object " + acumObject);
+        things.add(thing);
+
+        acumObject++;
+        selectedThings.sync();
+        return thing;
     }
 
     public void selectObjectWithMouse(int x, int y, boolean composite)

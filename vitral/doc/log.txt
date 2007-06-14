@@ -285,3 +285,8 @@ Changes in 2007 may 29-30 revition
   - ImageProcessing.gammaCorrection, ImageProcessing.processDistanceField
   - ReaderObj normalizes typical .obj aligment (Y is up) to typical
     Aquynza/VitralSDK alignment (Z is up)
+
+Changes in 2007 june 2 revition
+  - Offline rendering generation (Pbuffer based technique) of orthogonal views
+    for a selected object in SceneEditorApplication, now complemented with
+    use of main GL context for use in computers without 3D acceleration

@@ -31,18 +31,25 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.Triangle;
+import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.NormalMap;
+import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.Arrow;
+import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglArrowRenderer;
@@ -59,6 +66,7 @@ import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.processing.ImageProcessing;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
@@ -89,6 +97,10 @@ public class JoglDrawingArea implements
     public boolean wantToGetColor;
     public boolean wantToGetDepth;
     public boolean wantToGetContourns;
+    public boolean wantToDebugProjectedViews;
+
+    private JoglPerspectiveViewRenderer perspectiveViewRenderer;
+    private JoglOfflineRenderer offlineRenderer;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -109,6 +121,8 @@ public class JoglDrawingArea implements
     private int viewportYframe;
 
     SceneEditorApplication parent;
+
+    private boolean doDistanceField;
 
     public JoglDrawingArea(Scene theScene, JLabel statusMessage, SceneEditorApplication parent)
     {
@@ -133,7 +147,7 @@ public class JoglDrawingArea implements
         cameraController = new CameraControllerAquynza(theScene.camera);
         translationGizmo = new TranslateGizmo(theScene.camera);
 
-        qualitySelection = parent.theScene.qualityTemplate;
+        qualitySelection = theScene.qualityTemplate;
         qualityController = new RendererConfigurationController(qualitySelection);
         qualitySelectionVisualDebug = new RendererConfiguration();
         qualitySelectionVisualDebug.setShadingType(
@@ -156,6 +170,11 @@ public class JoglDrawingArea implements
         wantToGetColor = false;
         wantToGetDepth = false;
         wantToGetContourns = false;
+    wantToDebugProjectedViews = false;
+
+        perspectiveViewRenderer = new JoglPerspectiveViewRenderer(true);
+        offlineRenderer = null;
+        doDistanceField = false;
     }
 
     private void createCursors()
@@ -245,6 +264,328 @@ public class JoglDrawingArea implements
         gl.glEnable(gl.GL_DEPTH_TEST);
     }
 
+    private Image createProjectedView(GL gl, JoglOfflineRenderer offlineRenderer, SimpleBodyGroup referenceBodies, int cam)
+    {
+        //- Will render a normalized body inside the unit cube ------------
+        SimpleBody referenceBody;
+        double minmax[];
+        SimpleBody framedBody = null;
+        SimpleBodyGroup bodySet = new SimpleBodyGroup();
+
+    Vector3D p;
+    {
+            referenceBody = referenceBodies.getBodies().get(0);
+            minmax = referenceBody.getGeometry().getMinMax();
+
+            if ( cam == 1 ) {
+                framedBody = theScene.addThing(referenceBody.getGeometry());
+              }
+              else {
+                framedBody = new SimpleBody();
+                framedBody.setGeometry(referenceBody.getGeometry());
+                framedBody.setPosition(new Vector3D());
+                framedBody.setRotation(new Matrix4x4());
+                framedBody.setRotationInverse(new Matrix4x4());
+                framedBody.setMaterial(theScene.defaultMaterial());
+            }
+
+            Vector3D min, max, s;
+            min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+            max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+            s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
+
+            double maxsize = s.x;
+            if ( s.y > maxsize ) maxsize = s.y;
+            if ( s.z > maxsize ) maxsize = s.z;
+            // The 95% scale factor is to allow a full render of the object to
+            // fit inside the rendered view
+            s.x = s.y = s.z = (2/maxsize) * 0.95;
+
+            p = max.add(min);
+            p = p.multiply(-1/maxsize);
+
+            framedBody.setPosition(p);
+            framedBody.setScale(s);
+            bodySet.getBodies().add(framedBody);
+    }
+
+        //- Render will proceed in a PBuffer ------------------------------
+        IndexedColorImage distanceFieldIndexed;
+
+        perspectiveViewRenderer.configureScene(bodySet, cam);
+        if ( offlineRenderer.isPbufferSupported() ) {
+            offlineRenderer.execute();
+            offlineRenderer.waitForMe();
+    }
+    else {
+            perspectiveViewRenderer.draw(gl);
+    }
+
+        //-----------------------------------------------------------------
+        Image finalImage;
+        if ( !doDistanceField ) {
+            finalImage = perspectiveViewRenderer.image;
+        }
+        else {
+            System.out.print("Processing maps for view " + cam + "... ");
+            distanceFieldIndexed = new IndexedColorImage();
+            distanceFieldIndexed.init(64, 64);
+            ImageProcessing.processDistanceField(perspectiveViewRenderer.image, distanceFieldIndexed, 1);
+            ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);
+
+            RGBAImage distanceFieldRgba;
+            distanceFieldRgba = distanceFieldIndexed.exportToRgbaImage();
+            int x, y;
+
+            for ( x = 0; x < distanceFieldRgba.getXSize(); x++ ) {
+                for ( y = 0; y < distanceFieldRgba.getYSize(); y++ ) {
+                    if ( distanceFieldIndexed.getPixel(x, y) < 1 ) {
+                        distanceFieldRgba.putPixel(x, y,
+                            (byte)255, (byte)0, (byte)0, (byte)128);
+                    }
+                }
+            }
+            finalImage = distanceFieldRgba;
+            System.out.println("Ok!");
+        }
+
+        //- Obtain Pbuffer's rendered image -------------------------------
+        return finalImage;
+    }
+
+    private SimpleBodyGroup
+    addDebugProjectedView(GL gl, JoglOfflineRenderer offlineRenderer, SimpleBodyGroup referenceBodies)
+    {
+        SimpleBody boxBody;
+        Image texture;
+        SimpleBodyGroup group;
+        Vector3D position = new Vector3D(0, 0, 0);
+        Vector3D scale = new Vector3D(1, 1, 1);
+        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4 R1 = new Matrix4x4();
+        Matrix4x4 R2 = new Matrix4x4();
+        int i;
+        double delta = 0.01/2.0;
+        TriangleMesh mesh;
+        Vertex[] vertexArray;
+        Triangle[] triangleArray;
+        Vector3D n;
+        Image textureArray[];
+        Material materialArray[];
+        int materialRanges[][];
+        int textureRanges[][];
+
+        group = new SimpleBodyGroup();
+        for ( i = 1; i <= 13; i++ ) {
+            R = new Matrix4x4();
+            switch ( i ) {
+              case 1:
+                position = new Vector3D(0, -2, 0);
+                R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                break;
+              case 2:
+                position = new Vector3D(-2, 0, 0);
+                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
+                R2.axisRotation(Math.toRadians(90), new Vector3D(0, -1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 3:
+                position = new Vector3D(0, 0, -2);
+                R.axisRotation(Math.toRadians(180), new Vector3D(0, 1, 0));
+                break;
+              case 4:
+                position = new Vector3D(-1, -1, 1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, -1));
+                R2.axisRotation(Math.toRadians(35), new Vector3D(1, -1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 5:
+                position = new Vector3D(1, -1, 1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
+                R2.axisRotation(Math.toRadians(35), new Vector3D(1, 1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 6:
+                position = new Vector3D(1, 1, 1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
+                R2.axisRotation(Math.toRadians(35), new Vector3D(-1, 1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 7:
+                position = new Vector3D(-1, 1, 1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, -1));
+                R2.axisRotation(Math.toRadians(35), new Vector3D(-1, -1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 8:
+                position = new Vector3D(0, 1, -1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(180), new Vector3D(0, 0, 1));
+                R2.axisRotation(Math.toRadians(135), new Vector3D(-1, 0, 0));
+                R = R2.multiply(R1);
+                break;
+              case 9:
+                position = new Vector3D(-1, 0, -1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
+                R2.axisRotation(Math.toRadians(135), new Vector3D(0, -1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 10:
+                position = new Vector3D(0, -1, -1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R.axisRotation(Math.toRadians(135), new Vector3D(1, 0, 0));
+                break;
+              case 11:
+                position = new Vector3D(1, 0, -1);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, 1));
+                R2.axisRotation(Math.toRadians(135), new Vector3D(0, 1, 0));
+                R = R2.multiply(R1);
+                break;
+              case 12:
+                position = new Vector3D(1, -1, 0);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                R2.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
+                R = R2.multiply(R1);
+                break;
+              case 13:
+                position = new Vector3D(1, 1, 0);
+                position.normalize();
+                position = position.multiply(1.5);
+                scale = new Vector3D(0.5, 0.5, 0.5);
+                R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                R2.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
+                R = R2.multiply(R1);
+                break;
+            }
+
+            //-----------------------------------------------------------------
+            texture = createProjectedView(gl, offlineRenderer, referenceBodies, i);
+            if ( texture == null ) {
+                return null;
+            }
+
+            //-----------------------------------------------------------------
+            n = new Vector3D(0, 0, 1);
+            vertexArray = new Vertex[4];
+            vertexArray[0] = new Vertex(new Vector3D(-1, -1, 0), n, 0.0, 0.0);
+            vertexArray[1] = new Vertex(new Vector3D(1, -1, 0), n, 1.0, 0.0);
+            vertexArray[2] = new Vertex(new Vector3D(1, 1, 0), n, 1.0, 1.0);
+            vertexArray[3] = new Vertex(new Vector3D(-1, 1, 0), n, 0.0, 1.0);
+            triangleArray = new Triangle[2];
+            triangleArray[0] = new Triangle(0, 1, 2);
+            triangleArray[1] = new Triangle(2, 3, 0);
+            textureArray = new Image[1];
+            textureArray[0] = texture;
+            textureRanges = new int[1][2];
+            textureRanges[0][0] = 2;
+            textureRanges[0][1] = 1;
+            materialArray = new Material[1];
+            materialArray[0] = theScene.defaultMaterial();
+            materialArray[0].setDoubleSided(true);
+            materialArray[0].setAmbient(new ColorRgb(1, 1, 1));
+            materialArray[0].setDiffuse(new ColorRgb(1, 1, 1));
+            materialArray[0].setSpecular(new ColorRgb(1, 1, 1));
+            materialRanges = new int[1][2];
+            materialRanges[0][0] = 2;
+            materialRanges[0][1] = 0;
+
+            mesh = new TriangleMesh();
+            mesh.setVertexes(vertexArray);
+            mesh.setTriangles(triangleArray);
+            mesh.setTextures(textureArray);
+            mesh.setTextureRanges(textureRanges);
+            mesh.setMaterials(materialArray);
+            mesh.setMaterialRanges(materialRanges);
+
+            //-----------------------------------------------------------------
+            boxBody = new SimpleBody();
+            boxBody.setGeometry(mesh);
+            boxBody.setPosition(position);
+            boxBody.setScale(scale);
+            boxBody.setRotation(R);
+            boxBody.setRotationInverse(R.inverse());
+            boxBody.setMaterial(theScene.defaultMaterial());
+            boxBody.getMaterial().setDoubleSided(true);
+            boxBody.getMaterial().setAmbient(new ColorRgb(1, 1, 1));
+            boxBody.getMaterial().setDiffuse(new ColorRgb(1, 1, 1));
+            boxBody.getMaterial().setSpecular(new ColorRgb(1, 1, 1));
+            boxBody.setName("Proyected view box");
+            boxBody.setTexture(texture);
+            //-----------------------------------------------------------------
+            group.getBodies().add(boxBody);
+        }
+        return group;
+    }
+
+    private void debugProjectedViewsIfNeeded(GL glAppContext)
+    {
+        //-----------------------------------------------------------------
+    if ( wantToDebugProjectedViews == false ) {
+        return;
+    }
+        wantToDebugProjectedViews = false;
+
+        //-----------------------------------------------------------------
+        if ( offlineRenderer == null ) {
+            if ( doDistanceField ) {
+                offlineRenderer = new JoglOfflineRenderer(64, 64, perspectiveViewRenderer);
+              }
+              else {
+                offlineRenderer = new JoglOfflineRenderer(640, 640, perspectiveViewRenderer);
+            }
+        }
+
+        //-----------------------------------------------------------------
+        int selectedThing = theScene.selectedThings.firstSelected();
+        SimpleBody referenceBody = null;
+
+        if ( selectedThing >= 0 ) {
+            referenceBody = theScene.things.get(selectedThing);
+        }
+
+        if ( referenceBody == null ) {
+            parent.statusMessage.setText("ERROR: An object must be selected for projected views debugging to be created");
+        }
+        else {
+            SimpleBodyGroup group;
+            SimpleBodyGroup bodySet;
+            bodySet = new SimpleBodyGroup();
+            bodySet.getBodies().add(referenceBody);
+            group = addDebugProjectedView(glAppContext, offlineRenderer, bodySet);
+            if ( group != null ) {
+                theScene.debugThingGroups.add(group);
+            }
+            else {
+                parent.statusMessage.setText("ERROR: cannot create Pbuffer, you need recent 3D hardware acceleration for this function");
+            }
+        }
+    }
+
     private void copyColorBufferIfNeeded(GL gl)
     {
         if ( wantToGetColor ) {
@@ -293,6 +634,8 @@ public class JoglDrawingArea implements
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        debugProjectedViewsIfNeeded(gl);
 
         //-----------------------------------------------------------------
         gl.glClearColor(0, 0, 0, 1);
@@ -1034,7 +1377,7 @@ public class JoglDrawingArea implements
 
               SimpleBody o;
               int i;
-              ArrayList generic = parent.theScene.things;
+              ArrayList generic = theScene.things;
               String msg = "";
 
               for ( i = 0; i < generic.size(); i++ ) {
