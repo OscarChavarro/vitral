@@ -4,7 +4,8 @@
             *   Modified by Tomas Lozano-Perez for Fall '01
             *   Modified by Oscar Chavarro for Spring '04 
             *   FUSM 05061.
-            *   Modified by Oscar Chavarro for PUJ Vitral
+            *   Modified by Oscar Chavarro for PUJ Vitral 
+            *   VSDK '05, '06
             ****************************************************/
 
 //===========================================================================
@@ -15,14 +16,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
-// Paquetes de java utilizados para la agregacion multiple
-import java.util.Vector;
-
-// Paquetes internos al sistema de raytracing / modelamiento
-import vitral_transition.toolkits.media.RGBImage;
-import vitral_transition.framework.visual.RaytracerMIT;
-import vitral_transition.framework.Universe;
+// VSDK classes
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.common.ProgressMonitorConsole;
+import vsdk.toolkit.render.Raytracer;
 
 public class RaytracerSimple {
 //- Atributos ---------------------------------------------------------------
@@ -30,7 +28,7 @@ public class RaytracerSimple {
     // Modelo de la aplicacion
     private Universe la_escena;
     private RGBImage la_imagen_resultado;
-    private RaytracerMIT el_visualizador;
+    private Raytracer visualizationEngine;
 
 //- Metodos -----------------------------------------------------------------
 
@@ -44,7 +42,7 @@ public class RaytracerSimple {
     pintar_offline(String nombre_de_archivo)
     {
         //- 1. Leer la escena ---------------------------------------------
-        System.out.println("Leyendo " + nombre_de_archivo);
+        System.out.println("Loading scene from " + nombre_de_archivo + ": ");
         InputStream is = null;
         try {
             is = new FileInputStream(new File(nombre_de_archivo));
@@ -55,10 +53,9 @@ public class RaytracerSimple {
             System.err.println("Error leyendo " + nombre_de_archivo);
             System.exit(-1);
         }
+        System.out.println("Scene loaded OK!");
 
         //- 2. Crear una imagen -------------------------------------------
-        File fd = new File("./output.ppm");
-
         la_imagen_resultado = new RGBImage();
         if ( !la_imagen_resultado.init(
                   la_escena.viewportXSize, la_escena.viewportYSize) ) {
@@ -67,24 +64,29 @@ public class RaytracerSimple {
         }
 
         //- 3. Calcular la imagen / procesar la escena --------------------
-        el_visualizador = new RaytracerMIT();
+        ProgressMonitorConsole reporter = new ProgressMonitorConsole();
+
+        visualizationEngine = new Raytracer();
         la_escena.camara.updateViewportResize(la_imagen_resultado.getXSize(), 
-                                         la_imagen_resultado.getYSize());
-        el_visualizador.ejecutar(la_imagen_resultado,
-                                 la_escena.arr_cosas,
-                                 la_escena.arr_luces, 
-                                 la_escena.fondo,
-                                 la_escena.camara);
+                                              la_imagen_resultado.getYSize());
+        visualizationEngine.execute(la_imagen_resultado,
+                                la_escena.arr_cosas,
+                                la_escena.arr_luces, 
+                                la_escena.fondo,
+                                la_escena.camara, reporter);
 
         //- 4. Exportar la imagen a un archivo ----------------------------
-        if ( !la_imagen_resultado.exportar_ppm(fd) )
+        File fd = new File("./output.ppm");
+
+        System.out.print("Exporting result image to file: ");
+        if ( !la_imagen_resultado.exportPPM(fd) )
         {
             System.err.println("Error grabando la imagen!!");
             System.exit(1);
         }
-        System.out.println("Se ha generado una imagen llamada output.ppm");
-        System.out.println("En Unix / Linux puede verla con el comando");
-        System.out.println("  display output.ppm");
+        System.out.println(" OK!");
+
+        System.out.println("An image has been created in the file output.ppm");
 
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Destruir la imagen
@@ -92,7 +94,7 @@ public class RaytracerSimple {
         la_imagen_resultado = null;
 
         // 5.2. Destruir la escena
-        el_visualizador = null;
+        visualizationEngine = null;
         la_escena.dispose();
         la_escena = null;
 

@@ -25,8 +25,6 @@ cd ..
 cd SceneEditorApplication
 ./run.sh
 cd ..
-cd RaytracingApplication/testsuite/RaytracingExample
+cd RaytracingApplication
 ./run.sh
-cd ..
-cd ..
 cd ..

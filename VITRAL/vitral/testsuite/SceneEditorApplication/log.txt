@@ -1,3 +1,6 @@
+Most of these times includes not only the work done in this sample application,
+but the necessary additions made to the toolkit 
+
 Started from stage 041 CameraSwing
 
 August 8 2005, Oscar Chavarro: 33min
@@ -36,7 +39,19 @@ March 15 2006, Oscar Chavarro: 320
   - 1h15min -> Implemented basic rotate and scale gizmos
   - 1h40min -> Implemented basic Jogl gizmos renderers  :-)
 
-<<TOTAL>> 883 min (14h43min)
+March 16 2006, Oscar Chavarro: 65
+  - 1h5min Adding lights to the model (incomplete)
+
+March 16 2006, Oscar Chavarro: 85
+  - 55min: Fixing lighting not anticipated issue: updated Material and light 
+    renderers in the toolkit
+  - 30min: Added cone feature
+
+<<TOTAL>> 1033 min (17h13min)
 
 March 16 2006, Oscar Chavarro:
-  - 1h5min Adding lights to the model (incomplete)
+  - 14min: Cleaning jogl package in toolkit 
+  - 40min: Developing interface ProgressMonitor and Console implementation
+  - 35min: Adding raytracing render option to editor and image control window
+  - 50min: Preparing raytracing example for reuse
+  - 44min: Adding raytracing functionality to the application :)

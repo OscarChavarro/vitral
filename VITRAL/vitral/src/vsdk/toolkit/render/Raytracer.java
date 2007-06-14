@@ -7,15 +7,17 @@
 //=   in an object-coordinate basis.                                        =
 //===========================================================================
 
-package vitral_transition.framework.visual;
+package vsdk.toolkit.render;
 
-import java.util.Vector;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+import vsdk.toolkit.common.ProgressMonitor;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
@@ -23,7 +25,7 @@ import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayableObject;
-import vitral_transition.toolkits.media.RGBImage;
+
 
 /**
 Esta clase solo provee un m&eacute;todo que encapsula un algoritmo de
@@ -33,12 +35,12 @@ la abstracci&oacute;n de la operaci&oacute;n de visualizaci&oacute;n, la
 cual puede ser cambiada por otro algoritmo de visualizaci&oacute;n (i.e.
 zbuffer o radiosidad), pero manteniendo el mismo modelo de escena 3D.
 */
-public class RaytracerMIT {
+public class Raytracer {
     private static final float INFINITO = Float.MAX_VALUE;
     private static final float TINY = 0.001f;
     private Vector3D static_tmp;
 
-    public RaytracerMIT()
+    public Raytracer()
     {
         // Machete similar al descrito en Sphere::intersect
         static_tmp = new Vector3D();
@@ -55,7 +57,7 @@ public class RaytracerMIT {
     into account in the reflection and refraction calculations)
     */
     public ColorRgb modelo_de_iluminacion(Vector3D p, Vector3D n, Vector3D v, 
-        Vector lights, Vector objects, Background fondo,
+        ArrayList lights, ArrayList objects, Background fondo,
         Material m) {
 
         ColorRgb resultado = new ColorRgb();
@@ -69,9 +71,9 @@ public class RaytracerMIT {
         Vector3D po;
         Matrix4x4 R, Ri;
 
-        for ( Enumeration lightSources = lights.elements();
-              lightSources.hasMoreElements(); ) {
-            Light luz = (Light)lightSources.nextElement();
+        for ( Iterator i = lights.iterator();
+              i.hasNext(); ) {
+            Light luz = (Light)i.next();
             lightEmission = luz.getSpecular();
             if ( luz.tipo_de_luz == Light.AMBIENT ) {
                 ambient = m.getAmbient();
@@ -210,15 +212,15 @@ public class RaytracerMIT {
     and its combination with geometric transformations.
     */
     public RayableObject 
-    trazar_rayo_en_escena(Ray inRay, Vector inRayableObjectArray) {
-        Enumeration i;
+    trazar_rayo_en_escena(Ray inRay, ArrayList inRayableObjectArray) {
+        Iterator i;
         RayableObject gi;
         RayableObject nearestObject;
 
         inRay.t = INFINITO;
         nearestObject = null;
-        for ( i = inRayableObjectArray.elements(); i.hasMoreElements(); ) {
-            gi = (RayableObject)i.nextElement();
+        for ( i = inRayableObjectArray.iterator(); i.hasNext(); ) {
+            gi = (RayableObject)i.next();
             if ( gi.doIntersection(inRay) ) {
                 nearestObject = gi;
             }
@@ -231,8 +233,8 @@ public class RaytracerMIT {
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
-    private ColorRgb seguimiento_rayo(Ray inRay, Vector in_objetos, 
-                         Vector in_luces, Background in_fondo)
+    private ColorRgb seguimiento_rayo(Ray inRay, ArrayList in_objetos, 
+                         ArrayList in_luces, Background in_fondo)
     {
         ColorRgb c;
         Vector3D v = new Vector3D();
@@ -313,11 +315,12 @@ public class RaytracerMIT {
           considerarse que es una re-escritura y re-estructuraci&oacute;n 
           completa de Oscar Chavarro.
     */
-    public void ejecutar(RGBImage inoutViewport, 
-                         Vector inRayableObjectArray,
-                         Vector in_arr_luces,
+    public void execute(RGBImage inoutViewport, 
+                         ArrayList inRayableObjectArray,
+                         ArrayList in_arr_luces,
                          Background in_fondo,
-                         Camera in_camara)
+                         Camera in_camara,
+                         ProgressMonitor report)
     {
         int x, y;
         Ray rayo;
@@ -325,14 +328,9 @@ public class RaytracerMIT {
 
         in_camara.updateVectors();
 
-        //System.out.println(in_camara);
-
-        System.out.print("[");
-
+        report.begin();
         for ( y = 0; y < inoutViewport.getYSize(); y++ ) {
-            if ( y % 10 == 0 ) {
-                System.out.print(".");
-            }
+            report.update(0, inoutViewport.getYSize(), y);
             for ( x = 0; x < inoutViewport.getXSize(); x++ ) {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
@@ -342,12 +340,12 @@ public class RaytracerMIT {
                     in_arr_luces, in_fondo);
 
                 //- Exporto el resultado de color del pixel ----------------
-                inoutViewport.putpixel(x, y, (byte)(255 * color.r), 
+                inoutViewport.putPixel(x, y, (byte)(255 * color.r), 
                                               (byte)(255 * color.g), 
                                               (byte)(255 * color.b));
             }
         }
-        System.out.println("]");
+        report.end();
     }
 
 }

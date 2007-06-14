@@ -37,10 +37,12 @@ import javax.media.opengl.GLCanvas;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.RayableObject;
 
 // Internal classes
@@ -49,10 +51,14 @@ import gui.GuiCache;
 public class SceneEditorApplication {
     // Application model
     public Scene theScene;
+    public RGBImage raytracedImage;
+    public int raytracedImageWidth;
+    public int raytracedImageHeight;
 
     // Application GUI
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
+    public AwtImageControlWindow imageControlWindow;
     private JFrame mainWindowWidget;
     private String lookAndFeel;
 
@@ -83,6 +89,10 @@ public class SceneEditorApplication {
     {
         //-----------------------------------------------------------------
         theScene = new Scene();
+
+        raytracedImage = new RGBImage();
+        raytracedImageWidth = 320;
+        raytracedImageHeight = 240;
     }
 
     private JPanel createStatusBar()
@@ -127,6 +137,11 @@ public class SceneEditorApplication {
         panel = new ButtonsPanel(this, 3);
         sp = new JScrollPane(panel);
         container.addTab("Scene components", null, sp, "Control the scene components");
+
+        //-----------------------------------------------------------------
+        panel = new ButtonsPanel(this, 4);
+        sp = new JScrollPane(panel);
+        container.addTab("Render", null, sp, "Control the scene components");
         //-----------------------------------------------------------------
 
         return container;
@@ -198,6 +213,9 @@ public class SceneEditorApplication {
         mainWindowWidget.pack();
         mainWindowWidget.setVisible(true);
         drawingArea.getCanvas().requestFocusInWindow();
+
+        //-----------------------------------------------------------------
+        imageControlWindow = null;
     }
 
     private void destroyGUI()
@@ -319,6 +337,18 @@ class ButtonsPanel extends JPanel implements ActionListener
 
             break;
 
+          case 4:
+            b = new JButton("Obtain Zbuffer Image");
+            configureButton(b);
+
+            b = new JButton("Obtain Zbuffer Depthmap");
+            configureButton(b);
+
+            b = new JButton("Raytrace Scene");
+            configureButton(b);
+
+            break;
+
           case 101:
             b = new JButton("New");
             configureButton2(b);
@@ -408,6 +438,15 @@ class ButtonsPanel extends JPanel implements ActionListener
             thing.setMaterial(defaultMaterial());
             parent.theScene.things.add(thing);
         }
+        else if ( label == "Create Cone/Cylinder" ) {
+            thing = new RayableObject();
+            thing.setGeometry(new Cone(1, 0, 2));
+            thing.setPosition(new Vector3D());
+            thing.setRotation(new Matrix4x4());
+            thing.setRotationInverse(new Matrix4x4());
+            thing.setMaterial(defaultMaterial());
+            parent.theScene.things.add(thing);
+        }
         else if ( label == "Create Light" ) {
             light = new Light(Light.POINT, new Vector3D(10, 9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.lights.add(light);
@@ -447,6 +486,15 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
             parent.drawingArea.interactionMode = 
                 parent.drawingArea.SCALE_INTERACTION_MODE;
+        }
+        else if ( label == "Raytrace Scene" ) {
+            parent.statusMessage.setText("Computing raytracing, this may take some time ...");
+            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage);
+        }
+            parent.theScene.raytrace(parent.raytracedImage);
+            parent.imageControlWindow.redrawImage();
         }
 
         parent.drawingArea.canvas.repaint();

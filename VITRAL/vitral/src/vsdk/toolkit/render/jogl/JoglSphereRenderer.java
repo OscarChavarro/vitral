@@ -24,12 +24,12 @@ public class JoglSphereRenderer {
         }
         if ( q.isSurfacesSet() ) {
             glut.glutSolidSphere(s.getRadius(), 20, 10);
-    }
+        }
 
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);
             glut.glutWireSphere(s.getRadius(), 20, 10);
-    }
+        }
     }
 
 }

@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 
-import vsdk.toolkit.media.RGBAPixel;
-
 public class RGBAImage 
 {
     private RGBAPixel data[];
@@ -29,8 +27,9 @@ public class RGBAImage
     {
         xSize = 0;
         ySize = 0;
-        pixelDepth=24;
         data = null;
+
+        pixelDepth=24;
     }
 
     /**
@@ -47,9 +46,10 @@ public class RGBAImage
             }
             xSize = 0;
             ySize = 0;
-            pixelDepth=24;
             data = null;
             System.gc();
+
+            pixelDepth=24;
         }
     }
 
@@ -115,8 +115,8 @@ public class RGBAImage
     }
 
     /**
-    Este m&eacute;todo retorna las coordenadas de color (r, g, b) para el pixel
-    de la posicion (x, y) de la imagen.
+    Este m&eacute;todo retorna las coordenadas de color (r, g, b, a) para el 
+    pixel de la posicion (x, y) de la imagen.
     */
     public RGBAPixel getPixel(int x, int y)
     {

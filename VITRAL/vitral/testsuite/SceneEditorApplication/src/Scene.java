@@ -3,13 +3,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.ProgressMonitorConsole;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.RayableObject;
+import vsdk.toolkit.render.Raytracer;
 
 public class Scene
 {
@@ -116,4 +120,36 @@ public class Scene
     }
         System.out.println("= END OF REPORT ===========================================================");
     }
+
+    public void raytrace(RGBImage out_Viewport)
+    {
+        int originalWidth;
+        int originalHeight;
+
+        originalWidth = (int)activeCamera.getViewportXSize();
+        originalHeight = (int)activeCamera.getViewportYSize();
+        activeCamera.updateViewportResize(out_Viewport.getXSize(), out_Viewport.getYSize());
+
+        //-----------------------------------------------------------------
+        ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
+    Raytracer visualizationEngine;
+
+        Background activeBackground;
+        switch ( selectedBackground ) {
+          case 1:
+            activeBackground = cubemapBackground;
+            break;
+          case 0: default:
+            activeBackground = simpleBackground;
+            break;
+        }
+
+        visualizationEngine = new Raytracer();
+        visualizationEngine.execute(out_Viewport, things, lights, 
+                                activeBackground, activeCamera, reporter);
+
+        //-----------------------------------------------------------------
+        activeCamera.updateViewportResize(originalWidth, originalHeight);
+    }
+
 }

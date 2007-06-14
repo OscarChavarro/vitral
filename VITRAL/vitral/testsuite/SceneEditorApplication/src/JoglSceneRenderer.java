@@ -36,7 +36,6 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        int j = 0;
         RayableObject gi;
         Vector3D p;
         Vector3D scale;
@@ -48,11 +47,12 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
     }
 
-        for ( Iterator i = s.lights.iterator(); i.hasNext(); j++ ) {
+        for ( Iterator i = s.lights.iterator(); i.hasNext(); ) {
             Light l = (Light)i.next();
             JoglLightRenderer.activate(gl, l);
         }
 
+        int j = 0;
         for ( Iterator i = s.things.iterator(); i.hasNext(); j++ ) {
             QualitySelection quality;
             gi = ((RayableObject)i.next());

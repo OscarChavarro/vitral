@@ -18,17 +18,25 @@ public class JoglLightRenderer {
     public static void activate(GL gl, Light l)
     {
         float[] lightPosition=l.getPosition().toFloatVect();
+        float global_ambient[] = {0, 0, 0, 1};
+        float global_twoside[] = {gl.GL_TRUE};  // WARNING: This is inefficient!
         int lightNumber = l.getId();
 
-    System.out.println("Activo la luz " + lightNumber);
-
-        if ( lightNumber >= supportedLightsInOpenGL ) {
+        if ( lightNumber >= supportedLightsInOpenGL || lightNumber < 0 ) {
             return;
     }
 
-        if ( l.getLightType() == Light.DIRECTIONAL ) {
+/*
+        if ( l.getLightType() == Light.DIRECTIONAL ) { // Why?
             lightPosition[3]=0;
         }
+*/
+
+        gl.glLightModelfv(gl.GL_LIGHT_MODEL_AMBIENT, global_ambient, 0);   // OJO! Esta
+        gl.glLightModelfv(gl.GL_LIGHT_MODEL_TWO_SIDE, global_twoside, 0);  // cableado!
+        gl.glLightModeli(gl.GL_LIGHT_MODEL_LOCAL_VIEWER, gl.GL_TRUE); // OJO: ?
+        gl.glEnable(gl.GL_LIGHTING);  // Is it right to have this here and re-set all the time?
+        gl.glEnable(gl.GL_LIGHT0 + lightNumber);
 
         gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_POSITION, lightPosition, 0);
         gl.glLightfv(gl.GL_LIGHT0 + lightNumber, gl.GL_AMBIENT, l.getAmbient().toFloatVect(), 0);

@@ -1,7 +1,5 @@
 //===========================================================================
 
-package vitral_transition.framework;
-
 // Paquetes de java utilizados para la agregacion multiple
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +8,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
-import java.util.Vector;
+import java.util.ArrayList;
 
 // Paquetes internos al sistema de raytracing / modelamiento
 import vsdk.toolkit.common.Vector3D;
@@ -26,7 +24,7 @@ import vsdk.toolkit.environment.geometry.RayableObject;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Cube;
-import vsdk.toolkit.environment.geometry.Cylinder;
+import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.RGBAImageBuilder;
 
@@ -36,8 +34,8 @@ public class Universe
     private static final boolean depurar = false;
 
     // El modelo del mundo
-    public Vector<RayableObject> arr_cosas;
-    public Vector<Light> arr_luces;
+    public ArrayList<RayableObject> arr_cosas;
+    public ArrayList<Light> arr_luces;
     public Background fondo;
     public Camera camara;
     public int viewportXSize;
@@ -52,9 +50,9 @@ public class Universe
         int CHUNKSIZE = 100; // Incremento de arreglos
 
         // Arreglo de Geometrys
-        arr_cosas = new Vector<RayableObject>(CHUNKSIZE, CHUNKSIZE);  
+        arr_cosas = new ArrayList<RayableObject>();  
         // Arreglo de LIGHTes
-        arr_luces = new Vector<Light>(CHUNKSIZE, CHUNKSIZE);
+        arr_luces = new ArrayList<Light>();
 
         viewportXSize = 320;
         viewportYSize = 240;
@@ -136,7 +134,7 @@ public class Universe
                   Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
-                  arr_cosas.addElement(thing);
+                  arr_cosas.add(thing);
                 }
             else if ( st.sval.equals("cube") ) {
                   Vector3D c = new Vector3D((float) leerNumero(st), 
@@ -155,7 +153,7 @@ public class Universe
                   Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
-                  arr_cosas.addElement(thing);
+                  arr_cosas.add(thing);
                 } 
             else if ( st.sval.equals("cylinder") ) {
                   Vector3D c = new Vector3D((float) leerNumero(st), 
@@ -167,7 +165,7 @@ public class Universe
 
                   imprimirMensaje("cylinder");
                   thing = new RayableObject();
-          thing.setGeometry(new Cylinder(r1, r2, h));
+          thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(material_actual);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
@@ -176,7 +174,7 @@ public class Universe
                   Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
-                  arr_cosas.addElement(thing);
+                  arr_cosas.add(thing);
                 }
                 /*
                 else if (st.sval.equals("triangles")) {
@@ -184,7 +182,7 @@ public class Universe
                   thing = new RayableObject();
           thing.setGeometry(new MESH(st));
                   thing.setMaterial(material_actual);
-                  arr_cosas.addElement(thing);
+                  arr_cosas.add(thing);
                 } 
                 */
                 else if (st.sval.equals("viewport")) {
@@ -228,7 +226,7 @@ public class Universe
 
             try {
 
-            System.out.print("Loading background: 1");
+            System.out.print("  - Loading background images: 1");
             front = RGBAImageBuilder.buildImage(
                         new File("./etc/cubemaps/dorise1/entorno0_small.jpg"));
             System.out.print("2");
@@ -271,21 +269,21 @@ public class Universe
                   }
                   if ( st.sval.equals("ambient") ) {
                       imprimirMensaje("ambient");
-                      arr_luces.addElement(new Light(Light.AMBIENT, null, new ColorRgb(r,g,b)));
+                      arr_luces.add(new Light(Light.AMBIENT, null, new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       imprimirMensaje("directional");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light(Light.DIRECTIONAL, v, new ColorRgb(r,g,b)));
+                      arr_luces.add(new Light(Light.DIRECTIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       imprimirMensaje("point");
                       Vector3D v = new Vector3D(leerNumero(st), 
                                             leerNumero(st), 
                                             leerNumero(st));
-                      arr_luces.addElement(new Light(Light.POINT, v, new ColorRgb(r, g, b)));
+                      arr_luces.add(new Light(Light.POINT, v, new ColorRgb(r, g, b)));
                     } 
                     else {
                       System.err.println("ERROR: in line " + 

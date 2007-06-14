@@ -1,32 +1,41 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - March 15 2006 - Oscar Chavarro: Original base version                 =
+//= - March 18 2006 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
+import com.sun.opengl.util.GLUT;
 
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Cone;
 
-public class JoglGeometryRenderer
-{
-    public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
-    {
-        String geometryType = g.getClass().getName();
+public class JoglConeRenderer {
 
-        if ( geometryType == "vsdk.toolkit.environment.geometry.Sphere" ) {
-            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+    private static GLUT glut = null;
+
+    public static void draw(GL gl, Cone cone, Camera c, QualitySelection q)
+    {
+        if (glut == null) {
+            glut = new GLUT();
+        }
+
+        gl.glPushMatrix();
+        gl.glTranslated(0, 0, -cone.getHeight()/2);
+        if ( q.isSurfacesSet() ) {
+        glut.glutSolidCone(cone.getBaseRadius(), cone.getHeight(), 20, 3);
+        }
+
+        if ( q.isWiresSet() ) {
+            gl.glLineWidth(1);
+        glut.glutWireCone(cone.getBaseRadius(), cone.getHeight(), 20, 3);
+        }
+        gl.glPopMatrix();
     }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.Cone" ) {
-            JoglConeRenderer.draw(gl, (Cone)g, c, q);
-    }
-    }
+
 }
 
 //===========================================================================

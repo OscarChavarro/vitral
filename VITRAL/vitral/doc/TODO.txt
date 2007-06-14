@@ -1,3 +1,6 @@
+  - Move exportPPM method in image classes to io package
+  - Check that RGBImage has same services than RGBAImage (i.e. renderers in
+    Jogl and Awt)
   - Define HDRI interpretation of values in the 
     vitral.toolkits.common.ColorRgb class
   - Check the names in JoglRenderers... should be activate and draw,

@@ -140,7 +140,7 @@ public class RGBAImageBuilder
         if ( image instanceof BufferedImage ) {
             return (BufferedImage)image;
         }
-    System.out.println(image.getClass().getName());
+    //System.out.println(image.getClass().getName());
     
         // This code ensures that all the pixels in the image are loaded
         image = new ImageIcon(image).getImage();

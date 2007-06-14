@@ -27,8 +27,4 @@ compile
 cd ..
 cd RaytracingApplication
 compile
-cd testsuite\RaytracingExample
-compile
-cd ..
-cd ..
 cd ..

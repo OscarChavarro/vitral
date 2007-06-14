@@ -12,17 +12,47 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
 
-public class Cylinder extends Geometry {
+public class Cone extends Geometry {
     private double r1; // Radius at the base
     private double r2; // Radius at the top
     private double h;  // Height
 
     GeometryIntersectionInformation lastInfo;
 
-    public Cylinder(double r1, double r2, double h) {
+    public Cone(double r1, double r2, double h) {
         this.r1 = r1;
         this.r2 = r2;
         this.h = h;
+    }
+
+    public double getBaseRadius()
+    {
+        return r1;
+    }
+
+    public double getTopRadius()
+    {
+        return r2;
+    }
+
+    public double getHeight()
+    {
+        return h;
+    }
+
+    public void setBaseRadius(double val)
+    {
+        r1 = val;
+    }
+
+    public void setTopRadius(double val)
+    {
+        r2 = val;
+    }
+
+    public void setHeight(double val)
+    {
+        h = val;
     }
 
     private boolean

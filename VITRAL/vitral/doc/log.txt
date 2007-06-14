@@ -32,3 +32,10 @@ the old names and the new names for packages:
     . Classes ImageNotRecognizedException, RGBAImageBuilder and TargaImage 
       which handles image loading from files were moved to package io.image.
   - The main library is not "vitral.jar", but "vsdk.jar"
+  - As a cylinder is a special case of cone, class Cylinder is now called
+    Cone
+
+Changes in 2006 march 19 revition
+  - Raytracing application example was set for full code reuse, now the
+    raytracer is generic and lies in the main toolkit render package
+  - SceneEditor application example in its first fully functional version :-)

@@ -1,0 +1,111 @@
+// Java basic classes
+import java.io.FileReader;
+
+// Java GUI classes
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import javax.swing.border.Border; 
+import javax.swing.BorderFactory; 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+
+// VSDK classes
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
+
+// Application classes
+import gui.GuiCache;
+
+public class AwtImageControlWindow
+{
+    private JFrame windowWidget;
+    public JLabel statusMessage;
+    private RGBImage controlledImage;
+    private ImageDisplayPanel workArea;
+
+    public AwtImageControlWindow(RGBImage image){
+        controlledImage = image;
+
+        windowWidget = new JFrame("Image control tool");
+        windowWidget.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE );
+
+        JMenuBar menubar = buildMenu();
+        JPanel statusBar = createStatusBar();
+        workArea = new ImageDisplayPanel(controlledImage);
+
+        windowWidget.add(workArea, BorderLayout.CENTER);
+        windowWidget.add(statusBar, BorderLayout.SOUTH);
+        windowWidget.setJMenuBar(menubar);
+
+        windowWidget.setPreferredSize(new Dimension(640, 480));
+        windowWidget.pack();
+        windowWidget.setVisible(true);
+    }
+
+    public void redrawImage()
+    {
+        windowWidget.setVisible(true);
+        workArea.repaint();
+    }
+
+    private JMenuBar buildMenu()
+    {
+        JMenuBar menubar;
+        GuiCache guiReader = null;
+
+        try {
+            guiReader = new GuiCache(new FileReader("./etc/spanish.gui"));
+        }
+        catch (Exception e) {
+            System.err.println("Fatal error: can not open GUI file");
+            System.exit(0);
+        }
+
+        menubar = guiReader.exportSwingMenubar();
+
+        return menubar;
+    }
+
+    private JPanel createStatusBar()
+    {
+        JPanel panel;
+
+        statusMessage = new JLabel("Image control window ready");
+        Border border = BorderFactory.createLoweredBevelBorder();
+        statusMessage.setBorder(border);
+
+        panel = new JPanel();
+        panel.setLayout(new GridLayout());
+
+        border = BorderFactory.createEmptyBorder(3, 3, 3, 3);
+        panel.setBorder(border);
+
+        panel.add(statusMessage);
+
+        return panel;
+    }
+}
+
+class ImageDisplayPanel extends JPanel
+{
+    RGBImage imageToPaint;
+
+    public ImageDisplayPanel(RGBImage img)
+    {
+        Dimension d = new Dimension(320+20, 240+30);
+
+        setMinimumSize(d);        
+        setSize(d);        
+        imageToPaint = img;
+    }
+
+    public void paint(Graphics g)
+    {
+        super.paint(g);
+        AwtRGBImageRenderer.draw(g, imageToPaint, 10, 10);
+    }
+}

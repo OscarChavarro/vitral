@@ -116,7 +116,7 @@ public class JoglMeshRenderer
 
     public static void drawSurfacesSmooth(GL gl, Mesh mesh, boolean flip)
     {
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
         for(int i=0; i<mesh.getTriangles().length; i++)
         {
             gl.glBegin(gl.GL_TRIANGLES);
@@ -172,7 +172,7 @@ else {
 
     public static void drawSurfacesSolid(GL gl, Mesh mesh, boolean flip)
     {
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
         for(int i=0; i<mesh.getTriangles().length; i++)
         {
             gl.glBegin(gl.GL_TRIANGLES);
@@ -208,7 +208,7 @@ else {
     public static void drawWires(GL gl, Mesh mesh)
     {
 
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
         for(int i=0; i<mesh.getTriangles().length; i++)
         {
             gl.glBegin(gl.GL_LINE_LOOP);
@@ -261,7 +261,7 @@ else {
 
     public static void drawTexture(GL gl, Mesh mesh)
     {
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
         int[] textObjs=null;
         if(objTex.containsKey(mesh))
         {
@@ -373,7 +373,7 @@ else {
 
     public static void drawBumpMap(GL gl, Mesh mesh)
     {
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
     }
 
     private static void drawShading(GL gl, int shadingType)
@@ -392,7 +392,7 @@ else {
 
     public static void drawPoints(GL gl, Mesh mesh)
     {
-        JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
+        JoglMaterialRenderer.activate(gl, mesh.getMaterial());
         for (int i = 0; i < mesh.getVertexes().length; i++)
         {
             gl.glBegin(gl.GL_POINTS);

@@ -1,10 +1,16 @@
 //===========================================================================
-package vitral_transition.toolkits.media;
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//= - November 28 2005 - Oscar Chavarro: Quality check                      =
+//= - March 19 2006 - Oscar Chavarro: VSDK integration                      =
+//===========================================================================
+
+package vsdk.toolkit.media;
 
 import java.io.File;
 import java.io.FileOutputStream;
-
-import vsdk.toolkit.media.RGBPixel;
+import java.io.BufferedOutputStream;
 
 public class RGBImage 
 {
@@ -45,7 +51,7 @@ public class RGBImage
     /**
     Inicializaci&oacute;n del contenido de una imagen.
 
-    Recibe el ancho y el alto que debe tener esta RGBImage (n&oacute;tese
+    Recibe el width y el height que debe tener esta RGBImage (n&oacute;tese
     que una imagen puede asi cambiar de tama&ntilde;o en cualquier momento)
     y asigna la memoria necesaria para hacerlo.
 
@@ -55,11 +61,11 @@ public class RGBImage
     se pudo asignar la cantidad de memoria necesaria para almacenar la
     imagen del tama&ntilde;o seleccionado.
     */
-    public boolean init(int ancho, int alto)
+    public boolean init(int width, int height)
     {
         try {
-          data = new RGBPixel[ancho * alto];
-          for ( int i = 0; i < ancho*alto; i++ ) {
+          data = new RGBPixel[width * height];
+          for ( int i = 0; i < width*height; i++ ) {
               data[i] = new RGBPixel();
           }
         }
@@ -67,8 +73,8 @@ public class RGBImage
           data = null;
           return false;
         }
-        xSize = ancho;        
-        ySize = alto;        
+        xSize = width;        
+        ySize = height;        
         return true;
     }
 
@@ -76,7 +82,7 @@ public class RGBImage
     Este m&eacute;todo cambia la posicion (x, y) de la matriz de imagen y
     escribe en ella un pixel con coordenadas (r, g, b).
     */
-    public void putpixel(int x, int y, byte r, byte g, byte b)
+    public void putPixel(int x, int y, byte r, byte g, byte b)
     {
         int index = xSize*y + x;
         data[index].r = r;
@@ -84,19 +90,28 @@ public class RGBImage
         data[index].b = b;
     }
 
+    public void putPixel(int x, int y, RGBPixel p)
+    {
+        int index = xSize*y + x;
+        data[index].r = p.r;
+        data[index].g = p.g;
+        data[index].b = p.b;
+    }
+
     /**
     Este m&eacute;todo retorna las coordenadas de color (r, g, b) para el pixel
     de la posicion (x, y) de la imagen.
     */
-    public RGBPixel getpixel(int x, int y)
+    public RGBPixel getPixel(int x, int y)
     {
         RGBPixel p = new RGBPixel();
         int index = xSize*y + x;
+
         p.r = data[index].r;
         p.g = data[index].g;
         p.b = data[index].b;
 
-        return new RGBPixel();
+        return p;
     }
 
     /**
@@ -104,7 +119,7 @@ public class RGBImage
     un par de lineas de colores atravezandolo por el centro.  Puede utilizarse
     para probar otras operaciones de imagenes, o para inicializarlas.
     */
-    public void crear_patron_de_prueba()
+    public void createTestPattern()
     {
         int i;
         int j;
@@ -135,7 +150,7 @@ public class RGBImage
                     g = (byte)255;
                     b = 0;
                 }
-                putpixel(j, i, r, g, b);
+                putPixel(j, i, r, g, b);
             }
         }
     }
@@ -146,10 +161,12 @@ public class RGBImage
     sale bien o false si algo falla (i.e. como un problema de permisos o
     que se acabe el espacio en el dispositivo de almacenamiento `fd`).
     */
-    public boolean exportar_ppm(File fd)
+    public boolean exportPPM(File fd)
     {
         try {
-            FileOutputStream escritor = new FileOutputStream(fd);
+            BufferedOutputStream escritor;
+
+            escritor = new BufferedOutputStream(new FileOutputStream(fd));
 
             String linea1 = "P6\n";
             String linea2 = xSize + " " + ySize + "\n";
@@ -168,6 +185,7 @@ public class RGBImage
                 escritor.write(data[i].g);
                 escritor.write(data[i].b);
             }
+            escritor.close();
         }
         catch (Exception e) {
             return false;

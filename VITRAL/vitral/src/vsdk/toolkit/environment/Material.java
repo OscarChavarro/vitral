@@ -4,6 +4,7 @@
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - November 24 2005 - Oscar Chavarro: Revision and integration with      =
 //=   recursive raytracing ilumination model                                =
+//= - March 18 2006 - Oscar Chavarro: minor checks                          =
 //===========================================================================
 
 package vsdk.toolkit.environment;
@@ -21,7 +22,7 @@ public class Material
 
     private String name="default";
     
-    private double alpha=1;
+    private double alpha;
     private double phongExponent;
     
     /** Creates a new instance of MaterialGL */
@@ -32,7 +33,8 @@ public class Material
         specular=new ColorRgb(); 
         emission=new ColorRgb(); 
         reflectionCoefficient = 0;
-        refractionCoefficient = 0;
+        alpha = 1;
+        phongExponent = 128;
     }
     
     public Material(Material m) 
@@ -138,7 +140,7 @@ public class Material
 
     public String toString()
     {
-        return "Material:\n  - Specular " + specular + "\n  - Diffuse " + diffuse + "\n  - Ambient " + ambient + "\n\n";
+        return "Material [" + name + "]:\n  - Specular " + specular + "\n  - Diffuse " + diffuse + "\n  - Ambient " + ambient + "\n  - Phong exponent: " + phongExponent + "\n\n";
     }
 }
 
