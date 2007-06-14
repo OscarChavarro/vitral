@@ -1,0 +1,98 @@
+package id1gf1sejrj3ao8ejrjhnz2;
+
+/**
+@version 2.0
+@physicalPackage
+@__modelType diagram 
+*/
+class diagram {
+/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Ray:oiref><oihard>
+@__modelType reference 
+*/
+class reference {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.ColorRgb:oiref><oihard>
+@__modelType reference 
+*/
+class reference63 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Vector3D:oiref><oihard>
+@__modelType reference 
+*/
+class reference64 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Quaternion:oiref><oihard>
+@__modelType reference 
+*/
+class reference65 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Matrix4x4:oiref><oihard>
+@__modelType reference 
+*/
+class reference66 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Triangle:oiref><oihard>
+@__modelType reference 
+*/
+class reference67 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.QualitySelection:oiref><oihard>
+@__modelType reference 
+*/
+class reference68 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.VSDK:oiref><oihard>
+@__modelType reference 
+*/
+class reference69 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.common.Vertex:oiref><oihard>
+@__modelType reference 
+*/
+class reference70 {
+}}/**
+@__tags
+@shapeType ClassDiagram 
+*/
+class __tags {
+}/**
+@__options 
+*/
+class __options {
+}/**
+@__positions <oigroup:<oiref:java#Class#vitral.toolkits.common.Vertex:oiref>=141,10,185,309,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.Ray:oiref>=10,399,121,158,1:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Quaternion#direction:oiref>=578,152,578,203,388,399:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Ray#direction:oiref>=131,451,251,451:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.Quaternion:oiref>=518,10,121,142,1:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#binormal:oiref>=215,319,296,399:oigroup>
+<oigroup:Composite#supplierCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Triangle#normal:oiref>=333,379,28,16,0:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#position:oiref>=289,319,342,399:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#normal:oiref>=252,319,319,399:oigroup>
+<oigroup:Composite#supplierCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#tangent:oiref>=231,379,15,16,0:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.ColorRgb:oiref>=522,290,114,197,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.VSDK:oiref>=656,450,195,158,1:oigroup>
+<oigroup:Composite#supplierCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#binormal:oiref>=257,379,15,16,0:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#tangent:oiref>=178,319,273,399:oigroup>
+<oigroup:Composite#supplierRole#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#binormal:oiref>=300,379,57,16,0:oigroup>
+<oigroup:Composite#clientCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Triangle#normal:oiref>=404,264,15,16,0:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.QualitySelection:oiref>=10,730,200,590,1:oigroup>
+<oigroup:Composite#supplierCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#position:oiref>=310,379,15,16,0:oigroup>
+<oigroup:Composite#supplierRole#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#normal:oiref>=323,379,47,16,0:oigroup>
+<oigroup:Composite#supplierRole#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#position:oiref>=346,379,52,16,0:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.Vector3D:oiref>=251,399,147,286,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.Triangle:oiref>=369,10,129,254,1:oigroup>
+<oigroup:Composite#supplierRole#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#tangent:oiref>=277,379,49,16,0:oigroup>
+<oigroup:Composite#clientCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#binormal:oiref>=196,319,15,16,0:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Ray#origin:oiref>=131,504,251,504:oigroup>
+<oigroup:Composite#supplierRole#MemberLink#<oiref:java#Member#vitral.toolkits.common.Triangle#normal:oiref>=379,379,47,16,0:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.common.Matrix4x4:oiref>=659,10,193,398,1:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.common.Triangle#normal:oiref>=433,264,365,399:oigroup>
+<oigroup:Composite#clientCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#tangent:oiref>=159,319,15,16,0:oigroup>
+<oigroup:Composite#clientCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#normal:oiref>=233,319,15,16,0:oigroup>
+<oigroup:Composite#supplierCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#normal:oiref>=284,379,15,16,0:oigroup>
+<oigroup:Composite#clientCardinality#MemberLink#<oiref:java#Member#vitral.toolkits.common.Vertex#position:oiref>=270,319,15,16,0:oigroup> 
+*/
+class __positions {
+}

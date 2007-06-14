@@ -17,6 +17,9 @@ cd ../..
 cd stage090_Raytracing/lib
 ln -s ../../vitral/lib/vitral.jar .
 cd ../..
+cd stage091_CohenSutherlandClipping/lib
+ln -s ../../vitral/lib/vitral.jar .
+cd ../..
 cd stage144_Mesh/lib
 ln -s ../../vitral/lib/vitral.jar .
 cd ../..

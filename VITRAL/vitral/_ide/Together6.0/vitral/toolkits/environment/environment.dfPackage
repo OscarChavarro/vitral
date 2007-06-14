@@ -1,0 +1,61 @@
+package id22pm5ejrj3ao8ejrjho0d;
+
+/**
+@version 2.0
+@physicalPackage
+@__modelType diagram 
+*/
+class diagram {
+/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.CubemapBackground:oiref><oihard>
+@__modelType reference 
+*/
+class reference {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.Camera:oiref><oihard>
+@__modelType reference 
+*/
+class reference45 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.SimpleBackground:oiref><oihard>
+@__modelType reference 
+*/
+class reference46 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.Material:oiref><oihard>
+@__modelType reference 
+*/
+class reference47 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.Light:oiref><oihard>
+@__modelType reference 
+*/
+class reference48 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.environment.Background:oiref><oihard>
+@__modelType reference 
+*/
+class reference49 {
+}}/**
+@__tags
+@shapeType ClassDiagram 
+*/
+class __tags {
+}/**
+@__options 
+*/
+class __options {
+}/**
+@__positions <oigroup:<oiref:java#Extends#vitral.toolkits.environment.CubemapBackground#vitral.toolkits.environment.Background:oiref>=379,170,379,111:oigroup>
+<oigroup:<oiref:java#Extends#vitral.toolkits.environment.SimpleBackground#vitral.toolkits.environment.Background:oiref>=268,170,268,111:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.Background:oiref>=250,10,168,101,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.Camera:oiref>=880,210,200,702,1:oigroup>
+<oigroup:<oiref:java#Member#vitral.toolkits.environment.Camera#eyePosition:oiref>=210,210,178,16,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.Material:oiref>=480,370,183,261,1:oigroup>
+<oigroup:MemberLink#<oiref:java#Member#vitral.toolkits.environment.CubemapBackground#camera:oiref>=540,269,880,269:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.Light:oiref>=60,380,137,222,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.CubemapBackground:oiref>=340,170,200,158,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.environment.SimpleBackground:oiref>=120,170,166,126,1:oigroup> 
+*/
+class __positions {
+}

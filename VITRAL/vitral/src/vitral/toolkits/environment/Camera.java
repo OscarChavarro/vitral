@@ -16,16 +16,17 @@
 
 package vitral.toolkits.environment;
 
+import vitral.toolkits.common.VSDK;
 import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.common.Ray;
 import vitral.toolkits.common.Matrix4x4;
 
 public class Camera {
     // Basic Camera Model
-    private Vector3D eyePosition;
     private Vector3D up;
     private Vector3D front;
     private Vector3D left;
+    private Vector3D eyePosition;
     private double focalDistance;
     private int projectionMode;
     private double fov;
@@ -103,7 +104,17 @@ public class Camera {
 
         updateVectors();
     }
-    
+
+    public double getViewportXSize()
+    {
+        return viewport_xsize;
+    }
+
+    public double getViewportYSize()
+    {
+        return viewport_ysize;
+    }
+
     public Vector3D getPosition()
     {
         return eyePosition;
@@ -592,7 +603,7 @@ public class Camera {
             msg = msg + "  - Camara en modo de proyeccion PERSPECTIVA\n";
           }
           else if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            msg = msg + "  - Camara en modo de proyeccion PARALEqqqqqLA\n";
+            msg = msg + "  - Camara en modo de proyeccion PARALELA\n";
           }
           else {
             msg = msg + "  - Camara en modo de proyeccion DESCONOCIDO\n";
@@ -606,10 +617,18 @@ public class Camera {
         Matrix4x4 R;
         double yaw, pitch, roll;
 
-        R = calculateProjectionMatrix(STEREO_MODE_CENTER);
+        R = getRotation();//calculateProjectionMatrix(STEREO_MODE_CENTER);
         yaw = R.obtainEulerYawAngle();
         pitch = R.obtainEulerPitchAngle();
         roll = R.obtainEulerRollAngle();
+
+        msg = msg + "  - Rotacion yaw/pitch/roll: <" +
+            VSDK.formatDouble(yaw) + ", " +
+            VSDK.formatDouble(pitch) + ", " +
+            VSDK.formatDouble(roll) + "> RAD (<" +
+            VSDK.formatDouble(Math.toDegrees(yaw)) + ", " +
+            VSDK.formatDouble(Math.toDegrees(pitch)) + ", " +
+            VSDK.formatDouble(Math.toDegrees(roll)) + "> DEG)\n";
 
         //------------------------------------------------------------
         updateVectors();
@@ -620,6 +639,7 @@ public class Camera {
         msg = msg + "  - fov = " + fov + "\n";
         msg = msg + "  - nearPlaneDistance = " + nearPlaneDistance + "\n";
         msg = msg + "  - farPlaneDistance = " + farPlaneDistance + "\n";
+        msg = msg + "  - Matriz de transformacion:\n" + R + "\n";
 
         return msg;
     }

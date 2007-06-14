@@ -1,0 +1,75 @@
+package id1tvmwejrj3ao8ejrjho6v;
+
+/**
+@version 2.0
+@physicalPackage
+@__modelType diagram 
+*/
+class diagram {
+/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglMatrixRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglMeshRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference55 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglRGBAImageRendererImageAssociation:oiref><oihard>
+@__modelType reference 
+*/
+class reference56 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglCubemapBackgroundRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference57 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglToolkitInterface:oiref><oihard>
+@__modelType reference 
+*/
+class reference58 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglCameraRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference59 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglMeshGroupRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference60 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglRGBAImageRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference61 {
+}/**
+@__ref <oiref:java#Class#vitral.toolkits.visual.jogl.JoglSimpleBackgroundRenderer:oiref><oihard>
+@__modelType reference 
+*/
+class reference62 {
+}}/**
+@__tags
+@shapeType ClassDiagram 
+*/
+class __tags {
+}/**
+@__options 
+*/
+class __options {
+}/**
+@__positions <oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglRGBAImageRendererImageAssociation:oiref>=155,10,200,107,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglCubemapBackgroundRenderer:oiref>=375,10,200,85,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglSimpleBackgroundRenderer:oiref>=363,450,197,85,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglMatrixRenderer:oiref>=10,10,125,101,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglRGBAImageRenderer:oiref>=10,530,180,142,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglToolkitInterface:oiref>=375,130,125,149,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglCameraRenderer:oiref>=203,310,140,117,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglMeshRenderer:oiref>=10,150,173,341,1:oigroup>
+<oigroup:<oiref:java#Class#vitral.toolkits.visual.jogl.JoglMeshGroupRenderer:oiref>=363,310,165,101,1:oigroup> 
+*/
+class __positions {
+}
