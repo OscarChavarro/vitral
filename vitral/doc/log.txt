@@ -221,3 +221,7 @@ Changes in 2007 april 22 revition
     solid modeling operations from chapters 11 and 12 of Mantylla text. :)
   - Design level changes in class hierarchies. MediaEntity & FundamentalEntity
     abstract classes incorporated.
+
+Changes in 2007 may 1 revition
+  - Image persistence linked directly to JDK's ImageIO class. Not depending
+    on slow and deprecated sun propiertary API anymore.

@@ -7,31 +7,19 @@
 //= - August 6 2006                                                         =
 //=   - Oscar Chavarro: managed RGB and RGBA cases independently            =
 //=   - Oscar Chavarro: Awt BufferedImage convertion moved to render.awt    =
+//= - May 1 2007 - Oscar Chavarro: updated to ImageIO API                   =
 //===========================================================================
 
 package vsdk.toolkit.io.image;
 
+// Basic JDK classes
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 
-import java.awt.HeadlessException;
-import java.awt.Toolkit;
-import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Transparency;
+// Extended JDK classes
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
-import java.awt.image.ColorModel;
-
-// This class is used, but explicit import conflicts with VSDK
-//import java.awt.Image;
-
-import javax.swing.ImageIcon;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
@@ -78,12 +66,24 @@ public class ImagePersistence extends PersistenceElement
 //PENDING
             return retImage;
         }
-        if( type.equals("jpg") || type.equals("png") || 
-            type.equals("jpeg") || type.equals("gif") )  {
-            Toolkit awtTools = Toolkit.getDefaultToolkit();
-            java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
-            BufferedImage bi = toBufferedImage(image);
+        else if( type.equals("jpg") || type.equals("jpeg") ||
+                 type.equals("gif") || type.equals("png") )  {
+            BufferedImage bi = null;
 
+            // OLD SLOW METHOD, DO NOT USE!
+            //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
+            //java.awt.Image image;
+            //image = awtTools.getImage(imagen.getAbsolutePath());
+            //bi = toBufferedImage(image);
+
+            try {
+                bi = ImageIO.read(imagen);
+              }
+              catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
+                  "cannot import image file");
+                return null;
+            }
             AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
@@ -116,12 +116,24 @@ public class ImagePersistence extends PersistenceElement
 //PENDING
             return retImage;
         }
-        if( type.equals("jpg") || type.equals("png") || 
-            type.equals("jpeg") || type.equals("gif") )  {
-            Toolkit awtTools = Toolkit.getDefaultToolkit();
-            java.awt.Image image = awtTools.getImage(imagen.getAbsolutePath());
-            BufferedImage bi = toBufferedImage(image);
+        else if( type.equals("jpg") || type.equals("jpeg") ||
+                 type.equals("gif") || type.equals("png") )  {
+            BufferedImage bi = null;
 
+            // OLD SLOW METHOD, DO NOT USE!
+            //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
+            //java.awt.Image image;
+            //image = awtTools.getImage(imagen.getAbsolutePath());
+            //bi = toBufferedImage(image);
+
+            try {
+                bi = ImageIO.read(imagen);
+              }
+              catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                  "cannot import image file");
+                return null;
+            }
             AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
@@ -183,94 +195,13 @@ public class ImagePersistence extends PersistenceElement
         }
     }
     
-    private static boolean hasAlpha(java.awt.Image image) 
-    {
-        if (image instanceof BufferedImage) 
-        {
-            BufferedImage bimage = (BufferedImage)image;
-            return bimage.getColorModel().hasAlpha();
-        }
-    
-        PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-        try 
-        {
-            pg.grabPixels();
-        } 
-        catch (InterruptedException e) 
-        {
-        }
-    
-        ColorModel cm = pg.getColorModel();
-        return cm.hasAlpha();
-    }
-
-    private static BufferedImage toBufferedImage(java.awt.Image image) 
-    {
-        if ( image instanceof BufferedImage ) {
-            return (BufferedImage)image;
-        }
-        //System.out.println(image.getClass().getName());
-    
-        // This code ensures that all the pixels in the image are loaded
-        image = new ImageIcon(image).getImage();
-    
-        // Determine if the image has transparent pixels; for this method's
-        // implementation, see e661 Determining If an Image Has Transparent Pixels
-        boolean hasAlpha = hasAlpha(image); 
-    
-        // Create a buffered image with a format that's compatible with the screen
-        BufferedImage bimage = null;
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        try 
-        {
-            // Determine the type of transparency of the new buffered image
-            int transparency = Transparency.OPAQUE;
-            if (hasAlpha) 
-            {
-                transparency = Transparency.BITMASK;
-            }
-    
-            // Create the buffered image
-            GraphicsDevice gs = ge.getDefaultScreenDevice();
-            GraphicsConfiguration gc = gs.getDefaultConfiguration();
-            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-        } 
-        catch (HeadlessException e) 
-        {
-            // The system does not have a screen
-        }
-    
-        if (bimage == null) 
-        {
-            // Create a buffered image using the default color model
-            int type = BufferedImage.TYPE_INT_RGB;
-            if (hasAlpha) 
-            {
-                type = BufferedImage.TYPE_INT_ARGB;
-            }
-            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-        }
-    
-        // Copy image to buffered image
-        Graphics g = bimage.createGraphics();
-    
-        // Paint the image onto the buffered image
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-
-        return bimage;
-    }
-    
     /**
     This method writes the contents of the specified image to a file in 
     binary JPEG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
-
-    @todo implement a non SUN specific code! this generates two ugly
-    warnings on JDK 1.6.
     */    
-    public static boolean exportJPG(File fd, vsdk.toolkit.media.Image img)
+    public static boolean exportJPG(File fd, Image img)
     {
         try {
             BufferedImage bimg;
@@ -292,10 +223,14 @@ public class ImagePersistence extends PersistenceElement
             }
 
             FileOutputStream fos = new FileOutputStream(fd);
-            com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
 
-            jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
-            jpeg.encode(bimg);
+            ImageIO.write(bimg, "jpg", fos);
+
+            // OLD DEPRECATED API, DO NOT USE!
+            //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+            //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
+            //jpeg.encode(bimg);
+
             fos.close();
         }
         catch ( Exception e ) {
@@ -310,7 +245,7 @@ public class ImagePersistence extends PersistenceElement
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
     */
-    public static boolean exportPPM(File fd, vsdk.toolkit.media.Image img)
+    public static boolean exportPPM(File fd, Image img)
     {
         try {
             BufferedOutputStream writer;
@@ -348,6 +283,89 @@ public class ImagePersistence extends PersistenceElement
         }
         return true;
     }
+
+    //=================================================================
+    // DESACTIVATED METHODS!!! DO NOT USE!!!
+    //=================================================================
+/*
+    private static boolean hasAlpha(java.awt.Image image) 
+    {
+        if (image instanceof BufferedImage) 
+        {
+            BufferedImage bimage = (BufferedImage)image;
+            return bimage.getColorModel().hasAlpha();
+        }
+    
+        java.awt.image.PixelGrabber pg;
+        pg = new java.awt.image.PixelGrabber(image, 0, 0, 1, 1, false);
+        try 
+        {
+            pg.grabPixels();
+        } 
+        catch (InterruptedException e) 
+        {
+        }
+    
+        java.awt.image.ColorModel cm = pg.getColorModel();
+        return cm.hasAlpha();
+    }
+
+    private static BufferedImage toBufferedImage(java.awt.Image image) 
+    {
+        if ( image instanceof BufferedImage ) {
+            return (BufferedImage)image;
+        }
+        //System.out.println(image.getClass().getName());
+    
+        // This code ensures that all the pixels in the image are loaded
+        image = new javax.swing.ImageIcon(image).getImage();
+    
+        // Determine if the image has transparent pixels; for this method's
+        // implementation, see e661 Determining If an Image Has Transparent Pixels
+        boolean hasAlpha = hasAlpha(image); 
+    
+        // Create a buffered image with a format that's compatible with the screen
+        BufferedImage bimage = null;
+        java.awt.GraphicsEnvironment ge;
+        ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+        try 
+        {
+            // Determine the type of transparency of the new buffered image
+            int transparency = java.awt.Transparency.OPAQUE;
+            if ( hasAlpha ) {
+                transparency = java.awt.Transparency.BITMASK;
+            }
+    
+            // Create the buffered image
+            java.awt.GraphicsDevice gs = ge.getDefaultScreenDevice();
+            java.awt.GraphicsConfiguration gc = gs.getDefaultConfiguration();
+            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
+        } 
+        catch ( java.awt.HeadlessException e ) {
+            // The system does not have a screen
+        }
+    
+        if (bimage == null) 
+        {
+            // Create a buffered image using the default color model
+            int type = BufferedImage.TYPE_INT_RGB;
+            if (hasAlpha) 
+            {
+                type = BufferedImage.TYPE_INT_ARGB;
+            }
+            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+        }
+    
+        // Copy image to buffered image
+        java.awt.Graphics g = bimage.createGraphics();
+    
+        // Paint the image onto the buffered image
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+
+        return bimage;
+    }
+*/
     
 }
 

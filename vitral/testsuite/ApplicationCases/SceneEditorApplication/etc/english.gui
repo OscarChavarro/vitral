@@ -266,6 +266,13 @@ COMMAND IDC_TOOLS_CAMERA {
     iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
 }
 
+COMMAND IDC_TOOLS_RAY {
+    name "Ray control", 
+    brief "Activates or desactivates ray debug control",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1060.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
+}
+
 COMMAND IDC_CREATE_SPHERE {
     name "Create Sphere"
 }
@@ -387,7 +394,7 @@ BUTTON_GROUP "GLOBAL" {
     BUTTONS  {
         IDC_TOOLS_SELECT,
         IDC_TOOLS_TRANSLATE, IDC_TOOLS_ROTATE, IDC_TOOLS_SCALE,
-        IDC_TOOLS_CAMERA
+        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY
     }
 }
 
