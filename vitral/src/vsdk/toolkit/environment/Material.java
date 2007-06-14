@@ -21,6 +21,7 @@ public class Material extends Entity
     private ColorRgb diffuse; 
     private ColorRgb specular; 
     private ColorRgb emission;
+    private boolean doubleSided;
     private double reflectionCoefficient;
     private double refractionCoefficient; // Also known as "transmition"
 
@@ -36,8 +37,9 @@ public class Material extends Entity
         diffuse=new ColorRgb(0.9, 0.5, 0.5);
         specular=new ColorRgb(1, 1, 1);
         emission=new ColorRgb(0, 0, 0);
+        doubleSided = true;
         reflectionCoefficient = 0;
-        opacity = 1;
+        opacity = 1.0;
         phongExponent = 128;
     }
     
@@ -48,6 +50,7 @@ public class Material extends Entity
         diffuse=new ColorRgb(m.getDiffuse()); 
         specular=new ColorRgb(m.getSpecular()); 
         emission=new ColorRgb(m.getEmission()); 
+        doubleSided=m.doubleSided;
         opacity=m.getOpacity();
         phongExponent=m.phongExponent;
     }
@@ -102,6 +105,16 @@ public class Material extends Entity
         this.opacity=a;
     }
     
+    public boolean isDoubleSided()
+    {
+    return doubleSided;
+    }
+
+    public void setDoubleSided(boolean doubleSided)
+    {
+    this.doubleSided = doubleSided;
+    }
+
     public ColorRgb getAmbient()
     {
         return new ColorRgb(ambient);
@@ -149,7 +162,13 @@ public class Material extends Entity
     */
     public String toString()
     {
-        return "Material [" + name + "]:\n  - Specular " + specular + "\n  - Diffuse " + diffuse + "\n  - Ambient " + ambient + "\n  - Phong exponent: " + phongExponent + "\n\n";
+        return "Material [" + name + "]:\n" +
+               "  - Specular " + specular + "\n" +
+               "  - Diffuse " + diffuse + "\n" +
+               "  - Ambient " + ambient + "\n" +
+               "  - Phong exponent: " + phongExponent + "\n" +
+           (isDoubleSided()?"  - Double sided\n":"  - Single sided\n") +
+               "\n";
     }
 }
 

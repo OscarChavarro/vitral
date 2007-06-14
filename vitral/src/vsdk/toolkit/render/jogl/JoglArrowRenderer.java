@@ -62,6 +62,9 @@ public class JoglArrowRenderer extends JoglRenderer {
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, arrow, q);
         }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, arrow, q);
+        }
     }
 
 }

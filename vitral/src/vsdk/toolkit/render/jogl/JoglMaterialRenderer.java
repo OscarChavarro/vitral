@@ -49,6 +49,14 @@ public class JoglMaterialRenderer extends JoglRenderer {
         //float emission[] = m.getEmission().toFloatVect();
         //emission[3] = opacity;
 
+        if ( m.isDoubleSided() ) {
+            gl.glDisable(gl.GL_CULL_FACE);
+      }
+      else {
+            gl.glEnable(gl.GL_CULL_FACE);
+        gl.glCullFace(gl.GL_BACK);
+    }
+
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_AMBIENT, ambient, 0);
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE, diffuse, 0);
         gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_SPECULAR, specular, 0);

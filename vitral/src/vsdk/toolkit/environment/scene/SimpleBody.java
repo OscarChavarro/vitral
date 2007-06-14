@@ -21,6 +21,10 @@ public class SimpleBody extends Entity {
     private Vector3D position;
     private Vector3D scale;
 
+    /// This string should be used for specific application defined
+    /// functionality. Can be null.
+    private String name;
+
     /// Warning: The translation value in this matrix must be <0, 0, 0>
     private Matrix4x4 rotation;
 
@@ -37,6 +41,16 @@ public class SimpleBody extends Entity {
         position = new Vector3D(0, 0, 0);
         scale = new Vector3D(1, 1, 1);
         material = new Material();
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String n)
+    {
+        name = new String(n);
     }
 
     public Geometry getGeometry()

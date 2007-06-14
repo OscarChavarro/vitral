@@ -23,14 +23,14 @@ import vsdk.transition.io.presentation.GuiCachePersistence;
 import vsdk.transition.gui.GuiCache;
 import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 
-public class AwtImageControlWindow
+public class SwingImageControlWindow
 {
     private JFrame windowWidget;
     public JLabel statusMessage;
     private RGBImage controlledImage;
     private ImageDisplayPanel workArea;
 
-    public AwtImageControlWindow(RGBImage image, 
+    public SwingImageControlWindow(RGBImage image, 
                                  GuiCache gui, ActionListener executor) {
         controlledImage = image;
 

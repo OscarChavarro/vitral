@@ -37,7 +37,8 @@ public class Scene
     public boolean showCorridor;
     public boolean showGrid;
     public ArrayList<SimpleBody> things;
-    public int selectedThingIndex; // Negative when none selected
+
+    public SelectionSet selectedThings;
 
     // Others
     public QualitySelection qualityTemplate;
@@ -55,13 +56,13 @@ public class Scene
         camera.setRotation(R);
 
         activeCamera = camera;
-        selectedThingIndex = -1;
+        selectedThings = new SelectionSet(things);
 
         //-----------------------------------------------------------------
         simpleBackground = new SimpleBackground();
         simpleBackground.setColor(0.49, 0.49, 0.49);
 
-    cubemapBackground = null;
+        cubemapBackground = null;
 
         selectedBackground = 0;
 
@@ -112,7 +113,7 @@ public class Scene
         return true;
     }
 
-    public void selectObjectWithMouse(int x, int y)
+    public void selectObjectWithMouse(int x, int y, boolean composite)
     {
         Ray r;
         SimpleBody gi;
@@ -125,14 +126,22 @@ public class Scene
         Iterator i;
         int index = 0;
 
-        selectedThingIndex = -1;
+    if ( !composite ) {
+            selectedThings.unselectAll();
+    }
         for ( i = things.iterator(); i.hasNext(); index++ ) {
             gi = (SimpleBody)i.next();
             if ( gi.doIntersection(r) && r.t < nearestDistance ) {
                 nearestDistance = r.t;
-                selectedThingIndex = index;
+        if ( !composite ) {
+                    selectedThings.unselectAll();
+                    selectedThings.select(index);
+        }
+        else {
+                    selectedThings.change(index);
+        }
             }
-    }
+        }
     }
 
     public void print()
@@ -143,7 +152,7 @@ public class Scene
         int c = 0;
         for ( Iterator i = things.iterator(); i.hasNext(); c++ ) {
             System.out.println("  - Thing[" + c + "]: " + ((SimpleBody)i.next()).getGeometry().getClass().getName());
-    }
+        }
         System.out.println("= END OF REPORT ===========================================================");
     }
 
@@ -158,20 +167,20 @@ public class Scene
 
         //-----------------------------------------------------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
-    Raytracer visualizationEngine;
+        Raytracer visualizationEngine;
 
         Background activeBackground;
         switch ( selectedBackground ) {
           case 1:
-        if ( cubemapBackground == null ) {
+            if ( cubemapBackground == null ) {
                 buildCubemap();
             }
-        if ( cubemapBackground != null ) {
+            if ( cubemapBackground != null ) {
                 activeBackground = cubemapBackground;
-        }
-        else {
+            }
+            else {
                 activeBackground = simpleBackground;
-        }
+            }
             break;
           case 0: default:
             activeBackground = simpleBackground;
@@ -181,7 +190,7 @@ public class Scene
         visualizationEngine = new Raytracer();
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, things, lights, 
-                    activeBackground, activeCamera,
+                                    activeBackground, activeCamera,
                                     reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");

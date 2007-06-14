@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.Arrow;
 
 public class JoglTranslateGizmoRenderer extends JoglRenderer 
 {
@@ -77,7 +78,6 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
                 position = r.getPosition();
                 gl.glTranslated(position.x, position.y, position.z);
                 JoglMatrixRenderer.activate(gl, r.getRotation());
-
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
                 gl.glPopMatrix();

@@ -45,14 +45,12 @@ public class XmlManager {
             Element xmlElement;
             xmlElement = null;
 
-            if ( object.getClass().getName().equals(
-                "vsdk.toolkit.environment.geometry.ParametricCurve") ) {
+            if ( object instanceof ParametricCurve) ) {
                 ParametricCurve curve = (ParametricCurve) object;
                 xmlElement = ParametricCurvePersistence.toElement(curve, 
                                                                   document);
             }
-            else if ( object.getClass().getName().equals(
-                "vsdk.toolkit.environment.geometry.ParametricBiCubicPatch") ) {
+            else if ( object instanceof ParametricBiCubicPatch ) {
                 ParametricBiCubicPatch patch = (ParametricBiCubicPatch) object;
                 xmlElement = ParametricBiCubicPatchPersistence.toElement(patch,
                                                                      document);

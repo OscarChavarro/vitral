@@ -27,6 +27,20 @@ public class Light extends Entity
     private ColorRgb specular;         // Emission color of the light source
     private int id;
 
+    /// This string should be used for specific application defined
+    /// functionality. Can be null.
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String n)
+    {
+        name = new String(n);
+    }
+
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;

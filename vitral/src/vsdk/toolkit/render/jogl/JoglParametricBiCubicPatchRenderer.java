@@ -148,6 +148,9 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
         }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, p, q);
+        }
     }
 
     public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
@@ -159,6 +162,9 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                         inicialTextCoorU, inicialTextCoorV);
         if (q.isBoundingVolumeSet()) {
             JoglGeometryRenderer.drawMinMaxBox(gl, p, q);
+        }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, p, q);
         }
     }
 }

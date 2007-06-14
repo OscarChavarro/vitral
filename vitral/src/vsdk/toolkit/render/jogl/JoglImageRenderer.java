@@ -34,15 +34,15 @@ public class JoglImageRenderer extends JoglRenderer
     */
     public static void activate(GL gl, Image img)
     {
-        String c = img.getClass().getName();
-
-        if ( c.equals("vsdk.toolkit.media.RGBAImage") ) {
+        if ( img instanceof RGBAImage ) {
             JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
     }
-        else if ( c.equals("vsdk.toolkit.media.RGBImage") ) {
+        else if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.activate(gl, (RGBImage)img);
     }
     else {
+            String c = img.getClass().getName();
+
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.activate",
             "Image GL activation not implemented for subclass " + c);
     }
@@ -50,15 +50,15 @@ public class JoglImageRenderer extends JoglRenderer
 
     public static void draw(GL gl, Image img)
     {
-        String c = img.getClass().getName();
-
-        if ( c.equals("vsdk.toolkit.media.RGBAImage") ) {
+        if ( img instanceof RGBAImage ) {
             JoglRGBAImageRenderer.draw(gl, (RGBAImage)img);
     }
-        else if ( c.equals("vsdk.toolkit.media.RGBImage") ) {
+        else if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.draw(gl, (RGBImage)img);
     }
     else {
+            String c = img.getClass().getName();
+
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.draw",
             "Image GL drawing not implemented for subclass " + c);
     }

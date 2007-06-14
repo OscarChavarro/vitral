@@ -157,3 +157,9 @@ Changes in 2006 december 8 to 10 revition
   - Organizer abstract classes incorporated for exceptions, renderers, gizmos,
     controllers and persistence classes
   - Implementation of reader 3ds started, first partial version operational
+
+Changes in 2006 december 16 to 17 revition
+  - Material support double sided and single sided configurations
+  - Added details to Reader3ds
+  - object.getClass().getName().equals(...) hierarchy detection update to
+    the use of "instanceof" Java operator

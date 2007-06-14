@@ -138,3 +138,19 @@ Aug 20 2006, Oscar Chavarro:
 
 Nov 10 2006, Oscar Chavarro:
   - 10min: added quality selection management
+
+Dec 17 2006, Oscar Chavarro:
+  - 10min: added object deletion capability
+  - 45min: Java reflection mechanisms study and testing, in preparation
+    for naming management for selection set interface
+  - 40min: SelectionSet class development
+  - 33min: Multiple mouse selection :-)
+  - 2h30min: Modifying behavior details in TranslateGizmo :-) not really
+    well understood yet, but now working finer than before (empiric
+    trial and error optimization)
+  - 20min: Multiple selection translation test (failed, to redesign later)
+  - 30min: Swing study for general user defined modal dialogs
+  - 40min: Selection corners managing
+
+Dec 18 2006, Oscar Chavarro:
+  - 10min: Swing building of selector dialog

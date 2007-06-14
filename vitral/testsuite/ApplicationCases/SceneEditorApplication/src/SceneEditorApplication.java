@@ -127,7 +127,8 @@ public class SceneEditorApplication {
     public GuiCache gui;
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
-    public AwtImageControlWindow imageControlWindow;
+    public SwingImageControlWindow imageControlWindow;
+    public SwingSelectorDialog selectorDialog;
     public ButtonsPanel executorPanel;
     private JFrame mainWindowWidget;
     private String lookAndFeel;
@@ -329,6 +330,7 @@ public class SceneEditorApplication {
 
         //-----------------------------------------------------------------
         imageControlWindow = null;
+        selectorDialog = null;
     }
 
     private void destroyGUI()
@@ -361,7 +363,8 @@ public class SceneEditorApplication {
 
 class ButtonsPanel extends JPanel implements ActionListener
 {
-    SceneEditorApplication parent;
+    private SceneEditorApplication parent;
+    private int acumObject = 1;
 
     public ButtonsPanel(SceneEditorApplication parent, int group)
     {
@@ -434,7 +437,11 @@ class ButtonsPanel extends JPanel implements ActionListener
         thing.setRotation(new Matrix4x4());
         thing.setRotationInverse(new Matrix4x4());
         thing.setMaterial(defaultMaterial());
+        thing.setName("Geometric object " + acumObject);
         parent.theScene.things.add(thing);
+
+    acumObject++;
+        parent.theScene.selectedThings.sync();
     }
 
     public void actionPerformed(ActionEvent ev) {
@@ -442,8 +449,7 @@ class ButtonsPanel extends JPanel implements ActionListener
 
         // This makes event compatible with ButtonGroup scheme of event
         // handling
-        if ( ev.getSource().getClass().getName().equals(
-             "javax.swing.JButton") ) {
+        if ( ev.getSource() instanceof JButton ) {
             JButton origin = (JButton)ev.getSource();
             label = origin.getName();
         }
@@ -643,7 +649,7 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
             parent.theScene.raytrace(parent.raytracedImage);
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+                parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
             }
             else {
                 parent.imageControlWindow.setImage(parent.raytracedImage);

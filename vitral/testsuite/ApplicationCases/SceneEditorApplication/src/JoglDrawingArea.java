@@ -1,5 +1,10 @@
+//===========================================================================
+//===========================================================================
+
 // JDK Basic classes
+import java.lang.reflect.Method;
 import java.io.File;
+import java.util.ArrayList;
 
 // AWT/Swing classes
 import java.awt.Cursor;
@@ -153,12 +158,15 @@ public class JoglDrawingArea implements
         translationGizmo.setCamera(theScene.activeCamera);
 
         gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+
+        int firstThingSelected = theScene.selectedThings.firstSelected();
+
         if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
-            if ( theScene.selectedThingIndex >= 0 ) {
+            if ( firstThingSelected >= 0 ) {
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
 
               Matrix4x4 composed;
 
@@ -173,11 +181,11 @@ public class JoglDrawingArea implements
             }
         }
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
-            if ( theScene.selectedThingIndex >= 0 ) {
+            if ( firstThingSelected >= 0 ) {
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
 
               position = gi.getPosition();
               rotateGizmo.setTransformationMatrix(gi.getRotation());
@@ -185,11 +193,11 @@ public class JoglDrawingArea implements
             }
         }
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
-            if ( theScene.selectedThingIndex >= 0 ) {
+            if ( firstThingSelected >= 0 ) {
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
 
               position = gi.getPosition();
               scaleGizmo.setTransformationMatrix(gi.getRotation());
@@ -204,30 +212,30 @@ public class JoglDrawingArea implements
         if ( wantToGetColor ) {
             parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
-        }
-        else {
+                parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
+            }
+            else {
                 parent.imageControlWindow.setImage(parent.zbufferImage);
-        }
+            }
             parent.imageControlWindow.redrawImage();
             parent.statusMessage.setText("ZBuffer Color Image obtained!");
             wantToGetColor = false;
-    }
+        }
     }
     private void copyZBufferIfNeeded(GL gl)
     {
         if ( wantToGetDepth ) {
             parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(parent.palette);
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new AwtImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
-        }
-        else {
+                parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
+            }
+            else {
                 parent.imageControlWindow.setImage(parent.zbufferImage);
-        }
+            }
             parent.imageControlWindow.redrawImage();
             parent.statusMessage.setText("ZBuffer depth map obtained!");
             wantToGetDepth = false;
-    }
+        }
     }
 
     /** Called by drawable to initiate drawing */
@@ -240,7 +248,7 @@ public class JoglDrawingArea implements
         // the zbuffer...
         copyZBufferIfNeeded(gl);
 
-      // Must be the last to draw
+        // Must be the last to draw
         drawGizmos(gl);
 
         copyColorBufferIfNeeded(gl);
@@ -319,7 +327,17 @@ public class JoglDrawingArea implements
                   interactionMode == ROTATE_INTERACTION_MODE || 
                   interactionMode == SCALE_INTERACTION_MODE 
                  ) {
-          theScene.selectObjectWithMouse(e.getX(), e.getY());
+      boolean composite = false;
+          if ( ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
+          composite = true;
+          }
+          int f = theScene.selectedThings.firstSelected();
+          theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
+      if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
+               interactionMode == TRANSLATE_INTERACTION_MODE &&
+               translationGizmo.isActive() ) {
+          theScene.selectedThings.select(f);
+      }
           reportObjectSelection();
           canvas.repaint();
       }
@@ -330,6 +348,9 @@ public class JoglDrawingArea implements
       // There should be a cameraController.getFutureAction(e) that calculates
       // the proper icon for display ... here an Aquynza operation is
       // assumed and hard-coded
+
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+
       if ( interactionMode == CAMERA_INTERACTION_MODE ) {
           canvas.setCursor(camrotateCursor);
       }
@@ -342,11 +363,11 @@ public class JoglDrawingArea implements
           canvas.repaint();
       }
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                theScene.selectedThingIndex >= 0 ) {
+                firstThingSelected >= 0 ) {
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(theScene.selectedThingIndex);
+          gi = theScene.things.get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -366,11 +387,7 @@ public class JoglDrawingArea implements
               composed.M[0][3] = 0;
               composed.M[1][3] = 0;
               composed.M[2][3] = 0;
-              gi.setPosition(position);
-              gi.setRotation(composed);
-              composed = new Matrix4x4(composed);
-              composed.invert();
-              gi.setRotationInverse(composed);
+              applyTransformToSelectedObjects(position, composed);
               canvas.repaint();
           }
       }
@@ -378,16 +395,18 @@ public class JoglDrawingArea implements
   }
 
   public void mouseClicked(MouseEvent e) {
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMouseClickedEventAwt(e) ) {
           canvas.repaint();
       }
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                theScene.selectedThingIndex >= 0 ) {
+                firstThingSelected >= 0 ) {
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(theScene.selectedThingIndex);
+          gi = theScene.things.get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -407,27 +426,25 @@ public class JoglDrawingArea implements
               composed.M[0][3] = 0;
               composed.M[1][3] = 0;
               composed.M[2][3] = 0;
-              gi.setPosition(position);
-              gi.setRotation(composed);
-              composed = new Matrix4x4(composed);
-              composed.invert();
-              gi.setRotationInverse(composed);
+              applyTransformToSelectedObjects(position, composed);
               canvas.repaint();
           }
       }
   }
 
   public void mouseMoved(MouseEvent e) {
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMouseMovedEventAwt(e) ) {
           canvas.repaint();
       }
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                theScene.selectedThingIndex >= 0 ) {
+                firstThingSelected >= 0 ) {
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(theScene.selectedThingIndex);
+          gi = theScene.things.get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -447,27 +464,25 @@ public class JoglDrawingArea implements
               composed.M[0][3] = 0;
               composed.M[1][3] = 0;
               composed.M[2][3] = 0;
-              gi.setPosition(position);
-              gi.setRotation(composed);
-              composed = new Matrix4x4(composed);
-              composed.invert();
-              gi.setRotationInverse(composed);
+              applyTransformToSelectedObjects(position, composed);
               canvas.repaint();
           }
       }
   }
 
   public void mouseDragged(MouseEvent e) {
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMouseDraggedEventAwt(e) ) {
           canvas.repaint();
       }
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                theScene.selectedThingIndex >= 0 ) {
+                firstThingSelected >= 0 ) {
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(theScene.selectedThingIndex);
+          gi = theScene.things.get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -487,11 +502,7 @@ public class JoglDrawingArea implements
               composed.M[0][3] = 0;
               composed.M[1][3] = 0;
               composed.M[2][3] = 0;
-              gi.setPosition(position);
-              gi.setRotation(composed);
-              composed = new Matrix4x4(composed);
-              composed.invert();
-              gi.setRotationInverse(composed);
+              applyTransformToSelectedObjects(position, composed);
               canvas.repaint();
           }
       }
@@ -515,6 +526,8 @@ public class JoglDrawingArea implements
       unicode_id = e.getKeyChar();
       keycode = e.getKeyCode();
 
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processKeyPressedEventAwt(e) ) {
           canvas.repaint();
@@ -527,21 +540,11 @@ public class JoglDrawingArea implements
           if ( unicode_id == e.CHAR_UNDEFINED ) {
             switch ( keycode ) {
               case KeyEvent.VK_LEFT:
-                if ( theScene.selectedThingIndex == -1 ) {
-                    theScene.selectedThingIndex = theScene.things.size()-1;
-                }
-                else {
-                    theScene.selectedThingIndex--;
-                }
+                theScene.selectedThings.selectPrevious();
                 reportObjectSelection();
                 break;
               case KeyEvent.VK_RIGHT:
-                if ( theScene.selectedThingIndex >= theScene.things.size()-1 ) {
-                    theScene.selectedThingIndex = -1;
-                }
-                else {
-                    theScene.selectedThingIndex++;
-                }
+                theScene.selectedThings.selectNext();
                 reportObjectSelection();
                 break;
             }
@@ -549,12 +552,12 @@ public class JoglDrawingArea implements
           }
       }
       else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
-          if ( theScene.selectedThingIndex >= 0 ) {
+          if ( firstThingSelected >= 0 ) {
               Matrix4x4 composed;
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
 
               position = gi.getPosition();
               composed = new Matrix4x4(gi.getRotation());
@@ -571,20 +574,16 @@ public class JoglDrawingArea implements
                   composed.M[0][3] = 0;
                   composed.M[1][3] = 0;
                   composed.M[2][3] = 0;
-                  gi.setPosition(position);
-                  gi.setRotation(composed);
-                  composed = new Matrix4x4(composed);
-                  composed.invert();
-                  gi.setRotationInverse(composed);
+                  applyTransformToSelectedObjects(position, composed);
                   canvas.repaint();
               }
           }
       }
       else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
-          if ( theScene.selectedThingIndex >= 0 ) {
+          if ( firstThingSelected >= 0 ) {
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
               Matrix4x4 R = gi.getRotation();
 
               rotateGizmo.setTransformationMatrix(R);
@@ -600,10 +599,10 @@ public class JoglDrawingArea implements
           }
       }
       else if ( interactionMode == SCALE_INTERACTION_MODE ) {
-          if ( theScene.selectedThingIndex >= 0 ) {
+          if ( firstThingSelected >= 0 ) {
               SimpleBody gi;
 
-              gi = theScene.things.get(theScene.selectedThingIndex);
+              gi = theScene.things.get(firstThingSelected);
               Vector3D s = gi.getScale();
               Matrix4x4 S = new Matrix4x4();
               S.M[0][0] = s.x;
@@ -622,10 +621,70 @@ public class JoglDrawingArea implements
       }
 
       // Global commands
-      if ( keycode == KeyEvent.VK_ESCAPE) System.exit(0);
+      if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
+
+      if ( keycode == KeyEvent.VK_DELETE ) {
+          int  i;
+          for ( i = theScene.things.size()-1; i >= 0; i-- ) {
+              if ( theScene.selectedThings.isSelected(i) ) {
+                  theScene.things.remove(i);
+              }
+          }
+          theScene.selectedThings.sync();
+          canvas.repaint();
+      }
+
+      if ( keycode == KeyEvent.VK_F10 ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
+            parent.raytracedImage.init(parent.raytracedImageWidth, parent.raytracedImageHeight);
+            parent.theScene.raytrace(parent.raytracedImage);
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+            }
+            else {
+                parent.imageControlWindow.setImage(parent.raytracedImage);
+            }
+            parent.imageControlWindow.redrawImage();
+      }
 
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
+            case 'h':
+              //-------------------------------------------------------------
+              if ( parent.selectorDialog == null ) {
+                  parent.selectorDialog = new SwingSelectorDialog();
+              }
+              parent.selectorDialog.setVisible(true);
+              parent.selectorDialog.repaint();
+              //-------------------------------------------------------------
+
+
+              SimpleBody o;
+              int i;
+              ArrayList generic = parent.theScene.things;
+              String msg = "";
+
+              for ( i = 0; i < generic.size(); i++ ) {
+                  System.out.println("Consultando cosa " + i + ":");
+                  o = (SimpleBody)generic.get(i);
+                  try {
+                      Method m = o.getClass().getMethod("getName", (Class[])null);
+                      if ( !(m.getReturnType().isInstance(msg)) ) {
+                          throw new Exception("Wrong method signature");
+                      }
+                      msg = (String)m.invoke(o);
+                  }
+                  catch ( Exception ee ) {
+                      msg = null;
+                  }
+                  if ( msg == null || msg.equals("") ) {
+                      msg = "Not named object";
+                  }
+                  System.out.println("Object: " + msg);
+              }
+              break;
+
             case 'c':
               statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
               interactionMode = CAMERA_INTERACTION_MODE;
@@ -656,7 +715,7 @@ public class JoglDrawingArea implements
               canvas.repaint();
               break;
 
-        case 'g':
+            case 'g':
               if ( theScene.showGrid == true ) {
                   theScene.showGrid = false;
               }
@@ -664,7 +723,7 @@ public class JoglDrawingArea implements
                   theScene.showGrid = true;
               }
               canvas.repaint();
-          break;
+              break;
           }
       }
 
@@ -677,19 +736,42 @@ public class JoglDrawingArea implements
 
   }
 
-  private void reportObjectSelection()
+  private void applyTransformToSelectedObjects(Vector3D position,
+                                               Matrix4x4 rotation)
   {
-      if ( theScene.selectedThingIndex <= -1 ) {
-          statusMessage.setText("All things are UNSELECTED");
-      }
-      else {
-          statusMessage.setText("Thing [" + theScene.selectedThingIndex + 
-                                "] selected, which is a [" + 
-((SimpleBody)(theScene.things.get(theScene.selectedThingIndex))).getGeometry().getClass().getName() 
-                                + "]");
+      SimpleBody gi;
+      int firstThingSelected = theScene.selectedThings.firstSelected();
+      int i;
+
+      for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
+          if ( !theScene.selectedThings.isSelected(i) ) continue;
+          gi = theScene.things.get(i);
+
+          gi.setPosition(position);
+          gi.setRotation(rotation);
+          rotation = new Matrix4x4(rotation);
+          rotation.invert();
+          gi.setRotationInverse(rotation);
       }
   }
 
+  private void reportObjectSelection()
+  {
+      theScene.selectedThings.sync();
+      int n = theScene.selectedThings.numberOfSelections();
+      if ( n == 0 ) {
+          statusMessage.setText("All things are UNSELECTED");
+      }
+      else if ( n == 1 ) {
+          int f = theScene.selectedThings.firstSelected();
+          statusMessage.setText("Thing [" + f + "] selected, which is a [" + 
+     ((SimpleBody)(theScene.things.get(f))).getGeometry().getClass().getName() 
+                                + "]");
+      }
+      else {
+          statusMessage.setText(n + " things selected");
+      }
+  }
 
   public void keyReleased(KeyEvent e) {
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -708,3 +790,6 @@ public class JoglDrawingArea implements
   }
 }
 
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

@@ -44,6 +44,10 @@ public class Camera extends Entity
     private double nearPlaneDistance;
     private double farPlaneDistance;
 
+    /// This string should be used for specific application defined
+    /// functionality. Can be null.
+    private String name;
+
     // Global constants
     public static final int OPCODE_FAR = (0x01 << 1);
     public static final int OPCODE_NEAR = (0x01 << 2);
@@ -120,6 +124,16 @@ public class Camera extends Entity
         focalDistance = b.focalDistance;
 
         updateVectors();
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String n)
+    {
+        name = new String(n);
     }
 
     public double getViewportXSize()

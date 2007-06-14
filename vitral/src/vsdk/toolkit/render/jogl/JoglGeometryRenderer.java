@@ -10,6 +10,7 @@ import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.QualitySelection;
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
@@ -60,6 +61,90 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
+    public static void drawSelectionCorners(GL gl, Geometry g, QualitySelection q)
+    {
+        double [] minmax;
+    double borderPercent = 0.01;
+    double linePercent = 0.25;
+        minmax = g.getMinMax();
+
+        Vector3D min, max, delta;
+        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        delta = max.substract(min);
+        min = min.substract(delta.multiply(borderPercent));
+        max = max.add(delta.multiply(borderPercent));
+        delta = delta.multiply(linePercent);
+
+        gl.glPushAttrib(gl.GL_LIGHTING_BIT);
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        // Warning: Change with configured color for bounding volume
+        gl.glColor3d(1, 1, 1);
+        gl.glLineWidth(1.0f);
+        gl.glBegin(gl.GL_LINES);
+
+            gl.glVertex3d(min.x, min.y, min.z);
+            gl.glVertex3d(min.x+delta.x, min.y, min.z);
+            gl.glVertex3d(min.x, min.y, min.z);
+            gl.glVertex3d(min.x, min.y+delta.y, min.z);
+            gl.glVertex3d(min.x, min.y, min.z);
+            gl.glVertex3d(min.x, min.y, min.z+delta.z);
+
+            gl.glVertex3d(max.x, min.y, min.z);
+            gl.glVertex3d(max.x-delta.x, min.y, min.z);
+            gl.glVertex3d(max.x, min.y, min.z);
+            gl.glVertex3d(max.x, min.y+delta.y, min.z);
+            gl.glVertex3d(max.x, min.y, min.z);
+            gl.glVertex3d(max.x, min.y, min.z+delta.z);
+
+            gl.glVertex3d(min.x, max.y, min.z);
+            gl.glVertex3d(min.x+delta.x, max.y, min.z);
+            gl.glVertex3d(min.x, max.y, min.z);
+            gl.glVertex3d(min.x, max.y-delta.y, min.z);
+            gl.glVertex3d(min.x, max.y, min.z);
+            gl.glVertex3d(min.x, max.y, min.z+delta.z);
+
+            gl.glVertex3d(min.x, min.y, max.z);
+            gl.glVertex3d(min.x+delta.x, min.y, max.z);
+            gl.glVertex3d(min.x, min.y, max.z);
+            gl.glVertex3d(min.x, min.y+delta.y, max.z);
+            gl.glVertex3d(min.x, min.y, max.z);
+            gl.glVertex3d(min.x, min.y, max.z-delta.z);
+
+            gl.glVertex3d(max.x, max.y, min.z);
+            gl.glVertex3d(max.x-delta.x, max.y, min.z);
+            gl.glVertex3d(max.x, max.y, min.z);
+            gl.glVertex3d(max.x, max.y-delta.y, min.z);
+            gl.glVertex3d(max.x, max.y, min.z);
+            gl.glVertex3d(max.x, max.y, min.z+delta.z);
+
+            gl.glVertex3d(max.x, min.y, max.z);
+            gl.glVertex3d(max.x-delta.x, min.y, max.z);
+            gl.glVertex3d(max.x, min.y, max.z);
+            gl.glVertex3d(max.x, min.y+delta.y, max.z);
+            gl.glVertex3d(max.x, min.y, max.z);
+            gl.glVertex3d(max.x, min.y, max.z-delta.z);
+
+            gl.glVertex3d(min.x, max.y, max.z);
+            gl.glVertex3d(min.x+delta.x, max.y, max.z);
+            gl.glVertex3d(min.x, max.y, max.z);
+            gl.glVertex3d(min.x, max.y-delta.y, max.z);
+            gl.glVertex3d(min.x, max.y, max.z);
+            gl.glVertex3d(min.x, max.y, max.z-delta.z);
+
+            gl.glVertex3d(max.x, max.y, max.z);
+            gl.glVertex3d(max.x-delta.x, max.y, max.z);
+            gl.glVertex3d(max.x, max.y, max.z);
+            gl.glVertex3d(max.x, max.y-delta.y, max.z);
+            gl.glVertex3d(max.x, max.y, max.z);
+            gl.glVertex3d(max.x, max.y, max.z-delta.z);
+
+        gl.glEnd();
+
+        gl.glPopAttrib();
+    }
+
     public static void draw(GL gl, Geometry g, Camera c, QualitySelection q)
     {
         if ( g == null ) {
@@ -68,30 +153,29 @@ public class JoglGeometryRenderer extends JoglRenderer
                                "null Geometry reference recieved");
             return;
     }
-        String geometryType = g.getClass().getName();
 
-        if ( geometryType == "vsdk.toolkit.environment.geometry.Sphere" ) {
+        if ( g instanceof Sphere ) {
             JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
     }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.Box" ) {
+        else if ( g instanceof Box ) {
             JoglBoxRenderer.draw(gl, (Box)g, c, q);
     }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.Cone" ) {
+        else if ( g instanceof Cone ) {
             JoglConeRenderer.draw(gl, (Cone)g, c, q);
     }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.Arrow" ) {
+        else if ( g instanceof Arrow ) {
             JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricCurve" ) {
+        else if ( g instanceof ParametricCurve ) {
         JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.ParametricBiCubicPatch" ) {
+        else if ( g instanceof ParametricBiCubicPatch ) {
         JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.TriangleMesh" ) {
+        else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
         }
-        else if ( geometryType == "vsdk.toolkit.environment.geometry.TriangleMeshGroup" ) {
+        else if ( g instanceof TriangleMeshGroup ) {
             JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
         }
     }

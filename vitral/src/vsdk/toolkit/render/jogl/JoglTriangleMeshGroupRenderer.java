@@ -24,7 +24,13 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
 
         for ( i = meshGroup.getMeshes().iterator(); i.hasNext(); ) {
             mesh = (TriangleMesh)i.next();
+            boolean c = quality.isSelectionCornersSet()?true:false;
+            quality.setSelectionCorners(false);
             JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);
+            quality.setSelectionCorners(c);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, meshGroup, quality);
         }
     }
 

@@ -15,12 +15,17 @@ import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.QualitySelection;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.Material;
 
 public class JoglTriangleMeshRenderer extends JoglRenderer {
+
+    private static Vector3D p = new Vector3D();
+    private static Vector3D n = new Vector3D();
+
     /**
     @todo program this!
     */
@@ -55,6 +60,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         if ( quality.isSurfacesSet() ) {
             int shadingType = quality.getShadingType();
 
+            gl.glPolygonOffset(0.0f, 0.0f);
+
             switch ( shadingType ) {
               case QualitySelection.SHADING_TYPE_NOLIGHT:
                 gl.glDisable(gl.GL_LIGHTING);
@@ -85,7 +92,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         if ( quality.isWiresSet() ) {
             gl.glDisable(gl.GL_LIGHTING);
             gl.glShadeModel(gl.GL_FLAT);
+
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+
+            gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
@@ -157,12 +168,15 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void drawVertexNormal(GL gl, Vertex vertex) {
         double l = 0.2;
+    p = vertex.getPosition();
+    n = vertex.getNormal();
 
-        gl.glVertex3d(vertex.getPosition().x, vertex.getPosition().y,
-                      vertex.getPosition().z);
-        gl.glVertex3d(vertex.getPosition().x + (vertex.getNormal().x * l),
-                      vertex.getPosition().y + (vertex.getNormal().y * l),
-                      vertex.getPosition().z + (vertex.getNormal().z * l));
+        gl.glVertex3d(p.x + (n.x * l/100),
+                      p.y + (n.y * l/100),
+                      p.z + (n.z * l/100));
+        gl.glVertex3d(p.x + (n.x * l),
+                      p.y + (n.y * l),
+                      p.z + (n.z * l));
     }
 
     private static void drawTriangleNormals(GL gl, TriangleMesh m) {

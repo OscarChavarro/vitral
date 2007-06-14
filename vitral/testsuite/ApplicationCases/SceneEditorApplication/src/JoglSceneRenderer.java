@@ -69,11 +69,11 @@ public class JoglSceneRenderer
 
             quality = s.qualityTemplate;
 
-            if ( j == s.selectedThingIndex ) {
-                quality.setBoundingVolume(true);
+            if ( s.selectedThings.isSelected(j) ) {
+                quality.setSelectionCorners(true);
             }
             else {
-                quality.setBoundingVolume(false);
+                quality.setSelectionCorners(false);
             }
 
             gl.glPushMatrix();

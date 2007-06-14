@@ -88,6 +88,8 @@ public class TranslateGizmo extends Gizmo {
   private boolean selectedResizing;
   private double currentScale;
 
+  private boolean active;
+
   public TranslateGizmo(Camera cam)
   {
       persistentSelection = X_AXIS_GROUP;
@@ -111,6 +113,7 @@ public class TranslateGizmo extends Gizmo {
       oldmousey = 0;
       selectedResizing = true;
       currentScale = 1.0;
+      active = false;
   }
 
   public void setCamera(Camera cam)
@@ -520,7 +523,7 @@ public class TranslateGizmo extends Gizmo {
   public boolean processMouseEventAwt(MouseEvent mouseEvent)
   {
       oldmousex = mouseEvent.getX();
-      oldmousey = mouseEvent.getX();
+      oldmousey = mouseEvent.getY();
       return false;
   }
 
@@ -589,7 +592,7 @@ public class TranslateGizmo extends Gizmo {
   public boolean processMousePressedEventAwt(MouseEvent mouseEvent)
   {
       oldmousex = mouseEvent.getX();
-      oldmousey = mouseEvent.getX();
+      oldmousey = mouseEvent.getY();
       return false;
   }
 
@@ -660,11 +663,24 @@ public class TranslateGizmo extends Gizmo {
         case XZX_SEGMENT_ELEMENT: selection = XZ_PLANE_GROUP; break;
       }
 
+      active = false;
+      if ( selection != NULL_GROUP ) {
+      active = true;
+      }
+
       return selection;
+  }
+
+  public boolean isActive()
+  {
+      return active;
   }
 
   public boolean processMouseMovedEventAwt(MouseEvent e)
   {
+      oldmousex = e.getX();
+      oldmousey = e.getY();
+
       selectedResizing = true;
       calculateGeometryState(getPosition(), T, selectedResizing, 
                              INITIAL_DU, camera, MODEL_FOR_GRAVITY);
@@ -689,7 +705,7 @@ public class TranslateGizmo extends Gizmo {
       if ( skipRobot ) {
           skipRobot = false;
           oldmousex = e.getX();
-          oldmousey = e.getX();
+          oldmousey = e.getY();
           return false;
       }
 
@@ -734,7 +750,7 @@ public class TranslateGizmo extends Gizmo {
 
       if ( v == null ) {
           oldmousex = e.getX();
-          oldmousey = e.getX();
+          oldmousey = e.getY();
           return false;
       }
 
@@ -743,16 +759,18 @@ public class TranslateGizmo extends Gizmo {
       camera.updateVectors();
       Vector3D p = new Vector3D(0, 0, 0);
       Ray r = null;
-      InfinitePlane plane;
+      InfinitePlane plane, oldplane;
       int mousex = e.getX();
       int mousey = e.getY();
+      Vector3D deltapos = new Vector3D();
+      Vector3D oldp = new Vector3D();
 
       if ( interactionTechnique == 2 ) {
           r = camera.generateRay(mousex, mousey);
           plane = new InfinitePlane(v, o);
           if ( !plane.doIntersection(r) ) {
               oldmousex = e.getX();
-              oldmousey = e.getX();
+              oldmousey = e.getY();
               p = o;
             }
         else {
@@ -780,48 +798,58 @@ public class TranslateGizmo extends Gizmo {
 
           if ( accountForU && !accountForV ) {
               plane = camera.calculateUPlaneAtPixel(mousex, mousey);
+              oldplane = camera.calculateUPlaneAtPixel(oldmousex, oldmousey);
           }
           else if ( accountForV && !accountForU ) {
               plane = camera.calculateVPlaneAtPixel(mousex, mousey);
+              oldplane = camera.calculateVPlaneAtPixel(oldmousex, oldmousey);
           }
           else if ( accountForU && accountForV ) {
               if ( (mousex-oldmousex) > (mousey-oldmousey) ) {
                   plane = camera.calculateUPlaneAtPixel(mousex, mousey);
+                  oldplane = camera.calculateUPlaneAtPixel(oldmousex, oldmousey);
               }
               else {
                   plane = camera.calculateVPlaneAtPixel(mousex, mousey);
+                  oldplane = camera.calculateVPlaneAtPixel(oldmousex, oldmousey);
               }
           }
           else {
               oldmousex = e.getX();
-              oldmousey = e.getX();
+              oldmousey = e.getY();
               return false;
           }
 
           r = new Ray(o, v);
-          if ( !plane.doIntersectionWithNegative(r) ) {
+          Ray r2 = new Ray(o, v);
+          if ( !plane.doIntersectionWithNegative(r) || 
+               !oldplane.doIntersectionWithNegative(r2) ) {
               oldmousex = e.getX();
-              oldmousey = e.getX();
+              oldmousey = e.getY();
               return false;
           }
-          p = v.multiply(r.t).add(r.origin);
+          oldp = v.multiply(r2.t).add(r2.origin);
+          p = v.multiply(2*(r.t-r2.t)).add(r.origin);
+      //deltapos = v.multiply(r.t);
       }
 
       setPosition(p);
       selectedResizing = false;
 
       //- Automatic cursor repositioning constrain ----------------------
+      // THIS IS NOT WORKING!
       try {
           if ( awtRobot == null ) {
               awtRobot = new Robot();
           }
 
           Vector3D pp = new Vector3D();
+          Vector3D base = p.add(deltapos);
 
-          camera.projectPoint(p, pp);
+          camera.projectPoint(base, pp);
 
           Point global = e.getComponent().getLocationOnScreen();
-          awtRobot.mouseMove((int)pp.x+global.x, (int)pp.y+global.y);
+          //awtRobot.mouseMove((int)pp.x+global.x, (int)pp.y+global.y);
           skipRobot = true;
       }
       catch ( Exception ex ) {
@@ -830,7 +858,7 @@ public class TranslateGizmo extends Gizmo {
 
       //-----------------------------------------------------------------
       oldmousex = e.getX();
-      oldmousey = e.getX();
+      oldmousey = e.getY();
 
       return true;
   }

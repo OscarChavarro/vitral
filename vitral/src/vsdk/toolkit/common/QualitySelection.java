@@ -34,6 +34,7 @@ public class QualitySelection extends Entity {
     private boolean surfaces;
     private boolean wires;
     private boolean boundingVolume;
+    private boolean selectionCorners;
     private boolean texture;
     private boolean bumpMap;
     private boolean points;
@@ -65,53 +66,12 @@ public class QualitySelection extends Entity {
         surfaces = true;
         wires = false;
         boundingVolume = false;
+        selectionCorners = false;
         texture = true;
         bumpMap = false;
         points = false;
         normals = false;
         trianglesNormals = false;
-    }
-
-    /**
-    Contructs a QualitySelection object with the specified parameers
-    @param surfaces Indicates wether or not the surface of the object is to be 
-           displayed
-    @param wires Indicates wether or not the edges of the faces that compose 
-           the object are to be displayed
-    @param boundingVolume Indicates wether or not the bounding volume of the 
-           object is to be displayed
-    @param texture Indicates wether or not the object is to be displayed using 
-           texture mapping
-    @param bumpMap Indicates wether or not the object is to be displayed using 
-           bump mapping
-    @param points Indicates wether or not the vertexes of the object are to be 
-           displayed
-    @param normals Indicates wether or not the normals of the object are to be 
-           displayed
-    @param trianglesNormals Indicates wether or not the face normals of the 
-           object are to be displayed
-    @param shadingType Indicates the behavior of the lighting calculation for 
-           this object
-    */
-    public QualitySelection(boolean surfaces,
-                            boolean wires,
-                            boolean boundingVolume,
-                            boolean texture,
-                            boolean bumpMap,
-                            boolean points,
-                            boolean normals,
-                            boolean trianglesNormals, 
-                            int shadingType)
-    {
-        this.surfaces = surfaces;
-        this.wires = wires;
-        this.boundingVolume = boundingVolume;
-        this.texture = texture;
-        this.bumpMap = bumpMap;
-        this.points = points;
-        this.normals = normals;
-        this.shadingType = shadingType;
-        this.trianglesNormals = trianglesNormals;
     }
 
     /**
@@ -132,6 +92,11 @@ public class QualitySelection extends Entity {
     public void setBoundingVolume(boolean b)
     {
         this.boundingVolume = b;
+    }
+
+    public void setSelectionCorners(boolean c)
+    {
+        this.selectionCorners = c;
     }
 
     public void setTexture(boolean b)
@@ -179,6 +144,11 @@ public class QualitySelection extends Entity {
         return this.boundingVolume;
     }
 
+    public boolean isSelectionCornersSet()
+    {
+        return this.selectionCorners;
+    }
+
     public boolean isTextureSet()
     {
         return this.texture;
@@ -222,6 +192,11 @@ public class QualitySelection extends Entity {
     public void changeBoundingVolume()
     {
         boundingVolume = !boundingVolume;
+    }
+
+    public void changeSelectionCorners()
+    {
+        selectionCorners = !selectionCorners;
     }
 
     public void changeTexture()
@@ -286,6 +261,7 @@ public class QualitySelection extends Entity {
         msg = msg + "  - Draw wires: " + (wires?"ON":"OFF") + "\n";
         msg = msg + "  - Draw surfaces: " + (surfaces?"ON":"OFF") + "\n";
         msg = msg + "  - Draw bounding volume: " + (boundingVolume?"ON":"OFF") + "\n";
+        msg = msg + "  - Draw selection corners: " + (selectionCorners?"ON":"OFF") + "\n";
         msg = msg + "  - Draw normals: " + (normals?"ON":"OFF") + "\n";
         msg = msg + "  - Draw triangles normals: " + (trianglesNormals?"ON":"OFF") + "\n";
         msg = msg + "  - With texture: " + (texture?"ON":"OFF") + "\n";

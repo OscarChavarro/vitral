@@ -56,85 +56,99 @@ class _Reader3dsChunk extends PersistenceElement
 
     //=======================================================================
     // Main level 3DS Fileformat chunk identifiers
-    public static final int ID_MAIN                    = 0x4D4D;
+    public static final int ID_MAIN                     = 0x4D4D;
 
     // Scene element 3DS Fileformat chunk identifiers
-    public static final int ID_MESH                    = 0x3D3D;
-    public static final int ID_BACKGROUND_COLOR        = 0x1200;
-    public static final int ID_AMBIENT_COLOR           = 0x2100;
-    public static final int ID_MATERIAL                = 0xAFFF;
-    public static final int ID_MATERIAL_NAME           = 0xA000;
-    public static final int ID_MATERIAL_AMBIENT        = 0xA010;
-    public static final int ID_MATERIAL_DIFFUSE        = 0xA020;
-    public static final int ID_MATERIAL_SPECULAR       = 0xA030;
-    public static final int ID_MATERIAL_SHININESS      = 0xA040;
-    public static final int ID_MATERIAL_TWOSIDED       = 0xA081;
-    public static final int ID_MATERIAL_TYPE           = 0xA100;
-    public static final int ID_OBJECT_BLOCK            = 0x4000;
-    public static final int ID_TRIANGLE_MESH           = 0x4100;
-    public static final int ID_VERTEX_LIST             = 0x4110;
-    public static final int ID_TRIANGLE_LIST           = 0x4120;
-    public static final int ID_MATERIAL_MAPPING_TABLE  = 0x4130;
-    public static final int ID_SMOOTH_LIST             = 0x4150;
-    public static final int ID_MAP_LIST                = 0x4140;
-    public static final int ID_MATRIX                  = 0x4160;
-    public static final int ID_TRI_MAPPING_STANDARD    = 0x4170;
-    public static final int ID_TRI_VISIBLE             = 0x4165;
-    public static final int ID_TRI_VERTEX_OPTIONS      = 0x4111;
-    public static final int ID_LIGHT                   = 0x4600;
-    public static final int ID_SPOTLIGHT               = 0x4610;
-    public static final int ID_LIT_OFF                 = 0x4620;
-    public static final int ID_LIT_UNKNOWN_01          = 0x465A;
-    public static final int ID_CAMERA                  = 0x4700;
-    public static final int ID_OBJECT_UNKNOWN_01       = 0x4710;
-    public static final int ID_OBJECT_UNKNOWN_02       = 0x4720;
-    public static final int ID_EDIT_CONFIG1            = 0x0100;
-    public static final int ID_EDIT_CONFIG2            = 0x3E3D;
-    public static final int ID_EDIT_VIEW_P1            = 0x7012;
-    public static final int ID_EDIT_VIEW_P2            = 0x7011;
-    public static final int ID_EDIT_VIEW_P3            = 0x7020;
-    public static final int ID_TOP                     = 0x0001;
-    public static final int ID_BOTTOM                  = 0x0002;
-    public static final int ID_LEFT                    = 0x0003;
-    public static final int ID_RIGHT                   = 0x0004;
-    public static final int ID_FRONT                   = 0x0005;
-    public static final int ID_BACK                    = 0x0006;
-    public static final int ID_USER                    = 0x0007;
-    public static final int ID_CAMERA_VIEW             = 0xFFFF;
-    public static final int ID_LIGHT_VIEW              = 0x0009;
-    public static final int ID_COLOR_RGB1              = 0x0010;
-    public static final int ID_COLOR_RGB2              = 0x0011;
-    public static final int ID_COLOR_RGB3              = 0x0012;
-    public static final int ID_VIEWPORT                = 0x7001;
-    public static final int ID_EDIT_UNKNOWN_01         = 0x1100;
-    public static final int ID_EDIT_UNKNOWN_02         = 0x1201;
-    public static final int ID_EDIT_UNKNOWN_03         = 0x1300;
-    public static final int ID_EDIT_UNKNOWN_04         = 0x1400;
-    public static final int ID_EDIT_UNKNOWN_05         = 0x1420;
-    public static final int ID_EDIT_UNKNOWN_06         = 0x1450;
-    public static final int ID_EDIT_UNKNOWN_07         = 0x1500;
-    public static final int ID_EDIT_UNKNOWN_08         = 0x2200;
-    public static final int ID_EDIT_UNKNOWN_09         = 0x2201;
-    public static final int ID_EDIT_UNKNOWN_10         = 0x2210;
-    public static final int ID_EDIT_UNKNOWN_11         = 0x2300;
-    public static final int ID_EDIT_UNKNOWN_12         = 0x2302;
-    public static final int ID_EDIT_UNKNOWN_13         = 0x2000;
-    public static final int ID_EDIT_UNKNOWN_14         = 0x3000;
+    public static final int ID_MESH                     = 0x3D3D;
+    public static final int ID_BACKGROUND_COLOR         = 0x1200;
+    public static final int ID_AMBIENT_COLOR            = 0x2100;
+    public static final int ID_MATERIAL                 = 0xAFFF;
+    public static final int ID_MATERIAL_NAME            = 0xA000;
+    public static final int ID_MATERIAL_AMBIENT         = 0xA010;
+    public static final int ID_MATERIAL_DIFFUSE         = 0xA020;
+    public static final int ID_MATERIAL_SPECULAR        = 0xA030;
+    public static final int ID_MATERIAL_SHININESS_EXP   = 0xA040;
+    public static final int ID_MATERIAL_SHININESS_KTE   = 0xA041;
+    public static final int ID_MATERIAL_TRANSPARENCY    = 0xA050;
+    public static final int ID_MATERIAL_TRANSPARENCY_F  = 0xA052;
+    public static final int ID_MATERIAL_TRANSPARENCY_FI = 0xA08A;
+    public static final int ID_MATERIAL_REFLECT_BLUR    = 0xA053;
+    public static final int ID_MATERIAL_TWOSIDED        = 0xA081;
+    public static final int ID_MATERIAL_WIRE_THICKNESS  = 0xA087;
+    public static final int ID_MATERIAL_SOFTEN          = 0xA08C;
+    public static final int ID_MATERIAL_TYPE            = 0xA100;
+    public static final int ID_OBJECT_BLOCK             = 0x4000;
+    public static final int ID_TRIANGLE_MESH            = 0x4100;
+    public static final int ID_VERTEX_LIST              = 0x4110;
+    public static final int ID_TRIANGLE_LIST            = 0x4120;
+    public static final int ID_MATERIAL_MAPPING_TABLE   = 0x4130;
+    public static final int ID_SMOOTH_LIST              = 0x4150;
+    public static final int ID_MAP_LIST                 = 0x4140;
+    public static final int ID_MATRIX                   = 0x4160;
+    public static final int ID_TRI_MAPPING_STANDARD     = 0x4170;
+    public static final int ID_OBJECT_IS_VISIBLE        = 0x4165;
+    public static final int ID_TRI_VERTEX_OPTIONS       = 0x4111;
+    public static final int ID_LIGHT                    = 0x4600;
+    public static final int ID_SPOTLIGHT                = 0x4610;
+    public static final int ID_LIT_OFF                  = 0x4620;
+    public static final int ID_LIT_UNKNOWN_01           = 0x465A;
+    public static final int ID_CAMERA                   = 0x4700;
+    public static final int ID_OBJECT_UNKNOWN_01        = 0x4710;
+    public static final int ID_OBJECT_UNKNOWN_02        = 0x4720;
+    public static final int ID_EDIT_CONFIG1             = 0x0100;
+    public static final int ID_EDIT_CONFIG2             = 0x3E3D;
+    public static final int ID_EDIT_VIEW_P1             = 0x7012;
+    public static final int ID_EDIT_VIEW_P2             = 0x7011;
+    public static final int ID_EDIT_VIEW_P3             = 0x7020;
+    public static final int ID_TOP                      = 0x0001;
+    public static final int ID_BOTTOM                   = 0x0002;
+    public static final int ID_LEFT                     = 0x0003;
+    public static final int ID_RIGHT                    = 0x0004;
+    public static final int ID_FRONT                    = 0x0005;
+    public static final int ID_BACK                     = 0x0006;
+    public static final int ID_USER                     = 0x0007;
+    public static final int ID_CAMERA_VIEW              = 0xFFFF;
+    public static final int ID_LIGHT_VIEW               = 0x0009;
+    public static final int ID_COLOR_RGB1               = 0x0010;
+    public static final int ID_COLOR_RGB2               = 0x0011;
+    public static final int ID_COLOR_RGB3               = 0x0012;
+    public static final int ID_AMOUNT                   = 0x0030;
+    public static final int ID_VIEWPORT                 = 0x7001;
+    public static final int ID_EDIT_UNKNOWN_01          = 0x1100;
+    public static final int ID_EDIT_UNKNOWN_02          = 0x1201;
+    public static final int ID_EDIT_UNKNOWN_03          = 0x1300;
+    public static final int ID_EDIT_UNKNOWN_04          = 0x1400;
+    public static final int ID_EDIT_UNKNOWN_05          = 0x1420;
+    public static final int ID_EDIT_UNKNOWN_06          = 0x1450;
+    public static final int ID_EDIT_UNKNOWN_07          = 0x1500;
+    public static final int ID_EDIT_UNKNOWN_08          = 0x2200;
+    public static final int ID_EDIT_UNKNOWN_09          = 0x2201;
+    public static final int ID_EDIT_UNKNOWN_10          = 0x2210;
+    public static final int ID_EDIT_UNKNOWN_11          = 0x2300;
+    public static final int ID_EDIT_UNKNOWN_12          = 0x2302;
+    public static final int ID_EDIT_UNKNOWN_13          = 0x2000;
+    public static final int ID_EDIT_UNKNOWN_14          = 0x3000;
 
     // Scene control 3DS Fileformat chunk identifiers
-    public static final int ID_KEYFRAMER               = 0xB000;
-    public static final int ID_KEYFRAMER_FRAMES        = 0xB008;
-    public static final int ID_KEYFRAMER_UNKNOWN_01    = 0xB00A;
-    public static final int ID_KEYFRAMER_UNKNOWN_02    = 0xB009;
-    public static final int ID_KEYFRAMER_OBJDES        = 0xB002;
-    public static final int ID_KEYFRAMER_OBJHIERARCH   = 0xB010;
-    public static final int ID_KEYFRAMER_OBJDUMMYNAME  = 0xB011;
-    public static final int ID_KEYFRAMER_OBJUNKNOWN_01 = 0xB013;
-    public static final int ID_KEYFRAMER_OBJUNKNOWN_02 = 0xB014;
-    public static final int ID_KEYFRAMER_OBJUNKNOWN_03 = 0xB015;
-    public static final int ID_KEYFRAMER_OBJPIVOT      = 0xB020;
-    public static final int ID_KEYFRAMER_OBJUNKNOWN_04 = 0xB021;
-    public static final int ID_KEYFRAMER_OBJUNKNOWN_05 = 0xB022;
+    public static final int ID_KEYFRAMER                = 0xB000;
+    public static final int ID_KEYFRAMER_FRAMES         = 0xB008;
+    public static final int ID_KEYFRAMER_UNKNOWN_01     = 0xB00A;
+    public static final int ID_KEYFRAMER_UNKNOWN_02     = 0xB009;
+    public static final int ID_KEYFRAMER_OBJDES         = 0xB002;
+    public static final int ID_KEYFRAMER_OBJHIERARCH    = 0xB010;
+    public static final int ID_KEYFRAMER_OBJDUMMYNAME   = 0xB011;
+    public static final int ID_KEYFRAMER_OBJUNKNOWN_01  = 0xB013;
+    public static final int ID_KEYFRAMER_OBJUNKNOWN_02  = 0xB014;
+    public static final int ID_KEYFRAMER_OBJUNKNOWN_03  = 0xB015;
+    public static final int ID_KEYFRAMER_OBJPIVOT       = 0xB020;
+    public static final int ID_KEYFRAMER_OBJUNKNOWN_04  = 0xB021;
+    public static final int ID_KEYFRAMER_OBJUNKNOWN_05  = 0xB022;
+
+    // Unknown ids
+    public static final int ID_UNKNOWN_01               = 0x3d3e;
+    public static final int ID_UNKNOWN_02               = 0xA084;
+    public static final int ID_UNKNOWN_03               = 0x0031;
+    public static final int ID_UNKNOWN_04               = 0x1460;
 
     //=======================================================================
     public static String
@@ -170,11 +184,32 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_MATERIAL_SPECULAR:
             chunkname = "ID_MATERIAL_SPECULAR";
             break;
-          case ID_MATERIAL_SHININESS:
-            chunkname = "ID_MATERIAL_SHININESS";
+          case ID_MATERIAL_SHININESS_EXP:
+            chunkname = "ID_MATERIAL_SHININESS_EXP";
+            break;
+          case ID_MATERIAL_SHININESS_KTE:
+            chunkname = "ID_MATERIAL_SHININESS_KTE";
+            break;
+          case ID_MATERIAL_TRANSPARENCY:
+            chunkname = "ID_MATERIAL_TRANSPARENCY";
+            break;
+          case ID_MATERIAL_TRANSPARENCY_F:
+            chunkname = "ID_MATERIAL_TRANSPARENCY_F";
+            break;
+          case ID_MATERIAL_TRANSPARENCY_FI:
+            chunkname = "ID_MATERIAL_TRANSPARENCY_FI";
+            break;
+          case ID_MATERIAL_REFLECT_BLUR:
+            chunkname = "ID_MATERIAL_REFLECT_BLUR";
             break;
           case ID_MATERIAL_TWOSIDED:
             chunkname = "ID_MATERIAL_TWOSIDED";
+            break;
+          case ID_MATERIAL_WIRE_THICKNESS:
+            chunkname = "ID_MATERIAL_WIRE_THICKNESS";
+            break;
+          case ID_MATERIAL_SOFTEN:
+            chunkname = "ID_MATERIAL_SOFTEN";
             break;
           case ID_MATERIAL_TYPE:
             chunkname = "ID_MATERIAL_TYPE";
@@ -206,8 +241,8 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_TRI_MAPPING_STANDARD:
             chunkname = "ID_TRI_MAPPING_STANDARD";
             break;
-          case ID_TRI_VISIBLE:
-            chunkname = "ID_TRI_VISIBLE";
+          case ID_OBJECT_IS_VISIBLE:
+            chunkname = "ID_OBJECT_IS_VISIBLE";
             break;
           case ID_TRI_VERTEX_OPTIONS:
             chunkname = "ID_TRI_VERTEX_OPTIONS";
@@ -283,6 +318,9 @@ class _Reader3dsChunk extends PersistenceElement
             break;
           case ID_COLOR_RGB3:
             chunkname = "ID_COLOR_RGB3";
+            break;
+          case ID_AMOUNT:
+            chunkname = "ID_AMOUNT";
             break;
           case ID_VIEWPORT:
             chunkname = "ID_VIEWPORT";
@@ -368,6 +406,18 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_KEYFRAMER_OBJUNKNOWN_05:
             chunkname = "ID_KEYFRAMER_OBJUNKNOWN_05";
             break;
+          case ID_UNKNOWN_01:
+            chunkname = "ID_UNKNOWN_01";
+            break;
+          case ID_UNKNOWN_02:
+            chunkname = "ID_UNKNOWN_02";
+            break;
+          case ID_UNKNOWN_03:
+            chunkname = "ID_UNKNOWN_03";
+            break;
+          case ID_UNKNOWN_04:
+            chunkname = "ID_UNKNOWN_04";
+            break;
           default:
             byte a, b;
             a = (byte)((chunkid & 0xFF00) >> 8);
@@ -426,6 +476,7 @@ public class Reader3ds extends PersistenceElement
     // Current environment building elements
     private static Material currentBuildingMaterial = null;
     private static ColorRgb currentColor = null;
+    private static int currentAmount = 0;
     private static ArrayList<Material> currentMaterialArray = null;
     private static ArrayList<SimpleBody> currentSimpleBodiesArray = null;
 
@@ -516,8 +567,15 @@ public class Reader3ds extends PersistenceElement
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_DIFFUSE) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SPECULAR) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TYPE) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SHININESS) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SHININESS_EXP) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SHININESS_KTE) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY_F) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY_FI) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_REFLECT_BLUR) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TWOSIDED) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_WIRE_THICKNESS) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SOFTEN) ||
 (father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_MATERIAL_MAPPING_TABLE) ||
 (father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_SMOOTH_LIST) ||
 (father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_TRIANGLE_MESH) ||
@@ -525,6 +583,13 @@ public class Reader3ds extends PersistenceElement
 (father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_CAMERA) ||
 (father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_VERTEX_LIST) ||
 (father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_TRIANGLE_LIST) ||
+(father.id == father.ID_MATERIAL_SHININESS_KTE && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_SHININESS_EXP && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_TRANSPARENCY && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_TRANSPARENCY_F && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_TRANSPARENCY_FI && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_REFLECT_BLUR && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_OBJECT_IS_VISIBLE) ||
 (father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_TRI_VERTEX_OPTIONS) ||(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_MATRIX) ||
 ((father.id == father.ID_MATERIAL_AMBIENT || 
   father.id == father.ID_MATERIAL_DIFFUSE || 
@@ -539,6 +604,12 @@ public class Reader3ds extends PersistenceElement
             return true;
         }
 
+        if ( son.id == son.ID_UNKNOWN_01 || son.id == son.ID_UNKNOWN_02 ||
+             son.id == son.ID_UNKNOWN_03 || son.id == son.ID_UNKNOWN_04 ) {
+            return true;
+        }
+
+
         VSDK.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.checkChunkHierarchy",
                            "" + son.chunkToString(son.id) + 
@@ -547,6 +618,9 @@ public class Reader3ds extends PersistenceElement
         return false;
     }
 
+    /**
+    @todo Process missing chunks. (skipped)
+    */
     private static void processChunk(
         InputStream is, 
         _Reader3dsChunk currentChunk, _Reader3dsChunk parentChunk,
@@ -587,6 +661,7 @@ public class Reader3ds extends PersistenceElement
             }
             if ( currentChunk.id == currentChunk.ID_MATERIAL ) {
                 currentBuildingMaterial = new Material();
+                currentBuildingMaterial.setDoubleSided(false);
             }
 
             // Generic recursive block processing
@@ -695,13 +770,21 @@ public class Reader3ds extends PersistenceElement
                 b = readIntLE(is);
                 c = readIntLE(is);
                 flags = readIntLE(is) & 0x07;
-                if ( (flags & 0x04) != 0x00 ) {
-                    currentTrianglesList[i] = new Triangle(a, c, b);
-          }
-          else {
+                /* Warning: dont know how to process this! */
+                if ( (flags & 0x07) == 0x00 ||
+                     (flags & 0x07) == 0x01 ||
+                     (flags & 0x07) == 0x02 ||
+                     (flags & 0x07) == 0x03 ||
+                     (flags & 0x07) == 0x04 ||
+                     (flags & 0x07) == 0x05 ||
+                     (flags & 0x07) == 0x06 ||
+                     (flags & 0x07) == 0x07 ) {
                     currentTrianglesList[i] = new Triangle(a, b, c);
-        }
-        System.out.println("FACE: " + flags);
+                  }
+                  else {
+                    currentTrianglesList[i] = new Triangle(a, c, b);
+                }
+                //System.out.println("FACE: " + flags);
             }
 
             //----
@@ -747,6 +830,103 @@ public class Reader3ds extends PersistenceElement
                     (double)(VSDK.signedByte2unsignedInteger(g[0])) / 255.0;
                 currentColor.b = 
                     (double)(VSDK.signedByte2unsignedInteger(b[0])) / 255.0;
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_AMOUNT ) {
+            //-------------------------------------------------------------
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = readIntLE(is);
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_SHININESS_KTE ) {
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = 0;
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+            if ( currentBuildingMaterial != null ) {
+                // Warning: don't know well how to handle this (percent over
+                // specular color?)
+                ;
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY ) {
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = 0;
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+            if ( currentBuildingMaterial != null && currentAmount > 0 ) {
+                if ( currentAmount > 100 ) currentAmount = 100;
+                // Warning: not verified yet
+                currentBuildingMaterial.setOpacity(1.0-((double)currentAmount)/100.0);
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY_F ) {
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = 0;
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+            if ( currentBuildingMaterial != null ) {
+                // Warning: don't know well how to handle this
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY_FI ) {
+            // Warning: don't know well how to handle this
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TWOSIDED ) {
+            if ( currentBuildingMaterial != null ) {
+                currentBuildingMaterial.setDoubleSided(true);
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_REFLECT_BLUR ) {
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = 0;
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+            if ( currentBuildingMaterial != null ) {
+                // Warning: don't know well how to handle this
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_SHININESS_EXP ) {
+            //System.out.println(indent(level) + currentChunk);
+            currentAmount = 0;
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+            if ( currentBuildingMaterial != null ) {
+                currentBuildingMaterial.setPhongExponent((double)currentAmount);
             }
         }
         else if ( currentChunk.id == currentChunk.ID_MATERIAL_AMBIENT ) {
@@ -820,7 +1000,7 @@ public class Reader3ds extends PersistenceElement
         }
         else {
             //-------------------------------------------------------------
-            System.out.println(indent(level) + currentChunk + " (skipped)");
+            //System.out.println(indent(level) + currentChunk + " (skipped)");
             // Trivial case: unknown chunk
             skipChunk = true;
         }

@@ -49,6 +49,9 @@ public class JoglSphereRenderer extends JoglRenderer {
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
     }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, s, q);
+        }
     }
 
 }

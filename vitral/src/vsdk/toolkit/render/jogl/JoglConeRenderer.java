@@ -59,13 +59,22 @@ public class JoglConeRenderer extends JoglRenderer {
             gluQuadric = glu.gluNewQuadric();
         }
 
+        if ( q.isSurfacesSet() ) {
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            drawParts(gl, cone);
+    }
+
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            drawParts(gl, cone);
         }
-        drawParts(gl, cone);
 
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, cone, q);
+        }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, cone, q);
         }
     }
 

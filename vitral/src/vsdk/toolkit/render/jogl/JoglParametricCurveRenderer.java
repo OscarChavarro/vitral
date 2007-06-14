@@ -153,6 +153,10 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, curve, q);
         }
+        if ( q.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, curve, q);
+        }
+
     }
 
     static public void draw(GL gl, ParametricCurve curve,
