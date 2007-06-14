@@ -146,3 +146,9 @@ Changes in 2006 november 13 revition
     This implied the development of a new algorithm for TriangleMesh
     traversal that uses a mixtured texture/material spans in
     JoglTriangleMeshRenderer.
+
+Changes in 2006 november 19 revition
+  - Implementation of polyhedral bounded solid representation started! :)
+  - Updates to TriangleMesh internal representation and ReaderObj /
+    JoglTriangleMeshRenderer to simplify design.
+  - Raytracer now support objects with sub-materials

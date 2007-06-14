@@ -30,7 +30,8 @@ public abstract class Curve extends Geometry {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
-    public void doExtraInformation(Ray inRay, double intT, 
+    public void
+    doExtraInformation(Ray inRay, double intT, 
                                       GeometryIntersectionInformation outData)
     {
         return;

@@ -1,7 +1,26 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
+//= - November 19 2006 - Oscar Chavarro: re-structured and tested           =
+//===========================================================================
+
 package vsdk.toolkit.common;
 
 import java.util.ArrayList;
 
+/**
+A vertex is a basic data pack for tipically used operations in computer
+graphics, as polygon mesh representations and basic visualization algorithms
+and shaders.
+
+This class is meant as a modeling facility for polygon meshes, and a common
+structure for operation signatures.
+
+Note that this is NOT a class, but merely a data structure, and as such,
+all its attributes are public.  This structure is not supposed to evolve or
+change in time radically.
+*/
 public class Vertex extends Entity
 {
     /// Check the general attribute description in superclass Entity.
@@ -37,7 +56,7 @@ public class Vertex extends Entity
     }
 
     public Vertex(double x, double y, double z) {
-        this.position = new Vector3D(x, y, z);
+        position = new Vector3D(x, y, z);
         normal = new Vector3D(1, 0, 0);
         binormal = new Vector3D(0, 1, 0);
         tangent = new Vector3D(0, 0, 1);
@@ -63,9 +82,6 @@ public class Vertex extends Entity
 
         binormal = new Vector3D(0, 1, 0);
         tangent = new Vector3D(0, 0, 1);
-
-        binormal = null;
-        tangent = null;
         incidentTriangles = null;
         u = 0.0;
         v = 0.0;
@@ -83,13 +99,13 @@ public class Vertex extends Entity
     }
 
     public Vertex(Vertex vertex) {
-        this.position = vertex.position;
-        this.normal = vertex.normal;
-        this.binormal = vertex.binormal;
-        this.tangent = vertex.tangent;
-        this.incidentTriangles=vertex.getIncidentTriangles();
-        this.u = vertex.u;
-        this.v = vertex.v;
+        position = vertex.position;
+        normal = vertex.normal;
+        binormal = vertex.binormal;
+        tangent = vertex.tangent;
+        incidentTriangles=vertex.getIncidentTriangles();
+        u = vertex.u;
+        v = vertex.v;
     }
 
     public Vector3D getPosition() {
@@ -163,3 +179,7 @@ public class Vertex extends Entity
             position.z + " > <"+u+", "+v+">";
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

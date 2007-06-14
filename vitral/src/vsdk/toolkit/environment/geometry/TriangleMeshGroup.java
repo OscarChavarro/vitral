@@ -191,6 +191,7 @@ public class TriangleMeshGroup extends Surface {
                     lastInfo.n.x = Info.n.x;
                     lastInfo.n.y = Info.n.y;
                     lastInfo.n.z = Info.n.z;
+            lastInfo.material = Info.material;
                     inOut_Ray.t = ray.t;
 
                     // Stores the intersected mesh and the triangle intersected inside that mesh
@@ -210,7 +211,8 @@ public class TriangleMeshGroup extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
-    public void doExtraInformation(Ray inRay, double inT,
+    public void
+    doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
         outData.p.x = lastInfo.p.x;
         outData.p.y = lastInfo.p.y;
@@ -218,6 +220,7 @@ public class TriangleMeshGroup extends Surface {
         outData.n.x = lastInfo.n.x;
         outData.n.y = lastInfo.n.y;
         outData.n.z = lastInfo.n.z;
+        outData.material = lastInfo.material;
     }
 
     public int[] doIntersectionInformation()

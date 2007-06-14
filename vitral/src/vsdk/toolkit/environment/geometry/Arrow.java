@@ -120,8 +120,9 @@ public class Arrow extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
-    public void doExtraInformation(Ray inRay, double inT, 
-                                   GeometryIntersectionInformation outData) {
+    public void
+           doExtraInformation(Ray inRay, double inT, 
+           GeometryIntersectionInformation outData) {
         lastElement.doExtraInformation(inRay, inT, outData);
         if ( lastElement == headCone ) {
             // Modify answer!

@@ -5,6 +5,8 @@
 //= - May 18 2006 - David Diaz: bug fixes                                   =
 //= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
 //= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
+//= - November 19 2006 - Oscar Chavarro: re-structured and tested - using   =
+//=       private class _ReaderObjVertex and simplified TriangleMesh design =
 //===========================================================================
 
 package vsdk.toolkit.io.geometry;
@@ -29,14 +31,37 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
 
+//===========================================================================
+
+/**
+Class _ReaderObjVertex contains indexes to different Arrays inside a ReaderObj.
+The objective of this class is to provide a temporary mapping between original
+information in an Alias Wavefront Object file (.obj) and VSDK's TriangleMesh
+representation. It is used only by the ReaderObj class for format conversion
+of geometric data.
+*/
 class _ReaderObjVertex
 {
     public int vertexPositionIndex;
     public int vertexNormalIndex;
     public int vertexTextureCoordinateIndex;
+
+    public _ReaderObjVertex()
+    {
+        vertexPositionIndex = -1;
+        vertexNormalIndex = -1;
+        vertexTextureCoordinateIndex = -1;
+    }
+
+    public _ReaderObjVertex(_ReaderObjVertex other)
+    {
+        vertexPositionIndex = other.vertexPositionIndex;
+        vertexTextureCoordinateIndex = other.vertexTextureCoordinateIndex;
+        vertexNormalIndex = other.vertexNormalIndex;
+    }
+    
     public boolean equals(Object alien)
     {
-        System.out.println("Comparando...!");
         if ( !(alien instanceof _ReaderObjVertex) ) return false;
         _ReaderObjVertex other = (_ReaderObjVertex)alien;
 
@@ -45,19 +70,28 @@ class _ReaderObjVertex
              other.vertexTextureCoordinateIndex != 
              this.vertexTextureCoordinateIndex ) {
             return false;
+        }
+        return true;
     }
-    return true;
+
+    public String toString()
+    {
+        return "Vertex " + vertexPositionIndex + " / " + vertexNormalIndex
+            + " / " + vertexTextureCoordinateIndex;
     }
 }
+
+//===========================================================================
 
 /**
 The class ReaderObj provides wavefront obj loading functionality. Wavefront
 obj is a 3d object format used to describe polygon meshes; it is capable of
-storing vertex, vertex normal, vetrex texture, faces, material, texture and
+storing vertex, vertex normal, vertex texture, faces, material, texture and
 other maps information.
 By the use of extensions, it has the potential to describe more information.
 The original Wavefront format is not well standarized, so many variations
-could exist. This code currently manages only triangle faces.
+could exist. This code currently manages only triangle faces, and interprets
+other polygons to triangle fans.
 */
 public class ReaderObj
 {
@@ -72,11 +106,11 @@ public class ReaderObj
 
     For a mesh to have a material, the matrial file has to be in the same
     folder as the mesh file; the same statement can be given about the
-    textures.
+    textures and other maps.
 
     @todo should not recieve a filename, but a previously opened stream, to
     make it independent of filesystems, and generalize it to URLs or whatever
-    connection.
+    other connection.
     */
     public static TriangleMeshGroup read(String fileName) throws IOException
     {
@@ -90,11 +124,10 @@ public class ReaderObj
         vertexTextureCoordinatesArray = new ArrayList<Vector3D>();
 
         //- Topology data extracted from file -----------------------------
-        ArrayList<int[][]> facesArray;
-        ArrayList<_ReaderObjVertex> unifiedVertexesArray;
+        // _ReaderObjVertex[] will always be of size 3 (3 vertexes groups)
+        ArrayList<_ReaderObjVertex[]> triangleDatasetsArray;
 
-        facesArray = new ArrayList<int[][]>();
-        unifiedVertexesArray = new ArrayList<_ReaderObjVertex>();
+        triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
 
         //- Accumulated states for currently builded geometric object -----
         String nextGeometricObjectName;
@@ -108,7 +141,7 @@ public class ReaderObj
         //- Aditional support data structures -----------------------------
         ArrayList<TriangleMesh> meshGroup;
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table;
-        ArrayList<int[]> inicial;
+        ArrayList<int[]> auxInitialTextureMapping;
         ArrayList<int[]> material_triangleRange_table;
         HashMap<String, RGBAImage> texturesHashMap;
         HashMap<String, Material> materialsHashMap;
@@ -120,9 +153,9 @@ public class ReaderObj
         textureIndex = 0;
 
         texture_span_triangleRange_table = new ArrayList<ArrayList<int[]>>();
-        inicial = new ArrayList<int[]>();
-        inicial.add(new int[2]);
-        texture_span_triangleRange_table.add(inicial);
+        auxInitialTextureMapping = new ArrayList<int[]>();
+        auxInitialTextureMapping.add(new int[2]);
+        texture_span_triangleRange_table.add(auxInitialTextureMapping);
 
         material_triangleRange_table = new ArrayList<int[]>();
 
@@ -149,7 +182,7 @@ public class ReaderObj
                 //
                 int auxMaterialRange[];
                 auxMaterialRange = new int[2];
-                auxMaterialRange[0] = facesArray.size();
+                auxMaterialRange[0] = triangleDatasetsArray.size();
                 auxMaterialRange[1] = nextMaterialsArray.size()-1;
                 material_triangleRange_table.add(auxMaterialRange);
             }
@@ -166,28 +199,18 @@ public class ReaderObj
                 vertexTextureCoordinatesArray.add(
                     readVertexTexture(lineOfText));
             }
-            // Read faces (only triangles)
+            // Read faces as triangles sets
             if ( lineOfText.startsWith("f ") ) {
                 try {
                     // Note that only first 3 vertexes for each polygon are
                     // processed
-                    ArrayList<int[][]> auxTriangle;
-                    auxTriangle = readPolygonAsTriangleFan(lineOfText);
-                    int auxVertexData[][];
+                    ArrayList<_ReaderObjVertex[]> auxTriangleFanSet;
+                    auxTriangleFanSet = readPolygonAsTriangleFan(lineOfText);
+                    _ReaderObjVertex newVertexSet[];
 
-                    System.out.println("Reading triangle: " + auxTriangle.size());
-
-                    for( int i = 0; i < auxTriangle.size(); i++ ) {
-                        auxVertexData = auxTriangle.get(i);
-                        facesArray.add(auxVertexData);
-
-                        // 
-                        _ReaderObjVertex uv = new _ReaderObjVertex();
-                        uv.vertexPositionIndex = 0;
-                        uv.vertexNormalIndex = 1;
-                        uv.vertexTextureCoordinateIndex = 2;
-                        unifiedVertexesArray.add(uv);
-
+                    for( int i = 0; i < auxTriangleFanSet.size(); i++ ) {
+                        newVertexSet = auxTriangleFanSet.get(i);
+                        triangleDatasetsArray.add(newVertexSet);
                     }
 
                     //
@@ -195,7 +218,7 @@ public class ReaderObj
                     actRanges =
                         texture_span_triangleRange_table.get(textureIndex);
                     int[] lastRange = actRanges.get(actRanges.size()-1);
-                    lastRange[1] = facesArray.size();
+                    lastRange[1] = triangleDatasetsArray.size();
                 }
                 catch( NoSuchElementException nsee ) {
                 }
@@ -241,10 +264,10 @@ public class ReaderObj
                 ArrayList<int[]> actRanges;
                 actRanges = texture_span_triangleRange_table.get(textureIndex);
                 int[] newRange=new int[2];
-                newRange[0] = facesArray.size();
+                newRange[0] = triangleDatasetsArray.size();
                 actRanges.add(newRange);
             }
-            // Armar objeto
+            // Object building
             if ( lineOfText.startsWith("o ") || lineOfText.startsWith("g ") ) {
                 if ( vertexPositionsArray.size() > 0 ) {
                     addMeshToGroup(meshGroup,
@@ -252,7 +275,7 @@ public class ReaderObj
                                    vertexPositionsArray,
                                    vertexNormalsArray,
                                    vertexTextureCoordinatesArray,
-                                   facesArray,
+                                   triangleDatasetsArray,
                                    nextTexturesArray,
                                    texture_span_triangleRange_table,
                                    nextMaterialsArray,
@@ -268,15 +291,15 @@ public class ReaderObj
                 // Clear accumulated states variables
                 nextTexturesArray = new ArrayList<RGBAImage>();
                 nextMaterialsArray = new ArrayList<Material>();
-                facesArray = new ArrayList<int[][]>();
+                triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
                 material_triangleRange_table = new ArrayList<int[]>();
                 texture_span_triangleRange_table =
                     new ArrayList<ArrayList<int[]>>();
-                inicial = new ArrayList<int[]>();
+                auxInitialTextureMapping = new ArrayList<int[]>();
                 int[] auxInitialRange = new int[2];
                 auxInitialRange[0] = auxInitialRange[1] = 0;
-                inicial.add(auxInitialRange);
-                texture_span_triangleRange_table.add(inicial);
+                auxInitialTextureMapping.add(auxInitialRange);
+                texture_span_triangleRange_table.add(auxInitialTextureMapping);
                 textureIndex = 0;
             }
         }
@@ -288,7 +311,7 @@ public class ReaderObj
                            vertexPositionsArray,
                            vertexNormalsArray,
                            vertexTextureCoordinatesArray,
-                           facesArray,
+                           triangleDatasetsArray,
                            nextTexturesArray, texture_span_triangleRange_table,
                            nextMaterialsArray, material_triangleRange_table);
         }
@@ -312,26 +335,171 @@ public class ReaderObj
         ArrayList<Vector3D> vertexPositionsArray,
         ArrayList<Vector3D> vertexNormalsArray,
         ArrayList<Vector3D> vertexTextureCoordinatesArray,
-        ArrayList<int[][]> facesArray,
+        ArrayList<_ReaderObjVertex[]> triangleDatasetsArray,
         ArrayList<RGBAImage> nextTexturesArray,
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
         ArrayList<Material> nextMaterialsArray,
         ArrayList<int[]> material_triangleRange_table
     )
     {
+        int i;
         TriangleMesh newTriangleMesh;
+        newTriangleMesh = new TriangleMesh();
+
+        //- If there are no specified materials, add a default one --------
         if ( nextMaterialsArray.size() == 0 ) {
             nextMaterialsArray.add(new Material());
         }
-        newTriangleMesh = buildGeometry(
-                               vertexPositionsArray,
-                               vertexNormalsArray,
-                               vertexTextureCoordinatesArray,
-                               facesArray,
-                               nextTexturesArray,
-                               texture_span_triangleRange_table,
-                               nextMaterialsArray,
-                               material_triangleRange_table);
+
+        //- Convert vertex data from obj format to VSDK format ------------
+        ArrayList<_ReaderObjVertex> finalVertexes;        
+        HashMap<_ReaderObjVertex, Integer> usedCombinedVertexes;
+
+        finalVertexes = new ArrayList<_ReaderObjVertex>();
+        usedCombinedVertexes = new HashMap<_ReaderObjVertex, Integer>();
+        int combinedVertexCount = 0;
+
+        for( i = 0; i < triangleDatasetsArray.size(); i++ ) {
+            _ReaderObjVertex p1 = triangleDatasetsArray.get(i)[0];
+            _ReaderObjVertex p2 = triangleDatasetsArray.get(i)[1];
+            _ReaderObjVertex p3 = triangleDatasetsArray.get(i)[2];
+
+            if ( !usedCombinedVertexes.containsKey(p1) ) {
+                usedCombinedVertexes.put(p1, combinedVertexCount);
+                combinedVertexCount++;
+                finalVertexes.add(new _ReaderObjVertex(p1));
+            }
+            p1.vertexPositionIndex = usedCombinedVertexes.get(p1);
+
+            if ( !usedCombinedVertexes.containsKey(p2) ) {
+                usedCombinedVertexes.put(p2, combinedVertexCount);
+                combinedVertexCount++;
+                finalVertexes.add(new _ReaderObjVertex(p2));
+            }
+            p2.vertexPositionIndex = usedCombinedVertexes.get(p2);
+            
+            if ( !usedCombinedVertexes.containsKey(p3) ) {
+                usedCombinedVertexes.put(p3, combinedVertexCount);
+                combinedVertexCount++;
+                finalVertexes.add(new _ReaderObjVertex(p3));
+            }
+            p3.vertexPositionIndex = usedCombinedVertexes.get(p3);
+        }
+
+        //- Build the mesh vertexes ---------------------------------------
+        Vertex newVertexArray[];
+        int ti, ni;
+
+        newVertexArray = new Vertex[finalVertexes.size()];
+        for ( i = 0; i < finalVertexes.size(); i++ ) {
+            newVertexArray[i] = new Vertex();
+            // Position
+            newVertexArray[i].setPosition(
+                vertexPositionsArray.get(
+                    finalVertexes.get(i).vertexPositionIndex-1));
+            // Texture coordinates
+            ti = finalVertexes.get(i).vertexTextureCoordinateIndex - 1;
+            if ( ti >= 0 ) {
+                newVertexArray[i].u = vertexTextureCoordinatesArray.get(ti).x;
+                newVertexArray[i].v = vertexTextureCoordinatesArray.get(ti).y;
+            }
+            else {
+                newVertexArray[i].u = newVertexArray[i].v = 0.0;
+            }
+            // Normals
+            ni = finalVertexes.get(i).vertexNormalIndex - 1;
+            if ( ni >= 0 ) {
+                newVertexArray[i].setNormal(vertexNormalsArray.get(ni));
+            }
+            else {
+                newVertexArray[i].setNormal(new Vector3D(0, 0, 0));
+            }
+        }
+        newTriangleMesh.setVertexes(newVertexArray);
+        
+        //- Build the mesh triangles --------------------------------------
+        Triangle newTriangleArray[];
+        newTriangleArray = new Triangle[triangleDatasetsArray.size()];
+        for ( i = 0; i < newTriangleArray.length; i++ ) {
+            newTriangleArray[i] = new Triangle();
+            newTriangleArray[i].p0 =
+               triangleDatasetsArray.get(i)[0].vertexPositionIndex;
+            newTriangleArray[i].p1 =
+               triangleDatasetsArray.get(i)[1].vertexPositionIndex;
+            newTriangleArray[i].p2 =
+               triangleDatasetsArray.get(i)[2].vertexPositionIndex;
+        }
+        newTriangleMesh.setTriangles(newTriangleArray);
+        
+        //- Process materials ---------------------------------------------
+        Material materials[];
+        materials = new Material[nextMaterialsArray.size()];
+
+        for ( i = 0; i < materials.length; i++ ) {
+            materials[i] = nextMaterialsArray.get(i);
+            if ( materials[i] == null ) {
+                materials[i] = new Material();
+            }
+        }
+        newTriangleMesh.setMaterials(materials);
+
+        //- Process material ranges ---------------------------------------
+        int auxMaterialRange[];
+        auxMaterialRange = new int[2];
+        auxMaterialRange[0] = triangleDatasetsArray.size();
+        auxMaterialRange[1] = nextMaterialsArray.size()-1;
+        material_triangleRange_table.add(auxMaterialRange);
+
+        int materialRanges[][];
+
+        materialRanges = new int[material_triangleRange_table.size()][2];
+        for ( i = 1; i < material_triangleRange_table.size(); i++ ) {
+            materialRanges[i][0] = material_triangleRange_table.get(i)[0];
+            materialRanges[i][1] = material_triangleRange_table.get(i-1)[1];
+        }
+        newTriangleMesh.setMaterialRanges(materialRanges);
+
+        //- Process textures ----------------------------------------------
+        RGBAImage newTextureArray[];
+
+        newTextureArray = new RGBAImage[nextTexturesArray.size()];
+        for ( i = 0; i < newTextureArray.length; i++ ) {
+            newTextureArray[i]=nextTexturesArray.get(i);
+        }
+        newTriangleMesh.setTextures(newTextureArray);
+
+        //- Process texture ranges ----------------------------------------
+        int numTextureSpans = 0;
+        for ( int textureIndex = 0;
+              textureIndex < texture_span_triangleRange_table.size();
+              textureIndex++ ) {
+            for( int j = 0;
+                 j < texture_span_triangleRange_table.get(textureIndex).size();
+                 j++ ) {
+                numTextureSpans++;
+            }
+        }        
+
+        int textureRanges[][] = new int[numTextureSpans][2];
+        i = 0;
+        for ( int textureIndex = 0;
+              textureIndex < texture_span_triangleRange_table.size();
+              textureIndex++ ) {
+            for( int j = 0;
+                 j < texture_span_triangleRange_table.get(textureIndex).size();
+                 j++ ) {
+                textureRanges[i][0] =
+                  texture_span_triangleRange_table.get(textureIndex).get(j)[1];
+                textureRanges[i][1] = textureIndex;
+                i++;
+            }
+        }
+        quickSortTriangleRange(textureRanges, 0, textureRanges.length-1);
+        newTriangleMesh.setTextureRanges(textureRanges);
+
+        //- Finalize mesh and add to group --------------------------------
+        //newTriangleMesh.calculateNormals();
+        newTriangleMesh.reorientateNormals();
         newTriangleMesh.setName(nextGeometricObjectName);
         meshGroup.add(newTriangleMesh);
     }
@@ -380,213 +548,33 @@ public class ReaderObj
             return null;
         }
     }
-
-    private static TriangleMesh buildGeometry(
-        ArrayList<Vector3D> vertexPositionsArray, 
-        ArrayList<Vector3D> vertexNormalsArray,
-        ArrayList<Vector3D> vertexTextureCoordinatesArray,
-        ArrayList<int[][]> facesArray,
-        ArrayList<RGBAImage> textures,
-        ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
-        ArrayList<Material> nextMaterialsArray,
-        ArrayList<int[]> material_triangleRange_table)
-    {
-        TriangleMesh m = new TriangleMesh();
-
-        m.setTriangles(new Triangle[facesArray.size()]);
-
-        ArrayList<Integer> usedVertexes = new ArrayList<Integer>();
-        ArrayList<Integer> usedTexVertexes = new ArrayList<Integer>();
-        
-        HashMap<Integer, Integer> cambiosVert;
-        cambiosVert = new HashMap<Integer, Integer>();
-        HashMap<Integer, Integer> cambiosVertTex;
-        cambiosVertTex = new HashMap<Integer, Integer>();
-        int indexVert = 0;
-        int indexVertTex = 0;
-        int i;
-
-        for( i = 0; i < m.getTriangles().length; i++ ) {
-            int[] p1 = facesArray.get(i)[0];
-            int[] p2 = facesArray.get(i)[1];
-            int[] p3 = facesArray.get(i)[2];
-
-            if ( !cambiosVert.containsKey(p1[0]) ) {
-                cambiosVert.put(p1[0], indexVert);
-                indexVert++;
-                usedVertexes.add(p1[0]);
-            }
-            p1[0] = cambiosVert.get(p1[0]);
-            
-            if ( !cambiosVertTex.containsKey(p1[1]) && p1[1] != -1 ) {
-                cambiosVertTex.put(p1[1], indexVertTex);
-                indexVertTex++;
-                usedTexVertexes.add(p1[1]);
-            }
-            if ( p1[1]!=-1 ) {
-                p1[1]=cambiosVertTex.get(p1[1]);
-            }
-            
-            if ( !cambiosVert.containsKey(p2[0]) ) {
-                cambiosVert.put(p2[0], indexVert);
-                indexVert++;
-                usedVertexes.add(p2[0]);
-            }
-            p2[0] = cambiosVert.get(p2[0]);
-            
-            if ( !cambiosVertTex.containsKey(p2[1]) && p2[1] != -1 ) {
-                cambiosVertTex.put(p2[1], indexVertTex);
-                indexVertTex++;
-                usedTexVertexes.add(p2[1]);
-            }
-            if ( p2[1] != -1 ) {
-                p2[1]=cambiosVertTex.get(p2[1]);
-            }
-            
-            if ( !cambiosVert.containsKey(p3[0]) ) {
-                cambiosVert.put(p3[0], indexVert);
-                indexVert++;
-                usedVertexes.add(p3[0]);
-            }
-            p3[0] = cambiosVert.get(p3[0]);
-            
-            if ( !cambiosVertTex.containsKey(p3[1]) && p3[1]!=-1 ) {
-                cambiosVertTex.put(p3[1], indexVertTex);
-                indexVertTex++;
-                usedTexVertexes.add(p3[1]);
-            }
-            if ( p3[1] != -1 ) {
-                p3[1] = cambiosVertTex.get(p3[1]);
-            }
-        }
- 
-        m.setVertexes(new Vertex[usedVertexes.size()]);
-        for ( i = 0; i < usedVertexes.size(); i++ ) {
-            m.getVertexes()[i] = new Vertex();
-            m.getVertexes()[i].setPosition(
-                vertexPositionsArray.get(usedVertexes.get(i)-1));
-        }
-        
-        m.setVerTexture(new Vector3D[usedTexVertexes.size()]);
-        for ( i = 0; i < m.getVerTexture().length; i++ ) {
-            m.getVerTexture()[i]=vertexTextureCoordinatesArray.get(usedTexVertexes.get(i)-1);
-        }
-        
-        for ( i = 0; i < m.getTriangles().length; i++ ) {
-            m.getTriangles()[i]=new Triangle();
-            m.getTriangles()[i].setPoint0(facesArray.get(i)[0][0]);
-            m.getTriangles()[i].setPoint1(facesArray.get(i)[1][0]);
-            m.getTriangles()[i].setPoint2(facesArray.get(i)[2][0]);
-
-            m.getTriangles()[i].setVt0(facesArray.get(i)[0][1]);
-            m.getTriangles()[i].setVt1(facesArray.get(i)[1][1]);
-            m.getTriangles()[i].setVt2(facesArray.get(i)[2][1]);
-        }
-        
-        //- Process textures ----------------------------------------------
-        Material materials[];
-        materials = new Material[nextMaterialsArray.size()];
-
-        for ( i = 0; i < materials.length; i++ ) {
-            materials[i] = nextMaterialsArray.get(i);
-            if ( materials[i] == null ) {
-                materials[i] = new Material();
-            }
-        }
-        m.setMaterials(materials);
-
-        //-----------------------------------------------------------------
-        int auxMaterialRange[];
-        auxMaterialRange = new int[2];
-        auxMaterialRange[0] = facesArray.size();
-        auxMaterialRange[1] = nextMaterialsArray.size()-1;
-        material_triangleRange_table.add(auxMaterialRange);
-
-        int materialRanges[][];
-
-        materialRanges = new int[material_triangleRange_table.size()][2];
-        for ( i = 1; i < material_triangleRange_table.size(); i++ ) {
-            materialRanges[i][0] = material_triangleRange_table.get(i)[0];
-            materialRanges[i][1] = material_triangleRange_table.get(i-1)[1];
-        }
-        m.setMaterialRanges(materialRanges);
-
-        //- Process textures ----------------------------------------------
-        m.setTextures(new RGBAImage[textures.size()]);
-        for ( i = 0; i < m.getTextures().length; i++ ) {
-            m.getTextures()[i]=textures.get(i);
-        }
-
-        //- Process texture ranges ----------------------------------------
-        int numTextureSpans = 0;
-        for ( int textureIndex = 0;
-              textureIndex < texture_span_triangleRange_table.size();
-              textureIndex++ ) {
-            for( int j = 0;
-                 j < texture_span_triangleRange_table.get(textureIndex).size();
-                 j++ ) {
-                numTextureSpans++;
-            }
-        }        
-
-        int textureRanges[][] = new int[numTextureSpans][2];
-        i = 0;
-        for ( int textureIndex = 0;
-              textureIndex < texture_span_triangleRange_table.size();
-              textureIndex++ ) {
-            for( int j = 0;
-                 j < texture_span_triangleRange_table.get(textureIndex).size();
-                 j++ ) {
-                textureRanges[i][0] =
-                  texture_span_triangleRange_table.get(textureIndex).get(j)[1];
-                textureRanges[i][1] = textureIndex;
-                i++;
-            }
-        }
-        quickSortTriangleRange(textureRanges, 0, textureRanges.length-1);
-        m.setTextureRanges(textureRanges);
-
-        //- Process normals -----------------------------------------------
-        m.calculateNormals();
-        
-        return m;
-    }
-    
-    private static int[] copyLength3IntArray(int[] a)
-    {
-        int[] ret = new int[3];
-        ret[0] = a[0];
-        ret[1] = a[1];
-        ret[2] = a[2];
-        return ret;
-    }
     
     /**
     This method reads a polygon from a face line. It returns a set of triangles
     as an ArrayList of matrices. For each matrix, there is the information of
-    a single triangle, where there are 3 rows (one for each triangle vertex)
-    and each row has three elements: vertex position index, texture coordinates
-    and vertex normal.
+    a single triangle, where there are 3 vertexes with: vertex position index,
+    texture coordinates index and vertex normal index.
     Note that the triangle set is builded as a triangle fan: the first vertex
     (p0) is a pivot which is fixed for all triangles, the second point 
     determines the first triangle edge, and for each following vertex,
     a new triangle is builded.
     */
-    private static ArrayList<int[][]>
+    private static ArrayList<_ReaderObjVertex[]>
     readPolygonAsTriangleFan(String lineOfText) {
-        ArrayList<int[][]> ret = new ArrayList<int[][]>();
+        ArrayList<_ReaderObjVertex[]> ret;
         StringTokenizer st = new StringTokenizer(lineOfText, " \n\r\t");
         st.nextToken(); // The "f" token
         int numberOfTokens = st.countTokens();
-        int[] p0 = null;
-        int[] p1 = null;
-        int[] p2 = null;
-        int[][]aux = null;
+        _ReaderObjVertex p0 = null;
+        _ReaderObjVertex p1 = null;
+        _ReaderObjVertex p2 = null;
+        _ReaderObjVertex[] aux = null;
         int i;
 
+        ret = new ArrayList<_ReaderObjVertex[]>();
         for( i = 0; i < numberOfTokens; i++ ) {
             String token = st.nextToken();
-            int[] indexes = readFaceVertex(token);
+            _ReaderObjVertex indexes = readFaceVertex(token);
 
             if( i == 0 ) {
                 p0 = indexes;
@@ -597,78 +585,81 @@ public class ReaderObj
             else {
                 p2 = indexes;
 
-                aux = new int[3][];
-                aux[0] = copyLength3IntArray(p0);
-                aux[1] = copyLength3IntArray(p1);
-                aux[2] = copyLength3IntArray(p2);
+                aux = new _ReaderObjVertex[3];
+                aux[0] = new _ReaderObjVertex(p0);
+                aux[1] = new _ReaderObjVertex(p1);
+                aux[2] = new _ReaderObjVertex(p2);
                 ret.add(aux);
 
-                p1 = copyLength3IntArray(p2); // Why?
-        }
+                p1 = new _ReaderObjVertex(p2);
+            }
         }
         return ret;
     }
 
     /**
-    Returns three indices: vertex, texture coorinates, normal
+    Returns three indices: vertex position, texture coordinates and normal,
+    as a vertex
     */    
-    private static int[] readFaceVertex(String lineOfText)
+    private static _ReaderObjVertex readFaceVertex(String lineOfText)
     {
-        int[] ret = new int[3];
+        _ReaderObjVertex ret = new _ReaderObjVertex();
         StringTokenizer st=new StringTokenizer(lineOfText, "/");
         if ( st.countTokens() == 2 ) {
             if( lineOfText.endsWith("/") ) {
                 // Has vertex and texture
                 try {
-                    ret[0] = Integer.parseInt(st.nextToken());
+                    ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
-                    ret[0] = -1;
+                    ret.vertexPositionIndex = -1;
                 }
                 try {
-                    ret[1] = Integer.parseInt(st.nextToken());
+                    ret.vertexTextureCoordinateIndex =
+                        Integer.parseInt(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
-                    ret[1] = -1;
+                    ret.vertexTextureCoordinateIndex = -1;
                 }
-                ret[2] = -1;
+                ret.vertexNormalIndex = -1;
               }
               else {
                 // Has vertex and normal
                 try {
-                    ret[0] = Integer.parseInt(st.nextToken());
+                    ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
-                    ret[0] = -1;
+                    ret.vertexPositionIndex = -1;
                 }
-                ret[1]=-1;
+                ret.vertexTextureCoordinateIndex=-1;
                 try {
-                    ret[2] = Integer.parseInt(st.nextToken());
+                    ret.vertexNormalIndex = Integer.parseInt(st.nextToken());
                 }
                 catch ( NumberFormatException nfe ) {
-                    ret[2] = -1;
+                    ret.vertexNormalIndex = -1;
                 }
             }
           }
           else {
             // Has all
             try {
-                ret[0] = Integer.parseInt(st.nextToken());
+                ret.vertexPositionIndex = Integer.parseInt(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
-                ret[0] = -1;
+                ret.vertexPositionIndex = -1;
             }
             try {
-                ret[1] = Integer.parseInt(st.nextToken());
+                ret.vertexTextureCoordinateIndex =
+                    Integer.parseInt(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
-                ret[1] = -1;
+                ret.vertexTextureCoordinateIndex = -1;
             }
             try {
-                ret[2] = Integer.parseInt(st.nextToken());
+                ret.vertexNormalIndex = Integer.parseInt(st.nextToken());
             }
             catch ( NumberFormatException nfe ) {
-                ret[2] = -1;
+                ret.vertexNormalIndex = -1;
             }
           }
         ;
@@ -705,8 +696,8 @@ public class ReaderObj
         HashMap<String, Material> ret = new HashMap<String, Material>();
         StringTokenizer st = new StringTokenizer(material, " ");
         st.nextToken(); // "mtlib" token
-        File arc=new File(fileName);
-        File dirArc=arc.getParentFile();
+        File arc = new File(fileName);
+        File dirArc = arc.getParentFile();
         String nomArc;
         nomArc = dirArc + System.getProperty("file.separator")+st.nextToken();
         

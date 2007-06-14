@@ -331,7 +331,8 @@ public class ParametricBiCubicPatch extends Surface {
 
     @todo implement the method
     */
-    public void doExtraInformation(Ray inRay, double intT, 
+    public void
+    doExtraInformation(Ray inRay, double intT, 
                                    GeometryIntersectionInformation outData) {
         return;
     }

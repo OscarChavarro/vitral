@@ -12,6 +12,8 @@
 //= - May 16 2006 - Alfonso Barbosa: modify to manage ZBuffers              =
 //= - November 1 2006 - Alfonso Barbosa / Diana Reyes: exceute generalized  =
 //=   for inclusion of sub-viewport spec.                                   =
+//= - November 19 2006 - Oscar Chavarro: material handling supporting       =
+//=   submaterials inside geometry.                                         =
 //===========================================================================
 
 package vsdk.toolkit.render;
@@ -63,12 +65,12 @@ public class Raytracer {
     into account in the reflection and refraction calculations)
     */
     private ColorRgb evaluateIlluminationModel(Vector3D p, Vector3D n, Vector3D v, 
-        ArrayList lights, ArrayList objects, Background fondo,
-        Material m) {
+        ArrayList lights, ArrayList objects, Background background,
+        Material material) {
 
         SimpleBody nearestObject;
         ColorRgb result = new ColorRgb();
-        ColorRgb color_de_fondo = fondo.colorInDireccion(n);
+        ColorRgb backgroundColor = background.colorInDireccion(n);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -82,7 +84,7 @@ public class Raytracer {
             lightEmission = light.getSpecular();
 
             if ( light.tipo_de_luz == Light.AMBIENT ) {
-                ambient = m.getAmbient();
+                ambient = material.getAmbient();
                 result.r += ambient.r*lightEmission.r;
                 result.g += ambient.g*lightEmission.g;
                 result.b += ambient.b*lightEmission.b;
@@ -110,13 +112,13 @@ public class Raytracer {
 
                 double lambert = n.dotProduct(l);
                 if ( lambert > 0 ) {
-                    diffuse = m.getDiffuse();
+                    diffuse = material.getDiffuse();
                     if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
                         result.r += lambert*diffuse.r*lightEmission.r;
                         result.g += lambert*diffuse.g*lightEmission.g;
                         result.b += lambert*diffuse.b*lightEmission.b;
                     }
-                    specular = m.getSpecular();
+                    specular = material.getSpecular();
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
 
@@ -129,7 +131,7 @@ public class Raytracer {
                         if ( spec > 0 ) {
                             // OJO: Raro...
                             spec = ((specular.r + specular.g + specular.b)/3)*(
-                                (float) Math.pow((double) spec, (double)m.getPhongExponent()));
+                                (float) Math.pow((double) spec, (double)material.getPhongExponent()));
                             result.r += spec*lightEmission.r;
                             result.g += spec*lightEmission.g;
                             result.b += spec*lightEmission.b;
@@ -140,7 +142,7 @@ public class Raytracer {
         } // for ( Iterator i = lights.iterator(); i.hasNext(); )
 
         // Compute illumination due to reflection
-        double kr = m.getReflectionCoefficient();
+        double kr = material.getReflectionCoefficient();
         if ( kr > 0 ) {
             double t = v.dotProduct(n);
             if ( t > 0 ) {
@@ -182,16 +184,17 @@ public class Raytracer {
                     rv.y = -rayo_reflejado.direction.y;
                     rv.z = -rayo_reflejado.direction.z;                    
                     ColorRgb rcolor =
-                        evaluateIlluminationModel(rp, rn, rv, lights, objects, fondo, m);
+                        evaluateIlluminationModel(rp, rn, rv, lights, objects, 
+                            background, material);
 
                     result.r += kr*rcolor.r;
                     result.g += kr*rcolor.g;
                     result.b += kr*rcolor.b;
                   } 
                   else {
-                    result.r += kr*color_de_fondo.r;
-                    result.g += kr*color_de_fondo.g;
-                    result.b += kr*color_de_fondo.b;
+                    result.r += kr*backgroundColor.r;
+                    result.g += kr*backgroundColor.g;
+                    result.b += kr*backgroundColor.b;
                 }
             }
         }
@@ -246,7 +249,7 @@ public class Raytracer {
     and its combination with geometric transformations.
     */
     private ColorRgb followRayPath(Ray inRay, ArrayList in_objetos, 
-                         ArrayList in_luces, Background in_fondo)
+                         ArrayList in_luces, Background in_background)
     {
         ColorRgb c;
         Vector3D v = new Vector3D();
@@ -271,8 +274,8 @@ public class Raytracer {
             myRay.t = inRay.t;
 
             nearestObject.getGeometry().doExtraInformation(myRay, 
-                                                                myRay.t,
-                                                                info);
+                                                                  myRay.t,
+                                                                  info);
             //------------------------------------------------------------
             v.x = -inRay.direction.x;
             v.y = -inRay.direction.y;
@@ -281,12 +284,19 @@ public class Raytracer {
             p = R.multiply(info.p).add(po);
             n = R.multiply(info.n);
 
+            Material material;
+            if ( info.material != null ) {
+                material = info.material;
+            }
+            else {
+                material = nearestObject.getMaterial();
+            }
+
             c = evaluateIlluminationModel(
-                p, n, v, in_luces, in_objetos, in_fondo, 
-                nearestObject.getMaterial());
+                    p, n, v, in_luces, in_objetos, in_background, material);
           }
           else {
-            c = in_fondo.colorInDireccion(inRay.direction);
+            c = in_background.colorInDireccion(inRay.direction);
         }
         return c;
     }
@@ -294,25 +304,25 @@ public class Raytracer {
     public void execute(RGBImage inoutViewport, 
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
-                        Background in_fondo,
+                        Background in_background,
                         Camera in_camara,
                         ProgressMonitor report)
     {
         execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
-                in_fondo, in_camara, report, null, 0, 0,
+                in_background, in_camara, report, null, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
     public void execute(RGBImage inoutViewport, 
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
-                        Background in_fondo,
+                        Background in_background,
                         Camera in_camara,
                         ProgressMonitor report,
                         ZBuffer depthmap)
     {
         execute(inoutViewport, inSimpleBodyArray, in_arr_luces,
-                in_fondo, in_camara, report, depthmap, 0, 0,
+                in_background, in_camara, report, depthmap, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
@@ -328,7 +338,7 @@ public class Raytracer {
     - `in_objetos`: arreglo din&aacute;mico de SimpleBodys que constituyen los
        objetos visibles de la escena.
     - `in_luces`: arreglo din&aacute;mico de Light'es (luces puntuales)
-    - `in_fondo`: especificaci&oacute;n de un color de fondo para la escena
+    - `in_background`: especificaci&oacute;n de un color de fondo para la escena
       (i.e. el color que se ve si no se ve ning&uacute;n objeto!)
     - `in_camara`: especificaci&oacute;n de la transformaci&oacute;n de
       proyecci&oacute;n 3D a 2D que se lleva a cabo en el proceso de 
@@ -352,7 +362,7 @@ public class Raytracer {
 
     POST:
     - `inout_viewport` contiene una representaci&oacute;n visual de la
-       escena 3D (`in_objetos`, `in_luces`, `in_fondo`), tal que corresponde a
+       escena 3D (`in_objetos`, `in_luces`, `in_background`), tal que corresponde a
        una proyecci&oacute;n 3D a 2D controlada por la c&aacute;mara
        virtual `in_camara`.
 
@@ -365,7 +375,7 @@ public class Raytracer {
     public void execute(RGBImage inoutViewport,
                         ArrayList inSimpleBodyArray,
                         ArrayList in_arr_luces,
-                        Background in_fondo,
+                        Background in_background,
                         Camera in_camara,
                         ProgressMonitor report,
                         ZBuffer depthmap,
@@ -389,7 +399,7 @@ public class Raytracer {
                 // (i.e. "final")
                 rayo = in_camara.generateRay(x, y);
                 color = followRayPath(rayo, inSimpleBodyArray,
-                    in_arr_luces, in_fondo);
+                    in_arr_luces, in_background);
                 if ( depthmap != null ) {
                     depthmap.setZ(x, y, (float)rayo.t);
                 }

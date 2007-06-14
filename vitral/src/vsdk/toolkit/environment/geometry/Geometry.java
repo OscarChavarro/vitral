@@ -105,7 +105,8 @@ public abstract class Geometry extends Entity {
     Prerequisite: this method should be called only after a call to
     doIntersection method in the same object that returned a true value.
     */
-    public abstract void doExtraInformation(Ray inRay, double intT, 
+    public abstract void
+    doExtraInformation(Ray inRay, double intT, 
                                       GeometryIntersectionInformation outData);
 
     /**

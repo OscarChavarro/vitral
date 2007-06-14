@@ -65,13 +65,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               case QualitySelection.SHADING_TYPE_FLAT:
                 gl.glEnable(gl.GL_LIGHTING);
                 gl.glShadeModel(gl.GL_FLAT);
-                JoglMaterialRenderer.activate(gl, mesh.getMaterials()[0]);
                 break;
               case QualitySelection.SHADING_TYPE_PHONG:
               case QualitySelection.SHADING_TYPE_GOURAUD: default:
                 gl.glEnable(gl.GL_LIGHTING);
                 gl.glShadeModel(gl.GL_SMOOTH);
-                JoglMaterialRenderer.activate(gl, mesh.getMaterials()[0]);
                 break;
             }
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
@@ -343,29 +341,25 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               else {
                 gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
-            gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt0()).x,
-                            mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt0()).y);
+        //gl.glTexCoord2d(0, 0);
+        //gl.glNormal3d(0, 0, 1);
+            gl.glTexCoord2d(v0.u, v0.v);
             gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
-
             if ( !flipNormals ) {
                 gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
             }
             else {
                 gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
             }
-            gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt1()).x,
-                            mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt1()).y);
-
+            gl.glTexCoord2d(v1.u, v1.v);
             gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
-
             if ( !flipNormals ) {
                 gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
               }
               else {
                 gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
             }
-            gl.glTexCoord2d(mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).x,
-                            mesh.getVerTextureAt(mesh.getTriangleAt(i).getVt2()).y);
+            gl.glTexCoord2d(v2.u, v2.v);
             gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
         }
         gl.glEnd();

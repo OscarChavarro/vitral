@@ -2,6 +2,10 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - April 29 2006 - Oscar Chavarro: Original base version                 =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [BRES1965] Bresenham, J.E. "Algorithm for computer control of a digital =
+//=            plotter" IBM Syst. J. 4, 1 (1965), 25-30.                    =
 //===========================================================================
 
 package vsdk.toolkit.media;

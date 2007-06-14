@@ -100,7 +100,8 @@ public class InfinitePlane extends HalfSpace {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
-    public void doExtraInformation(Ray inRay, double inT, 
+    public void
+    doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         outData.p.x = inRay.origin.x + inT*inRay.direction.x;
         outData.p.y = inRay.origin.y + inT*inRay.direction.y;

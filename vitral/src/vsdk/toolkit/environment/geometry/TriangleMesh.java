@@ -64,8 +64,6 @@ public class TriangleMesh extends Surface {
     private Material[] materials;
     private Image[] textures;
 
-    private Vector3D[] verTex;
-
     /**
     textureRanges is a 2D array which contents mappings between the
     `triangles` and `textures` sets. Each pair 
@@ -94,11 +92,13 @@ public class TriangleMesh extends Surface {
     private int selectedTriangle;
     private SimpleBody boundingVolume;
     private GeometryIntersectionInformation lastInfo;
+    private Ray lastRay;
 
 //= Basic class management methods ==========================================
 
     public TriangleMesh() {
         lastInfo = new GeometryIntersectionInformation();
+        lastRay = null;
         boundingVolume = null;
     }
 
@@ -107,6 +107,7 @@ public class TriangleMesh extends Surface {
         this.triangles = triangles;
         minMax = null;
         lastInfo = new GeometryIntersectionInformation();
+        lastRay = null;
         boundingVolume = null;
     }
 
@@ -142,14 +143,6 @@ public class TriangleMesh extends Surface {
         return this.textures[index];
     }
 
-    public Vector3D[] getVerTexture() {
-        return this.verTex;
-    }
-
-    public Vector3D getVerTextureAt(int index) {
-        return this.verTex[index];
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -172,10 +165,6 @@ public class TriangleMesh extends Surface {
         this.materials = materials;
     }
 
-    public void setVerTexture(Vector3D[] verTex) {
-        this.verTex = verTex;
-    }
-
     public void setTrianglesSize(int size) {
         this.triangles = new Triangle[size];
         boundingVolume = null;
@@ -191,18 +180,8 @@ public class TriangleMesh extends Surface {
         boundingVolume = null;
     }
 
-    public void setVerTextureSize(int size) {
-        this.verTex = new Vector3D[size];
-        boundingVolume = null;
-    }
-
     public void setVertexAt(int index, Vertex vertex) {
         this.vertexes[index] = vertex;
-        boundingVolume = null;
-    }
-
-    public void setVerTextureAt(int index, Vector3D verTex) {
-        this.verTex[index] = verTex;
         boundingVolume = null;
     }
 
@@ -258,7 +237,7 @@ public class TriangleMesh extends Surface {
 
     public void calculateNormals() {
         boundingVolume = null;
-        for (int i = 0; i < this.triangles.length; i++) {
+        for (int i = 0; i < triangles.length; i++) {
             Vertex v1 = vertexes[triangles[i].getPoint0()];
             Vertex v2 = vertexes[triangles[i].getPoint1()];
             Vertex v3 = vertexes[triangles[i].getPoint2()];
@@ -288,10 +267,10 @@ public class TriangleMesh extends Surface {
             vecinos.add(new ArrayList<Triangle> ());
         }
 
-        for (int i = 0; i < this.triangles.length; i++) {
-            vecinos.get(triangles[i].getPoint0()).add(triangles[i]);
-            vecinos.get(triangles[i].getPoint1()).add(triangles[i]);
-            vecinos.get(triangles[i].getPoint2()).add(triangles[i]);
+        for (int i = 0; i < triangles.length; i++) {
+            vecinos.get(triangles[i].p0).add(triangles[i]);
+            vecinos.get(triangles[i].p1).add(triangles[i]);
+            vecinos.get(triangles[i].p2).add(triangles[i]);
         }
 
         for (int i = 0; i < vertexes.length; i++) {
@@ -304,6 +283,43 @@ public class TriangleMesh extends Surface {
             vertexes[i].getNormal().normalize();
             vertexes[i].setIncidentTriangles(vecinos.get(i));
         }
+    }
+
+    /**
+    In the triangle meshes the vector normal directions must be consistent with
+    the triangle normal, which direction depends on triangle order (clockwise
+    or counterclockwise).
+
+    This method checks for inverted normals, and invert them to make it
+    consistent with triangle orientation order.
+
+    Note that this methods recalculate triangle surface normals.
+    */
+    public void reorientateNormals()
+    {
+        int i;
+        Vertex a, b, c;
+        Vector3D u, v, n;
+
+        for ( i = 0; i < triangles.length; i++ ) {
+            a = vertexes[triangles[i].p0];
+            b = vertexes[triangles[i].p1];
+            c = vertexes[triangles[i].p2];
+            u = b.position.substract(a.position);
+            v = c.position.substract(a.position);
+            triangles[i].normal = u.crossProduct(v);
+            triangles[i].normal.normalize();
+        if ( triangles[i].normal.dotProduct(a.normal) < 0 ) {
+        a.normal = a.normal.multiply(-1);
+        }
+        if ( triangles[i].normal.dotProduct(b.normal) < 0 ) {
+        b.normal = b.normal.multiply(-1);
+        }
+        if ( triangles[i].normal.dotProduct(c.normal) < 0 ) {
+        c.normal = c.normal.multiply(-1);
+        }
+        }
+
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
@@ -420,7 +436,6 @@ public class TriangleMesh extends Surface {
         boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         Vector3D v0, v1, v2;  // Positions of the three triangle points
-        Vector3D n0, n1, n2;  // Normals of the three triangle points
         Vector3D u, v, n;     // Edge vectors and normal
         Vector3D p;           // Point of intersection between ray and plane
         double t, a, b, d;    // Coefficients for solving equation (2)
@@ -487,50 +502,10 @@ public class TriangleMesh extends Surface {
                 if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
                      (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
                     if ( t < min_t ) {
-
-                        //if ( withNormalInterpolation ) {
-                        // Normal interpolation
-                        n0 = vertexes[triangles[i].p0].normal;
-                        n1 = vertexes[triangles[i].p1].normal;
-                        n2 = vertexes[triangles[i].p2].normal;
-
-                        // Obtain barycentric coordinates for point p
-                        // Method taken from wikipedia
-                        double A, B, C, D, E, F, G, H, I;
-                        double lambda1, lambda2, lambda3;
-
-                        A = v0.x - v2.x;
-                        B = v1.x - v2.x;
-                        C = v2.x - p.x;
-                        D = v0.y - v2.y;
-                        E = v1.y - v2.y;
-                        F = v2.y - p.y;
-                        G = v0.z - v2.z;
-                        H = v1.z - v2.z;
-                        I = v2.z - p.z;
-
-                        // Recalculate n as the barycentric normal 
-                        // interpolation of three vertex normals
-                        lambda1 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
-                        lambda2 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
-                        lambda3 = 1-lambda1-lambda2;
-                        n = n0.multiply(lambda1).
-                            add(n1.multiply(lambda2).
-                            add(n2.multiply(lambda3)));
-                        n.normalize();
-                        //}
-
-                        // Normal is always pointed "outwards" with respect to 
-                        // the triangle (this manages the issue of back-facing
-                        // normals)
-                        if ( n.dotProduct(inOut_Ray.direction) < 0 ) {
-                            lastInfo.n = n;
-                          }
-                          else {
-                            lastInfo.n = n.multiply(-1);
-                        }
                         lastInfo.p = p;
+                        lastInfo.n = n;
                         inOut_Ray.t = t;
+                        lastRay = inOut_Ray;
                         min_t = t;
                         selectedTriangle = i;
                         intersection = true;
@@ -546,14 +521,76 @@ public class TriangleMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
-    public void doExtraInformation(Ray inRay, double inT,
+    public void
+    doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
+        //-----------------------------------------------------------------
+        Vector3D v0, v1, v2;  // Positions of the three triangle points
+        Vector3D n0, n1, n2;  // Normals of the three triangle points
+
+        //if ( withNormalInterpolation ) {
+            v0 = vertexes[triangles[selectedTriangle].p0].position;
+            v1 = vertexes[triangles[selectedTriangle].p1].position;
+            v2 = vertexes[triangles[selectedTriangle].p2].position;
+
+            // Normal interpolation
+            n0 = vertexes[triangles[selectedTriangle].p0].normal;
+            n1 = vertexes[triangles[selectedTriangle].p1].normal;
+            n2 = vertexes[triangles[selectedTriangle].p2].normal;
+
+            // Obtain barycentric coordinates for point p
+            // Method taken from wikipedia
+            double A, B, C, D, E, F, G, H, I;
+            double lambda1, lambda2, lambda3;
+
+            A = v0.x - v2.x;
+            B = v1.x - v2.x;
+            C = v2.x - lastInfo.p.x;
+            D = v0.y - v2.y;
+            E = v1.y - v2.y;
+            F = v2.y - lastInfo.p.y;
+            G = v0.z - v2.z;
+            H = v1.z - v2.z;
+            I = v2.z - lastInfo.p.z;
+
+            // Recalculate n as the barycentric normal 
+            // interpolation of three vertex normals
+            lambda1 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
+            lambda2 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
+            lambda3 = 1-lambda1-lambda2;
+            lastInfo.n = n0.multiply(lambda1).
+                add(n1.multiply(lambda2).
+                add(n2.multiply(lambda3)));
+        //}
+
+        lastInfo.n.normalize();
+
+        // Normal is always pointed "outwards" with respect to 
+        // the triangle (this manages the issue of back-facing
+        // normals)
+        if ( lastInfo.n.dotProduct(lastRay.direction) >= 0 ) {
+            lastInfo.n = lastInfo.n.multiply(-1);
+        }
+
+        //-----------------------------------------------------------------
         outData.p.x = lastInfo.p.x;
         outData.p.y = lastInfo.p.y;
         outData.p.z = lastInfo.p.z;
         outData.n.x = lastInfo.n.x;
         outData.n.y = lastInfo.n.y;
         outData.n.z = lastInfo.n.z;
+
+        //-----------------------------------------------------------------
+        outData.material = materials[0];
+        if ( materialRanges != null ) {
+            for ( int i = 0; i < materialRanges.length-1 ; i++ ) {
+        if ( selectedTriangle >= materialRanges[i][0] &&
+                     selectedTriangle < materialRanges[i+1][0] ) {
+                    outData.material = materials[materialRanges[i+1][1]];
+            break;
+        }
+        }
+    }
     }
 
     /**
