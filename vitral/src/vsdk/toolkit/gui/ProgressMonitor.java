@@ -4,7 +4,7 @@
 //= - March 19 2006 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.gui;
 
 /**
 This interface is designed to staandarize a way in which any slow or heavy

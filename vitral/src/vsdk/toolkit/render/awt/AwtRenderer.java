@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.awt;
 
-import vsdk.toolkit.common.RenderingElement;
+import vsdk.toolkit.render.RenderingElement;
 
 /**
 The AwtRenderer abstract class provides an interface for Awt*Renderer

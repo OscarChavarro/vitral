@@ -4,7 +4,7 @@
 //= - December 8 2006 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.render;
 
 /**
 DEFINITION: A `RenderingElement` in VitralSDK is a software element with

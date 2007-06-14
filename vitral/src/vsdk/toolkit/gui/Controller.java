@@ -6,8 +6,6 @@
 
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.PresentationElement;
-
 /**
 The Controller abstract class provides an interface for *Controller
 style classes. This serves two purposes:

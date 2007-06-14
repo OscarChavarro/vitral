@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.awt.Dimension;
 import java.awt.image.DirectColorModel;
 
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 /**
 The TargaImage class represents a targa image (the image files with .tga extension)

@@ -153,6 +153,7 @@ Changes in 2006 november 19 revition
     JoglTriangleMeshRenderer to simplify design.
   - Raytracer now support objects with sub-materials
 
-Changes in 2006 december 8 revition
+Changes in 2006 december 9 revition
   - Organizer abstract classes incorporated for exceptions, renderers, gizmos,
     controllers and persistence classes
+  - Implementation of reader 3ds started

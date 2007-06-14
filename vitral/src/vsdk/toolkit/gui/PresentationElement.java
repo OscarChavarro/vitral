@@ -4,7 +4,7 @@
 //= - December 8 2006 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.gui;
 
 /**
 DEFINITION: A `PresentationElement` in VitralSDK is a software element with

@@ -30,7 +30,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 //===========================================================================
 
@@ -93,6 +93,10 @@ By the use of extensions, it has the potential to describe more information.
 The original Wavefront format is not well standarized, so many variations
 could exist. This code currently manages only triangle faces, and interprets
 other polygons to triangle fans.
+
+@todo Perhaps "ReaderObj" is not the best name for this class, as in the
+future should support exporting (writing) operations. It could be renamed
+to something as "PersistenceObj".
 */
 public class ReaderObj extends PersistenceElement
 {

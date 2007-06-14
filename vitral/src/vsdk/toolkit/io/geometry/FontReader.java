@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.io.geometry;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 /**
 This is an abstract class to serve as a base in an abstract factory design

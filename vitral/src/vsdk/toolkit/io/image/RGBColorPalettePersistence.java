@@ -15,7 +15,7 @@ import java.io.StreamTokenizer;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBColorPalette;
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 /**
 This class contains the persistence operations to load and save

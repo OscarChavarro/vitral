@@ -19,7 +19,7 @@ import java.io.IOException;
 // VSDK classes
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.common.ProgressMonitorConsole;
+import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
 import vsdk.toolkit.io.image.ImagePersistence;
 

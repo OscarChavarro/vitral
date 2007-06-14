@@ -60,7 +60,7 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.XmlException;
-import vsdk.toolkit.io.geometry.ReaderObj;
+import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 
 // Internal classes
@@ -577,19 +577,19 @@ class ButtonsPanel extends JPanel implements ActionListener
             }
 */
         }
-        else if ( label.equals("IDC_CREATE_TRIANGLEMESH") ) {
+        else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
             JFileChooser jfc = null;
             jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../etc/geometry");
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
+            jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
             int opc = jfc.showOpenDialog(new JPanel());
             if (opc == JFileChooser.APPROVE_OPTION) {
                 try {
                     File file = jfc.getSelectedFile();
 
-                    TriangleMeshGroup mg = null;
-                    mg = ReaderObj.read(file.getAbsolutePath());
-                    addThing(mg);
+                    EnvironmentPersistence.importEnvironment(file,
+                        parent.theScene.things, null, null, null);
 
                     repaint();
                 }

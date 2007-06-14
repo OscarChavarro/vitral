@@ -17,7 +17,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 public class ParametricBiCubicPatchPersistence extends PersistenceElement {
   public static String rootName = "ParametricBiCubicPatch";

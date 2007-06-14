@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
@@ -43,7 +42,7 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
-import vsdk.toolkit.common.PersistenceElement;
+import vsdk.toolkit.io.PersistenceElement;
 
 /**
 This class is a front end front which images of various formats can be
@@ -72,7 +71,7 @@ public class ImagePersistence extends PersistenceElement
     */
     public static RGBAImage importRGBA(File imagen) throws ImageNotRecognizedException
     {
-        String type = accept(imagen);
+        String type = extractExtensionFromFile(imagen);
         RGBAImage retImage = new RGBAImage();
 
         if( type.equals("tga") ) {
@@ -110,7 +109,7 @@ public class ImagePersistence extends PersistenceElement
     */
     public static RGBImage importRGB(File imagen) throws ImageNotRecognizedException
     {
-        String type = accept(imagen);
+        String type = extractExtensionFromFile(imagen);
         RGBImage retImage = new RGBImage();
 
         if( type.equals("tga") ) {
@@ -228,19 +227,6 @@ public class ImagePersistence extends PersistenceElement
         return bimage;
     }
     
-    private static String accept(File f)
-    {
-        String fName=f.getName();
-        StringTokenizer st=new StringTokenizer(fName, ".");
-        int numTokens=st.countTokens();
-        for(int i=0; i<numTokens-1;i++)
-        {
-            st.nextToken();
-        }
-        String ext=st.nextToken();
-        return ext;
-    }
-
     /**
     This method writes the contents of the specified image to a file in 
     binary JPEG image format. Returns true if everything

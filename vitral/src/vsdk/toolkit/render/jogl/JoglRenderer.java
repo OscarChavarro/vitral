@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import vsdk.toolkit.common.RenderingElement;
+import vsdk.toolkit.render.RenderingElement;
 
 /**
 The JoglRenderer abstract class provides an interface for Jogl*Renderer

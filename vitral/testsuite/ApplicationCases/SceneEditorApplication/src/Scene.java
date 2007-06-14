@@ -5,7 +5,7 @@ import java.util.Iterator;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.ProgressMonitorConsole;
+import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
