@@ -27,7 +27,7 @@ public class SceneEditorApplication {
     private JFrame mainWindowWidget;
     private ButtonsPanel controls;
     private JMenuBar menubar;
-    private JoglDrawingArea drawingArea;
+    JoglDrawingArea drawingArea;
     private JSplitPane splitPane;
     private String lookAndFeel;
 
@@ -168,6 +168,10 @@ class ButtonsPanel extends JPanel implements ActionListener
         b.addActionListener(this);
         add(b);
 
+        b = new JButton("Rotar fondo");
+        b.addActionListener(this);
+        add(b);
+
         this.parent = parent;
     }
 
@@ -185,6 +189,9 @@ class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label == "Windows" ) {
             parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        }
+        else if ( label == "Rotar fondo" ) {
+            parent.drawingArea.rotateBackground();
         }
     }
 }

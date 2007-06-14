@@ -17,23 +17,31 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 import vitral.toolkits.environment.Camera;
+import vitral.toolkits.environment.SimpleBackground;
 import vitral.toolkits.gui.CameraController;
 import vitral.toolkits.gui.CameraControllerAquynza;
 import vitral.toolkits.gui.CameraControllerBlender;
 import vitral.toolkits.gui.CameraControllerGravZero;
-
+import vitral.toolkits.visual.jogl.JoglSimpleBackgroundRenderer;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
     KeyListener
 {
+    private GLCanvas canvas;
+
     private SimpleCorridor corridor;
     private CameraController cameraController;
     private Camera activeCamera;
-    private GLCanvas canvas;
+    private SimpleBackground simpleBackground;
+    private int selectedBackground;
 
     public JoglDrawingArea(Camera camera)
     {
+        simpleBackground = new SimpleBackground();
+        simpleBackground.setColor(0.9, 0.9, 0);
+        selectedBackground = 1;
+
         corridor = new SimpleCorridor();
         activeCamera = camera;
         //cameraController = new CameraControllerGravZero(camera);
@@ -50,6 +58,11 @@ public class JoglDrawingArea implements
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+    }
+
+    public void rotateBackground()
+    {
+    System.out.println("Roto fondo");
     }
 
     public GLCanvas getCanvas()
@@ -85,8 +98,12 @@ public class JoglDrawingArea implements
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        switch ( selectedBackground ) {
+        case 0: default:
+            JoglSimpleBackgroundRenderer.draw(gl, simpleBackground);
+        break;
+    }
+
         gl.glColor3d(1, 1, 1);
 
         vitral.toolkits.visual.jogl.JoglCameraRenderer.activateGL(gl, activeCamera);

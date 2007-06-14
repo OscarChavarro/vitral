@@ -16,12 +16,12 @@ public class SimpleBackground extends Background {
         _color.b = 0;
     }
 
-    public ColorRgb color_en_direccion(Vector3D d)
+    public ColorRgb colorInDireccion(Vector3D d)
     {
         return _color;
     }
 
-    public void set_color(float r, float g, float b)
+    public void setColor(double r, double g, double b)
     {
         _color.r = r;
         _color.g = g;

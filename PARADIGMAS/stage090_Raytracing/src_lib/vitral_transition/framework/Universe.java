@@ -36,7 +36,7 @@ public class Universe
     {
         camara = new Camera();
         fondo = new SimpleBackground();
-        fondo.set_color(0, 0, 0);
+        fondo.setColor(0, 0, 0);
 
         int CHUNKSIZE = 100; // Incremento de arreglos
 
@@ -138,9 +138,9 @@ public class Universe
                 else if (st.sval.equals("background")) {
                   imprimirMensaje("background");
                   fondo = new SimpleBackground();
-                  fondo.set_color((float)leerNumero(st), 
-                                  (float)leerNumero(st), 
-                                  (float)leerNumero(st));
+                  fondo.setColor(leerNumero(st), 
+                                 leerNumero(st), 
+                                 leerNumero(st));
                 }
                 else if (st.sval.equals("light")) {
                   imprimirMensaje("light");

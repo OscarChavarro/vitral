@@ -8,7 +8,7 @@ public abstract class Background {
     public Background() {
         ;
     }
-    public abstract ColorRgb color_en_direccion(Vector3D d);
+    public abstract ColorRgb colorInDireccion(Vector3D d);
 }
 
 //===========================================================================

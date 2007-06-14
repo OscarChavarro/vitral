@@ -43,7 +43,7 @@ public class RaytracerMIT {
 
         ColorRgb resultado = new ColorRgb();
         Geometry objeto_mas_cercano;
-        ColorRgb color_de_fondo = fondo.color_en_direccion(n);
+        ColorRgb color_de_fondo = fondo.colorInDireccion(n);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -204,7 +204,7 @@ public class RaytracerMIT {
                 objeto_mas_cercano.material);
           }
           else {
-            c = in_fondo.color_en_direccion(rayo.direction);
+            c = in_fondo.colorInDireccion(rayo.direction);
         }
         return c;
     }
