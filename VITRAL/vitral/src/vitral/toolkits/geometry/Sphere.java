@@ -1,21 +1,21 @@
 //===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//===========================================================================
 
 package vitral.toolkits.geometry;
 
 import vitral.toolkits.common.Vector3D;
-import vitral.toolkits.environment.Ray;
-import vitral.toolkits.environment.Material;
+import vitral.toolkits.common.Ray;
 import vitral.toolkits.geometry.Geometry;
 
 public class Sphere extends Geometry {
-    private Vector3D _centro;
     private double _radio;
     private double _radio_al_cuadrado;
     private Vector3D _static_delta;
 
-    public Sphere(Material s, Vector3D c, double r) {
-        material = s;
-        _centro = c;
+    public Sphere(double r) {
         _radio = r;
         _radio_al_cuadrado = _radio*_radio;
         _static_delta = new Vector3D();
@@ -32,7 +32,7 @@ public class Sphere extends Geometry {
     del `inout_rayo`.
     */
     public boolean
-    interseccion(Ray inout_rayo) {
+    doIntersection(Ray inout_rayo) {
         /* OJO: Como en Java, a diferencia de C no hay sino objetos por
                 referencia, no se puede hacer una declaraci&oacute;n 
                 est&aacute;tica de un objeto, y poder hacerla es importante 
@@ -55,9 +55,9 @@ public class Sphere extends Geometry {
                 NOTA: Comparar este m&eacute;todo modificado con la 
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */
-        _static_delta.x = _centro.x - inout_rayo.origin.x;
-        _static_delta.y = _centro.y - inout_rayo.origin.y;
-        _static_delta.z = _centro.z - inout_rayo.origin.z;
+        _static_delta.x = -inout_rayo.origin.x;
+        _static_delta.y = -inout_rayo.origin.y;
+        _static_delta.z = -inout_rayo.origin.z;
         double v = inout_rayo.direction.dotProduct(_static_delta);
 
         // Do the following quick check to see if there is even a chance
@@ -98,16 +98,16 @@ public class Sphere extends Geometry {
     PRE: Las referencias a Vector3D out_p y out_n YA deben existir. El 
          m&eacute;todo solo coloca informaci&oacute;n dentro de ellos.
     */
-    public void informacion_extra(Ray in_rayo, double in_t, 
-                                  Vector3D out_p, Vector3D out_n) {
-        out_p.x = in_rayo.origin.x + in_t*in_rayo.direction.x;
-        out_p.y = in_rayo.origin.y + in_t*in_rayo.direction.y;
-        out_p.z = in_rayo.origin.z + in_t*in_rayo.direction.z;
+    public void doExtraInformation(Ray inRay, double inT, 
+                                  GeometryIntersectionInformation outData) {
+        outData.p.x = inRay.origin.x + inT*inRay.direction.x;
+        outData.p.y = inRay.origin.y + inT*inRay.direction.y;
+        outData.p.z = inRay.origin.z + inT*inRay.direction.z;
 
-        out_n.x = out_p.x - _centro.x;
-        out_n.y = out_p.y - _centro.y;
-        out_n.z = out_p.z - _centro.z;
-        out_n.normalize();
+        outData.n.x = outData.p.x;
+        outData.n.y = outData.p.y;
+        outData.n.z = outData.p.z;
+        outData.n.normalize();
     }
 
 }

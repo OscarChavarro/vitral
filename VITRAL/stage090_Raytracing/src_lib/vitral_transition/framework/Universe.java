@@ -13,13 +13,16 @@ import java.io.IOException;
 
 // Paquetes internos al sistema de raytracing / modelamiento
 import vitral.toolkits.common.Vector3D;
+import vitral.toolkits.common.Matrix4x4;
 import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.environment.Camera;
 import vitral_transition.toolkits.environment.Light2;
 import vitral.toolkits.environment.Material;
 import vitral.toolkits.environment.SimpleBackground;
+import vitral.toolkits.geometry.RayableObject;
 import vitral.toolkits.geometry.Geometry;
 import vitral.toolkits.geometry.Sphere;
+import vitral.toolkits.geometry.Cube;
 
 public class Universe
 {
@@ -27,7 +30,7 @@ public class Universe
     private static final boolean depurar = false;
 
     // El modelo del mundo
-    public Vector<Geometry> arr_cosas;
+    public Vector<RayableObject> arr_cosas;
     public Vector<Light2> arr_luces;
     public SimpleBackground fondo;
     public Camera camara;
@@ -41,7 +44,7 @@ public class Universe
         int CHUNKSIZE = 100; // Incremento de arreglos
 
         // Arreglo de Geometrys
-        arr_cosas = new Vector<Geometry>(CHUNKSIZE, CHUNKSIZE);  
+        arr_cosas = new Vector<RayableObject>(CHUNKSIZE, CHUNKSIZE);  
         // Arreglo de LIGHTes
         arr_luces = new Vector<Light2>(CHUNKSIZE, CHUNKSIZE);
     }
@@ -94,23 +97,57 @@ public class Universe
         material_actual.setReflectionCoefficient(0);
         material_actual.setRefractionCoefficient(0);
         material_actual.setPhongExponent(10);
+        RayableObject thing;
+        Matrix4x4 R, Ri;
 
         while ( !fin_de_lectura ) {
           switch ( st.nextToken() ) {
             case StreamTokenizer.TT_WORD:
-              if (st.sval.equals("sphere")) {
+              if ( st.sval.equals("sphere") ) {
                   Vector3D c = new Vector3D((float) leerNumero(st), 
-                                        (float) leerNumero(st), 
-                                        (float) leerNumero(st));
+                                            (float) leerNumero(st), 
+                                            (float) leerNumero(st));
                   float r = (float)leerNumero(st);
 
                   imprimirMensaje("sphere");
-                  arr_cosas.addElement(new Sphere(material_actual, c, r));
+                  thing = new RayableObject();
+          thing.setGeometry(new Sphere(r));
+                  thing.setMaterial(material_actual);
+                  R = new Matrix4x4();
+                  // Pending to add rotation code
+                  thing.setRotation(R);
+                  Ri = new Matrix4x4(R);
+                  Ri.invert();
+                  thing.setRotationInverse(Ri);
+                  thing.setPosition(c);
+                  arr_cosas.addElement(thing);
+                }
+            else if ( st.sval.equals("cube") ) {
+                  Vector3D c = new Vector3D((float) leerNumero(st), 
+                                            (float) leerNumero(st), 
+                                            (float) leerNumero(st));
+                  float r = (float)leerNumero(st);
+
+                  imprimirMensaje("cube");
+                  thing = new RayableObject();
+          thing.setGeometry(new Cube(r));
+                  thing.setMaterial(material_actual);
+                  R = new Matrix4x4();
+                  // Pending to add rotation code
+                  thing.setRotation(R);
+                  Ri = new Matrix4x4(R);
+                  Ri.invert();
+                  thing.setRotationInverse(Ri);
+                  thing.setPosition(c);
+                  arr_cosas.addElement(thing);
                 } 
                 /*
                 else if (st.sval.equals("triangles")) {
                   imprimirMensaje("triangles");
-                  arr_cosas.addElement(new MESH(material_actual, st));
+                  thing = new RayableObject();
+          thing.setGeometry(new MESH(st));
+                  thing.setMaterial(material_actual);
+                  arr_cosas.addElement(thing);
                 } 
                 */
                 else if (st.sval.equals("eye")) {

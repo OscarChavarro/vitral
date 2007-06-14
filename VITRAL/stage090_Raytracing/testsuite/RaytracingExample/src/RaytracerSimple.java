@@ -47,7 +47,7 @@ public class RaytracerSimple {
         File fd = new File("./salida.ppm");
 
         la_imagen_resultado = new RGBImage();
-        if ( !la_imagen_resultado.init(480, 640) ) {
+        if ( !la_imagen_resultado.init(320, 240) ) {
             System.err.println("Error creando la imagen!!");
             System.exit(1);
         }
@@ -106,7 +106,7 @@ public class RaytracerSimple {
         RaytracerSimple instancia = new RaytracerSimple();
 
         if ( args.length < 1 ) {
-            instancia.pintar_offline("./etc/balls.ray");
+            instancia.pintar_offline("./etc/object.ray");
           }
           else {
             instancia.pintar_offline(args[0]);

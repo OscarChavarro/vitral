@@ -17,6 +17,7 @@
 package vitral.toolkits.environment;
 
 import vitral.toolkits.common.Vector3D;
+import vitral.toolkits.common.Ray;
 import vitral.toolkits.common.Matrix4x4;
 
 public class Camera {

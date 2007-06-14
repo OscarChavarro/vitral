@@ -12,7 +12,6 @@ import java.awt.event.MouseMotionListener;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -113,8 +112,7 @@ public class JoglDrawingArea implements
         //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 
-        GLCapabilities capabilities = new GLCapabilities();
-        canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
+        canvas = new GLCanvas();
 
         Dimension minimumSize = new Dimension(8, 8);
         canvas.setMinimumSize(minimumSize);

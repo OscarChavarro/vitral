@@ -22,7 +22,6 @@ import java.awt.event.MouseMotionListener;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -45,8 +44,7 @@ public class CameraSwingExample extends JFrame implements
     public CameraSwingExample() {
         super("VITRAL concept test - JOGL Hello World");
 
-        GLCapabilities capabilities = new GLCapabilities();
-        canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
+        canvas = new GLCanvas();
 
         canvas.addGLEventListener(this);
         canvas.addMouseListener(this);
@@ -59,6 +57,7 @@ public class CameraSwingExample extends JFrame implements
         this.add(canvas, BorderLayout.CENTER);
         this.add(controls, BorderLayout.SOUTH);
         this.setJMenuBar(menubar);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         camera = new Camera();
 

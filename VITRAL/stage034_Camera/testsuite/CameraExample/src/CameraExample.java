@@ -14,7 +14,6 @@ import java.awt.event.KeyListener;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -35,8 +34,7 @@ public class CameraExample extends JFrame implements
     public CameraExample() {
         super("VITRAL concept test - JOGL Hello World");
 
-        GLCapabilities capabilities = new GLCapabilities();
-        canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
+        canvas = new GLCanvas();
 
         canvas.addGLEventListener(this);
         canvas.addMouseListener(this);

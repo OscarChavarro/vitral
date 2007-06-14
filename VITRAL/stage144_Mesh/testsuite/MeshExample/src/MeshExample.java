@@ -51,8 +51,7 @@ public class MeshExample
 
     }
 
-    GLCapabilities capabilities = new GLCapabilities();
-    canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
+    canvas = new GLCanvas();
 
     canvas.addGLEventListener(this);
     canvas.addMouseListener(this);

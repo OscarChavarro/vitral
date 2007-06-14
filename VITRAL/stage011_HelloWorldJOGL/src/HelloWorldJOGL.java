@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
@@ -18,8 +17,7 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
     public HelloWorldJOGL() {
         super("VITRAL concept test - JOGL Hello World");
 
-        GLCapabilities capabilities = new GLCapabilities();
-        GLCanvas canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);
+        GLCanvas canvas = new GLCanvas();
         canvas.addGLEventListener(this);
 
         this.add(canvas, BorderLayout.CENTER);

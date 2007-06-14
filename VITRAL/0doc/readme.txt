@@ -11,3 +11,10 @@ DESIGN (GUI)
   - JFrames must include a nmemonic label identifying the program in its window title
   - JFrames must be configured to exit:
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+IMPLEMENTATION (SIZE RESTRICTION, DISTRIBUTION AND DEPLOYMENT)
+  - Implementation should be distributed in two main files: one basic small
+    autocontained package and one extra samples-only, posibly big package.
+  - All files included in the basic package must be: java code, scripts,
+    basic documentation and SMALL samples. This package should be as small
+    as posible, and avoid the inclusion of big data files.
