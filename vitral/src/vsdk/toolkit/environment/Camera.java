@@ -875,7 +875,10 @@ public class Camera extends Entity
                     clippingPlane = nearPlane;
                 }
                 else {
-                    System.out.println("Non implemented case!");
+                    // Not possible: non implemented case!
+                        VSDK.reportMessage(this, VSDK.WARNING, 
+                            "clipLineCohenSutherland", 
+                            "Unusal ray case, check code and data");
                 }
 
                 if ( clippingPlane != null ) {

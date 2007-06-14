@@ -9,7 +9,6 @@
 package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Vector3D;

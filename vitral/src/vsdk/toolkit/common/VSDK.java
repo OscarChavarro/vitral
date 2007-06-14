@@ -211,21 +211,28 @@ public class VSDK
 
     public static void reportMessage(Object o, int level, String method, String message)
     {
-        System.err.println("===========================================================================");
-        System.err.println("= VSDK Exception report                                                   =");
+        String msg;
+
+        msg = "===========================================================================\n";
+        msg = msg + "= VSDK Exception report                                                   =\n";
         if ( o != null ) {
-            System.err.println(" - An exception has been thrown in the \"" + o.getClass().getName() + "\" class");
+            msg = msg + " - An exception has been thrown in the \"" + o.getClass().getName() + "\" class\n";
         }
         else {
-            System.err.println(" - An exception has been thrown from a static context");
+            msg = msg + " - An exception has been thrown from a static context\n";
         }
-        System.err.println(" - Exception located at method " + method);
-        System.err.println(" - Exception message:\n" + message);
-        System.err.println("===========================================================================");
+        msg = msg + " - Exception located at method " + method + "\n";
+        msg = msg + " - Exception message:\n" + message + "\n";
+        msg = msg + "===========================================================================\n";
         if ( level == FATAL_ERROR ) {
-            System.err.println("Program excecution suspended!");
-            System.exit(1);
+            msg = msg + "Program excecution suspended!\n";
         }
+
+        System.err.println(msg);
+
+        if ( level == FATAL_ERROR ) {
+            System.exit(1);
+    }
     }
 
 }

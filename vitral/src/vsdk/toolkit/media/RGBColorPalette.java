@@ -9,7 +9,6 @@
 package vsdk.toolkit.media;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
@@ -70,9 +69,10 @@ public class RGBColorPalette extends Entity {
     {
         int pos = 0;
         double val = 0;
+    int i;
 
-        for ( Iterator i = colors.iterator(); i.hasNext(); ) {
-            ColorRgb c = (ColorRgb)i.next();
+        for ( i = 0; i < colors.size(); i++ ) {
+            ColorRgb c = colors.get(i);
             c.r = c.g = c.b = val;
             val += 1.0/((double)(colors.size()-1));
             pos++;        

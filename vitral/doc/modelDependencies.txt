@@ -1,0 +1,47 @@
+Just a little comment about Vitral SDK architectural simplicity:
+
+Basic model classes (packages common + media + environment) are clean enough
+to as december 27 / 2006, that they depend only on the following external
+classes:
+  - java.lang.System            2 uses in VSDK.java
+  - java.lang.Math
+  - java.lang.String
+  - java.util.ArrayList
+  - java.io.Serializable        1 use in Entity.java
+  - java.text.DecimalFormat     1 use in VSDK.java
+  - java.text.FieldPosition     1 use in VSDK.java
+  - Base types java wrappers classes Integer and Double. 
+
+Serializable interface is NOT used inside the VitralSDK toolkit, so can be
+removed easily for applications not requiring it and/or for platforms /
+java profiles where java serialization toolkit is not available.
+
+DecimalFormat and FieldPosition only affects double number formatting.
+
+There is only one call to System.err.println and one call to System.err.exit
+in VSDK.java, for error reporting / managing. If not supported, this method
+can be easily modified.
+
+So the only classes in which Vitral SDK toolkit's base model depends
+heavily are Math, String and ArrayList (in java 5 typed/templated notation).
+For profiles not supporting Java 5 / Math / floating point types like J2ME
+CLDC 1.0 / MIDP 2.0, the use of a postcompiler like J2ME Polish's "floater"
+is recommended.
+
+From Math class, only the following attributes/methods are used:
+  - Math.PI
+  - Math.sin
+  - Math.cos
+  - Math.tan
+  - Math.asin
+  - Math.acos
+  - Math.atan
+  - Math.abs
+  - Math.floor
+  - Math.max
+  - Math.pow
+  - Math.sqrt
+  - Math.toDegrees
+  - Math.toRadians
+
+It is expected that this situation eases the portability of the Vitral SDK. :)

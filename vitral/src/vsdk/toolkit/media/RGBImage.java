@@ -39,7 +39,6 @@ public class RGBImage extends Image
             xSize = 0;
             ySize = 0;
             data = null;
-            System.gc();
         }
     }
 
