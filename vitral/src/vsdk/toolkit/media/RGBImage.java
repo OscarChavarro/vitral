@@ -35,7 +35,6 @@ public class RGBImage extends Image
     */
     public void finalize()
     {
-    System.out.println("Finalizing RGBImage!");
         if ( data != null ) {
             xSize = 0;
             ySize = 0;

@@ -1,3 +1,5 @@
+#---------------------------------------------------------------------------
+cd _APITests
 cd _JOGLHelloWorld
 ./run.sh
 cd ..
@@ -7,10 +9,28 @@ cd ..
 cd _JAIHelloWorld
 ./run.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd OfflineExamples
+cd ImageOfflineExample
+./run.sh
+cd ..
+cd WireframeOfflineExample
+./run.sh
+cd ..
+cd RaytracingOfflineExample
+./run.sh
+cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd VSDKExamples
 cd CameraExample
 ./run.sh
 cd ..
 cd CameraSwingExample
+./run.sh
+cd ..
+cd GlyphExample
 ./run.sh
 cd ..
 cd ImageExample
@@ -19,24 +39,26 @@ cd ..
 cd ImageSwingExample
 ./run.sh
 cd ..
-cd ImageOfflineExample
-./run.sh
-cd ..
 cd PaletteSwingExample
 ./run.sh
 cd ..
 cd MeshExample
 ./run.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd Techniques
 cd CohenSutherlandClippingTechnique
 ./run.sh
 cd ..
 cd IlluminationTest
 ./run.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd ApplicationCases
 cd SceneEditorApplication
 ./run.sh
 cd ..
-cd RaytracingApplication
-./run.sh
 cd ..
+#---------------------------------------------------------------------------

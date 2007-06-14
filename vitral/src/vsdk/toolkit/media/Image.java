@@ -6,8 +6,9 @@
 
 package vsdk.toolkit.media;
 
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Entity;
+import vsdk.toolkit.common.VSDK;
 
 /**
 This abstract class establishes the required interface for all Image classes
@@ -111,19 +112,85 @@ public abstract class Image extends Entity
                     p.g = 0;
                     p.b = 0;
                 }
-                if ( i == getYSize()/2 ) {
+                if ( j == getYSize()/2 ) {
                     p.r = (byte)255;
                     p.g = 0;
                     p.b = 0;
                 }
-                if ( j == getXSize()/2) {
+                if ( i == getXSize()/2) {
                     p.r = 0;
                     p.g = (byte)255;
                     p.b = 0;
                 }
-                putPixelRgb(j, i, p);
+                putPixelRgb(i, j, p);
             }
         }
+    }
+
+    /**
+    This algorithm implements the Bresenham line algoritm with NO CLIPPING!
+    See [BRES1965].
+    */
+    public void drawLine(int x0, int y0, int x1, int y1, RGBPixel p)
+    {
+        double dx, dy;
+        double dxdy;
+        double dydx;
+        int x, y;
+        double xx, yy;
+
+        dx = (double)(x1-x0);
+        dy = (double)(y1-y0);
+
+        if ( Math.abs(dx) > VSDK.EPSILON && Math.abs(dy/dx) <= 1 && x1 > x0 ) {
+            // Pendiente entre -1 y 1
+            dydx = dy/dx;
+            for ( x = x0, yy = (double)y0; x <= x1; x++ ) {
+                y = (int)yy;
+                if ( x >= 0 && x < getXSize() &&
+                     y >= 0 && y < getYSize() ) {
+                    putPixelRgb(x, y, p);
+                }
+                yy += dydx;
+            }
+          }
+          else if ( Math.abs(dx) > VSDK.EPSILON && Math.abs(dy/dx) <= 1 && x1 < x0 ) {
+            // Pendiente entre -1 y 1
+            dydx = dy/dx;
+            for ( x = x1, yy = (double)y1; x <= x0; x++ ) {
+                y = (int)yy;
+                if ( x >= 0 && x < getXSize() &&
+                     y >= 0 && y < getYSize() ) {
+                    putPixelRgb(x, y, p);
+                }
+                yy += dydx;
+            }
+          }
+          else if ( Math.abs(dy) > VSDK.EPSILON && y1 > y0 ) {
+            // Pendiente mayor a 1 o menor a -1
+            dxdy = dx/dy;
+            for ( y = y0, xx = (double)x0; y <= y1; y++ ) {
+                x = (int)xx;
+                if ( x >= 0 && x < getXSize() &&
+                     y >= 0 && y < getYSize() ) {
+                    putPixelRgb(x, y, p);
+                }
+                xx += dxdy;
+            }
+          }
+          else if ( Math.abs(dy) > VSDK.EPSILON && y1 < y0 ) {
+            // Pendiente mayor a 1 o menor a -1
+            dxdy = dx/dy;
+            for ( y = y1, xx = (double)x1; y <= y0; y++ ) {
+                x = (int)xx;
+                if ( x >= 0 && x < getXSize() &&
+                     y >= 0 && y < getYSize() ) {
+                    putPixelRgb(x, y, p);
+                }
+                xx += dxdy;
+            }
+          }
+        ;
     }
 
 }

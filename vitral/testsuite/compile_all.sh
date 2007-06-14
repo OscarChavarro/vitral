@@ -1,3 +1,5 @@
+#---------------------------------------------------------------------------
+cd _APITests
 cd _JOGLHelloWorld
 ./compile.sh
 cd ..
@@ -7,6 +9,21 @@ cd ..
 cd _JAIHelloWorld
 ./compile.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd OfflineExamples
+cd ImageOfflineExample
+./compile.sh
+cd ..
+cd WireframeOfflineExample
+./compile.sh
+cd ..
+cd RaytracingOfflineExample
+./compile.sh
+cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd VSDKExamples
 cd CameraExample
 ./compile.sh
 cd ..
@@ -22,25 +39,26 @@ cd ..
 cd ImageSwingExample
 ./compile.sh
 cd ..
-cd ImageOfflineExample
-./compile.sh
-cd ..
 cd PaletteSwingExample
 ./compile.sh
 cd ..
 cd MeshExample
 ./compile.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd Techniques
 cd CohenSutherlandClippingTechnique
 ./compile.sh
 cd ..
 cd IlluminationTest
 ./compile.sh
 cd ..
+cd ..
+#---------------------------------------------------------------------------
+cd ApplicationCases
 cd SceneEditorApplication
 ./compile_lib.sh
 ./compile.sh
 cd ..
-cd RaytracingApplication
-./compile.sh
-cd ..
+#---------------------------------------------------------------------------

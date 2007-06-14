@@ -9,26 +9,26 @@ public class Vertex extends Entity
 
   /**
    */
-  private Vector3D position;
+  public Vector3D position;
 
   /**
    */
-  private Vector3D normal;
+  public Vector3D normal;
 
   /**
    */
-  private Vector3D binormal;
+  public Vector3D binormal;
 
   /**
    */
-  private Vector3D tangent;
+  public Vector3D tangent;
 
-  private double u;
-  private double v;
+  public double u;
+  public double v;
 
   /**
    */
-  private ArrayList<Triangle> incidentTriangles;
+  public ArrayList<Triangle> incidentTriangles;
 
   public Vertex()
   {

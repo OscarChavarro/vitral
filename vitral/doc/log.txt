@@ -125,7 +125,13 @@ Changes in 2006 november 1 revition (Alfonso Barbosa / Diana Reyes)
   - InfinitePlane.classifyPoint method added
   - Raytracing.excecute uptade (generalized for sub-viewport definition)
 
-Changes in 2006 november5 revition
+Changes in 2006 november 5 revition
   - Added Cohen-Sutherland to Camera class
   - Fixed minor bugs in orthogonal projection handling of Camera class
   - Added Cohen-Sutherland technique example to testsuites :)
+  - 100% software wireframe render examples incorporated :)
+    (architectural integration into the toolkit is pending due to
+     non implemented exportToTriangleMesh operation in geometries)
+
+Changes in 2006 november 6 revition
+  - Reorganized testsuite directory
