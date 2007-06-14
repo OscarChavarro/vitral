@@ -1,6 +1,10 @@
 //===========================================================================
 
+// Basic JDK classes
 import java.io.File;
+import java.util.ArrayList;
+
+// AWT classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -17,15 +21,21 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.AffineTransform;
 
+// Swing classes
 import javax.swing.JFrame;
 
+// JOGL classes
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUtessellator;
+import javax.media.opengl.glu.GLUtessellatorCallback;
 
+// VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.QualitySelection;
@@ -36,7 +46,87 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.CameraControllerGravZero;
+import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;
+
+class _TesselatorProcessorRoutines implements GLUtessellatorCallback
+{
+    private GL gl;
+    private GLU glu;
+    public _TesselatorProcessorRoutines(GL gl, GLU glu) {
+        this.gl = gl;
+        this.glu = glu;
+    }
+
+    public void begin(int type) {
+        gl.glBegin(type);
+    }
+
+    public void end() {
+        gl.glEnd();
+    }
+
+    public void vertex(Object vertexData) {
+        double[] pointer;
+        if ( vertexData instanceof double[] ) {
+            pointer = (double[]) vertexData;
+            gl.glVertex3dv(pointer, 0);
+        }
+
+    }
+
+    public void vertexData(Object vertexData, Object polygonData) {
+    }
+
+    /* combineCallback is used to create a new vertex when edges intersect.
+    coordinate location is trivial to calculate, but weight[4] may be
+    used to average color, normal, or texture coordinate data. In this
+    program, color is weighted. */
+    public void combine(double[] coords, Object[] data, 
+                        float[] weight, Object[] outData) {
+        double[] vertex = new double[6];
+        int i;
+
+        vertex[0] = coords[0];
+        vertex[1] = coords[1];
+        vertex[2] = coords[2];
+        for (i = 3; i < 6/* 7OutOfBounds from C! */; i++)
+            vertex[i] = weight[0]
+                * ((double[]) data[0])[i] + weight[1]
+                * ((double[]) data[1])[i] + weight[2]
+                * ((double[]) data[2])[i] + weight[3]
+                * ((double[]) data[3])[i];
+        outData[0] = vertex;
+    }
+
+    public void combineData(double[] coords, Object[] data, //
+                            float[] weight, Object[] outData, Object polygonData) {
+    }
+
+    public void error(int errnum) {
+        String estring;
+
+        estring = glu.gluErrorString(errnum);
+        System.err.println("Tessellation Error: " + estring);
+        System.exit(0);
+    }
+
+    public void beginData(int type, Object polygonData) {
+    }
+
+    public void endData(Object polygonData) {
+    }
+
+    public void edgeFlag(boolean boundaryEdge) {
+    }
+
+    public void edgeFlagData(boolean boundaryEdge, Object polygonData) {
+    }
+
+    public void errorData(int errnum, Object polygonData) {
+    }
+}
+
 
 public class GlyphExample extends JFrame implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -46,6 +136,14 @@ public class GlyphExample extends JFrame implements
     private GLCanvas canvas;
     private ParametricCurve curve;
     private Font fuente;
+
+    private int steps;
+    private _TesselatorProcessorRoutines tesselatorProcessor;
+    private GLU glu;
+
+
+    private GLUtessellator tesselator;
+
 
     public GlyphExample(String fontFile) {
         super("VITRAL concept test - JOGL Hello World");
@@ -69,6 +167,10 @@ public class GlyphExample extends JFrame implements
 
         cameraController = new CameraControllerAquynza(camera);
 
+        steps = 7;
+        tesselatorProcessor = null;
+        glu = null;
+
         //-----------------------------------------------------------------
         try {
             fuente = Font.createFont(Font.TRUETYPE_FONT, 
@@ -84,13 +186,15 @@ public class GlyphExample extends JFrame implements
         //-----------------------------------------------------------------
         Vector3D pointParameters[];
 
-        curve = new ParametricCurve();
+    AwtFontReader fontReader = new AwtFontReader();
 
+        curve = fontReader.extractGlyph(fontFile, "%");
+        curve.setApproximationSteps(steps);
         //- Analisis de glyphs ---------------------------------------
         AffineTransform a = new AffineTransform();
 
         FontRenderContext frc = new FontRenderContext(a, true, true);
-        GlyphVector gv = fuente.createGlyphVector(frc, "k");
+        GlyphVector gv = fuente.createGlyphVector(frc, "%");
 
         GeneralPath p = (GeneralPath)gv.getGlyphOutline(0);
 
@@ -129,52 +233,33 @@ public class GlyphExample extends JFrame implements
 
             if ( !endIt ) {
                 switch ( code ) {
-          case 0:
+                  case 0:
                     curve.addPoint(null, curve.BREAK);
 
                     pointParameters = new Vector3D[1];
                     pointParameters[0] = 
                         new Vector3D(coords[0], -coords[1], 0);
                     curve.addPoint(pointParameters, curve.CORNER);
-/*
-                    System.out.println(msg + "(POINT) <" + coords[0] +
-                               ", " + coords[1] + ">");
-*/
-            break;
-          case 1:
+                    break;
+                  case 1:
                     pointParameters = new Vector3D[1];
                     pointParameters[0] = new Vector3D(coords[0], -coords[1], 0);
                     curve.addPoint(pointParameters, curve.CORNER);
-/*
-                    System.out.println(msg + "(POINT) <" + coords[0] +
-                               ", " + coords[1] + ">");
-*/
-            break;
-          case 2:
+                    break;
+                  case 2:
                     pointParameters = new Vector3D[2];
                     // Note the inverse order of awt with respect to VSDK!
                     pointParameters[0] = new Vector3D(coords[2], -coords[3], 0);
                     pointParameters[1] = new Vector3D(coords[0], -coords[1], 0);
                     curve.addPoint(pointParameters, curve.QUAD);
-/*
-                    System.out.println(msg + "(QUAD) <" + coords[0] +
-                               ", " + coords[1] + "> / <" + coords[2] +
-                               ", " + coords[3] + ">");
-*/
-            break;
-          case 3:
+                    break;
+                  case 3:
                     //endIt = true;
-            break;
-          default:
-/*
-                    System.out.println(msg + " <" + coords[0] +
-                               ", " + coords[1] + "> / <" + coords[2] +
-                               ", " + coords[3] + "> / <" + coords[4] +
-                               ", " + coords[5] + ">");
-*/
-                break;
-        }
-        }
+                    break;
+                  default:
+                    break;
+                }
+            }
 
         }
 
@@ -199,14 +284,99 @@ public class GlyphExample extends JFrame implements
         f.setVisible(true);
     }
 
+    private void drawTesselatedCurveInterior(GL gl, ParametricCurve curve)
+    {
+        tesselator = glu.gluNewTess();
+        glu.gluTessCallback(tesselator, glu.GLU_TESS_VERTEX, tesselatorProcessor);
+        glu.gluTessCallback(tesselator, glu.GLU_TESS_BEGIN, tesselatorProcessor);
+        glu.gluTessCallback(tesselator, glu.GLU_TESS_END, tesselatorProcessor);
+        glu.gluTessCallback(tesselator, glu.GLU_TESS_ERROR, tesselatorProcessor);
+
+        glu.gluTessBeginPolygon(tesselator, null);
+
+        int i;
+
+        //-----------------------------------------------------------------
+        int totalNumberOfPoints = 0;
+        double list[][];
+
+        for ( i = 1; i < curve.types.size(); i++ ) {
+            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+                i++;
+                continue;
+            }
+            ArrayList polyline = curve.calculatePoints(i, false);
+            totalNumberOfPoints += polyline.size();
+        }
+
+        list = new double[totalNumberOfPoints][3];
+
+        //-----------------------------------------------------------------
+        int count = 0;
+
+        glu.gluTessBeginContour(tesselator);
+        //gl.glBegin(gl.GL_LINE_LOOP);
+
+        Vector3D first = new Vector3D();
+        boolean beginning = true;
+        for ( i = 1; i < curve.types.size(); i++ ) {
+            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+                i++;
+                //gl.glEnd();
+                //gl.glBegin(gl.GL_LINE_LOOP);
+                glu.gluTessEndContour(tesselator);
+                glu.gluTessBeginContour(tesselator);
+                beginning = true;
+                continue;
+            }
+
+            // Build a polyline for approximating the [i] curve segment
+            ArrayList polyline = curve.calculatePoints(i, false);
+
+            // Insert into current contour the polyline
+            for ( int j = 0; j < polyline.size(); j++ ) {
+                Vector3D vec = (Vector3D) polyline.get(j);
+                if ( !beginning ) {
+                    Vector3D prev = new Vector3D(list[count-1][0], 
+                                                 list[count-1][1],
+                                                 list[count-1][2]);
+                    if ( VSDK.vectorDistance(vec,  prev) > VSDK.EPSILON &&
+                         VSDK.vectorDistance(vec, first) > VSDK.EPSILON ) {
+                        list[count][0] = vec.x;
+                        list[count][1] = vec.y;
+                        list[count][2] = vec.z;
+                        glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                        //gl.glVertex3d(vec.x, vec.y, vec.z);
+                        count++;
+                    }
+                  }
+                  else {
+                    beginning = false;
+                    list[count][0] = vec.x;
+                    list[count][1] = vec.y;
+                    list[count][2] = vec.z;
+                    glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                    //gl.glVertex3d(vec.x, vec.y, vec.z);
+                    first = new Vector3D(vec.x, vec.y, vec.z);
+                    count++;
+                }
+            }
+        }
+        //gl.glEnd();
+        glu.gluTessEndContour(tesselator);
+
+        glu.gluTessEndPolygon(tesselator);
+        glu.gluDeleteTess(tesselator);
+
+    }
+
     private void drawObjectsGL(GL gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
-
         gl.glLoadIdentity();
 
+        //-----------------------------------------------------------------
         gl.glLineWidth((float)1.0);
-
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
@@ -221,9 +391,14 @@ public class GlyphExample extends JFrame implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
+        //-----------------------------------------------------------------
         gl.glLineWidth((float)2.0);
         JoglParametricCurveRenderer.draw(gl, curve, camera, new QualitySelection(), new ColorRgb(1, 1, 1));
 
+        //-----------------------------------------------------------------
+        gl.glColor3d(0, 0, 1);
+        drawTesselatedCurveInterior(gl, curve);
+        //-----------------------------------------------------------------
     }
 
     /** Called by drawable to initiate drawing */
@@ -239,9 +414,10 @@ public class GlyphExample extends JFrame implements
         drawObjectsGL(gl);
     }
    
-    /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
-        ;
+        GL gl = drawable.getGL();
+        glu = new GLU();
+        tesselatorProcessor = new _TesselatorProcessorRoutines(gl, glu);
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
@@ -312,6 +488,19 @@ public class GlyphExample extends JFrame implements
   public void keyPressed(KeyEvent e) {
       if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
           System.exit(0);
+      }
+      else if ( e.getKeyCode() == KeyEvent.VK_1 ) {
+          steps--;
+          if ( steps < 1 ) steps = 1;
+          System.out.println("Steps: " + steps);
+          curve.setApproximationSteps(steps);
+          canvas.repaint();
+      }
+      else if ( e.getKeyCode() == KeyEvent.VK_2 ) {
+          steps++;
+          System.out.println("Steps: " + steps);
+          curve.setApproximationSteps(steps);
+          canvas.repaint();
       }
 
       if ( cameraController.processKeyPressedEventAwt(e) ) {

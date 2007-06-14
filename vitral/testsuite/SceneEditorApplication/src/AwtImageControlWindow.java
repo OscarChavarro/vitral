@@ -19,9 +19,9 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
 // Application classes
-import io.presentation.GuiCachePersistence;
-import gui.GuiCache;
-import render.swing.SwingGuiCacheRenderer;
+import vsdk.transition.io.presentation.GuiCachePersistence;
+import vsdk.transition.gui.GuiCache;
+import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 
 public class AwtImageControlWindow
 {

@@ -57,27 +57,40 @@ public class Scene
         simpleBackground = new SimpleBackground();
         simpleBackground.setColor(0.49, 0.49, 0.49);
 
+    cubemapBackground = null;
+
+        selectedBackground = 0;
+
+        //-----------------------------------------------------------------
+        corridor = new SimpleCorridor();
+        showCorridor = false;
+        showGrid = true;
+    }
+
+    public boolean
+    buildCubemap()
+    {
         RGBAImage front, right, back, left, down, up;
 
         try {
             System.out.print("Loading background: 1");
             front = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno0_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno0.jpg"));
             System.out.print("2");
             right = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno1_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno1.jpg"));
             System.out.print("3");
             back = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno2_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno2.jpg"));
             System.out.print("4");
             left = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno3_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno3.jpg"));
             System.out.print("5");
             down = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno4_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno4.jpg"));
             System.out.print("6");
             up = ImagePersistence.importRGBA(
-                        new File("../../etc/cubemaps/dorise1/entorno5_small.jpg"));
+                        new File("../../etc/cubemaps/dorise1/entorno5.jpg"));
             System.out.println(" OK!");
 
             cubemapBackground = 
@@ -86,15 +99,9 @@ public class Scene
         }
         catch (Exception e) {
             System.err.println(e);
-            System.exit(0);
+            return false;
         }
-
-        selectedBackground = 0;
-
-        //-----------------------------------------------------------------
-        corridor = new SimpleCorridor();
-        showCorridor = false;
-        showGrid = true;
+        return true;
     }
 
     public void selectObjectWithMouse(int x, int y)
@@ -148,7 +155,15 @@ public class Scene
         Background activeBackground;
         switch ( selectedBackground ) {
           case 1:
-            activeBackground = cubemapBackground;
+        if ( cubemapBackground == null ) {
+                buildCubemap();
+            }
+        if ( cubemapBackground != null ) {
+                activeBackground = cubemapBackground;
+        }
+        else {
+                activeBackground = simpleBackground;
+        }
             break;
           case 0: default:
             activeBackground = simpleBackground;

@@ -20,7 +20,15 @@ public class JoglSceneRenderer
     {
         switch ( s.selectedBackground ) {
           case 1:
-            JoglCubemapBackgroundRenderer.draw(gl, s.cubemapBackground);
+            if ( s.cubemapBackground == null ) {
+                s.buildCubemap();
+            }
+            if ( s.cubemapBackground != null ) {
+                JoglCubemapBackgroundRenderer.draw(gl, s.cubemapBackground);
+            }
+            else {
+                JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
+            }
             break;
           case 0: default:
             JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
@@ -42,10 +50,10 @@ public class JoglSceneRenderer
 
         if ( s.lights.size() > 0 ) {
             gl.glEnable(gl.GL_LIGHTING);
-    }
-    else {
+        }
+        else {
             gl.glDisable(gl.GL_LIGHTING);
-    }
+        }
 
         for ( Iterator i = s.lights.iterator(); i.hasNext(); ) {
             Light l = (Light)i.next();
@@ -115,18 +123,18 @@ public class JoglSceneRenderer
         gl.glColor3d(0.37, 0.37, 0.37);
         for ( x = 0; x <= nx; x++ ) {
             if ( x == nx/2 ) continue;
-        gl.glVertex3d(minx + ((double)x)*dx, miny, 0);
-        gl.glVertex3d(minx + ((double)x)*dx, maxy, 0);
-    }
+            gl.glVertex3d(minx + ((double)x)*dx, miny, 0);
+            gl.glVertex3d(minx + ((double)x)*dx, maxy, 0);
+        }
         for ( y = 0; y <= ny; y++ ) {
             if ( y == ny/2 ) continue;
-        gl.glVertex3d(minx, minx + ((double)y)*dy, 0);
-        gl.glVertex3d(maxx, minx + ((double)y)*dy, 0);
-    }
+            gl.glVertex3d(minx, minx + ((double)y)*dy, 0);
+            gl.glVertex3d(maxx, minx + ((double)y)*dy, 0);
+        }
         gl.glColor3d(0, 0, 0);
-    gl.glVertex3d(minx + ((double)(nx/2))*dx, miny, 0);
-    gl.glVertex3d(minx + ((double)(nx/2))*dx, maxy, 0);
-    gl.glVertex3d(minx, minx + ((double)(ny/2))*dy, 0);
+        gl.glVertex3d(minx + ((double)(nx/2))*dx, miny, 0);
+        gl.glVertex3d(minx + ((double)(nx/2))*dx, maxy, 0);
+        gl.glVertex3d(minx, minx + ((double)(ny/2))*dy, 0);
         gl.glVertex3d(maxx, minx + ((double)(ny/2))*dy, 0);
 
         gl.glEnd();

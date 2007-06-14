@@ -1,4 +1,4 @@
-package gui;
+package vsdk.transition.gui;
 
 public abstract class GuiElementCache
 {

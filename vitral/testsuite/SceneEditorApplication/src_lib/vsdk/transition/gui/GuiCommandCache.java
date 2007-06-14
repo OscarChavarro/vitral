@@ -1,7 +1,7 @@
 //===========================================================================
 //= Initial version: august 9 2007
 
-package gui;
+package vsdk.transition.gui;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;

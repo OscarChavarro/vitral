@@ -500,8 +500,8 @@ public class ParametricCurve extends Curve {
              || endingPointForSegment == 0 ||
              (types.get(endingPointForSegment) == UNRBSPLINE &&
               endingPointForSegment < 3)) {
-            pol.add(points.get(endingPointForSegment)[0]);
             pol.add(points.get(endingPointForSegment - 1)[0]);
+            pol.add(points.get(endingPointForSegment)[0]);
         }
         else {
             Vector3D q = evaluate(endingPointForSegment,  0);

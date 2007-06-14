@@ -1,4 +1,4 @@
-package gui;
+package vsdk.transition.gui;
 
 public class GuiMenuItemCache extends GuiElementCache
 {

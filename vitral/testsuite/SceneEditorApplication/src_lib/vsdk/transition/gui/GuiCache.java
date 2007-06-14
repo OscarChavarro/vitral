@@ -1,6 +1,6 @@
 //===========================================================================
 
-package gui;
+package vsdk.transition.gui;
 
 import java.util.ArrayList;
 import java.util.Iterator;

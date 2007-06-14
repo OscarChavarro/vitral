@@ -1,7 +1,7 @@
 //===========================================================================
 //===========================================================================
 
-package render.swing;
+package vsdk.transition.render.swing;
 
 // Basic JAVA JDK classes
 import java.util.ArrayList;
@@ -31,12 +31,12 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 // Application specific classes
-import gui.GuiCache;
-import gui.GuiMenuCache;
-import gui.GuiMenuItemCache;
-import gui.GuiElementCache;
-import gui.GuiButtonGroupCache;
-import gui.GuiCommandCache;
+import vsdk.transition.gui.GuiCache;
+import vsdk.transition.gui.GuiMenuCache;
+import vsdk.transition.gui.GuiMenuItemCache;
+import vsdk.transition.gui.GuiElementCache;
+import vsdk.transition.gui.GuiButtonGroupCache;
+import vsdk.transition.gui.GuiCommandCache;
 
 public class SwingGuiCacheRenderer
 {
@@ -115,14 +115,14 @@ public class SwingGuiCacheRenderer
             for ( i = children.iterator(); i.hasNext(); ) {
                 element = (GuiElementCache)i.next();
                 className = element.getClass().getName();
-                if ( className.equals("gui.GuiMenuCache") ) {
+                if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
                     GuiMenuCache submenu = (GuiMenuCache)element;
                     JMenu widgetSubmenu = buildPopupMenu(context, 
                                                          submenu.getName(), 
                                                          executor);
                     widgetPopup.add(widgetSubmenu);
                 }
-                else if ( className.equals("gui.GuiMenuItemCache") ) {
+                else if ( className.equals("vsdk.transition.gui.GuiMenuItemCache") ) {
                     GuiMenuItemCache option = (GuiMenuItemCache)element;
                     if ( option.isSeparator() ) {
                         widgetPopup.addSeparator();
@@ -270,7 +270,7 @@ public class SwingGuiCacheRenderer
             for ( i = children.iterator(); i.hasNext(); ) {
                 element = (GuiElementCache)i.next();
                 className = element.getClass().getName();
-                if ( className.equals("gui.GuiMenuCache") ) {
+                if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
                     menu = (GuiMenuCache)element;
                     widgetPopup = buildPopupMenu(context, menu.getName(),
                                                  executor);

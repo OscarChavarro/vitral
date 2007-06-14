@@ -64,9 +64,9 @@ import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 
 // Internal classes
-import gui.GuiCache;
-import io.presentation.GuiCachePersistence;
-import render.swing.SwingGuiCacheRenderer;
+import vsdk.transition.gui.GuiCache;
+import vsdk.transition.io.presentation.GuiCachePersistence;
+import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 
 abstract class SuffixAwareFilter
     extends javax.swing.filechooser.FileFilter {

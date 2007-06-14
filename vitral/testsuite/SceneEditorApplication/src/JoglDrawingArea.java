@@ -1,4 +1,7 @@
+// JDK Basic classes
 import java.io.File;
+
+// AWT/Swing classes
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -15,12 +18,14 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JLabel;
 
+// JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
+// VSDK classes
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.RGBAImage;

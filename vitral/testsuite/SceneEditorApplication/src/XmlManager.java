@@ -1,29 +1,31 @@
+import java.io.File;
+import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import org.w3c.dom.Document;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
 import javax.xml.transform.TransformerException;
-import org.w3c.dom.Element;
-import java.io.File;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.xml.sax.SAXException;
 import javax.xml.transform.TransformerConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.ParametricCurvePersistence;
 import vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
 
 public class XmlManager {
   public XmlManager() {

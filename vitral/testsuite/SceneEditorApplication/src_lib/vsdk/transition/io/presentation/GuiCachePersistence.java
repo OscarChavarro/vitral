@@ -1,18 +1,18 @@
 //===========================================================================
 
-package io.presentation;
+package vsdk.transition.io.presentation;
 
 import java.io.File;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 
-import gui.GuiButtonGroupCache;
-import gui.GuiCache;
-import gui.GuiCommandCache;
-import gui.GuiMenuCache;
-import gui.GuiMenuItemCache;
-import gui.ExceptionGuiCacheBadName;
-import gui.ExceptionGuiCacheParseError;
+import vsdk.transition.gui.GuiButtonGroupCache;
+import vsdk.transition.gui.GuiCache;
+import vsdk.transition.gui.GuiCommandCache;
+import vsdk.transition.gui.GuiMenuCache;
+import vsdk.transition.gui.GuiMenuItemCache;
+import vsdk.transition.gui.ExceptionGuiCacheBadName;
+import vsdk.transition.gui.ExceptionGuiCacheParseError;
 
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;

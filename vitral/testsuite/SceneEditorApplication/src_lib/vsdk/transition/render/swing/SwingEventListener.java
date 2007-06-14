@@ -1,7 +1,7 @@
 //===========================================================================
 //===========================================================================
 
-package render.swing;
+package vsdk.transition.render.swing;
 
 // GUI JDK classes (Awt + Swing)
 import java.awt.event.ActionEvent;
