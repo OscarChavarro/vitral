@@ -370,7 +370,6 @@ public class SceneEditorApplication {
     {
         raytracedImage.init(raytracedImageWidth, raytracedImageHeight);
         if ( theScene.selectedBackground == 1 ) {
-            //raytracedImage = theScene.fixedBackground.getImage().exportToRgbImage();
             theScene.fixedBackground.getImage().resize(raytracedImage);
         }
         theScene.raytrace(raytracedImage);

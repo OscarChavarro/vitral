@@ -54,6 +54,24 @@ public class SphericalHarmonicShapeDescriptor extends ShapeDescriptor
         }
         return msg;
     }
+
+    public double [] getFeatureVector() {
+        return featureVector;
+    }
+
+    public void setFeatureVector(double vector[]) {
+    if ( vector.length != numberOfSpheres*numberOfHarmonics ) {
+            VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
+                "Trying to set featurevector from incorrectly sized data!");
+        return;
+    }
+        featureVector = new double[numberOfSpheres*numberOfHarmonics];
+    int i;
+    for ( i = 0; i < featureVector.length; i++ ) {
+        featureVector[i] = vector[i];
+    }
+    }
+
 }
 
 //===========================================================================

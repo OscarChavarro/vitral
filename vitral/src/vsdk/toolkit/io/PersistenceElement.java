@@ -8,6 +8,7 @@ package vsdk.toolkit.io;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.StringTokenizer;
 
 /**
@@ -60,7 +61,7 @@ public abstract class PersistenceElement {
     with information readed from the given input stream.  If it is not
     enough information to read, this method generates an Exception.
     */
-    protected static void
+    public static void
     readBytes(InputStream is, byte[] bytesBuffer) throws Exception
     {
         int offset = 0;
@@ -71,6 +72,53 @@ public abstract class PersistenceElement {
                               offset, (length-offset));
             offset += numRead;
         } while( offset < length && numRead >= 0 ); 
+    }
+
+    /**
+    Given a previously initialized array of bytes, this method writes it
+    with information readed from the given output stream.  If it is not
+    enough information to read, this method generates an Exception.
+    */
+    public static void
+    writeBytes(OutputStream os, byte[] bytesBuffer) throws Exception
+    {
+        os.write(bytesBuffer, 0, bytesBuffer.length);
+    }
+
+    private static void int2byteArrayDirect(byte[] arr, int start, int num)
+    {
+        int i = 0;
+        int len = 2;
+        byte[] tmp = new byte[len];
+
+        // Convert number to array
+    for ( i = 0; i < len; i++ ) {
+            tmp[i] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+    }
+
+        // Export subarray to end array
+        int cnt;
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            arr[i] = tmp[cnt];
+        }
+    }
+
+    private static void int2byteArrayInvert(byte[] arr, int start, int num)
+    {
+        int i = 0;
+        int len = 2;
+        byte[] tmp = new byte[len];
+
+        // Convert number to array
+    for ( i = 0; i < len; i++ ) {
+            tmp[len-i-1] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+    }
+
+        // Export subarray to end array
+        int cnt;
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            arr[i] = tmp[cnt];
+        }
     }
 
     private static int byteArray2intDirect(byte[] arr, int start) {
@@ -101,6 +149,42 @@ public abstract class PersistenceElement {
             i++;
         }
         return accum;
+    }
+
+    private static void long2byteArrayDirect(
+        byte[] arr, int start, long num) {
+        int i = 0;
+        int len = 4;
+        byte[] tmp = new byte[len];
+
+        // Convert number to array
+    for ( i = 0; i < len; i++ ) {
+            tmp[i] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+    }
+
+        // Export subarray to end array
+        int cnt;
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            arr[i] = tmp[cnt];
+        }
+    }
+
+    private static void long2byteArrayInvert(
+        byte[] arr, int start, long num) {
+        int i = 0;
+        int len = 4;
+        byte[] tmp = new byte[len];
+
+        // Convert number to array
+    for ( i = 0; i < len; i++ ) {
+            tmp[len-i-1] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+    }
+
+        // Export subarray to end array
+        int cnt;
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            arr[i] = tmp[cnt];
+        }
     }
 
     private static long byteArray2longInvert(byte[] arr, int start) {
@@ -168,6 +252,13 @@ public abstract class PersistenceElement {
         return byteArray2intInvert(arr, start);
     }
 
+    public static void int2byteArrayBE(byte[] arr, int start, int num) {
+        if ( bigEndianArchitecture ) {
+            int2byteArrayDirect(arr, start, num);
+        }
+        int2byteArrayInvert(arr, start, num);
+    }
+
     /**
     This method is responsible of taking into account the endianess of the 
     original data
@@ -213,6 +304,14 @@ public abstract class PersistenceElement {
         return byteArray2longInvert(arr, start);
     }
 
+    public static void float2byteArrayBE(byte[] arr, int start, float num) {
+        long a = Float.floatToIntBits(num);
+        if ( bigEndianArchitecture ) {
+            long2byteArrayDirect(arr, start, a);
+        }
+        long2byteArrayInvert(arr, start, a);
+    }
+
     /**
     This method is responsible of taking into account the endianess of the 
     original data
@@ -224,42 +323,57 @@ public abstract class PersistenceElement {
         return byteArray2floatDirect(arr, start);
     }
 
-    protected static int readIntLE(InputStream is) throws Exception
+    public static int readIntLE(InputStream is) throws Exception
     {
         readBytes(is, bytesForInt);
         return byteArray2intLE(bytesForInt, 0);
     }
 
-    protected static int readIntBE(InputStream is) throws Exception
+    public static int readIntBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForInt);
         return byteArray2intBE(bytesForInt, 0);
     }
 
-    protected static long readLongLE(InputStream is) throws Exception
+    public static void writeIntBE(OutputStream is, int num) throws Exception
+    {
+        int2byteArrayBE(bytesForInt, 0, num);
+        writeBytes(is, bytesForInt);
+    }
+
+    public static long readLongLE(InputStream is) throws Exception
     {
         readBytes(is, bytesForLong);
         return byteArray2longLE(bytesForLong, 0);
     }
 
-    protected static long readLongBE(InputStream is) throws Exception
+    public static long readLongBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForLong);
         return byteArray2longBE(bytesForLong, 0);
     }
-    protected static float readFloatLE(InputStream is) throws Exception
+    public static float readFloatLE(InputStream is) throws Exception
     {
         readBytes(is, bytesForFloat);
         return byteArray2floatLE(bytesForFloat, 0);
     }
 
-    protected static float readFloatBE(InputStream is) throws Exception
+    public static float readFloatBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForFloat);
-        return byteArray2floatBE(bytesForFloat, 0);
+    long i = byteArray2longBE(bytesForFloat, 0);
+    int j = (int)i;
+        return Float.intBitsToFloat(j);
     }
 
-    protected static String readAsciiString(InputStream is) throws Exception
+    public static void writeFloatBE(OutputStream os, float num)
+        throws Exception
+    {
+        float2byteArrayBE(bytesForFloat, 0, num);
+        writeBytes(os, bytesForFloat);
+    }
+
+    public static String readAsciiString(InputStream is) throws Exception
     {
         byte character[] = new byte[1];
         char letter;
@@ -272,7 +386,21 @@ public abstract class PersistenceElement {
                 msg = msg + letter;
             }
         } while ( character[0] != 0x00 );
+
         return msg;
+    }
+
+    public static void
+    writeAsciiString(OutputStream writer, String cad)
+        throws Exception
+    {
+        byte arr[];
+        arr = cad.getBytes();
+        writer.write(arr, 0, arr.length);
+
+        byte end[] = new byte[1];
+        end[0] = '\0';
+        writer.write(end, 0, end.length);
     }
 
     /**

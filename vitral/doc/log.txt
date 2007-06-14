@@ -264,3 +264,6 @@ Changes in 2007 may 17-18 revition
 Changes in 2007 may 20-22 revition
   - Added the SpharmonicKit package to compute spherical harmonics (native
     JNI method tested only in linux)
+
+Changes in 2007 may 23 revition
+  - First working implementation of a Search Engine for 3D models! :)

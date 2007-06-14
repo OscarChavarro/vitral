@@ -15,6 +15,6 @@
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:53: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 
-/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/IndexedColorImage.java:133: Warning: The following parameters of vsdk::toolkit::media::IndexedColorImage::putPixelRgb(int x, int y, RGBPixel p) are not documented:
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/IndexedColorImage.java:138: Warning: The following parameters of vsdk::toolkit::media::IndexedColorImage::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 

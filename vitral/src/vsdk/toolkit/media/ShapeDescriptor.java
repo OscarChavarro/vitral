@@ -8,7 +8,13 @@ package vsdk.toolkit.media;
 
 public abstract class ShapeDescriptor extends MediaEntity
 {
+    public double [] getFeatureVector() {
+        return null;
+    }
+
+    public void setFeatureVector(double vector[]) {
     ;
+    }
 }
 
 //===========================================================================
