@@ -241,6 +241,10 @@ COMMAND IDC_CREATE_VOLUME {
     name "Crear volumen (voxels)"
 }
 
+COMMAND IDC_CREATE_BREP {
+    name "Crear solido (BREP)"
+}
+
 COMMAND IDC_IMPORT_OBJECTS_FROM_FILE {
     name "Importar objetos desde archivo"
 }
@@ -349,6 +353,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_BOX, 
         IDC_CREATE_ARROW, 
         IDC_CREATE_VOLUME, 
+        IDC_CREATE_BREP, 
         IDC_IMPORT_OBJECTS_FROM_FILE, 
         IDC_CREATE_PARAMETRICCUBICCURVE, 
         IDC_CREATE_PARAMETRICBICUBICPATCH, 

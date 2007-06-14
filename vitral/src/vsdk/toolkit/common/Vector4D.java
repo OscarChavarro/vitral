@@ -8,7 +8,7 @@ package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.VSDK;
 
-public class Vector4D extends Entity 
+public class Vector4D extends FundamentalEntity 
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20061103L;

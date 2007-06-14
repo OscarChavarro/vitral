@@ -6,15 +6,21 @@
 
 package vsdk.toolkit.common;
 
-class _CircularDoubleLinkedListNode<E>
+class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
 {
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20070422L;
+
     public E data;
     public _CircularDoubleLinkedListNode<E> next;
     public _CircularDoubleLinkedListNode<E> previous;
 }
 
-public class CircularDoubleLinkedList<E>
+public class CircularDoubleLinkedList<E> extends FundamentalEntity
 {
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20070422L;
+
     private _CircularDoubleLinkedListNode<E> head;
     private _CircularDoubleLinkedListNode<E> window;
     private int lastAccessedIndex;
@@ -187,6 +193,39 @@ public class CircularDoubleLinkedList<E>
         window = null;
     currentSize--;
     }
+
+    public void push(E newElem)
+    {
+    window = head;
+    lastAccessedIndex = 0;
+        _CircularDoubleLinkedListNode<E> newContainer;
+
+        newContainer = new _CircularDoubleLinkedListNode<E>();
+        newContainer.data = newElem;
+        lastAccessedIndex = -1;
+
+        if ( head == null ) {
+            head = newContainer;
+            newContainer.next = newContainer;
+            newContainer.previous = newContainer;
+        }
+        else if ( window == null || window == head ) {
+        window = head;
+            head = newContainer;
+            newContainer.previous = window.previous;
+            newContainer.next = window;
+            window.previous.next = newContainer;
+            window.previous = newContainer;
+    }
+    else {
+            newContainer.previous = window.previous;
+            newContainer.next = window;
+            window.previous.next = newContainer;
+            window.previous = newContainer;
+    }
+    currentSize++;
+    }
+
 }
 
 //===========================================================================

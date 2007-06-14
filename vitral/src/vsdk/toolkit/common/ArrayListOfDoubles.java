@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.common;
 
-public class ArrayListOfDoubles extends Entity {
+public class ArrayListOfDoubles extends FundamentalEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20061105L;
 

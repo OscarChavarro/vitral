@@ -105,97 +105,75 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
           case 4:  r = 1; g = 0; b = 1; break;
           case 5:  r = 0.5; g = 0; b = 0; break;
           case 6:  r = 0; g = 0.5; b = 0; break;
-          default: r = .5; g = .5; b = .5; break;
+          default: r = .6; g = .5; b = .4; break;
         }
         gl.glColor3d(r, g, b);
     }
 
-    public static void
-    draw(GL gl, PolyhedralBoundedSolid solid,
-         Camera c, RendererConfiguration q, int faceIndex)
+    private static void
+    drawPoints(GL gl, PolyhedralBoundedSolid solid)
     {
-        //-----------------------------------------------------------------
-        int i, j;
-
-        JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glColor3d(0, 0, 0);
-        gl.glPointSize(8.0f);
-        gl.glLineWidth(1.0f);
+        // Warning: Change with configured color for point
+        gl.glColor3d(1, 0, 0);
+        gl.glPointSize(2.0f);
 
         gl.glBegin(gl.GL_POINTS);
+
+        int i;
         for ( i = 0; i < solid.verticesList.size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solid.verticesList.get(i);
             Vector3D p = v.position;
             gl.glVertex3d(p.x, p.y, p.z);
         }
         gl.glEnd();
+    }
 
-        Vector3D startP, endP;
-        Vector3D p0 = null, p1 = null, p2 = null, n, a, b;
-        _PolyhedralBoundedSolidHalfEdge hePrev;
-        InfinitePlane loopPlane;
+    private static void
+    drawEdges(GL gl, PolyhedralBoundedSolid solid)
+    {
+        int i;
 
-        //- Draw face boundaries, one for each loop -----------------------
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_CULL_FACE);
+        gl.glShadeModel(gl.GL_FLAT);
 
-            if ( i != faceIndex ) {
-                //continue;
-            }
+        gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+        gl.glPolygonOffset(-0.5f, 0.0f);
+        gl.glLineWidth(1.0f);
 
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+        // Warning: Change with configured color for borders
+        gl.glColor3d(1, 1, 1);
+        gl.glDisable(gl.GL_TEXTURE_2D);
 
-                loop = face.boundariesList.get(j);
-                he = loop.boundaryStartHalfEdge;
-                heStart = he;
-                do {
-                    // Logic
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        break;
-                    }
-
-                    // Calculate containing plane equation for current edge
-                    p0 = he.startingVertex.position;
-                    p1 = he.next().startingVertex.position;
-                    p2 = he.next().next().startingVertex.position;
-                    a = p1.substract(p0);    a.normalize();
-                    b = p2.substract(p0);    b.normalize();
-                    n = a.crossProduct(b);   n.normalize();
-                    loopPlane = new InfinitePlane(n, p0);
-
-                    // Draw halfedges
-                    if ( i == faceIndex ) {
-                        gl.glLineWidth(2);
-                    }
-                    else {
-                        gl.glLineWidth(1);
-                    }
-                    setColor(gl, i);
-                    drawHalfEdge(gl, he, p0, p1, loopPlane);
-
-                    // Draw edges (repeated!, this could be done better)
-                    gl.glLineWidth(1);
-                    gl.glColor3d(0, 0, 0);
-                    gl.glBegin(gl.GL_LINES);
-                    gl.glVertex3d(he.startingVertex.position.x,
-                                  he.startingVertex.position.y,
-                                  he.startingVertex.position.z);
-                    gl.glVertex3d(he.next().startingVertex.position.x,
-                                  he.next().startingVertex.position.y,
-                                  he.next().startingVertex.position.z);
-                    gl.glEnd();
-                } while( he != heStart );
+        gl.glBegin(gl.GL_LINES);
+        for ( i = 0; i < solid.edgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
+            int start, end;
+            start = e.getStartingVertexIndex();
+            end = e.getEndingVertexIndex();
+            if ( start >= 0 && end >= 0 ) {
+                Vector3D startPosition;
+                Vector3D endPosition;
+                startPosition = solid.getVertexPosition(start);
+                endPosition = solid.getVertexPosition(end);
+                if ( startPosition != null && endPosition != null ) {
+                    gl.glVertex3d(startPosition.x, startPosition.y, 
+                                  startPosition.z);
+                    gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
+                }
             }
         }
+        gl.glEnd();
+    }
+
+    private static void
+    drawSurfaces(GL gl, PolyhedralBoundedSolid solid)
+    {
+        int i, j;
 
         //- Prepare tesselator --------------------------------------------
-        //double list[] = new double [3];
         if ( tesselatorProcessor == null ) {
             glu = new GLU();
             tesselatorProcessor = 
@@ -209,10 +187,10 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glEnable(gl.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
+        Vector3D p0;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            //if ( i != faceIndex ) continue;
             setColor(gl, i);
 
             // Count used vertex for current face
@@ -286,6 +264,97 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
             glu.gluTessEndPolygon(tesselator);
             glu.gluDeleteTess(tesselator);
+        }
+    }
+
+    public static void
+    draw(GL gl, PolyhedralBoundedSolid solid,
+         Camera c, RendererConfiguration quality)
+    {
+    draw(gl, solid, c, quality, -1);
+    }
+
+    public static void
+    draw(GL gl, PolyhedralBoundedSolid solid,
+         Camera c, RendererConfiguration quality, int faceIndex)
+    {
+        //-----------------------------------------------------------------
+        int i, j;
+
+        JoglRenderer.disableNvidiaCgProfiles();
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glColor3d(0, 0, 0);
+        gl.glLineWidth(1.0f);
+
+        if ( quality.isPointsSet() ) {
+            drawPoints(gl, solid);
+        }
+
+        Vector3D startP, endP;
+        Vector3D p0 = null, p1 = null, p2 = null, n, a, b;
+        _PolyhedralBoundedSolidHalfEdge hePrev;
+        InfinitePlane loopPlane;
+
+        //- Draw face boundaries, one for each loop -----------------------
+        for ( i = 0; faceIndex >= 0 && i < solid.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+
+            if ( i != faceIndex ) {
+                continue;
+            }
+
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+
+                    // Calculate containing plane equation for current edge
+                    p0 = he.startingVertex.position;
+                    p1 = he.next().startingVertex.position;
+                    p2 = he.next().next().startingVertex.position;
+                    a = p1.substract(p0);    a.normalize();
+                    b = p2.substract(p0);    b.normalize();
+                    n = a.crossProduct(b);   n.normalize();
+                    loopPlane = new InfinitePlane(n, p0);
+
+                    // Draw halfedges
+                    if ( i == faceIndex ) {
+                        gl.glLineWidth(2);
+                    }
+                    else {
+                        gl.glLineWidth(1);
+                    }
+                    setColor(gl, i);
+                    drawHalfEdge(gl, he, p0, p1, loopPlane);
+                } while( he != heStart );
+            }
+        }
+
+        if ( quality.isWiresSet() ) {
+            gl.glPolygonOffset(-0.5f, 0.0f);
+            drawEdges(gl, solid);
+        }
+        if ( quality.isSurfacesSet() ) {
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonOffset(0.0f, 0.0f);
+            drawSurfaces(gl, solid);
+        }
+        if ( quality.isBoundingVolumeSet() ) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, solid, quality);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, solid, quality);
         }
 
         //-----------------------------------------------------------------

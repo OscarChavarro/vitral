@@ -85,6 +85,26 @@ public class _PolyhedralBoundedSolidFace extends Entity {
     return null;
     }
 
+    /**
+    Find the first halfedge originating from vertex `vn1`.
+    Returns null if halfedge not found, or current founded halfedge otherwise.
+    */
+    public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1)
+    {
+        _PolyhedralBoundedSolidLoop loop;
+    _PolyhedralBoundedSolidHalfEdge he;
+    int i;
+
+    for ( i = 0; i < boundariesList.size(); i++ ) {
+        loop = boundariesList.get(i);
+        he = loop.firstHalfEdgeAtVertex(vn1);
+            if ( he != null ) {
+        return he;
+        }
+    }
+    return null;
+    }
+
     public String toString()
     {
         String msg;

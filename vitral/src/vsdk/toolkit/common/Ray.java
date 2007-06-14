@@ -5,7 +5,7 @@ package vsdk.toolkit.common;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.VSDK;
 
-public class Ray  extends Entity
+public class Ray  extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

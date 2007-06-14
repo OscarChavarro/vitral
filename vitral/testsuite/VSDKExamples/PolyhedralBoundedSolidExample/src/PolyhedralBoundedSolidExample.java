@@ -1,3 +1,5 @@
+//===========================================================================
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -21,11 +23,9 @@ import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
@@ -38,8 +38,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private int faceIndex = 0;
 
     private RendererConfiguration quality;
+    private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
+    private int solidType = 2;
 
     public PolyhedralBoundedSolidExample() {
         camera = new Camera();
@@ -49,45 +51,57 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         camera.setRotation(R);
 
         quality = new RendererConfiguration();
+        qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerAquynza(camera);
 
-        //- Cube building -------------------------------------------------
-        solid = new PolyhedralBoundedSolid();
-    solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
-        solid.mev(1, 1, 1, 1, 1, 4, new Vector3D(0.1, 1, 0.1));
-        solid.mev(1, 1, 4, 1, 1, 3, new Vector3D(1, 1, 0.1));
-        solid.mev(1, 1, 3, 4, 4, 2, new Vector3D(1, 0.1, 0.1));
-        solid.mef(1, 1, 1, 4, 2, 3, /*NewFaceId*/ 2);
-        solid.mev(1, 1, 1, 2, 2, 5, new Vector3D(0.1, 0.1, 1));
-        solid.mev(1, 1, 2, 3, 3, 6, new Vector3D(1, 0.1, 1));
-        solid.mef(1, 1, 5, 1, 6, 2, /*NewFaceId*/ 3);
-        solid.mev(1, 1, 3, 4, 4, 7, new Vector3D(1, 1, 1));
-        solid.mef(1, 1, 6, 2, 7, 3, /*NewFaceId*/ 4);
-        solid.mev(1, 1, 4, 1, 1, 8, new Vector3D(0.1, 1, 1));
-        solid.mef(1, 1, 7, 3, 8, 4, /*NewFaceId*/ 5);
-        solid.mef(1, 1, 5, 6, 8, 4, /*NewFaceId*/ 6);
-
-        //- Cube modification to holed box --------------------------------
-        solid.mev(6, 6, 5, 6, 6, 9, new Vector3D(0.3, 0.3, 1));
-        solid.kemr(6, 6, 5, 9, 9, 5);
-        solid.mev(6, 6, 9, 9, 9, 10, new Vector3D(0.8, 0.3, 1));
-        solid.mev(6, 6, 10, 9, 9, 11, new Vector3D(0.8, 0.8, 1));
-        solid.mev(6, 6, 11, 10, 10, 12, new Vector3D(0.3, 0.8, 1));
-        solid.mef(6, 6, 9, 10, 12, 11, /*NewFaceId*/ 7);
-
-        //- Box extrusion -------------------------------------------------
-        solid.mev(7, 7, 9, 10, 10, 13, new Vector3D(0.3, 0.3, 0.1));
-        solid.mev(7, 7, 10, 11, 11, 14, new Vector3D(0.8, 0.3, 0.1));
-        solid.mef(7, 7, 13, 9, 14, 10, /*NewFaceId*/ 8);
-        solid.mev(7, 7, 11, 12, 12, 15, new Vector3D(0.8, 0.8, 0.1));
-        solid.mef(7, 7, 14, 10, 15, 11, /*NewFaceId*/ 9);
-        solid.mev(7, 7, 12, 9, 9, 16, new Vector3D(0.3, 0.8, 0.1));
-        solid.mef(7, 7, 15, 11, 16, 12, /*NewFaceId*/ 10);
-        solid.mef(7, 7, 13, 14, 16, 12, /*NewFaceId*/ 11);
-
+        //- Solid building ------------------------------------------------
+        solid = buildSolid(solidType);
         //- Topology joining from 0-genus to 1-genus ----------------------
 
         //-----------------------------------------------------------------
+    }
+
+    private PolyhedralBoundedSolid buildSolid(int type)
+    {
+        PolyhedralBoundedSolid solid = null;
+        Matrix4x4 T;
+
+        switch ( type % 6 ) {
+          case 0:
+            solid = new PolyhedralBoundedSolid();
+            solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
+            solid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
+            solid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
+            break;
+          case 1:
+            solid = PolyhedralBoundedSolidModelingTools.createBox(new Vector3D(0.9, 0.9, 0.9));
+            break;
+          case 3:
+            solid = new PolyhedralBoundedSolid();
+            solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            PolyhedralBoundedSolidModelingTools.addArc(
+                solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
+        break;
+      case 4:
+        solid = PolyhedralBoundedSolidModelingTools.createCircle(
+                0.5, 0.5, 0.5, 0.1, 12
+            );
+        break;
+      case 5:
+        solid = PolyhedralBoundedSolidModelingTools.createCircle(
+                0.5, 0.5, 0.5, 0.1, 24
+            );
+        T = new Matrix4x4();
+        T.translation(0.1, 0.1, 0.5);
+            PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFace(
+                solid, solid.findFace(1), T);
+        break;
+      case 2: default:
+            solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
+            break;
+        }
+
+        return solid;
     }
 
     private GLCanvas createGUI()
@@ -152,7 +166,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        gl.glClearColor(1, 1, 1, 1);
+        gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
@@ -238,12 +252,37 @@ public class PolyhedralBoundedSolidExample extends Applet implements
       if ( cameraController.processKeyPressedEventAwt(e) ) {
           canvas.repaint();
       }
+      if ( qualityController.processKeyPressedEventAwt(e) ) {
+          System.out.println(quality);
+          canvas.repaint();
+      }
+
       int unicode_id = e.getKeyChar();
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
             case '1': faceIndex --; break;
             case '2': faceIndex ++; break;
-            case 'I': System.out.println(solid); break;
+            case 'I':
+                System.out.println(solid);
+                if ( solid.validateModel() ) {
+                    System.out.println("SOLID MODEL IS VALID!");
+                }
+                else {
+                    System.out.println("SOLID MODEL IS INVALID!");
+                }
+                break;
+
+            case '3':
+              solidType--;
+              if ( solidType < 0 ) solidType = 0;
+              solid = buildSolid(solidType);
+              break;
+
+            case '4':
+              solidType++;
+              solid = buildSolid(solidType);
+              break;
+
           }
           if ( faceIndex < 0 ) faceIndex = 0;
           canvas.repaint();
@@ -266,3 +305,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
   }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

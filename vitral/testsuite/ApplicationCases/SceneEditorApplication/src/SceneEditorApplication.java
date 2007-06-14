@@ -55,6 +55,7 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
@@ -425,8 +426,8 @@ class ButtonsPanel extends JPanel implements ActionListener
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
         m.setSpecular(new ColorRgb(1, 1, 1));
-    m.setDoubleSided(false);
-    m.setPhongExponent(100);
+        m.setDoubleSided(false);
+        m.setPhongExponent(100);
         return m;
     }
 
@@ -486,6 +487,37 @@ class ButtonsPanel extends JPanel implements ActionListener
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             VoxelVolume vv = new VoxelVolume();
             addThing(vv);
+        }
+        else if ( label.equals("IDC_CREATE_BREP") ) {
+            PolyhedralBoundedSolid brep =
+                (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
+            Matrix4x4 R = new Matrix4x4();
+            R.translation(0.55, 0.55, 0.55);
+            brep.applyTransformation(R);
+            //- Cube modification to holed box ----------------------------
+            brep.smev(6, 5, 9, new Vector3D(0.3, 0.3, 1));
+            brep.kemr(6, 6, 5, 9, 9, 5);
+            brep.smev(6, 9, 10, new Vector3D(0.8, 0.3, 1));
+            brep.smev(6, 10, 11, new Vector3D(0.8, 0.8, 1));
+            brep.smev(6, 11, 12, new Vector3D(0.3, 0.8, 1));
+            brep.mef(6, 6, 9, 10, 12, 11, 7);
+
+            //- Box extrusion ---------------------------------------------
+            brep.smev(7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
+            brep.smev(7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
+            brep.mef(7, 7, 13, 9, 14, 10, 8);
+            brep.smev(7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
+            brep.mef(7, 7, 14, 10, 15, 11, 9);
+            brep.smev(7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
+            brep.mef(7, 7, 15, 11, 16, 12, 10);
+            brep.mef(7, 7, 13, 14, 16, 12, 11);
+
+            //- Hole creation ---------------------------------------------
+            brep.kfmrhSameShell(2, 11);
+
+            R.translation(-0.55, -0.55, -0.55);
+            brep.applyTransformation(R);
+            addThing(brep);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
             ParametricCurve curve;

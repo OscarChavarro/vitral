@@ -3,6 +3,7 @@
 //= Module history:                                                         =
 //= - November 18 2006 - Oscar Chavarro: Original base version              =
 //= - January 3 2007 - Oscar Chavarro: First phase implementation           =
+//= - April 21 2007 - Oscar Chavarro: First working version with basics     =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
@@ -18,6 +19,7 @@ import java.text.FieldPosition;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
@@ -50,6 +52,11 @@ public class PolyhedralBoundedSolid extends Solid {
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
+    // Auxiliary data structures for storage of parcial results and 
+    // preprocessing
+    private double[] minMax;
+    private int maxVertexId;
+    private int maxFaceId;
 
     //=================================================================
     public PolyhedralBoundedSolid()
@@ -60,6 +67,9 @@ public class PolyhedralBoundedSolid extends Solid {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
+        minMax = null;
+    maxVertexId = -1;
+    maxFaceId = -1;
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -79,6 +89,20 @@ public class PolyhedralBoundedSolid extends Solid {
             facei = polygonsList.get(i);
             if ( facei.id == id ) {
                 return facei;
+            }
+        }
+        return null;
+    }
+
+    public Vector3D getVertexPosition(int vertexid)
+    {
+        int i;
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v;
+            v = verticesList.get(i);
+            if ( v.id == vertexid ) {
+                return v.position;
             }
         }
         return null;
@@ -159,6 +183,10 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge newHalfEdge;
         _PolyhedralBoundedSolidVertex newVertex;
 
+        if ( vertexId > maxVertexId ) maxVertexId = vertexId;
+        if ( faceId > maxFaceId ) maxFaceId = faceId;
+
+        minMax = null;
         newFace = new _PolyhedralBoundedSolidFace(this, faceId);
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
         newVertex = new _PolyhedralBoundedSolidVertex(this, p, vertexId);
@@ -196,8 +224,11 @@ public class PolyhedralBoundedSolid extends Solid {
             return;
         }
 
+        if ( vertexID > maxVertexId ) maxVertexId = vertexID;
+
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
         newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexID);
+        minMax = null;
 
         he = he1;
         while ( he != he2 ) {
@@ -247,6 +278,8 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidLoop oldLoop;
         _PolyhedralBoundedSolidEdge newEdge;
         _PolyhedralBoundedSolidHalfEdge he, nhe1, nhe2, temp;
+
+        if ( faceId > maxFaceId ) maxFaceId = faceId;
 
         newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, faceId);
         oldLoop = he1.parentLoop;
@@ -357,11 +390,74 @@ public class PolyhedralBoundedSolid extends Solid {
         edgesList.removeElemAtWindow();
     }
 
+    /**
+    lkfmrhSameShell: LowlevelKillFaceMakeRingHoleinSameShell.
+    Operator `lkfmrhSameShell` merges two faces `face1` and `face2` by making
+    the loop of the latter a ring into the former. Face `face2` is hence
+    removed.
+    PRE: It is assumed that `face2` is simple, i.e., has just one loop.
+    Note that this method is a partial solution to problem [MANT1988].11.5, 
+    and follows the functional definition of section [MANT1988].11.5.2.
+    */
+    public void lkfmrhSameShell(
+        _PolyhedralBoundedSolidFace face1,
+        _PolyhedralBoundedSolidFace face2)
+    {
+        if ( face2.boundariesList.size() > 1 ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lkfmrhSameShell",
+                "Internal face to form new loop must have just one boundary!");
+            return;
+        }
+
+        _PolyhedralBoundedSolidLoop newLoop;
+        _PolyhedralBoundedSolidLoop oldLoop;
+        _PolyhedralBoundedSolidHalfEdge he;
+        int i;
+
+        oldLoop = face2.boundariesList.get(0);
+        newLoop = new _PolyhedralBoundedSolidLoop(face1);
+
+        for ( i = 0; i < oldLoop.halfEdgesList.size(); i++ ) {
+            he = oldLoop.halfEdgesList.get(i);
+            he.parentLoop = newLoop;
+            newLoop.halfEdgesList.add(he);
+        }
+        newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
+
+        polygonsList.locateWindowAtElem(face2);
+        polygonsList.removeElemAtWindow();
+    }
+
     //= HIGH LEVEL EULER OPERATIONS ===================================
 
     /**
+    smev: "Strut" or line-drawing "Simplified" version of mev operator.
+    See mev method for a complete description.
+    */
+    public boolean smev(int f1, int v1, int v4, Vector3D p)
+    {
+        _PolyhedralBoundedSolidFace oldface1;
+        _PolyhedralBoundedSolidHalfEdge he1, he2;
+
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Face " + f1 + " not found.");
+            return false;
+        }
+        he1 = oldface1.findHalfEdge(v1);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mev",
+            "Edge " + v1 + " - * not found in face " + f1 + ".");
+            return false;
+        }
+        lmev(he1, he1, v4, p);
+        return true;
+    }
+
+    /**
     mev: (High level version) MakeEdgeVertex (vertex splitting operation).
-    Operator `mev` divides the cicle of edges around the vertex `v1` so
+    Operator `mev` divides the cycle of edges around the vertex `v1` so
     that all edges from `v1` -> `v2` (inclusive) to `v1` -> `v3` (exclusive)
     will become adjacent to a new vertex `v4`.  The vertices `v1` and `v4`
     are joined with a new edge.  Coordinates defined in `p` are assigned
@@ -406,12 +502,48 @@ public class PolyhedralBoundedSolid extends Solid {
             "Edge " + v1 + " - " + v3 + " not found in face " + f2 + ".");
             return false;
         }
-    lmev(he1, he2, v4, p);
+        lmev(he1, he2, v4, p);
+        return true;
+    }
+
+    /**
+    smef: simplified version of mef operator.
+    See mef method for a complete description.
+    */
+    public boolean smef(int f1, int v1, int v3, int newfaceid)
+    {
+        _PolyhedralBoundedSolidFace oldface1, oldface2;
+        _PolyhedralBoundedSolidHalfEdge he1, he2;
+
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Face " + f1 + " not found.");
+            return false;
+        }
+        he1 = oldface1.findHalfEdge(v1);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Edge " + v1 + " - * not found in face " + f1 + ".");
+            return false;
+        }
+        he2 = oldface1.findHalfEdge(v3);
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            "Edge " + v3 + " - * not found in face " + f1 + ".");
+            return false;
+        }
+        lmef(he1, he2, newfaceid);
         return true;
     }
 
     /**
     mev: (High level version) MakeEdgeFace (face splitting operation).
+    Operator `mef` connects the vertices `v1` and `v3` of face `f1` with
+    a new edge, and creates a new face `f2`. Similarly to method `smev`,
+    there is included a convenience procedure `smef` that leaves the arguments
+    `v1` and `v4` out; that method should be applied only if `v1` and `v3`
+    are known to occur just once in the face.
     Executes a `lmef` in halfedges v1-v2, v3-v4 in respective faces `f1`
     and `f2`, and assigns to the new face the `newfaceid`.
     */
@@ -445,7 +577,7 @@ public class PolyhedralBoundedSolid extends Solid {
             "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
             return false;
         }
-    lmef(he1, he2, newfaceid);
+        lmef(he1, he2, newfaceid);
         return true;
     }
 
@@ -484,11 +616,78 @@ public class PolyhedralBoundedSolid extends Solid {
             "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
             return false;
         }
-    lkemr(he1, he2);
+        lkemr(he1, he2);
+        return true;
+    }
+
+    /**
+    kfmrhSameShell: (High level version) KillFaceMakeRingHole
+    (connected sum topological operation, global manipulation).
+    Operator `kfmrhSameShell` "merges" two faces `f1` and `f2` by making
+    the latter an interior loop of the former. Face `f2` is removed.
+    As noted in section [MANT1988].9.2.4, the name `kfmrh` is actually a
+    misnomer, because the operator does not necessarily create a "hole".
+    Actualy, `kfmrh` creates a hole only if the two argument faces belong
+    to the same shell.  This method implements that case, taking `this`
+    solid as the only shell.
+    */
+    public boolean kfmrhSameShell(int f1, int f2)
+    {
+        _PolyhedralBoundedSolidFace oldface1, oldface2;
+
+        oldface1 = findFace(f1);
+        if ( oldface1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Face " + f1 + " not found.");
+            return false;
+        }
+        oldface2 = findFace(f2);
+        if ( oldface2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            "Face " + f2 + " not found.");
+            return false;
+        }
+        lkfmrhSameShell(oldface1, oldface2);
         return true;
     }
 
     //=================================================================
+
+    /**
+    This method gives access to the higher vertex id used in current solid
+    model. This method is useful for higher level modeling operations, as
+    noted in section [MANT1988].12.2. Current method (and method getMaxFaceId)
+    is build after the function `getmaxnames` of program [MANT1988].12.1.
+    */
+    public int getMaxVertexId()
+    {
+    return maxVertexId;
+    }
+
+    /**
+    This method gives access to the higher face id used in current solid
+    model. This method is useful for higher level modeling operations, as
+    noted in section [MANT1988].12.2. Current method (and method
+    getMaxVertexId) is build after the function `getmaxnames` of program
+    [MANT1988].12.1.
+    */
+    public int getMaxFaceId()
+    {
+    return maxFaceId;
+    }
+
+    public void
+    applyTransformation(Matrix4x4 T)
+    {
+        int i;
+
+        minMax = null;
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v;
+            v = verticesList.get(i);
+            v.position = T.multiply(v.position);
+        }
+    }
 
     public boolean
     doIntersection(Ray inout_rayo) {
@@ -504,20 +703,185 @@ public class PolyhedralBoundedSolid extends Solid {
             "Method not implemented");
     }
 
-    public double[] getMinMax()
+    /** Needed for supplying the Geometry.getMinMax operation */
+    private void calculateMinMaxPositions() {
+        if ( minMax == null ) {
+            minMax = new double[6];
+
+            double minX = Double.MAX_VALUE;
+            double minY = Double.MAX_VALUE;
+            double minZ = Double.MAX_VALUE;
+            double maxX = Double.MIN_VALUE;
+            double maxY = Double.MIN_VALUE;
+            double maxZ = Double.MIN_VALUE;
+            int i;
+
+            for ( i = 0; i < verticesList.size(); i++ ) {
+                _PolyhedralBoundedSolidVertex v;
+                v = verticesList.get(i);
+                double x = v.position.x;
+                double y = v.position.y;
+                double z = v.position.z;
+
+                if ( x < minX ) minX = x;
+                if ( y < minY ) minY = y;
+                if ( z < minZ ) minZ = z;
+                if ( x > maxX ) maxX = x;
+                if ( y > maxY ) maxY = y;
+                if ( z > maxZ ) maxZ = z;
+            }
+            minMax[0] = minX;
+            minMax[1] = minY;
+            minMax[2] = minZ;
+            minMax[3] = maxX;
+            minMax[4] = maxY;
+            minMax[5] = maxZ;
+        }
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.getMinMax.
+    */
+    public double[] getMinMax() {
+        if ( minMax == null ) {
+            calculateMinMaxPositions();
+        }
+        return minMax;
+    }
+
+    /**
+    Checks that:
+    1. There are at least 3 points in set (no no-surface case)
+    2. There are at least 2 different points in the set (no all-equal
+       bad case)
+    3. There are at least a third point, no colinear with the first 2
+    4. All points in this set lies within a small tolerance over the
+       surface of the plane
+    If all four steps succed, this method returns true. Otherwise returns
+    false.
+    */
+    private boolean
+    validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
     {
-        double minmax[] = new double[6];
-        for ( int i = 0; i < 3; i++ ) {
-            minmax[i] = -1.0;
+        //- 1. Test no-surface case ---------------------------------------
+        if ( points.size() < 3 ) return false;
+
+        //- 2. Test all-equal case ----------------------------------------
+        Vector3D p0, p1, p2;
+        p0 = points.get(0);
+        p1 = null;
+        boolean test = false;
+
+        int i;
+        for ( i = 1; i < points.size(); i++ ) {
+            p1 = points.get(i);
+            if ( VSDK.vectorDistance(p0, p1) > 10 * VSDK.EPSILON ) {
+                test = true;
+                break;
+            }
         }
-        for ( int i = 3; i < 6; i++ ) {
-            minmax[i] = 1.0;
+        if ( !test ) return false;
+
+        //- 3. Test co-linear case ----------------------------------------
+        Vector3D a, b, n;
+        double aDotB;
+        InfinitePlane facePlane = null;
+
+        for ( i = 1; i < points.size(); i++ ) {
+            p2 = points.get(i);
+            if ( VSDK.vectorDistance(p0, p2) > 10 * VSDK.EPSILON &&
+                 VSDK.vectorDistance(p1, p2) > 10 * VSDK.EPSILON ) {
+                a = p2.substract(p0);
+                b = p1.substract(p0);
+                a.normalize();
+                b.normalize();
+                aDotB = Math.abs(a.dotProduct(b));
+                if ( aDotB < 1 - 2*VSDK.EPSILON ) {
+                    n = a.crossProduct(b);
+                    n.normalize();
+                    facePlane = new InfinitePlane(n, p0);
+                }
+                break;
+            }
+        }
+        if ( facePlane == null ) return false;
+
+        //- 4. Check if all points are near face plane --------------------
+        for ( i = 1; i < points.size(); i++ ) {
+            p0 = points.get(i);
+            if ( facePlane.classifyPoint(p0) != 0 ) {
+                return false;
+            }
         }
 
-        VSDK.reportMessage(this, VSDK.WARNING, "getMinMax",
-            "Method not implemented");
+        //-----------------------------------------------------------------
+        return true;
+    }
 
-        return minmax;
+    /**
+    This method runs a set of validity tests to check te integrity of the
+    data structure. If all of the tests goes well, this method returns true.
+    If any of the test fails, this method return false.
+
+    Current methods (already implemented):
+      - All loops have an starting halfedge
+      - All loops are closed
+
+    Current methods (not implemented yet):
+      - All faces are co-planar
+      - For faces with more than one loop, the loops are not intersecting
+        nor self-intersecting
+      - Topology test: euler formula gives a closed representation
+        (no holes, no missing faces and no non-manifold solids like
+        Klain bottles)
+      - Geometric integrity: there are no intersecting faces
+    */
+    public boolean
+    validateModel()
+    {
+        int i, j;
+        String msg = "";
+        boolean test = true;
+        ArrayList<Vector3D> points;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            points = new ArrayList<Vector3D>();
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    msg += "  - Loop without starting halfedge\n";
+                    test = false;
+                }
+                heStart = he;
+                do {
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        msg += "  - Not closed loop\n";
+                        test = false;
+                        break;
+                    }
+                    points.add(he.startingVertex.position);
+                } while( he != heStart );
+            }
+            if ( !validateFacePointsAreCoplanar(points) ) {
+                msg += "  - Face [" + face.id + "] is not coplanar\n";
+                test = false;
+            }
+        }
+
+        if ( !test ) {
+            System.out.println("Validation test failed!:");
+            System.out.println(msg);
+        }
+
+        return test;
     }
 
     //= TEXTUAL QUERY OPERATIONS ======================================

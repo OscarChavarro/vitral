@@ -121,13 +121,13 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
 
+        gl.glBegin(gl.GL_POINTS);
         for ( int i = 0; i < mesh.getVertexes().length; i++ ) {
-            gl.glBegin(gl.GL_POINTS);
             gl.glVertex3d(mesh.getVertexAt(i).getPosition().x,
                           mesh.getVertexAt(i).getPosition().y,
                           mesh.getVertexAt(i).getPosition().z);
-            gl.glEnd();
         }
+        gl.glEnd();
     }
 
     private static void drawVertexNormals(GL gl, TriangleMesh mesh) {

@@ -21,7 +21,7 @@ Note that this is NOT a class, but merely a data structure, and as such,
 all its attributes are public.  This structure is not supposed to evolve or
 change in time radically.
 */
-public class Vertex extends Entity
+public class Vertex extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

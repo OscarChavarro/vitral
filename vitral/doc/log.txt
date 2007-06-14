@@ -209,5 +209,15 @@ Changes in 2007 april 21 revition
     compatible with multiple loop face polyhedra.
   - First succesful tests for the operator lkemr in the polyhedral boundary
     representation based upon Mantylla text.
-  - Implemented mev, mef and kemr high level euler operators in polyhedral
-    boundary representation based upon Mantylla text.
+  - Implemented mev, smev, mef and kemr high level euler operators in
+    polyhedral boundary representation based upon Mantylla text.
+  - First global euler operators lkfmrhSameShell and kfmrhSameShell implemented
+    in polyhedral boundary representation based upon Mantylla text, supporting
+    hole creation for N-genus topological structures.
+  - First version of PolyhedralBoundedSolid.validateModel method.
+
+Changes in 2007 april 22 revition
+  - PolyhedralBoundedSolidExample in testsuite adds multiple mid-level 
+    solid modeling operations from chapters 11 and 12 of Mantylla text. :)
+  - Design level changes in class hierarchies. MediaEntity & FundamentalEntity
+    abstract classes incorporated.

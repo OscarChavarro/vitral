@@ -16,7 +16,7 @@ responsible of display any data, it is just an a suggestion on how to draw it.
 
 @todo: Rename to 'RenderConfiguration' or something similar...
 */
-public class RendererConfiguration extends Entity {
+public class RendererConfiguration extends FundamentalEntity {
 
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

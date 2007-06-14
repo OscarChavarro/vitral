@@ -7,7 +7,7 @@
 
 package vsdk.toolkit.common;
 
-public class Triangle extends Entity 
+public class Triangle extends FundamentalEntity 
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

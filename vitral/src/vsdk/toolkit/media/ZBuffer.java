@@ -10,7 +10,6 @@ package vsdk.toolkit.media;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -25,7 +24,7 @@ is useful as part of visualization algorithms like ZBuffer.
 shadow approximation.
 </UL>
 */
-public class ZBuffer extends Entity {
+public class ZBuffer extends MediaEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 

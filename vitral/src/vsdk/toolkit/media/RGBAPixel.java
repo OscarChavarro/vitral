@@ -10,8 +10,6 @@
 
 package vsdk.toolkit.media;
 
-import vsdk.toolkit.common.Entity;
-
 /**
 Respect to data representation:
 
@@ -25,7 +23,7 @@ performance issues in a lot of algorithms, as this avoids indirections.
 Nevertheless, get and set methods are provided.
 */
 
-public class RGBAPixel extends Entity {
+public class RGBAPixel extends MediaEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 

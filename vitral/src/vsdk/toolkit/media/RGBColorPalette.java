@@ -10,13 +10,12 @@ package vsdk.toolkit.media;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 
 /**
 This class represents a color palette, as an indexed set of colors.
 */
-public class RGBColorPalette extends Entity {
+public class RGBColorPalette extends MediaEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 

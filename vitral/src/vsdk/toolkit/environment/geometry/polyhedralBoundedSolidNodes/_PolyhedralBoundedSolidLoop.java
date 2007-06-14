@@ -52,7 +52,7 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
     public void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
     {
         halfEdgesList.locateWindowAtElem(he);
-    halfEdgesList.removeElemAtWindow();
+        halfEdgesList.removeElemAtWindow();
     }
 
     /** Locates a half edge that goes from vertex with id `a` to vertex with
@@ -62,7 +62,7 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
         _PolyhedralBoundedSolidHalfEdge he, oldhe;
         he = boundaryStartHalfEdge;
         do {
-        oldhe = he;
+            oldhe = he;
             he = he.next();
             if ( he == null ) {
                 // Loop is not closed!
@@ -70,11 +70,33 @@ public class _PolyhedralBoundedSolidLoop extends Entity {
             }
 
             if ( oldhe.startingVertex.id == a && he.startingVertex.id == b) {
-        return oldhe;
-        }
+                return oldhe;
+            }
 
         } while( he != boundaryStartHalfEdge );
-    return null;
+        return null;
+    }
+
+    /** Locates a half edge that goes from vertex with id `a` to vertex with
+    id `b`.  Returns null if no such half edge exists in this loop. */
+    public _PolyhedralBoundedSolidHalfEdge firstHalfEdgeAtVertex(int a)
+    {
+        _PolyhedralBoundedSolidHalfEdge he, oldhe;
+        he = boundaryStartHalfEdge;
+        do {
+            oldhe = he;
+            he = he.next();
+            if ( he == null ) {
+                // Loop is not closed!
+                break;
+            }
+
+            if ( oldhe.startingVertex.id == a ) {
+                return oldhe;
+            }
+
+        } while( he != boundaryStartHalfEdge );
+        return null;
     }
 
     public String toString()

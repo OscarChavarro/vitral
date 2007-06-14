@@ -238,7 +238,7 @@ public class VSDK
 
         if ( level == FATAL_ERROR ) {
             System.exit(1);
-    }
+        }
     }
 
 }

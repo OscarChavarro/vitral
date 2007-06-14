@@ -17,7 +17,7 @@ import vsdk.toolkit.common.VSDK;
 This class is a data structure that represents a 4x4 matrix
  */
 
-public class Matrix4x4 extends Entity
+public class Matrix4x4 extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

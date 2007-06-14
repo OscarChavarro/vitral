@@ -9,7 +9,6 @@ package vsdk.toolkit.media;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.ArrayListOfDoubles;
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 
@@ -30,7 +29,7 @@ This class doen' t impose any interpretation on coordinates, but it is
 suggested that internal double coordinates be mapped to the range 
 <-1, -1, -1> to <1, 1, 1>.
 */
-public class Calligraphic2DBuffer extends Entity {
+public class Calligraphic2DBuffer extends MediaEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 

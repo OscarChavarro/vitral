@@ -21,6 +21,7 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
@@ -201,6 +202,9 @@ public class JoglGeometryRenderer extends JoglRenderer
         else if ( g instanceof ParametricBiCubicPatch ) {
             JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
+    else if ( g instanceof PolyhedralBoundedSolid ) {
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
+    }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
         }

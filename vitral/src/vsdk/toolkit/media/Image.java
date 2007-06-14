@@ -13,7 +13,6 @@
 package vsdk.toolkit.media;
 
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.VSDK;
 
 /**
@@ -22,7 +21,7 @@ in the VSDK toolkit, and provides some common utilities for nearest and
 bi-linear interpolation evaluation on Rgb space.
 */
 
-public abstract class Image extends Entity
+public abstract class Image extends MediaEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20061220L;

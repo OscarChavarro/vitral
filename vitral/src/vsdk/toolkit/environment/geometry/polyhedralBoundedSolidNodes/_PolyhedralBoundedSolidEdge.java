@@ -54,6 +54,22 @@ public class _PolyhedralBoundedSolidEdge extends Entity {
     currentId++;
     }
 
+    public int getStartingVertexIndex()
+    {
+        if ( leftHalf == null ) {
+        return -1;
+    }
+    return leftHalf.startingVertex.id;
+    }
+
+    public int getEndingVertexIndex()
+    {
+        if ( rightHalf == null ) {
+        return -1;
+    }
+    return rightHalf.startingVertex.id;
+    }
+
     public String toString()
     {
         String msg;

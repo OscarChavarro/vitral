@@ -27,7 +27,7 @@ style classes. This serves three purposes:
     explicit programmer configuration for little-endian or big-endian
     hardware platform.
   - To provide means of accessing some operating system's native library
-    files and other basic file system managment.
+    files and other basic file system management.
 */
 
 public abstract class PersistenceElement {

@@ -1,6 +1,6 @@
 package vsdk.toolkit.common;
 
-public class Quaternion extends Entity
+public class Quaternion extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
