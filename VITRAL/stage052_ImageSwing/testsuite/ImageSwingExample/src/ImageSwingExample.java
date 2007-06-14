@@ -162,7 +162,7 @@ class MyPanel extends JPanel
     public MyPanel()
     {
         try {
-            img = RGBAImageBuilder.buildImage(new File("./etc/render.jpg"));
+            img = RGBAImageBuilder.buildImage(new File("./etc/entorno1.jpg"));
         }
         catch (Exception e) {
             System.err.println(e);

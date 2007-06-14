@@ -51,11 +51,38 @@ public class JoglMatrixRenderer {
     will reflect any inconsistent state, as null vectors or non-ortogonal
     vectors, by making different red marks.
 
-    THE METHOD IS NOT IMPLEMENTED.
+    THIS METHOD WILL BE CHANGED TO ALLOW CUSTOMIZATION
     */
     public static void drawGL(GL gl, Matrix4x4 A)
     {
-        ;
+        gl.glPushMatrix();
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glBegin(gl.GL_LINES);
+            gl.glColor3d(1, 0, 0);
+            gl.glVertex3d(A.M[0][3],
+                          A.M[1][3],
+                          A.M[2][3]); 
+            gl.glVertex3d(A.M[0][3] + A.M[0][0],
+                          A.M[1][3] + A.M[1][0],
+                          A.M[2][3] + A.M[2][0]);
+
+            gl.glColor3d(0, 1, 0);
+            gl.glVertex3d(A.M[0][3],
+                          A.M[1][3],
+                          A.M[2][3]); 
+            gl.glVertex3d(A.M[0][3] + A.M[0][1],
+                          A.M[1][3] + A.M[1][1],
+                          A.M[2][3] + A.M[2][1]);
+
+            gl.glColor3d(0, 0, 1);
+            gl.glVertex3d(A.M[0][3],
+                          A.M[1][3],
+                          A.M[2][3]); 
+            gl.glVertex3d(A.M[0][3] + A.M[0][2],
+                          A.M[1][3] + A.M[1][2],
+                          A.M[2][3] + A.M[2][2]);
+        gl.glEnd();
+        gl.glPopMatrix();
     }
     
 }

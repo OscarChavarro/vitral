@@ -47,15 +47,32 @@ public class RGBAImageBuilder
         }
         if( type.equals("jpg") || type.equals("png") || 
             type.equals("jpeg") || type.equals("gif") )  {
-System.out.println(".");
             Toolkit awtTools = Toolkit.getDefaultToolkit();
-            Image i = awtTools.getImage(imagen.getAbsolutePath());
-            BufferedImage bi = toBufferedImage(i);
+            Image image = awtTools.getImage(imagen.getAbsolutePath());
+            BufferedImage bi = toBufferedImage(image);
             
             int w = bi.getWidth();
             int h = bi.getHeight();
             //System.out.println("w: "+w+"; h: "+h);
-System.out.println("[");
+            retImage.init(w, h);
+            int x, y;
+            int pixel;
+            byte r, g, b, a;
+
+            //DataBuffer salvage = bi.getRaster().getDataBuffer();
+
+            for ( y = 0; y < h; y++ ) {
+                for ( x = 0; x < w; x++ ) {
+                    // Warning: This method call is so slow...
+            pixel = bi.getRGB(x, y);
+                    a = (byte)((pixel & 0xFF000000) >> 24);
+                    r = (byte)((pixel & 0x00FF0000) >> 16);
+            g = (byte)((pixel & 0x0000FF00) >> 8);
+            b = (byte)((pixel & 0x000000FF));
+                    retImage.putPixel(x, y, r, g, b, a);
+        }
+        }
+/*
             int[] pix = new int[w*h];
 
             pix = bi.getRGB(0, 0, w, h, pix, 0, w);
@@ -69,8 +86,7 @@ System.out.println("[");
             
             transferPixels(pix, data, w, h, pixelDepth); 
             retImage.setRawImage(data, pixelDepth, w, h);
-
-System.out.println("]");
+*/
 
             return retImage;
         }
@@ -119,10 +135,10 @@ System.out.println("]");
 
     private static BufferedImage toBufferedImage(Image image) 
     {
-        if (image instanceof BufferedImage) 
-        {
+        if ( image instanceof BufferedImage ) {
             return (BufferedImage)image;
         }
+    System.out.println(image.getClass().getName());
     
         // This code ensures that all the pixels in the image are loaded
         image = new ImageIcon(image).getImage();
@@ -170,7 +186,7 @@ System.out.println("]");
         // Paint the image onto the buffered image
         g.drawImage(image, 0, 0, null);
         g.dispose();
-    
+
         return bimage;
     }
     

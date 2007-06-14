@@ -1,7 +1,9 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - November 25 2005 - Oscar Chavarro: Original base version                 =
+//= - November 25 2005 - Oscar Chavarro: Original base version              =
+//= - December 7 2005 - Fabio Aroca / Eduardo Mendoza: importJOGLimage and  =
+//=   getImageJOGL methods added                                            =
 //===========================================================================
 
 package vitral.toolkits.visual.jogl;
@@ -105,6 +107,43 @@ public class JoglRGBAImageRenderer
                         ByteBuffer.wrap(img.getRawImage()));
     }
 
+    public static ByteBuffer importJOGLimage(GL gl) {
+        int[] view= new int[4];
+        //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        int width = view[2], height = view[3];
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
+        gl.glReadBuffer(GL.GL_FRONT_LEFT);
+        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
+                        bb);
+        gl.glFlush();
+        return bb;
+    }
+
+    public static RGBAImage getImageJOGL(GL gl) {
+        RGBAImage image = new RGBAImage();
+        int[] view= new int[4];
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        int width = view[2], height = view[3];
+
+        image.init(width, height);
+
+        // TODO: Check if this can be done without duplication!
+        ByteBuffer bb = importJOGLimage(gl).duplicate();
+
+        int pos = 0;
+
+        for (int y =image.getYSize()-1; y >=0; y--) {
+            for (int x = 0; x < image.getXSize(); x++) {
+                image.putPixel(x,y, bb.get(pos), bb.get(pos + 1),
+                               bb.get(pos + 2));
+                pos += 3;
+            }
+        }
+        return image;
+    }
 }
 
 //===========================================================================

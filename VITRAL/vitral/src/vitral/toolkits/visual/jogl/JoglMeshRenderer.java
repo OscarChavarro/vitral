@@ -71,16 +71,16 @@ public class JoglMeshRenderer
      * @param mesh Mesh
      * @param quality QualitySelection
      */
-    public static void draw(GL gl, Mesh mesh, QualitySelection quality)
+    public static void draw(GL gl, Mesh mesh, QualitySelection quality, boolean flip)
     {
         if (quality.isSurfacesSet())
         {
             int qt = quality.getShadingType();
             if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
-                drawSurfacesSolid(gl, mesh);
+                drawSurfacesSolid(gl, mesh, flip);
               }
               else {
-                drawSurfacesSmooth(gl,mesh);
+                drawSurfacesSmooth(gl,mesh, flip);
             }
         }
         if (quality.isWiresSet())
@@ -114,33 +114,53 @@ public class JoglMeshRenderer
         drawShading(gl, quality.getShadingType());
     }
 
-    public static void drawSurfacesSmooth(GL gl, Mesh mesh)
+    public static void drawSurfacesSmooth(GL gl, Mesh mesh, boolean flip)
     {
         JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
         for(int i=0; i<mesh.getTriangles().length; i++)
         {
             gl.glBegin(gl.GL_TRIANGLES);
             {
-
+                if ( flip == false ) {
                 gl.glNormal3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().y,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().z);
+                }
+                else {
+                gl.glNormal3d(-mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().x,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().y,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().z);
+                }
 
                 gl.glVertex3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getPosition().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getPosition().y,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getPosition().z);
 
+                if ( flip == false ) {    
                 gl.glNormal3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().y,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().z);
+}
+else {
+                gl.glNormal3d(-mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().x,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().y,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getNormal().z);
 
+}
                 gl.glVertex3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getPosition().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getPosition().y,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1()).getPosition().z);
 
+                if ( flip == false ) {    
                 gl.glNormal3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().y,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().z);
+ }
+else {
+                gl.glNormal3d(-mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().x,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().y,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getNormal().z);
+}
 
                 gl.glVertex3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getPosition().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2()).getPosition().y,
@@ -150,16 +170,24 @@ public class JoglMeshRenderer
         }
     }
 
-    public static void drawSurfacesSolid(GL gl, Mesh mesh)
+    public static void drawSurfacesSolid(GL gl, Mesh mesh, boolean flip)
     {
         JoglToolkitInterface.setMaterial(gl, mesh.getMaterial());
         for(int i=0; i<mesh.getTriangles().length; i++)
         {
             gl.glBegin(gl.GL_TRIANGLES);
             {
-                gl.glNormal3d(mesh.getTriangleAt(i).normal.x,
-                        mesh.getTriangleAt(i).normal.y,
-                        mesh.getTriangleAt(i).normal.z);
+                if ( flip == false ) {
+                gl.glNormal3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().x,
+                        mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().y,
+                        mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().z);
+                }
+                else {
+                gl.glNormal3d(-mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().x,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().y,
+                        -mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getNormal().z);
+                }
+
 
                 gl.glVertex3d(mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getPosition().x,
                         mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0()).getPosition().y,

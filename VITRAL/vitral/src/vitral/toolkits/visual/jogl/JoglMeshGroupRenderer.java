@@ -27,12 +27,23 @@ public class JoglMeshGroupRenderer {
       mesh = (Mesh) i.nextElement();
       if (quality.isSurfacesSet()) {
           int qt = quality.getShadingType();
+          gl.glCullFace(gl.GL_FRONT);
+
           if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
-              JoglMeshRenderer.drawSurfacesSolid(gl, mesh);
+              JoglMeshRenderer.drawSurfacesSolid(gl, mesh, false);
             }
             else {
-              JoglMeshRenderer.drawSurfacesSmooth(gl,mesh);
+              JoglMeshRenderer.drawSurfacesSmooth(gl,mesh, false);
           }
+
+          gl.glCullFace(gl.GL_BACK);
+          if ( qt == quality.SHADING_TYPE_GOURAUD || qt == quality.SHADING_TYPE_PHONG ) {
+              JoglMeshRenderer.drawSurfacesSolid(gl, mesh, true);
+            }
+            else {
+              JoglMeshRenderer.drawSurfacesSmooth(gl,mesh, true);
+          }
+
       }
       if (quality.isWiresSet()) {
         gl.glPushAttrib(gl.GL_ALL_ATTRIB_BITS);
