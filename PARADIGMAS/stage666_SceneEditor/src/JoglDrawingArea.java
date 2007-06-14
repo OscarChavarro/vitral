@@ -9,12 +9,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLCapabilities;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLDrawableFactory;
-import net.java.games.jogl.GLEventListener;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLEventListener;
 
 import vitral.toolkits.environment.Camera;
 import vitral.framework.gui.CameraController;
@@ -82,30 +82,30 @@ public class JoglDrawingArea implements
     }
 
     /** Called by drawable to initiate drawing */
-    public void display(GLDrawable drawable) {
+    public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        vitral.toolkits.util.jogl.JoglCameraRenderer.activateGL(gl, activeCamera);
+        vitral.toolkits.visual.jogl.JoglCameraRenderer.activateGL(gl, activeCamera);
 
         drawObjectsGL(gl);
     }
    
     /** Not used method, but needed to instanciate GLEventListener */
-    public void init(GLDrawable drawable) {
+    public void init(GLAutoDrawable drawable) {
         ;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
-    public void displayChanged(GLDrawable drawable, boolean a, boolean b) {
+    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
     
     /** Called to indicate the drawing surface has been moved and/or resized */
-    public void reshape (GLDrawable drawable,
+    public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
                          int width,

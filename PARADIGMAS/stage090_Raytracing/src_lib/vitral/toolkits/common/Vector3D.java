@@ -1,4 +1,9 @@
 //===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//= - November 15 2005 - Oscar Chavarro: quality check                      =
+//===========================================================================
 
 package vitral.toolkits.common;
 
@@ -6,7 +11,7 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 
 public class Vector3D {
-    /// Yes, they are public due to efficiency factors
+    /// Yes, they are public due to efficiency issues
     public double x, y, z;
 
     /**
@@ -88,9 +93,9 @@ public class Vector3D {
     */
     private String f(double a)
     {
-    DecimalFormat f = new DecimalFormat("0.##");
+        DecimalFormat f = new DecimalFormat("0.##");
 
-    return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
+        return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
 
     public String toString()

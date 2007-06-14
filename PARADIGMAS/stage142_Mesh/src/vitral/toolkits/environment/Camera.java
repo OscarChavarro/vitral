@@ -2,31 +2,33 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
+//= - August 24 2005 - David Diaz / Cesar Bustacara: Design changes to      =
+//=   decouple JOGL from the Camera data model, extra utilitary methods     =
+//=   added                                                                 =
+//= - August 25 2005 - Oscar Chavarro: English translation of comments      =
+//= - September 12 2005 - Oscar Chavarro: generateRay updated               =
+//= - November 15 2005 - Oscar Chavarro: generateRay updated (Bug?)         =
 //===========================================================================
 
 package vitral.toolkits.environment;
 
 import vitral.toolkits.common.Vector3D;
 import vitral.toolkits.common.Matrix4x4;
-import net.java.games.jogl.GL;
 
 public class Camera {
-    // Modelo basico de la camara
+    // Basic Camera Model
     private Vector3D eyePosition;
-
     private Vector3D up;
-    //DAD
     private Vector3D front;
     private Vector3D left;
     private double focalDistance;
-    //FDAD
     private int projectionMode;
     private double fov;
     private double orthogonalZoom;
     private double nearPlaneDistance;
     private double farPlaneDistance;
 
-    // Constantes globales
+    // Global constants
     public static final int STEREO_MODE_CENTER = 1;
     public static final int STEREO_MODE_LEFT_EYE = 2;
     public static final int STEREO_MODE_RIGHT_EYE = 3;
@@ -41,7 +43,7 @@ public class Camera {
     vision (`fov`) y de la actual proporci&oacute;n de ancho/alto del
     viewport. Las variables internas `viewport_xsize` y `viewport_ysize`
     representan el tama&nacute;o en pixels para el viewport, y son valores
-    que solo pueden ser cambiados por el m&eacute;todo
+    que solo pueden ser cambiados por el m&eacute;todo 
     `Camera::updateViewportResize`. Estos dos valores son para uso interno de
     la clase c&aacute;mara y no pueden ser consultados (i.e. son una copia
     de la configuraci&oacute;n del viewport, que debe ser administrado por
@@ -53,15 +55,15 @@ public class Camera {
 
     // Vectores privados que se preprocesan para agilizar los calculos
     private Vector3D dx, dy, _dir;
-
-    public Camera()
+    
+    public Camera() 
     {
         eyePosition = new Vector3D(0,-5,1);
-
+        
         up = new Vector3D(0,0,1);
         front=new Vector3D(0,1,0);
         left=new Vector3D(-1,0,0);
-
+        
         fov = 60;
         viewport_xsize = 320;
         viewport_ysize = 320;
@@ -74,9 +76,7 @@ public class Camera {
         focalDistance=10;
         // OJO: dx, dy y _dir no estan inicializados!
     }
-
-
-
+    
     public Vector3D getPosition()
     {
         return eyePosition;
@@ -87,27 +87,28 @@ public class Camera {
         this.eyePosition = eyePosition;
     }
 
-
+    
     public Vector3D getFocusedPosition()
     {
         return eyePosition.add(front.multiply(focalDistance));
     }
 
-
+    
     /**
      * En este metodo no se tiene en cuenta si up y front quedan mirando para el mismo lado
-     * @param focusedPosition Vector3D
+     WARNING: Perhaps this method should be renamed as 
+     `setFocusedPositionMaintaingOrthogonality`, as a simple copy method could
+     be needed in advanced applications
      */
     public void setFocusedPosition(Vector3D focusedPosition)
     {
-
         front = focusedPosition.substract(eyePosition);
         focalDistance=front.length();
         front.normalize();
-
+        
         left = up.crossProduct(front);
         left.normalize();
-
+        
         up=left.crossProduct(front);
         up.normalize();
     }
@@ -119,7 +120,9 @@ public class Camera {
 
     /**
      * En este metodo no se tiene en cuenta si up y front quedan mirando para el mismo lado
-     * @param up Vector3D
+     WARNING: Perhaps this method should be renamed as 
+     `setUpMaintaingOrthogonality`, as a simple copy method could
+     be needed in advanced applications
      */
     public void setUp(Vector3D up)
     {
@@ -127,10 +130,10 @@ public class Camera {
 
         left = up.crossProduct(front);
         left.normalize();
-
+ 
         this.up=front.crossProduct(left);
         this.up.normalize();
-
+        
     }
 
     public double getFov()
@@ -187,14 +190,17 @@ public class Camera {
       - dy queda normalizado
       - _dir ... no se ha entendido bien!
     */
-
+    
     public void updateVectors()
     {
         // Compute mapping from screen coordinate to a ray direction
-        Vector3D _dir_no_normalizado = new Vector3D(this.getFocusedPosition().x - eyePosition.x,
-                                                this.getFocusedPosition().y - eyePosition.y,
+        Vector3D _dir_no_normalizado = new Vector3D(this.getFocusedPosition().x - eyePosition.x, 
+                                                this.getFocusedPosition().y - eyePosition.y, 
                                                 this.getFocusedPosition().z - eyePosition.z);
-        double fl = (double)(viewport_xsize / (2*Math.tan((0.5*fov)*Math.PI/180)));
+
+        // WARNING: This appears to be the Bug detected by Gina Chiquillo
+//      double fl = (double)(viewport_xsize / (2*Math.tan((0.5*fov)*Math.PI/180)));
+        double fl = (double)(viewport_ysize / (2*Math.tan((0.5*fov)*Math.PI/180)));
 
         dx = _dir_no_normalizado.crossProduct(up);
         dx.normalize();
@@ -204,29 +210,35 @@ public class Camera {
 
         _dir = _dir_no_normalizado;
         _dir.normalize();
-        _dir.x = _dir.x * fl - 0.5f * (viewport_xsize*dx.x +
+        _dir.x = _dir.x * fl - 0.5f * (viewport_xsize*dx.x + 
                                        viewport_ysize*dy.x);
-        _dir.y = _dir.y * fl - 0.5f * (viewport_xsize*dx.y +
+        _dir.y = _dir.y * fl - 0.5f * (viewport_xsize*dx.y + 
                                        viewport_ysize*dy.y);
-        _dir.z = _dir.z * fl - 0.5f * (viewport_xsize*dx.z +
+        _dir.z = _dir.z * fl - 0.5f * (viewport_xsize*dx.z + 
                                        viewport_ysize*dy.z);
     }
 
     public final Ray generateRay(int x, int y)
     {
-        // OJO: Es posible que esto este siendo lento por asignar a memoria
-        //      dinamica estas dos variables. Notese que podrian ser estaticos
-        //      y reutilizarse...
-        // Notese como se utiliza un vector preprocesado `dy` para calcular
-        // las coordenadas en la pantalla que aumentan hacia abajo
-        Vector3D dir = new Vector3D(
-            x*dx.x + y*dy.x + _dir.x,
-            x*dx.y + y*dy.y + _dir.y,
-            x*dx.z + y*dy.z + _dir.z);
+        double xInDouble, yIndouble;
+        Vector3D ddx, ddy, dir;
+        double vxt, vyt;
+        Ray ray;
 
-        // La direccion de este rayo es un vector unitario, dado que en la
-        // version actual de Ray::Ray se normaliza...
-        Ray ray = new Ray(eyePosition, dir);
+        vxt = (double)viewport_xsize;
+        vyt = (double)viewport_ysize;
+
+        xInDouble = (x - vxt/2.0) / vxt;
+        yIndouble = ((vyt - y - 1) -  vyt/2.0) / vyt;
+
+        ddy = up.multiply(yIndouble);
+        ddx = left.multiply(-xInDouble);
+
+        dir = ddx.add(ddy);
+        dir = dir.add(front);
+        dir.normalize();
+
+        ray = new Ray(eyePosition, dir);
 
         return ray;
     }
@@ -271,7 +283,7 @@ public class Camera {
 
         return R;
     }
-
+    
     /*
      *This method returns a matrix that can be applied to the camera to rotate it on their local coordinates
      *
@@ -289,73 +301,74 @@ public class Camera {
         double sino[]={Math.sin(dx/57.29577951), Math.sin(dy/57.29577951), Math.sin(dz/57.29577951)};
         double cosi[]={Math.cos(dx/57.29577951), Math.cos(dy/57.29577951), Math.cos(dz/57.29577951)};
         double cosiComp[]={1.0-cosi[0], 1.0-cosi[1], 1.0-cosi[2]};//este es el complemento del coseno
-
-//    Esta es la matriz teorica de rotacion que gira n grados en el eje left de la camara (si)
-//    double[] rotStraf=new Double[]={ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
+        
+//      Esta es la matriz teorica de rotacion que gira n grados en el eje left de la camara (si)
+//      double[] rotStraf=new Double[]={ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
 //                                       (cosiComp[0]*left.x*left.y+sino[0]*left.z), (cosiComp[0]*left.y*left.y +cosi[0])      , (cosiComp[0]*left.y*left.z-sino[0]*left.x), 0,
 //                                       (cosiComp[0]*left.x*left.z-sino[0]*left.z), (cosiComp[0]*left.y*left.z+sino[0]*left.x), (cosiComp[0]*left.z*left.z+cosi[0]),        0,
 //                                                  0,                                                   0,                                             0,                   1};
 
-//esta es la representacion de esa matriz para opengl
-//    double[] rotStraf=new Double[]{ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
+//esta es la representacion de esa matriz para opengl 
+//      double[] rotStraf=new Double[]{ (cosiComp[0]*left.x*left.x+cosi[0]),        (cosiComp[0]*left.x*left.y-sino[0]*left.z), (cosiComp[0]*left.x*left.z+sino[0]*left.y), 0,
 //                                      (cosiComp[0]*left.x*left.y+sino[0]*left.z), (cosiComp[0]*left.y*left.y +cosi[0]),       (cosiComp[0]*left.y*left.z-sino[0]*left.x), 0,
 //                                      (cosiComp[0]*left.x*left.z-sino[0]*left.y), (cosiComp[0]*left.y*left.z+sino[0]*left.x), (cosiComp[0]*left.z*left.z+cosi[0]),        0,
-//                                           0,                                            0,                                      0,                           1};
+//                                                       0,                                            0,                                      0,                           1};
 
-// This is the matrix in the toolkit representation
+        // Esta es la matriz en la representacion del toolkit
         Matrix4x4 rStraf=new Matrix4x4();
         rStraf.M[0][0]=cosiComp[0]*left.x*left.x+cosi[0];           rStraf.M[0][1]=cosiComp[0]*left.x*left.y-sino[0]*left.z;    rStraf.M[0][2]=cosiComp[0]*left.x*left.z+sino[0]*left.y;    rStraf.M[0][3]=0;
         rStraf.M[1][0]=cosiComp[0]*left.x*left.y+sino[0]*left.z;    rStraf.M[1][1]=cosiComp[0]*left.y*left.y +cosi[0];          rStraf.M[1][2]=cosiComp[0]*left.y*left.z-sino[0]*left.x;    rStraf.M[1][3]=0;
         rStraf.M[2][0]=cosiComp[0]*left.x*left.z-sino[0]*left.y;    rStraf.M[2][1]=cosiComp[0]*left.y*left.z+sino[0]*left.x;    rStraf.M[2][2]=cosiComp[0]*left.z*left.z+cosi[0];           rStraf.M[2][3]=0;
         rStraf.M[3][0]=0;                                           rStraf.M[3][1]=0;                                           rStraf.M[3][2]=0;                                           rStraf.M[3][3]=1;
+        
 
-
-//    Esta es la matriz teorica de rotacion que gira n grados en el eje up de la camara (no)
-//    double[] rotUp = new Double[]{  (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
+//      Esta es la matriz teorica de rotacion que gira n grados en el eje up de la camara (no)
+//      double[] rotUp = new Double[]{  (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
 //                                      (cosiComp[1]*up.x*up.y+sino[1]*up.z), (cosiComp[1]*up.y*up.y +cosi[1])    , (cosiComp[1]*up.y*up.z-sino[1]*up.x), 0,
 //                                      (cosiComp[1]*up.x*up.z-sino[1]*up.z), (cosiComp[1]*up.y*up.z+sino[1]*up.x), (cosiComp[1]*up.z*up.z+cosi[1]),      0,
-//                                                     0,                                      0,                                    0,              1};
+//                                                     0,                                      0,                                    0,                   1};
 
 //esta es la representacion de esa matriz para opengl
-//    double[] rotUp = new Double[]{   (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
+//      double[] rotUp = new Double[]{   (cosiComp[1]*up.x*up.x+cosi[1]),      (cosiComp[1]*up.x*up.y-sino[1]*up.z), (cosiComp[1]*up.x*up.z+sino[1]*up.y), 0,
 //                                       (cosiComp[1]*up.x*up.y+sino[1]*up.z), (cosiComp[1]*up.y*up.y+cosi[1]),      (cosiComp[1]*up.y*up.z-sino[1]*up.x), 0,
 //                                       (cosiComp[1]*up.x*up.z-sino[1]*up.y), (cosiComp[1]*up.y*up.z+sino[1]*up.x), (cosiComp[1]*up.z*up.z+cosi[1]),      0,
 //                                                     0,                                      0,                                      0,                  1};
 
-// This is the matrix in the toolkit representation
+//Esta es la matriz en la representacion del toolkit
         Matrix4x4 rUp=new Matrix4x4();
         rUp.M[0][0]=cosiComp[1]*up.x*up.x+cosi[1];         rUp.M[0][1]=cosiComp[1]*up.x*up.y-sino[1]*up.z;    rUp.M[0][2]=cosiComp[1]*up.x*up.z+sino[1]*up.y;    rUp.M[0][3]=0;
         rUp.M[1][0]=cosiComp[1]*up.x*up.y+sino[1]*up.z;    rUp.M[1][1]=cosiComp[1]*up.y*up.y+cosi[1];         rUp.M[1][2]=cosiComp[1]*up.y*up.z-sino[1]*up.x;    rUp.M[1][3]=0;
         rUp.M[2][0]=cosiComp[1]*up.x*up.z-sino[1]*up.y;    rUp.M[2][1]=cosiComp[1]*up.y*up.z+sino[1]*up.x;    rUp.M[2][2]=cosiComp[1]*up.z*up.z+cosi[1];         rUp.M[2][3]=0;
         rUp.M[3][0]=0;                                     rUp.M[3][1]=0;                                     rUp.M[3][2]=0;                                     rUp.M[3][3]=1;
 
-//    Esta es la matriz de rotacion que gira n grados en el eje front de la camara (no se)
-//    double[] rotFront = new Double[]{ (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
+//      Esta es la matriz de rotacion que gira n grados en el eje front de la camara (no se)
+//      double[] rotFront = new Double[]{ (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
 //                                        (cosiComp[2]*front.x*front.y+sino[2]*front.z), (cosiComp[2]*front.y*front.y +cosi[2])       , (cosiComp[2]*front.y*front.z-sino[2]*front.x), 0,
 //                                        (cosiComp[2]*front.x*front.z-sino[2]*front.z), (cosiComp[2]*front.y*front.z+sino[2]*front.x), (cosiComp[2]*front.z*front.z+cosi[2]),         0,
-//                                               0                                               0,                                         0,                         1};
+//                                                               0                                               0,                                         0,                         1};
 
 //esta es la representacion de esa matriz para opengl
-//    double[] rotFront = new Double[]{  (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
+//      double[] rotFront = new Double[]{  (cosiComp[2]*front.x*front.x+cosi[2]),         (cosiComp[2]*front.x*front.y-sino[2]*front.z), (cosiComp[2]*front.x*front.z+sino[2]*front.y), 0,
 //                                         (cosiComp[2]*front.x*front.y+sino[2]*front.z), (cosiComp[2]*front.y*front.y+cosi[2]),         (cosiComp[2]*front.y*front.z-sino[2]*front.x), 0,
 //                                         (cosiComp[2]*front.x*front.z-sino[2]*front.y), (cosiComp[2]*front.y*front.z+sino[2]*front.x), (cosiComp[2]*front.z*front.z+cosi[2]),         0,
-//                                                     0,                                               0,                                         0,                         1};
+//                                                               0,                                               0,                                         0,                         1};
 
-//esta es la representacion de esa matriz en opengl
+        // esta es la representacion de esa matriz en opengl
         Matrix4x4 rFr=new Matrix4x4();
+
         rFr.M[0][0]=cosiComp[2]*front.x*front.x+cosi[2];            rFr.M[0][1]=cosiComp[2]*front.x*front.y-sino[2]*front.z;    rFr.M[0][2]=cosiComp[2]*front.x*front.z+sino[2]*front.y;    rFr.M[0][3]=0;
         rFr.M[1][0]=cosiComp[2]*front.x*front.y+sino[2]*front.z;    rFr.M[1][1]=cosiComp[2]*front.y*front.y+cosi[2];            rFr.M[1][2]=cosiComp[2]*front.y*front.z-sino[2]*front.x;    rFr.M[1][3]=0;
         rFr.M[2][0]=cosiComp[2]*front.x*front.z-sino[2]*front.y;    rFr.M[2][1]=cosiComp[2]*front.y*front.z+sino[2]*front.x;    rFr.M[2][2]=cosiComp[2]*front.z*front.z+cosi[2];            rFr.M[2][3]=0;
         rFr.M[3][0]=0;                                              rFr.M[3][1]=0;                                              rFr.M[3][2]=0;                                              rFr.M[3][3]=1;
-
-// A rotation matrix is calculated
+        
+        // Aca se halla la matriz de rotacion
         Matrix4x4 rotacion=new Matrix4x4();
         rotacion.identity();
         rotacion=rotacion.multiply(rStraf);
         rotacion=rotacion.multiply(rUp);
         rotacion=rotacion.multiply(rFr);
 
-//Aca se actualizan los vectores
+        // Aca se actualizan los vectores        
         Vector3D frontAux=rotacion.multiply(front);
         Vector3D leftAux=rotacion.multiply(left);
         Vector3D upAux=rotacion.multiply(up);
@@ -363,16 +376,31 @@ public class Camera {
         leftAux.normalize();
         upAux.normalize();
 
-//Aca se arma la nueva matriz de rotacion
+        // Aca se arma la nueva matriz de rotacion        
         Matrix4x4 retRot=new Matrix4x4();
-        retRot.M[0][0]=frontAux.x;     retRot.M[0][1]=leftAux.x;     retRot.M[0][2]=upAux.x;     retRot.M[0][3]=0;
-        retRot.M[1][0]=frontAux.y;     retRot.M[1][1]=leftAux.y;     retRot.M[1][2]=upAux.y;     retRot.M[1][3]=0;
-        retRot.M[2][0]=frontAux.z;     retRot.M[2][1]=leftAux.z;     retRot.M[2][2]=upAux.z;     retRot.M[2][3]=0;
-        retRot.M[3][0]=0;              retRot.M[3][1]=0;             retRot.M[3][2]=0;           retRot.M[3][3]=1;
+        retRot.M[0][0]=frontAux.x;
+        retRot.M[0][1]=leftAux.x;
+        retRot.M[0][2]=upAux.x;
+        retRot.M[0][3]=0;
 
+        retRot.M[1][0]=frontAux.y;
+        retRot.M[1][1]=leftAux.y;
+        retRot.M[1][2]=upAux.y;
+        retRot.M[1][3]=0;
+
+        retRot.M[2][0]=frontAux.z;
+        retRot.M[2][1]=leftAux.z;
+        retRot.M[2][2]=upAux.z;
+        retRot.M[2][3]=0;
+
+        retRot.M[3][0]=0;
+        retRot.M[3][1]=0;
+        retRot.M[3][2]=0;
+        retRot.M[3][3]=1;
+        
         return retRot;
     }
-
+    
     /*
      *This method translate the camera on its local coordinates
      *
@@ -386,7 +414,7 @@ public class Camera {
         Vector3D frontAux=front.multiply(dz);
         Vector3D upAux=up.multiply(dy);
         Vector3D leftAux=left.multiply(dx);
-
+        
         eyePosition=eyePosition.add(frontAux);
         eyePosition=eyePosition.add(upAux);
         eyePosition=eyePosition.add(leftAux);
@@ -399,22 +427,22 @@ public class Camera {
         Matrix4x4 P = new Matrix4x4();
 
         switch ( projectionMode ) {
-        case Camera.PROJECTION_MODE_ORTHOGONAL:
+          case Camera.PROJECTION_MODE_ORTHOGONAL:
             P.orthogonalProjection(-1/orthogonalZoom, 1/orthogonalZoom,
                                    -1/orthogonalZoom, 1/orthogonalZoom,
                                    nearPlaneDistance, farPlaneDistance);
-        break;
-        case Camera.PROJECTION_MODE_PERSPECTIVE:
-            aspect = viewport_xsize / viewport_ysize;
+            break;
+          case Camera.PROJECTION_MODE_PERSPECTIVE:
+            aspect = viewport_xsize / viewport_ysize; 
             upDistance = nearPlaneDistance * Math.tan(fov * Math.PI / 360);
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
             P.frustumProjection(leftDistance, rightDistance,
                                 downDistance, upDistance,
-                nearPlaneDistance, farPlaneDistance);
-        break;
-    }
+                                nearPlaneDistance, farPlaneDistance);
+            break;
+        }
 
         //- 2. Take into account the camera position and orientation -------
         Matrix4x4 R;
@@ -486,7 +514,7 @@ public class Camera {
         roll = R.obtainEulerRollAngle();
 
         //------------------------------------------------------------
-//        updateVectors();
+        updateVectors();
         msg = msg + "    . Vector UP = " + up + "\n";
         msg = msg + "    . Vector FRONT = " + front + "\n";
         msg = msg + "    . Vector LEFT = " + left + "\n";

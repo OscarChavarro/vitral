@@ -15,19 +15,18 @@ public class Light
 
     public int tipo_de_luz;
     public Vector3D lvec;             // the position of a point light or
-                                    // the direction to a directional light
-    public ColorRgb emissionColor;        // color of the light source
+                                      // the direction to a directional light
+    public ColorRgb emissionColor;    // color of the light source
     
-    private ColorRgb ambient; 
-    private ColorRgb diffuse; 
-    private ColorRgb specular; 
+    private ColorRgb ambient;
+    private ColorRgb diffuse;
+    private ColorRgb specular;
 
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
         emissionColor=emission;
-        if ( type != AMBIENTE ) 
-        {
+        if ( type != AMBIENTE ) {
             lvec = pos;
             if ( type == DIRECCIONAL ) 
             {

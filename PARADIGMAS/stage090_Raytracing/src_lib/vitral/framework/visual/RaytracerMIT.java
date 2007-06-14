@@ -6,7 +6,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 import vitral.toolkits.common.Vector3D;
-import vitral.toolkits.common.Color;
+import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.environment.Ray;
 import vitral.toolkits.environment.Camera;
 import vitral.toolkits.environment.Material;
@@ -37,13 +37,13 @@ public class RaytracerMIT {
     //   the point of intersection (p)
     //   a unit-length surface normal (n)
     //   a unit-length vector towards the ray's origin (v)
-    public Color modelo_de_iluminacion(Vector3D p, Vector3D n, Vector3D v, 
+    public ColorRgb modelo_de_iluminacion(Vector3D p, Vector3D n, Vector3D v, 
         Vector lights, Vector objects, Background fondo,
         Material m) {
 
-        Color resultado = new Color();
+        ColorRgb resultado = new ColorRgb();
         Geometry objeto_mas_cercano;
-    Color color_de_fondo = fondo.color_en_direccion(n);
+    ColorRgb color_de_fondo = fondo.color_en_direccion(n);
 
         for ( Enumeration lightSources = lights.elements();
               lightSources.hasMoreElements(); ) {
@@ -128,7 +128,7 @@ public class RaytracerMIT {
                     rv.x = -rayo_reflejado.direction.x;
                     rv.y = -rayo_reflejado.direction.y;
                     rv.z = -rayo_reflejado.direction.z;                    
-                    Color rcolor =
+                    ColorRgb rcolor =
                         modelo_de_iluminacion(rp, rn, rv, lights, objects, fondo, m);
 
                     resultado.r += m.kr*rcolor.r;
@@ -176,10 +176,10 @@ public class RaytracerMIT {
         return objeto_mas_cercano;
     }
 
-    private Color seguimiento_rayo(Ray rayo, Vector in_objetos, 
+    private ColorRgb seguimiento_rayo(Ray rayo, Vector in_objetos, 
                          Vector in_luces, Background in_fondo)
     {
-        Color c;
+        ColorRgb c;
         Vector3D p = new Vector3D();
         Vector3D n = new Vector3D();
         Vector3D v = new Vector3D();
@@ -205,10 +205,10 @@ public class RaytracerMIT {
 /*
     // SIN MODELO DE ILUMINACION: SOLO Light AMBIENTE (Borrar luego de aqui,
     // dejar solo en el estudio paso a paso de las etapas!
-    private Color seguimiento_rayo(Ray rayo, Vector in_objetos, 
-                         Vector in_luces, Color in_fondo)
+    private ColorRgb seguimiento_rayo(Ray rayo, Vector in_objetos, 
+                         Vector in_luces, ColorRgb in_fondo)
     {
-        Color c;
+        ColorRgb c;
         Geometry objeto_mas_cercano;
 
         c = in_fondo;
@@ -266,7 +266,7 @@ public class RaytracerMIT {
     {
         int x, y;
         Ray rayo;
-        Color color;
+        ColorRgb color;
 
         System.out.print("[");
         in_camara.updateVectors();

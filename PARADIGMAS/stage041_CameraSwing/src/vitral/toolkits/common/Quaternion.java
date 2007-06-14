@@ -13,7 +13,7 @@ public class Quaternion
 
     public double length()
     {
-    return magnitude * magnitude + direction.dotProduct(direction);
+        return magnitude * magnitude + direction.dotProduct(direction);
     }
 
     public void normalize()

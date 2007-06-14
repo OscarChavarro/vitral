@@ -1,22 +1,22 @@
 //===========================================================================
 package vitral.toolkits.environment;
 
-import vitral.toolkits.common.Color;
+import vitral.toolkits.common.ColorRgb;
 import vitral.toolkits.common.Vector3D;
 
 public class SimpleBackground extends Background {
-    Color _color;
+    ColorRgb _color;
 
     public SimpleBackground() {
     super();
 
-        _color = new Color();
+        _color = new ColorRgb();
     _color.r = 0;
     _color.g = 0;
     _color.b = 0;
     }
 
-    public Color color_en_direccion(Vector3D d)
+    public ColorRgb color_en_direccion(Vector3D d)
     {
         return _color;
     }

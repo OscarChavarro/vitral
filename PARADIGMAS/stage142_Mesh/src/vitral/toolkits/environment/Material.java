@@ -8,7 +8,7 @@ public class Material
     private ColorRgb diffuse; 
     private ColorRgb specular; 
     private ColorRgb emission; 
-    
+
     private String name="default";
     
     private double alpha=1;

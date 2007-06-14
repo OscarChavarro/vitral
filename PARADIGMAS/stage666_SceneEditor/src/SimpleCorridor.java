@@ -1,4 +1,4 @@
-import net.java.games.jogl.GL;
+import javax.media.opengl.GL;
 
 public class SimpleCorridor
 {

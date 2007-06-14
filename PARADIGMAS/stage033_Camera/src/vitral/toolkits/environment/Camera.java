@@ -7,6 +7,7 @@
 //=   added                                                                 =
 //= - August 25 2005 - Oscar Chavarro: English translation of comments      =
 //= - September 12 2005 - Oscar Chavarro: generateRay updated               =
+//= - November 15 2005 - Oscar Chavarro: generateRay updated (Bug?)         =
 //===========================================================================
 
 package vitral.toolkits.environment;
@@ -196,7 +197,10 @@ public class Camera {
         Vector3D _dir_no_normalizado = new Vector3D(this.getFocusedPosition().x - eyePosition.x, 
                                                 this.getFocusedPosition().y - eyePosition.y, 
                                                 this.getFocusedPosition().z - eyePosition.z);
-        double fl = (double)(viewport_xsize / (2*Math.tan((0.5*fov)*Math.PI/180)));
+
+        // WARNING: This appears to be the Bug detected by Gina Chiquillo
+//      double fl = (double)(viewport_xsize / (2*Math.tan((0.5*fov)*Math.PI/180)));
+        double fl = (double)(viewport_ysize / (2*Math.tan((0.5*fov)*Math.PI/180)));
 
         dx = _dir_no_normalizado.crossProduct(up);
         dx.normalize();

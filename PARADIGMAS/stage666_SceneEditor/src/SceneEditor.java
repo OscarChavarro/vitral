@@ -15,7 +15,7 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import net.java.games.jogl.GLCanvas;
+import javax.media.opengl.GLCanvas;
 
 import vitral.toolkits.environment.Camera;
 
