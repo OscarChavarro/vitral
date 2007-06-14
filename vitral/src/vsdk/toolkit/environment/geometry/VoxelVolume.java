@@ -13,6 +13,7 @@ package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
@@ -51,19 +52,19 @@ public class VoxelVolume extends Solid {
     public int getXSize()
     {
         if ( data == null || data.size() < 0 ) return 0;
-    return data.get(0).getXSize();
+        return data.get(0).getXSize();
     }
 
     public int getYSize()
     {
         if ( data == null || data.size() < 0 ) return 0;
-    return data.get(0).getXSize();
+        return data.get(0).getXSize();
     }
 
     public int getZSize()
     {
         if ( data == null || data.size() < 0 ) return 0;
-    return data.size();
+        return data.size();
     }
 
     public boolean init(int xSize, int ySize, int zSize)
@@ -74,32 +75,32 @@ public class VoxelVolume extends Solid {
 
         localData = new ArrayList<IndexedColorImage>();
 
-    for ( z = 0; z < zSize; z++ ) {
+        for ( z = 0; z < zSize; z++ ) {
             slice = new IndexedColorImage();
-        if ( !slice.init(xSize, ySize) ) {
+            if ( !slice.init(xSize, ySize) ) {
                 return false;
+            }
+            localData.add(slice);
         }
-        localData.add(slice);
-    }
 
         data = localData;
-    return true;
+        return true;
     }
 
     public void putVoxel(int x, int y, int z, byte val)
     {
         try {
-        if ( (x < 0 || x >= getXSize()) ||
+            if ( (x < 0 || x >= getXSize()) ||
                  (y < 0 || y >= getYSize()) ||
                  (z < 0 || z >= getZSize()) ) {
-        return;
-        }
+                return;
+            }
             IndexedColorImage slice = data.get(z);
             slice.putPixel(x, y, val);
-    }
-    catch ( Exception e ) {
-        //
-    }
+        }
+        catch ( Exception e ) {
+            //
+        }
     }
 
     /**
@@ -113,7 +114,7 @@ public class VoxelVolume extends Solid {
         p.x = ((double)x+0.5) / ((double)getXSize())*2 - 1;
         p.y = ((double)y+0.5) / ((double)getYSize())*2 - 1;
         p.z = ((double)z+0.5) / ((double)getZSize())*2 - 1;
-    return p;
+        return p;
     }
 
     /**
@@ -151,14 +152,14 @@ public class VoxelVolume extends Solid {
     */
     public int getVoxelAtPosition(double x, double y, double z)
     {
-    if ( x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1 ) return 0;
+        if ( x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1 ) return 0;
         int i, j, k;
 
         i = (int)(((x + 1)/2) * ((double)getXSize()) - 0.5);
-    j = (int)(((y + 1)/2) * ((double)getYSize()) - 0.5);
-    k = (int)(((z + 1)/2) * ((double)getZSize()) - 0.5);
+        j = (int)(((y + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((z + 1)/2) * ((double)getZSize()) - 0.5);
 
-    return getVoxel(i, j, k);
+        return getVoxel(i, j, k);
     }
 
     /**
@@ -169,14 +170,14 @@ public class VoxelVolume extends Solid {
     */
     public int getVoxelAtPosition(Vector3D p)
     {
-    if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return 0;
+        if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return 0;
         int i, j, k;
 
         i = (int)(((p.x + 1)/2) * ((double)getXSize()) - 0.5);
-    j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
-    k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
+        j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
 
-    return getVoxel(i, j, k);
+        return getVoxel(i, j, k);
     }
 
     /**
@@ -187,14 +188,14 @@ public class VoxelVolume extends Solid {
     */
     public void putVoxelAtPosition(double x, double y, double z, byte val)
     {
-    if ( x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1 ) return;
+        if ( x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1 ) return;
         int i, j, k;
 
         i = (int)(((x + 1)/2) * ((double)getXSize()) - 0.5);
-    j = (int)(((y + 1)/2) * ((double)getYSize()) - 0.5);
-    k = (int)(((z + 1)/2) * ((double)getZSize()) - 0.5);
+        j = (int)(((y + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((z + 1)/2) * ((double)getZSize()) - 0.5);
 
-    putVoxel(i, j, k, val);
+        putVoxel(i, j, k, val);
     }
 
     /**
@@ -205,14 +206,14 @@ public class VoxelVolume extends Solid {
     */
     public void putVoxelAtPosition(Vector3D p, byte val)
     {
-    if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return;
+        if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return;
         int i, j, k;
 
         i = (int)(((p.x + 1)/2) * ((double)getXSize()) - 0.5);
-    j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
-    k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
+        j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
 
-    putVoxel(i, j, k, val);
+        putVoxel(i, j, k, val);
     }
 
     public int getVoxel(int x, int y, int z)
@@ -220,11 +221,11 @@ public class VoxelVolume extends Solid {
         try {
             IndexedColorImage slice = data.get(z);
             return slice.getPixel(x, y);
-    }
-    catch ( Exception e ) {
-        //
-    }
-    return 0;
+        }
+        catch ( Exception e ) {
+            //
+        }
+        return 0;
     }
 
     /**
@@ -254,7 +255,7 @@ public class VoxelVolume extends Solid {
        el origen del rayo hasta el punto de interseccion mas cercano de todas las mallas.
      */
     public boolean doIntersection(Ray inOut_Ray) {
-    return false;
+        return false;
     }
 
     /**
@@ -264,7 +265,7 @@ public class VoxelVolume extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-    ;
+        ;
     }
 
     /**
@@ -301,7 +302,7 @@ public class VoxelVolume extends Solid {
                        minmax[2]-(greaterScale-sz)/2);
 
         M = T2.multiply(S.multiply(T1));
-    return M;
+        return M;
     }
 
     /**
@@ -309,27 +310,31 @@ public class VoxelVolume extends Solid {
     Solid.doCenterOfMass
     */
     public Vector3D doCenterOfMass() {
-    Vector3D cm, p;
+        Vector3D cm, p;
         cm = new Vector3D(0, 0, 0);
-    double mi; // Maximum mass of one voxel (linear to voxel density)
+        double mi; // Maximum mass of one voxel (linear to voxel density)
         double M = 0;  // Total mass for current voxel volume
-    int x, y, z;
+        int x, y, z;
 
-    for ( x = 0; x < getXSize(); x++ ) {
-          for ( y = 0; y < getYSize(); y++ ) {
-            for ( z = 0; z < getZSize(); z++ ) {
+        for ( x = 0; x < getXSize(); x++ ) {
+            for ( y = 0; y < getYSize(); y++ ) {
+                for ( z = 0; z < getZSize(); z++ ) {
                     // mi goes from 0 to 1
-                mi = (double)(getVoxel(x, y, z)) / 255.0;
-            M += mi;
-            p = getVoxelPosition(x, y, z);
+                    mi = (double)(getVoxel(x, y, z)) / 255.0;
+                    M += mi;
+                    p = getVoxelPosition(x, y, z);
                     cm.x += mi * p.x;
                     cm.y += mi * p.y;
                     cm.z += mi * p.z;
+                }
+            }
         }
-        }
-    }
 
-    return cm.multiply(1/M);
+        if ( Math.abs(M) < VSDK.EPSILON ) {
+            return new Vector3D(0, 0, 0);
+        }
+
+        return cm.multiply(1/M);
     }
 
 }

@@ -29,7 +29,6 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
-import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.IndexedColorImage;
@@ -90,10 +89,11 @@ public class DatasetControl
     [FUNK2003].4.2.
     */
     private static boolean processSphericalHarmonics(VoxelVolume vv,
-        int groupIndex, SphericalHarmonicShapeDescriptor featureVector)
+        int groupIndex, SphericalHarmonicShapeDescriptor featureVector,
+        Vector3D cm, double averageDistance)
     {
         // (r, tetha, phi)
-        double r = ((double)groupIndex) / 31.0;
+        double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
         double tetha, phi;
 
         Sphere sphere;
@@ -115,6 +115,7 @@ public class DatasetControl
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
                 p.setSphericalCoordinates(r, tetha, phi);
+                p = cm.add(p);
                 voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
                 if ( voxelValue < 128 ) {
                     texture.putPixel(s, t, (byte)255);
@@ -131,13 +132,14 @@ public class DatasetControl
         }
 
         //-----------------------------------------------------------------
+    //ImagePersistence.exportJPG(new File("sphere"+(100+groupIndex)+".jpg"),
+        //    texture);
         return true;
     }
 
     /**
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
-    @todo change transformation strategy to that described at [FUNK2003].4.1.
     */
     public static GeometryMetadata analyzeModel(String filename)
     {
@@ -146,6 +148,8 @@ public class DatasetControl
         int i, R;
         VoxelVolume vv;
         Geometry referenceGeometry;
+        Vector3D cm; // Center of mass for vv, in VoxelVolume coordinates
+    int x, y, z;
 
         vv = new VoxelVolume();
         // Spherical harmonic bandwitdh config. as defined at [FUNK2003].4.1.
@@ -155,7 +159,7 @@ public class DatasetControl
 
         GeometryMetadata metadata = new GeometryMetadata();
         things = new ArrayList<SimpleBody>();
-        System.out.println("Analizing model " + filename);
+        System.out.println("Analyzing model " + filename);
         try {
             File fd = new File(filename);
             EnvironmentPersistence.importEnvironment(fd,
@@ -169,7 +173,6 @@ public class DatasetControl
                 //- Calculate transform matrix --------------------------------
                 double minmax[] = referenceGeometry.getMinMax();
                 // Transform from voxelspace to geometry minmax space
-// TODO:
                 Matrix4x4 M;
                 M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
 
@@ -178,11 +181,33 @@ public class DatasetControl
                 referenceGeometry.doVoxelization(vv, M, reporter);
             }
 
+            //- Calculate average distance from nonzero voxels to cm ----------
+            // This accounts for scale normalization as in [FUNK2003].4.1.
+            cm = vv.doCenterOfMass();
+        int numberOfNonZeroVoxels = 0;
+        double d; // Distance between a given voxel and center of mass
+        Vector3D p; // Position of voxel
+            double averageDistance = 0;
+
+            for ( x = 0; x < vv.getXSize(); x++ ) {
+                for ( y = 0; y < vv.getYSize(); y++ ) {
+                    for ( z = 0; z < vv.getZSize(); z++ ) {
+                        if ( vv.getVoxel(x, y, z) != 0 ) {
+                            p = vv.getVoxelPosition(x, y, z);
+                averageDistance += VSDK.vectorDistance(cm, p);
+                numberOfNonZeroVoxels++;
+            }
+                    }
+                }
+            }
+        averageDistance /= (double)numberOfNonZeroVoxels;
+
             //- Spherical harmonic shape descriptor extraction ------------
             SphericalHarmonicShapeDescriptor featureVector;
             featureVector = new SphericalHarmonicShapeDescriptor();
             for ( i = 0; i < 32; i++ ) {
-                if ( !processSphericalHarmonics(vv, i, featureVector) ) {
+                if ( !processSphericalHarmonics(vv, i, featureVector, cm,
+                          averageDistance) ) {
                     System.err.println("Error processing spherical harmonics.");
                     return null;
                 }

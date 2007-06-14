@@ -88,6 +88,7 @@ public class JoglDrawingArea implements
 
     public boolean wantToGetColor;
     public boolean wantToGetDepth;
+    public boolean wantToGetContourns;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -154,6 +155,7 @@ public class JoglDrawingArea implements
 
         wantToGetColor = false;
         wantToGetDepth = false;
+        wantToGetContourns = false;
     }
 
     private void createCursors()
@@ -261,7 +263,20 @@ public class JoglDrawingArea implements
     private void copyZBufferIfNeeded(GL gl)
     {
         if ( wantToGetDepth ) {
-            parent.zbufferImage = JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(parent.palette);
+        if ( wantToGetContourns ) {
+        IndexedColorImage zbuffer;
+        NormalMap nm;
+        zbuffer = JoglZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+        nm = new NormalMap();
+        nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
+                parent.zbufferImage = nm.exportToRgbImageGradient();
+          }
+          else {
+                parent.zbufferImage =
+                    JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
+                        parent.palette);
+        }
+
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
             }
@@ -271,6 +286,7 @@ public class JoglDrawingArea implements
             parent.imageControlWindow.redrawImage();
             parent.statusMessage.setText("ZBuffer depth map obtained!");
             wantToGetDepth = false;
+            wantToGetContourns = false;
         }
     }
 

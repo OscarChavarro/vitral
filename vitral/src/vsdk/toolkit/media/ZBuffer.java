@@ -10,6 +10,7 @@ package vsdk.toolkit.media;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -122,6 +123,31 @@ public class ZBuffer extends MediaEntity {
     public void setZ(int x, int y, float v) {
         int pos = (xSize * y) + x;
         depth[pos] = v;
+    }
+
+    /**
+    This method converts this Z buffer into an RGBImage using the specified
+    ColorPalette
+    @param p The color palete used to convert this z buffer into an RGBImage
+    @return An RGBAImage that represents this z buffer
+    */
+    public IndexedColorImage exportIndexedColorImage() {
+        IndexedColorImage image = new IndexedColorImage();
+        image.init(xSize, ySize);
+        int pos = 0;
+    int val;
+
+        for (int y = 0; y <image.getYSize(); y++) {
+            for (int x = 0; x < image.getXSize(); x++) {
+                float f = depth[pos];
+                if ( f < 0.0 ) f = 0.0f;
+                if ( f > 1.0 ) f = 1.0f;
+        val = (int)(f * 255.0);
+                image.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(val));
+                pos++;
+            }
+        }
+        return image;
     }
 
     /**

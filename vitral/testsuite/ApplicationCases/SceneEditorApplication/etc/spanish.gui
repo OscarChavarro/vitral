@@ -316,6 +316,10 @@ COMMAND IDC_RENDERING_OBTAINZBUFFERIMAGE {
     name "Obtener imagen (ZBuffer)"
 }
 
+COMMAND IDC_RENDERING_OBTAINCONTOURNS {
+    name "Obtener contornos"
+}
+
 COMMAND IDC_RENDERING_RAYTRACING {
     name "Visualizar usando trazado de rayos (Raytracing)"
 }
@@ -412,6 +416,7 @@ BUTTON_GROUP "RENDER" {
         IDC_RENDERING_SELECTPALETTEDEPTH,
         IDC_RENDERING_OBTAINZBUFFERDEPTHMAP,
         IDC_RENDERING_OBTAINZBUFFERIMAGE,
+        IDC_RENDERING_OBTAINCONTOURNS,
         IDC_RENDERING_RAYTRACING
     }
 }
@@ -427,6 +432,8 @@ MESSAGES {
         "En espera del cálculo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ..."
     IDM_PENDING_ZBUFFER_DEPTH,
         "En espera del cálculo de la matriz de profundidad (ZBuffer) ..."
+    IDM_PENDING_CONTOURNS,
+        "Calculando contornos ..."
     IDM_COMPUTING_RAYTRACING,
         "Calculando raytracing, puede durar algún tiempo ..."
     IDM_CAMERA_MODE,

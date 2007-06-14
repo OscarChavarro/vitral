@@ -9,7 +9,7 @@ package vsdk.toolkit.processing;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.io.PersistenceElement;
 
-public class SpharmonicKitWrapper {
+public class SpharmonicKitWrapper extends ProcessingElement {
 
     static boolean loaded = false;
 

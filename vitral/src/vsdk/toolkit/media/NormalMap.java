@@ -150,6 +150,42 @@ public class NormalMap extends MediaEntity
         return output;
     }
 
+    /**
+    Similar to exportToRgbImage, but each pixel is equivalent to a magnitude
+    of displacement from <0, 0, 1> normal
+    */
+    public RGBImage exportToRgbImageGradient()
+    {
+        RGBImage output = new RGBImage();
+
+        if ( !output.init(xSize, ySize) ) {
+            return null;
+        }
+
+        int x, y;
+        Vector3D n;
+    int val;
+        byte col;
+    Vector3D k = new Vector3D(0, 0, 1);
+
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                n = getNormal(x, y);
+                n.normalize();
+
+                n.x = (n.x+1)/2;
+                n.y = (n.y+1)/2;
+                n.z = (n.z+1)/2;
+
+                val = (int)(k.dotProduct(n) * 255.0);
+                col = VSDK.unsigned8BitInteger2signedByte(val);
+
+                output.putPixel(x, y, col, col, col);
+            }
+        }
+        return output;
+    }
+
     public void importBumpMap(IndexedColorImage inBumpmap, Vector3D inOutScale)
     {
         //-------------------------------------------------------------------

@@ -271,3 +271,5 @@ Changes in 2007 may 23 revition
 Changes in 2007 may 24 revition
   - Spherical harmonics feature vector shape descriptor modified to have
     spheres centered at object center of mass (not geometric center)
+  - Normalmap gradient technique for generating contourns drawings (from
+    Zbuffer) incorporated into SceneEditorApplication

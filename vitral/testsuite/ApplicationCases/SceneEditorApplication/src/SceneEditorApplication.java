@@ -484,7 +484,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         int voxelValue;
         Vector3D p = new Vector3D();
     Vector3D pos;
-    Vector3D scale;
+    Vector3D scale, cm2;
         Matrix4x4 S = new Matrix4x4();
 
         sphere = new Sphere(r);
@@ -494,8 +494,8 @@ class ButtonsPanel extends JPanel implements ActionListener
     S.scale(scale.x, scale.y, scale.z);
     scale = scale.multiply(r);
         body.setScale(scale);
-    cm = S.multiply(cm);
-    pos = voxelBody.getPosition().add(cm);
+    cm2 = S.multiply(cm);
+    pos = voxelBody.getPosition().add(cm2);
         body.setPosition(pos);
 
         texture = new RGBAImage();
@@ -509,7 +509,7 @@ class ButtonsPanel extends JPanel implements ActionListener
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
                 p.setSphericalCoordinates(r, tetha, phi);
-        p = p.add(cm);
+        p = cm.add(p);
                 voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
                 if ( voxelValue < 128 ) {
                     texture.putPixel(s, t, (byte)255, (byte)255, (byte)255, (byte)0);
@@ -814,6 +814,12 @@ class ButtonsPanel extends JPanel implements ActionListener
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
             parent.drawingArea.wantToGetDepth = true;
+        }
+        else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_PENDING_CONTOURNS"));
+            parent.drawingArea.wantToGetDepth = true;
+            parent.drawingArea.wantToGetContourns = true;
         }
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
             parent.statusMessage.setText(

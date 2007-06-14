@@ -370,6 +370,10 @@ COMMAND IDC_RENDERING_OBTAINZBUFFERIMAGE {
     name "Obtain Zbuffer Image"
 }
 
+COMMAND IDC_RENDERING_OBTAINCONTOURNS {
+    name "Obtain contourns"
+}
+
 COMMAND IDC_RENDERING_RAYTRACING {
     name "Raytrace Scene"
 }
@@ -464,6 +468,7 @@ BUTTON_GROUP "RENDER" {
         IDC_RENDERING_SELECTPALETTEDEPTH,
         IDC_RENDERING_OBTAINZBUFFERDEPTHMAP,
         IDC_RENDERING_OBTAINZBUFFERIMAGE,
+        IDC_RENDERING_OBTAINCONTOURNS,
         IDC_RENDERING_RAYTRACING
     }
 }
@@ -479,6 +484,8 @@ MESSAGES {
         "Pending to obtaining ZBuffer Color Image ..."
     IDM_PENDING_ZBUFFER_DEPTH,
         "Pending to obtaining ZBuffer Depth ..."
+    IDM_PENDING_CONTOURNS,
+        "Pending to calculate contourns ..."
     IDM_COMPUTING_RAYTRACING,
         "Computing raytracing, this may take some time ..."
     IDM_CAMERA_MODE,
