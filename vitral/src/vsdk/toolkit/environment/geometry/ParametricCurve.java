@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 
@@ -575,6 +576,40 @@ public class ParametricCurve extends Curve {
         return minmax;
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    @todo Check efficiency for this implementation. Note that for the
+    special application of volume rendering generation, it is better
+    to provide another method, to add voxels after a path following
+    over the line.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+        int i, j;
+    Vector3D vec;
+
+        for ( i = 1; i < types.size(); i++ ) {
+            if ( types.get(i).intValue() == BREAK ) {
+                i++;
+                continue;
+            }
+
+            // Build a polyline for approximating the [i] curve segment
+            ArrayList polyline = calculatePoints(i, false);
+
+            // Solve problem for the polyline
+            for ( j = 0; j < polyline.size(); j++ ) {
+                vec = (Vector3D) polyline.get(j);
+                if ( VSDK.vectorDistance(vec, p) < distanceTolerance ) {
+            return LIMIT;
+        }
+            }
+        }
+
+
+    return OUTSIDE;
+    }
 }
 
 //===========================================================================

@@ -70,6 +70,9 @@ public class InfinitePlane extends HalfSpace {
         return true;
     }
 
+    /**
+    @deprecated
+    */
     public int classifyPoint(Vector3D p) {
         return classifyPoint(p.x, p.y, p.z);
     }
@@ -82,6 +85,7 @@ public class InfinitePlane extends HalfSpace {
     -1 if point is inside the plane.
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.
+    @deprecated
     */
     public int classifyPoint(double x, double y, double z) {
         double num = a*x + b*y + c*z + d;
@@ -94,6 +98,24 @@ public class InfinitePlane extends HalfSpace {
             op = -1;
         }
         return op;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+        double num = a*p.x + b*p.y + c*p.z + d;
+        int op = LIMIT;
+
+        if( num > distanceTolerance ) {
+            op = OUTSIDE;
+        }
+        else if( num < -distanceTolerance ) {
+            op = -INSIDE;
+        }
+        return op;    
     }
 
     /**
@@ -135,6 +157,29 @@ public class InfinitePlane extends HalfSpace {
     public double getD()
     {
         return d;
+    }
+
+    public void setNormal(Vector3D n)
+    {
+        n.normalize();
+        a = n.x;
+    b = n.y;
+    c = n.z;
+    }
+
+    public void setD(double d)
+    {
+    this.d = d;
+    }
+
+    /**
+    Given a plane normal and a point in the plane, this method updates
+    current plane to fit that spec.
+    */
+    public void setFromPointNormal(Vector3D p, Vector3D n)
+    {
+        setNormal(n);
+        setD(-(n.x*p.x + n.y*p.y + n.z*p.z));
     }
 }
 

@@ -210,9 +210,34 @@ public class TriangleMeshGroup extends Surface {
     }
 
     public int[] doIntersectionInformation()
-        {
-            return intersectionInformation;
+    {
+        return intersectionInformation;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    @todo Check efficiency for this implementation. Note that for the
+    special application of volume rendering generation, it is better
+    to provide another method, to add voxels after a path following
+    over the line.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+    TriangleMesh mesh;
+    int status;
+    int i;
+
+        // Chain of responsability behavior design pattern with TriangleMesh
+        for ( i= 0; i< meshes.size(); i++ ) {
+            mesh = meshes.get(i);
+            status = mesh.doContainmentTest(p, distanceTolerance);
+            if ( status != OUTSIDE ) {
+                return status;
         }
+    }
+    return OUTSIDE;
+    }
 
     /**
     Provides an object to text report convertion, optimized for human

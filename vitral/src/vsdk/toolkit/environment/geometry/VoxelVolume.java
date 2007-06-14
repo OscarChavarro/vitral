@@ -99,9 +99,9 @@ public class VoxelVolume extends Solid {
     public Vector3D getVoxelPosition(int x, int y, int z)
     {
         Vector3D p = new Vector3D();
-        p.x = ((double)x) / ((double)getXSize())*2 - 1;
-        p.y = ((double)y) / ((double)getYSize())*2 - 1;
-        p.z = ((double)z) / ((double)getZSize())*2 - 1;
+        p.x = ((double)x+0.5) / ((double)getXSize())*2 - 1;
+        p.y = ((double)y+0.5) / ((double)getYSize())*2 - 1;
+        p.z = ((double)z+0.5) / ((double)getZSize())*2 - 1;
     return p;
     }
 

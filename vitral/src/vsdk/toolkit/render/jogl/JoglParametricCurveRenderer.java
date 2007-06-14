@@ -38,7 +38,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     static public void draw(GL gl, ParametricCurve curve, 
                             Camera c, RendererConfiguration q,
                             ColorRgb color) {
-        int i;
+        int i, j;
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
         gl.glDisable(GL.GL_LIGHTING);
 
@@ -55,7 +55,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
             // Draw the polyline
             gl.glBegin(GL.GL_LINE_STRIP);
-            for ( int j = 0; j < polyline.size(); j++ ) {
+            for ( j = 0; j < polyline.size(); j++ ) {
                 Vector3D vec = (Vector3D) polyline.get(j);
                 gl.glVertex3d(vec.x, vec.y, vec.z);
             }

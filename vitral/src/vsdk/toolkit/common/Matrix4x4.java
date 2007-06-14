@@ -199,6 +199,23 @@ public class Matrix4x4 extends FundamentalEntity
 
     /**
      This method calculates new values for current matrix to make it represent
+     a scale matrix. The matrix is similar to an identity matrix, with
+     recieved values in place to make the matrix a scale one.
+     @param sx The scale factor in the x axis
+     @param sy The scale factor in the y axis
+     @param sz The scale factor in the z axis
+     */
+    public void
+    scale(double sx, double sy, double sz)
+    {
+        M[0][0]=sx;  M[0][1]=0.0; M[0][2]=0.0; M[0][3]=0.0;
+        M[1][0]=0.0; M[1][1]=sy;  M[1][2]=0.0; M[1][3]=0.0;
+        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=sz;  M[2][3]=0.0;
+        M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
+    }
+
+    /**
+     This method calculates new values for current matrix to make it represent
      a translation matrix. The position of translation for the matrix is the
      one indicated by the recieved vector.
      @param T A Vector3D that contains a position to calculate the 

@@ -135,6 +135,10 @@ G                igual respecto al c&oacute;digo original de MIT.
         //-----------------------------------------------------------------
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    */
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         double l = p.length();

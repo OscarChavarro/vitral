@@ -449,7 +449,7 @@ class ButtonsPanel extends JPanel implements ActionListener
         return m;
     }
 
-    private void addThing(Geometry g)
+    private SimpleBody addThing(Geometry g)
     {
         SimpleBody thing;
 
@@ -464,6 +464,7 @@ class ButtonsPanel extends JPanel implements ActionListener
 
         acumObject++;
         parent.theScene.selectedThings.sync();
+        return thing;
     }
 
     public void actionPerformed(ActionEvent ev) {
@@ -503,23 +504,79 @@ class ButtonsPanel extends JPanel implements ActionListener
             addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
+            //-----------------------------------------------------------------
+            int selectedThing = parent.theScene.selectedThings.firstSelected();
+            Geometry referenceGeometry = null;
+
+            if ( selectedThing < 0 ) {
+                referenceGeometry = new Sphere(0.5);
+            }
+            else {
+                referenceGeometry = parent.theScene.things.get(selectedThing).getGeometry();
+            }
+
+            //-----------------------------------------------------------------
+            Matrix4x4 S, T1, T2;
+            Matrix4x4 M; // Transform from voxelspace to geometry minmax space
+            Vector3D transformedP;
+            double minmax[] = referenceGeometry.getMinMax();
+            double greaterScale, sx, sy, sz;
+
+            sx = minmax[3]-minmax[0];
+            sy = minmax[4]-minmax[1];
+            sz = minmax[5]-minmax[2];
+            greaterScale = sx;
+            if ( sy > greaterScale ) {
+                greaterScale = sy;
+            }
+            if ( sz > greaterScale ) {
+                greaterScale = sz;
+            }
+
+            S = new Matrix4x4();
+            S.scale(greaterScale/2, greaterScale/2, greaterScale/2);
+
+            T1 = new Matrix4x4();
+            T1.translation(1, 1, 1);
+            T2 = new Matrix4x4();
+            T2.translation(minmax[0]-(greaterScale-sx)/2,
+                           minmax[1]-(greaterScale-sy)/2,
+                           minmax[2]-(greaterScale-sz)/2);
+
+            M = T2.multiply(S.multiply(T1));
+
+            //-----------------------------------------------------------------
             VoxelVolume vv = new VoxelVolume();
-            int nx = 64, ny = 64, nz = 64;
+            int containmentStatus;
+            int nx = 64, ny = 64, nz = 64, nmax;
             int x, y, z;
             Vector3D p = new Vector3D();
+
+            nmax = nx;
+            if ( ny > nmax ) nmax = ny;
+            if ( nz > nmax ) nmax = nz;
 
             vv.init(nx, ny, nz);
             for ( x = 0; x < nx; x++ ) {
                 for ( y = 0; y < ny; y++ ) {
                     for ( z = 0; z < nz; z++ ) {
                         p = vv.getVoxelPosition(x, y, z);
-                        if ( p.length() > 0.9 && p.length() < 1 ) {
+                        transformedP = M.multiply(p);
+                        containmentStatus =
+                            referenceGeometry.doContainmentTest(
+                                transformedP, (2/((double)nmax) * greaterScale));
+                        if ( containmentStatus == referenceGeometry.INSIDE ||
+                             containmentStatus == referenceGeometry.LIMIT ) {
                             vv.putVoxel(x, y, z, (byte)-1);
                         }
                     }
                 }
             }
-            addThing(vv);
+            SimpleBody thing = addThing(vv);
+            Vector3D pos = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
+            thing.setPosition(pos);
+            Vector3D size = new Vector3D(M.M[0][0], M.M[1][1], M.M[2][2]);
+            thing.setScale(size);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
             PolyhedralBoundedSolid brep =

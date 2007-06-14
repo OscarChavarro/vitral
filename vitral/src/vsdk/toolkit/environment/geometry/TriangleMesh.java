@@ -598,7 +598,7 @@ public class TriangleMesh extends Surface {
                 }
             }
         }
-    outData.texture = null;
+        outData.texture = null;
         if ( textureRanges != null ) {
             for ( int i = 0; i < textureRanges.length-1 ; i++ ) {
                 if ( selectedTriangle >= textureRanges[i][0] &&
@@ -608,6 +608,34 @@ public class TriangleMesh extends Surface {
                 }
             }
         }
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    @todo Check efficiency for this implementation. Note that for the
+    special application of volume rendering generation, it is better
+    to provide another method, to add voxels after a path following
+    over the line.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+        int i;
+        int status;
+
+        for ( i = 0; i < triangles.length; i++ ) {
+            status = ComputationalGeometry.triangleContainmentTest(
+                vertexes[triangles[i].p0].position,
+                vertexes[triangles[i].p1].position,
+                vertexes[triangles[i].p2].position,
+        p,
+                distanceTolerance);
+            if ( status != OUTSIDE ) {
+                return LIMIT;
+            }
+        }
+
+        return OUTSIDE;
     }
 
     /**
