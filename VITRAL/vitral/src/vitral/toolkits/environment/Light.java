@@ -16,16 +16,13 @@ public class Light
     public int tipo_de_luz;
     public Vector3D lvec;             // the position of a point light or
                                       // the direction to a directional light
-    public ColorRgb emissionColor;    // color of the light source
-    
     private ColorRgb ambient;
     private ColorRgb diffuse;
-    private ColorRgb specular;
+    private ColorRgb specular;         // Emission color of the light source
 
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
-        emissionColor=emission;
         if ( type != AMBIENTE ) {
             lvec = pos;
             if ( type == DIRECCIONAL ) 
@@ -35,7 +32,7 @@ public class Light
         }
         ambient=new ColorRgb(0,0,0);
         diffuse=new ColorRgb(1,1,1);
-        specular=new ColorRgb(1,1,1);
+        specular=emission;
     }
 
     public void setAmbient(ColorRgb a)
@@ -53,11 +50,6 @@ public class Light
         specular=new ColorRgb(s);
     }
     
-    public void setEmission(ColorRgb e)
-    {
-        emissionColor=new ColorRgb(e);
-    }
-    
     public ColorRgb getAmbient()
     {
         return new ColorRgb(ambient);
@@ -71,11 +63,6 @@ public class Light
     public ColorRgb getSpecular()
     {
         return new ColorRgb(specular);
-    }
-
-    public ColorRgb getEmission()
-    {
-        return new ColorRgb(emissionColor);
     }
 
 }
