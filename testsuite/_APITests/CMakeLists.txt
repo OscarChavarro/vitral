@@ -1,0 +1,10 @@
+
+IF(BUILD_JAI)
+  SUBDIRS(_JAIHelloWorld)
+ENDIF(BUILD_JAI)
+
+IF(BUILD_JOGL)
+  SUBDIRS(_JOGLHelloWorld _JOGLPbufferExample)
+ENDIF(BUILD_JOGL)
+
+# eof - CMakeLists.txt
