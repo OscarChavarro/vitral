@@ -1,0 +1,141 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - March 16 2006 - Oscar Chavarro: Original base version                 =
+//===========================================================================
+
+package vsdk.toolkit.gui;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.KeyEvent;
+
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Vector3D;
+
+public class ScaleGizmo extends Gizmo {
+
+  private Matrix4x4 T;
+
+  public void setTransformationMatrix(Matrix4x4 T)
+  {
+      this.T = T;
+  }
+
+  public Matrix4x4 getTransformationMatrix()
+  {
+      return T;
+  }
+
+  public boolean processMouseEventAwt(MouseEvent mouseEvent)
+  {
+      return false;
+  }
+
+  public boolean processKeyPressedEventAwt(KeyEvent keyEvent)
+  {
+      char unicode_id;
+      int keycode;
+      double deltaMov = 1.1;
+      boolean updateNeeded = false;
+
+      unicode_id = keyEvent.getKeyChar();
+      keycode = keyEvent.getKeyCode();
+
+      Vector3D s = new Vector3D(T.M[0][0], T.M[1][1], T.M[2][2]);
+
+      if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
+            switch ( unicode_id ) {
+              // Position
+              case 'x':
+                s.x /= deltaMov;
+                updateNeeded = true;
+                break;
+              case 'X':
+                s.x *= deltaMov;
+                updateNeeded = true;
+                break;
+              case 'y':
+                s.y /= deltaMov;
+                updateNeeded = true;
+                break;
+              case 'Y':
+                s.y *= deltaMov;
+                updateNeeded = true;
+                break;
+              case 'z':
+                s.z /= deltaMov;
+                updateNeeded = true;
+                break;
+              case 'Z':
+                s.z *= deltaMov;
+                updateNeeded = true;
+                break; 
+            }
+        }
+        else {
+            switch ( keycode ) {
+              case KeyEvent.VK_UP:
+              case KeyEvent.VK_RIGHT:
+                s.x *= deltaMov;
+                s.y *= deltaMov;
+                s.z *= deltaMov;
+                updateNeeded = true;
+                break;
+
+              case KeyEvent.VK_LEFT:
+              case KeyEvent.VK_DOWN:
+                s.x /= deltaMov;
+                s.y /= deltaMov;
+                s.z /= deltaMov;
+                updateNeeded = true;
+                break;
+            }
+      }
+
+      T.M[0][0] = s.x;
+      T.M[1][1] = s.y;
+      T.M[2][2] = s.z;
+
+      return updateNeeded;
+  }
+
+  public boolean processKeyReleasedEventAwt(KeyEvent mouseEvent)
+  {
+      return false;
+  }
+
+  public boolean processMousePressedEventAwt(MouseEvent e)
+  {
+      return false;
+  }
+
+  public boolean processMouseReleasedEventAwt(MouseEvent e)
+  {
+      return false;
+  }
+
+  public boolean processMouseClickedEventAwt(MouseEvent e)
+  {
+      return false;
+  }
+
+  public boolean processMouseMovedEventAwt(MouseEvent e)
+  {
+      return false;
+  }
+
+  public boolean processMouseDraggedEventAwt(MouseEvent e)
+  {
+      return false;
+  }
+
+  public boolean processMouseWheelEventAwt(MouseWheelEvent e)
+  {
+      return false;
+  }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
