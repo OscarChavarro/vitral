@@ -326,6 +326,9 @@ Changes in 2007 june 17 revition
   - Fine tunning of SearchEngineFor3DModels application and tests with the
     memory loaded database
 
+Changes in 2007 june 20 revition
+  - First SVN controlled version in orion.javeriana.edu.co
+
 TODO:
   - Implement OBHU technique
   - Add an ID for object in SearchEngineFor3DModels (primary key)
