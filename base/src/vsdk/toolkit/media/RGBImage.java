@@ -175,42 +175,42 @@ public class RGBImage extends Image
     public RGBImage clone()
     {
         RGBImage copy;
-    int xSize = getXSize();
-    int ySize = getYSize();
-    int x, y;
+        int xSize = getXSize();
+        int ySize = getYSize();
+        int x, y;
 
         copy = new RGBImage();
-    copy.init(xSize, ySize);
-    for ( x = 0; x < xSize; x++ ) {
-          for ( y = 0; y < ySize; y++ ) {
-        copy.putPixel(x, y, getPixel(x, y));
+        copy.init(xSize, ySize);
+        for ( x = 0; x < xSize; x++ ) {
+            for ( y = 0; y < ySize; y++ ) {
+                copy.putPixel(x, y, getPixel(x, y));
+            }
         }
-    }
-    return copy;
+        return copy;
     }
 
     /** Returns a copy of current image in its own memory */
     public RGBAImage cloneToRgba()
     {
         RGBAImage copy;
-    int xSize = getXSize();
-    int ySize = getYSize();
-    int x, y;
-    RGBPixel source;
-    RGBAPixel target = new RGBAPixel();
+        int xSize = getXSize();
+        int ySize = getYSize();
+        int x, y;
+        RGBPixel source;
+        RGBAPixel target = new RGBAPixel();
 
         copy = new RGBAImage();
-    copy.init(xSize, ySize);
-    for ( x = 0; x < xSize; x++ ) {
-          for ( y = 0; y < ySize; y++ ) {
-        source = getPixel(x, y);
-        target.r = source.r;
-        target.g = source.g;
-        target.b = source.b;
-        copy.putPixel(x, y, target);
+        copy.init(xSize, ySize);
+        for ( x = 0; x < xSize; x++ ) {
+            for ( y = 0; y < ySize; y++ ) {
+                source = getPixel(x, y);
+                target.r = source.r;
+                target.g = source.g;
+                target.b = source.b;
+                copy.putPixel(x, y, target);
+            }
         }
-    }
-    return copy;
+        return copy;
     }
 
 }

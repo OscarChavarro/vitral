@@ -52,7 +52,7 @@ Java_vsdk_toolkit_processing_SpharmonicKitWrapper_executeSphericalHarmonics(
     jdoubleArray outSphericalHarmonicsI)
 {
     /*-----------------------------------------------------------------*/
-    FILE *textFd;
+    /*FILE *textFd;*/
     int i, bw, size;
     double *rdata, *idata, *rresult, *iresult;
     double *workspace, *disk_array;

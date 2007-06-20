@@ -69,7 +69,7 @@ public class WireframeOfflineExample {
 
     public void display() {
         TriangleMesh mesh = null;
-    int i;
+        int i;
         Vertex[] arrVertexes;
         Triangle[] arrTriangles;
         int t;

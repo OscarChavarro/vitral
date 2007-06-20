@@ -27,11 +27,11 @@ public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
         Image texture;
         Vector3D scale;
         Vector3D p;
-    int i;
+        int i;
         SimpleBody gi;
-    RendererConfiguration internalQuality;
+        RendererConfiguration internalQuality;
 
-    internalQuality = q.clone();
+        internalQuality = q.clone();
         internalQuality.setSelectionCorners(false);
         internalQuality.setBoundingVolume(false);
 
@@ -39,7 +39,7 @@ public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
         sublist = b.getBodies();
 
         gl.glPushMatrix();
-    p = b.getPosition();
+        p = b.getPosition();
         gl.glTranslated(p.x, p.y, p.z);
         JoglMatrixRenderer.activate(gl, b.getRotation());
         scale = b.getScale();
@@ -52,10 +52,10 @@ public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
 
         if ( q.isSelectionCornersSet() ) {
             JoglGeometryRenderer.drawSelectionCorners(gl, b.getMinMax(), q);
-    }
+        }
         if ( q.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, b.getMinMax(), q);
-    }
+        }
         gl.glPopMatrix();
 
     }

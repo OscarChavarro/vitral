@@ -58,7 +58,7 @@ public class ComputationalGeometry extends ProcessingElement
         double d;
         Vector3D a, b;
         Vector3D lineVector = p1.substract(p0);
-    Vector3D pointVector = p.substract(p0);
+        Vector3D pointVector = p.substract(p0);
 
         double denominator = lineVector.length();
         if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
@@ -70,10 +70,10 @@ public class ComputationalGeometry extends ProcessingElement
 
         if ( d <= distanceTolerance ) {
             double t = pointVector.dotProduct(lineVector) / lineVector.length();
-        if ( t < 0 || t > 1 ) return Geometry.OUTSIDE;
+            if ( t < 0 || t > 1 ) return Geometry.OUTSIDE;
 
             return Geometry.LIMIT;
-    }
+        }
         return Geometry.OUTSIDE;
     }
 

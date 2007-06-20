@@ -55,12 +55,12 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
         _PolyhedralBoundedSolidLoop parentLoop,
         PolyhedralBoundedSolid parentSolid)
     {
-    startingVertex = v;
-    this.parentLoop = parentLoop;
-    parentEdge = null;
+        startingVertex = v;
+        this.parentLoop = parentLoop;
+        parentEdge = null;
 
         id = currentId;
-    currentId++;
+        currentId++;
     }
 
     /**
@@ -70,7 +70,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     {
         parentLoop.halfEdgesList.locateWindowAtElem(this);
         parentLoop.halfEdgesList.previous();
-    return parentLoop.halfEdgesList.getWindow();
+        return parentLoop.halfEdgesList.getWindow();
     }
 
     /**
@@ -80,21 +80,21 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     {
         parentLoop.halfEdgesList.locateWindowAtElem(this);
         parentLoop.halfEdgesList.next();
-    return parentLoop.halfEdgesList.getWindow();
+        return parentLoop.halfEdgesList.getWindow();
     }
 
     private int
     determineSideness()
     {
         if ( parentEdge == null ) {
-        return NO_SIDE;
-    }
+            return NO_SIDE;
+        }
         if ( this == parentEdge.leftHalf ) {
             return LEFT_SIDE;
-    }
-    else if ( this == parentEdge.rightHalf ) {
+        }
+        else if ( this == parentEdge.rightHalf ) {
             return RIGHT_SIDE;
-    }
+        }
         return NO_SIDE;
     }
 
@@ -120,23 +120,23 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
         msg = "HalfEdge id " + id + ". Parent face " + parentLoop.parentFace.id + ". ";
         if ( parentEdge == null ) {
             msg = msg + "without parent edge. ";
-      }
-      else {
-        msg = msg + "with parent edge ";
-            if ( this == parentEdge.leftHalf ) {
-        msg = msg + "(left side)";
-          }
-          else if ( this == parentEdge.rightHalf ) {
-        msg = msg + "(right side)";
           }
           else {
-        msg = msg + "(INCONSISTENT!)";
-          }
+            msg = msg + "with parent edge ";
+            if ( this == parentEdge.leftHalf ) {
+                msg = msg + "(left side)";
+              }
+              else if ( this == parentEdge.rightHalf ) {
+                msg = msg + "(right side)";
+              }
+              else {
+                msg = msg + "(INCONSISTENT!)";
+              }
             ;
             msg = msg + ". ";
-    }
-    msg = msg + "Starting at vertex " + startingVertex.id + ". ";
-    msg = msg + "Next halfedge: " + next().id + ".";
+        }
+        msg = msg + "Starting at vertex " + startingVertex.id + ". ";
+        msg = msg + "Next halfedge: " + next().id + ".";
         return msg;
     }
 }

@@ -39,12 +39,15 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
-
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.io.image.ImagePersistence;
 
 class _Reader3dsMaterialMapping extends PersistenceElement
 {
     public String materialName;
+    public String textureFilename;
     public int associatedTriangles[];
 }
 
@@ -71,12 +74,46 @@ class _Reader3dsChunk extends PersistenceElement
     public static final int ID_MATERIAL_SHININESS_KTE   = 0xA041;
     public static final int ID_MATERIAL_TRANSPARENCY    = 0xA050;
     public static final int ID_MATERIAL_TRANSPARENCY_F  = 0xA052;
+    public static final int ID_MATERIAL_TRANSPARENCYADD = 0xA083;
+    public static final int ID_MATERIAL_FACEMAP         = 0xA088;
     public static final int ID_MATERIAL_TRANSPARENCY_FI = 0xA08A;
+    public static final int ID_MATERIAL_WIRETHICKNESS   = 0xA08E;
     public static final int ID_MATERIAL_REFLECT_BLUR    = 0xA053;
     public static final int ID_MATERIAL_TWOSIDED        = 0xA081;
+    public static final int ID_MATERIAL_WIREON          = 0xA085;
     public static final int ID_MATERIAL_WIRE_THICKNESS  = 0xA087;
     public static final int ID_MATERIAL_SOFTEN          = 0xA08C;
     public static final int ID_MATERIAL_TYPE            = 0xA100;
+    public static final int ID_MATERIAL_TEXTURE1        = 0xA200;
+    public static final int ID_MATERIAL_TEXTURE1MASK    = 0xA33E;
+    public static final int ID_MATERIAL_TEXTURE2        = 0xA33A;
+    public static final int ID_MATERIAL_TEXTURE2MASK    = 0xA340;
+    public static final int ID_MATERIAL_MAPREFLECTION   = 0xA220;
+    public static final int ID_MATERIAL_MAPREFLECTIONM  = 0xA34C;
+    public static final int ID_MATERIAL_MAPSELFIL       = 0xA33D;
+    public static final int ID_MATERIAL_MAPSELFILMASK   = 0xA34A;
+    public static final int ID_MATERIAL_AUTOREFLECTION  = 0xA310;
+    public static final int ID_MATERIAL_BUMPMAP         = 0xA230;
+    public static final int ID_MATERIAL_BUMPMAPMASK     = 0xA344;
+    public static final int ID_MATERIAL_MAPOPACITY      = 0xA210;
+    public static final int ID_MATERIAL_MAPOPACITYMASK  = 0xA342;
+    public static final int ID_MATERIAL_MAPSPECULAR     = 0xA204;
+    public static final int ID_MATERIAL_MAPSPECULARMASK = 0xA348;
+    public static final int ID_MATERIAL_MAPSHINE        = 0xA33C;
+    public static final int ID_MATERIAL_MAPSHINEMASK    = 0xA346;
+    public static final int ID_MATERIAL_MAPFILENAME     = 0xA300;
+    public static final int ID_MATERIAL_MAPOPTIONS      = 0xA351;
+    public static final int ID_MATERIAL_MAPFILTERBLUR   = 0xA353;
+    public static final int ID_MATERIAL_MAP1USCALE      = 0xA354;
+    public static final int ID_MATERIAL_MAP1VSCALE      = 0xA356;
+    public static final int ID_MATERIAL_MAPUOFFSET      = 0xA358;
+    public static final int ID_MATERIAL_MAPVOFFSET      = 0xA35A;
+    public static final int ID_MATERIAL_MAPROTANGLE     = 0xA35C;
+    public static final int ID_MATERIAL_MAPTINT1A       = 0xA360;
+    public static final int ID_MATERIAL_MAPTINT2A       = 0xA362;
+    public static final int ID_MATERIAL_MAPTINT1R       = 0xA364;
+    public static final int ID_MATERIAL_MAPTINT1G       = 0xA366;
+    public static final int ID_MATERIAL_MAPTINT1B       = 0xA368;
     public static final int ID_OBJECT_BLOCK             = 0x4000;
     public static final int ID_TRIANGLE_MESH            = 0x4100;
     public static final int ID_VERTEX_LIST              = 0x4110;
@@ -145,10 +182,78 @@ class _Reader3dsChunk extends PersistenceElement
     public static final int ID_KEYFRAMER_OBJUNKNOWN_05  = 0xB022;
 
     // Unknown ids
-    public static final int ID_UNKNOWN_01               = 0x3d3e;
-    public static final int ID_UNKNOWN_02               = 0xA084;
+    public static final int ID_UNKNOWN_01               = 0x0000;
+    public static final int ID_UNKNOWN_02               = 0x000E;
     public static final int ID_UNKNOWN_03               = 0x0031;
-    public static final int ID_UNKNOWN_04               = 0x1460;
+    public static final int ID_UNKNOWN_04               = 0x003C;
+    public static final int ID_UNKNOWN_05               = 0x003F;
+    public static final int ID_UNKNOWN_06               = 0x0040;
+    public static final int ID_UNKNOWN_07               = 0x0068;
+    public static final int ID_UNKNOWN_08               = 0x0074;
+    public static final int ID_UNKNOWN_09               = 0x00BE;
+    public static final int ID_UNKNOWN_10               = 0x00C0;
+    public static final int ID_UNKNOWN_11               = 0x00D3;
+    public static final int ID_UNKNOWN_12               = 0x0182;
+    public static final int ID_UNKNOWN_13               = 0x0402;
+    public static final int ID_UNKNOWN_14               = 0x042C;
+    public static final int ID_UNKNOWN_15               = 0x0500;
+    public static final int ID_UNKNOWN_16               = 0x0800;
+    public static final int ID_UNKNOWN_17               = 0x0A46;
+    public static final int ID_UNKNOWN_18               = 0x0B00;
+    public static final int ID_UNKNOWN_19               = 0x0E70;
+    public static final int ID_UNKNOWN_20               = 0x1101;
+    public static final int ID_UNKNOWN_21               = 0x1301;
+    public static final int ID_UNKNOWN_22               = 0x1410;
+    public static final int ID_UNKNOWN_23               = 0x1430;
+    public static final int ID_UNKNOWN_24               = 0x1440;
+    public static final int ID_UNKNOWN_25               = 0x1460;
+    public static final int ID_UNKNOWN_26               = 0x1470;
+    public static final int ID_UNKNOWN_27               = 0x1734;
+    public static final int ID_UNKNOWN_28               = 0x2301;
+    public static final int ID_UNKNOWN_29               = 0x2303;
+    public static final int ID_UNKNOWN_30               = 0x3238;
+    public static final int ID_UNKNOWN_31               = 0x334B;
+    public static final int ID_UNKNOWN_32               = 0x3D3E;
+    public static final int ID_UNKNOWN_33               = 0x3ECC;
+    public static final int ID_UNKNOWN_34               = 0x3F19;
+    public static final int ID_UNKNOWN_35               = 0x3F80;
+    public static final int ID_UNKNOWN_36               = 0x4010;
+    public static final int ID_UNKNOWN_37               = 0x4011;
+    public static final int ID_UNKNOWN_38               = 0x4012;
+    public static final int ID_UNKNOWN_39               = 0x4014;
+    public static final int ID_UNKNOWN_40               = 0x4015;
+    public static final int ID_UNKNOWN_41               = 0x4016;
+    public static final int ID_UNKNOWN_42               = 0x4017;
+    public static final int ID_UNKNOWN_43               = 0x4181;
+    public static final int ID_UNKNOWN_44               = 0x4182;
+    public static final int ID_UNKNOWN_45               = 0x4190;
+    public static final int ID_UNKNOWN_46               = 0x41FA;
+    public static final int ID_UNKNOWN_47               = 0x434E;
+    public static final int ID_UNKNOWN_48               = 0x4650;
+    public static final int ID_UNKNOWN_49               = 0x5DDC;
+    public static final int ID_UNKNOWN_50               = 0x6769;
+    public static final int ID_UNKNOWN_51               = 0x8000;
+    public static final int ID_UNKNOWN_52               = 0xA080;
+    public static final int ID_UNKNOWN_53               = 0xA082;
+    public static final int ID_UNKNOWN_54               = 0xA084;
+    public static final int ID_UNKNOWN_55               = 0xA240;
+    public static final int ID_UNKNOWN_56               = 0xA250;
+    public static final int ID_UNKNOWN_57               = 0xA320;
+    public static final int ID_UNKNOWN_58               = 0xA321;
+    public static final int ID_UNKNOWN_59               = 0xA322;
+    public static final int ID_UNKNOWN_60               = 0xA324;
+    public static final int ID_UNKNOWN_61               = 0xA325;
+    public static final int ID_UNKNOWN_62               = 0xA326;
+    public static final int ID_UNKNOWN_63               = 0xA328;
+    public static final int ID_UNKNOWN_64               = 0xA32A;
+    public static final int ID_UNKNOWN_65               = 0xA32C;
+    public static final int ID_UNKNOWN_66               = 0xA32D;
+    public static final int ID_UNKNOWN_67               = 0xAE6C;
+    public static final int ID_UNKNOWN_68               = 0xC82A;
+    public static final int ID_UNKNOWN_69               = 0xD567;
+    public static final int ID_UNKNOWN_70               = 0xDE49;
+    public static final int ID_UNKNOWN_71               = 0xE759;
+    public static final int ID_UNKNOWN_72               = 0xEC04;
 
     //=======================================================================
     public static String
@@ -193,6 +298,9 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_MATERIAL_TRANSPARENCY:
             chunkname = "ID_MATERIAL_TRANSPARENCY";
             break;
+          case ID_MATERIAL_TRANSPARENCYADD:
+            chunkname = "ID_MATERIAL_TRANSPARENCYADD";
+            break;
           case ID_MATERIAL_TRANSPARENCY_F:
             chunkname = "ID_MATERIAL_TRANSPARENCY_F";
             break;
@@ -202,8 +310,17 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_MATERIAL_REFLECT_BLUR:
             chunkname = "ID_MATERIAL_REFLECT_BLUR";
             break;
+          case ID_MATERIAL_WIRETHICKNESS:
+            chunkname = "ID_MATERIAL_WIRETHICKNESS";
+            break;
+          case ID_MATERIAL_FACEMAP:
+            chunkname = "ID_MATERIAL_FACEMAP";
+            break;
           case ID_MATERIAL_TWOSIDED:
             chunkname = "ID_MATERIAL_TWOSIDED";
+            break;
+          case ID_MATERIAL_WIREON:
+            chunkname = "ID_MATERIAL_WIREON";
             break;
           case ID_MATERIAL_WIRE_THICKNESS:
             chunkname = "ID_MATERIAL_WIRE_THICKNESS";
@@ -213,6 +330,69 @@ class _Reader3dsChunk extends PersistenceElement
             break;
           case ID_MATERIAL_TYPE:
             chunkname = "ID_MATERIAL_TYPE";
+            break;
+          case ID_MATERIAL_TEXTURE1:
+            chunkname = "ID_MATERIAL_TEXTURE1";
+            break;
+          case ID_MATERIAL_TEXTURE1MASK:
+            chunkname = "ID_MATERIAL_TEXTURE1MASK";
+            break;
+          case ID_MATERIAL_TEXTURE2:
+            chunkname = "ID_MATERIAL_TEXTURE2";
+            break;
+          case ID_MATERIAL_TEXTURE2MASK:
+            chunkname = "ID_MATERIAL_TEXTURE2MASK";
+            break;
+          case ID_MATERIAL_MAPREFLECTION:
+            chunkname = "ID_MATERIAL_MAPREFLECTION";
+            break;
+          case ID_MATERIAL_MAPREFLECTIONM:
+            chunkname = "ID_MATERIAL_MAPREFLECTIONM";
+            break;
+          case ID_MATERIAL_MAPSELFIL:
+            chunkname = "ID_MATERIAL_MAPSELFIL";
+            break;
+          case ID_MATERIAL_MAPSELFILMASK:
+            chunkname = "ID_MATERIAL_MAPSELFILMASK";
+            break;
+          case ID_MATERIAL_MAPFILENAME:
+            chunkname = "ID_MATERIAL_MAPFILENAME";
+            break;
+          case ID_MATERIAL_MAPOPTIONS:
+            chunkname = "ID_MATERIAL_MAPOPTIONS";
+            break;
+          case ID_MATERIAL_MAPFILTERBLUR:
+            chunkname = "ID_MATERIAL_MAPFILTERBLUR";
+            break;
+          case ID_MATERIAL_MAPUOFFSET:
+            chunkname = "ID_MATERIAL_MAPUOFFSET";
+            break;
+          case ID_MATERIAL_MAPVOFFSET:
+            chunkname = "ID_MATERIAL_MAPVOFFSET";
+            break;
+          case ID_MATERIAL_MAP1USCALE:
+            chunkname = "ID_MATERIAL_MAP1USCALE";
+            break;
+          case ID_MATERIAL_MAP1VSCALE:
+            chunkname = "ID_MATERIAL_MAP1VSCALE";
+            break;
+          case ID_MATERIAL_MAPROTANGLE:
+            chunkname = "ID_MATERIAL_MAPROTANGLE";
+            break;
+          case ID_MATERIAL_MAPTINT1A:
+            chunkname = "ID_MATERIAL_MAPTINT1A";
+            break;
+          case ID_MATERIAL_MAPTINT2A:
+            chunkname = "ID_MATERIAL_MAPTINT2A";
+            break;
+          case ID_MATERIAL_MAPTINT1R:
+            chunkname = "ID_MATERIAL_MAPTINT1R";
+            break;
+          case ID_MATERIAL_MAPTINT1G:
+            chunkname = "ID_MATERIAL_MAPTINT1G";
+            break;
+          case ID_MATERIAL_MAPTINT1B:
+            chunkname = "ID_MATERIAL_MAPTINT1B";
             break;
           case ID_OBJECT_BLOCK:
             chunkname = "ID_OBJECT_BLOCK";
@@ -406,18 +586,103 @@ class _Reader3dsChunk extends PersistenceElement
           case ID_KEYFRAMER_OBJUNKNOWN_05:
             chunkname = "ID_KEYFRAMER_OBJUNKNOWN_05";
             break;
-          case ID_UNKNOWN_01:
-            chunkname = "ID_UNKNOWN_01";
+          case ID_MATERIAL_MAPSHINE:    chunkname = "ID_MATERIAL_MAPSHINE";    break;
+          case ID_MATERIAL_MAPSHINEMASK:
+            chunkname = "ID_MATERIAL_MAPSHINEMASK";
             break;
-          case ID_UNKNOWN_02:
-            chunkname = "ID_UNKNOWN_02";
+          case ID_MATERIAL_AUTOREFLECTION:
+            chunkname = "ID_MATERIAL_AUTOREFLECTION";
             break;
-          case ID_UNKNOWN_03:
-            chunkname = "ID_UNKNOWN_03";
+          case ID_MATERIAL_BUMPMAP:
+            chunkname = "ID_MATERIAL_BUMPMAP";
             break;
-          case ID_UNKNOWN_04:
-            chunkname = "ID_UNKNOWN_04";
+          case ID_MATERIAL_BUMPMAPMASK:
+            chunkname = "ID_MATERIAL_BUMPMAPMASK";
             break;
+          case ID_MATERIAL_MAPOPACITY:
+            chunkname = "ID_MATERIAL_MAPOPACITY";
+            break;
+          case ID_MATERIAL_MAPOPACITYMASK:
+            chunkname = "ID_MATERIAL_MAPOPACITYMASK";
+            break;
+          case ID_MATERIAL_MAPSPECULAR:
+            chunkname = "ID_MATERIAL_MAPSPECULAR";
+            break;
+          case ID_MATERIAL_MAPSPECULARMASK:
+            chunkname = "ID_MATERIAL_MAPSPECULARMASK";
+            break;
+          case ID_UNKNOWN_01:    chunkname = "ID_UNKNOWN_01";    break;
+          case ID_UNKNOWN_02:    chunkname = "ID_UNKNOWN_02";    break;
+          case ID_UNKNOWN_03:    chunkname = "ID_UNKNOWN_03";    break;
+          case ID_UNKNOWN_04:    chunkname = "ID_UNKNOWN_04";    break;
+          case ID_UNKNOWN_05:    chunkname = "ID_UNKNOWN_05";    break;
+          case ID_UNKNOWN_06:    chunkname = "ID_UNKNOWN_06";    break;
+          case ID_UNKNOWN_07:    chunkname = "ID_UNKNOWN_07";    break;
+          case ID_UNKNOWN_08:    chunkname = "ID_UNKNOWN_08";    break;
+          case ID_UNKNOWN_09:    chunkname = "ID_UNKNOWN_09";    break;
+          case ID_UNKNOWN_10:    chunkname = "ID_UNKNOWN_10";    break;
+          case ID_UNKNOWN_11:    chunkname = "ID_UNKNOWN_11";    break;
+          case ID_UNKNOWN_12:    chunkname = "ID_UNKNOWN_12";    break;
+          case ID_UNKNOWN_13:    chunkname = "ID_UNKNOWN_13";    break;
+          case ID_UNKNOWN_14:    chunkname = "ID_UNKNOWN_14";    break;
+          case ID_UNKNOWN_15:    chunkname = "ID_UNKNOWN_15";    break;
+          case ID_UNKNOWN_16:    chunkname = "ID_UNKNOWN_16";    break;
+          case ID_UNKNOWN_17:    chunkname = "ID_UNKNOWN_17";    break;
+          case ID_UNKNOWN_18:    chunkname = "ID_UNKNOWN_18";    break;
+          case ID_UNKNOWN_19:    chunkname = "ID_UNKNOWN_19";    break;
+          case ID_UNKNOWN_20:    chunkname = "ID_UNKNOWN_20";    break;
+          case ID_UNKNOWN_21:    chunkname = "ID_UNKNOWN_21";    break;
+          case ID_UNKNOWN_22:    chunkname = "ID_UNKNOWN_22";    break;
+          case ID_UNKNOWN_23:    chunkname = "ID_UNKNOWN_23";    break;
+          case ID_UNKNOWN_24:    chunkname = "ID_UNKNOWN_24";    break;
+          case ID_UNKNOWN_25:    chunkname = "ID_UNKNOWN_25";    break;
+          case ID_UNKNOWN_26:    chunkname = "ID_UNKNOWN_26";    break;
+          case ID_UNKNOWN_27:    chunkname = "ID_UNKNOWN_27";    break;
+          case ID_UNKNOWN_28:    chunkname = "ID_UNKNOWN_28";    break;
+          case ID_UNKNOWN_29:    chunkname = "ID_UNKNOWN_29";    break;
+          case ID_UNKNOWN_30:    chunkname = "ID_UNKNOWN_30";    break;
+          case ID_UNKNOWN_31:    chunkname = "ID_UNKNOWN_31";    break;
+          case ID_UNKNOWN_32:    chunkname = "ID_UNKNOWN_32";    break;
+          case ID_UNKNOWN_33:    chunkname = "ID_UNKNOWN_33";    break;
+          case ID_UNKNOWN_34:    chunkname = "ID_UNKNOWN_34";    break;
+          case ID_UNKNOWN_35:    chunkname = "ID_UNKNOWN_35";    break;
+          case ID_UNKNOWN_36:    chunkname = "ID_UNKNOWN_36";    break;
+          case ID_UNKNOWN_37:    chunkname = "ID_UNKNOWN_37";    break;
+          case ID_UNKNOWN_38:    chunkname = "ID_UNKNOWN_38";    break;
+          case ID_UNKNOWN_39:    chunkname = "ID_UNKNOWN_39";    break;
+          case ID_UNKNOWN_40:    chunkname = "ID_UNKNOWN_40";    break;
+          case ID_UNKNOWN_41:    chunkname = "ID_UNKNOWN_41";    break;
+          case ID_UNKNOWN_42:    chunkname = "ID_UNKNOWN_42";    break;
+          case ID_UNKNOWN_43:    chunkname = "ID_UNKNOWN_43";    break;
+          case ID_UNKNOWN_44:    chunkname = "ID_UNKNOWN_44";    break;
+          case ID_UNKNOWN_45:    chunkname = "ID_UNKNOWN_45";    break;
+          case ID_UNKNOWN_46:    chunkname = "ID_UNKNOWN_46";    break;
+          case ID_UNKNOWN_47:    chunkname = "ID_UNKNOWN_47";    break;
+          case ID_UNKNOWN_48:    chunkname = "ID_UNKNOWN_48";    break;
+          case ID_UNKNOWN_49:    chunkname = "ID_UNKNOWN_49";    break;
+          case ID_UNKNOWN_50:    chunkname = "ID_UNKNOWN_50";    break;
+          case ID_UNKNOWN_51:    chunkname = "ID_UNKNOWN_51";    break;
+          case ID_UNKNOWN_52:    chunkname = "ID_UNKNOWN_52";    break;
+          case ID_UNKNOWN_53:    chunkname = "ID_UNKNOWN_53";    break;
+          case ID_UNKNOWN_54:    chunkname = "ID_UNKNOWN_54";    break;
+          case ID_UNKNOWN_55:    chunkname = "ID_UNKNOWN_55";    break;
+          case ID_UNKNOWN_56:    chunkname = "ID_UNKNOWN_56";    break;
+          case ID_UNKNOWN_57:    chunkname = "ID_UNKNOWN_57";    break;
+          case ID_UNKNOWN_58:    chunkname = "ID_UNKNOWN_58";    break;
+          case ID_UNKNOWN_59:    chunkname = "ID_UNKNOWN_59";    break;
+          case ID_UNKNOWN_60:    chunkname = "ID_UNKNOWN_60";    break;
+          case ID_UNKNOWN_61:    chunkname = "ID_UNKNOWN_61";    break;
+          case ID_UNKNOWN_62:    chunkname = "ID_UNKNOWN_62";    break;
+          case ID_UNKNOWN_63:    chunkname = "ID_UNKNOWN_63";    break;
+          case ID_UNKNOWN_64:    chunkname = "ID_UNKNOWN_64";    break;
+          case ID_UNKNOWN_65:    chunkname = "ID_UNKNOWN_65";    break;
+          case ID_UNKNOWN_66:    chunkname = "ID_UNKNOWN_66";    break;
+          case ID_UNKNOWN_67:    chunkname = "ID_UNKNOWN_67";    break;
+          case ID_UNKNOWN_68:    chunkname = "ID_UNKNOWN_68";    break;
+          case ID_UNKNOWN_69:    chunkname = "ID_UNKNOWN_69";    break;
+          case ID_UNKNOWN_70:    chunkname = "ID_UNKNOWN_70";    break;
+          case ID_UNKNOWN_71:    chunkname = "ID_UNKNOWN_71";    break;
+          case ID_UNKNOWN_72:    chunkname = "ID_UNKNOWN_72";    break;
           default:
             byte a, b;
             a = (byte)((chunkid & 0xFF00) >> 8);
@@ -463,7 +728,7 @@ and data structures as described in [PITT1994], [FERC1996] and [VANV1997].
 
 @todo Perhaps "Reader3ds" is not the best name for this class, as in the
 future should support exporting (writing) operations. It could be renamed
-to something as "Persistence3ds".
+to something as "Persistence3ds". Some chunks are not being processed.
 */
 public class Reader3ds extends PersistenceElement
 {
@@ -471,14 +736,23 @@ public class Reader3ds extends PersistenceElement
     private static ArrayList<Vector3D> currentVertexPositionArray = null;
     private static ArrayList<_Reader3dsMaterialMapping> currentMaterialMappingArray = null;
     private static TriangleMesh currentTriangleMesh = null;
-    private static Triangle[] currentTrianglesList;
+    private static Triangle currentTrianglesList[] = null;
+    private static double currentUTextureMapping[] = null;
+    private static double currentVTextureMapping[] = null;
 
     // Current environment building elements
     private static Material currentBuildingMaterial = null;
+    private static String currentTextureFilename = null;
     private static ColorRgb currentColor = null;
     private static int currentAmount = 0;
     private static ArrayList<Material> currentMaterialArray = null;
+    private static ArrayList<String> currentTextureFilenamesArray = null;
     private static ArrayList<SimpleBody> currentSimpleBodiesArray = null;
+    private static String workingDirectory = null;
+
+    // Error reporting attributes
+    private static boolean bumpNotImplementedReported = false;
+    private static boolean t2NotImplementedReported = false;
 
     private static Material defaultMaterial()
     {
@@ -502,6 +776,45 @@ public class Reader3ds extends PersistenceElement
             }
         }
         return defaultMaterial();
+    }
+
+    private static int resolveMaterialIndex(String name)
+    {
+        int i;
+        Material m;
+
+        for ( i = 0; i < currentMaterialArray.size(); i++ ) {
+            m = currentMaterialArray.get(i);
+            if ( name.equals(m.getName()) ) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static Image loadImagefile(String imageFilename)
+    {
+        //-----------------------------------------------------------------
+        if ( imageFilename == null || imageFilename.length() < 1 ) {
+            return null;
+        }
+
+        //-----------------------------------------------------------------
+        RGBImage img = null;
+        String fullFilename = workingDirectory + "/" + imageFilename.toLowerCase();
+
+        try {
+            img = ImagePersistence.importRGB(new File(fullFilename));
+        }
+        catch (Exception e) {
+            System.err.println("Error: could not read the image file \"" + fullFilename + "\".");
+            System.err.println("Check you have access to that file from current working directory.");
+            System.err.println(e);
+            img = new RGBImage();
+            img.init(64, 64);
+            img.createTestPattern();
+        }
+        return img;
     }
 
     private static void addThing(Geometry g,
@@ -574,8 +887,20 @@ public class Reader3ds extends PersistenceElement
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY_FI) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_REFLECT_BLUR) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TWOSIDED) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_WIREON) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_WIRE_THICKNESS) ||
 (father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SOFTEN) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TEXTURE1) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TEXTURE2) ||
+(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_BUMPMAP) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_AMOUNT) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPOPTIONS) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPFILTERBLUR) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPUOFFSET) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPVOFFSET) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAP1USCALE) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAP1VSCALE) ||
+(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPFILENAME) ||
 (father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_MATERIAL_MAPPING_TABLE) ||
 (father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_SMOOTH_LIST) ||
 (father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_TRIANGLE_MESH) ||
@@ -583,6 +908,7 @@ public class Reader3ds extends PersistenceElement
 (father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_CAMERA) ||
 (father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_VERTEX_LIST) ||
 (father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_TRIANGLE_LIST) ||
+(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_MAP_LIST) ||
 (father.id == father.ID_MATERIAL_SHININESS_KTE && son.id == son.ID_AMOUNT) ||
 (father.id == father.ID_MATERIAL_SHININESS_EXP && son.id == son.ID_AMOUNT) ||
 (father.id == father.ID_MATERIAL_TRANSPARENCY && son.id == son.ID_AMOUNT) ||
@@ -605,10 +931,45 @@ public class Reader3ds extends PersistenceElement
         }
 
         if ( son.id == son.ID_UNKNOWN_01 || son.id == son.ID_UNKNOWN_02 ||
-             son.id == son.ID_UNKNOWN_03 || son.id == son.ID_UNKNOWN_04 ) {
+             son.id == son.ID_UNKNOWN_03 || son.id == son.ID_UNKNOWN_04 ||
+             son.id == son.ID_UNKNOWN_05 || son.id == son.ID_UNKNOWN_06 ||
+             son.id == son.ID_UNKNOWN_07 || son.id == son.ID_UNKNOWN_08 ||
+             son.id == son.ID_UNKNOWN_09 || son.id == son.ID_UNKNOWN_10 ||
+             son.id == son.ID_UNKNOWN_11 || son.id == son.ID_UNKNOWN_12 ||
+             son.id == son.ID_UNKNOWN_13 || son.id == son.ID_UNKNOWN_14 ||
+             son.id == son.ID_UNKNOWN_15 || son.id == son.ID_UNKNOWN_16 ||
+             son.id == son.ID_UNKNOWN_17 || son.id == son.ID_UNKNOWN_18 ||
+             son.id == son.ID_UNKNOWN_19 || son.id == son.ID_UNKNOWN_20 ||
+             son.id == son.ID_UNKNOWN_21 || son.id == son.ID_UNKNOWN_22 ||
+             son.id == son.ID_UNKNOWN_23 || son.id == son.ID_UNKNOWN_24 ||
+             son.id == son.ID_UNKNOWN_25 || son.id == son.ID_UNKNOWN_26 ||
+             son.id == son.ID_UNKNOWN_27 || son.id == son.ID_UNKNOWN_28 ||
+             son.id == son.ID_UNKNOWN_29 || son.id == son.ID_UNKNOWN_30 ||
+             son.id == son.ID_UNKNOWN_31 || son.id == son.ID_UNKNOWN_32 ||
+             son.id == son.ID_UNKNOWN_33 || son.id == son.ID_UNKNOWN_34 ||
+             son.id == son.ID_UNKNOWN_35 || son.id == son.ID_UNKNOWN_36 ||
+             son.id == son.ID_UNKNOWN_37 || son.id == son.ID_UNKNOWN_38 ||
+             son.id == son.ID_UNKNOWN_39 || son.id == son.ID_UNKNOWN_40 ||
+             son.id == son.ID_UNKNOWN_41 || son.id == son.ID_UNKNOWN_42 ||
+             son.id == son.ID_UNKNOWN_43 || son.id == son.ID_UNKNOWN_44 ||
+             son.id == son.ID_UNKNOWN_45 || son.id == son.ID_UNKNOWN_46 ||
+             son.id == son.ID_UNKNOWN_47 || son.id == son.ID_UNKNOWN_48 ||
+             son.id == son.ID_UNKNOWN_49 || son.id == son.ID_UNKNOWN_50 ||
+             son.id == son.ID_UNKNOWN_51 || son.id == son.ID_UNKNOWN_52 ||
+             son.id == son.ID_UNKNOWN_53 || son.id == son.ID_UNKNOWN_54 ||
+             son.id == son.ID_UNKNOWN_55 || son.id == son.ID_UNKNOWN_56 ||
+             son.id == son.ID_UNKNOWN_57 || son.id == son.ID_UNKNOWN_58 ||
+             son.id == son.ID_UNKNOWN_59 || son.id == son.ID_UNKNOWN_60 ||
+             son.id == son.ID_UNKNOWN_61 || son.id == son.ID_UNKNOWN_62 ||
+             son.id == son.ID_UNKNOWN_63 || son.id == son.ID_UNKNOWN_64 ||
+             son.id == son.ID_UNKNOWN_65 || son.id == son.ID_UNKNOWN_66 ||
+             son.id == son.ID_UNKNOWN_67 || son.id == son.ID_UNKNOWN_67 ||
+             son.id == son.ID_UNKNOWN_68 || son.id == son.ID_UNKNOWN_69 ||
+             son.id == son.ID_UNKNOWN_70 || son.id == son.ID_UNKNOWN_71 ||
+             son.id == son.ID_UNKNOWN_72 ) {
+            // WARNING: Not implemented features!
             return true;
         }
-
 
         VSDK.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.checkChunkHierarchy",
@@ -660,6 +1021,7 @@ public class Reader3ds extends PersistenceElement
                     new ArrayList<_Reader3dsMaterialMapping>();
             }
             if ( currentChunk.id == currentChunk.ID_MATERIAL ) {
+                currentTextureFilename = null;
                 currentBuildingMaterial = new Material();
                 currentBuildingMaterial.setDoubleSided(false);
             }
@@ -680,12 +1042,20 @@ public class Reader3ds extends PersistenceElement
             // Build operations postprocessing phase
             if ( currentChunk.id == currentChunk.ID_MATERIAL ) {
                 currentMaterialArray.add(currentBuildingMaterial);
+                currentTextureFilenamesArray.add(currentTextureFilename);
             }
             if ( currentChunk.id == currentChunk.ID_TRIANGLE_MESH ) {
                 // Vertex processing
                 Vertex v[] = new Vertex[currentVertexPositionArray.size()];
                 for ( i = 0; i < v.length; i++ ) {
                     v[i] = new Vertex(new Vector3D(currentVertexPositionArray.get(i)));
+                }
+                for ( i = 0;
+                      i < v.length && currentUTextureMapping != null &&
+                      i < currentUTextureMapping.length;
+                      i++ ) {
+                    v[i].u = currentUTextureMapping[i];
+                    v[i].v = currentVTextureMapping[i];
                 }
                 currentTriangleMesh.setVertexes(v);
 
@@ -703,30 +1073,74 @@ public class Reader3ds extends PersistenceElement
                 else {
                     Triangle newTrianglesList[];
                     Material newMaterials[];
-                    int newRanges[][];
-                    int j, k;
+                    Image newTextures[];
+                    int newMaterialRanges[][];
+                    int newTextureRanges[][];
+                    int j, k, textureIndex;
 
                     newTrianglesList = new Triangle[numMappedTriangles];
                     newMaterials =
                         new Material[currentMaterialMappingArray.size()];
-                    newRanges = new int[currentMaterialMappingArray.size()][2];
+                    newTextures = new Image[currentMaterialMappingArray.size()];
+                    newMaterialRanges = new int[currentMaterialMappingArray.size()][2];
+                    newTextureRanges = new int[currentMaterialMappingArray.size()][2];
 
                     for ( i = 0, k = 0; 
                           i < currentMaterialMappingArray.size(); i++ ) {
                         map_i = currentMaterialMappingArray.get(i);
                         newMaterials[i] = resolveMaterial(map_i.materialName);
+                        textureIndex = resolveMaterialIndex(map_i.materialName);
+                        if ( textureIndex >= 0 ) {
+                            newTextures[i] = loadImagefile(currentTextureFilenamesArray.get(textureIndex));
+                          }
+                          else {
+                            newTextures[i] = null;
+                        }
+
+                        // This is checkpoint A
+                        if ( newTrianglesList == null ) {
+                            VSDK.reportMessage(null, VSDK.WARNING,
+                            "Reader3ds.processChunk",
+                            "null newTriangleList at checkpoint A.");
+                        }
+                        if ( currentTrianglesList == null ) {
+                            VSDK.reportMessage(null, VSDK.WARNING,
+                            "Reader3ds.processChunk",
+                            "null currentTrianglesList at checkpoint A.");
+                        }
+
                         for ( j = 0; 
                               j < map_i.associatedTriangles.length; j++ ) {
+                            if ( k >= newTrianglesList.length ) {
+                                VSDK.reportMessage(null, VSDK.WARNING,
+                                "Reader3ds.processChunk",
+                                "k to large at checkpoint A.");
+                            }
+                            if ( map_i.associatedTriangles[j] >=
+                                 currentTrianglesList.length ) {
+                                VSDK.reportMessage(null, VSDK.WARNING,
+                                "Reader3ds.processChunk",
+                                "map to large at checkpoint A.");
+                            }
                             newTrianglesList[k] = 
                             currentTrianglesList[map_i.associatedTriangles[j]];
                             k++;
                         }
-                        newRanges[i][0] = k;
-                        newRanges[i][1] = i;
+                        newMaterialRanges[i][0] = k;
+                        newMaterialRanges[i][1] = i;
+                        newTextureRanges[i][0] = k;
+                        if ( newTextures[i] == null ) {
+                            newTextureRanges[i][1] = 0;
+                        }
+                        else {
+                            newTextureRanges[i][1] = i+1;
+                        }
                     }
                     currentTriangleMesh.setTriangles(newTrianglesList);
                     currentTriangleMesh.setMaterials(newMaterials);
-                    currentTriangleMesh.setMaterialRanges(newRanges);
+                    currentTriangleMesh.setTextures(newTextures);
+                    currentTriangleMesh.setMaterialRanges(newMaterialRanges);
+                    currentTriangleMesh.setTextureRanges(newTextureRanges);
                     currentTrianglesList = null;
                 }
 
@@ -836,6 +1250,10 @@ public class Reader3ds extends PersistenceElement
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             currentAmount = readIntLE(is);
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPFILENAME ) {
+            //-------------------------------------------------------------
+            currentTextureFilename = new String(readAsciiString(is));
         }
         else if ( currentChunk.id == currentChunk.ID_MATERIAL_SHININESS_KTE ) {
             //System.out.println(indent(level) + currentChunk);
@@ -998,6 +1416,86 @@ public class Reader3ds extends PersistenceElement
             }
             currentMaterialMappingArray.add(range);
         }
+        else if ( currentChunk.id == currentChunk.ID_MAP_LIST ) {
+            //-------------------------------------------------------------
+            int numVerticesUVMaps = readIntLE(is);
+            currentUTextureMapping = new double[numVerticesUVMaps];
+            currentVTextureMapping = new double[numVerticesUVMaps];
+            for ( i = 0; i < currentVTextureMapping.length; i++ ) {
+                currentUTextureMapping[i] = readFloatLE(is);
+                currentVTextureMapping[i] = readFloatLE(is);
+            }
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TEXTURE1 ) {
+            //-------------------------------------------------------------
+            // Prepare values
+            currentAmount = 0;
+
+            // Processing of recursive chunks
+            _Reader3dsChunk subChunk = new _Reader3dsChunk();
+            long internalBytes = 6; // Skip current chunk header
+            do {
+                subChunk.readHeader(is);
+                processChunk(is, subChunk, currentChunk, level+1);
+                internalBytes += subChunk.length;
+            } while ( is.available() > 0 && 
+                      (internalBytes < currentChunk.length) );
+
+            // Texture building
+            // Consider currentAmount
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_BUMPMAP ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            if ( !bumpNotImplementedReported ) {
+                VSDK.reportMessage(null, VSDK.WARNING,
+                           "Reader3ds.processChunk",
+                           "Chunk ID_MATERIAL_BUMPMAP not implemented! " +
+                           "Further error reporting disabled.");
+                bumpNotImplementedReported = true;
+            }
+            skipChunk = true;
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TEXTURE2 ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            if ( !t2NotImplementedReported ) {
+                VSDK.reportMessage(null, VSDK.WARNING,
+                           "Reader3ds.processChunk",
+                           "Chunk ID_MATERIAL_TEXTURE2 not implemented! " +
+                           "Further error reporting disabled.");
+                t2NotImplementedReported = true;
+            }
+            skipChunk = true;
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_WIREON ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPOPTIONS ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            int dummyOptions = readIntLE(is);
+            //System.out.println("Options: " + dummyOptions);
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPFILTERBLUR ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            double dummyBlur = readFloatLE(is);
+            //System.out.println("Blur: " + dummyBlur);
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPUOFFSET ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            double currentUOffset = readFloatLE(is);
+            //System.out.println("DU: " + currentUOffset);
+        }
+        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPVOFFSET ) {
+            //-------------------------------------------------------------
+            // WARNING: Not implemented feature!
+            double currentVOffset = readFloatLE(is);
+            //System.out.println("DV: " + currentVOffset);
+        }
         else {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk + " (skipped)");
@@ -1007,6 +1505,8 @@ public class Reader3ds extends PersistenceElement
 
         //-----------------------------------------------------------------
         if ( skipChunk ) {
+            VSDK.reportMessage(null, VSDK.WARNING, "Reader3ds.processChunk",
+                "Skipping chunk (" + (currentChunk.length - 6) + ").");
             is.skip(currentChunk.length - 6);
         }
 
@@ -1026,6 +1526,9 @@ public class Reader3ds extends PersistenceElement
 
         currentSimpleBodiesArray = inoutSimpleBodiesArray;
         currentMaterialArray = new ArrayList<Material>();
+        currentTextureFilenamesArray = new ArrayList<String>();
+
+        workingDirectory = inSceneFileFd.getParentFile().getAbsolutePath();
 
         //- Main level chunk hierarchy processing -------------------------
         chunk.readHeader(is);
@@ -1039,8 +1542,19 @@ public class Reader3ds extends PersistenceElement
 
         processChunk(is, chunk, null, 0);
 
-        //-----------------------------------------------------------------
+        //- Free resources and mark unused memory area for garbage collection
         is.close();
+        currentVertexPositionArray = null;
+        currentMaterialMappingArray = null;
+        currentTriangleMesh = null;
+        currentTrianglesList = null;
+        currentBuildingMaterial = null;
+        currentTextureFilename = null;
+        currentColor = null;
+        currentMaterialArray = null;
+        currentTextureFilenamesArray = null;
+        currentSimpleBodiesArray = null;
+        workingDirectory = null;
     }
 }
 

@@ -29,6 +29,9 @@ public class GeometryMetadata extends MediaEntity
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20070523L;
 
+    private static long lastId = 0;
+
+    private long id;
     private String objectFilename;
     private ArrayList<ShapeDescriptor> descriptorsList;
 
@@ -57,9 +60,9 @@ public class GeometryMetadata extends MediaEntity
         //-----------------------------------------------------------------
         for ( i = 0; i < this.descriptorsList.size(); i++ ) {
             aa = this.descriptorsList.get(i);
-        if ( aa.getLabel().equals(subGroup) ) {
+            if ( aa.getLabel().equals(subGroup) ) {
                 a = aa;
-        }
+            }
         }
         if ( a == null ) {
             return Double.MAX_VALUE;
@@ -68,9 +71,9 @@ public class GeometryMetadata extends MediaEntity
         //-----------------------------------------------------------------
         for ( i = 0; i < other.descriptorsList.size(); i++ ) {
             bb = other.descriptorsList.get(i);
-        if ( bb.getLabel().equals(subGroup) ) {
+            if ( bb.getLabel().equals(subGroup) ) {
                 b = bb;
-        }
+            }
         }
         if ( b == null ) {
             return Double.MAX_VALUE;
@@ -92,8 +95,21 @@ public class GeometryMetadata extends MediaEntity
 
     public GeometryMetadata()
     {
+        lastId++;
+        id = lastId;
         objectFilename = null;
         descriptorsList = new ArrayList<ShapeDescriptor>();
+    }
+
+    public void setId(long id)
+    {
+        this.id = id;
+	if ( lastId < id ) lastId = id;
+    }
+
+    public long getId()
+    {
+        return id;
     }
 
     public void setFilename(String filename)
@@ -125,6 +141,19 @@ public class GeometryMetadata extends MediaEntity
             msg += "        . " + descriptorsList.get(i).getClass().getName();
         }
         return msg;
+    }
+
+    public void finalize()
+    {
+        int i;
+        for ( i = 0; i < descriptorsList.size(); i++ ) {
+            descriptorsList.set(i, null);
+        }
+        for ( i = 0; descriptorsList.size() > 0; i++ ) {
+            descriptorsList.remove(0);
+        }
+        objectFilename = null;
+        descriptorsList = null;
     }
 }
 

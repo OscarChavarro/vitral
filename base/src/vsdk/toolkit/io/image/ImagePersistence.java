@@ -81,7 +81,7 @@ public class ImagePersistence extends PersistenceElement
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
-                  "cannot import image file");
+                                     "Cannot import image file \"" + imagen.getAbsolutePath() + "\"");
                 return null;
             }
             AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
@@ -106,13 +106,13 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static RGBImage importRGB(File imagen) throws ImageNotRecognizedException
+    public static RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException
     {
-        String type = extractExtensionFromFile(imagen);
+        String type = extractExtensionFromFile(inImageFd);
         RGBImage retImage = new RGBImage();
 
         if( type.equals("tga") ) {
-            TargaImage t = new TargaImage(imagen);
+            TargaImage t = new TargaImage(inImageFd);
 //PENDING
             return retImage;
         }
@@ -123,22 +123,22 @@ public class ImagePersistence extends PersistenceElement
             // OLD SLOW METHOD, DO NOT USE!
             //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
             //java.awt.Image image;
-            //image = awtTools.getImage(imagen.getAbsolutePath());
+            //image = awtTools.getImage(inImageFd.getAbsolutePath());
             //bi = toBufferedImage(image);
 
             try {
-                bi = ImageIO.read(imagen);
+                bi = ImageIO.read(inImageFd);
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
-                  "cannot import image file");
-                return null;
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+                 throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
             AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
         }
-        throw new ImageNotRecognizedException("Image not recognized", imagen);
+        throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
 
     /**
@@ -241,6 +241,50 @@ public class ImagePersistence extends PersistenceElement
 
     /**
     This method writes the contents of the specified image to a file in 
+    binary GIF image format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */    
+    public static boolean exportGIF(File fd, Image img)
+    {
+        try {
+            BufferedImage bimg;
+            int x, y, xSize, ySize;
+            RGBPixel p;
+
+            xSize = img.getXSize();
+            ySize = img.getYSize();
+            bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+            for ( y = 0; y < ySize; y++ ) {
+                for ( x = 0; x < xSize; x++ ) {
+                    p = img.getPixelRgb(x, y);
+                    bimg.setRGB(x, y, 
+                      (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.b))
+                    );
+                }
+            }
+
+            FileOutputStream fos = new FileOutputStream(fd);
+
+            ImageIO.write(bimg, "gif", fos);
+
+            // OLD DEPRECATED API, DO NOT USE!
+            //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+            //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
+            //jpeg.encode(bimg);
+
+            fos.close();
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
     binary RGB PPM format (i.e. P6 PNG sub-format). Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
@@ -249,7 +293,7 @@ public class ImagePersistence extends PersistenceElement
     {
         try {
             BufferedOutputStream writer;
-        FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos = new FileOutputStream(fd);
             writer = new BufferedOutputStream(fos);
 
             String linea1 = "P6\n";
@@ -277,7 +321,7 @@ public class ImagePersistence extends PersistenceElement
 
             writer.flush();
             writer.close();
-        fos.close();
+            fos.close();
         }
         catch (Exception e) {
             return false;

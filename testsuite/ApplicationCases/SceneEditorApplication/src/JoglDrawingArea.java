@@ -68,6 +68,8 @@ import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
+import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
@@ -101,7 +103,7 @@ public class JoglDrawingArea implements
     public boolean wantToDebugProjectedViews;
 
     private JoglProjectedViewRenderer projectedViewRenderer;
-    private JoglOfflineRenderer offlineRenderer;
+    private JoglShapeMatchingOfflineRenderer offlineRenderer;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -187,10 +189,10 @@ public class JoglDrawingArea implements
 
         if ( offlineRenderer == null ) {
             if ( doDistanceField ) {
-                offlineRenderer = new JoglOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
+                offlineRenderer = new JoglShapeMatchingOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
               }
               else {
-                offlineRenderer = new JoglOfflineRenderer(640, 640, projectedViewRenderer);
+                offlineRenderer = new JoglShapeMatchingOfflineRenderer(640, 640, projectedViewRenderer);
             }
         }
     }

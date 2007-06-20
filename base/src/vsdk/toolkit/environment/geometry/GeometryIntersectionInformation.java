@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.environment.geometry;
 
-import vsdk.toolkit.common.Entity;
+import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
@@ -16,7 +16,7 @@ import vsdk.toolkit.environment.Material;
 Note: contains public attributes so this structure is critical for various
 performance compute intensive algorithms.
 */
-public class GeometryIntersectionInformation extends Entity {
+public class GeometryIntersectionInformation extends FundamentalEntity {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
@@ -50,7 +50,7 @@ public class GeometryIntersectionInformation extends Entity {
 
     public GeometryIntersectionInformation(GeometryIntersectionInformation b) 
     {
-    clone(b);
+        clone(b);
     }
 
     public void clone(GeometryIntersectionInformation other)

@@ -199,6 +199,21 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void drawSurfacesWithoutTexture(GL gl, 
                                      TriangleMesh mesh, boolean flipNormals) {
+        //-----------------------------------------------------------------
+        // Warning: Shoult this be here? or not ...
+        // Just in case using external texture...
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+            gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+            gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+        gl.glTexParameterf(gl.GL_TEXTURE_2D,
+            gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+        gl.glTexParameterf(gl.GL_TEXTURE_2D,
+            gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+            gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+
+        //-----------------------------------------------------------------
         if ( mesh.getTriangles() == null ) {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "JoglTriangleMeshRenderer.activate",
@@ -227,11 +242,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             drawRangeWithoutTexture(gl, mesh, start, end, flipNormals);
             start = end;
         }
-    if ( end <= mesh.getTriangles().length ) {
+        if ( end <= mesh.getTriangles().length ) {
             Material m = new Material();
             JoglMaterialRenderer.activate(gl, m);
             drawRangeWithoutTexture(gl, mesh, start, mesh.getTriangles().length, flipNormals);
-    }
+        }
     }
 
     /**
@@ -379,28 +394,34 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             v1 = mesh.getVertexAt(mesh.getTriangleAt(i).p1);
             v2 = mesh.getVertexAt(mesh.getTriangleAt(i).p2);
 
+            //-----------------------------------------------------------------
             if ( !flipNormals ) {
                 gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
               }
               else {
                 gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
+            gl.glTexCoord2d(v0.u, v0.v);
             gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
 
+            //-----------------------------------------------------------------
             if ( !flipNormals ) {
                 gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
             }
             else {
                 gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
             }
+            gl.glTexCoord2d(v1.u, v1.v);
             gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
 
+            //-----------------------------------------------------------------
             if ( !flipNormals ) {
                 gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
               }
               else {
                 gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
             }
+            gl.glTexCoord2d(v2.u, v2.v);
             gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
         }
         gl.glEnd();

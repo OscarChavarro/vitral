@@ -109,7 +109,7 @@ public class CameraSwingExample extends Applet implements
 
         // Create application based GUI
         JFrame frame;
-    Dimension size;
+        Dimension size;
 
         instance.createGUI();
         frame = new JFrame("VITRAL concept test - Camera control example");
@@ -129,8 +129,8 @@ public class CameraSwingExample extends Applet implements
         appletMode = true;
         createModel();
         setLayout(new BorderLayout());
-    createGUI();
-    add("North", menubar);
+        createGUI();
+        add("North", menubar);
         add("Center", canvas);
         add("South", controls);
     }
@@ -287,7 +287,7 @@ public class CameraSwingExample extends Applet implements
             public void actionPerformed(ActionEvent e) {
                 if ( !appletMode ) {
                     System.exit(0);
-        }
+                }
             }});
 
         popup.getPopupMenu().setLightWeightPopupEnabled(false);

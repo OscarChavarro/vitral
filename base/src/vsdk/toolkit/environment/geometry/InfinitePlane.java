@@ -156,13 +156,13 @@ public class InfinitePlane extends HalfSpace {
     {
         n.normalize();
         a = n.x;
-    b = n.y;
-    c = n.z;
+        b = n.y;
+        c = n.z;
     }
 
     public void setD(double d)
     {
-    this.d = d;
+        this.d = d;
     }
 
     /**

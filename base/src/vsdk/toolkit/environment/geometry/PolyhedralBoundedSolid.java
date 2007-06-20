@@ -68,8 +68,8 @@ public class PolyhedralBoundedSolid extends Solid {
         verticesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
         minMax = null;
-    maxVertexId = -1;
-    maxFaceId = -1;
+        maxVertexId = -1;
+        maxFaceId = -1;
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -661,7 +661,7 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public int getMaxVertexId()
     {
-    return maxVertexId;
+        return maxVertexId;
     }
 
     /**
@@ -673,7 +673,7 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public int getMaxFaceId()
     {
-    return maxFaceId;
+        return maxFaceId;
     }
 
     public void

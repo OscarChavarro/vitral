@@ -62,7 +62,7 @@ public class ImagePersistenceSGI extends PersistenceElement
                     pos++;
                     if ( x >= img.getXSize() || pos >= length ) {
                         return;
-            }
+                    }
                     img.putPixel(x, y, buffer[pos]);
                     x++;
                 }
@@ -73,7 +73,7 @@ public class ImagePersistenceSGI extends PersistenceElement
                 for ( i = 0; i < count; i++ ) {
                     if ( x >= img.getXSize() || pos >= length ) {
                         return;
-            }
+                    }
                     img.putPixel(x, y, buffer[pos]);
                     x++;
                 }

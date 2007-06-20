@@ -135,14 +135,14 @@ public class ZBuffer extends MediaEntity {
         IndexedColorImage image = new IndexedColorImage();
         image.init(xSize, ySize);
         int pos = 0;
-    int val;
+        int val;
 
         for (int y = 0; y <image.getYSize(); y++) {
             for (int x = 0; x < image.getXSize(); x++) {
                 float f = depth[pos];
                 if ( f < 0.0 ) f = 0.0f;
                 if ( f > 1.0 ) f = 1.0f;
-        val = (int)(f * 255.0);
+                val = (int)(f * 255.0);
                 image.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(val));
                 pos++;
             }

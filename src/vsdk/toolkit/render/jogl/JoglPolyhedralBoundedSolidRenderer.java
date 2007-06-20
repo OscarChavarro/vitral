@@ -271,7 +271,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     draw(GL gl, PolyhedralBoundedSolid solid,
          Camera c, RendererConfiguration quality)
     {
-    draw(gl, solid, c, quality, -1);
+        draw(gl, solid, c, quality, -1);
     }
 
     public static void

@@ -109,8 +109,8 @@ public class jaitest extends JPanel implements KeyListener {
         for ( i = 0; i < uncut.getXSize(); i++ ) {
             for ( j = 0; j < uncut.getYSize(); j++ ) {
                 p = uncut.getPixelRgb(i, j);
-        ii = i-startX;
-        jj = j-startY;
+                ii = i-startX;
+                jj = j-startY;
                 if ( ii >= 0 && jj >= 0 &&
                      ii < processedImage.getXSize() &&
                      jj < processedImage.getYSize() ) {
@@ -205,18 +205,18 @@ public class jaitest extends JPanel implements KeyListener {
                 ImagePersistence.exportPPM(new File(namePattern + ".ppm"), processedImage);
                 try {
                     BufferedOutputStream writer;
-            byte arr[];
+                    byte arr[];
 
                     writer = new BufferedOutputStream(new FileOutputStream(new File(namePattern + ".log")));
                     String data = namePattern + "\t" + startX + "\t" + startY + "\t" + rotationAngle + "\n";
                     arr = data.getBytes();
-            writer.write(arr, 0, arr.length);
+                    writer.write(arr, 0, arr.length);
                     writer.flush();
                     writer.close();
-        }
-        catch ( Exception ex ) {
-            System.out.println("Error writing data!");
-        }
+                }
+                catch ( Exception ex ) {
+                    System.out.println("Error writing data!");
+                }
                 
                 break;
            }

@@ -58,6 +58,19 @@ public class SimpleBody extends Entity {
         globalNormalMap = null;
     }
 
+    public void finalize()
+    {
+        geometry = null;
+        position = null;
+        scale = null;
+        rotation = null;
+        rotation_i = null;
+        globalMaterial = null;
+        globalTextureMap = null;
+        globalNormalMap = null;
+        name = null;
+    }
+
     public String getName()
     {
         return name;
@@ -155,11 +168,11 @@ public class SimpleBody extends Entity {
 
     public Matrix4x4 getTransformationMatrix()
     {
-    Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
+        Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
         S.scale(scale);
         T.translation(position);
-    M = T.multiply(rotation.multiply(S));
-    return M;
+        M = T.multiply(rotation.multiply(S));
+        return M;
     }
 
     public void setScale(Vector3D s)

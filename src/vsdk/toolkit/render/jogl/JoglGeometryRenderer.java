@@ -176,7 +176,7 @@ public class JoglGeometryRenderer extends JoglRenderer
 
     public static void drawSelectionCorners(GL gl, Geometry g, RendererConfiguration q)
     {
-    drawSelectionCorners(gl, g.getMinMax(), q);
+        drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
     public static void draw(GL gl, Geometry g, Camera c, RendererConfiguration q)
@@ -206,9 +206,9 @@ public class JoglGeometryRenderer extends JoglRenderer
         else if ( g instanceof ParametricBiCubicPatch ) {
             JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
-    else if ( g instanceof PolyhedralBoundedSolid ) {
-        JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
-    }
+        else if ( g instanceof PolyhedralBoundedSolid ) {
+            JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
+        }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
         }

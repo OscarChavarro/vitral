@@ -46,7 +46,7 @@ public class JoglImageRenderer extends JoglRenderer
             VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.activate",
             "Image GL activation not implemented for subclass " + c);
         }
-    return -1;
+        return -1;
     }
 
     public static void draw(GL gl, Image img)

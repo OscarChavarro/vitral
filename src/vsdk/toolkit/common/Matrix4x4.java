@@ -373,17 +373,17 @@ public class Matrix4x4 extends FundamentalEntity
         for ( row = 0; row < 4; row++ ) {
             for ( column = 0; column < 4; column++ ) {
                 fillMinor(minor3x3, row, column);
-        if ( (row+column) % 2 == 0 ) {
+                if ( (row+column) % 2 == 0 ) {
                     sign = 1;
-        }
-        else {
+                }
+                else {
                     sign = -1;
-        }
+                }
                 N.M[row][column] =
                     sign*determinant3x3(minor3x3);
             }
         }
-    return N;
+        return N;
     }
 
     /**

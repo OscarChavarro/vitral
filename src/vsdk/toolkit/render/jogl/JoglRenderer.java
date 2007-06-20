@@ -68,9 +68,9 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !getNvidiaCgAvailability() ) {
             renderingWithNvidiaGpuFlag = false;
         }
-    else {
+        else {
             renderingWithNvidiaGpuFlag = requested;
-    }
+        }
         return renderingWithNvidiaGpuFlag;
     }
 
@@ -78,31 +78,31 @@ public abstract class JoglRenderer extends RenderingElement {
     bindNvidiaGpuShaders(CGprogram vertexShader, CGprogram pixelShader)
     {
         currentVertexShader = vertexShader;
-    currentPixelShader = pixelShader;
-    if ( currentVertexShader != null ) {
+        currentPixelShader = pixelShader;
+        if ( currentVertexShader != null ) {
             CgGL.cgGLBindProgram(currentVertexShader);
-    }
-    if ( currentPixelShader != null ) {
+        }
+        if ( currentPixelShader != null ) {
             CgGL.cgGLBindProgram(currentPixelShader);
-    }
+        }
     }
 
     public static CGparameter
     accessNvidiaGpuVertexParameter(String name)
     {
-    if ( currentVertexShader != null ) {
+        if ( currentVertexShader != null ) {
             return CgGL.cgGetNamedParameter(currentVertexShader, name);
-    }
-    return null;
+        }
+        return null;
     }
 
     public static CGparameter
     accessNvidiaGpuPixelParameter(String name)
     {
-    if ( currentPixelShader != null ) {
+        if ( currentPixelShader != null ) {
             return CgGL.cgGetNamedParameter(currentPixelShader, name);
-    }
-    return null;
+        }
+        return null;
     }
 
     public static boolean verifyOpenGLAvailability()

@@ -50,6 +50,24 @@ public class SimpleBodyGroup extends Entity {
         scale = new Vector3D(1, 1, 1);
     }
 
+    public void finalize()
+    {
+	int i;
+
+	for ( i = 0; i < bodies.size(); i++ ) {
+	    bodies.set(i, null);
+	}
+	while ( bodies.size() > 0 ) {
+	    bodies.remove(0);
+	}
+        bodies = null;
+        position = null;
+        scale = null;
+        rotation = null;
+        rotation_i = null;
+        name = null;
+    }
+
     public ArrayList <SimpleBody> getBodies()
     {
         return bodies;
@@ -117,11 +135,11 @@ public class SimpleBodyGroup extends Entity {
 
     public Matrix4x4 getTransformationMatrix()
     {
-    Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
+        Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
         S.scale(scale);
         T.translation(position);
-    M = T.multiply(rotation.multiply(S));
-    return M;
+        M = T.multiply(rotation.multiply(S));
+        return M;
     }
 
     /**

@@ -97,7 +97,7 @@ public class CameraExample extends Applet implements
 
         // Create application based GUI
         JFrame frame;
-    Dimension size;
+        Dimension size;
 
         instance.createGUI();
         frame = new JFrame("VITRAL concept test - Camera control example");
@@ -115,7 +115,7 @@ public class CameraExample extends Applet implements
         appletMode = true;
         createModel();
         setLayout(new BorderLayout());
-    createGUI();
+        createGUI();
         add("Center", canvas);
     }
     

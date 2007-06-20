@@ -380,8 +380,56 @@ public class TriangleMesh extends Surface {
     purposes.
     */
     public String toString() {
-        return ("TriangleMesh < #Triangles:" + triangles.length + 
-                            " - #Vertexes:" + vertexes.length + " >");
+        String msg;
+        int i;
+        double mm[];
+
+        mm = getMinMax();
+        Vector3D p;
+
+        msg = "- TriangleMesh ------------------------------------------------------------\n";
+        msg += "  - Number of triangles:" + triangles.length + "\n";
+        msg += "  - Number of vertexes:" + vertexes.length + "\n";
+        p = new Vector3D(mm[0], mm[1], mm[2]);
+        msg += "  - MINMAX: " + p;
+        p = new Vector3D(mm[3], mm[4], mm[5]);
+        msg += " - " + p + "\n";
+        if ( materials == null ) {
+            msg += "  - No materials available!\n";
+          }
+          else {
+            msg += "  - " + materials.length + " materials\n";
+        }
+
+        if ( materialRanges == null ) {
+            msg += "  - No material ranges association table available!\n";
+        }
+        else {
+            msg += "  - " + materialRanges.length + " material spans:\n";
+            for ( i = 0; i < materialRanges.length; i++ ) {
+                msg += "    . " + materialRanges[i][0] + " -> " + materialRanges[i][1] + "\n";
+            }
+        }
+
+        if ( textures == null ) {
+            msg += "  - No textures available!\n";
+          }
+          else {
+            msg += "  - " + textures.length + " textures\n";
+        }
+
+        if ( textureRanges == null ) {
+            msg += "  - No texture ranges association table available!\n";
+        }
+        else {
+            msg += "  - " + textureRanges.length + " texture spans:\n";
+            for ( i = 0; i < textureRanges.length; i++ ) {
+                msg += "    . " + textureRanges[i][0] + " -> " + textureRanges[i][1] + "\n";
+            }
+        }
+
+        msg += "---------------------------------------------------------------------------\n";
+        return msg;
     }
 
     /**
@@ -670,32 +718,32 @@ public class TriangleMesh extends Surface {
     doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {
         // The `*Geom` variables are in geometry space
-    Vector3D p0Geom, p1Geom, p2Geom;
+        Vector3D p0Geom, p1Geom, p2Geom;
         // The `*Volume` variables are in voxel space
         Vector3D p0Volume, p1Volume, p2Volume, minpVolume, maxpVolume, pVolume;
         // Voxel volume control
-    int minI, minJ, minK;
-    int maxI, maxJ, maxK;
-    int i, j, k;
+        int minI, minJ, minK;
+        int maxI, maxJ, maxK;
+        int i, j, k;
         // Structural algorithm control variables
         int t;
         int status;
         Matrix4x4 Minv = M.inverse();
-    double triangleMinmax[] = new double[6];
-    double distanceTolerance;
+        double triangleMinmax[] = new double[6];
+        double distanceTolerance;
 
         minpVolume = new Vector3D();
         maxpVolume = new Vector3D();
 
         for ( t = 0; t < triangles.length; t++ ) {
             // Process i-th triangle in mesh
-        p0Geom = vertexes[triangles[t].p0].position;
-        p1Geom = vertexes[triangles[t].p1].position;
-        p2Geom = vertexes[triangles[t].p2].position;
+            p0Geom = vertexes[triangles[t].p0].position;
+            p1Geom = vertexes[triangles[t].p1].position;
+            p2Geom = vertexes[triangles[t].p2].position;
             // Obtain triangle in voxel coordinates
-        p0Volume = Minv.multiply(p0Geom);
-        p1Volume = Minv.multiply(p1Geom);
-        p2Volume = Minv.multiply(p2Geom);
+            p0Volume = Minv.multiply(p0Geom);
+            p1Volume = Minv.multiply(p1Geom);
+            p2Volume = Minv.multiply(p2Geom);
             // Obtain triangle minmax
             ComputationalGeometry.triangleMinMax(p0Volume, p1Volume, p2Volume,
                                                  triangleMinmax);
@@ -705,28 +753,28 @@ public class TriangleMesh extends Surface {
             maxpVolume.x = triangleMinmax[3];
             maxpVolume.y = triangleMinmax[4];
             maxpVolume.z = triangleMinmax[5];
-        minI = vv.getNearestIFromX(minpVolume.x);
-        minJ = vv.getNearestJFromY(minpVolume.y);
-        minK = vv.getNearestKFromZ(minpVolume.z);
-        maxI = vv.getNearestIFromX(maxpVolume.x);
-        maxJ = vv.getNearestJFromY(maxpVolume.y);
-        maxK = vv.getNearestKFromZ(maxpVolume.z);
+            minI = vv.getNearestIFromX(minpVolume.x);
+            minJ = vv.getNearestJFromY(minpVolume.y);
+            minK = vv.getNearestKFromZ(minpVolume.z);
+            maxI = vv.getNearestIFromX(maxpVolume.x);
+            maxJ = vv.getNearestJFromY(maxpVolume.y);
+            maxK = vv.getNearestKFromZ(maxpVolume.z);
 
             // Rasterize triangle in voxel space
             distanceTolerance = 2.0 / (double)vv.getXSize();
-        for ( i = minI; i <= maxI; i++ ) {
-             for ( j = minJ; j <= maxJ; j++ ) {
-                for ( k = minK; k <= maxK; k++ ) {
+            for ( i = minI; i <= maxI; i++ ) {
+                for ( j = minJ; j <= maxJ; j++ ) {
+                    for ( k = minK; k <= maxK; k++ ) {
                         pVolume = vv.getVoxelPosition(i, j, k);
                         status = ComputationalGeometry.triangleContainmentTest(
                             p0Volume, p1Volume, p2Volume,
                             pVolume, distanceTolerance);
                         if ( status != OUTSIDE ) {
-                    vv.putVoxel(i, j, k, (byte)255);
+                            vv.putVoxel(i, j, k, (byte)255);
                         }
+                    }
+                }
             }
-        }
-        }
         }
 
     }

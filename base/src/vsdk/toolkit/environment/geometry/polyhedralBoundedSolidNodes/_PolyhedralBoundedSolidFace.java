@@ -72,17 +72,17 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1, int vn2)
     {
         _PolyhedralBoundedSolidLoop loop;
-    _PolyhedralBoundedSolidHalfEdge he;
-    int i;
+        _PolyhedralBoundedSolidHalfEdge he;
+        int i;
 
-    for ( i = 0; i < boundariesList.size(); i++ ) {
-        loop = boundariesList.get(i);
-        he = loop.halfEdgeVertices(vn1, vn2);
+        for ( i = 0; i < boundariesList.size(); i++ ) {
+            loop = boundariesList.get(i);
+            he = loop.halfEdgeVertices(vn1, vn2);
             if ( he != null ) {
-        return he;
+                return he;
+            }
         }
-    }
-    return null;
+        return null;
     }
 
     /**
@@ -92,17 +92,17 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1)
     {
         _PolyhedralBoundedSolidLoop loop;
-    _PolyhedralBoundedSolidHalfEdge he;
-    int i;
+        _PolyhedralBoundedSolidHalfEdge he;
+        int i;
 
-    for ( i = 0; i < boundariesList.size(); i++ ) {
-        loop = boundariesList.get(i);
-        he = loop.firstHalfEdgeAtVertex(vn1);
+        for ( i = 0; i < boundariesList.size(); i++ ) {
+            loop = boundariesList.get(i);
+            he = loop.firstHalfEdgeAtVertex(vn1);
             if ( he != null ) {
-        return he;
+                return he;
+            }
         }
-    }
-    return null;
+        return null;
     }
 
     public String toString()

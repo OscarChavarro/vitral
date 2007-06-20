@@ -65,7 +65,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         gl.glEnable(gl.GL_LIGHTING);
         gl.glShadeModel(gl.GL_SMOOTH);
 
-    int i;
+        int i;
         for ( i = 0; i < things.size(); i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();

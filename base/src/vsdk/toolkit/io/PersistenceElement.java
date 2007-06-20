@@ -92,9 +92,9 @@ public abstract class PersistenceElement {
         byte[] tmp = new byte[len];
 
         // Convert number to array
-    for ( i = 0; i < len; i++ ) {
+        for ( i = 0; i < len; i++ ) {
             tmp[i] = (byte)((num & (0xFF << 8*i)) >> 8*i);
-    }
+        }
 
         // Export subarray to end array
         int cnt;
@@ -110,9 +110,9 @@ public abstract class PersistenceElement {
         byte[] tmp = new byte[len];
 
         // Convert number to array
-    for ( i = 0; i < len; i++ ) {
+        for ( i = 0; i < len; i++ ) {
             tmp[len-i-1] = (byte)((num & (0xFF << 8*i)) >> 8*i);
-    }
+        }
 
         // Export subarray to end array
         int cnt;
@@ -158,9 +158,9 @@ public abstract class PersistenceElement {
         byte[] tmp = new byte[len];
 
         // Convert number to array
-    for ( i = 0; i < len; i++ ) {
+        for ( i = 0; i < len; i++ ) {
             tmp[i] = (byte)((num & (0xFF << 8*i)) >> 8*i);
-    }
+        }
 
         // Export subarray to end array
         int cnt;
@@ -176,9 +176,9 @@ public abstract class PersistenceElement {
         byte[] tmp = new byte[len];
 
         // Convert number to array
-    for ( i = 0; i < len; i++ ) {
+        for ( i = 0; i < len; i++ ) {
             tmp[len-i-1] = (byte)((num & (0xFF << 8*i)) >> 8*i);
-    }
+        }
 
         // Export subarray to end array
         int cnt;
@@ -361,8 +361,8 @@ public abstract class PersistenceElement {
     public static float readFloatBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForFloat);
-    long i = byteArray2longBE(bytesForFloat, 0);
-    int j = (int)i;
+        long i = byteArray2longBE(bytesForFloat, 0);
+        int j = (int)i;
         return Float.intBitsToFloat(j);
     }
 
@@ -371,6 +371,26 @@ public abstract class PersistenceElement {
     {
         float2byteArrayBE(bytesForFloat, 0, num);
         writeBytes(os, bytesForFloat);
+    }
+
+    public static void writeLongBE(OutputStream os, long num)
+        throws Exception
+    {
+        if ( bigEndianArchitecture ) {
+            long2byteArrayDirect(bytesForLong, 0, num);
+        }
+        long2byteArrayInvert(bytesForLong, 0, num);
+        writeBytes(os, bytesForLong);
+    }
+
+    public static void writeLongLE(OutputStream os, long num)
+        throws Exception
+    {
+        if ( bigEndianArchitecture ) {
+            long2byteArrayInvert(bytesForLong, 0, num);
+        }
+        long2byteArrayDirect(bytesForLong, 0, num);
+        writeBytes(os, bytesForLong);
     }
 
     public static String readAsciiString(InputStream is) throws Exception

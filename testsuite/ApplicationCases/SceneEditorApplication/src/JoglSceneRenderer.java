@@ -120,11 +120,11 @@ public class JoglSceneRenderer
                 quality.setSelectionCorners(false);
             }
             ggi = s.debugThingGroups.get(i);
-         if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
+            if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
                 gl.glDisable(gl.GL_DEPTH_TEST);
-        }
+            }
             JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
-        gl.glEnable(gl.GL_DEPTH_TEST);
+            gl.glEnable(gl.GL_DEPTH_TEST);
         }
 
 

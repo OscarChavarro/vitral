@@ -9,6 +9,8 @@ AWT_CLASSES="vsdk/toolkit/render/awt/*.java vsdk/toolkit/gui/CameraController.ja
 
 JOGL_CLASSES="vsdk/toolkit/render/jogl/*.java"
 
+VITRALARCHITECTURE_CLASSES="vsdk/framework/shapeMatching/*.java"
+
 #---------------------------------------------------------------------------
 
 if [ ! -d ./classes ]; then
@@ -21,7 +23,7 @@ fi
 
 clear
 cd src
-javac -Xlint -classpath . -d ../classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES
+javac -Xlint -classpath . -d ../classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 cd ..
 cd classes
 jar cf ../lib/vsdk.jar vsdk

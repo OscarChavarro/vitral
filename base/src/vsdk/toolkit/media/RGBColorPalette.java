@@ -68,7 +68,7 @@ public class RGBColorPalette extends MediaEntity {
     {
         int pos = 0;
         double val = 0;
-    int i;
+        int i;
 
         for ( i = 0; i < colors.size(); i++ ) {
             ColorRgb c = colors.get(i);

@@ -45,8 +45,8 @@ public class JoglLightRenderer extends JoglRenderer {
             lightPosition[3]=0;
         }
 */
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
         gl.glLightModelfv(gl.GL_LIGHT_MODEL_AMBIENT, global_ambient, 0);   // OJO! Esta
         gl.glLightModelfv(gl.GL_LIGHT_MODEL_TWO_SIDE, global_twoside, 0);  // cableado!
         gl.glLightModeli(gl.GL_LIGHT_MODEL_LOCAL_VIEWER, gl.GL_TRUE); // OJO: ?
@@ -63,7 +63,7 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glLightf(gl.GL_LIGHT0 + lightNumber, gl.GL_LINEAR_ATTENUATION, linearAtenuation);
         gl.glLightf(gl.GL_LIGHT0 + lightNumber, gl.GL_QUADRATIC_ATTENUATION, quadricAtenuation);
 */
-    gl.glPopMatrix();
+        gl.glPopMatrix();
     }
 
     public static void activateNvidiaGpuParameters(GL gl, Light light,
@@ -87,7 +87,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
         gl.glPushMatrix();
         gl.glDisable(gl.GL_LIGHTING);
-    gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(2.0f);
         gl.glBegin(gl.GL_LINES);
             gl.glColor3d(c.r, c.g, c.b);

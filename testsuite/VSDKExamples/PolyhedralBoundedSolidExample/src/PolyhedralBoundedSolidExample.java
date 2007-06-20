@@ -81,22 +81,22 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             PolyhedralBoundedSolidModelingTools.addArc(
                 solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
-        break;
-      case 4:
-        solid = PolyhedralBoundedSolidModelingTools.createCircle(
+            break;
+          case 4:
+            solid = PolyhedralBoundedSolidModelingTools.createCircle(
                 0.5, 0.5, 0.5, 0.1, 12
             );
-        break;
-      case 5:
-        solid = PolyhedralBoundedSolidModelingTools.createCircle(
+            break;
+          case 5:
+            solid = PolyhedralBoundedSolidModelingTools.createCircle(
                 0.5, 0.5, 0.5, 0.1, 24
             );
-        T = new Matrix4x4();
-        T.translation(0.1, 0.1, 0.5);
+            T = new Matrix4x4();
+            T.translation(0.1, 0.1, 0.5);
             PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), T);
-        break;
-      case 2: default:
+            break;
+          case 2: default:
             solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
             break;
         }

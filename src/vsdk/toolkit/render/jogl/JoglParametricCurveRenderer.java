@@ -258,11 +258,11 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
         GLUtessellator tesselator;
         int i, j;
-    int totalNumberOfPoints;
+        int totalNumberOfPoints;
         double list[][];
-    Vector3D first;
-    boolean beginning;
-    int count;
+        Vector3D first;
+        boolean beginning;
+        int count;
 
         tesselator = glu.gluNewTess();
         glu.gluTessCallback(tesselator,

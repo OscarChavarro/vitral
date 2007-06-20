@@ -10,6 +10,22 @@ package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.VSDK;
 
+/**
+Class Vector3D represents a one dimensional array of three values, usually
+to be interpreted as:
+  - A column vector of 1x3 positions, useful in linear algebra computations.
+  - A point in the R3 euclidean space
+As current class is supposed to be used in the context of computer graphics,
+array elements are not indiced, to say from 0 to 2, but are instead named
+with the usual 3D axis labels `x`, `y` and `z`.
+This is one of the most fundamental classes in VitralSDK toolkit, and its
+attributes are usually accessed in the inner loops of computational intensive
+calculations. As such, the attributes are promoted to be public, yes, 
+breaking encaptulation and converting current class to a mere non-evolvable
+structure.
+Lack of get/set method enforces a direct attribute access programming style
+which will lend to shorter code.
+*/
 public class Vector3D extends FundamentalEntity 
 {
     /// Check the general attribute description in superclass Entity.
@@ -145,19 +161,19 @@ public class Vector3D extends FundamentalEntity
     public double obtainSphericalThetaAngle()
     {
         double val;
-    if ( Math.abs(x) > VSDK.EPSILON ) {
-        if ( x > 0 ) val = Math.atan(y/x);
-        else val = Math.PI + Math.atan(y/x);
-    }
-    else if ( y > 0 ) {
-        val = Math.PI/2;
-    }
-    else {
-        val = Math.PI + Math.PI/2;
-    }
-    while ( val < 0 ) val += 2*Math.PI;
-    while ( val > 2*Math.PI ) val -= 2*Math.PI;
-    return val;
+        if ( Math.abs(x) > VSDK.EPSILON ) {
+            if ( x > 0 ) val = Math.atan(y/x);
+            else val = Math.PI + Math.atan(y/x);
+        }
+        else if ( y > 0 ) {
+            val = Math.PI/2;
+        }
+        else {
+            val = Math.PI + Math.PI/2;
+        }
+        while ( val < 0 ) val += 2*Math.PI;
+        while ( val > 2*Math.PI ) val -= 2*Math.PI;
+        return val;
     }
 
     /**
@@ -170,7 +186,7 @@ public class Vector3D extends FundamentalEntity
     {
         double r = length();
 
-    if ( r < VSDK.EPSILON ) return 0;
+        if ( r < VSDK.EPSILON ) return 0;
 
         return Math.acos(z/r);
     }

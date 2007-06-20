@@ -279,7 +279,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
         }
         else if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
-        parent.drawingArea.wantToDebugProjectedViews = true;
+            parent.drawingArea.wantToDebugProjectedViews = true;
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -

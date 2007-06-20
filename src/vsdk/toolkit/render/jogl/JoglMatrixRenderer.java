@@ -34,7 +34,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
                 R.M[row][column] = Mgl[pos];
             }
         }
-    return R;
+        return R;
     }
 
     /**

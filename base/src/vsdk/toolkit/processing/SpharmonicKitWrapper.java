@@ -42,13 +42,13 @@ public class SpharmonicKitWrapper extends ProcessingElement {
             System.loadLibrary("spharmonickit");
             loaded = true;
         }
-    if ( loaded == true ) {
+        if ( loaded == true ) {
             return executeSphericalHarmonics(inImage,
                 outSphericalHarmonicsR, outSphericalHarmonicsI);
-    }
-    else {
-        return false;
-    }
+        }
+        else {
+            return false;
+        }
     }
 
 }

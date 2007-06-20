@@ -1,5 +1,5 @@
 md classes
 cls
 cd src
-javac -Xlint:unchecked -classpath .;..\..\..\..\lib\vsdk.jar -d ../classes DatasetControl.java
+javac -Xlint:unchecked -classpath .;..\..\..\..\lib\vsdk.jar -d ../classes BatchConsole.java
 cd ..

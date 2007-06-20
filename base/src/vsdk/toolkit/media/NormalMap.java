@@ -66,7 +66,7 @@ public class NormalMap extends MediaEntity
         if ( i < 0 || j < 0 || i >= xSize || j >= ySize ) return;
         int index = j * xSize + i;
         Vector3D elem = data.get(index);
-    elem.clone(n);
+        elem.clone(n);
     }
 
     public Vector3D getNormal(int u, int v)
@@ -124,7 +124,7 @@ public class NormalMap extends MediaEntity
         int x, y;
         Vector3D n;
         byte r, g, b;
-    int rr, gg, bb;
+        int rr, gg, bb;
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -135,12 +135,12 @@ public class NormalMap extends MediaEntity
                 n.y = (n.y+1)/2;
                 n.z = (n.z+1)/2;
 
-        rr = (int)(n.x * 255.0);
-        gg = (int)(n.y * 255.0);
-        bb = (int)(n.z * 255.0);
-        if ( rr < 0 ) rr += 256;
-        if ( gg < 0 ) gg += 256;
-        if ( bb < 0 ) bb += 256;
+                rr = (int)(n.x * 255.0);
+                gg = (int)(n.y * 255.0);
+                bb = (int)(n.z * 255.0);
+                if ( rr < 0 ) rr += 256;
+                if ( gg < 0 ) gg += 256;
+                if ( bb < 0 ) bb += 256;
                 r = VSDK.unsigned8BitInteger2signedByte(rr);
                 g = VSDK.unsigned8BitInteger2signedByte(gg);
                 b = VSDK.unsigned8BitInteger2signedByte(bb);
@@ -170,9 +170,9 @@ public class NormalMap extends MediaEntity
         int x, y;
         Vector3D n;
         byte r, g, b, a;
-    int rr, gg, bb;
+        int rr, gg, bb;
 
-    a = VSDK.unsigned8BitInteger2signedByte(255);
+        a = VSDK.unsigned8BitInteger2signedByte(255);
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -183,12 +183,12 @@ public class NormalMap extends MediaEntity
                 n.y = (n.y+1)/2;
                 n.z = (n.z+1)/2;
 
-        rr = (int)(n.x * 255.0);
-        gg = (int)(n.y * 255.0);
-        bb = (int)(n.z * 255.0);
-        if ( rr < 0 ) rr += 256;
-        if ( gg < 0 ) gg += 256;
-        if ( bb < 0 ) bb += 256;
+                rr = (int)(n.x * 255.0);
+                gg = (int)(n.y * 255.0);
+                bb = (int)(n.z * 255.0);
+                if ( rr < 0 ) rr += 256;
+                if ( gg < 0 ) gg += 256;
+                if ( bb < 0 ) bb += 256;
                 r = VSDK.unsigned8BitInteger2signedByte(rr);
                 g = VSDK.unsigned8BitInteger2signedByte(gg);
                 b = VSDK.unsigned8BitInteger2signedByte(bb);
@@ -213,9 +213,9 @@ public class NormalMap extends MediaEntity
 
         int x, y;
         Vector3D n;
-    int val;
+        int val;
         byte col;
-    Vector3D k = new Vector3D(0, 0, 1);
+        Vector3D k = new Vector3D(0, 0, 1);
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -244,9 +244,9 @@ public class NormalMap extends MediaEntity
 
         int x, y;
         Vector3D n;
-    int val;
+        int val;
         byte col;
-    Vector3D k = new Vector3D(0, 0, 1);
+        Vector3D k = new Vector3D(0, 0, 1);
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -258,11 +258,11 @@ public class NormalMap extends MediaEntity
                 output.putPixel(x, y, col, col, col, 
                       VSDK.unsigned8BitInteger2signedByte(128));
 /*
-        if ( val > 250 ) {
+                if ( val > 250 ) {
                     output.putPixel(x, y, (byte)0, (byte)0, (byte)0, (byte)0);
-        }
-        else {
-                    output.putPixel(x, y, (byte)0, (byte)0, (byte)0, (byte)255);        }
+                }
+                else {
+                    output.putPixel(x, y, (byte)0, (byte)0, (byte)0, (byte)255);                }
 */
             }
         }

@@ -44,7 +44,7 @@ public class Light extends Entity
     public Light(int type, Vector3D pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
-    lvec = new Vector3D();
+        lvec = new Vector3D();
         if ( type != AMBIENT ) {
             lvec.x = pos.x;
             lvec.y = pos.y;

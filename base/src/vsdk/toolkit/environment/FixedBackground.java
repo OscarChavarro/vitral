@@ -36,7 +36,7 @@ public class FixedBackground extends Background {
 
     public RGBAImage getImage()
     {
-    return backgroundImage;
+        return backgroundImage;
     }
 
     /**
@@ -44,33 +44,33 @@ public class FixedBackground extends Background {
     */
     public ColorRgb colorInDireccion(Vector3D d)
     {
-    return null;
+        return null;
 /*
         InfinitePlane plane = camera.calculateNearPlane();
-    Ray r = new Ray(camera.getPosition(), d);
-    ColorRgb color = new ColorRgb();
-    double u, v;
+        Ray r = new Ray(camera.getPosition(), d);
+        ColorRgb color = new ColorRgb();
+        double u, v;
         Vector3D p;
-    Vector3D left = camera.getLeft();
-    Vector3D up = camera.getUp();
-    Vector3D rel;
-    double near = camera.getNearPlaneDistance();
-    Vector3D front = camera.getFront();
+        Vector3D left = camera.getLeft();
+        Vector3D up = camera.getUp();
+        Vector3D rel;
+        double near = camera.getNearPlaneDistance();
+        Vector3D front = camera.getFront();
 
-    if ( plane.doIntersectionWithNegative(r) ) {
-        p = r.origin.add(d.multiply(r.t));
-        rel = p.substract(front.multiply(near));
-        u = rel.dotProduct(left);
-        v = rel.dotProduct(up);
-        color.r = 1;
-        color.g = 0;
-        color.b = 0;
-        if ( u >= -1 && u <= 1 && v >= -1 && v <= 1 ) {
+        if ( plane.doIntersectionWithNegative(r) ) {
+            p = r.origin.add(d.multiply(r.t));
+            rel = p.substract(front.multiply(near));
+            u = rel.dotProduct(left);
+            v = rel.dotProduct(up);
+            color.r = 1;
+            color.g = 0;
+            color.b = 0;
+            if ( u >= -1 && u <= 1 && v >= -1 && v <= 1 ) {
                 return backgroundImage.getColorRgbBiLinear(u, v);
+            }
         }
-    }
 
-    return color;
+        return color;
 */
     }
 

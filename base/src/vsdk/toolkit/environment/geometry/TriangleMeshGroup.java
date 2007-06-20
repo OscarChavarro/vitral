@@ -208,7 +208,7 @@ public class TriangleMeshGroup extends Surface {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-    outData.clone(lastInfo);
+        outData.clone(lastInfo);
     }
 
     public int[] doIntersectionInformation()
@@ -226,9 +226,9 @@ public class TriangleMeshGroup extends Surface {
     */
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
-    TriangleMesh mesh;
-    int status;
-    int i;
+        TriangleMesh mesh;
+        int status;
+        int i;
 
         // Chain of responsability behavior design pattern with TriangleMesh
         for ( i= 0; i< meshes.size(); i++ ) {
@@ -236,9 +236,9 @@ public class TriangleMeshGroup extends Surface {
             status = mesh.doContainmentTest(p, distanceTolerance);
             if ( status != OUTSIDE ) {
                 return status;
+            }
         }
-    }
-    return OUTSIDE;
+        return OUTSIDE;
     }
 
     /**
@@ -256,12 +256,12 @@ public class TriangleMeshGroup extends Surface {
     */
     public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {
-    int i;
+        int i;
 
         // Chain of responsability behavior design pattern with TriangleMesh
         for ( i= 0; i< meshes.size(); i++ ) {
             meshes.get(i).doVoxelization(vv, M, reporter);
-    }
+        }
     }
 
 

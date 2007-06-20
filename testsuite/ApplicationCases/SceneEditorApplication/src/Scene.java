@@ -67,7 +67,7 @@ public class Scene
 
         activeCamera = camera;
         selectedThings = new SelectionSet(things);
-    selectedDebugThingGroups = new SelectionSet(debugThingGroups);
+        selectedDebugThingGroups = new SelectionSet(debugThingGroups);
 
         //-----------------------------------------------------------------
         simpleBackground = new SimpleBackground();
@@ -244,8 +244,8 @@ public class Scene
                 activeBackground = simpleBackground;
             }
             break;
-      case 1:
-        if ( fixedBackground == null ) {
+          case 1:
+            if ( fixedBackground == null ) {
                 buildFixedmap();
             }
             if ( fixedBackground != null ) {
@@ -254,7 +254,7 @@ public class Scene
             else {
                 activeBackground = simpleBackground;
             }
-        break;
+            break;
           case 0: default:
             activeBackground = simpleBackground;
             break;

@@ -19,7 +19,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     public static void
     draw(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
         TriangleMesh mesh = null;
-    int i;
+        int i;
 
         for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
             mesh = meshGroup.getMeshes().get(i);

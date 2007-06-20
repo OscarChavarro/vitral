@@ -40,7 +40,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         this.id = id;
         emanatingHalfEdge = null;
         this.position = new Vector3D(position);
-    parentSolid.verticesList.add(this);
+        parentSolid.verticesList.add(this);
     }
 
     public String toString()
@@ -48,11 +48,11 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         String msg;
         msg = "vertex id " + id + ". Position " + position + ". ";
         if ( emanatingHalfEdge == null ) {
-        msg = msg + "No associated halfedge.";
-    }
-    else {
-        msg = msg + "Associated halfedge " + emanatingHalfEdge.id + ", to vertex id " + emanatingHalfEdge.startingVertex.id;
-    }
+            msg = msg + "No associated halfedge.";
+        }
+        else {
+            msg = msg + "Associated halfedge " + emanatingHalfEdge.id + ", to vertex id " + emanatingHalfEdge.startingVertex.id;
+        }
         return msg;
     }
 }

@@ -47,27 +47,27 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
     public _PolyhedralBoundedSolidEdge(PolyhedralBoundedSolid parentSolid)
     {
         parentSolid.edgesList.add(this);
-    rightHalf = null;
-    leftHalf = null;
+        rightHalf = null;
+        leftHalf = null;
 
         id = currentId;
-    currentId++;
+        currentId++;
     }
 
     public int getStartingVertexIndex()
     {
         if ( leftHalf == null ) {
-        return -1;
-    }
-    return leftHalf.startingVertex.id;
+            return -1;
+        }
+        return leftHalf.startingVertex.id;
     }
 
     public int getEndingVertexIndex()
     {
         if ( rightHalf == null ) {
-        return -1;
-    }
-    return rightHalf.startingVertex.id;
+            return -1;
+        }
+        return rightHalf.startingVertex.id;
     }
 
     public String toString()
@@ -75,20 +75,20 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
         String msg;
         msg = "Edge id " + id + ". Half1: ";
         if ( leftHalf == null ) {
-        msg = msg + "null. ";
-    }
-    else {
+            msg = msg + "null. ";
+        }
+        else {
             msg = msg + "vertex " + leftHalf.startingVertex.id;
-    }
+        }
 
         msg = msg + " / Half2: ";
 
         if ( rightHalf == null ) {
-        msg = msg + "null. ";
-    }
-    else {
+            msg = msg + "null. ";
+        }
+        else {
             msg = msg + "vertex " + rightHalf.startingVertex.id;
-    }
+        }
 
         return msg;
     }

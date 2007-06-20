@@ -149,7 +149,7 @@ public class PolyhedralBoundedSolidModelingTools
         int i;
 
         for ( i = 0; i < face.boundariesList.size(); i++ ) {
-        l = face.boundariesList.get(i);
+            l = face.boundariesList.get(i);
             first = l.boundaryStartHalfEdge;
             scan = first.next();
             v = scan.startingVertex;
@@ -163,10 +163,10 @@ public class PolyhedralBoundedSolidModelingTools
                 solid.lmef(scan.previous(), scan.next().next(),
                     solid.getMaxFaceId()+1);
                 scan = (scan.next().mirrorHalfEdge()).next();
-        }
+            }
             solid.lmef(scan.previous(), scan.next().next(),
                 solid.getMaxFaceId()+1);
-    }
+        }
     }
 }
 

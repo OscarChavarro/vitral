@@ -284,7 +284,7 @@ public class RendererConfiguration extends FundamentalEntity {
         copy.normals = normals;
         copy.trianglesNormals = trianglesNormals;
         copy.lodHint = lodHint;
-    return copy;
+        return copy;
     }
 }
 

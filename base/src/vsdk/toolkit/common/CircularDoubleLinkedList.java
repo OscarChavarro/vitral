@@ -73,20 +73,20 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             newContainer.previous = newContainer;
         }
         else if ( window == null || window == head ) {
-        window = head;
+            window = head;
             head = newContainer;
             newContainer.previous = window.previous;
             newContainer.next = window;
             window.previous.next = newContainer;
             window.previous = newContainer;
-    }
-    else {
+        }
+        else {
             newContainer.previous = window.previous;
             newContainer.next = window;
             window.previous.next = newContainer;
             window.previous = newContainer;
-    }
-    currentSize++;
+        }
+        currentSize++;
     }
 
     public void locateWindowAtIndex(int index)
@@ -124,7 +124,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         locateWindowAtElem(e2);
         _CircularDoubleLinkedListNode<E> window2 = window;
 
-    if ( window1 == null || window2 == null ) return;
+        if ( window1 == null || window2 == null ) return;
         E temp = window1.data;
 
         window1.data = window2.data;
@@ -144,7 +144,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
 
     public E getWindow()
     {
-    if ( head == null ) return null;
+        if ( head == null ) return null;
         lastAccessedIndex = -1;
         if ( window == null ) {
             window = head;
@@ -186,18 +186,18 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
 
     public void removeElemAtWindow()
     {
-    if ( window == null ) return;
+        if ( window == null ) return;
         if ( window == head ) head = window.next;
         window.previous.next = window.next;
         window.next.previous = window.previous;
         window = null;
-    currentSize--;
+        currentSize--;
     }
 
     public void push(E newElem)
     {
-    window = head;
-    lastAccessedIndex = 0;
+        window = head;
+        lastAccessedIndex = 0;
         _CircularDoubleLinkedListNode<E> newContainer;
 
         newContainer = new _CircularDoubleLinkedListNode<E>();
@@ -210,20 +210,20 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             newContainer.previous = newContainer;
         }
         else if ( window == null || window == head ) {
-        window = head;
+            window = head;
             head = newContainer;
             newContainer.previous = window.previous;
             newContainer.next = window;
             window.previous.next = newContainer;
             window.previous = newContainer;
-    }
-    else {
+        }
+        else {
             newContainer.previous = window.previous;
             newContainer.next = window;
             window.previous.next = newContainer;
             window.previous = newContainer;
-    }
-    currentSize++;
+        }
+        currentSize++;
     }
 
 }

@@ -38,7 +38,7 @@ Changes in 2006 march 14 revition
 Changes in 2006 march 19 revition
   - Raytracing application example was set for full code reuse, now the
     raytracer is generic and lies in the main toolkit render package
-  - SceneEditor application example in its first fully functional version :-)
+  - SceneEditor application example in its first fully functional version :)
 
 Changes in 2006 march 31 revition
   - RGBColorPalette
@@ -46,7 +46,7 @@ Changes in 2006 march 31 revition
 Changes in 2006 april 6 revition
   - RGBColorPalette completed, and AwtRGBColorPalette functions and sample
     working fine.
-  - Exporting from ZBuffer to RGBImages now uses palettes :-)
+  - Exporting from ZBuffer to RGBImages now uses palettes :)
 
 Changes in 2006 april 28 revition
   - Integrated the models of ParametricCubicCurve and ParametricCubicPatches
@@ -104,7 +104,7 @@ Changes in 2006 august 6 revition
 
 Changes in 2006 august 6 revition
   - Mesh classes, including model, JOGL renderer and persistence revisited.
-    This now seems to work quite well :-)
+    This now seems to work quite well :)
 
 Changes in 2006 august 12 revition
   - Fixed a bug in TriangleMesh code that made some objects to die
@@ -178,13 +178,13 @@ Changes in 2006 december 24 revition
   - Ported to JDK1.6, some minor warnings fixed
 
 Changes in 2006 december 28-30 revition
-  - First tests of Nvidia Cg support :-)
+  - First tests of Nvidia Cg support :)
   - Minor adjustments to Jogl*Renderer classes
   - toFloatVect method generalized to float and double and renamed to 'exportToArray',
     available in ColorRgb, Vector3D, Vector4D and Matrix4x4.
 
 Changes in 2007 january 2 revition
-  - First functional and correct Nvidia Cg shader for bump-mapping! :-)
+  - First functional and correct Nvidia Cg shader for bump-mapping! :)
 
 Changes in 2007 january 3 revition
   - First implementation for low level Euler operator in PolyhedralBoundedSolid
@@ -299,4 +299,38 @@ Changes in 2007 june 4 revition
 
 Changes in 2007 june 5-6 revition
   - First implementation of 2D sketch functionality in the
-    SearchEngineFor3DModels application :)
+    SearchEngineFor3DModels application
+
+Changes in 2007 june 8 revition
+  - First working implementation of 2D sketch functionality, based on FFT
+    for 1D functions :)
+
+Changes in 2007 june 11 revition
+  - Reader3ds additions to load texture coordinates, support texture maps
+    and handle more chunks :)
+  - JoglTriangleMeshRenderer can manage texture coordinates for textures
+    activated externally to TriangleMesh (i.e. global texture associated
+    with containing Body)
+
+Changes in 2007 june 15, 16 revition
+  - Refactoring SearchEngineFor3DModels towards a component paradigm based
+    application.
+  - First framework level components included (shape matching package)
+  - TimeReport implemented in SearchEngineFor3DModels
+  - PrimitiveCountShapeDescriptor incorporated
+  - SearchEngineFor3DModels exportDatabase to text operation implemented
+
+Changes in 2007 june 17 revition
+  - Testing of Reader3ds class
+  - Fine tunning of Reader3ds error handling
+  - Fine tunning of SearchEngineFor3DModels application and tests with the
+    memory loaded database
+
+TODO:
+  - Implement OBHU technique
+  - Add an ID for object in SearchEngineFor3DModels (primary key)
+  - Save projected views (perspective with different cameras) when analyzing
+    models
+  - Fix bug in SearchEngine that doesnt read well addList file
+  - Offlinerenderer should not be controlled by application... it should
+    call an excecute routine in the same manner as inside a JFrame

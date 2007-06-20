@@ -587,7 +587,7 @@ public class ParametricCurve extends Curve {
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         int i, j;
-    Vector3D vec;
+        Vector3D vec;
 
         for ( i = 1; i < types.size(); i++ ) {
             if ( types.get(i).intValue() == BREAK ) {
@@ -602,13 +602,13 @@ public class ParametricCurve extends Curve {
             for ( j = 0; j < polyline.size(); j++ ) {
                 vec = (Vector3D) polyline.get(j);
                 if ( VSDK.vectorDistance(vec, p) < distanceTolerance ) {
-            return LIMIT;
-        }
+                    return LIMIT;
+                }
             }
         }
 
 
-    return OUTSIDE;
+        return OUTSIDE;
     }
 }
 

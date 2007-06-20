@@ -1,1 +1,1 @@
-java -classpath .\classes;..\..\..\lib\vsdk.jar DatasetControl
+java -classpath .\classes;..\..\..\lib\vsdk.jar BatchConsole
