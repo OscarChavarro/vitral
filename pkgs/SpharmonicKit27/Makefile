@@ -37,8 +37,8 @@
 ############################################################################
 
 #===========================================================================
+JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
 
-JDKHOME=/usr/local/jdk1.6.0_01
 PLATFORM=linux
 SRC_DIR = ./src
 LIB_DIR = ../../lib
@@ -114,7 +114,7 @@ FSTHYBRIDXOBJ = $(FLTHYBRIDOBJ) \
 
 all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.so bin/generateSphericalHarmonics bin/convertFileToBynaryArray
 
-check:
+check: ./classes ./bin
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
 	echo "ERROR: JDK not found!";                                      \
 	echo "Check you have Sun Microsystems' Java implementation and";   \
@@ -133,8 +133,14 @@ check:
 	exit 1;                                                            \
 	fi
 
+./classes:
+	@mkdir classes
+
+./bin:
+	@mkdir bin
+
 clean: 
-	@rm -rf $(LIB_DIR)/*.so
+	@rm -rf $(LIB_DIR)/*.so ./classes ./bin
 	@rm -rf $(CLASSES_DIR)/*
 	@rm -rf $(TMP_DIR)/*
 	@rm -f bin/generateSphericalHarmonics bin/convertFileToBynaryArray `find . -name "*~"`
