@@ -13,6 +13,7 @@ VITRALARCHITECTURE_CLASSES="vsdk/framework/shapeMatching/*.java"
 
 #---------------------------------------------------------------------------
 
+# Create empty working directories if they does not exist
 if [ ! -d ./classes ]; then
     mkdir ./classes
 fi
