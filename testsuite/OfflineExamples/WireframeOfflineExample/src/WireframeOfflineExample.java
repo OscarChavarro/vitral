@@ -26,10 +26,10 @@ public class WireframeOfflineExample {
     public WireframeOfflineExample() {
         //-----------------------------------------------------------------
         camera = new Camera();
-        camera.setPosition(new Vector3D(6.61, 2.92, 3.47));
+        camera.setPosition(new Vector3D(7, -4, 4));
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(-148),
-                              Math.toRadians(-38), Math.toRadians(102));
+        R.eulerAnglesRotation(Math.toRadians(140),
+                              Math.toRadians(-30), 0);
         camera.setRotation(R);
         camera.updateViewportResize(640, 480);
 
