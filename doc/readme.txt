@@ -32,3 +32,8 @@ IMPLEMENTATION ON OPENGL/JOGL
     glPushMatrix/glPopMatrix pair without glLoadIdentity use
   - glCullFace, GL_CULLING should be avoided in application code
   - glMaterial, glShadingModel should be only inside Material renderers
+
+VERSION CONTROL
+  - Based on subversion
+  - To obtain first:
+svn checkout svn+ssh://ochavarr@orion.javeriana.edu.co/home/svn/repos/vitral/trunk vitral
