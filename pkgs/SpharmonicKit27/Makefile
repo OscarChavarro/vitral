@@ -114,7 +114,7 @@ FSTHYBRIDXOBJ = $(FLTHYBRIDOBJ) \
 
 all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.so bin/generateSphericalHarmonics bin/convertFileToBynaryArray
 
-check: ./classes ./bin
+check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
 	echo "ERROR: JDK not found!";                                      \
 	echo "Check you have Sun Microsystems' Java implementation and";   \
@@ -139,8 +139,11 @@ check: ./classes ./bin
 ./bin:
 	@mkdir bin
 
+./tmp:
+	@mkdir tmp
+
 clean: 
-	@rm -rf $(LIB_DIR)/*.so ./classes ./bin
+	@rm -rf $(LIB_DIR)/*.so ./classes ./bin ./tmp
 	@rm -rf $(CLASSES_DIR)/*
 	@rm -rf $(TMP_DIR)/*
 	@rm -f bin/generateSphericalHarmonics bin/convertFileToBynaryArray `find . -name "*~"`
