@@ -70,5 +70,7 @@ cd SceneEditorApplication
 cd ..
 cd SearchEngineFor3DModels
 ./compile.sh
+./compileServer.sh
+./compileClient.sh
 cd ..
 #---------------------------------------------------------------------------
