@@ -1165,7 +1165,9 @@ public class Reader3ds extends PersistenceElement
                 p.z = readFloatLE(is);
                 currentVertexPositionArray.add(p);
             }
-            is.skip(currentChunk.length-8-numVertexes*12);
+            if ( currentChunk.length-8-numVertexes*12 > 0 ) {
+                is.skip(currentChunk.length-8-numVertexes*12);
+            }
         }
         else if ( currentChunk.id == currentChunk.ID_TRIANGLE_LIST ) {
             //-------------------------------------------------------------
@@ -1507,9 +1509,9 @@ public class Reader3ds extends PersistenceElement
         if ( skipChunk ) {
             VSDK.reportMessage(null, VSDK.WARNING, "Reader3ds.processChunk",
                 "Skipping chunk (" + (currentChunk.length - 6) + ").");
-	    if ( currentChunk.length - 6 > 0 ) {
+            if ( currentChunk.length - 6 > 0 ) {
                 is.skip(currentChunk.length - 6);
-	    }
+            }
         }
 
     }
