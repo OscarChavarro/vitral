@@ -32,6 +32,7 @@ cd ..
 cd pkgs/SpharmonicKit27;make;cd ../..
 
 # Set proper permisions
+chmod 755 `find . -type d`
 chmod 644 `find . -name "*.java"`
 chmod 644 `find . -name "*.bat"`
 chmod 755 `find . -name "*.sh"`
