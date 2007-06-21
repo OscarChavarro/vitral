@@ -20,12 +20,12 @@ import javax.media.opengl.GLDrawableFactory;
 public class JoglShapeMatchingOfflineRenderer implements GLEventListener {
     private GLPbuffer  pbuffer;
     private boolean ready;
-    private JoglProjectedViewRenderer renderer;
     private boolean pbufferSupported;
+    private JoglShapeMatchingOfflineRenderable target;
 
-    public JoglShapeMatchingOfflineRenderer(int imageWidth, int imageHeight, JoglProjectedViewRenderer renderer) {
+    public JoglShapeMatchingOfflineRenderer(int imageWidth, int imageHeight, JoglShapeMatchingOfflineRenderable target) {
 
-        this.renderer = renderer;
+	this.target = target;
         ready = false;
 
         // Create a GLCapabilities object for the pbuffer
@@ -73,7 +73,7 @@ public class JoglShapeMatchingOfflineRenderer implements GLEventListener {
 
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
-        renderer.draw(gl);
+        target.executeRendering(gl);
         ready = true;
     }
 

@@ -50,61 +50,16 @@ public class ShapeDescriptor3DGenerator
     the viewport image to be rendered.
     */
     private Image
-    createCube13ProjectedViewDistanceField(GL gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer, JoglShapeMatchingOfflineRenderer offlineRenderer)
+    createCube13ProjectedViewDistanceField(GL gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer)
     {
-        //- Will render a normalized body inside the unit cube ------------
-        double minmax[];
-        SimpleBodyGroup bodySet = new SimpleBodyGroup();
-        int i;
-
-        Vector3D p;
-
-        //-----------------------------------------------------------------
-        minmax = referenceBodies.getMinMax();
-        Vector3D min, max, s;
-        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-        s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
-
-        double maxsize = s.x;
-        if ( s.y > maxsize ) maxsize = s.y;
-        if ( s.z > maxsize ) maxsize = s.z;
-        // The 95% scale factor is to allow a full render of the object to
-        // fit inside the rendered view
-        s.x = s.y = s.z = (2/maxsize) * 0.95;
-
-        p = max.add(min);
-        p = p.multiply(-1/maxsize);
-
-        bodySet.setPosition(p);
-        bodySet.setScale(s);
-
-        //-----------------------------------------------------------------
-        SimpleBody referenceBody;
-        SimpleBody framedBody;
-
-        for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
-            referenceBody = referenceBodies.getBodies().get(i);
-            framedBody = new SimpleBody();
-            framedBody.setGeometry(referenceBody.getGeometry());
-            framedBody.setPosition(referenceBody.getPosition());
-            framedBody.setRotation(referenceBody.getRotation());
-            framedBody.setRotationInverse(referenceBody.getRotationInverse());
-            framedBody.setMaterial(new Material());
-            bodySet.getBodies().add(framedBody);
-        }
+        //- Execute posing ------------------------------------------------
+        SimpleBodyGroup bodySet = calculateUnitCubePosing(referenceBodies);
 
         //- Render will proceed in a PBuffer ------------------------------
         IndexedColorImage distanceFieldIndexed;
 
         projectedViewRenderer.configureScene(bodySet, cam);
-        if ( offlineRenderer.isPbufferSupported() ) {
-            offlineRenderer.execute();
-            offlineRenderer.waitForMe();
-        }
-        else {
-            projectedViewRenderer.draw(gl);
-        }
+        projectedViewRenderer.draw(gl);
 
         //-----------------------------------------------------------------
         distanceFieldIndexed = new IndexedColorImage();
@@ -215,40 +170,98 @@ public class ShapeDescriptor3DGenerator
         return true;
     }
 
+    /**
+    Given a set of bodies, this method is responsible of generating a new
+    geometric transformation for the set, so the models contained be
+    "normalized".
+    Note this operation just accounts for scale/translate normalization,
+    and leaves untouched rotation. Other methods could normalize also
+    rotation.
+    This simple method is useful for rotational invariant image shape
+    descriptor use.
+    */
+    public SimpleBodyGroup
+    calculateUnitCubePosing(SimpleBodyGroup referenceBodies)
+    {
+        //- Will render a normalized body inside the unit cube ------------
+        SimpleBodyGroup bodySet = new SimpleBodyGroup();
+        int i;
+        double minmax[];
+
+        Vector3D p;
+
+        //-----------------------------------------------------------------
+        minmax = referenceBodies.getMinMax();
+        Vector3D min, max, s;
+        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
+
+        double maxsize = s.x;
+        if ( s.y > maxsize ) maxsize = s.y;
+        if ( s.z > maxsize ) maxsize = s.z;
+        // The 95% scale factor is to allow a full render of the object to
+        // fit inside the rendered view
+        s.x = s.y = s.z = (2/maxsize) * 0.95;
+
+        p = max.add(min);
+        p = p.multiply(-1/maxsize);
+
+        bodySet.setPosition(p);
+        bodySet.setScale(s);
+
+        //-----------------------------------------------------------------
+        SimpleBody referenceBody;
+        SimpleBody framedBody;
+
+        for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
+            referenceBody = referenceBodies.getBodies().get(i);
+            framedBody = new SimpleBody();
+            framedBody.setGeometry(referenceBody.getGeometry());
+            framedBody.setPosition(referenceBody.getPosition());
+            framedBody.setRotation(referenceBody.getRotation());
+            framedBody.setRotationInverse(referenceBody.getRotationInverse());
+            framedBody.setMaterial(new Material());
+            bodySet.getBodies().add(framedBody);
+        }
+
+        return bodySet;
+    }
+
     public PrimitiveCountShapeDescriptor
     calculatePrimitiveCountShapeDescriptor(SimpleBodyGroup referenceBodies, String label)
     {
         PrimitiveCountShapeDescriptor primitiveCountShapeDescriptor;
         primitiveCountShapeDescriptor = new PrimitiveCountShapeDescriptor(label);
-	int i, j;
-	Geometry referenceGeometry;
-	TriangleMesh mesh;
-	TriangleMeshGroup meshGroup;
+        int i, j;
+        Geometry referenceGeometry;
+        TriangleMesh mesh;
+        TriangleMeshGroup meshGroup;
         SimpleBody referenceBody;
-	long totalVertices = 0;
-	long totalTriangles = 0;
+        long totalVertices = 0;
+        long totalTriangles = 0;
 
         for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
             referenceBody = referenceBodies.getBodies().get(i);
-	    referenceGeometry = referenceBody.getGeometry();
-	    if ( referenceGeometry instanceof TriangleMesh ) {
-		mesh = (TriangleMesh)referenceGeometry;
-	        totalVertices += mesh.getVertexes().length;
+            referenceGeometry = referenceBody.getGeometry();
+            if ( referenceGeometry instanceof TriangleMesh ) {
+                mesh = (TriangleMesh)referenceGeometry;
+                totalVertices += mesh.getVertexes().length;
                 totalTriangles += mesh.getTriangles().length;
-	    }
-	    else if ( referenceGeometry instanceof TriangleMeshGroup ) {
-		meshGroup = (TriangleMeshGroup)referenceGeometry;
-		for ( j = 0; j < meshGroup.getMeshes().size(); j++ ) {
-		    mesh = meshGroup.getMeshes().get(j);
-  	            totalVertices += mesh.getVertexes().length;
+            }
+            else if ( referenceGeometry instanceof TriangleMeshGroup ) {
+                meshGroup = (TriangleMeshGroup)referenceGeometry;
+                for ( j = 0; j < meshGroup.getMeshes().size(); j++ ) {
+                    mesh = meshGroup.getMeshes().get(j);
+                    totalVertices += mesh.getVertexes().length;
                     totalTriangles += mesh.getTriangles().length;
-		}
-	    }
-	}
+                }
+            }
+        }
         primitiveCountShapeDescriptor.setFeature(VSDK.POINT, totalVertices);
             
         primitiveCountShapeDescriptor.setFeature(VSDK.TRIANGLE, totalTriangles);
-	return primitiveCountShapeDescriptor;
+        return primitiveCountShapeDescriptor;
     }
 
     public FourierShapeDescriptor
@@ -304,7 +317,7 @@ public class ShapeDescriptor3DGenerator
       - Adds newly computed shape descriptor to specified `descriptorsList`
     */
     public void
-    calculateCube13ProjectedViewsShapeDescriptors(GL gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer, JoglShapeMatchingOfflineRenderer offlineRenderer) throws Exception
+    calculateCube13ProjectedViewsShapeDescriptors(GL gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer) throws Exception
     {
         FourierShapeDescriptor fourierShapeDescriptor;
         Image distanceField;
@@ -314,7 +327,7 @@ public class ShapeDescriptor3DGenerator
             //- Generate distance field for i-th projection -------------------
             distanceField = createCube13ProjectedViewDistanceField(
                 gl, referenceBodies, i, distanceFieldSide,
-                projectedViewRenderer, offlineRenderer);
+                projectedViewRenderer);
             if ( distanceField == null ) {
                 throw new Exception("Error processing projected texture!");
             }

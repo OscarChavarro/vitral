@@ -186,6 +186,16 @@ public class JoglProjectedViewRenderer {
         }
         else {
             JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
+
+            // Debug code to check correct posing to unit sphere
+/*
+            vsdk.toolkit.environment.geometry.Sphere sphere = new vsdk.toolkit.environment.geometry.Sphere(1);
+            RendererConfiguration quality2;
+            quality2 = new RendererConfiguration();
+            quality2.setWires(true);
+            quality2.setSurfaces(false);
+            vsdk.toolkit.render.jogl.JoglSphereRenderer.draw(gl, sphere, camera, quality2);
+*/
         }
 
         gl.glFlush();
@@ -232,7 +242,7 @@ public class JoglProjectedViewRenderer {
 
         //- Debug code (disabled) -----------------------------------------
         //image=JoglRGBImageRenderer.getImageJOGL(gl);
-        //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./output" + side + ".ppm"), image);
+        //vsdk.toolkit.io.image.ImagePersistence.exportJPG(new java.io.File("./output" + side + ".jpg"), image);
     }
 }
 
