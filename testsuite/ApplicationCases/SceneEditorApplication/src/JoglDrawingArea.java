@@ -68,7 +68,6 @@ import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
-import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
 public class JoglDrawingArea implements 
@@ -103,7 +102,6 @@ public class JoglDrawingArea implements
     public boolean wantToDebugProjectedViews;
 
     private JoglProjectedViewRenderer projectedViewRenderer;
-    private JoglShapeMatchingOfflineRenderer offlineRenderer;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -185,15 +183,6 @@ public class JoglDrawingArea implements
         }
         else {
             projectedViewRenderer = new JoglProjectedViewRenderer(640, 640, true);
-        }
-
-        if ( offlineRenderer == null ) {
-            if ( doDistanceField ) {
-                offlineRenderer = new JoglShapeMatchingOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
-              }
-              else {
-                offlineRenderer = new JoglShapeMatchingOfflineRenderer(640, 640, projectedViewRenderer);
-            }
         }
     }
 
@@ -360,15 +349,9 @@ public class JoglDrawingArea implements
         IndexedColorImage distanceFieldIndexed;
 
         projectedViewRenderer.configureScene(bodySet, cam);
-        if ( offlineRenderer.isPbufferSupported() ) {
-            offlineRenderer.execute();
-            offlineRenderer.waitForMe();
-        }
-        else {
-            this.viewportResizeNeeded = true;
-            projectedViewRenderer.draw(gl);
-            //canvas.swapBuffers();
-        }
+        this.viewportResizeNeeded = true;
+        projectedViewRenderer.draw(gl);
+        //canvas.swapBuffers();
 
         //-----------------------------------------------------------------
         Image finalImage;
