@@ -2,7 +2,7 @@
 
 import vsdk.toolkit.common.VSDK;
 
-public class Result
+public class Result implements Comparable <Result>
 {
     private double distance;
     private String filename;
@@ -21,6 +21,13 @@ public class Result
     public String getFilename()
     {
         return filename;
+    }
+
+    public int compareTo(Result other)
+    {
+        if ( this.distance < other.distance ) return -1;
+	else if ( this.distance > other.distance ) return 1;
+	return 0;
     }
 
     public String toString()

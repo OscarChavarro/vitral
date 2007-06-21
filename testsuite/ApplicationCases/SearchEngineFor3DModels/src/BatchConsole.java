@@ -22,6 +22,7 @@ import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Collections;
 
 // Awt / swing classes
 import java.awt.BorderLayout;
@@ -41,6 +42,7 @@ import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
+import vsdk.toolkit.gui.ProgressMonitorConsole;
 
 /**
 Current application provides a batch (command line) oriented management control
@@ -60,6 +62,8 @@ public class BatchConsole implements GLEventListener
 {
     private JoglShapeMatchingOfflineRenderer offlineRenderer = null;
     private int distanceFieldSide = 64;
+    private int renderPreviewXSize = 640;
+    private int renderPreviewYSize = 480;
     private JoglProjectedViewRenderer projectedViewRenderer = null;
     private String args[];
     private GLCanvas canvas;
@@ -70,7 +74,7 @@ public class BatchConsole implements GLEventListener
     {
         this.args = args;
         projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
-        offlineRenderer = new JoglShapeMatchingOfflineRenderer(distanceFieldSide, distanceFieldSide, projectedViewRenderer);
+        offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, projectedViewRenderer);
         searchEngine = new SearchEngine();
         canvas = null;
         times = new HashMap<String, TimeReport>();
@@ -101,16 +105,20 @@ public class BatchConsole implements GLEventListener
                           totalTime, totalSum, totalTime - totalSum);
         System.out.println("Other times stand for:");
         System.out.println("  - Garbage collection");
+        System.out.println("  - Errors in time metrics");
         System.out.println("  - Control operations");
         System.out.println("  - Time used for console to scroll text");
         System.out.println("  - Time used for redirected console to save log files");
-        System.out.println("  - Errors in time metrics");
         System.out.println("Note that current figures stands for ELLAPSED (no CPU) times (java limitation)");
     }
 
     private void reportResults(ArrayList <Result> similarModels)
     {
         int i;
+
+        //- Sort report ---------------------------------------------------
+        Collections.sort(similarModels);
+        //- Print report --------------------------------------------------
         System.out.println("= SIMILAR MODELS REPORT ===================================================");
         System.out.println("Founded " + similarModels.size() +
             " similar objects:");
@@ -135,6 +143,7 @@ public class BatchConsole implements GLEventListener
         times.put("SPHERICAL_HARMONICS", new TimeReport("SPHERICAL_HARMONICS"));
         times.put("PRIMITIVE_COUNT", new TimeReport("PRIMITIVE_COUNT"));
         times.put("CUBE13_PROJECTIONS", new TimeReport("CUBE13_PROJECTIONS"));
+        times.put("PREVIEWS", new TimeReport("PREVIEWS"));
         times.get("TOTAL").start();
 
         if ( args[0].equals("add") ) {
@@ -276,7 +285,7 @@ public class BatchConsole implements GLEventListener
                 ArrayList<ShapeDescriptor> d;
                 ShapeDescriptor s;
                 double arr[];
-                String line;
+                String stringSegment;
 
                 try {
                     //---------------------------------------------------------
@@ -289,27 +298,38 @@ public class BatchConsole implements GLEventListener
                     writer = new BufferedOutputStream(fos);
 
                     //---------------------------------------------------------
+                    byte barr[];
+                    ProgressMonitorConsole reporter;
+                    reporter = new ProgressMonitorConsole();
+
+                    reporter.begin();
                     for ( i = 0; i < descriptorsArray.size(); i++ ) {
                         m = descriptorsArray.get(i);
                         d = m.getDescriptors();
-                        //line = "[" + m.getId() + "]\t" + m.getFilename() + "\n";
-                        line = m.getFilename() + "\n";
-/*
+                        stringSegment = "[" + m.getId() + "]\t" + m.getFilename() + "\t";
                         for ( j = 0; j < d.size(); j++ ) {
                             s = d.get(j);
-                            line += s.getLabel() + "\t";
+                            stringSegment += s.getLabel() + "\t";
+                            barr = stringSegment.getBytes();
+                            writer.write(barr, 0, barr.length);
+
                             arr = s.getFeatureVector();
                             for ( k = 0; k < arr.length; k++ ) {
-                                line += arr[k] + "\t";
+                                stringSegment = arr[k] + "\t";
+                                barr = stringSegment.getBytes();
+                                writer.write(barr, 0, barr.length);
                             }
                         }
-                        line += "EOL\n";
-*/
-                        byte barr[];
-                        barr = line.getBytes();
+                        stringSegment = "EOL\n";
+                        barr = stringSegment.getBytes();
                         writer.write(barr, 0, barr.length);
+
+                        reporter.update(0, descriptorsArray.size(), i);
+
                     }
-		    writer.close();
+                    reporter.end();
+
+                    writer.close();
                     fos.close();
                 }
                 catch ( Exception e ) {
@@ -391,7 +411,7 @@ public class BatchConsole implements GLEventListener
                 frame = new JFrame("VITRAL offline renderer window - do not hide");
                 frame.add(instance.canvas, BorderLayout.CENTER);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                size = new Dimension(instance.distanceFieldSide*2, instance.distanceFieldSide*2);
+                size = new Dimension(instance.renderPreviewXSize+40, instance.renderPreviewYSize+60);
                 frame.setMinimumSize(size);
                 frame.setSize(size);
                 frame.setVisible(true);

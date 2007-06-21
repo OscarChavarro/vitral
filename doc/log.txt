@@ -328,6 +328,8 @@ Changes in 2007 june 17 revition
 
 Changes in 2007 june 20 revition
   - First SVN controlled version in orion.javeriana.edu.co
+  - First support for model previewing thumbnail image generation in
+    SearchEngineFor3DModels
 
 TODO:
   - Implement OBHU technique

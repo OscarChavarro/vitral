@@ -4,10 +4,13 @@
 //= Oscar Chavarro, May 23 2007                                             =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
-//= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
+//= [FUNK2003] Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,   =
 //=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
 //=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
 //=     January 2003. Pp. 83-105                                            =
+//= [MIN2003] Min, Patrick. Halderman, John A. Kazhdan, Michael.            =
+//=     Funkhouser, Thoimas A. "Early Experiences with a 3D Model Search    =
+//=     Engine".                                                            =
 //===========================================================================
 
 // Java basic classes
@@ -52,7 +55,7 @@ public class SearchEngine
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
     */
-    private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer, HashMap<String, TimeReport> times)
+    private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer, HashMap<String, TimeReport> times)
     {
         //- Variables -----------------------------------------------------
         ArrayList<SimpleBody> things;
@@ -69,7 +72,7 @@ public class SearchEngine
 
         GeometryMetadata metadata = new GeometryMetadata();
         things = new ArrayList<SimpleBody>();
-        System.out.println("Analyzing model " + filename);
+        System.out.println("Analyzing model id [" + metadata.getId() + "], filename: " + filename);
         try {
             //- Load scene from specified size and configure its body group ---
             times.get("READ_MODEL").start();
@@ -144,14 +147,32 @@ public class SearchEngine
                 System.out.print("    . Projected views image descriptors (cube 13 setup) ... ");
                 times.get("CUBE13_PROJECTIONS").start();
                 component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer, offlineRenderer);
-                if ( !offlineRenderer.isPbufferSupported() ) {
-                    canvas.swapBuffers();
-                }
                 times.get("CUBE13_PROJECTIONS").stop();
                 System.out.println("Ok.");
             }
 
-// IMAGE PREVIEW GENERATION GOES HERE **************************************
+            //- Image preview generation [MIN2003] ------------------------
+            JoglPreviewGenerator component2 = new JoglPreviewGenerator();
+            if ( withPreviews ) {
+                System.out.print("    . Previews ... ");
+                times.get("PREVIEWS").start();
+                System.out.print(" for model " + metadata.getId() + " ... ");
+
+                GLCanvas mycanvas = null;
+                if ( !offlineRenderer.isPbufferSupported() ) {
+                    mycanvas = canvas;
+                }
+
+                component2.calculatePreviews(gl, bodySet, metadata.getId(), 640, 480, mycanvas);
+
+                times.get("PREVIEWS").stop();
+                System.out.println("Ok.");
+            }
+
+            //-----------------------------------------------------------------
+            if ( (withProjection || withPreviews ) && !offlineRenderer.isPbufferSupported() ) {
+                canvas.swapBuffers();
+            }
 
             //- Free memory (unlink references for garbage collector gathering)
             for ( i = 0; i < things.size(); i++ ) {
@@ -189,7 +210,7 @@ public class SearchEngine
         HashMap<String, TimeReport> times)
     {
         ArrayList <Result> results = new ArrayList <Result>();
-        GeometryMetadata m = analyzeModel(gl, filename, false, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
+        GeometryMetadata m = analyzeModel(gl, filename, false, false, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
 
         if ( m == null ) {
             System.err.println("Error analyzing reference model. No results reported.");
@@ -357,7 +378,7 @@ public class SearchEngine
             }
 
             // Insert new model in database
-            m = analyzeModel(gl, filenamesList[i], true, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
+            m = analyzeModel(gl, filenamesList[i], true, true, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
             if ( m != null ) {
                 descriptorsArray.add(m);
             }

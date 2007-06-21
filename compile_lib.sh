@@ -31,6 +31,11 @@ jar cf ../lib/vsdk.jar vsdk
 cd ..
 cd pkgs/SpharmonicKit27;make;cd ../..
 
+# Set proper permisions
+chmod 644 `find . -name "*.java"`
+chmod 644 `find . -name "*.bat"`
+chmod 755 `find . -name "*.sh"`
+
 #===========================================================================
 #= EOF                                                                     =
 #===========================================================================

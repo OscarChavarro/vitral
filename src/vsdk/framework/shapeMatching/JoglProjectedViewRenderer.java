@@ -187,7 +187,7 @@ public class JoglProjectedViewRenderer {
         else {
             JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
         }
-        
+
         gl.glFlush();
 
         //- Obtain ZBuffer ------------------------------------------------
