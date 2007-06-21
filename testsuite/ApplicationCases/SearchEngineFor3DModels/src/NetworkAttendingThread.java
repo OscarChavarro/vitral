@@ -37,7 +37,6 @@ public class NetworkAttendingThread implements Runnable
             String args[];
             do {
                 inputLine = in.readLine();
-                System.out.println("REC:" + inputLine);
                 if ( inputLine.equals("close") ) {
                     outputLine = "disconnect";
                     terminate = true;
@@ -54,9 +53,6 @@ public class NetworkAttendingThread implements Runnable
                     for ( n = 0; auxStringTokenizer.hasMoreTokens(); n++ ) {
                         token = auxStringTokenizer.nextToken();
                     };
-
-                    System.out.println("preparing " + n + " tokens");
-
                     auxStringTokenizer = new StringTokenizer(inputLine, " ");
                     args = new String[n];
                     for ( i = 0; i < n; i++ ) {

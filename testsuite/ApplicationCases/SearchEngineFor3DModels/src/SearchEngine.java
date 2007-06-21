@@ -230,7 +230,7 @@ public class SearchEngine
             //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
             //    " to " + descriptorsArray.get(i).getFilename());
             if ( Ls < tolerance ) {
-                result = new Result(descriptorsArray.get(i).getFilename(), Ls);
+                result = new Result(descriptorsArray.get(i).getFilename(), Ls, descriptorsArray.get(i).getId());
                 results.add(result);
             }
         }
@@ -275,7 +275,7 @@ public class SearchEngine
                 //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
                 //    " to " + descriptorsArray.get(i).getFilename() + " : " + j);
                 if ( Ls < tolerance ) {
-                    result = new Result(descriptorsArray.get(i).getFilename() + ", view: " + j, Ls);
+                    result = new Result(descriptorsArray.get(i).getFilename() + ", view: " + j, Ls, descriptorsArray.get(i).getId());
                     results.add(result);
                 }
             }
