@@ -76,6 +76,7 @@ import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 public class ButtonsPanel extends JPanel implements ActionListener
 {
     private SceneEditorApplication parent;
+    private String currentFilePath;
 
     public ButtonsPanel(SceneEditorApplication parent, int group)
     {
@@ -94,6 +95,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
             Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
             this.setBorder(empty);
         }
+
+        currentFilePath = (new File("")).getAbsolutePath() + "/../../../etc/geometry";
 
         //-------------------------------------------------------------------
         JPanel internal = null;
@@ -459,7 +462,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
             JFileChooser jfc = null;
-            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../etc/geometry");
+            jfc = new JFileChooser(currentFilePath);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
             jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
@@ -470,6 +473,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
                     EnvironmentPersistence.importEnvironment(file,
                         parent.theScene.things, null, null, null);
+
+                    currentFilePath = file.getParentFile().getAbsolutePath();
 
                     repaint();
                 }
