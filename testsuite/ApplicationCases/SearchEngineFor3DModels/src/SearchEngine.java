@@ -146,7 +146,7 @@ public class SearchEngine
             if ( withProjection ) {
                 System.out.print("    . Projected views image descriptors (cube 13 setup) ... ");
                 times.get("CUBE13_PROJECTIONS").start();
-                component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer, offlineRenderer);
+                component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer);
                 times.get("CUBE13_PROJECTIONS").stop();
                 System.out.println("Ok.");
             }
@@ -156,14 +156,12 @@ public class SearchEngine
             if ( withPreviews ) {
                 System.out.print("    . Previews ... ");
                 times.get("PREVIEWS").start();
-                System.out.print(" for model " + metadata.getId() + " ... ");
-
                 GLCanvas mycanvas = null;
                 if ( !offlineRenderer.isPbufferSupported() ) {
                     mycanvas = canvas;
                 }
 
-                component2.calculatePreviews(gl, bodySet, metadata.getId(), 640, 480, mycanvas);
+                component2.calculatePreviews(gl, component.calculateUnitCubePosing(bodySet), metadata.getId(), 640, 480, mycanvas);
 
                 times.get("PREVIEWS").stop();
                 System.out.println("Ok.");

@@ -22,14 +22,17 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 
 // VSDK Classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 
@@ -53,7 +56,7 @@ public class JoglPreviewGenerator
         return true;
     }
 
-    private static void drawGridRectangle(GL gl)
+    private static void drawGridRectangle(GL gl, double z)
     {
         int nx = 14; // Must be an even number
         int ny = 14; // Must be an even number
@@ -64,7 +67,6 @@ public class JoglPreviewGenerator
         double maxx = (((double)nx)/2) * dx;
         double miny = -(((double)ny)/2) * dy;
         double maxy = (((double)ny)/2) * dy;
-        double z = -1;
 
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -92,7 +94,9 @@ public class JoglPreviewGenerator
 
     private void renderView(GL gl, SimpleBodyGroup bodies, Camera camera, RendererConfiguration quality)
     {
-        gl.glClearColor(0.7f, 0.7f, 0.7f, 1);
+        double minmax[];
+
+        gl.glClearColor(0.62f, 0.72f, 0.83f, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 
@@ -102,18 +106,22 @@ public class JoglPreviewGenerator
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glColor3d(0, 0, 0);
-        drawGridRectangle(gl);
+        minmax = bodies.getMinMax();
+        drawGridRectangle(gl, minmax[2]);
 
         if ( bodies != null ) {
             JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
+
+            // Debug code to check correct posing to unit sphere
+/*
+            vsdk.toolkit.environment.geometry.Sphere sphere = new vsdk.toolkit.environment.geometry.Sphere(1);
+            RendererConfiguration quality2;
+            quality2 = new RendererConfiguration();
+            quality2.setWires(true);
+            quality2.setSurfaces(false);
+            vsdk.toolkit.render.jogl.JoglSphereRenderer.draw(gl, sphere, camera, quality2);
+*/
         }
-        gl.glColor3d(1, 1, 0);
-            gl.glBegin(GL.GL_LINE_LOOP);
-                gl.glVertex3d(-1, -1, 0);
-                gl.glVertex3d(1, -1, 0);
-                gl.glVertex3d(1, 1, 0);
-                gl.glVertex3d(-1, 1, 0);
-            gl.glEnd();
 
         gl.glFlush();
     }
@@ -123,25 +131,64 @@ public class JoglPreviewGenerator
     */
     private void configureView(int i, Camera cam, RendererConfiguration quality)
     {
-        Vector3D p = new Vector3D();
+        Vector3D position = new Vector3D();
         Matrix4x4 R = new Matrix4x4();
+        double yaw = 0, pitch = 0;
+        double fov = 60.0;
 
-        quality.setWires(true);
-        quality.setSurfaces(false);
-
+        quality.setShadingType(quality.SHADING_TYPE_GOURAUD);
         switch ( i ) {
           case 0:
-            p = new Vector3D(15, -15, 0);
-            R.eulerAnglesRotation(Math.toRadians(135), 0, 0);
+            yaw = -20;
+            pitch = -10;
+            quality.setWires(false);
+            quality.setSurfaces(true);
             break;
+          case 1:
+            yaw = 160;
+            pitch = -70;
+            quality.setWires(false);
+            quality.setSurfaces(true);
+            break;
+          case 2:
+            yaw = 160;
+            pitch = -10;
+            quality.setWires(true);
+            quality.setSurfaces(false);
+            break;
+          case 3:
+            yaw = 160;
+            pitch = -10;
+            fov = 30;
+            quality.setWires(true);
+            quality.setSurfaces(true);
+            break;
+          case 4:
+            yaw = 160;
+            pitch = -10;
+            fov = 30;
+            quality.setWires(false);
+            quality.setSurfaces(true);
+            quality.setShadingType(quality.SHADING_TYPE_FLAT);
+            break;
+          case 5:
           default:
-            p = new Vector3D(0, 0, 15);
-            R.eulerAnglesRotation(0, Math.toRadians(-90), 0);
+            yaw = -20;
+            pitch = -10;
+            fov = 30;
+            quality.setWires(true);
+            quality.setSurfaces(true);
             break;
         }
 
-        cam.setPosition(p);
+        R.eulerAnglesRotation(Math.toRadians(yaw), Math.toRadians(pitch), 0);
+        position = new Vector3D(-1, 0, 0);
+        position = R.multiply(position);
+        position.normalize();
+        position = position.multiply(2);
+        cam.setPosition(position);
         cam.setRotation(R);
+        cam.setFov(fov);
     }
 
     public void calculatePreviews(
@@ -165,9 +212,21 @@ public class JoglPreviewGenerator
         Camera cam = new Camera();
         cam.updateViewportResize(viewportXSize, viewportYSize);
         RendererConfiguration quality = new RendererConfiguration();
+        Light light1;
+        Light light2;
+        Vector3D p;
 
-        for ( i = 0; i < 2; i++ ) {
+        light1 = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
+        light2 = new Light(Light.POINT, new Vector3D(10, 9, -8), new ColorRgb(1, 1, 1));
+        JoglLightRenderer.activate(gl, light1);
+        JoglLightRenderer.activate(gl, light2);
+
+        for ( i = 0; i < 6; i++ ) {
             configureView(i, cam, quality);
+            p = cam.getPosition();
+            light1.setPosition(p);
+            p = p.multiply(-1);
+            light2.setPosition(p);
             renderView(gl, referenceBodies, cam, quality);
 
             //-----------------------------------------------------------------

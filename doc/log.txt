@@ -330,12 +330,11 @@ Changes in 2007 june 20 revition
   - First SVN controlled version in orion.javeriana.edu.co
   - First support for model previewing thumbnail image generation in
     SearchEngineFor3DModels
+  - Offline rendering (hardware accelerated) and screenshot based automatic
+    rendering have now a consistent design.
 
 TODO:
   - Implement OBHU technique
-  - Add an ID for object in SearchEngineFor3DModels (primary key)
-  - Save projected views (perspective with different cameras) when analyzing
-    models
-  - Fix bug in SearchEngine that doesnt read well addList file
-  - Offlinerenderer should not be controlled by application... it should
-    call an excecute routine in the same manner as inside a JFrame
+  - Fix bug in SearchEngine that doesnt read well addList file (missing first
+    line)
+

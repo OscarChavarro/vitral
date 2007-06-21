@@ -1507,7 +1507,9 @@ public class Reader3ds extends PersistenceElement
         if ( skipChunk ) {
             VSDK.reportMessage(null, VSDK.WARNING, "Reader3ds.processChunk",
                 "Skipping chunk (" + (currentChunk.length - 6) + ").");
-            is.skip(currentChunk.length - 6);
+	    if ( currentChunk.length - 6 > 0 ) {
+                is.skip(currentChunk.length - 6);
+	    }
         }
 
     }

@@ -41,6 +41,7 @@ import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
+import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderable;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 
@@ -58,7 +59,7 @@ modes:
     using pbuffers.
   - A software renderer that lies upon a valid and visible window.
 */
-public class BatchConsole implements GLEventListener
+public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements GLEventListener
 {
     private JoglShapeMatchingOfflineRenderer offlineRenderer = null;
     private int distanceFieldSide = 64;
@@ -74,7 +75,7 @@ public class BatchConsole implements GLEventListener
     {
         this.args = args;
         projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
-        offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, projectedViewRenderer);
+        offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, this);
         searchEngine = new SearchEngine();
         canvas = null;
         times = new HashMap<String, TimeReport>();
@@ -127,7 +128,7 @@ public class BatchConsole implements GLEventListener
         }
     }
 
-    private void executeOperation(GL gl)
+    public void executeRendering(GL gl)
     {
         ArrayList<GeometryMetadata> descriptorsArray;
         descriptorsArray = new ArrayList<GeometryMetadata>();
@@ -381,7 +382,7 @@ public class BatchConsole implements GLEventListener
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
-        executeOperation(gl);
+        executeRendering(gl);
         System.exit(1);
     }
 
@@ -397,7 +398,13 @@ public class BatchConsole implements GLEventListener
         if ( instance.offlineRenderer.isPbufferSupported() ||
              (args.length > 0 && 
               !( args[0].equals("add") || args[0].equals("addList") )) ) {
-            instance.executeOperation(null);
+            if ( instance.offlineRenderer.isPbufferSupported() ) {
+                instance.offlineRenderer.execute();
+                instance.offlineRenderer.waitForMe();
+            }
+	    else {
+                instance.executeRendering(null);
+	    }
         }
         else {
             if ( args.length > 0 && 
