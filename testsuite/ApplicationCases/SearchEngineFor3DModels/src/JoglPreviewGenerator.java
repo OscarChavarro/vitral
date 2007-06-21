@@ -189,6 +189,8 @@ public class JoglPreviewGenerator
         cam.setPosition(position);
         cam.setRotation(R);
         cam.setFov(fov);
+        cam.setNearPlaneDistance(0.2);
+        cam.setFarPlaneDistance(20);
     }
 
     public void calculatePreviews(

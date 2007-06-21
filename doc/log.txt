@@ -333,6 +333,10 @@ Changes in 2007 june 20 revition
   - Offline rendering (hardware accelerated) and screenshot based automatic
     rendering have now a consistent design.
 
+Changes in 2007 june 21 revition
+  - Network controlled console version for SearchEngineFor3DModels (sockets
+    based).
+
 TODO:
   - Implement OBHU technique
   - Fix bug in SearchEngine that doesnt read well addList file (missing first
