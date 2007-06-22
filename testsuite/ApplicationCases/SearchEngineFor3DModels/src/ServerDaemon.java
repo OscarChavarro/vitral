@@ -104,6 +104,17 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         searchEngine.readDatabase(descriptorsArray, times);
     }
 
+    private int searchLastSlash(String cad)
+    {
+        int i;
+	for ( i = cad.length()-1; i > 0; i-- ) {
+	    if ( cad.charAt(i) == '/' ) {
+		return i+1;
+	    }
+	}
+	return 0;
+    }
+
     private void startWriter()
     {
         try {
@@ -177,6 +188,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         DecimalFormat f1 = new DecimalFormat("0000000");
         DecimalFormat f2 = new DecimalFormat("00");
         long modelId;
+	String filename, fullpath;
 
         for ( i = 0; i < similarModels.size(); i++ ) {
             modelId = similarModels.get(i).getId();
@@ -189,13 +201,15 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
 
             data = searchMetadataById(descriptorsArray, modelId);
             if ( data != null ) {
-                write("<IMG WIDTH=160 HEIGHT=120 BORDER=1 SRC=\"./output/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + ".jpg" + "\"></IMG>\n");
+                write("<IMG WIDTH=160 HEIGHT=120 BORDER=1 SRC=\"./output/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
             }
             else {
                 write("<B>No metadata descriptor for ID " + similarModels.get(i).getId() + "\n");
             }
 
-            write("<BR>" + similarModels.get(i).toString());
+	    fullpath = similarModels.get(i).toString();
+	    filename = fullpath.substring(searchLastSlash(fullpath));
+            write("<BR>" + filename);
             write("<BR></TD>\n");
 
             if ( i % 4 == 3 ) {
