@@ -1,0 +1,75 @@
+<HTML>
+
+<script language='JavaScript'>
+<!--
+
+    searching = 0;
+    
+    function disable_search()
+    {
+	searching = 1;
+        var input = "text_2d";
+	// only necessary for file uploads now
+        if (input.indexOf("file") == 0) {
+	    document.forms[0].search.value = " Searching ... ";
+	}
+	else if (input.indexOf("text_2d") == 0) {
+	    var applet = document.Sketch;
+	    applet.disable_search();
+	}
+	else if (input.indexOf("text_3d") == 0) {
+	    var applet = document.Teddy;
+	    applet.disable_search();
+	}
+	
+    }  // disable_search
+
+    function enable_search()
+    {
+        var input = "text_2d";
+        if (input.indexOf("file") == 0) {
+	    document.forms[0].search.value = " Search ";
+	}
+	else if (input.indexOf("text_2d") == 0) {
+	    var applet = document.Sketch;
+	    applet.enable_search();
+	}
+	else if (input.indexOf("text_3d") == 0) {
+	    var applet = document.Teddy;
+	    applet.enable_search();
+	}
+	searching = 0;
+
+    }  // enable_search
+
+	
+    function do_search()
+    {
+	// again, only used for file uploads now
+	if (searching) {
+	    alert("Sorry, you can run only one search at a time");
+	    return false;
+	}
+	disable_search();
+	return true;
+	
+    }  // do_search
+//-->
+</script>
+
+<!-- onSubmit="return do_search()" -->
+
+<FORM NAME="query_form" METHOD='POST' ENCTYPE='multipart/for&macute;-data' ACTION='results.cgi' TARGET='control'>
+    <TABLE BGCOLOR="#ffffff" BORDER=0 WIDTH="100%" CELLPADDING=2 CELLSPACING=0>
+        <TR><TH BGCOLOR=#f0f0f0>TEST SKETCH INTERFACE</TH></TR>
+
+        <TR><TD>
+            <APPLET CODE="Sketch.class" ARCHIVE="sketch_comb.jar" NAME="Sketch" WIDTH=245 HEIGHT=525>
+              <PARAM NAME="nr_sketches" VALUE=3>
+            <BR><B>Please enable Java in your browser.</B><P>
+            </applet>
+        </TD></TR>
+    </TABLE>
+</FORM>
+
+</HTML>
