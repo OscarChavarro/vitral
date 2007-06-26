@@ -1,7 +1,68 @@
 <HTML>
-<H1>VITRAL BASED WEB SEARCH ENGINE</H1>
-This is the start page supposed to contain an introduction of the usage of the
-3D model search system, based on VITRAL. <P>
+<HEAD>
+<TITLE>TAKINA COMPUTER GRAPHICS RESEARCH GROUP - 3D MODEL SEARCH ENGINE</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" VLINK="#551A8B" LINK="#0000CC">
+<FONT FACE="Arial, Helvetica">
 
-This is an empty page that must be filled.
+<H1>VITRAL 3D MODEL SEARCH ENGINE</H1>
+
+<H2>Vitral based search engine testbed</H2>
+
+Welcome to the VITRAL 3D Model Search Engine page. This site is a web based
+search engine for 3D geometrical models, inspired in (almost cloned from!) the
+original Princeton's 3D Model Search Engine available at 
+<A HREF="http://shape.cs.princeton.edu">http://shape.cs.princeton.edu</A>,
+as currently published in [FUNK2003] and [MIN2003].<P>
+
+Current differences between this search engine and original Princeton's search
+engine are:
+<UL>
+<LI> Princeton's search engine is a lot bigger than this site, with more traffic and many more supported models, as VITRAL implementation doesn't have a web crawler yet. If you want to search for 3D models, use Princeton's original page.
+<LI> Princeton's search engine is the original. This page is just an independent clone. If you want to reference this idea, please give credit to original authors at Princeton.
+<LI> Absolutely all of the source code is free software, available in the net
+and distributed inside an easily reproducible project, included inside the
+Vitral SDK software distribution. Download page for Vitral SDK is at
+<A HREF="http://sophia.javeriana.edu.co/~ochavarr">http://sophia.javeriana.edu.co/~ochavarr</A>. Use VITRAL implementation if you are interested in studying
+current system (most posible if you are a computer science student, or other
+related academic person interested in pattern matching and shape matching).
+<LI> This is an almost 99% java implementation of the search engine. Current
+implementation use java libraries (Vitral, JOGL), java applets and java
+servlets inside a TOMCAT web application container. Use VITRAL implementation
+if you like java programming language use in computer graphics applications. 
+Currently, just some Fourier algorithms are used in C/C++, with JNI native
+code wrappers for SpharmonicKit and FTTW libraries.
+<LI>This implementation integrates other shape matching techniques aside from
+those described in [FUNK2003] and [MIN2003]. Use this implementation if you
+want to compare different shape matching algorithms.
+</UL>
+
+
+<H2>Available datasets</H2>
+
+<UL>
+<LI><B>Free Models</B><BR>
+~ 9800 models downloaded from the Web
+</UL>
+
+<H2>References</H2>
+
+<UL>
+<LI>[FUNK2003] Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen, Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1. January 2003. Pp. 83-105.
+<LI>[MIN2003] Min, Patrick. Halderman, John A. Kazhdan, Michael. Funkhouser, Thoimas A. "Early Experiences with a 3D Model Search Engine".
+</UL>
+
+<HR>
+<BR>                                                  
+<FONT SIZE=-1><CENTER><EM>Online since June 2007</EM></CENTER></FONT>
+<BR>
+
+<BR>
+<FONT SIZE=-1>
+This site should work with any 2007 or later updated web server, as Firefox/Moxilla 1.7, Microsoft Internet Explorer 7 or equivalent, with Java and Javascript enabled, version 1.6 or higher.<P>
+</FONT>
+
+</FONT>
+</BODY>
 </HTML>
+

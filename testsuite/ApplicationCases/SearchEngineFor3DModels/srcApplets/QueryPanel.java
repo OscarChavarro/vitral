@@ -42,10 +42,12 @@ public class QueryPanel extends Panel
 	db_list = new Choice();
 	db_list.addItem("All Models");
 	db_list.addItem("Free Web Models");
+/*
 	db_list.addItem("Viewpoint Models");
 	db_list.addItem("De Espona Models");
 	db_list.addItem("CacheForce Models");
 	db_list.addItem("Protein Database");
+*/
 	db_list.select(0);
 	db_list.addItemListener(new ItemListener() {
 	    public void itemStateChanged(ItemEvent itemevent) {
@@ -103,10 +105,12 @@ public class QueryPanel extends Panel
 			 0, 10, 2.0, 0.75, 2, 2, 2, 2);
 	Layout.constrain(this, db_list, 2, 0, 2, 1, 0, 10,
 			 2.0, 0.75, 4, 2, 0, 2);
+/*
 	Layout.constrain(this, keywords_text, 0, 1, 2, 1,
 			 0, 10, 1.0, 0.75, 2, 2, 2, 2);
 	Layout.constrain(this, query, 2, 1, 2, 1, 0, 10,
 			 1.0, 0.75, 2, 2, 2, 2);
+*/
     }
     
     public void disable_search() {
