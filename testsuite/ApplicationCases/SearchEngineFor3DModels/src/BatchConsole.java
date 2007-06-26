@@ -69,6 +69,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
     private String args[];
     private GLCanvas canvas;
     private SearchEngine searchEngine;
+    private ArrayList<GeometryMetadata> descriptorsArray;
     private HashMap<String, TimeReport> times;
 
     private BatchConsole(String args[])
@@ -78,7 +79,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, this);
         searchEngine = new SearchEngine();
         canvas = null;
-        times = new HashMap<String, TimeReport>();
+        times = searchEngine.createTimers();
     }
 
     private void reportTimes()
@@ -128,33 +129,18 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         }
     }
 
-    public void executeRendering(GL gl)
+    public ArrayList <Result> runCommand(GL gl, String command[], HashMap<String, TimeReport> times)
     {
-        ArrayList<GeometryMetadata> descriptorsArray;
-        descriptorsArray = new ArrayList<GeometryMetadata>();
-        ArrayList <Result> similarModels;
+        ArrayList <Result> similarModels = null;
         int i, j, k;
 
-        times.put("TOTAL", new TimeReport("TOTAL"));
-        times.put("VOXELIZE", new TimeReport("VOXELIZE"));
-        times.put("READ_MODEL", new TimeReport("READ_MODEL"));
-        times.put("READ_DATABASE", new TimeReport("READ_DATABASE"));
-        times.put("WRITE_DATABASE", new TimeReport("WRITE_DATABASE"));
-        times.put("SEARCH_MODEL", new TimeReport("SEARCH_MODEL"));
-        times.put("SPHERICAL_HARMONICS", new TimeReport("SPHERICAL_HARMONICS"));
-        times.put("PRIMITIVE_COUNT", new TimeReport("PRIMITIVE_COUNT"));
-        times.put("CUBE13_PROJECTIONS", new TimeReport("CUBE13_PROJECTIONS"));
-        times.put("PREVIEWS", new TimeReport("PREVIEWS"));
         times.get("TOTAL").start();
-
-        if ( args[0].equals("add") ) {
+        if ( command[0].equals("add") ) {
             System.out.println("Processing command add...");
-            searchEngine.readDatabase(descriptorsArray, times);
-            searchEngine.indexFiles(gl, args, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
+            searchEngine.indexFiles(gl, command, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
             searchEngine.saveDatabase(descriptorsArray, times);
         }
-        else if ( args[0].equals("addList") ) {
-            searchEngine.readDatabase(descriptorsArray, times);
+        else if ( command[0].equals("addList") ) {
             String list[] = null;
             try {
                 File fd;
@@ -168,7 +154,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
                 i = 0;
 
                 //- Count filenames ------------------------------------------
-                fd = new File(args[1]);
+                fd = new File(command[1]);
                 fr = new FileReader(fd);
                 parser = new StreamTokenizer(fr);
 
@@ -202,7 +188,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
                 System.out.println("Processing " + count + " files.");
                 list = new String[count];
 
-                fd = new File(args[1]);
+                fd = new File(command[1]);
                 fr = new FileReader(fd);
                 parser = new StreamTokenizer(fr);
 
@@ -241,24 +227,19 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
             searchEngine.indexFiles(gl, list, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
             searchEngine.saveDatabase(descriptorsArray, times);
         }
-        else if ( args[0].equals("searchModel") ) {
-            searchEngine.readDatabase(descriptorsArray, times);
-            similarModels = searchEngine.matchModel(gl, args[1], descriptorsArray, 1, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
-            reportResults(similarModels);
+        else if ( command[0].equals("searchModel") ) {
+            similarModels = searchEngine.matchModel(gl, command[1], descriptorsArray, 1, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
         }
-        else if ( args[0].equals("searchDistanceField") ) {
-            searchEngine.readDatabase(descriptorsArray, times);
-            IndexedColorImage distanceField = searchEngine.readIndexedColorImage(args[1], distanceFieldSide);
+        else if ( command[0].equals("searchDistanceField") ) {
+            IndexedColorImage distanceField = searchEngine.readIndexedColorImage(command[1], distanceFieldSide);
             if ( distanceField == null ) {
                 System.err.println("Error importing distance field. Program aborted.");
                 System.exit(1);
             }
             similarModels = searchEngine.matchSketch(gl, distanceField, descriptorsArray, 5, times);
-            reportResults(similarModels);
         }
-        else if ( args[0].equals("searchSketch") ) {
-            searchEngine.readDatabase(descriptorsArray, times);
-            IndexedColorImage outline = searchEngine.readIndexedColorImage(args[1], distanceFieldSide);
+        else if ( command[0].equals("searchSketch") ) {
+            IndexedColorImage outline = searchEngine.readIndexedColorImage(command[1], distanceFieldSide);
             if ( outline == null ) {
                 System.err.println("Error importing distance field. Program aborted.");
                 System.exit(1);
@@ -268,17 +249,14 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
             similarModels = searchEngine.matchSketch(gl, distanceField, descriptorsArray, 5, times);
-            reportResults(similarModels);
         }
-        else if ( args[0].equals("exportDatabase") ) {
-            if ( args.length != 2 ) {
+        else if ( command[0].equals("exportDatabase") ) {
+            if ( command.length != 2 ) {
                 System.err.println("ERROR: exportDatabase command must specified a text filename to export.");
                 System.err.println("Database exporting aborted.");
             }
             else {
                 System.out.println("Processing command exportDatabase ...");
-                searchEngine.readDatabase(descriptorsArray, times);
-
                 times.get("WRITE_DATABASE").start();
                 System.out.println("Exporting database with " + descriptorsArray.size() + " fields!");
                 System.out.println("Depending on database size, this could take some time...");
@@ -290,11 +268,11 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
 
                 try {
                     //---------------------------------------------------------
-                    File fd = new File(args[1]);
+                    File fd = new File(command[1]);
                     FileOutputStream fos;
                     BufferedOutputStream writer;
 
-                    fd = new File(args[1]);
+                    fd = new File(command[1]);
                     fos = new FileOutputStream(fd);
                     writer = new BufferedOutputStream(fos);
 
@@ -341,11 +319,27 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
             }
         }
         else {
-            System.err.println("Invalid command [" + args[0] + "]");
+            System.err.println("Invalid command [" + command[0] + "]");
         }
 
         //-----------------------------------------------------------------
         times.get("TOTAL").stop();
+        return similarModels;
+    }
+
+    public void executeRendering(GL gl)
+    {
+        descriptorsArray = new ArrayList<GeometryMetadata>();
+        int i;
+
+        //-----------------------------------------------------------------
+        ArrayList <Result> similarModels;
+
+        searchEngine.readDatabase(descriptorsArray, times);
+        similarModels = runCommand(gl, args, times);
+        if ( similarModels != null ) {
+            reportResults(similarModels);
+        }
         reportTimes();
 
         //- Free unused references for garbage collection -----------------
@@ -402,9 +396,9 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
                 instance.offlineRenderer.execute();
                 instance.offlineRenderer.waitForMe();
             }
-	    else {
+            else {
                 instance.executeRendering(null);
-	    }
+            }
         }
         else {
             if ( args.length > 0 && 

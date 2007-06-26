@@ -12,9 +12,17 @@
 
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/environment/geometry/Geometry.java:78: Warning: Unexpected tag </img> found
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/io/image/ImagePersistence.java:94: Warning: argument `imagen' of command @param is not found in the argument list of ImagePersistence::importRGB(File inImageFd)
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/io/image/ImagePersistence.java:94: Warning: The following parameters of vsdk::toolkit::io::image::ImagePersistence::importRGB(File inImageFd) are not documented:
+  parameter inImageFd
+
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/GeometryMetadata.java:38: Warning: The following parameters of vsdk::toolkit::media::GeometryMetadata::doMinskowskiDistance(GeometryMetadata other, double s, String subGroup) are not documented:
+  parameter subGroup
+
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/Image.java:53: Warning: The following parameters of vsdk::toolkit::media::Image::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 
 /home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/IndexedColorImage.java:138: Warning: The following parameters of vsdk::toolkit::media::IndexedColorImage::putPixelRgb(int x, int y, RGBPixel p) are not documented:
   parameter p
 
+/home/jedilink/LABORAL_JAVERIANA/investigacion_grupo_Takina/VITRAL/vitral/src/vsdk/toolkit/media/ZBuffer.java:128: Warning: argument `p' of command @param is not found in the argument list of ZBuffer::exportIndexedColorImage()

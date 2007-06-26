@@ -29,9 +29,9 @@ public class ServletConsole extends HttpServlet {
           throws ServletException
     {
         System.out.println("Initializing ServletConsole class.");
-	if ( workingImage == null ) {
+        if ( workingImage == null ) {
             workingImage = new IndexedColorImage();
-	}
+        }
         workingImage.init(320, 240);
         workingImage.createTestPattern();
     }
@@ -45,38 +45,38 @@ public class ServletConsole extends HttpServlet {
     {
         StringTokenizer auxStringTokenizer;
         auxStringTokenizer = new StringTokenizer(cad, " \n");
-	String token;
-	int pos;
-	int xSize = 320;
-	int ySize = 240;
-	int index;
-	int x, y;
+        String token;
+        int pos;
+        int xSize = 320;
+        int ySize = 240;
+        int index;
+        int x, y;
 
-	for ( pos = 0; auxStringTokenizer.hasMoreTokens(); pos++ ) {
-	    token = auxStringTokenizer.nextToken();
-	    switch ( pos ) {
- 	      case 0:
-		xSize = Integer.parseInt(token);
-		break;
- 	      case 1:
-		ySize = Integer.parseInt(token);
-		if ( img.getXSize() != xSize ||
+        for ( pos = 0; auxStringTokenizer.hasMoreTokens(); pos++ ) {
+            token = auxStringTokenizer.nextToken();
+            switch ( pos ) {
+              case 0:
+                xSize = Integer.parseInt(token);
+                break;
+              case 1:
+                ySize = Integer.parseInt(token);
+                if ( img.getXSize() != xSize ||
                      img.getYSize() != ySize ) {
-		    System.out.printf("Initializing image to size <%d x %d>\n",
-				      xSize, ySize);
-		    img.init(xSize, ySize);
-		}
-		break;
-	      default:
-		index = Integer.parseInt(token);
-		if ( index < xSize*ySize ) {
-		    y = index / xSize;
-		    x = index % xSize;
-		    img.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(255));
-		}
-		break;
-	    }
-	}
+                    System.out.printf("Initializing image to size <%d x %d>\n",
+                                      xSize, ySize);
+                    img.init(xSize, ySize);
+                }
+                break;
+              default:
+                index = Integer.parseInt(token);
+                if ( index < xSize*ySize ) {
+                    y = index / xSize;
+                    x = index % xSize;
+                    img.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(255));
+                }
+                break;
+            }
+        }
     }
 
     private void processImages(
@@ -96,10 +96,10 @@ public class ServletConsole extends HttpServlet {
 
         while ( listaDeParametros.hasMoreElements() ) {
             cad = "" + listaDeParametros.nextElement();
-	    if ( cad.startsWith("image") ) {
+            if ( cad.startsWith("image") ) {
                 extractImage(workingImage, request.getParameter(cad));
-		out.println("filespec: " + cad);
-	    }
+                out.println("filespec: " + cad);
+            }
         }
         out.println("done");
 
@@ -109,12 +109,12 @@ public class ServletConsole extends HttpServlet {
         System.out.println("  - Parameters:");
         while ( listaDeParametros.hasMoreElements() ) {
             cad = "" + listaDeParametros.nextElement();
-	    if ( cad.startsWith("image") ) {
-		System.out.println("    . Recieving an image (" + cad + ")!");
-	      }
-	      else {
+            if ( cad.startsWith("image") ) {
+                System.out.println("    . Recieving an image (" + cad + ")!");
+              }
+              else {
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
-	    }
+            }
         }
     }
 
@@ -155,7 +155,8 @@ public class ServletConsole extends HttpServlet {
         out.println("</UL>"); 
 
         //-----------------------------------------------------------------
-        out.println("<img src=\"http://10.0.0.1:8080/output.jpg\"></img>\n");
+        //out.println("<img src=\"http://10.0.0.1:8080/output.jpg\"></img>\n");
+        out.println("<img src=\"http://10.6.2.49:8080/images/output.jpg\"></img>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");
@@ -182,14 +183,15 @@ public class ServletConsole extends HttpServlet {
                       HttpServletResponse response)
         throws IOException, ServletException
     {
-	if ( workingImage != null ) {
+        if ( workingImage != null ) {
             workingImage = new IndexedColorImage();
-	}
+        }
 
         processImages(request, response, "doPost");
 
         //-----------------------------------------------------------------
-        File f = new File("/tmp/output.jpg");
+        //File f = new File("/tmp/output.jpg");
+        File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/output.jpg");
 
         if ( f != null ) {
             System.out.println("Trying to write an image in " + f.getParentFile().getAbsolutePath());
