@@ -6,14 +6,12 @@
 
 <web-app>
 
-    <display-name>Aplicaciones de prueba de tipo hola mundo</display-name>
+    <display-name>VITRAL-based search engine for 3d models</display-name>
 
     <description>
-    Aplicaciones de prueba sencillas que pueden ser usadas como plantillas
-    de desarrollo para aplicaciones JSP. Estos ejemplos han sido probados en
-    Linux Fedora Core 4 (kernel 2.6.16), con el Java JDK 1.6.0 (version
-    x86_64, corriendo en un AMD64) y el sistema Tomcat (catalina) version
-    6.0.13, en junio de 2007.
+    Tested under Linux Fedora Core 4 (kernel 2.6.16), with Java JDK 1.6.0
+    (x86_64 version running on an AMD64) amd Tomcat (catalina) version
+    6.0.13, june 2007.
     </description>
 
     <servlet>
