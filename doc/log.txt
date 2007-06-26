@@ -337,6 +337,10 @@ Changes in 2007 june 21 revition
   - Network controlled console version for SearchEngineFor3DModels (sockets
     based).
 
+Changes in 2007 june 24-25 revition
+  - First version of applet for controlling the SearchEngineFor3DModels system
+    from web.
+
 TODO:
   - Implement OBHU technique
   - Fix bug in SearchEngine that doesnt read well addList file (missing first
