@@ -59,10 +59,10 @@ public class SketchCanvas extends Canvas
         prev_points_y = new Vector<Integer>(100, 100);
         prev_operation = new Vector<Integer>(50, 25);
         prev_start_indices = new Vector<Integer>(50, 25);
-	int i;
+        int i;
         for ( i = 0; i < 6; i++ ) {
             help_strings[i] = null;
-	}
+        }
     }
     
     public void clear(Graphics graphics) {

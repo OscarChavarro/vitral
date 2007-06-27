@@ -133,7 +133,7 @@ public class Sketch extends SearchApplet
     }
     
     public void doSearch() {
-	int i;
+        int i;
 
         if ( !query_panel.get_searching() ) {
             disable_search();
@@ -145,7 +145,7 @@ public class Sketch extends SearchApplet
             for ( i = 1; i <= 3; i++) {
                 stringbuffer.append("&file" + i + "="
                                     + filespecs[i - 1]);
-	    }
+            }
             query_panel.request_url(stringbuffer);
         }
     }
@@ -240,7 +240,7 @@ public class Sketch extends SearchApplet
                                        + filespecs[i]);
                     if ( filespecs[i] == null ) {
                         filespecs[i] = "null";
-		    }
+                    }
                 }
                 enableButtons();
                 setStatus(0);

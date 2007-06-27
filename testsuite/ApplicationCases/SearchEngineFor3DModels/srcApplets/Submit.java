@@ -22,7 +22,7 @@ public class Submit
     
     public boolean connect(Applet applet) {
         try {
-            String pageUrl = Globals.BASE_URL_SKETCH;
+            String pageUrl = applet.getCodeBase() + "ServletConsole?";
             System.out.println("Url for sketch reporting: " + pageUrl);
             URL url = new URL(pageUrl);
             urlConn = url.openConnection();
