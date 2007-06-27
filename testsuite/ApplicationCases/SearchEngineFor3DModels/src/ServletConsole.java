@@ -17,7 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
@@ -47,11 +49,11 @@ public class ServletConsole extends HttpServlet {
         workingImage.createTestPattern();
         if ( outline == null ) {
             outline = new IndexedColorImage();
-	}
+        }
         outline.init(distanceFieldSide, distanceFieldSide);
         if ( distanceField == null ) {
             distanceField = new IndexedColorImage();
-	}
+        }
         distanceField.init(distanceFieldSide, distanceFieldSide);
 
         //-----------------------------------------------------------------
@@ -151,6 +153,59 @@ public class ServletConsole extends HttpServlet {
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
         }
+
+        saveImage(workingImage, "output.jpg", new PrintWriter(System.out));
+    }
+
+    private void extractOutlineImage(
+        IndexedColorImage source, IndexedColorImage target)
+    {
+        int x, y;
+        int x0Roi, y0Roi, x1Roi, y1Roi;
+        IndexedColorImage roi, squaredRoi, framedRoi;
+        int val;
+
+        x1Roi = 0;
+        y1Roi = 0;
+        x0Roi = source.getXSize();
+        y0Roi = source.getYSize();
+        for ( y = 0; y < source.getYSize(); y++ ) {
+            for ( x = 0; x < source.getXSize(); x++ ) {
+                val = source.getPixel(x, y);
+                if ( val != 0 ) {
+                    if ( x1Roi < x ) x1Roi = x;
+                    if ( y1Roi < y ) y1Roi = y;
+                    if ( x0Roi > x ) x0Roi = x;
+                    if ( y0Roi > y ) y0Roi = y;
+                }
+            }
+        }
+        roi = new IndexedColorImage();
+        squaredRoi = new IndexedColorImage();
+        framedRoi = new IndexedColorImage();
+
+        ImageProcessing.extractRoi(source, roi, x0Roi, y0Roi, x1Roi, y1Roi);
+        ImageProcessing.squareFill(roi, squaredRoi);
+        ImageProcessing.frame(squaredRoi, framedRoi,
+                              squaredRoi.getXSize()/10);
+        ImageProcessing.resize(framedRoi, target);
+        for ( y = 0; y < target.getYSize(); y++ ) {
+            for ( x = 0; x < target.getXSize(); x++ ) {
+                val = target.getPixel(x, y);
+                if ( val != 0 ) {
+                    target.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(255));
+                }
+            }
+        }
+    }
+
+    private void saveImage(Image img, String filename, PrintWriter out)
+    {
+        File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/" + filename);
+        if ( f == null ) {
+            out.println("Error writing image. No file space available for servlet.");
+        }
+        ImagePersistence.exportJPG(f, img);
     }
 
     private void processGeneric(
@@ -194,28 +249,40 @@ public class ServletConsole extends HttpServlet {
         if ( workingImage == null ) {
             out.println("Error importing distance field. Query aborted.");
         }
-	else {
-	    ImageProcessing.resize(workingImage, outline);
-            File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/outline.jpg");
-            if ( f != null ) {
-                out.println("<P>Internal outline in file " + f.getParentFile().getAbsolutePath() + ":<P>");
-            }
-            else {
-                out.println("Error writing image. No file space available for servlet.");
-            }
-            ImagePersistence.exportJPG(f, outline);
+        else {
+            extractOutlineImage(workingImage, outline);
+            saveImage(outline, "outline.jpg", out);
 
-outline = 
             distanceField = new IndexedColorImage();
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
-            //similarModels = searchEngine.matchSketch(distanceField, descriptorsArray, 5);
-            //searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray);
-	}
+
+            similarModels = searchEngine.matchSketch(distanceField, descriptorsArray, 5);
+            searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray);
+	    //
+            RGBImage distanceFieldRgb;
+            ImageProcessing.gammaCorrection(distanceField, 2.0);
+            distanceFieldRgb = distanceField.exportToRgbImage();
+            int x, y;
+
+            for ( x = 0; x < distanceFieldRgb.getXSize(); x++ ) {
+                for ( y = 0; y < distanceFieldRgb.getYSize(); y++ ) {
+                    if ( distanceField.getPixel(x, y) < 1 ) {
+                        distanceFieldRgb.putPixel(x, y,
+                            (byte)255, (byte)0, (byte)0);
+                    }
+                }
+            }
+            saveImage(distanceFieldRgb, "distanceField.jpg", out);
+        }
         //-----------------------------------------------------------------
-        //out.println("<img src=\"http://10.0.0.1:8080/output.jpg\"></img>\n");
+	out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
+	out.println("2D Sketch recieved from applet:<BR>\n");
         out.println("<img src=\"http://10.6.2.49:8080/images/output.jpg\"></img>\n");
+	out.println("<P>Normalized 2D Sketch to 64x64 pixels:<BR>\n");
         out.println("<img src=\"http://10.6.2.49:8080/images/outline.jpg\"></img>\n");
+	out.println("<P>Distance field (gamma corrected at factor 2 and border highlighted):<BR>\n");
+        out.println("<img src=\"http://10.6.2.49:8080/images/distanceField.jpg\"></img>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");
@@ -247,19 +314,6 @@ outline =
         }
 
         processImages(request, response, "doPost");
-
-        //-----------------------------------------------------------------
-        //File f = new File("/tmp/output.jpg");
-        File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/output.jpg");
-
-        if ( f != null ) {
-            System.out.println("Trying to write an image in " + f.getParentFile().getAbsolutePath());
-        }
-        else {
-            System.err.println("Error writing image. No file space available for servlet.");
-        }
-        ImagePersistence.exportJPG(f, workingImage);
-
     }
 
 }

@@ -347,6 +347,10 @@ Changes in 2007 june 26 revition
   - SearchEngineFor3DModels refactorized and organized. Better results
     management for avoiding repeating hits.
 
+Changes in 2007 june 27 revition
+  - First succesfully and fully working web application in
+    SearchEngineFor3DModels, proved with applet / servlet test! :)
+
 TODO:
   - Implement OBHU technique
   - Fix bug in SearchEngine that doesnt read well addList file (missing first
