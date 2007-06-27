@@ -62,18 +62,24 @@ public abstract class ImageProcessing extends ProcessingElement {
     */
     public static void resize(Image input, Image output)
     {
-        int xSize = output.getXSize();
-        int ySize = output.getYSize();
+        int xSizeIn = input.getXSize();
+        int ySizeIn = input.getYSize(); 
+        int xSizeOut = output.getXSize();
+        int ySizeOut = output.getYSize();
         double u, v;
         int x, y;
         ColorRgb source;
         RGBPixel target = new RGBPixel();
+        RGBPixel acum = new RGBPixel();
 
-        if ( xSize >= input.getXSize() && ySize >= input.getYSize() ) {
-            for ( x = 0; x < xSize; x++ ) {
-                for ( y = 0; y < ySize; y++ ) {
-                    u = ((double)x)/((double)(xSize));
-                    v = ((double)y)/((double)(ySize));
+        if ( xSizeOut == xSizeIn && ySizeOut == ySizeIn ) {
+            copy(input, output);
+        }
+        else if ( xSizeOut > xSizeIn && ySizeOut > ySizeIn ) {
+            for ( x = 0; x < xSizeOut; x++ ) {
+                for ( y = 0; y < ySizeOut; y++ ) {
+                    u = ((double)x)/((double)(xSizeOut));
+                    v = ((double)y)/((double)(ySizeOut));
                     source = input.getColorRgbBiLinear(u, v);
                     target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r*255));
                     target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g*255));
@@ -81,10 +87,154 @@ public abstract class ImageProcessing extends ProcessingElement {
                     output.putPixelRgb(x, y, target);
                 }
             }
-	}
-	else {
-	    output.createTestPattern();
-	}
+        }
+        else {
+            output.init(xSizeOut, ySizeOut);
+            double xf = (((double)xSizeIn) / ((double)xSizeOut));
+            double yf = (((double)ySizeIn) / ((double)ySizeOut));
+            int xfi = (int)xf + 1;
+            int yfi = (int)yf + 1;
+            double w = xfi * yfi;
+            int xx, yy, x0, y0, x1, y1;
+            acum = new RGBPixel();
+            for ( xx = 0; xx < xSizeOut; xx++ ) {
+                for ( yy = 0; yy < ySizeOut; yy++ ) {
+                    acum.r = acum.g = acum.b = 0;
+
+                    x0 = (int)(((double)xx)*xf);
+                    x1 = x0 + xfi;;
+                    for ( x = x0; x < x1; x++ ) {
+                        y0 = (int)(((double)yy)*yf);
+                        y1 = y0 + yfi;
+                        for ( y = y0; y < y1; y++ ) {
+                            target = input.getPixelRgb(x, y);
+                            acum.r += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.r)) / w));
+                            acum.g += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.g)) / w));
+                            acum.b += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.b)) / w));
+                        }
+                    }
+
+                    output.putPixelRgb(xx, yy, acum);
+                }
+            }
+        }
+    }
+
+    /**
+    Copies the contents from the `input` image to the `output` image. Note that
+    this method can serve also as a format conversion between different Image
+    formats (i.e. convert an RGBImage to an IndexedColorImage).
+    */
+    public static void copy(Image input, Image output)
+    {
+        int xSize = input.getXSize();
+        int ySize = input.getYSize();
+        int x, y;
+        RGBPixel target = new RGBPixel();
+
+        output.init(xSize, ySize);
+        for ( x = 0; x < xSize; x++ ) {
+            for ( y = 0; y < ySize; y++ ) {
+                target = input.getPixelRgb(x, y);
+                output.putPixelRgb(x, y, target);
+            }
+        }
+    }
+
+    /**
+    Takes the greater dimension of the input image, and uses it to create an
+    output square image of such dimension. Then copies the input image
+    centered in the output image.
+    */
+    public static void squareFill(Image input, Image output)
+    {
+        int xSize = input.getXSize();
+        int ySize = input.getYSize();
+        int x, y;
+        RGBPixel target = new RGBPixel();
+        int maxSize = xSize;
+
+        if ( ySize > maxSize ) {
+            maxSize = ySize;
+        }
+        output.init(maxSize, maxSize);
+
+        int dx, dy;
+        dx = (maxSize-xSize)/2;
+        dy = (maxSize-ySize)/2;
+        for ( x = 0; x < xSize; x++ ) {
+            for ( y = 0; y < ySize; y++ ) {
+                target = input.getPixelRgb(x, y);
+                output.putPixelRgb(x+dx, y+dy, target);
+            }
+        }
+    }
+
+    /**
+    Grows the input image copying the input in the center of a border of
+    `border` size.
+    */
+    public static void frame(Image input, Image output, int border)
+    {
+        int xSize = input.getXSize();
+        int ySize = input.getYSize();
+        int x, y;
+        RGBPixel target = new RGBPixel();
+
+        output.init(xSize+2*border, ySize+2*border);
+
+        int dx, dy;
+        for ( x = 0; x < xSize; x++ ) {
+            for ( y = 0; y < ySize; y++ ) {
+                target = input.getPixelRgb(x, y);
+                output.putPixelRgb(x+border, y+border, target);
+            }
+        }
+    }
+
+    /**
+    This method extracts a region of interest from source image rectangle
+    including points from <x0Roi, y0Roi> to <x1Roi, y1Roi>.
+    */
+    public static void extractRoi(Image source, Image roi,
+        int x0Roi, int y0Roi, int x1Roi, int y1Roi)
+    {
+        int tmp;
+        int dx, dy;
+
+        //-----------------------------------------------------------------
+        if ( x0Roi > x1Roi ) {
+            tmp = x0Roi;
+            x0Roi = x1Roi;
+            x1Roi = tmp;
+        }
+        if ( y0Roi > y1Roi ) {
+            tmp = y0Roi;
+            y0Roi = y1Roi;
+            y1Roi = tmp;
+        }
+        if ( x0Roi < 0 ) x0Roi = 0;
+        if ( y0Roi < 0 ) y0Roi = 0;
+        if ( x1Roi >= source.getXSize() ) x1Roi = source.getXSize()-1;
+        if ( y1Roi >= source.getYSize() ) y1Roi = source.getYSize()-1;
+        if ( x0Roi >= source.getXSize() ||
+             y0Roi >= source.getYSize()) {
+            return;
+        }
+        dx = x1Roi - x0Roi + 1;
+        dy = y1Roi - y0Roi + 1;
+
+        //-----------------------------------------------------------------
+        RGBPixel target = new RGBPixel();
+        int x, y;
+
+        roi.init(dx, dy);
+        for ( x = 0; x < dx; x++ ) {
+            for ( y = 0; y < dy; y++ ) {
+                target = source.getPixelRgb(x0Roi+x, y0Roi+y);
+                roi.putPixelRgb(x, y, target);
+            }
+        }
     }
 
     /**
