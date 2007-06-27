@@ -5,5 +5,5 @@ if [ ! -d ./classes ]; then
 fi
 
 cd src
-javac -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar:../lib/vsdk_transition.jar -d ../classes SceneEditorApplication.java
+javac -Xlint:deprecation -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar:../lib/vsdk_transition.jar -d ../classes SceneEditorApplication.java
 cd ..

@@ -5,5 +5,5 @@ if [ ! -d ./classes ]; then
 fi
 
 cd src
-javac -d ../classes -classpath ../../../../lib/vsdk.jar:. ./PbufferExample.java
+javac -Xlint:deprecation -Xlint:unchecked -d ../classes -classpath ../../../../lib/vsdk.jar:. ./PbufferExample.java
 cd ..

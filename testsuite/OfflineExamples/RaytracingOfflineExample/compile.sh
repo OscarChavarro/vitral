@@ -5,5 +5,5 @@ if [ ! -d ./classes ]; then
 fi
 
 cd src
-javac -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar -d ../classes RaytracerSimple.java
+javac -Xlint:deprecation -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar -d ../classes RaytracerSimple.java
 cd ..
