@@ -17,14 +17,19 @@
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
+import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -47,13 +52,25 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.PrimitiveCountShapeDescriptor;
+import vsdk.toolkit.media.ShapeDescriptor;
+import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 import vsdk.framework.shapeMatching.ShapeDescriptor3DGenerator;
 import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
+/**
+Class `SearchEngine` stablishes a Fachade design pattern role in which any
+application can ask for high level functional operations of a Vitral based
+search engine for 3D models.
+
+Vitral based search engine for 3D models follows the functional operations
+ideas of other systems, like the one proposed in [FUNK2003] and [MIN2003].
+*/
 public class SearchEngine
 {
+    private HashMap<String, TimeReport> timers;
+
     private int searchLastSlash(String cad)
     {
         int i;
@@ -63,6 +80,24 @@ public class SearchEngine
             }
         }
         return 0;
+    }
+
+    /**
+    Search for a result with the given id inside the list. If not found
+    returns null.
+    */
+    private Result searchResult(ArrayList <Result> results, long id)
+    {
+        int i;
+        Result r;
+
+        for ( i = 0; i < results.size(); i++ ) {
+            r = results.get(i);
+            if ( r.getId() == id ) {
+                return r;
+            }
+        }
+        return null;
     }
 
     private GeometryMetadata searchMetadataById(ArrayList<GeometryMetadata> descriptorsArray, long id)
@@ -83,7 +118,7 @@ public class SearchEngine
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
     */
-    private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer, HashMap<String, TimeReport> times)
+    private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer)
     {
         //- Variables -----------------------------------------------------
         ArrayList<SimpleBody> things;
@@ -103,7 +138,7 @@ public class SearchEngine
         System.out.println("Analyzing model id [" + metadata.getId() + "], filename: " + filename);
         try {
             //- Load scene from specified size and configure its body group ---
-            times.get("READ_MODEL").start();
+            timers.get("READ_MODEL").start();
             File fd = new File(filename);
             System.out.print("  - Reading file... ");
             EnvironmentPersistence.importEnvironment(fd,
@@ -118,7 +153,7 @@ public class SearchEngine
                 System.err.println("Warning: no geometries found inside " + filename + ", skipping shape analysis.");
                 return null;
             }
-            times.get("READ_MODEL").stop();
+            timers.get("READ_MODEL").stop();
             System.out.println("  - Processing " + bodySet.getBodies().size() +
                 " geometries:");
 
@@ -126,17 +161,17 @@ public class SearchEngine
 
             //- Calculate spherical harmonics shape descriptor ----------------
             System.out.print("    . Primitive count shape descriptor ... ");
-            times.get("PRIMITIVE_COUNT").start();
+            timers.get("PRIMITIVE_COUNT").start();
             PrimitiveCountShapeDescriptor primitiveCountShapeDescriptor;
             primitiveCountShapeDescriptor =
                 component.calculatePrimitiveCountShapeDescriptor(bodySet,
                     "PRIMITIVE_COUNT");
             metadata.getDescriptors().add(primitiveCountShapeDescriptor);
-            times.get("PRIMITIVE_COUNT").stop();
+            timers.get("PRIMITIVE_COUNT").stop();
             System.out.println("Ok.");
 
             //- Prepare voxelized version of scene for descriptors requiring it
-            times.get("VOXELIZE").start();
+            timers.get("VOXELIZE").start();
             for ( i = 0; i < bodySet.getBodies().size(); i++ ) {
                 referenceGeometry = bodySet.getBodies().get(i).getGeometry();
                 System.out.print("    . Voxelizing a " +
@@ -157,25 +192,25 @@ public class SearchEngine
                 // Keep reference clean for garbage collector
                 referenceGeometry = null;
             }
-            times.get("VOXELIZE").stop();
+            timers.get("VOXELIZE").stop();
 
             //- Calculate spherical harmonics shape descriptor ----------------
             System.out.print("    . Spherical harmonics shape descriptor for voxelized geometry ... ");
-            times.get("SPHERICAL_HARMONICS").start();
+            timers.get("SPHERICAL_HARMONICS").start();
             FourierShapeDescriptor fourierShapeDescriptor;
             fourierShapeDescriptor =
                 component.calculateSphericalHarmonicsShapeDescriptor(vv,
                     "SPHERICAL_HARMONIC_3D");
             metadata.getDescriptors().add(fourierShapeDescriptor);
-            times.get("SPHERICAL_HARMONICS").stop();
+            timers.get("SPHERICAL_HARMONICS").stop();
             System.out.println("Ok.");
 
             //- Projection views image descriptor extraction [FUNK2003] ---
             if ( withProjection ) {
                 System.out.print("    . Projected views image descriptors (cube 13 setup) ... ");
-                times.get("CUBE13_PROJECTIONS").start();
+                timers.get("CUBE13_PROJECTIONS").start();
                 component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer);
-                times.get("CUBE13_PROJECTIONS").stop();
+                timers.get("CUBE13_PROJECTIONS").stop();
                 System.out.println("Ok.");
             }
 
@@ -183,7 +218,7 @@ public class SearchEngine
             JoglPreviewGenerator component2 = new JoglPreviewGenerator();
             if ( withPreviews ) {
                 System.out.print("    . Previews ... ");
-                times.get("PREVIEWS").start();
+                timers.get("PREVIEWS").start();
                 GLCanvas mycanvas = null;
                 if ( !offlineRenderer.isPbufferSupported() ) {
                     mycanvas = canvas;
@@ -191,7 +226,7 @@ public class SearchEngine
 
                 component2.calculatePreviews(gl, component.calculateUnitCubePosing(bodySet), metadata.getId(), 640, 480, mycanvas);
 
-                times.get("PREVIEWS").stop();
+                timers.get("PREVIEWS").stop();
                 System.out.println("Ok.");
             }
 
@@ -220,21 +255,31 @@ public class SearchEngine
         return metadata;
     }
 
-    public HashMap<String, TimeReport> createTimers()
+    public SearchEngine()
     {
-        HashMap<String, TimeReport> times;
-        times = new HashMap<String, TimeReport>();
-        times.put("TOTAL", new TimeReport("TOTAL"));
-        times.put("VOXELIZE", new TimeReport("VOXELIZE"));
-        times.put("READ_MODEL", new TimeReport("READ_MODEL"));
-        times.put("READ_DATABASE", new TimeReport("READ_DATABASE"));
-        times.put("WRITE_DATABASE", new TimeReport("WRITE_DATABASE"));
-        times.put("SEARCH_MODEL", new TimeReport("SEARCH_MODEL"));
-        times.put("SPHERICAL_HARMONICS", new TimeReport("SPHERICAL_HARMONICS"));
-        times.put("PRIMITIVE_COUNT", new TimeReport("PRIMITIVE_COUNT"));
-        times.put("CUBE13_PROJECTIONS", new TimeReport("CUBE13_PROJECTIONS"));
-        times.put("PREVIEWS", new TimeReport("PREVIEWS"));
-        return times;
+        timers = createTimers();
+    }
+
+    public HashMap<String, TimeReport> getTimers()
+    {
+        return timers;
+    }
+
+    private HashMap<String, TimeReport> createTimers()
+    {
+        HashMap<String, TimeReport> timers;
+        timers = new HashMap<String, TimeReport>();
+        timers.put("TOTAL", new TimeReport("TOTAL"));
+        timers.put("VOXELIZE", new TimeReport("VOXELIZE"));
+        timers.put("READ_MODEL", new TimeReport("READ_MODEL"));
+        timers.put("READ_DATABASE", new TimeReport("READ_DATABASE"));
+        timers.put("WRITE_DATABASE", new TimeReport("WRITE_DATABASE"));
+        timers.put("SEARCH_MODEL", new TimeReport("SEARCH_MODEL"));
+        timers.put("SPHERICAL_HARMONICS", new TimeReport("SPHERICAL_HARMONICS"));
+        timers.put("PRIMITIVE_COUNT", new TimeReport("PRIMITIVE_COUNT"));
+        timers.put("CUBE13_PROJECTIONS", new TimeReport("CUBE13_PROJECTIONS"));
+        timers.put("PREVIEWS", new TimeReport("PREVIEWS"));
+        return timers;
     }
 
     /**
@@ -243,17 +288,14 @@ public class SearchEngine
     return the -tolerance closest models. For example, for an equal behavior
     to the search engine described in [FUNK2003], this value should be -16.0.
     */
-    public ArrayList <Result> matchModel(
-        GL gl,
+    public ArrayList <Result> matchModelSphericalHarmonics(
         String filename,
         ArrayList<GeometryMetadata> descriptorsArray,
-        double tolerance, int distanceFieldSide, GLCanvas canvas,
-        JoglShapeMatchingOfflineRenderer offlineRenderer,
-        JoglProjectedViewRenderer projectedViewRenderer,
-        HashMap<String, TimeReport> times)
+        double tolerance, int distanceFieldSide)
     {
         ArrayList <Result> results = new ArrayList <Result>();
-        GeometryMetadata m = analyzeModel(gl, filename, false, false, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
+        GeometryMetadata m = analyzeModel(null, filename, false, false, distanceFieldSide, null, null, null);
+        GeometryMetadata n;
 
         if ( m == null ) {
             System.err.println("Error analyzing reference model. No results reported.");
@@ -266,7 +308,7 @@ public class SearchEngine
         Result result;
         System.out.println("Searching for closest 3D model to " + filename);
 
-        times.get("SEARCH_MODEL").start();
+        timers.get("SEARCH_MODEL").start();
 
         for ( i = 0; i < descriptorsArray.size(); i++ ) {
             // Takes into consideration the euclidean distance as indicated
@@ -275,21 +317,28 @@ public class SearchEngine
             //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
             //    " to " + descriptorsArray.get(i).getFilename());
             if ( Ls < tolerance ) {
-                result = new Result(descriptorsArray.get(i).getFilename(), Ls, descriptorsArray.get(i).getId());
-                results.add(result);
+                n = descriptorsArray.get(i);
+                result = searchResult(results, n.getId());
+                if ( result == null ) {
+                    result = new Result(n.getFilename(), n.getId(),
+                        new ResultSource(ResultSource.SPHERICAL_HARMONIC, Ls));
+                    results.add(result);
+                }
+                else {
+                    result.addSource(new ResultSource(ResultSource.SPHERICAL_HARMONIC, Ls));
+                }
             }
         }
 
-        times.get("SEARCH_MODEL").stop();
+        timers.get("SEARCH_MODEL").stop();
 
         return results;
     }
 
     public ArrayList <Result> matchSketch(
-        GL gl,
         IndexedColorImage distanceField,
         ArrayList<GeometryMetadata> descriptorsArray,
-        double tolerance, HashMap<String, TimeReport> times)
+        double tolerance)
     {
         int i, j;
         double Ls;
@@ -304,11 +353,12 @@ public class SearchEngine
             return results;
         }
         GeometryMetadata metadata = new GeometryMetadata();
+        GeometryMetadata n;
         metadata.getDescriptors().add(fourierShapeDescriptor);
 
         String name;
 
-        times.get("SEARCH_MODEL").start();
+        timers.get("SEARCH_MODEL").start();
 
         for ( i = 0; i < descriptorsArray.size(); i++ ) {
             // Takes into consideration the euclidean distance as indicated
@@ -320,19 +370,28 @@ public class SearchEngine
                 //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
                 //    " to " + descriptorsArray.get(i).getFilename() + " : " + j);
                 if ( Ls < tolerance ) {
-                    result = new Result(descriptorsArray.get(i).getFilename() + ", view: " + j, Ls, descriptorsArray.get(i).getId());
-                    results.add(result);
+                    n = descriptorsArray.get(i);
+                    result = searchResult(results, n.getId());
+                    if ( result == null ) {
+                        result = new Result(n.getFilename(), n.getId(),
+                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls));
+                        results.add(result);
+                    }
+                    else {
+                        result.addSource(
+                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls));
+                    }
                 }
             }
         }
 
-        times.get("SEARCH_MODEL").stop();
+        timers.get("SEARCH_MODEL").stop();
 
         return results;
     }
 
     public void
-    readDatabase(ArrayList<GeometryMetadata> descriptorsArray, HashMap<String, TimeReport> times)
+    readDatabase(ArrayList<GeometryMetadata> descriptorsArray)
     {
         File fd = new File("etc/metadata.bin");
         FileInputStream fis;
@@ -340,7 +399,7 @@ public class SearchEngine
         GeometryMetadata m;
 
         System.out.print("Reading database ... ");
-        times.get("READ_DATABASE").start();
+        timers.get("READ_DATABASE").start();
 
         try {
             fis = new FileInputStream(fd);
@@ -360,18 +419,18 @@ public class SearchEngine
                 System.err.println("ERROR importing database!" + e);
             }
         }
-        times.get("READ_DATABASE").stop();
+        timers.get("READ_DATABASE").stop();
         System.out.println(descriptorsArray.size() + " entries, Ok. ");
     }
 
     public void
-    saveDatabase(ArrayList<GeometryMetadata> descriptorsArray, HashMap<String, TimeReport> times)
+    saveDatabase(ArrayList<GeometryMetadata> descriptorsArray)
     {
         GeometryMetadata m;
         int i;
 
         System.out.print("Writing database ... ");
-        times.get("WRITE_DATABASE").start();
+        timers.get("WRITE_DATABASE").start();
 
         File fd = new File("etc/metadata.bin");
         FileOutputStream fos;
@@ -391,7 +450,7 @@ public class SearchEngine
         catch ( Exception e ) {
             System.err.println("ERROR exporting database!");
         }
-        times.get("WRITE_DATABASE").stop();
+        timers.get("WRITE_DATABASE").stop();
 
         System.out.println(descriptorsArray.size() + " entries, Ok. ");
     }
@@ -403,11 +462,19 @@ public class SearchEngine
                            ArrayList<GeometryMetadata> descriptorsArray,
                            int distanceFieldSide, GLCanvas canvas,
                            JoglShapeMatchingOfflineRenderer offlineRenderer,
-                           JoglProjectedViewRenderer projectedViewRenderer,
-                           HashMap<String, TimeReport> times)
+                           JoglProjectedViewRenderer projectedViewRenderer)
     {
         int i, j;
         GeometryMetadata m, other;
+
+        if ( canvas == null || offlineRenderer == null ||
+             projectedViewRenderer == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING,
+                               "indexFiles",
+            "Graphical contexts needed for indexing models not available.\n" +
+            "Aborting file indexing.");
+            return;
+        }
 
         for ( i = 1; i < filenamesList.length; i++ ) {
             // If that model was before in database, delete it
@@ -421,7 +488,7 @@ public class SearchEngine
             }
 
             // Insert new model in database
-            m = analyzeModel(gl, filenamesList[i], true, true, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer, times);
+            m = analyzeModel(gl, filenamesList[i], true, true, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer);
             if ( m != null ) {
                 descriptorsArray.add(m);
             }
@@ -520,6 +587,249 @@ public class SearchEngine
         out.write("</HTML>\n");
     }
 
+    public void reportTimers()
+    {
+        int i;
+        TimeReport r;
+        double totalTime = 0;
+        double totalSum = 0;
+
+        System.out.println("= TIMERS REPORT ===========================================================");
+        System.out.println("Following a report of different stage timers for program operations:");
+        Set<String> s = timers.keySet();
+        for ( String e : s ) {
+            r = timers.get(e);
+            if ( r.getLabel().equals("TOTAL") ) {
+                totalTime = r.getTime();
+            }
+            else {
+                System.out.println("  - " + r);
+                totalSum += r.getTime();
+            }
+        }
+        System.out.println("  - " + timers.get("TOTAL"));
+        System.out.printf("  - Other timers (%f total - %f summed): %f\n",
+                          totalTime, totalSum, totalTime - totalSum);
+        System.out.println("Other timers stand for:");
+        System.out.println("  - Garbage collection");
+        System.out.println("  - Errors in time metrics");
+        System.out.println("  - Control operations");
+        System.out.println("  - Time used for console to scroll text");
+        System.out.println("  - Time used for redirected console to save log files");
+        System.out.println("Note that current figures stands for ELLAPSED (no CPU) times (java limitation)");
+    }
+
+    public ArrayList <Result> runCommand(
+        GL gl,
+        JoglShapeMatchingOfflineRenderer offlineRenderer,
+        GLCanvas canvas,
+        JoglProjectedViewRenderer projectedViewRenderer,
+        String command[],
+        ArrayList<GeometryMetadata> descriptorsArray,
+        int distanceFieldSide)
+    {
+        ArrayList <Result> similarModels = null;
+        int i, j, k;
+
+        timers.get("TOTAL").start();
+        //-----------------------------------------------------------------
+        if ( command[0].equals("add") ) {
+            System.out.println("Processing command add...");
+            indexFiles(gl, command, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer);
+            saveDatabase(descriptorsArray);
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("addList") ) {
+            String list[] = null;
+            try {
+                File fd;
+                FileReader fr;
+                BufferedInputStream bis;
+                BufferedReader reader;
+                int count = 0;
+                InputStreamReader isr;
+                StreamTokenizer parser;
+                int tokenType;
+                i = 0;
+
+                //- Count filenames ------------------------------------------
+                fd = new File(command[1]);
+                fr = new FileReader(fd);
+                parser = new StreamTokenizer(fr);
+
+                parser.resetSyntax();
+                parser.eolIsSignificant(true);
+                parser.wordChars(0x00, 0xFF);
+                parser.whitespaceChars('\n', '\n');
+
+                do {
+                    try {
+                        tokenType = parser.nextToken();
+                      }
+                      catch (Exception e) {
+                        break;
+                    }
+
+                    switch ( tokenType ) {
+                      case StreamTokenizer.TT_WORD:
+                        count++;
+                        break;
+                      case StreamTokenizer.TT_EOL: 
+                        break;
+                      case StreamTokenizer.TT_EOF: break;
+                      default: break;
+                    }
+
+                } while ( tokenType != StreamTokenizer.TT_EOF );
+                fr.close();
+
+                //- Load filenames -------------------------------------------
+                System.out.println("Processing " + count + " files.");
+                list = new String[count];
+
+                fd = new File(command[1]);
+                fr = new FileReader(fd);
+                parser = new StreamTokenizer(fr);
+
+                parser.resetSyntax();
+                parser.eolIsSignificant(true);
+                parser.wordChars(0x00, 0xFF);
+                parser.whitespaceChars('\n', '\n');
+
+                i = 0;
+                do {
+                    try {
+                        tokenType = parser.nextToken();
+                      }
+                      catch (Exception e) {
+                        break;
+                    }
+
+                    switch ( tokenType ) {
+                      case StreamTokenizer.TT_WORD:
+                        list[i] = new String(parser.sval);
+                        i++;
+                        break;
+                      case StreamTokenizer.TT_EOL: 
+                        break;
+                      case StreamTokenizer.TT_EOF: break;
+                      default: break;
+                    }
+
+                } while ( tokenType != StreamTokenizer.TT_EOF );
+                fr.close();
+            }
+            catch ( Exception e ) {
+                System.err.println("Error building file list.");
+                System.exit(1);
+            }
+            indexFiles(gl, list, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer);
+            saveDatabase(descriptorsArray);
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("searchModel") ) {
+            similarModels = matchModelSphericalHarmonics(command[1], descriptorsArray, 1, distanceFieldSide);
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("searchDistanceField") ) {
+            IndexedColorImage distanceField = readIndexedColorImage(command[1], distanceFieldSide);
+            if ( distanceField == null ) {
+                System.err.println("Error importing distance field. Program aborted.");
+                System.exit(1);
+            }
+            similarModels = matchSketch(distanceField, descriptorsArray, 5);
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("searchSketch") ) {
+            IndexedColorImage outline = readIndexedColorImage(command[1], distanceFieldSide);
+            if ( outline == null ) {
+                System.err.println("Error importing distance field. Program aborted.");
+                System.exit(1);
+            }
+            IndexedColorImage distanceField;
+            distanceField = new IndexedColorImage();
+            distanceField.init(distanceFieldSide, distanceFieldSide);
+            ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
+            similarModels = matchSketch(distanceField, descriptorsArray, 5);
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("exportDatabase") ) {
+            if ( command.length != 2 ) {
+                System.err.println("ERROR: exportDatabase command must specified a text filename to export.");
+                System.err.println("Database exporting aborted.");
+            }
+            else {
+                System.out.println("Processing command exportDatabase ...");
+                timers.get("WRITE_DATABASE").start();
+                System.out.println("Exporting database with " + descriptorsArray.size() + " fields!");
+                System.out.println("Depending on database size, this could take some time...");
+                GeometryMetadata m;
+                ArrayList<ShapeDescriptor> d;
+                ShapeDescriptor s;
+                double arr[];
+                String stringSegment;
+
+                try {
+                    //---------------------------------------------------------
+                    File fd = new File(command[1]);
+                    FileOutputStream fos;
+                    BufferedOutputStream writer;
+
+                    fd = new File(command[1]);
+                    fos = new FileOutputStream(fd);
+                    writer = new BufferedOutputStream(fos);
+
+                    //---------------------------------------------------------
+                    byte barr[];
+                    ProgressMonitorConsole reporter;
+                    reporter = new ProgressMonitorConsole();
+
+                    reporter.begin();
+                    for ( i = 0; i < descriptorsArray.size(); i++ ) {
+                        m = descriptorsArray.get(i);
+                        d = m.getDescriptors();
+                        stringSegment = "[" + m.getId() + "]\t" + m.getFilename() + "\t";
+                        for ( j = 0; j < d.size(); j++ ) {
+                            s = d.get(j);
+                            stringSegment += s.getLabel() + "\t";
+                            barr = stringSegment.getBytes();
+                            writer.write(barr, 0, barr.length);
+
+                            arr = s.getFeatureVector();
+                            for ( k = 0; k < arr.length; k++ ) {
+                                stringSegment = arr[k] + "\t";
+                                barr = stringSegment.getBytes();
+                                writer.write(barr, 0, barr.length);
+                            }
+                        }
+                        stringSegment = "EOL\n";
+                        barr = stringSegment.getBytes();
+                        writer.write(barr, 0, barr.length);
+
+                        reporter.update(0, descriptorsArray.size(), i);
+
+                    }
+                    reporter.end();
+
+                    writer.close();
+                    fos.close();
+                }
+                catch ( Exception e ) {
+                    System.out.println("Error exporting database!");
+                }
+                timers.get("WRITE_DATABASE").stop();
+                System.out.println("Done exporting database.");
+            }
+        }
+        //-----------------------------------------------------------------
+        else {
+            System.err.println("Invalid command [" + command[0] + "]");
+        }
+
+        //-----------------------------------------------------------------
+        timers.get("TOTAL").stop();
+        return similarModels;
+    }
 }
 
 //===========================================================================

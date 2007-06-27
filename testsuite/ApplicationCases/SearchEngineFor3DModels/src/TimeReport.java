@@ -9,7 +9,7 @@ public class TimeReport
 
     TimeReport(String label)
     {
-	this.label = new String(label);
+        this.label = new String(label);
         ocurrences = 0;
         elapsedTime = 0;
     }
@@ -22,8 +22,8 @@ public class TimeReport
     public void stop()
     {
         long currentTime = System.currentTimeMillis();
-	elapsedTime += currentTime - lastStartingTime;
-	ocurrences++;
+        elapsedTime += currentTime - lastStartingTime;
+        ocurrences++;
     }
 
     public String
@@ -35,7 +35,7 @@ public class TimeReport
     public double
     getTime()
     {
-	return ((double)elapsedTime) / 1000.0;
+        return ((double)elapsedTime) / 1000.0;
     }
 
     public long
@@ -46,12 +46,12 @@ public class TimeReport
 
     public String toString()
     {
-	String msg;
+        String msg;
 
         msg = "TIMER \"" + label + "\": " + ocurrences + " ocurrences in " +
             getTime() + " seconds.";
 
-	return msg;
+        return msg;
     }
 }
 

@@ -12,7 +12,7 @@ public class NetworkClientConsole {
         Socket kkSocket = null;
         PrintWriter out = null;
         BufferedReader in = null;
-	String hostname = "localhost";
+        String hostname = "localhost";
 
         try {
             kkSocket = new Socket(hostname, 1234);
