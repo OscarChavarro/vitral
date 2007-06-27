@@ -4,6 +4,7 @@
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -17,28 +18,62 @@ import javax.servlet.http.HttpServletResponse;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.processing.ImageProcessing;
 
 public class ServletConsole extends HttpServlet {
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
     /// so will not work with multiple connections!
     private IndexedColorImage workingImage = null;
+    private IndexedColorImage outline = null;
+    private IndexedColorImage distanceField = null;
+
+    private SearchEngine searchEngine;
+    private ArrayList<GeometryMetadata> descriptorsArray;
+    private int distanceFieldSide = 64;
 
     public void init(ServletConfig config)
           throws ServletException
     {
         System.out.println("Initializing ServletConsole class.");
+
+        //-----------------------------------------------------------------
         if ( workingImage == null ) {
             workingImage = new IndexedColorImage();
         }
         workingImage.init(320, 240);
         workingImage.createTestPattern();
+        if ( outline == null ) {
+            outline = new IndexedColorImage();
+	}
+        outline.init(distanceFieldSide, distanceFieldSide);
+        if ( distanceField == null ) {
+            distanceField = new IndexedColorImage();
+	}
+        distanceField.init(distanceFieldSide, distanceFieldSide);
+
+        //-----------------------------------------------------------------
+        descriptorsArray = new ArrayList<GeometryMetadata>();
+        searchEngine = new SearchEngine();
+        searchEngine.readDatabase(descriptorsArray, "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
     }
 
     public void destroy()
     {
         System.out.println("Destroying ServletConsole class.");
+
+        //- Free unused references for garbage collection -----------------
+        int i;
+        for ( i = 0; i < descriptorsArray.size(); i++ ) {
+            descriptorsArray.set(i, null);
+        }
+        for ( i = 0; i < descriptorsArray.size(); i++ ) {
+            descriptorsArray.remove(0);
+        }
+        descriptorsArray = null;
+        searchEngine = null;
     }
 
     private void extractImage(IndexedColorImage img, String cad)
@@ -155,8 +190,32 @@ public class ServletConsole extends HttpServlet {
         out.println("</UL>"); 
 
         //-----------------------------------------------------------------
+        ArrayList <Result> similarModels = null;
+        if ( workingImage == null ) {
+            out.println("Error importing distance field. Query aborted.");
+        }
+	else {
+	    workingImage.resize(outline);
+            File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/outline.jpg");
+            if ( f != null ) {
+                out.println("<P>Internal outline in file " + f.getParentFile().getAbsolutePath() + ":<P>");
+            }
+            else {
+                out.println("Error writing image. No file space available for servlet.");
+            }
+            ImagePersistence.exportJPG(f, outline);
+
+outline = 
+            distanceField = new IndexedColorImage();
+            distanceField.init(distanceFieldSide, distanceFieldSide);
+            ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
+            //similarModels = searchEngine.matchSketch(distanceField, descriptorsArray, 5);
+            //searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray);
+	}
+        //-----------------------------------------------------------------
         //out.println("<img src=\"http://10.0.0.1:8080/output.jpg\"></img>\n");
         out.println("<img src=\"http://10.6.2.49:8080/images/output.jpg\"></img>\n");
+        out.println("<img src=\"http://10.6.2.49:8080/images/outline.jpg\"></img>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");

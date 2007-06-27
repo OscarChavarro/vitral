@@ -81,7 +81,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         canvas = null;
 
         descriptorsArray = new ArrayList<GeometryMetadata>();
-        searchEngine.readDatabase(descriptorsArray);
+        searchEngine.readDatabase(descriptorsArray, "etc/metadata.bin");
     }
 
     private void startWriter()

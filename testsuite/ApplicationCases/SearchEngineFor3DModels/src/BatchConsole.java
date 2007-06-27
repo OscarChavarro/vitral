@@ -90,7 +90,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         descriptorsArray = new ArrayList<GeometryMetadata>();
         ArrayList <Result> similarModels;
 
-        searchEngine.readDatabase(descriptorsArray);
+        searchEngine.readDatabase(descriptorsArray, "etc/metadata.bin");
         similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, descriptorsArray, distanceFieldSide);
         if ( similarModels != null ) {
             reportResults(similarModels);

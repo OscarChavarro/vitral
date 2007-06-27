@@ -391,9 +391,9 @@ public class SearchEngine
     }
 
     public void
-    readDatabase(ArrayList<GeometryMetadata> descriptorsArray)
+    readDatabase(ArrayList<GeometryMetadata> descriptorsArray, String filename)
     {
-        File fd = new File("etc/metadata.bin");
+        File fd = new File(filename);
         FileInputStream fis;
         BufferedInputStream reader;
         GeometryMetadata m;
