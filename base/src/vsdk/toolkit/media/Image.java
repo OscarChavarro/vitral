@@ -204,6 +204,8 @@ public abstract class Image extends MediaEntity
     `output`'s space the `this` image using bilinear interpolation.
     @todo worked well only in the growing case. Must add the shrinking
     case for area averaging.
+    @todo: must be moved to ImageProcessing class
+    @deprecated
     */
     public void resize(Image output)
     {
@@ -214,17 +216,22 @@ public abstract class Image extends MediaEntity
         ColorRgb source;
         RGBPixel target = new RGBPixel();
 
-        for ( x = 0; x < xSize; x++ ) {
-            for ( y = 0; y < ySize; y++ ) {
-                u = ((double)x)/((double)(xSize));
-                v = ((double)y)/((double)(ySize));
-                source = getColorRgbBiLinear(u, v);
-                target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r*255));
-                target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g*255));
-                target.b = VSDK.unsigned8BitInteger2signedByte((int)(source.b*255));
-                output.putPixelRgb(x, y, target);
+        if ( xSize >= getXSize() && ySize >= getYSize() ) {
+            for ( x = 0; x < xSize; x++ ) {
+                for ( y = 0; y < ySize; y++ ) {
+                    u = ((double)x)/((double)(xSize));
+                    v = ((double)y)/((double)(ySize));
+                    source = getColorRgbBiLinear(u, v);
+                    target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r*255));
+                    target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g*255));
+                    target.b = VSDK.unsigned8BitInteger2signedByte((int)(source.b*255));
+                    output.putPixelRgb(x, y, target);
+                }
             }
-        }
+	}
+	else {
+	    output.createTestPattern();
+	}
     }
 
     /**
