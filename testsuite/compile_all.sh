@@ -72,5 +72,7 @@ cd SearchEngineFor3DModels
 ./compile.sh
 ./compileServer.sh
 ./compileClient.sh
+./compileApplets.sh
+#./compileServlets.sh
 cd ..
 #---------------------------------------------------------------------------

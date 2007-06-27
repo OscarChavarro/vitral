@@ -343,6 +343,10 @@ Changes in 2007 june 24-25 revition
   - First version of servlet for accessing the SearchEngineFor3DModels system
     from web (empty J2EE / JSP / Servlet skeleton, not using Vitral yet).
 
+Changes in 2007 june 26 revition
+  - SearchEngineFor3DModels refactorized and organized. Better results
+    management for avoiding repeating hits.
+
 TODO:
   - Implement OBHU technique
   - Fix bug in SearchEngine that doesnt read well addList file (missing first
