@@ -73,6 +73,7 @@ import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
 import vsdk.transition.gui.GuiCache;
@@ -372,7 +373,7 @@ public class SceneEditorApplication {
     {
         raytracedImage.init(raytracedImageWidth, raytracedImageHeight);
         if ( theScene.selectedBackground == 1 ) {
-            theScene.fixedBackground.getImage().resize(raytracedImage);
+            ImageProcessing.resize(theScene.fixedBackground.getImage(), raytracedImage);
         }
         theScene.raytrace(raytracedImage);
     }

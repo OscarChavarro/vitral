@@ -195,7 +195,7 @@ public class ServletConsole extends HttpServlet {
             out.println("Error importing distance field. Query aborted.");
         }
 	else {
-	    workingImage.resize(outline);
+	    ImageProcessing.resize(workingImage, outline);
             File f = new File("/usr/local/apache-tomcat-6.0.13/webapps/images/outline.jpg");
             if ( f != null ) {
                 out.println("<P>Internal outline in file " + f.getParentFile().getAbsolutePath() + ":<P>");

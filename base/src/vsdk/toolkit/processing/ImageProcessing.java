@@ -7,6 +7,7 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
@@ -51,6 +52,39 @@ public abstract class ImageProcessing extends ProcessingElement {
                 img.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(val));
             }
         }
+    }
+
+    /**
+    Given the `input` and `output` previously created images, fills in
+    `output`'s space the `this` image using bilinear interpolation.
+    @todo worked well only in the growing case. Must add the shrinking
+    case for area averaging.
+    */
+    public static void resize(Image input, Image output)
+    {
+        int xSize = output.getXSize();
+        int ySize = output.getYSize();
+        double u, v;
+        int x, y;
+        ColorRgb source;
+        RGBPixel target = new RGBPixel();
+
+        if ( xSize >= input.getXSize() && ySize >= input.getYSize() ) {
+            for ( x = 0; x < xSize; x++ ) {
+                for ( y = 0; y < ySize; y++ ) {
+                    u = ((double)x)/((double)(xSize));
+                    v = ((double)y)/((double)(ySize));
+                    source = input.getColorRgbBiLinear(u, v);
+                    target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r*255));
+                    target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g*255));
+                    target.b = VSDK.unsigned8BitInteger2signedByte((int)(source.b*255));
+                    output.putPixelRgb(x, y, target);
+                }
+            }
+	}
+	else {
+	    output.createTestPattern();
+	}
     }
 
     /**
