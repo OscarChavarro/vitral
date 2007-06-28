@@ -103,10 +103,10 @@ public abstract class ImageProcessing extends ProcessingElement {
 
                     x0 = (int)(((double)xx)*xf);
                     x1 = x0 + xfi;;
-                    for ( x = x0; x < x1; x++ ) {
+                    for ( x = x0; x < x1 && x < xSizeIn; x++ ) {
                         y0 = (int)(((double)yy)*yf);
                         y1 = y0 + yfi;
-                        for ( y = y0; y < y1; y++ ) {
+                        for ( y = y0; y < y1 && y < ySizeIn; y++ ) {
                             target = input.getPixelRgb(x, y);
                             acum.r += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.r)) / w));
                             acum.g += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.g)) / w));
