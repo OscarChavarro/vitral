@@ -534,7 +534,7 @@ public class SearchEngine
         return distanceField;
     }
 
-    public void writeResultsAsHtml(PrintWriter out, ArrayList <Result> similarModels, ArrayList<GeometryMetadata> descriptorsArray)
+    public void writeResultsAsHtml(PrintWriter out, ArrayList <Result> similarModels, ArrayList<GeometryMetadata> descriptorsArray, String dir)
     {
         out.write("<HTML>\n");
         out.write("<H1>VITRAL IMPLEMENTATION OF A 3D MODEL SEARCH ENGINE</H1>\n");
@@ -560,7 +560,7 @@ public class SearchEngine
 
             data = searchMetadataById(descriptorsArray, modelId);
             if ( data != null ) {
-                out.write("<IMG WIDTH=160 HEIGHT=120 BORDER=1 SRC=\"./output/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
+                out.write("<IMG WIDTH=160 HEIGHT=120 BORDER=1 SRC=\"" + dir + "//previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
             }
             else {
                 out.write("<B>No metadata descriptor for ID " + similarModels.get(i).getId() + "\n");

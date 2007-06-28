@@ -35,6 +35,7 @@ import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.processing.ImageProcessing;
 
 public class JoglPreviewGenerator
 {
@@ -238,6 +239,12 @@ public class JoglPreviewGenerator
             }
             RGBImage img = JoglRGBImageRenderer.getImageJOGL(gl);
             ImagePersistence.exportJPG(new File(filename), img);
+            RGBImage thumbnail;
+            thumbnail = new RGBImage();
+            thumbnail.init(160, 120);
+            ImageProcessing.resize(img, thumbnail);
+            filename = dirName + "/" + f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg";
+            ImagePersistence.exportJPG(new File(filename), thumbnail);
         }
     }
 }

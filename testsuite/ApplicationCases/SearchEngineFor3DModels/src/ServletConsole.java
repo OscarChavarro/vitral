@@ -59,7 +59,8 @@ public class ServletConsole extends HttpServlet {
         //-----------------------------------------------------------------
         descriptorsArray = new ArrayList<GeometryMetadata>();
         searchEngine = new SearchEngine();
-        searchEngine.readDatabase(descriptorsArray, "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
+        //searchEngine.readDatabase(descriptorsArray, "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
+        searchEngine.readDatabase(descriptorsArray, "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
     }
 
     public void destroy()
@@ -258,7 +259,7 @@ public class ServletConsole extends HttpServlet {
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
             similarModels = searchEngine.matchSketch(distanceField, descriptorsArray, 5);
-            searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray);
+            searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray, "http://10.0.0.1:8081/images");
 	    //
             RGBImage distanceFieldRgb;
             ImageProcessing.gammaCorrection(distanceField, 2.0);
@@ -278,11 +279,11 @@ public class ServletConsole extends HttpServlet {
         //-----------------------------------------------------------------
 	out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
 	out.println("2D Sketch recieved from applet:<BR>\n");
-        out.println("<img src=\"http://10.6.2.49:8080/images/output.jpg\"></img>\n");
+        out.println("<img src=\"http://10.0.0.1:8081/images/output.jpg\"></img>\n");
 	out.println("<P>Normalized 2D Sketch to 64x64 pixels:<BR>\n");
-        out.println("<img src=\"http://10.6.2.49:8080/images/outline.jpg\"></img>\n");
+        out.println("<img src=\"http://10.0.0.1:8081/images/outline.jpg\"></img>\n");
 	out.println("<P>Distance field (gamma corrected at factor 2 and border highlighted):<BR>\n");
-        out.println("<img src=\"http://10.6.2.49:8080/images/distanceField.jpg\"></img>\n");
+        out.println("<img src=\"http://10.0.0.1:8081/images/distanceField.jpg\"></img>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");
