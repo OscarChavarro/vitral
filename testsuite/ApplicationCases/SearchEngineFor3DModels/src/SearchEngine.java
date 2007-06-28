@@ -467,7 +467,7 @@ public class SearchEngine
         int i, j;
         GeometryMetadata m, other;
 
-        if ( canvas == null || offlineRenderer == null ||
+        if ( gl == null || offlineRenderer == null ||
              projectedViewRenderer == null ) {
             VSDK.reportMessage(this, VSDK.WARNING,
                                "indexFiles",
