@@ -28,15 +28,14 @@ import vsdk.toolkit.processing.ImageProcessing;
 public class ServletConsole extends HttpServlet {
 
     //public static final String serverUrl = "http://10.0.0.1:8081";
-    //public static final String serverUrl = "http://10.6.2.49:8080";
-    public static final String serverUrl = "http://192.168.250.1:8080";
+    public static final String serverUrl = "http://10.6.2.49:8080";
     //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
     public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
     /// so will not work with multiple connections!
-    private IndexedColorImage workingImage = null;
+    private ArrayList<IndexedColorImage> workingImages;
     private IndexedColorImage outline = null;
     private IndexedColorImage distanceField = null;
 
@@ -50,11 +49,17 @@ public class ServletConsole extends HttpServlet {
         System.out.println("Initializing ServletConsole class.");
 
         //-----------------------------------------------------------------
-        if ( workingImage == null ) {
-            workingImage = new IndexedColorImage();
+        int i;
+        IndexedColorImage workingImage;
+
+        if ( workingImages == null ) {
+            workingImages = new ArrayList<IndexedColorImage>();
+            for ( i = 0; i < 3; i++ ) {
+                workingImage = new IndexedColorImage();
+                workingImages.add(workingImage);
+                workingImage.init(0, 0);
+            }
         }
-        workingImage.init(320, 240);
-        workingImage.createTestPattern();
         if ( outline == null ) {
             outline = new IndexedColorImage();
         }
@@ -98,12 +103,7 @@ public class ServletConsole extends HttpServlet {
                 break;
               case 1:
                 ySize = Integer.parseInt(token);
-                if ( img.getXSize() != xSize ||
-                     img.getYSize() != ySize ) {
-                    System.out.printf("Initializing image to size <%d x %d>\n",
-                                      xSize, ySize);
-                    img.init(xSize, ySize);
-                }
+                img.init(xSize, ySize);
                 break;
               default:
                 index = Integer.parseInt(token);
@@ -131,11 +131,20 @@ public class ServletConsole extends HttpServlet {
         Enumeration listaDeParametros;
 
         listaDeParametros = request.getParameterNames();
+        IndexedColorImage img;
+        int i;
+        for ( i = 0; i < 3; i++ ) {
+            img = workingImages.get(i);
+            img.init(0, 0);
+        }
 
         while ( listaDeParametros.hasMoreElements() ) {
             cad = "" + listaDeParametros.nextElement();
             if ( cad.startsWith("image") ) {
-                extractImage(workingImage, request.getParameter(cad));
+                i = Integer.parseInt(cad.substring(5)) - 1;
+                if ( i >= 0 && i < 3 ) {
+                    extractImage(workingImages.get(i), request.getParameter(cad));
+                }
                 out.println("filespec: " + cad);
             }
         }
@@ -155,7 +164,9 @@ public class ServletConsole extends HttpServlet {
             }
         }
 
-        saveImage(workingImage, "output.jpg", new PrintWriter(System.out));
+        for ( i = 0; i < 3; i++ ) {
+            saveImage(workingImages.get(i), "output" + i + ".jpg", new PrintWriter(System.out));
+        }
     }
 
     private void extractOutlineImage(
@@ -209,58 +220,41 @@ public class ServletConsole extends HttpServlet {
         ImagePersistence.exportJPG(f, img);
     }
 
-    private void processGeneric(
-                      HttpServletRequest request,
-                      HttpServletResponse response,
-                      String id)
-        throws IOException, ServletException
+    private ArrayList<Result>
+    processImages(PrintWriter out)
     {
-        response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
+        ArrayList<Result> similarModels = new ArrayList<Result>();
 
-        out.println("<html>");
-        out.println("<body>");
+        IndexedColorImage img1 = workingImages.get(0);
+        IndexedColorImage img2 = workingImages.get(1);
+        IndexedColorImage img3 = workingImages.get(2);
 
-        //-----------------------------------------------------------------
-        String cad;
-
-        cad = request.getParameter("param");
-
-        out.println("Par&aacute;metro conocido: " + cad + "<P>");
-
-        //-----------------------------------------------------------------
-        Enumeration listaDeParametros;
-
-        listaDeParametros = request.getParameterNames();
-
-        out.println("Par&aacute;metros desconocidos:<BR><UL>");
-        while ( listaDeParametros.hasMoreElements() ) {
-            cad = "" + listaDeParametros.nextElement();
-            out.println(
-                "<LI>" +
-                cad +
-                " = " +
-                request.getParameter(cad)
-            );
+        if ( (img1 == null) && (img2 == null) && (img3 == null) ) {
+            out.println("No images. Error importing distance field. Query aborted.");
+            return similarModels;
         }
-        out.println("</UL>"); 
 
         //-----------------------------------------------------------------
-        ArrayList <Result> similarModels = null;
-        if ( workingImage == null ) {
-            out.println("Error importing distance field. Query aborted.");
-        }
-        else {
-            extractOutlineImage(workingImage, outline);
-            saveImage(outline, "outline.jpg", out);
+        int i;
+        IndexedColorImage img;
+        for ( i = 0; i < 3; i++ ) {
+            img = workingImages.get(i);
+            if ( img == null || img.getXSize() <= 0 || img.getYSize() <= 0 ) {
+                continue;
+            }
+            extractOutlineImage(img, outline);
+            saveImage(outline, "outline" + i + ".jpg", out);
 
             distanceField = new IndexedColorImage();
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
-            similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5);
-            Collections.sort(similarModels);
-            searchEngine.writeResultsAsHtml(out, similarModels, shapeDatabase.descriptorsArray, serverUrl + "/images");
+            if ( i == 0 ) {
+                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5);
+                Collections.sort(similarModels);
+                searchEngine.writeResultsAsHtml(out, similarModels, shapeDatabase.descriptorsArray, serverUrl + "/images");
+            }
+
             //
             RGBImage distanceFieldRgb;
             ImageProcessing.gammaCorrection(distanceField, 2.0);
@@ -275,16 +269,67 @@ public class ServletConsole extends HttpServlet {
                     }
                 }
             }
-            saveImage(distanceFieldRgb, "distanceField.jpg", out);
+            saveImage(distanceFieldRgb, "distanceField" + i + ".jpg", out);
         }
+        return similarModels;
+    }
+
+    private void processGeneric(
+                      HttpServletRequest request,
+                      HttpServletResponse response,
+                      String id)
+        throws IOException, ServletException
+    {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
         //-----------------------------------------------------------------
+        String cad;
+
+        //-----------------------------------------------------------------
+        Enumeration listaDeParametros;
+
+        listaDeParametros = request.getParameterNames();
+
+/*
+        out.println("Par&aacute;metros desconocidos:<BR><UL>");
+        while ( listaDeParametros.hasMoreElements() ) {
+            cad = "" + listaDeParametros.nextElement();
+            out.println(
+                "<LI>" +
+                cad +
+                " = " +
+                request.getParameter(cad)
+            );
+        }
+        out.println("</UL>"); 
+*/
+
+        //-----------------------------------------------------------------
+        ArrayList <Result> similarModels = null;
+        similarModels = processImages(out);
+        //-----------------------------------------------------------------
+        int i;
+        IndexedColorImage img;
+
         out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
-        out.println("2D Sketch recieved from applet:<BR>\n");
-        out.println("<img src=\"" + serverUrl + "/images/output.jpg\"></img>\n");
-        out.println("<P>Normalized 2D Sketch to 64x64 pixels:<BR>\n");
-        out.println("<img src=\"" + serverUrl + "/images/outline.jpg\"></img>\n");
-        out.println("<P>Distance field (gamma corrected at factor 2 and border highlighted):<BR>\n");
-        out.println("<img src=\"" + serverUrl + "/images/distanceField.jpg\"></img>\n");
+        out.println("<CENTER><TABLE BORDER=2>\n");
+        out.println("<TR><TH>Image number</TH>\n");
+        out.println("<TH>2D Sketch recieved from applet</TH>\n");
+        out.println("<TH>Normalized 2D Sketch to 64x64 pixels</TH>\n");
+        out.println("<TH>Distance field (gamma corrected at factor 2 and border highlighted)</TH></TR>\n");
+
+        for ( i = 0; (workingImages != null) && i < 3; i++ ) {
+            img = workingImages.get(i);
+            if ( img != null && img.getXSize() > 0 && img.getYSize() > 0 ) {
+                out.println("<TR><TD><CENTER><B>" + i + "</B></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/output" + i + ".jpg\"></IMG></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/outline" + i + ".jpg\"></IMG></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/distanceField" + i + ".jpg\"></IMG></CENTER></TD>\n");
+                out.println("</TR>\n");
+            }
+        }
+        out.println("</TABLE></CENTER>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");
@@ -311,10 +356,6 @@ public class ServletConsole extends HttpServlet {
                       HttpServletResponse response)
         throws IOException, ServletException
     {
-        if ( workingImage != null ) {
-            workingImage = new IndexedColorImage();
-        }
-
         processImages(request, response, "doPost");
     }
 
