@@ -43,8 +43,8 @@ import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
-import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
@@ -391,36 +391,11 @@ public class SearchEngine
     }
 
     public void
-    readDatabase(ArrayList<GeometryMetadata> descriptorsArray, String filename)
+    readDatabase(ShapeDatabase database)
     {
-        File fd = new File(filename);
-        FileInputStream fis;
-        BufferedInputStream reader;
-        GeometryMetadata m;
-
-        System.out.print("Reading database ... ");
         timers.get("READ_DATABASE").start();
-
-        try {
-            fis = new FileInputStream(fd);
-            reader = new BufferedInputStream(fis);
-
-            while ( reader.available() > 0 ) {
-                m = ShapeDescriptorPersistence.importGeometryMetadata(reader);
-                if ( m != null ) {
-                    descriptorsArray.add(m);
-                }
-            }
-            reader.close();
-            fis.close();
-        }
-        catch ( Exception e ) {
-            if ( !(e instanceof FileNotFoundException) ) {
-                System.err.println("ERROR importing database!" + e);
-            }
-        }
+        database.connect();
         timers.get("READ_DATABASE").stop();
-        System.out.println(descriptorsArray.size() + " entries, Ok. ");
     }
 
     public void

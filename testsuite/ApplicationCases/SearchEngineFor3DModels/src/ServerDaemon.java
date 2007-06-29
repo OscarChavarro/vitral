@@ -64,7 +64,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
 
     // Search engine and its configuration
     private SearchEngine searchEngine;
-    private ArrayList<GeometryMetadata> descriptorsArray;
+    private ShapeDatabaseFile shapeDatabase;
     public String command[];
     private int distanceFieldSide = 64;
 
@@ -80,8 +80,8 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         searchEngine = new SearchEngine();
         canvas = null;
 
-        descriptorsArray = new ArrayList<GeometryMetadata>();
-        searchEngine.readDatabase(descriptorsArray, "etc/metadata.bin");
+        shapeDatabase = new ShapeDatabaseFile("etc/metadata.bin");
+        searchEngine.readDatabase(shapeDatabase);
     }
 
     private void startWriter()
@@ -123,7 +123,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         }
 
         startWriter();
-        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, descriptorsArray, "./output");
+        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, shapeDatabase.descriptorsArray, "./output");
         stopWriter();
     }
 
@@ -158,9 +158,9 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
                 System.out.print(".");
                 if ( command != null ) {
                     ArrayList <Result> similarModels;
-                    similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, descriptorsArray, distanceFieldSide);
+                    similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase.descriptorsArray, distanceFieldSide);
                     if ( similarModels != null ) {
-                        exportResults(similarModels, descriptorsArray);
+                        exportResults(similarModels, shapeDatabase.descriptorsArray);
                     }
                 }
                 command = null;
@@ -173,14 +173,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         } while ( !terminate );
 
         //- Free unused references for garbage collection -----------------
-        int i;
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.set(i, null);
-        }
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.remove(0);
-        }
-        descriptorsArray = null;
+        shapeDatabase = null;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */

@@ -60,6 +60,7 @@ public class Result implements Comparable <Result>
     public int compareTo(Result other)
     {
         updateDistance();
+        other.updateDistance();
         if ( this.distance < other.distance ) return -1;
         else if ( this.distance > other.distance ) return 1;
         return 0;

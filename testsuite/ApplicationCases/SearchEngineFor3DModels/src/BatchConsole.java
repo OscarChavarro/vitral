@@ -56,7 +56,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
 
     // Search engine and its configuration
     private SearchEngine searchEngine;
-    private ArrayList<GeometryMetadata> descriptorsArray;
+    private ShapeDatabaseFile shapeDatabase;
     private String command[];
     private int distanceFieldSide = 64;
 
@@ -67,6 +67,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, this);
         searchEngine = new SearchEngine();
         canvas = null;
+        shapeDatabase = new ShapeDatabaseFile("etc/metadata.bin");
     }
 
     private void reportResults(ArrayList <Result> similarModels)
@@ -87,25 +88,17 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
     public void executeRendering(GL gl)
     {
         //-----------------------------------------------------------------
-        descriptorsArray = new ArrayList<GeometryMetadata>();
         ArrayList <Result> similarModels;
 
-        searchEngine.readDatabase(descriptorsArray, "etc/metadata.bin");
-        similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, descriptorsArray, distanceFieldSide);
+        searchEngine.readDatabase(shapeDatabase);
+        similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase.descriptorsArray, distanceFieldSide);
         if ( similarModels != null ) {
             reportResults(similarModels);
         }
         searchEngine.reportTimers();
 
         //- Free unused references for garbage collection -----------------
-        int i;
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.set(i, null);
-        }
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.remove(0);
-        }
-        descriptorsArray = null;
+        shapeDatabase = null;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */

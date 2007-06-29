@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -26,6 +27,13 @@ import vsdk.toolkit.processing.ImageProcessing;
 
 public class ServletConsole extends HttpServlet {
 
+    //public static final String serverUrl = "http://10.0.0.1:8081";
+    //public static final String serverUrl = "http://10.6.2.49:8080";
+    public static final String serverUrl = "http://192.168.250.1:8080";
+    //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+
+
     /// Warning: this code makes current implementation NOT THREAD SAFE,
     /// so will not work with multiple connections!
     private IndexedColorImage workingImage = null;
@@ -33,7 +41,7 @@ public class ServletConsole extends HttpServlet {
     private IndexedColorImage distanceField = null;
 
     private SearchEngine searchEngine;
-    private ArrayList<GeometryMetadata> descriptorsArray;
+    private ShapeDatabaseFile shapeDatabase;
     private int distanceFieldSide = 64;
 
     public void init(ServletConfig config)
@@ -57,10 +65,9 @@ public class ServletConsole extends HttpServlet {
         distanceField.init(distanceFieldSide, distanceFieldSide);
 
         //-----------------------------------------------------------------
-        descriptorsArray = new ArrayList<GeometryMetadata>();
+        shapeDatabase = new ShapeDatabaseFile(databaseFile);
         searchEngine = new SearchEngine();
-        //searchEngine.readDatabase(descriptorsArray, "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
-        searchEngine.readDatabase(descriptorsArray, "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin");
+        searchEngine.readDatabase(shapeDatabase);
     }
 
     public void destroy()
@@ -68,14 +75,7 @@ public class ServletConsole extends HttpServlet {
         System.out.println("Destroying ServletConsole class.");
 
         //- Free unused references for garbage collection -----------------
-        int i;
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.set(i, null);
-        }
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.remove(0);
-        }
-        descriptorsArray = null;
+        shapeDatabase = null;
         searchEngine = null;
     }
 
@@ -258,9 +258,10 @@ public class ServletConsole extends HttpServlet {
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
-            similarModels = searchEngine.matchSketch(distanceField, descriptorsArray, 5);
-            searchEngine.writeResultsAsHtml(out, similarModels, descriptorsArray, "http://10.0.0.1:8081/images");
-	    //
+            similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5);
+            Collections.sort(similarModels);
+            searchEngine.writeResultsAsHtml(out, similarModels, shapeDatabase.descriptorsArray, serverUrl + "/images");
+            //
             RGBImage distanceFieldRgb;
             ImageProcessing.gammaCorrection(distanceField, 2.0);
             distanceFieldRgb = distanceField.exportToRgbImage();
@@ -277,13 +278,13 @@ public class ServletConsole extends HttpServlet {
             saveImage(distanceFieldRgb, "distanceField.jpg", out);
         }
         //-----------------------------------------------------------------
-	out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
-	out.println("2D Sketch recieved from applet:<BR>\n");
-        out.println("<img src=\"http://10.0.0.1:8081/images/output.jpg\"></img>\n");
-	out.println("<P>Normalized 2D Sketch to 64x64 pixels:<BR>\n");
-        out.println("<img src=\"http://10.0.0.1:8081/images/outline.jpg\"></img>\n");
-	out.println("<P>Distance field (gamma corrected at factor 2 and border highlighted):<BR>\n");
-        out.println("<img src=\"http://10.0.0.1:8081/images/distanceField.jpg\"></img>\n");
+        out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
+        out.println("2D Sketch recieved from applet:<BR>\n");
+        out.println("<img src=\"" + serverUrl + "/images/output.jpg\"></img>\n");
+        out.println("<P>Normalized 2D Sketch to 64x64 pixels:<BR>\n");
+        out.println("<img src=\"" + serverUrl + "/images/outline.jpg\"></img>\n");
+        out.println("<P>Distance field (gamma corrected at factor 2 and border highlighted):<BR>\n");
+        out.println("<img src=\"" + serverUrl + "/images/distanceField.jpg\"></img>\n");
 
         //-----------------------------------------------------------------
         out.println("</body>\n");

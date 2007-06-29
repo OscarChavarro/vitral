@@ -24,22 +24,22 @@ public class ResultSource
 
     public String toString()
     {
-	String msg;
+        String msg;
 
         msg = "(";
-	if ( source == SPHERICAL_HARMONIC ) {
-	    msg += "SH";
-	}
-	else if ( source >= CUBE13VIEW+1 && source <= CUBE13VIEW+13 ) {
-	    msg += "CV" + (source - CUBE13VIEW);
-	}
-	else {
-	    msg += "?";
-	}
-	msg += ":" + VSDK.formatDouble(distance);
-	msg += ")";
+        if ( source == SPHERICAL_HARMONIC ) {
+            msg += "SH";
+        }
+        else if ( source >= CUBE13VIEW+1 && source <= CUBE13VIEW+13 ) {
+            msg += "CV" + (source - CUBE13VIEW);
+        }
+        else {
+            msg += "?";
+        }
+        msg += ":" + VSDK.formatDouble(distance);
+        msg += ")";
 
-	return msg;
+        return msg;
     }
 }
 
