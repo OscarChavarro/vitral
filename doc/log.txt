@@ -351,8 +351,9 @@ Changes in 2007 june 27 revition
   - First succesfully and fully working web application in
     SearchEngineFor3DModels, proved with applet / servlet test! :)
 
+Changes in 2007 july 1 revition
+  - Fixed addList processing bug in SearchEngineFor3DModels
+
 TODO:
   - Implement OBHU technique
-  - Fix bug in SearchEngine that doesnt read well addList file (missing first
-    line)
 

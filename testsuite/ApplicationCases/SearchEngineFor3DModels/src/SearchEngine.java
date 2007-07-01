@@ -18,15 +18,12 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
-import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -621,41 +618,23 @@ public class SearchEngine
                 FileReader fr;
                 BufferedInputStream bis;
                 BufferedReader reader;
-                int count = 0;
                 InputStreamReader isr;
-                StreamTokenizer parser;
                 int tokenType;
                 i = 0;
 
                 //- Count filenames ------------------------------------------
+                int count = 0;
                 fd = new File(command[1]);
                 fr = new FileReader(fd);
-                parser = new StreamTokenizer(fr);
-
-                parser.resetSyntax();
-                parser.eolIsSignificant(true);
-                parser.wordChars(0x00, 0xFF);
-                parser.whitespaceChars('\n', '\n');
+                reader = new BufferedReader(fr);
+                String line;
 
                 do {
-                    try {
-                        tokenType = parser.nextToken();
-                      }
-                      catch (Exception e) {
-                        break;
-                    }
+                    line = reader.readLine();
+                    if ( line == null ) break;
+                    count++;
+                } while ( true );
 
-                    switch ( tokenType ) {
-                      case StreamTokenizer.TT_WORD:
-                        count++;
-                        break;
-                      case StreamTokenizer.TT_EOL: 
-                        break;
-                      case StreamTokenizer.TT_EOF: break;
-                      default: break;
-                    }
-
-                } while ( tokenType != StreamTokenizer.TT_EOF );
                 fr.close();
 
                 //- Load filenames -------------------------------------------
@@ -664,38 +643,20 @@ public class SearchEngine
 
                 fd = new File(command[1]);
                 fr = new FileReader(fd);
-                parser = new StreamTokenizer(fr);
-
-                parser.resetSyntax();
-                parser.eolIsSignificant(true);
-                parser.wordChars(0x00, 0xFF);
-                parser.whitespaceChars('\n', '\n');
-
+                reader = new BufferedReader(fr);
                 i = 0;
+
                 do {
-                    try {
-                        tokenType = parser.nextToken();
-                      }
-                      catch (Exception e) {
-                        break;
-                    }
-
-                    switch ( tokenType ) {
-                      case StreamTokenizer.TT_WORD:
-                        list[i] = new String(parser.sval);
-                        i++;
-                        break;
-                      case StreamTokenizer.TT_EOL: 
-                        break;
-                      case StreamTokenizer.TT_EOF: break;
-                      default: break;
-                    }
-
-                } while ( tokenType != StreamTokenizer.TT_EOF );
+                    line = reader.readLine();
+                    if ( line == null ) break;
+                    list[i] = new String(line);
+                    i++;
+                } while ( true );
                 fr.close();
             }
             catch ( Exception e ) {
                 System.err.println("Error building file list.");
+                e.printStackTrace();
                 System.exit(1);
             }
             indexFiles(gl, list, descriptorsArray, distanceFieldSide, canvas, offlineRenderer, projectedViewRenderer);
