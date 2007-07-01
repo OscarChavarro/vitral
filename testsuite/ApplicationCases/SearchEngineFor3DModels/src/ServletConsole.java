@@ -27,10 +27,10 @@ import vsdk.toolkit.processing.ImageProcessing;
 
 public class ServletConsole extends HttpServlet {
 
-    //public static final String serverUrl = "http://10.0.0.1:8081";
-    public static final String serverUrl = "http://10.6.2.49:8080";
-    //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
-    public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    public static final String serverUrl = "http://10.0.0.1:8081";
+    //public static final String serverUrl = "http://10.6.2.49:8080";
+    public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    //public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,

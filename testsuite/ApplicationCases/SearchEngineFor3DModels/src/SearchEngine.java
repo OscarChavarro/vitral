@@ -532,16 +532,19 @@ public class SearchEngine
 
             data = searchMetadataById(descriptorsArray, modelId);
             if ( data != null ) {
-                out.write("<IMG WIDTH=160 HEIGHT=120 BORDER=1 SRC=\"" + dir + "//previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
+                out.write("<A HREF=\"ServletDetails?geom=" + modelId + "\">\n");
+                out.write("<IMG BORDER=1 SRC=\"" + dir + "//previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
             }
             else {
                 out.write("<B>No metadata descriptor for ID " + similarModels.get(i).getId() + "\n");
             }
 
-            fullpath = similarModels.get(i).toString();
+            fullpath = similarModels.get(i).getFilename().toString();
             filename = fullpath.substring(searchLastSlash(fullpath));
-            out.write("<BR>" + filename);
-            out.write("<BR></TD>\n");
+            out.write("<BR>" + filename + "</A>");
+            out.write("<BR>Distance: "
+                      + VSDK.formatDouble(similarModels.get(i).getDistance()) +
+                      "</TD>\n");
 
             if ( i % 4 == 3 ) {
                 out.write("</TR>\n");
