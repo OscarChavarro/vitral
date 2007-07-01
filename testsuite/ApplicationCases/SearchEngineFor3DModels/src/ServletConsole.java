@@ -1,6 +1,8 @@
 //===========================================================================
 
 // Java basic classes
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
@@ -22,6 +24,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.GeometryMetadata;
+import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
@@ -151,7 +154,7 @@ public class ServletConsole extends HttpServlet {
         out.println("done");
 
         //-----------------------------------------------------------------
-        System.out.println("Log message: (ServletConsole::" + id + ").");
+        System.out.print("Log message: (ServletConsole::" + id + ").");
         listaDeParametros = request.getParameterNames();
         System.out.println("  - Parameters:");
         while ( listaDeParametros.hasMoreElements() ) {
@@ -274,37 +277,73 @@ public class ServletConsole extends HttpServlet {
         return similarModels;
     }
 
-    private void processGeneric(
-                      HttpServletRequest request,
-                      HttpServletResponse response,
-                      String id)
-        throws IOException, ServletException
+    private void
+    processInformation(HttpServletRequest request, PrintWriter out)
     {
-        response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
+        int id, i;
+        id = Integer.parseInt(request.getParameter("id"));
+        DecimalFormat f1 = new DecimalFormat("0000000");
+        DecimalFormat f2 = new DecimalFormat("00");
 
-        //-----------------------------------------------------------------
-        String cad;
+        out.println("<HTML><BODY>\n");
+        GeometryMetadata data;
+        String imgname, basename;
 
-        //-----------------------------------------------------------------
-        Enumeration listaDeParametros;
+        data = searchEngine.searchMetadataById(shapeDatabase.descriptorsArray, id);
+        if ( data != null ) {
+            // Print basic information
+            out.println("<H1>GEOMETRIC MODEL DETAILS</H1>");
+            out.println("Basic model information\n");
+            out.println("<UL>\n");
+            out.println("<LI>Model filename in shape server: " + data.getFilename() + "\n");
+            out.println("<LI>PENDING LINK TO DOWNLOAD MODEL\n");
+            out.println("</UL><P>\n");
 
-        listaDeParametros = request.getParameterNames();
+            // Include precomputed thumbnails
+            basename = serverUrl + "/images/previews/" + f1.format(id, new StringBuffer(""), new FieldPosition(0)).toString() + "/";
+            out.println("Preprocessed views:<BR>\n");
+            out.println("<CENTER><TABLE WIDTH=100% CELLPADDING=3 CELLSPACING=3 BORDER=0>\n");
+            out.println("<TR>\n");
+            for ( i = 0; i < 8; i++ ) {
+                imgname = f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString();
+                out.println("<TD><A HREF=\"" + basename + imgname + ".jpg" + "\"><CENTER><IMG SRC=\"" + basename + imgname + "small.jpg" + "\"></IMG></CENTER></A></TD\n");
+                if ( i == 3 ) {
+                    out.println("</TR><TR>");
+                }
+            }
+            out.println("</TR></TABLE></CENTER>\n");
 
-/*
-        out.println("Par&aacute;metros desconocidos:<BR><UL>");
-        while ( listaDeParametros.hasMoreElements() ) {
-            cad = "" + listaDeParametros.nextElement();
-            out.println(
-                "<LI>" +
-                cad +
-                " = " +
-                request.getParameter(cad)
-            );
+            // Include primitive count information
+            ShapeDescriptor sd;
+            double featureVector[];
+            int n;
+
+            sd = data.getDescriptorByName("PRIMITIVE_COUNT");
+
+            out.println("Privitive count:\n");
+
+            if ( sd != null ) {
+                featureVector = sd.getFeatureVector();
+                n = (int)(Math.floor(featureVector[VSDK.TRIANGLE]));
+                out.println("<CENTER><TABLE BORDER=2 WIDTH=100% CELLPADDING=3 CELLSPACING=3>\n");
+                out.println("<TR><TH>Triangles</TH></TR>");
+                out.println("<TR><TD>" + n);
+                out.println("</TD></TR>");
+                out.println("</TR></TABLE></CENTER>\n");
+            }
+            else {
+                out.println("No PRIMITIVE_COUNT shape descriptor inside metadata descriptor for model with ID " + id + ".\n");
+            }
         }
-        out.println("</UL>"); 
-*/
+        else {
+            out.write("<B>No metadata descriptor for model with ID " + id + ".\n");
+        }
+        out.println("</BODY></HTML>\n");
+    }
 
+    private void
+    process2DSketchQuery(PrintWriter out)
+    {
         //-----------------------------------------------------------------
         ArrayList <Result> similarModels = null;
         similarModels = processImages(out);
@@ -334,14 +373,85 @@ public class ServletConsole extends HttpServlet {
         //-----------------------------------------------------------------
         out.println("</body>\n");
         out.println("</html>\n");
+    }
+
+    private void processGeneric(
+                      HttpServletRequest request,
+                      HttpServletResponse response,
+                      String id)
+        throws IOException, ServletException
+    {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
 
         //-----------------------------------------------------------------
-        System.out.println("Log message: (ServletConsole::" + id + ").");
+        String cad;
+
+        //-----------------------------------------------------------------
+        Enumeration listaDeParametros;
+
         listaDeParametros = request.getParameterNames();
-        System.out.println("  - Parameters:");
-        while ( listaDeParametros.hasMoreElements() ) {
-            cad = "" + listaDeParametros.nextElement();
-            System.out.println("    . " + cad + " = " + request.getParameter(cad));
+        String operation;
+
+        operation = request.getParameter("input");
+
+        System.out.println("Log message: (ServletConsole::" + id + ")->");
+
+        if ( operation == null || operation.length() < 1 ) {
+            // JOB
+            out.println("No input parameter specifying operation found on request parameters!<P>Parameters given where:<BR><UL>");
+            while ( listaDeParametros.hasMoreElements() ) {
+                cad = "" + listaDeParametros.nextElement();
+                out.println(
+                    "<LI>" +
+                    cad +
+                    " = " +
+                    request.getParameter(cad)
+                );
+            }
+            out.println("</UL>"); 
+            // LOG
+            System.out.println("No input parameter specifying operation found on request parameters!\nParameters given where:");
+            listaDeParametros = request.getParameterNames();
+            System.out.println("  - Parameters:");
+            while ( listaDeParametros.hasMoreElements() ) {
+                cad = "" + listaDeParametros.nextElement();
+                System.out.println("    . " + cad + " = " + request.getParameter(cad));
+            }
+          }
+          else if ( operation.equals("text_2d") ) {
+            // JOB
+            process2DSketchQuery(out);
+            // LOG
+            System.out.println("request for sketch search.");
+          }
+          else if ( operation.equals("model_detail") ) {
+            // JOB
+            processInformation(request, out);
+            // LOG
+            System.out.println("request for model detail.");
+          }
+          else {
+            // JOB
+            out.println("Unknown operation <B>" + operation + "</B>!<P>Parameters given where:<BR><UL>");
+            while ( listaDeParametros.hasMoreElements() ) {
+                cad = "" + listaDeParametros.nextElement();
+                out.println(
+                    "<LI>" +
+                    cad +
+                    " = " +
+                    request.getParameter(cad)
+                );
+            }
+            out.println("</UL>"); 
+            // LOG
+            System.out.println("Unknown operation " + operation + "!\nParameters given where:");
+            listaDeParametros = request.getParameterNames();
+            System.out.println("  - Parameters:");
+            while ( listaDeParametros.hasMoreElements() ) {
+                cad = "" + listaDeParametros.nextElement();
+                System.out.println("    . " + cad + " = " + request.getParameter(cad));
+            }
         }
     }
 

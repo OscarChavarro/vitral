@@ -104,7 +104,7 @@ public class GeometryMetadata extends MediaEntity
     public void setId(long id)
     {
         this.id = id;
-	if ( lastId < id ) lastId = id;
+        if ( lastId < id ) lastId = id;
     }
 
     public long getId()
@@ -130,6 +130,20 @@ public class GeometryMetadata extends MediaEntity
     public ArrayList<ShapeDescriptor> getDescriptors()
     {
         return descriptorsList;
+    }
+
+    public ShapeDescriptor getDescriptorByName(String name)
+    {
+        int i;
+        ShapeDescriptor s;
+
+        for ( i = 0; i < descriptorsList.size(); i++ ) {
+            s = descriptorsList.get(i);
+            if ( s.getLabel().equals(name) ) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public String toString()

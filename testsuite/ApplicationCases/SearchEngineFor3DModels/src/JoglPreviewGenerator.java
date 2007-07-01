@@ -140,31 +140,43 @@ public class JoglPreviewGenerator
         quality.setShadingType(quality.SHADING_TYPE_GOURAUD);
         switch ( i ) {
           case 0:
-            yaw = -20;
+            yaw = 160;
             pitch = -10;
             quality.setWires(false);
             quality.setSurfaces(true);
             break;
           case 1:
-            yaw = 160;
-            pitch = -70;
+            yaw = -20;
+            pitch = -10;
             quality.setWires(false);
             quality.setSurfaces(true);
             break;
           case 2:
             yaw = 160;
+            pitch = -70;
+            quality.setWires(false);
+            quality.setSurfaces(true);
+            break;
+          case 3:
+            yaw = 160;
             pitch = -10;
             quality.setWires(true);
             quality.setSurfaces(false);
             break;
-          case 3:
+          case 4:
+            yaw = 160;
+            pitch = -10;
+            quality.setWires(true);
+            quality.setSurfaces(true);
+            break;
+          case 5:
             yaw = 160;
             pitch = -10;
             fov = 30;
             quality.setWires(true);
             quality.setSurfaces(true);
             break;
-          case 4:
+          case 6:
             yaw = 160;
             pitch = -10;
             fov = 30;
@@ -172,7 +184,7 @@ public class JoglPreviewGenerator
             quality.setSurfaces(true);
             quality.setShadingType(quality.SHADING_TYPE_FLAT);
             break;
-          case 5:
+          case 7:
           default:
             yaw = -20;
             pitch = -10;
@@ -219,12 +231,12 @@ public class JoglPreviewGenerator
         Light light2;
         Vector3D p;
 
-        light1 = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
-        light2 = new Light(Light.POINT, new Vector3D(10, 9, -8), new ColorRgb(1, 1, 1));
+        light1 = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
+        light2 = new Light(Light.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
         JoglLightRenderer.activate(gl, light1);
         JoglLightRenderer.activate(gl, light2);
 
-        for ( i = 0; i < 6; i++ ) {
+        for ( i = 0; i < 8; i++ ) {
             configureView(i, cam, quality);
             p = cam.getPosition();
             light1.setPosition(p);
