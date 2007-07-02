@@ -238,9 +238,9 @@ public class ServletConsole extends HttpServlet {
         }
 
         //-----------------------------------------------------------------
-        int i;
+        int i, j;
         IndexedColorImage img;
-        for ( i = 0; i < 3; i++ ) {
+        for ( i = 0, j = 0; i < 3; i++ ) {
             img = workingImages.get(i);
             if ( img == null || img.getXSize() <= 0 || img.getYSize() <= 0 ) {
                 continue;
@@ -252,10 +252,13 @@ public class ServletConsole extends HttpServlet {
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
-            if ( i == 0 ) {
+            if ( j == 0 ) {
                 similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5);
-                Collections.sort(similarModels);
-                searchEngine.writeResultsAsHtml(out, similarModels, shapeDatabase.descriptorsArray, serverUrl + "/images");
+                j++;
+            }
+            else {
+                similarModels = searchEngine.matchSketchRestricted(distanceField, 5, similarModels);
+                j++;
             }
 
             //
@@ -274,6 +277,9 @@ public class ServletConsole extends HttpServlet {
             }
             saveImage(distanceFieldRgb, "distanceField" + i + ".jpg", out);
         }
+        Collections.sort(similarModels);
+        searchEngine.writeResultsAsHtml(out, similarModels, shapeDatabase.descriptorsArray, serverUrl + "/images");
+
         return similarModels;
     }
 

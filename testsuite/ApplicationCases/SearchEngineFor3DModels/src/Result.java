@@ -3,6 +3,7 @@
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.media.GeometryMetadata;
 
 public class Result implements Comparable <Result>
 {
@@ -10,12 +11,14 @@ public class Result implements Comparable <Result>
     private long id;
     private String filename;
     private ArrayList<ResultSource> parts;
+    private GeometryMetadata descriptor;
 
     public Result(String filename, long id, ResultSource part)
     {
         this.distance = distance;
         this.filename = new String(filename);
         this.id = id;
+        descriptor = null;
         parts = new ArrayList<ResultSource>();
         parts.add(part);
     }
@@ -33,6 +36,16 @@ public class Result implements Comparable <Result>
                 distance = d;
             }
         }
+    }
+
+    public GeometryMetadata getDescriptor()
+    {
+        return descriptor;
+    }
+
+    public void setDescriptor(GeometryMetadata descriptor)
+    {
+        this.descriptor = descriptor;
     }
 
     public void addSource(ResultSource part)

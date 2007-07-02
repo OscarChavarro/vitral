@@ -319,6 +319,7 @@ public class SearchEngine
                 if ( result == null ) {
                     result = new Result(n.getFilename(), n.getId(),
                         new ResultSource(ResultSource.SPHERICAL_HARMONIC, Ls));
+                    result.setDescriptor(n);
                     results.add(result);
                 }
                 else {
@@ -351,6 +352,8 @@ public class SearchEngine
         }
         GeometryMetadata metadata = new GeometryMetadata();
         GeometryMetadata n;
+        GeometryMetadata descriptor;
+
         metadata.getDescriptors().add(fourierShapeDescriptor);
 
         String name;
@@ -358,16 +361,75 @@ public class SearchEngine
         timers.get("SEARCH_MODEL").start();
 
         for ( i = 0; i < descriptorsArray.size(); i++ ) {
+            descriptor = descriptorsArray.get(i);
             // Takes into consideration the euclidean distance as indicated
             // in [FUNK2003].4 (L2 Minskowski distance).
             for ( j = 1; j <= 13; j++ ) {
                 name = "PROJECTED_VIEW_CUBE_" + j;
                 fourierShapeDescriptor.setLabel(name);
-                Ls = metadata.doMinskowskiDistance(descriptorsArray.get(i), 2, name);
+                Ls = metadata.doMinskowskiDistance(descriptor, 2, name);
                 //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
-                //    " to " + descriptorsArray.get(i).getFilename() + " : " + j);
+                //    " to " + descriptor.getFilename() + " : " + j);
                 if ( Ls < tolerance ) {
-                    n = descriptorsArray.get(i);
+                    n = descriptor;
+                    result = searchResult(results, n.getId());
+                    if ( result == null ) {
+                        result = new Result(n.getFilename(), n.getId(),
+                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls));
+                        result.setDescriptor(n);
+                        results.add(result);
+                    }
+                    else {
+                        result.addSource(
+                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls));
+                    }
+                }
+            }
+        }
+
+        timers.get("SEARCH_MODEL").stop();
+
+        return results;
+    }
+
+    public ArrayList <Result> matchSketchRestricted(
+        IndexedColorImage distanceField,
+        double tolerance, ArrayList <Result> prevSearch)
+    {
+        int i, j;
+        double Ls;
+
+        ArrayList <Result> results = new ArrayList <Result>();
+        Result result;
+
+        ShapeDescriptor2DGenerator component = new ShapeDescriptor2DGenerator();
+        FourierShapeDescriptor fourierShapeDescriptor;
+        fourierShapeDescriptor = component.calculateCircularHarmonicsShapeDescriptor(distanceField, "PROJECTED_VIEW_CUBE_0");
+        if ( fourierShapeDescriptor == null ) {
+            return results;
+        }
+        GeometryMetadata metadata = new GeometryMetadata();
+        GeometryMetadata n;
+        GeometryMetadata descriptor;
+
+        metadata.getDescriptors().add(fourierShapeDescriptor);
+
+        String name;
+
+        timers.get("SEARCH_MODEL").start();
+
+        for ( i = 0; i < prevSearch.size(); i++ ) {
+            // Takes into consideration the euclidean distance as indicated
+            // in [FUNK2003].4 (L2 Minskowski distance).
+            descriptor = prevSearch.get(i).getDescriptor();
+            for ( j = 1; descriptor != null && j <= 13; j++ ) {
+                name = "PROJECTED_VIEW_CUBE_" + j;
+                fourierShapeDescriptor.setLabel(name);
+                Ls = metadata.doMinskowskiDistance(descriptor, 2, name);
+                //System.out.println(" - Distance " + VSDK.formatDouble(Ls) +
+                //    " to " + descriptor.getFilename() + " : " + j);
+                if ( Ls < tolerance ) {
+                    n = descriptor;
                     result = searchResult(results, n.getId());
                     if ( result == null ) {
                         result = new Result(n.getFilename(), n.getId(),
@@ -509,8 +571,10 @@ public class SearchEngine
     public void writeResultsAsHtml(PrintWriter out, ArrayList <Result> similarModels, ArrayList<GeometryMetadata> descriptorsArray, String dir)
     {
         out.write("<HTML>\n");
-        out.write("<H1>VITRAL IMPLEMENTATION OF A 3D MODEL SEARCH ENGINE</H1>\n");
-        out.write("<B>Search results in database [test]</B>, " + descriptorsArray.size() + " models         (click on a thumbnail for more information on that model)\n");
+        out.write("<H1>VITRAL BASED 3D MODEL SEARCH ENGINE</H1>\n");
+        out.write("<B>Search results in database [test]</B>, " + descriptorsArray.size() + " models &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE=\"-1\">(click on a thumbnail for more information on that model)</FONT><P>\n");
+        out.write("<FONT SIZE=\"-1\">results: " + similarModels.size() + "</FONT>\n");
+
         out.write("<CENTER>\n");
         out.write("<TABLE BORDER=0 WIDTH=100% CELLPADDING=3 CELLSPACING=3>\n");
 
@@ -541,7 +605,7 @@ public class SearchEngine
 
             fullpath = similarModels.get(i).getFilename().toString();
             filename = fullpath.substring(searchLastSlash(fullpath));
-            out.write("<BR>" + filename + "</A>");
+            out.write("</A><BR>"+ (i+1) + ". &nbsp;<B>" + filename + "</B>");
             out.write("<BR>Distance: "
                       + VSDK.formatDouble(similarModels.get(i).getDistance()) +
                       "</TD>\n");
