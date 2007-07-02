@@ -123,7 +123,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         }
 
         startWriter();
-        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, shapeDatabase.descriptorsArray, "./output");
+        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, shapeDatabase.descriptorsArray, "./output", 0, 0, similarModels.size());
         stopWriter();
     }
 

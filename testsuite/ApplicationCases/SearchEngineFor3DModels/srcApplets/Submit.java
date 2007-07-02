@@ -20,7 +20,7 @@ public class Submit
     static DataOutputStream printout;
     static URLConnection urlConn;
     
-    public boolean connect(Applet applet) {
+    public boolean connect(Sketch applet) {
         try {
             String pageUrl = applet.getCodeBase() + "ServletConsole?";
             System.out.println("Url for sketch reporting: " + pageUrl);
@@ -106,7 +106,7 @@ public class Submit
         return pixelArray;
     }
     
-    public static void receive(String[] strings) {
+    public static void receive(Sketch applet, String[] strings) {
         int i = 0;
         System.out.println("Submit::receive(): ... ");
         try {
@@ -117,10 +117,15 @@ public class Submit
             do {
                 string = br.readLine();
                 System.out.println("rec: [" + string + "]");
-                if ( string != null && string.startsWith("filespec:") ) {
-                    strings[i] = new String(string.substring(10));
-                    i++;
-                }
+                if ( string != null ) {
+		    if ( string.startsWith("filespec:") ) {
+                        strings[i] = new String(string.substring(10));
+                        i++;
+                    }
+		    else if ( string.startsWith("session:") ) {
+                        applet.setSessionId(Long.parseLong(string.substring(9)));
+		    }
+	        }
             } while ( (string != null) && !string.startsWith("done") );
             br.close();
             System.out.println("Read " + i + " filespecs.");
@@ -131,13 +136,13 @@ public class Submit
     }
 
     public static void
-    send(SketchCanvas sketchcanvases[], int numberOfImages) {
+    send(Sketch applet, SketchCanvas sketchcanvases[], int numberOfImages) {
         int i;
         String urlGetParametersString;
 
         try {
             if ( connected ) {
-                urlGetParametersString = "nr_sketches=" +
+                urlGetParametersString = "session=" + applet.getSessionId() + "&nr_sketches=" +
                   URLEncoder.encode(Integer.toString(numberOfImages), "UTF-8");
                 for ( i = 0; i < numberOfImages; i++ ) {
                     if ( sketchcanvases[i].is_empty() ) {

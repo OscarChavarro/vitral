@@ -20,7 +20,23 @@ public class Sketch extends SearchApplet
     Button[] clear_button;
     Button clear_all_button;
     private GridBagLayout my_layout = new GridBagLayout();
-    
+    private long sessionId;
+
+    public Sketch() {
+	sessionId = 0;
+    }
+
+    public long getSessionId()
+    {
+	return sessionId;
+    }
+
+    public void setSessionId(long id)
+    {
+        sessionId = id;
+	System.out.println("Session ID set to " + sessionId);
+    }
+
     public boolean all_filled() {
         boolean bool = true;
         for (int i = 0; i < nr_sketches; i++) {
@@ -226,13 +242,13 @@ public class Sketch extends SearchApplet
                     ("Sketch::sendImages, connect says ok, calling send");
                 disableButtons();
                 setStatus(2);
-                submit.send(draw_areas, nr_sketches);
+                submit.send(this, draw_areas, nr_sketches);
                 System.out.println("calling receive");
                 setStatus(3);
                 for ( i = 0; i < nr_sketches; i++) {
                     filespecs[i] = new String("null");
                 }
-                submit.receive(filespecs);
+                submit.receive(this, filespecs);
                 System.out
                     .println("receive called, nr_sketches is " + nr_sketches);
                 for ( i = 0; i < nr_sketches; i++) {

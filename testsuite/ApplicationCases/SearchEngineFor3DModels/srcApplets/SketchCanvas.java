@@ -126,7 +126,7 @@ public class SketchCanvas extends Canvas
         }
     }
     
-    public void draw_sketch(Graphics graphics, boolean bool) {
+    private void draw_sketch(Graphics graphics, boolean bool) {
         int i = start_indices.size();
         if ( i != 0 ) {
             int i_5_ = points_x.size();
@@ -268,10 +268,12 @@ public class SketchCanvas extends Canvas
     }
     
     public void set_active(boolean bool) {
-        if (bool)
+        if ( bool ) {
             status = 1;
-        else
+        }
+        else {
             status = 0;
+        }
     }
     
     public void set_help_string(int i, String string) {

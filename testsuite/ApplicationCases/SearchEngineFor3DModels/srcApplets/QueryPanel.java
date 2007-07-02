@@ -22,9 +22,9 @@ public class QueryPanel extends Panel
     TextField query;
     private static final int QUERY_LENGTH = 20;
     boolean searching = false;
-    private SearchApplet parent_applet;
+    private Sketch parent_applet;
     
-    QueryPanel(SearchApplet searchapplet) {
+    QueryPanel(Sketch searchapplet) {
         parent_applet = searchapplet;
         search_button = new Button(search_string);
         search_button.setFont(Globals.search_button_font);
@@ -74,7 +74,8 @@ public class QueryPanel extends Panel
     public StringBuffer construct_url() {
         StringBuffer stringbuffer
             = (new StringBuffer(parent_applet.getCodeBase() + "ServletConsole?"));
-        stringbuffer.append("textquery=" + get_query_string());
+        stringbuffer.append("session=" + parent_applet.getSessionId());
+        stringbuffer.append("&textquery=" + get_query_string());
         stringbuffer.append("&dataset=");
         int i = get_selected_index();
         switch (i) {
@@ -105,6 +106,7 @@ public class QueryPanel extends Panel
                          0, 10, 2.0, 0.75, 2, 2, 2, 2);
         Layout.constrain(this, db_list, 2, 0, 2, 1, 0, 10,
                          2.0, 0.75, 4, 2, 0, 2);
+
 /*
         Layout.constrain(this, keywords_text, 0, 1, 2, 1,
                          0, 10, 1.0, 0.75, 2, 2, 2, 2);
