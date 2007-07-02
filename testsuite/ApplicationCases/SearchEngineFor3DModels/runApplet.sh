@@ -1,3 +1,4 @@
+cp web/applet.html classes
 cd classes
-appletviewer index.html
+appletviewer applet.html
 cd ..

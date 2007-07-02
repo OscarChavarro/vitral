@@ -1,3 +1,9 @@
+//===========================================================================
+
+// Java basic classes
+import java.util.ArrayList;
+
+// Java AWT / Swing classes
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -5,9 +11,12 @@ import java.awt.Event;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.util.Vector;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 public class SketchCanvas extends Canvas
+ implements MouseListener, MouseMotionListener
 {
     private int id;
     private Sketch parent;
@@ -35,14 +44,14 @@ public class SketchCanvas extends Canvas
     private Graphics off_g;
     private Graphics single_g;
     private Graphics this_g;
-    private Vector<Integer> points_x;
-    private Vector<Integer> points_y;
-    private Vector<Integer> start_indices;
-    private Vector<Integer> operation;
-    private Vector<Integer> prev_points_x;
-    private Vector<Integer> prev_points_y;
-    private Vector<Integer> prev_start_indices;
-    private Vector<Integer> prev_operation;
+    private ArrayList<Integer> points_x;
+    private ArrayList<Integer> points_y;
+    private ArrayList<Integer> start_indices;
+    private ArrayList<Integer> operation;
+    private ArrayList<Integer> prev_points_x;
+    private ArrayList<Integer> prev_points_y;
+    private ArrayList<Integer> prev_start_indices;
+    private ArrayList<Integer> prev_operation;
     private static final int DRAW = 0;
     private static final int ERASE = 1;
     private static final int OVAL_SIZE = 20;
@@ -51,17 +60,26 @@ public class SketchCanvas extends Canvas
         this.setBackground(Color.black);
         this.id = id;
         parent = sketch;
-        points_x = new Vector<Integer>(100, 100);
-        points_y = new Vector<Integer>(100, 100);
-        operation = new Vector<Integer>(50, 25);
-        start_indices = new Vector<Integer>(50, 25);
-        prev_points_x = new Vector<Integer>(100, 100);
-        prev_points_y = new Vector<Integer>(100, 100);
-        prev_operation = new Vector<Integer>(50, 25);
-        prev_start_indices = new Vector<Integer>(50, 25);
+        points_x = new ArrayList<Integer>();
+        points_y = new ArrayList<Integer>();
+        operation = new ArrayList<Integer>();
+        start_indices = new ArrayList<Integer>();
+        prev_points_x = new ArrayList<Integer>();
+        prev_points_y = new ArrayList<Integer>();
+        prev_operation = new ArrayList<Integer>();
+        prev_start_indices = new ArrayList<Integer>();
         int i;
         for ( i = 0; i < 6; i++ ) {
             help_strings[i] = null;
+        }
+        addMouseListener(this);
+        addMouseMotionListener(this);
+    }
+
+    private void clearArray(ArrayList<Integer> arr)
+    {
+        while ( arr.size() > 0 ) {
+            arr.remove(0);
         }
     }
     
@@ -74,24 +92,24 @@ public class SketchCanvas extends Canvas
         history.add_command("cl", parent.get_timer());
         int i = points_x.size();
         if (i > 1) {
-            prev_points_x.removeAllElements();
-            prev_points_y.removeAllElements();
-            prev_start_indices.removeAllElements();
-            prev_operation.removeAllElements();
+            clearArray(prev_points_x);
+            clearArray(prev_points_y);
+            clearArray(prev_start_indices);
+            clearArray(prev_operation);
             for (int i_1_ = 0; i_1_ < i; i_1_++) {
-                prev_points_x.addElement(points_x.elementAt(i_1_));
-                prev_points_y.addElement(points_y.elementAt(i_1_));
+                prev_points_x.add(points_x.get(i_1_));
+                prev_points_y.add(points_y.get(i_1_));
             }
             int i_2_ = start_indices.size();
             for (int i_3_ = 0; i_3_ < i_2_; i_3_++) {
-                prev_start_indices.addElement(start_indices.elementAt(i_3_));
-                prev_operation.addElement(operation.elementAt(i_3_));
+                prev_start_indices.add(start_indices.get(i_3_));
+                prev_operation.add(operation.get(i_3_));
             }
         }
-        points_x.removeAllElements();
-        points_y.removeAllElements();
-        start_indices.removeAllElements();
-        operation.removeAllElements();
+        clearArray(points_x);
+        clearArray(points_y);
+        clearArray(start_indices);
+        clearArray(operation);
         paint();
     }
     
@@ -114,24 +132,24 @@ public class SketchCanvas extends Canvas
             int i_5_ = points_x.size();
             graphics.setColor(draw_colour);
             for (int i_6_ = 0; i_6_ < i; i_6_++) {
-                int i_7_ = ((Integer) operation.elementAt(i_6_)).intValue();
+                int i_7_ = ((Integer) operation.get(i_6_)).intValue();
                 if (i_7_ == 0)
                     graphics.setColor(draw_colour);
                 else
                     graphics.setColor(background_colour);
                 int i_8_
-                    = ((Integer) start_indices.elementAt(i_6_)).intValue();
+                    = ((Integer) start_indices.get(i_6_)).intValue();
                 int i_9_ = i_5_;
                 if (i_6_ < i - 1)
-                    i_9_ = ((Integer) start_indices.elementAt(i_6_ + 1))
+                    i_9_ = ((Integer) start_indices.get(i_6_ + 1))
                                .intValue();
-                int i_10_ = ((Integer) points_x.elementAt(i_8_)).intValue();
-                int i_11_ = ((Integer) points_y.elementAt(i_8_)).intValue();
+                int i_10_ = ((Integer) points_x.get(i_8_)).intValue();
+                int i_11_ = ((Integer) points_y.get(i_8_)).intValue();
                 for (int i_12_ = i_8_ + 1; i_12_ < i_9_; i_12_++) {
                     int i_13_
-                        = ((Integer) points_x.elementAt(i_12_)).intValue();
+                        = ((Integer) points_x.get(i_12_)).intValue();
                     int i_14_
-                        = ((Integer) points_y.elementAt(i_12_)).intValue();
+                        = ((Integer) points_y.get(i_12_)).intValue();
                     if (i_7_ == 0) {
                         graphics.drawLine(i_10_, i_11_, i_13_, i_14_);
                         if (bool) {
@@ -190,54 +208,13 @@ public class SketchCanvas extends Canvas
         return new Dimension(150, 150);
     }
     
-    public boolean mouseDown(Event event, int i, int i_18_) {
-        if (status == 4)
-            return true;
-        parent.notify_canvas_active(id);
-        int i_19_ = 0;
-        if ((event.modifiers & 0x8) != 0) {
-            undo_segment();
-            return true;
-        }
-        if ((event.modifiers & 0x4) != 0)
-            i_19_ = 1;
-        operation.addElement(new Integer(i_19_));
-        if (i_19_ == 0)
-            history.add_command("md", parent.get_timer());
-        else
-            history.add_command("er", parent.get_timer());
-        history.add_coords(i, i_18_);
-        int i_20_ = points_x.size();
-        start_indices.addElement(new Integer(i_20_));
-        points_x.addElement(new Integer(i));
-        points_y.addElement(new Integer(i_18_));
-        paint();
-        return true;
-    }
-    
-    public boolean mouseDrag(Event event, int i, int i_21_) {
-        if (status == 4)
-            return true;
-        points_x.addElement(new Integer(i));
-        points_y.addElement(new Integer(i_21_));
-        history.add_coords(i, i_21_);
-        paint();
-        return true;
-    }
-    
-    public boolean mouseUp(Event event, int i, int i_22_) {
-        if (status == 4)
-            return true;
-        history.add_command("mu", parent.get_timer());
-        return true;
-    }
-    
     public void paint() {
         Dimension dimension = this.getSize();
-        if (offscreen == null || dimension.width != image_width
-            || dimension.height != image_height) {
-            if (dimension.width < 1 || dimension.height < 1)
+        if ( offscreen == null || dimension.width != image_width
+            || dimension.height != image_height ) {
+            if (dimension.width < 1 || dimension.height < 1) {
                 return;
+            }
             System.out.println("SketchCanvas(" + id + ") size: "
                                + dimension.width + ", " + dimension.height);
             offscreen = this.createImage(dimension.width, dimension.height);
@@ -309,10 +286,10 @@ public class SketchCanvas extends Canvas
     public void undo_segment() {
         history.add_command("ud", parent.get_timer());
         int i = start_indices.size();
-        if (i == 0) {
+        if ( i == 0 ) {
             int i_23_ = prev_points_x.size();
             if (i_23_ > 1) {
-                Vector<Integer> vector = points_x;
+                ArrayList<Integer> vector = points_x;
                 points_x = prev_points_x;
                 prev_points_x = vector;
                 vector = points_y;
@@ -326,20 +303,93 @@ public class SketchCanvas extends Canvas
                 prev_operation = vector;
                 paint();
             }
-        } else {
-            int i_24_ = ((Integer) start_indices.elementAt(i - 1)).intValue();
+          }
+          else {
+            int i_24_ = ((Integer) start_indices.get(i - 1)).intValue();
             int i_25_ = points_x.size();
             int i_26_ = i_25_ - i_24_;
             for (int i_27_ = i_25_ - 1; i_27_ >= i_24_; i_27_--) {
-                points_x.removeElementAt(i_27_);
-                points_y.removeElementAt(i_27_);
+                points_x.remove(i_27_);
+                points_y.remove(i_27_);
             }
-            start_indices.removeElementAt(i - 1);
-            operation.removeElementAt(i - 1);
-            if (i_26_ == 1)
+            start_indices.remove(i - 1);
+            operation.remove(i - 1);
+            if (i_26_ == 1) {
                 undo_segment();
+            }
             paint();
         }
     }
+
+    public void mouseEntered(MouseEvent e) {
+        ;
+    }
+
+    public void mouseExited(MouseEvent e) {
+        ;
+    }
+
+    public void mouseClicked(MouseEvent e) {
+        ;
+    }
+
+    public void mousePressed(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        int modifiers = e.getModifiers();
+
+        //int modifiers = 0;
+        if ( status == 4 ) {
+            return;
+        }
+        parent.notify_canvas_active(id);
+        int newOperationId = 0;
+        if ((modifiers & 0x8) != 0) {
+            undo_segment();
+            return;
+        }
+        if ((modifiers & 0x4) != 0) {
+            newOperationId = 1;
+        }
+        operation.add(new Integer(newOperationId));
+        if (newOperationId == 0) {
+            history.add_command("md", parent.get_timer());
+        }
+        else {
+            history.add_command("er", parent.get_timer());
+        }
+        history.add_coords(x, y);
+        int newSize = points_x.size();
+        start_indices.add(new Integer(newSize));
+        points_x.add(new Integer(x));
+        points_y.add(new Integer(y));
+        paint();
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        if ( status == 4 ) {
+            return;
+        }
+        history.add_command("mu", parent.get_timer());
+    }
+
+    public void mouseDragged(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        if ( status == 4 ) {
+            return;
+        }
+        points_x.add(new Integer(x));
+        points_y.add(new Integer(y));
+        history.add_coords(x, y);
+        paint();
+    }
+
+    public void mouseMoved(MouseEvent e) {
+        ;
+    }
 }
 
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
