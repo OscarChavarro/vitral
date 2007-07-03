@@ -6,6 +6,7 @@ import java.text.FieldPosition;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -39,9 +40,6 @@ public class ServletConsole extends HttpServlet {
     /// Warning: this code makes current implementation NOT THREAD SAFE,
     /// so will not work with multiple connections!
     private ArrayList<IndexedColorImage> workingImages;
-    private IndexedColorImage outline = null;
-    private IndexedColorImage distanceField = null;
-
     private SearchEngine searchEngine;
     private ShapeDatabaseFile shapeDatabase;
     private int distanceFieldSide = 64;
@@ -65,14 +63,6 @@ public class ServletConsole extends HttpServlet {
                 workingImage.init(0, 0);
             }
         }
-        if ( outline == null ) {
-            outline = new IndexedColorImage();
-        }
-        outline.init(distanceFieldSide, distanceFieldSide);
-        if ( distanceField == null ) {
-            distanceField = new IndexedColorImage();
-        }
-        distanceField.init(distanceFieldSide, distanceFieldSide);
 
         //-----------------------------------------------------------------
         shapeDatabase = new ShapeDatabaseFile(databaseFile);
@@ -200,8 +190,8 @@ public class ServletConsole extends HttpServlet {
             }
         }
 
-        for ( i = 0; i < 3; i++ ) {
-            saveImage(workingImages.get(i), "output" + i + ".jpg", new PrintWriter(System.out));
+        for ( i = 0; currentSession != null && i < 3; i++ ) {
+            currentSession.setSourceImage(workingImages.get(i), i);
         }
     }
 
@@ -257,7 +247,8 @@ public class ServletConsole extends HttpServlet {
     }
 
     private ArrayList<Result>
-    execute2DSketchQuery(PrintWriter out)
+    execute2DSketchQuery(ServletSessionInformation currentSession,
+                         PrintWriter out)
     {
         ArrayList<Result> similarModels = new ArrayList<Result>();
 
@@ -272,14 +263,17 @@ public class ServletConsole extends HttpServlet {
 
         //-----------------------------------------------------------------
         int i, j;
-        IndexedColorImage img;
+        IndexedColorImage img, outline, distanceField;
+
         for ( i = 0, j = 0; i < 3; i++ ) {
             img = workingImages.get(i);
             if ( img == null || img.getXSize() <= 0 || img.getYSize() <= 0 ) {
                 continue;
             }
+            outline = new IndexedColorImage();
+            outline.init(distanceFieldSide, distanceFieldSide);
             extractOutlineImage(img, outline);
-            saveImage(outline, "outline" + i + ".jpg", out);
+            currentSession.setOutline(outline, i);
 
             distanceField = new IndexedColorImage();
             distanceField.init(distanceFieldSide, distanceFieldSide);
@@ -308,7 +302,7 @@ public class ServletConsole extends HttpServlet {
                     }
                 }
             }
-            saveImage(distanceFieldRgb, "distanceField" + i + ".jpg", out);
+            currentSession.setDistanceField(distanceFieldRgb, i);
         }
 
         Collections.sort(similarModels);
@@ -317,7 +311,7 @@ public class ServletConsole extends HttpServlet {
     }
 
     private void
-    processInformation(HttpServletRequest request, PrintWriter out)
+    processInformation(HttpServletRequest request, PrintWriter out, ServletSessionInformation currentSession)
     {
         int id, i;
         id = Integer.parseInt(request.getParameter("id"));
@@ -332,6 +326,7 @@ public class ServletConsole extends HttpServlet {
         if ( data != null ) {
             // Print basic information
             out.println("<H1>GEOMETRIC MODEL DETAILS</H1>");
+            out.println("<P><HR><P><H2>FOUNDED 3D MODEL INFORMATION</H2>\n");
             out.println("Basic model information\n");
             out.println("<UL>\n");
             out.println("<LI>Model filename in shape server: " + data.getFilename() + "\n");
@@ -377,27 +372,20 @@ public class ServletConsole extends HttpServlet {
         else {
             out.write("<B>No metadata descriptor for model with ID " + id + ".\n");
         }
+
+        writeDebuggingReport(currentSession, out);
+
         out.println("</BODY></HTML>\n");
     }
 
     private void
-    process2DSketchQuery(ServletSessionInformation currentSession,
+    writeDebuggingReport(ServletSessionInformation currentSession,
                          PrintWriter out)
     {
-        //-----------------------------------------------------------------
-        currentSession.setSimilarModels(execute2DSketchQuery(out));
-        int similarSize = currentSession.getSimilarModels().size();
-        int minSize = 16;
-        if ( similarSize < minSize ) {
-            minSize = similarSize;
-        }
-        searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase.descriptorsArray, serverUrl + "/images", currentSession.getId(), 0, minSize);
-
-        //-----------------------------------------------------------------
         int i;
         IndexedColorImage img;
 
-        out.println("<P><HR><P><H2>DEBUGGING INFORMATION</H2>\n");
+        out.println("<P><HR><P><H2>QUERY INFORMATION</H2>\n");
         out.println("<CENTER><TABLE BORDER=2>\n");
         out.println("<TR><TH>Image number</TH>\n");
         out.println("<TH>2D Sketch recieved from applet</TH>\n");
@@ -408,17 +396,58 @@ public class ServletConsole extends HttpServlet {
             img = workingImages.get(i);
             if ( img != null && img.getXSize() > 0 && img.getYSize() > 0 ) {
                 out.println("<TR><TD><CENTER><B>" + i + "</B></CENTER></TD>\n");
-                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/output" + i + ".jpg\"></IMG></CENTER></TD>\n");
-                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/outline" + i + ".jpg\"></IMG></CENTER></TD>\n");
-                out.println("<TD><CENTER><IMG SRC=\"" + serverUrl + "/images/distanceField" + i + ".jpg\"></IMG></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=source" + i + "\"></IMG></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=outline" + i + "\"></IMG></CENTER></TD>\n");
+                out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=distance_field" + i + "\"></IMG></CENTER></TD>\n");
                 out.println("</TR>\n");
             }
         }
         out.println("</TABLE></CENTER>\n");
+    }
 
+    private void
+    process2DSketchQuery(ServletSessionInformation currentSession,
+                         PrintWriter out)
+    {
         //-----------------------------------------------------------------
-        out.println("</body>\n");
-        out.println("</html>\n");
+        currentSession.setSimilarModels(execute2DSketchQuery(currentSession, out));
+        int similarSize = currentSession.getSimilarModels().size();
+        int minSize = 16;
+        if ( similarSize < minSize ) {
+            minSize = similarSize;
+        }
+        searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase.descriptorsArray, serverUrl + "/images", currentSession.getId(), 0, minSize);
+    }
+
+    private void retrieveSketch(ServletSessionInformation currentSession, 
+                                HttpServletRequest request,
+                                HttpServletResponse response, OutputStream os)
+    {
+        response.setContentType("image/jpeg");
+        String source;
+        try {
+            Image img = null;
+            source = request.getParameter("image_source");
+            if ( source != null && source.startsWith("source") ) {
+                img = currentSession.getSourceImage(Integer.parseInt(source.substring(6)));
+            }
+            else if ( source != null && source.startsWith("outline") ) {
+                img = currentSession.getOutline(Integer.parseInt(source.substring(7)));
+            }
+            else if ( source != null && source.startsWith("distance_field") ) {
+                img = currentSession.getDistanceField(Integer.parseInt(source.substring(14)));
+            }
+            else {
+                img = new RGBImage();
+                img.init(640, 480);
+                img.createTestPattern();
+            }
+            ImagePersistence.exportJPG(os, img);
+        }
+        catch ( Exception e ) {
+            System.out.println("Error sending image.");
+            e.printStackTrace();
+        }
     }
 
     private void processGeneric(
@@ -428,7 +457,9 @@ public class ServletConsole extends HttpServlet {
         throws IOException, ServletException
     {
         response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
+        OutputStream os = response.getOutputStream();
+        PrintWriter out = new PrintWriter(os);
+        //PrintWriter out = response.getWriter();
 
         //-----------------------------------------------------------------
         String cad;
@@ -472,7 +503,7 @@ public class ServletConsole extends HttpServlet {
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
         }
-        if ( operation == null || operation.length() < 1 ) {
+        else if ( operation == null || operation.length() < 1 ) {
             // JOB
             out.println("No input parameter specifying operation found on request parameters!<P>Parameters given where:<BR><UL>");
             while ( listaDeParametros.hasMoreElements() ) {
@@ -502,9 +533,15 @@ public class ServletConsole extends HttpServlet {
           }
           else if ( operation.equals("model_detail") ) {
             // JOB
-            processInformation(request, out);
+            processInformation(request, out, currentSession);
             // LOG
             System.out.println("request for model detail.");
+          }
+          else if ( operation.equals("retrieve_sketch") ) {
+            // JOB
+            retrieveSketch(currentSession, request, response, os);
+            // LOG
+            System.out.println("request for sketch search.");
           }
           else if ( operation.equals("show_cached_results") ) {
             // JOB
@@ -541,6 +578,7 @@ public class ServletConsole extends HttpServlet {
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
         }
+        out.flush();
     }
 
     public void doGet(HttpServletRequest request,

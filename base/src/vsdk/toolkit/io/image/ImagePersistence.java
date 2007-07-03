@@ -16,6 +16,7 @@ package vsdk.toolkit.io.image;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 // Extended JDK classes
 import javax.imageio.ImageIO;
@@ -204,32 +205,9 @@ public class ImagePersistence extends PersistenceElement
     public static boolean exportJPG(File fd, Image img)
     {
         try {
-            BufferedImage bimg;
-            int x, y, xSize, ySize;
-            RGBPixel p;
-
-            xSize = img.getXSize();
-            ySize = img.getYSize();
-            bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
-            for ( y = 0; y < ySize; y++ ) {
-                for ( x = 0; x < xSize; x++ ) {
-                    p = img.getPixelRgb(x, y);
-                    bimg.setRGB(x, y, 
-                      (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
-                      (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
-                      (VSDK.signedByte2unsignedInteger(p.b))
-                    );
-                }
-            }
-
             FileOutputStream fos = new FileOutputStream(fd);
 
-            ImageIO.write(bimg, "jpg", fos);
-
-            // OLD DEPRECATED API, DO NOT USE!
-            //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
-            //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
-            //jpeg.encode(bimg);
+            exportJPG(fos, img);
 
             fos.close();
         }
@@ -237,6 +215,35 @@ public class ImagePersistence extends PersistenceElement
             return false;
         }
         return true;
+    }
+
+    public static void exportJPG(OutputStream os, Image img)
+        throws Exception
+    {
+        BufferedImage bimg;
+        int x, y, xSize, ySize;
+        RGBPixel p;
+
+        xSize = img.getXSize();
+        ySize = img.getYSize();
+        bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                p = img.getPixelRgb(x, y);
+                bimg.setRGB(x, y, 
+                  (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.b))
+                );
+            }
+        }
+
+        ImageIO.write(bimg, "jpg", os);
+
+        // OLD DEPRECATED API, DO NOT USE!
+        //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+        //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
+        //jpeg.encode(bimg);
     }
 
     /**

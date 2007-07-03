@@ -359,6 +359,8 @@ Changes in 2007 july 1 revition
   - SearchEngineFor3DModels supporting multiple simultaneous users with
     separate sessions, and cached results independent storage for each user,
     with partial browsing capability.
+  - SearchEngineFor3DModels is able of managing not file-stored images, and
+    sending them directly from servlet to browser.
 
 TODO:
   - Implement OBHU technique
