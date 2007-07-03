@@ -35,28 +35,11 @@ import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.ImageProcessing;
 
 public class JoglPreviewGenerator
 {
-    private boolean
-    checkDirectory(String dirName)
-    {
-        File dirFd = new File(dirName);
-
-        if ( dirFd.exists() && (!dirFd.isDirectory() ) ) {
-            System.err.println("Directory " + dirName + " can not be created, because a file with that name already exists (not overwriten).");
-            return false;
-        }
-
-        if ( !dirFd.exists() && !dirFd.mkdir() ) {
-            System.err.println("Directory " + dirName + " can not be created, check permisions and available free disk space.");
-            return false;
-        }
-
-        return true;
-    }
-
     private static void drawGridRectangle(GL gl, double z)
     {
         int nx = 14; // Must be an even number
@@ -213,9 +196,9 @@ public class JoglPreviewGenerator
         DecimalFormat f1 = new DecimalFormat("0000000");
         DecimalFormat f2 = new DecimalFormat("00");
         String dirName = "./output/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString();
-        if ( !checkDirectory("./output") ||
-             !checkDirectory("./output/previews") ||
-             !checkDirectory(dirName) ) {
+        if ( !PersistenceElement.checkDirectory("./output") ||
+             !PersistenceElement.checkDirectory("./output/previews") ||
+             !PersistenceElement.checkDirectory(dirName) ) {
             System.err.println("Unable to create / find directories for preview generation!");
             System.err.println("Aborting preview generation.");
             return;

@@ -42,6 +42,7 @@ import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.metadata.ShapeDescriptorPersistence;
+import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
@@ -203,10 +204,47 @@ public class SearchEngine
             System.out.println("Ok.");
 
             //- Projection views image descriptor extraction [FUNK2003] ---
+            IndexedColorImage distanceFieldsArray[];
+            RGBImage distanceFieldRgb;
+
             if ( withProjection ) {
                 System.out.print("    . Projected views image descriptors (cube 13 setup) ... ");
                 timers.get("CUBE13_PROJECTIONS").start();
-                component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer);
+                distanceFieldsArray = component.calculateCube13ProjectedViewsShapeDescriptors(gl, bodySet, metadata.getDescriptors(), distanceFieldSide, projectedViewRenderer, true);
+                //---------------------------------------------------------
+                String imageFilename;
+                for ( i = 0; i < distanceFieldsArray.length; i++ ) {
+                    ImageProcessing.gammaCorrection(distanceFieldsArray[i], 2.0);
+                    distanceFieldRgb = distanceFieldsArray[i].exportToRgbImage();
+                    int x, y;
+
+                    for ( x = 0; x < distanceFieldRgb.getXSize(); x++ ) {
+                        for ( y = 0; y < distanceFieldRgb.getYSize(); y++ ) {
+                            if ( distanceFieldsArray[i].getPixel(x, y) < 1 ) {
+                                distanceFieldRgb.putPixel(x, y,
+                                    (byte)255, (byte)0, (byte)0);
+                            }
+                        }
+                    }
+                    //---------------------------------------------------------
+                    DecimalFormat f1 = new DecimalFormat("0000000");
+                    DecimalFormat f2 = new DecimalFormat("00");
+                    String dirName = "./output/previews/" + f1.format(metadata.getId(), new StringBuffer(""), new FieldPosition(0)).toString();
+                    if ( !PersistenceElement.checkDirectory("./output") ||
+                         !PersistenceElement.checkDirectory("./output/previews") ||
+                         !PersistenceElement.checkDirectory(dirName) ) {
+                        System.err.println("Unable to create / find directories for preview generation!");
+                        System.err.println("Aborting preview generation.");
+                        continue;
+                    }
+
+                    imageFilename = dirName + "/df" + f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString() + ".jpg";
+                    ImagePersistence.exportJPG(new File(imageFilename), distanceFieldRgb);
+                    distanceFieldsArray[i] = null;
+                }
+                //---------------------------------------------------------
+                distanceFieldsArray = null;
+                distanceFieldRgb = null;
                 timers.get("CUBE13_PROJECTIONS").stop();
                 System.out.println("Ok.");
             }

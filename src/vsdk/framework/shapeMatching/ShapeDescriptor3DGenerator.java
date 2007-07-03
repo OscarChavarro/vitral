@@ -49,7 +49,7 @@ public class ShapeDescriptor3DGenerator
     OpenGL / JOGL, so it needs a working GL context, large enough to contain
     the viewport image to be rendered.
     */
-    private Image
+    private IndexedColorImage
     createCube13ProjectedViewDistanceField(GL gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer)
     {
         //- Execute posing ------------------------------------------------
@@ -316,12 +316,17 @@ public class ShapeDescriptor3DGenerator
         (trigonometrics decomposition)
       - Adds newly computed shape descriptor to specified `descriptorsList`
     */
-    public void
-    calculateCube13ProjectedViewsShapeDescriptors(GL gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer) throws Exception
+    public IndexedColorImage[]
+    calculateCube13ProjectedViewsShapeDescriptors(GL gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer, boolean exportDistanceFields) throws Exception
     {
         FourierShapeDescriptor fourierShapeDescriptor;
-        Image distanceField;
+        IndexedColorImage distanceField;
         int i;
+        IndexedColorImage array[] = null;
+
+        if ( exportDistanceFields ) {
+            array = new IndexedColorImage[13];
+        }
 
         for ( i = 1; i <= 13; i++ ) {
             //- Generate distance field for i-th projection -------------------
@@ -341,8 +346,14 @@ public class ShapeDescriptor3DGenerator
             descriptorsList.add(fourierShapeDescriptor);
 
             //- Mark null reference for garbage collector ---------------------
-            distanceField = null;
+            if ( exportDistanceFields ) {
+                array[i-1] = distanceField;
+            }
+            else {
+                distanceField = null;
+            }
         }
+        return array;
     }
 
 }

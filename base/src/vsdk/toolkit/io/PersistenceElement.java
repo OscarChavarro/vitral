@@ -39,6 +39,24 @@ public abstract class PersistenceElement {
     private static byte[] bytesForLong = new byte[4];
     private static byte[] bytesForFloat = new byte[4];
 
+    public static boolean
+    checkDirectory(String dirName)
+    {
+        File dirFd = new File(dirName);
+
+        if ( dirFd.exists() && (!dirFd.isDirectory() ) ) {
+            System.err.println("Directory " + dirName + " can not be created, because a file with that name already exists (not overwriten).");
+            return false;
+        }
+
+        if ( !dirFd.exists() && !dirFd.mkdir() ) {
+            System.err.println("Directory " + dirName + " can not be created, check permisions and available free disk space.");
+            return false;
+        }
+
+        return true;
+    }
+
     /**
     Given a filename, this method extract its extension and return it.
     @todo: This method will fail when directory path or filename contains
