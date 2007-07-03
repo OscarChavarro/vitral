@@ -354,7 +354,7 @@ Changes in 2007 june 27 revition
 Changes in 2007 july 1 revition
   - Fixed addList processing bug in SearchEngineFor3DModels
 
-Changes in 2007 july 1 revition
+Changes in 2007 july 2 revition
   - SearchEngineFor3DModels supporting 2D queries with multiple sketches!
   - SearchEngineFor3DModels supporting multiple simultaneous users with
     separate sessions, and cached results independent storage for each user,
