@@ -26,8 +26,10 @@ import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
+import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 
 public class ServletConsole extends HttpServlet {
 
@@ -280,11 +282,11 @@ public class ServletConsole extends HttpServlet {
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
             if ( j == 0 ) {
-                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5);
+                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5, i);
                 j++;
             }
             else {
-                similarModels = searchEngine.matchSketchRestricted(distanceField, 5, similarModels);
+                similarModels = searchEngine.matchSketchRestricted(distanceField, 5, similarModels, i);
                 j++;
             }
 
@@ -373,19 +375,21 @@ public class ServletConsole extends HttpServlet {
             out.write("<B>No metadata descriptor for model with ID " + id + ".\n");
         }
 
-        writeDebuggingReport(currentSession, out);
+        writeDebuggingReport(currentSession, data, out);
 
         out.println("</BODY></HTML>\n");
     }
 
     private void
     writeDebuggingReport(ServletSessionInformation currentSession,
-                         PrintWriter out)
+                         GeometryMetadata data, PrintWriter out)
     {
         int i;
         IndexedColorImage img;
 
+        //-----------------------------------------------------------------
         out.println("<P><HR><P><H2>QUERY INFORMATION</H2>\n");
+        out.println("Current reported model was retrieved from a 2D SKETCH commit. The following table sumarize drawings given by end user:<P>");
         out.println("<CENTER><TABLE BORDER=2>\n");
         out.println("<TR><TH>Image number</TH>\n");
         out.println("<TH>2D Sketch recieved from applet</TH>\n");
@@ -395,13 +399,97 @@ public class ServletConsole extends HttpServlet {
         for ( i = 0; (workingImages != null) && i < 3; i++ ) {
             img = workingImages.get(i);
             if ( img != null && img.getXSize() > 0 && img.getYSize() > 0 ) {
-                out.println("<TR><TD><CENTER><B>" + i + "</B></CENTER></TD>\n");
+                out.println("<TR><TD><CENTER><B>" + (i+1) + "</B></CENTER></TD>\n");
                 out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=source" + i + "\"></IMG></CENTER></TD>\n");
                 out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=outline" + i + "\"></IMG></CENTER></TD>\n");
                 out.println("<TD><CENTER><IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=distance_field" + i + "\"></IMG></CENTER></TD>\n");
                 out.println("</TR>\n");
             }
         }
+        out.println("</TABLE></CENTER>\n");
+        //-----------------------------------------------------------------
+        DecimalFormat f1 = new DecimalFormat("0000000");
+        DecimalFormat f2 = new DecimalFormat("00");
+        String imgname, basename, name;
+        FourierShapeDescriptor fourierShapeDescriptor1 = null;
+        int j;
+
+        ShapeDescriptor2DGenerator component = new ShapeDescriptor2DGenerator();
+/*
+        if (  ) {
+            fourierShapeDescriptor1 = component.calculateCircularHarmonicsShapeDescriptor(distanceField, "PROJECTED_VIEW_CUBE_0");
+        }
+*/
+
+        out.println("<P>From such skethes, current model resulted in a match, due to CUBE13 projected view ([FUNK2003]) matching in the views shown in the following table:<P>");
+        out.println("<CENTER><TABLE BORDER=2>\n");
+
+        out.println("<TR>\n");
+        out.println("<TH>DATA</TH>\n");
+        for ( i = 0; i < 13; i++ ) {
+            out.println("<TH><CENTER>VIEW" + (i+1) + "</CENTER></TH>\n");
+        }
+        out.println("</TR>\n");
+
+        out.println("<TR>\n");
+        out.println("<TH>VIEW </TH>\n");
+        for ( i = 0; i < 13; i++ ) {
+            basename = serverUrl + "/images/previews/" + f1.format(data.getId(), new StringBuffer(""), new FieldPosition(0)).toString() + "/";
+            imgname = f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString();
+            out.println("<TD><CENTER><IMG SRC=\"" + (basename + "df" + imgname + ".jpg") + "\"></IMG></CENTER></TD>\n");
+        }
+        out.println("</TR>\n");
+
+        //-----------------------------------------------------------------
+        int k, l;
+        Image test;
+
+        for ( i = 0; i < 3; i++ ) {
+            test = workingImages.get(i);
+            if ( test == null || test.getXSize() <= 0 || test.getYSize() <= 0 ) {
+                continue;
+            }
+            out.println("<TR>\n");
+            out.println("<TH>Matches with sketch " + (i+1) + "</TH>\n");
+
+            for ( j = 0; j < 13; j++ ) {
+                name = "PROJECTED_VIEW_CUBE_" + j;
+                ArrayList<Result> results = currentSession.getSimilarModels();
+                ArrayList<ResultSource> parts;
+                Result r;
+                int source;
+                int sketch;
+                boolean match = false;
+                double d;
+
+                out.println("<TD><CENTER>\n");
+                for ( k = 0; k < results.size(); k++ ) {
+                    r = results.get(k);
+                    if ( r.getId() == data.getId() ) {
+                        parts = r.getParts();
+                        for ( l = 0; l < parts.size(); l++ ) {
+                            source = parts.get(l).getSource() - 1 - ResultSource.CUBE13VIEW;
+                            sketch = parts.get(l).getSketchId();
+                            d = parts.get(l).getSource() - 1 - ResultSource.CUBE13VIEW;
+                            if ( source == j /*&& i == sketch*/ ) {
+                                out.println("<IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=distance_field" + i + "\"></IMG>\n");
+                                out.println("Distance: " + VSDK.formatDouble(d));
+                                out.println("Sketch: " + sketch);
+                                match = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if ( !match ) {
+                    out.println("No match\n");
+                }
+                out.println("</CENTER></TD>\n");
+            }
+            out.println("</TR>\n");
+        }
+        //-----------------------------------------------------------------
+
         out.println("</TABLE></CENTER>\n");
     }
 

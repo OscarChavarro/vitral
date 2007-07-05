@@ -92,6 +92,11 @@ public class Result implements Comparable <Result>
         }
         return msg;
     }
+
+    public ArrayList<ResultSource> getParts()
+    {
+        return parts;
+    }
 }
 
 //===========================================================================

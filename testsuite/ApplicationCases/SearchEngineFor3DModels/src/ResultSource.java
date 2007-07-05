@@ -8,18 +8,36 @@ public class ResultSource
     public static final int CUBE13VIEW = 0;
 
     public int source;
+    public int sketchId;
     public double distance;
 
-    public ResultSource(int source, double distance)
+    public ResultSource(int source, double distance, int sketchId)
     {
         this.source = source;
         this.distance = distance;
+        this.sketchId = sketchId;
     }
 
     public ResultSource(ResultSource other)
     {
         this.source = other.source;
-        this.distance = other.distance;    
+        this.distance = other.distance;
+        this.sketchId = other.sketchId;
+    }
+
+    public int getSource()
+    {
+        return source;
+    }
+
+    public int getSketchId()
+    {
+        return sketchId;
+    }
+
+    public double getDistance()
+    {
+        return distance;
     }
 
     public String toString()
