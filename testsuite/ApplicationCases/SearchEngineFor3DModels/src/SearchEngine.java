@@ -472,13 +472,36 @@ public class SearchEngine
                     result = searchResult(results, n.getId());
                     if ( result == null ) {
                         result = new Result(n.getFilename(), n.getId(),
-                                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls, sketchId));
+                            new ResultSource(ResultSource.CUBE13VIEW+j, Ls, sketchId));
                         results.add(result);
                     }
                     else {
                         result.addSource(
                             new ResultSource(ResultSource.CUBE13VIEW+j, Ls, sketchId));
                     }
+                }
+            }
+        }
+
+        Result prevResult;
+        for ( i = 0; i < results.size(); i++ ) {
+            result = results.get(i);
+            prevResult = searchResult(prevSearch, result.getId());
+            if ( prevResult != null ) {
+                ArrayList<ResultSource> parts;
+                ResultSource part;
+                int oldSource;
+                int oldSketchId;
+                double oldDistance;
+                parts = prevResult.getParts();
+
+                for ( j = 0; j < parts.size(); j++ ) {
+                    part = parts.get(j);
+                    oldSource = part.getSource();
+                    oldSketchId = part.getSketchId();
+                    oldDistance = part.getDistance();
+                    result.addSource(
+                        new ResultSource(oldSource, oldDistance, oldSketchId));
                 }
             }
         }
@@ -610,9 +633,6 @@ public class SearchEngine
     private void writePreviousNextAsHtml(PrintWriter out, ArrayList <Result> similarModels, long sessionId, int start, int size)
     {
         int a, b;
-
-        System.out.println("Start: " + start);
-        System.out.println("Size: " + size);
 
         if ( start - size > -1 ) {
             a = start - size;

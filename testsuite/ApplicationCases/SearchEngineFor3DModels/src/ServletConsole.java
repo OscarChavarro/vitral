@@ -33,10 +33,10 @@ import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 
 public class ServletConsole extends HttpServlet {
 
-    //public static final String serverUrl = "http://10.0.0.1:8081";
-    public static final String serverUrl = "http://10.6.2.49:8080";
-    //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
-    public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    public static final String serverUrl = "http://10.0.0.1:8081";
+    //public static final String serverUrl = "http://10.6.2.49:8080";
+    public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    //public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
@@ -440,11 +440,26 @@ public class ServletConsole extends HttpServlet {
         }
         out.println("</TR>\n");
 
-        //-----------------------------------------------------------------
-        int k, l;
-        Image test;
+        //- Search result for which debugging report is being generated ---
+        Result r;
+        Result currentModel = null;
+        ArrayList<Result> results = currentSession.getSimilarModels();
 
-        for ( i = 0; i < 3; i++ ) {
+        for ( i = 0; i < results.size(); i++ ) {
+            r = results.get(i);
+            if ( r.getId() == data.getId() ) {
+                currentModel = r;
+                break;
+            }
+        }
+
+        //-----------------------------------------------------------------
+        int k;
+        Image test;
+        ArrayList<ResultSource> parts;
+        ResultSource part;
+
+        for ( i = 0; currentModel != null && i < 3; i++ ) {
             test = workingImages.get(i);
             if ( test == null || test.getXSize() <= 0 || test.getYSize() <= 0 ) {
                 continue;
@@ -454,31 +469,23 @@ public class ServletConsole extends HttpServlet {
 
             for ( j = 0; j < 13; j++ ) {
                 name = "PROJECTED_VIEW_CUBE_" + j;
-                ArrayList<Result> results = currentSession.getSimilarModels();
-                ArrayList<ResultSource> parts;
-                Result r;
                 int source;
                 int sketch;
                 boolean match = false;
                 double d;
 
                 out.println("<TD><CENTER>\n");
-                for ( k = 0; k < results.size(); k++ ) {
-                    r = results.get(k);
-                    if ( r.getId() == data.getId() ) {
-                        parts = r.getParts();
-                        for ( l = 0; l < parts.size(); l++ ) {
-                            source = parts.get(l).getSource() - 1 - ResultSource.CUBE13VIEW;
-                            sketch = parts.get(l).getSketchId();
-                            d = parts.get(l).getSource() - 1 - ResultSource.CUBE13VIEW;
-                            if ( source == j /*&& i == sketch*/ ) {
-                                out.println("<IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=distance_field" + i + "\"></IMG>\n");
-                                out.println("Distance: " + VSDK.formatDouble(d));
-                                out.println("Sketch: " + sketch);
-                                match = true;
-                                break;
-                            }
-                        }
+                parts = currentModel.getParts();
+                for ( k = 0; k < parts.size(); k++ ) {
+                    part = parts.get(k);
+                    source = part.getSource() - 1 - ResultSource.CUBE13VIEW;
+                    sketch = part.getSketchId();
+                    d = parts.get(k).getSource() - 1 - ResultSource.CUBE13VIEW;
+                    if ( source == j && i == sketch ) {
+                        out.println("<IMG SRC=\"ServletConsole?session=" + currentSession.getId() + "&input=retrieve_sketch&image_source=distance_field" + i + "\"></IMG>\n");
+                        out.println("<BR>Distance: " + VSDK.formatDouble(d));
+                        match = true;
+                        break;
                     }
                 }
                 if ( !match ) {
@@ -567,7 +574,7 @@ public class ServletConsole extends HttpServlet {
 
         operation = request.getParameter("input");
 
-        System.out.println("Log message: (ServletConsole::" + id + ")->");
+        System.out.print("Log message: (ServletConsole::" + id + ")->");
 
         if ( currentSession == null ) {
             // JOB
@@ -629,7 +636,7 @@ public class ServletConsole extends HttpServlet {
             // JOB
             retrieveSketch(currentSession, request, response, os);
             // LOG
-            System.out.println("request for sketch search.");
+            System.out.println("request for image sketch retrieval.");
           }
           else if ( operation.equals("show_cached_results") ) {
             // JOB
