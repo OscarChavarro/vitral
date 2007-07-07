@@ -108,7 +108,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         }
     }
 
-    private void exportResults(ArrayList <Result> similarModels, ArrayList<GeometryMetadata> descriptorsArray)
+    private void exportResults(ArrayList <Result> similarModels, ShapeDatabase shapeDatabase)
     {
         int i;
 
@@ -123,7 +123,7 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
         }
 
         startWriter();
-        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, shapeDatabase.descriptorsArray, "./output", 0, 0, similarModels.size());
+        searchEngine.writeResultsAsHtml(new PrintWriter(writer), similarModels, shapeDatabase, "./output", 0, 0, similarModels.size());
         stopWriter();
     }
 
@@ -158,9 +158,9 @@ public class ServerDaemon extends JoglShapeMatchingOfflineRenderable implements 
                 System.out.print(".");
                 if ( command != null ) {
                     ArrayList <Result> similarModels;
-                    similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase.descriptorsArray, distanceFieldSide);
+                    similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase, distanceFieldSide);
                     if ( similarModels != null ) {
-                        exportResults(similarModels, shapeDatabase.descriptorsArray);
+                        exportResults(similarModels, shapeDatabase);
                     }
                 }
                 command = null;

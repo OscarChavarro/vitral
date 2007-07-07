@@ -362,6 +362,14 @@ Changes in 2007 july 2 revition
   - SearchEngineFor3DModels is able of managing not file-stored images, and
     sending them directly from servlet to browser.
 
+Changes in 2007 july 6 revition
+  - SearchEngineFor3DModels includes a preprocessed views report in shape
+    matching from 2D sketches.
+
+Changes in 2007 july 7 revition
+  - SearchEngineFor3DModels algoritms generalized to support interface
+    ShapeDatabase.
+
 TODO:
   - Implement OBHU technique
 

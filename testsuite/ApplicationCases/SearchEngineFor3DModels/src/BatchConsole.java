@@ -91,7 +91,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         ArrayList <Result> similarModels;
 
         searchEngine.readDatabase(shapeDatabase);
-        similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase.descriptorsArray, distanceFieldSide);
+        similarModels = searchEngine.runCommand(gl, offlineRenderer, canvas, projectedViewRenderer, command, shapeDatabase, distanceFieldSide);
         if ( similarModels != null ) {
             reportResults(similarModels);
         }

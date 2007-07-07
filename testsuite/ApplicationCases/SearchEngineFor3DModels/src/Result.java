@@ -23,6 +23,24 @@ public class Result implements Comparable <Result>
         parts.add(part);
     }
 
+    /**
+    Search for a result with the given id inside the list. If not found
+    returns null.
+    */
+    public static Result searchResult(ArrayList <Result> results, long id)
+    {
+        int i;
+        Result r;
+
+        for ( i = 0; i < results.size(); i++ ) {
+            r = results.get(i);
+            if ( r.getId() == id ) {
+                return r;
+            }
+        }
+        return null;
+    }
+
     private void updateDistance()
     {
         int i;

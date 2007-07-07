@@ -282,7 +282,7 @@ public class ServletConsole extends HttpServlet {
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
 
             if ( j == 0 ) {
-                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase.descriptorsArray, 5, i);
+                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase, 5, i);
                 j++;
             }
             else {
@@ -324,7 +324,7 @@ public class ServletConsole extends HttpServlet {
         GeometryMetadata data;
         String imgname, basename;
 
-        data = searchEngine.searchMetadataById(shapeDatabase.descriptorsArray, id);
+        data = shapeDatabase.searchEntryById(id);
         if ( data != null ) {
             // Print basic information
             out.println("<H1>GEOMETRIC MODEL DETAILS</H1>");
@@ -511,7 +511,7 @@ public class ServletConsole extends HttpServlet {
         if ( similarSize < minSize ) {
             minSize = similarSize;
         }
-        searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase.descriptorsArray, serverUrl + "/images", currentSession.getId(), 0, minSize);
+        searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase, serverUrl + "/images", currentSession.getId(), 0, minSize);
     }
 
     private void retrieveSketch(ServletSessionInformation currentSession, 
@@ -646,7 +646,7 @@ public class ServletConsole extends HttpServlet {
                 out.printf("Error: no start range specified.");
             }
             else {
-                searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase.descriptorsArray, serverUrl + "/images", currentSession.getId(), Integer.parseInt(cad), 16);
+                searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase, serverUrl + "/images", currentSession.getId(), Integer.parseInt(cad), 16);
             }
             // LOG
             System.out.println("showing cached results.");
