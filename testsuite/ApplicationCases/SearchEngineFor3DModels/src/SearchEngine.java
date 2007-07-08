@@ -694,6 +694,80 @@ public class SearchEngine
         System.out.println("Note that current figures stands for ELLAPSED (no CPU) times (java limitation)");
     }
 
+    private void exportDatabase(String command[], ShapeDatabase shapeDatabase, int op)
+    {
+        int j, k;
+
+        timers.get("WRITE_DATABASE").start();
+        System.out.println("Exporting database with " + shapeDatabase.getNumEntries() + " fields!");
+        System.out.println("Depending on database size, this could take some time...");
+        GeometryMetadata m;
+        ArrayList<ShapeDescriptor> d;
+        ShapeDescriptor s;
+        double arr[];
+        String stringSegment = null;
+
+        try {
+            //---------------------------------------------------------
+            File fd = new File(command[1]);
+            FileOutputStream fos;
+            BufferedOutputStream writer;
+
+            fd = new File(command[1]);
+            fos = new FileOutputStream(fd);
+            writer = new BufferedOutputStream(fos);
+
+            //---------------------------------------------------------
+            byte barr[];
+            ProgressMonitorConsole reporter;
+            reporter = new ProgressMonitorConsole();
+
+            reporter.begin();
+            long index;
+            long N;
+            N = shapeDatabase.getMaxEntryId();
+
+            for ( index = 0; index <= N; index++ ) {
+                m = shapeDatabase.searchEntryById(index);
+                if ( m != null ) {
+                    d = m.getDescriptors();
+                    if ( op == 1 ) {
+                        stringSegment = "[" + m.getId() + "]\t" + m.getFilename() + "\t";
+                        for ( j = 0; j < d.size(); j++ ) {
+                            s = d.get(j);
+                            stringSegment += s.getLabel() + "\t";
+                            barr = stringSegment.getBytes();
+                            writer.write(barr, 0, barr.length);
+        
+                            arr = s.getFeatureVector();
+                            for ( k = 0; k < arr.length; k++ ) {
+                                stringSegment = arr[k] + "\t";
+                                barr = stringSegment.getBytes();
+                                writer.write(barr, 0, barr.length);
+                            }
+                        }
+                        stringSegment = "EOL\n";
+                    }
+                    else if ( op == 2 ) {
+                        DecimalFormat f1 = new DecimalFormat("0000000");
+                        stringSegment = "convert ./output/previews/" + f1.format(m.getId(), new StringBuffer(""), new FieldPosition(0)).toString() + "/00.jpg " + m.getFilename() + "_preview.png\n";
+                    }
+                    barr = stringSegment.getBytes();
+                    writer.write(barr, 0, barr.length);
+                }
+                reporter.update(0, N, index);
+            }
+            reporter.end();
+
+            writer.close();
+            fos.close();
+        }
+        catch ( Exception e ) {
+            System.out.println("Error exporting database!");
+        }
+        timers.get("WRITE_DATABASE").stop();
+    }
+
     public ArrayList <Result> runCommand(
         GL gl,
         JoglShapeMatchingOfflineRenderer offlineRenderer,
@@ -704,7 +778,7 @@ public class SearchEngine
         int distanceFieldSide)
     {
         ArrayList <Result> similarModels = null;
-        int i, j, k;
+        int i;
 
         timers.get("TOTAL").start();
         //-----------------------------------------------------------------
@@ -799,68 +873,19 @@ public class SearchEngine
             }
             else {
                 System.out.println("Processing command exportDatabase ...");
-                timers.get("WRITE_DATABASE").start();
-                System.out.println("Exporting database with " + shapeDatabase.getNumEntries() + " fields!");
-                System.out.println("Depending on database size, this could take some time...");
-                GeometryMetadata m;
-                ArrayList<ShapeDescriptor> d;
-                ShapeDescriptor s;
-                double arr[];
-                String stringSegment;
-
-                try {
-                    //---------------------------------------------------------
-                    File fd = new File(command[1]);
-                    FileOutputStream fos;
-                    BufferedOutputStream writer;
-
-                    fd = new File(command[1]);
-                    fos = new FileOutputStream(fd);
-                    writer = new BufferedOutputStream(fos);
-
-                    //---------------------------------------------------------
-                    byte barr[];
-                    ProgressMonitorConsole reporter;
-                    reporter = new ProgressMonitorConsole();
-
-                    reporter.begin();
-                    long index;
-                    long N;
-                    N = shapeDatabase.getMaxEntryId();
-
-                    for ( index = 0; index <= N; index++ ) {
-                        m = shapeDatabase.searchEntryById(index);
-                        if ( m != null ) {
-                            d = m.getDescriptors();
-                            stringSegment = "[" + m.getId() + "]\t" + m.getFilename() + "\t";
-                            for ( j = 0; j < d.size(); j++ ) {
-                                s = d.get(j);
-                                stringSegment += s.getLabel() + "\t";
-                                barr = stringSegment.getBytes();
-                                writer.write(barr, 0, barr.length);
-    
-                                arr = s.getFeatureVector();
-                                for ( k = 0; k < arr.length; k++ ) {
-                                    stringSegment = arr[k] + "\t";
-                                    barr = stringSegment.getBytes();
-                                    writer.write(barr, 0, barr.length);
-                                }
-                            }
-                            stringSegment = "EOL\n";
-                            barr = stringSegment.getBytes();
-                            writer.write(barr, 0, barr.length);
-                        }
-                    }
-                    reporter.update(0, N, index);
-                    reporter.end();
-
-                    writer.close();
-                    fos.close();
-                }
-                catch ( Exception e ) {
-                    System.out.println("Error exporting database!");
-                }
-                timers.get("WRITE_DATABASE").stop();
+                exportDatabase(command, shapeDatabase, 1);
+                System.out.println("Done exporting database.");
+            }
+        }
+        //-----------------------------------------------------------------
+        else if ( command[0].equals("exportPreviews") ) {
+            if ( command.length != 2 ) {
+                System.err.println("ERROR: exportPreviews command must specified a text filename to export.");
+                System.err.println("Database exporting aborted.");
+            }
+            else {
+                System.out.println("Processing command exportPreviews ...");
+                exportDatabase(command, shapeDatabase, 2);
                 System.out.println("Done exporting database.");
             }
         }

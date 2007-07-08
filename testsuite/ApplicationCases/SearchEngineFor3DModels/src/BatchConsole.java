@@ -133,7 +133,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
     {
         if ( args.length < 1 ) {
             System.err.println("Usage: java BatchConsole command files...");
-            System.err.println("Commands are: add, addList, searchModel, searchSketch, searchDistanceField, exportDatabase");
+            System.err.println("Commands are: add, addList, searchModel, searchSketch, searchDistanceField, exportDatabase, exportPreviews");
             System.exit(0);
         }
 
