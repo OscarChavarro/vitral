@@ -369,6 +369,8 @@ Changes in 2007 july 6 revition
 Changes in 2007 july 7 revition
   - SearchEngineFor3DModels algoritms generalized to support interface
     ShapeDatabase.
+  - SearchEngineFor3DModels include spherical harmonics search method in
+    find similar shapes option link in web results.
 
 TODO:
   - Implement OBHU technique

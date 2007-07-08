@@ -12,12 +12,16 @@ contains all the needed information to keep an independent web session.
 */
 public class ServletSessionInformation
 {
-    public static long nextSessionId = 1;
+    public static final int METHOD_NONE = 0;
+    public static final int METHOD_2D_SKETCH_CUBE13 = 1;
+    public static final int METHOD_3D_SPHERICAL_HARMONICS = 2;
+    private static long nextSessionId = 1;
     private long sessionId;
     private ArrayList <Result> similarModels;
     private Image sourceImages[];
     private Image outlines[];
     private Image distanceFields[];
+    private int lastSearchMethod;
 
     public ServletSessionInformation()
     {
@@ -32,6 +36,17 @@ public class ServletSessionInformation
             outlines[i] = null;
             distanceFields[i] = null;
         }
+        lastSearchMethod = METHOD_NONE;
+    }
+
+    public void setMethod(int m)
+    {
+        lastSearchMethod = m;
+    }
+
+    public int getMethod()
+    {
+        return lastSearchMethod;
     }
 
     public void setSourceImage(Image i, int pos)

@@ -141,9 +141,9 @@ public class ServletConsole extends HttpServlet {
 
         //-----------------------------------------------------------------
         String cad;
-        Enumeration listaDeParametros;
+        Enumeration parametersList;
 
-        listaDeParametros = request.getParameterNames();
+        parametersList = request.getParameterNames();
         IndexedColorImage img;
         int i;
         long sessionId = 0;
@@ -154,8 +154,8 @@ public class ServletConsole extends HttpServlet {
             img.init(0, 0);
         }
 
-        while ( listaDeParametros.hasMoreElements() ) {
-            cad = "" + listaDeParametros.nextElement();
+        while ( parametersList.hasMoreElements() ) {
+            cad = "" + parametersList.nextElement();
             if ( cad.startsWith("session") ) {
                 sessionId = Long.parseLong(request.getParameter(cad));
                 System.out.println("Searching for session: " + sessionId);
@@ -180,10 +180,10 @@ public class ServletConsole extends HttpServlet {
 
         //-----------------------------------------------------------------
         System.out.print("Log message: (ServletConsole::" + id + ").");
-        listaDeParametros = request.getParameterNames();
+        parametersList = request.getParameterNames();
         System.out.println("  - Parameters:");
-        while ( listaDeParametros.hasMoreElements() ) {
-            cad = "" + listaDeParametros.nextElement();
+        while ( parametersList.hasMoreElements() ) {
+            cad = "" + parametersList.nextElement();
             if ( cad.startsWith("image") ) {
                 System.out.println("    . Recieving an image (" + cad + ")!");
               }
@@ -380,15 +380,21 @@ public class ServletConsole extends HttpServlet {
         out.println("</BODY></HTML>\n");
     }
 
-    private void
-    writeDebuggingReport(ServletSessionInformation currentSession,
+    private void writeDebuggingReportSphericalHarmonics(
+                         ServletSessionInformation currentSession,
+                         GeometryMetadata data, PrintWriter out)
+    {
+        out.write("Current reported model was retrieved from a 3D comparison commit against a similar selected model. Spherical Harmonics shape descriptor defined in [FUNK2003] was used.<P>");
+    }
+
+    private void writeDebuggingReportSketch(
+                         ServletSessionInformation currentSession,
                          GeometryMetadata data, PrintWriter out)
     {
         int i;
         IndexedColorImage img;
 
         //-----------------------------------------------------------------
-        out.println("<P><HR><P><H2>QUERY INFORMATION</H2>\n");
         out.println("Current reported model was retrieved from a 2D SKETCH commit. The following table sumarize drawings given by end user:<P>");
         out.println("<CENTER><TABLE BORDER=2>\n");
         out.println("<TR><TH>Image number</TH>\n");
@@ -415,12 +421,6 @@ public class ServletConsole extends HttpServlet {
         int j;
 
         ShapeDescriptor2DGenerator component = new ShapeDescriptor2DGenerator();
-/*
-        if (  ) {
-            fourierShapeDescriptor1 = component.calculateCircularHarmonicsShapeDescriptor(distanceField, "PROJECTED_VIEW_CUBE_0");
-        }
-*/
-
         out.println("<P>From such skethes, current model resulted in a match, due to CUBE13 projected view ([FUNK2003]) matching in the views shown in the following table:<P>");
         out.println("<CENTER><TABLE BORDER=2>\n");
 
@@ -501,6 +501,24 @@ public class ServletConsole extends HttpServlet {
     }
 
     private void
+    writeDebuggingReport(ServletSessionInformation currentSession,
+                         GeometryMetadata data, PrintWriter out)
+    {
+        out.println("<P><HR><P><H2>QUERY INFORMATION</H2>\n");
+        switch ( currentSession.getMethod() ) {
+          case ServletSessionInformation.METHOD_2D_SKETCH_CUBE13:
+            writeDebuggingReportSketch(currentSession, data, out);
+            break;
+          case ServletSessionInformation.METHOD_3D_SPHERICAL_HARMONICS:
+            writeDebuggingReportSphericalHarmonics(currentSession, data, out);
+            break;
+          default:
+            out.println("Unknown search method used to obtain this model. No further information available.");
+            break;
+        }
+    }
+
+    private void
     process2DSketchQuery(ServletSessionInformation currentSession,
                          PrintWriter out)
     {
@@ -511,6 +529,37 @@ public class ServletConsole extends HttpServlet {
         if ( similarSize < minSize ) {
             minSize = similarSize;
         }
+        currentSession.setMethod(currentSession.METHOD_2D_SKETCH_CUBE13);
+        searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase, serverUrl + "/images", currentSession.getId(), 0, minSize);
+    }
+
+    private void
+    process3DSphericalHarmonicsQuery(
+        ServletSessionInformation currentSession,
+        HttpServletRequest request,
+        PrintWriter out)
+    {
+        ArrayList<Result> similarModels = new ArrayList<Result>();
+
+        //-----------------------------------------------------------------
+        String cad;
+        GeometryMetadata m;
+
+        cad = request.getParameter("id");
+        if ( cad != null && cad.length() > 0 ) {
+            m = shapeDatabase.searchEntryById(Long.parseLong(cad));
+            similarModels = searchEngine.matchModelSphericalHarmonics(m, shapeDatabase, 4);
+        }
+        Collections.sort(similarModels);
+
+        //-----------------------------------------------------------------
+        currentSession.setSimilarModels(similarModels);
+        int similarSize = currentSession.getSimilarModels().size();
+        int minSize = 16;
+        if ( similarSize < minSize ) {
+            minSize = similarSize;
+        }
+        currentSession.setMethod(currentSession.METHOD_3D_SPHERICAL_HARMONICS);
         searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase, serverUrl + "/images", currentSession.getId(), 0, minSize);
     }
 
@@ -545,6 +594,7 @@ public class ServletConsole extends HttpServlet {
         }
     }
 
+
     private void processGeneric(
                       HttpServletRequest request,
                       HttpServletResponse response,
@@ -560,9 +610,9 @@ public class ServletConsole extends HttpServlet {
         String cad;
 
         //-----------------------------------------------------------------
-        Enumeration listaDeParametros;
+        Enumeration parametersList;
 
-        listaDeParametros = request.getParameterNames();
+        parametersList = request.getParameterNames();
         String operation;
 
         ServletSessionInformation currentSession = null;
@@ -579,8 +629,8 @@ public class ServletConsole extends HttpServlet {
         if ( currentSession == null ) {
             // JOB
             out.println("No session ID specified!<P>Parameters given where:<BR><UL>");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 out.println(
                     "<LI>" +
                     cad +
@@ -591,18 +641,18 @@ public class ServletConsole extends HttpServlet {
             out.println("</UL>"); 
             // LOG
             System.out.println("No session ID specified!\nParameters given where:");
-            listaDeParametros = request.getParameterNames();
+            parametersList = request.getParameterNames();
             System.out.println("  - Parameters:");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
         }
         else if ( operation == null || operation.length() < 1 ) {
             // JOB
             out.println("No input parameter specifying operation found on request parameters!<P>Parameters given where:<BR><UL>");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 out.println(
                     "<LI>" +
                     cad +
@@ -613,10 +663,10 @@ public class ServletConsole extends HttpServlet {
             out.println("</UL>"); 
             // LOG
             System.out.println("No input parameter specifying operation found on request parameters!\nParameters given where:");
-            listaDeParametros = request.getParameterNames();
+            parametersList = request.getParameterNames();
             System.out.println("  - Parameters:");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
           }
@@ -638,6 +688,12 @@ public class ServletConsole extends HttpServlet {
             // LOG
             System.out.println("request for image sketch retrieval.");
           }
+          else if ( operation.equals("retrieve_sh") ) {
+            // JOB
+            process3DSphericalHarmonicsQuery(currentSession, request, out);
+            // LOG
+            System.out.println("request for spherical harmonics 3D model retrieval.");
+          }
           else if ( operation.equals("show_cached_results") ) {
             // JOB
             cad = request.getParameter("start");
@@ -654,8 +710,8 @@ public class ServletConsole extends HttpServlet {
           else {
             // JOB
             out.println("Unknown operation <B>" + operation + "</B>!<P>Parameters given where:<BR><UL>");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 out.println(
                     "<LI>" +
                     cad +
@@ -666,10 +722,10 @@ public class ServletConsole extends HttpServlet {
             out.println("</UL>"); 
             // LOG
             System.out.println("Unknown operation " + operation + "!\nParameters given where:");
-            listaDeParametros = request.getParameterNames();
+            parametersList = request.getParameterNames();
             System.out.println("  - Parameters:");
-            while ( listaDeParametros.hasMoreElements() ) {
-                cad = "" + listaDeParametros.nextElement();
+            while ( parametersList.hasMoreElements() ) {
+                cad = "" + parametersList.nextElement();
                 System.out.println("    . " + cad + " = " + request.getParameter(cad));
             }
         }
