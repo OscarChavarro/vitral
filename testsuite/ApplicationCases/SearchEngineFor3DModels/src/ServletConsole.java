@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -33,10 +34,10 @@ import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 
 public class ServletConsole extends HttpServlet {
 
-    public static final String serverUrl = "http://10.0.0.1:8081";
-    //public static final String serverUrl = "http://10.6.2.49:8080";
-    public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
-    //public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    //public static final String serverUrl = "http://10.0.0.1:8081";
+    public static final String serverUrl = "http://10.6.2.49:8080";
+    //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
@@ -568,6 +569,10 @@ public class ServletConsole extends HttpServlet {
                                 HttpServletResponse response, OutputStream os)
     {
         response.setContentType("image/jpeg");
+        response.setHeader( "Cache-control", "max-age=0" );
+        response.setDateHeader( "Expires", new Date().getTime()-1 );
+        response.setDateHeader( "Last-Modified", new Date().getTime()+1 );
+
         String source;
         try {
             Image img = null;
