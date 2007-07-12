@@ -372,6 +372,9 @@ Changes in 2007 july 7 revition
   - SearchEngineFor3DModels include spherical harmonics search method in
     find similar shapes option link in web results.
 
+Changes in 2007 july 11 revition
+  - Design updates.  
+
 TODO:
   - Implement OBHU technique
 
