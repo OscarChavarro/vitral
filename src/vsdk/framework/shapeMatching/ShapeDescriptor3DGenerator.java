@@ -35,8 +35,9 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.processing.SpharmonicKitWrapper;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.framework.Component;
 
-public class ShapeDescriptor3DGenerator
+public class ShapeDescriptor3DGenerator extends Component
 {
     /**
     Given a set of possed geometries (with respecto to unit cube), this method

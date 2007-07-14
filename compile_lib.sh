@@ -9,7 +9,7 @@ AWT_CLASSES="vsdk/toolkit/render/awt/*.java vsdk/toolkit/gui/CameraController.ja
 
 JOGL_CLASSES="vsdk/toolkit/render/jogl/*.java"
 
-VITRALARCHITECTURE_CLASSES="vsdk/framework/shapeMatching/*.java"
+VITRALARCHITECTURE_CLASSES="vsdk/framework/*.java vsdk/framework/shapeMatching/*.java"
 
 #---------------------------------------------------------------------------
 

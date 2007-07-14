@@ -20,7 +20,10 @@ A complex child is one with a real mother and an imaginary father.
 Current implementation of complex number based on (borrowed from, jeje)
 sample in [.wPRIN2007].9 course notes.
 */
-public class Complex {
+public class Complex extends FundamentalEntity {
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20070712L;
+
     /// Current complex number real part
     public double r;
     /// Current complex number imaginary part

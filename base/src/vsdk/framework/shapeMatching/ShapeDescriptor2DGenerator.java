@@ -8,8 +8,9 @@ import vsdk.toolkit.common.Complex;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.processing.SignalProcessing;
+import vsdk.framework.Component;
 
-public class ShapeDescriptor2DGenerator
+public class ShapeDescriptor2DGenerator extends Component
 {
     public FourierShapeDescriptor calculateCircularHarmonicsShapeDescriptor(Image distanceField, String label)
     {

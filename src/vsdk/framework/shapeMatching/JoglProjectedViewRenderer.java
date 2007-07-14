@@ -28,8 +28,9 @@ import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.framework.Component;
 
-public class JoglProjectedViewRenderer {
+public class JoglProjectedViewRenderer extends Component {
     public Image image;
     private SimpleBodyGroup bodies;
     private RendererConfiguration quality;

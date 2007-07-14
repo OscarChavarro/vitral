@@ -17,7 +17,10 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
-public class JoglShapeMatchingOfflineRenderer implements GLEventListener {
+// Vitral classes
+import vsdk.framework.Component;
+
+public class JoglShapeMatchingOfflineRenderer extends Component implements GLEventListener {
     private GLPbuffer  pbuffer;
     private boolean ready;
     private boolean pbufferSupported;
