@@ -14,7 +14,7 @@ package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.Complex;
 
-public class SignalProcessing {
+public class SignalProcessing extends ProcessingElement {
 
     /**
     Compute the FFT of x[], assuming its length is a power of 2.
