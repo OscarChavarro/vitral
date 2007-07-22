@@ -52,6 +52,9 @@ cd CgShaderExample
 ./compile1.sh
 ./compile2.sh
 cd ..
+cd WireframeExample
+./compile.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques

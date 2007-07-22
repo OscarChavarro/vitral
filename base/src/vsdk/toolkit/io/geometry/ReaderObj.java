@@ -27,9 +27,14 @@ import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.environment.Background;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
@@ -119,7 +124,7 @@ public class ReaderObj extends PersistenceElement
     make it independent of filesystems, and generalize it to URLs or whatever
     other connection.
     */
-    public static TriangleMeshGroup read(String fileName) throws IOException
+    private static TriangleMeshGroup read(String fileName) throws IOException
     {
         //- Geometric data and geometric attributes extracted from file ---
         ArrayList<Vector3D> vertexPositionsArray;
@@ -790,6 +795,45 @@ public class ReaderObj extends PersistenceElement
         catch( IOException ioe ) {
         }
         return ret;
+    }
+
+    private static Material defaultMaterial()
+    {
+        Material m = new Material();
+
+        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        return m;
+    }
+
+    private static void addThing(Geometry g,
+        ArrayList<SimpleBody> inoutSimpleBodiesArray)
+    {
+        if ( inoutSimpleBodiesArray == null ) return;
+
+        SimpleBody thing;
+
+        thing = new SimpleBody();
+        thing.setGeometry(g);
+        thing.setPosition(new Vector3D());
+        thing.setRotation(new Matrix4x4());
+        thing.setRotationInverse(new Matrix4x4());
+        thing.setMaterial(defaultMaterial());
+        inoutSimpleBodiesArray.add(thing);
+    }
+
+    public static void
+    importEnvironment(File inSceneFileFd,
+                      ArrayList<SimpleBody> inoutSimpleBodiesArray,
+                      ArrayList<Light> inoutLightsArray,
+                      ArrayList<Background> inoutBackgroundsArray,
+                      ArrayList<Camera> inoutCamerasArray
+                      ) throws Exception
+    {
+        TriangleMeshGroup mg = null;
+        mg = read(inSceneFileFd.getAbsolutePath());
+        addThing(mg, inoutSimpleBodiesArray);
     }
 }
 

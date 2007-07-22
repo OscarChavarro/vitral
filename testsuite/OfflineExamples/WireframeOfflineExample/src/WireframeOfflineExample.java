@@ -1,6 +1,10 @@
 //===========================================================================
-import java.io.File;
 
+// Java classes
+import java.io.File;
+import java.util.ArrayList;
+
+// VSDK classes
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Triangle;
@@ -8,8 +12,10 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vector4D;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
@@ -43,7 +49,22 @@ public class WireframeOfflineExample {
 
         //-----------------------------------------------------------------
         try {
-            meshGroup = ReaderObj.read("../../../etc/geometry/cow.obj");
+            int i;
+            ArrayList<SimpleBody> bodies = new ArrayList<SimpleBody>();
+            Geometry g;
+            ReaderObj.importEnvironment(new File("../../../etc/geometry/cow.obj"), bodies, null, null, null);
+            meshGroup = null;
+            for ( i = 0; i < bodies.size(); i++ ) {
+                g = bodies.get(i).getGeometry();
+                if ( g instanceof TriangleMeshGroup ) {
+                    meshGroup = (TriangleMeshGroup)g;
+                    break;
+                }
+            }
+            if ( meshGroup == null ) {
+                System.err.println("ERROR: Can not find a TriangleMeshGroup inside file.");
+                System.exit(1);
+            }
         }
         catch ( Exception ex ) {
             System.err.println("Failed to read file");

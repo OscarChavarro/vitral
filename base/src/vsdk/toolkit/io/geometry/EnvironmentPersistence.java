@@ -27,32 +27,6 @@ import vsdk.toolkit.io.PersistenceElement;
 
 public class EnvironmentPersistence extends PersistenceElement {
 
-    private static Material defaultMaterial()
-    {
-        Material m = new Material();
-
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        return m;
-    }
-
-    private static void addThing(Geometry g,
-        ArrayList<SimpleBody> inoutSimpleBodiesArray)
-    {
-        if ( inoutSimpleBodiesArray == null ) return;
-
-        SimpleBody thing;
-
-        thing = new SimpleBody();
-        thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
-        thing.setMaterial(defaultMaterial());
-        inoutSimpleBodiesArray.add(thing);
-    }
-
     public static void
     importEnvironment(File inSceneFileFd,
                       ArrayList<SimpleBody> inoutSimpleBodiesArray,
@@ -64,9 +38,9 @@ public class EnvironmentPersistence extends PersistenceElement {
         String type = extractExtensionFromFile(inSceneFileFd);
 
         if ( type.equals("obj") ) {
-            TriangleMeshGroup mg = null;
-            mg = ReaderObj.read(inSceneFileFd.getAbsolutePath());
-            addThing(mg, inoutSimpleBodiesArray);
+            ReaderObj.importEnvironment(inSceneFileFd,
+                inoutSimpleBodiesArray, inoutLightsArray,
+                inoutBackgroundsArray, inoutCamerasArray);
         }
         else if ( type.equals("3ds") ) {
             Reader3ds.importEnvironment(inSceneFileFd,

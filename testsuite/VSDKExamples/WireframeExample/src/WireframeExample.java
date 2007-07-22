@@ -1,5 +1,9 @@
 //===========================================================================
+
+// Java classes
+import java.io.File;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -17,6 +21,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
+// VSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vector4D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -24,8 +29,10 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
@@ -91,7 +98,22 @@ public class WireframeExample extends JFrame implements
 
         //-----------------------------------------------------------------
         try {
-            meshGroup = ReaderObj.read("../../../etc/geometry/cow.obj");
+            int i;
+            ArrayList<SimpleBody> bodies = new ArrayList<SimpleBody>();
+            Geometry g;
+            ReaderObj.importEnvironment(new File("../../../etc/geometry/cow.obj"), bodies, null, null, null);
+            meshGroup = null;
+            for ( i = 0; i < bodies.size(); i++ ) {
+                g = bodies.get(i).getGeometry();
+                if ( g instanceof TriangleMeshGroup ) {
+                    meshGroup = (TriangleMeshGroup)g;
+                    break;
+                }
+            }
+            if ( meshGroup == null ) {
+                System.err.println("ERROR: Can not find a TriangleMeshGroup inside file.");
+                System.exit(1);
+            }
         }
         catch (Exception ex) {
             System.err.println("Failed to read file");

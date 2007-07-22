@@ -2,7 +2,7 @@
 
 // Basic java classes
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 
 // AWT GUI java classes
 import java.awt.BorderLayout;
@@ -33,10 +33,11 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.io.geometry.ReaderObj;          // Persistence elements
+import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.render.jogl.JoglCameraRenderer; // View elements
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.gui.CameraController;           // Control elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
@@ -57,11 +58,14 @@ public class MeshExample
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;
 
-    private TriangleMeshGroup meshGroup;
+    private ArrayList<SimpleBody> bodies;
+
 
     public MeshExample(String fileName) {
         super("VITRAL mesh test - JOGL");
         File file = null;
+
+        bodies = new ArrayList<SimpleBody>();
 
         //-----------------------------------------------------------------
         if ( fileName == null ) {
@@ -71,6 +75,7 @@ public class MeshExample
 
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
+            jfc.addChoosableFileFilter(new ObjectFilter("3ds", "3ds Files"));
             int opc = jfc.showOpenDialog(new JPanel());
 
             if ( opc == JFileChooser.APPROVE_OPTION ) {
@@ -84,7 +89,7 @@ public class MeshExample
         //-----------------------------------------------------------------
         if ( file != null ) {
             try {
-                meshGroup = ReaderObj.read(file.getAbsolutePath());
+                EnvironmentPersistence.importEnvironment(file, bodies, null, null, null);
 
 // Trivial mesh creation (need to change TriangleMeshGroup by TriangleMesh):
 /*
@@ -102,15 +107,14 @@ public class MeshExample
         mesh.calculateNormals();
 */
             }
-            catch (IOException ex) {
+            catch ( Exception ex ) {
                 System.err.println("Failed to read file");
                 System.exit(0);
-                return;
             }
         }
         else {
             System.err.println("File not specified");
-            return;
+            System.exit(0);
         }
 
         //-----------------------------------------------------------------
@@ -130,7 +134,7 @@ public class MeshExample
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
 
-        light = new Light(Light.DIRECTIONAL, new Vector3D(10, 20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(Light.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
     }
 
     public Dimension getPreferredSize() {
@@ -175,7 +179,11 @@ public class MeshExample
         // Draw mesh
         gl.glDisable(gl.GL_CULL_FACE);
         //gl.glCullFace(gl.GL_BACK);
-        JoglTriangleMeshGroupRenderer.draw(gl, meshGroup, qualitySelection);
+
+        int i;
+        for ( i = 0; i < bodies.size(); i++ ) {
+            JoglSimpleBodyRenderer.draw(gl, bodies.get(i), camera, qualitySelection);
+        }
     }
 
     /** Called by drawable to initiate drawing */

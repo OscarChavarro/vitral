@@ -375,6 +375,11 @@ Changes in 2007 july 7 revition
 Changes in 2007 july 11 revition
   - Design updates.  
 
+Changes in 2007 july 22 revition
+  - Design update: EnvironmentPersistence.importEnvironment operation
+    generalized and applied to VSDK testsuite samples. Legacy ReaderObj.read
+    removed (made private). Minor design revitions and tests.
+
 TODO:
   - Implement OBHU technique
 
