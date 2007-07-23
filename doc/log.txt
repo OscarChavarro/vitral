@@ -379,7 +379,9 @@ Changes in 2007 july 22 revition
   - Design update: EnvironmentPersistence.importEnvironment operation
     generalized and applied to VSDK testsuite samples. Legacy ReaderObj.read
     removed (made private). Minor design revitions and tests.
+  - Design update: EnvironmentPersistence.importEnvironment operations using
+    newly incorporated "SimpleScene" class.
 
+---------------------------------------------------------------------------
 TODO:
-  - Implement OBHU technique
-
+  - Implement OBHU technique in SearchEngineFor3DModels

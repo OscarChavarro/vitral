@@ -51,6 +51,7 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglArrowRenderer;
@@ -232,7 +233,7 @@ public class JoglDrawingArea implements
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
               Matrix4x4 composed;
 
@@ -251,7 +252,7 @@ public class JoglDrawingArea implements
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
               position = gi.getPosition();
               rotateGizmo.setTransformationMatrix(gi.getRotation());
@@ -263,7 +264,7 @@ public class JoglDrawingArea implements
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
               position = gi.getPosition();
               scaleGizmo.setTransformationMatrix(gi.getRotation());
@@ -590,7 +591,7 @@ public class JoglDrawingArea implements
         int i;
 
         if ( selectedThing >= 0 ) {
-            referenceBody = theScene.things.get(selectedThing);
+            referenceBody = theScene.scene.getSimpleBodies().get(selectedThing);
         }
 
         if ( referenceBody == null ) {
@@ -603,7 +604,7 @@ public class JoglDrawingArea implements
 
             for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
                 if ( theScene.selectedThings.isSelected(i) ) {
-                    referenceBody = theScene.things.get(i);
+                    referenceBody = theScene.scene.getSimpleBodies().get(i);
                     bodySet.getBodies().add(referenceBody);
                 }
             }
@@ -888,7 +889,7 @@ public class JoglDrawingArea implements
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(firstThingSelected);
+          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -927,7 +928,7 @@ public class JoglDrawingArea implements
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(firstThingSelected);
+          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -965,7 +966,7 @@ public class JoglDrawingArea implements
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(firstThingSelected);
+          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -1003,7 +1004,7 @@ public class JoglDrawingArea implements
           Vector3D position;
           SimpleBody gi;
 
-          gi = theScene.things.get(firstThingSelected);
+          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
           Matrix4x4 composed;
 
@@ -1085,7 +1086,7 @@ public class JoglDrawingArea implements
               Vector3D position;
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
               position = gi.getPosition();
               composed = new Matrix4x4(gi.getRotation());
@@ -1111,7 +1112,7 @@ public class JoglDrawingArea implements
           if ( firstThingSelected >= 0 ) {
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
               Matrix4x4 R = gi.getRotation();
 
               rotateGizmo.setTransformationMatrix(R);
@@ -1130,7 +1131,7 @@ public class JoglDrawingArea implements
           if ( firstThingSelected >= 0 ) {
               SimpleBody gi;
 
-              gi = theScene.things.get(firstThingSelected);
+              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
               Vector3D s = gi.getScale();
               Matrix4x4 S = new Matrix4x4();
               S.M[0][0] = s.x;
@@ -1160,9 +1161,9 @@ public class JoglDrawingArea implements
           int  i;
 
           //-----------------------------------------------------------------
-          for ( i = theScene.things.size()-1; i >= 0; i-- ) {
+          for ( i = theScene.scene.getSimpleBodies().size()-1; i >= 0; i-- ) {
               if ( theScene.selectedThings.isSelected(i) ) {
-                  theScene.things.remove(i);
+                  theScene.scene.getSimpleBodies().remove(i);
               }
           }
           theScene.selectedThings.sync();
@@ -1349,7 +1350,7 @@ public class JoglDrawingArea implements
               if ( firstThingSelected >= 0 ) {
                   SimpleBody gi;
                   Image texture;
-                  gi = theScene.things.get(firstThingSelected);
+                  gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
                   texture = gi.getTexture();
                   if ( texture == null ) {
                       String imageFilename = "../../../etc/textures/miniearth.png";
@@ -1372,7 +1373,7 @@ public class JoglDrawingArea implements
                   IndexedColorImage source = null;
                   NormalMap normalMap;
                   RGBImage exported;
-                  gi = theScene.things.get(firstThingSelected);
+                  gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
                   normalMap = gi.getNormalMap();
                   if ( normalMap == null ) {
@@ -1410,7 +1411,7 @@ public class JoglDrawingArea implements
 
               SimpleBody o;
               int i;
-              ArrayList generic = theScene.things;
+              ArrayList generic = theScene.scene.getSimpleBodies();
               String msg = "";
 
               for ( i = 0; i < generic.size(); i++ ) {
@@ -1492,7 +1493,7 @@ public class JoglDrawingArea implements
 
       for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
           if ( !theScene.selectedThings.isSelected(i) ) continue;
-          gi = theScene.things.get(i);
+          gi = theScene.scene.getSimpleBodies().get(i);
 
           gi.setPosition(position);
           gi.setRotation(rotation);
@@ -1516,7 +1517,7 @@ public class JoglDrawingArea implements
       else if ( n == 1 ) {
           int f = theScene.selectedThings.firstSelected();
           msg = "Thing [" + f + "] selected, which is a [" + 
-     ((SimpleBody)(theScene.things.get(f))).getGeometry().getClass().getName() 
+     ((SimpleBody)(theScene.scene.getSimpleBodies().get(f))).getGeometry().getClass().getName() 
           + "]";
       }
       else {

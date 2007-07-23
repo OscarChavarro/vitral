@@ -34,6 +34,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.render.jogl.JoglCameraRenderer; // View elements
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
@@ -58,14 +59,13 @@ public class MeshExample
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;
 
-    private ArrayList<SimpleBody> bodies;
-
+    private SimpleScene scene;
 
     public MeshExample(String fileName) {
         super("VITRAL mesh test - JOGL");
         File file = null;
 
-        bodies = new ArrayList<SimpleBody>();
+        scene = new SimpleScene();
 
         //-----------------------------------------------------------------
         if ( fileName == null ) {
@@ -89,7 +89,7 @@ public class MeshExample
         //-----------------------------------------------------------------
         if ( file != null ) {
             try {
-                EnvironmentPersistence.importEnvironment(file, bodies, null, null, null);
+                EnvironmentPersistence.importEnvironment(file, scene);
 
 // Trivial mesh creation (need to change TriangleMeshGroup by TriangleMesh):
 /*
@@ -181,8 +181,8 @@ public class MeshExample
         //gl.glCullFace(gl.GL_BACK);
 
         int i;
-        for ( i = 0; i < bodies.size(); i++ ) {
-            JoglSimpleBodyRenderer.draw(gl, bodies.get(i), camera, qualitySelection);
+        for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+            JoglSimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i), camera, qualitySelection);
         }
     }
 

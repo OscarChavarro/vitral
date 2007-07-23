@@ -16,6 +16,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.ReaderObj;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
@@ -49,10 +50,11 @@ public class WireframeOfflineExample {
 
         //-----------------------------------------------------------------
         try {
+            SimpleScene scene = new SimpleScene();
             int i;
-            ArrayList<SimpleBody> bodies = new ArrayList<SimpleBody>();
+            ArrayList<SimpleBody> bodies = scene.getSimpleBodies();
             Geometry g;
-            ReaderObj.importEnvironment(new File("../../../etc/geometry/cow.obj"), bodies, null, null, null);
+            ReaderObj.importEnvironment(new File("../../../etc/geometry/cow.obj"), scene);
             meshGroup = null;
             for ( i = 0; i < bodies.size(); i++ ) {
                 g = bodies.get(i).getGeometry();

@@ -37,6 +37,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
@@ -87,6 +88,7 @@ public class SearchEngine
     private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer)
     {
         //- Variables -----------------------------------------------------
+        SimpleScene scene = new SimpleScene();
         ArrayList<SimpleBody> things;
         int i, R;
         VoxelVolume vv;
@@ -100,15 +102,14 @@ public class SearchEngine
         vv.init(2*R, 2*R, 2*R);
 
         GeometryMetadata metadata = new GeometryMetadata();
-        things = new ArrayList<SimpleBody>();
         System.out.println("Analyzing model id [" + metadata.getId() + "], filename: " + filename);
         try {
             //- Load scene from specified size and configure its body group ---
             timers.get("READ_MODEL").start();
             File fd = new File(filename);
             System.out.print("  - Reading file... ");
-            EnvironmentPersistence.importEnvironment(fd,
-                things, null, null, null);
+            EnvironmentPersistence.importEnvironment(fd, scene);
+            things = scene.getSimpleBodies();
             System.out.println("Ok.");
 
             bodySet = new SimpleBodyGroup();
@@ -254,6 +255,7 @@ public class SearchEngine
         }
         metadata.setFilename(filename);
         things = null;
+        scene = null;
 
         return metadata;
     }

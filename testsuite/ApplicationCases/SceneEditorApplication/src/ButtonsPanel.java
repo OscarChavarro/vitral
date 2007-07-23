@@ -63,6 +63,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
@@ -233,7 +234,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             Geometry referenceGeometry = null;
 
             if ( selectedThing >= 0 ) {
-                voxelBody = parent.theScene.things.get(selectedThing);
+                voxelBody = parent.theScene.scene.getSimpleBodies().get(selectedThing);
                 referenceGeometry = voxelBody.getGeometry();
             }
 
@@ -294,7 +295,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                 referenceGeometry = new Sphere(0.5);
             }
             else {
-                thing = parent.theScene.things.get(selectedThing);
+                thing = parent.theScene.scene.getSimpleBodies().get(selectedThing);
                 referenceGeometry = thing.getGeometry();
             }
 
@@ -472,7 +473,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     File file = jfc.getSelectedFile();
 
                     EnvironmentPersistence.importEnvironment(file,
-                        parent.theScene.things, null, null, null);
+                        parent.theScene.scene);
 
                     currentFilePath = file.getParentFile().getAbsolutePath();
 
@@ -486,7 +487,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
-            parent.theScene.lights.add(light);
+            parent.theScene.scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------
         else if ( label.equals("Select palette for depthmap display") ||

@@ -35,6 +35,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
@@ -824,16 +825,19 @@ public class ReaderObj extends PersistenceElement
     }
 
     public static void
-    importEnvironment(File inSceneFileFd,
-                      ArrayList<SimpleBody> inoutSimpleBodiesArray,
-                      ArrayList<Light> inoutLightsArray,
-                      ArrayList<Background> inoutBackgroundsArray,
-                      ArrayList<Camera> inoutCamerasArray
-                      ) throws Exception
+    importEnvironment(File inSceneFileFd, SimpleScene inoutSimpleScene)
+        throws Exception
     {
+        //-----------------------------------------------------------------
+        ArrayList<SimpleBody> simpleBodiesArray = inoutSimpleScene.getSimpleBodies();
+        ArrayList<Light> lightsArray = inoutSimpleScene.getLights();
+        ArrayList<Background> backgroundsArray = inoutSimpleScene.getBackgrounds();
+        ArrayList<Camera> camerasArray = inoutSimpleScene.getCameras();
+
+        //-----------------------------------------------------------------
         TriangleMeshGroup mg = null;
         mg = read(inSceneFileFd.getAbsolutePath());
-        addThing(mg, inoutSimpleBodiesArray);
+        addThing(mg, simpleBodiesArray);
     }
 }
 

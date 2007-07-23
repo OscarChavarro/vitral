@@ -1,6 +1,5 @@
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
@@ -21,16 +20,16 @@ import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.Raytracer;
 
 public class Scene
 {
+    public SimpleScene scene;
+
     //- 1. Camera ----------------------------------------------------------
     public Camera camera;
     public Camera activeCamera;
-
-    //- 2. Lights ----------------------------------------------------------
-    public ArrayList<Light> lights;
 
     //- 3. Background ------------------------------------------------------
     public SimpleBackground simpleBackground;
@@ -42,7 +41,6 @@ public class Scene
     public SimpleCorridor corridor;
     public boolean showCorridor;
     public boolean showGrid;
-    public ArrayList<SimpleBody> things;
     public ArrayList<SimpleBodyGroup> debugThingGroups;
 
     public SelectionSet selectedThings;
@@ -54,9 +52,9 @@ public class Scene
 
     Scene()
     {
+        scene = new SimpleScene();
+
         //-----------------------------------------------------------------
-        things = new ArrayList<SimpleBody>();
-        lights = new ArrayList<Light>();
         debugThingGroups = new ArrayList<SimpleBodyGroup>();
 
         Matrix4x4 R = new Matrix4x4();
@@ -66,7 +64,7 @@ public class Scene
         camera.setRotation(R);
 
         activeCamera = camera;
-        selectedThings = new SelectionSet(things);
+        selectedThings = new SelectionSet(scene.getSimpleBodies());
         selectedDebugThingGroups = new SelectionSet(debugThingGroups);
 
         //-----------------------------------------------------------------
@@ -168,7 +166,7 @@ public class Scene
         thing.setRotationInverse(new Matrix4x4());
         thing.setMaterial(defaultMaterial());
         thing.setName("Geometric object " + acumObject);
-        things.add(thing);
+        scene.getSimpleBodies().add(thing);
 
         acumObject++;
         selectedThings.sync();
@@ -185,22 +183,22 @@ public class Scene
 
         double nearestDistance = Float.MAX_VALUE;
 
-        Iterator i;
-        int index = 0;
+	int i;
 
         if ( !composite ) {
             selectedThings.unselectAll();
         }
-        for ( i = things.iterator(); i.hasNext(); index++ ) {
-            gi = (SimpleBody)i.next();
+        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        for ( i = 0; i < things.size(); i++ ) {
+            gi = things.get(i);
             if ( gi.doIntersection(r) && r.t < nearestDistance ) {
                 nearestDistance = r.t;
                 if ( !composite ) {
                     selectedThings.unselectAll();
-                    selectedThings.select(index);
+                    selectedThings.select(i);
                 }
                 else {
-                    selectedThings.change(index);
+                    selectedThings.change(i);
                 }
             }
         }
@@ -208,12 +206,14 @@ public class Scene
 
     public void print()
     {
+        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        int i;
+
         System.out.println("= SCENE REPORT ============================================================");
         System.out.println("Current camera:\n" +  activeCamera);
         System.out.println("Things in scene: " + things.size());
-        int c = 0;
-        for ( Iterator i = things.iterator(); i.hasNext(); c++ ) {
-            System.out.println("  - Thing[" + c + "]: " + ((SimpleBody)i.next()).getGeometry().getClass().getName());
+        for ( i = 0; i < things.size(); i++ ) {
+            System.out.println("  - Thing[" + i + "]: " + things.get(i).getGeometry().getClass().getName());
         }
         System.out.println("= END OF REPORT ===========================================================");
     }
@@ -263,7 +263,7 @@ public class Scene
         visualizationEngine = new Raytracer();
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, qualityTemplate,
-                                    things, lights, 
+                                    scene.getSimpleBodies(), scene.getLights(), 
                                     activeBackground, activeCamera,
                                     reporter, null);
         long finalTime = System.currentTimeMillis();

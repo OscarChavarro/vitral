@@ -74,26 +74,26 @@ public class JoglSceneRenderer
         }
 
         //- Draw lights ---------------------------------------------------
-        for ( i = 0; i < s.lights.size(); i++ ) {
-            Light l = s.lights.get(i);
+        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
+            Light l = s.scene.getLights().get(i);
             JoglLightRenderer.activate(gl, l);
         }
 
-        for ( i = 0; i < s.lights.size(); i++ ) {
-            JoglLightRenderer.draw(gl, s.lights.get(i));
+        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
+            JoglLightRenderer.draw(gl, s.scene.getLights().get(i));
         }
 
         //- Draw scene bodies ---------------------------------------------
         SimpleBody gi;
 
-        if ( s.lights.size() > 0 ) {
+        if ( s.scene.getLights().size() > 0 ) {
             gl.glEnable(gl.GL_LIGHTING);
         }
         else {
             gl.glDisable(gl.GL_LIGHTING);
         }
 
-        for ( i = 0; i < s.things.size(); i++ ) {
+        for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             quality = s.qualityTemplate.clone();
 
             if ( s.selectedThings.isSelected(i) ) {
@@ -102,7 +102,7 @@ public class JoglSceneRenderer
             else {
                 quality.setSelectionCorners(false);
             }
-            gi = s.things.get(i);
+            gi = s.scene.getSimpleBodies().get(i);
             JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
         }
 
