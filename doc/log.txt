@@ -381,6 +381,7 @@ Changes in 2007 july 22 revition
     removed (made private). Minor design revitions and tests.
   - Design update: EnvironmentPersistence.importEnvironment operations using
     newly incorporated "SimpleScene" class.
+  - Starting up ReaderAse code.
 
 ---------------------------------------------------------------------------
 TODO:
