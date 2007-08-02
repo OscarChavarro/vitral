@@ -35,8 +35,8 @@ public class Vector3D extends FundamentalEntity
     public double x, y, z;
 
     /**
-     * The default Vector3D value is the zero value
-     */
+    The default Vector3D value is the zero value
+    */
     public Vector3D() {
         x = 0;
         y = 0;
@@ -44,11 +44,10 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-     *
-     * @param x double
-     * @param y double
-     * @param z double
-     */
+    @param x X coordinate
+    @param y Y coordinate
+    @param z Z coordinate
+    */
     public Vector3D(double x, double y, double z) {
         this.x = x; this.y = y; this.z = z;
     }
@@ -62,10 +61,9 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-     *
-     * @param B Vector3D
-     * @return Vector3D
-     */
+    @param B the second vector in cross product
+    @return Vector3D, the result of the operation
+    */
     public final Vector3D crossProduct(Vector3D B) {
         return new Vector3D(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x);
     }
@@ -85,10 +83,9 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-     *
-     * @param B Vector3D
-     * @return double
-     */
+    @param B Vector3D
+    @return double
+    */
     public final double dotProduct(Vector3D B) {
         return (x*B.x + y*B.y + z*B.z);
     }

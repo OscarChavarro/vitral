@@ -9,10 +9,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Basic Java classes
 import java.util.ArrayList;
 
+// JOGL classes
 import javax.media.opengl.GL;
 
+// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;

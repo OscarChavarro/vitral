@@ -27,6 +27,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
@@ -53,21 +54,20 @@ public class ReaderVtk extends PersistenceElement
         StringTokenizer auxStringTokenizer;
 
         if ( vtkDataFragment != null && vtkDataFragment.startsWith("POINTS ") ) {
-            System.out.println("Reading points...");
+            System.out.print("Reading points... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
             elementType = auxStringTokenizer.nextToken();
-            System.out.println("Num elements: " + numElements);
-            System.out.println("Element type: " + elementType);
             if ( elementType.startsWith("float") ) {
                 points = new Vector3D[numElements];
                 for ( i = 0; i < numElements; i++ ) {
                     points[i] = new Vector3D();
-                    points[i].x = readFloatBE(fis);
-                    points[i].y = readFloatBE(fis);
-                    points[i].z = readFloatBE(fis);
+                    points[i].x = readFloatBE(fis) / 100.0;
+                    points[i].y = readFloatBE(fis) / 100.0;
+                    points[i].z = -readFloatBE(fis) / 100.0;
                 }
+                System.out.println("Ok.");
             }
             else {
                 VSDK.reportMessage(null, VSDK.WARNING,
@@ -78,24 +78,23 @@ public class ReaderVtk extends PersistenceElement
             readAsciiLine(fis); // Closing string
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("TRIANGLE_STRIPS ") ) {
-            System.out.println("Reading triangle strips...");
+            System.out.print("Reading triangle strips... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
             numIndexesInStripSet = Integer.parseInt(auxStringTokenizer.nextToken());
-            System.out.println("Number of strips: " + numElements);
-
             stripData = new long[numIndexesInStripSet];
             for ( i = 0; i < numIndexesInStripSet; i++ ) {
                 stripData[i] = readLongBE(fis);
             }
             readAsciiLine(fis); // Closing string
+            System.out.println("Ok.");
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("CELL_DATA ") ) {
             // Just ignore...
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("POINT_DATA ") ) {
-            System.out.println("Reading point data...");
+            System.out.print("Reading point data... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
@@ -105,17 +104,17 @@ public class ReaderVtk extends PersistenceElement
                 auxStringTokenizer.nextToken();
                 auxStringTokenizer.nextToken();
                 elementType = auxStringTokenizer.nextToken();
-                System.out.println("Element type: " + elementType);
                 if ( elementType.startsWith("float") ) {
-                    System.out.println("Reading " + numElements + " normals... ");
+                    System.out.print("Reading normals... ");
                     normals = new Vector3D[numElements];
                     for ( i = 0; i < numElements; i++ ) {
                         normals[i] = new Vector3D();
                         normals[i].x = readFloatBE(fis);
                         normals[i].y = readFloatBE(fis);
-                        normals[i].z = readFloatBE(fis);
+                        normals[i].z = -readFloatBE(fis);
                     }
                     readAsciiLine(fis); // Closing string
+                    System.out.println("Ok.");
                 }
                 else {
                     VSDK.reportMessage(null, VSDK.WARNING,
@@ -123,6 +122,7 @@ public class ReaderVtk extends PersistenceElement
                            "Current implementation can not read normals in data type " + elementType);
                     return false;
                 }
+                System.out.println("Ok.");
             }
             else {
                 VSDK.reportMessage(null, VSDK.WARNING,
@@ -201,8 +201,6 @@ public class ReaderVtk extends PersistenceElement
         String datasetType;
         datasetType = vtkDataset.substring(8);
 
-        System.out.println("DATASET a procesar: " + datasetType);
-
         //-----------------------------------------------------------------
         int resting;
         do {
@@ -211,20 +209,50 @@ public class ReaderVtk extends PersistenceElement
         } while ( resting > 0 );
 
         //-----------------------------------------------------------------
-        int acum = 0;
+        int acum;
         int i, j;
         long deltaTam;
+        SimpleBody newThing = new SimpleBody();
+        TriangleStripMesh geometry = new TriangleStripMesh();
+        newThing.setGeometry(geometry);
 
-        for ( i = 0; i < stripData.length; i++ ) {
+        simpleBodiesArray.add(newThing);
+
+        Vertex[] vertexes = new Vertex[points.length];
+        Vector3D n;
+        for ( i = 0; i < points.length; i++ ) {
+            if ( i < normals.length ) {
+                n = new Vector3D(normals[i]);
+            }
+            else {
+                n = new Vector3D(0, 0, 1);
+            }
+            vertexes[i] = new Vertex(points[i], n);
+        }
+        geometry.setVertexes(vertexes);
+
+        // Count strips
+        for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
             deltaTam = stripData[i];
-            acum++;
-            //System.out.printf(" . Tira %d: %d elementos.\n", acum, deltaTam);
             for ( j = 0; j < deltaTam; j++ ) {
                 i++;
-                //Geometria->anx_indice_tira(stripData[i]);
             }
-            //Geometria->anx_tira();
         }
+
+        // Build strips
+        int strips[][];
+
+        strips = new int[acum][];
+
+        for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
+            deltaTam = stripData[i];
+            strips[acum] = new int[(int)deltaTam];
+            for ( j = 0; j < deltaTam; j++ ) {
+                i++;
+                strips[acum][j] = (int)stripData[i];
+            }
+        }
+        geometry.setStrips(strips);
 
         //-----------------------------------------------------------------
         System.out.println("VTK import done.");

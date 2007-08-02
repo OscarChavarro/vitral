@@ -25,6 +25,7 @@ import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 
 public class JoglGeometryRenderer extends JoglRenderer 
@@ -179,6 +180,11 @@ public class JoglGeometryRenderer extends JoglRenderer
         drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
+    /**
+    @todo Homogenize all of the draw method signatures. Perhaps this code can
+    be generalized to search the corresponding rendering class to a given
+    Geometry via reflection, so this search should not be done explicitly.
+    */
     public static void draw(GL gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
@@ -211,6 +217,9 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+        }
+        else if ( g instanceof TriangleStripMesh ) {
+            JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
         }
         else if ( g instanceof TriangleMeshGroup ) {
             JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);

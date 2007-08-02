@@ -386,6 +386,8 @@ Changes in 2007 july 22 revition
 Changes in 2007 august 2 revition
   - Stating up ReaderVtk code and creating basic parsing structure for
     ReaderAse.
+  - Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
+    (1h25min)
 
 ---------------------------------------------------------------------------
 TODO:

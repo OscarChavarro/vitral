@@ -1,1 +1,1 @@
-java -classpath ./classes:../../../lib/vsdk.jar MeshExample $@
+java -Xms300m -Xmx300m -classpath ./classes:../../../lib/vsdk.jar MeshExample $@
