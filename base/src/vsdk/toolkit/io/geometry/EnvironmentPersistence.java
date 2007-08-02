@@ -30,6 +30,9 @@ public class EnvironmentPersistence extends PersistenceElement {
         else if ( type.equals("ase") ) {
             ReaderAse.importEnvironment(inSceneFileFd, inoutScene);
         }
+        else if ( type.equals("vtk") ) {
+            ReaderVtk.importEnvironment(inSceneFileFd, inoutScene);
+        }
     }
 }
 

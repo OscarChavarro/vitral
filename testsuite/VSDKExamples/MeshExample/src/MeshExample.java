@@ -77,6 +77,7 @@ public class MeshExample
             jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
             jfc.addChoosableFileFilter(new ObjectFilter("3ds", "3ds Files"));
             jfc.addChoosableFileFilter(new ObjectFilter("ase", "3ds Files (Ascii Scene Export)"));
+            jfc.addChoosableFileFilter(new ObjectFilter("vtk", "kitware's VTK legacy binary file"));
             int opc = jfc.showOpenDialog(new JPanel());
 
             if ( opc == JFileChooser.APPROVE_OPTION ) {

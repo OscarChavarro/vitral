@@ -383,6 +383,10 @@ Changes in 2007 july 22 revition
     newly incorporated "SimpleScene" class.
   - Starting up ReaderAse code.
 
+Changes in 2007 august 2 revition
+  - Stating up ReaderVtk code and creating basic parsing structure for
+    ReaderAse.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

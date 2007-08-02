@@ -428,6 +428,23 @@ public abstract class PersistenceElement {
         return msg;
     }
 
+    public static String readAsciiLine(InputStream is) throws Exception
+    {
+        byte character[] = new byte[1];
+        char letter;
+        String msg = "";
+
+        do {
+            readBytes(is, character);
+            letter = (char)character[0];
+            if ( character[0] != '\n' && character[0] != '\r' ) {
+                msg = msg + letter;
+            }
+        } while ( character[0] != '\n' );
+
+        return msg;
+    }
+
     public static void
     writeAsciiString(OutputStream writer, String cad)
         throws Exception
