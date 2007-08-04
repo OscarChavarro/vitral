@@ -50,8 +50,8 @@ JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
 #===========================================================================
 
-CC = gcc
-CCP = g++
+CC = gcc -DUNIX_ENABLED
+CCP = g++ -DUNIX_ENABLED
 
 # define WALLCLOCK on the CFLAGS line if want to time
 # walltime and not cpu time (cpu time is default); also

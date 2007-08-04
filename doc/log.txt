@@ -389,6 +389,10 @@ Changes in 2007 august 2 revition
   - Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
     (1h25min)
 
+Changes in 2007 august 4 revition
+  - SciVisApplication application added
+  - SpharmonicKit native library ported to Windows
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

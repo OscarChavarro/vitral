@@ -59,10 +59,12 @@
 #include <limits.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifdef UNIX_ENABLED
 #include <sys/param.h>
 #include <sys/times.h>
 #include <sys/types.h>
-
+#endif
 
 #ifdef CLK_TCK
 #define DIVIDER CLK_TCK
@@ -87,7 +89,8 @@ double csecond( )
 double csecond( )
 #endif
 {
-    struct tms buf;
+#ifdef UNIX_ENABLED
+	struct tms buf;
     static struct tms buf0;			/* times structure */
     static int firstcall=1;
     clock_t  rv;
@@ -106,6 +109,10 @@ double csecond( )
     return( (double)( (buf.tms_utime + buf.tms_stime + buf.tms_cutime + buf.tms_cstime) -
                       (buf0.tms_utime + buf0.tms_stime + buf0.tms_cutime + buf0.tms_cstime)
                      ) / (double)DIVIDER );
+#endif
+#endif /* UNIX_ENABLED */
+	#ifndef UNIX_ENABLED
+	return 0;
 #endif
 }
 
