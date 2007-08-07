@@ -63,11 +63,12 @@ public class SciVisApplication
     public JLabel statusMessage;
     private JPanel spaceControlSubDialog;
     private JPanel iconsAndWorkAreasPanel;
-    public MyImagePanel drawingArea = new MyImagePanel();
+    public MyImagePanel drawingArea;
     public JSpinner slicesSelectSpinner;
 
     public SciVisApplication()
     {
+        drawingArea = new MyImagePanel(this);
         study = null;
 
         gui = null;
@@ -80,7 +81,7 @@ public class SciVisApplication
 
     public void createModel()
     {
-        study = new Study();
+	System.out.println("Create model start");
 
 	currentSlice = 0;
 	currentTimeTake = 0;
@@ -110,6 +111,7 @@ public class SciVisApplication
 
         drawingArea.setImage(img);
         drawingArea.repaint();
+	System.out.println("Create model end");
     }
 
     private JPanel
@@ -213,8 +215,11 @@ public class SciVisApplication
 
         //drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
 
+	PanelManager panelManager = new PanelManager(this);
+
         //Component left = drawingArea.getCanvas();
-        Component left = drawingArea;
+        //Component left = drawingArea;
+	Component left = panelManager;
         //Component right = createPanel();
         Component right = new JLabel("Panel");
         Dimension minleft = new Dimension(160, 120);
@@ -363,6 +368,11 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
         //- FILE ----------------------------------------------------------
         if ( label.equals("IDC_FILE_QUIT") ) {
             System.exit(0);
+        }
+
+        //- TESTS ---------------------------------------------------------
+        else if ( label.equals("IDC_TESTS_CYCLE_SLICES" ) ) {
+            parent.drawingArea.setCyclePending(true);
         }
 
         //- SPACE CONTROL SUBDIALOG ---------------------------------------

@@ -32,13 +32,10 @@ public class CacheManager
         for ( i = 0; i < cachedElementsArray.size(); i++ ) {
             totalSizeInBytes += cachedElementsArray.get(i).getSizeInBytes();
         }
-        System.out.println("Cache Manager:");
-        System.out.println("  - " + 
-            cachedElementsArray.size() + " cached elements");
-        System.out.println("  - " + 
-            totalSizeInBytes + " total bytes used");
-        System.out.println("  - " + 
-            limitInBytes + " limit in bytes");
+        System.out.print("Cache Manager: ");
+        System.out.print(cachedElementsArray.size() + " cached elements, ");
+        System.out.print(totalSizeInBytes + " total bytes used, ");
+        System.out.println(limitInBytes + " limit in bytes.");
     }
 }
 

@@ -15,3 +15,11 @@ September 3 2006, Oscar Chavarro:
   - 19min: RGBImage internal representation changed to byte array
   - 12min: implementing Entity::getSizeInBytes
   - 23min: starting the implementation cache managing schema
+
+August 6 2007, Oscar Chavarro:
+  - 15min: Studying 2006 advances (11 months later)
+  - 45min Cycle slices test in Awt:  ... (too slow!)
+
+August 7 2007, Oscar Chavarro:
+  - 45min: Empty PanelManager class with Popup menu
+

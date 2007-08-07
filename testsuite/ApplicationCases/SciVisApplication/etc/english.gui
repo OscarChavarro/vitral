@@ -22,6 +22,14 @@ MENU "GLOBAL" {
         MENUITEM SEPARATOR
         MENUITEM "&Exit", IDC_FILE_QUIT
     }
+    POPUP "&Tests" {
+        MENUITEM "&Cycle slices", IDC_TESTS_CYCLE_SLICES
+    }
+}
+
+POPUP "POPUP_PANEL_MANAGER" {
+    MENUITEM "&New panel", IDC_PANEL_MANAGER_NEW_AREA
+    MENUITEM "&Delete this panel", IDC_PANEL_MANAGER_DELETE_AREA
 }
 
 //===========================================================================

@@ -8,13 +8,48 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
+// Application classes
+import scivis.Study;
+import scivis.TimeTake;
+
 public class MyImagePanel extends JPanel
 {
     private Image image;
+    private SciVisApplication parent;
+    private int pendingCycles = -1;
 
-    public MyImagePanel()
+    public MyImagePanel(SciVisApplication parent)
     {
         image = null;
+	this.parent = parent;
+    }
+
+    private void cycleSlices(Graphics dc)
+    {
+	if ( parent.study == null ) {
+	    return;
+	}
+	parent.currentSlice = 0;
+	parent.currentTimeTake = 0;
+
+        //-----------------------------------------------------------------
+        Image img = null;
+	int i;
+        TimeTake timeTake = parent.study.getTimeTake(0);
+
+        img = parent.study.getSliceImageAt(parent.currentTimeTake, pendingCycles);
+        AwtRGBImageRenderer.draw(dc, (RGBImage)img, 10, 10);
+    }
+
+    public void setCyclePending(boolean flag)
+    {
+	if ( flag == true ) {
+            TimeTake timeTake = parent.study.getTimeTake(0);
+            pendingCycles = timeTake.getNumSlices() - 1;
+	}
+	else {
+	    pendingCycles = -1;
+	}
     }
 
     public void setImage(Image img)
@@ -26,8 +61,15 @@ public class MyImagePanel extends JPanel
     {
         super.paint(dc);
 
-        if ( image != null ) {
-            AwtRGBImageRenderer.draw(dc, (RGBImage)image, 10, 10);
+	if ( pendingCycles >= 0 ) {
+	    cycleSlices(dc);
+	    pendingCycles--;
+	    repaint();
+        }
+	else {
+            if ( image != null ) {
+                AwtRGBImageRenderer.draw(dc, (RGBImage)image, 10, 10);
+	    }
 	}
     }
 }
