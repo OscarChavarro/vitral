@@ -3,7 +3,6 @@
 package vsdk.transition.gui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
 
 public class GuiCache
@@ -54,10 +53,10 @@ public class GuiCache
     {
         GuiCommandCache command = null;
         GuiCommandCache candidate = null;
-        Iterator i;
+        int i;
 
-        for ( i = commandList.iterator(); i.hasNext(); ) {
-            candidate = (GuiCommandCache)i.next();
+        for ( i = 0; i < commandList.size(); i++ ) {
+            candidate = commandList.get(i);
             if ( candidate.getId().equals(name) ) {
                 command = candidate;
                 break;
@@ -72,10 +71,10 @@ public class GuiCache
         }
 
         GuiButtonGroupCache group = null, candidate;
-        Iterator i;
+        int i;
 
-        for ( i = buttonGroupList.iterator(); i.hasNext(); ) {
-            candidate = (GuiButtonGroupCache)i.next();
+        for ( i = 0; i < buttonGroupList.size(); i++ ) {
+            candidate = buttonGroupList.get(i);
             if ( candidate.getName().equals(name) ) {
                 group = candidate;
                 break;
@@ -90,9 +89,9 @@ public class GuiCache
         GuiMenuCache menu = null;
         GuiMenuCache candidate;
 
-        Iterator i;
-        for ( i = popupMenuList.iterator(); i.hasNext(); ) {
-            candidate = (GuiMenuCache)i.next();
+        int i;
+        for ( i = 0; i < popupMenuList.size(); i++ ) {
+            candidate = popupMenuList.get(i);
             if ( candidate.getName().equals(name) ) {
                 menu = candidate;
                 break;
@@ -124,10 +123,10 @@ public class GuiCache
         msg = msg + "Gui cache structure contains " + commandList.size() +
             " commands registered\n";
 
-        Iterator i;
+        int i;
         GuiCommandCache command;
-        for ( i = commandList.iterator(); i.hasNext(); ) {
-            command = (GuiCommandCache)i.next();
+        for ( i = 0; i < commandList.size(); i++ ) {
+            command = commandList.get(i);
             msg = msg + command;
         }
 
