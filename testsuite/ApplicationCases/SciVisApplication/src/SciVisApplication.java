@@ -58,7 +58,7 @@ public class SciVisApplication
     public GuiCache gui;
     private String lookAndFeel;
     public String languageGuiFile;
-    private JFrame mainWindowWidget;
+    public JFrame mainWindowWidget;
     public ButtonsPanel executorPanel;
     public JLabel statusMessage;
     private JPanel spaceControlSubDialog;

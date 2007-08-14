@@ -13,6 +13,8 @@ public class ViewerPanel extends JPanel
         this.parent = parent;
         Color c = Color.BLACK;
 
+	lastId++;
+
         switch ( lastId % 13 ) {
           case 1: c = Color.BLACK; break;
           case 2: c = Color.BLUE; break;
@@ -29,7 +31,6 @@ public class ViewerPanel extends JPanel
           case 13: c = Color.YELLOW; break;
         }
         setBackground(c);
-	lastId++;
     }
 }
 

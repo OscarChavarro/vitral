@@ -22,4 +22,5 @@ August 6 2007, Oscar Chavarro:
 
 August 7 2007, Oscar Chavarro:
   - 45min: Empty PanelManager class with Popup menu
+  - 45min: PanelManager adding ViewerPanels
 
