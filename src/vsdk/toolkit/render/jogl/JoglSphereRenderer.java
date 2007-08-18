@@ -26,11 +26,11 @@ public class JoglSphereRenderer extends JoglRenderer {
     @todo check this method for efficiency improvement
     */
     private static void
-    spherePosition(Vector3D p, double theta, double phi)
+    spherePosition(Vector3D p, double theta, double phi, double r)
     {
-        p.x = Math.cos(phi) * Math.cos(theta);
-        p.y = -Math.cos(phi) * Math.sin(theta);
-        p.z = Math.sin(phi);
+        p.x = Math.cos(phi) * Math.cos(theta) * r;
+        p.y = -Math.cos(phi) * Math.sin(theta) * r;
+        p.z = Math.sin(phi) * r;
     }
 
     /**
@@ -92,7 +92,7 @@ public class JoglSphereRenderer extends JoglRenderer {
                 double theta = 2*Math.PI*s;
 
                 sphereNormal(n, theta, phi1);
-                spherePosition(p, theta, phi1);
+                spherePosition(p, theta, phi1, r);
                 sphereTangent(T, theta, phi1);
                 sphereBinormal(b, theta, phi1);
 
@@ -129,7 +129,7 @@ public class JoglSphereRenderer extends JoglRenderer {
             for( int j = 0; j < slices; j++ ) {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
-                spherePosition(p, theta, phi1);
+                spherePosition(p, theta, phi1, r);
                 gl.glVertex3d(p.x, p.y, p.z);
             }
         }
@@ -142,11 +142,11 @@ public class JoglSphereRenderer extends JoglRenderer {
     */
     private static void
     drawVertex(GL gl, double theta, double phi, double s, double t,
-               Vector3D P, Vector3D N, Vector3D T, Vector3D B)
+               Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
     {
         //- Calculate vertex parameters -----------------------------------
         sphereNormal(N, theta, phi);
-        spherePosition(P, theta, phi);
+        spherePosition(P, theta, phi, r);
         sphereTangent(T, theta, phi);
         sphereBinormal(B, theta, phi);
 
@@ -211,8 +211,8 @@ public class JoglSphereRenderer extends JoglRenderer {
             for( j = 0; j < slices; j++ ) {
                 s = j/(slices-1.f);
                 theta = 2*Math.PI*s;
-                drawVertex(gl, theta, phi1, s, t1, P, N, T, B);
-                drawVertex(gl, theta, phi2, s, t2, P, N, T, B);
+                drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
+                drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
             }
             gl.glEnd();
         }
@@ -229,8 +229,8 @@ public class JoglSphereRenderer extends JoglRenderer {
         for( j = slices-1; j >= 0; j-- ) {
             s = j/(slices-1.f);
             theta = 2*Math.PI*s;
-            drawVertex(gl, theta, phi2, s, t2, P, N, T, B);
-            drawVertex(gl, theta, phi1, s, t1, P, N, T, B);
+            drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
+            drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
         }
         gl.glEnd();
 
