@@ -21,6 +21,7 @@ import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 import com.sun.opengl.util.texture.TextureData;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 
 class _JoglRGBImageRendererImageAssociation extends JoglRenderer
@@ -129,6 +130,14 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         //- 4. Use the image's glList -------------------------------------
         //if ( glListIsCompiled == false ) {
+	    if ( item == null ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item");
+		return -1;
+ 	    }
+	    if ( item.renderer == null ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
+		return -1;
+ 	    }
             item.renderer.bind();
             item.renderer.enable();
 /*

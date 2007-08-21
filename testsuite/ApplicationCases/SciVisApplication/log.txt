@@ -22,5 +22,14 @@ August 6 2007, Oscar Chavarro:
 
 August 7 2007, Oscar Chavarro:
   - 45min: Empty PanelManager class with Popup menu
-  - 45min: PanelManager adding ViewerPanels
+  - 45min: PanelManager adding ViewerPanels (1 view case)
+
+August 20 2007, Oscar Chavarro:
+  - 2h: PanelManager adding ViewerPanels (2 to 8 views case)
+  - 1h: Changing the JSplitPane divider look and feel to get it drawn in the
+    3dsmax style
+  - 10min: ViewerPanel erasing functionality
+  - 50min: ViewerPanel2DSwing activated, PanelManager redesigned (generalized)
+  - 40min: Integrating Jogl
+  - 1h40min: First version supporting Jogl slice rendering in Z plane :)
 

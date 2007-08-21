@@ -12,14 +12,14 @@ import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import scivis.Study;
 import scivis.TimeTake;
 
-public class MyImagePanel extends JPanel
+public class ViewerPanel2DSwing extends ViewerPanel
 {
     private Image image;
-    private SciVisApplication parent;
     private int pendingCycles = -1;
 
-    public MyImagePanel(SciVisApplication parent)
+    public ViewerPanel2DSwing(SciVisApplication parent, PanelManager container)
     {
+	super(parent, container);
         image = null;
 	this.parent = parent;
     }

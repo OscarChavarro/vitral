@@ -63,12 +63,11 @@ public class SciVisApplication
     public JLabel statusMessage;
     private JPanel spaceControlSubDialog;
     private JPanel iconsAndWorkAreasPanel;
-    public MyImagePanel drawingArea;
     public JSpinner slicesSelectSpinner;
+    public PanelManagerSciVisApplication panelManager;
 
     public SciVisApplication()
     {
-        drawingArea = new MyImagePanel(this);
         study = null;
 
         gui = null;
@@ -81,10 +80,10 @@ public class SciVisApplication
 
     public void createModel()
     {
-	System.out.println("Create model start");
+        System.out.println("Create model start");
 
-	currentSlice = 0;
-	currentTimeTake = 0;
+        currentSlice = 0;
+        currentTimeTake = 0;
 
         //- DEFAULT TEST HARD-CODED STUDY ---------------------------------
         String imageFilenameBase = "./etc/studies/frog/slices/s";
@@ -100,7 +99,7 @@ public class SciVisApplication
         TimeTake timeTake = study.getTimeTake(0);
         for ( i = 0; i < numSlices; i++ ) {
             ii = String.format("%03d", i);
-	    imageFilename = imageFilenameBase+ii+".png";
+            imageFilename = imageFilenameBase+ii+".png";
             timeTake.setSliceImageAt(imageFilename, i, 0, 0);
         }
 
@@ -109,9 +108,9 @@ public class SciVisApplication
 
         img = study.getSliceImageAt(currentTimeTake, currentSlice);
 
-        drawingArea.setImage(img);
-        drawingArea.repaint();
-	System.out.println("Create model end");
+        panelManager.setPopup("POPUP_PANEL_MANAGER_BASE");
+	panelManager.propagateImage(currentTimeTake, currentSlice);
+        System.out.println("Create model end");
     }
 
     private JPanel
@@ -132,10 +131,10 @@ public class SciVisApplication
         JLabel label1;
 
         nm1 = new SpinnerNumberModel(
-	    0, /* Initial value */
-	    0, /* Minimal value */
-	    study.getNumTimeTakes()-1, /* Maximum value */
-	    1  /* Step */
+            0, /* Initial value */
+            0, /* Minimal value */
+            study.getNumTimeTakes()-1, /* Maximum value */
+            1  /* Step */
         );
 
         label1 = new JLabel("Current time take: ");
@@ -152,10 +151,10 @@ public class SciVisApplication
 
         TimeTake timeTake = study.getTimeTake(0);
         nm2 = new SpinnerNumberModel(
-	    0, /* Initial value */
-	    0, /* Minimal value */
-	    timeTake.getNumSlices()-1, /* Maximum value */
-	    1  /* Step */
+            0, /* Initial value */
+            0, /* Minimal value */
+            timeTake.getNumSlices()-1, /* Maximum value */
+            1  /* Step */
         );
 
         label2 = new JLabel("Current slice: ");
@@ -215,13 +214,14 @@ public class SciVisApplication
 
         //drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
 
-	PanelManager panelManager = new PanelManager(this);
+        panelManager = new PanelManagerSciVisApplication(this, gui);
+        panelManager.setPopup("POPUP_PANEL_MANAGER_EMPTY");
 
         //Component left = drawingArea.getCanvas();
         //Component left = drawingArea;
-	Component left = panelManager;
+        Component left = panelManager;
         //Component right = createPanel();
-        Component right = new JLabel("Panel");
+        Component right = new JLabel("Control Panel (not developed yet)");
         Dimension minleft = new Dimension(160, 120);
         Dimension minright = new Dimension(320, 120);
 
@@ -294,6 +294,15 @@ public class SciVisApplication
         spaceControlSubDialog = createControlSpaceSubDialog(executorPanel);
         iconsAndWorkAreasPanel.add(spaceControlSubDialog);
         mainWindowWidget.pack();
+    }
+
+    public void closeStudy()
+    {
+        removeSpaceControlSubDialog();
+        study = null;
+        System.gc();
+        panelManager.setPopup("POPUP_PANEL_MANAGER_EMPTY");
+        panelManager.empty();
     }
 
     public void
@@ -372,20 +381,17 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
 
         //- TESTS ---------------------------------------------------------
         else if ( label.equals("IDC_TESTS_CYCLE_SLICES" ) ) {
-            parent.drawingArea.setCyclePending(true);
+            //parent.drawingArea.setCyclePending(true);
         }
 
         //- SPACE CONTROL SUBDIALOG ---------------------------------------
         else if ( label.equals("IDC_FILE_CLOSE_STUDY") ) {
-            parent.removeSpaceControlSubDialog();
-            parent.study = null;
-            parent.drawingArea.setImage(null);
-            System.gc();
+            parent.closeStudy();
         }
         else if ( label.equals("IDC_FILE_NEW_STUDY") ) {
             parent.createModel();
             parent.addSpaceControlSubDialog();
-	    parent.drawingArea.repaint();
+            //parent.drawingArea.repaint();
         }
 
         //-----------------------------------------------------------------
@@ -402,7 +408,7 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
 
         if ( label.equals("TIME_SPINNER") ) {
             ival = ((Integer)(spinner.getValue())).intValue();
-	    parent.currentTimeTake = ival;
+            parent.currentTimeTake = ival;
             TimeTake timeTake = parent.study.getTimeTake(0);
             nm = new SpinnerNumberModel(
                 1, /* Initial value */
@@ -415,18 +421,14 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
         }
         if ( label.equals("SLICE_SPINNER") ) {
             ival = ((Integer)(spinner.getValue())).intValue();
-	    parent.currentSlice = ival;
+            parent.currentSlice = ival;
         }
 
         //-----------------------------------------------------------------
-        Image img = null;
+	parent.panelManager.propagateImage(parent.currentTimeTake, parent.currentSlice);
 
-        img = parent.study.getSliceImageAt(parent.currentTimeTake, parent.currentSlice);
-
-	System.out.println("Show take " + parent.currentTimeTake + ", slice " + parent.currentSlice);
-
-        parent.drawingArea.setImage(img);
-        parent.drawingArea.repaint();
+        //parent.drawingArea.setImage(img);
+        //parent.drawingArea.repaint();
     }
 }
 
