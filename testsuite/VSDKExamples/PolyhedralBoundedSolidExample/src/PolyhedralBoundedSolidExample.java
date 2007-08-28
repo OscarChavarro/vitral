@@ -18,24 +18,31 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import java.applet.Applet;
 
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
 
 public class PolyhedralBoundedSolidExample extends Applet implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
+    private Material material;
+    private Light light;
     private PolyhedralBoundedSolid solid;
-    private int faceIndex = 0;
+    private int faceIndex = -2;
 
     private RendererConfiguration quality;
     private RendererConfigurationController qualityController;
@@ -54,11 +61,26 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerAquynza(camera);
 
+        material = defaultMaterial();
+        light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
+
         //- Solid building ------------------------------------------------
         solid = buildSolid(solidType);
         //- Topology joining from 0-genus to 1-genus ----------------------
 
         //-----------------------------------------------------------------
+    }
+
+    private Material defaultMaterial()
+    {
+        Material m = new Material();
+
+        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
+        m.setPhongExponent(100);
+        return m;
     }
 
     private PolyhedralBoundedSolid buildSolid(int type)
@@ -140,10 +162,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     
     private void drawObjectsGL(GL gl)
     {
-        gl.glEnable(gl.GL_DEPTH_TEST);
-
         gl.glLoadIdentity();
 
+        //-----------------------------------------------------------------
+        gl.glDisable(gl.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
@@ -159,7 +181,13 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
-        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality, faceIndex);
+        //-----------------------------------------------------------------
+        JoglMaterialRenderer.activate(gl, material);
+        JoglLightRenderer.activate(gl, light);
+        JoglLightRenderer.draw(gl, light);
+        gl.glEnable(gl.GL_LIGHTING);
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
+        JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
     }
 
     /** Called by drawable to initiate drawing */
@@ -169,6 +197,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
+        gl.glEnable(gl.GL_DEPTH_TEST);
 
         JoglCameraRenderer.activate(gl, camera);
 
@@ -284,7 +313,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
               break;
 
           }
-          if ( faceIndex < 0 ) faceIndex = 0;
+          if ( faceIndex < -2 ) faceIndex = -2;
           canvas.repaint();
       }
   }

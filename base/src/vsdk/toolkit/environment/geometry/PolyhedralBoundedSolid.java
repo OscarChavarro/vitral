@@ -57,6 +57,7 @@ public class PolyhedralBoundedSolid extends Solid {
     private double[] minMax;
     private int maxVertexId;
     private int maxFaceId;
+    private boolean modelIsValid;
 
     //=================================================================
     public PolyhedralBoundedSolid()
@@ -70,6 +71,7 @@ public class PolyhedralBoundedSolid extends Solid {
         minMax = null;
         maxVertexId = -1;
         maxFaceId = -1;
+        modelIsValid = false;
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -758,7 +760,7 @@ public class PolyhedralBoundedSolid extends Solid {
     3. There are at least a third point, no colinear with the first 2
     4. All points in this set lies within a small tolerance over the
        surface of the plane
-    If all four steps succed, this method returns true. Otherwise returns
+    If all four steps succeed, this method returns true. Otherwise returns
     false.
     */
     private boolean
@@ -820,6 +822,15 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    Returns true if the model was validated (using `validateModel` method)
+    and validation succeed after any geometrical or topological operation.
+    */
+    public boolean isValid()
+    {
+        return modelIsValid;
+    }
+
+    /**
     This method runs a set of validity tests to check te integrity of the
     data structure. If all of the tests goes well, this method returns true.
     If any of the test fails, this method return false.
@@ -827,6 +838,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Current methods (already implemented):
       - All loops have an starting halfedge
       - All loops are closed
+      - All faces contains its corresponding containing plane equation
 
     Current methods (not implemented yet):
       - All faces are co-planar
@@ -844,6 +856,8 @@ public class PolyhedralBoundedSolid extends Solid {
         String msg = "";
         boolean test = true;
         ArrayList<Vector3D> points;
+
+        modelIsValid = false;
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
@@ -870,15 +884,21 @@ public class PolyhedralBoundedSolid extends Solid {
                     points.add(he.startingVertex.position);
                 } while( he != heStart );
             }
-            if ( !validateFacePointsAreCoplanar(points) ) {
+            if ( validateFacePointsAreCoplanar(points) ) {
+                face.calculatePlane();
+            }
+            else {
                 msg += "  - Face [" + face.id + "] is not coplanar\n";
                 test = false;
             }
         }
 
-        if ( !test ) {
-            System.out.println("Validation test failed!:");
-            System.out.println(msg);
+        if ( test ) {
+            modelIsValid = true;
+        }
+        else {
+            VSDK.reportMessage(this, VSDK.WARNING, "validateModel",
+                "Validation test failed!:\n" + msg);
         }
 
         return test;

@@ -11,8 +11,9 @@
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
-import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
+import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
@@ -103,6 +104,61 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             }
         }
         return null;
+    }
+
+    /**
+    PRE: current face points must be all co-planar. Previous solid validation
+    should be made!
+    POST: current face contains a plane containing the face.
+
+    Current implementation takes in to account only the first loop.
+    */
+    public void
+    calculatePlane()
+    {
+        if ( boundariesList.size() < 1 ) {
+            return;
+        }
+
+        _PolyhedralBoundedSolidLoop loop;
+        _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+        loop = boundariesList.get(0);
+
+        he = loop.boundaryStartHalfEdge;
+        if ( he == null ) {
+            // Loop without starting halfedge
+            return;
+        }
+        heStart = he;
+
+
+        // This is only considering the first three vertices, and not taking
+        // in to account the possible case of to close vertices. Should be
+        // replaced to consider the full vertices set.
+        Vector3D p0 = null, p1 = null;
+        Vector3D p2 = null, a, b;
+        Vector3D n;
+
+        p0 = he.startingVertex.position;
+        p1 = he.next().startingVertex.position;
+        p2 = he.next().next().startingVertex.position;
+        a = p1.substract(p0);    a.normalize();
+        b = p2.substract(p0);    b.normalize();
+        n = a.crossProduct(b);   n.normalize();
+        containingPlane = new InfinitePlane(n, p0);
+
+        /*
+        do {
+            he = he.next();
+            if ( he == null ) {
+                // Loop is not closed!
+                break;
+            }
+            // ?
+        } while( he != heStart );
+        */
+
     }
 
     public String toString()

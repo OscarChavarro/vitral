@@ -187,7 +187,7 @@ public class Vertex extends FundamentalEntity
     purposes.
     */
     public String toString() {
-        return "v " + position + " UV<" +
+        return "v " + position +" n " + normal + " UV<" +
             VSDK.formatDouble(u) + ", " + VSDK.formatDouble(v) + ">";
     }
 }

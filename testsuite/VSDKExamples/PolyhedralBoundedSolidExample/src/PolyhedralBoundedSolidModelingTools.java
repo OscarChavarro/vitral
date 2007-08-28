@@ -31,7 +31,7 @@ public class PolyhedralBoundedSolidModelingTools
         Box b = new Box(boxSize);
         solid = b.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
-
+        solid.validateModel();
         return solid;
     }
 
@@ -59,6 +59,7 @@ public class PolyhedralBoundedSolidModelingTools
         solid.smev(7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
         solid.mef(7, 7, 15, 11, 16, 12, 10);
         solid.mef(7, 7, 13, 14, 16, 12, 11);
+        solid.validateModel();
     }
 
     /**
@@ -75,6 +76,7 @@ public class PolyhedralBoundedSolidModelingTools
         solid.kfmrhSameShell(2, 11);
         //R.translation(-0.55, -0.55, -0.55);
         //solid.applyTransformation(R);
+        solid.validateModel();
 
         return solid;
     }
@@ -111,6 +113,7 @@ public class PolyhedralBoundedSolidModelingTools
             solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
             prev = nextVertexId;
         }
+        solid.validateModel();
     }
 
     /**
@@ -127,6 +130,7 @@ public class PolyhedralBoundedSolidModelingTools
         addArc(solid, 1, 1, cx, cy, rad, h, 0, 
             ((double)(n-1))*360.0/((double)n), n-1);
         solid.smef(1, n, 1, 2);
+        solid.validateModel();
         return solid;
     }
 
@@ -167,6 +171,7 @@ public class PolyhedralBoundedSolidModelingTools
             solid.lmef(scan.previous(), scan.next().next(),
                 solid.getMaxFaceId()+1);
         }
+        solid.validateModel();
     }
 }
 

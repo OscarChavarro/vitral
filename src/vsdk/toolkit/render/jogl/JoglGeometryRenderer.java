@@ -11,6 +11,7 @@ import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -30,6 +31,9 @@ import vsdk.toolkit.environment.geometry.VoxelVolume;
 
 public class JoglGeometryRenderer extends JoglRenderer 
 {
+    private static Vector3D p = new Vector3D();
+    private static Vector3D n = new Vector3D();
+
     public static void prepareSurfaceQuality(GL gl, RendererConfiguration quality)
     {
         int shadingType = quality.getShadingType();
@@ -51,6 +55,19 @@ public class JoglGeometryRenderer extends JoglRenderer
             gl.glShadeModel(gl.GL_SMOOTH);
             break;
         }
+    }
+
+    public static void drawVertexNormal(GL gl, Vertex vertex) {
+        double l = 0.2;
+        p = vertex.getPosition();
+        n = vertex.getNormal();
+
+        gl.glVertex3d(p.x + (n.x * l/100),
+                      p.y + (n.y * l/100),
+                      p.z + (n.z * l/100));
+        gl.glVertex3d(p.x + (n.x * l),
+                      p.y + (n.y * l),
+                      p.z + (n.z * l));
     }
 
     public static void drawMinMaxBox(GL gl, double minmax[], RendererConfiguration q)

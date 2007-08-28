@@ -37,6 +37,14 @@ public class InfinitePlane extends HalfSpace {
         d = -normal.dotProduct(pointInPlane);
     }
 
+    public void clone(InfinitePlane other)
+    {
+        this.a = other.a;
+        this.a = other.b;
+        this.a = other.c;
+        this.a = other.d;
+    }
+
     public boolean
     doIntersection(Ray inout_rayo) {
         double denominator = a*inout_rayo.direction.x + b*inout_rayo.direction.y + c*inout_rayo.direction.z;

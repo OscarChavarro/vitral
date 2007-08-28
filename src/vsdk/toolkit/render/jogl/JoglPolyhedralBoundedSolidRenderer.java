@@ -19,6 +19,7 @@ import com.sun.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
@@ -169,6 +170,57 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
+    drawVertexNormals(GL gl, PolyhedralBoundedSolid solid)
+    {
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        // Warning: Change with configured color for vertex normals
+        gl.glColor3d(1, 1, 0);
+        gl.glLineWidth(1.0f);
+        int i, j;
+
+        //-----------------------------------------------------------------
+        Vector3D p0, n;
+        Vertex vertex = new Vertex();
+
+        gl.glBegin(gl.GL_LINES);
+        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+            // Logic
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            if ( face.containingPlane != null ) {
+                vertex.normal = face.containingPlane.getNormal();
+            }
+            else {
+                continue;
+            }
+
+            // Face polygon processing via JOGL GLU tesselator
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+
+                    // Draw polygon parts
+                    vertex.position = he.startingVertex.position;
+                    JoglGeometryRenderer.drawVertexNormal(gl, vertex);
+                } while( he != heStart );
+            }
+        }
+        gl.glEnd();
+
+    }
+
+    private static void
     drawSurfaces(GL gl, PolyhedralBoundedSolid solid)
     {
         int i, j;
@@ -187,11 +239,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glEnable(gl.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
-        Vector3D p0;
+        Vector3D p0, n;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            setColor(gl, i);
+            if ( face.containingPlane != null ) {
+                n = face.containingPlane.getNormal();
+                gl.glNormal3d(n.x, n.y, n.z);
+            }
 
             // Count used vertex for current face
             int totalNumberOfPoints = 0;
@@ -268,39 +323,26 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     public static void
-    draw(GL gl, PolyhedralBoundedSolid solid,
-         Camera c, RendererConfiguration quality)
+    drawDebugFaceBoundary(GL gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
-        draw(gl, solid, c, quality, -1);
-    }
-
-    public static void
-    draw(GL gl, PolyhedralBoundedSolid solid,
-         Camera c, RendererConfiguration quality, int faceIndex)
-    {
-        //-----------------------------------------------------------------
         int i, j;
-
-        JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glColor3d(0, 0, 0);
-        gl.glLineWidth(1.0f);
-
-        if ( quality.isPointsSet() ) {
-            drawPoints(gl, solid);
-        }
-
         Vector3D startP, endP;
-        Vector3D p0 = null, p1 = null, p2 = null, n, a, b;
+        Vector3D p0 = null, p1 = null;
+        Vector3D p2 = null, a, b;
+        Vector3D n;
         _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;
 
-        //- Draw face boundaries, one for each loop -----------------------
-        for ( i = 0; faceIndex >= 0 && i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glLineWidth(1.0f);
 
-            if ( i != faceIndex ) {
+        //- Draw face boundaries, one for each loop -----------------------
+        for ( i = 0; faceIndex >= -1 && i < solid.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            //n = face.containingPlane.getNormal();
+
+            if ( i != faceIndex && faceIndex > -1 ) {
                 continue;
             }
 
@@ -327,6 +369,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     b = p2.substract(p0);    b.normalize();
                     n = a.crossProduct(b);   n.normalize();
                     loopPlane = new InfinitePlane(n, p0);
+                    //loopPlane = face.containingPlane;
 
                     // Draw halfedges
                     if ( i == faceIndex ) {
@@ -340,15 +383,38 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 } while( he != heStart );
             }
         }
+    }
 
+    /**
+    PRE: Solid has been previously validated. This implies for example that
+    all faces are planar and has its containing plane equation calculated, so
+    they are correctly formed geometrical and topological entities.
+    */
+    public static void
+    draw(GL gl, PolyhedralBoundedSolid solid,
+         Camera c, RendererConfiguration quality)
+    {
+        //-----------------------------------------------------------------
+        JoglRenderer.disableNvidiaCgProfiles();
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glEnable(gl.GL_NORMALIZE);
+
+        //-----------------------------------------------------------------
+        if ( quality.isSurfacesSet() ) {
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonOffset(0.0f, 0.0f);
+            drawSurfaces(gl, solid);
+        }
         if ( quality.isWiresSet() ) {
             gl.glPolygonOffset(-0.5f, 0.0f);
             drawEdges(gl, solid);
         }
-        if ( quality.isSurfacesSet() ) {
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
-            drawSurfaces(gl, solid);
+        if ( quality.isPointsSet() ) {
+            drawPoints(gl, solid);
+        }
+        if ( quality.isNormalsSet() ) {
+            drawVertexNormals(gl, solid);
         }
         if ( quality.isBoundingVolumeSet() ) {
             JoglGeometryRenderer.drawMinMaxBox(gl, solid, quality);

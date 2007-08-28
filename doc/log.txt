@@ -393,6 +393,10 @@ Changes in 2007 august 4 revition
   - SciVisApplication application added
   - SpharmonicKit native library ported to Windows
 
+Changes in 2007 august 28 revition
+  - Polyhedral bounded solid model jogl rendering complete for the basic
+    shading cases! :) (2h)
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

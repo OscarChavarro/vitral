@@ -26,9 +26,6 @@ import vsdk.toolkit.environment.Material;
 
 public class JoglTriangleMeshRenderer extends JoglRenderer {
 
-    private static Vector3D p = new Vector3D();
-    private static Vector3D n = new Vector3D();
-
     /**
     @todo program this!
     */
@@ -143,26 +140,13 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glBegin(gl.GL_LINES);
         for ( int i = 0; i < mesh.getTriangles().length; i++ ) {
             Vertex vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0());
-            drawVertexNormal(gl, vertex);
+            JoglGeometryRenderer.drawVertexNormal(gl, vertex);
             vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1());
-            drawVertexNormal(gl, vertex);
+            JoglGeometryRenderer.drawVertexNormal(gl, vertex);
             vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2());
-            drawVertexNormal(gl, vertex);
+            JoglGeometryRenderer.drawVertexNormal(gl, vertex);
         }
         gl.glEnd();
-    }
-
-    private static void drawVertexNormal(GL gl, Vertex vertex) {
-        double l = 0.2;
-        p = vertex.getPosition();
-        n = vertex.getNormal();
-
-        gl.glVertex3d(p.x + (n.x * l/100),
-                      p.y + (n.y * l/100),
-                      p.z + (n.z * l/100));
-        gl.glVertex3d(p.x + (n.x * l),
-                      p.y + (n.y * l),
-                      p.z + (n.z * l));
     }
 
     private static void drawTriangleNormals(GL gl, TriangleMesh m) {
