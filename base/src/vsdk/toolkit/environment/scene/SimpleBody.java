@@ -14,6 +14,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 
 public class SimpleBody extends Entity {
     /// Check the general attribute description in superclass Entity.
@@ -208,6 +209,30 @@ public class SimpleBody extends Entity {
         }
 
         return answer;
+    }
+
+    /**
+    WARNING: Check if this method works ok for modified geometric operations!
+    */
+    public void doExtraInformation(Ray inRay, double inT, GeometryIntersectionInformation outInfo)
+    {
+        Vector3D po;
+        Matrix4x4 R, Ri;
+	Ray myRay;
+
+        po = getPosition();
+        R = getRotation();
+        Ri = getRotationInverse();
+        myRay = new Ray ( 
+            Ri.multiply(inRay.origin.substract(po) ),
+            Ri.multiply(inRay.direction)
+        );
+        myRay.t = inRay.t;
+        geometry.doExtraInformation(myRay, inT, outInfo);
+
+        outInfo.p = R.multiply(outInfo.p).add(po);
+        outInfo.n = R.multiply(outInfo.n);
+
     }
 }
 

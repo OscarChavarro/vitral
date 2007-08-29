@@ -94,9 +94,6 @@ public class Raytracer extends RenderingElement {
         ColorRgb diffuse;
         ColorRgb specular;
         ColorRgb lightEmission;
-        Ray myRay;
-        Vector3D po;
-        Matrix4x4 R, Ri;
 
         //- Normal perturbation / bump mapping ----------------------------
         // This code follows the variable name convention used on equation
@@ -169,8 +166,8 @@ public class Raytracer extends RenderingElement {
                 // Check if the surface point is in shadow
                 Vector3D poffset = 
                     new Vector3D(info.p.x + VSDK.EPSILON*l.x, info.p.y + VSDK.EPSILON*l.y, info.p.z + VSDK.EPSILON*l.z);
-                Ray rayo_sombra = new Ray(poffset, l);
-                nearestObject = selectNearestThingInRayDirection(rayo_sombra, objects);
+                Ray shadowRay = new Ray(poffset, l);
+                nearestObject = selectNearestThingInRayDirection(shadowRay, objects);
                 if ( nearestObject != null ) {
                     continue;
                 }
@@ -222,26 +219,17 @@ public class Raytracer extends RenderingElement {
                 Vector3D poffset = new Vector3D(info.p.x + VSDK.EPSILON*reflect.x, 
                                                 info.p.y + VSDK.EPSILON*reflect.y, 
                                                 info.p.z + VSDK.EPSILON*reflect.z);
-                Ray rayo_reflejado = new Ray(poffset, reflect);
+                Ray reflected_ray = new Ray(poffset, reflect);
                 nearestObject = 
-                    selectNearestThingInRayDirection(rayo_reflejado, objects);
+                    selectNearestThingInRayDirection(reflected_ray, objects);
                 if ( nearestObject != null ) {
                     Vector3D rv = new Vector3D();
                     GeometryIntersectionInformation subInfo = 
                         new GeometryIntersectionInformation();
 
                     //--------------------------------------------------------
-                    po = nearestObject.getPosition();
-                    R = nearestObject.getRotation();
-                    Ri = nearestObject.getRotationInverse();
-                    myRay = new Ray ( 
-                        Ri.multiply(rayo_reflejado.origin.substract(po) ),
-                        Ri.multiply(rayo_reflejado.direction)
-                    );
-                    myRay.t = rayo_reflejado.t;
-
-                    nearestObject.getGeometry().doExtraInformation(
-                        myRay, myRay.t, subInfo);
+                    nearestObject.doExtraInformation(
+                        reflected_ray, reflected_ray.t, subInfo);
 
                     //-----
                     if ( !inQualitySelection.isTextureSet() ) {
@@ -258,14 +246,11 @@ public class Raytracer extends RenderingElement {
                         subInfo.normalMap = nearestObject.getNormalMap();
                     }
 
-                    subInfo.p = R.multiply(subInfo.p).add(po);
-                    subInfo.n = R.multiply(subInfo.n);
-
                     //--------------------------------------------------------
 
-                    rv.x = -rayo_reflejado.direction.x;
-                    rv.y = -rayo_reflejado.direction.y;
-                    rv.z = -rayo_reflejado.direction.z;                    
+                    rv.x = -reflected_ray.direction.x;
+                    rv.y = -reflected_ray.direction.y;
+                    rv.z = -reflected_ray.direction.z;                    
                     ColorRgb rcolor =
                         evaluateIlluminationModel(subInfo, rv, lights, objects, 
                                                   background, material, 
@@ -345,26 +330,13 @@ public class Raytracer extends RenderingElement {
         Vector3D v = new Vector3D();
         SimpleBody nearestObject;
         Ray myRay;
-        Vector3D po;
-        Matrix4x4 R, Ri;
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
 
         nearestObject = selectNearestThingInRayDirection(inRay, in_objetos);
         if ( nearestObject != null ) {
             //------------------------------------------------------------
-            po = nearestObject.getPosition();
-            R = nearestObject.getRotation();
-            Ri = nearestObject.getRotationInverse();
-            myRay = new Ray ( 
-                Ri.multiply(inRay.origin.substract(po) ),
-                Ri.multiply(inRay.direction)
-            );
-            myRay.t = inRay.t;
-
-            nearestObject.getGeometry().doExtraInformation(myRay, 
-                                                                  myRay.t,
-                                                                  info);
+            nearestObject.doExtraInformation(inRay, inRay.t, info);
             //-----
             if ( !inQualitySelection.isTextureSet() ) {
                 info.texture = null;
@@ -384,9 +356,6 @@ public class Raytracer extends RenderingElement {
             v.x = -inRay.direction.x;
             v.y = -inRay.direction.y;
             v.z = -inRay.direction.z;
-
-            info.p = R.multiply(info.p).add(po);
-            info.n = R.multiply(info.n);
 
             Material material;
             if ( info.material != null ) {

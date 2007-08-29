@@ -14,11 +14,11 @@ public class Ray  extends FundamentalEntity
     public Vector3D direction;
     public double t;
 
-    public Ray(Vector3D eye, Vector3D dir)
+    public Ray(Vector3D origin, Vector3D direction)
     {
-        origin = new Vector3D(eye.x, eye.y, eye.z);
-        direction = new Vector3D(dir.x, dir.y, dir.z);
-        direction.normalize();
+        this.origin = new Vector3D(origin.x, origin.y, origin.z);
+        this.direction = new Vector3D(direction.x, direction.y, direction.z);
+        this.direction.normalize();
     }
 
     public Ray(Ray b)
