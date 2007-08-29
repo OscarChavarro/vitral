@@ -1,3 +1,4 @@
+//===========================================================================
 import java.io.File;
 import java.util.ArrayList;
 
@@ -18,6 +19,7 @@ import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -173,6 +175,32 @@ public class Scene
         return thing;
     }
 
+    public boolean doIntersection(Ray r, GeometryIntersectionInformation info)
+    {
+        int i;
+        double nearestDistance = Float.MAX_VALUE;
+        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        boolean intersected = false;
+        SimpleBody gi;
+        GeometryIntersectionInformation ii;
+
+        ii = new GeometryIntersectionInformation();
+        for ( i = 0; i < things.size(); i++ ) {
+            gi = things.get(i);
+            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
+                gi.doExtraInformation(r, r.t, ii);
+                nearestDistance = r.t;
+                intersected = true;
+            }
+        }
+        if ( intersected ) {
+            r.t = nearestDistance;
+            info.clone(ii);
+            return true;
+        }
+        return false;
+    }
+
     public void selectObjectWithMouse(int x, int y, boolean composite)
     {
         Ray r;
@@ -183,7 +211,7 @@ public class Scene
 
         double nearestDistance = Float.MAX_VALUE;
 
-	int i;
+        int i;
 
         if ( !composite ) {
             selectedThings.unselectAll();
@@ -285,3 +313,7 @@ public class Scene
     }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

@@ -182,3 +182,7 @@ June 2 2007, Oscar Chavarro:
 
 June 3 2007, Oscar Chavarro:
   - 4h: view projection debugging supports a selection of multiple objects
+
+August 28 2007, Oscar Chavarro:
+  - 2h50min: Visual debug ray tracing capability casting rays in
+    SceneEditorApplication

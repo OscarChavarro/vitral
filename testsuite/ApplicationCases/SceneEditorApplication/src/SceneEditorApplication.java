@@ -202,7 +202,7 @@ public class SceneEditorApplication {
             System.exit(0);
         }
 
-        visualDebugRay = new Ray(new Vector3D(0, -1, 0), new Vector3D(0, 1, 0));
+        visualDebugRay = new Ray(new Vector3D(0, -3, 0), new Vector3D(0, 1, 0));
         visualDebugRayLevels = 2;
         withVisualDebugRay = false;
 

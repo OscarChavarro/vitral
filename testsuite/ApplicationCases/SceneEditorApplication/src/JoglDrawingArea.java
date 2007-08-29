@@ -31,8 +31,10 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Quaternion;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -48,13 +50,18 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.Arrow;
+import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglArrowRenderer;
+import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
@@ -90,7 +97,7 @@ public class JoglDrawingArea implements
     private TranslateGizmo translationGizmo;
     private RotateGizmo rotateGizmo;
     private ScaleGizmo scaleGizmo;
-    private Arrow visualDebugRayGizmo;
+    private Material visualDebugMaterial;
 
     private Scene theScene;
     private JLabel statusMessage;
@@ -158,7 +165,7 @@ public class JoglDrawingArea implements
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
 
-        visualDebugRayGizmo = new Arrow(1, 0.4, 0.05, 0.1);
+        visualDebugMaterial = parent.theScene.defaultMaterial();
 
         canvas = new GLCanvas();
 
@@ -748,22 +755,111 @@ public class JoglDrawingArea implements
         copyColorBufferIfNeeded(gl);
     }
 
+    private void drawVisualRayDebugSegment(GL gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
+    {
+        double l;
+        Vector3D diff = end.substract(start);
+        l = diff.length();
+
+        JoglMaterialRenderer.activate(gl, visualDebugMaterial);
+
+        //-----------------------------------------------------------------
+        Geometry a;
+
+        if ( l > tip ) {
+            a = new Arrow(l - tip, tip, w/2, w);
+        }
+        else {
+            a = new Cone(w/2, w/2, l);
+        }
+        Matrix4x4 R = new Matrix4x4();
+        double yaw, pitch;
+        yaw = diff.obtainSphericalThetaAngle();
+        pitch = diff.obtainSphericalPhiAngle();
+        R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
+
+        gl.glPushMatrix();
+        gl.glTranslated(start.x, start.y, start.z);
+        JoglMatrixRenderer.activate(gl, R);
+        JoglGeometryRenderer.draw(gl, a, theScene.camera, qualitySelectionVisualDebug);
+        gl.glPopMatrix();
+
+        //-----------------------------------------------------------------
+        if ( follow ) {
+            Sphere s = new Sphere(0.025);
+            Vector3D p;
+            double offset = 0.1;
+            int i;
+            diff.normalize();
+            for ( i = 0; i < 3; i++, offset += 0.1 ) {
+                p = end.add(diff.multiply(offset));
+                gl.glPushMatrix();
+                gl.glTranslated(p.x, p.y, p.z);
+                JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
+                gl.glPopMatrix();
+            }
+        }
+    }
+
+    private void drawVisualRayDebug(GL gl, Ray ray, int level)
+    {
+        gl.glLoadIdentity();
+        if ( level < 0 ) return;
+
+        //-----------------------------------------------------------------
+        Vector3D p;
+        Vector3D d = new Vector3D(ray.direction);
+        d.normalize();
+        GeometryIntersectionInformation info;
+
+        info = new GeometryIntersectionInformation();
+
+        //-----------------------------------------------------------------
+        visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.5, 0.0));
+        JoglMaterialRenderer.activate(gl, visualDebugMaterial);
+        Sphere s = new Sphere(0.05);
+        gl.glPushMatrix();
+        gl.glTranslated(ray.origin.x, ray.origin.y, ray.origin.z);
+        JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
+        gl.glPopMatrix();
+
+        //-----------------------------------------------------------------
+        if ( parent.theScene.doIntersection(ray, info) ) {
+            d = d.multiply(ray.t);
+            p = ray.origin.add(d);
+
+            drawVisualRayDebugSegment(gl, ray.origin, p, false, 0.07, 0.4);
+            if ( level >= 1 ) {
+                // Draw normal
+                visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.9, 0.5));
+                drawVisualRayDebugSegment(gl, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2);
+            }
+            // Reflection ray
+            Vector3D dd = ray.direction.multiply(-1);
+            dd.normalize();
+            Vector3D h = info.n.multiply(dd.dotProduct(info.n)).substract(dd);
+            Ray subray = new Ray(p, dd.add(h.multiply(2)));
+            subray.origin = subray.origin.add(subray.direction.multiply(VSDK.EPSILON*10.0));
+            drawVisualRayDebug(gl, subray, level-1);
+        }
+        else {
+            d = d.multiply(1.4);
+            p = ray.origin.add(d);
+            drawVisualRayDebugSegment(gl, ray.origin, p, true, 0.07, 0.4);
+        }
+    }
+
     private void drawVisualRayDebug(GL gl)
     {
+        //-----------------------------------------------------------------
         if ( !parent.withVisualDebugRay ) {
             return;
         }
+
+        //-----------------------------------------------------------------
         gl.glEnable(gl.GL_LIGHTING);
-        gl.glPushMatrix();
-        gl.glTranslated(parent.visualDebugRay.origin.x, parent.visualDebugRay.origin.y, parent.visualDebugRay.origin.z);
-        Matrix4x4 R = new Matrix4x4();
-        double yaw, pitch;
-        yaw = parent.visualDebugRay.direction.obtainSphericalThetaAngle();
-        pitch = parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-        R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
-        JoglMatrixRenderer.activate(gl, R);
-        JoglArrowRenderer.draw(gl, visualDebugRayGizmo, theScene.camera, qualitySelectionVisualDebug);
-        gl.glPopMatrix();
+        drawVisualRayDebug(gl, parent.visualDebugRay, parent.visualDebugRayLevels);
+        //-----------------------------------------------------------------
     }
 
 
@@ -1281,6 +1377,21 @@ public class JoglDrawingArea implements
                   canvas.repaint();
               }
               break;
+            case '9': // Numpad 9
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRayLevels++;
+                  canvas.repaint();
+              }
+              break;
+            case '3': // Numpad 3
+              if ( parent.withVisualDebugRay ) {
+                  parent.visualDebugRayLevels--;
+                  if ( parent.visualDebugRayLevels < 0 ) {
+                      parent.visualDebugRayLevels = 0;
+		  }
+                  canvas.repaint();
+              }
+              break;
             case '5': // Numpad 5
               if ( parent.withVisualDebugRay ) {
                   parent.withVisualDebugRay = false;
@@ -1296,11 +1407,9 @@ public class JoglDrawingArea implements
                    parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                   phi =
                    parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  theta -= Math.toRadians(15);
+                  theta -= Math.toRadians(5);
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
-                  System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
-                                    Math.toDegrees(theta), Math.toDegrees(phi));
                   canvas.repaint();
               }
               break;
@@ -1310,11 +1419,9 @@ public class JoglDrawingArea implements
                    parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                   phi =
                    parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  theta += Math.toRadians(15);
+                  theta += Math.toRadians(5);
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
-                  System.out.printf("Tetha: %.2f, Phi: %.2f\n", 
-                                    Math.toDegrees(theta), Math.toDegrees(phi));
                   canvas.repaint();
               }
               break;
@@ -1324,7 +1431,7 @@ public class JoglDrawingArea implements
                    parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                   phi =
                    parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  phi += Math.toRadians(15);
+                  phi += Math.toRadians(5);
                   if ( phi > Math.PI ) phi = Math.PI;
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
@@ -1337,7 +1444,7 @@ public class JoglDrawingArea implements
                    parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                   phi =
                    parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  phi -= Math.toRadians(15);
+                  phi -= Math.toRadians(5);
                   if ( phi < 0 ) phi = 0;
                   parent.visualDebugRay.direction.setSphericalCoordinates(
                    1, theta, phi);
