@@ -386,8 +386,7 @@ Changes in 2007 july 22 revition
 Changes in 2007 august 2 revition
   - Stating up ReaderVtk code and creating basic parsing structure for
     ReaderAse.
-  - Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
-    (1h25min)
+  - 1h25min: Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
 
 Changes in 2007 august 4 revition
   - SciVisApplication application added
@@ -396,6 +395,7 @@ Changes in 2007 august 4 revition
 Changes in 2007 august 28 revition
   - Polyhedral bounded solid model jogl rendering complete for the basic
     shading cases! :) (2h)
+  - 2h40min: PolyhedralBoundedSolid.doIntersection working!!! :) :)
 
 ---------------------------------------------------------------------------
 TODO:

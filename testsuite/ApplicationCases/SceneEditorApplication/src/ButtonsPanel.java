@@ -191,6 +191,42 @@ public class ButtonsPanel extends JPanel implements ActionListener
         return body;
     }
 
+    private static PolyhedralBoundedSolid createCircle(
+        double cx, double cy, double rad, double h, int n)
+    {
+        PolyhedralBoundedSolid solid;
+
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(cx + rad, cy, h), 1, 1);
+        addArc(solid, 1, 1, cx, cy, rad, h, 0, 
+            ((double)(n-1))*360.0/((double)n), n-1);
+        solid.smef(1, n, 1, 2);
+        solid.validateModel();
+        return solid;
+    }
+
+    private static void addArc(PolyhedralBoundedSolid solid,
+        int faceId, int vertexId,
+        double cx, double cy, double rad, double h, double phi1, double phi2,
+        int n)
+    {
+        double x, y, angle, inc;
+        int prev, i, nextVertexId;
+
+        angle = Math.toRadians(phi1);
+        inc = Math.toRadians(((phi2 - phi1) / ((double)n)));
+        prev = vertexId;
+        for ( i = 0; i < n; i++ ) {
+            angle += inc;
+            x = cx + rad * Math.cos(angle);
+            y = cy + rad * Math.sin(angle);
+            nextVertexId = solid.getMaxVertexId() + 1;
+            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
+            prev = nextVertexId;
+        }
+        solid.validateModel();
+    }
+
     public void actionPerformed(ActionEvent ev) {
         String label = ev.getActionCommand();
 
@@ -328,8 +364,9 @@ public class ButtonsPanel extends JPanel implements ActionListener
             newThing.setScale(size);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
-            PolyhedralBoundedSolid brep =
-                (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
+            PolyhedralBoundedSolid brep;
+
+            brep = (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
             Matrix4x4 R = new Matrix4x4();
             R.translation(0.55, 0.55, 0.55);
             brep.applyTransformation(R);
@@ -356,6 +393,12 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
             R.translation(-0.55, -0.55, -0.55);
             brep.applyTransformation(R);
+	    brep.validateModel();
+
+            //brep = createCircle(0.5, 0.5, 0.5, 0.1, 12);
+
+	    //
+            brep.validateModel();
             parent.theScene.addThing(brep);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {

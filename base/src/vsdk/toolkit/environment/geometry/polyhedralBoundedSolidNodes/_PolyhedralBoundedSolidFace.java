@@ -5,6 +5,8 @@
 //= - January 3 2007 - Oscar Chavarro: First phase implementation           =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
+//= [GLAS1989] Glassner, Andrew. "An introduction to ray tracing",          =
+//=     Academic Press, 1989.                                               =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 //===========================================================================
@@ -14,6 +16,8 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
@@ -159,6 +163,163 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         } while( he != heStart );
         */
 
+    }
+
+    /**
+    @coord: 1 means drop x, 2 means drop y and 3 means drop z
+    */
+    private void dropCoordinate(Vector3D in, Vector3D out, int coord)
+    {
+        out.z = 0;
+
+        switch ( coord ) {
+          case 1:
+            // Drop X
+            out.x = in.y;
+            out.y = in.z;
+            break;
+          case 2:
+            // Drop Y
+            out.x = in.x;
+            out.y = in.z;
+            break;
+          case 3: default:
+            // Drop Z
+            out.x = in.x;
+            out.y = in.y;
+            break;
+        }
+    }
+
+    /**
+    Given a point p in the containing plane of this face, the method returns:
+    @return 1 if point is outside polygon, 0 if its in the polygon border,
+    -1 if point is inside border.
+    PRE:
+    - Polygon is planar
+    - Point p is in the containing plane
+    The structure of this algorithm follows the one outlined in
+    [GLAS1989].2.3.2. with a little variation in the handlig of `sh`
+    which allows this code to manage internal loops.
+    */
+    public int
+    testPointInside(Vector3D p)
+    {
+        Vector3D n = containingPlane.getNormal();
+        int nc; // Number of crossings
+        int sh; // Sign holder for vertex crossings
+        int nsh; // Next sign holder for vertex crossings
+
+        //-----------------------------------------------------------------
+        //- 1. For all vertices in face, project them in to dominant
+        //- coordinate's plane
+        ArrayListOfDoubles polygon2Du = new ArrayListOfDoubles(100);
+        ArrayListOfDoubles polygon2Dv = new ArrayListOfDoubles(100);
+        double u, v;
+        Vector3D projectedPoint = new Vector3D();
+        int dominantCoordinate = 3;
+        int i;
+
+        if ( Math.abs(n.x) >= Math.abs(n.y) &&
+             Math.abs(n.x) >= Math.abs(n.z) ) {
+            dominantCoordinate = 1;
+        }
+        else if ( Math.abs(n.y) >= Math.abs(n.x) &&
+                  Math.abs(n.y) >= Math.abs(n.z) ) {
+            dominantCoordinate = 2;
+        }
+        else {
+            dominantCoordinate = 3;
+        }
+
+        for ( i = 0; i < boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop;
+            _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+            loop = boundariesList.get(i);
+            he = loop.boundaryStartHalfEdge;
+            if ( he == null ) {
+                // Loop without starting halfedge
+                return 1;
+            }
+            heStart = he;
+            do {
+                dropCoordinate(he.startingVertex.position, projectedPoint,
+                               dominantCoordinate);
+                polygon2Du.append(projectedPoint.x);
+                polygon2Dv.append(projectedPoint.y);
+                he = he.next();
+                if ( he == null ) {
+                    // Loop is not closed!
+                    return 1;
+                }
+                dropCoordinate(he.startingVertex.position, projectedPoint,
+                               dominantCoordinate);
+                polygon2Du.append(projectedPoint.x);
+                polygon2Dv.append(projectedPoint.y);
+            } while( he != heStart );
+        }
+        dropCoordinate(p, projectedPoint, dominantCoordinate);
+        u = projectedPoint.x;
+        v = projectedPoint.y;
+
+        //-----------------------------------------------------------------
+        //- 2. Translate the 2D polygon such that the intersection point is
+        //- in the origin
+        for ( i = 0; i < polygon2Du.size; i++ ) {
+            polygon2Du.array[i] -= u;
+            polygon2Dv.array[i] -= v;
+        }
+        nc = 0;
+
+        //-----------------------------------------------------------------
+        //- 3. Iterate edges
+        double ua, va, ub, vb;
+
+        for ( i = 0; i < polygon2Du.size - 1; i += 2 ) {
+            // This iteration tests the line segment (ua, va) - (ub, vb)
+            ua = polygon2Du.array[i];
+            va = polygon2Dv.array[i];
+            ub = polygon2Du.array[i+1];
+            vb = polygon2Dv.array[i+1];
+
+            // Note that testing line is (y = 0), so "segment crossed" can be
+            // detected as a sign change in the v dimension.
+
+            // First, calculate the va and vb signs in sh and nsh respectively
+            if ( va < 0 ) {
+                sh = -1;
+            }
+            else {
+                sh = 1;
+            }
+            if ( vb < 0 ) {
+                nsh = -1;
+            }
+            else {
+                nsh = 1;
+            }
+
+            // If a sign change in the v dimension occurs, then report cross...
+            if ( sh != nsh ) {
+                // But taking into account the special case crossing occurring
+                // over a vertex
+                if ( ua >= 0 && ub >= 0 ) {
+                    nc++;
+                }
+                else if ( ua >= 0 || ub >= 0 ) {
+                    if ( ua - va*(ub-ua)/(vb - va) > 0 ) {
+                        nc++;
+                    }
+                }
+            }
+        }
+
+        if ( (nc % 2) == 1 ) {
+            return -1;
+        }
+
+        return 1;
     }
 
     public String toString()

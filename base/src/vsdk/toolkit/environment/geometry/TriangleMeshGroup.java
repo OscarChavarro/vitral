@@ -178,7 +178,7 @@ public class TriangleMeshGroup extends Surface {
             TriangleMesh mesh = meshes.get(i);
             Ray ray = new Ray(inOut_Ray);
 
-            if ( mesh.doIntersection(ray) == true ) {
+            if ( mesh.doIntersection(ray) ) {
                 mesh.doExtraInformation(ray, 0.0, Info);
 
                 if ( ray.t < min_t ) {

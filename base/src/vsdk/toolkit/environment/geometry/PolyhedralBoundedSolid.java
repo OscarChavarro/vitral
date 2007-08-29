@@ -58,6 +58,7 @@ public class PolyhedralBoundedSolid extends Solid {
     private int maxVertexId;
     private int maxFaceId;
     private boolean modelIsValid;
+    private GeometryIntersectionInformation lastInfo;
 
     //=================================================================
     public PolyhedralBoundedSolid()
@@ -72,6 +73,7 @@ public class PolyhedralBoundedSolid extends Solid {
         maxVertexId = -1;
         maxFaceId = -1;
         modelIsValid = false;
+        lastInfo = new GeometryIntersectionInformation();
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -692,17 +694,44 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     public boolean
-    doIntersection(Ray inout_rayo) {
-        VSDK.reportMessage(this, VSDK.WARNING, "doIntersection",
-            "Method not implemented");
-        return false;
+    doIntersection(Ray inOutRay) {
+        int i;
+        boolean intersection; // true if intersection founded
+        double min_t;         // Shortest distance founded so far
+
+        // Initialization values for search algorithm
+        min_t = Double.MAX_VALUE;
+        intersection = false;
+        GeometryIntersectionInformation Info;
+        Info = new GeometryIntersectionInformation();
+        Vector3D p;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            Ray ray = new Ray(inOutRay);
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            if ( face.containingPlane.doIntersection(ray) ) {
+                face.containingPlane.doExtraInformation(ray, 0.0, Info);
+                if ( ray.t < min_t ) {
+                    ray.direction.normalize();
+                    p = ray.origin.add(ray.direction.multiply(ray.t));
+                    if ( face.testPointInside(p) <= 0 ) {
+                        min_t = ray.t;
+                        // Stores standard doIntersection operation information
+                        lastInfo.clone(Info);
+                        inOutRay.t = ray.t;
+                        intersection = true;
+                    }
+                }
+            }
+        }
+
+        return intersection;
     }
 
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
-        VSDK.reportMessage(this, VSDK.WARNING, "doExtraInformation",
-            "Method not implemented");
+        outData.clone(lastInfo);
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
