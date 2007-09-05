@@ -403,6 +403,7 @@ Changes in 2007 september 4 revition
 Changes in 2007 september 5 revition
   - 1h05min: HiddenLineRenderer with basic logic control structure for
     Appel algorithm support...
+  - 50min: computing quantitative invisibility in PolyhedralBoundedSolid
 
 ---------------------------------------------------------------------------
 TODO:

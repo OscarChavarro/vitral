@@ -693,6 +693,10 @@ public class PolyhedralBoundedSolid extends Solid {
         }
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
+    */
     public boolean
     doIntersection(Ray inOutRay) {
         int i;
@@ -948,6 +952,42 @@ public class PolyhedralBoundedSolid extends Solid {
             cad = " " + cad;
         }
         return cad;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.computeQuantitativeInvisibility.
+    */
+    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    {
+	int qi = 0;
+        int i;
+        Vector3D d = p.substract(origin);
+	Vector3D pi;
+        double t0 = d.length();
+        d.normalize();
+
+        Ray ray = new Ray(origin, d);
+        GeometryIntersectionInformation info;
+        info = new GeometryIntersectionInformation();
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            if ( face.containingPlane.doIntersection(ray) ) {
+                if ( ray.t < t0-VSDK.EPSILON ) {
+                    ray.direction.normalize();
+                    pi = ray.origin.add(ray.direction.multiply(ray.t));
+                    if ( face.testPointInside(pi) < 0 ) {
+                        face.containingPlane.doExtraInformation(ray, 0.0, info);
+                        if ( info.n.dotProduct(d) < 0.0 ) {
+                            qi ++;
+			}
+                    }
+                }
+            }
+        }
+
+        return qi;
     }
 
     public String toString()

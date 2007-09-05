@@ -211,6 +211,19 @@ public class SimpleBody extends Entity {
         return answer;
     }
 
+    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    {
+        Vector3D myOrigin, myP;
+        Ray myRay;
+
+        myOrigin = new Vector3D(
+            rotation_i.multiply(origin.substract(position)));
+        myP = new Vector3D(
+            rotation_i.multiply(p.substract(position)));
+
+        return geometry.computeQuantitativeInvisibility(myOrigin, myP);
+    }
+
     /**
     WARNING: Check if this method works ok for modified geometric operations!
     */

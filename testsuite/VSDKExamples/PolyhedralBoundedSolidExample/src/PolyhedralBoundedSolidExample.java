@@ -47,7 +47,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private Light light;
     private PolyhedralBoundedSolid solid;
     private int faceIndex = -2;
-    private int edgeIndex = -3;
+    private int edgeIndex = -2;
 
     private RendererConfiguration quality;
     private RendererConfigurationController qualityController;

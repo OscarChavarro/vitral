@@ -15,6 +15,7 @@
 package vsdk.toolkit.render;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
@@ -27,6 +28,12 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+
+class _AppelEdgeSegment
+{
+    /// Distance from start to end with respect to line parameter
+    public double t;
+}
 
 class _AppelEdgeCache
 {
@@ -42,6 +49,11 @@ class _AppelEdgeCache
     boolean onSequence;
     public Vector3D start;
     public Vector3D end;
+    /// d = start - end
+    public Vector3D d;
+
+    public _PolyhedralBoundedSolidFace visibleEdgeForContourLine;
+
     public void setStart(Vector3D s)
     {
         start = new Vector3D(s);
@@ -54,10 +66,28 @@ class _AppelEdgeCache
 
 public class HiddenLineRenderer
 {
+    private static int
+    computeQuantitativeInvisibility(ArrayList <SimpleBody> solids,
+        Camera camera, _AppelEdgeCache edge)
+    {
+        int qi = 0;
+        int i;
+
+	for ( i = 0; i < solids.size(); i++ ) {
+	    qi += solids.get(i).computeQuantitativeInvisibility(
+		camera.getPosition(), edge.start);
+	}
+
+        System.out.println("Quantitative invisibility for line " + 
+			   edge.start + " - " + edge.end + ": " + qi);
+	return qi;
+    }
+
     /**
     @todo handle Geometry's other than PolyhedralBoundedSolid by convertion.
     */
-    private static void buildCache(SimpleBody body, 
+    private static void buildCache(ArrayList <SimpleBody> solids,
+                                   SimpleBody body, 
                                    ArrayList <_AppelEdgeCache> cache,
                                    ArrayList <_AppelEdgeCache> contourCache,
                                    Camera camera)
@@ -67,6 +97,9 @@ public class HiddenLineRenderer
             // Should not ignoreit, but export it to PolyhedralBoundedSolid!!!
             return;
         }
+	else {
+	    solids.add(body);
+	}
         PolyhedralBoundedSolid solid = (PolyhedralBoundedSolid)g;
 
         int i;
@@ -103,6 +136,7 @@ public class HiddenLineRenderer
                     materialLine = new _AppelEdgeCache();
                     materialLine.setStart(startPosition);
                     materialLine.setEnd(endPosition);
+                    materialLine.d = endPosition.substract(startPosition);
                     if ( l > 0 &&
                          VSDK.vectorDistance(prevEnd, startPosition) < 
                              VSDK.EPSILON ) {
@@ -118,6 +152,12 @@ public class HiddenLineRenderer
                     else if ( f1 && !f2 || !f1 && f2 ) {
                         // Contour lines
                         materialLine.edgeType = materialLine.CONTOUR_LINE;
+                        if ( f1 ) {
+                            materialLine.visibleEdgeForContourLine = face1;
+			}
+			else {
+                            materialLine.visibleEdgeForContourLine = face2;
+			}
                         contourCache.add(materialLine);
                     }
                     else {
@@ -153,8 +193,9 @@ public class HiddenLineRenderer
         int i;
 
         //-----------------------------------------------------------------
+        ArrayList <SimpleBody> solids = new ArrayList <SimpleBody>();
         for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {
-            buildCache(inSimpleBodyArray.get(i), cache, contourCache, inCamera);
+            buildCache(solids, inSimpleBodyArray.get(i), cache, contourCache, inCamera);
         }
 
         //-----------------------------------------------------------------
@@ -162,6 +203,8 @@ public class HiddenLineRenderer
 
         for ( i = 0; i < cache.size(); i++ ) {
             edge = cache.get(i);
+            // Note that a "line to be drawn" is any line in the cache
+            // not marked as a hidden line.
             switch ( edge.edgeType ) {
               case _AppelEdgeCache.HIDDEN_LINE:
                 outHiddenLineEndPoints.add(new Vector3D(edge.start));
@@ -169,10 +212,11 @@ public class HiddenLineRenderer
                 break;
               case _AppelEdgeCache.CONTOUR_LINE:
               case _AppelEdgeCache.VISIBLE_LINE:
-                processQuantitativeInvisibility(
+                processLineToBeDrawn(
+                    solids,
                     edge, inCamera, outContourLineEndPoints,
                     outVisibleLineEndPoints, outHiddenLineEndPoints,
-                    cache, contourCache);
+                    contourCache);
                 break;
               default: break;
             }
@@ -183,20 +227,34 @@ public class HiddenLineRenderer
     }
 
     private static void
-    processQuantitativeInvisibility(
+    processLineToBeDrawn(
+        ArrayList <SimpleBody> solids,
         _AppelEdgeCache edge,
-        Camera inCamera,
+        Camera camera,
         ArrayList <Vector3D> outContourLineEndPoints,
         ArrayList <Vector3D> outVisibleLineEndPoints,
         ArrayList <Vector3D> outHiddenLineEndPoints,
-        ArrayList <_AppelEdgeCache> cache,
         ArrayList <_AppelEdgeCache> contourCache)
     {
-        Vector3D m = edge.end.add(edge.start).multiply(0.5);
+        Vector3D m;
+	double t = 0.1;
+        int qi;
+
+        qi = computeQuantitativeInvisibility(solids, camera, edge);
+        if ( qi > 3 ) qi = 3;
+        t = 0.05 + ((double)qi) * 0.3;
+
+        m = edge.start.add(edge.d.multiply(t));
         outContourLineEndPoints.add(new Vector3D(edge.start));
         outContourLineEndPoints.add(new Vector3D(m));
         outVisibleLineEndPoints.add(new Vector3D(m));
         outVisibleLineEndPoints.add(new Vector3D(edge.end));
+
+        int i;
+
+        for ( i = 0; i < contourCache.size(); i++ ) {
+	    ;
+	}
     }
 
 }

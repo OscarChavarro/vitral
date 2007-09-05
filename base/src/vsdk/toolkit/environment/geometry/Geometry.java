@@ -1,5 +1,10 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
+//=          the machine rendering of solids". Proceedings, ACM National    =
+//=          meeting 1967.                                                  =
+//=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //===========================================================================
@@ -90,6 +95,30 @@ public abstract class Geometry extends Entity {
     value is returned, otherwise false is returned.
     */
     public abstract boolean doIntersection(Ray inOut_ray);
+
+    /**
+    This method returns the number of front facing surface elements (with
+    respect to `origin`) between the `origin` point and the `p` point. The
+    internal working of this method is usually related with the
+    `doIntersection` method.
+
+    This operation is used in queries as the specified on [APPE1967]. Note,
+    that as stated on [APPE1967]: "...A bounded surface hides a point when the
+    line of sight to that point pierces the surface within the surface
+    boundaries, and the piercing point is closer to the observer than the
+    point being tested for visibility...". Acording to that definition:
+    @param origin contains the "observer" position.
+    @param p is the "point being tested for visibility".
+
+    @return The number of surfaces within current Geometry hiding giving point.
+    Default (empty) implementation here reports any point as non-obscured,
+    that is "phamtom" or "transparent" geometry with respect to visibility.
+    This method should be overloaded for each Geometry's subclass.
+    */
+    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    {
+        return 0;
+    }
 
     /**
     This operation is complementary to doIntersection method. It is used to
