@@ -1,5 +1,7 @@
 //===========================================================================
 
+import java.util.ArrayList;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -26,9 +28,11 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.render.HiddenLineRenderer;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
@@ -43,7 +47,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private Light light;
     private PolyhedralBoundedSolid solid;
     private int faceIndex = -2;
-    private int edgeIndex = -2;
+    private int edgeIndex = -3;
 
     private RendererConfiguration quality;
     private RendererConfigurationController qualityController;
@@ -162,6 +166,47 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         add("Center", createGUI());
     }
     
+    private void
+    renderLinesResult(GL gl, ArrayList <Vector3D> contourLines,
+                      ArrayList <Vector3D> visibleLines,
+                      ArrayList <Vector3D> hiddenLines)
+    {
+        int i;
+        Vector3D p;
+
+        gl.glPushAttrib(gl.GL_DEPTH_TEST);
+        gl.glDisable(gl.GL_DEPTH_TEST);
+
+        gl.glLineWidth(4.0f);
+        gl.glColor3d(1, 0, 0);
+        gl.glBegin(gl.GL_LINES);
+        for ( i = 0; i < contourLines.size(); i++ ) {
+	    p = contourLines.get(i);
+            gl.glVertex3d(p.x, p.y, p.z);
+	}
+        gl.glEnd();
+
+        gl.glLineWidth(1.0f);
+        gl.glColor3d(0.5, 0, 0);
+        gl.glBegin(gl.GL_LINES);
+        for ( i = 0; i < visibleLines.size(); i++ ) {
+	    p = visibleLines.get(i);
+            gl.glVertex3d(p.x, p.y, p.z);
+	}
+        gl.glEnd();
+
+        gl.glLineWidth(1.0f);
+        gl.glColor3d(0, 0, 0);
+        gl.glBegin(gl.GL_LINES);
+        for ( i = 0; i < hiddenLines.size(); i++ ) {
+	    p = hiddenLines.get(i);
+            gl.glVertex3d(p.x, p.y, p.z);
+	}
+        gl.glEnd();
+
+        gl.glPopAttrib();
+    }
+
     private void drawObjectsGL(GL gl)
     {
         gl.glLoadIdentity();
@@ -190,9 +235,39 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glEnable(gl.GL_LIGHTING);
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
-        if ( debugEdges ) {
+
+        //-----------------------------------------------------------------
+        ArrayList <Vector3D> contourLines;
+        ArrayList <Vector3D> visibleLines;
+        ArrayList <Vector3D> hiddenLines;
+        ArrayList <SimpleBody> bodyArray;
+        SimpleBody body;
+
+        if ( debugEdges && edgeIndex > -3 ) {
             JoglPolyhedralBoundedSolidRenderer.drawDebugEdges(gl, solid, camera, edgeIndex);
 	}
+	else if ( edgeIndex == -3 ) {
+            contourLines = new ArrayList <Vector3D>();
+            visibleLines = new ArrayList <Vector3D>();
+            hiddenLines = new ArrayList <Vector3D>();
+            bodyArray = new ArrayList <SimpleBody>();
+
+            body = new SimpleBody();
+            body.setGeometry(solid);
+            body.setPosition(new Vector3D());
+            body.setRotation(new Matrix4x4());
+            body.setRotationInverse(new Matrix4x4());
+            bodyArray.add(body);
+            HiddenLineRenderer.executeAppelAlgorithm(bodyArray, camera,
+                contourLines, visibleLines, hiddenLines);
+            renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
+	}
+
+        contourLines = null;
+        visibleLines = null;
+        hiddenLines = null;
+        bodyArray = null;
+        body = null;
     }
 
     /** Called by drawable to initiate drawing */
@@ -329,7 +404,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
           }
           if ( faceIndex < -2 ) faceIndex = -2;
-          if ( edgeIndex < -2 ) edgeIndex = -2;
+          if ( edgeIndex < -3 ) edgeIndex = -3;
           canvas.repaint();
       }
   }

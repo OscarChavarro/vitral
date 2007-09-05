@@ -400,6 +400,10 @@ Changes in 2007 september 4 revition
   - 1h48m: JoglPolyhedralBoundedSolidRenderer.drawDebugEdges implements 
     Zajac/Loutrel hidden edge identification for convex polyhedra.
 
+Changes in 2007 september 5 revition
+  - 1h05min: HiddenLineRenderer with basic logic control structure for
+    Appel algorithm support...
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

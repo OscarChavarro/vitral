@@ -380,12 +380,12 @@ public class Raytracer extends RenderingElement {
                         ArrayList <SimpleBody> inSimpleBodyArray,
                         ArrayList <Light> in_arr_luces,
                         Background in_background,
-                        Camera in_camara,
+                        Camera inCamera,
                         ProgressMonitor report)
     {
         execute(inoutViewport, inQualitySelection,
                 inSimpleBodyArray, in_arr_luces,
-                in_background, in_camara, report, null, 0, 0,
+                in_background, inCamera, report, null, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
@@ -394,13 +394,13 @@ public class Raytracer extends RenderingElement {
                         ArrayList <SimpleBody> inSimpleBodyArray,
                         ArrayList <Light> in_arr_luces,
                         Background in_background,
-                        Camera in_camara,
+                        Camera inCamera,
                         ProgressMonitor report,
                         ZBuffer depthmap)
     {
         execute(inoutViewport, inQualitySelection, inSimpleBodyArray, 
                 in_arr_luces,
-                in_background, in_camara, report, depthmap, 0, 0,
+                in_background, inCamera, report, depthmap, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
@@ -418,7 +418,7 @@ public class Raytracer extends RenderingElement {
     - `in_luces`: arreglo din&aacute;mico de Light'es (luces puntuales)
     - `in_background`: especificaci&oacute;n de un color de fondo para la escena
       (i.e. el color que se ve si no se ve ning&uacute;n objeto!)
-    - `in_camara`: especificaci&oacute;n de la transformaci&oacute;n de
+    - `inCamera`: especificaci&oacute;n de la transformaci&oacute;n de
       proyecci&oacute;n 3D a 2D que se lleva a cabo en el proceso de 
       visualizaci&oacute;n.
     - `depthmap`: can be null or a reference to a ZBuffer. If it is null,
@@ -443,7 +443,7 @@ public class Raytracer extends RenderingElement {
     - `inout_viewport` contiene una representaci&oacute;n visual de la
        escena 3D (`in_objetos`, `in_luces`, `in_background`), tal que corresponde a
        una proyecci&oacute;n 3D a 2D controlada por la c&aacute;mara
-       virtual `in_camara`.
+       virtual `inCamera`.
 
     NOTA: Este algoritmo se inici&oacute; como una modificaci&oacute;n del 
           raytracer del curso 6.837 (computaci&oacute;n gr&aacute;fica) de MIT,
