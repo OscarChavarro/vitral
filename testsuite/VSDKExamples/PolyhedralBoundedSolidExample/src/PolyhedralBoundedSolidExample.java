@@ -43,12 +43,14 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private Light light;
     private PolyhedralBoundedSolid solid;
     private int faceIndex = -2;
+    private int edgeIndex = -2;
 
     private RendererConfiguration quality;
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
     private int solidType = 2;
+    private boolean debugEdges = false;
 
     public PolyhedralBoundedSolidExample() {
         camera = new Camera();
@@ -188,6 +190,9 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glEnable(gl.GL_LIGHTING);
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
+        if ( debugEdges ) {
+            JoglPolyhedralBoundedSolidRenderer.drawDebugEdges(gl, solid, camera, edgeIndex);
+	}
     }
 
     /** Called by drawable to initiate drawing */
@@ -289,8 +294,18 @@ public class PolyhedralBoundedSolidExample extends Applet implements
       int unicode_id = e.getKeyChar();
       if ( unicode_id != e.CHAR_UNDEFINED ) {
           switch ( unicode_id ) {
+            case '0':
+                if ( debugEdges ) {
+                    debugEdges = false;
+		}
+		else {
+                    debugEdges = true;
+		}
+                break;
             case '1': faceIndex --; break;
             case '2': faceIndex ++; break;
+            case '8': edgeIndex --; break;
+            case '9': edgeIndex ++; break;
             case 'I':
                 System.out.println(solid);
                 if ( solid.validateModel() ) {
@@ -314,6 +329,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
           }
           if ( faceIndex < -2 ) faceIndex = -2;
+          if ( edgeIndex < -2 ) edgeIndex = -2;
           canvas.repaint();
       }
   }

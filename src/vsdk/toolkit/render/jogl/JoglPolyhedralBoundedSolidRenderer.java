@@ -169,6 +169,115 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glEnd();
     }
 
+    public static void
+    drawDebugEdges(GL gl, PolyhedralBoundedSolid solid, Camera c, int edgeIndex)
+    {
+        int i;
+
+        gl.glPushAttrib(gl.GL_DEPTH_TEST);
+        gl.glDisable(gl.GL_DEPTH_TEST);
+
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_CULL_FACE);
+        gl.glShadeModel(gl.GL_FLAT);
+
+        gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+        gl.glPolygonOffset(-0.5f, 0.0f);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+
+        _PolyhedralBoundedSolidFace face1;
+        _PolyhedralBoundedSolidFace face2;
+        boolean f1, f2;
+
+        for ( i = 0; edgeIndex >= -1 && i < solid.edgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
+
+            if ( i != edgeIndex && edgeIndex > -1 ) {
+                continue;
+            }
+
+            int start, end;
+            start = e.getStartingVertexIndex();
+            end = e.getEndingVertexIndex();
+            if ( start >= 0 && end >= 0 ) {
+                Vector3D startPosition;
+                Vector3D endPosition;
+                Vector3D middle;
+                Vector3D n;
+
+                startPosition = solid.getVertexPosition(start);
+                endPosition = solid.getVertexPosition(end);
+                if ( startPosition != null && endPosition != null ) {
+                    //--------------------------------------------------------
+                    face1 = e.leftHalf.parentLoop.parentFace;
+                    face2 = e.rightHalf.parentLoop.parentFace;
+                    f1 = face1.isVisibleFrom(c) >= 0;
+                    f2 = face2.isVisibleFrom(c) >= 0;
+
+/*
+                    System.out.println("Edge [" + i + "]:");
+                    if ( f1 ) {
+                        System.out.println("  - Face 1 IS visible. (normal " +
+                            face1.containingPlane.getNormal() + ")");
+                    }
+                    else {
+                        System.out.println("  - Face 1 is NOT visible. (normal " +
+                            face1.containingPlane.getNormal() + ")");
+                    }
+                    if ( f2 ) {
+                        System.out.println("  - Face 2 IS visible. (normal " +
+                            face2.containingPlane.getNormal() + ")");
+                    }
+                    else {
+                        System.out.println("  - Face 2 is NOT visible. (normal " +
+                            face2.containingPlane.getNormal() + ")");
+                    }
+*/
+                    if ( !f1 && !f2 ) {
+                        gl.glLineWidth(1.0f);
+                        gl.glColor3d(0, 0, 0);
+                    }
+                    else {
+                        gl.glLineWidth(4.0f);
+                        gl.glColor3d(1, 0, 0);
+                    }
+
+                    //--------------------------------------------------------
+                    gl.glBegin(gl.GL_LINES);
+                    gl.glVertex3d(startPosition.x, startPosition.y, 
+                                  startPosition.z);
+                    gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
+                    gl.glEnd();
+
+                    //--------------------------------------------------------
+                    if ( edgeIndex > -1 ) {
+                        middle = startPosition.add(endPosition).multiply(0.5);
+                        n = face1.containingPlane.getNormal();
+                        gl.glLineWidth(1.0f);
+                        gl.glColor3d(1, 1, 0);
+                        gl.glBegin(gl.GL_LINES);
+                            gl.glVertex3d(middle.x, middle.y, middle.z);
+                            gl.glVertex3d(middle.x + n.x/10,
+                                          middle.y + n.y/10,
+                                          middle.z + n.z/10);
+                        gl.glEnd();
+                        n = face2.containingPlane.getNormal();
+                        gl.glLineWidth(1.0f);
+                        gl.glColor3d(0, 1, 1);
+                        gl.glBegin(gl.GL_LINES);
+                            gl.glVertex3d(middle.x, middle.y, middle.z);
+                            gl.glVertex3d(middle.x + n.x/10,
+                                          middle.y + n.y/10,
+                                          middle.z + n.z/10);
+                        gl.glEnd();
+                    }
+                }
+            }
+        }
+        gl.glPopAttrib();
+
+    }
+
     private static void
     drawVertexNormals(GL gl, PolyhedralBoundedSolid solid)
     {

@@ -20,6 +20,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
+import vsdk.toolkit.environment.Camera;
 
 /**
 As noted in [MANT1988].10.2.1, class `_PolyhedralBoundedSolidFace` represents
@@ -320,6 +321,72 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
 
         return 1;
+    }
+
+    /**
+    Current implementation only takes into account the containing plane.
+    @return 1 if this face is visible from camera c, -1 if is not visible and
+    0 if is tangent to it.
+    @todo: generalize to plane. This is returning "1" in cases where should
+    return "-1".
+    */
+    public int isVisibleFrom(Camera c)
+    {
+        Vector3D iv = new Vector3D(1, 0, 0);
+        Vector3D viewingVector;
+        viewingVector = c.getRotation().multiply(iv);
+        Vector3D n = containingPlane.getNormal();
+        Vector3D cp, t;
+        n.normalize();
+	double dot;
+	int i;
+        Vector3D p;
+
+	if ( c.getProjectionMode() == c.PROJECTION_MODE_ORTHOGONAL ) {
+            viewingVector.normalize();
+            dot = n.dotProduct(viewingVector);
+            if ( dot > VSDK.EPSILON ) {
+                return -1;
+	    }
+	    else if ( dot > VSDK.EPSILON ) {
+                return 1;
+	    }
+	    else return 0;
+	}
+	else {
+            cp = c.getPosition();
+            _PolyhedralBoundedSolidLoop l;
+            for ( i = 0; i < boundariesList.size(); i++ ) {
+		//System.out.println("  - Testing boundary " + i + " of " + boundariesList.size());
+		l = boundariesList.get(i);
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                he = l.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+
+                    // Calculate containing plane equation for current edge
+                    p = he.startingVertex.position;
+		    //System.out.println("    . Testing point " + p);
+                    t = p.substract(cp);
+                    t = t.multiply(-1);
+                    t.normalize();
+		    //System.out.println("     -> Viewing point " + t);
+                    if ( t.dotProduct(n) > 0.0 ) {
+                        return 1;
+			//System.out.println("  * Face in");
+		    }
+                } while( he != heStart );
+	    }
+  	    //System.out.println("  * Face out");
+            return -1;
+	}
     }
 
     public String toString()

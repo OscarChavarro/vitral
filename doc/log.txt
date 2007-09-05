@@ -387,7 +387,6 @@ Changes in 2007 august 2 revition
   - Stating up ReaderVtk code and creating basic parsing structure for
     ReaderAse.
   - 1h25min: Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
-
 Changes in 2007 august 4 revition
   - SciVisApplication application added
   - SpharmonicKit native library ported to Windows
@@ -396,6 +395,10 @@ Changes in 2007 august 28 revition
   - Polyhedral bounded solid model jogl rendering complete for the basic
     shading cases! :) (2h)
   - 2h40min: PolyhedralBoundedSolid.doIntersection working!!! :) :)
+
+Changes in 2007 september 4 revition
+  - 1h48m: JoglPolyhedralBoundedSolidRenderer.drawDebugEdges implements 
+    Zajac/Loutrel hidden edge identification for convex polyhedra.
 
 ---------------------------------------------------------------------------
 TODO:
