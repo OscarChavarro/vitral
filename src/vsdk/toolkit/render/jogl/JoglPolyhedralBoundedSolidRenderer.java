@@ -233,13 +233,22 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                             face2.containingPlane.getNormal() + ")");
                     }
 */
+
+                    //--------------------------------------------------------
                     if ( !f1 && !f2 ) {
+                        // Totally hidden lines
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(0, 0, 0);
                     }
-                    else {
+                    else if ( f1 && !f2 || !f1 && f2 ) {
+                        // Contour lines
                         gl.glLineWidth(4.0f);
                         gl.glColor3d(1, 0, 0);
+                    }
+		    else {
+                        // Visible non contour lines
+                        gl.glLineWidth(1.0f);
+                        gl.glColor3d(0.5, 0, 0);
                     }
 
                     //--------------------------------------------------------
