@@ -438,56 +438,6 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doIntersection.
-
-    SPECIFIC IMPLEMENTATION: this method solve the intersection problem
-    for the TriangleMesh in two stages:
-    <UL>
-    <LI>For each Triangle, calculates the plane containing the Triangle
-    and checks if the Ray intersects with that plane.
-    <LI>If the Ray intersects the plane, a check is done to determine
-    if the intersection is inside the Triangle.
-    </UL>
-    That logic y repeated for all the Triangles in the TriangleMesh, and
-    the shortest length intersected Triangle is reported.<P>
-
-    Precondition:
-\f[
-    \mathbf{Q} := inOut\_Ray.direction.length() = 1 \;
-\f]
-
-    NOTES:
-    <UL>
-    <LI>The plane normal is determined for each triangle as the cross product
-    of two Triangle edge Vector3D's, algorithm step (1).
-    <LI>The canonic equation for a plane with normal n is
-\f[
-        nx*x + ny*y +nz*z + d = 0
-\f]
-    <LI>The parametric equation for the ray inOut_Ray (call it r) is
-\f[
-        \vec p = \vec{r.o} + t * \vec{r.d}
-\f]
-    <LI>Combining those two equations and solving for parameter t, algorithm
-    step (2), gives
-\f[
-        t = \frac{ -(nx*ox+ny*oy+nz*oz+d) }{ nx*dx+ny*dy+nz*dz }
-\f]
-    and observing that the appearing vector components can be expressed as
-    dot product, this equation can be rewritten in the condensed vectorial
-    form
-\f[
-        t = \frac{ -(\vec n \cdot \vec{r.o} +d) }
-                               { \vec n \cdot \vec{r.d} }
-\f]
-    <LI>Scalar value d in that equation can be solve replacing the coordinates
-    of any of the Triangle points into the plane equation.
-    <LI>To check if an intersected point lies inside the triangle, a left/right
-    test is done with each one of the three directed edge vectors. If all three
-    tests pass, then the point is inside the triangle.
-    <LI>If the normal and the direction of the ray are in the same direction
-    (more than 90 degrees of vector angle) then the normal is inverted to manage
-     meshes with reversed triangles.
-    </UL>
     */
     public boolean
     doIntersection(Ray inOut_Ray) {
@@ -495,10 +445,9 @@ public class TriangleMesh extends Surface {
         boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         Vector3D v0, v1, v2;  // Positions of the three triangle points
-        Vector3D u, v, n;     // Edge vectors and normal
         Vector3D p;           // Point of intersection between ray and plane
-        double t, a, b, d;    // Coefficients for solving equation (2)
-        double s1, s2, s3;    // Side test for each of triangle border
+        Vector3D n;           // Normal at point of intersection
+        Ray myRay = new Ray(inOut_Ray);
 
         // Bounding volume check
         if ( boundingVolume == null ) {
@@ -520,6 +469,8 @@ public class TriangleMesh extends Surface {
         min_t = Double.MAX_VALUE;
         intersection = false;
         selectedTriangle = 0;
+        p = new Vector3D();
+        n = new Vector3D();
 
         // For each triangle in the mesh ...
         for ( i = 0; i < triangles.length; i++ ) {
@@ -528,47 +479,15 @@ public class TriangleMesh extends Surface {
             v1 = vertexes[triangles[i].p1].position;
             v2 = vertexes[triangles[i].p2].position;
 
-            // The vectors u & v are two triangle edges, and define the 
-            // normal (1)
-            u = v1.substract(v0);
-            v = v2.substract(v1);
-            n = v.crossProduct(u);
-            n.normalize();
-
-            // This is the result of replacing point v0 on plane equation, 
-            // solving for d
-            d = -n.dotProduct(v0);
-
-            // Calculate numerator and denominator for equation (2)
-            a = n.dotProduct(inOut_Ray.origin) + d;
-            b = n.dotProduct(inOut_Ray.direction);
-
-            // The denominator is big when the ray is not parallel to the plane
-            if ( Math.abs(b) > VSDK.EPSILON ) {
-                // Solution for equation (2), only if non-zero denominator
-                t = (-a) / b;
-
-                if ( t < 0.0 ) continue;
-
-                // Calculate the intersection point between ray and plane
-                p = inOut_Ray.origin.add(inOut_Ray.direction.multiply(t));
-
-                // Check if the point is inside the triangle
-                s1 = u.crossProduct(p.substract(v0)).dotProduct(n);
-                s2 = (v2.substract(v1)).crossProduct(p.substract(v1)).dotProduct(n);
-                s3 = (v0.substract(v2)).crossProduct(p.substract(v2)).dotProduct(n);
-
-                if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
-                     (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
-                    if ( t < min_t ) {
-                        lastInfo.p = p;
-                        lastInfo.n = n;
-                        inOut_Ray.t = t;
-                        lastRay = inOut_Ray;
-                        min_t = t;
-                        selectedTriangle = i;
-                        intersection = true;
-                    }
+	    if ( doIntersectionWithTriangle(myRay, v0, v1, v2, p, n) ) {
+                if ( myRay.t < min_t ) {
+                    lastInfo.p = p;
+                    lastInfo.n = n;
+                    inOut_Ray.t = myRay.t;
+                    lastRay = inOut_Ray;
+                    min_t = myRay.t;
+                    selectedTriangle = i;
+                    intersection = true;
                 }
             }
         }

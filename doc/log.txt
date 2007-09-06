@@ -404,6 +404,11 @@ Changes in 2007 september 5 revition
   - 1h05min: HiddenLineRenderer with basic logic control structure for
     Appel algorithm support...
   - 50min: computing quantitative invisibility in PolyhedralBoundedSolid
+  - 50min: sweep plane triangle intersecting with contour line, involves
+    refactorization of method Geometry.doIntersectionWithTriangle from
+    TriangleMesh existing code.
+  - 1h15min: first working implementation of Appel's algorithm! :)
+    (not tested with special cases).
 
 ---------------------------------------------------------------------------
 TODO:

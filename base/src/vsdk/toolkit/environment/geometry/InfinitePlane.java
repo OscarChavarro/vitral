@@ -37,6 +37,20 @@ public class InfinitePlane extends HalfSpace {
         d = -normal.dotProduct(pointInPlane);
     }
 
+    public InfinitePlane(Vector3D p0, Vector3D p1, Vector3D p2) {
+        Vector3D a, b, normal;
+        a = p1.substract(p0);
+        a.normalize();
+        b = p2.substract(p0);
+        b.normalize();
+        normal = a.crossProduct(b);
+        normal.normalize();
+        this.a = normal.x;
+        this.b = normal.y;
+        this.c = normal.z;
+        this.d = -normal.dotProduct(p0);
+    }
+
     public void clone(InfinitePlane other)
     {
         this.a = other.a;

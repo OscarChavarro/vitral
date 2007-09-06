@@ -178,31 +178,33 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glDisable(gl.GL_DEPTH_TEST);
 
         gl.glLineWidth(4.0f);
-        gl.glColor3d(1, 0, 0);
+        gl.glColor3d(0, 0, 0);
         gl.glBegin(gl.GL_LINES);
         for ( i = 0; i < contourLines.size(); i++ ) {
-	    p = contourLines.get(i);
+            p = contourLines.get(i);
             gl.glVertex3d(p.x, p.y, p.z);
-	}
+        }
         gl.glEnd();
 
-        gl.glLineWidth(1.0f);
-        gl.glColor3d(0.5, 0, 0);
+        gl.glLineWidth(4.0f);
+        gl.glColor3d(0, 0, 0);
         gl.glBegin(gl.GL_LINES);
         for ( i = 0; i < visibleLines.size(); i++ ) {
-	    p = visibleLines.get(i);
+            p = visibleLines.get(i);
             gl.glVertex3d(p.x, p.y, p.z);
-	}
+        }
         gl.glEnd();
 
+/*
         gl.glLineWidth(1.0f);
         gl.glColor3d(0, 0, 0);
         gl.glBegin(gl.GL_LINES);
         for ( i = 0; i < hiddenLines.size(); i++ ) {
-	    p = hiddenLines.get(i);
+            p = hiddenLines.get(i);
             gl.glVertex3d(p.x, p.y, p.z);
-	}
+        }
         gl.glEnd();
+*/
 
         gl.glPopAttrib();
     }
@@ -214,19 +216,22 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         //-----------------------------------------------------------------
         gl.glDisable(gl.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
-        gl.glBegin(GL.GL_LINES);
-            gl.glColor3d(1, 0, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(1, 0, 0);
 
-            gl.glColor3d(0, 1, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 1, 0);
-
-            gl.glColor3d(0, 0, 1);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 0, 1);
-        gl.glEnd();
+        if ( edgeIndex > -3 ) {
+            gl.glBegin(GL.GL_LINES);
+                gl.glColor3d(1, 0, 0);
+                gl.glVertex3d(0, 0, 0);
+                gl.glVertex3d(1, 0, 0);
+    
+                gl.glColor3d(0, 1, 0);
+                gl.glVertex3d(0, 0, 0);
+                gl.glVertex3d(0, 1, 0);
+    
+                gl.glColor3d(0, 0, 1);
+                gl.glVertex3d(0, 0, 0);
+                gl.glVertex3d(0, 0, 1);
+            gl.glEnd();
+        }
 
         //-----------------------------------------------------------------
         JoglMaterialRenderer.activate(gl, material);
@@ -245,8 +250,8 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
         if ( debugEdges && edgeIndex > -3 ) {
             JoglPolyhedralBoundedSolidRenderer.drawDebugEdges(gl, solid, camera, edgeIndex);
-	}
-	else if ( edgeIndex == -3 ) {
+        }
+        else if ( edgeIndex == -3 ) {
             contourLines = new ArrayList <Vector3D>();
             visibleLines = new ArrayList <Vector3D>();
             hiddenLines = new ArrayList <Vector3D>();
@@ -261,7 +266,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, camera,
                 contourLines, visibleLines, hiddenLines);
             renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
-	}
+        }
 
         contourLines = null;
         visibleLines = null;
@@ -372,10 +377,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             case '0':
                 if ( debugEdges ) {
                     debugEdges = false;
-		}
-		else {
+                }
+                else {
                     debugEdges = true;
-		}
+                }
                 break;
             case '1': faceIndex --; break;
             case '2': faceIndex ++; break;

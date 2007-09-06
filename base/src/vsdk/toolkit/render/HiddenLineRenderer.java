@@ -19,9 +19,11 @@ import java.util.Collections;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
@@ -29,10 +31,18 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 
-class _AppelEdgeSegment
+class _AppelEdgeSegment implements Comparable <_AppelEdgeSegment>
 {
     /// Distance from start to end with respect to line parameter
     public double t;
+    public int deltaQI; // Relative change in quantitative invisibility
+
+    public int compareTo(_AppelEdgeSegment other)
+    {
+        if ( this.t < other.t ) return -1;
+        else if ( this.t > other.t ) return 1;
+        return 0;
+    }
 }
 
 class _AppelEdgeCache
@@ -51,7 +61,8 @@ class _AppelEdgeCache
     public Vector3D end;
     /// d = start - end
     public Vector3D d;
-
+    /// `visibleEdgeForContourLine` contains an explicit reference to the
+    /// planar surface marked as "S" on figure 5 on [APPE1967].
     public _PolyhedralBoundedSolidFace visibleEdgeForContourLine;
 
     public void setStart(Vector3D s)
@@ -73,14 +84,11 @@ public class HiddenLineRenderer
         int qi = 0;
         int i;
 
-	for ( i = 0; i < solids.size(); i++ ) {
-	    qi += solids.get(i).computeQuantitativeInvisibility(
-		camera.getPosition(), edge.start);
-	}
-
-        System.out.println("Quantitative invisibility for line " + 
-			   edge.start + " - " + edge.end + ": " + qi);
-	return qi;
+        for ( i = 0; i < solids.size(); i++ ) {
+            qi += solids.get(i).computeQuantitativeInvisibility(
+                camera.getPosition(), edge.start.add(edge.d.multiply(10*VSDK.EPSILON)));
+        }
+        return qi;
     }
 
     /**
@@ -97,9 +105,9 @@ public class HiddenLineRenderer
             // Should not ignoreit, but export it to PolyhedralBoundedSolid!!!
             return;
         }
-	else {
-	    solids.add(body);
-	}
+        else {
+            solids.add(body);
+        }
         PolyhedralBoundedSolid solid = (PolyhedralBoundedSolid)g;
 
         int i;
@@ -154,10 +162,10 @@ public class HiddenLineRenderer
                         materialLine.edgeType = materialLine.CONTOUR_LINE;
                         if ( f1 ) {
                             materialLine.visibleEdgeForContourLine = face1;
-			}
-			else {
+                        }
+                        else {
                             materialLine.visibleEdgeForContourLine = face2;
-			}
+                        }
                         contourCache.add(materialLine);
                     }
                     else {
@@ -236,25 +244,116 @@ public class HiddenLineRenderer
         ArrayList <Vector3D> outHiddenLineEndPoints,
         ArrayList <_AppelEdgeCache> contourCache)
     {
-        Vector3D m;
-	double t = 0.1;
+        //- Compute the sweep plane triangle ------------------------------
+        // Defines plane "SP1" on figure 5 of [APPE1967]
+        Vector3D sp1a, sp1b, sp1c;
+
+        sp1a = edge.start;
+        sp1b = edge.end;
+        sp1c = camera.getPosition();
+
+        //-----------------------------------------------------------------
+        // Defines plane "SP2" on figure 5 of [APPE1967]
+        Vector3D sp2a, sp2b, sp2c;
+        Vector3D K; // Preceding point "K" on figure 5 of [APPE1967]
+        Vector3D J; // "K" projected on "SP2"
+        Ray ray = new Ray(new Vector3D(), new Vector3D());
+        double t0;
+        int i;
+        _AppelEdgeCache cl;          // Line "CL" on figure 5 of [APPE1967]
+        Vector3D p = new Vector3D(); // Point "PP1" on figure 5 of [APPE1967]
+        Vector3D n = new Vector3D();
+        ArrayList<_AppelEdgeSegment> segments;
+        _AppelEdgeSegment segment;
+        InfinitePlane plane;
+
+        segments = new ArrayList<_AppelEdgeSegment>();
+        segment = new _AppelEdgeSegment();
+        segment.t = 0;
+        segment.deltaQI = 0;
+        segments.add(segment);
+        sp2c = camera.getPosition();
+
+        for ( i = 0; i < contourCache.size(); i++ ) {
+            cl = contourCache.get(i);
+            ray.origin.clone(cl.start.add(cl.d.multiply(VSDK.EPSILON)));
+            ray.direction.clone(cl.d);
+            t0 = ray.direction.length() - 2*VSDK.EPSILON;
+            ray.direction.normalize();
+            if (
+             Geometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c, p, n) &&
+             ray.t < t0
+            ) {
+                // The breaking point in the current testing edge corresponding
+                // to the passing contour is the piercing point where the
+                // edge intersects with the contour's sweeping plane.
+                sp2a = cl.start;
+                sp2b = cl.end;
+                plane = new InfinitePlane(sp2a, sp2b, sp2c);
+                ray.origin.clone(edge.start);
+                ray.direction.clone(edge.d);
+                ray.direction.normalize();
+                if ( plane.doIntersection(ray) ) {
+                    segment = new _AppelEdgeSegment();
+                    segment.t = ray.t / edge.d.length(); // Point "PP2"
+
+                    // Determine the change in quantitative invisibility...
+                    K = edge.start.add(edge.d.multiply(segment.t-2*VSDK.EPSILON));
+
+                    // Project K on SP2
+                    ray.origin.clone(K);
+                    ray.direction = sp2c.substract(K);
+                    ray.direction.normalize();
+                    if ( cl.visibleEdgeForContourLine.containingPlane.
+                         doIntersection(ray) ) {
+                        J = ray.origin.add(ray.direction.multiply(ray.t));
+                        if ( cl.visibleEdgeForContourLine.testPointInside(J) >= 0 ) {
+                            segment.deltaQI = 1;
+                        }
+                        else {
+                            segment.deltaQI = -1;
+                        }
+                        segments.add(segment);
+                    }
+                }
+            }
+        }
+        segment = new _AppelEdgeSegment();
+        segment.t = 1;
+        segments.add(segment);
+
+        //-----------------------------------------------------------------
+        Collections.sort(segments);
+
+        //-----------------------------------------------------------------
+        Vector3D pos1, pos2;
         int qi;
 
         qi = computeQuantitativeInvisibility(solids, camera, edge);
-        if ( qi > 3 ) qi = 3;
-        t = 0.05 + ((double)qi) * 0.3;
 
-        m = edge.start.add(edge.d.multiply(t));
-        outContourLineEndPoints.add(new Vector3D(edge.start));
-        outContourLineEndPoints.add(new Vector3D(m));
-        outVisibleLineEndPoints.add(new Vector3D(m));
-        outVisibleLineEndPoints.add(new Vector3D(edge.end));
+        for ( i = 0; i < segments.size()-1; i++ ) {
+            segment = segments.get(i);
+            qi += segment.deltaQI;
+            pos1 = edge.start.add(edge.d.multiply(segment.t));
+            segment = segments.get(i+1);
+            pos2 = edge.start.add(edge.d.multiply(segment.t));
+            if ( qi == 0 ) {
+                if ( edge.edgeType == edge.CONTOUR_LINE ) {
+                    outContourLineEndPoints.add(new Vector3D(pos1));
+                    outContourLineEndPoints.add(new Vector3D(pos2));
+                }
+                else {
+                    outVisibleLineEndPoints.add(new Vector3D(pos1));
+                    outVisibleLineEndPoints.add(new Vector3D(pos2));
+                }
+            }
+            else {
+                outHiddenLineEndPoints.add(new Vector3D(pos1));
+                outHiddenLineEndPoints.add(new Vector3D(pos2));
+            }
+        }
+        segments = null;
 
-        int i;
-
-        for ( i = 0; i < contourCache.size(); i++ ) {
-	    ;
-	}
     }
 
 }
