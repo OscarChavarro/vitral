@@ -104,10 +104,11 @@ MENU "GLOBAL" {
             //INCLUDE "CALIDAD_VISUAL"
         }
         MENUITEM SEPARATOR
-        MENUITEM "&Nueva vista", IDC_NEW_VIEW
-        MENUITEM "&Display remoto ...", IDC_MESSAGE
+        MENUITEM "&New View", IDC_NEW_VIEW
+        MENUITEM "&Delete View", IDC_DEL_VIEW
+        MENUITEM "&Remote Display ...", IDC_MESSAGE
         MENUITEM SEPARATOR
-        MENUITEM "!&Imprimir todo!", IDC_PRINT_ALL
+        MENUITEM "!&Print all!", IDC_PRINT_ALL
     }
     POPUP "&Rendering" {
         MENUITEM "Render Using &Raytracing\tF9", IDC_RENDERING_RAYTRACING

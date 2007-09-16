@@ -186,3 +186,8 @@ June 3 2007, Oscar Chavarro:
 August 28 2007, Oscar Chavarro:
   - 2h50min: Visual debug ray tracing capability casting rays in
     SceneEditorApplication
+
+September 16 2007, Oscar Chavarro:
+  - 1h40min: Preparation for supporting multiple JoglView's
+  - 37min: Border drawing
+  - 2h00min: Nice layouts working for 1 to 4 views! :)

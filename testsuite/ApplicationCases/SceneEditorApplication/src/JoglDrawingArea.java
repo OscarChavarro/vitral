@@ -102,6 +102,8 @@ public class JoglDrawingArea implements
     private Scene theScene;
     private JLabel statusMessage;
 
+    private ArrayList<JoglView> views;
+
     public int interactionMode;
 
     public boolean wantToGetColor;
@@ -120,14 +122,12 @@ public class JoglDrawingArea implements
     private static final int RENDER_MODE_ZBUFFER = 1;
     private static final int RENDER_MODE_RAYTRACING = 2;
     private int renderMode;
-    private boolean viewportFullSize;
-    private boolean viewportResizeNeeded;
-    private int viewportXpos;
-    private int viewportYpos;
-    private int viewportXsize;
-    private int viewportYsize;
-    private int viewportXframe;
-    private int viewportYframe;
+    private int globalViewportXSize;
+    private int globalViewportYSize;
+    private ViewOrganizer viewOrganizer;
+    private int selectedView;
+    private boolean fullViewport;
+    private int viewOrderStyle;
 
     SceneEditorApplication parent;
 
@@ -139,14 +139,8 @@ public class JoglDrawingArea implements
         this.parent = parent;
         this.theScene = theScene;
         this.statusMessage = statusMessage;
-        this.viewportResizeNeeded = false;
-        this.viewportFullSize = true;
-        this.viewportXpos = 0;
-        this.viewportYpos = 0;
-        this.viewportXsize = 0;
-        this.viewportYsize = 0;
-        this.viewportXframe = 0;
-        this.viewportYframe = 0;
+        this.globalViewportXSize = 0;
+        this.globalViewportYSize = 0;
         this.renderMode = RENDER_MODE_ZBUFFER;
 
         interactionMode = CAMERA_INTERACTION_MODE;
@@ -192,6 +186,22 @@ public class JoglDrawingArea implements
         else {
             projectedViewRenderer = new JoglProjectedViewRenderer(640, 640, true);
         }
+
+        //-----------------------------------------------------------------
+        JoglView view;
+        int i;
+
+        views = new ArrayList<JoglView>();
+        viewOrganizer = new ViewOrganizer();
+        selectedView = 0;
+        fullViewport = false;
+        viewOrderStyle = 0;
+
+        for ( i = 0; i < 2; i++ ) {
+            view = new JoglView();
+            views.add(view);
+        }
+        selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
     }
 
     private void createCursors()
@@ -357,7 +367,6 @@ public class JoglDrawingArea implements
         IndexedColorImage distanceFieldIndexed;
 
         projectedViewRenderer.configureScene(bodySet, cam);
-        this.viewportResizeNeeded = true;
         projectedViewRenderer.draw(gl);
         //canvas.swapBuffers();
 
@@ -672,59 +681,23 @@ public class JoglDrawingArea implements
         }
     }
 
-    /** Called by drawable to initiate drawing */
-    public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
-
-        debugProjectedViewsIfNeeded(gl);
-
-        //-----------------------------------------------------------------
-        gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        if ( viewportResizeNeeded ) {
-            if ( viewportFullSize ) {
-                gl.glViewport(viewportXpos, viewportYpos,
-                              viewportXsize, viewportYsize); 
-                theScene.activeCamera.updateViewportResize(
-                    viewportXsize, viewportYsize);
-                viewportResizeNeeded = false;
-              }
-              else {
-                int w, h;
-
-                if ( viewportXframe < viewportXsize ) {
-                    w = viewportXframe;
-                }
-                else {
-                    w = viewportXsize;
-                }
-                if ( viewportYframe < viewportYsize ) {
-                    h = viewportYframe;
-                }
-                else {
-                    h = viewportYsize;
-                }
-                viewportXpos = (viewportXsize - w) / 2;
-                viewportYpos = (viewportYsize - h) / 2;
-                gl.glViewport(viewportXpos, viewportYpos, w, h);
-                theScene.activeCamera.updateViewportResize(w, h);
-                viewportResizeNeeded = false;
-            }
-        }
-
-        //-----------------------------------------------------------------
+    private void displayView(GL gl, JoglView view)
+    {
         if ( renderMode == RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
         }
         else {
             JoglSceneRenderer.drawBackground(gl, theScene);
-            if ( viewportFullSize ) {
-                parent.raytracedImageWidth = viewportXsize;
-                parent.raytracedImageHeight = viewportYsize;
+            if ( views.get(0).useFullContainerViewportArea() ) {
+                System.out.println("RAYTRACING COMPLETO");
+                parent.raytracedImageWidth = globalViewportXSize;
+                parent.raytracedImageHeight = globalViewportYSize;
             }
             else {
-                parent.raytracedImageWidth = viewportXframe;
-                parent.raytracedImageHeight = viewportYframe;
+                System.out.println("RAYTRACING PARCIAL");
+
+                parent.raytracedImageWidth = views.get(0).getViewportRequestedSizeXInPixels();
+                parent.raytracedImageHeight = views.get(0).getViewportRequestedSizeYInPixels();
             }
 
             parent.doRaytracedImage();
@@ -753,6 +726,48 @@ public class JoglDrawingArea implements
         drawGizmos(gl);
 
         copyColorBufferIfNeeded(gl);
+    }
+
+    /** Called by drawable to initiate drawing */
+    public void display(GLAutoDrawable drawable) {
+        GL gl = drawable.getGL();
+
+        debugProjectedViewsIfNeeded(gl);
+
+        JoglView view;
+        int i;
+
+        //-----------------------------------------------------------------
+        gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glViewport(0, 0, globalViewportXSize, globalViewportYSize);
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glLoadIdentity();
+
+        for ( i = 0; i < views.size(); i++ ) {
+            view = views.get(i);
+            view.drawBorderGL(gl, globalViewportXSize, globalViewportYSize);
+        }
+
+        //-----------------------------------------------------------------
+        for ( i = 0; i < views.size(); i++ ) {
+            view = views.get(i);
+
+            if ( !view.isActive() ) {
+                continue;
+            }
+            //
+            view.activateViewportGL(gl, globalViewportXSize, globalViewportYSize);
+            if ( view.isSelected() ) {
+                cameraController.setCamera(view.getCamera());
+            }
+            theScene.activeCamera = view.getCamera();
+
+            //
+            displayView(gl, view);
+        }
     }
 
     private void drawVisualRayDebugSegment(GL gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
@@ -879,11 +894,9 @@ public class JoglDrawingArea implements
                          int y,
                          int width,
                          int height) {
-        this.viewportXpos = 0;
-        this.viewportYpos = 0;
-        this.viewportXsize = width;
-        this.viewportYsize = height;
-        this.viewportResizeNeeded = true;
+        this.globalViewportXSize = width;
+        this.globalViewportYSize = height;
+        views.get(0).updateViewportConfiguration(globalViewportXSize, globalViewportYSize);
     }   
 
   public void mouseEntered(MouseEvent e) {
@@ -906,6 +919,27 @@ public class JoglDrawingArea implements
   }
 
   public void mousePressed(MouseEvent e) {
+      //-----------------------------------------------------------------
+      int i;
+      double xpercent;
+      double ypercent;
+      JoglView view;
+
+      xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
+      ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
+
+      for ( i = 0; i < views.size(); i++ ) {
+          view = views.get(i);
+          if ( view.inside(xpercent, ypercent) ) {
+              view.setSelected(true);
+              selectedView = i;
+          }
+          else {
+              view.setSelected(false);
+          }
+      }
+
+      //-----------------------------------------------------------------
       // WARNING / TODO
       // There should be a cameraController.getFutureAction(e) that calculates
       // the proper icon for display ... here an Aquynza operation is
@@ -930,7 +964,7 @@ public class JoglDrawingArea implements
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
            cameraController.processMousePressedEventAwt(e) ) {
-          canvas.repaint();
+          ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ||
                   interactionMode == TRANSLATE_INTERACTION_MODE || 
@@ -942,13 +976,11 @@ public class JoglDrawingArea implements
               composite = true;
           }
           int f = theScene.selectedThings.firstSelected();
-
-          if ( viewportFullSize ) {
-              theScene.selectObjectWithMouse(e.getX(), e.getY(), composite);
-          }
-          else {
-              theScene.selectObjectWithMouse(e.getX()-viewportXpos,
-                                             e.getY()-viewportXpos, composite);
+          view = views.get(selectedView);
+          if ( view.useFullContainerViewportArea() ) {
+              theScene.selectObjectWithMouse(e.getX()-view.getViewportStartX(),
+                                             e.getY()-view.getViewportStartY(),
+                                             composite);
           }
 
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
@@ -957,8 +989,8 @@ public class JoglDrawingArea implements
               theScene.selectedThings.select(f);
           }
           reportObjectSelection();
-          canvas.repaint();
       }
+      canvas.repaint();
   }
 
   public void mouseReleased(MouseEvent e) {
@@ -1137,459 +1169,458 @@ public class JoglDrawingArea implements
       }
   }
 
-  public void keyPressed(KeyEvent e) {
-      char unicode_id;
-      int keycode;
-      boolean skipKey = false;
+    public void keyPressed(KeyEvent e) {
+        char unicode_id;
+        int keycode;
+        boolean skipKey = false;
 
-      unicode_id = e.getKeyChar();
-      keycode = e.getKeyCode();
+        unicode_id = e.getKeyChar();
+        keycode = e.getKeyCode();
 
-      int firstThingSelected = theScene.selectedThings.firstSelected();
+        int firstThingSelected = theScene.selectedThings.firstSelected();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processKeyPressedEventAwt(e) ) {
-          canvas.repaint();
-      }
-      else if ( interactionMode == SELECT_INTERACTION_MODE ) {
-          if ( unicode_id == e.CHAR_UNDEFINED ) {
-            switch ( keycode ) {
-              case KeyEvent.VK_LEFT:
-                if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
-                    theScene.selectedThings.selectPrevious();
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processKeyPressedEventAwt(e) ) {
+            canvas.repaint();
+        }
+        else if ( interactionMode == SELECT_INTERACTION_MODE ) {
+            if ( unicode_id == e.CHAR_UNDEFINED ) {
+              switch ( keycode ) {
+                case KeyEvent.VK_LEFT:
+                  if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                      theScene.selectedThings.selectPrevious();
+                  }
+                  if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                      theScene.selectedDebugThingGroups.selectPrevious();
+                  }
+                  reportObjectSelection();
+                  break;
+                case KeyEvent.VK_RIGHT:
+                  if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                      theScene.selectedThings.selectNext();
+                  }
+                  if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                      theScene.selectedDebugThingGroups.selectNext();
+                  }
+                  reportObjectSelection();
+                  break;
+              }
+              canvas.repaint();
+            }
+        }
+        else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
+            if ( firstThingSelected >= 0 ) {
+                Matrix4x4 composed;
+                Vector3D position;
+                SimpleBody gi;
+
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+
+                position = gi.getPosition();
+                composed = new Matrix4x4(gi.getRotation());
+                composed.M[0][3] = position.x;
+                composed.M[1][3] = position.y;
+                composed.M[2][3] = position.z;
+
+                translationGizmo.setTransformationMatrix(composed);
+                if ( translationGizmo.processKeyPressedEventAwt(e) ) {
+                    composed = translationGizmo.getTransformationMatrix();
+                    position.x = composed.M[0][3];
+                    position.y = composed.M[1][3];
+                    position.z = composed.M[2][3];
+                    composed.M[0][3] = 0;
+                    composed.M[1][3] = 0;
+                    composed.M[2][3] = 0;
+                    applyTransformToSelectedObjects(position, composed);
+                    canvas.repaint();
                 }
-                if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-                    theScene.selectedDebugThingGroups.selectPrevious();
+            }
+        }
+        else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
+            if ( firstThingSelected >= 0 ) {
+                SimpleBody gi;
+
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                Matrix4x4 R = gi.getRotation();
+
+                rotateGizmo.setTransformationMatrix(R);
+
+                if ( rotateGizmo.processKeyPressedEventAwt(e) ) {
+                    R = rotateGizmo.getTransformationMatrix();
+                    gi.setRotation(R);
+                    Matrix4x4 Ri = new Matrix4x4(R);
+                    Ri.invert();
+                    gi.setRotationInverse(Ri);
+                    canvas.repaint();
                 }
-                reportObjectSelection();
+            }
+        }
+        else if ( interactionMode == SCALE_INTERACTION_MODE ) {
+            if ( firstThingSelected >= 0 ) {
+                SimpleBody gi;
+
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                Vector3D s = gi.getScale();
+                Matrix4x4 S = new Matrix4x4();
+                S.M[0][0] = s.x;
+                S.M[1][1] = s.y;
+                S.M[2][2] = s.z;
+
+                scaleGizmo.setTransformationMatrix(S);
+
+                if ( scaleGizmo.processKeyPressedEventAwt(e) ) {
+                    S = scaleGizmo.getTransformationMatrix();
+                    s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
+                    gi.setScale(s);
+                    canvas.repaint();
+                }
+            }
+        }
+
+        // Global commands
+        if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
+
+        if ( qualityController.processKeyPressedEventAwt(e) ) {
+            System.out.println(qualitySelection);
+            canvas.repaint();
+        }
+
+        if ( keycode == KeyEvent.VK_DELETE ) {
+            int  i;
+
+            //-----------------------------------------------------------------
+            for ( i = theScene.scene.getSimpleBodies().size()-1; i >= 0; i-- ) {
+                if ( theScene.selectedThings.isSelected(i) ) {
+                    theScene.scene.getSimpleBodies().remove(i);
+                }
+            }
+            theScene.selectedThings.sync();
+            //-----------------------------------------------------------------
+            for ( i = theScene.debugThingGroups.size()-1; i >= 0; i-- ) {
+                if ( theScene.selectedDebugThingGroups.isSelected(i) ) {
+                    theScene.debugThingGroups.remove(i);
+                }
+            }
+            theScene.selectedThings.sync();
+            //-----------------------------------------------------------------
+            canvas.repaint();
+        }
+
+        if ( keycode == KeyEvent.VK_F10 ) {
+              parent.statusMessage.setText(
+                  parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
+              parent.doRaytracedImage();
+  
+              if ( parent.imageControlWindow == null ) {
+                  parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+              }
+              else {
+                  parent.imageControlWindow.setImage(parent.raytracedImage);
+              }
+              parent.imageControlWindow.redrawImage();
+        }
+
+        if ( keycode == KeyEvent.VK_0 ) {
+            // Alphanumeric 0
+            views.get(0).keyPressed(e);
+            skipKey = true;
+            canvas.repaint();
+        }
+
+        if ( keycode == KeyEvent.VK_9 ) {
+            // Alphanumeric 0
+            skipKey = true;
+            switch ( renderMode ) {
+              case RENDER_MODE_ZBUFFER:
+                renderMode = RENDER_MODE_RAYTRACING;
                 break;
-              case KeyEvent.VK_RIGHT:
-                if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
-                    theScene.selectedThings.selectNext();
-                }
-                if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-                    theScene.selectedDebugThingGroups.selectNext();
-                }
-                reportObjectSelection();
+              default:
+                renderMode = RENDER_MODE_ZBUFFER;
                 break;
             }
             canvas.repaint();
-          }
-      }
-      else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
-          if ( firstThingSelected >= 0 ) {
-              Matrix4x4 composed;
-              Vector3D position;
-              SimpleBody gi;
+        }
 
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+        double theta = 0;
+        double phi = Math.PI/2;
 
-              position = gi.getPosition();
-              composed = new Matrix4x4(gi.getRotation());
-              composed.M[0][3] = position.x;
-              composed.M[1][3] = position.y;
-              composed.M[2][3] = position.z;
-
-              translationGizmo.setTransformationMatrix(composed);
-              if ( translationGizmo.processKeyPressedEventAwt(e) ) {
-                  composed = translationGizmo.getTransformationMatrix();
-                  position.x = composed.M[0][3];
-                  position.y = composed.M[1][3];
-                  position.z = composed.M[2][3];
-                  composed.M[0][3] = 0;
-                  composed.M[1][3] = 0;
-                  composed.M[2][3] = 0;
-                  applyTransformToSelectedObjects(position, composed);
-                  canvas.repaint();
-              }
-          }
-      }
-      else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
-          if ( firstThingSelected >= 0 ) {
-              SimpleBody gi;
-
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-              Matrix4x4 R = gi.getRotation();
-
-              rotateGizmo.setTransformationMatrix(R);
-
-              if ( rotateGizmo.processKeyPressedEventAwt(e) ) {
-                  R = rotateGizmo.getTransformationMatrix();
-                  gi.setRotation(R);
-                  Matrix4x4 Ri = new Matrix4x4(R);
-                  Ri.invert();
-                  gi.setRotationInverse(Ri);
-                  canvas.repaint();
-              }
-          }
-      }
-      else if ( interactionMode == SCALE_INTERACTION_MODE ) {
-          if ( firstThingSelected >= 0 ) {
-              SimpleBody gi;
-
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-              Vector3D s = gi.getScale();
-              Matrix4x4 S = new Matrix4x4();
-              S.M[0][0] = s.x;
-              S.M[1][1] = s.y;
-              S.M[2][2] = s.z;
-
-              scaleGizmo.setTransformationMatrix(S);
-
-              if ( scaleGizmo.processKeyPressedEventAwt(e) ) {
-                  S = scaleGizmo.getTransformationMatrix();
-                  s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
-                  gi.setScale(s);
-                  canvas.repaint();
-              }
-          }
-      }
-
-      // Global commands
-      if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
-
-      if ( qualityController.processKeyPressedEventAwt(e) ) {
-          System.out.println(qualitySelection);
-          canvas.repaint();
-      }
-
-      if ( keycode == KeyEvent.VK_DELETE ) {
-          int  i;
-
-          //-----------------------------------------------------------------
-          for ( i = theScene.scene.getSimpleBodies().size()-1; i >= 0; i-- ) {
-              if ( theScene.selectedThings.isSelected(i) ) {
-                  theScene.scene.getSimpleBodies().remove(i);
-              }
-          }
-          theScene.selectedThings.sync();
-          //-----------------------------------------------------------------
-          for ( i = theScene.debugThingGroups.size()-1; i >= 0; i-- ) {
-              if ( theScene.selectedDebugThingGroups.isSelected(i) ) {
-                  theScene.debugThingGroups.remove(i);
-              }
-          }
-          theScene.selectedThings.sync();
-          //-----------------------------------------------------------------
-          canvas.repaint();
-      }
-
-      if ( keycode == KeyEvent.VK_F10 ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.doRaytracedImage();
-
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
-            }
-            else {
-                parent.imageControlWindow.setImage(parent.raytracedImage);
-            }
-            parent.imageControlWindow.redrawImage();
-      }
-
-      if ( keycode == KeyEvent.VK_0 ) {
-          // Alphanumeric 0
-          skipKey = true;
-          switch ( viewportXframe ) {
-            case 0:
-              viewportXframe = 320;
-              viewportYframe = 240;
-              viewportFullSize = false;
-              break;
-            case 320:
-              viewportXframe = 640;
-              viewportYframe = 480;
-              viewportFullSize = false;
-              break;
-            case 640:
-              viewportXframe = 800;
-              viewportYframe = 600;
-              viewportFullSize = false;
-              break;
-            case 800:
-              viewportXframe = 0;
-              viewportYframe = 0;
-              viewportFullSize = true;
-              break;
-          }
-          if ( viewportFullSize ) {
-              viewportXpos = 0;
-              viewportYpos = 0;
-          }
-          viewportResizeNeeded = true;
-          canvas.repaint();
-      }
-
-      if ( keycode == KeyEvent.VK_9 ) {
-          // Alphanumeric 0
-          skipKey = true;
-          switch ( renderMode ) {
-            case RENDER_MODE_ZBUFFER:
-              renderMode = RENDER_MODE_RAYTRACING;
-              break;
-            default:
-              renderMode = RENDER_MODE_ZBUFFER;
-              break;
-          }
-          canvas.repaint();
-      }
-
-      double theta = 0;
-      double phi = Math.PI/2;
-
-      if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
-          switch ( unicode_id ) {
-            //- Visual debug ray control ---------------------------------
-            case '4': // Numpad 4
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.x -= 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '6': // Numpad 6
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.x += 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '8': // Numpad 8
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.y += 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '2': // Numpad 2
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.y -= 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '1': // Numpad 1
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.z -= 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '7': // Numpad 7
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRay.origin.z += 0.1;
-                  canvas.repaint();
-              }
-              break;
-            case '9': // Numpad 9
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRayLevels++;
-                  canvas.repaint();
-              }
-              break;
-            case '3': // Numpad 3
-              if ( parent.withVisualDebugRay ) {
-                  parent.visualDebugRayLevels--;
-                  if ( parent.visualDebugRayLevels < 0 ) {
-                      parent.visualDebugRayLevels = 0;
-		  }
-                  canvas.repaint();
-              }
-              break;
-            case '5': // Numpad 5
-              if ( parent.withVisualDebugRay ) {
-                  parent.withVisualDebugRay = false;
-              }
-              else {
-                  parent.withVisualDebugRay = true;
-              }
-              canvas.repaint();
-              break;
-            case '*': // Numpad *
-              if ( parent.withVisualDebugRay ) {
-                  theta =
-                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
-                  phi =
-                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  theta -= Math.toRadians(5);
-                  parent.visualDebugRay.direction.setSphericalCoordinates(
-                   1, theta, phi);
-                  canvas.repaint();
-              }
-              break;
-            case '/': // Numpad /
-              if ( parent.withVisualDebugRay ) {
-                  theta =
-                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
-                  phi =
-                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  theta += Math.toRadians(5);
-                  parent.visualDebugRay.direction.setSphericalCoordinates(
-                   1, theta, phi);
-                  canvas.repaint();
-              }
-              break;
-            case '+': // Numpad +
-              if ( parent.withVisualDebugRay ) {
-                  theta =
-                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
-                  phi =
-                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  phi += Math.toRadians(5);
-                  if ( phi > Math.PI ) phi = Math.PI;
-                  parent.visualDebugRay.direction.setSphericalCoordinates(
-                   1, theta, phi);
-                  canvas.repaint();
-              }
-              break;
-            case '-': // Numpad -
-              if ( parent.withVisualDebugRay ) {
-                  theta =
-                   parent.visualDebugRay.direction.obtainSphericalThetaAngle();
-                  phi =
-                   parent.visualDebugRay.direction.obtainSphericalPhiAngle();
-                  phi -= Math.toRadians(5);
-                  if ( phi < 0 ) phi = 0;
-                  parent.visualDebugRay.direction.setSphericalCoordinates(
-                   1, theta, phi);
-                  canvas.repaint();
-              }
-              break;
-            //------------------------------------------------------------
-
-            case 't':
-              if ( firstThingSelected >= 0 ) {
-                  SimpleBody gi;
-                  Image texture;
-                  gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-                  texture = gi.getTexture();
-                  if ( texture == null ) {
-                      String imageFilename = "../../../etc/textures/miniearth.png";
-                      try {
-                          texture = 
-                           ImagePersistence.importRGB(new File(imageFilename));
-                      }
-                      catch ( Exception ee ) {}
-                      gi.setTexture(texture);
+        if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
+            switch ( unicode_id ) {
+              //- Multiple views control -----------------------------------
+              case '.':
+                selectedView++;
+                if ( selectedView >= views.size() ) {
+                    selectedView = 0;
+                }
+                selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+                canvas.repaint();
+                break;
+              case ',':
+                viewOrderStyle++;
+                selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+                canvas.repaint();
+                break;
+              //- Visual debug ray control ---------------------------------
+              case '4': // Numpad 4
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.x -= 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '6': // Numpad 6
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.x += 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '8': // Numpad 8
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.y += 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '2': // Numpad 2
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.y -= 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '1': // Numpad 1
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.z -= 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '7': // Numpad 7
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRay.origin.z += 0.1;
+                    canvas.repaint();
+                }
+                break;
+              case '9': // Numpad 9
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRayLevels++;
+                    canvas.repaint();
+                }
+                break;
+              case '3': // Numpad 3
+                if ( parent.withVisualDebugRay ) {
+                    parent.visualDebugRayLevels--;
+                    if ( parent.visualDebugRayLevels < 0 ) {
+                        parent.visualDebugRayLevels = 0;
                   }
-                  else {
-                      gi.setTexture(null);
-                  }
-              }
-              canvas.repaint();
-              break;
-            case 'b':
-              if ( firstThingSelected >= 0 ) {
-                  SimpleBody gi;
-                  IndexedColorImage source = null;
-                  NormalMap normalMap;
-                  RGBImage exported;
-                  gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                    canvas.repaint();
+                }
+                break;
+              case '5': // Numpad 5
+                if ( parent.withVisualDebugRay ) {
+                    parent.withVisualDebugRay = false;
+                }
+                else {
+                    parent.withVisualDebugRay = true;
+                }
+                canvas.repaint();
+                break;
+              case '*': // Numpad *
+                if ( parent.withVisualDebugRay ) {
+                    theta =
+                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                    phi =
+                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                    theta -= Math.toRadians(5);
+                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                     1, theta, phi);
+                    canvas.repaint();
+                }
+                break;
+              case '/': // Numpad /
+                if ( parent.withVisualDebugRay ) {
+                    theta =
+                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                    phi =
+                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                    theta += Math.toRadians(5);
+                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                     1, theta, phi);
+                    canvas.repaint();
+                }
+                break;
+              case '+': // Numpad +
+                if ( parent.withVisualDebugRay ) {
+                    theta =
+                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                    phi =
+                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                    phi += Math.toRadians(5);
+                    if ( phi > Math.PI ) phi = Math.PI;
+                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                     1, theta, phi);
+                    canvas.repaint();
+                }
+                break;
+              case '-': // Numpad -
+                if ( parent.withVisualDebugRay ) {
+                    theta =
+                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                    phi =
+                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                    phi -= Math.toRadians(5);
+                    if ( phi < 0 ) phi = 0;
+                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                     1, theta, phi);
+                    canvas.repaint();
+                }
+                break;
+              //------------------------------------------------------------
 
-                  normalMap = gi.getNormalMap();
-                  if ( normalMap == null ) {
-                      try {
-                          normalMap = new NormalMap();
-                          //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
-                          String imageFilename = "../../../etc/bumpmaps/earth.bw";
-                          source = ImagePersistence.importIndexedColor(new File(imageFilename));
-                          normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
-
-                          exported = normalMap.exportToRgbImage();
-                          //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
-                      }
-                      catch ( Exception ee ) {
-                          System.err.println(ee);
-                          ee.printStackTrace();
-                      }
-                      gi.setNormalMap(normalMap);
+              case 't':
+                if ( firstThingSelected >= 0 ) {
+                    SimpleBody gi;
+                    Image texture;
+                    gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                    texture = gi.getTexture();
+                    if ( texture == null ) {
+                        String imageFilename = "../../../etc/textures/miniearth.png";
+                        try {
+                            texture = 
+                             ImagePersistence.importRGB(new File(imageFilename));
+                        }
+                        catch ( Exception ee ) {}
+                        gi.setTexture(texture);
                     }
                     else {
-                      gi.setNormalMap(null);
-                  }
-              }
-              canvas.repaint();
-              break;
-            case 'h':
-              //-------------------------------------------------------------
-              if ( parent.selectorDialog == null ) {
-                  parent.selectorDialog = new SwingSelectorDialog();
-              }
-              parent.selectorDialog.setVisible(true);
-              parent.selectorDialog.repaint();
-              //-------------------------------------------------------------
+                        gi.setTexture(null);
+                    }
+                }
+                canvas.repaint();
+                break;
+              case 'b':
+                if ( firstThingSelected >= 0 ) {
+                    SimpleBody gi;
+                    IndexedColorImage source = null;
+                    NormalMap normalMap;
+                    RGBImage exported;
+                    gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
+                    normalMap = gi.getNormalMap();
+                    if ( normalMap == null ) {
+                        try {
+                            normalMap = new NormalMap();
+                            //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
+                            String imageFilename = "../../../etc/bumpmaps/earth.bw";
+                            source = ImagePersistence.importIndexedColor(new File(imageFilename));
+                            normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
 
-              SimpleBody o;
-              int i;
-              ArrayList generic = theScene.scene.getSimpleBodies();
-              String msg = "";
-
-              for ( i = 0; i < generic.size(); i++ ) {
-                  System.out.println("Consultando cosa " + i + ":");
-                  o = (SimpleBody)generic.get(i);
-                  try {
-                      Method m = o.getClass().getMethod("getName", (Class[])null);
-                      if ( !(m.getReturnType().isInstance(msg)) ) {
-                          throw new Exception("Wrong method signature");
+                            exported = normalMap.exportToRgbImage();
+                            //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
+                        }
+                        catch ( Exception ee ) {
+                            System.err.println(ee);
+                            ee.printStackTrace();
+                        }
+                        gi.setNormalMap(normalMap);
                       }
-                      msg = (String)m.invoke(o);
-                  }
-                  catch ( Exception ee ) {
-                      msg = null;
-                  }
-                  if ( msg == null || msg.equals("") ) {
-                      msg = "Not named object";
-                  }
-                  System.out.println("Object: " + msg);
-              }
-              break;
+                      else {
+                        gi.setNormalMap(null);
+                    }
+                }
+                canvas.repaint();
+                break;
+              case 'h':
+                //-------------------------------------------------------------
+                if ( parent.selectorDialog == null ) {
+                    parent.selectorDialog = new SwingSelectorDialog();
+                }
+                parent.selectorDialog.setVisible(true);
+                parent.selectorDialog.repaint();
+                //-------------------------------------------------------------
 
-            case 'c':
-              statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
-              interactionMode = CAMERA_INTERACTION_MODE;
-              canvas.repaint();
-              break;
 
-            case 'q':
-              statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
-              interactionMode = SELECT_INTERACTION_MODE;
-              canvas.repaint();
-              break;
+                SimpleBody o;
+                int i;
+                ArrayList generic = theScene.scene.getSimpleBodies();
+                String msg = "";
 
-            case 'w':
-              statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
-              interactionMode = TRANSLATE_INTERACTION_MODE;
-              canvas.repaint();
-              break;
+                for ( i = 0; i < generic.size(); i++ ) {
+                    System.out.println("Consultando cosa " + i + ":");
+                    o = (SimpleBody)generic.get(i);
+                    try {
+                        Method m = o.getClass().getMethod("getName", (Class[])null);
+                        if ( !(m.getReturnType().isInstance(msg)) ) {
+                            throw new Exception("Wrong method signature");
+                        }
+                        msg = (String)m.invoke(o);
+                    }
+                    catch ( Exception ee ) {
+                        msg = null;
+                    }
+                    if ( msg == null || msg.equals("") ) {
+                        msg = "Not named object";
+                    }
+                    System.out.println("Object: " + msg);
+                }
+                break;
 
-            case 'e':
-              statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
-              interactionMode = ROTATE_INTERACTION_MODE;
-              canvas.repaint();
-              break;
+              case 'c':
+                statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
+                interactionMode = CAMERA_INTERACTION_MODE;
+                canvas.repaint();
+                break;
 
-            case 'r':
-              statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
-              interactionMode = SCALE_INTERACTION_MODE;
-              canvas.repaint();
-              break;
+              case 'q':
+                statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
+                interactionMode = SELECT_INTERACTION_MODE;
+                canvas.repaint();
+                break;
 
-            case 'g':
-              if ( theScene.showGrid == true ) {
-                  theScene.showGrid = false;
-              }
-              else {
-                  theScene.showGrid = true;
-              }
-              canvas.repaint();
-              break;
-          }
-      }
+              case 'w':
+                if ( ((e.getModifiersEx()) & e.ALT_DOWN_MASK) != 0x0 ) {
+                    if ( fullViewport ) {
+                        fullViewport = false;
+                    }
+                    else {
+                        fullViewport = true;
+                    }
+                    selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+                }
+                else {
+                    statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+                    interactionMode = TRANSLATE_INTERACTION_MODE;
+                }
+                canvas.repaint();
+                break;
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-          canvas.setCursor(camrotateCursor);
-      }
-      else {
-          canvas.setCursor(selectCursor);
-      }
-  }
+              case 'e':
+                statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
+                interactionMode = ROTATE_INTERACTION_MODE;
+                canvas.repaint();
+                break;
+
+              case 'r':
+                statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
+                interactionMode = SCALE_INTERACTION_MODE;
+                canvas.repaint();
+                break;
+
+              case 'g':
+                if ( theScene.showGrid == true ) {
+                    theScene.showGrid = false;
+                }
+                else {
+                    theScene.showGrid = true;
+                }
+                canvas.repaint();
+                break;
+            }
+        }
+
+        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+            canvas.setCursor(camrotateCursor);
+        }
+        else {
+            canvas.setCursor(selectCursor);
+        }
+    }
 
   private void applyTransformToSelectedObjects(Vector3D position,
                                                Matrix4x4 rotation)
@@ -1608,6 +1639,21 @@ public class JoglDrawingArea implements
           rotation.invert();
           gi.setRotationInverse(rotation);
       }
+  }
+
+  public void newView()
+  {
+      views.add(new JoglView());
+      selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+  }
+
+  public void delView()
+  {
+      if ( views.size() > 1 ) {
+          views.remove(views.size()-1);
+      }
+
+      selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
   }
 
   private void reportObjectSelection()
@@ -1649,21 +1695,21 @@ public class JoglDrawingArea implements
       statusMessage.setText(msg);
   }
 
-  public void keyReleased(KeyEvent e) {
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processKeyReleasedEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    public void keyReleased(KeyEvent e) {
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+            cameraController.processKeyReleasedEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-  /**
-  Do NOT call your controller from the `keyTyped` method, or the controller
-  will be invoked twice for each key. Call it only from the `keyPressed` and
-  `keyReleased` method
-  */
-  public void keyTyped(KeyEvent e) {
-      ;
-  }
+    /**
+    Do NOT call your controller from the `keyTyped` method, or the controller
+    will be invoked twice for each key. Call it only from the `keyPressed` and
+    `keyReleased` method
+    */
+    public void keyTyped(KeyEvent e) {
+        ;
+    }
 }
 
 //===========================================================================

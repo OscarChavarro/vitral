@@ -663,6 +663,12 @@ public class ButtonsPanel extends JPanel implements ActionListener
                 parent.withVisualDebugRay = true;
             }
         }
+        else if ( label.equals("IDC_NEW_VIEW") ) {
+            parent.drawingArea.newView();
+	}
+        else if ( label.equals("IDC_DEL_VIEW") ) {
+            parent.drawingArea.delView();
+	}
 
         //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();
