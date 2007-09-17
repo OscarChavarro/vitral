@@ -1,8 +1,15 @@
 //===========================================================================
 
 // AWT/Swing classes
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -10,8 +17,12 @@ import javax.media.opengl.GL;
 // VSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-
+import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAPixel;
+import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 /**
 A `JoglView` represents an specific Jogl viewport inside a canvas. One Jogl
 canvas may contain one ore more `JoglView`s, arrange geometrically in 2D,
@@ -30,17 +41,17 @@ accordingly and will keep its ocupation percentages (see
 public class JoglView implements KeyListener
 {
     // JoglView occupancy specification with respect to containing canvas
-    protected double viewportStartXPercent;
-    protected double viewportStartYPercent;
-    protected double viewportSizeXPercent;
-    protected double viewportSizeYPercent;
+    private double viewportStartXPercent;
+    private double viewportStartYPercent;
+    private double viewportSizeXPercent;
+    private double viewportSizeYPercent;
 
     // Current configuration, available only after a call to activateViewportGL
-    protected int viewportStartX;
-    protected int viewportStartY;
-    protected int viewportSizeX;
-    protected int viewportSizeY;
-    protected int viewportBorder; // In pixels
+    private int viewportStartX;
+    private int viewportStartY;
+    private int viewportSizeX;
+    private int viewportSizeY;
+    private int viewportBorder; // In pixels
 
     // A JoglView can request an specific size in pixels. If this size gets
     // smaller than percent-based area, the viewport is assigned to match the
@@ -50,18 +61,29 @@ public class JoglView implements KeyListener
     // viewport will always be centered inside the given percent-based area.
     // A requested size of 0 means the requested size match the percent-based
     // size.
-    protected int viewportRequestedSizeXInPixels;
-    protected int viewportRequestedSizeYInPixels;
+    private int viewportRequestedSizeXInPixels;
+    private int viewportRequestedSizeYInPixels;
 
-    // Every JoglView has an internal camera
-    protected Camera camera;
+    // Every JoglView has an internal camera and renderer configuration
+    private Camera camera;
+    private Camera cameraPerspective;
+    private Camera cameraTop;
+    private Camera cameraBottom;
+    private Camera cameraLeft;
+    private Camera cameraFront;
+    private RendererConfiguration quality;
 
     //
-    protected boolean selected;
-    protected boolean active;
+    private boolean selected;
+    private boolean active;
+    private String title;
+    private RGBAImage titleImage;
+
+    private Font font;
 
     public JoglView()
     {
+        //-----------------------------------------------------------------
         viewportStartXPercent = 0.0;
         viewportStartYPercent = 0.0;
         viewportSizeXPercent = 1.0;
@@ -70,14 +92,58 @@ public class JoglView implements KeyListener
         viewportRequestedSizeYInPixels = 0;
         viewportBorder = 2;
 
+        //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
+
+        cameraPerspective = new Camera();
+        cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
         R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
-        camera = new Camera();
-        camera.setPosition(new Vector3D(-5, -5, 5));
-        camera.setRotation(R);
+        cameraPerspective.setRotation(R);
+        cameraPerspective.setName("Perspective");
+
+        cameraTop = new Camera();
+        cameraTop.setProjectionMode(cameraTop.PROJECTION_MODE_ORTHOGONAL);
+        cameraTop.setPosition(new Vector3D(0, 0, 5));
+        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        cameraTop.setRotation(R);
+        cameraTop.setOrthogonalZoom(0.1);
+        cameraTop.setName("Top");
+
+        cameraBottom = new Camera();
+        cameraBottom.setProjectionMode(cameraBottom.PROJECTION_MODE_ORTHOGONAL);
+        cameraBottom.setPosition(new Vector3D(0, 0, -5));
+        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
+        cameraBottom.setRotation(R);
+        cameraBottom.setOrthogonalZoom(0.1);
+        cameraBottom.setName("Bottom");
+
+        cameraLeft = new Camera();
+        cameraLeft.setProjectionMode(cameraLeft.PROJECTION_MODE_ORTHOGONAL);
+        cameraLeft.setPosition(new Vector3D(-5, 0, 0));
+        R.identity();
+        cameraLeft.setRotation(R);
+        cameraLeft.setOrthogonalZoom(0.1);
+        cameraLeft.setName("Left");
+
+        cameraFront = new Camera();
+        cameraFront.setProjectionMode(cameraFront.PROJECTION_MODE_ORTHOGONAL);
+        cameraFront.setPosition(new Vector3D(0, -5, 0));
+        R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
+        cameraFront.setRotation(R);
+        cameraFront.setOrthogonalZoom(0.1);
+        cameraFront.setName("Front");
+
+        camera = cameraPerspective;
+
+        //-----------------------------------------------------------------
+        quality = new RendererConfiguration();
 
         selected = true;
         active = true;
+
+        setTitle(camera.getName());
+
+        font = new Font("Arial", Font.PLAIN, 14);
     }
 
     /**
@@ -98,22 +164,46 @@ public class JoglView implements KeyListener
         unicode_id = e.getKeyChar();
 
         if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
-            switch ( getViewportRequestedSizeXInPixels() ) {
-              case 0:
-                setViewportRequestedSizeXInPixels(320);
-                setViewportRequestedSizeYInPixels(240);
+            switch ( unicode_id ) {
+              case 't':
+                camera = cameraTop;
+                setTitle(camera.getName());
                 break;
-              case 320:
-                setViewportRequestedSizeXInPixels(640);
-                setViewportRequestedSizeYInPixels(480);
+              case 'l':
+                camera = cameraLeft;
+                setTitle(camera.getName());
                 break;
-              case 640:
-                setViewportRequestedSizeXInPixels(800);
-                setViewportRequestedSizeYInPixels(600);
+              case 'f':
+                camera = cameraFront;
+                setTitle(camera.getName());
                 break;
-              case 800:
-                setViewportRequestedSizeXInPixels(0);
-                setViewportRequestedSizeYInPixels(0);
+              case 'b':
+                camera = cameraBottom;
+                setTitle(camera.getName());
+                break;
+              case 'p':
+                camera = cameraPerspective;
+                setTitle(camera.getName());
+                break;
+              case '0':
+                switch ( getViewportRequestedSizeXInPixels() ) {
+                  case 0:
+                    setViewportRequestedSizeXInPixels(320);
+                    setViewportRequestedSizeYInPixels(240);
+                    break;
+                  case 320:
+                    setViewportRequestedSizeXInPixels(640);
+                    setViewportRequestedSizeYInPixels(480);
+                    break;
+                  case 640:
+                    setViewportRequestedSizeXInPixels(800);
+                    setViewportRequestedSizeYInPixels(600);
+                    break;
+                  case 800:
+                    setViewportRequestedSizeXInPixels(0);
+                    setViewportRequestedSizeYInPixels(0);
+                    break;
+                }
                 break;
             }
         }
@@ -244,6 +334,11 @@ public class JoglView implements KeyListener
         return camera;
     }
 
+    public RendererConfiguration getRendererConfiguration()
+    {
+        return quality;
+    }
+
     /**
     A given container canvas has valid pixel coordinates from (0, 0) to
     (canvasXSize-1, canvasYSize-1). Current JoglView is defined inside that
@@ -259,10 +354,10 @@ public class JoglView implements KeyListener
         int subCanvasXSize;
         int subCanvasYSize;
 
-        viewportStartX = (int)(viewportStartXPercent*((double)canvasXSize))+viewportBorder;
-        viewportStartY = (int)(viewportStartYPercent*((double)canvasYSize))+viewportBorder;
-        subCanvasXSize = (int)(viewportSizeXPercent*((double)canvasXSize))-2*viewportBorder;
-        subCanvasYSize = (int)(viewportSizeYPercent*((double)canvasYSize))-2*viewportBorder;
+        viewportStartX = (int)(viewportStartXPercent*((double)canvasXSize))+viewportBorder+1;
+        viewportStartY = (int)(viewportStartYPercent*((double)canvasYSize))+viewportBorder+1;
+        subCanvasXSize = (int)(viewportSizeXPercent*((double)canvasXSize))-2*viewportBorder-2;
+        subCanvasYSize = (int)(viewportSizeYPercent*((double)canvasYSize))-2*viewportBorder-2;
         if ( useFullContainerViewportArea() ) {
             viewportSizeX = subCanvasXSize;
             viewportSizeY = subCanvasYSize;
@@ -291,8 +386,8 @@ public class JoglView implements KeyListener
     public void activateViewportGL(GL gl, int canvasXSize, int canvasYSize)
     {
         if ( !active ) {
-	    return;
-	}
+            return;
+        }
         updateViewportConfiguration(canvasXSize, canvasYSize);
         gl.glViewport(viewportStartX, viewportStartY, viewportSizeX, viewportSizeY);
     }
@@ -304,8 +399,8 @@ public class JoglView implements KeyListener
     public void drawBorderGL(GL gl, int viewportXsize, int viewportYsize)
     {
         if ( !active ) {
-	    return;
-	}
+            return;
+        }
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -334,12 +429,69 @@ public class JoglView implements KeyListener
             gl.glVertex3d(x2, y2, 0);
             gl.glVertex3d(x1, y2, 0);
             gl.glColor3d(0, 0, 0);
-            gl.glVertex3d(x1+dx, y1+dy, 0);
-            gl.glVertex3d(x2-dx, y1+dy, 0);
-            gl.glVertex3d(x2-dx, y2-dy, 0);
-            gl.glVertex3d(x1+dx, y2-dy, 0);
+            gl.glVertex3d(x1+2*dx, y1+2*dy, 0);
+            gl.glVertex3d(x2-2*dx, y1+2*dy, 0);
+            gl.glVertex3d(x2-2*dx, y2-2*dy, 0);
+            gl.glVertex3d(x1+2*dx, y2-2*dy, 0);
         gl.glEnd();
         gl.glPopAttrib();
+    }
+
+    public void setTitle(String name)
+    {
+        //-----------------------------------------------------------------
+        title = new String(name);
+        titleImage = new RGBAImage();
+        titleImage.init(200, 30);
+
+        BufferedImage bi;
+        Graphics offlineContext;
+
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(titleImage);
+        offlineContext = bi.getGraphics();
+        FontMetrics fm = offlineContext.getFontMetrics();
+        Rectangle2D r = fm.getStringBounds(title, offlineContext);
+        Rectangle ri = r.getBounds();
+
+        //-----------------------------------------------------------------
+        titleImage.init(ri.width-ri.x+10, (ri.height-ri.y)/2+10);
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(titleImage);
+        offlineContext = bi.getGraphics();
+
+        //-----------------------------------------------------------------
+        offlineContext.setColor(new Color(0.76f, 0.76f, 0.76f));
+        offlineContext.setFont(font);
+        offlineContext.drawString(title, -ri.x, -ri.y);
+
+        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, titleImage);
+    }
+
+    public void drawTitle(GL gl)
+    {
+        int borderx = 4;
+        int bordery = 1;
+        double dx;
+        double dy;
+
+        dx = ((double)(2*(borderx))) / ((double)viewportSizeX);
+        dy = ((double)(2*(viewportSizeY - (titleImage.getYSize() + bordery)))) / 
+             ((double)viewportSizeY);
+
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glLoadIdentity();
+        gl.glTranslated(dx, dy, 0);
+
+        gl.glEnable(gl.GL_TEXTURE_2D);
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+
+        // First: activate texture, Second: set texture parameters
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_BLEND);
+        JoglImageRenderer.draw(gl, titleImage);
     }
 
     public boolean inside(double x, double y)
@@ -349,8 +501,30 @@ public class JoglView implements KeyListener
              y >= viewportStartYPercent &&
              y <= viewportStartYPercent + viewportSizeYPercent ) {
             return true;
+        }
+        return false;
+    }
+
+    public void hintConfig(int numViews, int id)
+    {
+        if ( numViews >= 4 ) {
+            switch ( id ) {
+	      case 0:
+                camera = cameraLeft;
+		break;
+	      case 1:
+                camera = cameraPerspective;
+		break;
+	      case 2:
+                camera = cameraTop;
+		break;
+	      case 3: default:
+                camera = cameraFront;
+		break;
+	    }
+        
+        setTitle(camera.getName());
 	}
-	return false;
     }
 }
 

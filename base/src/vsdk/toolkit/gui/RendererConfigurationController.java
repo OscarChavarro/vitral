@@ -15,6 +15,11 @@ public class RendererConfigurationController extends Controller {
     this.qualitySelection = qualitySelection;
   }
 
+  public void setRendererConfiguration(RendererConfiguration q)
+  {
+      qualitySelection = q;
+  }
+
   public boolean processKeyPressedEventAwt(KeyEvent keyEvent) {
     boolean updated = false;
     char unicode_id;

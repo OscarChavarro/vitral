@@ -18,7 +18,6 @@ import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 

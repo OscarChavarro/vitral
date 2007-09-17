@@ -305,6 +305,7 @@ public class SceneEditorApplication {
         statusBarPanel = createStatusBar();
 
         drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
+
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
         Dimension minleft = new Dimension(160, 120);

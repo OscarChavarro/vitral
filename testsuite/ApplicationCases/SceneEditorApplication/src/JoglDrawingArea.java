@@ -193,12 +193,13 @@ public class JoglDrawingArea implements
 
         views = new ArrayList<JoglView>();
         viewOrganizer = new ViewOrganizer();
-        selectedView = 0;
         fullViewport = false;
         viewOrderStyle = 0;
+        selectedView = 2;
 
-        for ( i = 0; i < 2; i++ ) {
+        for ( i = 0; i < 4; i++ ) {
             view = new JoglView();
+            view.hintConfig(4, i);
             views.add(view);
         }
         selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
@@ -762,11 +763,15 @@ public class JoglDrawingArea implements
             view.activateViewportGL(gl, globalViewportXSize, globalViewportYSize);
             if ( view.isSelected() ) {
                 cameraController.setCamera(view.getCamera());
+                qualityController.setRendererConfiguration(view.getRendererConfiguration());
+                qualitySelection = view.getRendererConfiguration();
             }
             theScene.activeCamera = view.getCamera();
 
             //
+            theScene.qualityTemplate = view.getRendererConfiguration();
             displayView(gl, view);
+            view.drawTitle(gl);
         }
     }
 
@@ -1181,7 +1186,7 @@ public class JoglDrawingArea implements
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
              cameraController.processKeyPressedEventAwt(e) ) {
-            canvas.repaint();
+	    ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
             if ( unicode_id == e.CHAR_UNDEFINED ) {
@@ -1205,7 +1210,6 @@ public class JoglDrawingArea implements
                   reportObjectSelection();
                   break;
               }
-              canvas.repaint();
             }
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
@@ -1232,7 +1236,6 @@ public class JoglDrawingArea implements
                     composed.M[1][3] = 0;
                     composed.M[2][3] = 0;
                     applyTransformToSelectedObjects(position, composed);
-                    canvas.repaint();
                 }
             }
         }
@@ -1251,7 +1254,6 @@ public class JoglDrawingArea implements
                     Matrix4x4 Ri = new Matrix4x4(R);
                     Ri.invert();
                     gi.setRotationInverse(Ri);
-                    canvas.repaint();
                 }
             }
         }
@@ -1272,17 +1274,18 @@ public class JoglDrawingArea implements
                     S = scaleGizmo.getTransformationMatrix();
                     s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
                     gi.setScale(s);
-                    canvas.repaint();
                 }
             }
         }
+
+        // In view command propagation
+        views.get(selectedView).keyPressed(e);
 
         // Global commands
         if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
 
         if ( qualityController.processKeyPressedEventAwt(e) ) {
             System.out.println(qualitySelection);
-            canvas.repaint();
         }
 
         if ( keycode == KeyEvent.VK_DELETE ) {
@@ -1303,7 +1306,6 @@ public class JoglDrawingArea implements
             }
             theScene.selectedThings.sync();
             //-----------------------------------------------------------------
-            canvas.repaint();
         }
 
         if ( keycode == KeyEvent.VK_F10 ) {
@@ -1320,13 +1322,6 @@ public class JoglDrawingArea implements
               parent.imageControlWindow.redrawImage();
         }
 
-        if ( keycode == KeyEvent.VK_0 ) {
-            // Alphanumeric 0
-            views.get(0).keyPressed(e);
-            skipKey = true;
-            canvas.repaint();
-        }
-
         if ( keycode == KeyEvent.VK_9 ) {
             // Alphanumeric 0
             skipKey = true;
@@ -1338,7 +1333,6 @@ public class JoglDrawingArea implements
                 renderMode = RENDER_MODE_ZBUFFER;
                 break;
             }
-            canvas.repaint();
         }
 
         double theta = 0;
@@ -1353,54 +1347,45 @@ public class JoglDrawingArea implements
                     selectedView = 0;
                 }
                 selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
-                canvas.repaint();
                 break;
               case ',':
                 viewOrderStyle++;
                 selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
-                canvas.repaint();
                 break;
               //- Visual debug ray control ---------------------------------
               case '4': // Numpad 4
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.x -= 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '6': // Numpad 6
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.x += 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '8': // Numpad 8
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.y += 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '2': // Numpad 2
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.y -= 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '1': // Numpad 1
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.z -= 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '7': // Numpad 7
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.z += 0.1;
-                    canvas.repaint();
                 }
                 break;
               case '9': // Numpad 9
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRayLevels++;
-                    canvas.repaint();
                 }
                 break;
               case '3': // Numpad 3
@@ -1409,7 +1394,6 @@ public class JoglDrawingArea implements
                     if ( parent.visualDebugRayLevels < 0 ) {
                         parent.visualDebugRayLevels = 0;
                   }
-                    canvas.repaint();
                 }
                 break;
               case '5': // Numpad 5
@@ -1419,7 +1403,6 @@ public class JoglDrawingArea implements
                 else {
                     parent.withVisualDebugRay = true;
                 }
-                canvas.repaint();
                 break;
               case '*': // Numpad *
                 if ( parent.withVisualDebugRay ) {
@@ -1430,7 +1413,6 @@ public class JoglDrawingArea implements
                     theta -= Math.toRadians(5);
                     parent.visualDebugRay.direction.setSphericalCoordinates(
                      1, theta, phi);
-                    canvas.repaint();
                 }
                 break;
               case '/': // Numpad /
@@ -1442,7 +1424,6 @@ public class JoglDrawingArea implements
                     theta += Math.toRadians(5);
                     parent.visualDebugRay.direction.setSphericalCoordinates(
                      1, theta, phi);
-                    canvas.repaint();
                 }
                 break;
               case '+': // Numpad +
@@ -1455,7 +1436,6 @@ public class JoglDrawingArea implements
                     if ( phi > Math.PI ) phi = Math.PI;
                     parent.visualDebugRay.direction.setSphericalCoordinates(
                      1, theta, phi);
-                    canvas.repaint();
                 }
                 break;
               case '-': // Numpad -
@@ -1468,7 +1448,6 @@ public class JoglDrawingArea implements
                     if ( phi < 0 ) phi = 0;
                     parent.visualDebugRay.direction.setSphericalCoordinates(
                      1, theta, phi);
-                    canvas.repaint();
                 }
                 break;
               //------------------------------------------------------------
@@ -1492,7 +1471,6 @@ public class JoglDrawingArea implements
                         gi.setTexture(null);
                     }
                 }
-                canvas.repaint();
                 break;
               case 'b':
                 if ( firstThingSelected >= 0 ) {
@@ -1524,7 +1502,6 @@ public class JoglDrawingArea implements
                         gi.setNormalMap(null);
                     }
                 }
-                canvas.repaint();
                 break;
               case 'h':
                 //-------------------------------------------------------------
@@ -1564,13 +1541,11 @@ public class JoglDrawingArea implements
               case 'c':
                 statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
                 interactionMode = CAMERA_INTERACTION_MODE;
-                canvas.repaint();
                 break;
 
               case 'q':
                 statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
                 interactionMode = SELECT_INTERACTION_MODE;
-                canvas.repaint();
                 break;
 
               case 'w':
@@ -1587,19 +1562,16 @@ public class JoglDrawingArea implements
                     statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
                     interactionMode = TRANSLATE_INTERACTION_MODE;
                 }
-                canvas.repaint();
                 break;
 
               case 'e':
                 statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
                 interactionMode = ROTATE_INTERACTION_MODE;
-                canvas.repaint();
                 break;
 
               case 'r':
                 statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
                 interactionMode = SCALE_INTERACTION_MODE;
-                canvas.repaint();
                 break;
 
               case 'g':
@@ -1609,7 +1581,6 @@ public class JoglDrawingArea implements
                 else {
                     theScene.showGrid = true;
                 }
-                canvas.repaint();
                 break;
             }
         }
@@ -1620,6 +1591,7 @@ public class JoglDrawingArea implements
         else {
             canvas.setCursor(selectCursor);
         }
+        canvas.repaint();
     }
 
   private void applyTransformToSelectedObjects(Vector3D position,
