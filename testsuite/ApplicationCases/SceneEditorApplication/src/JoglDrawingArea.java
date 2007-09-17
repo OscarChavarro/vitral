@@ -684,23 +684,16 @@ public class JoglDrawingArea implements
 
     private void displayView(GL gl, JoglView view)
     {
+        if ( !view.isActive() ) {
+	    return;
+	}
         if ( renderMode == RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
         }
         else {
             JoglSceneRenderer.drawBackground(gl, theScene);
-            if ( views.get(0).useFullContainerViewportArea() ) {
-                System.out.println("RAYTRACING COMPLETO");
-                parent.raytracedImageWidth = globalViewportXSize;
-                parent.raytracedImageHeight = globalViewportYSize;
-            }
-            else {
-                System.out.println("RAYTRACING PARCIAL");
-
-                parent.raytracedImageWidth = views.get(0).getViewportRequestedSizeXInPixels();
-                parent.raytracedImageHeight = views.get(0).getViewportRequestedSizeYInPixels();
-            }
-
+            parent.raytracedImageWidth = view.getViewportSizeX();
+            parent.raytracedImageHeight = view.getViewportSizeY();
             parent.doRaytracedImage();
             gl.glMatrixMode(gl.GL_PROJECTION);
             gl.glPushMatrix();
@@ -781,6 +774,7 @@ public class JoglDrawingArea implements
         Vector3D diff = end.substract(start);
         l = diff.length();
 
+        gl.glEnable(gl.GL_LIGHTING);
         JoglMaterialRenderer.activate(gl, visualDebugMaterial);
 
         //-----------------------------------------------------------------
@@ -982,11 +976,10 @@ public class JoglDrawingArea implements
           }
           int f = theScene.selectedThings.firstSelected();
           view = views.get(selectedView);
-          if ( view.useFullContainerViewportArea() ) {
-              theScene.selectObjectWithMouse(e.getX()-view.getViewportStartX(),
-                                             e.getY()-view.getViewportStartY(),
-                                             composite);
-          }
+	  theScene.activeCamera = view.getCamera();
+          theScene.selectObjectWithMouse(e.getX()-view.getViewportStartX(),
+	     view.getViewportSizeY() + e.getY() - (globalViewportYSize-view.getViewportStartY()),
+             composite, parent.visualDebugRay);
 
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
                interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1088,6 +1081,27 @@ public class JoglDrawingArea implements
   }
 
   public void mouseMoved(MouseEvent e) {
+      //-----------------------------------------------------------------
+      int i;
+      double xpercent;
+      double ypercent;
+      JoglView view;
+
+      xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
+      ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
+
+      for ( i = 0; i < views.size(); i++ ) {
+          view = views.get(i);
+          if ( view.inside(xpercent, ypercent) ) {
+              view.setSelected(true);
+              selectedView = i;
+          }
+          else {
+              view.setSelected(false);
+          }
+      }
+
+      //-----------------------------------------------------------------
       int firstThingSelected = theScene.selectedThings.firstSelected();
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 

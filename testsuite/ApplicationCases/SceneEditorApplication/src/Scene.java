@@ -201,13 +201,17 @@ public class Scene
         return false;
     }
 
-    public void selectObjectWithMouse(int x, int y, boolean composite)
+    public void selectObjectWithMouse(int x, int y, boolean composite, Ray ro)
     {
         Ray r;
         SimpleBody gi;
 
+	System.out.println("CLICK AT " + x + ", " + y);
+
         activeCamera.updateVectors();
         r = activeCamera.generateRay(x, y);
+
+        ro.clone(r);
 
         double nearestDistance = Float.MAX_VALUE;
 

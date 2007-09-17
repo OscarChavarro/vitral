@@ -322,21 +322,23 @@ public class Camera extends Entity
     }
 
     /**
-    Given a 2D integer coordinate in viewport space, this method calculates a proyector ray
-    that emanates from the eye position and passes over the (u, v) float coordinate in the
-    projection plane. Note that the (u, v) coordinate correspond to the (x, y) coordinate.
+    Given a 2D integer coordinate in viewport space, this method calculates a
+    proyector ray that emanates from the eye position and passes over the 
+    (u, v) float coordinate in the projection plane. Note that the (u, v)
+    coordinate correspond to the (x, y) coordinate.
 
-    This method is of vital importance to many fundamental algorithms of visualization
-    (i.e. ray casting, ray tracing, radiosity), object selection and others (simulation,
-    colition detection, visual debugging). As it is important to improve the efficiency of
-    this method, some precalculated values are stored in the class attributes `_dir`,
-    `upWithScale` and `rightWithScale`, which values are stored in the `updateVectors`
+    This method is of vital importance to many fundamental algorithms of
+    visualization (i.e. ray casting, ray tracing, radiosity), object selection
+    and others (simulation, colition detection, visual debugging). As it is
+    important to improve the efficiency of this method, some precalculated
+    values are stored in the class attributes `_dir`, `upWithScale` and
+    `rightWithScale`, which values are stored in the `updateVectors`
     method, leading to the precondition:
 
     PRE:
-      - At least a call to the updateVectors method must be done before calling this method,
-        and after changing any camera parameter the updateVectors method must be called again
-        to reflect the changes in this calculation.
+      - At least a call to the updateVectors method must be done before calling
+        this method, and after changing any camera parameter the updateVectors
+        method must be called again to reflect the changes in this calculation.
     */
     public final Ray generateRay(int x, int y)
     {

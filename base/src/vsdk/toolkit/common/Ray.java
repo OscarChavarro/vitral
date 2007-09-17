@@ -28,6 +28,13 @@ public class Ray  extends FundamentalEntity
         t = b.t;
     }
 
+    public void clone(Ray other)
+    {
+        this.origin.clone(other.origin);
+        this.direction.clone(other.direction);
+        this.t = other.t;
+    }
+
     /**
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
