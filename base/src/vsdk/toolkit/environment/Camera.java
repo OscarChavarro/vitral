@@ -498,7 +498,7 @@ public class Camera extends Entity
         String msg;
 
         msg = "<Camera>:\n";
-        msg + = "  - Name: \"" + getName() + "\"\n";
+        msg += "  - Name: \"" + getName() + "\"\n";
         if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
             msg = msg + "  - Camera in PERSPECTIVE projection mode\n";
           }
