@@ -410,6 +410,9 @@ Changes in 2007 september 5 revition
   - 1h15min: first working implementation of Appel's algorithm! :)
     (not tested with special cases).
 
+Changes in 2007 september 18 revition
+  - 27min: Camera.generateRay supports operation with orthogonal mode.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

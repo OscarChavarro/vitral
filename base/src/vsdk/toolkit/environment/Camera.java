@@ -329,11 +329,11 @@ public class Camera extends Entity
 
     This method is of vital importance to many fundamental algorithms of
     visualization (i.e. ray casting, ray tracing, radiosity), object selection
-    and others (simulation, colition detection, visual debugging). As it is
-    important to improve the efficiency of this method, some precalculated
+    and others (simulation, colision detection, visual debugging, etc.). As it
+    is important to improve the efficiency of this method, some precalculated
     values are stored in the class attributes `_dir`, `upWithScale` and
     `rightWithScale`, which values are stored in the `updateVectors`
-    method, leading to the precondition:
+    method, leading to the following precondition:
 
     PRE:
       - At least a call to the updateVectors method must be done before calling
@@ -344,19 +344,32 @@ public class Camera extends Entity
     {
         double u, v;
         double mi_x, mi_y;
+        Ray ray;
 
         // 1. Convert integer image coordinates into values in the range [-0.5, 0.5]
         u = ((double)x - viewport_xsize/2.0) / viewport_xsize;
         v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
 
         // 2. Calculate the ray direction
-        Vector3D dv = upWithScale.multiply(v);
-        Vector3D du = rightWithScale.multiply(u);
+        Vector3D dv;
+        Vector3D du;
+
+        if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            double fovFactor = viewport_xsize/viewport_ysize;
+            du = left.multiply(-fovFactor);
+            dv = up;
+            du = du.multiply(2*u/orthogonalZoom);
+            dv = dv.multiply(2*v/orthogonalZoom);
+            ray = new Ray(eyePosition.add(du.add(dv)), front);
+            return ray;
+	}
+        // Default behavior is to assume planar perspective projection
+        du = rightWithScale.multiply(u);
+        dv = upWithScale.multiply(v);
+
         Vector3D dir = dv.add(du).add(_dir);
 
         // 3. Build up and return a ray with origin in the eye position and with calculated direction
-        Ray ray;
-
         ray = new Ray(eyePosition, dir);
 
         return ray;
