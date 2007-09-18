@@ -685,8 +685,8 @@ public class JoglDrawingArea implements
     private void displayView(GL gl, JoglView view)
     {
         if ( !view.isActive() ) {
-	    return;
-	}
+            return;
+        }
         if ( renderMode == RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
         }
@@ -929,7 +929,7 @@ public class JoglDrawingArea implements
 
       for ( i = 0; i < views.size(); i++ ) {
           view = views.get(i);
-          if ( view.inside(xpercent, ypercent) ) {
+          if ( view.isActive() && view.inside(xpercent, ypercent) ) {
               view.setSelected(true);
               selectedView = i;
           }
@@ -976,10 +976,12 @@ public class JoglDrawingArea implements
           }
           int f = theScene.selectedThings.firstSelected();
           view = views.get(selectedView);
-	  theScene.activeCamera = view.getCamera();
-          theScene.selectObjectWithMouse(e.getX()-view.getViewportStartX(),
-	     view.getViewportSizeY() + e.getY() - (globalViewportYSize-view.getViewportStartY()),
-             composite, parent.visualDebugRay);
+          theScene.activeCamera = view.getCamera();
+              theScene.selectObjectWithMouse(
+                 e.getX()-view.getViewportStartX(),
+                 view.getViewportSizeY() + e.getY() - 
+                 (globalViewportYSize-view.getViewportStartY()),
+                 composite, parent.visualDebugRay);
 
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
                interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1200,7 +1202,7 @@ public class JoglDrawingArea implements
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
              cameraController.processKeyPressedEventAwt(e) ) {
-	    ;
+            ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
             if ( unicode_id == e.CHAR_UNDEFINED ) {

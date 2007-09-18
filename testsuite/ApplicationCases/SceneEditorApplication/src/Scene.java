@@ -206,8 +206,6 @@ public class Scene
         Ray r;
         SimpleBody gi;
 
-	System.out.println("CLICK AT " + x + ", " + y);
-
         activeCamera.updateVectors();
         r = activeCamera.generateRay(x, y);
 
