@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import javax.media.opengl.GL;
 
 // VSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -22,6 +23,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 /**
 A `JoglView` represents an specific Jogl viewport inside a canvas. One Jogl
@@ -78,8 +80,17 @@ public class JoglView implements KeyListener
     private boolean active;
     private String title;
     private RGBAImage titleImage;
-
+    private RGBAImage xLabelImage;
+    private RGBAImage yLabelImage;
+    private RGBAImage zLabelImage;
     private Font font;
+
+    // Each JoglView can call a different visualization algorithm
+    public static final int RENDER_MODE_ZBUFFER = 1;
+    public static final int RENDER_MODE_RAYTRACING = 2;
+    private int renderMode;
+
+    public boolean showGrid;
 
     public JoglView()
     {
@@ -106,7 +117,7 @@ public class JoglView implements KeyListener
         cameraTop.setPosition(new Vector3D(0, 0, 5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         cameraTop.setRotation(R);
-        cameraTop.setOrthogonalZoom(0.1);
+        cameraTop.setOrthogonalZoom(0.5);
         cameraTop.setName("Top");
 
         cameraBottom = new Camera();
@@ -114,7 +125,7 @@ public class JoglView implements KeyListener
         cameraBottom.setPosition(new Vector3D(0, 0, -5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
         cameraBottom.setRotation(R);
-        cameraBottom.setOrthogonalZoom(0.1);
+        cameraBottom.setOrthogonalZoom(0.5);
         cameraBottom.setName("Bottom");
 
         cameraLeft = new Camera();
@@ -122,7 +133,7 @@ public class JoglView implements KeyListener
         cameraLeft.setPosition(new Vector3D(-5, 0, 0));
         R.identity();
         cameraLeft.setRotation(R);
-        cameraLeft.setOrthogonalZoom(0.1);
+        cameraLeft.setOrthogonalZoom(0.5);
         cameraLeft.setName("Left");
 
         cameraFront = new Camera();
@@ -130,7 +141,7 @@ public class JoglView implements KeyListener
         cameraFront.setPosition(new Vector3D(0, -5, 0));
         R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         cameraFront.setRotation(R);
-        cameraFront.setOrthogonalZoom(0.1);
+        cameraFront.setOrthogonalZoom(0.5);
         cameraFront.setName("Front");
 
         camera = cameraPerspective;
@@ -142,8 +153,15 @@ public class JoglView implements KeyListener
         active = true;
 
         setTitle(camera.getName());
+        xLabelImage = calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
+        yLabelImage = calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
+        zLabelImage = calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
 
         font = new Font("Arial", Font.PLAIN, 14);
+
+        this.renderMode = RENDER_MODE_ZBUFFER;
+
+        showGrid = true;
     }
 
     /**
@@ -163,8 +181,29 @@ public class JoglView implements KeyListener
         keycode = e.getKeyCode();
         unicode_id = e.getKeyChar();
 
+        if ( keycode == KeyEvent.VK_9 ) {
+            // Alphanumeric 0
+            skipKey = true;
+            switch ( renderMode ) {
+              case RENDER_MODE_ZBUFFER:
+                renderMode = RENDER_MODE_RAYTRACING;
+                break;
+              default:
+                renderMode = RENDER_MODE_ZBUFFER;
+                break;
+            }
+        }
+
         if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
+              case 'g':
+                if ( showGrid == true ) {
+                    showGrid = false;
+                }
+                else {
+                    showGrid = true;
+                }
+                break;
               case 't':
                 camera = cameraTop;
                 setTitle(camera.getName());
@@ -210,6 +249,11 @@ public class JoglView implements KeyListener
     }
 
     public void keyReleased(KeyEvent e) {
+    }
+
+    public int getRenderMode()
+    {
+        return renderMode;
     }
 
     public double getViewportStartXPercent()
@@ -437,52 +481,209 @@ public class JoglView implements KeyListener
         gl.glPopAttrib();
     }
 
-    public void setTitle(String name)
+    private RGBAImage calculateLabelImage(String label, ColorRgb color)
     {
+        RGBAImage labelImage;
+
         //-----------------------------------------------------------------
-        title = new String(name);
-        titleImage = new RGBAImage();
-        titleImage.init(200, 30);
+        labelImage = new RGBAImage();
+        labelImage.init(200, 30);
 
         BufferedImage bi;
         Graphics offlineContext;
 
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(titleImage);
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
         offlineContext = bi.getGraphics();
         FontMetrics fm = offlineContext.getFontMetrics();
-        Rectangle2D r = fm.getStringBounds(title, offlineContext);
+        Rectangle2D r = fm.getStringBounds(label, offlineContext);
         Rectangle ri = r.getBounds();
 
         //-----------------------------------------------------------------
-        titleImage.init(ri.width-ri.x+10, (ri.height-ri.y)/2+10);
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(titleImage);
+        labelImage.init(ri.width-ri.x+10, (ri.height-ri.y)/2+5);
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
         offlineContext = bi.getGraphics();
 
         //-----------------------------------------------------------------
-        offlineContext.setColor(new Color(0.76f, 0.76f, 0.76f));
+        offlineContext.setColor(
+            new Color((float)color.r, (float)color.g, (float)color.b));
         offlineContext.setFont(font);
-        offlineContext.drawString(title, -ri.x, -ri.y);
+        offlineContext.drawString(label, -ri.x, -ri.y);
 
-        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, titleImage);
+        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
+        return labelImage;
     }
 
-    public void drawTitle(GL gl)
+    public void setTitle(String name)
     {
-        int borderx = 4;
-        int bordery = 1;
+        title = new String(name);
+        titleImage = calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
+    }
+
+    public void drawReferenceBase(GL gl)
+    {
+        //-----------------------------------------------------------------
+        int basesize = 64;
+        gl.glPushAttrib(gl.GL_VIEWPORT_BIT);
+        gl.glPushAttrib(gl.GL_DEPTH_TEST);
+        gl.glViewport(viewportStartX, viewportStartY, basesize, basesize);
+
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glPushMatrix();
+
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(gl.GL_DEPTH_TEST);
+
+        //-----------------------------------------------------------------
+        Matrix4x4 R = camera.getRotation();
+
+        gl.glLoadIdentity();
+        R.invert();
+        gl.glRotated(90, -1, 0, 0);
+        gl.glRotated(90, 0, 0, 1);
+        JoglMatrixRenderer.activate(gl, R);
+
+        gl.glPushMatrix();
+        gl.glTranslated(2, 1, 0);
+        drawTextureString3D(gl, xLabelImage);
+        gl.glPopMatrix();
+
+        gl.glPushMatrix();
+        gl.glTranslated(1, 2, 0);
+        drawTextureString3D(gl, yLabelImage);
+        gl.glPopMatrix();
+
+        gl.glPushMatrix();
+        gl.glTranslated(1, 1, 1);
+        drawTextureString3D(gl, zLabelImage);
+        gl.glPopMatrix();
+
+        //gl.glLoadIdentity();
+        gl.glBegin(gl.GL_LINES);
+            gl.glColor3d(0.78, 0, 0);
+            gl.glVertex3d(0, 0, 0);
+            gl.glVertex3d(1, 0, 0);
+            gl.glColor3d(0, 0.61, 0);
+            gl.glVertex3d(0, 0, 0);
+            gl.glVertex3d(0, 1, 0);
+            gl.glColor3d(0, 0, 0.76);
+            gl.glVertex3d(0, 0, 0);
+            gl.glVertex3d(0, 0, 1);
+        gl.glEnd();
+
+        //-----------------------------------------------------------------
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+
+        gl.glPopAttrib();
+    }
+
+    private void drawGridRectangle(GL gl)
+    {
+        gl.glPushMatrix();
+
+        Matrix4x4 R;
+        double yaw, pitch;
+
+        R = camera.getRotation();
+        yaw = Math.toDegrees(R.obtainEulerYawAngle());
+        pitch = Math.toDegrees(R.obtainEulerPitchAngle());
+
+        if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL &&
+              (pitch > -45 && pitch < 45) ) {
+            if ( (yaw > 45 && yaw < 135) ||
+                 (yaw < -45 && yaw > -135) ) {
+                gl.glRotated(90, 1, 0, 0);
+            }
+            else {
+                gl.glRotated(90, 0, 1, 0);
+            }
+        }
+        
+        //-----------------------------------------------------------------
+        int nx = 14; // Must be an even number
+        int ny = 14; // Must be an even number
+        double dx = 1.0;
+        double dy = 1.0;
+        int x, y;
+        double minx = -(((double)nx)/2) * dx;
+        double maxx = (((double)nx)/2) * dx;
+        double miny = -(((double)ny)/2) * dy;
+        double maxy = (((double)ny)/2) * dy;
+
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glLineWidth(1.0f);
+        gl.glBegin(GL.GL_LINES);
+        gl.glColor3d(0.37, 0.37, 0.37);
+        for ( x = 0; x <= nx; x++ ) {
+            if ( x == nx/2 ) continue;
+            gl.glVertex3d(minx + ((double)x)*dx, miny, 0);
+            gl.glVertex3d(minx + ((double)x)*dx, maxy, 0);
+        }
+        for ( y = 0; y <= ny; y++ ) {
+            if ( y == ny/2 ) continue;
+            gl.glVertex3d(minx, minx + ((double)y)*dy, 0);
+            gl.glVertex3d(maxx, minx + ((double)y)*dy, 0);
+        }
+        gl.glColor3d(0, 0, 0);
+        gl.glVertex3d(minx + ((double)(nx/2))*dx, miny, 0);
+        gl.glVertex3d(minx + ((double)(nx/2))*dx, maxy, 0);
+        gl.glVertex3d(minx, minx + ((double)(ny/2))*dy, 0);
+        gl.glVertex3d(maxx, minx + ((double)(ny/2))*dy, 0);
+
+        gl.glEnd();
+        gl.glPopMatrix();
+    }
+
+    public void toggleGrid()
+    {
+        if ( showGrid ) {
+            showGrid = false;
+        }
+        else {
+            showGrid = true;
+        }
+    }
+
+    public void drawGrid(GL gl)
+    {
+        //- Draw reference grid plane -------------------------------------
+        if ( showGrid ) drawGridRectangle(gl);
+    }
+
+    private void drawTextureString2D(GL gl, int x, int y, RGBAImage i)
+    {
         double dx;
         double dy;
 
-        dx = ((double)(2*(borderx))) / ((double)viewportSizeX);
-        dy = ((double)(2*(viewportSizeY - (titleImage.getYSize() + bordery)))) / 
-             ((double)viewportSizeY);
+        dx = ((double)(2*x)) / ((double)viewportSizeX);
+        dy = ((double)(2*(viewportSizeY - y))) / ((double)viewportSizeY);
 
         gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glTranslated(dx, dy, 0);
 
+        drawTextureString3D(gl, i);
+
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+    }
+
+    private void drawTextureString3D(GL gl, RGBAImage i)
+    {
+        gl.glRasterPos3d(-1, -1, 0);
         gl.glEnable(gl.GL_TEXTURE_2D);
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -491,7 +692,14 @@ public class JoglView implements KeyListener
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
         gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_BLEND);
-        JoglImageRenderer.draw(gl, titleImage);
+        JoglImageRenderer.draw(gl, i);
+    }
+
+    public void drawTitle(GL gl)
+    {
+        int borderx = 4;
+        int bordery = 1;
+        drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
 
     public boolean inside(double x, double y)
@@ -509,22 +717,22 @@ public class JoglView implements KeyListener
     {
         if ( numViews >= 4 ) {
             switch ( id ) {
-	      case 0:
+              case 0:
                 camera = cameraLeft;
-		break;
-	      case 1:
+                break;
+              case 1:
                 camera = cameraPerspective;
-		break;
-	      case 2:
+                break;
+              case 2:
                 camera = cameraTop;
-		break;
-	      case 3: default:
+                break;
+              case 3: default:
                 camera = cameraFront;
-		break;
-	    }
+                break;
+            }
         
         setTitle(camera.getName());
-	}
+        }
     }
 }
 

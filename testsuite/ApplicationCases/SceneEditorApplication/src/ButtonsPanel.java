@@ -393,11 +393,11 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
             R.translation(-0.55, -0.55, -0.55);
             brep.applyTransformation(R);
-	    brep.validateModel();
+            brep.validateModel();
 
             //brep = createCircle(0.5, 0.5, 0.5, 0.1, 12);
 
-	    //
+            //
             brep.validateModel();
             parent.theScene.addThing(brep);
         }
@@ -614,12 +614,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             }
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_GRID") ) {
-            if ( parent.theScene.showGrid == true ) {
-                parent.theScene.showGrid = false;
-            }
-            else {
-                parent.theScene.showGrid = true;
-            }
+            parent.drawingArea.toggleGrid();
         }
         else if ( label.equals("IDC_OTHERS_PRINT_SCENE_ON_CONSOLE") ) {
             parent.theScene.print();
@@ -665,10 +660,10 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_NEW_VIEW") ) {
             parent.drawingArea.newView();
-	}
+        }
         else if ( label.equals("IDC_DEL_VIEW") ) {
             parent.drawingArea.delView();
-	}
+        }
 
         //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();

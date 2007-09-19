@@ -187,10 +187,15 @@ August 28 2007, Oscar Chavarro:
   - 2h50min: Visual debug ray tracing capability casting rays in
     SceneEditorApplication
 
-September 16 2007, Oscar Chavarro:
+September 17 2007, Oscar Chavarro:
   - 1h40min: Preparation for supporting multiple JoglView's
   - 37min: Border drawing
   - 2h00min: Nice layouts working for 1 to 4 views! :)
   - 2h46min: Working multiple camera modes for views! Nice text labeling
     scheme using 2D offline rendering based on Java2D/Awt and texturing
     transparently over GL! :)
+
+September 18 2007, Oscar Chavarro:
+  - 30min: particularizing rendering mode and grid to each view
+  - 22min: front facing grid for orthogonal views
+  - 54min: placing axis reference base on views :)

@@ -119,9 +119,6 @@ public class JoglDrawingArea implements
     private Cursor selectCursor;
 
     //
-    private static final int RENDER_MODE_ZBUFFER = 1;
-    private static final int RENDER_MODE_RAYTRACING = 2;
-    private int renderMode;
     private int globalViewportXSize;
     private int globalViewportYSize;
     private ViewOrganizer viewOrganizer;
@@ -141,7 +138,6 @@ public class JoglDrawingArea implements
         this.statusMessage = statusMessage;
         this.globalViewportXSize = 0;
         this.globalViewportYSize = 0;
-        this.renderMode = RENDER_MODE_ZBUFFER;
 
         interactionMode = CAMERA_INTERACTION_MODE;
 
@@ -682,12 +678,17 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void displayView(GL gl, JoglView view)
+    public void toggleGrid()
+    {
+        views.get(selectedView).toggleGrid();
+    }
+
+    private void drawView(GL gl, JoglView view)
     {
         if ( !view.isActive() ) {
             return;
         }
-        if ( renderMode == RENDER_MODE_ZBUFFER ) {
+        if ( view.getRenderMode() == view.RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
         }
         else {
@@ -710,6 +711,7 @@ public class JoglDrawingArea implements
 
         //-----------------------------------------------------------------
         drawVisualRayDebug(gl);
+        view.drawGrid(gl);
 
         //-----------------------------------------------------------------
         // Note that gizmo information will not be reported, as they damage
@@ -720,6 +722,8 @@ public class JoglDrawingArea implements
         drawGizmos(gl);
 
         copyColorBufferIfNeeded(gl);
+
+        view.drawReferenceBase(gl);
     }
 
     /** Called by drawable to initiate drawing */
@@ -763,7 +767,7 @@ public class JoglDrawingArea implements
 
             //
             theScene.qualityTemplate = view.getRendererConfiguration();
-            displayView(gl, view);
+            drawView(gl, view);
             view.drawTitle(gl);
         }
     }
@@ -1294,9 +1298,6 @@ public class JoglDrawingArea implements
             }
         }
 
-        // In view command propagation
-        views.get(selectedView).keyPressed(e);
-
         // Global commands
         if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
 
@@ -1338,17 +1339,9 @@ public class JoglDrawingArea implements
               parent.imageControlWindow.redrawImage();
         }
 
-        if ( keycode == KeyEvent.VK_9 ) {
-            // Alphanumeric 0
-            skipKey = true;
-            switch ( renderMode ) {
-              case RENDER_MODE_ZBUFFER:
-                renderMode = RENDER_MODE_RAYTRACING;
-                break;
-              default:
-                renderMode = RENDER_MODE_ZBUFFER;
-                break;
-            }
+        // In view command propagation
+        if ( !skipKey ) {
+            views.get(selectedView).keyPressed(e);
         }
 
         double theta = 0;
@@ -1588,15 +1581,6 @@ public class JoglDrawingArea implements
               case 'r':
                 statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
                 interactionMode = SCALE_INTERACTION_MODE;
-                break;
-
-              case 'g':
-                if ( theScene.showGrid == true ) {
-                    theScene.showGrid = false;
-                }
-                else {
-                    theScene.showGrid = true;
-                }
                 break;
             }
         }

@@ -505,7 +505,7 @@ MESSAGES {
     IDM_SCALE_MODE,
         "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it."
     IDM_INTRO_MESSAGE,
-        "VSDK 3D Editor example - copyright, Pontificia Universidad Javeriana, 2005-2006"
+        "VSDK 3D Editor example - (c) Copyright, Pontificia Universidad Javeriana, 2005-2007"
 }
 
 //===========================================================================

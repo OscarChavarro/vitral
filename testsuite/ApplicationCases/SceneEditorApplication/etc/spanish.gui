@@ -453,7 +453,7 @@ MESSAGES {
     IDM_SCALE_MODE,
         "Modo de interacción de escalamiento - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto."
     IDM_INTRO_MESSAGE,
-        "Ejemplo de editor 3D VSDK - derechos reservados, Pontificia Universidad Javeriana, 2005-2006"
+        "Ejemplo de editor 3D VSDK - (c) derechos reservados, Pontificia Universidad Javeriana, 2005-2007"
 }
 
 //===========================================================================

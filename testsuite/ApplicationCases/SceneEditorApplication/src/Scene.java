@@ -42,7 +42,6 @@ public class Scene
     //- 4. Objects ---------------------------------------------------------
     public SimpleCorridor corridor;
     public boolean showCorridor;
-    public boolean showGrid;
     public ArrayList<SimpleBodyGroup> debugThingGroups;
 
     public SelectionSet selectedThings;
@@ -81,7 +80,6 @@ public class Scene
         //-----------------------------------------------------------------
         corridor = new SimpleCorridor();
         showCorridor = false;
-        showGrid = true;
 
         qualityTemplate = new RendererConfiguration();
         qualityTemplate.setSurfaces(true);
