@@ -27,7 +27,9 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
     public static Light light2 = null;
     public static void draw(GL gl, TranslateGizmo gizmo)
     {
+/*
         JoglLightRenderer.turnOffAllLights(gl);
+
         Vector3D lp1;
         Vector3D lp2;
 
@@ -48,6 +50,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         light2.setPosition(lp2);
         JoglLightRenderer.activate(gl, light1);
         JoglLightRenderer.activate(gl, light2);
+*/
 
         //-----------------------------------------------------------------
         RendererConfiguration q = new RendererConfiguration();
@@ -62,7 +65,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         q.setNormals(false);
         q.setShadingType(q.SHADING_TYPE_GOURAUD);
 
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glDisable(gl.GL_LIGHTING);
         gl.glShadeModel(gl.GL_SMOOTH);
 
         int i;

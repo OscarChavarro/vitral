@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 // JOGL classes
@@ -711,6 +712,12 @@ public class JoglView implements KeyListener
             return true;
         }
         return false;
+    }
+
+    public void updateMouseEvent(MouseEvent e, int globalViewportXSize, int globalViewportYSize)
+    {
+          e.translatePoint(-getViewportStartX(),
+            getViewportSizeY() - (globalViewportYSize-getViewportStartY()));
     }
 
     public void hintConfig(int numViews, int id)

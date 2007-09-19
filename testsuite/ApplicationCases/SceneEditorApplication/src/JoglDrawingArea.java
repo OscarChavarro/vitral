@@ -921,12 +921,14 @@ public class JoglDrawingArea implements
       //System.out.println("Mouse exited");
   }
 
-  public void mousePressed(MouseEvent e) {
+    private JoglView getSelectedView(MouseEvent e)
+  {
+      JoglView view = null;
+
       //-----------------------------------------------------------------
       int i;
       double xpercent;
       double ypercent;
-      JoglView view;
 
       xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
       ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
@@ -941,6 +943,11 @@ public class JoglDrawingArea implements
               view.setSelected(false);
           }
       }
+      return view;
+  }
+
+  public void mousePressed(MouseEvent e) {
+      JoglView view = getSelectedView(e);
 
       //-----------------------------------------------------------------
       // WARNING / TODO
@@ -980,11 +987,9 @@ public class JoglDrawingArea implements
           }
           int f = theScene.selectedThings.firstSelected();
           view = views.get(selectedView);
+          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
           theScene.activeCamera = view.getCamera();
-              theScene.selectObjectWithMouse(
-                 e.getX()-view.getViewportStartX(),
-                 view.getViewportSizeY() + e.getY() - 
-                 (globalViewportYSize-view.getViewportStartY()),
+              theScene.selectObjectWithMouse(e.getX(), e.getY(),
                  composite, parent.visualDebugRay);
 
           if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
@@ -998,6 +1003,8 @@ public class JoglDrawingArea implements
   }
 
   public void mouseReleased(MouseEvent e) {
+      JoglView view = views.get(selectedView);
+
       // WARNING / TODO
       // There should be a cameraController.getFutureAction(e) that calculates
       // the proper icon for display ... here an Aquynza operation is
@@ -1033,6 +1040,7 @@ public class JoglDrawingArea implements
 
           translationGizmo.setCamera(theScene.activeCamera);
           translationGizmo.setTransformationMatrix(composed);
+          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
           if ( translationGizmo.processMouseReleasedEventAwt(e) ) {
               composed = translationGizmo.getTransformationMatrix();
               position.x = composed.M[0][3];
@@ -1049,6 +1057,8 @@ public class JoglDrawingArea implements
   }
 
   public void mouseClicked(MouseEvent e) {
+      JoglView view = getSelectedView(e);
+
       int firstThingSelected = theScene.selectedThings.firstSelected();
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1072,6 +1082,7 @@ public class JoglDrawingArea implements
 
           translationGizmo.setCamera(theScene.activeCamera);
           translationGizmo.setTransformationMatrix(composed);
+          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
           if ( translationGizmo.processMouseClickedEventAwt(e) ) {
               composed = translationGizmo.getTransformationMatrix();
               position.x = composed.M[0][3];
@@ -1088,24 +1099,7 @@ public class JoglDrawingArea implements
 
   public void mouseMoved(MouseEvent e) {
       //-----------------------------------------------------------------
-      int i;
-      double xpercent;
-      double ypercent;
-      JoglView view;
-
-      xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
-      ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
-
-      for ( i = 0; i < views.size(); i++ ) {
-          view = views.get(i);
-          if ( view.inside(xpercent, ypercent) ) {
-              view.setSelected(true);
-              selectedView = i;
-          }
-          else {
-              view.setSelected(false);
-          }
-      }
+      JoglView view = views.get(selectedView);
 
       //-----------------------------------------------------------------
       int firstThingSelected = theScene.selectedThings.firstSelected();
@@ -1129,8 +1123,9 @@ public class JoglDrawingArea implements
           composed.M[1][3] = position.y;
           composed.M[2][3] = position.z;
 
-          translationGizmo.setCamera(theScene.activeCamera);
+          translationGizmo.setCamera(view.getCamera());
           translationGizmo.setTransformationMatrix(composed);
+          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
           if ( translationGizmo.processMouseMovedEventAwt(e) ) {
               composed = translationGizmo.getTransformationMatrix();
               position.x = composed.M[0][3];
@@ -1146,6 +1141,8 @@ public class JoglDrawingArea implements
   }
 
   public void mouseDragged(MouseEvent e) {
+      JoglView view = views.get(selectedView);
+
       int firstThingSelected = theScene.selectedThings.firstSelected();
 
       if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1169,6 +1166,7 @@ public class JoglDrawingArea implements
 
           translationGizmo.setCamera(theScene.activeCamera);
           translationGizmo.setTransformationMatrix(composed);
+          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
           if ( translationGizmo.processMouseDraggedEventAwt(e) ) {
               composed = translationGizmo.getTransformationMatrix();
               position.x = composed.M[0][3];
