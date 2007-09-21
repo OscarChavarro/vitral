@@ -1,0 +1,5 @@
+md classes
+cd src
+javac -Xlint:deprecation -Xlint:unchecked -classpath .;..\..\..\..\lib\vsdk.jar -d ..\classes CgAutomaticShaderExample.java
+cd ..
+pause

@@ -216,6 +216,7 @@ public abstract class JoglRenderer extends RenderingElement {
         //-----------------------------------------------------------------
         if ( !verifyOpenGLAvailability() ||
              !verifyNvidiaCgAvailability() ) {
+            nvidiaCgAutomaticMode = false;
             return false;
         }
 
@@ -354,7 +355,8 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static boolean needCg(RendererConfiguration quality)
     {
-        if ( quality.getShadingType() != quality.SHADING_TYPE_PHONG ) {
+        if ( quality.getShadingType() != quality.SHADING_TYPE_PHONG ||
+             nvidiaCgErrorReported ) {
             return false;
         }
         return true;
@@ -364,6 +366,10 @@ public abstract class JoglRenderer extends RenderingElement {
         RendererConfiguration quality,
         CGprogram vertexShader, CGprogram pixelShader)
     {
+        if ( nvidiaCgErrorReported ) {
+            return;
+	}
+
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
             //- Global per-frame shader activation ----------------------------

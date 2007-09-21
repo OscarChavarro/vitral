@@ -177,14 +177,14 @@ public class JoglRGBAImageRenderer extends JoglRenderer
 
     public static int activateAsNormalMap(GL gl, RGBAImage img)
     {
-        int list = activateBase(gl, img);
-
+        int list = -1;
         //-----------------------------------------------------------------
         CGparameter param;
         if ( nvidiaCgAutomaticMode ) {
+            list = activateBase(gl, img);
             param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump, "normalMap");
             CgGL.cgGLSetTextureParameter(param, list);
-	}
+        }
         return list;
     }
 

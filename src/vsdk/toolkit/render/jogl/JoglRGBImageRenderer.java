@@ -133,14 +133,14 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         //- 4. Use the image's glList -------------------------------------
         //if ( glListIsCompiled == false ) {
-	    if ( item == null ) {
+            if ( item == null ) {
                 VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item");
-		return -1;
- 	    }
-	    if ( item.renderer == null ) {
+                return -1;
+            }
+            if ( item.renderer == null ) {
                 VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
-		return -1;
- 	    }
+                return -1;
+            }
             item.renderer.bind();
             item.renderer.enable();
 /*
@@ -170,20 +170,20 @@ public class JoglRGBImageRenderer extends JoglRenderer
             param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump,
             "textureMap");
             CgGL.cgGLSetTextureParameter(param, list);
-	}
+        }
         return list;
     }
 
     public static int activateAsNormalMap(GL gl, RGBImage img)
     {
-        int list = activateBase(gl, img);
-
+        int list = -1;
         //-----------------------------------------------------------------
         CGparameter param;
         if ( nvidiaCgAutomaticMode ) {
+            list = activateBase(gl, img);
             param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump, "normalMap");
             CgGL.cgGLSetTextureParameter(param, list);
-	}
+        }
         return list;
     }
 

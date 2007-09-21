@@ -69,14 +69,9 @@ public class CgAutomaticShaderExample
     private CameraController cameraController;
     private RendererConfigurationController qualityController;
 
-    //- GPU control --------------------------------------------------------
-    private int normalMapList;
-    private int textureMapList;
-
     //- Animation & state control ------------------------------------------
     private boolean firstTimer = true;
     private int needPaint = 3;
-    private boolean retextureNeeded = false;
     private boolean withRotationAnimation = false;
     private boolean withLightAnimation = false;
     private double lightAngle = 0;
@@ -241,12 +236,6 @@ public class CgAutomaticShaderExample
 
         boolean NvidiaGpuActive;
         NvidiaGpuActive = JoglRenderer.needCg(quality);
-        if ( (!quality.isBumpMapSet() || !NvidiaGpuActive) && 
-             retextureNeeded ) {
-            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
-                JoglRenderer.NvidiaGpuPixelProgramTexture);
-            retextureNeeded = false;
-        }
 
         enableTexture(gl, NvidiaGpuActive && quality.isBumpMapSet());
 
@@ -278,14 +267,9 @@ public class CgAutomaticShaderExample
                 CgGL.cgGLDisableTextureParameter(param);
             }
             JoglRenderer.disableNvidiaCgProfiles();
-
-            // When using multiple textures... without this fixed function OpenGL
-            // gets unconfigured is texture state! More should be researched on
-            // this topic!
-            if ( quality.isBumpMapSet() ) {
-                retextureNeeded = true;
-            }
             JoglRenderer.setRenderingWithNvidiaGpu(false);
+            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
+                JoglRenderer.NvidiaGpuPixelProgramTexture);
         }
 
         gl.glLoadIdentity();
@@ -295,7 +279,7 @@ public class CgAutomaticShaderExample
     void enableTexture(GL gl, boolean withMap) {
         //-----------------------------------------------------------------
         gl.glEnable(gl.GL_TEXTURE_2D);
-        textureMapList = JoglImageRenderer.activate(gl, textureMap);
+        JoglImageRenderer.activate(gl, textureMap);
 
         //- Basic OpenGL texture state setup ------------------------------
         gl.glTexParameteri(GL.GL_TEXTURE_2D,
@@ -314,7 +298,7 @@ public class CgAutomaticShaderExample
 
         //-----------------------------------------------------------------
         if ( withMap ) {
-            normalMapList = JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap);
+            JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap);
         }
     }
 
