@@ -24,8 +24,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGparameter;
 import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
@@ -176,17 +174,6 @@ public class CgAutomaticShaderExample
         System.out.println("Ok!");
     }
 
-    public void createCgElements(GL gl) {
-        if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
-            System.out.println("Nvidia Cg not available. Turning off GPU support!");
-            enableTexture(gl, false);
-            return;
-        }
-        enableTexture(gl, true);
-
-        JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
-    }
-
     public void init(GLAutoDrawable drawable) {
         // Not used in VitralSDK style applications... check 'firstTimer'
     }
@@ -217,7 +204,8 @@ public class CgAutomaticShaderExample
 
         if ( firstTimer ) {
             firstTimer = false;
-            createCgElements(gl);
+            // IMPORTANT POINT 1/4
+            JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
         }
 
         //-----------------------------------------------------------------
@@ -234,16 +222,13 @@ public class CgAutomaticShaderExample
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
-        boolean NvidiaGpuActive;
-        NvidiaGpuActive = JoglRenderer.needCg(quality);
+        activateTextures(gl, quality);
 
-        enableTexture(gl, NvidiaGpuActive && quality.isBumpMapSet());
-
-        if ( NvidiaGpuActive ) {
-            //- Shader configuration from scene data --------------------------
-            JoglRenderer.activateNvidiaGpuParameters(gl, quality,
-                JoglRenderer.currentVertexShader, JoglRenderer.currentPixelShader);
-        }
+        //- Shader configuration from scene data --------------------------
+        // IMPORTANT POINT 2/4
+        JoglRenderer.activateNvidiaGpuParameters(gl, quality,
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
 
         JoglLightRenderer.activate(gl, light);
         JoglMaterialRenderer.activate(gl, material);
@@ -257,26 +242,14 @@ public class CgAutomaticShaderExample
 
         JoglGeometryRenderer.draw(gl, geometry, camera, quality);
 
-        if ( NvidiaGpuActive ) {
-            // Disable textures
-            CGparameter param = null;
-            param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "textureMap");
-            CgGL.cgGLDisableTextureParameter(param);
-            if ( quality.isBumpMapSet() ) {
-                param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "normalMap");
-                CgGL.cgGLDisableTextureParameter(param);
-            }
-            JoglRenderer.disableNvidiaCgProfiles();
-            JoglRenderer.setRenderingWithNvidiaGpu(false);
-            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
-                JoglRenderer.NvidiaGpuPixelProgramTexture);
-        }
+        // IMPORTANT POINT 3/4
+        JoglRenderer.deactivateNvidiaGpuParameters(gl, quality);
 
         gl.glLoadIdentity();
         JoglLightRenderer.draw(gl, light);
     }
 
-    void enableTexture(GL gl, boolean withMap) {
+    void activateTextures(GL gl, RendererConfiguration quality) {
         //-----------------------------------------------------------------
         gl.glEnable(gl.GL_TEXTURE_2D);
         JoglImageRenderer.activate(gl, textureMap);
@@ -297,9 +270,8 @@ public class CgAutomaticShaderExample
         //   GL.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
 
         //-----------------------------------------------------------------
-        if ( withMap ) {
-            JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap);
-        }
+        // IMPORTANT POINT 4/4
+        JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap, quality);
     }
 
     public void

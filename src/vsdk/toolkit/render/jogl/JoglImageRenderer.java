@@ -12,6 +12,7 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -49,13 +50,13 @@ public class JoglImageRenderer extends JoglRenderer
         return -1;
     }
 
-    public static int activateAsNormalMap(GL gl, Image img)
+    public static int activateAsNormalMap(GL gl, Image img, RendererConfiguration quality)
     {
         if ( img instanceof RGBAImage ) {
-            return JoglRGBAImageRenderer.activateAsNormalMap(gl, (RGBAImage)img);
+            return JoglRGBAImageRenderer.activateAsNormalMap(gl, (RGBAImage)img, quality);
         }
         else if ( img instanceof RGBImage ) {
-            return JoglRGBImageRenderer.activateAsNormalMap(gl, (RGBImage)img);
+            return JoglRGBImageRenderer.activateAsNormalMap(gl, (RGBImage)img, quality);
         }
         else {
             String c = img.getClass().getName();

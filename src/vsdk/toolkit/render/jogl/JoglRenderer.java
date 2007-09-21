@@ -51,7 +51,7 @@ public abstract class JoglRenderer extends RenderingElement {
     }
 */
     // Nvidia Cg general management
-    private static boolean nvidiaCgErrorReported = false;
+    protected static boolean nvidiaCgErrorReported = false;
     private static boolean nvidiaCgAvailable = false;
     private static CGcontext nvidiaGpuContext = null;
     private static int nvidiaGpuVertexProfile = -1;
@@ -61,11 +61,21 @@ public abstract class JoglRenderer extends RenderingElement {
     public static CGprogram currentPixelShader = null;
 
     // Nvidia Cg automatic shader management
-    protected static boolean nvidiaCgAutomaticMode = true;
+    public static boolean nvidiaCgAutomaticMode = true;
     public static CGprogram NvidiaGpuVertexProgramTexture;
     public static CGprogram NvidiaGpuPixelProgramTexture;
     public static CGprogram NvidiaGpuVertexProgramTextureBump;
     public static CGprogram NvidiaGpuPixelProgramTextureBump;
+
+    public static CGprogram getCurrentVertexShader()
+    {
+	return currentVertexShader;
+    }
+
+    public static CGprogram getCurrentPixelShader()
+    {
+	return currentPixelShader;
+    }
 
     public static void createDefaultAutomaticNvidiaCgShaders()
     {
@@ -362,16 +372,41 @@ public abstract class JoglRenderer extends RenderingElement {
         return true;
     }
 
+    public static void deactivateNvidiaGpuParameters(GL gl, RendererConfiguration quality)
+    {
+        if ( nvidiaCgErrorReported ) {
+            return;
+        }
+
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode && needCg(quality) ) {
+            // Disable textures
+            CGparameter param = null;
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTexture, "textureMap");
+            CgGL.cgGLDisableTextureParameter(param);
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump, "textureMap");
+            CgGL.cgGLDisableTextureParameter(param);
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTexture, "normalMap");
+            CgGL.cgGLDisableTextureParameter(param);
+            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump, "normalMap");
+            CgGL.cgGLDisableTextureParameter(param);
+            disableNvidiaCgProfiles();
+            setRenderingWithNvidiaGpu(false);
+            setDefaultTextureForFixedFunctionOpenGL(
+                NvidiaGpuPixelProgramTexture);
+        }
+    }
+
     public static void activateNvidiaGpuParameters(GL gl,
         RendererConfiguration quality,
         CGprogram vertexShader, CGprogram pixelShader)
     {
         if ( nvidiaCgErrorReported ) {
             return;
-	}
+        }
 
         //-----------------------------------------------------------------
-        if ( nvidiaCgAutomaticMode ) {
+        if ( nvidiaCgAutomaticMode && needCg(quality) ) {
             //- Global per-frame shader activation ----------------------------
             enableNvidiaCgProfiles();
             setRenderingWithNvidiaGpu(true);

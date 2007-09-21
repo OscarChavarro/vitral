@@ -25,6 +25,7 @@ import com.sun.opengl.cg.CgGL;
 
 // VitralSDK classes
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.common.RendererConfiguration;
 
 class _JoglRGBAImageRendererImageAssociation extends JoglRenderer
 {
@@ -175,12 +176,13 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         return list;
     }
 
-    public static int activateAsNormalMap(GL gl, RGBAImage img)
+    public static int activateAsNormalMap(GL gl, RGBAImage img, RendererConfiguration quality)
     {
         int list = -1;
         //-----------------------------------------------------------------
         CGparameter param;
-        if ( nvidiaCgAutomaticMode ) {
+        if ( nvidiaCgAutomaticMode && !nvidiaCgErrorReported &&
+             needCg(quality) ) {
             list = activateBase(gl, img);
             param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump, "normalMap");
             CgGL.cgGLSetTextureParameter(param, list);

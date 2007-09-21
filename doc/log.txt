@@ -417,6 +417,7 @@ Changes in 2007 september 18 revition
 Changes in 2007 september 20 revition
   - 2h40min: Integrating generic Nvidia Cg automatic material shader management
   - 35min: Testing Nvidia Cg automatic material shader on systems without Cg
+  - 50min: Nvidia Cg automatic material shader programming interface ready!
 
 ---------------------------------------------------------------------------
 TODO:
