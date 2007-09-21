@@ -9,17 +9,21 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Java base classes
 import java.io.FileInputStream;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+
+// JOGL classes
 import javax.media.opengl.GL;
 //import javax.media.opengl.glu.GLU;
-
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
+import com.sun.opengl.cg.CGparameter;
+import com.sun.opengl.cg.CgGL;
 
+// VitralSDK classes
 import vsdk.toolkit.media.RGBAImage;
 
 class _JoglRGBAImageRendererImageAssociation extends JoglRenderer
@@ -48,7 +52,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static int activate(GL gl, RGBAImage img)
+    private static int activateBase(GL gl, RGBAImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -152,6 +156,36 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         */
         gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         return item.glList;
+    }
+
+    public static int activate(GL gl, RGBAImage img)
+    {
+        int list = activateBase(gl, img);
+
+        //-----------------------------------------------------------------
+        CGparameter param;
+        if ( nvidiaCgAutomaticMode ) {
+            param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTexture,
+            "textureMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+            param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump,
+            "textureMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+	}
+        return list;
+    }
+
+    public static int activateAsNormalMap(GL gl, RGBAImage img)
+    {
+        int list = activateBase(gl, img);
+
+        //-----------------------------------------------------------------
+        CGparameter param;
+        if ( nvidiaCgAutomaticMode ) {
+            param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump, "normalMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+	}
+        return list;
     }
 
     public static void draw(GL gl, RGBAImage img)

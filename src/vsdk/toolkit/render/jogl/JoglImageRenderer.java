@@ -49,6 +49,23 @@ public class JoglImageRenderer extends JoglRenderer
         return -1;
     }
 
+    public static int activateAsNormalMap(GL gl, Image img)
+    {
+        if ( img instanceof RGBAImage ) {
+            return JoglRGBAImageRenderer.activateAsNormalMap(gl, (RGBAImage)img);
+        }
+        else if ( img instanceof RGBImage ) {
+            return JoglRGBImageRenderer.activateAsNormalMap(gl, (RGBImage)img);
+        }
+        else {
+            String c = img.getClass().getName();
+
+            VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.activateAsNormalMap",
+            "Image GL activation not implemented for subclass " + c);
+        }
+        return -1;
+    }
+
     public static void draw(GL gl, Image img)
     {
         if ( img instanceof RGBAImage ) {

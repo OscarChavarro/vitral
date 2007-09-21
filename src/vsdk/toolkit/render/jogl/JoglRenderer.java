@@ -9,6 +9,7 @@ package vsdk.toolkit.render.jogl;
 
 // Java base classes
 import java.io.InputStream;
+import java.io.FileInputStream;
 
 // JOGL clases
 import javax.media.opengl.GL;
@@ -40,23 +41,76 @@ public abstract class JoglRenderer extends RenderingElement {
     Note that this static block is automatically called for the first
     instanciation or the first static call to any of current subclasses.
     This is used to check correct JOGL environment availability, and
-    report if not. DISABLED!
+    report if not.
+    Check why it is good to have this here disabled
     */
 /*
     static {
         // What happens when this is executed from an applet?
-        verifyOpenGLAvailability();
+        //verifyOpenGLAvailability();
     }
 */
-
+    // Nvidia Cg general management
     private static boolean nvidiaCgErrorReported = false;
     private static boolean nvidiaCgAvailable = false;
     private static CGcontext nvidiaGpuContext = null;
     private static int nvidiaGpuVertexProfile = -1;
     private static int nvidiaGpuPixelProfile = -1;
     private static boolean renderingWithNvidiaGpuFlag = false;
-    private static CGprogram currentVertexShader = null;
-    private static CGprogram currentPixelShader = null;
+    public static CGprogram currentVertexShader = null;
+    public static CGprogram currentPixelShader = null;
+
+    // Nvidia Cg automatic shader management
+    protected static boolean nvidiaCgAutomaticMode = true;
+    public static CGprogram NvidiaGpuVertexProgramTexture;
+    public static CGprogram NvidiaGpuPixelProgramTexture;
+    public static CGprogram NvidiaGpuVertexProgramTextureBump;
+    public static CGprogram NvidiaGpuPixelProgramTextureBump;
+
+    public static void createDefaultAutomaticNvidiaCgShaders()
+    {
+        if ( !nvidiaCgAutomaticMode ) {
+            return;
+        }
+        try {
+            //-----------------------------------------------------------------
+            if ( !tryToEnableNvidiaCg() ) {
+                nvidiaCgAutomaticMode = false;
+                return;
+            }
+            NvidiaGpuVertexProgramTexture =
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+            NvidiaGpuPixelProgramTexture =
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+            NvidiaGpuVertexProgramTextureBump =
+              JoglRenderer.loadNvidiaGpuVertexShader(
+                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
+            NvidiaGpuPixelProgramTextureBump =
+              JoglRenderer.loadNvidiaGpuPixelShader(
+                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
+            setDefaultTextureForFixedFunctionOpenGL(
+                NvidiaGpuPixelProgramTexture);
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "JoglRenderer.createDefaultAutomaticNvidiaCgShaders",
+                "Cannot access Cg shaders (.cg files). Nvidia Cg shader deactivated.");
+            nvidiaCgAutomaticMode = false;
+            return;
+        }
+    }
+
+    public static void setNvidiaCgAutomaticMode(boolean flag)
+    {
+        nvidiaCgAutomaticMode = flag;
+    }
+
+    public static boolean getNvidiaCgAutomaticMode()
+    {
+        return nvidiaCgAutomaticMode;
+    }
 
     public static boolean renderingWithNvidiaGpu()
     {
@@ -298,10 +352,48 @@ public abstract class JoglRenderer extends RenderingElement {
         return shader;
     }
 
+    public static boolean needCg(RendererConfiguration quality)
+    {
+        if ( quality.getShadingType() != quality.SHADING_TYPE_PHONG ) {
+            return false;
+        }
+        return true;
+    }
+
     public static void activateNvidiaGpuParameters(GL gl,
         RendererConfiguration quality,
         CGprogram vertexShader, CGprogram pixelShader)
     {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            //- Global per-frame shader activation ----------------------------
+            enableNvidiaCgProfiles();
+            setRenderingWithNvidiaGpu(true);
+
+            if ( quality.isBumpMapSet() ) {
+                JoglRenderer.currentVertexShader = JoglRenderer.NvidiaGpuVertexProgramTextureBump;
+                JoglRenderer.currentPixelShader = JoglRenderer.NvidiaGpuPixelProgramTextureBump;
+              }
+              else {
+                JoglRenderer.currentVertexShader = JoglRenderer.NvidiaGpuVertexProgramTexture;
+                JoglRenderer.currentPixelShader = JoglRenderer.NvidiaGpuPixelProgramTexture;
+            }
+            JoglRenderer.bindNvidiaGpuShaders(
+                currentVertexShader, currentPixelShader);
+            vertexShader = currentVertexShader;
+            pixelShader = currentPixelShader;
+
+            //- Multiple texture management for pixel shaders -----------------
+            CGparameter param;
+            param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "textureMap");
+            CgGL.cgGLEnableTextureParameter(param);
+            if ( quality.isBumpMapSet() ) {
+                param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "normalMap");
+                CgGL.cgGLEnableTextureParameter(param);
+            }  
+
+        }
+        //-----------------------------------------------------------------
         double withTexture = 0.0;
         if ( quality.isTextureSet() ) withTexture = 1.0;
         CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(

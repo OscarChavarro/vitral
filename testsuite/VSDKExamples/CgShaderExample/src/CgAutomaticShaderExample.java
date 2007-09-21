@@ -25,9 +25,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGparameter;
-import com.sun.opengl.cg.CGprogram;
 import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
@@ -58,11 +56,11 @@ import vsdk.toolkit.render.jogl.JoglRenderer;
 
 /**
 This program is an extended variation of the program
-CgSimpleUnrestrictedShaderExample with two additions:
-  - Bumpmaping support
-  - Standard use of VitralSDK for standard shader support
+CgComplexStandardShaderExample with one addition:
+  - Cg shader management is managed by vitral toolkit material / Renderer
+    configuration scheme
 */
-public class CgComplexStandardShaderExample
+public class CgAutomaticShaderExample
     implements GLEventListener, MouseListener, MouseMotionListener,
                MouseWheelListener, KeyListener
 {
@@ -72,12 +70,6 @@ public class CgComplexStandardShaderExample
     private RendererConfigurationController qualityController;
 
     //- GPU control --------------------------------------------------------
-    private boolean NvidiaGpuActive = true;
-    private boolean NvidiaGpuAvailable = true;
-    private CGprogram NvidiaGpuVertexProgramTexture;
-    private CGprogram NvidiaGpuPixelProgramTexture;
-    private CGprogram NvidiaGpuVertexProgramTextureBump;
-    private CGprogram NvidiaGpuPixelProgramTextureBump;
     private int normalMapList;
     private int textureMapList;
 
@@ -104,7 +96,7 @@ public class CgComplexStandardShaderExample
 
     //----------------------------------------------------------------------
 
-    public CgComplexStandardShaderExample(boolean appletMode) {
+    public CgAutomaticShaderExample(boolean appletMode) {
         if ( !appletMode ) init();
     }
 
@@ -192,49 +184,12 @@ public class CgComplexStandardShaderExample
     public void createCgElements(GL gl) {
         if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
             System.out.println("Nvidia Cg not available. Turning off GPU support!");
-            NvidiaGpuActive = false;
-            NvidiaGpuAvailable = false;
             enableTexture(gl, false);
             return;
         }
         enableTexture(gl, true);
-        try {
-            //-----------------------------------------------------------------
-            NvidiaGpuVertexProgramTexture =
-              JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
-            NvidiaGpuPixelProgramTexture =
-              JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
-            NvidiaGpuVertexProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
-            NvidiaGpuPixelProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
 
-            //-----------------------------------------------------------------
-            CGparameter param;
-
-            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTexture,
-                "textureMap");
-            CgGL.cgGLSetTextureParameter(param, textureMapList);
-
-            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump,
-                "normalMap");
-            CgGL.cgGLSetTextureParameter(param, normalMapList);
-            param = CgGL.cgGetNamedParameter(NvidiaGpuPixelProgramTextureBump,
-                "textureMap");
-            CgGL.cgGLSetTextureParameter(param, textureMapList);
-
-            //-----------------------------------------------------------------
-            JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
-                NvidiaGpuPixelProgramTexture);
-        }
-        catch ( Exception e ) {
-            System.err.println("Error loading shaders!");
-            System.exit(1);
-        }
+        JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
     }
 
     public void init(GLAutoDrawable drawable) {
@@ -284,74 +239,42 @@ public class CgComplexStandardShaderExample
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
-        CGprogram currentVertexProgram = null;
-        CGprogram currentPixelProgram = null;
-        CGparameter param = null;
-
+        boolean NvidiaGpuActive;
+        NvidiaGpuActive = JoglRenderer.needCg(quality);
         if ( (!quality.isBumpMapSet() || !NvidiaGpuActive) && 
              retextureNeeded ) {
             JoglRenderer.setDefaultTextureForFixedFunctionOpenGL(
-                NvidiaGpuPixelProgramTexture);
+                JoglRenderer.NvidiaGpuPixelProgramTexture);
             retextureNeeded = false;
         }
 
         enableTexture(gl, NvidiaGpuActive && quality.isBumpMapSet());
 
         if ( NvidiaGpuActive ) {
-            //- Global per-frame shader activation ----------------------------
-            JoglRenderer.enableNvidiaCgProfiles();
-            JoglRenderer.setRenderingWithNvidiaGpu(true);
-            if ( quality.isBumpMapSet() ) {
-                currentVertexProgram = NvidiaGpuVertexProgramTextureBump;
-                currentPixelProgram = NvidiaGpuPixelProgramTextureBump;
-              }
-              else {
-                currentVertexProgram = NvidiaGpuVertexProgramTexture;
-                currentPixelProgram = NvidiaGpuPixelProgramTexture;
-            }
-            JoglRenderer.bindNvidiaGpuShaders(
-                currentVertexProgram, currentPixelProgram);
-
             //- Shader configuration from scene data --------------------------
             JoglRenderer.activateNvidiaGpuParameters(gl, quality,
-                currentVertexProgram, currentPixelProgram);
-            JoglCameraRenderer.activateNvidiaGpuParameters(gl, camera,
-                currentVertexProgram, currentPixelProgram);
-            JoglLightRenderer.activateNvidiaGpuParameters(gl, light,
-                currentVertexProgram, currentPixelProgram);
-            JoglMaterialRenderer.activateNvidiaGpuParameters(gl, material,
-                currentVertexProgram, currentPixelProgram);
-            JoglGeometryRenderer.activateNvidiaGpuParameters(gl, geometry,
-                camera, currentVertexProgram, currentPixelProgram);
+                JoglRenderer.currentVertexShader, JoglRenderer.currentPixelShader);
+        }
 
-            //- Multiple texture management for pixel shaders -----------------
-            param = CgGL.cgGetNamedParameter(currentPixelProgram, "textureMap");
-            CgGL.cgGLEnableTextureParameter(param);
-            if ( quality.isBumpMapSet() ) {
-                param = CgGL.cgGetNamedParameter(currentPixelProgram, "normalMap");
-                CgGL.cgGLEnableTextureParameter(param);
-            }  
+        JoglLightRenderer.activate(gl, light);
+        JoglMaterialRenderer.activate(gl, material);
+
+        if ( quality.isTextureSet() ) {
+            gl.glEnable(gl.GL_TEXTURE_2D);
         }
         else {
-            JoglLightRenderer.activate(gl, light);
-            JoglMaterialRenderer.activate(gl, material);
-            if ( quality.isTextureSet() ) {
-                gl.glEnable(gl.GL_TEXTURE_2D);
-            }
-            else {
-                gl.glDisable(gl.GL_TEXTURE_2D);
-            }
+            gl.glDisable(gl.GL_TEXTURE_2D);
         }
-
 
         JoglGeometryRenderer.draw(gl, geometry, camera, quality);
 
         if ( NvidiaGpuActive ) {
             // Disable textures
-            param = CgGL.cgGetNamedParameter(currentPixelProgram, "textureMap");
+            CGparameter param = null;
+            param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "textureMap");
             CgGL.cgGLDisableTextureParameter(param);
             if ( quality.isBumpMapSet() ) {
-                param = CgGL.cgGetNamedParameter(currentPixelProgram, "normalMap");
+                param = CgGL.cgGetNamedParameter(JoglRenderer.currentPixelShader, "normalMap");
                 CgGL.cgGLDisableTextureParameter(param);
             }
             JoglRenderer.disableNvidiaCgProfiles();
@@ -391,7 +314,7 @@ public class CgComplexStandardShaderExample
 
         //-----------------------------------------------------------------
         if ( withMap ) {
-            normalMapList = JoglImageRenderer.activate(gl, convertedNormalMap);
+            normalMapList = JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap);
         }
     }
 
@@ -494,15 +417,6 @@ public class CgComplexStandardShaderExample
             case 'j': lightPosition.z -= 0.1; break;
             case '9': lightPosition.y -= 0.1; break;
             case '0': lightPosition.y += 0.1; break;
-            case 'g':
-              if ( NvidiaGpuAvailable ) {
-                  NvidiaGpuActive = !NvidiaGpuActive;
-              }
-              else {
-                  NvidiaGpuActive = false;
-                  System.out.println("Nvidia Cg not available. Turning on GPU support not available!");
-              }
-              break;
             case 'r': withRotationAnimation = !withRotationAnimation; break;
             case ' ': withLightAnimation = !withLightAnimation; break;
           }
@@ -532,10 +446,9 @@ public class CgComplexStandardShaderExample
         //-----------------------------------------------------------------
         JoglRenderer.verifyOpenGLAvailability();
         JoglRenderer.verifyNvidiaCgAvailability();
-        JoglRenderer.setNvidiaCgAutomaticMode(false);
 
         //-----------------------------------------------------------------
-        CgComplexStandardShaderExample instance = new CgComplexStandardShaderExample(false);
+        CgAutomaticShaderExample instance = new CgAutomaticShaderExample(false);
 
         JFrame frame = new JFrame("Vitral SDK / Nvidia Cg demo");
         canvas = new GLCanvas();

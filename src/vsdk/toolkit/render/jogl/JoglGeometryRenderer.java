@@ -34,6 +34,17 @@ public class JoglGeometryRenderer extends JoglRenderer
     private static Vector3D p = new Vector3D();
     private static Vector3D n = new Vector3D();
 
+    protected static void activateShaders(GL gl, Geometry g, Camera c)
+    {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            JoglCameraRenderer.activateNvidiaGpuParameters(gl, c,
+                currentVertexShader, currentPixelShader);
+            activateNvidiaGpuParameters(gl, g, c,
+                currentVertexShader, currentPixelShader);
+	}
+    }
+
     public static void prepareSurfaceQuality(GL gl, RendererConfiguration quality)
     {
         int shadingType = quality.getShadingType();

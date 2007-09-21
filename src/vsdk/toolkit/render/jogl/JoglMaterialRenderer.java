@@ -19,6 +19,13 @@ public class JoglMaterialRenderer extends JoglRenderer {
 
     public static void activate(GL gl, Material m)
     {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            activateNvidiaGpuParameters(gl, m,
+                currentVertexShader, currentPixelShader);
+	}
+
+        //-----------------------------------------------------------------
         if ( m == null ) {
             if ( errorReported == false ) {
                 VSDK.reportMessage(null, VSDK.WARNING, 

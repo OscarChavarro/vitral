@@ -30,6 +30,13 @@ public class JoglLightRenderer extends JoglRenderer {
 
     public static void activate(GL gl, Light l)
     {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            activateNvidiaGpuParameters(gl, l,
+                currentVertexShader, currentPixelShader);
+	}
+
+        //-----------------------------------------------------------------
         float[] lightPosition=l.getPosition().exportToFloatArrayVect();
         float global_ambient[] = {0, 0, 0, 1};
         float global_twoside[] = {gl.GL_TRUE};  // WARNING: This is inefficient!

@@ -414,6 +414,9 @@ Changes in 2007 september 18 revition
   - 27min: Camera.generateRay supports operation with orthogonal mode.
   - 33min: Translation gizmo small review
 
+Changes in 2007 september 20 revition
+  - 2h40min: Integrating generic Nvidia Cg automatic material shader management
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

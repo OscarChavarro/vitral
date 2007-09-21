@@ -51,6 +51,7 @@ cd ..
 cd CgShaderExample
 ./compile1.sh
 ./compile2.sh
+./compile3.sh
 cd ..
 cd WireframeExample
 ./compile.sh

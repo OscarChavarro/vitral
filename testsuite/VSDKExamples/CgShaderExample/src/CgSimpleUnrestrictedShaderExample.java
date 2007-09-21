@@ -19,7 +19,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
-// JOGL clases
+// JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
@@ -86,7 +86,7 @@ public class CgSimpleUnrestrictedShaderExample
     //- Scene elements -----------------------------------------------------
     private Camera camera;                   // 1. Camera
     private Light light;                     // 2. Light
-    private Material material;               // 3. Surface propierties
+    private Material material;               // 3. Surface properties
     private RGBImage textureMap;
     private RendererConfiguration quality;
     private double xrotation;                // 4. Geometrical transformations
@@ -518,6 +518,7 @@ public class CgSimpleUnrestrictedShaderExample
         //-----------------------------------------------------------------
         JoglRenderer.verifyOpenGLAvailability();
         JoglRenderer.verifyNvidiaCgAvailability();
+        JoglRenderer.setNvidiaCgAutomaticMode(false);
 
         //-----------------------------------------------------------------
         CgSimpleUnrestrictedShaderExample instance = new CgSimpleUnrestrictedShaderExample(false);

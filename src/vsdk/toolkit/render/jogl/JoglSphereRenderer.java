@@ -248,6 +248,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     public static void draw(GL gl, Sphere s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
+	JoglGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
