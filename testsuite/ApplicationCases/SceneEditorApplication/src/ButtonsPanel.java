@@ -510,6 +510,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
             jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
+
             int opc = jfc.showOpenDialog(new JPanel());
             if (opc == JFileChooser.APPROVE_OPTION) {
                 try {
@@ -527,6 +528,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     return;
                 }
             }
+
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));

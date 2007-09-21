@@ -10,6 +10,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglFixedBackgroundRenderer;
@@ -92,6 +93,10 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
         }
 
+        //JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
+        //    JoglRenderer.getCurrentVertexShader(), 
+        //    JoglRenderer.getCurrentPixelShader());
+
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             quality = s.qualityTemplate.clone();
 
@@ -104,6 +109,7 @@ public class JoglSceneRenderer
             gi = s.scene.getSimpleBodies().get(i);
             JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
         }
+        //JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
 
         //- Draw visual debug entities (usually transparent) --------------
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {

@@ -69,12 +69,12 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static CGprogram getCurrentVertexShader()
     {
-	return currentVertexShader;
+        return currentVertexShader;
     }
 
     public static CGprogram getCurrentPixelShader()
     {
-	return currentPixelShader;
+        return currentPixelShader;
     }
 
     public static void createDefaultAutomaticNvidiaCgShaders()
@@ -82,26 +82,31 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !nvidiaCgAutomaticMode ) {
             return;
         }
+
+	FileInputStream fis;
+
         try {
             //-----------------------------------------------------------------
             if ( !tryToEnableNvidiaCg() ) {
                 nvidiaCgAutomaticMode = false;
                 return;
             }
+            fis = new FileInputStream("./etc/PhongTextureVertexShader.cg");
             NvidiaGpuVertexProgramTexture =
-              JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+                JoglRenderer.loadNvidiaGpuVertexShader(fis);
+            fis.close();
+	    fis = new FileInputStream("./etc/PhongTexturePixelShader.cg");
             NvidiaGpuPixelProgramTexture =
-              JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+              JoglRenderer.loadNvidiaGpuPixelShader(fis);
+	    fis.close();
+	    fis = new FileInputStream("./etc/PhongTextureBumpVertexShader.cg");
             NvidiaGpuVertexProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
+              JoglRenderer.loadNvidiaGpuVertexShader(fis);
+	    fis.close();
+	    fis = new FileInputStream("./etc/PhongTextureBumpPixelShader.cg");
             NvidiaGpuPixelProgramTextureBump =
-              JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
-            setDefaultTextureForFixedFunctionOpenGL(
-                NvidiaGpuPixelProgramTexture);
+              JoglRenderer.loadNvidiaGpuPixelShader(fis);
+	    fis.close();
         }
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.WARNING, 
@@ -306,12 +311,15 @@ public abstract class JoglRenderer extends RenderingElement {
         if ( !getNvidiaCgAvailability() ) {
             return null;
         }
-
-        CGprogram shader;
+        CGprogram shader = null;
         try {
             shader = CgGL.cgCreateProgramFromStream(
                 nvidiaGpuContext, CgGL.CG_SOURCE, is,
                 nvidiaGpuVertexProfile, null, null);
+            if ( !CgGL.cgIsProgramCompiled(shader) ) {
+                CgGL.cgCompileProgram(shader);
+            }
+            CgGL.cgGLLoadProgram(shader);
         }
         catch ( Exception e ) {
             if ( nvidiaCgErrorReported ) return null;
@@ -324,11 +332,6 @@ public abstract class JoglRenderer extends RenderingElement {
             nvidiaCgAvailable = false;
             return null;
         }
-        if ( !CgGL.cgIsProgramCompiled(shader) ) {
-            CgGL.cgCompileProgram(shader);
-        }
-        CgGL.cgGLLoadProgram(shader);
-
         return shader;
     }
 
@@ -343,6 +346,10 @@ public abstract class JoglRenderer extends RenderingElement {
             shader = CgGL.cgCreateProgramFromStream(
                 nvidiaGpuContext, CgGL.CG_SOURCE, is,
                 nvidiaGpuPixelProfile, null, null);
+            if ( !CgGL.cgIsProgramCompiled(shader) ) {
+                CgGL.cgCompileProgram(shader);
+            }
+            CgGL.cgGLLoadProgram(shader);
         }
         catch ( Exception e ) {
             if ( nvidiaCgErrorReported ) return null;
@@ -355,10 +362,6 @@ public abstract class JoglRenderer extends RenderingElement {
             nvidiaCgAvailable = false;
             return null;
         }
-        if ( !CgGL.cgIsProgramCompiled(shader) ) {
-            CgGL.cgCompileProgram(shader);
-        }
-        CgGL.cgGLLoadProgram(shader);
 
         return shader;
     }

@@ -61,7 +61,7 @@ public class RendererConfiguration extends FundamentalEntity {
     Constructs a default RendererConfiguration object that will display the surfaces
     */
     public RendererConfiguration() {
-        shadingType = SHADING_TYPE_PHONG;
+        shadingType = SHADING_TYPE_GOURAUD;
 
         surfaces = true;
         wires = false;

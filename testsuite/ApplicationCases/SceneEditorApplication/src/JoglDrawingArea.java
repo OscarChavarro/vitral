@@ -58,6 +58,7 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
@@ -106,6 +107,7 @@ public class JoglDrawingArea implements
 
     public int interactionMode;
 
+    private boolean firstTimer = true;
     public boolean wantToGetColor;
     public boolean wantToGetDepth;
     public boolean wantToGetContourns;
@@ -688,6 +690,7 @@ public class JoglDrawingArea implements
         if ( !view.isActive() ) {
             return;
         }
+
         if ( view.getRenderMode() == view.RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene);
         }
@@ -710,7 +713,14 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
+        //JoglRenderer.activateNvidiaGpuParameters(gl, view.getRendererConfiguration(),
+        //    JoglRenderer.getCurrentVertexShader(), 
+        //    JoglRenderer.getCurrentPixelShader());
+
         drawVisualRayDebug(gl);
+
+        //JoglRenderer.deactivateNvidiaGpuParameters(gl, view.getRendererConfiguration());
+
         view.drawGrid(gl);
 
         //-----------------------------------------------------------------
@@ -729,6 +739,11 @@ public class JoglDrawingArea implements
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        if ( firstTimer ) {
+            firstTimer = false;
+            //JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
+        }
 
         debugProjectedViewsIfNeeded(gl);
 
@@ -750,6 +765,7 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
+
         for ( i = 0; i < views.size(); i++ ) {
             view = views.get(i);
 
@@ -1459,7 +1475,7 @@ public class JoglDrawingArea implements
                 break;
               //------------------------------------------------------------
 
-              case 't':
+              case 'T':
                 if ( firstThingSelected >= 0 ) {
                     SimpleBody gi;
                     Image texture;
@@ -1479,7 +1495,7 @@ public class JoglDrawingArea implements
                     }
                 }
                 break;
-              case 'b':
+              case 'B':
                 if ( firstThingSelected >= 0 ) {
                     SimpleBody gi;
                     IndexedColorImage source = null;

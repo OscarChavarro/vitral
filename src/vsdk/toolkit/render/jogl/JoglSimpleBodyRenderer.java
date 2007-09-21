@@ -15,6 +15,7 @@ import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBImage;
 
 public class JoglSimpleBodyRenderer extends JoglRenderer {
     public static void draw(GL gl, SimpleBody b,
@@ -45,6 +46,12 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             gl.glDisable(gl.GL_TEXTURE_2D);
         }
 
+        RGBImage nm = b.getNormalMapRgb();
+        if ( q.isBumpMapSet() && (nm != null) ) {
+            JoglImageRenderer.activateAsNormalMap(gl, nm, q);
+        }
+
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
 
         gl.glPopMatrix();
