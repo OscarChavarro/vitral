@@ -2,7 +2,6 @@
 
 // Java classes
 import java.io.File;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -198,7 +197,7 @@ public class WireframeExample extends JFrame implements
         //-----------------------------------------------------------------
         if ( drawWires || drawImage ) {
             TriangleMesh mesh = null;
-            Iterator<TriangleMesh> i;
+            int i;
             Vertex[] arrVertexes;
             Triangle[] arrTriangles;
             int t;
@@ -211,8 +210,8 @@ public class WireframeExample extends JFrame implements
             cp1 = new Vector3D();
             R = camera.calculateProjectionMatrix(camera.STEREO_MODE_CENTER);
 
-            for ( i = meshGroup.getMeshes().iterator(); i.hasNext(); ) {
-                mesh = (TriangleMesh)i.next();
+            for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
+                mesh = meshGroup.getMeshes().get(i);
                 arrVertexes = mesh.getVertexes();
                 arrTriangles = mesh.getTriangles();
                 for ( t = 0; t < arrTriangles.length; t++ ) {

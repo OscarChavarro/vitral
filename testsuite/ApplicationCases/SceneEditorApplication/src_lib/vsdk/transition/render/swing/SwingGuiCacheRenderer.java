@@ -5,7 +5,6 @@ package vsdk.transition.render.swing;
 
 // Basic JAVA JDK classes
 import java.util.ArrayList;
-import java.util.Iterator;
 
 // GUI JDK classes (Awt + Swing)
 import java.awt.Color;
@@ -110,12 +109,12 @@ public class SwingGuiCacheRenderer
             ArrayList<GuiElementCache> children;
             children = menu.getChildren();
 
-            Iterator i;
+            int i;
             GuiElementCache element;
             String className;
 
-            for ( i = children.iterator(); i.hasNext(); ) {
-                element = (GuiElementCache)i.next();
+            for ( i = 0; i < children.size(); i++ ) {
+                element = children.get(i);
                 className = element.getClass().getName();
                 if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
                     GuiMenuCache submenu = (GuiMenuCache)element;
@@ -179,12 +178,12 @@ public class SwingGuiCacheRenderer
         }
 
         ArrayList<GuiCommandCache> list = group.getCommands();
-        Iterator i;
+        int i;
         GuiCommandCache element;
         RGBAImage img;
 
-        for ( i = list.iterator(); i.hasNext(); ) {
-            element = (GuiCommandCache)i.next();
+        for ( i = 0; i < list.size(); i++ ) {
+            element = list.get(i);
 
             // Button goes with images ... if any inside command
             img = element.getIcon();
@@ -269,13 +268,13 @@ public class SwingGuiCacheRenderer
             ArrayList<GuiElementCache> children;
             children = menubar.getChildren();
 
-            Iterator i;
+            int i;
             GuiElementCache element;
             GuiMenuCache menu;
             String className;
 
-            for ( i = children.iterator(); i.hasNext(); ) {
-                element = (GuiElementCache)i.next();
+            for ( i = 0; i < children.size(); i++ ) {
+                element = children.get(i);
                 className = element.getClass().getName();
                 if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
                     menu = (GuiMenuCache)element;

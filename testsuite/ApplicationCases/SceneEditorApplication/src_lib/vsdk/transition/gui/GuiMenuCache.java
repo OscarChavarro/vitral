@@ -1,7 +1,6 @@
 package vsdk.transition.gui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class GuiMenuCache extends GuiElementCache
 {
@@ -45,10 +44,10 @@ public class GuiMenuCache extends GuiElementCache
 
         String msg = leadingSpace + "Menu \"" + name + "\"\n";
 
-        Iterator i;
+        int i;
 
-        for ( i = children.iterator(); i.hasNext(); ) {
-            msg = msg + ((GuiElementCache)i.next()).toString(level+1);
+        for ( i = 0; i < children.size(); i++ ) {
+            msg = msg + (children.get(i)).toString(level+1);
         }
 
         return msg;

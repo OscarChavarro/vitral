@@ -2,7 +2,6 @@
 
 // Basic JDK classes
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -135,8 +134,8 @@ public class GlyphExample extends JFrame implements
         double minmax[] = new double[6];
 
         gl.glPushMatrix();
-        for ( Iterator i = glyphs.iterator(); i.hasNext(); ) {
-            ParametricCurve c = (ParametricCurve)i.next();
+        for ( int i = 0; i < glyphs.size(); i++ ) {
+            ParametricCurve c = glyphs.get(i);
 
             gl.glLineWidth((float)2.0);
             JoglParametricCurveRenderer.draw(gl, c, camera, 
@@ -244,9 +243,8 @@ public class GlyphExample extends JFrame implements
           if ( steps < 1 ) steps = 1;
           System.out.println("Steps: " + steps);
 
-          for ( Iterator i = glyphs.iterator(); i.hasNext(); ) {
-              ParametricCurve c = (ParametricCurve)i.next();
-              c.setApproximationSteps(steps);
+          for ( int i = 0; i < glyphs.size(); i++ ) {
+              glyphs.get(i).setApproximationSteps(steps);
           }
 
           canvas.repaint();
@@ -255,9 +253,8 @@ public class GlyphExample extends JFrame implements
           steps++;
           System.out.println("Steps: " + steps);
 
-          for ( Iterator i = glyphs.iterator(); i.hasNext(); ) {
-              ParametricCurve c = (ParametricCurve)i.next();
-              c.setApproximationSteps(steps);
+          for ( int i = 0; i < glyphs.size(); i++ ) {
+              glyphs.get(i).setApproximationSteps(steps);
           }
 
           canvas.repaint();
