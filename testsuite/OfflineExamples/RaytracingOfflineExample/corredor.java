@@ -11,7 +11,8 @@ Oscar Chavarro, Fundacion Universidad San Martin, septiembre 27 de 2003.
 Este codigo se rige bajo la licencia GNU/GPL (http://www.gnu.org)
 */
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 
 public class corredor {
 
