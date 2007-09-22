@@ -81,7 +81,7 @@ public class JoglView implements KeyListener
     private boolean active;
     private String title;
     private RGBAImage titleImage;
-    private RGBAImage xLabelImage;
+    public RGBAImage xLabelImage;
     private RGBAImage yLabelImage;
     private RGBAImage zLabelImage;
     private Font font;
@@ -658,7 +658,7 @@ public class JoglView implements KeyListener
         if ( showGrid ) drawGridRectangle(gl);
     }
 
-    private void drawTextureString2D(GL gl, int x, int y, RGBAImage i)
+    public void drawTextureString2D(GL gl, int x, int y, RGBAImage i)
     {
         double dx;
         double dy;

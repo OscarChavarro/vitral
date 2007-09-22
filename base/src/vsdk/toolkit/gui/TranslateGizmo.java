@@ -6,14 +6,17 @@
 
 package vsdk.toolkit.gui;
 
+// Java basic classes
 import java.util.ArrayList;
 
+// Awt classes
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Robot;
 import java.awt.Point;
 
+// VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
@@ -80,8 +83,8 @@ public class TranslateGizmo extends Gizmo {
     private int persistentSelection;
     private int volatileSelection;
 
-    private Robot awtRobot;
-    private boolean skipRobot;
+    //private Robot awtRobot;
+    //private boolean skipRobot;
     private int oldmousex;
     private int oldmousey;
     private boolean selectedResizing;
@@ -106,8 +109,8 @@ public class TranslateGizmo extends Gizmo {
         }
 
         setCamera(cam);
-        awtRobot = null;
-        skipRobot = false;
+        //awtRobot = null;
+        //skipRobot = false;
         oldmousex = 0;
         oldmousey = 0;
         selectedResizing = true;
@@ -142,22 +145,22 @@ public class TranslateGizmo extends Gizmo {
 
     /**
     This method updates the data structure contained in the `elementInstances`
-    array starting from the given paramenters.
+    array starting from the given parameters.
     - translation is the position of the center of the gizmo
     - rotation is the rotation matrix containing the orientation of the gizmo
     - if autosize is false, initialdu, initialdv and camera parameters are not
-    used, and the gizmo doesn't change its current size. If autosize is true,
-    the gizmo size is changed such as from the current camera, the gizmo
-    projection fit a 2D area of initialdu * initialdv pixels.
+      used, and the gizmo doesn't change its current size. If autosize is true,
+      the gizmo size is changed such as from the current camera, the gizmo
+      projection fit a 2D area of initialdu * initialdv pixels.
     - modelType must be one of the following values: MODEL_FOR_GRAVITY or
-    MODEL_FOR_DISPLAY. Depending on this value the size of current
-    geometric elements could change.
+      MODEL_FOR_DISPLAY. Depending on this value the size of current
+      geometric elements could change.
     */
     public void calculateGeometryState(Vector3D translation, Matrix4x4 rotation,
-                                       boolean autosize, int initialdu, Camera camera, 
-                                       int modelType)
+                                       boolean autosize, int initialdu,
+                                       Camera camera, int modelType)
     {
-        int index;
+        //-----------------------------------------------------------------
         int i;
         Material red = createMaterial(1, 0, 0);
         Material green = createMaterial(0, 1, 0);
@@ -189,10 +192,12 @@ public class TranslateGizmo extends Gizmo {
         Vector3D eleP;
 
         if ( selectedResizing ) {
-            Vector3D right = camera.getLeft().multiply(-1);
+            Vector3D a = new Vector3D();
+            Vector3D b = new Vector3D();
             Vector3D p = getPosition();
+            Vector3D right = camera.getLeft().multiply(-1);
+
             right.normalize();
-            Vector3D a = new Vector3D(), b = new Vector3D();
             camera.projectPoint(p, a);
             camera.projectPoint(p.add(right), b);
             double factor = VSDK.vectorDistance(a, b);
@@ -209,8 +214,11 @@ public class TranslateGizmo extends Gizmo {
         cylinderModel.setHeight(scale*SEGMENT_LENGHT);
         boxModel.setSize(scale*BOX_SIDE, scale*BOX_SIDE, scale*BOX_HEIGHT);
 
-        index = 1;
-        for ( i = 0; index <= 12 && i < elementInstances.size(); index++, i++ ) {
+        //-----------------------------------------------------------------
+        int index;
+        for ( i = 0, index = 1;
+              index <= 12 && i < elementInstances.size();
+              index++, i++ ) {
             SimpleBody r = elementInstances.get(i);
             r.setGeometry(null);
             switch ( index ) {
@@ -699,12 +707,14 @@ public class TranslateGizmo extends Gizmo {
     public boolean processMouseDraggedEventAwt(MouseEvent e)
     {
         //- If it is called as an automatic reposition, do nothing --------
+/*
         if ( skipRobot ) {
             skipRobot = false;
             oldmousex = e.getX();
             oldmousey = e.getY();
             return false;
         }
+*/
 
         //- Configure sub-interaction technique from active element -------
         int currentSelection;
@@ -835,6 +845,7 @@ public class TranslateGizmo extends Gizmo {
 
         //- Automatic cursor repositioning constrain ----------------------
         // THIS IS NOT WORKING!
+/*
         try {
             if ( awtRobot == null ) {
                 awtRobot = new Robot();
@@ -852,7 +863,7 @@ public class TranslateGizmo extends Gizmo {
         catch ( Exception ex ) {
             System.err.println(ex);
         }
-
+*/
         //-----------------------------------------------------------------
         oldmousex = e.getX();
         oldmousey = e.getY();

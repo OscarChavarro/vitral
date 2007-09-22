@@ -196,6 +196,45 @@ public class InfinitePlane extends HalfSpace {
         setNormal(n);
         setD(-(n.x*p.x + n.y*p.y + n.z*p.z));
     }
+
+    /**
+    Given point `p`, current method returns the minimum distance between such
+    a point and this plane.
+    */
+    public double pointDistance(Vector3D p)
+    {
+        return a*p.x + b*p.y + c*p.z + d;
+    }
+
+    /**
+    Given point `p`, current method returns the point in this plane such as
+    its distance is the minimum to `p`. Note this correspond to "the point's
+    projection to the plane" such as the projector is at 90 deg. angle with
+    respect to the plane.
+    */
+    public Vector3D projectPoint(Vector3D p)
+    {
+        double distance = pointDistance(p);
+        Vector3D n = new Vector3D(a, b, c);
+        n.normalize();
+        n = n.multiply(distance);
+        return p.substract(n);
+    }
+
+    /**
+    Given point `p`, current method returns the mirrored point of `p` with
+    respect to this plane. Note that the intersection between this plane and
+    the line from `p` to its mirror is the projection of p over the plane.
+    */
+    public Vector3D mirrorPoint(Vector3D p)
+    {
+        double distance = pointDistance(p);
+        Vector3D n = new Vector3D(a, b, c);
+        n.normalize();
+        n = n.multiply(2*distance);
+        return p.substract(n);
+    }
+
 }
 
 //===========================================================================

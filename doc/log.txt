@@ -419,6 +419,11 @@ Changes in 2007 september 20 revition
   - 35min: Testing Nvidia Cg automatic material shader on systems without Cg
   - 50min: Nvidia Cg automatic material shader programming interface ready!
 
+Changes in 2007 september 22 revition
+  - 26min: indenting and untabifying some modules.
+  - 2h: Camera.projectPoint updated to support orthogonal cases, InfinitePlane
+    operations for projectDistance, projectPoint and mirrorPoint.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

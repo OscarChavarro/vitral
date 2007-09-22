@@ -69,7 +69,7 @@ public class Camera extends Entity
     el cual est&aacute; generando una proyecci&oacute;n, para poder modificar
     sus par&aacute;metros internos en funci&oacute;n del &aacute;ngulo de
     vision (`fov`) y de la actual proporci&oacute;n de ancho/alto del
-    viewport. Las variables internas `viewport_xsize` y `viewport_ysize`
+    viewport. Las variables internas `viewportXSize` y `viewportYSize`
     representan el tama&nacute;o en pixels para el viewport, y son valores
     que solo pueden ser cambiados por el m&eacute;todo 
     `Camera::updateViewportResize`. Estos dos valores son para uso interno de
@@ -77,9 +77,9 @@ public class Camera extends Entity
     de la configuraci&oacute;n del viewport, que debe ser administrado por
     la aplicaci&oacute;n que use `Camera`s).
     */
-    private double viewport_xsize;
-    /// Ver la documentaci&oacute;n de `viewport_xsize`
-    private double viewport_ysize;
+    private double viewportXSize;
+    /// Check `viewportXSize`'s documentation
+    private double viewportYSize;
 
     // Vectores privados que se preprocesan para agilizar los calculos
     private Vector3D dx, dy, _dir, upWithScale, rightWithScale;
@@ -93,8 +93,8 @@ public class Camera extends Entity
         left=new Vector3D(-1,0,0);
         
         fov = 60;
-        viewport_xsize = 320;
-        viewport_ysize = 320;
+        viewportXSize = 320;
+        viewportYSize = 320;
 
         projectionMode = PROJECTION_MODE_PERSPECTIVE;
         orthogonalZoom = 1;
@@ -114,8 +114,8 @@ public class Camera extends Entity
         left=new Vector3D(b.left);
         
         fov = b.fov;
-        viewport_xsize = b.viewport_xsize;
-        viewport_ysize = b.viewport_ysize;
+        viewportXSize = b.viewportXSize;
+        viewportYSize = b.viewportYSize;
 
         projectionMode = b.projectionMode;
         orthogonalZoom = b.orthogonalZoom;
@@ -139,12 +139,12 @@ public class Camera extends Entity
 
     public double getViewportXSize()
     {
-        return viewport_xsize;
+        return viewportXSize;
     }
 
     public double getViewportYSize()
     {
-        return viewport_ysize;
+        return viewportYSize;
     }
 
     public Vector3D getPosition()
@@ -293,8 +293,8 @@ public class Camera extends Entity
 
     public void updateViewportResize(int dx, int dy)
     {
-        viewport_xsize = dx;
-        viewport_ysize = dy;
+        viewportXSize = dx;
+        viewportYSize = dy;
         updateVectors();
     }
 
@@ -315,7 +315,7 @@ public class Camera extends Entity
         left.normalize();
         front.normalize();
 
-        double fovFactor = viewport_xsize/viewport_ysize;
+        double fovFactor = viewportXSize/viewportYSize;
         _dir = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
         rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
@@ -339,6 +339,8 @@ public class Camera extends Entity
       - At least a call to the updateVectors method must be done before calling
         this method, and after changing any camera parameter the updateVectors
         method must be called again to reflect the changes in this calculation.
+
+    /todo this method should be named "generateProjectorRay"
     */
     public final Ray generateRay(int x, int y)
     {
@@ -347,15 +349,15 @@ public class Camera extends Entity
         Ray ray;
 
         // 1. Convert integer image coordinates into values in the range [-0.5, 0.5]
-        u = ((double)x - viewport_xsize/2.0) / viewport_xsize;
-        v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
+        u = ((double)x - viewportXSize/2.0) / viewportXSize;
+        v = ((viewportYSize - (double)y - 1) -  viewportYSize/2.0) / viewportYSize;
 
         // 2. Calculate the ray direction
         Vector3D dv;
         Vector3D du;
 
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            double fovFactor = viewport_xsize/viewport_ysize;
+            double fovFactor = viewportXSize/viewportYSize;
             du = left.multiply(-fovFactor);
             dv = up;
             du = du.multiply(2*u/orthogonalZoom);
@@ -425,7 +427,7 @@ public class Camera extends Entity
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
         Matrix4x4 P = new Matrix4x4();
 
-        aspect = viewport_xsize / viewport_ysize; 
+        aspect = viewportXSize / viewportYSize; 
         switch ( projectionMode ) {
           case Camera.PROJECTION_MODE_ORTHOGONAL:
             P.orthogonalProjection(-aspect/orthogonalZoom,
@@ -560,7 +562,7 @@ public class Camera extends Entity
         msg = msg + "  - fov = " + VSDK.formatDouble(fov) + "\n";
         msg = msg + "  - nearPlaneDistance = " + VSDK.formatDouble(nearPlaneDistance) + "\n";
         msg = msg + "  - farPlaneDistance = " + VSDK.formatDouble(farPlaneDistance) + "\n";
-        msg = msg + "  - Viewport size in pixels = (" + VSDK.formatDouble(viewport_xsize) + ", " + VSDK.formatDouble(viewport_ysize) + ")\n";
+        msg = msg + "  - Viewport size in pixels = (" + VSDK.formatDouble(viewportXSize) + ", " + VSDK.formatDouble(viewportYSize) + ")\n";
         msg = msg + "  - Transformation * projection matrix:" + TP;
 
         //------------------------------------------------------------
@@ -568,7 +570,7 @@ public class Camera extends Entity
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
 
         P = new Matrix4x4();
-        aspect = viewport_xsize / viewport_ysize; 
+        aspect = viewportXSize / viewportYSize; 
         if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
             upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
             downDistance = -upDistance;
@@ -605,7 +607,7 @@ public class Camera extends Entity
     {
         // 1. Calculate the angle between the front vector and the plane
         updateVectors();
-        double u = ((double)x - viewport_xsize/2.0) / viewport_xsize;
+        double u = ((double)x - viewportXSize/2.0) / viewportXSize;
         return calculateUPlane(u);
     }
 
@@ -661,7 +663,7 @@ public class Camera extends Entity
     {
         // 1. Calculate the angle between the front vector and the plane
         updateVectors();
-        double v = ((viewport_ysize - (double)y - 1) -  viewport_ysize/2.0) / viewport_ysize;
+        double v = ((viewportYSize - (double)y - 1) -  viewportYSize/2.0) / viewportYSize;
         return calculateVPlane(v);
     }
 
@@ -975,9 +977,25 @@ public class Camera extends Entity
     }
 
     /**
-    Given a point in world coordinates, this method calculates a pixel
-    coordinates in viewport space (in the form <u, v, 0>). Returns true
-    if the pixel lies inside the viewport, false otherwise.
+    Given a point `inPoint` in world coordinates, this method calculates a
+    pixel's  coordinate in viewport space (in the form <u, v, 0>).
+    Returns true if the pixel lies inside the viewport, false otherwise.
+
+    Note that the integer part of the returned `outProjected` point (in
+    its x and y coordinates) can be used as an input to a putPixel type
+    image operation for display, and the same coordinate as double, is
+    usefull as an input for antialiased versions of line rasterizers.
+
+    This method is fundamental for visualization operations, where some
+    examples includes but are not limited to:
+    - Given two (previously clipped) line endpoints in world space, 
+      projected positions can be used for 2D line drawing for wireframe
+      and hidden line rendering algorithms (caligraphic phase prior to
+      2D rasterizing).
+    - For interaction techniques, 2D feedback over 2D visualization.
+    - As part of complex interaction techniques involving a 3D point image
+      in camera viewport, for example to calculate relative movement in 3D
+      with respect to aparent current view from camera.
 
     TODO: Current implementation is suspicious. It should use a simple
     multiplication of point with projection matrix... but this idea is not
@@ -986,38 +1004,68 @@ public class Camera extends Entity
     public boolean projectPoint(Vector3D inPoint, Vector3D outProjected)
     {
         // 1. Calculate vectors
-        updateVectors();
-        Vector3D upCopy = new Vector3D(up);
-        Vector3D rightCopy = new Vector3D(left.multiply(-1));
-        double fovFactor = viewport_xsize/viewport_ysize;
-        double scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
+        Vector3D upCopy = null;
+        Vector3D rightCopy = null;
+        double fovFactor = 0.0;
+        double scaleFactor = 0.0;
 
-        upCopy.normalize();
-        upCopy = upCopy.multiply(scaleFactor);
-        rightCopy.normalize();
-        rightCopy = rightCopy.multiply(scaleFactor).multiply(1/fovFactor);
+        fovFactor = viewportXSize/viewportYSize;
+        updateVectors(); // Should be made a prerequisite for efficiency!
 
-        // 2. Calculate projector
-        Vector3D p = getPosition();
-        Ray r = new Ray(p, inPoint.substract(p));
-        if ( r.direction.length() < VSDK.EPSILON ) return false;
+        // 2. Calculate projection plane
+        Vector3D p;
+        Vector3D center;
+        InfinitePlane viewPlane;
 
-        // 3. Calculate projection plane
-        Vector3D center = new Vector3D(front);
+        center = new Vector3D(front);
+        p = getPosition();
         center.normalize();
+        center.multiply(nearPlaneDistance);
         center = center.add(p);
-        InfinitePlane plane = new InfinitePlane(front.multiply(-1), center);
+        viewPlane = new InfinitePlane(front.multiply(-1), center);
 
-        if ( !plane.doIntersection(r) ) {
-            return false;
+        // 3. Calculate projected global coordinates XYZ
+        Vector3D projected;
+
+        if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            projected = (viewPlane.projectPoint(inPoint).substract(center)).multiply(orthogonalZoom);
+        }
+        else {
+            // 3.1. Vector calculation for perspective case
+            upCopy = new Vector3D(up);
+            rightCopy = new Vector3D(left.multiply(-1));
+            scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
+            upCopy.normalize();
+            upCopy = upCopy.multiply(scaleFactor);
+            rightCopy.normalize();
+            rightCopy = rightCopy.multiply(scaleFactor).multiply(1/fovFactor);
+
+            // 3.2. Calculate projector for perspective case
+            Ray r;
+            r = new Ray(p, inPoint.substract(p));
+
+            // 3.3. Project point in view plane from perspective eyepoint
+            if ( !viewPlane.doIntersection(r) ||
+                 r.direction.length() < VSDK.EPSILON ) {
+                return false;
+            }
+            projected = r.origin.add(r.direction.multiply(r.t)).substract(center);
+            // 3.4. Clip projected point in viewport
+            if ( projected.x < -1 || projected.x > 1 ||
+                 projected.y < -1 || projected.y > 1 ) {
+                return false;
+            }
         }
 
-        // 4. Calculate projected global coordinates XYZ
-        Vector3D projected = r.origin.add(r.direction.multiply(r.t)).substract(center);
-
-        // 5. Scale point to viewport
-        outProjected.x = (projected.dotProduct(rightCopy)/2+0.5)*viewport_xsize;
-        outProjected.y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewport_ysize;
+        // 4. Scale point to viewport
+        if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            outProjected.x = viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize;
+            outProjected.y = (((projected.dotProduct(up)*-1)+1)/2)*viewportYSize;
+        }
+        else {
+            outProjected.x = (projected.dotProduct(rightCopy)/2+0.5)*viewportXSize;
+            outProjected.y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize;
+        }
         outProjected.z = 0.0;
 
         return true;

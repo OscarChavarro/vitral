@@ -720,6 +720,14 @@ public class JoglDrawingArea implements
 
         drawVisualRayDebug(gl);
 
+        // Nice debugging for Camera.projectPoint operation :)
+        Vector3D projected = new Vector3D();
+        if ( view.getCamera().projectPoint(
+             parent.visualDebugRay.origin, projected) ) {
+            view.drawTextureString2D(gl,
+                (int)projected.x-3, (int)projected.y+10, view.xLabelImage);
+	}
+
         //JoglRenderer.deactivateNvidiaGpuParameters(gl, view.getRendererConfiguration());
 
         view.drawGrid(gl);
