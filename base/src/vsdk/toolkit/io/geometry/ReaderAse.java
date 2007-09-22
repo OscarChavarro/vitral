@@ -331,11 +331,11 @@ public class ReaderAse extends PersistenceElement
                         char content = report.charAt(7);
                         if (content == '{') {
                             //System.out.println("{ MARK");
-			    level++;
+                            level++;
                           }
                           else if (content == '}') {
                             //System.out.println("} MARK");
-			      level--;
+                              level--;
                           } else {
                             // Nothing is done, as this is and unknown token,
                             // posibly corresponding to an empty token (i.e.
@@ -350,13 +350,13 @@ public class ReaderAse extends PersistenceElement
         //printList();
         System.out.print(inSceneFileFd.getAbsolutePath());
 
-	if ( level == 0 ) { 
-	    System.out.println(" OKOK!");
-	}
-	else {
-	    System.out.println(" BADBAD: Final level " + level);
-	}
-	System.exit(0);
+        if ( level == 0 ) { 
+            System.out.println(" OKOK!");
+        }
+        else {
+            System.out.println(" BADBAD: Final level " + level);
+        }
+        System.exit(0);
     }
 }
 

@@ -24,7 +24,7 @@ public class ViewerPanel extends JPanel implements MouseListener
         setBorder(new MatteBorder(2, 2, 2, 2, Color.PINK));
         Color c = Color.BLACK;
 
-	lastId++;
+        lastId++;
 
         switch ( lastId % 13 ) {
           case 1: c = Color.RED; break;
@@ -64,7 +64,7 @@ public class ViewerPanel extends JPanel implements MouseListener
 
     public void mouseEntered(MouseEvent e) {
         container.setPointedViewerPanel(this);
-	requestFocusInWindow();
+        requestFocusInWindow();
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -79,12 +79,12 @@ public class ViewerPanel extends JPanel implements MouseListener
 
     public void setSelected(boolean newState)
     {
-	if ( newState ) {
+        if ( newState ) {
             setBorder(new MatteBorder(2, 2, 2, 2, new Color(1.0f, 0.96f, 0.0f)));
-	}
-	else {
+        }
+        else {
             setBorder(new MatteBorder(2, 2, 2, 2, new Color(0.21f, 0.25f, 0.29f)));
-	}
+        }
     }
 }
 

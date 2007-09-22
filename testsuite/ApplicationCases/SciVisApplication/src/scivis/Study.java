@@ -83,19 +83,19 @@ public class Study
     */
     public Study()
     {
-	init(0);
+        init(0);
     }
 
     public void init(int timeTakes)
     {
         //-----------------------------------------------------------------
-	System.out.println("Study.init");
+        System.out.println("Study.init");
         //-----------------------------------------------------------------
         int i;
 
-	for ( i = 0; i < 10; i++ ) {
-	    System.gc();
-	}
+        for ( i = 0; i < 10; i++ ) {
+            System.gc();
+        }
 
         cacheManager = new CacheManager(Runtime.getRuntime().freeMemory());
         setVoxelSizeFactor(new Vector3D(1.0, 1.0, 1.0));
@@ -141,20 +141,20 @@ public class Study
     {
         if ( pos < 0 || pos >= timeTakesArray.size() ) {
             return null;
-	}
+        }
         return timeTakesArray.get(pos);
     }
 
     public int getNumTimeTakes()
     {
-	return timeTakesArray.size();
+        return timeTakesArray.size();
     }
 
     public int getNumSlicesAtTimeTake(int i)
     {
         if ( i < 0 || i >= timeTakesArray.size() ) {
             return 0;
-	}
+        }
 
         return timeTakesArray.get(i).getNumSlices();
     }
@@ -163,7 +163,7 @@ public class Study
     {
         if ( timeTake < 0 || timeTake >= timeTakesArray.size() ) {
             return null;
-	}
+        }
 
         TimeTake tt = timeTakesArray.get(timeTake);
 

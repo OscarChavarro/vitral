@@ -23,24 +23,24 @@ public class PanelManagerSciVisApplication extends PanelManager
 
         System.out.println("Show take " + currentTimeTake + ", slice " + currentSlice);
 
-	if ( parent.study == null ) {
-	    return;
-	}
+        if ( parent.study == null ) {
+            return;
+        }
 
         img = parent.study.getSliceImageAt(currentTimeTake, currentSlice);
 
         int i;
 
-	ViewerPanel p;
-	ViewerPanel2DSwing pe;
-	for ( i = 0; i < panels.size(); i++ ) {
-	    p = panels.get(i);
-	    if ( p instanceof ViewerPanel2DSwing ) {
+        ViewerPanel p;
+        ViewerPanel2DSwing pe;
+        for ( i = 0; i < panels.size(); i++ ) {
+            p = panels.get(i);
+            if ( p instanceof ViewerPanel2DSwing ) {
                 pe = (ViewerPanel2DSwing)p;
                 pe.setImage(img);
                 pe.repaint();
-	    }
-	}
+            }
+        }
     }
 
     public void actionPerformed(ActionEvent ev) {

@@ -34,7 +34,7 @@ public class JoglLightRenderer extends JoglRenderer {
         if ( nvidiaCgAutomaticMode ) {
             activateNvidiaGpuParameters(gl, l,
                 currentVertexShader, currentPixelShader);
-	}
+        }
 
         //-----------------------------------------------------------------
         float[] lightPosition=l.getPosition().exportToFloatArrayVect();

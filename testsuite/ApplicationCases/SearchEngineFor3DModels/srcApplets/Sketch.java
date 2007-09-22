@@ -23,18 +23,18 @@ public class Sketch extends SearchApplet
     private long sessionId;
 
     public Sketch() {
-	sessionId = 0;
+        sessionId = 0;
     }
 
     public long getSessionId()
     {
-	return sessionId;
+        return sessionId;
     }
 
     public void setSessionId(long id)
     {
         sessionId = id;
-	System.out.println("Session ID set to " + sessionId);
+        System.out.println("Session ID set to " + sessionId);
     }
 
     public boolean all_filled() {

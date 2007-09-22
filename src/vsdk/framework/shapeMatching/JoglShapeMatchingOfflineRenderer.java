@@ -28,7 +28,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
 
     public JoglShapeMatchingOfflineRenderer(int imageWidth, int imageHeight, JoglShapeMatchingOfflineRenderable target) {
 
-	this.target = target;
+        this.target = target;
         ready = false;
 
         // Create a GLCapabilities object for the pbuffer

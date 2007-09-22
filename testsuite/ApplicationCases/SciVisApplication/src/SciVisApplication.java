@@ -109,7 +109,7 @@ public class SciVisApplication
         img = study.getSliceImageAt(currentTimeTake, currentSlice);
 
         panelManager.setPopup("POPUP_PANEL_MANAGER_BASE");
-	panelManager.propagateImage(currentTimeTake, currentSlice);
+        panelManager.propagateImage(currentTimeTake, currentSlice);
         System.out.println("Create model end");
     }
 
@@ -425,7 +425,7 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
         }
 
         //-----------------------------------------------------------------
-	parent.panelManager.propagateImage(parent.currentTimeTake, parent.currentSlice);
+        parent.panelManager.propagateImage(parent.currentTimeTake, parent.currentSlice);
 
         //parent.drawingArea.setImage(img);
         //parent.drawingArea.repaint();

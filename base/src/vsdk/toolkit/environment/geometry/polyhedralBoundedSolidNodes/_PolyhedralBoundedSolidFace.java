@@ -338,27 +338,27 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D n = containingPlane.getNormal();
         Vector3D cp, t;
         n.normalize();
-	double dot;
-	int i;
+        double dot;
+        int i;
         Vector3D p;
 
-	if ( c.getProjectionMode() == c.PROJECTION_MODE_ORTHOGONAL ) {
+        if ( c.getProjectionMode() == c.PROJECTION_MODE_ORTHOGONAL ) {
             viewingVector.normalize();
             dot = n.dotProduct(viewingVector);
             if ( dot > VSDK.EPSILON ) {
                 return -1;
-	    }
-	    else if ( dot > VSDK.EPSILON ) {
+            }
+            else if ( dot > VSDK.EPSILON ) {
                 return 1;
-	    }
-	    else return 0;
-	}
-	else {
+            }
+            else return 0;
+        }
+        else {
             cp = c.getPosition();
             _PolyhedralBoundedSolidLoop l;
             for ( i = 0; i < boundariesList.size(); i++ ) {
-		//System.out.println("  - Testing boundary " + i + " of " + boundariesList.size());
-		l = boundariesList.get(i);
+                //System.out.println("  - Testing boundary " + i + " of " + boundariesList.size());
+                l = boundariesList.get(i);
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
 
                 he = l.boundaryStartHalfEdge;
@@ -373,20 +373,20 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
                     // Calculate containing plane equation for current edge
                     p = he.startingVertex.position;
-		    //System.out.println("    . Testing point " + p);
+                    //System.out.println("    . Testing point " + p);
                     t = p.substract(cp);
                     t = t.multiply(-1);
                     t.normalize();
-		    //System.out.println("     -> Viewing point " + t);
+                    //System.out.println("     -> Viewing point " + t);
                     if ( t.dotProduct(n) > 0.0 ) {
                         return 1;
-			//System.out.println("  * Face in");
-		    }
+                        //System.out.println("  * Face in");
+                    }
                 } while( he != heStart );
-	    }
-  	    //System.out.println("  * Face out");
+            }
+            //System.out.println("  * Face out");
             return -1;
-	}
+        }
     }
 
     public String toString()

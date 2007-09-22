@@ -52,14 +52,14 @@ public class SimpleBodyGroup extends Entity {
 
     public void finalize()
     {
-	int i;
+        int i;
 
-	for ( i = 0; i < bodies.size(); i++ ) {
-	    bodies.set(i, null);
-	}
-	while ( bodies.size() > 0 ) {
-	    bodies.remove(0);
-	}
+        for ( i = 0; i < bodies.size(); i++ ) {
+            bodies.set(i, null);
+        }
+        while ( bodies.size() > 0 ) {
+            bodies.remove(0);
+        }
         bodies = null;
         position = null;
         scale = null;

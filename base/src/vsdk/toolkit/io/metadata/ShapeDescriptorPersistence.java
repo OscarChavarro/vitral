@@ -53,12 +53,12 @@ public class ShapeDescriptorPersistence extends PersistenceElement
         String label;
         long metadataId;
 
-	metadataId = readLongBE(reader);
+        metadataId = readLongBE(reader);
         chunkId = importByte(reader);
         switch ( chunkId ) {
           case TYPE_STRING:
             m = new GeometryMetadata();
-	    m.setId(metadataId);
+            m.setId(metadataId);
             m.setFilename(readAsciiString(reader));
             do {
                 subChunkId = importByte(reader);
@@ -145,7 +145,7 @@ public class ShapeDescriptorPersistence extends PersistenceElement
             if ( s instanceof FourierShapeDescriptor ) {
                 exportByte(writer, TYPE_FOURIER_DESCRIPTOR);
               }
-	      else if ( s instanceof PrimitiveCountShapeDescriptor ) {
+              else if ( s instanceof PrimitiveCountShapeDescriptor ) {
                 exportByte(writer, TYPE_PRIMITIVECOUNT_DESCRIPTOR);
               }
               else {

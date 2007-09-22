@@ -27,7 +27,8 @@ import javax.swing.JLabel;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
+import javax.myes
+edia.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes

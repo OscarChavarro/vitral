@@ -479,7 +479,7 @@ public class TriangleMesh extends Surface {
             v1 = vertexes[triangles[i].p1].position;
             v2 = vertexes[triangles[i].p2].position;
 
-	    if ( doIntersectionWithTriangle(myRay, v0, v1, v2, p, n) ) {
+            if ( doIntersectionWithTriangle(myRay, v0, v1, v2, p, n) ) {
                 if ( myRay.t < min_t ) {
                     lastInfo.p = p;
                     lastInfo.n = n;

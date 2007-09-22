@@ -36,7 +36,7 @@ public class CachedImage extends CachedInformation {
     {
         if ( image == null) {
             return 0;
-	}
+        }
         return image.getSizeInBytes();
     }
 
@@ -70,9 +70,9 @@ public class CachedImage extends CachedInformation {
     public Image getImage()
     {
         if ( !isLoaded() ) {
-	    System.out.println("[CachedImage] Loading " + source);
+            System.out.println("[CachedImage] Loading " + source);
             load();
-	}
+        }
         System.out.println("[CachedImage] Image of " + image.getSizeInBytes() + " bytes");
         return image;
     }

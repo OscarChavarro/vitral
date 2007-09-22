@@ -160,10 +160,10 @@ public abstract class PanelManager extends JPanel implements ActionListener
     public void empty()
     {
         removeAll();
-	while ( panels.size() > 0 ) {
-	    panels.set(0, null);
-	    panels.remove(0);
-	}
+        while ( panels.size() > 0 ) {
+            panels.set(0, null);
+            panels.remove(0);
+        }
     }
 
     protected void reorganizePanels()

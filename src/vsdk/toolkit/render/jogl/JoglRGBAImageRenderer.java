@@ -172,7 +172,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             param = CgGL.cgGetNamedParameter(JoglRenderer.NvidiaGpuPixelProgramTextureBump,
             "textureMap");
             CgGL.cgGLSetTextureParameter(param, list);
-	}
+        }
         return list;
     }
 

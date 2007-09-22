@@ -83,7 +83,7 @@ public abstract class JoglRenderer extends RenderingElement {
             return;
         }
 
-	FileInputStream fis;
+        FileInputStream fis;
 
         try {
             //-----------------------------------------------------------------
@@ -95,18 +95,18 @@ public abstract class JoglRenderer extends RenderingElement {
             NvidiaGpuVertexProgramTexture =
                 JoglRenderer.loadNvidiaGpuVertexShader(fis);
             fis.close();
-	    fis = new FileInputStream("./etc/PhongTexturePixelShader.cg");
+            fis = new FileInputStream("./etc/PhongTexturePixelShader.cg");
             NvidiaGpuPixelProgramTexture =
               JoglRenderer.loadNvidiaGpuPixelShader(fis);
-	    fis.close();
-	    fis = new FileInputStream("./etc/PhongTextureBumpVertexShader.cg");
+            fis.close();
+            fis = new FileInputStream("./etc/PhongTextureBumpVertexShader.cg");
             NvidiaGpuVertexProgramTextureBump =
               JoglRenderer.loadNvidiaGpuVertexShader(fis);
-	    fis.close();
-	    fis = new FileInputStream("./etc/PhongTextureBumpPixelShader.cg");
+            fis.close();
+            fis = new FileInputStream("./etc/PhongTextureBumpPixelShader.cg");
             NvidiaGpuPixelProgramTextureBump =
               JoglRenderer.loadNvidiaGpuPixelShader(fis);
-	    fis.close();
+            fis.close();
         }
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.WARNING, 

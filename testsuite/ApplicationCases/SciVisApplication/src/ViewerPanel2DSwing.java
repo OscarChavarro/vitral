@@ -19,22 +19,22 @@ public class ViewerPanel2DSwing extends ViewerPanel
 
     public ViewerPanel2DSwing(SciVisApplication parent, PanelManager container)
     {
-	super(parent, container);
+        super(parent, container);
         image = null;
-	this.parent = parent;
+        this.parent = parent;
     }
 
     private void cycleSlices(Graphics dc)
     {
-	if ( parent.study == null ) {
-	    return;
-	}
-	parent.currentSlice = 0;
-	parent.currentTimeTake = 0;
+        if ( parent.study == null ) {
+            return;
+        }
+        parent.currentSlice = 0;
+        parent.currentTimeTake = 0;
 
         //-----------------------------------------------------------------
         Image img = null;
-	int i;
+        int i;
         TimeTake timeTake = parent.study.getTimeTake(0);
 
         img = parent.study.getSliceImageAt(parent.currentTimeTake, pendingCycles);
@@ -43,13 +43,13 @@ public class ViewerPanel2DSwing extends ViewerPanel
 
     public void setCyclePending(boolean flag)
     {
-	if ( flag == true ) {
+        if ( flag == true ) {
             TimeTake timeTake = parent.study.getTimeTake(0);
             pendingCycles = timeTake.getNumSlices() - 1;
-	}
-	else {
-	    pendingCycles = -1;
-	}
+        }
+        else {
+            pendingCycles = -1;
+        }
     }
 
     public void setImage(Image img)
@@ -61,16 +61,16 @@ public class ViewerPanel2DSwing extends ViewerPanel
     {
         super.paint(dc);
 
-	if ( pendingCycles >= 0 ) {
-	    cycleSlices(dc);
-	    pendingCycles--;
-	    repaint();
+        if ( pendingCycles >= 0 ) {
+            cycleSlices(dc);
+            pendingCycles--;
+            repaint();
         }
-	else {
+        else {
             if ( image != null ) {
                 AwtRGBImageRenderer.draw(dc, (RGBImage)image, 10, 10);
-	    }
-	}
+            }
+        }
     }
 }
 

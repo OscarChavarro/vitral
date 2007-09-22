@@ -23,7 +23,7 @@ public class JoglMaterialRenderer extends JoglRenderer {
         if ( nvidiaCgAutomaticMode ) {
             activateNvidiaGpuParameters(gl, m,
                 currentVertexShader, currentPixelShader);
-	}
+        }
 
         //-----------------------------------------------------------------
         if ( m == null ) {

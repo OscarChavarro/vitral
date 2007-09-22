@@ -76,7 +76,7 @@ public class FourierShapeDescriptor extends ShapeDescriptor
 
     public void finalize()
     {
-	label = null;
+        label = null;
         featureVector = null;
     }
 }

@@ -960,10 +960,10 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
     {
-	int qi = 0;
+        int qi = 0;
         int i;
         Vector3D d = p.substract(origin);
-	Vector3D pi;
+        Vector3D pi;
         double t0 = d.length();
         d.normalize();
 
@@ -981,7 +981,7 @@ public class PolyhedralBoundedSolid extends Solid {
                         face.containingPlane.doExtraInformation(ray, 0.0, info);
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             qi ++;
-			}
+                        }
                     }
                 }
             }

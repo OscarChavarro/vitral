@@ -159,7 +159,7 @@ public class SimpleBody extends Entity {
         globalNormalMap = in;
         if ( globalNormalMap != null ) {
             globalNormalMapRgb = globalNormalMap.exportToRgbImage();
-	}
+        }
     }
 
     public Vector3D getPosition()
@@ -241,7 +241,7 @@ public class SimpleBody extends Entity {
     {
         Vector3D po;
         Matrix4x4 R, Ri;
-	Ray myRay;
+        Ray myRay;
 
         po = getPosition();
         R = getRotation();

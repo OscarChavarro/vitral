@@ -362,7 +362,7 @@ public class Camera extends Entity
             dv = dv.multiply(2*v/orthogonalZoom);
             ray = new Ray(eyePosition.add(du.add(dv)), front);
             return ray;
-	}
+        }
         // Default behavior is to assume planar perspective projection
         du = rightWithScale.multiply(u);
         dv = upWithScale.multiply(v);

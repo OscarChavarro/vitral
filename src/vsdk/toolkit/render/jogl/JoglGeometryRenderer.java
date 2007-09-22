@@ -42,7 +42,7 @@ public class JoglGeometryRenderer extends JoglRenderer
                 currentVertexShader, currentPixelShader);
             activateNvidiaGpuParameters(gl, g, c,
                 currentVertexShader, currentPixelShader);
-	}
+        }
     }
 
     public static void prepareSurfaceQuality(GL gl, RendererConfiguration quality)

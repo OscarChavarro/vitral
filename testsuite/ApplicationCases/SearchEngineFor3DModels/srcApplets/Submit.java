@@ -118,14 +118,14 @@ public class Submit
                 string = br.readLine();
                 System.out.println("rec: [" + string + "]");
                 if ( string != null ) {
-		    if ( string.startsWith("filespec:") ) {
+                    if ( string.startsWith("filespec:") ) {
                         strings[i] = new String(string.substring(10));
                         i++;
                     }
-		    else if ( string.startsWith("session:") ) {
+                    else if ( string.startsWith("session:") ) {
                         applet.setSessionId(Long.parseLong(string.substring(9)));
-		    }
-	        }
+                    }
+                }
             } while ( (string != null) && !string.startsWith("done") );
             br.close();
             System.out.println("Read " + i + " filespecs.");

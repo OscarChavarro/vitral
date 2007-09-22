@@ -119,8 +119,8 @@ public class TimeTake
         int ns = getNumSlices();
 
         if ( slice < 0 || slice >= ns ) {
-	    return null;
-	}
+            return null;
+        }
         return imageSlicesArray.get(slice).getImage();
     }
 

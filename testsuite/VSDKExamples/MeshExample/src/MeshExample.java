@@ -111,7 +111,7 @@ public class MeshExample
             }
             catch ( Exception ex ) {
                 System.err.println("Failed to read file.");
-		ex.printStackTrace();
+                ex.printStackTrace();
                 System.exit(0);
             }
         }
