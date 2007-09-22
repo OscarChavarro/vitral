@@ -31,7 +31,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 
-class _AppelEdgeSegment implements Comparable <_AppelEdgeSegment>
+class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
     /// Distance from start to end with respect to line parameter
     public double t;
@@ -45,7 +45,7 @@ class _AppelEdgeSegment implements Comparable <_AppelEdgeSegment>
     }
 }
 
-class _AppelEdgeCache
+class _AppelEdgeCache extends RenderingElement
 {
     public static final int HIDDEN_LINE = 0;
     public static final int VISIBLE_LINE = 1;
@@ -75,7 +75,7 @@ class _AppelEdgeCache
     }
 }
 
-public class HiddenLineRenderer
+public class HiddenLineRenderer extends RenderingElement
 {
     private static int
     computeQuantitativeInvisibility(ArrayList <SimpleBody> solids,
