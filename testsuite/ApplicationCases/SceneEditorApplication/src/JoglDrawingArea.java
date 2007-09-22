@@ -205,19 +205,19 @@ public class JoglDrawingArea implements
 
     private void createCursors()
     {
-      Toolkit awtToolkit = Toolkit.getDefaultToolkit();
-      java.awt.Image i;
+        Toolkit awtToolkit = Toolkit.getDefaultToolkit();
+        java.awt.Image i;
 
-      i = awtToolkit.getImage("./etc/cursors/cursor_camrotate.gif");
-      camrotateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraRotation");
+        i = awtToolkit.getImage("./etc/cursors/cursor_camrotate.gif");
+        camrotateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraRotation");
 
-      i = awtToolkit.getImage("./etc/cursors/cursor_camtranslate.gif");
-      camtranslateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraTranslation");
+        i = awtToolkit.getImage("./etc/cursors/cursor_camtranslate.gif");
+        camtranslateCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraTranslation");
 
-      i = awtToolkit.getImage("./etc/cursors/cursor_camadvance.gif");
-      camadvanceCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraAdvance");
+        i = awtToolkit.getImage("./etc/cursors/cursor_camadvance.gif");
+        camadvanceCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraAdvance");
 
-      selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+        selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
     }
 
@@ -246,45 +246,45 @@ public class JoglDrawingArea implements
 
         if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-              Vector3D position;
-              SimpleBody gi;
+                Vector3D position;
+                SimpleBody gi;
 
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-              Matrix4x4 composed;
+                Matrix4x4 composed;
 
-              position = gi.getPosition();
-              composed = new Matrix4x4(gi.getRotation());
-              composed.M[0][3] = position.x;
-              composed.M[1][3] = position.y;
-              composed.M[2][3] = position.z;
-              translationGizmo.setTransformationMatrix(composed);
+                position = gi.getPosition();
+                composed = new Matrix4x4(gi.getRotation());
+                composed.M[0][3] = position.x;
+                composed.M[1][3] = position.y;
+                composed.M[2][3] = position.z;
+                translationGizmo.setTransformationMatrix(composed);
 
-              JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
+                JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
             }
         }
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-              Vector3D position;
-              SimpleBody gi;
+                Vector3D position;
+                SimpleBody gi;
 
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-              position = gi.getPosition();
-              rotateGizmo.setTransformationMatrix(gi.getRotation());
-              JoglRotateGizmoRenderer.draw(gl, rotateGizmo, position);
+                position = gi.getPosition();
+                rotateGizmo.setTransformationMatrix(gi.getRotation());
+                JoglRotateGizmoRenderer.draw(gl, rotateGizmo, position);
             }
         }
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-              Vector3D position;
-              SimpleBody gi;
+                Vector3D position;
+                SimpleBody gi;
 
-              gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-              position = gi.getPosition();
-              scaleGizmo.setTransformationMatrix(gi.getRotation());
-              JoglScaleGizmoRenderer.draw(gl, scaleGizmo, position);
+                position = gi.getPosition();
+                scaleGizmo.setTransformationMatrix(gi.getRotation());
+                JoglScaleGizmoRenderer.draw(gl, scaleGizmo, position);
             }
         }
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -389,7 +389,7 @@ public class JoglDrawingArea implements
                 for ( y = 0; y < distanceFieldRgba.getYSize(); y++ ) {
                     if ( distanceFieldIndexed.getPixel(x, y) < 1 ) {
                         distanceFieldRgba.putPixel(x, y,
-                            (byte)255, (byte)0, (byte)0, (byte)128);
+                                                   (byte)255, (byte)0, (byte)0, (byte)128);
                     }
                 }
             }
@@ -650,6 +650,7 @@ public class JoglDrawingArea implements
             wantToGetColor = false;
         }
     }
+
     private void copyZBufferIfNeeded(GL gl)
     {
         if ( wantToGetDepth ) {
@@ -660,8 +661,8 @@ public class JoglDrawingArea implements
                 nm = new NormalMap();
                 nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
                 parent.zbufferImage = nm.exportToRgbImageGradient();
-              }
-              else {
+            }
+            else {
                 parent.zbufferImage =
                     JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
                         parent.palette);
@@ -737,7 +738,8 @@ public class JoglDrawingArea implements
     }
 
     /** Called by drawable to initiate drawing */
-    public void display(GLAutoDrawable drawable) {
+    public void display(GLAutoDrawable drawable)
+    {
         GL gl = drawable.getGL();
 
         if ( firstTimer ) {
@@ -765,7 +767,6 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
-
         for ( i = 0; i < views.size(); i++ ) {
             view = views.get(i);
 
@@ -898,12 +899,14 @@ public class JoglDrawingArea implements
 
 
     /** Not used method, but needed to instanciate GLEventListener */
-    public void init(GLAutoDrawable drawable) {
+    public void init(GLAutoDrawable drawable)
+    {
         ;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
-    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
+    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b)
+    {
         ;
     }
     
@@ -912,303 +915,320 @@ public class JoglDrawingArea implements
                          int x,
                          int y,
                          int width,
-                         int height) {
+                         int height)
+    {
         this.globalViewportXSize = width;
         this.globalViewportYSize = height;
         views.get(0).updateViewportConfiguration(globalViewportXSize, globalViewportYSize);
     }   
 
-  public void mouseEntered(MouseEvent e) {
-      canvas.requestFocusInWindow();
+    public void mouseEntered(MouseEvent e)
+    {
+        canvas.requestFocusInWindow();
 
-      // WARNING / TODO
-      // There should be a cameraController.getFutureAction(e) that calculates
-      // the proper icon for display ... here an Aquynza operation is
-      // assumed and hard-coded
-      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-          canvas.setCursor(camrotateCursor);
-      }
-      else {
-          canvas.setCursor(selectCursor);
-      }
-  }
+        // WARNING / TODO
+        // There should be a cameraController.getFutureAction(e) that calculates
+        // the proper icon for display ... here an Aquynza operation is
+        // assumed and hard-coded
+        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+            canvas.setCursor(camrotateCursor);
+        }
+        else {
+            canvas.setCursor(selectCursor);
+        }
+    }
 
-  public void mouseExited(MouseEvent e) {
-      //System.out.println("Mouse exited");
-  }
+    public void mouseExited(MouseEvent e) 
+    {
+        //System.out.println("Mouse exited");
+    }
 
-    private JoglView getSelectedView(MouseEvent e)
-  {
-      JoglView view = null;
+    private JoglView getSelectedView(MouseEvent e, boolean changeSelection)
+    {
+        JoglView view = null;
+        JoglView theView = null;
 
-      //-----------------------------------------------------------------
-      int i;
-      double xpercent;
-      double ypercent;
+        //-----------------------------------------------------------------
+        int i;
+        double xpercent;
+        double ypercent;
 
-      xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
-      ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
+        xpercent = ((double)e.getX()) / ((double)globalViewportXSize);
+        ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
 
-      for ( i = 0; i < views.size(); i++ ) {
-          view = views.get(i);
-          if ( view.isActive() && view.inside(xpercent, ypercent) ) {
-              view.setSelected(true);
-              selectedView = i;
-          }
-          else {
-              view.setSelected(false);
-          }
-      }
-      return view;
-  }
+        for ( i = 0; i < views.size(); i++ ) {
+            view = views.get(i);
+            if ( view.isActive() && view.inside(xpercent, ypercent) ) {
+                if ( changeSelection ) {
+                    view.setSelected(true);
+                    selectedView = i;
+                }
+                theView = view;
+            }
+            else {
+                if ( changeSelection ) {
+                    view.setSelected(false);
+                }
+            }
+        }
+        return theView;
+    }
 
-  public void mousePressed(MouseEvent e) {
-      JoglView view = getSelectedView(e);
+    public void mousePressed(MouseEvent e)
+    {
+        JoglView view = getSelectedView(e, true);
 
-      //-----------------------------------------------------------------
-      // WARNING / TODO
-      // There should be a cameraController.getFutureAction(e) that calculates
-      // the proper icon for display ... here an Aquynza operation is
-      // assumed and hard-coded
-      int m = e.getModifiersEx();
+        //-----------------------------------------------------------------
+        // WARNING / TODO
+        // There should be a cameraController.getFutureAction(e) that calculates
+        // the proper icon for display ... here an Aquynza operation is
+        // assumed and hard-coded
+        int m = e.getModifiersEx();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           (m & e.BUTTON1_DOWN_MASK) != 0 ) {
-          canvas.setCursor(camrotateCursor);
-      }
-      else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                (m & e.BUTTON2_DOWN_MASK) != 0 ) {
-          canvas.setCursor(camtranslateCursor);
-      }
-      else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                (m & e.BUTTON3_DOWN_MASK) != 0 ) {
-          canvas.setCursor(camadvanceCursor);
-      }
-      else {
-          canvas.setCursor(selectCursor);
-      }
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             (m & e.BUTTON1_DOWN_MASK) != 0 ) {
+            canvas.setCursor(camrotateCursor);
+        }
+        else if ( interactionMode == CAMERA_INTERACTION_MODE &&
+                  (m & e.BUTTON2_DOWN_MASK) != 0 ) {
+            canvas.setCursor(camtranslateCursor);
+        }
+        else if ( interactionMode == CAMERA_INTERACTION_MODE &&
+                  (m & e.BUTTON3_DOWN_MASK) != 0 ) {
+            canvas.setCursor(camadvanceCursor);
+        }
+        else {
+            canvas.setCursor(selectCursor);
+        }
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMousePressedEventAwt(e) ) {
-          ;
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMousePressedEventAwt(e) ) {
+            ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ||
                   interactionMode == TRANSLATE_INTERACTION_MODE || 
                   interactionMode == ROTATE_INTERACTION_MODE || 
                   interactionMode == SCALE_INTERACTION_MODE 
-                 ) {
-          boolean composite = false;
-          if ( ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
-              composite = true;
-          }
-          int f = theScene.selectedThings.firstSelected();
-          view = views.get(selectedView);
-          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
-          theScene.activeCamera = view.getCamera();
-              theScene.selectObjectWithMouse(e.getX(), e.getY(),
-                 composite, parent.visualDebugRay);
+                  ) {
+            boolean composite = false;
+            if ( ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
+                composite = true;
+            }
+            int f = theScene.selectedThings.firstSelected();
+            view = views.get(selectedView);
+            view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
+            theScene.activeCamera = view.getCamera();
+            theScene.selectObjectWithMouse(e.getX(), e.getY(),
+                                           composite, parent.visualDebugRay);
 
-          if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
-               interactionMode == TRANSLATE_INTERACTION_MODE &&
-               translationGizmo.isActive() ) {
-              theScene.selectedThings.select(f);
-          }
-          reportObjectSelection();
-      }
-      canvas.repaint();
-  }
+            if ( f >= 0 && theScene.selectedThings.firstSelected() < 0 &&
+                 interactionMode == TRANSLATE_INTERACTION_MODE &&
+                 translationGizmo.isActive() ) {
+                theScene.selectedThings.select(f);
+            }
+            reportObjectSelection();
+        }
+        canvas.repaint();
+    }
 
-  public void mouseReleased(MouseEvent e) {
-      JoglView view = views.get(selectedView);
+    public void mouseReleased(MouseEvent e)
+    {
+        JoglView view = views.get(selectedView);
 
-      // WARNING / TODO
-      // There should be a cameraController.getFutureAction(e) that calculates
-      // the proper icon for display ... here an Aquynza operation is
-      // assumed and hard-coded
+        // WARNING / TODO
+        // There should be a cameraController.getFutureAction(e) that calculates
+        // the proper icon for display ... here an Aquynza operation is
+        // assumed and hard-coded
 
-      int firstThingSelected = theScene.selectedThings.firstSelected();
+        int firstThingSelected = theScene.selectedThings.firstSelected();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-          canvas.setCursor(camrotateCursor);
-      }
-      else {
-          canvas.setCursor(selectCursor);
-      }
+        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+            canvas.setCursor(camrotateCursor);
+        }
+        else {
+            canvas.setCursor(selectCursor);
+        }
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMouseReleasedEventAwt(e) ) {
-          canvas.repaint();
-      }
-      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                firstThingSelected >= 0 ) {
-          Vector3D position;
-          SimpleBody gi;
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMouseReleasedEventAwt(e) ) {
+            canvas.repaint();
+        }
+        else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                  firstThingSelected >= 0 ) {
+            Vector3D position;
+            SimpleBody gi;
 
-          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-          Matrix4x4 composed;
+            Matrix4x4 composed;
 
-          position = gi.getPosition();
-          composed = new Matrix4x4(gi.getRotation());
-          composed.M[0][3] = position.x;
-          composed.M[1][3] = position.y;
-          composed.M[2][3] = position.z;
+            position = gi.getPosition();
+            composed = new Matrix4x4(gi.getRotation());
+            composed.M[0][3] = position.x;
+            composed.M[1][3] = position.y;
+            composed.M[2][3] = position.z;
 
-          translationGizmo.setCamera(theScene.activeCamera);
-          translationGizmo.setTransformationMatrix(composed);
-          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
-          if ( translationGizmo.processMouseReleasedEventAwt(e) ) {
-              composed = translationGizmo.getTransformationMatrix();
-              position.x = composed.M[0][3];
-              position.y = composed.M[1][3];
-              position.z = composed.M[2][3];
-              composed.M[0][3] = 0;
-              composed.M[1][3] = 0;
-              composed.M[2][3] = 0;
-              applyTransformToSelectedObjects(position, composed);
-              canvas.repaint();
-          }
-      }
+            translationGizmo.setCamera(theScene.activeCamera);
+            translationGizmo.setTransformationMatrix(composed);
+            view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
+            if ( translationGizmo.processMouseReleasedEventAwt(e) ) {
+                composed = translationGizmo.getTransformationMatrix();
+                position.x = composed.M[0][3];
+                position.y = composed.M[1][3];
+                position.z = composed.M[2][3];
+                composed.M[0][3] = 0;
+                composed.M[1][3] = 0;
+                composed.M[2][3] = 0;
+                applyTransformToSelectedObjects(position, composed);
+                canvas.repaint();
+            }
+        }
 
-  }
+    }
 
-  public void mouseClicked(MouseEvent e) {
-      JoglView view = getSelectedView(e);
+    public void mouseClicked(MouseEvent e)
+    {
+        JoglView view = getSelectedView(e, true);
 
-      int firstThingSelected = theScene.selectedThings.firstSelected();
+        int firstThingSelected = theScene.selectedThings.firstSelected();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMouseClickedEventAwt(e) ) {
-          canvas.repaint();
-      }
-      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                firstThingSelected >= 0 ) {
-          Vector3D position;
-          SimpleBody gi;
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMouseClickedEventAwt(e) ) {
+            canvas.repaint();
+        }
+        else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                  firstThingSelected >= 0 ) {
+            Vector3D position;
+            SimpleBody gi;
 
-          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-          Matrix4x4 composed;
+            Matrix4x4 composed;
 
-          position = gi.getPosition();
-          composed = new Matrix4x4(gi.getRotation());
-          composed.M[0][3] = position.x;
-          composed.M[1][3] = position.y;
-          composed.M[2][3] = position.z;
+            position = gi.getPosition();
+            composed = new Matrix4x4(gi.getRotation());
+            composed.M[0][3] = position.x;
+            composed.M[1][3] = position.y;
+            composed.M[2][3] = position.z;
 
-          translationGizmo.setCamera(theScene.activeCamera);
-          translationGizmo.setTransformationMatrix(composed);
-          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
-          if ( translationGizmo.processMouseClickedEventAwt(e) ) {
-              composed = translationGizmo.getTransformationMatrix();
-              position.x = composed.M[0][3];
-              position.y = composed.M[1][3];
-              position.z = composed.M[2][3];
-              composed.M[0][3] = 0;
-              composed.M[1][3] = 0;
-              composed.M[2][3] = 0;
-              applyTransformToSelectedObjects(position, composed);
-              canvas.repaint();
-          }
-      }
-  }
+            translationGizmo.setCamera(theScene.activeCamera);
+            translationGizmo.setTransformationMatrix(composed);
+            view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
+            if ( translationGizmo.processMouseClickedEventAwt(e) ) {
+                composed = translationGizmo.getTransformationMatrix();
+                position.x = composed.M[0][3];
+                position.y = composed.M[1][3];
+                position.z = composed.M[2][3];
+                composed.M[0][3] = 0;
+                composed.M[1][3] = 0;
+                composed.M[2][3] = 0;
+                applyTransformToSelectedObjects(position, composed);
+                canvas.repaint();
+            }
+        }
+    }
 
-  public void mouseMoved(MouseEvent e) {
-      //-----------------------------------------------------------------
-      JoglView view = views.get(selectedView);
+    public void mouseMoved(MouseEvent e)
+    {
+        //-----------------------------------------------------------------
+        JoglView view = views.get(selectedView);
+        JoglView mouseView = getSelectedView(e, false);
 
-      //-----------------------------------------------------------------
-      int firstThingSelected = theScene.selectedThings.firstSelected();
+        //-----------------------------------------------------------------
+        int firstThingSelected = theScene.selectedThings.firstSelected();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMouseMovedEventAwt(e) ) {
-          canvas.repaint();
-      }
-      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                firstThingSelected >= 0 ) {
-          Vector3D position;
-          SimpleBody gi;
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMouseMovedEventAwt(e) ) {
+            canvas.repaint();
+        }
+        else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                  firstThingSelected >= 0 ) {
+            Vector3D position;
+            SimpleBody gi;
 
-          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-          Matrix4x4 composed;
+            Matrix4x4 composed;
 
-          position = gi.getPosition();
-          composed = new Matrix4x4(gi.getRotation());
-          composed.M[0][3] = position.x;
-          composed.M[1][3] = position.y;
-          composed.M[2][3] = position.z;
+            position = gi.getPosition();
+            composed = new Matrix4x4(gi.getRotation());
+            composed.M[0][3] = position.x;
+            composed.M[1][3] = position.y;
+            composed.M[2][3] = position.z;
 
-          translationGizmo.setCamera(view.getCamera());
-          translationGizmo.setTransformationMatrix(composed);
-          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
-          if ( translationGizmo.processMouseMovedEventAwt(e) ) {
-              composed = translationGizmo.getTransformationMatrix();
-              position.x = composed.M[0][3];
-              position.y = composed.M[1][3];
-              position.z = composed.M[2][3];
-              composed.M[0][3] = 0;
-              composed.M[1][3] = 0;
-              composed.M[2][3] = 0;
-              applyTransformToSelectedObjects(position, composed);
-              canvas.repaint();
-          }
-      }
-  }
+            translationGizmo.setCamera(mouseView.getCamera());
+            translationGizmo.setTransformationMatrix(composed);
+            mouseView.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
+            if ( translationGizmo.processMouseMovedEventAwt(e) ) {
+                composed = translationGizmo.getTransformationMatrix();
+                position.x = composed.M[0][3];
+                position.y = composed.M[1][3];
+                position.z = composed.M[2][3];
+                composed.M[0][3] = 0;
+                composed.M[1][3] = 0;
+                composed.M[2][3] = 0;
+                applyTransformToSelectedObjects(position, composed);
+                canvas.repaint();
+            }
+        }
+    }
 
-  public void mouseDragged(MouseEvent e) {
-      JoglView view = views.get(selectedView);
+    public void mouseDragged(MouseEvent e)
+    {
+        JoglView view = views.get(selectedView);
 
-      int firstThingSelected = theScene.selectedThings.firstSelected();
+        int firstThingSelected = theScene.selectedThings.firstSelected();
 
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMouseDraggedEventAwt(e) ) {
-          canvas.repaint();
-      }
-      else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                firstThingSelected >= 0 ) {
-          Vector3D position;
-          SimpleBody gi;
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMouseDraggedEventAwt(e) ) {
+            canvas.repaint();
+        }
+        else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
+                  firstThingSelected >= 0 ) {
+            Vector3D position;
+            SimpleBody gi;
 
-          gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-          Matrix4x4 composed;
+            Matrix4x4 composed;
 
-          position = gi.getPosition();
-          composed = new Matrix4x4(gi.getRotation());
-          composed.M[0][3] = position.x;
-          composed.M[1][3] = position.y;
-          composed.M[2][3] = position.z;
+            position = gi.getPosition();
+            composed = new Matrix4x4(gi.getRotation());
+            composed.M[0][3] = position.x;
+            composed.M[1][3] = position.y;
+            composed.M[2][3] = position.z;
 
-          translationGizmo.setCamera(theScene.activeCamera);
-          translationGizmo.setTransformationMatrix(composed);
-          view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
-          if ( translationGizmo.processMouseDraggedEventAwt(e) ) {
-              composed = translationGizmo.getTransformationMatrix();
-              position.x = composed.M[0][3];
-              position.y = composed.M[1][3];
-              position.z = composed.M[2][3];
-              composed.M[0][3] = 0;
-              composed.M[1][3] = 0;
-              composed.M[2][3] = 0;
-              applyTransformToSelectedObjects(position, composed);
-              canvas.repaint();
-          }
-      }
-  }
+            translationGizmo.setCamera(theScene.activeCamera);
+            translationGizmo.setTransformationMatrix(composed);
+            view.updateMouseEvent(e, globalViewportXSize, globalViewportYSize);
+            if ( translationGizmo.processMouseDraggedEventAwt(e) ) {
+                composed = translationGizmo.getTransformationMatrix();
+                position.x = composed.M[0][3];
+                position.y = composed.M[1][3];
+                position.z = composed.M[2][3];
+                composed.M[0][3] = 0;
+                composed.M[1][3] = 0;
+                composed.M[2][3] = 0;
+                applyTransformToSelectedObjects(position, composed);
+                canvas.repaint();
+            }
+        }
+    }
 
-  /**
-  WARNING: It is not working... check pending
-  */
-  public void mouseWheelMoved(MouseWheelEvent e) {
-      System.out.println(".");
-      if ( interactionMode == CAMERA_INTERACTION_MODE && 
-           cameraController.processMouseWheelEventAwt(e) ) {
-          canvas.repaint();
-      }
-  }
+    /**
+    WARNING: It is not working... check pending
+    */
+    public void mouseWheelMoved(MouseWheelEvent e)
+    {
+        System.out.println(".");
+        if ( interactionMode == CAMERA_INTERACTION_MODE && 
+             cameraController.processMouseWheelEventAwt(e) ) {
+            canvas.repaint();
+        }
+    }
 
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e)
+    {
         char unicode_id;
         int keycode;
         boolean skipKey = false;
@@ -1224,26 +1244,26 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
             if ( unicode_id == e.CHAR_UNDEFINED ) {
-              switch ( keycode ) {
-                case KeyEvent.VK_LEFT:
-                  if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
-                      theScene.selectedThings.selectPrevious();
-                  }
-                  if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-                      theScene.selectedDebugThingGroups.selectPrevious();
-                  }
-                  reportObjectSelection();
-                  break;
-                case KeyEvent.VK_RIGHT:
-                  if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
-                      theScene.selectedThings.selectNext();
-                  }
-                  if ( theScene.selectedThings.numberOfSelections() < 1 ) {
-                      theScene.selectedDebugThingGroups.selectNext();
-                  }
-                  reportObjectSelection();
-                  break;
-              }
+                switch ( keycode ) {
+                  case KeyEvent.VK_LEFT:
+                    if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                        theScene.selectedThings.selectPrevious();
+                    }
+                    if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                        theScene.selectedDebugThingGroups.selectPrevious();
+                    }
+                    reportObjectSelection();
+                    break;
+                  case KeyEvent.VK_RIGHT:
+                    if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
+                        theScene.selectedThings.selectNext();
+                    }
+                    if ( theScene.selectedThings.numberOfSelections() < 1 ) {
+                        theScene.selectedDebugThingGroups.selectNext();
+                    }
+                    reportObjectSelection();
+                    break;
+                }
             }
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
@@ -1340,17 +1360,17 @@ public class JoglDrawingArea implements
         }
 
         if ( keycode == KeyEvent.VK_F10 ) {
-              parent.statusMessage.setText(
-                  parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
-              parent.doRaytracedImage();
+            parent.statusMessage.setText(
+                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
+            parent.doRaytracedImage();
   
-              if ( parent.imageControlWindow == null ) {
-                  parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
-              }
-              else {
-                  parent.imageControlWindow.setImage(parent.raytracedImage);
-              }
-              parent.imageControlWindow.redrawImage();
+            if ( parent.imageControlWindow == null ) {
+                parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+            }
+            else {
+                parent.imageControlWindow.setImage(parent.raytracedImage);
+            }
+            parent.imageControlWindow.redrawImage();
         }
 
         // In view command propagation
@@ -1363,7 +1383,7 @@ public class JoglDrawingArea implements
 
         if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
-              //- Multiple views control -----------------------------------
+                //- Multiple views control -----------------------------------
               case '.':
                 selectedView++;
                 if ( selectedView >= views.size() ) {
@@ -1375,7 +1395,7 @@ public class JoglDrawingArea implements
                 viewOrderStyle++;
                 selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
                 break;
-              //- Visual debug ray control ---------------------------------
+                //- Visual debug ray control ---------------------------------
               case '4': // Numpad 4
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay.origin.x -= 0.1;
@@ -1416,7 +1436,7 @@ public class JoglDrawingArea implements
                     parent.visualDebugRayLevels--;
                     if ( parent.visualDebugRayLevels < 0 ) {
                         parent.visualDebugRayLevels = 0;
-                  }
+                    }
                 }
                 break;
               case '5': // Numpad 5
@@ -1430,50 +1450,50 @@ public class JoglDrawingArea implements
               case '*': // Numpad *
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                        parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                     phi =
-                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                        parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     theta -= Math.toRadians(5);
                     parent.visualDebugRay.direction.setSphericalCoordinates(
-                     1, theta, phi);
+                        1, theta, phi);
                 }
                 break;
               case '/': // Numpad /
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                        parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                     phi =
-                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                        parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     theta += Math.toRadians(5);
                     parent.visualDebugRay.direction.setSphericalCoordinates(
-                     1, theta, phi);
+                        1, theta, phi);
                 }
                 break;
               case '+': // Numpad +
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                        parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                     phi =
-                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                        parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     phi += Math.toRadians(5);
                     if ( phi > Math.PI ) phi = Math.PI;
                     parent.visualDebugRay.direction.setSphericalCoordinates(
-                     1, theta, phi);
+                        1, theta, phi);
                 }
                 break;
               case '-': // Numpad -
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                     parent.visualDebugRay.direction.obtainSphericalThetaAngle();
+                        parent.visualDebugRay.direction.obtainSphericalThetaAngle();
                     phi =
-                     parent.visualDebugRay.direction.obtainSphericalPhiAngle();
+                        parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     phi -= Math.toRadians(5);
                     if ( phi < 0 ) phi = 0;
                     parent.visualDebugRay.direction.setSphericalCoordinates(
-                     1, theta, phi);
+                        1, theta, phi);
                 }
                 break;
-              //------------------------------------------------------------
+                //------------------------------------------------------------
 
               case 'T':
                 if ( firstThingSelected >= 0 ) {
@@ -1485,7 +1505,7 @@ public class JoglDrawingArea implements
                         String imageFilename = "../../../etc/textures/miniearth.png";
                         try {
                             texture = 
-                             ImagePersistence.importRGB(new File(imageFilename));
+                                ImagePersistence.importRGB(new File(imageFilename));
                         }
                         catch ( Exception ee ) {}
                         gi.setTexture(texture);
@@ -1502,26 +1522,24 @@ public class JoglDrawingArea implements
                     NormalMap normalMap;
                     RGBImage exported;
                     gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-                    normalMap = gi.getNormalMap();
+                     normalMap = gi.getNormalMap();
                     if ( normalMap == null ) {
                         try {
                             normalMap = new NormalMap();
-                            //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
+                                //String imageFilename = "../../../etc/bumpmaps/blinn2.bw";
                             String imageFilename = "../../../etc/bumpmaps/earth.bw";
                             source = ImagePersistence.importIndexedColor(new File(imageFilename));
                             normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
-
-                            exported = normalMap.exportToRgbImage();
-                            //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
+                             exported = normalMap.exportToRgbImage();
+                                //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                         }
                         catch ( Exception ee ) {
                             System.err.println(ee);
                             ee.printStackTrace();
                         }
                         gi.setNormalMap(normalMap);
-                      }
-                      else {
+                    }
+                    else {
                         gi.setNormalMap(null);
                     }
                 }
@@ -1534,7 +1552,6 @@ public class JoglDrawingArea implements
                 parent.selectorDialog.setVisible(true);
                 parent.selectorDialog.repaint();
                 //-------------------------------------------------------------
-
 
                 SimpleBody o;
                 int i;
@@ -1608,82 +1625,83 @@ public class JoglDrawingArea implements
         canvas.repaint();
     }
 
-  private void applyTransformToSelectedObjects(Vector3D position,
-                                               Matrix4x4 rotation)
-  {
-      SimpleBody gi;
-      int firstThingSelected = theScene.selectedThings.firstSelected();
-      int i;
+    private void applyTransformToSelectedObjects(Vector3D position,
+                                                 Matrix4x4 rotation)
+    {
+        SimpleBody gi;
+        int firstThingSelected = theScene.selectedThings.firstSelected();
+        int i;
 
-      for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
-          if ( !theScene.selectedThings.isSelected(i) ) continue;
-          gi = theScene.scene.getSimpleBodies().get(i);
+        for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
+            if ( !theScene.selectedThings.isSelected(i) ) continue;
+            gi = theScene.scene.getSimpleBodies().get(i);
 
-          gi.setPosition(position);
-          gi.setRotation(rotation);
-          rotation = new Matrix4x4(rotation);
-          rotation.invert();
-          gi.setRotationInverse(rotation);
-      }
-  }
+            gi.setPosition(position);
+            gi.setRotation(rotation);
+            rotation = new Matrix4x4(rotation);
+            rotation.invert();
+            gi.setRotationInverse(rotation);
+        }
+    }
 
-  public void newView()
-  {
-      views.add(new JoglView());
-      selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
-  }
+    public void newView()
+    {
+        views.add(new JoglView());
+        selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+    }
 
-  public void delView()
-  {
-      if ( views.size() > 1 ) {
-          views.remove(views.size()-1);
-      }
+    public void delView()
+    {
+        if ( views.size() > 1 ) {
+            views.remove(views.size()-1);
+        }
 
-      selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
-  }
+        selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
+    }
 
-  private void reportObjectSelection()
-  {
-      String msg = "";
-      int n;
+    private void reportObjectSelection()
+    {
+        String msg = "";
+        int n;
 
-      //-----------------------------------------------------------------
-      theScene.selectedThings.sync();
-      n = theScene.selectedThings.numberOfSelections();
-      if ( n == 0 ) {
-          msg += "All things are UNSELECTED";
-      }
-      else if ( n == 1 ) {
-          int f = theScene.selectedThings.firstSelected();
-          msg = "Thing [" + f + "] selected, which is a [" + 
-     ((SimpleBody)(theScene.scene.getSimpleBodies().get(f))).getGeometry().getClass().getName() 
-          + "]";
-      }
-      else {
-          msg += "" + n + " things selected";
-      }
+        //-----------------------------------------------------------------
+        theScene.selectedThings.sync();
+        n = theScene.selectedThings.numberOfSelections();
+        if ( n == 0 ) {
+            msg += "All things are UNSELECTED";
+        }
+        else if ( n == 1 ) {
+            int f = theScene.selectedThings.firstSelected();
+            msg = "Thing [" + f + "] selected, which is a [" + 
+                ((SimpleBody)(theScene.scene.getSimpleBodies().get(f))).getGeometry().getClass().getName() 
+                + "]";
+        }
+        else {
+            msg += "" + n + " things selected";
+        }
 
-      //-----------------------------------------------------------------
-      theScene.selectedDebugThingGroups.sync();
-      n = theScene.selectedDebugThingGroups.numberOfSelections();
-      if ( n == 0 ) {
-          msg += "; All visual debug groups are UNSELECTED";
-      }
-      else if ( n == 1 ) {
-          int f = theScene.selectedDebugThingGroups.firstSelected();
-          msg += "; Debug group [" + f + "] selected.";
-      }
-      else {
-          msg += "; " + n + " debug groups selected";
-      }
+        //-----------------------------------------------------------------
+        theScene.selectedDebugThingGroups.sync();
+        n = theScene.selectedDebugThingGroups.numberOfSelections();
+        if ( n == 0 ) {
+            msg += "; All visual debug groups are UNSELECTED";
+        }
+        else if ( n == 1 ) {
+            int f = theScene.selectedDebugThingGroups.firstSelected();
+            msg += "; Debug group [" + f + "] selected.";
+        }
+        else {
+            msg += "; " + n + " debug groups selected";
+        }
 
-      //-----------------------------------------------------------------
-      statusMessage.setText(msg);
-  }
+        //-----------------------------------------------------------------
+        statusMessage.setText(msg);
+    }
 
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e) 
+    {
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-            cameraController.processKeyReleasedEventAwt(e) ) {
+             cameraController.processKeyReleasedEventAwt(e) ) {
             canvas.repaint();
         }
     }
@@ -1693,7 +1711,8 @@ public class JoglDrawingArea implements
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method
     */
-    public void keyTyped(KeyEvent e) {
+    public void keyTyped(KeyEvent e)
+    {
         ;
     }
 }
