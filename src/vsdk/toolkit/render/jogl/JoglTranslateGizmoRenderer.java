@@ -11,8 +11,11 @@ import java.util.ArrayList;
 
 // JOGL classes
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUquadric;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
@@ -23,11 +26,42 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Arrow;
+import vsdk.toolkit.environment.geometry.Cone;
 
 public class JoglTranslateGizmoRenderer extends JoglRenderer 
 {
     public static Light light1 = null;
     public static Light light2 = null;
+
+    private static GLU glu = null;
+    private static GLUquadric gluQuadric = null;
+
+    private static void drawConeWithShadow(GL gl, Cone cone, ColorRgb color)
+    {
+        if ( glu == null ) {
+            glu = new GLU();
+            gluQuadric = glu.gluNewQuadric();
+        }
+
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+
+        double r1, r2, h;
+        int slices = 8;
+
+        r1 = cone.getBaseRadius();
+        r2 = cone.getTopRadius();
+        h = cone.getHeight();
+
+        VSDK.acumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
+
+        glu.gluCylinder(gluQuadric, r1, r2, h, slices, 1);
+        gl.glPushMatrix();
+        gl.glRotated(180, 1, 0, 0);
+	double p = 0.5;
+        gl.glColor3d(color.r*p, color.g*p, color.b*p);
+        glu.gluDisk(gluQuadric, 0, r1, slices, 1);
+        gl.glPopMatrix();
+    }
 
     private static void draw3dsmax(GL gl, TranslateGizmo gizmo)
     {
@@ -67,7 +101,12 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
                 c = r.getMaterial().getDiffuse();
                 gl.glColor3d(c.r, c.g, c.b);
                 q.setWireColor(c);
-                JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
+                if ( g instanceof Cone ) {
+                    drawConeWithShadow(gl, (Cone)g, c);
+                }
+                else {
+                    JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
+                }
                 gl.glPopMatrix();
             }
         }

@@ -54,7 +54,7 @@ public class JoglConeRenderer extends JoglRenderer {
     */
     public static void draw(GL gl, Cone cone, Camera c, RendererConfiguration q)
     {
-        if (glu == null) {
+        if ( glu == null ) {
             glu = new GLU();
             gluQuadric = glu.gluNewQuadric();
         }

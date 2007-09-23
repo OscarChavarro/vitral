@@ -1398,7 +1398,26 @@ public class JoglDrawingArea implements
         }
 
         // Global commands
-        if ( keycode == KeyEvent.VK_ESCAPE ) System.exit(0);
+        int asp;
+        switch ( keycode ) {
+          case KeyEvent.VK_ESCAPE:
+            System.exit(0);
+            break;
+          case KeyEvent.VK_EQUALS:
+            // Alphanumeric =
+	    asp = translationGizmo.getAparentSizeInPixels();
+            asp += 10;
+            if ( asp > 300 ) asp = 300;
+            translationGizmo.setAparentSizeInPixels(asp);
+            break;
+          case KeyEvent.VK_MINUS:
+            // Alphanumeric -
+	    asp = translationGizmo.getAparentSizeInPixels();
+            asp -= 20;
+            if ( asp < 20 ) asp = 20;
+            translationGizmo.setAparentSizeInPixels(asp);
+            break;
+        }
 
         if ( qualityController.processKeyPressedEventAwt(e) ) {
             System.out.println(qualitySelection);

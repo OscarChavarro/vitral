@@ -79,7 +79,7 @@ public class TranslateGizmo extends Gizmo {
     private static final double BOX_HEIGHT = 0.01;
     private static final double ARROW_LENGHT = 1.0;
 
-    private static final int INITIAL_DU = 100;
+    private int aparentSizeInPixels;
 
     /// Interaction state
     private int persistentSelection;
@@ -97,6 +97,7 @@ public class TranslateGizmo extends Gizmo {
 
     public TranslateGizmo(Camera cam)
     {
+        aparentSizeInPixels = 100;
         persistentSelection = X_AXIS_GROUP;
         volatileSelection = NULL_GROUP;
 
@@ -129,6 +130,16 @@ public class TranslateGizmo extends Gizmo {
         lastDeltaPosition = new Vector3D();
     }
 
+    public int getAparentSizeInPixels()
+    {
+	return aparentSizeInPixels;
+    }
+
+    public void setAparentSizeInPixels(int du)
+    {
+        aparentSizeInPixels = du;
+    }
+
     public void setCamera(Camera cam)
     {
         camera = cam;
@@ -149,9 +160,9 @@ public class TranslateGizmo extends Gizmo {
         int i;
         SimpleBody r, o, r2;
         Geometry g;
-        Material red = createMaterial(1, 0, 0);
-        Material green = createMaterial(0, 1, 0);
-        Material blue = createMaterial(0, 0, 1);
+        Material red = createMaterial(0.78, 0, 0);
+        Material green = createMaterial(0, 0.61, 0);
+        Material blue = createMaterial(0, 0, 0.76);
 
         Matrix4x4 R = new Matrix4x4(T);
         R.M[3][0] = 0.0;
@@ -168,7 +179,7 @@ public class TranslateGizmo extends Gizmo {
 
         coneModel.setBaseRadius(currentScale*0.05);
         coneModel.setHeight(currentScale*0.3*ARROW_LENGHT);
-//        boxModel.setSize(currentScale*BOX_SIDE, currentScale*BOX_SIDE, VSDK.EPSILON*BOX_HEIGHT);
+        boxModel.setSize(currentScale*(BOX_SIDE+0.025), currentScale*(BOX_SIDE+0.025), currentScale*BOX_HEIGHT);
 
         //-----------------------------------------------------------------
         ParametricCurve lineModel;
@@ -286,9 +297,9 @@ public class TranslateGizmo extends Gizmo {
     {
         //-----------------------------------------------------------------
         int i;
-        Material red = createMaterial(1, 0, 0);
-        Material green = createMaterial(0, 1, 0);
-        Material blue = createMaterial(0, 0, 1);
+        Material red = createMaterial(0.78, 0, 0);
+        Material green = createMaterial(0, 0.61, 0);
+        Material blue = createMaterial(0, 0, 0.76);
         Material yellow = createMaterial(1, 1, 0);
         Material yellowTransparent = createMaterial(1, 1, 0);
 
@@ -678,7 +689,7 @@ public class TranslateGizmo extends Gizmo {
         R.M[3][3] = 1.0;
 
         calculateGeometryState(getPosition(), 
-                               R, selectedResizing, INITIAL_DU,
+                               R, selectedResizing, aparentSizeInPixels,
                                camera);
     }
 
@@ -715,7 +726,7 @@ public class TranslateGizmo extends Gizmo {
 
         selectedResizing = true;
         calculateGeometryState(new Vector3D(T.M[0][3], T.M[1][3], T.M[2][3]), 
-                               R, selectedResizing, INITIAL_DU, 
+                               R, selectedResizing, aparentSizeInPixels, 
                                camera);
 
         if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
@@ -894,7 +905,7 @@ public class TranslateGizmo extends Gizmo {
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera);
+                               aparentSizeInPixels, camera);
         return true;
     }
 
@@ -902,7 +913,7 @@ public class TranslateGizmo extends Gizmo {
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera);
+                               aparentSizeInPixels, camera);
         int previousSelection = volatileSelection;
 
         if ( volatileSelection == NULL_GROUP ) {
@@ -981,7 +992,7 @@ public class TranslateGizmo extends Gizmo {
 
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera);
+                               aparentSizeInPixels, camera);
         int previousSelection = volatileSelection;
 
         if ( volatileSelection == NULL_GROUP ) {
