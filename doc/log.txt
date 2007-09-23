@@ -428,6 +428,11 @@ Changes in 2007 september 22 revition
   - 1h50min: TranslationGizmo bettered, special case of click outside object
     but inside gizmo working.
 
+Changes in 2007 september 23 revition
+  - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 
+    3dstudio max like interaction and display. First version of
+    GeometricModeler class.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

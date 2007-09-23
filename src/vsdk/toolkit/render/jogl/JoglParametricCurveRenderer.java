@@ -75,7 +75,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     static public void draw(GL gl, ParametricCurve curve,
                             Camera c, RendererConfiguration q) {
-        draw(gl, curve, c, q, new ColorRgb(1, 1, 1));
+        draw(gl, curve, c, q, q.getWireColor());
     }
 
     static public void drawControlPointsCurve(GL gl, 

@@ -26,7 +26,72 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
     public static Light light1 = null;
     public static Light light2 = null;
 
-    public static void drawAquynza(GL gl, TranslateGizmo gizmo)
+    private static void draw3dsmax(GL gl, TranslateGizmo gizmo)
+    {
+        RendererConfiguration q = new RendererConfiguration();
+        ArrayList<SimpleBody> things = gizmo.getElements3dsmax();
+
+        q.setSurfaces(true);
+        q.setWires(false);
+        q.setBoundingVolume(false);
+        q.setTexture(false);
+        q.setPoints(false);
+        q.setBumpMap(false);
+        q.setNormals(false);
+        q.setShadingType(q.SHADING_TYPE_FLAT);
+
+        gl.glShadeModel(gl.GL_SMOOTH);
+
+        ColorRgb c;
+
+        int i;
+
+        //-----------------------------------------------------------------
+        gl.glDisable(gl.GL_LIGHTING);
+        for ( i = 0; i < things.size(); i++ ) {
+            SimpleBody r = things.get(i);
+            Geometry g = r.getGeometry();
+            Vector3D position;
+
+            if ( g != null && (i < 9 || i > 11) ) {
+                gl.glPushMatrix();
+
+                gl.glLoadIdentity();
+                position = r.getPosition();
+                gl.glTranslated(position.x, position.y, position.z);
+                JoglMatrixRenderer.activate(gl, r.getRotation());
+                gl.glDisable(gl.GL_LIGHTING);
+                c = r.getMaterial().getDiffuse();
+                gl.glColor3d(c.r, c.g, c.b);
+                q.setWireColor(c);
+                JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
+                gl.glPopMatrix();
+            }
+        }
+
+        //-----------------------------------------------------------------
+        gl.glEnable(gl.GL_LIGHTING);
+        for ( i = 9; i < things.size() && i < 12; i++ ) {
+            SimpleBody r = things.get(i);
+            Geometry g = r.getGeometry();
+            Vector3D position;
+
+            if ( g != null ) {
+                gl.glPushMatrix();
+
+                gl.glLoadIdentity();
+                position = r.getPosition();
+                gl.glTranslated(position.x, position.y, position.z);
+                JoglMatrixRenderer.activate(gl, r.getRotation());
+                JoglMaterialRenderer.activate(gl, r.getMaterial());
+                JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
+                gl.glPopMatrix();
+            }
+        }
+
+    }
+
+    private static void drawAquynza(GL gl, TranslateGizmo gizmo)
     {
         RendererConfiguration q = new RendererConfiguration();
         ArrayList<SimpleBody> things = gizmo.getElements();
@@ -40,7 +105,6 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         q.setNormals(false);
         q.setShadingType(q.SHADING_TYPE_GOURAUD);
 
-        gl.glDisable(gl.GL_LIGHTING);
         gl.glShadeModel(gl.GL_SMOOTH);
 
         int i;
@@ -91,7 +155,8 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 */
 
         //-----------------------------------------------------------------
-        drawAquynza(gl, gizmo);
+        //drawAquynza(gl, gizmo);
+        draw3dsmax(gl, gizmo);
         //-----------------------------------------------------------------
         JoglLightRenderer.turnOffAllLights(gl);
     }

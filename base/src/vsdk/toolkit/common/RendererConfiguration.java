@@ -40,6 +40,7 @@ public class RendererConfiguration extends FundamentalEntity {
     private boolean points;
     private boolean normals;
     private boolean trianglesNormals;
+    private ColorRgb wireColor;
 
     // To be used in future: depending of the rendering implementation for
     // each geometry, this can be used to specify the desired amount of
@@ -72,6 +73,24 @@ public class RendererConfiguration extends FundamentalEntity {
         points = false;
         normals = false;
         trianglesNormals = false;
+        wireColor = new ColorRgb(1, 1, 1);
+    }
+
+    public void setWireColor(ColorRgb c)
+    {
+        wireColor = new ColorRgb(c);
+    }
+
+    public void setWireColor(double r, double g, double b)
+    {
+        wireColor.r = r;
+        wireColor.g = g;
+        wireColor.b = b;
+    }
+
+    public ColorRgb getWireColor()
+    {
+        return wireColor;
     }
 
     /**

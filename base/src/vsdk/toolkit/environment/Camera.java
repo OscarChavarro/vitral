@@ -599,9 +599,6 @@ public class Camera extends Entity
     ray origin and by the proyection plane (u, v) point, where (u, v) is
     the proyection of pixel (x, y). The plane is perpendicular to the v
     direction.
-
-    WARNING: This is currently considering only the perspective case!
-    TODO: The paralel projection case!
     */
     public InfinitePlane calculateUPlaneAtPixel(int x, int y)
     {
@@ -614,12 +611,17 @@ public class Camera extends Entity
     /**
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
-
-    WARNING: This is currently considering only the perspective case!
-    TODO: The paralel projection case!
     */
     public InfinitePlane calculateUPlane(double u)
     {
+        if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            u /= orthogonalZoom;
+            u *= 2*(viewportXSize/viewportYSize);
+            Vector3D right = left.multiply(-1);
+            right.normalize();
+            return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
+        }
+
         Vector3D du = rightWithScale.multiply(u);
         Vector3D f = new Vector3D(front);
         Vector3D dir = du.add(_dir);
@@ -655,9 +657,6 @@ public class Camera extends Entity
     ray origin and by the proyection plane (u, v) point, where (u, v) is
     the proyection of pixel (x, y). The plane is perpendicular to the v
     direction.
-
-    WARNING: This is currently considering only the perspective case!
-    TODO: The paralel projection case!
     */
     public InfinitePlane calculateVPlaneAtPixel(int x, int y)
     {
@@ -670,12 +669,17 @@ public class Camera extends Entity
     /**
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
-
-    WARNING: This is currently considering only the perspective case!
-    TODO: The paralel projection case!
     */
     public InfinitePlane calculateVPlane(double v)
     {
+        if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+            v /= orthogonalZoom;
+            v *= 2;
+            Vector3D up2 = new Vector3D(up);
+            up.normalize();
+            return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
+        }
+
         Vector3D dv = upWithScale.multiply(v);
         Vector3D f = new Vector3D(front);
         Vector3D dir = dv.add(_dir);

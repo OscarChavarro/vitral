@@ -110,6 +110,7 @@ public class JoglBoxRenderer extends JoglRenderer {
         gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             drawSolidUnitCube(gl);
         }
 

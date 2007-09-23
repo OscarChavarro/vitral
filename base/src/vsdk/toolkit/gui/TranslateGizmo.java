@@ -27,8 +27,11 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.processing.GeometricModeler;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state
@@ -40,11 +43,13 @@ public class TranslateGizmo extends Gizmo {
     private Arrow arrowModel;
     private Cone cylinderModel;
     private Box boxModel;
+    private Cone coneModel;
 
     /// Geometric model based in primitive instancing: primitive instances
     /// This list is always of size 12, and its elements follow the order 
     /// indicated in the values of the *_ELEMENT constants of this class.
     ArrayList<SimpleBody> elementInstances;
+    ArrayList<SimpleBody> elementInstances3dsmax;
 
     /// Internal element selection state
     public static final int X_AXIS_ELEMENT = 1;
@@ -67,9 +72,6 @@ public class TranslateGizmo extends Gizmo {
     public static final int XY_PLANE_GROUP = 4;
     public static final int YZ_PLANE_GROUP = 5;
     public static final int XZ_PLANE_GROUP = 6;
-
-    public static final int MODEL_FOR_GRAVITY = 1;
-    public static final int MODEL_FOR_DISPLAY = 1;
 
     private static final double SEGMENT_LENGHT = 0.32;
     private static final double SEGMENT_WIDTH = 0.02;
@@ -102,11 +104,18 @@ public class TranslateGizmo extends Gizmo {
         arrowModel = new Arrow(0.5*ARROW_LENGHT, 0.3*ARROW_LENGHT, 0.025, 0.05);
         cylinderModel = new Cone(SEGMENT_WIDTH, SEGMENT_WIDTH, SEGMENT_LENGHT);
         boxModel = new Box(BOX_SIDE, BOX_SIDE, BOX_HEIGHT);
+        coneModel = new Cone(0.05, 0, 0.3*ARROW_LENGHT);
 
         elementInstances = new ArrayList<SimpleBody>();
         for ( int i = 0; i < 12; i++ ) {
             SimpleBody r = new SimpleBody();
             elementInstances.add(r);
+        }
+
+        elementInstances3dsmax = new ArrayList<SimpleBody>();
+        for ( int i = 0; i < 15; i++ ) {
+            SimpleBody r = new SimpleBody();
+            elementInstances3dsmax.add(r);
         }
 
         setCamera(cam);
@@ -135,6 +144,119 @@ public class TranslateGizmo extends Gizmo {
         return elementInstances;
     }
 
+    public ArrayList<SimpleBody> getElements3dsmax()
+    {
+        int i;
+        SimpleBody r, o, r2;
+        Geometry g;
+        Material red = createMaterial(1, 0, 0);
+        Material green = createMaterial(0, 1, 0);
+        Material blue = createMaterial(0, 0, 1);
+
+        Matrix4x4 R = new Matrix4x4(T);
+        R.M[3][0] = 0.0;
+        R.M[3][1] = 0.0;
+        R.M[3][2] = 0.0;
+        R.M[0][3] = 0.0;
+        R.M[1][3] = 0.0;
+        R.M[2][3] = 0.0;
+        R.M[3][3] = 1.0;
+        Matrix4x4 subR = new Matrix4x4();
+        Matrix4x4 eleR, eleRi;
+        Vector3D subP;
+        Vector3D eleP;
+
+        coneModel.setBaseRadius(currentScale*0.05);
+        coneModel.setHeight(currentScale*0.3*ARROW_LENGHT);
+//        boxModel.setSize(currentScale*BOX_SIDE, currentScale*BOX_SIDE, VSDK.EPSILON*BOX_HEIGHT);
+
+        //-----------------------------------------------------------------
+        ParametricCurve lineModel;
+        ParametricCurve segmentModel;
+
+        lineModel = GeometricModeler.createLine(0, 0, 0,
+            0, 0, currentScale*0.7);
+
+        segmentModel = GeometricModeler.createLine(0, 0, 0,
+            0, 0, currentScale*SEGMENT_LENGHT);
+
+        //-----------------------------------------------------------------
+        for ( i = 0; i < elementInstances.size(); i++ ) {
+            r = elementInstances3dsmax.get(i);
+            o = elementInstances.get(i);
+
+            r.setMaterial(o.getMaterial()); 
+            r.setRotation(o.getRotation());
+            r.setRotationInverse(o.getRotationInverse());
+
+            g = o.getGeometry();
+            if ( g != null && g instanceof Arrow ) {
+                r.setGeometry(coneModel);
+                switch ( i ) {
+                  case 0:
+                    // Rotation
+                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
+                    r.setMaterial(red); 
+                    break;
+                  case 1:
+                    // Rotation
+                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
+                    r.setMaterial(green); 
+                    break;
+                  case 2:
+                    // Rotation
+                    subR = new Matrix4x4();
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
+                    r.setMaterial(blue); 
+                    break;
+                }
+
+                r2 = elementInstances3dsmax.get(i+12);
+                r2.setMaterial(o.getMaterial()); 
+                r2.setRotation(o.getRotation());
+                r2.setRotationInverse(o.getRotationInverse());
+                r2.setPosition(o.getPosition());
+                r2.setGeometry(lineModel);
+            }
+            else if ( g != null && g instanceof Cone ) {
+                r.setPosition(o.getPosition());
+                r.setGeometry(segmentModel);
+            }
+            else {
+                r.setPosition(o.getPosition());
+                r.setGeometry(g);
+            }
+        }
+
+        return elementInstances3dsmax;
+    }
+
     private Material createMaterial(double r, double g, double b)
     {
         Material m = new Material();
@@ -160,7 +282,7 @@ public class TranslateGizmo extends Gizmo {
     */
     public void calculateGeometryState(Vector3D translation, Matrix4x4 rotation,
                                        boolean autosize, int initialdu,
-                                       Camera camera, int modelType)
+                                       Camera camera)
     {
         //-----------------------------------------------------------------
         int i;
@@ -461,8 +583,7 @@ public class TranslateGizmo extends Gizmo {
                 if ( !(orthogonalCamera && (iPar || jPar)) ) {
                     // Basic model
                     r.setGeometry(null);
-                    if ( modelType == MODEL_FOR_DISPLAY &&
-                         currentSelection != XY_PLANE_GROUP ) {
+                    if ( currentSelection != XY_PLANE_GROUP ) {
                         break;
                     }
                     r.setGeometry(boxModel);
@@ -484,8 +605,7 @@ public class TranslateGizmo extends Gizmo {
                 if ( !(orthogonalCamera && (jPar || kPar)) ) {
                     // Basic model
                     r.setGeometry(null);
-                    if ( modelType == MODEL_FOR_DISPLAY &&
-                         currentSelection != YZ_PLANE_GROUP ) {
+                    if ( currentSelection != YZ_PLANE_GROUP ) {
                         break;
                     }
                     r.setGeometry(boxModel);
@@ -508,8 +628,7 @@ public class TranslateGizmo extends Gizmo {
                 if ( !(orthogonalCamera && (iPar || kPar)) ) {
                     // Basic model
                     r.setGeometry(null);
-                    if ( modelType == MODEL_FOR_DISPLAY &&
-                         currentSelection != XZ_PLANE_GROUP ) {
+                    if ( currentSelection != XZ_PLANE_GROUP ) {
                         break;
                     }
                     r.setGeometry(boxModel);
@@ -560,7 +679,7 @@ public class TranslateGizmo extends Gizmo {
 
         calculateGeometryState(getPosition(), 
                                R, selectedResizing, INITIAL_DU,
-                               camera, MODEL_FOR_DISPLAY);
+                               camera);
     }
 
     public Matrix4x4 getTransformationMatrix()
@@ -597,7 +716,7 @@ public class TranslateGizmo extends Gizmo {
         selectedResizing = true;
         calculateGeometryState(new Vector3D(T.M[0][3], T.M[1][3], T.M[2][3]), 
                                R, selectedResizing, INITIAL_DU, 
-                               camera, MODEL_FOR_DISPLAY);
+                               camera);
 
         if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
             switch ( unicode_id ) {
@@ -775,7 +894,7 @@ public class TranslateGizmo extends Gizmo {
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera, MODEL_FOR_GRAVITY);
+                               INITIAL_DU, camera);
         return true;
     }
 
@@ -783,7 +902,7 @@ public class TranslateGizmo extends Gizmo {
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera, MODEL_FOR_GRAVITY);
+                               INITIAL_DU, camera);
         int previousSelection = volatileSelection;
 
         if ( volatileSelection == NULL_GROUP ) {
@@ -862,7 +981,7 @@ public class TranslateGizmo extends Gizmo {
 
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
-                               INITIAL_DU, camera, MODEL_FOR_GRAVITY);
+                               INITIAL_DU, camera);
         int previousSelection = volatileSelection;
 
         if ( volatileSelection == NULL_GROUP ) {

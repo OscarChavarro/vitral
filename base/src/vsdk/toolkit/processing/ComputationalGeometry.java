@@ -17,7 +17,10 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
 /**
-This class contains common computational geometry operations.
+This class contains common computational geometry operations (mostly
+geometrical querys over existing geometries). This is a companion class
+for the `GeometricModeler`, which holds creation and modification operations
+over gemetries.
 */
 public class ComputationalGeometry extends ProcessingElement
 {
