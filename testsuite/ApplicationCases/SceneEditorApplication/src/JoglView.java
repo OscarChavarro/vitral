@@ -1,5 +1,8 @@
 //===========================================================================
 
+// Java basic classes
+import java.util.ArrayList;
+
 // AWT/Swing classes
 import java.awt.Color;
 import java.awt.Graphics;
@@ -16,16 +19,22 @@ import java.awt.image.BufferedImage;
 import javax.media.opengl.GL;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.Arrow;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.gui.TranslateGizmo;
+
 /**
 A `JoglView` represents an specific Jogl viewport inside a canvas. One Jogl
 canvas may contain one ore more `JoglView`s, arrange geometrically in 2D,
@@ -81,9 +90,12 @@ public class JoglView implements KeyListener
     private boolean active;
     private String title;
     private RGBAImage titleImage;
-    public RGBAImage xLabelImage;
+    private RGBAImage xLabelImage;
     private RGBAImage yLabelImage;
     private RGBAImage zLabelImage;
+    private RGBAImage xLabelImageSelected;
+    private RGBAImage yLabelImageSelected;
+    private RGBAImage zLabelImageSelected;
     private Font font;
 
     // Each JoglView can call a different visualization algorithm
@@ -157,6 +169,10 @@ public class JoglView implements KeyListener
         xLabelImage = calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
         yLabelImage = calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
         zLabelImage = calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
+
+        xLabelImageSelected = calculateLabelImage("X", new ColorRgb(1, 1, 0));
+        yLabelImageSelected = calculateLabelImage("Y", new ColorRgb(1, 1, 0));
+        zLabelImageSelected = calculateLabelImage("Z", new ColorRgb(1, 1, 0));
 
         font = new Font("Arial", Font.PLAIN, 14);
 
@@ -487,7 +503,7 @@ public class JoglView implements KeyListener
         gl.glPopAttrib();
     }
 
-    private RGBAImage calculateLabelImage(String label, ColorRgb color)
+    public RGBAImage calculateLabelImage(String label, ColorRgb color)
     {
         RGBAImage labelImage;
 
@@ -754,6 +770,86 @@ public class JoglView implements KeyListener
                 break;
             }
             setTitle(camera.getName());
+        }
+    }
+
+    public void drawLabelsForTranslateGizmo(GL gl, TranslateGizmo gizmo)
+    {
+        ArrayList<SimpleBody> things = gizmo.getElements();
+        int i;
+        Vector3D lv = new Vector3D();
+        Vector3D p;
+        Vector3D tp = new Vector3D();
+        Matrix4x4 R;
+        boolean yellow;
+        ColorRgb c = new ColorRgb(1, 1, 0);
+
+        for ( i = 0; i < things.size() && i < 3; i++ ) {
+            SimpleBody r = things.get(i);
+            Geometry g = r.getGeometry();
+            Vector3D position;
+
+            if ( g != null ) {
+                gl.glPushMatrix();
+                gl.glLoadIdentity();
+
+                lv.x = lv.y = 0;
+                if ( g instanceof Arrow ) {
+                    Arrow a = ((Arrow)g);
+                    lv.z = (a.getHeadLength() + a.getBaseLength()) * 1.1;
+                }
+                else {
+                    lv.z = 1;
+                }
+
+                R = new Matrix4x4();
+                R.translation(r.getPosition());
+                R = R.multiply(r.getRotation());
+                p = R.multiply(lv);
+                camera.projectPoint(p, tp);
+
+                //---------------------------------------------
+                yellow = false;
+                if ( VSDK.colorDistance(c, r.getMaterial().getDiffuse()) <
+                     VSDK.EPSILON ) {
+                yellow = true;
+                }
+
+                //---------------------------------------------
+                switch ( i ) {
+                  case 0:
+                    if ( yellow ) {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            xLabelImageSelected);
+                    }
+                    else {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            xLabelImage);
+                    }
+                    break;
+                  case 1:
+                    if ( yellow ) {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            yLabelImageSelected);
+                    }
+                    else {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            yLabelImage);
+                    }
+                    break;
+                  case 2:
+                    if ( yellow ) {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            zLabelImageSelected);
+                    }
+                    else {
+                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                            zLabelImage);
+                    }
+                    break;
+                }
+                gl.glPopMatrix();
+            }
         }
     }
 }

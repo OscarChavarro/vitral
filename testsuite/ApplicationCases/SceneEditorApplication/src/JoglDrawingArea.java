@@ -106,6 +106,8 @@ public class JoglDrawingArea implements
     private ArrayList<JoglView> views;
 
     public int interactionMode;
+    public int lastInteractionMode;
+    private boolean translationGizmoDrawn;
 
     private boolean firstTimer = true;
     public boolean wantToGetColor;
@@ -142,7 +144,8 @@ public class JoglDrawingArea implements
         this.globalViewportYSize = 0;
 
         interactionMode = CAMERA_INTERACTION_MODE;
-
+        lastInteractionMode = CAMERA_INTERACTION_MODE;
+        translationGizmoDrawn = false;
         createCursors();
 
         //cameraController = new CameraControllerBlender(theScene.camera);
@@ -237,6 +240,7 @@ public class JoglDrawingArea implements
     private void drawGizmos(GL gl)
     {
         // Pending: Turn off scene light and turn on gizmo specific lighting
+        translationGizmoDrawn = false;
 
         translationGizmo.setCamera(theScene.activeCamera);
 
@@ -244,7 +248,9 @@ public class JoglDrawingArea implements
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
-        if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
+        if ( interactionMode == TRANSLATE_INTERACTION_MODE ||
+             (interactionMode == CAMERA_INTERACTION_MODE &&
+              lastInteractionMode == TRANSLATE_INTERACTION_MODE) ) {
             if ( firstThingSelected >= 0 ) {
                 Vector3D position;
                 SimpleBody gi;
@@ -261,6 +267,7 @@ public class JoglDrawingArea implements
                 translationGizmo.setTransformationMatrix(composed);
 
                 JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
+                translationGizmoDrawn = true;
             }
         }
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
@@ -748,6 +755,9 @@ public class JoglDrawingArea implements
         copyColorBufferIfNeeded(gl);
 
         view.drawReferenceBase(gl);
+        if ( translationGizmoDrawn ) {
+            view.drawLabelsForTranslateGizmo(gl, translationGizmo);
+        }
     }
 
     /** Called by drawable to initiate drawing */
@@ -1635,11 +1645,13 @@ public class JoglDrawingArea implements
 
               case 'c':
                 statusMessage.setText("Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
+                lastInteractionMode = interactionMode;
                 interactionMode = CAMERA_INTERACTION_MODE;
                 break;
 
               case 'q':
                 statusMessage.setText("Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
+                lastInteractionMode = interactionMode;
                 interactionMode = SELECT_INTERACTION_MODE;
                 break;
 
@@ -1655,17 +1667,20 @@ public class JoglDrawingArea implements
                 }
                 else {
                     statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+                    lastInteractionMode = interactionMode;
                     interactionMode = TRANSLATE_INTERACTION_MODE;
                 }
                 break;
 
               case 'e':
                 statusMessage.setText("Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
+                lastInteractionMode = interactionMode;
                 interactionMode = ROTATE_INTERACTION_MODE;
                 break;
 
               case 'r':
                 statusMessage.setText("Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
+                lastInteractionMode = interactionMode;
                 interactionMode = SCALE_INTERACTION_MODE;
                 break;
             }

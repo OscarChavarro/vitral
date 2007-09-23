@@ -170,6 +170,13 @@ public class VSDK
                          (a.z-b.z)*(a.z-b.z));
     }
 
+    public static double colorDistance(ColorRgb a, ColorRgb b)
+    {
+        return Math.sqrt((a.r-b.r)*(a.r-b.r) + 
+                         (a.g-b.g)*(a.g-b.g) +
+                         (a.b-b.b)*(a.b-b.b));
+    }
+
     public static double square(double a)
     {
         return a*a;

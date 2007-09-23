@@ -6,10 +6,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Java basic classes
 import java.util.ArrayList;
 
+// JOGL classes
 import javax.media.opengl.GL;
 
+// VSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
