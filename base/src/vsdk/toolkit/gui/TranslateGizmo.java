@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.KeyEvent;
-import java.awt.Robot;
+//import java.awt.Robot;
 import java.awt.Point;
 
 // VSDK classes
@@ -87,6 +87,7 @@ public class TranslateGizmo extends Gizmo {
     //private boolean skipRobot;
     private int oldmousex;
     private int oldmousey;
+    private Vector3D lastDeltaPosition;
     private boolean selectedResizing;
     private double currentScale;
 
@@ -116,6 +117,7 @@ public class TranslateGizmo extends Gizmo {
         selectedResizing = true;
         currentScale = 1.0;
         active = false;
+        lastDeltaPosition = new Vector3D();
     }
 
     public void setCamera(Camera cam)
@@ -191,6 +193,8 @@ public class TranslateGizmo extends Gizmo {
         Vector3D subP;
         Vector3D eleP;
 
+        camera.updateVectors();
+
         if ( selectedResizing ) {
             Vector3D a = new Vector3D();
             Vector3D b = new Vector3D();
@@ -215,6 +219,20 @@ public class TranslateGizmo extends Gizmo {
         boxModel.setSize(scale*BOX_SIDE, scale*BOX_SIDE, scale*BOX_HEIGHT);
 
         //-----------------------------------------------------------------
+        Vector3D front = camera.getFront();
+        Vector3D axisI = new Vector3D(1, 0, 0);
+        Vector3D axisJ = new Vector3D(0, 1, 0);
+        Vector3D axisK = new Vector3D(0, 0, 1);
+        boolean orthogonalCamera;
+        boolean iPar;
+        boolean jPar;
+        boolean kPar;
+
+        orthogonalCamera = (camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL);
+        iPar = (Math.abs(front.dotProduct(axisI)) > 1.0-VSDK.EPSILON);
+        jPar = (Math.abs(front.dotProduct(axisJ)) > 1.0-VSDK.EPSILON);
+        kPar = (Math.abs(front.dotProduct(axisK)) > 1.0-VSDK.EPSILON);
+
         int index;
         for ( i = 0, index = 1;
               index <= 12 && i < elementInstances.size();
@@ -223,268 +241,292 @@ public class TranslateGizmo extends Gizmo {
             r.setGeometry(null);
             switch ( index ) {
               case X_AXIS_ELEMENT:
-                // Basic model
-                r.setGeometry(arrowModel);
-                if ( currentSelection == X_AXIS_GROUP ||
-                     currentSelection == XY_PLANE_GROUP ||
-                     currentSelection == XZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && iPar) ) {
+                    // Basic model
+                    r.setGeometry(arrowModel);
+                    if ( currentSelection == X_AXIS_GROUP ||
+                         currentSelection == XY_PLANE_GROUP ||
+                         currentSelection == XZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(red);
+                    }
+                    // Rotation
+                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(red);
-                }
-                // Rotation
-                subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
-                eleP = eleR.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case Y_AXIS_ELEMENT:
-                // Basic model
-                r.setGeometry(arrowModel);
-                if ( currentSelection == Y_AXIS_GROUP ||
-                     currentSelection == XY_PLANE_GROUP ||
-                     currentSelection == YZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                  if ( !(orthogonalCamera && jPar) ) {
+                    // Basic model
+                    r.setGeometry(arrowModel);
+                    if ( currentSelection == Y_AXIS_GROUP ||
+                         currentSelection == XY_PLANE_GROUP ||
+                         currentSelection == YZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(green);
+                    }
+                    // Rotation
+                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(green);
-                }
-                // Rotation
-                subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
-                eleP = eleR.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case Z_AXIS_ELEMENT:
-                // Basic model
-                r.setGeometry(arrowModel);
-                if ( currentSelection == Z_AXIS_GROUP ||
-                     currentSelection == YZ_PLANE_GROUP ||
-                     currentSelection == XZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && kPar) ) {
+                    // Basic model
+                    r.setGeometry(arrowModel);
+                    if ( currentSelection == Z_AXIS_GROUP ||
+                         currentSelection == YZ_PLANE_GROUP ||
+                         currentSelection == XZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(blue);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(blue);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
-                eleP = eleR.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XYY_SEGMENT_ELEMENT:
-                // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == XY_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (iPar || jPar)) ) {
+                    // Basic model
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == XY_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(green);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(green);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
-                eleP = eleR.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XYX_SEGMENT_ELEMENT:
-                // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == XY_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (iPar || jPar)) ) {
+                    // Basic model
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == XY_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(red);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
+                    eleP = eleR.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(red);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
-                eleP = eleR.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case YZZ_SEGMENT_ELEMENT:
                 // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == YZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (jPar || kPar)) ) {
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == YZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(blue);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(blue);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case YZY_SEGMENT_ELEMENT:
-                // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == YZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (jPar || kPar)) ) {
+                    // Basic model
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == YZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(green);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(green);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XZZ_SEGMENT_ELEMENT:
-                // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == XZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (iPar || kPar)) ) {
+                    // Basic model
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == XZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(blue);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(blue);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XZX_SEGMENT_ELEMENT:
-                // Basic model
-                r.setGeometry(cylinderModel);
-                if ( currentSelection == XZ_PLANE_GROUP ) {
-                    r.setMaterial(yellow); 
+                if ( !(orthogonalCamera && (iPar || kPar)) ) {
+                    // Basic model
+                    r.setGeometry(cylinderModel);
+                    if ( currentSelection == XZ_PLANE_GROUP ) {
+                        r.setMaterial(yellow); 
+                    }
+                    else {
+                        r.setMaterial(red);
+                    }
+                    // Rotation
+                    subR = new Matrix4x4();
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                else {
-                    r.setMaterial(red);
-                }
-                // Rotation
-                subR = new Matrix4x4();
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XY_BOX_ELEMENT:
-                // Basic model
-                r.setGeometry(null);
-                if ( modelType == MODEL_FOR_DISPLAY &&
-                     currentSelection != XY_PLANE_GROUP ) {
-                    break;
+                if ( !(orthogonalCamera && (iPar || jPar)) ) {
+                    // Basic model
+                    r.setGeometry(null);
+                    if ( modelType == MODEL_FOR_DISPLAY &&
+                         currentSelection != XY_PLANE_GROUP ) {
+                        break;
+                    }
+                    r.setGeometry(boxModel);
+                    r.setMaterial(yellowTransparent); 
+                    // Rotation
+                    subR = new Matrix4x4();
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(scale*BOX_SIDE/2, scale*BOX_SIDE/2, 0);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                r.setGeometry(boxModel);
-                r.setMaterial(yellowTransparent); 
-                // Rotation
-                subR = new Matrix4x4();
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(scale*BOX_SIDE/2, scale*BOX_SIDE/2, 0);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case YZ_BOX_ELEMENT:
-                // Basic model
-                r.setGeometry(null);
-                if ( modelType == MODEL_FOR_DISPLAY &&
-                     currentSelection != YZ_PLANE_GROUP ) {
-                    break;
+                if ( !(orthogonalCamera && (jPar || kPar)) ) {
+                    // Basic model
+                    r.setGeometry(null);
+                    if ( modelType == MODEL_FOR_DISPLAY &&
+                         currentSelection != YZ_PLANE_GROUP ) {
+                        break;
+                    }
+                    r.setGeometry(boxModel);
+                    r.setMaterial(yellowTransparent); 
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(0, scale*BOX_SIDE/2, scale*BOX_SIDE/2);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                r.setGeometry(boxModel);
-                r.setMaterial(yellowTransparent); 
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(0, scale*BOX_SIDE/2, scale*BOX_SIDE/2);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
               case XZ_BOX_ELEMENT:
-                // Basic model
-                r.setGeometry(null);
-                if ( modelType == MODEL_FOR_DISPLAY &&
-                     currentSelection != XZ_PLANE_GROUP ) {
-                    break;
+                if ( !(orthogonalCamera && (iPar || kPar)) ) {
+                    // Basic model
+                    r.setGeometry(null);
+                    if ( modelType == MODEL_FOR_DISPLAY &&
+                         currentSelection != XZ_PLANE_GROUP ) {
+                        break;
+                    }
+                    r.setGeometry(boxModel);
+                    r.setMaterial(yellowTransparent); 
+                    // Rotation
+                    subR = new Matrix4x4();
+                    subR.axisRotation(Math.toRadians(90.0), 1, 0, 0);
+                    eleR = R.multiply(subR);
+                    r.setRotation(eleR);
+                    eleRi = new Matrix4x4(eleR);
+                    eleRi.invert();
+                    r.setRotationInverse(eleRi);
+                    // Translation
+                    subP = new Vector3D(scale*BOX_SIDE/2, 0, scale*BOX_SIDE/2);
+                    eleP = R.multiply(subP).add(getPosition());
+                    r.setPosition(eleP);
                 }
-                r.setGeometry(boxModel);
-                r.setMaterial(yellowTransparent); 
-                // Rotation
-                subR = new Matrix4x4();
-                subR.axisRotation(Math.toRadians(90.0), 1, 0, 0);
-                eleR = R.multiply(subR);
-                r.setRotation(eleR);
-                eleRi = new Matrix4x4(eleR);
-                eleRi.invert();
-                r.setRotationInverse(eleRi);
-                // Translation
-                subP = new Vector3D(scale*BOX_SIDE/2, 0, scale*BOX_SIDE/2);
-                eleP = R.multiply(subP).add(getPosition());
-                r.setPosition(eleP);
                 break;
             }
         }
@@ -559,7 +601,7 @@ public class TranslateGizmo extends Gizmo {
 
         if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
             switch ( unicode_id ) {
-                // Position
+              // Position
               case 'x':
                 T.M[0][3] -= deltaMov;
                 updateNeeded = true;
@@ -595,10 +637,137 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
-    public boolean processMousePressedEventAwt(MouseEvent mouseEvent)
+    public boolean processMousePressedEventAwt(MouseEvent e)
     {
-        oldmousex = mouseEvent.getX();
-        oldmousey = mouseEvent.getY();
+        lastDeltaPosition = new Vector3D();
+        //lastDeltaPosition = calculateDeltaPosition(mouseEvent);
+        //Vector3D p = calculateInteractionPosition(e); // Not working!
+        //* HOW TO REFACTOR FROM HERE *************************************
+
+        //- Configure sub-interaction technique from active element -------
+        int currentSelection;
+        if ( volatileSelection == NULL_GROUP ) {
+            currentSelection = persistentSelection;
+        }
+        else {
+            currentSelection = volatileSelection;
+        }
+
+        Vector3D v = null;
+        int interactionTechnique = 0;
+
+        switch ( currentSelection ) {
+          case X_AXIS_GROUP: 
+            v = new Vector3D(1, 0, 0);
+            interactionTechnique = 1; // Vector
+            break;
+          case Y_AXIS_GROUP: 
+            v = new Vector3D(0, 1, 0);
+            interactionTechnique = 1; // Vector
+            break;
+          case Z_AXIS_GROUP: 
+            v = new Vector3D(0, 0, 1);
+            interactionTechnique = 1; // Vector
+            break;
+          case XY_PLANE_GROUP: 
+            v = new Vector3D(0, 0, 1);
+            interactionTechnique = 2; // Plane
+            break;
+          case YZ_PLANE_GROUP: 
+            v = new Vector3D(1, 0, 0);
+            interactionTechnique = 2; // Plane
+            break;
+          case XZ_PLANE_GROUP: 
+            v = new Vector3D(0, 1, 0);
+            interactionTechnique = 2; // Plane
+            break;
+        }
+
+        if ( v == null ) {
+            oldmousex = e.getX();
+            oldmousey = e.getY();
+            return false;
+        }
+
+        //- Implement interaction technique for selected element ----------
+        Vector3D o = getPosition();
+        Vector3D p = new Vector3D(0, 0, 0);
+        Ray r = null;
+        InfinitePlane plane;
+        int mousex = e.getX();
+        int mousey = e.getY();
+        Vector3D deltapos = new Vector3D();
+
+        camera.updateVectors();
+
+        if ( interactionTechnique == 2 ) {
+            r = camera.generateRay(mousex, mousey);
+            if ( r.direction.dotProduct(v) > 0 ) {
+                v = v.multiply(-1);
+            }
+            plane = new InfinitePlane(v, o);
+            if ( !plane.doIntersection(r) ) {
+                oldmousex = e.getX();
+                oldmousey = e.getY();
+                p = o;
+            }
+            else {
+                p = r.direction.multiply(r.t).add(r.origin);
+            }
+        }
+        else if ( interactionTechnique == 1 ) {
+            boolean accountForU = false;
+            boolean accountForV = false;
+            Vector3D left, up;
+
+            left = camera.getLeft();
+            up = camera.getUp();
+
+            v.normalize();
+            left.normalize();
+            up.normalize();
+
+            if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
+                accountForU = true;
+            }
+            if ( Math.abs(v.dotProduct(up)) > Math.cos(Math.toRadians(80.0)) ) {
+                accountForV = true;
+            }
+
+            if ( accountForU && !accountForV ) {
+                plane = camera.calculateUPlaneAtPixel(mousex, mousey);
+            }
+            else if ( accountForV && !accountForU ) {
+                plane = camera.calculateVPlaneAtPixel(mousex, mousey);
+            }
+            else if ( accountForU && accountForV ) {
+                if ( (mousex-oldmousex) > (mousey-oldmousey) ) {
+                    plane = camera.calculateUPlaneAtPixel(mousex, mousey);
+                }
+                else {
+                    plane = camera.calculateVPlaneAtPixel(mousex, mousey);
+                }
+            }
+            else {
+                oldmousex = e.getX();
+                oldmousey = e.getY();
+                return false;
+            }
+
+            r = new Ray(o, v);
+            Ray r2 = new Ray(o, v);
+            if ( !plane.doIntersectionWithNegative(r) ) {
+                oldmousex = e.getX();
+                oldmousey = e.getY();
+                return false;
+            }
+            p = r.origin.add(r.direction.multiply(r.t));
+        }
+        oldmousex = e.getX();
+        oldmousey = e.getY();
+        //* HOW TO REFACTOR TO HERE ***************************************
+        lastDeltaPosition = p.substract(getPosition());
+
         return false;
     }
 
@@ -634,6 +803,10 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
+    /**
+    Given a pixel coordinate, this method traces a ray from current camera
+    to gizmo's geometry and determines the constituent element selected.
+    */
     private int calculateSelection(int x, int y)
     {
         camera.updateVectors();
@@ -648,7 +821,8 @@ public class TranslateGizmo extends Gizmo {
             r.t = Double.MAX_VALUE;
             SimpleBody gi = elementInstances.get(i);
 
-            if ( gi.getGeometry() != null && gi.doIntersection(r) ) {
+            if ( gi.getGeometry() != null && gi.doIntersection(r) &&
+                 r.t < nearestDistance ) {
                 nearestDistance = r.t;
                 nearestElement = index;
             }
@@ -704,6 +878,12 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
+    /* TO REFACTOR CODE! */
+    private Vector3D calculateInteractionPosition(MouseEvent e)
+    {
+        return null;
+    }
+
     public boolean processMouseDraggedEventAwt(MouseEvent e)
     {
         //- If it is called as an automatic reposition, do nothing --------
@@ -715,6 +895,9 @@ public class TranslateGizmo extends Gizmo {
             return false;
         }
 */
+
+        //Vector3D p = calculateInteractionPosition(e); // Not working!
+        //* HOW TO REFACTOR FROM HERE *************************************
 
         //- Configure sub-interaction technique from active element -------
         int currentSelection;
@@ -763,17 +946,20 @@ public class TranslateGizmo extends Gizmo {
 
         //- Implement interaction technique for selected element ----------
         Vector3D o = getPosition();
-        camera.updateVectors();
         Vector3D p = new Vector3D(0, 0, 0);
         Ray r = null;
-        InfinitePlane plane, oldplane;
+        InfinitePlane plane;
         int mousex = e.getX();
         int mousey = e.getY();
         Vector3D deltapos = new Vector3D();
-        Vector3D oldp = new Vector3D();
+
+        camera.updateVectors();
 
         if ( interactionTechnique == 2 ) {
             r = camera.generateRay(mousex, mousey);
+            if ( r.direction.dotProduct(v) > 0 ) {
+                v = v.multiply(-1);
+            }
             plane = new InfinitePlane(v, o);
             if ( !plane.doIntersection(r) ) {
                 oldmousex = e.getX();
@@ -796,29 +982,25 @@ public class TranslateGizmo extends Gizmo {
             left.normalize();
             up.normalize();
 
-            if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(60.0)) ) {
+            if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
                 accountForU = true;
             }
-            if ( Math.abs(v.dotProduct(up)) > Math.cos(Math.toRadians(60.0)) ) {
+            if ( Math.abs(v.dotProduct(up)) > Math.cos(Math.toRadians(80.0)) ) {
                 accountForV = true;
             }
 
             if ( accountForU && !accountForV ) {
                 plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-                oldplane = camera.calculateUPlaneAtPixel(oldmousex, oldmousey);
             }
             else if ( accountForV && !accountForU ) {
                 plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-                oldplane = camera.calculateVPlaneAtPixel(oldmousex, oldmousey);
             }
             else if ( accountForU && accountForV ) {
                 if ( (mousex-oldmousex) > (mousey-oldmousey) ) {
                     plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-                    oldplane = camera.calculateUPlaneAtPixel(oldmousex, oldmousey);
                 }
                 else {
                     plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-                    oldplane = camera.calculateVPlaneAtPixel(oldmousex, oldmousey);
                 }
             }
             else {
@@ -829,22 +1011,22 @@ public class TranslateGizmo extends Gizmo {
 
             r = new Ray(o, v);
             Ray r2 = new Ray(o, v);
-            if ( !plane.doIntersectionWithNegative(r) || 
-                 !oldplane.doIntersectionWithNegative(r2) ) {
+            if ( !plane.doIntersectionWithNegative(r) ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
                 return false;
             }
-            oldp = v.multiply(r2.t).add(r2.origin);
-            p = v.multiply(2*(r.t-r2.t)).add(r.origin);
-            //deltapos = v.multiply(r.t);
+            p = r.origin.add(r.direction.multiply(r.t));
         }
+        oldmousex = e.getX();
+        oldmousey = e.getY();
+        //* HOW TO REFACTOR TO HERE ***************************************
 
-        setPosition(p);
+        setPosition(p.substract(lastDeltaPosition));
         selectedResizing = false;
 
         //- Automatic cursor repositioning constrain ----------------------
-        // THIS IS NOT WORKING!
+        // THIS IS NOT WORKING NICELY!
 /*
         try {
             if ( awtRobot == null ) {
@@ -864,9 +1046,6 @@ public class TranslateGizmo extends Gizmo {
             System.err.println(ex);
         }
 */
-        //-----------------------------------------------------------------
-        oldmousex = e.getX();
-        oldmousey = e.getY();
 
         return true;
     }

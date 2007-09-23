@@ -447,6 +447,8 @@ public class JoglView implements KeyListener
             return;
         }
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
+        gl.glPushAttrib(gl.GL_TEXTURE_2D);
+        gl.glPushAttrib(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glDisable(gl.GL_DEPTH_TEST);
@@ -462,6 +464,7 @@ public class JoglView implements KeyListener
         x2 = x1 + viewportSizeXPercent*2;
         y2 = y1 + viewportSizeYPercent*2;
 
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
         gl.glBegin(gl.GL_QUADS);
             if ( selected ) {
                 gl.glColor3d(1, 0.96, 0);
@@ -479,6 +482,8 @@ public class JoglView implements KeyListener
             gl.glVertex3d(x2-2*dx, y2-2*dy, 0);
             gl.glVertex3d(x1+2*dx, y2-2*dy, 0);
         gl.glEnd();
+        gl.glPopAttrib();
+        gl.glPopAttrib();
         gl.glPopAttrib();
     }
 
@@ -526,6 +531,8 @@ public class JoglView implements KeyListener
         int basesize = 64;
         gl.glPushAttrib(gl.GL_VIEWPORT_BIT);
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
+        gl.glPushAttrib(gl.GL_TEXTURE_2D);
+        gl.glPushAttrib(gl.GL_LIGHTING);
         gl.glViewport(viewportStartX, viewportStartY, basesize, basesize);
 
         gl.glMatrixMode(gl.GL_PROJECTION);
@@ -581,6 +588,9 @@ public class JoglView implements KeyListener
         gl.glPopMatrix();
         gl.glMatrixMode(gl.GL_MODELVIEW);
 
+        gl.glPopAttrib();
+        gl.glPopAttrib();
+        gl.glPopAttrib();
         gl.glPopAttrib();
     }
 
@@ -726,19 +736,24 @@ public class JoglView implements KeyListener
             switch ( id ) {
               case 0:
                 camera = cameraLeft;
+                quality.setSurfaces(false);
+                quality.setWires(true);
                 break;
               case 1:
                 camera = cameraPerspective;
                 break;
               case 2:
                 camera = cameraTop;
+                quality.setSurfaces(false);
+                quality.setWires(true);
                 break;
               case 3: default:
                 camera = cameraFront;
+                quality.setSurfaces(false);
+                quality.setWires(true);
                 break;
             }
-        
-        setTitle(camera.getName());
+            setTitle(camera.getName());
         }
     }
 }

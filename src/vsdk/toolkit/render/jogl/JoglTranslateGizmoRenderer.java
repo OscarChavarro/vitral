@@ -25,34 +25,9 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 {
     public static Light light1 = null;
     public static Light light2 = null;
-    public static void draw(GL gl, TranslateGizmo gizmo)
+
+    public static void drawAquynza(GL gl, TranslateGizmo gizmo)
     {
-/*
-        JoglLightRenderer.turnOffAllLights(gl);
-
-        Vector3D lp1;
-        Vector3D lp2;
-
-        lp1 = new Vector3D(gizmo.getPosition());
-        lp1.x += 20;
-        lp1.y += 20;
-        lp1.z += 20;
-        lp2 = new Vector3D(gizmo.getPosition());
-        lp2.x -= 20;
-        lp2.y -= 20;
-        if ( light1 == null ) {
-            light1 = new Light(Light.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
-        }
-        if ( light2 == null ) {
-            light2 = new Light(Light.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
-        }
-        light1.setPosition(lp1);
-        light2.setPosition(lp2);
-        JoglLightRenderer.activate(gl, light1);
-        JoglLightRenderer.activate(gl, light2);
-*/
-
-        //-----------------------------------------------------------------
         RendererConfiguration q = new RendererConfiguration();
         ArrayList<SimpleBody> things = gizmo.getElements();
 
@@ -86,7 +61,37 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
                 gl.glPopMatrix();
             }
         }
+    }
 
+    public static void draw(GL gl, TranslateGizmo gizmo)
+    {
+/*
+        JoglLightRenderer.turnOffAllLights(gl);
+
+        Vector3D lp1;
+        Vector3D lp2;
+
+        lp1 = new Vector3D(gizmo.getPosition());
+        lp1.x += 20;
+        lp1.y += 20;
+        lp1.z += 20;
+        lp2 = new Vector3D(gizmo.getPosition());
+        lp2.x -= 20;
+        lp2.y -= 20;
+        if ( light1 == null ) {
+            light1 = new Light(Light.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
+        }
+        if ( light2 == null ) {
+            light2 = new Light(Light.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
+        }
+        light1.setPosition(lp1);
+        light2.setPosition(lp2);
+        JoglLightRenderer.activate(gl, light1);
+        JoglLightRenderer.activate(gl, light2);
+*/
+
+        //-----------------------------------------------------------------
+        drawAquynza(gl, gizmo);
         //-----------------------------------------------------------------
         JoglLightRenderer.turnOffAllLights(gl);
     }

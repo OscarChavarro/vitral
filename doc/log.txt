@@ -423,6 +423,10 @@ Changes in 2007 september 22 revition
   - 26min: indenting and untabifying some modules.
   - 2h: Camera.projectPoint updated to support orthogonal cases, InfinitePlane
     operations for projectDistance, projectPoint and mirrorPoint.
+  - 1h5min: revisiting TranslationGizmo code
+  - 1h10min: TranslationGizmo/SceneEditor updated to support multiple views
+  - 1h50min: TranslationGizmo bettered, special case of click outside object
+    but inside gizmo working.
 
 ---------------------------------------------------------------------------
 TODO:
