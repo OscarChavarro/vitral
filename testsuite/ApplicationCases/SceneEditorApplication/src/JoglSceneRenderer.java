@@ -1,8 +1,12 @@
 //===========================================================================
-import javax.media.opengl.GL;
 
+// Java basic classes
 import java.util.ArrayList;
 
+// JOGL classes
+import javax.media.opengl.GL;
+
+// VSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
@@ -55,7 +59,7 @@ public class JoglSceneRenderer
         }
     }
 
-    public static void draw(GL gl, Scene s)
+    public static void draw(GL gl, Scene s, SceneEditorApplication parent)
     {
         int i, j;
         Image texture;
@@ -107,7 +111,13 @@ public class JoglSceneRenderer
                 quality.setSelectionCorners(false);
             }
             gi = s.scene.getSimpleBodies().get(i);
-            JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
+
+            if ( parent.modifyPanel.getTarget() != gi ) {
+                JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
+	    }
+	    else {
+                parent.modifyPanel.draw(gl, s.activeCamera, quality);
+	    }
         }
         //JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
 

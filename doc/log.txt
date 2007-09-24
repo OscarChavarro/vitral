@@ -432,7 +432,7 @@ Changes in 2007 september 23 revition
   - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 
     3dstudio max like interaction and display. First version of
     GeometricModeler class.
-  - 1h15min: TranslationGizmo gets text labels. This step completes its
+  - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
 
 ---------------------------------------------------------------------------

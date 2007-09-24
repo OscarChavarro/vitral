@@ -485,6 +485,7 @@ MESSAGES {
     IDM_OTHERS_TAB, "Scene components"
     IDM_GUI_TAB, "GUI Control"
     IDM_RENDER_TAB, "Render"
+    IDM_MODIFY_TAB, "Modify"
 
     IDM_PENDING_ZBUFFER_COLOR_IMAGE, 
         "Pending to obtaining ZBuffer Color Image ..."

@@ -199,3 +199,6 @@ September 18 2007, Oscar Chavarro:
   - 30min: particularizing rendering mode and grid to each view
   - 22min: front facing grid for orthogonal views
   - 54min: placing axis reference base on views :)
+
+September 23 2007, Oscar Chavarro:
+  - 1h13min: base Swing setup for supporting geometry editors

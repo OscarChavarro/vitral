@@ -36,7 +36,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SingleSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 // JOGL Classes
 import javax.media.opengl.GLCanvas;
@@ -126,6 +129,27 @@ class MyFilter
   }
 }
 
+class MyChangeListener implements ChangeListener
+{
+    public SceneEditorApplication parent;
+    public MyChangeListener(SceneEditorApplication parent)
+    {
+        this.parent = parent;
+    }
+
+    public void stateChanged(ChangeEvent e)
+    {
+        SingleSelectionModel sm = (SingleSelectionModel)e.getSource();
+        if ( sm.getSelectedIndex() == 1 ) {
+            parent.modifyPanelSelected = true;
+            parent.drawingArea.reportTargetToModifyPanel();
+	}
+	else {
+            parent.modifyPanelSelected = false;
+	}
+    }
+}
+
 public class SceneEditorApplication {
     // Application model
     public Scene theScene;
@@ -149,6 +173,8 @@ public class SceneEditorApplication {
     private JFrame mainWindowWidget;
     private String lookAndFeel;
     public String languageGuiFile;
+    public ModifyPanel modifyPanel;
+    public boolean modifyPanelSelected;
 
     public void setLookAndFeel(String lookAndFeel)
     {
@@ -234,12 +260,19 @@ public class SceneEditorApplication {
         JScrollPane sp;
 
         container = new JTabbedPane();
+        container.getModel().addChangeListener(new MyChangeListener(this));
 
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 1);
         sp = new JScrollPane(panel);
         container.addTab(gui.getMessage("IDM_CREATION_TAB"), 
             null, sp, "Object creation operations");
+
+        //-----------------------------------------------------------------
+        modifyPanel = new ModifyPanel(this);
+        sp = new JScrollPane(modifyPanel);
+        container.addTab(gui.getMessage("IDM_MODIFY_TAB"), 
+            null, sp, "Modify selected body");
 
         //-----------------------------------------------------------------
         panel = new ButtonsPanel(this, 2);
@@ -351,6 +384,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         imageControlWindow = null;
         selectorDialog = null;
+        modifyPanelSelected = false;
     }
 
     private void destroyGUI()

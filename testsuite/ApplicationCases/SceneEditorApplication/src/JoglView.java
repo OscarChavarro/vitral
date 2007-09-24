@@ -130,7 +130,7 @@ public class JoglView implements KeyListener
         cameraTop.setPosition(new Vector3D(0, 0, 5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         cameraTop.setRotation(R);
-        cameraTop.setOrthogonalZoom(0.5);
+        cameraTop.setOrthogonalZoom(0.25);
         cameraTop.setName("Top");
 
         cameraBottom = new Camera();
@@ -138,7 +138,7 @@ public class JoglView implements KeyListener
         cameraBottom.setPosition(new Vector3D(0, 0, -5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
         cameraBottom.setRotation(R);
-        cameraBottom.setOrthogonalZoom(0.5);
+        cameraBottom.setOrthogonalZoom(0.25);
         cameraBottom.setName("Bottom");
 
         cameraLeft = new Camera();
@@ -146,7 +146,7 @@ public class JoglView implements KeyListener
         cameraLeft.setPosition(new Vector3D(-5, 0, 0));
         R.identity();
         cameraLeft.setRotation(R);
-        cameraLeft.setOrthogonalZoom(0.5);
+        cameraLeft.setOrthogonalZoom(0.25);
         cameraLeft.setName("Left");
 
         cameraFront = new Camera();
@@ -154,7 +154,7 @@ public class JoglView implements KeyListener
         cameraFront.setPosition(new Vector3D(0, -5, 0));
         R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         cameraFront.setRotation(R);
-        cameraFront.setOrthogonalZoom(0.5);
+        cameraFront.setOrthogonalZoom(0.25);
         cameraFront.setName("Front");
 
         camera = cameraPerspective;

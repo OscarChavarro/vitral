@@ -700,7 +700,7 @@ public class JoglDrawingArea implements
         }
 
         if ( view.getRenderMode() == view.RENDER_MODE_ZBUFFER ) {
-            JoglSceneRenderer.draw(gl, theScene);
+            JoglSceneRenderer.draw(gl, theScene, parent);
         }
         else {
             JoglSceneRenderer.drawBackground(gl, theScene);
@@ -1785,6 +1785,22 @@ public class JoglDrawingArea implements
 
         //-----------------------------------------------------------------
         statusMessage.setText(msg);
+
+        //-----------------------------------------------------------------
+        reportTargetToModifyPanel();
+    }
+
+    public void reportTargetToModifyPanel()
+    {
+        int firstThingSelected = theScene.selectedThings.firstSelected();
+	if ( parent.modifyPanelSelected && firstThingSelected >= 0 ) {
+            parent.modifyPanel.notifyTargetBeginEdit(
+                theScene.scene.getSimpleBodies().get(firstThingSelected)
+            );
+	}
+	else {
+            parent.modifyPanel.notifyTargetEndEdit();
+	}
     }
 
     public void keyReleased(KeyEvent e) 

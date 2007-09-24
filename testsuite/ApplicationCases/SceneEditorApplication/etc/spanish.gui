@@ -433,6 +433,7 @@ MESSAGES {
     IDM_OTHERS_TAB, "Elementos de escena"
     IDM_GUI_TAB, "Control de GUI"
     IDM_RENDER_TAB, "Visualización"
+    IDM_MODIFY_TAB, "Modifición"
 
     IDM_PENDING_ZBUFFER_COLOR_IMAGE, 
         "En espera del cálculo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ..."
