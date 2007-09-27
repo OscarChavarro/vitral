@@ -549,6 +549,8 @@ public class Camera extends Entity
             VSDK.formatDouble(Math.toDegrees(pitch)) + ", " +
             VSDK.formatDouble(Math.toDegrees(roll)) + "> DEG)\n";
 
+        msg = msg + "  - Rotation quaternion: " + R.exportToQuaternion() + "\n";
+
         //------------------------------------------------------------
         updateVectors();
         msg = msg + "  - Reference frame:\n";

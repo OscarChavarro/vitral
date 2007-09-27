@@ -33,6 +33,13 @@ public class Quaternion extends FundamentalEntity
         magnitude *= 1/l;
         direction = direction.multiply(1/l);
     }
+
+    public String toString()
+    {
+        String msg;
+        msg = direction + " / " + VSDK.formatDouble(magnitude);
+        return msg;
+    }
 }
 
 //===========================================================================
