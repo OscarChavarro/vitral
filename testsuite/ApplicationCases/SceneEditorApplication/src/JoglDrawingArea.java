@@ -103,7 +103,7 @@ public class JoglDrawingArea implements
     private Scene theScene;
     private JLabel statusMessage;
 
-    private ArrayList<JoglView> views;
+    public ArrayList<JoglView> views;
 
     public int interactionMode;
     public int lastInteractionMode;
@@ -126,7 +126,7 @@ public class JoglDrawingArea implements
     private int globalViewportXSize;
     private int globalViewportYSize;
     private ViewOrganizer viewOrganizer;
-    private int selectedView;
+    public int selectedView;
     private boolean fullViewport;
     private int viewOrderStyle;
 

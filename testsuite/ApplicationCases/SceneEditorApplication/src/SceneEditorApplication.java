@@ -103,6 +103,20 @@ abstract class SuffixAwareFilter
 
 }
 
+class MainThread implements Runnable
+{
+    private String args[];
+    public MainThread(String args[])
+    {
+        this.args = args;
+    }
+    public void run()
+    {
+        SceneEditorApplication app;
+        app = new SceneEditorApplication(args);
+    }
+}
+
 class MyFilter
     extends SuffixAwareFilter {
   private String suffix;
@@ -176,6 +190,9 @@ public class SceneEditorApplication {
     public ModifyPanel modifyPanel;
     public boolean modifyPanelSelected;
 
+    // Networking
+    private VitralEditorServer networkServer;
+
     public void setLookAndFeel(String lookAndFeel)
     {
         this.lookAndFeel = lookAndFeel;
@@ -232,6 +249,7 @@ public class SceneEditorApplication {
         visualDebugRayLevels = 2;
         withVisualDebugRay = false;
 
+        networkServer = null;
     }
 
     private JPanel createStatusBar()
@@ -396,12 +414,19 @@ public class SceneEditorApplication {
         System.gc();
     }
 
-    public SceneEditorApplication() {
+    public SceneEditorApplication(String[] args) {
         lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
         languageGuiFile = "./etc/english.gui";
 
         createModel();
         createGUI();
+
+        int i;
+	for ( i = 0; i < args.length; i++ ) {
+	    if ( args[i].equals("-s") ) {
+                networkServer = new VitralEditorServer(this);
+	    }
+	}
     }
 
     public void doRaytracedImage()
@@ -415,11 +440,8 @@ public class SceneEditorApplication {
 
     public static void main(String[] args) {
         // Note that this is a thread-safe invocation of the GUI
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new SceneEditorApplication();
-            }
-        });
+        MainThread mt = new MainThread(args);
+        javax.swing.SwingUtilities.invokeLater(mt);
     }
 
 }

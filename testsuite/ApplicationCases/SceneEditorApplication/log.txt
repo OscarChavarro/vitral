@@ -202,3 +202,7 @@ September 18 2007, Oscar Chavarro:
 
 September 23 2007, Oscar Chavarro:
   - 1h13min: base Swing setup for supporting geometry editors
+
+September 30 2007, Oscar Chavarro:
+  - 33min: VitralEditorServer base structure for tcp socket servicing
+  - 44min: VitralEditorServer basic protocol

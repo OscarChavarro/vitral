@@ -154,7 +154,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension size = new Dimension(640, 480);
-        frame.setMinimumSize(size);
+        //frame.setMinimumSize(size);
         frame.setSize(size);
         frame.setVisible(true);
         canvas.requestFocusInWindow();
