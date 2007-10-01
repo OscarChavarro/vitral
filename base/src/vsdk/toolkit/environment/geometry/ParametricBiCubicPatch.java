@@ -215,17 +215,17 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
     /**
-    This methods evaluates equation set 11.76 in [FOLE1992] for a given set
+    This method evaluates equation set 11.76 in [FOLE1992] for a given set
     of approximationSteps^2 points, and in the code, the variables names
     follows the following notation:
     <UL>
-      <LI> S_MATRIX  Column vector for storing s parameter polinomial
+      <LI> S_MATRIX  Column vector for storing s parameter polynomial
       <LI> M_MATRIX  Patch's blending function
+      <LI> Mt_MATRIX M's transpose
       <LI> Gx_MATRIX Geometry matrix for x
       <LI> Gy_MATRIX Geometry matrix for y
       <LI> Gz_MATRIX Geometry matrix for z
-      <LI> Mt_MATRIX M's transpose
-      <LI> Tt_MATRIX Row vector for storing t parameter polinomial
+      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
     </UL>
     */
     public double[][][] evaluateSurface() {
@@ -320,10 +320,10 @@ public class ParametricBiCubicPatch extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
 
-    Check the discution in [WAYN1990] about solvin this problem. Two main
-    strategies are known for solving this: a numeric root finding,
-    trying different values for Ray.t until a given error tolerance is
-    reached and converting the patch to a mesh and test the mesh.
+    Check the discusion in [WAYN1990] about solving this problem. Two main
+    strategies are known for solving this: a numeric root finding
+    (trying different values for Ray.t until a given error tolerance is
+    reached) and converting the patch to a mesh and test the mesh.
 
     This method implements the numerical approach, while an explicit
     convertion to a Mesh could be managed by the user/programmer directly.
