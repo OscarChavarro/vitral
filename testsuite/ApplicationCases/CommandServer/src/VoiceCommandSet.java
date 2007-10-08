@@ -16,12 +16,12 @@ public class VoiceCommandSet
     {
         VoiceCommand candidate;
         int i;
-	for ( i = 0; i < commandSet.size(); i++ ) {
+        for ( i = 0; i < commandSet.size(); i++ ) {
             candidate = commandSet.get(i);
-	    if ( candidate.getName().equals(commandName) ) {
+            if ( candidate.getName().equals(commandName) ) {
                 return candidate;
-	    }
-	}
+            }
+        }
         candidate = new VoiceCommand(commandName);
         commandSet.add(candidate);
         return candidate;
@@ -48,12 +48,15 @@ public class VoiceCommandSet
     {
         int i;
         VoiceCommand candidate;
-	for ( i = 0; i < commandSet.size(); i++ ) {
-	    candidate = commandSet.get(i);
+
+        System.out.println("Testing for speech [" + speech + "]");
+
+        for ( i = 0; i < commandSet.size(); i++ ) {
+            candidate = commandSet.get(i);
             if ( candidate.selectFromSpeech(speech) ) {
                 return candidate;
-	    }
-	}
+            }
+        }
         return null;
     }
 }

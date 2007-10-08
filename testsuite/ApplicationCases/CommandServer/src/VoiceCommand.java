@@ -32,22 +32,20 @@ public class VoiceCommand
 
         speech = speech.toLowerCase();
 
-	for ( i = 0; i < speechSet.size(); i++ ) {
+        for ( i = 0; i < speechSet.size(); i++ ) {
             speechToBeTested = speechSet.get(i);
 
-  	    System.out.println("Testing [" + speech + "] against [" + speechToBeTested + "]" );
-
             int j;
-	    for ( j = 0; j < speech.length(); j++ ) {
-		if ( speech.charAt(j) != ' ' ) break;
-	    }
+            for ( j = 0; j < speech.length(); j++ ) {
+                if ( speech.charAt(j) != ' ' ) break;
+            }
             subString = speech.subSequence(j, speech.length());
             
-	    if ( speechToBeTested.contains(subString) ) {
+            if ( speechToBeTested.contains(subString) ) {
                 return true;
-	    }
-	}
-	return false;
+            }
+        }
+        return false;
     }
 }
 
