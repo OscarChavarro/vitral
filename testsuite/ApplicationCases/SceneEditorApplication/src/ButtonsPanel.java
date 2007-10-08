@@ -18,7 +18,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.border.Border;
-import javax.swing.BorderFactory; 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JFileChooser;
@@ -236,7 +236,11 @@ public class ButtonsPanel extends JPanel implements ActionListener
             JButton origin = (JButton)ev.getSource();
             label = origin.getName();
         }
+        executeCommand(label);
+    }
 
+    public void executeCommand(String label)
+    {
         Light light;
 
         //- FILE ----------------------------------------------------------
@@ -660,6 +664,9 @@ public class ButtonsPanel extends JPanel implements ActionListener
                 parent.withVisualDebugRay = true;
             }
         }
+        else if ( label.equals("IDC_VOICECOMMAND_CLIENT") ) {
+            parent.switchVoiceCommandClient();
+	}
         else if ( label.equals("IDC_NEW_VIEW") ) {
             parent.drawingArea.newView();
         }
@@ -670,6 +677,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         //-----------------------------------------------------------------
         parent.drawingArea.canvas.repaint();
     }
+
 }
 
 //===========================================================================

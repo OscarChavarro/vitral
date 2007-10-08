@@ -435,6 +435,13 @@ Changes in 2007 september 23 revition
   - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
 
+Changes in 2007 october 7 revition <<3h34min>>
+  - 38min: CommandServer (basic test app)
+  - 38min: Researching how to get strokes from a JTextField :)
+  - 42min: Command set data structures
+  - 30min: Automatic erasing of command speech based on time outs
+  - 36min: networking server funnctionality
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

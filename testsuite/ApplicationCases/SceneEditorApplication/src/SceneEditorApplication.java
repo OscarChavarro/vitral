@@ -31,6 +31,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
@@ -157,10 +158,10 @@ class MyChangeListener implements ChangeListener
         if ( sm.getSelectedIndex() == 1 ) {
             parent.modifyPanelSelected = true;
             parent.drawingArea.reportTargetToModifyPanel();
-	}
-	else {
+        }
+        else {
             parent.modifyPanelSelected = false;
-	}
+        }
     }
 }
 
@@ -192,6 +193,9 @@ public class SceneEditorApplication {
 
     // Networking
     private VitralEditorServer networkServer;
+    private VitralCommandClient networkCommandClient;
+    private String currentNetworkCommandClientIp;
+    private String currentNetworkCommandClientPort;
 
     public void setLookAndFeel(String lookAndFeel)
     {
@@ -250,6 +254,9 @@ public class SceneEditorApplication {
         withVisualDebugRay = false;
 
         networkServer = null;
+        networkCommandClient = null;
+        currentNetworkCommandClientIp = "127.0.0.1";
+        currentNetworkCommandClientPort = "1235";
     }
 
     private JPanel createStatusBar()
@@ -422,11 +429,11 @@ public class SceneEditorApplication {
         createGUI();
 
         int i;
-	for ( i = 0; i < args.length; i++ ) {
-	    if ( args[i].equals("-s") ) {
+        for ( i = 0; i < args.length; i++ ) {
+            if ( args[i].equals("-s") ) {
                 networkServer = new VitralEditorServer(this);
-	    }
-	}
+            }
+        }
     }
 
     public void doRaytracedImage()
@@ -436,6 +443,71 @@ public class SceneEditorApplication {
             ImageProcessing.resize(theScene.fixedBackground.getImage(), raytracedImage);
         }
         theScene.raytrace(raytracedImage);
+    }
+
+    public void switchVoiceCommandClient()
+    {
+        String ip, port;
+        if ( networkCommandClient == null ) {
+            ip = (String)JOptionPane.showInputDialog(
+                mainWindowWidget, // Component parentComponent
+                gui.getMessage("IDM_VOICECOMMAND_IPQUESTION"), // Object message
+                gui.getMessage("IDM_VOICECOMMAND_TITLE"), // String title
+                JOptionPane.QUESTION_MESSAGE, // int messageType
+                null, // Icon icon
+                null, // Object[] selectionValues
+                currentNetworkCommandClientIp // Object initialSelectionValue
+            );
+            if ( ip == null ) {
+                statusMessage.setText(
+                    gui.getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
+                    gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
+                return;
+            }
+            currentNetworkCommandClientIp = ip;
+            port = (String)JOptionPane.showInputDialog(
+                mainWindowWidget, // Component parentComponent
+                gui.getMessage("IDM_VOICECOMMAND_PORTQUESTION"), // Object message
+                gui.getMessage("IDM_VOICECOMMAND_TITLE"), // String title
+                JOptionPane.QUESTION_MESSAGE, // int messageType
+                null, // Icon icon
+                null, // Object[] selectionValues
+                currentNetworkCommandClientPort // Object initialSelectionValue
+            );
+            if ( port == null ) {
+                statusMessage.setText(
+                    gui.getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
+                    gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
+                return;
+            }
+            currentNetworkCommandClientPort = port;
+            networkCommandClient = new VitralCommandClient(this,
+                currentNetworkCommandClientIp,
+                Integer.parseInt(currentNetworkCommandClientPort));
+            Thread ct = new Thread(networkCommandClient);
+            ct.start();
+            statusMessage.setText(
+                gui.getMessage("IDM_VOICECOMMAND_ENABLED"));
+        }
+        else {
+            networkCommandClient.running = false;
+            statusMessage.setText(
+                gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
+            networkCommandClient = null;
+        }
+    }
+
+    public void closeApplication()
+    {
+        if ( networkCommandClient != null ) {
+            networkCommandClient.end();
+	}
+        System.exit(0);
+    }
+
+    public void externalCommand(String label)
+    {
+	executorPanel.executeCommand(label);
     }
 
     public static void main(String[] args) {

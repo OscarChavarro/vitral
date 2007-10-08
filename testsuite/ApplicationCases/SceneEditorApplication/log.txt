@@ -206,3 +206,9 @@ September 23 2007, Oscar Chavarro:
 September 30 2007, Oscar Chavarro:
   - 33min: VitralEditorServer base structure for tcp socket servicing
   - 44min: VitralEditorServer basic protocol
+
+October 7 2007, Oscar Chavarro: <<1h48min>>
+  - 1h8min: VitralCommandClient basic structure
+  - 40min: VitralCommandClient application level commands processing.
+    First version of vitral with voice recognition enabled via Dragon
+    Naturally speaking (spanish) :)

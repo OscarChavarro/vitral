@@ -1401,7 +1401,7 @@ public class JoglDrawingArea implements
         int asp;
         switch ( keycode ) {
           case KeyEvent.VK_ESCAPE:
-            System.exit(0);
+	      parent.closeApplication();
             break;
           case KeyEvent.VK_EQUALS:
             // Alphanumeric =

@@ -237,6 +237,13 @@ COMMAND IDC_FILE_SAVE {
     help "<Aun no disponible>"
 }
 
+COMMAND IDC_VOICECOMMAND_CLIENT {
+    name "Voice recognition", 
+    brief "Activates the networked voice recognition client",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
+}
+
 COMMAND IDC_TOOLS_SELECT {
     name "Select", 
     brief "Select objects",
@@ -408,7 +415,7 @@ BUTTON_GROUP "GLOBAL" {
     BUTTONS  {
         IDC_TOOLS_SELECT,
         IDC_TOOLS_TRANSLATE, IDC_TOOLS_ROTATE, IDC_TOOLS_SCALE,
-        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY
+        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY, IDC_VOICECOMMAND_CLIENT
     }
 }
 
@@ -505,6 +512,18 @@ MESSAGES {
         "Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it."
     IDM_SCALE_MODE,
         "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it."
+    IDM_VOICECOMMAND_DISABLED,
+        "Voice recognition feature disabled."
+    IDM_VOICECOMMAND_ENABLED,
+        "Voice recognition feature enabled."
+    IDM_VOICECOMMAND_TITLE,
+        "Voice recognition client network connection"
+    IDM_VOICECOMMAND_IPQUESTION,
+        "Please specify the IP network direction or Internet machine name where the voice recognition server application is running:"
+    IDM_VOICECOMMAND_PORTQUESTION,
+        "Please specify the TCP PORT for network connection to the running voice recognition server application:"
+    IDM_OPERATION_CANCELLED_BY_USER,
+        "Operation cancelled by user."
     IDM_INTRO_MESSAGE,
         "VSDK 3D Editor example - (c) Copyright, Pontificia Universidad Javeriana, 2005-2007"
 }

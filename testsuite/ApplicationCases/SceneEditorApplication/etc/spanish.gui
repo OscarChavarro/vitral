@@ -183,6 +183,13 @@ COMMAND IDC_FILE_SAVE {
     help "<Aun no disponible>"
 }
 
+COMMAND IDC_VOICECOMMAND_CLIENT {
+    name "Reconocer Voz", 
+    brief "Habilita la funcionalidad de reconocimiento de voz",
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
+}
+
 COMMAND IDC_TOOLS_SELECT {
     name "Selección", 
     brief "Selecciona objetos",
@@ -355,7 +362,7 @@ BUTTON_GROUP "GLOBAL" {
     BUTTONS  {
         IDC_TOOLS_SELECT,
         IDC_TOOLS_TRANSLATE, IDC_TOOLS_ROTATE, IDC_TOOLS_SCALE,
-        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY
+        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY, IDC_VOICECOMMAND_CLIENT
     }
 }
 
@@ -453,6 +460,18 @@ MESSAGES {
         "Modo de interacción de rotación - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para rotar el objeto."
     IDM_SCALE_MODE,
         "Modo de interacción de escalamiento - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto."
+    IDM_VOICECOMMAND_DISABLED,
+        "La característica de reconomimiento de voz ha sido habilitada."
+    IDM_VOICECOMMAND_ENABLED,
+        "La característica de reconomimiento de voz ha sido deshabilitada."
+    IDM_VOICECOMMAND_TITLE,
+        "Conexión de red con el servicio de reconocimiento de voz"
+    IDM_VOICECOMMAND_IPQUESTION,
+        "Por favor especifique la dirección IP o el nombre de red Internet de la máquina en donde se encuentra ejecutando la aplicación de servicio de reconocimiento del habla:"
+    IDM_VOICECOMMAND_PORTQUESTION,
+        "Por favor especifique el puerto TCP en donde se encuentra ejecutando la aplicación de servicio de reconocimiento del habla:"
+    IDM_OPERATION_CANCELLED_BY_USER,
+        "Operación cancelada por el usuario."
     IDM_INTRO_MESSAGE,
         "Ejemplo de editor 3D VSDK - (c) derechos reservados, Pontificia Universidad Javeriana, 2005-2007"
 }
