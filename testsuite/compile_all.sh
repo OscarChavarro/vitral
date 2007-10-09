@@ -79,4 +79,7 @@ cd SearchEngineFor3DModels
 ./compileApplets.sh
 #./compileServlets.sh
 cd ..
+cd CommandServer
+./compile.sh
+cd ..
 #---------------------------------------------------------------------------

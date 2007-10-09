@@ -71,5 +71,8 @@ cd ApplicationCases
 cd SceneEditorApplication
 ./run.sh
 cd ..
+cd CommandServer
+./run.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
