@@ -45,7 +45,7 @@ public class XmlManager {
             Element xmlElement;
             xmlElement = null;
 
-            if ( object instanceof ParametricCurve) ) {
+            if ( object instanceof ParametricCurve)  {
                 ParametricCurve curve = (ParametricCurve) object;
                 xmlElement = ParametricCurvePersistence.toElement(curve, 
                                                                   document);
