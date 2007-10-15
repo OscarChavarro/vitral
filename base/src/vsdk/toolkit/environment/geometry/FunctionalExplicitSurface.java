@@ -25,6 +25,7 @@ public class FunctionalExplicitSurface extends Surface
     public static final long serialVersionUID = 20071015L;
 
     private AlgebraicExpression xyFunction;
+    private String functionExpression;
     private double minx;
     private double miny;
     private double minz;
@@ -37,6 +38,7 @@ public class FunctionalExplicitSurface extends Surface
 
     public FunctionalExplicitSurface(String fxy)
     {
+        functionExpression = new String(fxy);
         xyFunction = new AlgebraicExpression();
         try {
             xyFunction.setExpression(fxy);
@@ -61,6 +63,11 @@ public class FunctionalExplicitSurface extends Surface
         updateInternalGeometry();
     }
 
+    public String getFunctionExpression()
+    {
+        return functionExpression;
+    }
+
     public void setBounds(double minx, double miny, double minz,
                           double maxx, double maxy, double maxz)
     {
@@ -80,9 +87,49 @@ public class FunctionalExplicitSurface extends Surface
         updateInternalGeometry();
     }
 
+    public int getTesselationHintX()
+    {
+        return nx;
+    }
+
+    public int getTesselationHintY()
+    {
+        return ny;
+    }
+
+    public double getMinXBound()
+    {
+        return minx;
+    }
+
+    public double getMinYBound()
+    {
+        return miny;
+    }
+
+    public double getMinZBound()
+    {
+        return minz;
+    }
+
+    public double getMaxXBound()
+    {
+        return maxx;
+    }
+
+    public double getMaxYBound()
+    {
+        return maxy;
+    }
+
+    public double getMaxZBound()
+    {
+        return maxz;
+    }
+
     private int coord(int nx, int ny, int ix, int iy)
     {
-        return ((ny+1)*iy) + ix;
+        return ((nx+1)*iy) + ix;
     }
 
     private void updateInternalGeometry()
@@ -91,7 +138,7 @@ public class FunctionalExplicitSurface extends Surface
         // Size of each tile in x direction
         double dx = (maxx - minx) / ((double)nx); 
         // Size of each tile in y direction
-        double dy = (maxy - minz) / ((double)ny);
+        double dy = (maxy - miny) / ((double)ny);
 
         // Temporary variable
         double x;
@@ -107,11 +154,17 @@ public class FunctionalExplicitSurface extends Surface
 
         try {
             index = 0;
-            for ( iy = 0, y = -((double)ny)/2*dy; iy <= ny; iy++, y += dy ) {
+            for ( iy = 0, y = miny; iy <= ny; iy++, y += dy ) {
                 xyFunction.defineValue("y", y);
-                for ( ix = 0, x = -((double)nx)/2*dx; ix <= nx; ix++, x += dx ) {
+                for ( ix = 0, x = minx; ix <= nx; ix++, x += dx ) {
                     xyFunction.defineValue("x", x);
                     z = xyFunction.eval();
+                    if ( z > maxz ) {
+                        z = maxz;
+                    }
+                    if ( z < minz ) {
+                        z = minz;
+                    }
                     v[index] = new Vertex(new Vector3D(x, y, z), k);
                     index++;
                 }
@@ -121,8 +174,8 @@ public class FunctionalExplicitSurface extends Surface
             VSDK.reportMessage(this, VSDK.WARNING, 
                 "constructor",
                 "Cannot evaluate algebraic expression!" + e);
-	    return;
-	}
+            return;
+        }
 
         //-----------------------------------------------------------------
         Triangle t[] = new Triangle[nx*ny*2];

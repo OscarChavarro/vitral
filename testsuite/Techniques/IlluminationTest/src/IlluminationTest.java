@@ -72,7 +72,7 @@ public class IlluminationTest
 
     private int coord(int nx, int ny, int ix, int iy)
     {
-        return ((ny+1)*iy) + ix;
+        return ((nx+1)*iy) + ix;
     }
 
     private void updateH()

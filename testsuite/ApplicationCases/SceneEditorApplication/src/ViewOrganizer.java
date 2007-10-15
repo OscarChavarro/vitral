@@ -131,6 +131,16 @@ public class ViewOrganizer
         switch ( style % 7 ) {
           case 0:
             Pstart[0][0] = p00; Pstart[0][1] = p00;
+            Pstart[3][0] = p00; Pstart[3][1] = p33;
+            Pstart[2][0] = p00; Pstart[2][1] = p66;
+            Pstart[1][0] = p33; Pstart[1][1] = p00;
+            Psize[0][0] = p33; Psize[0][1] = p33;
+            Psize[3][0] = p33; Psize[3][1] = p33;
+            Psize[2][0] = p33; Psize[2][1] = p33;
+            Psize[1][0] = p66; Psize[1][1] = p100;
+            break;
+          case 1:
+            Pstart[0][0] = p00; Pstart[0][1] = p00;
             Pstart[1][0] = p50; Pstart[1][1] = p00;
             Pstart[2][0] = p00; Pstart[2][1] = p50;
             Pstart[3][0] = p50; Pstart[3][1] = p50;
@@ -138,16 +148,6 @@ public class ViewOrganizer
             Psize[1][0] = p50; Psize[1][1] = p50;
             Psize[2][0] = p50; Psize[2][1] = p50;
             Psize[3][0] = p50; Psize[3][1] = p50;
-            break;
-          case 1:
-            Pstart[0][0] = p00; Pstart[0][1] = p00;
-            Pstart[1][0] = p00; Pstart[1][1] = p33;
-            Pstart[2][0] = p00; Pstart[2][1] = p66;
-            Pstart[3][0] = p50; Pstart[3][1] = p00;
-            Psize[0][0] = p50; Psize[0][1] = p33;
-            Psize[1][0] = p50; Psize[1][1] = p33;
-            Psize[2][0] = p50; Psize[2][1] = p33;
-            Psize[3][0] = p50; Psize[3][1] = p100;
             break;
           case 2:
             Pstart[0][0] = p00; Pstart[0][1] = p00;

@@ -454,12 +454,13 @@ public class ButtonsPanel extends JPanel implements ActionListener
 */
         }
         else if ( label.equals("IDC_CREATE_FUNCTIONALEXPLICITSURFACE") ) {
-            String f = javax.swing.JOptionPane.showInputDialog(null, "Enter function:");
+            SimpleBody newThing;
             FunctionalExplicitSurface functionalSurface;
-            functionalSurface = new FunctionalExplicitSurface(f);
+            functionalSurface = new FunctionalExplicitSurface("cos((PI*x)/2)");
             functionalSurface.setBounds(-10, -10, -10, 10, 10, 10);
-            functionalSurface.setTesselationHint(50, 50);
-            parent.theScene.addThing(functionalSurface);
+            functionalSurface.setTesselationHint(100, 100);
+            newThing = parent.theScene.addThing(functionalSurface);
+            newThing.getMaterial().setDoubleSided(true);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
