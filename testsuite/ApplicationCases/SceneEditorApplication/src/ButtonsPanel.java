@@ -59,6 +59,7 @@ import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -452,6 +453,14 @@ public class ButtonsPanel extends JPanel implements ActionListener
             }
 */
         }
+        else if ( label.equals("IDC_CREATE_FUNCTIONALEXPLICITSURFACE") ) {
+            String f = javax.swing.JOptionPane.showInputDialog(null, "Enter function:");
+            FunctionalExplicitSurface functionalSurface;
+            functionalSurface = new FunctionalExplicitSurface(f);
+            functionalSurface.setBounds(-10, -10, -10, 10, 10, 10);
+            functionalSurface.setTesselationHint(50, 50);
+            parent.theScene.addThing(functionalSurface);
+        }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
 
@@ -666,7 +675,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_VOICECOMMAND_CLIENT") ) {
             parent.switchVoiceCommandClient();
-	}
+        }
         else if ( label.equals("IDC_NEW_VIEW") ) {
             parent.drawingArea.newView();
         }

@@ -1,0 +1,212 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - October 15 2007 - Oscar Chavarro: Original base version               =
+//===========================================================================
+
+package vsdk.toolkit.environment.geometry;
+
+// VitralSDK classes
+import vsdk.toolkit.common.AlgebraicExpression;
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Triangle;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.gui.ProgressMonitor;
+
+/**
+
+*/
+public class FunctionalExplicitSurface extends Surface
+{
+    /// Check the general attribute description in superclass Entity.
+    public static final long serialVersionUID = 20071015L;
+
+    private AlgebraicExpression xyFunction;
+    private double minx;
+    private double miny;
+    private double minz;
+    private double maxx;
+    private double maxy;
+    private double maxz;
+    private int nx;
+    private int ny;
+    private TriangleMesh internalGeometry;
+
+    public FunctionalExplicitSurface(String fxy)
+    {
+        xyFunction = new AlgebraicExpression();
+        try {
+            xyFunction.setExpression(fxy);
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(this, VSDK.WARNING, 
+                "constructor",
+                "Cannot create algebraic expression for \"" + fxy + "\":\n" + e);
+            try {
+                xyFunction.setExpression("0");
+            }
+            catch ( Exception e2 ) {
+                VSDK.reportMessage(this, VSDK.FATAL_ERROR, 
+                    "constructor",
+                    "So bad. Something is wrong with algebraic expressions!:\n" + e2);
+            }
+        }
+        minx = miny = minz = -1.0;
+        maxx = maxy = maxz = 1.0;
+        nx = 10;
+        ny = 10;
+        updateInternalGeometry();
+    }
+
+    public void setBounds(double minx, double miny, double minz,
+                          double maxx, double maxy, double maxz)
+    {
+        this.minx = minx;
+        this.miny = miny;
+        this.minz = minz;
+        this.maxx = maxx;
+        this.maxy = maxy;
+        this.maxz = maxz;
+        updateInternalGeometry();
+    }
+
+    public void setTesselationHint(int tesx, int tesy)
+    {
+        nx = tesx;
+        ny = tesy;
+        updateInternalGeometry();
+    }
+
+    private int coord(int nx, int ny, int ix, int iy)
+    {
+        return ((ny+1)*iy) + ix;
+    }
+
+    private void updateInternalGeometry()
+    {
+        //-----------------------------------------------------------------
+        // Size of each tile in x direction
+        double dx = (maxx - minx) / ((double)nx); 
+        // Size of each tile in y direction
+        double dy = (maxy - minz) / ((double)ny);
+
+        // Temporary variable
+        double x;
+        double y;
+        int ix;
+        int iy;
+        int index;
+
+        //-----------------------------------------------------------------
+        Vertex v[] = new Vertex[(nx+1)*(ny+1)];
+        Vector3D k = new Vector3D(0, 0, 1);
+        double z;
+
+        try {
+            index = 0;
+            for ( iy = 0, y = -((double)ny)/2*dy; iy <= ny; iy++, y += dy ) {
+                xyFunction.defineValue("y", y);
+                for ( ix = 0, x = -((double)nx)/2*dx; ix <= nx; ix++, x += dx ) {
+                    xyFunction.defineValue("x", x);
+                    z = xyFunction.eval();
+                    v[index] = new Vertex(new Vector3D(x, y, z), k);
+                    index++;
+                }
+            }
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(this, VSDK.WARNING, 
+                "constructor",
+                "Cannot evaluate algebraic expression!" + e);
+	    return;
+	}
+
+        //-----------------------------------------------------------------
+        Triangle t[] = new Triangle[nx*ny*2];
+        int a, b, c;
+
+        index = 0;
+        for ( iy = 0; iy < ny; iy++ ) {
+            for ( ix = 0; ix < nx; ix++ ) {
+                a = coord(nx, ny, ix, iy);
+                b = coord(nx, ny, ix+1, iy);
+                c = coord(nx, ny, ix+1, iy+1);
+                t[index] = new Triangle(a, b, c);
+                index++;
+
+                a = coord(nx, ny, ix, iy);
+                b = coord(nx, ny, ix+1, iy+1);
+                c = coord(nx, ny, ix, iy+1);
+                t[index] = new Triangle(a, b, c);
+                index++;
+            }
+        }
+
+        //-----------------------------------------------------------------
+        internalGeometry = new TriangleMesh();
+        internalGeometry.setVertexes(v);
+        internalGeometry.setTriangles(t);
+        internalGeometry.calculateNormals();
+    }
+
+    public TriangleMesh getInternalTriangleMesh()
+    {
+        return internalGeometry;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.getMinMax.
+    */
+    public double[] getMinMax() {
+        return internalGeometry.getMinMax();
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
+
+    @todo Should not delegate work over tesselated geometry version. Should
+    evaluate directly from algebraic function surface!
+    */
+    public boolean
+    doIntersection(Ray inOut_Ray) {
+        return internalGeometry.doIntersection(inOut_Ray);
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
+    */
+    public void
+    doExtraInformation(Ray inRay, double inT,
+                                   GeometryIntersectionInformation outData) {
+        internalGeometry.doExtraInformation(inRay, inT, outData);
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest.
+    */
+    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    {
+        return internalGeometry.doContainmentTest(p, distanceTolerance);
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doVoxelization.
+    */
+    public void
+    doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    {
+        internalGeometry.doVoxelization(vv, M, reporter);
+    }
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

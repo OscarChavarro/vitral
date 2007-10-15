@@ -24,6 +24,7 @@ import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleStripMesh;
@@ -245,6 +246,9 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+        }
+        else if ( g instanceof FunctionalExplicitSurface ) {
+            JoglFunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
         }
         else if ( g instanceof TriangleStripMesh ) {
             JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);

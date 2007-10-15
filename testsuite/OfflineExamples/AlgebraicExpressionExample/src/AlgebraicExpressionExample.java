@@ -1,17 +1,17 @@
 //===========================================================================
-//= This example serves as a testbed for RegularExpression class.           =
+//= This example serves as a testbed for AlgebraicExpression class.           =
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - October 14 2007 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
 // VSDK classes
-import vsdk.toolkit.common.RegularExpression;
+import vsdk.toolkit.common.AlgebraicExpression;
 
 public class AlgebraicExpressionExample 
 {
     public static void main (String[] args) {
-        RegularExpression regexp = new RegularExpression();
+        AlgebraicExpression regexp = new AlgebraicExpression();
 
         try {
             if ( args.length <= 0 ) {
