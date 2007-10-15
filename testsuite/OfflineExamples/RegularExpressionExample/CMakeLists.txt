@@ -1,7 +1,7 @@
 
 VSDK_COMPILE_JAVA_APPLICATION(
-  ImageOfflineExample
+  RegularExpressionExample
   ${VSDK_BINARY_DIR}/src/vsdk.jar
-  src/ImageOfflineExample.java)
+  src/RegularExpressionExample.java)
 
 # eof - CMakeLists.txt

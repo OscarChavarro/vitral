@@ -1,55 +1,40 @@
 //===========================================================================
-//= This example serves as a testbed for basic RGB image manipulation       =
+//= This example serves as a testbed for RegularExpression class.           =
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - August 2 2006 - Oscar Chavarro: comments added                        =
+//= - October 14 2007 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
-// Basic JDK classes
-import java.io.File;
-
 // VSDK classes
-import vsdk.toolkit.common.VSDK;                      // Utilities
-import vsdk.toolkit.media.RGBImage;                   // Model elements
-import vsdk.toolkit.io.image.ImagePersistence;        // Persistence elements
+import vsdk.toolkit.common.RegularExpression;
 
 public class RegularExpressionExample 
 {
-    private static void performImageOperation1(RGBImage img)
-    {
-        int x, y;
-        int xSize, ySize;
-        byte r, g, b;
-
-        xSize = img.getXSize();
-        ySize = img.getYSize();
-        for ( y = 0; y < ySize/2; y++ ) {
-            for ( x = 0; x < xSize/2; x++ ) {
-                r = VSDK.unsigned8BitInteger2signedByte(255);
-                g = VSDK.unsigned8BitInteger2signedByte(0);
-                b = VSDK.unsigned8BitInteger2signedByte(0);
-                img.putPixel(x, y, r, g, b);
-            }
-        }
-    }
-
     public static void main (String[] args) {
-        RGBImage img = null;
-        String imageFilename = "../../../etc/images/render.jpg";
+        RegularExpression regexp = new RegularExpression();
 
         try {
-            img = ImagePersistence.importRGB(new File(imageFilename));
-        }
-        catch (Exception e) {
-            System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
-            System.err.println("Check you have access to that file from current working directory.");
-            System.err.println(e);
-            System.exit(0);
-        }
-
-        performImageOperation1(img);
-        ImagePersistence.exportJPG(new File("output.jpg"), img);
+            if ( args.length <= 0 ) {
+                regexp.setExpression("666.0");
+	    }
+	    else {
+                String joined = "";
+		int i;
+		for ( i = 0; i < args.length; i++ ) {
+		    joined += args[i];
+                    if ( i < args.length - 1 ) {
+                        joined += " ";
+		    }
+		}
+		System.out.println("Parsing from " + args.length + " parameters with regexp \"" + joined + "\"");
+                regexp.setExpression(joined);
+	    }
+  	    System.out.println("REGEXP:\n" + regexp);
+	    System.out.println("REGEXP VALUE:\n" + regexp.eval());
+	}
+	catch ( Exception e ) {
+	    System.out.println("Error processing regular expression." + e);
+	}
     }
 
 }

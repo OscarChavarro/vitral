@@ -26,7 +26,7 @@ structure.
 Lack of get/set method enforces a direct attribute access programming style
 which will lend to shorter code.
 */
-public class Vector3D extends FundamentalEntity 
+public class Vector3D extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;

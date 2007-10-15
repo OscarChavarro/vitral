@@ -10,7 +10,7 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - April 27 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2005 - Gina Chiquillo / Oscar Chavarro: quality check        =
+//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;

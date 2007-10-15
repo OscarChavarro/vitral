@@ -442,6 +442,13 @@ Changes in 2007 october 7 revition <<3h34min>>
   - 30min: Automatic erasing of command speech based on time outs
   - 36min: networking server funnctionality
 
+Changes in 2007 october 14 revition <<3h52min>>
+  - 46min: RegularExpression empty classes structure and example testsuite
+    program
+  - 44min: RegularExpression parser and some tree building research
+  - 39min: RegularExpression tree building research and tests (failed)
+  - 1h39min: first RegularExpression implementation working.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
