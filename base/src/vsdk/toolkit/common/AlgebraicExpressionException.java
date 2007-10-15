@@ -6,27 +6,27 @@
 
 package vsdk.toolkit.common;
 
-public class RegularExpressionException extends VSDKException
+public class AlgebraicExpressionException extends VSDKException
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20071014L;
 
-    public RegularExpressionException()
+    public AlgebraicExpressionException()
     {
         ;
     }
 
-    public RegularExpressionException(String message)
+    public AlgebraicExpressionException(String message)
     {
         super(message);
     }
 
-    public RegularExpressionException(String message, Throwable cause)
+    public AlgebraicExpressionException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public RegularExpressionException(Throwable cause)
+    public AlgebraicExpressionException(Throwable cause)
     {
         super(cause);
     }

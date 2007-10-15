@@ -8,18 +8,18 @@ package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.VSDK;
 
-public class _RegularExpressionConstantNode extends _RegularExpressionNode
+public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20071014L;
 
     private double val;
-    public _RegularExpressionConstantNode(double val)
+    public _AlgebraicExpressionConstantNode(double val)
     {
         this.val = val;
     }
 
-    public double eval() throws RegularExpressionException
+    public double eval() throws AlgebraicExpressionException
     {
         return val;
     }

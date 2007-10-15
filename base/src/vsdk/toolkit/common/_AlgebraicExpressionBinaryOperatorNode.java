@@ -6,33 +6,33 @@
 
 package vsdk.toolkit.common;
 
-public class _RegularExpressionBinaryOperatorNode extends _RegularExpressionNode
+public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpressionNode
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20071014L;
 
-    private RegularExpression parent;
+    private AlgebraicExpression parent;
     private char operator;
-    private _RegularExpressionNode leftOperand;
-    private _RegularExpressionNode rightOperand;
+    private _AlgebraicExpressionNode leftOperand;
+    private _AlgebraicExpressionNode rightOperand;
 
-    public _RegularExpressionBinaryOperatorNode(RegularExpression parent, char op)
+    public _AlgebraicExpressionBinaryOperatorNode(AlgebraicExpression parent, char op)
     {
         this.parent = parent;
         operator = op;
     }
 
-    public void setLeftOperand(_RegularExpressionNode operand)
+    public void setLeftOperand(_AlgebraicExpressionNode operand)
     {
         this.leftOperand = operand;
     }
 
-    public void setRightOperand(_RegularExpressionNode operand)
+    public void setRightOperand(_AlgebraicExpressionNode operand)
     {
         this.rightOperand = operand;
     }
 
-    public double eval() throws RegularExpressionException
+    public double eval() throws AlgebraicExpressionException
     {
         double lval = leftOperand.eval();
         double rval = rightOperand.eval();
@@ -45,7 +45,7 @@ public class _RegularExpressionBinaryOperatorNode extends _RegularExpressionNode
           case '/':    val = lval / rval;    break;
 	  case '^':    val = Math.pow(lval, rval);    break;
 	  default:
-            throw new RegularExpressionException("Unknown binary operator \"" + operator + "\"");
+            throw new AlgebraicExpressionException("Unknown binary operator \"" + operator + "\"");
 	}
         return val;
     }

@@ -6,28 +6,28 @@
 
 package vsdk.toolkit.common;
 
-public class _RegularExpressionUnaryOperatorNode extends _RegularExpressionNode
+public class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionNode
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20071014L;
 
-    private RegularExpression parent;
+    private AlgebraicExpression parent;
     private String operatorName;
-    private _RegularExpressionNode operand;
+    private _AlgebraicExpressionNode operand;
 
-    public _RegularExpressionUnaryOperatorNode(RegularExpression parent, String operatorName)
+    public _AlgebraicExpressionUnaryOperatorNode(AlgebraicExpression parent, String operatorName)
     {
         this.parent = parent;
         this.operatorName = operatorName;
         operand = null;
     }
 
-    public void setOperand(_RegularExpressionNode operand)
+    public void setOperand(_AlgebraicExpressionNode operand)
     {
         this.operand = operand;
     }
 
-    public double eval() throws RegularExpressionException
+    public double eval() throws AlgebraicExpressionException
     {
         double operandValue = operand.eval();
         double val = Double.NaN;
@@ -96,7 +96,7 @@ public class _RegularExpressionUnaryOperatorNode extends _RegularExpressionNode
             val = -operandValue;
 	}
 	else {
-            throw new RegularExpressionException("Unknown unary operator or function \"" + operatorName + "\"");
+            throw new AlgebraicExpressionException("Unknown unary operator or function \"" + operatorName + "\"");
 	}
         return val;
     }

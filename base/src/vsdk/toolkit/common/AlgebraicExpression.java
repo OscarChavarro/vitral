@@ -16,24 +16,24 @@ import java.io.StringReader;
 import vsdk.toolkit.common.VSDK;
 
 /**
-A `RegularExpression` is an algebraic expression composed of algebraic
+A `AlgebraicExpression` is an algebraic expression composed of algebraic
 variables, unary and binary operators (including basic logaritmic, exponential,
 and trigonometric functions) with a set of values for algebraic variables
 that can be evaluated, giving as a result a `double` value.
 
 This class stablishes a Facade (Facade design pattern for all regular
 expression operations) and plays a user role in a composite design pattern
-with _RegularExpression*Node classes.
+with _AlgebraicExpression*Node classes.
 */
-public class RegularExpression extends FundamentalEntity
+public class AlgebraicExpression extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20071014L;
 
-    private _RegularExpressionNode root;
+    private _AlgebraicExpressionNode root;
     private HashMap<String, Double> values;
 
-    public RegularExpression()
+    public AlgebraicExpression()
     {
         values = new HashMap<String, Double>();
         defineValue("PI", Math.PI);
@@ -61,12 +61,12 @@ public class RegularExpression extends FundamentalEntity
         return msg;
     }
 
-    public double getVariableValue(String name) throws RegularExpressionException
+    public double getVariableValue(String name) throws AlgebraicExpressionException
     {
         Double val;
         val = values.get(name);
         if ( val == null ) {
-            throw new RegularExpressionException("RegularExpression.getVariableValue: Variable \"" + name + "\" not defined");
+            throw new AlgebraicExpressionException("AlgebraicExpression.getVariableValue: Variable \"" + name + "\" not defined");
         }
         return val.doubleValue();
     }
@@ -90,8 +90,8 @@ public class RegularExpression extends FundamentalEntity
         return answer;
     }
 
-    private _RegularExpressionNode buildExpressionTree(ArrayList<String> tokens)
-        throws RegularExpressionException
+    private _AlgebraicExpressionNode buildExpressionTree(ArrayList<String> tokens)
+        throws AlgebraicExpressionException
     {
         //-----------------------------------------------------------------
         int i;
@@ -106,14 +106,14 @@ public class RegularExpression extends FundamentalEntity
         //- Trivial case: if I am a single token, I create myself here ----
         if ( tokens.size() == 1 ) {
             if ( isOperator(tokens.get(0)) ) {
-                throw new RegularExpressionException("Parse error, invalid placement for operator \'" + tokens.get(0).charAt(0) + "\'");
+                throw new AlgebraicExpressionException("Parse error, invalid placement for operator \'" + tokens.get(0).charAt(0) + "\'");
             }
             else if ( Character.isDigit(tokens.get(0).charAt(0)) ||
                       tokens.get(0).charAt(0) == '-' ) {
-                return new _RegularExpressionConstantNode(Double.parseDouble(tokens.get(0)));
+                return new _AlgebraicExpressionConstantNode(Double.parseDouble(tokens.get(0)));
             }
             else {
-                return new _RegularExpressionVariableNode(this, tokens.get(0));
+                return new _AlgebraicExpressionVariableNode(this, tokens.get(0));
             }
         }
 
@@ -141,8 +141,8 @@ public class RegularExpression extends FundamentalEntity
         // Determine the top level connector
         if ( topLevelConnectorIndexes.size() <= 0 ) {
             // Try a funcional form expression
-            _RegularExpressionUnaryOperatorNode uo;
-            uo = new _RegularExpressionUnaryOperatorNode(this, tokens.get(0));
+            _AlgebraicExpressionUnaryOperatorNode uo;
+            uo = new _AlgebraicExpressionUnaryOperatorNode(this, tokens.get(0));
             tokens.remove(0);
             uo.setOperand(buildExpressionTree(tokens));
             return uo;
@@ -181,11 +181,11 @@ public class RegularExpression extends FundamentalEntity
         char op = tokens.get(mainConnector).charAt(0);
 
         if ( op != '-' && mainConnector == 0 ) {
-            throw new RegularExpressionException("Operator \"" + op + "\" can not be used as a unary operator");
+            throw new AlgebraicExpressionException("Operator \"" + op + "\" can not be used as a unary operator");
           }
           else if ( op == '-' && mainConnector == 0 ) {
-            _RegularExpressionUnaryOperatorNode uo;
-            uo = new _RegularExpressionUnaryOperatorNode(this, "-");
+            _AlgebraicExpressionUnaryOperatorNode uo;
+            uo = new _AlgebraicExpressionUnaryOperatorNode(this, "-");
             tokens.remove(0);
             uo.setOperand(buildExpressionTree(tokens));
             return uo;
@@ -203,8 +203,8 @@ public class RegularExpression extends FundamentalEntity
                 rightTokens.add(tokens.get(i));
             }
 
-            _RegularExpressionBinaryOperatorNode bo;
-            bo = new _RegularExpressionBinaryOperatorNode(this, op);
+            _AlgebraicExpressionBinaryOperatorNode bo;
+            bo = new _AlgebraicExpressionBinaryOperatorNode(this, op);
             bo.setLeftOperand(buildExpressionTree(leftTokens));
             bo.setRightOperand(buildExpressionTree(rightTokens));
             return bo;
@@ -216,7 +216,7 @@ public class RegularExpression extends FundamentalEntity
     /**
     @return true if expression was compiled successfully, false if not.
     */
-    public void setExpression(String regexp) throws RegularExpressionException
+    public void setExpression(String regexp) throws AlgebraicExpressionException
     {
         //-----------------------------------------------------------------
         ArrayList<String> tokens;
@@ -279,10 +279,10 @@ public class RegularExpression extends FundamentalEntity
         root = buildExpressionTree(tokens);
     }
 
-    public double eval() throws RegularExpressionException
+    public double eval() throws AlgebraicExpressionException
     {
         if ( root == null ) {
-            throw new RegularExpressionException("Null expression, can not evaluate.");
+            throw new AlgebraicExpressionException("Null expression, can not evaluate.");
         }
         return root.eval();
     }
