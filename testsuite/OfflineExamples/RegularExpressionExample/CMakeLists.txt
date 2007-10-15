@@ -1,7 +1,7 @@
 
 VSDK_COMPILE_JAVA_APPLICATION(
-  RegularExpressionExample
+  AlgebraicExpressionExample
   ${VSDK_BINARY_DIR}/src/vsdk.jar
-  src/RegularExpressionExample.java)
+  src/AlgebraicExpressionExample.java)
 
 # eof - CMakeLists.txt

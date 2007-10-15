@@ -1,2 +1,2 @@
-java -classpath ./classes;../../../lib/vsdk.jar RegularExpressionExample
+java -classpath ./classes;../../../lib/vsdk.jar AlgebraicExpressionExample
 pause

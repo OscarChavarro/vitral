@@ -5,5 +5,5 @@ if [ ! -d ./classes ]; then
 fi
 
 cd src
-javac -Xlint:deprecation -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar -d ../classes RegularExpressionExample.java
+javac -Xlint:deprecation -Xlint:unchecked -classpath .:../../../../lib/vsdk.jar -d ../classes AlgebraicExpressionExample.java
 cd ..

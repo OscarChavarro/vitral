@@ -8,7 +8,7 @@
 // VSDK classes
 import vsdk.toolkit.common.RegularExpression;
 
-public class RegularExpressionExample 
+public class AlgebraicExpressionExample 
 {
     public static void main (String[] args) {
         RegularExpression regexp = new RegularExpression();
