@@ -12,6 +12,9 @@ cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd OfflineExamples
+cd AlgebraicExpressionExample
+./compile.sh
+cd ..
 cd ImageOfflineExample
 ./compile.sh
 cd ..
