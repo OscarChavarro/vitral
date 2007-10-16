@@ -213,5 +213,5 @@ October 7 2007, Oscar Chavarro: <<1h48min>>
     First version of vitral with voice recognition enabled via Dragon
     Naturally speaking (spanish) :)
 
-October 15 2007, Oscar Chavarro:
+October 15 2007, Oscar Chavarro: <<3h>>
   - 3h: ModifyPanelForFunctionalExplicitSurface :)

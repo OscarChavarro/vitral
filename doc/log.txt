@@ -450,7 +450,7 @@ Changes in 2007 october 14 revition <<3h52min>>
   - 1h39min: first RegularExpression implementation working, renamed to
     AlgebraicExpression
 
-Changes in 2007 october 15 revition 
+Changes in 2007 october 15 revition <<2h15min>>
   - 52min: FunctionalExplicitSurface :)
   - 37min: Fixing bugs in AlgebraicExpression
   - 46min: EnvironmentPersistence.exportObj
