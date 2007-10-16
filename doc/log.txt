@@ -447,10 +447,12 @@ Changes in 2007 october 14 revition <<3h52min>>
     program
   - 44min: RegularExpression parser and some tree building research
   - 39min: RegularExpression tree building research and tests (failed)
-  - 1h39min: first RegularExpression implementation working
+  - 1h39min: first RegularExpression implementation working, renamed to
+    AlgebraicExpression
 
 Changes in 2007 october 15 revition 
   - 52min: FunctionalExplicitSurface :)
+  - 37min: Fixing bugs in AlgebraicExpression
 
 ---------------------------------------------------------------------------
 TODO:

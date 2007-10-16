@@ -95,10 +95,31 @@ public class AlgebraicExpression extends FundamentalEntity
     {
         //-----------------------------------------------------------------
         int i;
+        int level;
+        char c;
 
         //- Trim out embracing parenthesis from expression ----------------
         while ( tokens.get(0).equals("(") &&
                 tokens.get(tokens.size()-1).equals(")") ) {
+            level = 0;
+            boolean trim = true;
+
+            for ( i = 0; i < tokens.size(); i++ ) {
+                c = tokens.get(i).charAt(0);
+                if ( c == '(' ) {
+                    level++;
+                }
+                else if ( c == ')' ) {
+                    level--;
+                }
+                if ( level == 0 && i < (tokens.size()-1) ) {
+                    trim = false;
+                }
+            }
+
+            if ( !trim ) {
+                break;
+            }
             tokens.remove(tokens.size()-1);
             tokens.remove(0);
         }
@@ -123,15 +144,16 @@ public class AlgebraicExpression extends FundamentalEntity
         topLevelConnectorIndexes = new ArrayList<Integer>();
 
         // Search for top level connector operators
-        char c;
-        int level = 0;
+        level = 0;
         for ( i = 0; i < tokens.size(); i++ ) {
             c = tokens.get(i).charAt(0);
             if ( c == '(' ) {
                 level++;
+                continue;
             }
             else if ( c == ')' ) {
                 level--;
+                continue;
             }
             if ( level == 0 && isOperator(tokens.get(i)) ) {
                 topLevelConnectorIndexes.add(new Integer(i));
@@ -146,6 +168,9 @@ public class AlgebraicExpression extends FundamentalEntity
             tokens.remove(0);
             uo.setOperand(buildExpressionTree(tokens));
             return uo;
+        }
+
+        for ( i = 0; i < topLevelConnectorIndexes.size(); i++ ) {
         }
 
         int mainConnector = 0;
@@ -180,7 +205,7 @@ public class AlgebraicExpression extends FundamentalEntity
 
         char op = tokens.get(mainConnector).charAt(0);
 
-        if ( op != '-' && mainConnector == 0 ) {
+        if ( op != '-' && mainConnector == -1 ) {
             throw new AlgebraicExpressionException("Operator \"" + op + "\" can not be used as a unary operator");
           }
           else if ( op == '-' && mainConnector == 0 ) {

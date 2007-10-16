@@ -89,10 +89,22 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
         container2.add(label);
 
         JComboBox jcb = new JComboBox();
+
+        // This is strange, but makes combobox heavyweight and integrable with JOGL!
+	jcb.getEditor().getEditorComponent().setBackground(java.awt.Color.WHITE);
+
+        jcb.setLightWeightPopupEnabled(false);
         jcb.addActionListener(this);
         jcb.addItem("<None selected>");
         jcb.addItem("cos((PI*x)/2);-10;-10;-10;10;10;10;100;100");
-        // ((3-x)/2)*((9/4-y^2)^4)*sin(PI*x/2)^2
+        jcb.addItem("0.03*((1.5-x/2)*((2.25-y^2)^4)*(sin(PI*x/2))^2);-2;-1.5;-10;2;1.5;3;100;100");
+        jcb.addItem("x*y*cos(x*y);-1.5;-1.5;-10;1.5;1.5;3;100;100");
+        jcb.addItem("x^2+y^2;-2;-2;-10;2;2;2;100;100");
+        jcb.addItem("x*y*((x^2 - y^2)/(x^2+y^2));-1.5;-1.5;-10;1.5;1.5;3;100;100");
+        jcb.addItem("(1-sqrt(abs(x*y)));-1.5;-1.5;-10;1.5;1.5;10;100;100");
+        jcb.addItem("(x^3*y^2)/2;-1.5;-1.5;-10;1.5;1.5;10;100;100");
+        jcb.addItem("2*y^2*sin(2*x);-1.5;-1.5;-10;1.5;1.5;10;100;100");
+        jcb.addItem("cos(7.17307*(x+3/2)+(2*y)+(-3))*(exp(2*y+(-3)));-1.5;-1.5;-10;1.5;1.5;3;100;100");
         container2.add(jcb);
 
         //-----------------------------------------------------------------
