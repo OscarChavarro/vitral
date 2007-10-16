@@ -8,6 +8,7 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.File;
+import java.io.OutputStream;
 
 // VSDK Classes
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -33,6 +34,13 @@ public class EnvironmentPersistence extends PersistenceElement {
         else if ( type.equals("vtk") ) {
             ReaderVtk.importEnvironment(inSceneFileFd, inoutScene);
         }
+    }
+
+    public static void
+    exportEnvironmentObj(OutputStream inOutputStream, SimpleScene inScene)
+        throws Exception
+    {
+        WriterObj.exportEnvironment(inOutputStream, inScene);
     }
 }
 

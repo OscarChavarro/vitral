@@ -3,6 +3,7 @@
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.BufferedReader;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
@@ -78,7 +79,8 @@ import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 public class ButtonsPanel extends JPanel implements ActionListener
 {
     private SceneEditorApplication parent;
-    private String currentFilePath;
+    private String currentFilePathForReading;
+    private String currentFilePathForWriting;
 
     public ButtonsPanel(SceneEditorApplication parent, int group)
     {
@@ -98,7 +100,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
             this.setBorder(empty);
         }
 
-        currentFilePath = (new File("")).getAbsolutePath() + "/../../../etc/geometry";
+        currentFilePathForReading = (new File("")).getAbsolutePath() + "/../../../etc/geometry";
+        currentFilePathForWriting = ".";
 
         //-------------------------------------------------------------------
         JPanel internal = null;
@@ -520,7 +523,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
             JFileChooser jfc = null;
-            jfc = new JFileChooser(currentFilePath);
+            jfc = new JFileChooser(currentFilePathForReading);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
             jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
@@ -533,7 +536,34 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     EnvironmentPersistence.importEnvironment(file,
                         parent.theScene.scene);
 
-                    currentFilePath = file.getParentFile().getAbsolutePath();
+                    currentFilePathForReading = file.getParentFile().getAbsolutePath();
+
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to read file...\n" + ex);
+                    return;
+                }
+            }
+
+        }
+        else if ( label.equals("IDC_EXPORT_OBJECTS_TO_OBJ") ) {
+            JFileChooser jfc = null;
+            jfc = new JFileChooser(currentFilePathForWriting);
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
+
+            int opc = jfc.showOpenDialog(new JPanel());
+            if ( opc == JFileChooser.APPROVE_OPTION ) {
+                try {
+                    File file = jfc.getSelectedFile();
+                    FileOutputStream fos = new FileOutputStream(file);
+
+                    EnvironmentPersistence.exportEnvironmentObj(fos,
+                        parent.theScene.scene);
+
+                    fos.close();
+
+                    currentFilePathForWriting = file.getParentFile().getAbsolutePath();
 
                     repaint();
                 }

@@ -453,6 +453,7 @@ Changes in 2007 october 14 revition <<3h52min>>
 Changes in 2007 october 15 revition 
   - 52min: FunctionalExplicitSurface :)
   - 37min: Fixing bugs in AlgebraicExpression
+  - 46min: EnvironmentPersistence.exportObj
 
 ---------------------------------------------------------------------------
 TODO:

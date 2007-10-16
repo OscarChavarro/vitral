@@ -458,6 +458,19 @@ public abstract class PersistenceElement {
         writer.write(end, 0, end.length);
     }
 
+    public static void
+    writeAsciiLine(OutputStream writer, String cad)
+        throws Exception
+    {
+        byte arr[];
+        arr = cad.getBytes();
+        writer.write(arr, 0, arr.length);
+
+        byte end[] = new byte[1];
+        end[0] = '\n';
+        writer.write(end, 0, end.length);
+    }
+
     /**
     Given the name of a native library, this method tries to determine
     wheter it is available or not.  Takes into account the cross-platform
