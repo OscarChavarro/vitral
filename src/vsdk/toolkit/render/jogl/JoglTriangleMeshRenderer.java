@@ -58,6 +58,12 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
 
         if ( quality.isSurfacesSet() ) {
+            // This line doesn't make sense (as it will later reactivated),
+            // but it is needed in some graphics cards/driver/os combinations
+            // like AMD Athlon64 running 32 bit Fedora Core 6 with Nvidia C51
+            gl.glDisable(gl.GL_LIGHTING);
+            //
+
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             gl.glPolygonOffset(0.0f, 0.0f);
