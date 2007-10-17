@@ -61,7 +61,7 @@ public abstract class JoglRenderer extends RenderingElement {
     public static CGprogram currentPixelShader = null;
 
     // Nvidia Cg automatic shader management
-    public static boolean nvidiaCgAutomaticMode = true;
+    public static boolean nvidiaCgAutomaticMode = false;
     public static CGprogram NvidiaGpuVertexProgramTexture;
     public static CGprogram NvidiaGpuPixelProgramTexture;
     public static CGprogram NvidiaGpuVertexProgramTextureBump;
@@ -79,9 +79,7 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static void createDefaultAutomaticNvidiaCgShaders()
     {
-        if ( !nvidiaCgAutomaticMode ) {
-            return;
-        }
+        nvidiaCgAutomaticMode = true;
 
         FileInputStream fis;
 

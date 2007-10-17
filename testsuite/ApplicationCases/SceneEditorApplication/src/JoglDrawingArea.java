@@ -767,7 +767,7 @@ public class JoglDrawingArea implements
 
         if ( firstTimer ) {
             firstTimer = false;
-            //JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
+            JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
         }
 
         debugProjectedViewsIfNeeded(gl);
