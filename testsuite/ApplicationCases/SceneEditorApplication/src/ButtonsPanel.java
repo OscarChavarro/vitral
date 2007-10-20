@@ -471,35 +471,38 @@ public class ButtonsPanel extends JPanel implements ActionListener
             // Case 1: Patch hard-coded in source
             ParametricCurve border = new ParametricCurve();
             Vector3D pointParameters[];
-            pointParameters = new Vector3D[3];
 
-            pointParameters[0] = new Vector3D(0, 0, 0);
-            pointParameters[1] = new Vector3D(0.5, 0, 0);
-            pointParameters[2] = new Vector3D(0, 0, 0.5);
+            pointParameters = new Vector3D[3];
+            pointParameters[0] = new Vector3D(0, 0, 0);         // 1
+            pointParameters[1] = new Vector3D(1, 0, 0);
+            pointParameters[2] = new Vector3D(0, 1, 0);
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0.5, 0, 1);
-            pointParameters[1] = new Vector3D(0, 0, 1);
-            pointParameters[2] = new Vector3D(1, 0, 1);
+            pointParameters[0] = new Vector3D(1, 0, 0);      // 2
+            pointParameters[1] = new Vector3D(0, 1, 0);
+            pointParameters[2] = new Vector3D(-1, 0, 0);
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0.5, 1, 1);
-            pointParameters[1] = new Vector3D(1, 1, 1);
-            pointParameters[2] = new Vector3D(0, 1, 1);
+            pointParameters[0] = new Vector3D(1, 1, 0);      // 3
+            pointParameters[1] = new Vector3D(-1, 0, 0);
+            pointParameters[2] = new Vector3D(0, 1, 0);
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 1, 0);
-            pointParameters[1] = new Vector3D(0, 1, 0.5);
+            pointParameters[0] = new Vector3D(0, 1, 0);       // 4
+            pointParameters[1] = new Vector3D(0, -1, 0);
             pointParameters[2] = new Vector3D(0.5, 1, 0);
             border.addPoint(pointParameters, border.BEZIER);
 
             border.addPoint(border.getPoint(0), border.BEZIER);
+
             patch = new ParametricBiCubicPatch(ParametricBiCubicPatch.QUAD,
                                                border);
-            parent.theScene.addThing(patch);
+	    SimpleBody newThing;
+            newThing = parent.theScene.addThing(patch);
+            newThing.getMaterial().setDoubleSided(true);
 /*
             try {
                 XmlManager.exportXml(patch, "patchTest.xml",

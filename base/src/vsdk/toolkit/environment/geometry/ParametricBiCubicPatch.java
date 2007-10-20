@@ -159,8 +159,8 @@ public class ParametricBiCubicPatch extends Surface {
         int i = 0;
         int sum = 1;
         int p = 0;
-        for (int j = 0; j < 4; j += 3) {
-            Vector3D[] vp = contourCurve.getPoint(p);
+        for ( int j = 0; j < 4; j += 3 ) {
+            Vector3D[] vp = contourCurve.getPoint(3-p);
             mx[i][j] = vp[0].x;
             my[i][j] = vp[0].y;
             mz[i][j] = vp[0].z;
@@ -185,8 +185,8 @@ public class ParametricBiCubicPatch extends Surface {
         i = 3;
         sum = -1;
 
-        for (int j = 3; j > -1; j -= 3) {
-            Vector3D[] vp = contourCurve.getPoint(p);
+        for ( int j = 3; j > -1; j -= 3 ) {
+            Vector3D[] vp = contourCurve.getPoint(3-p);
             mx[i][j] = vp[0].x;
             my[i][j] = vp[0].y;
             mz[i][j] = vp[0].z;
@@ -219,7 +219,8 @@ public class ParametricBiCubicPatch extends Surface {
     of approximationSteps^2 points, and in the code, the variables names
     follows the following notation:
     <UL>
-      <LI> S_MATRIX  Column vector for storing s parameter polynomial
+      <LI> S_MATRIX  Column vector for storing s parameter polynomial as
+      explain in section [FOLE1992].11.3
       <LI> M_MATRIX  Patch's blending function
       <LI> Mt_MATRIX M's transpose
       <LI> Gx_MATRIX Geometry matrix for x
@@ -272,7 +273,7 @@ public class ParametricBiCubicPatch extends Surface {
                     M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
             }
             else {
-                // y(s, t)
+                // z(s, t)
                 M_G_Mt_MATRIX = 
                     M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
             }
