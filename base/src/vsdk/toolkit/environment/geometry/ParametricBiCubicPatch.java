@@ -47,6 +47,16 @@ public class ParametricBiCubicPatch extends Surface {
         this.type = type;
     }
 
+    /**
+    Given a contour curve, this constructor builds a corresponding
+    FERGUSON type patch.
+
+    PRE: Contour curve must has at least 4 control points. The first
+    4 control points (the only one used) must be of type HERMITE.
+
+    Note that a Ferguson patch is an Hermite patch with zero valued
+    twist vectors.
+    */
     public ParametricBiCubicPatch(ParametricCurve curve) {
         this.contourCurve = curve;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
@@ -151,73 +161,12 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    private void buildGeometryMatricesXYZ_Ferguson() {
-        double[][] mx = new double[4][4];
-        double[][] my = new double[4][4];
-        double[][] mz = new double[4][4];
-        Vector3D[] vp00 = contourCurve.getPoint(0);
-        Vector3D[] vp10 = contourCurve.getPoint(1);
-        Vector3D[] vp11 = contourCurve.getPoint(2);
-        Vector3D[] vp01 = contourCurve.getPoint(3);
+    private void printGeometryMatrices()
+    {
+        double[][] mx = Gx_MATRIX.M;
+        double[][] my = Gy_MATRIX.M;
+        double[][] mz = Gz_MATRIX.M;
 
-        // Positions with respect to contour curve
-        mx[0][0] = vp00[0].x;
-        my[0][0] = vp00[0].y;
-        mz[0][0] = vp00[0].z;
-        mx[0][1] = vp01[0].x;
-        my[0][1] = vp01[0].y;
-        mz[0][1] = vp01[0].z;
-        mx[1][0] = vp10[0].x;
-        my[1][0] = vp10[0].y;
-        mz[1][0] = vp10[0].z;
-        mx[1][1] = vp11[0].x;
-        my[1][1] = vp11[0].y;
-        mz[1][1] = vp11[0].z;
-
-        // Partial derivatives with respect to S direction
-        mx[2][0] = (vp00[2].x - vp00[0].x);
-        my[2][0] = (vp00[2].y - vp00[0].y);
-        mz[2][0] = (vp00[2].z - vp00[0].z);
-        mx[2][1] = (vp01[1].x - vp01[0].x);
-        my[2][1] = (vp01[1].y - vp01[0].y);
-        mz[2][1] = (vp01[1].z - vp01[0].z);
-        mx[3][0] = (vp10[1].x - vp10[0].x)*-1;
-        my[3][0] = (vp10[1].y - vp10[0].y)*-1;
-        mz[3][0] = (vp10[1].z - vp10[0].z)*-1;
-        mx[3][1] = (vp11[2].x - vp11[0].x)*-1;
-        my[3][1] = (vp11[2].y - vp11[0].y)*-1;
-        mz[3][1] = (vp11[2].z - vp11[0].z)*-1;
-
-        // Partial derivatives with respect to T direction
-        mx[0][2] = (vp00[1].x - vp00[0].x);
-        my[0][2] = (vp00[1].y - vp00[0].y);
-        mz[0][2] = (vp00[1].z - vp00[0].z);
-        mx[0][3] = (vp01[2].x - vp01[0].x)*-1;
-        my[0][3] = (vp01[2].y - vp01[0].y)*-1;
-        mz[0][3] = (vp01[2].z - vp01[0].z)*-1;
-        mx[1][2] = (vp10[2].x - vp10[0].x);
-        my[1][2] = (vp10[2].y - vp10[0].y);
-        mz[1][2] = (vp10[2].z - vp10[0].z);
-        mx[1][3] = (vp11[1].x - vp11[0].x)*-1;
-        my[1][3] = (vp11[1].y - vp11[0].y)*-1;
-        mz[1][3] = (vp11[1].z - vp11[0].z)*-1;
-
-        // Ferguson patch: twist vectors (second order partial derivatives)
-        // are all 0, as noted on [FOLE1992].11.3.1, equation [FOLE1992].11.84
-        mx[2][2] = 0;
-        my[2][2] = 0;
-        mz[2][2] = 0;
-        mx[2][3] = 0;
-        my[2][3] = 0;
-        mz[2][3] = 0;
-        mx[3][2] = 0;
-        my[3][2] = 0;
-        mz[3][2] = 0;
-        mx[3][3] = 0;
-        my[3][3] = 0;
-        mz[3][3] = 0;
-
-/*
         System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
                           "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
                           mx[0][0], my[0][0], mz[0][0],
@@ -246,7 +195,81 @@ public class ParametricBiCubicPatch extends Surface {
                           mx[3][2], my[3][2], mz[3][2],
                           mx[3][3], my[3][3], mz[3][3]
         );
-*/
+    }
+
+    /**
+    @todo verify that current contour curve have at least 4 control points
+    and that first 4 control points are of type HERMITE.
+    */
+    private void buildGeometryMatricesXYZ_Ferguson() {
+        double[][] mx = new double[4][4];
+        double[][] my = new double[4][4];
+        double[][] mz = new double[4][4];
+        Vector3D[] vp00 = contourCurve.getPoint(0);
+        Vector3D[] vp10 = contourCurve.getPoint(1);
+        Vector3D[] vp11 = contourCurve.getPoint(2);
+        Vector3D[] vp01 = contourCurve.getPoint(3);
+
+        // Positions with respect to contour curve
+        mx[0][0] = vp00[0].x;
+        my[0][0] = vp00[0].y;
+        mz[0][0] = vp00[0].z;
+        mx[0][1] = vp01[0].x;
+        my[0][1] = vp01[0].y;
+        mz[0][1] = vp01[0].z;
+        mx[1][0] = vp10[0].x;
+        my[1][0] = vp10[0].y;
+        mz[1][0] = vp10[0].z;
+        mx[1][1] = vp11[0].x;
+        my[1][1] = vp11[0].y;
+        mz[1][1] = vp11[0].z;
+
+        // Partial derivatives with respect to S direction
+        // For Hermite contour
+        mx[2][0] = (vp00[2].x);
+        my[2][0] = (vp00[2].y);
+        mz[2][0] = (vp00[2].z);
+        mx[2][1] = -(vp01[1].x);
+        my[2][1] = -(vp01[1].y);
+        mz[2][1] = -(vp01[1].z);
+        mx[3][0] = (vp10[1].x);
+        my[3][0] = (vp10[1].y);
+        mz[3][0] = (vp10[1].z);
+        mx[3][1] = -(vp11[2].x);
+        my[3][1] = -(vp11[2].y);
+        mz[3][1] = -(vp11[2].z);
+
+        // Partial derivatives with respect to T direction
+        // For Hermite contour
+        mx[0][2] = -(vp00[1].x);
+        my[0][2] = -(vp00[1].y);
+        mz[0][2] = -(vp00[1].z);
+        mx[0][3] = -(vp01[2].x);
+        my[0][3] = -(vp01[2].y);
+        mz[0][3] = -(vp01[2].z);
+        mx[1][2] = (vp10[2].x);
+        my[1][2] = (vp10[2].y);
+        mz[1][2] = (vp10[2].z);
+        mx[1][3] = (vp11[1].x);
+        my[1][3] = (vp11[1].y);
+        mz[1][3] = (vp11[1].z);
+
+        // Ferguson patch: twist vectors (second order partial derivatives)
+        // are all 0, as noted on [FOLE1992].11.3.1, equation [FOLE1992].11.84
+        mx[2][2] = 0;
+        my[2][2] = 0;
+        mz[2][2] = 0;
+        mx[2][3] = 0;
+        my[2][3] = 0;
+        mz[2][3] = 0;
+        mx[3][2] = 0;
+        my[3][2] = 0;
+        mz[3][2] = 0;
+        mx[3][3] = 0;
+        my[3][3] = 0;
+        mz[3][3] = 0;
+
+        //printGeometryMatrices();
 
         // Final result
         Gx_MATRIX.M = mx;

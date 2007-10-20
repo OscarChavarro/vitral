@@ -416,6 +416,9 @@ public class ButtonsPanel extends JPanel implements ActionListener
             Vector3D pointParameters[];
 
             curve = new ParametricCurve();
+            // Note that an HERMITE curve uses tangent vectors, BEZIER curves
+            // uses control points (tangent vectors are control point minus
+            // knot position)
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(0, 0, 0); // Position 0
             pointParameters[1] = new Vector3D(0, 0, 0); // Not used
@@ -467,45 +470,46 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
-
-            // Case 1: Patch hard-coded in source
-            ParametricCurve border = new ParametricCurve();
+            ParametricCurve contourHermiteLine;
             Vector3D pointParameters[];
 
-            // WARNING: When defining a Ferguron patch from a curve, the
-            // curve should be HERMITE not BEZIER!!!
+            contourHermiteLine = new ParametricCurve();
+            // Note that an HERMITE curve uses tangent vectors, BEZIER curves
+            // uses control points (tangent vectors are control point minus
+            // knot position)
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(0, 0, 0);  // Position 0
-            pointParameters[1] = new Vector3D(0, 1, 0);  // Entry tangent end
-            pointParameters[2] = new Vector3D(1, 0, 0);  // Salient tangent end
-            border.addPoint(pointParameters, border.BEZIER);
+            pointParameters[1] = new Vector3D(0, -1, 0); // Entry tangent
+            pointParameters[2] = new Vector3D(1, 0, 0);  // Salient tangent
+            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(1, 0, 0);  // Position 1
-            pointParameters[1] = new Vector3D(0, 0, 0);  // Entry tangent end
-            pointParameters[2] = new Vector3D(1, 1, 0);  // Salient tangent end
-            border.addPoint(pointParameters, border.BEZIER);
+            pointParameters[1] = new Vector3D(1, 0, 0);  // Entry tangent
+            pointParameters[2] = new Vector3D(0, 1, 0);  // Salient tangent
+            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(1, 1, 0.4);  // Position 2
-            pointParameters[1] = new Vector3D(1, 0, 0);  // Entry tangent end
-            pointParameters[2] = new Vector3D(0, 1, 0);  // Salient tangent end
-            border.addPoint(pointParameters, border.BEZIER);
+            pointParameters[1] = new Vector3D(0, 1, 0);  // Entry tangent
+            pointParameters[2] = new Vector3D(-1, 0, 0);  // Salient tangent
+            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(0, 1, 0);  // Position 3
-            pointParameters[1] = new Vector3D(1, 1, 0);  // Entry tangent end
-            pointParameters[2] = new Vector3D(0, 0, 0);  // Salient tangent end
-            border.addPoint(pointParameters, border.BEZIER);
+            pointParameters[1] = new Vector3D(-1, 0, 0);  // Entry tangent
+            pointParameters[2] = new Vector3D(0, -1, 0);  // Salient tangent
+            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
 
-            border.addPoint(border.getPoint(0), border.BEZIER);
+	    System.out.println("->"+contourHermiteLine.getPoint(3)[2]);
 
-            patch = new ParametricBiCubicPatch(border);
+            contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), contourHermiteLine.HERMITE);
+
+            patch = new ParametricBiCubicPatch(contourHermiteLine);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
-
-            parent.theScene.addThing(border);
+            //parent.theScene.addThing(contourHermiteLine);
 /*
             try {
                 XmlManager.exportXml(patch, "patchTest.xml",
