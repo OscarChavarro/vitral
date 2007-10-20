@@ -42,6 +42,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
         gl.glDisable(GL.GL_LIGHTING);
 
+        gl.glColor3d(color.r, color.g, color.b);
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( curve.types.get(i).intValue() == curve.BREAK ) {
                 i++;
@@ -51,12 +52,11 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
             // Build a polyline for approximating the [i] curve segment
             ArrayList polyline = curve.calculatePoints(i, false);
 
-            gl.glColor3d(color.r, color.g, color.b);
-
             // Draw the polyline
             gl.glBegin(GL.GL_LINE_STRIP);
             for ( j = 0; j < polyline.size(); j++ ) {
                 Vector3D vec = (Vector3D) polyline.get(j);
+
                 gl.glVertex3d(vec.x, vec.y, vec.z);
             }
             gl.glEnd();

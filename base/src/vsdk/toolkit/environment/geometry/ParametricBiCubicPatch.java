@@ -30,7 +30,7 @@ public class ParametricBiCubicPatch extends Surface {
     public Matrix4x4 Gy_MATRIX = new Matrix4x4();
     public Matrix4x4 Gz_MATRIX = new Matrix4x4();
 
-    public static final int QUAD = 7;
+    public static final int FERGUSON = 7;
 
     /// Note that the contourCurve must have 4 points with its respective
     /// control parameters.
@@ -47,10 +47,10 @@ public class ParametricBiCubicPatch extends Surface {
         this.type = type;
     }
 
-    public ParametricBiCubicPatch(int type, ParametricCurve curve) {
+    public ParametricBiCubicPatch(ParametricCurve curve) {
         this.contourCurve = curve;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
-        this.type = type;
+        this.type = FERGUSON;
     }
 
     public int getApproximationSteps() {
@@ -151,64 +151,104 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    private void buildGeometryMatricesXYZ_Quad() {
+    private void buildGeometryMatricesXYZ_Ferguson() {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
+        Vector3D[] vp00 = contourCurve.getPoint(0);
+        Vector3D[] vp10 = contourCurve.getPoint(1);
+        Vector3D[] vp11 = contourCurve.getPoint(2);
+        Vector3D[] vp01 = contourCurve.getPoint(3);
 
-        int i = 0;
-        int sum = 1;
-        int p = 0;
-        for ( int j = 0; j < 4; j += 3 ) {
-            Vector3D[] vp = contourCurve.getPoint(3-p);
-            mx[i][j] = vp[0].x;
-            my[i][j] = vp[0].y;
-            mz[i][j] = vp[0].z;
+        // Positions with respect to contour curve
+        mx[0][0] = vp00[0].x;
+        my[0][0] = vp00[0].y;
+        mz[0][0] = vp00[0].z;
+        mx[0][1] = vp01[0].x;
+        my[0][1] = vp01[0].y;
+        mz[0][1] = vp01[0].z;
+        mx[1][0] = vp10[0].x;
+        my[1][0] = vp10[0].y;
+        mz[1][0] = vp10[0].z;
+        mx[1][1] = vp11[0].x;
+        my[1][1] = vp11[0].y;
+        mz[1][1] = vp11[0].z;
 
-            mx[i + 1][j] = vp[1 + (j / 3)].x;
-            my[i + 1][j] = vp[1 + (j / 3)].y;
-            mz[i + 1][j] = vp[1 + (j / 3)].z;
+        // Partial derivatives with respect to S direction
+        mx[2][0] = (vp00[2].x - vp00[0].x);
+        my[2][0] = (vp00[2].y - vp00[0].y);
+        mz[2][0] = (vp00[2].z - vp00[0].z);
+        mx[2][1] = (vp01[1].x - vp01[0].x);
+        my[2][1] = (vp01[1].y - vp01[0].y);
+        mz[2][1] = (vp01[1].z - vp01[0].z);
+        mx[3][0] = (vp10[1].x - vp10[0].x)*-1;
+        my[3][0] = (vp10[1].y - vp10[0].y)*-1;
+        mz[3][0] = (vp10[1].z - vp10[0].z)*-1;
+        mx[3][1] = (vp11[2].x - vp11[0].x)*-1;
+        my[3][1] = (vp11[2].y - vp11[0].y)*-1;
+        mz[3][1] = (vp11[2].z - vp11[0].z)*-1;
 
-            mx[i][j + sum] = vp[2 - (j / 3)].x;
-            my[i][j + sum] = vp[2 - (j / 3)].y;
-            mz[i][j + sum] = vp[2 - (j / 3)].z;
+        // Partial derivatives with respect to T direction
+        mx[0][2] = (vp00[1].x - vp00[0].x);
+        my[0][2] = (vp00[1].y - vp00[0].y);
+        mz[0][2] = (vp00[1].z - vp00[0].z);
+        mx[0][3] = (vp01[2].x - vp01[0].x)*-1;
+        my[0][3] = (vp01[2].y - vp01[0].y)*-1;
+        mz[0][3] = (vp01[2].z - vp01[0].z)*-1;
+        mx[1][2] = (vp10[2].x - vp10[0].x);
+        my[1][2] = (vp10[2].y - vp10[0].y);
+        mz[1][2] = (vp10[2].z - vp10[0].z);
+        mx[1][3] = (vp11[1].x - vp11[0].x)*-1;
+        my[1][3] = (vp11[1].y - vp11[0].y)*-1;
+        mz[1][3] = (vp11[1].z - vp11[0].z)*-1;
 
-            Vector3D vn = vp[1].substract(vp[0]).add(vp[2].substract(vp[0]));
-            vn = vn.add(vp[0]);
-            mx[i + 1][j + sum] = vn.x;
-            my[i + 1][j + sum] = vn.y;
-            mz[i + 1][j + sum] = vn.z;
-            p++;
-            sum *= -1;
-        }
+        // Ferguson patch: twist vectors (second order partial derivatives)
+        // are all 0, as noted on [FOLE1992].11.3.1, equation [FOLE1992].11.84
+        mx[2][2] = 0;
+        my[2][2] = 0;
+        mz[2][2] = 0;
+        mx[2][3] = 0;
+        my[2][3] = 0;
+        mz[2][3] = 0;
+        mx[3][2] = 0;
+        my[3][2] = 0;
+        mz[3][2] = 0;
+        mx[3][3] = 0;
+        my[3][3] = 0;
+        mz[3][3] = 0;
 
-        i = 3;
-        sum = -1;
+/*
+        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
+                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
+                          mx[0][0], my[0][0], mz[0][0],
+                          mx[0][1], my[0][1], mz[0][1],
+                          mx[0][2], my[0][2], mz[0][2],
+                          mx[0][3], my[0][3], mz[0][3]
+        );
+        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
+                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
+                          mx[1][0], my[1][0], mz[1][0],
+                          mx[1][1], my[1][1], mz[1][1],
+                          mx[1][2], my[1][2], mz[1][2],
+                          mx[1][3], my[1][3], mz[1][3]
+        );
+        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
+                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
+                          mx[2][0], my[2][0], mz[2][0],
+                          mx[2][1], my[2][1], mz[2][1],
+                          mx[2][2], my[2][2], mz[2][2],
+                          mx[2][3], my[2][3], mz[2][3]
+        );
+        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
+                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
+                          mx[3][0], my[3][0], mz[3][0],
+                          mx[3][1], my[3][1], mz[3][1],
+                          mx[3][2], my[3][2], mz[3][2],
+                          mx[3][3], my[3][3], mz[3][3]
+        );
+*/
 
-        for ( int j = 3; j > -1; j -= 3 ) {
-            Vector3D[] vp = contourCurve.getPoint(3-p);
-            mx[i][j] = vp[0].x;
-            my[i][j] = vp[0].y;
-            mz[i][j] = vp[0].z;
-
-            mx[i - 1][j] = vp[2 - (j / 3)].x;
-            my[i - 1][j] = vp[2 - (j / 3)].y;
-            mz[i - 1][j] = vp[2 - (j / 3)].z;
-
-            mx[i][j + sum] = vp[1 + (j / 3)].x;
-            my[i][j + sum] = vp[1 + (j / 3)].y;
-            mz[i][j + sum] = vp[1 + (j / 3)].z;
-
-            Vector3D vn = vp[1].substract(vp[0]).add(vp[2].substract(vp[0]));
-            vn = vn.add(vp[0]);
-            mx[i - 1][j + sum] = vn.x;
-            my[i - 1][j + sum] = vn.y;
-            mz[i - 1][j + sum] = vn.z;
-
-            p++;
-            sum *= -1;
-        }
-
+        // Final result
         Gx_MATRIX.M = mx;
         Gy_MATRIX.M = my;
         Gz_MATRIX.M = mz;
@@ -242,9 +282,9 @@ public class ParametricBiCubicPatch extends Surface {
             buildGeometryMatricesXYZ_Hermite();
             M_MATRIX = ParametricCurve.HERMITE_MATRIX;
         }
-        else if ( this.type == ParametricBiCubicPatch.QUAD ) {
-            buildGeometryMatricesXYZ_Quad();
-            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
+        else if ( this.type == ParametricBiCubicPatch.FERGUSON ) {
+            buildGeometryMatricesXYZ_Ferguson();
+            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
         }
         Mt_MATRIX = new Matrix4x4(M_MATRIX);
         Mt_MATRIX.transpose();
@@ -279,8 +319,10 @@ public class ParametricBiCubicPatch extends Surface {
             }
 
             // Evaluate current dimension in the generic equational form
-            for ( int i = 0; i < approximationSteps; i++ ) {
-                double s = (double) i / (approximationSteps - 1);
+            int i;
+            int j;
+            for ( i = 0; i < approximationSteps; i++ ) {
+                double s = ((double)i) / (approximationSteps - 1);
 
                 S_MATRIX.M[0][0] = s * s * s;
                 S_MATRIX.M[0][1] = s * s;
@@ -289,8 +331,8 @@ public class ParametricBiCubicPatch extends Surface {
 
                 Matrix4x4 S_M_G_Mt_MATRIX = S_MATRIX.multiply(M_G_Mt_MATRIX);
 
-                for ( int j = 0; j < approximationSteps; j++ ) {
-                    double t = (double) j / (approximationSteps - 1);
+                for ( j = 0; j < approximationSteps; j++ ) {
+                    double t = ((double)j) / (approximationSteps - 1);
 
                     Tt_MATRIX.M[0][0] = t * t * t;
                     Tt_MATRIX.M[1][0] = t * t;

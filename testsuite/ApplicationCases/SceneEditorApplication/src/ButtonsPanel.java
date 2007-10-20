@@ -417,20 +417,20 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
             curve = new ParametricCurve();
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 0, 0);
+            pointParameters[0] = new Vector3D(0, 0, 0); // Position 0
             pointParameters[1] = new Vector3D(0, 0, 0); // Not used
-            pointParameters[2] = new Vector3D(0, 1, 0);
+            pointParameters[2] = new Vector3D(0, 1, 0); // Salient tangent end
             curve.addPoint(pointParameters, curve.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 1, 0);
-            pointParameters[1] = new Vector3D(0, 1, 0);
-            pointParameters[2] = new Vector3D(2, 1, 0);
+            pointParameters[0] = new Vector3D(1, 1, 0); // Position 1
+            pointParameters[1] = new Vector3D(0, 1, 0); // Entry tangent end
+            pointParameters[2] = new Vector3D(2, 1, 0); // Salient tangent end
             curve.addPoint(pointParameters, curve.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(2, 0, 1);
-            pointParameters[1] = new Vector3D(2, 0, 0);
+            pointParameters[0] = new Vector3D(2, 0, 1); // Position 2
+            pointParameters[1] = new Vector3D(2, 0, 0); // Entry tangent end
             pointParameters[2] = new Vector3D(0, 0, 0); // Not used
             curve.addPoint(pointParameters, curve.BEZIER);
 
@@ -472,37 +472,40 @@ public class ButtonsPanel extends JPanel implements ActionListener
             ParametricCurve border = new ParametricCurve();
             Vector3D pointParameters[];
 
+            // WARNING: When defining a Ferguron patch from a curve, the
+            // curve should be HERMITE not BEZIER!!!
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 0, 0);         // 1
-            pointParameters[1] = new Vector3D(1, 0, 0);
-            pointParameters[2] = new Vector3D(0, 1, 0);
+            pointParameters[0] = new Vector3D(0, 0, 0);  // Position 0
+            pointParameters[1] = new Vector3D(0, 1, 0);  // Entry tangent end
+            pointParameters[2] = new Vector3D(1, 0, 0);  // Salient tangent end
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 0, 0);      // 2
-            pointParameters[1] = new Vector3D(0, 1, 0);
-            pointParameters[2] = new Vector3D(-1, 0, 0);
+            pointParameters[0] = new Vector3D(1, 0, 0);  // Position 1
+            pointParameters[1] = new Vector3D(0, 0, 0);  // Entry tangent end
+            pointParameters[2] = new Vector3D(1, 1, 0);  // Salient tangent end
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 1, 0);      // 3
-            pointParameters[1] = new Vector3D(-1, 0, 0);
-            pointParameters[2] = new Vector3D(0, 1, 0);
+            pointParameters[0] = new Vector3D(1, 1, 0.4);  // Position 2
+            pointParameters[1] = new Vector3D(1, 0, 0);  // Entry tangent end
+            pointParameters[2] = new Vector3D(0, 1, 0);  // Salient tangent end
             border.addPoint(pointParameters, border.BEZIER);
 
             pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 1, 0);       // 4
-            pointParameters[1] = new Vector3D(0, -1, 0);
-            pointParameters[2] = new Vector3D(0.5, 1, 0);
+            pointParameters[0] = new Vector3D(0, 1, 0);  // Position 3
+            pointParameters[1] = new Vector3D(1, 1, 0);  // Entry tangent end
+            pointParameters[2] = new Vector3D(0, 0, 0);  // Salient tangent end
             border.addPoint(pointParameters, border.BEZIER);
 
             border.addPoint(border.getPoint(0), border.BEZIER);
 
-            patch = new ParametricBiCubicPatch(ParametricBiCubicPatch.QUAD,
-                                               border);
-	    SimpleBody newThing;
+            patch = new ParametricBiCubicPatch(border);
+            SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
+
+            parent.theScene.addThing(border);
 /*
             try {
                 XmlManager.exportXml(patch, "patchTest.xml",

@@ -457,7 +457,8 @@ Changes in 2007 october 15 revition <<2h15min>>
 
 Changes in 2007 october 20 revition
   - 1h30min ParametricBiCubicPatch and its renderer revition.
-
+  - 2h37min: Fixing an structural bug in Ferguson parametric patches
+    management.
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
