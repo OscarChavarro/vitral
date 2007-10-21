@@ -1,100 +1,121 @@
-<map version="0.7.1">
-<node TEXT="1D Curves in 3D space">
-<node TEXT="1D Curves in 3D space" POSITION="left">
-<node TEXT="Explicit: y=f(x), z = g(x)"/>
-<node TEXT="Implicit: canonic equation = 0"/>
-<node TEXT="Parametric">
-<node TEXT="N-order (N &gt; 3)"/>
-<node TEXT="Cubic (N = 3)">
-<node TEXT="Hermite [FOLE1992].11.2.1"/>
-<node TEXT="Bezier [FOLE1992].11.2.2"/>
-<node TEXT="Spline">
-<node TEXT="Natural cubic splines [FOLE1992].11.2.3"/>
-<node TEXT="B Uniform non rational [FOLE1992].11.2.3"/>
-<node TEXT="B Nonuniform non rational [FOLE1992].11.2.4"/>
-<node TEXT="Nonuniform rational cubic polinomial curve segments [FOLE1992].11.2.5"/>
-<node TEXT="Catmull-Rom (Overhauser) [FOLE1992].11.2.6"/>
-<node TEXT="Uniform shaped beta [FOLE1992].11.2.6">
-<node TEXT="Continuous shaped"/>
-<node TEXT="Discretely shaped"/>
+<map version="0.8.0">
+<!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
+<node CREATED="1192997340619" ID="Freemind_Link_659060712" MODIFIED="1192997744862" TEXT="1D Curves and 2D Surfaces in 3D space">
+<node CREATED="1192997340619" ID="Freemind_Link_431796943" MODIFIED="1192997708284" POSITION="left" TEXT="Vitral Proposed Taxonomy">
+<node CREATED="1192997340619" ID="Freemind_Link_319549992" MODIFIED="1192997340619" TEXT="Explicit: y=f(x), z = g(x)"/>
+<node CREATED="1192997340619" MODIFIED="1192997340619" TEXT="Implicit: canonic equation = 0"/>
+<node CREATED="1192997340619" ID="Freemind_Link_242332011" MODIFIED="1192997340619" TEXT="Parametric">
+<node CREATED="1192997340620" ID="Freemind_Link_680015495" MODIFIED="1192997340620" TEXT="Straight lines (N = 1)"/>
+<node CREATED="1192997340620" ID="Freemind_Link_916653889" MODIFIED="1192997340620" TEXT="Quadratic (N = 2)"/>
+<node CREATED="1192997340619" ID="Freemind_Link_198337140" MODIFIED="1192997340619" TEXT="Cubic (N = 3)">
+<node CREATED="1192997340619" MODIFIED="1192997340619" TEXT="Hermite [FOLE1992].11.2.1"/>
+<node CREATED="1192997340619" MODIFIED="1192997340619" TEXT="Bezier [FOLE1992].11.2.2"/>
+<node CREATED="1192997340619" ID="Freemind_Link_645945391" MODIFIED="1192997340619" TEXT="Spline">
+<node CREATED="1192997434439" ID="_" MODIFIED="1192997592279" TEXT="Natural Uniform Rational"/>
+<node CREATED="1192997468106" ID="Freemind_Link_656052494" MODIFIED="1192997583600" TEXT="Natural Uniform Non Rational"/>
+<node CREATED="1192997470370" ID="Freemind_Link_1603129429" MODIFIED="1192997594663" TEXT="Natural Non Uniform Rational"/>
+<node CREATED="1192997472232" ID="Freemind_Link_1305304728" MODIFIED="1192997586224" TEXT="Natural Non Uniform Non Rational"/>
+<node CREATED="1192997475608" ID="Freemind_Link_1808604370" MODIFIED="1192997596966" TEXT="Basis (B)  Uniform Rational"/>
+<node CREATED="1192997483376" ID="Freemind_Link_1868053197" MODIFIED="1192997587839" TEXT="Basis (B) Uniform Non Rational">
+<node CREATED="1192997340620" ID="Freemind_Link_637578978" MODIFIED="1192997340620" TEXT="B Uniform non rational [FOLE1992].11.2.3"/>
+<node CREATED="1192997340620" ID="Freemind_Link_670659484" MODIFIED="1192997340620" TEXT="Natural cubic splines [FOLE1992].11.2.3"/>
 </node>
-<node TEXT="Kochanek/Bartels Hermite variant [FOLE1992].11.2.6"/>
+<node CREATED="1192997485342" ID="Freemind_Link_878242208" MODIFIED="1192997599821" TEXT="Basis (B) Non Uniform Rational"/>
+<node CREATED="1192997486614" ID="Freemind_Link_1912129898" MODIFIED="1192997589335" TEXT="Basis (B) Non Uniform Non Rational">
+<node CREATED="1192997340620" ID="Freemind_Link_159153857" MODIFIED="1192997340620" TEXT="B Nonuniform non rational [FOLE1992].11.2.4"/>
 </node>
+<node CREATED="1192997665225" ID="Freemind_Link_16164633" MODIFIED="1192997669370" TEXT="Unclassified?">
+<node CREATED="1192997340620" ID="Freemind_Link_1563863431" MODIFIED="1192997340620" TEXT="Nonuniform rational cubic polinomial curve segments [FOLE1992].11.2.5"/>
+<node CREATED="1192997340620" ID="Freemind_Link_1371856163" MODIFIED="1192997340620" TEXT="Catmull-Rom (Overhauser) [FOLE1992].11.2.6"/>
+<node CREATED="1192997340620" ID="Freemind_Link_333941211" MODIFIED="1192997340620" TEXT="Uniform shaped beta [FOLE1992].11.2.6">
+<node CREATED="1192997340620" MODIFIED="1192997340620" TEXT="Continuous shaped"/>
+<node CREATED="1192997340620" MODIFIED="1192997340620" TEXT="Discretely shaped"/>
 </node>
-<node TEXT="Quadratic (N = 2)"/>
-<node TEXT="Straight lines (N = 1)"/>
-</node>
-</node>
-<node TEXT="2D Surfaces in 3D space" POSITION="right">
-<node TEXT="Implicit"/>
-<node TEXT="Polygon meshes"/>
-<node TEXT="Patches">
-<node TEXT="Hermite [FOLE1992].11.3.1"/>
-<node TEXT="Coons/Ferguson [FOLE1992].11.3.1"/>
-<node TEXT="Bezier [FOLE1992].11.3.2"/>
-<node TEXT="B-spline surfaces [FOLE1992].11.3.3"/>
-</node>
-<node TEXT="Quadrics [FOLE1992].11.4"/>
-</node>
-<node TEXT="Comments" POSITION="right">
-<node TEXT="Splnes are">
-<node TEXT="Natural"/>
-<node TEXT="B (Basis)"/>
-</node>
-<node TEXT="Splines are">
-<node TEXT="Uniform with respect to distances in ti, ti+1, ..."/>
-<node TEXT="Non uniform"/>
-</node>
-<node TEXT="Splines are">
-<node TEXT="Non-rational (simple polynomials)">
-<node TEXT="Invariant under">
-<node TEXT="Rotation"/>
-<node TEXT="Scaling"/>
-<node TEXT="Translation"/>
+<node CREATED="1192997340620" ID="Freemind_Link_1580771894" MODIFIED="1192997340620" TEXT="Kochanek/Bartels Hermite variant [FOLE1992].11.2.6"/>
 </node>
 </node>
-<node TEXT="Rational (ratios of polynomials)">
-<node TEXT="Invariant under">
-<node TEXT="Rotation"/>
-<node TEXT="Scaling"/>
-<node TEXT="Translation"/>
-<node TEXT="Perspective"/>
 </node>
-<node TEXT="Can represent any conic section"/>
+<node CREATED="1192997340619" ID="Freemind_Link_1774818376" MODIFIED="1192997340619" TEXT="N-order (N &gt; 3)"/>
 </node>
 </node>
-<node TEXT="Splines propierties">
-<node TEXT="Local control">
-<node TEXT="YES">
-<node TEXT="Catmul-rom"/>
-<node TEXT="Uniformly shaped beta when continously or discretely shaped"/>
+<node CREATED="1192997340620" ID="Freemind_Link_1305019601" MODIFIED="1192997340620" POSITION="right" TEXT="2D Surfaces in 3D space">
+<node CREATED="1192997340620" ID="Freemind_Link_1026184411" MODIFIED="1192997765922" TEXT="Explicit functional"/>
+<node CREATED="1192997756793" ID="Freemind_Link_866850826" MODIFIED="1192997759211" TEXT="Implicit"/>
+<node CREATED="1192997340620" ID="Freemind_Link_1711379545" MODIFIED="1192997340620" TEXT="Polygon meshes">
+<node CREATED="1192997772120" ID="Freemind_Link_583140160" MODIFIED="1192997776152" TEXT="Triangle meshes"/>
+<node CREATED="1192997777023" ID="Freemind_Link_1675281968" MODIFIED="1192997781504" TEXT="Quad meshes"/>
+<node CREATED="1192997781941" ID="Freemind_Link_1389432040" MODIFIED="1192997789638" TEXT="General polygon (mixed) meshes"/>
 </node>
-<node TEXT="NO">
-<node TEXT="Natural splines"/>
-<node TEXT="Uniformly shaped beta"/>
+<node CREATED="1192997340621" ID="Freemind_Link_867709399" MODIFIED="1192997904963" TEXT="Parametric Patches">
+<node CREATED="1192997340621" ID="Freemind_Link_1801302127" MODIFIED="1192997340621" TEXT="Hermite [FOLE1992].11.3.1">
+<node CREATED="1192997340621" ID="Freemind_Link_1698341991" MODIFIED="1192997852268" TEXT="Non twisted Hermite (Ferguson) [FOLE1992].11.3.1, [FERG1964]"/>
+<node CREATED="1192997856010" ID="Freemind_Link_1135886301" MODIFIED="1192997873513" TEXT="General (Twisted) Hermite [FOLE1992].11.3.1"/>
+</node>
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Bezier [FOLE1992].11.3.2"/>
+<node CREATED="1192997802891" ID="Freemind_Link_468568329" MODIFIED="1192997819978" TEXT="Coons [FOLE1992].11.3.1"/>
+<node CREATED="1192997340621" ID="Freemind_Link_1479808500" MODIFIED="1192997340621" TEXT="B-spline surfaces [FOLE1992].11.3.3"/>
+</node>
+<node CREATED="1192997340621" ID="Freemind_Link_687464415" MODIFIED="1192997340621" TEXT="Quadrics [FOLE1992].11.4"/>
+</node>
+<node CREATED="1192997340621" MODIFIED="1192997340621" POSITION="right" TEXT="Comments">
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Splnes are">
+<node CREATED="1192997340621" ID="Freemind_Link_536925442" MODIFIED="1192997340621" TEXT="Natural"/>
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="B (Basis)"/>
+</node>
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Splines are">
+<node CREATED="1192997340621" ID="Freemind_Link_884973850" MODIFIED="1192997340621" TEXT="Uniform with respect to distances in ti, ti+1, ..."/>
+<node CREATED="1192997340621" ID="Freemind_Link_1256627661" MODIFIED="1192997340621" TEXT="Non uniform"/>
+</node>
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Splines are">
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Non-rational (simple polynomials)">
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Invariant under">
+<node CREATED="1192997340621" MODIFIED="1192997340621" TEXT="Rotation"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Scaling"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Translation"/>
 </node>
 </node>
-<node TEXT="Convex hull">
-<node TEXT="YES">
-<node TEXT="Hermite"/>
-<node TEXT="Bezier"/>
-<node TEXT="Uniformly shaped beta"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Rational (ratios of polynomials)">
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Invariant under">
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Rotation"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Scaling"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Translation"/>
+<node CREATED="1192997340622" MODIFIED="1192997340622" TEXT="Perspective"/>
 </node>
-<node TEXT="NO"/>
-</node>
-<node TEXT="Passing by knots">
-<node TEXT="YES">
-<node TEXT="Hermite"/>
-<node TEXT="Bezier"/>
-<node TEXT="Catmull-rom"/>
-<node TEXT="Natural splines"/>
-</node>
-<node TEXT="NO">
-<node TEXT="B-Splines"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Can represent any conic section"/>
 </node>
 </node>
-<node TEXT="Ease of subdivision"/>
-<node TEXT="Continuity"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Splines propierties">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Local control">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="YES">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Catmul-rom"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Uniformly shaped beta when continously or discretely shaped"/>
+</node>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="NO">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Natural splines"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Uniformly shaped beta"/>
+</node>
+</node>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Convex hull">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="YES">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Hermite"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Bezier"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Uniformly shaped beta"/>
+</node>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="NO"/>
+</node>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Passing by knots">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="YES">
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Hermite"/>
+<node CREATED="1192997340623" MODIFIED="1192997340623" TEXT="Bezier"/>
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="Catmull-rom"/>
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="Natural splines"/>
+</node>
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="NO">
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="B-Splines"/>
+</node>
+</node>
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="Ease of subdivision"/>
+<node CREATED="1192997340624" MODIFIED="1192997340624" TEXT="Continuity"/>
 </node>
 </node>
 </node>

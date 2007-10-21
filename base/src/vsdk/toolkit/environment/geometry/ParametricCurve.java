@@ -64,21 +64,22 @@ scheme can be:
 
 From a design point of view, this class is similar to Sun Microsystems'
 java.awt.geom.PathIterator class [.SUN2006], only that this one supports 
-curves in 3D space, not just a 2D plane. The implementation follows the
-parametric curve development derived in [FOLE1992, Chapter 11].
+curves in 3D space, and not just in a 2D plane. The implementation follows the
+parametric curve development derived in Chapter 11 of [FOLE1992].
 
 @todo Document in detail the interpretation of point data for each curve type.
 @todo Pending to implement some other curve types, like Catmull-Rom.
 @todo Include some curve examples and its corresponding data structure in
       this documentation.
 @todo Fix the definition of UNRBSPLINE_MATRIX, to have it divided by 6.
+@todo Add evaluateFirstDerivative and evaluateSecondDerivative functions
 */
 
 public class ParametricCurve extends Curve {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    // Model matrices for evaluating curve parametric equations like
+    // Model's "basis matrices" for evaluating curve parametric equations like
     // described in [FOLE1992].11.2.
     public static Matrix4x4 LINEAR_MATRIX = null;
     public static Matrix4x4 HERMITE_MATRIX = null;
@@ -87,7 +88,8 @@ public class ParametricCurve extends Curve {
     public static Matrix4x4 CATMULL_ROM_MATRIX = null;
 
     // Constants used for identification type values for controlling points
-    /// Identification type value for specify a discontinuity in the curve.
+
+    /// Identification type value for specifying a discontinuity in the curve.
     /// A control point of this type doesn't have any Vector3D, but uses a
     /// slot (possibly null) in the `points` attribute.
     public static final int BREAK = 1; 
@@ -142,8 +144,8 @@ public class ParametricCurve extends Curve {
     applied. This implies updating the evaluation methods.
     */
     public ParametricCurve() {
-        //- Matrix initialization -----------------------------------------
-        // All the matrixes are computed only for the first time this
+        //- Base matrices initialization ----------------------------------
+        // All the matrices are computed only for the first time this
         // class is instantiated. Note that this makes the Matrix4x4
         // creation efficient, but also makes this class non-re-entrant,
         // and not thread-safe.
@@ -210,6 +212,9 @@ public class ParametricCurve extends Curve {
 
     public void addPoint(Vector3D[] point, int type) {
         if ( type == BREAK && points.size() < 1 ) {
+            // It has no sense to insert a break command as the first segment
+            // in the curve. A `BREAK` is only inserted after a first curve
+            // segment is available in the curve model.
             return;
         }
         points.add(point);
@@ -233,6 +238,12 @@ public class ParametricCurve extends Curve {
     }
 
     public void addPointAt(Vector3D[] point, int type, int position) {
+        if ( type == BREAK && position < 1 ) {
+            // It has no sense to insert a break command as the first segment
+            // in the curve. A `BREAK` is only inserted after a first curve
+            // segment is available in the curve model.
+            return;
+        }
         points.add(position, point);
         types.add(position, new Integer(type));
     }
@@ -245,6 +256,10 @@ public class ParametricCurve extends Curve {
        return this.points.size();
     }
 
+    /**
+    @todo should check after removal of element 0 that if next command is a
+    BREAK, that command should be also be removed.
+    */
     public void removePoint(int pos) {
         points.remove(pos);
         types.remove(pos);
@@ -262,7 +277,8 @@ public class ParametricCurve extends Curve {
     The ending segment type determines the interpretation of
     interpolants.
 
-    Returns null if current endingSegment is not a segment but a BREAK.
+    Returns null if current endingSegment is not a segment but a BREAK
+    command.
     */
     public Vector3D evaluate(int endingSegment,  double t) {
         if ( types.get(endingSegment).intValue() == CORNER ) {
