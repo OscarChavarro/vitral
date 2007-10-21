@@ -269,12 +269,11 @@ public class ParametricBiCubicPatch extends Surface {
         my[3][3] = 0;
         mz[3][3] = 0;
 
-        //printGeometryMatrices();
-
         // Final result
         Gx_MATRIX.M = mx;
         Gy_MATRIX.M = my;
         Gz_MATRIX.M = mz;
+        //printGeometryMatrices();
     }
 
     /**
