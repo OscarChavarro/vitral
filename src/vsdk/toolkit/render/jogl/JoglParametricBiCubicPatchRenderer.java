@@ -35,7 +35,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         int i; // Integer index in the U direction
         int j; // Integer index in the V direction
         Vector3D pos = new Vector3D();
-        int n = p.getApproximationSteps();
+        int n = p.getApproximationSteps()+1;
         double s, t;
         double ds, dt;
 
@@ -70,7 +70,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         double sizeDivTv; // Size relation between patch and texture coordinate in V direction
         int n;
 
-        n = p.getApproximationSteps();
+        n = p.getApproximationSteps()+1;
         ds = 1 / ((double)n-1);
         dt = 1 / ((double)n-1);
 
@@ -152,7 +152,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         double ds, dt;
         double sizeDivTu; // Size relation between patch and texture coordinate in U direction
         double sizeDivTv; // Size relation between patch and texture coordinate in V direction
-        int n = p.getApproximationSteps();
+        int n = p.getApproximationSteps()+1;
 
         ds = 1 / ((double)n-1);
         dt = 1 / ((double)n-1);
@@ -167,7 +167,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         for ( i = 0; i < n - 1; i++ ) {
             s = ((double)i)*ds;
             sizeDivTv = (textureVSizeFactor / (n-1));
-            gl.glBegin(gl.GL_QUAD_STRIP);
+            gl.glBegin(gl.GL_TRIANGLE_STRIP);
             for ( j = 0; j < n; j++) {
                 t = ((double)j)*dt;
                 sizeDivTu = (textureUSizeFactor / (n-1));
@@ -186,14 +186,14 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
                 //- Generate GL primitives ------------------------------------
                 // First vertex
-                gl.glTexCoord3d( (j * sizeDivTu) + textureURelaviteStart,
-                                 (i * sizeDivTv) + textureVRelativeStart, 0);
+                gl.glTexCoord3d( (i * sizeDivTu) + textureURelaviteStart,
+                                 (j * sizeDivTv) + textureVRelativeStart, 0);
                 gl.glNormal3d(n1.x, n1.y, n1.z);
                 gl.glVertex3d(p1.x, p1.y, p1.z);
 
                 // Second vertex
-                gl.glTexCoord3d( (j * sizeDivTu) + textureURelaviteStart,
-                          ( (i + 1) * sizeDivTv) + textureVRelativeStart, 0);
+                gl.glTexCoord3d( ((i+1) * sizeDivTu) + textureURelaviteStart,
+                                   (j * sizeDivTv) + textureVRelativeStart, 0);
                 gl.glNormal3d(n2.x, n2.y, n2.z);
                 gl.glVertex3d(p2.x, p2.y, p2.z);
             }
@@ -276,9 +276,17 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     */
     public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
                            RendererConfiguration q) {
+        if ( q.isSurfacesSet() ) {
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonOffset(0.0f, 0.0f);
+            drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
+        }
         if ( q.isWiresSet() ) {
             gl.glDisable(gl.GL_LIGHTING);
             gl.glDisable(gl.GL_CULL_FACE);
+            gl.glDisable(gl.GL_TEXTURE_2D);
             gl.glShadeModel(gl.GL_FLAT);
 
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
@@ -287,13 +295,9 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glLineWidth(1.0f);
             drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
-        if ( q.isSurfacesSet() ) {
-            JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
-            drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
-        }
         if ( q.isNormalsSet() ) {
+            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonOffset(0.5f, 0.0f);
             drawNormals(gl, p, 1, 1, 0, 0);
         }
         if ( q.isPointsSet() ) {

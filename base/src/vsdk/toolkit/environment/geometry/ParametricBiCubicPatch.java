@@ -45,6 +45,7 @@ public class ParametricBiCubicPatch extends Surface {
     /// Note that the contourCurve must have 4 points with its respective
     /// control parameters.
     public ParametricCurve contourCurve;
+    private Vector3D controlMeshPoints[][];
     public int type;
 
     // Number of steps for curve approximation
@@ -80,6 +81,14 @@ public class ParametricBiCubicPatch extends Surface {
         this.contourCurve = curve;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = FERGUSON;
+        calculateMatrices();
+    }
+
+    public void buildBezierPatch(Vector3D controlMeshPoints[][])
+    {
+        this.controlMeshPoints = controlMeshPoints;
+        approximationSteps = INITIAL_APPROXIMATION_STEPS;
+        this.type = ParametricCurve.BEZIER;
         calculateMatrices();
     }
 
@@ -133,17 +142,21 @@ public class ParametricBiCubicPatch extends Surface {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Vector3D[] vp = contourCurve.getPoint(i * 4 + j);
-                mx[i][j] = vp[0].x;
-                my[i][j] = vp[0].y;
-                mz[i][j] = vp[0].z;
+        int i;
+        int j;
+
+        for ( i = 0; i < 4; i++ ) {
+            for ( j = 0; j < 4; j++ ) {
+                Vector3D vp = controlMeshPoints[i][j];
+                mx[i][j] = vp.x;
+                my[i][j] = vp.y;
+                mz[i][j] = vp.z;
             }
         }
         Gx_MATRIX.M = mx;
         Gy_MATRIX.M = my;
         Gz_MATRIX.M = mz;
+        //printGeometryMatrices();
     }
 
     private void buildGeometryMatricesXYZ_Hermite() {
@@ -489,7 +502,40 @@ public class ParametricBiCubicPatch extends Surface {
     @bug current contour curve asumption is not valid
     */
     public double[] getMinMax() {
-        return contourCurve.getMinMax();
+        if ( contourCurve != null ) {
+            return contourCurve.getMinMax();
+	}
+	else {
+            // This gives convex hull's minmax
+            double minX = Double.MAX_VALUE;
+            double minY = Double.MAX_VALUE;
+            double minZ = Double.MAX_VALUE;
+            double maxX = -Double.MAX_VALUE;
+            double maxY = -Double.MAX_VALUE;
+            double maxZ = -Double.MAX_VALUE;
+            double minMax[] = new double[6];
+            int i, j;
+
+            for ( i = 0; i < 4; i++ ) {
+                for ( j = 0; j < 4; j++ ) {
+                    Vector3D p = controlMeshPoints[i][j];
+
+                    if ( p.x < minX ) minX = p.x;
+                    if ( p.y < minY ) minY = p.y;
+                    if ( p.z < minZ ) minZ = p.z;
+                    if ( p.x > maxX ) maxX = p.x;
+                    if ( p.y > maxY ) maxY = p.y;
+                    if ( p.z > maxZ ) maxZ = p.z;
+		}
+            }
+            minMax[0] = minX;
+            minMax[1] = minY;
+            minMax[2] = minZ;
+            minMax[3] = maxX;
+            minMax[4] = maxY;
+            minMax[5] = maxZ;
+            return minMax;
+	}
     }
 
 }

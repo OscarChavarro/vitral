@@ -87,6 +87,56 @@ public class ParametricCurve extends Curve {
     public static Matrix4x4 UNRBSPLINE_MATRIX = null;
     public static Matrix4x4 CATMULL_ROM_MATRIX = null;
 
+    static {
+        //- Base matrices initialization ----------------------------------
+        // All the matrices are computed only for the first time this
+        // class is instantiated. Note that this makes the Matrix4x4
+        // creation efficient, but also makes this class non-re-entrant,
+        // and not thread-safe.
+        double[][] m;
+
+        // This equation was derived as the answer of exercise 11.3 in
+        // [FOLE1992], from equation base 11.11
+        m = new double[][] { { 0.0,  0.0,  0.0,  1.0},
+                             { 0.0,  0.0,  1.0,  1.0},
+                             {-1.0,  1.0,  0.0,  0.0},
+                             { 1.0,  0.0,  0.0,  0.0} };
+        LINEAR_MATRIX = new Matrix4x4();
+        LINEAR_MATRIX.M = m;
+
+        // Equation 11.19 in [FOLE1992]
+        m = new double[][] { { 2.0, -2.0,  1.0,  1.0},
+                             {-3.0,  3.0, -2.0, -1.0},
+                             { 0.0,  0.0,  1.0,  0.0},
+                             { 1.0,  0.0,  0.0,  0.0} };
+        HERMITE_MATRIX = new Matrix4x4();
+        HERMITE_MATRIX.M = m;
+
+        // Equation 11.28 in [FOLE1992]
+        m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
+                             { 3.0, -6.0,  3.0,  0.0},
+                             {-3.0,  3.0,  0.0,  0.0},
+                             { 1.0,  0.0,  0.0,  0.0} };
+        BEZIER_MATRIX = new Matrix4x4();
+        BEZIER_MATRIX.M = m;
+
+        // Equation 11.34 in [FOLE1992], but NOT multiplied by 1/6. (why?)
+        m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
+                             { 3.0, -6.0,  3.0,  0.0},
+                             {-3.0,  0.0,  3.0,  0.0},
+                             { 1.0,  4.0,  1.0,  0.0} };
+        UNRBSPLINE_MATRIX = new Matrix4x4();
+        UNRBSPLINE_MATRIX.M = m;
+
+        // Equation 11.47 in [FOLE1992], but NOT multiplied by T. (why?)
+        m = new double[][] { {-0.5,  1.5, -1.5,  0.5},
+                             { 1.0, -2.5,  2.0, -0.5},
+                             {-0.5,  0.0,  0.5,  0.0},
+                             { 0.0,  1.0,  0.0,  0.0} };
+        CATMULL_ROM_MATRIX = new Matrix4x4();
+        CATMULL_ROM_MATRIX.M = m;
+    }
+
     // Constants used for identification type values for controlling points
 
     /// Identification type value for specifying a discontinuity in the curve.
@@ -144,56 +194,6 @@ public class ParametricCurve extends Curve {
     applied. This implies updating the evaluation methods.
     */
     public ParametricCurve() {
-        //- Base matrices initialization ----------------------------------
-        // All the matrices are computed only for the first time this
-        // class is instantiated. Note that this makes the Matrix4x4
-        // creation efficient, but also makes this class non-re-entrant,
-        // and not thread-safe.
-        if ( HERMITE_MATRIX == null ) {
-            double[][] m;
-
-            // This equation was derived as the answer of exercise 11.3 in
-            // [FOLE1992], from equation base 11.11
-            m = new double[][] { { 0.0,  0.0,  0.0,  1.0},
-                                 { 0.0,  0.0,  1.0,  1.0},
-                                 {-1.0,  1.0,  0.0,  0.0},
-                                 { 1.0,  0.0,  0.0,  0.0} };
-            LINEAR_MATRIX = new Matrix4x4();
-            LINEAR_MATRIX.M = m;
-
-            // Equation 11.19 in [FOLE1992]
-            m = new double[][] { { 2.0, -2.0,  1.0,  1.0},
-                                 {-3.0,  3.0, -2.0, -1.0},
-                                 { 0.0,  0.0,  1.0,  0.0},
-                                 { 1.0,  0.0,  0.0,  0.0} };
-            HERMITE_MATRIX = new Matrix4x4();
-            HERMITE_MATRIX.M = m;
-
-            // Equation 11.28 in [FOLE1992]
-            m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
-                                 { 3.0, -6.0,  3.0,  0.0},
-                                 {-3.0,  3.0,  0.0,  0.0},
-                                 { 1.0,  0.0,  0.0,  0.0} };
-            BEZIER_MATRIX = new Matrix4x4();
-            BEZIER_MATRIX.M = m;
-
-            // Equation 11.34 in [FOLE1992], but NOT multiplied by 1/6. (why?)
-            m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
-                                 { 3.0, -6.0,  3.0,  0.0},
-                                 {-3.0,  0.0,  3.0,  0.0},
-                                 { 1.0,  4.0,  1.0,  0.0} };
-            UNRBSPLINE_MATRIX = new Matrix4x4();
-            UNRBSPLINE_MATRIX.M = m;
-
-            // Equation 11.47 in [FOLE1992], but NOT multiplied by T. (why?)
-            m = new double[][] { {-0.5,  1.5, -1.5,  0.5},
-                                 { 1.0, -2.5,  2.0, -0.5},
-                                 {-0.5,  0.0,  0.5,  0.0},
-                                 { 0.0,  1.0,  0.0,  0.0} };
-            CATMULL_ROM_MATRIX = new Matrix4x4();
-            CATMULL_ROM_MATRIX.M = m;
-        }
-
         //- Empty curve model creation ------------------------------------
         points = new ArrayList<Vector3D[]> ();
         types = new ArrayList<Integer> ();

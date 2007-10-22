@@ -463,6 +463,7 @@ Changes in 2007 october 20 revition
 Changes in 2007 october 21 revition
   - 3h: Revisiting and cleaning parametric bicubic patch management,
     representation and Jogl rendering code.
+  - 1h: Bezier parametric bicubic patch management revisited.
 
 ---------------------------------------------------------------------------
 TODO:

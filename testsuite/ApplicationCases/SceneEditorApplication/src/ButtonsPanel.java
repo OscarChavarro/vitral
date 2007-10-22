@@ -470,6 +470,9 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             ParametricBiCubicPatch patch;
+
+/*
+            //- Create a Ferguson patch ---------------------------------------
             ParametricCurve contourHermiteLine;
             Vector3D pointParameters[];
 
@@ -506,11 +509,38 @@ public class ButtonsPanel extends JPanel implements ActionListener
             patch = new ParametricBiCubicPatch();
             patch.buildFergusonPatch(contourHermiteLine);
             patch.setApproximationSteps(20);
+            //parent.theScene.addThing(contourHermiteLine);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
-            //parent.theScene.addThing(contourHermiteLine);
+            //-----------------------------------------------------------------
+	    */
+
+            //- Create a Bezier patch -----------------------------------------
+            patch = new ParametricBiCubicPatch();
+            Vector3D cp[][] = new Vector3D[4][4];
+            for ( int j = 0; j < 4; j++ ) {
+                for ( int i = 0; i < 4; i++ ) {
+                    cp[i][j] = new Vector3D();
+	  	    cp[i][j].x = ((double)i)/3-0.5;
+  	  	    cp[i][j].y = ((double)j)/3-0.5;
+                    if ( i > 0 && i < 3 && j > 0 && j < 3 ) {
+	  	        cp[i][j].z = 1;                        
+		    }
+		    else {
+	  	        cp[i][j].z = 0;
+		    }
+		}
+	    }
+            patch.buildBezierPatch(cp);
+            patch.setApproximationSteps(20);
+            SimpleBody newThing;
+            newThing = parent.theScene.addThing(patch);
+            newThing.getMaterial().setDoubleSided(true);
+            //-----------------------------------------------------------------
+
 /*
+            //- Save a previously created patch -------------------------------
             try {
                 XmlManager.exportXml(patch, "patchTest.xml",
                                      "../../../etc/xml/vsdk.dtd");
@@ -518,8 +548,10 @@ public class ButtonsPanel extends JPanel implements ActionListener
               catch (XmlException ex2) {
                  System.out.println("EXPORT:XmlException:" +ex2);
             }
+            //-----------------------------------------------------------------
 */
 /*
+            //- Load a previously saved patch ---------------------------------
             // Case 2: patch read from a previous existing data file
             try {
                 patch = (ParametricBiCubicPatch) XmlManager.importXml(
@@ -529,6 +561,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
               catch (XmlException ex1) {
                 System.out.println("IMPORT:XmlException:" +ex1);
             }
+            //-----------------------------------------------------------------
 */
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
