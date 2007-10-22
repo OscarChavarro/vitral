@@ -30,6 +30,16 @@ public class ParametricBiCubicPatch extends Surface {
     public Matrix4x4 Gy_MATRIX = new Matrix4x4();
     public Matrix4x4 Gz_MATRIX = new Matrix4x4();
 
+    private Matrix4x4 S_MATRIX;
+    private Matrix4x4 Tt_MATRIX;
+    private Matrix4x4 S_MATRIX_DS;
+    private Matrix4x4 Tt_MATRIX_DT;
+    private Matrix4x4 M_MATRIX;
+    private Matrix4x4 Mt_MATRIX;
+    private Matrix4x4 M_Gx_Mt_MATRIX;
+    private Matrix4x4 M_Gy_Mt_MATRIX;
+    private Matrix4x4 M_Gz_Mt_MATRIX;
+
     public static final int FERGUSON = 7;
 
     /// Note that the contourCurve must have 4 points with its respective
@@ -41,10 +51,19 @@ public class ParametricBiCubicPatch extends Surface {
     private static final int INITIAL_APPROXIMATION_STEPS = 12;
     private int approximationSteps;
 
-    public ParametricBiCubicPatch(int type) {
-        contourCurve = new ParametricCurve();
+    public ParametricBiCubicPatch() {
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
-        this.type = type;
+        this.type = ParametricCurve.HERMITE;
+        contourCurve = null;
+        S_MATRIX = null;
+        Tt_MATRIX = null;
+        S_MATRIX_DS = null;
+        Tt_MATRIX_DT = null;
+        M_MATRIX = null;
+        Mt_MATRIX = null;
+        M_Gx_Mt_MATRIX = null;
+        M_Gy_Mt_MATRIX = null;
+        M_Gz_Mt_MATRIX = null;
     }
 
     /**
@@ -57,10 +76,41 @@ public class ParametricBiCubicPatch extends Surface {
     Note that a Ferguson patch is an Hermite patch with zero valued
     twist vectors.
     */
-    public ParametricBiCubicPatch(ParametricCurve curve) {
+    public void buildFergusonPatch(ParametricCurve curve) {
         this.contourCurve = curve;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = FERGUSON;
+        calculateMatrices();
+    }
+
+    /**
+    PRE: Some of the "build*Patch" methods should be called before calling
+    this method.
+    */
+    private void calculateMatrices()
+    {
+        //- Build matrices M, Gx, Gy, Gz and Mt ---------------------------
+        if ( this.type == ParametricCurve.BEZIER ) {
+            buildGeometryMatricesXYZ_Bezier();
+            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
+        }
+        else if ( this.type == ParametricCurve.HERMITE ) {
+            buildGeometryMatricesXYZ_Hermite();
+            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
+        }
+        else if ( this.type == ParametricBiCubicPatch.FERGUSON ) {
+            buildGeometryMatricesXYZ_Ferguson();
+            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
+        }
+        Mt_MATRIX = new Matrix4x4(M_MATRIX);
+        Mt_MATRIX.transpose();
+        M_Gx_Mt_MATRIX = M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
+        M_Gy_Mt_MATRIX = M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
+        M_Gz_Mt_MATRIX = M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
+        S_MATRIX = new Matrix4x4();
+        Tt_MATRIX = new Matrix4x4();
+        S_MATRIX_DS = new Matrix4x4();
+        Tt_MATRIX_DT = new Matrix4x4();
     }
 
     public int getApproximationSteps() {
@@ -277,98 +327,128 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
     /**
-    This method evaluates equation set 11.76 in [FOLE1992] for a given set
-    of approximationSteps^2 points, and in the code, the variables names
-    follows the following notation:
+    This method evaluates current patch position in the parameter space 
+    position (s, t), computing the equation set 11.76 in [FOLE1992].
+
+    The following class attributes are used:
     <UL>
       <LI> S_MATRIX  Column vector for storing s parameter polynomial as
       explain in section [FOLE1992].11.3
+      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
       <LI> M_MATRIX  Patch's blending function
       <LI> Mt_MATRIX M's transpose
       <LI> Gx_MATRIX Geometry matrix for x
       <LI> Gy_MATRIX Geometry matrix for y
       <LI> Gz_MATRIX Geometry matrix for z
-      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
     </UL>
+
+    PRE: calculateMAtrices() should be called before calling this method.
     */
-    public double[][][] evaluateSurface() {
-        //- Build matrices M, Gx, Gy, Gz and Mt ---------------------------
-        Matrix4x4 M_MATRIX = new Matrix4x4();
-        Matrix4x4 Mt_MATRIX = new Matrix4x4();
+    public void evaluate(Vector3D p, double s, double t)
+    {
+        S_MATRIX.M[0][0] = s * s * s;
+        S_MATRIX.M[0][1] = s * s;
+        S_MATRIX.M[0][2] = s;
+        S_MATRIX.M[0][3] = 1;
 
-        if ( this.type == ParametricCurve.BEZIER ) {
-            buildGeometryMatricesXYZ_Bezier();
-            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
-        }
-        else if ( this.type == ParametricCurve.HERMITE ) {
-            buildGeometryMatricesXYZ_Hermite();
-            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
-        }
-        else if ( this.type == ParametricBiCubicPatch.FERGUSON ) {
-            buildGeometryMatricesXYZ_Ferguson();
-            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
-        }
-        Mt_MATRIX = new Matrix4x4(M_MATRIX);
-        Mt_MATRIX.transpose();
+        Tt_MATRIX.M[0][0] = t * t * t;
+        Tt_MATRIX.M[1][0] = t * t;
+        Tt_MATRIX.M[2][0] = t;
+        Tt_MATRIX.M[3][0] = 1;
 
-        //-----------------------------------------------------------------
-        // In the current dimension
-        double[][][] gridPoints;
+        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
-        gridPoints = new double[approximationSteps][approximationSteps][3];
+        // The result is a 1x1 matrix.
+        p.x = Qx_MATRIX.M[0][0];
+        p.y = Qy_MATRIX.M[0][0];
+        p.z = Qz_MATRIX.M[0][0];
+    }
 
-        Matrix4x4 S_MATRIX = new Matrix4x4();
-        Matrix4x4 Tt_MATRIX = new Matrix4x4();
+    public void evaluateTangent(Vector3D dQds, double s, double t)
+    {
+        S_MATRIX_DS.M[0][0] = 3 * s * s;
+        S_MATRIX_DS.M[0][1] = 2 * s;
+        S_MATRIX_DS.M[0][2] = 1;
+        S_MATRIX_DS.M[0][3] = 0;
 
-        for ( int d = 0; d < 3; d++ ) { // for each equation...
-            // Select the geometry matrix for current dimension
-            Matrix4x4 M_G_Mt_MATRIX = new Matrix4x4();
+        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
-            if ( d == 0 ) {
-                // x(s, t)
-                M_G_Mt_MATRIX =
-                    M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
-            }
-            else if ( d == 1 ) {
-                // y(s, t)
-                M_G_Mt_MATRIX =
-                    M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
-            }
-            else {
-                // z(s, t)
-                M_G_Mt_MATRIX = 
-                    M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
-            }
+        // The result is a 1x1 matrix.
+        Vector3D result = new Vector3D();
 
-            // Evaluate current dimension in the generic equational form
-            int i;
-            int j;
-            for ( i = 0; i < approximationSteps; i++ ) {
-                double s = ((double)i) / (approximationSteps - 1);
+        result.x = Qx_MATRIX.M[0][0];
+        result.y = Qy_MATRIX.M[0][0];
+        result.z = Qz_MATRIX.M[0][0];
+        result.normalize();
 
-                S_MATRIX.M[0][0] = s * s * s;
-                S_MATRIX.M[0][1] = s * s;
-                S_MATRIX.M[0][2] = s;
-                S_MATRIX.M[0][3] = 1;
+        dQds.clone(result);
+    }
 
-                Matrix4x4 S_M_G_Mt_MATRIX = S_MATRIX.multiply(M_G_Mt_MATRIX);
+    public void evaluateBinormal(Vector3D dQdt, double s, double t)
+    {
+        Tt_MATRIX_DT.M[0][0] = 3 * t * t;
+        Tt_MATRIX_DT.M[1][0] = 2 * t;
+        Tt_MATRIX_DT.M[2][0] = 1;
+        Tt_MATRIX_DT.M[3][0] = 0;
 
-                for ( j = 0; j < approximationSteps; j++ ) {
-                    double t = ((double)j) / (approximationSteps - 1);
+        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX_DT);
 
-                    Tt_MATRIX.M[0][0] = t * t * t;
-                    Tt_MATRIX.M[1][0] = t * t;
-                    Tt_MATRIX.M[2][0] = t;
-                    Tt_MATRIX.M[3][0] = 1;
+        // The results are 1x1 matrices.
+        Vector3D result = new Vector3D();
+        result.x = Qx_MATRIX.M[0][0];
+        result.y = Qy_MATRIX.M[0][0];
+        result.z = Qz_MATRIX.M[0][0];
+        result.normalize();
 
-                    Matrix4x4 Q_MATRIX = S_M_G_Mt_MATRIX.multiply(Tt_MATRIX);
-                    // The result is a 1x1 matrix.
-                    gridPoints[i][j][d] = Q_MATRIX.M[0][0];
-                }
-            }
-        }
+        dQdt.clone(result);
+    }
 
-        return gridPoints;
+    /**
+    This method evaluates current patch gradient in the parameter space 
+    position (s, t), computing the patch normal as explain in section 
+    [FOLE1992].11.3.4.
+
+    The following class attributes are used:
+    <UL>
+      <LI> S_MATRIX  Column vector for storing s parameter polynomial as
+      explain in section [FOLE1992].11.3
+      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
+      <LI> M_MATRIX  Patch's blending function
+      <LI> Mt_MATRIX M's transpose
+      <LI> Gx_MATRIX Geometry matrix for x
+      <LI> Gy_MATRIX Geometry matrix for y
+      <LI> Gz_MATRIX Geometry matrix for z
+    </UL>
+
+    PRE: calculateMAtrices() should be called before calling this method.
+    */
+    public void evaluateNormal(Vector3D n, double s, double t)
+    {
+        Vector3D dQds = new Vector3D();
+        Vector3D dQdt = new Vector3D();
+
+        evaluateTangent(dQds, s, t);
+        evaluateBinormal(dQdt, s, t);
+
+        Vector3D nn = dQds.crossProduct(dQdt);
+        nn.normalize();
+
+        n.clone(nn);
     }
 
     /**

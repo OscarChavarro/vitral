@@ -501,11 +501,11 @@ public class ButtonsPanel extends JPanel implements ActionListener
             pointParameters[2] = new Vector3D(0, -1, 0);  // Salient tangent
             contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
 
-            System.out.println("->"+contourHermiteLine.getPoint(3)[2]);
-
             contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), contourHermiteLine.HERMITE);
 
-            patch = new ParametricBiCubicPatch(contourHermiteLine);
+            patch = new ParametricBiCubicPatch();
+            patch.buildFergusonPatch(contourHermiteLine);
+            patch.setApproximationSteps(20);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);

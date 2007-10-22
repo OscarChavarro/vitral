@@ -44,7 +44,8 @@ public class ParametricBiCubicPatchPersistence extends PersistenceElement {
       if (atributo != null) {
         String type = atributo.getNodeValue();
         if (!"".equals(type)) {
-          patch = new ParametricBiCubicPatch(Integer.parseInt(type));
+          patch = new ParametricBiCubicPatch();
+          patch.setType(Integer.parseInt(type));
           atributo = atts.getNamedItem(patchAttributesNames[1]);
           if (atributo != null) {
             String approximationSteps = atributo.getNodeValue();

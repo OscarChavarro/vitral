@@ -24,42 +24,55 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
     public static void drawControlPoints(GL gl, ParametricBiCubicPatch p)
     {
+        //-----------------------------------------------------------------
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(6.0f);
 
-        gl.glBegin(gl.GL_POINTS);
-
+        //-----------------------------------------------------------------
         int i; // Integer index in the U direction
         int j; // Integer index in the V direction
-        double[][][] points = p.evaluateSurface();
+        Vector3D pos = new Vector3D();
+        int n = p.getApproximationSteps();
+        double s, t;
+        double ds, dt;
 
-        for ( i = 0; i < points.length; i += (points.length-1) ) {
-            for ( j = 0; j < points[0].length; j += (points[0].length-1) ) {
-                // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[i][j][0],
-                                           points[i][j][1],
-                                           points[i][j][2]);
+        ds = 1 / ((double)n-1);
+        dt = 1 / ((double)n-1);
 
-                //- Generate GL primitives ----------------------------------------
-                gl.glVertex3d(p1.x, p1.y, p1.z);
+        //-----------------------------------------------------------------
+        gl.glBegin(gl.GL_POINTS);
+
+        for ( i = 0; i < n; i += (n-1) ) {
+            s = ((double)i)*ds;
+            for ( j = 0; j < n; j += (n-1) ) {
+                t = ((double)j)*dt;
+                p.evaluate(pos, s, t);
+                gl.glVertex3d(pos.x, pos.y, pos.z);
             }
         }
 
         gl.glEnd();
     }
 
-    public static void drawNormals(GL gl, double[][][] points,
-                                       double textureUSizeFactor,
-                                       double textureVSizeFactor, 
-                                       double textureURelaviteStart,
-                                       double textureVRelativeStart) {
-        int s; // Integer index in the U direction
-        int t; // Integer index in the V direction
+    public static void drawNormals(GL gl, ParametricBiCubicPatch p,
+                                   double textureUSizeFactor,
+                                   double textureVSizeFactor, 
+                                   double textureURelaviteStart,
+                                   double textureVRelativeStart) {
+        int i; // Integer index in the U direction
+        int j; // Integer index in the V direction
+        double s, t;
+        double ds, dt;
         double sizeDivTu; // Size relation between patch and texture coordinate in U direction
         double sizeDivTv; // Size relation between patch and texture coordinate in V direction
+        int n;
+
+        n = p.getApproximationSteps();
+        ds = 1 / ((double)n-1);
+        dt = 1 / ((double)n-1);
 
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -67,135 +80,47 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
 
+        double reductionFactor = 20;
         gl.glBegin(gl.GL_LINES);
-        //-----------------------------------------------------------------
-        for ( s = 0; s < points.length - 1; s++ ) {
-            sizeDivTv = (textureVSizeFactor / (points.length-1));
-            for ( t = 0; t < points[0].length - 1; t++ ) {
-                sizeDivTu = (textureUSizeFactor /( points[0].length-1));
-                // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[s][t][0],
-                                           points[s][t][1],
-                                           points[s][t][2]);
-                Vector3D p2 = new Vector3D(points[s + 1][t][0],
-                                           points[s + 1][t][1],
-                                           points[s + 1][t][2]);
-                Vector3D p3 = new Vector3D(points[s + 1][t + 1][0],
-                                           points[s + 1][t + 1][1],
-                                           points[s + 1][t + 1][2]);
-                Vector3D p4 = new Vector3D(points[s][t + 1][0],
-                                           points[s][t + 1][1],
-                                           points[s][t + 1][2]);
+        for ( i = 0; i < n; i++ ) {
+            s = ((double)i)*ds;
+            sizeDivTv = (textureVSizeFactor / (n-1));
+            for ( j = 0; j < n; j++ ) {
+                t = ((double)j)*dt;
+                sizeDivTu = (textureUSizeFactor / (n-1));
 
-                Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-                normal.normalize();
+                Vector3D p1 = new Vector3D();
+                Vector3D normal = new Vector3D();
 
-                //- Generate GL primitives ----------------------------------------
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                p.evaluate(p1, s, t);
+
+                // Normal
+                p.evaluateNormal(normal, s, t);
+
+                gl.glColor3d(1, 1, 0);
                 gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x + normal.x/10,
-                              p1.y + normal.y/10, 
-                              p1.z + normal.z/10);
+                gl.glVertex3d(p1.x + normal.x/reductionFactor,
+                              p1.y + normal.y/reductionFactor, 
+                              p1.z + normal.z/reductionFactor);
+
+                // Tangent
+                p.evaluateTangent(normal, s, t);
+
+                gl.glColor3d(0.9, 0.5, 0.5);
+                gl.glVertex3d(p1.x, p1.y, p1.z);
+                gl.glVertex3d(p1.x + normal.x/(reductionFactor*2),
+                              p1.y + normal.y/(reductionFactor*2), 
+                              p1.z + normal.z/(reductionFactor*2));
+                // Binormal
+                p.evaluateBinormal(normal, s, t);
+
+                gl.glColor3d(0.5, 0.9, 0.5);
+                gl.glVertex3d(p1.x, p1.y, p1.z);
+                gl.glVertex3d(p1.x + normal.x/(reductionFactor*2),
+                              p1.y + normal.y/(reductionFactor*2), 
+                              p1.z + normal.z/(reductionFactor*2));
             }
         }
-
-        //-----------------------------------------------------------------
-        for ( s = 0; s < points.length - 1; s++ ) {
-            sizeDivTv = (textureVSizeFactor / (points.length-1));
-            t = points[0].length - 1;
-            {
-                sizeDivTu = (textureUSizeFactor /( points[0].length-1));
-                // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[s][t][0],
-                                           points[s][t][1],
-                                           points[s][t][2]);
-                Vector3D p2 = new Vector3D(points[s + 1][t][0],
-                                           points[s + 1][t][1],
-                                           points[s + 1][t][2]);
-                Vector3D p3 = new Vector3D(points[s + 1][t - 1][0],
-                                           points[s + 1][t - 1][1],
-                                           points[s + 1][t - 1][2]);
-                Vector3D p4 = new Vector3D(points[s][t - 1][0],
-                                           points[s][t - 1][1],
-                                           points[s][t - 1][2]);
-
-                Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-                normal.normalize();
-
-                //- Generate GL primitives ----------------------------------------
-                gl.glNormal3d(normal.x, normal.y, normal.z);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x - normal.x/10,
-                              p1.y - normal.y/10, 
-                              p1.z - normal.z/10);
-            }
-        }
-
-        //-----------------------------------------------------------------
-        s = points.length - 1;
-        {
-            sizeDivTv = (textureVSizeFactor / (points.length-1));
-            for ( t = 0; t < points[0].length - 1; t++ ) {
-                sizeDivTu = (textureUSizeFactor /( points[0].length-1));
-                // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[s][t][0],
-                                           points[s][t][1],
-                                           points[s][t][2]);
-                Vector3D p2 = new Vector3D(points[s - 1][t][0],
-                                           points[s - 1][t][1],
-                                           points[s - 1][t][2]);
-                Vector3D p3 = new Vector3D(points[s - 1][t + 1][0],
-                                           points[s - 1][t + 1][1],
-                                           points[s - 1][t + 1][2]);
-                Vector3D p4 = new Vector3D(points[s][t + 1][0],
-                                           points[s][t + 1][1],
-                                           points[s][t + 1][2]);
-
-                Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-                normal.normalize();
-
-                //- Generate GL primitives ----------------------------------------
-                gl.glNormal3d(normal.x, normal.y, normal.z);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x - normal.x/10,
-                              p1.y - normal.y/10, 
-                              p1.z - normal.z/10);
-            }
-        }
-
-        //-----------------------------------------------------------------
-        s = points.length - 1;
-        {
-            sizeDivTv = (textureVSizeFactor / (points.length-1));
-            t = points[0].length - 1;
-            {
-                sizeDivTu = (textureUSizeFactor /( points[0].length-1));
-                // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[s][t][0],
-                                           points[s][t][1],
-                                           points[s][t][2]);
-                Vector3D p2 = new Vector3D(points[s - 1][t][0],
-                                           points[s - 1][t][1],
-                                           points[s - 1][t][2]);
-                Vector3D p3 = new Vector3D(points[s - 1][t - 1][0],
-                                           points[s - 1][t - 1][1],
-                                           points[s - 1][t - 1][2]);
-                Vector3D p4 = new Vector3D(points[s][t - 1][0],
-                                           points[s][t - 1][1],
-                                           points[s][t - 1][2]);
-
-                Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-                normal.normalize();
-
-                //- Generate GL primitives ----------------------------------------
-                gl.glNormal3d(normal.x, normal.y, normal.z);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x + normal.x/10,
-                              p1.y + normal.y/10, 
-                              p1.z + normal.z/10);
-            }
-        }
-
         gl.glEnd();
     }
 
@@ -214,66 +139,66 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     and can be understood as a matrix of [NumberU][NumberV] points
     with coordinates (x, y, z).    
     */
-    public static void drawSurfaceGrid(GL gl, double[][][] points,
+    public static void drawSurfaceGrid(GL gl,
+                                       ParametricBiCubicPatch p,
                                        double textureUSizeFactor,
                                        double textureVSizeFactor, 
                                        double textureURelaviteStart,
-                                       double textureVRelativeStart) {
+                                       double textureVRelativeStart,
+                                       RendererConfiguration q) {
         int i; // Integer index in the U direction
         int j; // Integer index in the V direction
+        double s, t;
+        double ds, dt;
         double sizeDivTu; // Size relation between patch and texture coordinate in U direction
         double sizeDivTv; // Size relation between patch and texture coordinate in V direction
+        int n = p.getApproximationSteps();
 
-        gl.glBegin(gl.GL_QUADS);
-        for ( i = 0; i < points.length - 1; i++ ) {
-            sizeDivTv = (textureVSizeFactor / (points.length-1));
-            for ( j = 0; j < points[0].length - 1; j++) {
-                sizeDivTu = (textureUSizeFactor /( points[0].length-1));
+        ds = 1 / ((double)n-1);
+        dt = 1 / ((double)n-1);
+
+        if ( q.getShadingType() == q.SHADING_TYPE_FLAT ) {
+            gl.glShadeModel(gl.GL_FLAT);
+        }
+	else {
+            gl.glShadeModel(gl.GL_SMOOTH);
+	}
+
+        for ( i = 0; i < n - 1; i++ ) {
+            s = ((double)i)*ds;
+            sizeDivTv = (textureVSizeFactor / (n-1));
+            gl.glBegin(gl.GL_QUAD_STRIP);
+            for ( j = 0; j < n; j++) {
+                t = ((double)j)*dt;
+                sizeDivTu = (textureUSizeFactor / (n-1));
                 // Now we draw some lines
-                Vector3D p1 = new Vector3D(points[i][j][0],
-                                           points[i][j][1],
-                                           points[i][j][2]);
-                Vector3D p2 = new Vector3D(points[i + 1][j][0],
-                                           points[i + 1][j][1],
-                                           points[i + 1][j][2]);
-                Vector3D p3 = new Vector3D(points[i + 1][j + 1][0],
-                                           points[i + 1][j + 1][1],
-                                           points[i + 1][j + 1][2]);
-                Vector3D p4 = new Vector3D(points[i][j + 1][0],
-                                           points[i][j + 1][1],
-                                           points[i][j + 1][2]);
+                Vector3D p1 = new Vector3D();
+                Vector3D p2 = new Vector3D();
 
-                Vector3D normal = p2.substract(p1).crossProduct(p3.substract(p1));
-                normal.normalize();
+                p.evaluate(p1, s, t);
+                p.evaluate(p2, s+ds, t);
 
-                //- Generate GL primitives ----------------------------------------
+                Vector3D n1 = new Vector3D();
+                Vector3D n2 = new Vector3D();
+
+                p.evaluateNormal(n1, s, t);
+                p.evaluateNormal(n2, s+ds, t);
+
+                //- Generate GL primitives ------------------------------------
                 // First vertex
                 gl.glTexCoord3d( (j * sizeDivTu) + textureURelaviteStart,
                                  (i * sizeDivTv) + textureVRelativeStart, 0);
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                gl.glNormal3d(n1.x, n1.y, n1.z);
                 gl.glVertex3d(p1.x, p1.y, p1.z);
 
                 // Second vertex
                 gl.glTexCoord3d( (j * sizeDivTu) + textureURelaviteStart,
-                                 ( (i + 1) * sizeDivTv) + textureVRelativeStart, 0);
-
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                          ( (i + 1) * sizeDivTv) + textureVRelativeStart, 0);
+                gl.glNormal3d(n2.x, n2.y, n2.z);
                 gl.glVertex3d(p2.x, p2.y, p2.z);
-
-                // Third vertex
-                gl.glTexCoord3d( ( (j + 1) * sizeDivTu) + textureURelaviteStart,
-                                 ( (i + 1) * sizeDivTv) + textureVRelativeStart, 0);
-                gl.glNormal3d(normal.x, normal.y, normal.z);
-                gl.glVertex3d(p3.x, p3.y, p3.z);
-
-                // Fourth vertex
-                gl.glTexCoord3d( ( (j + 1) * sizeDivTu) + textureURelaviteStart,
-                                 (i * sizeDivTv) + textureVRelativeStart, 0);
-                gl.glNormal3d(normal.x, normal.y, normal.z);
-                gl.glVertex3d(p4.x, p4.y, p4.z);
             }
+            gl.glEnd();
         }
-        gl.glEnd();
     }
 
     public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
@@ -360,16 +285,16 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
-            drawSurfaceGrid(gl, p.evaluateSurface(), 1, 1, 0, 0);
+            drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             gl.glPolygonOffset(0.0f, 0.0f);
-            drawSurfaceGrid(gl, p.evaluateSurface(), 1, 1, 0, 0);
+            drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
         if ( q.isNormalsSet() ) {
-            drawNormals(gl, p.evaluateSurface(), 1, 1, 0, 0);
+            drawNormals(gl, p, 1, 1, 0, 0);
         }
         if ( q.isPointsSet() ) {
             drawControlPoints(gl, p);
@@ -396,18 +321,18 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
-            drawSurfaceGrid(gl, p.evaluateSurface(), textureUSizeFactor, tilling_y,
-                        textureURelaviteStart, textureVRelativeStart);
+            drawSurfaceGrid(gl, p, textureUSizeFactor, tilling_y,
+                            textureURelaviteStart, textureVRelativeStart, q);
         }
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             gl.glPolygonOffset(0.0f, 0.0f);
-            drawSurfaceGrid(gl, p.evaluateSurface(), textureUSizeFactor, tilling_y,
-                        textureURelaviteStart, textureVRelativeStart);
+            drawSurfaceGrid(gl, p, textureUSizeFactor, tilling_y,
+                            textureURelaviteStart, textureVRelativeStart, q);
         }
         if ( q.isNormalsSet() ) {
-            drawNormals(gl, p.evaluateSurface(), textureUSizeFactor, tilling_y,
+            drawNormals(gl, p, textureUSizeFactor, tilling_y,
                         textureURelaviteStart, textureVRelativeStart);
         }
         if ( q.isPointsSet() ) {
