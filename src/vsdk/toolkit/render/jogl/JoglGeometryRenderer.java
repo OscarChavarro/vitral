@@ -67,12 +67,6 @@ public class JoglGeometryRenderer extends JoglRenderer
             gl.glShadeModel(gl.GL_SMOOTH);
             break;
         }
-        if ( quality.isTextureSet() ) {
-            gl.glEnable(gl.GL_TEXTURE_2D);
-        }
-        else {
-            gl.glDisable(gl.GL_TEXTURE_2D);
-        }
     }
 
     public static void drawVertexNormal(GL gl, Vertex vertex) {

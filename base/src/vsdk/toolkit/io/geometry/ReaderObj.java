@@ -302,18 +302,20 @@ public class ReaderObj extends PersistenceElement
                 nextGeometricObjectName = auxStringTokenizer.nextToken();
 
                 // Clear accumulated states variables
-                nextTexturesArray = new ArrayList<RGBAImage>();
-                nextMaterialsArray = new ArrayList<Material>();
-                triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
-                material_triangleRange_table = new ArrayList<int[]>();
-                texture_span_triangleRange_table =
-                    new ArrayList<ArrayList<int[]>>();
-                auxInitialTextureMapping = new ArrayList<int[]>();
-                int[] auxInitialRange = new int[2];
-                auxInitialRange[0] = auxInitialRange[1] = 0;
-                auxInitialTextureMapping.add(auxInitialRange);
-                texture_span_triangleRange_table.add(auxInitialTextureMapping);
-                textureIndex = 0;
+                if ( vertexPositionsArray.size() > 0 ) {
+                    nextTexturesArray = new ArrayList<RGBAImage>();
+                    nextMaterialsArray = new ArrayList<Material>();
+                    triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
+                    material_triangleRange_table = new ArrayList<int[]>();
+                    texture_span_triangleRange_table =
+                        new ArrayList<ArrayList<int[]>>();
+                    auxInitialTextureMapping = new ArrayList<int[]>();
+                    int[] auxInitialRange = new int[2];
+                    auxInitialRange[0] = auxInitialRange[1] = 0;
+                    auxInitialTextureMapping.add(auxInitialRange);
+                    texture_span_triangleRange_table.add(auxInitialTextureMapping);
+                    textureIndex = 0;
+		}
             }
         }
 
@@ -458,16 +460,13 @@ public class ReaderObj extends PersistenceElement
         Material materials[];
         materials = new Material[nextMaterialsArray.size()];
 
-	System.out.println("Adding materials: " + materials.length);
         for ( i = 0; i < materials.length; i++ ) {
             materials[i] = nextMaterialsArray.get(i);
-	    System.out.println("  - " + i + ": " + materials[i]);
             if ( materials[i] == null ) {
                 materials[i] = new Material();
             }
         }
         newTriangleMesh.setMaterials(materials);
-	System.out.println("In mesh with triangles: " + newTriangleArray.length);
 
         //- Process material ranges ---------------------------------------
         int auxMaterialRange[];

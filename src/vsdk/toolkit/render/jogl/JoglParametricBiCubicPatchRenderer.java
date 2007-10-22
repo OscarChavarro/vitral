@@ -281,6 +281,12 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
             gl.glPolygonOffset(0.0f, 0.0f);
+            if ( q.isTextureSet() ) {
+                gl.glEnable(gl.GL_TEXTURE_2D);
+            }
+            else {
+                gl.glDisable(gl.GL_TEXTURE_2D);
+            }
             drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
         if ( q.isWiresSet() ) {
