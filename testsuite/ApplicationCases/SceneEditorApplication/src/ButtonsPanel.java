@@ -469,9 +469,6 @@ public class ButtonsPanel extends JPanel implements ActionListener
             newThing.getMaterial().setDoubleSided(true);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
-            ParametricBiCubicPatch patch;
-
-/*
             //- Create a Ferguson patch ---------------------------------------
             ParametricCurve contourHermiteLine;
             Vector3D pointParameters[];
@@ -506,18 +503,19 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
             contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), contourHermiteLine.HERMITE);
 
+            ParametricBiCubicPatch patch;
             patch = new ParametricBiCubicPatch();
             patch.buildFergusonPatch(contourHermiteLine);
             patch.setApproximationSteps(20);
-            //parent.theScene.addThing(contourHermiteLine);
+            parent.theScene.addThing(contourHermiteLine);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
             //-----------------------------------------------------------------
-	    */
 
+/*
             //- Create a Bezier patch -----------------------------------------
-            patch = new ParametricBiCubicPatch();
+            // Create control points 4x4 matrix
             Vector3D cp[][] = new Vector3D[4][4];
             for ( int j = 0; j < 4; j++ ) {
                 for ( int i = 0; i < 4; i++ ) {
@@ -532,12 +530,16 @@ public class ButtonsPanel extends JPanel implements ActionListener
 		    }
 		}
 	    }
+
+            // Create a Bezier patch
+            patch = new ParametricBiCubicPatch();
             patch.buildBezierPatch(cp);
             patch.setApproximationSteps(20);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
             //-----------------------------------------------------------------
+*/
 
 /*
             //- Save a previously created patch -------------------------------
