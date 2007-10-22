@@ -388,6 +388,10 @@ public class ParametricBiCubicPatch extends Surface {
         S_MATRIX_DS.M[0][1] = 2 * s;
         S_MATRIX_DS.M[0][2] = 1;
         S_MATRIX_DS.M[0][3] = 0;
+        Tt_MATRIX.M[0][0] = t * t * t;
+        Tt_MATRIX.M[1][0] = t * t;
+        Tt_MATRIX.M[2][0] = t;
+        Tt_MATRIX.M[3][0] = 1;
 
         Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
         Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
@@ -409,6 +413,11 @@ public class ParametricBiCubicPatch extends Surface {
 
     public void evaluateBinormal(Vector3D dQdt, double s, double t)
     {
+        S_MATRIX.M[0][0] = s * s * s;
+        S_MATRIX.M[0][1] = s * s;
+        S_MATRIX.M[0][2] = s;
+        S_MATRIX.M[0][3] = 1;
+
         Tt_MATRIX_DT.M[0][0] = 3 * t * t;
         Tt_MATRIX_DT.M[1][0] = 2 * t;
         Tt_MATRIX_DT.M[2][0] = 1;

@@ -228,7 +228,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         for ( int i = 0; i < materialRanges.length; i++ ) {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
-            if ( materialIndex >= 0 ) {
+            if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
                 JoglMaterialRenderer.activate(gl,
                     materialsArray[materialIndex]);
             }

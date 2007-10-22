@@ -160,14 +160,14 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         if ( q.getShadingType() == q.SHADING_TYPE_FLAT ) {
             gl.glShadeModel(gl.GL_FLAT);
         }
-	else {
+        else {
             gl.glShadeModel(gl.GL_SMOOTH);
-	}
+        }
 
         for ( i = 0; i < n - 1; i++ ) {
             s = ((double)i)*ds;
             sizeDivTv = (textureVSizeFactor / (n-1));
-            gl.glBegin(gl.GL_TRIANGLE_STRIP);
+            gl.glBegin(gl.GL_QUAD_STRIP);
             for ( j = 0; j < n; j++) {
                 t = ((double)j)*dt;
                 sizeDivTu = (textureUSizeFactor / (n-1));

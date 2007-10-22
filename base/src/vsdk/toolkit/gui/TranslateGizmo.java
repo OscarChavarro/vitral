@@ -132,7 +132,7 @@ public class TranslateGizmo extends Gizmo {
 
     public int getAparentSizeInPixels()
     {
-	return aparentSizeInPixels;
+        return aparentSizeInPixels;
     }
 
     public void setAparentSizeInPixels(int du)
@@ -687,7 +687,6 @@ public class TranslateGizmo extends Gizmo {
         R.M[1][3] = 0.0;
         R.M[2][3] = 0.0;
         R.M[3][3] = 1.0;
-
         calculateGeometryState(getPosition(), 
                                R, selectedResizing, aparentSizeInPixels,
                                camera);

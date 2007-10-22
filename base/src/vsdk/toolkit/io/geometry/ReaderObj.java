@@ -361,7 +361,10 @@ public class ReaderObj extends PersistenceElement
 
         //- If there are no specified materials, add a default one --------
         if ( nextMaterialsArray.size() == 0 ) {
-            nextMaterialsArray.add(new Material());
+            Material m;
+            m = new Material();
+            m.setName("default obj material");
+            nextMaterialsArray.add(m);
         }
 
         //- Convert vertex data from obj format to VSDK format ------------
@@ -455,13 +458,16 @@ public class ReaderObj extends PersistenceElement
         Material materials[];
         materials = new Material[nextMaterialsArray.size()];
 
+	System.out.println("Adding materials: " + materials.length);
         for ( i = 0; i < materials.length; i++ ) {
             materials[i] = nextMaterialsArray.get(i);
+	    System.out.println("  - " + i + ": " + materials[i]);
             if ( materials[i] == null ) {
                 materials[i] = new Material();
             }
         }
         newTriangleMesh.setMaterials(materials);
+	System.out.println("In mesh with triangles: " + newTriangleArray.length);
 
         //- Process material ranges ---------------------------------------
         int auxMaterialRange[];

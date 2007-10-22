@@ -260,7 +260,8 @@ public class JoglDrawingArea implements
                 Matrix4x4 composed;
 
                 position = gi.getPosition();
-                composed = new Matrix4x4(gi.getRotation());
+                //composed = new Matrix4x4(gi.getRotation());
+                composed = new Matrix4x4();
                 composed.M[0][3] = position.x;
                 composed.M[1][3] = position.y;
                 composed.M[2][3] = position.z;
@@ -1071,7 +1072,8 @@ public class JoglDrawingArea implements
                 Matrix4x4 composed;
 
                 position = gi.getPosition();
-                composed = new Matrix4x4(gi.getRotation());
+                //composed = new Matrix4x4(gi.getRotation());
+                composed = new Matrix4x4();
                 composed.M[0][3] = position.x;
                 composed.M[1][3] = position.y;
                 composed.M[2][3] = position.z;
@@ -1120,7 +1122,8 @@ public class JoglDrawingArea implements
             Matrix4x4 composed;
 
             position = gi.getPosition();
-            composed = new Matrix4x4(gi.getRotation());
+            //composed = new Matrix4x4(gi.getRotation());
+            composed = new Matrix4x4();
             composed.M[0][3] = position.x;
             composed.M[1][3] = position.y;
             composed.M[2][3] = position.z;
@@ -1139,7 +1142,7 @@ public class JoglDrawingArea implements
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
-                applyTransformToSelectedObjects(position, composed);
+                applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
         }
@@ -1167,7 +1170,8 @@ public class JoglDrawingArea implements
             Matrix4x4 composed;
 
             position = gi.getPosition();
-            composed = new Matrix4x4(gi.getRotation());
+            //composed = new Matrix4x4(gi.getRotation());
+            composed = new Matrix4x4();
             composed.M[0][3] = position.x;
             composed.M[1][3] = position.y;
             composed.M[2][3] = position.z;
@@ -1183,7 +1187,7 @@ public class JoglDrawingArea implements
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
-                applyTransformToSelectedObjects(position, composed);
+                applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
         }
@@ -1212,7 +1216,8 @@ public class JoglDrawingArea implements
             Matrix4x4 composed;
 
             position = gi.getPosition();
-            composed = new Matrix4x4(gi.getRotation());
+            //composed = new Matrix4x4(gi.getRotation());
+            composed = new Matrix4x4();
             composed.M[0][3] = position.x;
             composed.M[1][3] = position.y;
             composed.M[2][3] = position.z;
@@ -1228,7 +1233,7 @@ public class JoglDrawingArea implements
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
-                applyTransformToSelectedObjects(position, composed);
+                applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
         }
@@ -1255,7 +1260,8 @@ public class JoglDrawingArea implements
             Matrix4x4 composed;
 
             position = gi.getPosition();
-            composed = new Matrix4x4(gi.getRotation());
+            //composed = new Matrix4x4(gi.getRotation());
+            composed = new Matrix4x4();
             composed.M[0][3] = position.x;
             composed.M[1][3] = position.y;
             composed.M[2][3] = position.z;
@@ -1274,7 +1280,7 @@ public class JoglDrawingArea implements
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
-                applyTransformToSelectedObjects(position, composed);
+                applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
         }
@@ -1340,7 +1346,8 @@ public class JoglDrawingArea implements
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
                 position = gi.getPosition();
-                composed = new Matrix4x4(gi.getRotation());
+                //composed = new Matrix4x4(gi.getRotation());
+                composed = new Matrix4x4();
                 composed.M[0][3] = position.x;
                 composed.M[1][3] = position.y;
                 composed.M[2][3] = position.z;
@@ -1354,7 +1361,7 @@ public class JoglDrawingArea implements
                     composed.M[0][3] = 0;
                     composed.M[1][3] = 0;
                     composed.M[2][3] = 0;
-                    applyTransformToSelectedObjects(position, composed);
+                    applyTranslationToSelectedObjects(position);
                 }
             }
         }
@@ -1401,18 +1408,18 @@ public class JoglDrawingArea implements
         int asp;
         switch ( keycode ) {
           case KeyEvent.VK_ESCAPE:
-	      parent.closeApplication();
+              parent.closeApplication();
             break;
           case KeyEvent.VK_EQUALS:
             // Alphanumeric =
-	    asp = translationGizmo.getAparentSizeInPixels();
+            asp = translationGizmo.getAparentSizeInPixels();
             asp += 10;
             if ( asp > 300 ) asp = 300;
             translationGizmo.setAparentSizeInPixels(asp);
             break;
           case KeyEvent.VK_MINUS:
             // Alphanumeric -
-	    asp = translationGizmo.getAparentSizeInPixels();
+            asp = translationGizmo.getAparentSizeInPixels();
             asp -= 20;
             if ( asp < 20 ) asp = 20;
             translationGizmo.setAparentSizeInPixels(asp);
@@ -1733,6 +1740,20 @@ public class JoglDrawingArea implements
         }
     }
 
+    private void applyTranslationToSelectedObjects(Vector3D position)
+    {
+        SimpleBody gi;
+        int firstThingSelected = theScene.selectedThings.firstSelected();
+        int i;
+
+        for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
+            if ( !theScene.selectedThings.isSelected(i) ) continue;
+            gi = theScene.scene.getSimpleBodies().get(i);
+
+            gi.setPosition(position);
+        }
+    }
+
     public void newView()
     {
         views.add(new JoglView());
@@ -1793,14 +1814,14 @@ public class JoglDrawingArea implements
     public void reportTargetToModifyPanel()
     {
         int firstThingSelected = theScene.selectedThings.firstSelected();
-	if ( parent.modifyPanelSelected && firstThingSelected >= 0 ) {
+        if ( parent.modifyPanelSelected && firstThingSelected >= 0 ) {
             parent.modifyPanel.notifyTargetBeginEdit(
                 theScene.scene.getSimpleBodies().get(firstThingSelected)
             );
-	}
-	else {
+        }
+        else {
             parent.modifyPanel.notifyTargetEndEdit();
-	}
+        }
     }
 
     public void keyReleased(KeyEvent e) 
