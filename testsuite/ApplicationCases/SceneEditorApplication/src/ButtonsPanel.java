@@ -507,7 +507,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             patch = new ParametricBiCubicPatch();
             patch.buildFergusonPatch(contourHermiteLine);
             patch.setApproximationSteps(20);
-            parent.theScene.addThing(contourHermiteLine);
+            //parent.theScene.addThing(contourHermiteLine);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
             newThing.getMaterial().setDoubleSided(true);
