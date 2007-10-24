@@ -87,11 +87,18 @@ public class WriterObj extends PersistenceElement {
 
 	int i;
 	for ( i = 0; i < objs.size(); i++ ) {
+
+            //-----------------------------------------------------------------
             g = objs.get(i).getGeometry();
             mesh = null;
 	    if ( g instanceof FunctionalExplicitSurface ) {
                 mesh = ((FunctionalExplicitSurface)g).getInternalTriangleMesh();
 	    }
+	    else if ( g instanceof TriangleMesh ) {
+                mesh = (TriangleMesh)g;
+	    }
+
+            //-----------------------------------------------------------------
             if ( mesh != null ) {
                 baseVertexStart += exportMesh(inOutputStream, mesh, baseVertexStart);
 	    }
