@@ -199,9 +199,7 @@ public class FunctionalExplicitSurface extends Surface
         }
 
         //-----------------------------------------------------------------
-        internalGeometry = new TriangleMesh();
-        internalGeometry.setVertexes(v);
-        internalGeometry.setTriangles(t);
+        internalGeometry = new TriangleMesh(v, t);
         internalGeometry.calculateNormals();
     }
 

@@ -570,8 +570,10 @@ public class ButtonsPanel extends JPanel implements ActionListener
             JFileChooser jfc = null;
             jfc = new JFileChooser(currentFilePathForReading);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
             jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
+            jfc.addChoosableFileFilter(new MyFilter("vtk", "vtk Kitware vtk legacy binary file (mesh only)"));
+            jfc.addChoosableFileFilter(new MyFilter("gts", "gts Gts mesh ASCII file"));
+            jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
 
             int opc = jfc.showOpenDialog(new JPanel());
             if (opc == JFileChooser.APPROVE_OPTION) {
@@ -587,6 +589,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                 }
                 catch (Exception ex) {
                     System.out.println("Failed to read file...\n" + ex);
+		    ex.printStackTrace();
                     return;
                 }
             }

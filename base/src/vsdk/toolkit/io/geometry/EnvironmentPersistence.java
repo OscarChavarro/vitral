@@ -28,6 +28,9 @@ public class EnvironmentPersistence extends PersistenceElement {
         else if ( type.equals("3ds") ) {
             Reader3ds.importEnvironment(inSceneFileFd, inoutScene);
         }
+        else if ( type.equals("gts") ) {
+            ReaderGts.importEnvironment(inSceneFileFd, inoutScene);
+        }
         else if ( type.equals("ase") ) {
             ReaderAse.importEnvironment(inSceneFileFd, inoutScene);
         }

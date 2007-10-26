@@ -12,6 +12,7 @@
 
 package vsdk.toolkit.io.geometry;
 
+// Java basic classes
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+// VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Triangle;
@@ -315,7 +317,7 @@ public class ReaderObj extends PersistenceElement
                     auxInitialTextureMapping.add(auxInitialRange);
                     texture_span_triangleRange_table.add(auxInitialTextureMapping);
                     textureIndex = 0;
-		}
+                }
             }
         }
 

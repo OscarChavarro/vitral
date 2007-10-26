@@ -455,15 +455,18 @@ Changes in 2007 october 15 revition <<2h15min>>
   - 37min: Fixing bugs in AlgebraicExpression
   - 46min: EnvironmentPersistence.exportObj
 
-Changes in 2007 october 20 revition
+Changes in 2007 october 20 revition <<4h07min>>
   - 1h30min: ParametricBiCubicPatch and its renderer revition.
   - 2h37min: Fixing an structural bug in Ferguson parametric patches
     management.
 
-Changes in 2007 october 21 revition
+Changes in 2007 october 21 revition <<4h>>
   - 3h: Revisiting and cleaning parametric bicubic patch management,
     representation and Jogl rendering code.
   - 1h: Bezier parametric bicubic patch management revisited.
+
+Changes in 2007 october 25 revition
+  - 1h08min: ReaderGts class added
 
 ---------------------------------------------------------------------------
 TODO:
