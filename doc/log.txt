@@ -468,6 +468,11 @@ Changes in 2007 october 21 revition <<4h>>
 Changes in 2007 october 25 revition
   - 1h08min: ReaderGts class added
 
+Changes in 2007 october 26 revition
+  - 40min: WriterGts class added
+
+
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

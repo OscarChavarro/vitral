@@ -115,7 +115,7 @@ public class ReaderGts
         //-----------------------------------------------------------------
         Triangle t[] = new Triangle[numTriangles];
         int ie1, ie2, ie3;
-        int ip1, ip2, ip3 = -1;
+        int ip1, ip2 = -2, ip3 = -1;
 
         for ( i = 0; i < numTriangles; i++ ) {
             ie1 = triangles[i][0]-1;
@@ -123,18 +123,18 @@ public class ReaderGts
             ie3 = triangles[i][2]-1;
 
             ip1 = edges[ie1][0];
-            if ( ip1 != ip3) {
+            if ( ip1 != ip3 || ip1 == ip2 ) {
                 ip1 = edges[ie1][1];
             }
 
             ip2 = edges[ie2][0];
-            if ( ip1 == ip2 ) {
+            if ( ip2 == ip1 || ip2 == ip3 ) {
                 ip2 = edges[ie2][1];
             }
 
             ip3 = edges[ie3][0];
-            if ( ip2 == ip3 ) {
-                ip2 = edges[ie3][1];
+            if ( ip3 == ip2 || ip3 == ip1 ) {
+                ip3 = edges[ie3][1];
             }
 
             t[i] = new Triangle(ip1-1, ip2-1, ip3-1);
