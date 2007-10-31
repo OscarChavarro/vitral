@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import javax.media.opengl.GL;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Vector3D;
@@ -86,7 +87,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
-            gl.glColor3d(1, 1, 1);
+            ColorRgb c = quality.getWireColor();
+            gl.glColor3d(c.r, c.g, c.b);
             gl.glDisable(gl.GL_TEXTURE_2D);
 
             // Warning: pending definition of this behavior...
