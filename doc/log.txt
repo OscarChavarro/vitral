@@ -471,7 +471,8 @@ Changes in 2007 october 25 revition
 Changes in 2007 october 26 revition
   - 40min: WriterGts class added
 
-
+Changes in 2007 october 30 revition
+  - 1h30min: MatrixNxM basic class
 
 ---------------------------------------------------------------------------
 TODO:
