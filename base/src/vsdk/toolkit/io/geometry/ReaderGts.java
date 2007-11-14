@@ -25,8 +25,9 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.io.PersistenceElement;
 
-public class ReaderGts
+public class ReaderGts extends PersistenceElement
 {
     private static Material defaultMaterial()
     {

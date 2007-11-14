@@ -23,13 +23,13 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.PersistenceElement;
 
-class _WriterGtsEdge
+class _WriterGtsEdge extends PersistenceElement
 {
     public int from;
     public int to;
 }
 
-class _WriterGtsTriangle
+class _WriterGtsTriangle extends PersistenceElement
 {
     public int p0;
     public int p1;
