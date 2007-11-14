@@ -1,0 +1,116 @@
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - November 13 2007 - Oscar Chavarro: Original base version              =
+//===========================================================================
+
+package vsdk.toolkit.render.jogl;
+
+// JOGL clases
+import javax.media.opengl.GL;
+import com.sun.opengl.cg.CgGL;
+import com.sun.opengl.cg.CGparameter;
+
+// VitralSDK classes
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
+
+public class JoglInfinitePlaneRenderer extends JoglRenderer {
+
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+    */
+    public static void draw(GL gl, InfinitePlane s, Camera c, RendererConfiguration q)
+    {
+        draw(gl, s, c, q, 10, 10);
+    }
+
+    public static void
+    drawInfinitePlaneElements(GL gl, InfinitePlane s, int nx, int ny)
+    {
+        int i, j;
+        double x, y;
+        double dx, dy;
+        dx = 20.0/((double)nx);
+        dy = 20.0/((double)ny);
+
+        Matrix4x4 R = new Matrix4x4();
+
+        Vector3D n = s.getNormal();
+        double yaw = n.obtainSphericalThetaAngle();
+        double pitch = n.obtainSphericalPhiAngle();
+        R.eulerAnglesRotation(yaw, pitch, 0);
+        n.normalize();
+        n = n.multiply(s.getD());
+
+        gl.glPushMatrix();
+        gl.glTranslated(n.x, n.y, n.z);
+        JoglMatrixRenderer.activate(gl, R);
+        gl.glNormal3d(1, 0, 0);
+        gl.glBegin(gl.GL_QUADS);
+	for ( i = 0; i < nx; i++ ) {
+  	    for ( j = 0; j < ny; j++ ) {
+                x = ((double)i)*2 - (((double)nx) / 2);
+                y = ((double)j)*2 - (((double)ny) / 2);
+	        gl.glVertex3d(0, x, y);
+	        gl.glVertex3d(0, x+dx, y);
+	        gl.glVertex3d(0, x+dx, y+dy);
+	        gl.glVertex3d(0, x, y+dy);
+	    }
+	}
+        gl.glEnd();
+        gl.glPopMatrix();
+    }
+
+    public static void draw(GL gl, InfinitePlane s, Camera c, RendererConfiguration q,
+                            int slices, int stacks)
+    {
+        JoglGeometryRenderer.activateShaders(gl, s, c);
+        if ( q.isSurfacesSet() ) {
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonOffset(0.0f, 0.0f);
+            drawInfinitePlaneElements(gl, s, slices, stacks);
+        }
+        if ( q.isWiresSet() ) {
+            JoglRenderer.disableNvidiaCgProfiles();
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glShadeModel(gl.GL_FLAT);
+
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glLineWidth(1.0f);
+
+            // Warning: Change with configured color for borders
+            gl.glColor3d(1, 1, 1);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
+            drawInfinitePlaneElements(gl, s, slices, stacks);
+        }
+
+        if ( q.isPointsSet() ) {
+		//drawPoints(gl, s, slices, stacks);
+        }
+        if ( q.isNormalsSet() ) {
+		//drawVertexNormals(gl, s, slices, stacks);
+        }
+        if ( q.isBoundingVolumeSet() ) {
+		//JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
+        }
+        if ( q.isSelectionCornersSet() ) {
+		//JoglGeometryRenderer.drawSelectionCorners(gl, s, q);
+        }
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
