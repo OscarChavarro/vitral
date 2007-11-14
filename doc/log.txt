@@ -474,9 +474,10 @@ Changes in 2007 october 26 revition
 Changes in 2007 october 30 revition
   - 1h30min: MatrixNxM basic class
 
-Changes in 2007 november 13 revition
+Changes in 2007 november 13 revition <<2h50min>>
   - 50min: JoglInfinitePlaneRenderer, minor additions to 
     CameraControllerAquynza
+  - 2h: Plane rendering and managing revisited. Camera.getBoundingPlanes added.
 
 ---------------------------------------------------------------------------
 TODO:

@@ -611,6 +611,12 @@ public class Camera extends Entity
     }
 
     /**
+    Returns an outward pointing "horizontal" plane with respect to current
+    camera (horizontal is left-right direction). Outwards means that the
+    plane normal points outward the visualization volume / frustum.
+
+    Camera visualization limits for u are inside the interval [-0.5, 0.5].
+
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
     */
@@ -621,7 +627,12 @@ public class Camera extends Entity
             u *= 2*(viewportXSize/viewportYSize);
             Vector3D right = left.multiply(-1);
             right.normalize();
-            return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
+            if ( u > 0 ) {
+                return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
+            }
+            else {
+                return new InfinitePlane(left, eyePosition.add(right.multiply(u)));
+            }
         }
 
         Vector3D du = rightWithScale.multiply(u);
@@ -679,7 +690,13 @@ public class Camera extends Entity
             v *= 2;
             Vector3D up2 = new Vector3D(up);
             up.normalize();
-            return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
+            if ( v > 0 ) {
+                return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
+            }
+            else {
+                Vector3D down = up.multiply(-1);
+                return new InfinitePlane(down, eyePosition.add(up.multiply(v)));
+            }
         }
 
         Vector3D dv = upWithScale.multiply(v);
@@ -1076,6 +1093,40 @@ public class Camera extends Entity
 
         return true;
     }
+
+    /**
+    Return 6 outward pointing planes bounding the view volume / frustum
+    for current camera.
+    PRE: updateVectors method should be called before calling this method.
+    */
+    public InfinitePlane[] getBoundingPlanes()
+    {
+        InfinitePlane planes[];
+
+        planes = new InfinitePlane[6];
+
+        planes[0] = calculateUPlane(-0.5);
+        planes[1] = calculateUPlane(0.5);
+        planes[2] = calculateVPlane(-0.5);
+        planes[3] = calculateVPlane(0.5);
+
+        Vector3D back;
+        Vector3D nearPosition;
+        Vector3D farPosition;
+        Vector3D nfront;
+
+        nfront = new Vector3D(front);
+        nfront.normalize();
+        nearPosition = eyePosition.add(nfront.multiply(nearPlaneDistance));
+        farPosition = eyePosition.add(nfront.multiply(farPlaneDistance));
+        back = nfront.multiply(-1);        
+
+        planes[4] = new InfinitePlane(nfront, farPosition);
+        planes[5] = new InfinitePlane(back, nearPosition);
+
+        return planes;
+    }
+
 }
 
 //===========================================================================

@@ -240,7 +240,8 @@ public class InfinitePlane extends HalfSpace {
         String msg = "InfinitePlane: N=<" + 
             VSDK.formatDouble(a) + ", " +
             VSDK.formatDouble(b) + ", " +
-            VSDK.formatDouble(c) + ">, D=" + d;
+            VSDK.formatDouble(c) + ">, D=" +
+            VSDK.formatDouble(d);
         return msg;
     }
 

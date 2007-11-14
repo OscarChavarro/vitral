@@ -274,11 +274,18 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_PLANE") ) {
             InfinitePlane plane;
-	    //plane = new InfinitePlane(new Vector3D(-1, 0, 1), new Vector3D(0, 0, 1))
-            plane = parent.theScene.activeCamera.calculateUPlane(-1);
-            System.out.println(parent.theScene.activeCamera);
+            plane = new InfinitePlane(new Vector3D(-0.2, 0, 1), new Vector3D(0, 0, -1));
             System.out.println(plane);
             parent.theScene.addThing(plane);
+
+/*
+            parent.theScene.activeCamera.updateVectors();
+            InfinitePlane planes[];
+            planes = parent.theScene.activeCamera.getBoundingPlanes();
+            for ( int i = 0; i < 6; i++ ) {
+                parent.theScene.addThing(planes[i]);
+            }
+*/
         }
         else if ( label.equals("IDC_CREATE_SPHERE_HARMONIC") ) {
             SimpleBody voxelBody = null;
@@ -529,16 +536,16 @@ public class ButtonsPanel extends JPanel implements ActionListener
             for ( int j = 0; j < 4; j++ ) {
                 for ( int i = 0; i < 4; i++ ) {
                     cp[i][j] = new Vector3D();
-	  	    cp[i][j].x = ((double)i)/3-0.5;
-  	  	    cp[i][j].y = ((double)j)/3-0.5;
+                    cp[i][j].x = ((double)i)/3-0.5;
+                    cp[i][j].y = ((double)j)/3-0.5;
                     if ( i > 0 && i < 3 && j > 0 && j < 3 ) {
-	  	        cp[i][j].z = 1;                        
-		    }
-		    else {
-	  	        cp[i][j].z = 0;
-		    }
-		}
-	    }
+                        cp[i][j].z = 1;                        
+                    }
+                    else {
+                        cp[i][j].z = 0;
+                    }
+                }
+            }
 
             // Create a Bezier patch
             patch = new ParametricBiCubicPatch();
@@ -598,7 +605,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                 }
                 catch (Exception ex) {
                     System.out.println("Failed to read file...\n" + ex);
-		    ex.printStackTrace();
+                    ex.printStackTrace();
                     return;
                 }
             }

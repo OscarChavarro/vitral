@@ -43,20 +43,19 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
 
         Vector3D n = s.getNormal();
         double yaw = n.obtainSphericalThetaAngle();
-        double pitch = n.obtainSphericalPhiAngle();
+        double pitch = Math.PI/2 - n.obtainSphericalPhiAngle();
+
         R.eulerAnglesRotation(yaw, pitch, 0);
         n.normalize();
-        n = n.multiply(s.getD());
+        n = n.multiply(-s.getD());
 
         gl.glPushMatrix();
         gl.glTranslated(n.x, n.y, n.z);
         JoglMatrixRenderer.activate(gl, R);
         gl.glNormal3d(1, 0, 0);
         gl.glBegin(gl.GL_QUADS);
-	for ( i = 0; i < nx; i++ ) {
-  	    for ( j = 0; j < ny; j++ ) {
-                x = ((double)i)*2 - (((double)nx) / 2);
-                y = ((double)j)*2 - (((double)ny) / 2);
+	for ( i = 0, x = -5*dx; i < nx; i++, x+=dx ) {
+  	    for ( j = 0, y = -5*dy; j < ny; j++, y+=dy ) {
 	        gl.glVertex3d(0, x, y);
 	        gl.glVertex3d(0, x+dx, y);
 	        gl.glVertex3d(0, x+dx, y+dy);
