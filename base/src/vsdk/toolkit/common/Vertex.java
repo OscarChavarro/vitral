@@ -45,16 +45,6 @@ public class Vertex extends FundamentalEntity
     ///
     public ArrayList<Triangle> incidentTriangles;
 
-    public Vertex() {
-        position = null;
-        normal = null;
-        binormal = null;
-        tangent = null;
-        this.incidentTriangles = null;
-        u = 0.0;
-        v = 0.0;
-    }
-
     public Vertex(double x, double y, double z) {
         position = new Vector3D(x, y, z);
         normal = new Vector3D(1, 0, 0);

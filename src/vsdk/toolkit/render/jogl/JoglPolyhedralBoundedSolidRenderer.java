@@ -298,8 +298,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         int i, j;
 
         //-----------------------------------------------------------------
-        Vector3D p0, n;
-        Vertex vertex = new Vertex();
+        Vector3D p0 = null, n;
+        Vertex vertex = new Vertex(p0);
 
         gl.glBegin(gl.GL_LINES);
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {

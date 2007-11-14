@@ -415,12 +415,11 @@ public class ReaderObj extends PersistenceElement
         R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
         newVertexArray = new Vertex[finalVertexes.size()];
         for ( i = 0; i < finalVertexes.size(); i++ ) {
-            newVertexArray[i] = new Vertex();
             // Position
             p = vertexPositionsArray.get(
                 finalVertexes.get(i).vertexPositionIndex-1);
             p = R.multiply(p);
-            newVertexArray[i].setPosition(p);
+            newVertexArray[i] = new Vertex(p);
             // Texture coordinates
             ti = finalVertexes.get(i).vertexTextureCoordinateIndex - 1;
             if ( ti >= 0 ) {
