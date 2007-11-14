@@ -24,6 +24,7 @@ import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
@@ -225,6 +226,9 @@ public class JoglGeometryRenderer extends JoglRenderer
 
         if ( g instanceof Sphere ) {
             JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+        }
+        if ( g instanceof InfinitePlane ) {
+            JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
         }
         else if ( g instanceof Box ) {
             JoglBoxRenderer.draw(gl, (Box)g, c, q);

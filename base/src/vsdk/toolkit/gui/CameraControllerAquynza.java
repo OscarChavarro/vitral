@@ -13,11 +13,23 @@ public class CameraControllerAquynza extends CameraController {
     private Camera camera;
     private int oldMouseX;
     private int oldMouseY;
+    private double deltaMov;
 
     public CameraControllerAquynza(Camera camera) {
         this.camera = camera;
         oldMouseX = 0;
         oldMouseY = 0;
+        deltaMov = 0.25;
+    }
+
+    public double getDeltaMovement()
+    {
+        return deltaMov;
+    }
+
+    public void setDeltaMovement(double val)
+    {
+        deltaMov = val;
     }
 
     public boolean processMouseEventAwt(MouseEvent mouseEvent) {
@@ -74,7 +86,6 @@ public class CameraControllerAquynza extends CameraController {
         // Internal variables to control the interaction
         char unicode_id;
         int keycode;
-        double deltaMov = 0.25;
         double yaw;
         double pitch;
         double roll;
@@ -279,7 +290,7 @@ public class CameraControllerAquynza extends CameraController {
         int deltaX;
         int deltaY;
         boolean updated = false;
-        double senseFactor = 0.04;
+        double senseFactor = deltaMov/5;
 
         deltaX = e.getX() - oldMouseX;
         deltaY = e.getY() - oldMouseY;

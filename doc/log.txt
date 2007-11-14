@@ -474,6 +474,10 @@ Changes in 2007 october 26 revition
 Changes in 2007 october 30 revition
   - 1h30min: MatrixNxM basic class
 
+Changes in 2007 november 13 revition
+  - 50min: JoglInfinitePlaneRenderer, minor additions to 
+    CameraControllerAquynza
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

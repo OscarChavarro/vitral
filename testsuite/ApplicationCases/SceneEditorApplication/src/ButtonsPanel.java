@@ -60,6 +60,7 @@ import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
@@ -270,6 +271,14 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_ARROW") ) {
             parent.theScene.addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
+        }
+        else if ( label.equals("IDC_CREATE_PLANE") ) {
+            InfinitePlane plane;
+	    //plane = new InfinitePlane(new Vector3D(-1, 0, 1), new Vector3D(0, 0, 1))
+            plane = parent.theScene.activeCamera.calculateUPlane(-1);
+            System.out.println(parent.theScene.activeCamera);
+            System.out.println(plane);
+            parent.theScene.addThing(plane);
         }
         else if ( label.equals("IDC_CREATE_SPHERE_HARMONIC") ) {
             SimpleBody voxelBody = null;

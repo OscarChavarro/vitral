@@ -235,6 +235,15 @@ public class InfinitePlane extends HalfSpace {
         return p.substract(n);
     }
 
+    public String toString()
+    {
+        String msg = "InfinitePlane: N=<" + 
+            VSDK.formatDouble(a) + ", " +
+            VSDK.formatDouble(b) + ", " +
+            VSDK.formatDouble(c) + ">, D=" + d;
+        return msg;
+    }
+
 }
 
 //===========================================================================
