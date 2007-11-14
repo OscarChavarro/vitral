@@ -64,7 +64,7 @@ public class ImagePersistence extends PersistenceElement
 
         if( type.equals("tga") ) {
             TargaImage t = new TargaImage(imagen);
-//PENDING
+            t.exportRGBA(retImage);
             return retImage;
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
@@ -114,7 +114,7 @@ public class ImagePersistence extends PersistenceElement
 
         if( type.equals("tga") ) {
             TargaImage t = new TargaImage(inImageFd);
-//PENDING
+            t.exportRGB(retImage);
             return retImage;
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||

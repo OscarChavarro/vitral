@@ -242,7 +242,7 @@ class MyCanvasPanel extends JPanel
         catch ( Exception e ) {
             System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
             System.err.println("Check you have access to that file from current working directory.");
-            System.err.println(e);
+            e.printStackTrace();
             System.exit(0);
         }
     }
