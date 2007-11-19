@@ -154,9 +154,8 @@ public class Camera extends Entity
 
     public void setPosition(Vector3D eyePosition)
     {
-        this.eyePosition = eyePosition;
+        this.eyePosition.clone(eyePosition);
     }
-
     
     public Vector3D getFocusedPosition()
     {

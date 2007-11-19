@@ -144,7 +144,7 @@ public class InfinitePlane extends HalfSpace {
         outData.p.y = inRay.origin.y + inT*inRay.direction.y;
         outData.p.z = inRay.origin.z + inT*inRay.direction.z;
 
-        outData.n = getNormal();
+        outData.n.clone(getNormal());
     }
 
     /**
@@ -154,7 +154,7 @@ public class InfinitePlane extends HalfSpace {
     {
         double minmax[] = new double[6];
         for ( int i = 0; i < 3; i++ ) {
-            minmax[i] = Double.MIN_VALUE;
+            minmax[i] = -Double.MAX_VALUE;
         }
         for ( int i = 3; i < 6; i++ ) {
             minmax[i] = Double.MAX_VALUE;
