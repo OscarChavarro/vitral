@@ -159,7 +159,11 @@ public class Camera extends Entity
     
     public Vector3D getFocusedPosition()
     {
-        return eyePosition.add(front.multiply(focalDistance));
+        Vector3D partial;
+        Vector3D result;
+	partial = front.multiply(focalDistance);
+        result = eyePosition.add(partial);
+        return result;
     }
 
     /**
@@ -171,7 +175,10 @@ public class Camera extends Entity
      */
     public void setFocusedPositionDirect(Vector3D focusedPosition)
     {
-        front = focusedPosition.substract(eyePosition);
+        Vector3D partial;
+
+        partial = focusedPosition.substract(eyePosition);
+        front.clone(partial);
         focalDistance = front.length();
         front.normalize();
     }
@@ -195,13 +202,16 @@ public class Camera extends Entity
      */
     public void setFocusedPositionMaintainingOrthogonality(Vector3D focusedPosition)
     {
-        front = focusedPosition.substract(eyePosition);
-        focalDistance=front.length();
+        Vector3D partial1;
+
+        partial1 = focusedPosition.substract(eyePosition);
+        front.clone(partial1);
+        focalDistance = front.length();
         front.normalize();
-        
+
         left = up.crossProduct(front);
         left.normalize();
-        
+
         up = front.crossProduct(left);
         up.normalize();
     }
