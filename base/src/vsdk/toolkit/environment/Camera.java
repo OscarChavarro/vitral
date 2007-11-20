@@ -232,17 +232,29 @@ public class Camera extends Entity
     }
 
     /**
-     * En este metodo no se tiene en cuenta si up y front quedan mirando 
-       para el mismo lado
-     */
+    This method overwrites current `up` vector value, without considering the
+    ill-case of getting `up` and `front` vectors pointing in the same
+    direction.
+
+    For non-advanced programmers, it is desireable to invoke the 
+    `setUpMaintainingOrthogonality` method instead of this one.
+    */
     public void setUpDirect(Vector3D up)
     {
-        this.up = new Vector3D(up);
+        this.up.clone(up);
     }
 
+    /**
+    This method overwrites current `left` vector value, without considering the
+    ill-case of getting `left` and `front` (or `up` vectors pointing in the
+    same direction.
+
+    For non-advanced programmers, it is desireable to invoke the 
+    `setLeftMaintainingOrthogonality` method instead of this one.
+    */
     public void setLeftDirect(Vector3D left)
     {
-        this.left = new Vector3D(left);
+        this.left.clone(left);
     }
 
     /**
@@ -313,8 +325,7 @@ public class Camera extends Entity
     POST:
       - left queda normalizado
       - up queda normalizado
-    \todo 
-    Document the way in which vectors are calculated, acording to
+    @todo Document the way in which vectors are calculated, acording to
     the projection transformation.
     */
     
@@ -324,7 +335,7 @@ public class Camera extends Entity
         left.normalize();
         front.normalize();
 
-        double fovFactor = viewportXSize/viewportYSize;
+        double fovFactor = viewportXSize / viewportYSize;
         _dir = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
         rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
@@ -354,7 +365,6 @@ public class Camera extends Entity
     public final Ray generateRay(int x, int y)
     {
         double u, v;
-        double mi_x, mi_y;
         Ray ray;
 
         // 1. Convert integer image coordinates into values in the range [-0.5, 0.5]
@@ -491,14 +501,14 @@ public class Camera extends Entity
             pstereo.y = -R.M[0][1] * factor_distancia_entre_ojos;
             pstereo.z = -R.M[0][2] * factor_distancia_entre_ojos;
             Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
-            R.multiply(Tstereo);
+            R = R.multiply(Tstereo);
         }
         if ( stereoMode == STEREO_MODE_RIGHT_EYE ) {
             pstereo.x = R.M[0][0] * factor_distancia_entre_ojos;
             pstereo.y = R.M[0][1] * factor_distancia_entre_ojos;
             pstereo.z = R.M[0][2] * factor_distancia_entre_ojos;
             Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
-            R.multiply(Tstereo);
+            R = R.multiply(Tstereo);
         }
         return R;
     }
@@ -1118,20 +1128,8 @@ public class Camera extends Entity
         planes[1] = calculateUPlane(0.5);
         planes[2] = calculateVPlane(-0.5);
         planes[3] = calculateVPlane(0.5);
-
-        Vector3D back;
-        Vector3D nearPosition;
-        Vector3D farPosition;
-        Vector3D nfront;
-
-        nfront = new Vector3D(front);
-        nfront.normalize();
-        nearPosition = eyePosition.add(nfront.multiply(nearPlaneDistance));
-        farPosition = eyePosition.add(nfront.multiply(farPlaneDistance));
-        back = nfront.multiply(-1);        
-
-        planes[4] = new InfinitePlane(nfront, farPosition);
-        planes[5] = new InfinitePlane(back, nearPosition);
+        planes[4] = calculateNearPlane();
+        planes[5] = calculateFarPlane();
 
         return planes;
     }
