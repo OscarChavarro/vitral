@@ -78,7 +78,7 @@ public class RendererConfiguration extends FundamentalEntity {
 
     public void setWireColor(ColorRgb c)
     {
-        wireColor = new ColorRgb(c);
+        wireColor.clone(c);
     }
 
     public void setWireColor(double r, double g, double b)

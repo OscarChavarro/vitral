@@ -189,6 +189,12 @@ public class ColorRgb extends FundamentalEntity
                          (this.g - other.g)*(this.g - other.g) +
                          (this.b - other.b)*(this.b - other.b));
     }
+
+    public void clone(ColorRgb other) {
+        this.r = other.r;
+        this.g = other.g;
+        this.b = other.b;
+    }
 }
 
 //===========================================================================
