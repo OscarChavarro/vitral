@@ -299,6 +299,11 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
+
+            ColorRgb co = q.getWireColor();
+            gl.glColor3d(co.r, co.g, co.b);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
             drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
         if ( q.isNormalsSet() ) {
