@@ -217,7 +217,7 @@ KeyListener
         Vector3D clippedPoint0 = new Vector3D();
         Vector3D clippedPoint1 = new Vector3D();
 
-        linePasses = camera2.clipLineCohenSutherland(point0, point1, 
+        linePasses = camera2.clipLineCohenSutherlandPlanes(point0, point1, 
                                              clippedPoint0, clippedPoint1);
 
         //-----------------------------------------------------------------

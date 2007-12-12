@@ -23,6 +23,7 @@ package vsdk.toolkit.environment;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Vector4D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -808,7 +809,6 @@ public class Camera extends Entity
     classified.
     @todo: check this method... currently disabled due to non working cases!
     */
-/*
     private int calculateOutcodeBits(Vector4D p)
     {
         int bits = 0x00;
@@ -831,7 +831,6 @@ public class Camera extends Entity
         }
         return bits;
     }
-*/
 
     /**
     Given a point in world space, this method calculates a six bit opcode,
@@ -884,7 +883,8 @@ public class Camera extends Entity
     This algorithm structure follows the one proposed in [FOLE1992].3.12.3,
     generalizing it to the 3D case, as noted in [FOLE1992].6.5.3.
     */
-    public boolean clipLineCohenSutherland(Vector3D point0, Vector3D point1,
+    public boolean clipLineCohenSutherlandPlanes(
+                             Vector3D point0, Vector3D point1,
                              Vector3D clippedPoint0, Vector3D clippedPoint1)
     {
         //- Local variables definition ------------------------------------
@@ -978,14 +978,14 @@ public class Camera extends Entity
                 else {
                     // Not possible: non implemented case!
                         VSDK.reportMessage(this, VSDK.WARNING, 
-                            "clipLineCohenSutherland", 
+                            "clipLineCohenSutherlandPlanes", 
                             "Unusal ray case, check code and data");
                 }
 
                 if ( clippingPlane != null ) {
                     if ( !clippingPlane.doIntersection(testRay) ) {
                         VSDK.reportMessage(this, VSDK.WARNING, 
-                            "clipLineCohenSutherland", 
+                            "clipLineCohenSutherlandPlanes", 
                             "Unusal ray assembly, check code and data");
                     }
                     clippingMidPoint = testRay.origin.add(

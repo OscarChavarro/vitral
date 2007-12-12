@@ -7,6 +7,11 @@
 //= - May 2 2006 - David Diaz / Oscar Chavarro: documentation added         =
 //= - November 3 2006 - Oscar Chavarro: New versions of determinant and     =
 //=   invert that takes into account 4x4 matrices, not just the 3x3 case    =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =
+//=          principles and practice" - second edition, Addison Wesley,     =
+//=          1992.                                                          =
 //===========================================================================
 
 package vsdk.toolkit.common;
@@ -130,6 +135,41 @@ public class Matrix4x4 extends FundamentalEntity
         M[3][1] = 0;
         M[3][2] = 0;
         M[3][3] = 1;
+    }
+
+    /**
+    This method calculates the following new value for current matrix:
+\f[
+\left[
+   \begin{array}{cccc}
+      1 & 0 & 0 & 0 \\
+      0 & 1 & 0 & 0 \\
+      0 & 0 & 0 & 0 \\
+      0 & 0 & -1 & 1
+   \end{array}
+\right]
+\f]
+    which correspond to the perspective projection for the VITRAL's used
+    canonical volume: center of projection is point <0, 0, 1>, projection
+    plane is the z=0 plane, and view volume limiting planes are 45 degrees
+    with respect to the z axis, that is, they pass by the lines x=-1, x=1,
+    y=-1 and y=1 at the z=0 plane.
+
+    The derivation of this matrix follows the approach suggested at
+    [FOLE1992].6.4. except that relations are not derived from similar
+    triangles, but writting down line equations and noting that for current
+    view volume, the line equations of x and y with respect to z have
+    negative slopes.
+
+    @todo document better the derivation process for this matrix, including
+    drawings and algebra, step by step.
+    */
+    public void
+    canonicalPerspectiveProjection()
+    {
+        identity();
+        M[2][2] = 0;
+        M[3][2] = -1;
     }
 
     /**

@@ -221,19 +221,19 @@ public class WireframeExample extends JFrame implements
 
                     mp0 = arrVertexes[p0].position;
                     mp1 = arrVertexes[p1].position;
-                    if ( camera.clipLineCohenSutherland(mp0, mp1, cp0, cp1) ) {
+                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
                         addLine(lineSet, cp0, cp1, R);
                     }
 
                     mp0 = arrVertexes[p1].position;
                     mp1 = arrVertexes[p2].position;
-                    if ( camera.clipLineCohenSutherland(mp0, mp1, cp0, cp1) ) {
+                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
                         addLine(lineSet, cp0, cp1, R);
                     }
 
                     mp0 = arrVertexes[p2].position;
                     mp1 = arrVertexes[p0].position;
-                    if ( camera.clipLineCohenSutherland(mp0, mp1, cp0, cp1) ) {
+                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
                         addLine(lineSet, cp0, cp1, R);
                     }
                 }
