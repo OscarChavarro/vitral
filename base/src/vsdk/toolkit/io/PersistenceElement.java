@@ -277,6 +277,13 @@ public abstract class PersistenceElement {
         int2byteArrayInvert(arr, start, num);
     }
 
+    public static void int2byteArrayLE(byte[] arr, int start, int num) {
+        if ( bigEndianArchitecture ) {
+            int2byteArrayInvert(arr, start, num);
+        }
+        int2byteArrayDirect(arr, start, num);
+    }
+
     /**
     This method is responsible of taking into account the endianess of the 
     original data
@@ -353,10 +360,16 @@ public abstract class PersistenceElement {
         return byteArray2intBE(bytesForInt, 0);
     }
 
-    public static void writeIntBE(OutputStream is, int num) throws Exception
+    public static void writeIntBE(OutputStream os, int num) throws Exception
     {
         int2byteArrayBE(bytesForInt, 0, num);
-        writeBytes(is, bytesForInt);
+        writeBytes(os, bytesForInt);
+    }
+
+    public static void writeIntLE(OutputStream os, int num) throws Exception
+    {
+        int2byteArrayLE(bytesForInt, 0, num);
+        writeBytes(os, bytesForInt);
     }
 
     public static long readLongLE(InputStream is) throws Exception
