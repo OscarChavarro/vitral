@@ -92,7 +92,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private PolyhedralBoundedSolid buildSolid(int type)
     {
         PolyhedralBoundedSolid solid = null;
-        Matrix4x4 T;
+        Matrix4x4 T, R, S, M;
 
         switch ( type % 7 ) {
           case 0:
@@ -119,10 +119,29 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             solid = PolyhedralBoundedSolidModelingTools.createCircle(
                 0.5, 0.5, 0.5, 0.1, 24
             );
+
             T = new Matrix4x4();
-            T.translation(0.1, 0.1, 0.5);
+            T.translation(0.0, 0.0, 0.5);
+            R = new Matrix4x4();
+            R.axisRotation(Math.toRadians(5), 0, 1, 0);
+            S = new Matrix4x4();
+	    S.scale(0.5, 0.5, 0.5);
+            M = T.multiply(R.multiply(S));
+            PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), M);
+
+/*
+            T = new Matrix4x4();
+            T.translation(0.1, 0.1, 1.0);
+            R = new Matrix4x4();
+            //R.axisRotation(Math.toRadians(15), 0, 1, 0);
+            S = new Matrix4x4();
+	    S.scale(0.2, 0.2, 0.2);
+            M = T.multiply(R.multiply(S));
             PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFace(
-                solid, solid.findFace(1), T);
+                solid, solid.findFace(1), M);
+*/
+
             break;
           case 6:
             solid = PolyhedralBoundedSolidModelingTools.createSphere(0.5);

@@ -855,7 +855,9 @@ public class PolyhedralBoundedSolid extends Solid {
                 break;
             }
         }
-        if ( facePlane == null ) return false;
+        if ( facePlane == null ) {
+            return false;
+	}
 
         //- 4. Check if all points are near face plane --------------------
         for ( i = 1; i < points.size(); i++ ) {
@@ -876,6 +878,57 @@ public class PolyhedralBoundedSolid extends Solid {
     public boolean isValid()
     {
         return modelIsValid;
+    }
+
+    private ArrayList<Vector3D> extractPointsFromFace(_PolyhedralBoundedSolidFace face)
+    {
+        boolean test = true;
+        ArrayList<Vector3D> points;
+        points = new ArrayList<Vector3D>();
+        int j;
+
+        for ( j = 0; j < face.boundariesList.size(); j++ ) {
+            _PolyhedralBoundedSolidLoop loop;
+            _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+            loop = face.boundariesList.get(j);
+            he = loop.boundaryStartHalfEdge;
+            if ( he == null ) {
+                //msg += "  - Loop without starting halfedge\n";
+                test = false;
+                break;
+            }
+            heStart = he;
+            do {
+                he = he.next();
+                if ( he == null ) {
+                    // Loop is not closed!
+                    //msg += "  - Not closed loop\n";
+                    test = false;
+                    break;
+                }
+                points.add(he.startingVertex.position);
+            } while( he != heStart );
+        }
+
+        if ( !test ) {
+            return null;
+        }
+        return points;
+    }
+
+    /**
+    Given a face inside current solid, this method returns true if face is
+    planar, false otherwise.
+    */
+    public boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face)
+    {
+        ArrayList<Vector3D> points = extractPointsFromFace(face);
+
+        if ( (points != null) && validateFacePointsAreCoplanar(points) ) {
+	    return true;
+	}
+	return false;
     }
 
     /**
@@ -900,39 +953,16 @@ public class PolyhedralBoundedSolid extends Solid {
     public boolean
     validateModel()
     {
-        int i, j;
+        int i;
         String msg = "";
         boolean test = true;
-        ArrayList<Vector3D> points;
 
         modelIsValid = false;
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            points = new ArrayList<Vector3D>();
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
 
-                loop = face.boundariesList.get(j);
-                he = loop.boundaryStartHalfEdge;
-                if ( he == null ) {
-                    msg += "  - Loop without starting halfedge\n";
-                    test = false;
-                }
-                heStart = he;
-                do {
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        msg += "  - Not closed loop\n";
-                        test = false;
-                        break;
-                    }
-                    points.add(he.startingVertex.position);
-                } while( he != heStart );
-            }
-            if ( validateFacePointsAreCoplanar(points) ) {
+            if ( validateFaceIsPlanar(face) ) {
                 face.calculatePlane();
             }
             else {

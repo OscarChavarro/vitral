@@ -508,6 +508,9 @@ Changes in 2008 january 2 revition <<292min>>
 Changes in 2008 january 2 revition <<60min>>
   - 1h: First JNLP deployable example (CameraExample)
 
+Changes in 2008 january 12 revition <<60min>>
+  - 1h: study / review of PolyhedralBoundedSolidExample and [MANT1988].12
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
