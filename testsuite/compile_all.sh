@@ -7,7 +7,7 @@ cd _JOGLPbufferExample
 ./compile.sh
 cd ..
 cd _JAIHelloWorld
-./compile.sh
+#./compile.sh
 cd ..
 cd ..
 #---------------------------------------------------------------------------
@@ -57,6 +57,9 @@ cd CgShaderExample
 ./compile3.sh
 cd ..
 cd WireframeExample
+./compile.sh
+cd ..
+cd WireframeSwingExample
 ./compile.sh
 cd ..
 cd ..

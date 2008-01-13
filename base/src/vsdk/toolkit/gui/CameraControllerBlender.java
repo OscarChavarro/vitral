@@ -2,7 +2,7 @@ package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
@@ -55,7 +55,12 @@ public class CameraControllerBlender extends CameraController {
         return val;
     }
   
-    public boolean processKeyPressedEventAwt(KeyEvent keyEvent) {
+    public boolean processKeyPressedEvent(KeyEvent keyEvent) {
+	System.out.println("MY EVENT!");
+        return false;
+    }
+
+    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
         Vector3D focusedPosition;
@@ -108,7 +113,7 @@ public class CameraControllerBlender extends CameraController {
 //        if ( unicode_id == keyEvent.CHAR_UNDEFINED ) {
 
             switch ( keycode ) {
-              case KeyEvent.VK_X:
+              case java.awt.event.KeyEvent.VK_X:
                 if ( (mask & SHIFT_MASK) == 0 ) {
                     // Minuscula
                     eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
@@ -121,7 +126,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case KeyEvent.VK_NUMPAD5: // Rote el modo de proyeccion
+              case java.awt.event.KeyEvent.VK_NUMPAD5: // Rote el modo de proyeccion
                 switch ( projectionMode ) {
                   case Camera.PROJECTION_MODE_PERSPECTIVE:
                     projectionMode = Camera.PROJECTION_MODE_ORTHOGONAL;
@@ -133,7 +138,7 @@ public class CameraControllerBlender extends CameraController {
                 updated = true;
                 break;
 
-              case KeyEvent.VK_NUMPAD4:
+              case java.awt.event.KeyEvent.VK_NUMPAD4:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -157,7 +162,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case KeyEvent.VK_NUMPAD6:
+              case java.awt.event.KeyEvent.VK_NUMPAD6:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -181,7 +186,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case KeyEvent.VK_NUMPAD2:
+              case java.awt.event.KeyEvent.VK_NUMPAD2:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -205,7 +210,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case KeyEvent.VK_NUMPAD8:
+              case java.awt.event.KeyEvent.VK_NUMPAD8:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -229,12 +234,12 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case KeyEvent.VK_NUMPAD1:
+              case java.awt.event.KeyEvent.VK_NUMPAD1:
                 updated = true;
                 R.axisRotation(0, 0, 0, 1);
                 break;
 
-              case 107: // Warning: How to tell KeyEvent.VK_NUMPAD_PLUS: ?
+              case 107: // Warning: How to tell java.awt.event.KeyEvent.VK_NUMPAD_PLUS: ?
                 // Translation
                 eyePosition = 
                     eyePosition.add(u.multiply(deltaMov));
@@ -243,7 +248,7 @@ public class CameraControllerBlender extends CameraController {
                 updated = true;
                 break;
 
-              case 109: // Warning: How to tell KeyEvent.VK_NUMPAD_LESS: ?
+              case 109: // Warning: How to tell java.awt.event.KeyEvent.VK_NUMPAD_LESS: ?
                 // Translation
                 eyePosition = 
                     eyePosition.substract(u.multiply(deltaMov));
@@ -359,7 +364,7 @@ public class CameraControllerBlender extends CameraController {
         return updated;
     }
 
-    public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
+    public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
         return false;
     }
 

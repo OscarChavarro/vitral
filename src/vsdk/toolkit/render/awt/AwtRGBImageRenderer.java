@@ -19,6 +19,7 @@ public class AwtRGBImageRenderer extends AwtRenderer
 {
     public static void draw(Graphics dc, RGBImage img, int x0, int y0)
     {
+/*
         int x, y;
         RGBPixel pixel;
 
@@ -33,6 +34,9 @@ public class AwtRGBImageRenderer extends AwtRenderer
                 dc.drawLine(x+x0, y+y0, x+x0, y+y0);
             }
         }
+*/
+        BufferedImage i = exportToAwtBufferedImage(img);
+        dc.drawImage(i, x0, y0, null);
     }
 
     public static void draw(Graphics dc, RGBImage img)

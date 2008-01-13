@@ -15,7 +15,7 @@
 //=   rayable objects, with geometries implementing intersection operation  =
 //=   in an object-coordinate basis.                                        =
 //= - May 16 2006 - Alfonso Barbosa: modify to manage ZBuffers              =
-//= - November 1 2006 - Alfonso Barbosa / Diana Reyes: exceute generalized  =
+//= - November 1 2006 - Alfonso Barbosa / Diana Reyes: execute generalized  =
 //=   for inclusion of sub-viewport spec.                                   =
 //= - November 19 2006 - Oscar Chavarro: material handling supporting       =
 //=   submaterials inside geometry.                                         =
@@ -375,7 +375,7 @@ public class Raytracer extends RenderingElement {
         return c;
     }
 
-    public void execute(RGBImage inoutViewport, 
+    public void execute(RGBImage inoutViewport,
                         RendererConfiguration inQualitySelection,
                         ArrayList <SimpleBody> inSimpleBodyArray,
                         ArrayList <Light> in_arr_luces,

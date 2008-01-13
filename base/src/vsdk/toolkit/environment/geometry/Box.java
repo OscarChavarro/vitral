@@ -20,6 +20,7 @@ public class Box extends Solid {
 
     private GeometryIntersectionInformation lastInfo;
     private int lastPlane;
+    private PolyhedralBoundedSolid brepCache;
 
     public Box(double dx, double dy, double dz) {
         size = new Vector3D(dx, dy, dz);
@@ -260,6 +261,14 @@ public class Box extends Solid {
     }
 
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        if ( brepCache == null ) {
+            brepCache = buildPolyhedralBoundedSolid();
+	}
+        return brepCache;
+    }
+
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
         PolyhedralBoundedSolid solid;
         solid = new PolyhedralBoundedSolid();

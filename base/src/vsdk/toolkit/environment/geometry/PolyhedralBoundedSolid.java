@@ -308,6 +308,15 @@ public class PolyhedralBoundedSolid extends Solid {
             newLoop.halfEdgesList.add(he);
         }
 
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmef",
+            "Non-existing halfedge 1!");
+	}
+        if ( he2 == null ) {
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmef",
+            "Non-existing halfedge 2!");
+	}
+
         nhe1 = addhe(newEdge, he2.startingVertex, he1, MINUS);
         nhe2 = addhe(newEdge, he1.startingVertex, he2, PLUS);
 
@@ -437,6 +446,12 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     smev: "Strut" or line-drawing "Simplified" version of mev operator.
     See mev method for a complete description.
+    @param f1 existing face id (counted from 1) in current solid, where
+           new edge and vertex will be created
+    @param v1 existing vertex id (counted from 1) in current solid that
+           will be taken as starting vertex for new edge
+    @param v4 vertex id (counted from 1) for new vertex
+    @param p coordinates for new vertex
     */
     public boolean smev(int f1, int v1, int v4, Vector3D p)
     {
@@ -521,19 +536,19 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Face " + f1 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1);
         if ( he1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Edge " + v1 + " - * not found in face " + f1 + ".");
             return false;
         }
         he2 = oldface1.findHalfEdge(v3);
         if ( he1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "mef",
+            VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Edge " + v3 + " - * not found in face " + f1 + ".");
             return false;
         }
@@ -542,7 +557,7 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    mev: (High level version) MakeEdgeFace (face splitting operation).
+    mef: (High level version) MakeEdgeFace (face splitting operation).
     Operator `mef` connects the vertices `v1` and `v3` of face `f1` with
     a new edge, and creates a new face `f2`. Similarly to method `smev`,
     there is included a convenience procedure `smef` that leaves the arguments
@@ -1060,6 +1075,12 @@ public class PolyhedralBoundedSolid extends Solid {
         msg += "= END OF POLYHEDRAL BOUNDED SOLID STRUCTURE ===================================\n";
         return msg;
     }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        return this;
+    }
+
 }
 
 //===========================================================================

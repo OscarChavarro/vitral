@@ -73,6 +73,7 @@ public class ImageSwingExample
         this.add(canvasWidget, BorderLayout.CENTER);
         this.add(controlsPanelWidget, BorderLayout.SOUTH);
         this.setJMenuBar(menubarWidget);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public Dimension getPreferredSize() {

@@ -14,9 +14,11 @@
 
 package vsdk.toolkit.render;
 
+// Java classes
 import java.util.ArrayList;
 import java.util.Collections;
 
+// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Ray;
@@ -75,6 +77,9 @@ class _AppelEdgeCache extends RenderingElement
     }
 }
 
+/**
+This class implements the Appel's algorithm for hidden line rendering. :)
+*/
 public class HiddenLineRenderer extends RenderingElement
 {
     private static int
@@ -92,7 +97,6 @@ public class HiddenLineRenderer extends RenderingElement
     }
 
     /**
-    @todo handle Geometry's other than PolyhedralBoundedSolid by convertion.
     */
     private static void buildCache(ArrayList <SimpleBody> solids,
                                    SimpleBody body, 
@@ -101,13 +105,14 @@ public class HiddenLineRenderer extends RenderingElement
                                    Camera camera)
     {
         Geometry g = body.getGeometry();
-        if ( !(g instanceof PolyhedralBoundedSolid) ) {
-            // Should not ignoreit, but export it to PolyhedralBoundedSolid!!!
+
+        if ( g == null ) {
             return;
-        }
-        else {
-            solids.add(body);
-        }
+	}
+
+        g = g.exportToPolyhedralBoundedSolid();
+
+        solids.add(body);
         PolyhedralBoundedSolid solid = (PolyhedralBoundedSolid)g;
 
         int i;
@@ -357,7 +362,6 @@ public class HiddenLineRenderer extends RenderingElement
     }
 
 }
-
 
 //===========================================================================
 //= EOF                                                                     =

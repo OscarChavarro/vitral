@@ -1,0 +1,67 @@
+<html>
+  <head>
+      <title>VitralSDK Camera Example (standalone applet version)</title>
+  </head>
+  <body> 
+      <h1>VitralSDK Camera Example (standalone applet version)</h1>
+      <hr>
+
+<applet code=WireframeSwingExample.class codebase=classes archive="vsdk.jar"
+        width=640 height=480>
+	alt="Your browser understands the &lt;APPLET&gt; tag but isn't running the applet, for some reason."
+	Your browser is completely ignoring the &lt;APPLET&gt; tag!
+</applet>
+
+<!-- ====================================================================== -->
+      <hr>
+<H2>USAGE</H2>
+
+This applet-based program includes an interaction scheme based on the 
+following mouse and keyboard events, managed by standard Vitral SDK toolkit
+interaction controllers:
+<UL>
+<LI>Mouse drag with first button: camera rotation
+<LI>Mouse drag with second button: camera advance and roll
+<LI>Mouse drag with third button: camera tile
+<LI>Keyboard keys x, X, y, Y, z and Z: camera position
+<LI>Keyboard arrow keys: camera rotation
+<LI>Keyboard keys s and S: camera roll
+<LI>Keyboard keys a and A: camera angle for field of view
+<LI>Keyboard keys n and N: camera near plane
+<LI>Keyboard keys f and F: camera far plane
+<LI>Keyboard key i: print current camera state to java console
+</UL>
+
+<H2>TROUBLESHOOTING</H2>
+
+Before searching for reasons of a non working applet, consider that there are
+two different ways to use a JOGL based applet:
+<UL>
+<LI>Directly calling the application applet class (a stand-alone applet
+version): this method requires user to previously install JOGL in the java
+extensions directories (jdk/jre/lib/ext and jre/lib/ext) and native libraries
+in an operating system directory for libraries (system32 in Windows, or some
+lib in Unix).
+<LI>Indirect calling via the JOGL applet loader
+com.sun.opengl.util.JOGLAppletLauncher class (a subapplet version): this
+doesn't require users to have any JOGL installed, but only works well if JOGL
+is not installed.
+</UL>
+
+If this applet is not working, can be due to a different set of causes, mostly:
+<UL>
+<LI>If the webserver use a Unix/Linux based operating system, do not use 
+symbolic links, as applet subsystem gives security exceptions
+<LI>Some needed .jar file is not available in the webserver's applet codebase directory, or jogl-natives are not available for this platform
+<LI>The jogl jars included in webserver's applet codebase directory are not
+the signed versions from Sun Microsystems. Check they where downloaded from
+http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current.
+<LI>You are trying to use a subapplet version of this page in an environment
+where jogl is locally installed in the java extension directory, or from
+appletviewer
+<LI>You are trying to use a stand-alone applet version of this page in an
+environment where jogl is not locally installed in the java extension directory
+</UL>
+
+  </body>
+</html>	  

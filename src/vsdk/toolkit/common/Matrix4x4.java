@@ -149,11 +149,13 @@ public class Matrix4x4 extends FundamentalEntity
    \end{array}
 \right]
 \f]
-    which correspond to the perspective projection for the VITRAL's used
-    canonical volume: center of projection is point <0, 0, 1>, projection
+    which correspond to the perspective projection for the VITRAL's perspective
+    canonical view volume: center of projection is point <0, 0, 1>, projection
     plane is the z=0 plane, and view volume limiting planes are 45 degrees
-    with respect to the z axis, that is, they pass by the lines x=-1, x=1,
-    y=-1 and y=1 at the z=0 plane.
+    with respect to the z axis (fov is 90 degrees in u and v directions), that
+    is, they pass by the lines x=-1, x=1, y=-1 and y=1 at the z=0 plane.
+    Note that up vector for containing camera in that projection is the
+    j=<0, 1, 0> vector.
 
     The derivation of this matrix follows the approach suggested at
     [FOLE1992].6.4. except that relations are not derived from similar

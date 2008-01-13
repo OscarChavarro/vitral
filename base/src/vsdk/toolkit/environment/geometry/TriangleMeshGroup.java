@@ -264,6 +264,10 @@ public class TriangleMeshGroup extends Surface {
         }
     }
 
+    public TriangleMeshGroup exportToTriangleMeshGroup()
+    {
+        return this;
+    }
 
 }
 

@@ -19,7 +19,6 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -1515,7 +1514,7 @@ public class Reader3ds extends PersistenceElement
     }
 
     public static void
-    importEnvironment(File inSceneFileFd, SimpleScene inoutSimpleScene)
+    importEnvironment(InputStream is, String pathname, String sourcename, SimpleScene inoutSimpleScene)
         throws Exception
     {
         //-----------------------------------------------------------------
@@ -1526,19 +1525,18 @@ public class Reader3ds extends PersistenceElement
 
         //-----------------------------------------------------------------
         _Reader3dsChunk chunk = new _Reader3dsChunk();
-        InputStream is = new FileInputStream(inSceneFileFd);
 
         currentSimpleBodiesArray = simpleBodiesArray;
         currentMaterialArray = new ArrayList<Material>();
         currentTextureFilenamesArray = new ArrayList<String>();
 
-        workingDirectory = inSceneFileFd.getParentFile().getAbsolutePath();
+        workingDirectory = pathname;
 
         //- Main level chunk hierarchy processing -------------------------
         chunk.readHeader(is);
 
         if ( chunk.id != chunk.ID_MAIN ) {
-            Exception e = new Exception("\"" + inSceneFileFd.getName() +
+            Exception e = new Exception("\"" + sourcename +
                 "\" is not a 3DS format file, doesn't start with 0x4D4D " +
                 "header chunk.");
             throw e;

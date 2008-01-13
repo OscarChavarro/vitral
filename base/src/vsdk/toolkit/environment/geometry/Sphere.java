@@ -20,11 +20,14 @@ public class Sphere extends Solid {
     private Vector3D _static_delta;
     private double [] _static_minmax;
 
+    private PolyhedralBoundedSolid brepCache;
+
     public Sphere(double r) {
         _radius = r;
         _radius_squared = _radius*_radius;
         _static_delta = new Vector3D();
         _static_minmax = new double[6];
+        brepCache = null;
     }
 
     /**
@@ -173,6 +176,131 @@ G                igual respecto al c&oacute;digo original de MIT.
         _radius_squared = r*r;
     }
 
+    private static void
+    spherePosition(Vector3D p, double theta, double t, double r)
+    {
+        double phi = (t-0.5)*Math.PI;
+        p.x = Math.cos(phi) * Math.cos(theta) * r;
+        p.y = Math.cos(phi) * Math.sin(theta) * r;
+        p.z = Math.sin(phi) * r;
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        if ( brepCache == null ) {
+            brepCache = buildPolyhedralBoundedSolid();
+	}
+        return brepCache;
+    }
+
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    {
+        double theta = 0;
+        double phi = 0;
+        int nparalels = 8;
+        int nmeridians = 16;
+        double dtheta = 2*Math.PI / ((double)nmeridians);
+        double dphi = 1.0 / ((double)nparalels);
+        int i, base2, base1;
+        Vector3D pos;
+
+        PolyhedralBoundedSolid solid;
+
+        //- Build triangles for lower cap ---------------------------------
+        solid = new PolyhedralBoundedSolid();
+        pos = new Vector3D(0, 0, -_radius);
+        solid.mvfs(pos, 1, 1);
+
+        pos = new Vector3D();
+        spherePosition(pos, dtheta, dphi, _radius);
+        solid.smev(1, 1, 3, pos);
+        pos = new Vector3D();
+        spherePosition(pos, 0, dphi, _radius);
+        solid.smev(1, 3, 2, pos);
+
+        solid.mef(1, 1, 1, 3, 2, 3, 2);
+
+        for ( i = 2; i < nmeridians; i++ ) {
+            theta = dtheta * ((double)i);
+            pos = new Vector3D();
+            spherePosition(pos, theta, dphi, _radius);
+            solid.smev(1, 1, (i+1)+1, pos);
+            // Next face is <(1), (i+1), (i+0)>
+            solid.mef(1,        /* seed face, always face 1 */
+                      1,        /* seed face, always face 1 */
+                      (i+0)+1,  /* start of half edge 1 */
+                      (1),      /* end of half edge 1 */
+                      (i+1)+1,  /* start of half edge 2 */
+                      (1),      /* end of half edge 2 */
+                      i+1       /* new face id */);
+        }
+        // Next face is <(1), (2), (i+1)>
+        solid.mef(1,        /* seed face, always face 1 */
+                  1,        /* seed face, always face 1 */
+                  (i+1),    /* start of half edge 1 */
+                  (1),      /* end of half edge 1 */
+                  (2),      /* start of half edge 2 */
+                  (3),      /* end of half edge 2 */
+                  i+1       /* new face id */);
+        base2 = i+2;
+        base1 = 2;
+
+        //- Build side quads for sphere body ------------------------------
+        int p;
+        for ( p = 0; p < nparalels-2; p++ ) {
+            phi = ((double)(p+2)) / ((double)nparalels);
+            for ( i = 0; i < nmeridians; i++ ) {
+                theta = dtheta * ((double)i);
+                pos = new Vector3D();
+                spherePosition(pos, theta, phi, _radius);
+                solid.smev(1, (i)+base1, (i)+base2, pos);
+                if ( i > 0 ) {
+                    // Next face is <(i), (i+base2), (i-1+base2), (i-1)>
+                    solid.mef(1,           /* seed face, always face 1 */
+                              1,           /* seed face, always face 1 */
+                              (i-1)+base2, /* start of half edge 1 */
+                              (i-1)+base1, /* end of half edge 1 */
+                              (i)+base2,   /* start of half edge 2 */
+                              (i)+base1,   /* end of half edge 2 */
+                              base2+i+1    /* new face id */);
+                }
+            }
+            solid.mef(1,           /* seed face, always face 1 */
+                      1,           /* seed face, always face 1 */
+                      (i+base2-1), /* start of half edge 1 */
+                      (base1+i-1), /* end of half edge 1 */
+                      (base2),     /* start of half edge 2 */
+                      (base2+1),   /* end of half edge 2 */
+                      base2+i+1    /* new face id */);
+            base1 = base2;
+            base2 += nmeridians;
+        }
+
+        //- Build triangles for lower cap ---------------------------------
+        pos = new Vector3D(0, 0, _radius);
+        solid.smev(1, base1, base2, pos);
+
+        for ( i = 0; i < nmeridians-2; i++ ) {
+            solid.mef(1,           /* seed face, always face 1 */
+                      1,           /* seed face, always face 1 */
+                      base2,       /* start of half edge 1 */
+                      base1+i,     /* end of half edge 1 */
+                      base1+i+1,   /* start of half edge 2 */
+                      base1+i+2,   /* end of half edge 2 */
+                      base2+i+1    /* new face id */);
+        }
+
+        solid.mef(1,           /* seed face, always face 1 */
+                  1,           /* seed face, always face 1 */
+                  base2,       /* start of half edge 1 */
+                  base1+i,     /* end of half edge 1 */
+                  base1+i+1,   /* start of half edge 2 */
+                  base1,   /* end of half edge 2 */
+                  base2+i+1    /* new face id */);
+
+        //-----------------------------------------------------------------
+        return solid;
+    }
 }
 
 //===========================================================================

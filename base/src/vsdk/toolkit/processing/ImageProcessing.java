@@ -94,7 +94,12 @@ public abstract class ImageProcessing extends ProcessingElement {
             double yf = (((double)ySizeIn) / ((double)ySizeOut));
             int xfi = (int)xf + 1;
             int yfi = (int)yf + 1;
-            double w = xfi * yfi;
+            double w = (xfi * yfi);
+
+            if ( w > 50 ) {
+                w /= 2;
+	    }
+
             int xx, yy, x0, y0, x1, y1;
             acum = new RGBPixel();
             for ( xx = 0; xx < xSizeOut; xx++ ) {

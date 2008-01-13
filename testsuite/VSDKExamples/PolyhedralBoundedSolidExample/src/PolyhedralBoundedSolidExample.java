@@ -94,7 +94,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         PolyhedralBoundedSolid solid = null;
         Matrix4x4 T;
 
-        switch ( type % 6 ) {
+        switch ( type % 7 ) {
           case 0:
             solid = new PolyhedralBoundedSolid();
             solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
@@ -123,6 +123,9 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             T.translation(0.1, 0.1, 0.5);
             PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), T);
+            break;
+          case 6:
+            solid = PolyhedralBoundedSolidModelingTools.createSphere(0.5);
             break;
           case 2: default:
             solid = PolyhedralBoundedSolidModelingTools.createHoledBox();

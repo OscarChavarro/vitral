@@ -8,6 +8,8 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 // VSDK Classes
@@ -26,7 +28,10 @@ public class EnvironmentPersistence extends PersistenceElement {
             ReaderObj.importEnvironment(inSceneFileFd, inoutScene);
         }
         else if ( type.equals("3ds") ) {
-            Reader3ds.importEnvironment(inSceneFileFd, inoutScene);
+            InputStream is = new FileInputStream(inSceneFileFd);
+            String pathname = inSceneFileFd.getParentFile().getAbsolutePath();
+            String sourcename = inSceneFileFd.getName();
+            Reader3ds.importEnvironment(is, pathname, sourcename, inoutScene);
         }
         else if ( type.equals("gts") ) {
             ReaderGts.importEnvironment(inSceneFileFd, inoutScene);

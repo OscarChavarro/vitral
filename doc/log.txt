@@ -435,14 +435,14 @@ Changes in 2007 september 23 revition
   - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
 
-Changes in 2007 october 7 revition <<3h34min>>
+Changes in 2007 october 7 revition <<214min>>
   - 38min: CommandServer (basic test app)
   - 38min: Researching how to get strokes from a JTextField :)
   - 42min: Command set data structures
   - 30min: Automatic erasing of command speech based on time outs
   - 36min: networking server funnctionality
 
-Changes in 2007 october 14 revition <<3h52min>>
+Changes in 2007 october 14 revition <<232min>>
   - 46min: RegularExpression empty classes structure and example testsuite
     program
   - 44min: RegularExpression parser and some tree building research
@@ -450,34 +450,63 @@ Changes in 2007 october 14 revition <<3h52min>>
   - 1h39min: first RegularExpression implementation working, renamed to
     AlgebraicExpression
 
-Changes in 2007 october 15 revition <<2h15min>>
+Changes in 2007 october 15 revition <<135min>>
   - 52min: FunctionalExplicitSurface :)
   - 37min: Fixing bugs in AlgebraicExpression
   - 46min: EnvironmentPersistence.exportObj
 
-Changes in 2007 october 20 revition <<4h07min>>
+Changes in 2007 october 20 revition <<247min>>
   - 1h30min: ParametricBiCubicPatch and its renderer revition.
   - 2h37min: Fixing an structural bug in Ferguson parametric patches
     management.
 
-Changes in 2007 october 21 revition <<4h>>
+Changes in 2007 october 21 revition <<240min>>
   - 3h: Revisiting and cleaning parametric bicubic patch management,
     representation and Jogl rendering code.
   - 1h: Bezier parametric bicubic patch management revisited.
 
-Changes in 2007 october 25 revition
+Changes in 2007 october 25 revition <<68min>>
   - 1h08min: ReaderGts class added
 
-Changes in 2007 october 26 revition
+Changes in 2007 october 26 revition <<40min>>
   - 40min: WriterGts class added
 
-Changes in 2007 october 30 revition
+Changes in 2007 october 30 revition <<90min>>
   - 1h30min: MatrixNxM basic class
 
-Changes in 2007 november 13 revition <<2h50min>>
+Changes in 2007 november 13 revition <<170min>>
   - 50min: JoglInfinitePlaneRenderer, minor additions to 
     CameraControllerAquynza
   - 2h: Plane rendering and managing revisited. Camera.getBoundingPlanes added.
+
+Changes in 2007 december 28 revition <<60min>>
+  - 1h: studying WireframeOfflineExample, documenting it and generalizing it
+
+Changes in 2007 december 29 revition <<180min>>
+  - 3h: Camera.clipLineCohenSutherlandCanonicVolume
+
+Changes in 2007 december 30 revition <<401min>>
+  - 1h25min: Camera.clipLineCohenSutherlandCanonicVolume
+  - 1h22min: WireframeRenderer class created, and supporting surfaces and
+    solids
+  - 3h27min: migrating basic VitralSDK classes to J2ME+J2MEPolish :)
+    First working wireframe renderer running on a Nokia E61 cellphone!
+  - 27min: J2meCalligraphic2DBufferRenderer
+
+Changes in 2007 december 31 revition <<67min>>
+  - 1h05min: KeyEvent, AwtSystem and updates to CameraControllers
+  - 2h: J2eeSystem
+
+Changes in 2008 january 1 revition <<180min>>
+  - 3h: added camera control / KeyEvent management to Vitral J2ME port
+
+Changes in 2008 january 2 revition <<292min>>
+  - 1h: studying and fixing Camera normalization matrix generation
+  - 2h52min: Sphere.exportToPolyhedralBoundedSolid :)
+  - 1h: Migrating and testing J2ME example with raytracer included!
+
+Changes in 2008 january 2 revition <<60min>>
+  - 1h: First JNLP deployable example (CameraExample)
 
 ---------------------------------------------------------------------------
 TODO:

@@ -82,8 +82,9 @@ public class Camera extends Entity
     /// Check `viewportXSize`'s documentation
     private double viewportYSize;
 
-    // Vectores privados que se preprocesan para agilizar los calculos
+    // Private values which are preprocessed to speed up calculations
     private Vector3D dx, dy, _dir, upWithScale, rightWithScale;
+    private Matrix4x4 normalizingTransformation;
     
     public Camera() 
     {
@@ -128,6 +129,11 @@ public class Camera extends Entity
         updateVectors();
     }
 
+    public Matrix4x4 getNormalizingTransformation()
+    {
+        return normalizingTransformation;
+    }
+
     public String getName()
     {
         return name;
@@ -162,7 +168,7 @@ public class Camera extends Entity
     {
         Vector3D partial;
         Vector3D result;
-	partial = front.multiply(focalDistance);
+        partial = front.multiply(focalDistance);
         result = eyePosition.add(partial);
         return result;
     }
@@ -340,6 +346,61 @@ public class Camera extends Entity
         _dir = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
         rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
+
+        //-----------------------------------------------------------------
+        /*
+        The normalizing transformation of current camera is such that transforms
+        points in space to make it lie in the canonical view volume space,
+        and it is calculated following the mechanism described on sections
+        [FOLE1992].6.5.1 and [FOLE1992].6.5.2.
+        */
+        normalizingTransformation = new Matrix4x4();
+        // 1. Translate the "VRP" point to the origin
+        Vector3D VRP;
+        Matrix4x4 T1 = new Matrix4x4();
+
+        // Warning: near plane clipping
+        VRP = eyePosition.add(front.multiply(nearPlaneDistance));
+        //VRP = eyePosition.add(front.multiply(1));
+        T1.translation(VRP.multiply(-1));
+
+        // 2. Rotate the "VRC" coordinate system such as the front axis
+        //    become the -z axis
+        Matrix4x4 R1 = new Matrix4x4();
+        Matrix4x4 R2 = new Matrix4x4();
+
+        R1 = getRotation();
+        R1.invert();
+        R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+
+        // 3. Translate such that the center of projection is at the origin
+	;
+
+        // 4. Shear such that the center line of the view volume becomes the
+        //    z axis
+	;
+
+        // 5. Scale such that the view volume becomes the canonical perspective
+        //    view volume
+        Matrix4x4 S1 = new Matrix4x4();
+        Matrix4x4 S2 = new Matrix4x4();
+        double dx, dy, dz;
+
+        // 5.1. Non proportional scaling to adjust the slopes of the piramid
+        // planes to fix 45 degrees in u and v directions
+        dx = rightWithScale.length();
+        dy = upWithScale.length();
+        S1.scale(dx, dy, 1);
+        S1.invert();
+
+        // 5.2. Proportional scaling to adjust near / far clipping planes
+        // maintaining the piramid form
+        dz = nearPlaneDistance;
+        S2.scale(dz, dz, dz);
+        S2.invert();
+
+        //
+        normalizingTransformation = S2.multiply(S1.multiply(R2.multiply(R1.multiply(T1))));
     }
 
     /**
@@ -574,13 +635,13 @@ public class Camera extends Entity
         //------------------------------------------------------------
         updateVectors();
         msg = msg + "  - Reference frame:\n";
-        msg = msg + "    . Vector UP = " + up + " (longitud " + VSDK.formatDouble(up.length()) + ")\n";
-        msg = msg + "    . Vector FRONT = " + front + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
-        msg = msg + "    . Vector LEFT = " + left + " (longitud " + VSDK.formatDouble(front.length()) + ")\n";
+        msg = msg + "    . Vector UP = " + up + " (length " + VSDK.formatDouble(up.length()) + ")\n";
+        msg = msg + "    . Vector FRONT = " + front + " (length " + VSDK.formatDouble(front.length()) + ")\n";
+        msg = msg + "    . Vector LEFT = " + left + " (length " + VSDK.formatDouble(front.length()) + ")\n";
         msg = msg + "  - Reference frame with scales:\n";
-        msg = msg + "    . Vector UP' = " + upWithScale + " (longitud " + VSDK.formatDouble(upWithScale.length()) + ")\n";
-        msg = msg + "    . Vector FRONT' = " + _dir + " (longitud " + VSDK.formatDouble(_dir.length()) + ")\n";
-        msg = msg + "    . Vector RIGHT' = " + rightWithScale + " (longitud " + VSDK.formatDouble(rightWithScale.length()) + ")\n";
+        msg = msg + "    . Vector UP' = " + upWithScale + " (length " + VSDK.formatDouble(upWithScale.length()) + ")\n";
+        msg = msg + "    . Vector FRONT' = " + _dir + " (length " + VSDK.formatDouble(_dir.length()) + ")\n";
+        msg = msg + "    . Vector RIGHT' = " + rightWithScale + " (length " + VSDK.formatDouble(rightWithScale.length()) + ")\n";
         msg = msg + "  - fov = " + VSDK.formatDouble(fov) + "\n";
         msg = msg + "  - nearPlaneDistance = " + VSDK.formatDouble(nearPlaneDistance) + "\n";
         msg = msg + "  - farPlaneDistance = " + VSDK.formatDouble(farPlaneDistance) + "\n";
@@ -832,6 +893,36 @@ public class Camera extends Entity
         return bits;
     }
 
+    private double fpd()
+    {
+        return (farPlaneDistance - nearPlaneDistance) / nearPlaneDistance;
+    }
+
+    /**
+    Given a point in "clipping coordinates space", this method calculates
+    a six bit opcode, as explained in [FOLE1992].6.5.3, suitable for use in the
+    Cohen-Suterland line clipping algorithm.
+
+    Note that in VSDK, the clipping space correspond to the frustum for
+    the minmax cube from <-1, -1, -1> to <1, 1, 1>.
+
+    WARNING: Currently is only implementing the perspective case!
+    */
+    private int calculateOutcodeBits(Vector3D p)
+    {
+        int bits = 0x00;
+
+        if ( p.z + p.x - 1 > 0 ) bits |= OPCODE_RIGHT;
+        if ( p.z - p.x - 1 > 0 ) bits |= OPCODE_LEFT;
+        if ( p.z + p.y - 1 > 0 ) bits |= OPCODE_UP;
+        if ( p.z - p.y - 1 > 0 ) bits |= OPCODE_DOWN;
+        // Warning: near plane clipping
+        if ( p.z > 0 ) bits |= OPCODE_NEAR;
+        if ( p.z < -fpd() ) bits |= OPCODE_FAR;
+
+        return bits;
+    }
+
     /**
     Given a point in world space, this method calculates a six bit opcode,
     as explained in [FOLE1992].6.5.3, suitable for use in the Cohen-Suterland
@@ -994,7 +1085,6 @@ public class Camera extends Entity
                 }
 
                 //--------------------------------------------------
-                Vector3D p = new Vector3D();
                 if ( outcodeout == outcode0 ) {
                     clippedPoint0.x = clippingMidPoint.x;
                     clippedPoint0.y = clippingMidPoint.y;
@@ -1011,6 +1101,194 @@ public class Camera extends Entity
                         rightPlane, leftPlane, upPlane, 
                         downPlane, nearPlane, farPlane);
 
+                }
+            }
+        } while ( !done );
+
+        return linePasses;
+    }
+
+    /**
+    This method implements the Cohen-Sutherland line clipping algorithm with
+    respect to the view volume defined by current camera. Recieves the two
+    line endpoints and return true if any part of this line lies inside the
+    view volume.  In the case the line crosses the view volume, the new
+    resulting endpoints are calculated and returned.
+
+    This algorithm structure follows the one proposed in [FOLE1992].3.12.3,
+    generalizing it to the 3D case, as noted in [FOLE1992].6.5.3.
+
+    The resulting clipped points are in the canonical volume reference, ready
+    for projection.  If 3D clipped points are needed, they must be premultiplied
+    by the inverse of the normalizingTransformation.
+    */
+    public boolean clipLineCohenSutherlandCanonicVolume(
+                             Vector3D point0, Vector3D point1,
+                             Vector3D clippedPoint0, Vector3D clippedPoint1)
+    {
+        //- Local variables definition ------------------------------------
+        int outcode0;                // 6bit containment code for point0
+        int outcode1;                // 6bit containment code for point1
+        int outcodeout;              // Selected endpoint code for iteration
+        Vector3D clippingMidPoint;   // Selected endpoint clipped for iteration
+        Ray testRay;                 // Ray use for general line/plane clipping
+        Vector3D dirFromP0ToP1;      // Temporary for testRay construction
+        double l;                    // Length of dirFromP0ToP1
+        int planeId;                 // A number from 1 to 6 identifying which
+                                     // plane intersection is being tested
+
+        //- Algorithm initial state ---------------------------------------
+        Vector3D pp0, pp1;
+
+        pp0 = normalizingTransformation.multiply(point0);
+        pp1 = normalizingTransformation.multiply(point1);
+
+        clippedPoint0.x = pp0.x;
+        clippedPoint0.y = pp0.y;
+        clippedPoint0.z = pp0.z;
+        clippedPoint1.x = pp1.x;
+        clippedPoint1.y = pp1.y;
+        clippedPoint1.z = pp1.z;
+        updateVectors();
+        clippingMidPoint = new Vector3D();
+        outcode0 = calculateOutcodeBits(pp0);
+        outcode1 = calculateOutcodeBits(pp1);
+
+        //- Main Cohen-Sutherland iteration cycle (incremental clipping) --
+        boolean linePasses = false; // Algorithm return value
+        boolean done = false;       // Iteration exit condition
+        do {
+            //- Trivial cases: trivial accept and trivial reject ----------
+            if ( outcode0 == 0x0 && outcode1 == 0x0 ) {
+                linePasses = true;
+                done = true;
+            }
+            else if ( (outcode0 & outcode1) != 0x0 ) {
+                linePasses = false;
+                done = true;
+            }
+
+            //- Iterative cases: clipping with each of the 6 planes -------
+            else {
+                //--------------------------------------------------
+                dirFromP0ToP1 = clippedPoint1.substract(clippedPoint0);
+                l = dirFromP0ToP1.length();
+                if ( l < VSDK.EPSILON ) {
+                    // continue;
+                    return false;
+                }
+                dirFromP0ToP1.x /= l;
+                dirFromP0ToP1.y /= l;
+                dirFromP0ToP1.z /= l;
+
+                //--------------------------------------------------
+                if ( outcode0 != 0 ) {
+                    outcodeout = outcode0;
+                  }
+                  else {
+                    outcodeout = outcode1;
+                }
+                testRay = new Ray(clippedPoint0, dirFromP0ToP1);
+
+                //--------------------------------------------------
+                planeId = 0;
+                if ( (OPCODE_UP & outcodeout) != 0x0 ) {
+                    planeId = 1; // up plane;
+                }
+                else if ( (OPCODE_DOWN & outcodeout) != 0x0 ) {
+                    planeId = 2; // down plane;
+                }
+                else if ( (OPCODE_LEFT & outcodeout) != 0x0 ) {
+                    planeId = 3; // left plane;
+                }
+                else if ( (OPCODE_RIGHT & outcodeout) != 0x0 ) {
+                    planeId = 4; // right plane;
+                }
+                else if ( (OPCODE_NEAR & outcodeout) != 0x0 ) {
+                    planeId = 5; // near plane
+                }
+                else if ( (OPCODE_FAR & outcodeout) != 0x0 ) {
+                    planeId = 6; // far plane;
+                }
+                else {
+                    // Not possible: non implemented case!
+                        VSDK.reportMessage(this, VSDK.WARNING, 
+                            "clipLineCohenSutherlandCanonicVolume", 
+                            "Unusal case, check code and data");
+                }
+
+                double de;
+                de = (outcodeout == outcode1) ? -VSDK.EPSILON: VSDK.EPSILON;
+
+                switch ( planeId ) {
+                  case 1: // up plane
+                    testRay.t = 
+                          (l * (1 - clippedPoint0.z - clippedPoint0.y)) / 
+                          (clippedPoint1.z - clippedPoint0.z + 
+                           clippedPoint1.y - clippedPoint0.y);
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                  case 2: // down plane
+                    testRay.t = 
+                          (l * (clippedPoint0.y - clippedPoint0.z +1)) / 
+                          (clippedPoint1.z - clippedPoint0.z - 
+                           clippedPoint1.y + clippedPoint0.y);
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                  case 3: // left plane
+                    testRay.t = 
+                          (l * (clippedPoint0.x - clippedPoint0.z +1)) / 
+                          (clippedPoint1.z - clippedPoint0.z - 
+                           clippedPoint1.x + clippedPoint0.x);
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                  case 4: // right plane
+                    testRay.t = 
+                          (l * (1 - clippedPoint0.z - clippedPoint0.x)) / 
+                          (clippedPoint1.z - clippedPoint0.z + 
+                           clippedPoint1.x - clippedPoint0.x);
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                  case 5: // near plane
+                    // Warning: near plane clipping
+                    testRay.t = 
+			( /*(1-nearPlaneDistance)*/ -clippedPoint0.z * l) / 
+                          (clippedPoint1.z - clippedPoint0.z);
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                  case 6: // far plane
+                    testRay.t = 
+                        (((-fpd()-
+                             clippedPoint0.z) * l) / 
+                             (clippedPoint1.z - clippedPoint0.z));
+                    clippingMidPoint = testRay.origin.add(
+                        testRay.direction.multiply(testRay.t+de));
+                    linePasses = true;
+                    break;
+                }
+
+                //--------------------------------------------------
+                if ( outcodeout == outcode0 ) {
+                    clippedPoint0.x = clippingMidPoint.x;
+                    clippedPoint0.y = clippingMidPoint.y;
+                    clippedPoint0.z = clippingMidPoint.z;
+                    outcode0 = calculateOutcodeBits(clippedPoint0);
+                  }
+                  else {
+                    clippedPoint1.x = clippingMidPoint.x;
+                    clippedPoint1.y = clippingMidPoint.y;
+                    clippedPoint1.z = clippingMidPoint.z;
+                    outcode1 = calculateOutcodeBits(clippedPoint1);
                 }
             }
         } while ( !done );

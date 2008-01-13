@@ -59,6 +59,9 @@ cd ..
 cd WireframeExample
 ./run.sh
 cd ..
+cd WireframeSwingExample
+./run.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques

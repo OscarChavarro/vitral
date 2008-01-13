@@ -1,8 +1,10 @@
+//===========================================================================
+
 package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent; // Do not include, deprecated
 
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -72,7 +74,7 @@ public class CameraControllerAquynza extends CameraController {
         return val;
     }
   
-    public boolean processKeyPressedEventAwt(KeyEvent keyEvent) {
+    public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
         Vector3D focusedPosition;
@@ -104,9 +106,6 @@ public class CameraControllerAquynza extends CameraController {
         farPlaneDistance = camera.getFarPlaneDistance();
 
         // 2. Calculate variables used for interaction manipulation
-        unicode_id = keyEvent.getKeyChar();
-        keycode = keyEvent.getKeyCode();
-
         yaw = R.obtainEulerYawAngle();
         pitch = R.obtainEulerPitchAngle();
         roll = R.obtainEulerRollAngle();
@@ -118,129 +117,124 @@ public class CameraControllerAquynza extends CameraController {
         else angleInc = Math.toRadians(0.1);
 
         // 3. Event processing: update the copy of the camera's internal parameters
-        if ( unicode_id == keyEvent.CHAR_UNDEFINED ) {
-            switch ( keycode ) {
-              case KeyEvent.VK_UP:
-                pitch -= angleInc;
-                if ( pitch < Math.toRadians(-90) ) pitch = Math.toRadians(-90);
-                updated = true;
-                break;
-              case KeyEvent.VK_DOWN:
-                pitch += angleInc;
-                if ( pitch > Math.toRadians(90) ) pitch = Math.toRadians(90);
-                updated = true;
-                break;
-              case KeyEvent.VK_LEFT:
-                yaw += angleInc;
-                while ( yaw >= Math.toRadians(360) ) yaw -= Math.toRadians(360);
-                updated = true;
-                break;
-              case KeyEvent.VK_RIGHT:
-                yaw -= angleInc;
-                while ( yaw < 0 ) yaw += Math.toRadians(360);
-                updated = true;
-                break;
-            }
+        switch ( keyEvent.keycode ) {
+          case KeyEvent.KEY_UP:
+            pitch -= angleInc;
+            if ( pitch < Math.toRadians(-90) ) pitch = Math.toRadians(-90);
+            updated = true;
+            break;
+          case KeyEvent.KEY_DOWN:
+            pitch += angleInc;
+            if ( pitch > Math.toRadians(90) ) pitch = Math.toRadians(90);
+            updated = true;
+            break;
+          case KeyEvent.KEY_LEFT:
+            yaw += angleInc;
+            while ( yaw >= Math.toRadians(360) ) yaw -= Math.toRadians(360);
+            updated = true;
+            break;
+          case KeyEvent.KEY_RIGHT:
+            yaw -= angleInc;
+            while ( yaw < 0 ) yaw += Math.toRadians(360);
+            updated = true;
+            break;
 
-        }
-        else {
-            switch ( unicode_id ) {
-              // Position
-              case 'x':
-                eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
-                updated = true;
-                break;
-              case 'X':
-                eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
-                updated = true;
-                break;
-              case 'y':
-                eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;
-                updated = true;
-                break;
-              case 'Y':
-                eyePosition.y += deltaMov; focusedPosition.y += deltaMov;
-                updated = true;
-                break;
-              case 'z':
-                eyePosition.z -= deltaMov; focusedPosition.z -= deltaMov;
-                updated = true;
-                break;
-              case 'Z':
-                eyePosition.z += deltaMov; focusedPosition.z += deltaMov;
-                updated = true;
-                break; 
-              // Rotation
-              case 'S':
-                roll -= Math.toRadians(5);
-                while ( roll < 0 ) roll += Math.toRadians(360);
-                updated = true;
-                break;
-              case 's':
-                roll += Math.toRadians(5);
-                while ( roll > Math.toRadians(360) ) roll -= Math.toRadians(360);
-                updated = true;
-                break;
+          // Position
+          case KeyEvent.KEY_x:
+            eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
+            updated = true;
+            break;
+          case KeyEvent.KEY_X:
+            eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
+            updated = true;
+            break;
+          case KeyEvent.KEY_y:
+            eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;
+            updated = true;
+            break;
+          case KeyEvent.KEY_Y:
+            eyePosition.y += deltaMov; focusedPosition.y += deltaMov;
+            updated = true;
+            break;
+          case KeyEvent.KEY_z:
+            eyePosition.z -= deltaMov; focusedPosition.z -= deltaMov;
+            updated = true;
+            break;
+          case KeyEvent.KEY_Z:
+            eyePosition.z += deltaMov; focusedPosition.z += deltaMov;
+            updated = true;
+            break; 
+          // Rotation
+          case KeyEvent.KEY_S:
+            roll -= Math.toRadians(5);
+            while ( roll < 0 ) roll += Math.toRadians(360);
+            updated = true;
+            break;
+          case KeyEvent.KEY_s:
+            roll += Math.toRadians(5);
+            while ( roll > Math.toRadians(360) ) roll -= Math.toRadians(360);
+            updated = true;
+            break;
   
-              // View volume modification
-              case 'A':
-                if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
-                    orthogonalZoom /= 2;
-                  }
-                  else {
-                    if ( fov < 0.1 - EPSILON ) fov += 0.1;
-                    else if ( fov < 1 - EPSILON ) fov++;
-                    else if ( fov < 175 - EPSILON ) fov += 5;
-                }
-                updated = true;
+          // View volume modification
+          case KeyEvent.KEY_A:
+            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+                orthogonalZoom /= 2;
+              }
+              else {
+                if ( fov < 0.1 - EPSILON ) fov += 0.1;
+                else if ( fov < 1 - EPSILON ) fov++;
+                else if ( fov < 175 - EPSILON ) fov += 5;
+            }
+            updated = true;
+            break;
+          case KeyEvent.KEY_a:
+            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+                orthogonalZoom *= 2;
+              }
+              else {
+                if ( fov > 5 + EPSILON ) fov -= 5;
+                else if ( fov > 1 + EPSILON  ) fov--;
+                else if ( fov > 0.1 + EPSILON  ) fov -= 0.1;
+            }
+            updated = true;
+            break;
+  
+          case KeyEvent.KEY_N:
+            nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
+            updated = true;
+            break;
+          case KeyEvent.KEY_n:
+            nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
+            updated = true;
+            break;
+  
+          case KeyEvent.KEY_F:
+            farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
+            updated = true;
+            break;
+          case KeyEvent.KEY_f:
+            farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
+            updated = true;
+            break;
+  
+          case KeyEvent.KEY_p: // Rote el modo de proyeccion
+            switch ( projectionMode ) {
+              case Camera.PROJECTION_MODE_PERSPECTIVE:
+                projectionMode = Camera.PROJECTION_MODE_ORTHOGONAL;
                 break;
-              case 'a':
-                if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
-                    orthogonalZoom *= 2;
-                  }
-                  else {
-                    if ( fov > 5 + EPSILON ) fov -= 5;
-                    else if ( fov > 1 + EPSILON  ) fov--;
-                    else if ( fov > 0.1 + EPSILON  ) fov -= 0.1;
-                }
-                updated = true;
-                break;
-  
-            case 'N':
-                nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
-                updated = true;
-              break;
-            case 'n':
-                nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
-                updated = true;
-              break;
-  
-            case 'F':
-                farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
-                updated = true;
-              break;
-            case 'f':
-                farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
-                updated = true;
-              break;
-  
-              case 'p': // Rote el modo de proyeccion
-                switch ( projectionMode ) {
-                  case Camera.PROJECTION_MODE_PERSPECTIVE:
-                    projectionMode = Camera.PROJECTION_MODE_ORTHOGONAL;
-                    break;
-                  default:
-                    projectionMode = Camera.PROJECTION_MODE_PERSPECTIVE;
-                    break;
-                }
-                updated = true;
-                break;
-  
-              // Queries
-              case 'i':
-                System.out.println(camera);
+              default:
+                projectionMode = Camera.PROJECTION_MODE_PERSPECTIVE;
                 break;
             }
+            updated = true;
+            break;
+  
+          // Queries
+          case KeyEvent.KEY_i:
+            System.out.println(camera);
+            break;
+
         }
 
         // 4. Update camera's internal parameters from local copy
@@ -258,7 +252,20 @@ public class CameraControllerAquynza extends CameraController {
         return updated;
     }
 
-    public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
+    /**
+    @deprecated
+    Migrated to generalized version of this class, which is
+    independent of Awt.
+
+    This method has been deprecated in january 1st 2008. It should be
+    deleted by june 1st 2008.
+    */
+    @Deprecated
+    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
+        return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
+    }
+
+    public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
         return false;
     }
 
@@ -425,3 +432,7 @@ public class CameraControllerAquynza extends CameraController {
         this.camera = camera;
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

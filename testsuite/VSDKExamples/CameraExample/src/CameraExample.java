@@ -29,6 +29,7 @@ import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
+import vsdk.toolkit.gui.AwtSystem;
 
 /**
 Note that this program is designed to work as a java application, or as a
@@ -237,7 +238,7 @@ public class CameraExample extends Applet implements
             }
         }
 
-        if ( cameraController.processKeyPressedEventAwt(e) ) {
+        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }

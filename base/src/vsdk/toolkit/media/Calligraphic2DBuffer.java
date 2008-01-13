@@ -85,6 +85,30 @@ public class Calligraphic2DBuffer extends MediaEntity {
         return lineData.size/8;
     }
 
+    public void exportRgbImage(RGBImage inOutRasterViewport)
+    {
+        double xt = inOutRasterViewport.getXSize();
+        double yt = inOutRasterViewport.getYSize();
+
+        Vector3D e0 = new Vector3D();
+        Vector3D e1 = new Vector3D();
+        int x0, y0, x1, y1;
+        RGBPixel pixel = new RGBPixel();
+
+        pixel.r = (byte)255;
+        pixel.g = (byte)255;
+        pixel.b = (byte)255;
+
+        for ( int j = 0; j < getNumLines(); j++ ) {
+            get2DLine(j, e0, e1);
+            x0 = (int)((xt-1)*((e0.x+1)/2));
+            y0 = (int)((yt-1)*(1-((e0.y+1)/2)));
+            x1 = (int)((xt-1)*((e1.x+1)/2));
+            y1 = (int)((yt-1)*(1-((e1.y+1)/2)));
+            inOutRasterViewport.drawLine(x0, y0, x1, y1, pixel);
+        }
+    }
+
     public void finalize()
     {
         init();

@@ -192,6 +192,18 @@ public class VSDK
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
 
+    public static String formatDouble(double a, int digits)
+    {
+        int i;
+        String ff = "0.";
+	for ( i = 0; i < digits; i++ ) {
+	    ff = ff + "0";
+	}
+        DecimalFormat f = new DecimalFormat(ff);
+
+        return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
+    }
+
     /**
     Given a byte, it formats it to print as two hexagesimal nibbles
     */

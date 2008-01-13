@@ -101,7 +101,7 @@ KeyListener
         camera1.setFarPlaneDistance(300);
 
         camera2 = new Camera();
-        camera2.setPosition(new Vector3D(0, 0, 0));
+        camera2.setPosition(new Vector3D(0, 0, 1));
         camera2.setNearPlaneDistance(1);
         camera2.setFarPlaneDistance(3);
         camera2.setFov(90);
@@ -112,8 +112,10 @@ KeyListener
 
         cameraController = new CameraControllerAquynza(camera1);
 
-        point0 = new Vector3D(0, 0, -1.1);
-        point1 = new Vector3D(0, 0, -2.9);
+        point0 = new Vector3D(0, 0, 0.6);
+        point1 = new Vector3D(0, 0, -10);
+        //point0 = new Vector3D(-3, 0, -2.5);
+        //point1 = new Vector3D(0, 0, 0.5);
     }
 
     public void setPerspectiveView()
@@ -217,8 +219,18 @@ KeyListener
         Vector3D clippedPoint0 = new Vector3D();
         Vector3D clippedPoint1 = new Vector3D();
 
-        linePasses = camera2.clipLineCohenSutherlandPlanes(point0, point1, 
-                                             clippedPoint0, clippedPoint1);
+        camera2.updateVectors();
+
+        //linePasses = camera2.clipLineCohenSutherlandPlanes(
+        //    point0, point1, clippedPoint0, clippedPoint1);
+
+        linePasses = camera2.clipLineCohenSutherlandCanonicVolume(
+            point0, point1, clippedPoint0, clippedPoint1);
+
+        Matrix4x4 NT = camera2.getNormalizingTransformation().inverse();
+
+        clippedPoint0 = NT.multiply(clippedPoint0);
+        clippedPoint1 = NT.multiply(clippedPoint1);
 
         //-----------------------------------------------------------------
         double delta = 0.1;
@@ -509,7 +521,7 @@ class ControlPanel extends JPanel implements AdjustmentListener, ActionListener
             sb = new JScrollBar(JScrollBar.HORIZONTAL);
             sb.setName(names[i]);
             sb.addAdjustmentListener(this);
-            //sb.setMinimum(0);
+            sb.setMinimum(0);
             sb.setMaximum(100);
             //sb.setValue(50);
             innerframe.add(sb);

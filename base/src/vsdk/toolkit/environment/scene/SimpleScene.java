@@ -33,6 +33,21 @@ public class SimpleScene extends Entity
         camerasArray = new ArrayList<Camera>();
     }
 
+    public void addBody(SimpleBody b)
+    {
+        simpleBodiesArray.add(b);
+    }
+
+    public void addBackground(Background b)
+    {
+        backgroundsArray.add(b);
+    }
+
+    public void addLight(Light l)
+    {
+        lightsArray.add(l);
+    }
+
     public ArrayList<SimpleBody> getSimpleBodies()
     {
         return simpleBodiesArray;

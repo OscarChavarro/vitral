@@ -11,6 +11,7 @@
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Box;
+import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
@@ -30,6 +31,22 @@ public class PolyhedralBoundedSolidModelingTools
 
         Box b = new Box(boxSize);
         solid = b.exportToPolyhedralBoundedSolid();
+        solid.applyTransformation(R);
+        solid.validateModel();
+        return solid;
+    }
+
+    /**    
+    */
+    public static PolyhedralBoundedSolid createSphere(double r)
+    {
+        PolyhedralBoundedSolid solid;
+
+        Matrix4x4 R = new Matrix4x4();
+        R.translation(0.55, 0.55, 0.55);
+
+        Sphere s = new Sphere(r);
+        solid = s.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
         solid.validateModel();
         return solid;

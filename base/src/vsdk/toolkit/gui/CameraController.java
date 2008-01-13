@@ -8,16 +8,18 @@ package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 
 import vsdk.toolkit.environment.Camera;
 
 public abstract class CameraController extends Controller {
   public abstract boolean processMouseEventAwt(MouseEvent mouseEvent);
 
-  public abstract boolean processKeyPressedEventAwt(KeyEvent keyEvent);
+  public abstract boolean processKeyPressedEvent(KeyEvent keyEvent);
 
-  public abstract boolean processKeyReleasedEventAwt(KeyEvent keyEvent);
+  public abstract boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent);
+
+  public abstract boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent);
 
   public abstract boolean processMousePressedEventAwt(MouseEvent e);
 

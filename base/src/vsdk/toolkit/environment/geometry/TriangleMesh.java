@@ -103,6 +103,7 @@ public class TriangleMesh extends Surface {
     private SimpleBody boundingVolume;
     private GeometryIntersectionInformation lastInfo;
     private Ray lastRay;
+    private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
@@ -111,6 +112,7 @@ public class TriangleMesh extends Surface {
         lastRay = null;
         minMax = null;
         boundingVolume = null;
+        triangleMeshGroupCache = null;
     }
 
     public TriangleMesh(Vertex[] vertexes, Triangle[] triangles) {
@@ -120,6 +122,7 @@ public class TriangleMesh extends Surface {
         lastInfo = new GeometryIntersectionInformation();
         lastRay = null;
         boundingVolume = null;
+        triangleMeshGroupCache = null;
     }
 
     public String getName() {
@@ -701,6 +704,14 @@ public class TriangleMesh extends Surface {
 
     }
 
+    public TriangleMeshGroup exportToTriangleMeshGroup()
+    {
+        if ( triangleMeshGroupCache == null ) {
+            triangleMeshGroupCache = new TriangleMeshGroup();
+            triangleMeshGroupCache.addMesh(this);
+	}
+        return triangleMeshGroupCache;
+    }
 }
 
 //===========================================================================

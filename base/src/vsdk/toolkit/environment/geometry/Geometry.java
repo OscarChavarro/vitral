@@ -172,6 +172,14 @@ public abstract class Geometry extends Entity {
     }
 
     /**
+    The design of this method could change in future.
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        return null;
+    }
+
+    /**
     Given a point `p`, this method classifies if point lies `INSIDE` current
     geometry, `OUTSIDE` current geometry or `LIMIT` if it is near the geometry
     at some specified `distanceTolerance`.

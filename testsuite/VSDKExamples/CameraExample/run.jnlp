@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+"
+  codebase="http://sophia.javeriana.edu.co/~ochavarr/vsdk/apps/CameraExample"
+>
+<information>
+  <title>VitralSDK Web Application Template</title>
+  <vendor>Oscar Chavarro (oj.chavarro184@uniandes.edu.co)</vendor>
+  <homepage href="/vitralsdk" />
+  <description>JNLP (Java Web Start) distribution of VitralSDK sample application</description>
+</information>
+<offline-allowed/>
+<security>
+  <all-permissions/>
+</security>
+<resources>
+  <j2se version="1.5+" />
+  <jar href="vsdk.jar"/>
+  <jar href="app.jar" main="true"/>
+  <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
+</resources>
+<application-desc main-class="CameraExample" />
+</jnlp>
