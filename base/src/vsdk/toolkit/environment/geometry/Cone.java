@@ -1,5 +1,9 @@
 //===========================================================================
 //=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+//=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - February 13 2006 - Oscar Chavarro: Original base version              =
 //===========================================================================
@@ -344,6 +348,12 @@ public class Cone extends Solid {
         return brepCache;
     }
 
+    /**
+    Current implementation of the cylinder follows the idea suggested on
+    section [MANT1988].12.3.1 and program [MANT1988].12.4, where the
+    cylinder is built upon a circular lamina base and an extrusion 
+    (translational sweep) operation. The cone case is done manually,
+    */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
         PolyhedralBoundedSolid solid;
@@ -355,6 +365,7 @@ public class Cone extends Solid {
         );
 
         if ( r2 > VSDK.EPSILON ) {
+            // Cylinder case
             double f = r2/r1;
             T = new Matrix4x4();
             T.translation(0.0, 0.0, h);
@@ -365,13 +376,14 @@ public class Cone extends Solid {
                 solid, solid.findFace(1), M);
         }
         else {
-            Vector3D pos = new Vector3D(0, 0, h);
+            // Cone case
+            Vector3D apex;
             int i = 0;
             int base1 = 1;
             int base2 = nsides+1;
 
-            pos = new Vector3D(0, 0, h);
-            solid.smev(1, base1, base2, pos);
+            apex = new Vector3D(0, 0, h);
+            solid.smev(1, base1, base2, apex);
 
             for ( i = 0; i < nsides-2; i++ ) {
                 solid.mef(1,           /* seed face, always face 1 */

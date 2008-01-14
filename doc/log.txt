@@ -511,8 +511,11 @@ Changes in 2008 january 2 revition <<60min>>
 Changes in 2008 january 12 revition <<60min>>
   - 1h: study / review of PolyhedralBoundedSolidExample and [MANT1988].12
 
-Changes in 2008 january 12 revition <<60min>>
+Changes in 2008 january 13 revition <<60min>>
   - 1h: Cone.exportToPolyhedralBoundedSolid
+
+Changes in 2008 january 14 revition <<>>
+  - 32min: Arrow.exportToPolyhedralBoundedSolid
 
 ---------------------------------------------------------------------------
 TODO:

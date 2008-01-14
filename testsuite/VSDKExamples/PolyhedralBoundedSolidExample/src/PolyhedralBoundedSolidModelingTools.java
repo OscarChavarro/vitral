@@ -14,6 +14,7 @@ import java.util.ArrayList;
 // VitralSDK classes
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
@@ -68,6 +69,22 @@ public class PolyhedralBoundedSolidModelingTools
 
         Cone c = new Cone(r1, r2, h);
         solid = c.exportToPolyhedralBoundedSolid();
+        solid.applyTransformation(R);
+        solid.validateModel();
+        return solid;
+    }
+
+    /**    
+    */
+    public static PolyhedralBoundedSolid createArrow(double p1, double p2, double p3, double p4)
+    {
+        PolyhedralBoundedSolid solid;
+
+        Matrix4x4 R = new Matrix4x4();
+        R.translation(0.55, 0.55, 0.05);
+
+        Arrow a = new Arrow(p1, p2, p3, p4);
+        solid = a.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
         solid.validateModel();
         return solid;

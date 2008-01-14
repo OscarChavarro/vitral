@@ -7,9 +7,11 @@
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.processing.GeometricModeler;
 
 public class Arrow extends Solid {
     /// Check the general attribute description in superclass Entity.
@@ -23,6 +25,8 @@ public class Arrow extends Solid {
     private Cone baseCylinder;
     private Cone headCone;
     private Cone lastElement;
+
+    private PolyhedralBoundedSolid brepCache;
 
     public Arrow(double baseLength, double headLength, double baseRadius, double headRadius) {
         this.baseLength = baseLength;
@@ -143,6 +147,75 @@ public class Arrow extends Solid {
         minmax[5] = baseLength + headLength;
 
         return minmax;
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        if ( brepCache == null ) {
+            brepCache = buildPolyhedralBoundedSolid();
+        }
+        return brepCache;
+    }
+
+    /**
+    Current implementation of the cylinder follows the idea suggested on
+    section [MANT1988].12.3.1 and program [MANT1988].12.4, where the
+    cylinder is built upon a circular lamina base and an extrusion 
+    (translational sweep) operation. The cone case is done manually,
+    */
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    {
+        PolyhedralBoundedSolid solid;
+        Matrix4x4 T, S, M;
+        int nsides = 36/4;
+
+        solid = GeometricModeler.createCircularLamina(
+            0.0, 0.0, baseRadius, 0.0, nsides
+        );
+
+        // Cylinder case
+        T = new Matrix4x4();
+        T.translation(0.0, 0.0, baseLength);
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), T);
+
+        T = new Matrix4x4();
+        T.translation(0.0, 0.0, 0);
+        double f = headRadius / baseRadius;
+        S = new Matrix4x4();
+        S.scale(f, f, 1);
+        M = T.multiply(S);
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), M);
+
+        // Cone case
+        Vector3D apex;
+        int i = 0;
+        int base1 = 2*nsides+1;
+        int base2 = 3*nsides+1;
+
+        apex = new Vector3D(0, 0, baseLength + headLength);
+        solid.smev(1, base1, base2, apex);
+
+        for ( i = 0; i < nsides-2; i++ ) {
+            solid.mef(1,           /* seed face, always face 1 */
+                      1,           /* seed face, always face 1 */
+                      base2,       /* start of half edge 1 */
+                      base1+i,     /* end of half edge 1 */
+                      base1+i+1,   /* start of half edge 2 */
+                      base1+i+2,   /* end of half edge 2 */
+                      base2+i+1    /* new face id */);
+        }
+
+        solid.mef(1,           /* seed face, always face 1 */
+                  1,           /* seed face, always face 1 */
+                  base2,       /* start of half edge 1 */
+                  base1+i,     /* end of half edge 1 */
+                  base1+i+1,   /* start of half edge 2 */
+                  base1,   /* end of half edge 2 */
+                  base2+i+1    /* new face id */);
+
+        return solid;
     }
 
 }
