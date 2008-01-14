@@ -276,7 +276,7 @@ G                igual respecto al c&oacute;digo original de MIT.
             base2 += nmeridians;
         }
 
-        //- Build triangles for lower cap ---------------------------------
+        //- Build triangles for upper cap --------------------------------
         pos = new Vector3D(0, 0, _radius);
         solid.smev(1, base1, base2, pos);
 

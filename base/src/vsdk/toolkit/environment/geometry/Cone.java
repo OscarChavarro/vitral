@@ -8,9 +8,11 @@ package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.processing.GeometricModeler;
 
 public class Cone extends Solid {
     /// Check the general attribute description in superclass Entity.
@@ -20,7 +22,8 @@ public class Cone extends Solid {
     private double r2; // Radius at the top
     private double h;  // Height
 
-    GeometryIntersectionInformation lastInfo;
+    private GeometryIntersectionInformation lastInfo;
+    private PolyhedralBoundedSolid brepCache;
 
     public Cone(double r1, double r2, double h) {
         this.r1 = r1;
@@ -331,6 +334,65 @@ public class Cone extends Solid {
         minmax[5] = h;
 
         return minmax;
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        if ( brepCache == null ) {
+            brepCache = buildPolyhedralBoundedSolid();
+        }
+        return brepCache;
+    }
+
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    {
+        PolyhedralBoundedSolid solid;
+        Matrix4x4 T, R, S, M;
+        int nsides = 36;
+
+        solid = GeometricModeler.createCircularLamina(
+            0.0, 0.0, r1, 0.0, nsides
+        );
+
+        if ( r2 > VSDK.EPSILON ) {
+            double f = r2/r1;
+            T = new Matrix4x4();
+            T.translation(0.0, 0.0, h);
+            S = new Matrix4x4();
+            S.scale(f, f, f);
+            M = T.multiply(S);
+            GeometricModeler.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), M);
+        }
+        else {
+            Vector3D pos = new Vector3D(0, 0, h);
+            int i = 0;
+            int base1 = 1;
+            int base2 = nsides+1;
+
+            pos = new Vector3D(0, 0, h);
+            solid.smev(1, base1, base2, pos);
+
+            for ( i = 0; i < nsides-2; i++ ) {
+                solid.mef(1,           /* seed face, always face 1 */
+                          1,           /* seed face, always face 1 */
+                          base2,       /* start of half edge 1 */
+                          base1+i,     /* end of half edge 1 */
+                          base1+i+1,   /* start of half edge 2 */
+                          base1+i+2,   /* end of half edge 2 */
+                          base2+i+1    /* new face id */);
+            }
+
+            solid.mef(1,           /* seed face, always face 1 */
+                      1,           /* seed face, always face 1 */
+                      base2,       /* start of half edge 1 */
+                      base1+i,     /* end of half edge 1 */
+                      base1+i+1,   /* start of half edge 2 */
+                      base1,   /* end of half edge 2 */
+                      base2+i+1    /* new face id */);
+
+        }
+        return solid;
     }
 
 }

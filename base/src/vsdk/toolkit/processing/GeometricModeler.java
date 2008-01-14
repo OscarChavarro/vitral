@@ -6,8 +6,18 @@
 
 package vsdk.toolkit.processing;
 
+// Java classes
+import java.util.ArrayList;
+
+// VitralSDK classes
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 
 /**
 This is a utility class containing a lot of geometry operations (mostly
@@ -48,6 +58,164 @@ public class GeometricModeler extends ProcessingElement
         lineModel.addPoint(pointParameters, lineModel.CORNER);
 
         return lineModel;
+    }
+
+    /**
+    This method implements the example presented in section [MANT1988].12.2,
+    and figure [MANT1988].12.1.
+    Generate an arc based on the radius and the coordinates of the center on
+    the plane z=h. This method assumes that the first vertex of the arc
+    already exists, so its identifier (vertexId) must be supplied.
+    This method generates an approximation of a circular arc segment with
+    `n` edges, centered at <cx, cy, h>, on the plane z=h, and with radius
+    `rad`. The arc ranges from angle `phi1` to `phi2`, measured in degrees,
+    where an angle of 0.0 degrees equals the x-axis and angles grow
+    counterclockwise. The arc starts from existing vertex `vertexId` of face
+    `faceId`.
+    */
+    public static void addArc(PolyhedralBoundedSolid solid,
+        int faceId, int vertexId,
+        double cx, double cy, double rad, double h, double phi1, double phi2,
+        int n)
+    {
+        double x, y, angle, inc;
+        int prev, i, nextVertexId;
+
+        angle = Math.toRadians(phi1);
+        inc = Math.toRadians(((phi2 - phi1) / ((double)n)));
+        prev = vertexId;
+        for ( i = 0; i < n; i++ ) {
+            angle += inc;
+            x = cx + rad * Math.cos(angle);
+            y = cy + rad * Math.sin(angle);
+            nextVertexId = solid.getMaxVertexId() + 1;
+            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
+            prev = nextVertexId;
+        }
+        solid.validateModel();
+    }
+
+    /**
+    This method implements the example presented in section [MANT1988].12.2,
+    and figure [MANT1988].12.2.
+    */
+    public static PolyhedralBoundedSolid createCircularLamina(
+        double cx, double cy, double rad, double h, int n)
+    {
+        PolyhedralBoundedSolid solid;
+
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(cx + rad, cy, h), 1, 1);
+        addArc(solid, 1, 1, cx, cy, rad, h, 0, 
+            ((double)(n-1))*360.0/((double)n), n-1);
+        solid.smef(1, n, 1, 2);
+        solid.validateModel();
+        return solid;
+    }
+
+    /**
+    This method implements a generalized/extended version of the example
+    presented in section [MANT1988].12.3.1, and figure [MANT1988].12.3. In the
+    original example, a displacement vector is added (translated) to
+    the extruded point. Current implementation allows translations, scales
+    and rotations in terms of original face plane.
+    PRE: Given face should be closed and planar ("well formed")
+    Note that current algorithm could work on a lamina, on or an "ending face",
+    permiting a solid modeler to build complex loft-type sweeps based on
+    current method.
+    */
+    public static void translationalSweepExtrudeFace(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidFace face,
+        Matrix4x4 T)
+    {
+        _PolyhedralBoundedSolidLoop l;
+        _PolyhedralBoundedSolidHalfEdge first, scan;
+        _PolyhedralBoundedSolidVertex v;
+        Vector3D newPos;
+        int i;
+
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            l = face.boundariesList.get(i);
+            first = l.boundaryStartHalfEdge;
+            scan = first.next();
+            v = scan.startingVertex;
+            newPos = T.multiply(v.position);
+            solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
+            while ( scan != first ) {
+                v = scan.next().startingVertex;
+                newPos = T.multiply(v.position);
+                solid.lmev(scan.next(), scan.next(), 
+                    solid.getMaxVertexId()+1, newPos);
+                solid.lmef(scan.previous(), scan.next().next(),
+                    solid.getMaxFaceId()+1);
+                scan = (scan.next().mirrorHalfEdge()).next();
+            }
+            solid.lmef(scan.previous(), scan.next().next(),
+                solid.getMaxFaceId()+1);
+        }
+        solid.validateModel();
+    }
+
+    /**
+    This method implements a generalized/extended version of the 
+    translationalSweepExtrudeFace, which makes the same, plus a second
+    pass verifying if each of the newly created faces are planar or not.
+
+    If a new face is not planar, the face is triangulated.
+    */
+    public static void translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidFace face,
+        Matrix4x4 T)
+    {
+        _PolyhedralBoundedSolidLoop l;
+        _PolyhedralBoundedSolidHalfEdge first, scan;
+        _PolyhedralBoundedSolidVertex v;
+        Vector3D newPos;
+        ArrayList<Integer> newfaces = new ArrayList<Integer>();
+        int i;
+        int newfaceid;
+
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            l = face.boundariesList.get(i);
+            first = l.boundaryStartHalfEdge;
+            scan = first.next();
+            v = scan.startingVertex;
+            newPos = T.multiply(v.position);
+            solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
+            while ( scan != first ) {
+                v = scan.next().startingVertex;
+                newPos = T.multiply(v.position);
+                solid.lmev(scan.next(), scan.next(), 
+                    solid.getMaxVertexId()+1, newPos);
+                newfaceid = solid.getMaxFaceId()+1;
+                solid.lmef(scan.previous(), scan.next().next(), newfaceid);
+                newfaces.add(new Integer(newfaceid));
+                scan = (scan.next().mirrorHalfEdge()).next();
+            }
+            newfaceid = solid.getMaxFaceId()+1;
+            solid.lmef(scan.previous(), scan.next().next(), newfaceid);
+            newfaces.add(new Integer(newfaceid));
+        }
+
+        _PolyhedralBoundedSolidFace newface;
+	for ( i = 0; i < newfaces.size(); i++ ) {
+	    newfaceid = newfaces.get(i).intValue();
+            newface = solid.findFace(newfaceid);
+            if ( !solid.validateFaceIsPlanar(newface) ) {
+		scan = newface.boundariesList.get(0).boundaryStartHalfEdge;
+		newfaceid = solid.getMaxFaceId()+1;
+                solid.lmef(scan.next(), scan.previous(), newfaceid);
+	    }
+	}
+
+	for ( i = 0; newfaces.size() > 0; i++ ) {
+	    newfaces.remove(0);
+	}
+	newfaces = null;
+
+        solid.validateModel();
     }
 
 }

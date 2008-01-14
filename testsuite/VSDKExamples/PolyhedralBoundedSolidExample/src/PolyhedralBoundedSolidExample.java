@@ -1,10 +1,12 @@
 //===========================================================================
 
+// Java basic classes
 import java.util.ArrayList;
 
+// Java Swing / Awt classes
+import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.swing.JFrame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.KeyEvent;
@@ -12,14 +14,17 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
+import javax.swing.JFrame;
+
+// JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import java.applet.Applet;
 
+// VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -38,6 +43,7 @@ import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.processing.GeometricModeler;
 
 public class PolyhedralBoundedSolidExample extends Applet implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -94,7 +100,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         PolyhedralBoundedSolid solid = null;
         Matrix4x4 T, R, S, M;
 
-        switch ( type % 7 ) {
+        switch ( type % 9 ) {
           case 0:
             solid = new PolyhedralBoundedSolid();
             solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
@@ -107,16 +113,34 @@ public class PolyhedralBoundedSolidExample extends Applet implements
           case 3:
             solid = new PolyhedralBoundedSolid();
             solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
-            PolyhedralBoundedSolidModelingTools.addArc(
+            GeometricModeler.addArc(
                 solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
           case 4:
-            solid = PolyhedralBoundedSolidModelingTools.createCircle(
+            solid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
             break;
           case 5:
-            solid = PolyhedralBoundedSolidModelingTools.createCircle(
+            solid = new PolyhedralBoundedSolid();
+            solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            GeometricModeler.addArc(
+                solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
+
+            T = new Matrix4x4();
+            T.translation(0.0, 0.0, 0.5);
+            R = new Matrix4x4();
+            R.axisRotation(Math.toRadians(5), 0, 1, 0);
+            S = new Matrix4x4();
+	    S.scale(0.5, 0.5, 0.5);
+            M = T.multiply(R.multiply(S));
+
+            GeometricModeler.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), M);
+
+            break;
+          case 6:
+            solid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 24
             );
 
@@ -127,7 +151,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             S = new Matrix4x4();
 	    S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
-            PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFacePlanar(
+            GeometricModeler.translationalSweepExtrudeFacePlanar(
                 solid, solid.findFace(1), M);
 
 /*
@@ -138,16 +162,21 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             S = new Matrix4x4();
 	    S.scale(0.2, 0.2, 0.2);
             M = T.multiply(R.multiply(S));
-            PolyhedralBoundedSolidModelingTools.translationalSweepExtrudeFace(
+            GeometricModeler.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), M);
 */
 
+
             break;
-          case 6:
+
+          case 7:
             solid = PolyhedralBoundedSolidModelingTools.createSphere(0.5);
             break;
+          case 8:
+	    solid = PolyhedralBoundedSolidModelingTools.createCone(0.5, 0.0, 1.0);
+            break;
           case 2: default:
-            solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
+	    solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
             break;
         }
 
