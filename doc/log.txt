@@ -514,8 +514,9 @@ Changes in 2008 january 12 revition <<60min>>
 Changes in 2008 january 13 revition <<60min>>
   - 1h: Cone.exportToPolyhedralBoundedSolid
 
-Changes in 2008 january 14 revition <<>>
+Changes in 2008 january 14 revition <<50min>>
   - 32min: Arrow.exportToPolyhedralBoundedSolid
+  - 18min: Revisiting GlyphExample
 
 ---------------------------------------------------------------------------
 TODO:
