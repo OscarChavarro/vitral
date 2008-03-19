@@ -13,9 +13,7 @@ import java.text.FieldPosition;
 import vsdk.toolkit.common.Vector3D;
 
 /**
-!\mainpage Vitral SDK Toolkit documentation.
-
-.
+\mainpage Vitral SDK Toolkit documentation.
 
 Vitral SDK stands for "VITRAL Software Development Kit", and it is a software
 platform for computer graphics, virtual reality and augmented reality
