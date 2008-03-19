@@ -136,6 +136,60 @@ public class PolyhedralBoundedSolidModelingTools
         return solid;
     }
 
+    public static PolyhedralBoundedSolid createLaminaWithTwoShells()
+    {
+        //- Basic lamina --------------------------------------------------
+        Matrix4x4 R = new Matrix4x4();
+        PolyhedralBoundedSolid solid;
+
+        R.translation(0.55, 0.55, 0.55);
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
+        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.5, 0));
+        solid.smev(1, 4, 3, new Vector3D(0.5, 0.5, 0));
+        solid.smev(1, 3, 2, new Vector3D(0.5, -0.5, 0));
+        solid.mef(1, 1, 1, 4, 2, 3, 2);
+
+        //- New shell -----------------------------------------------------
+
+        //-----------------------------------------------------------------
+        solid.applyTransformation(R);
+        solid.validateModel();
+	return solid;
+    }
+
+    public static PolyhedralBoundedSolid createLaminaWithHole()
+    {
+        //- Basic lamina --------------------------------------------------
+        Matrix4x4 R = new Matrix4x4();
+        PolyhedralBoundedSolid solid;
+
+        R.translation(0.55, 0.55, 0.55);
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
+        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.5, 0));
+        solid.smev(1, 4, 3, new Vector3D(0.5, 0.5, 0));
+        solid.smev(1, 3, 2, new Vector3D(0.5, -0.5, 0));
+        solid.mef(1, 1, 1, 4, 2, 3, 2);
+
+        //- Hole ----------------------------------------------------------
+        solid.smev(1, 1, 5, new Vector3D(-0.3, -0.3, 0));
+        solid.kemr(1, 1, 1, 5, 5, 1);
+
+/*
+        solid.smev(1, 9-4, 10-4, new Vector3D(0.8, 0.3, 0));
+        solid.smev(1, 10-4, 11-4, new Vector3D(0.8, 0.8, 0));
+        solid.smev(1, 11-4, 12-4, new Vector3D(0.3, 0.8, 0));
+        solid.mef(6-4, 6-4, 9-4, 10-4, 12-4, 11-4, 7-4);
+*/
+//        solid.kfmrhSameShell(2, 5);
+
+        //-----------------------------------------------------------------
+        solid.applyTransformation(R);
+        solid.validateModel();
+	return solid;
+    }
+
 }
 
 //===========================================================================

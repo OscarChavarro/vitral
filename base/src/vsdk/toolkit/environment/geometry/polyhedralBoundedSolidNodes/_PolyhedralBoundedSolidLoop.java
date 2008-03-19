@@ -99,6 +99,19 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
         return null;
     }
 
+    /**
+    Vitral SDK's current implementation of original `delhe` utility function
+    presented at program [MANT1988].11.4. Note that current implementation
+    is quite diferent from the original from [MANT1988]. This could lead to
+    subtle problems! This method's functionality should be better understood!
+    */
+    public void delhe(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        halfEdgesList.locateWindowAtElem(he);
+        halfEdgesList.removeElemAtWindow();
+        boundaryStartHalfEdge = halfEdgesList.get(0);
+    }
+
     public String toString()
     {
         String msg;

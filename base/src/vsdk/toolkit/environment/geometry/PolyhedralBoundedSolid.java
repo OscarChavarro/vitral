@@ -372,6 +372,7 @@ public class PolyhedralBoundedSolid extends Solid {
 
         //-----------------------------------------------------------------
         int i;
+
         for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
             he3 = migratedHalfEdges.get(i);
             oldLoop.halfEdgesList.locateWindowAtElem(he3);
@@ -379,16 +380,10 @@ public class PolyhedralBoundedSolid extends Solid {
             newLoop.halfEdgesList.add(he3);
             he3.parentLoop = newLoop;
         }
-        oldLoop.boundaryStartHalfEdge = oldLoop.halfEdgesList.get(0);
         newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
         //-----------------------------------------------------------------
-        // delhe(h1)
-        oldLoop.halfEdgesList.locateWindowAtElem(he1);
-        oldLoop.halfEdgesList.removeElemAtWindow();
-
-        // delhe(h2)
-        oldLoop.halfEdgesList.locateWindowAtElem(he2);
-        oldLoop.halfEdgesList.removeElemAtWindow();
+        oldLoop.delhe(he1);
+        oldLoop.delhe(he2);
 
         if ( newLoop.halfEdgesList.size() <= 1 ) {
             newLoop.boundaryStartHalfEdge.parentEdge = null;
