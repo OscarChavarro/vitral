@@ -14,7 +14,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
-public class J2meCalligraphic2DBufferRenderer
+public class J2meCalligraphic2DBufferRenderer extends J2meRenderer
 {
     public static void draw(Graphics g, Calligraphic2DBuffer lineSet,
 			    int xx0, int yy0, int dx, int dy)

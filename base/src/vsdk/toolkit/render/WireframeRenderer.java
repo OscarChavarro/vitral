@@ -31,7 +31,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
-public class WireframeRenderer
+public class WireframeRenderer extends RenderingElement
 {
     /**
     Given a 3D line (with endpoints `cp0` and `cp1`), previously clipped
