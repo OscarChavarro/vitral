@@ -141,8 +141,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glShadeModel(gl.GL_FLAT);
 
         gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-        gl.glPolygonOffset(-0.5f, 0.0f);
-        gl.glLineWidth(1.0f);
+        gl.glPolygonOffset(-0.5f, 1.0f);
+        gl.glLineWidth(1.5f);
 
         // Warning: Change with configured color for borders
         gl.glColor3d(1, 1, 1);
@@ -521,7 +521,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         if ( quality.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
+            gl.glPolygonOffset(0.5f, 1.0f);
             drawSurfaces(gl, solid);
         }
         if ( quality.isWiresSet() ) {

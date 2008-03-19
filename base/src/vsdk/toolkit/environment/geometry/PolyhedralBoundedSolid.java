@@ -651,13 +651,13 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            VSDK.reportMessage(this, VSDK.WARNING, "kfmrhSameShell",
             "Face " + f1 + " not found.");
             return false;
         }
         oldface2 = findFace(f2);
         if ( oldface2 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "kemr",
+            VSDK.reportMessage(this, VSDK.WARNING, "kfmrhSameShell",
             "Face " + f2 + " not found.");
             return false;
         }

@@ -137,21 +137,39 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
         heStart = he;
 
+        //do {
+            // This is only considering the first three vertices, and not taking
+            // in to account the possible case of too close vertices. Should be
+            // replaced to consider the full vertices set.
 
-        // This is only considering the first three vertices, and not taking
-        // in to account the possible case of to close vertices. Should be
-        // replaced to consider the full vertices set.
-        Vector3D p0 = null, p1 = null;
-        Vector3D p2 = null, a, b;
-        Vector3D n;
+            //- Do normal estimation on a three set of points -----------------
+            Vector3D p0 = null, p1 = null;
+            Vector3D p2 = null, a, b;
+            Vector3D n;
 
-        p0 = he.startingVertex.position;
-        p1 = he.next().startingVertex.position;
-        p2 = he.next().next().startingVertex.position;
-        a = p1.substract(p0);    a.normalize();
-        b = p2.substract(p0);    b.normalize();
-        n = a.crossProduct(b);   n.normalize();
-        containingPlane = new InfinitePlane(n, p0);
+            p0 = he.startingVertex.position;
+            p1 = he.next().startingVertex.position;
+            p2 = he.next().next().startingVertex.position;
+            a = p1.substract(p0);    a.normalize();
+            b = p2.substract(p0);    b.normalize();
+            n = a.crossProduct(b);   n.normalize();
+            containingPlane = new InfinitePlane(n, p0);
+
+            //- Determine if p1 region is convex or concave -------------------
+            Vector3D middle = a.add(b);
+            Vector3D testPoint;
+            middle.normalize();
+            middle = middle.multiply(10.0*VSDK.EPSILON);
+
+            testPoint = p0.add(middle);
+
+            //- If concave, swap normal direction -----------------------------
+            if ( testPointInside(testPoint) > 0 ) {
+                n = n.multiply(-1.0);
+            }
+            containingPlane = new InfinitePlane(n, p0);
+
+        //} while ( colinearPoints );
 
         /*
         do {
@@ -206,7 +224,6 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     public int
     testPointInside(Vector3D p)
     {
-        Vector3D n = containingPlane.getNormal();
         int nc; // Number of crossings
         int sh; // Sign holder for vertex crossings
         int nsh; // Next sign holder for vertex crossings
@@ -220,6 +237,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D projectedPoint = new Vector3D();
         int dominantCoordinate = 3;
         int i;
+        Vector3D n;
+
+        n = containingPlane.getNormal();
 
         if ( Math.abs(n.x) >= Math.abs(n.y) &&
              Math.abs(n.x) >= Math.abs(n.z) ) {

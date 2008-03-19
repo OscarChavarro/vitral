@@ -10,6 +10,7 @@ package vsdk.toolkit.processing;
 import java.util.ArrayList;
 
 // VitralSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
@@ -200,22 +201,135 @@ public class GeometricModeler extends ProcessingElement
         }
 
         _PolyhedralBoundedSolidFace newface;
-	for ( i = 0; i < newfaces.size(); i++ ) {
-	    newfaceid = newfaces.get(i).intValue();
+        for ( i = 0; i < newfaces.size(); i++ ) {
+            newfaceid = newfaces.get(i).intValue();
             newface = solid.findFace(newfaceid);
             if ( !solid.validateFaceIsPlanar(newface) ) {
-		scan = newface.boundariesList.get(0).boundaryStartHalfEdge;
-		newfaceid = solid.getMaxFaceId()+1;
+                scan = newface.boundariesList.get(0).boundaryStartHalfEdge;
+                newfaceid = solid.getMaxFaceId()+1;
                 solid.lmef(scan.next(), scan.previous(), newfaceid);
-	    }
-	}
+            }
+        }
 
-	for ( i = 0; newfaces.size() > 0; i++ ) {
-	    newfaces.remove(0);
-	}
-	newfaces = null;
+        for ( i = 0; newfaces.size() > 0; i++ ) {
+            newfaces.remove(0);
+        }
+        newfaces = null;
 
         solid.validateModel();
+    }
+
+    public static PolyhedralBoundedSolid createBrepFromParametricCurve(ParametricCurve curve)
+    {
+        //-----------------------------------------------------------------
+        int i, j;
+        int totalNumberOfPoints;
+        double list[][];
+        Vector3D first;
+        boolean beginning;
+        int count;
+
+        //-----------------------------------------------------------------
+        totalNumberOfPoints = 0;
+
+        for ( i = 1; i < curve.types.size(); i++ ) {
+            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+                i++;
+                continue;
+            }
+            ArrayList polyline = curve.calculatePoints(i, false);
+            totalNumberOfPoints += polyline.size();
+        }
+
+        list = new double[totalNumberOfPoints][3];
+
+        //-----------------------------------------------------------------
+        PolyhedralBoundedSolid solid;
+        boolean firstLoop = true;
+        int nextVertexId = 1;
+        int lastLoopStartVertexId = 1;
+        count = 0;
+        boolean needAnEnding = false;
+        int nextFaceId = 1;
+
+        solid = new PolyhedralBoundedSolid();
+
+        first = new Vector3D();
+        beginning = true;
+        for ( i = 1; i < curve.types.size(); i++ ) {
+            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+                i++;
+
+                //----------
+                solid.mef(1, 1,
+                          lastLoopStartVertexId, lastLoopStartVertexId+1, 
+                          nextVertexId-1, nextVertexId-2, nextFaceId);
+                nextFaceId++;
+
+                if ( !firstLoop ) {
+                    solid.kfmrhSameShell(2, nextFaceId-1);
+                }
+                //----------
+                firstLoop = false;
+                beginning = true;
+                continue;
+            }
+
+            // Build a polyline for approximating the [i] curve segment
+            ArrayList polyline = curve.calculatePoints(i, false);
+
+            // Insert into current contour the polyline
+            for ( j = 0; j < polyline.size(); j++ ) {
+                Vector3D vec = (Vector3D)polyline.get(j);
+                if ( !beginning ) {
+                    Vector3D prev = new Vector3D(list[count-1][0], 
+                                                 list[count-1][1],
+                                                 list[count-1][2]);
+                    if ( VSDK.vectorDistance(vec,  prev) > VSDK.EPSILON &&
+                         VSDK.vectorDistance(vec, first) > VSDK.EPSILON ) {
+                        list[count][0] = vec.x;
+                        list[count][1] = vec.y;
+                        list[count][2] = vec.z;
+                        solid.smev(1, nextVertexId-1, nextVertexId, new Vector3D(vec));
+                        nextVertexId++;
+                        count++;
+                    }
+                  }
+                  else {
+                    beginning = false;
+                    list[count][0] = vec.x;
+                    list[count][1] = vec.y;
+                    list[count][2] = vec.z;
+                    if ( firstLoop ) {
+                        solid.mvfs(new Vector3D(vec), nextVertexId, nextFaceId);
+                        nextVertexId++;
+                        nextFaceId++;
+                    }
+                    else {
+                        solid.smev(1, nextVertexId-1, nextVertexId, new Vector3D(vec));
+                        nextVertexId++;
+                        solid.kemr(1, 1, nextVertexId-2, nextVertexId-1,
+                            nextVertexId-1, nextVertexId-2);
+                        lastLoopStartVertexId = nextVertexId-1;
+                        needAnEnding = true;
+                    }
+
+                    first = new Vector3D(vec.x, vec.y, vec.z);
+                    count++;
+                }
+            }
+        }
+
+        solid.mef(1, 1,
+                  lastLoopStartVertexId, lastLoopStartVertexId+1, 
+                  nextVertexId-1, nextVertexId-2, nextFaceId);
+        nextFaceId++;
+        if ( needAnEnding ) {
+            solid.kfmrhSameShell(2, nextFaceId-1);
+        }
+
+        solid.validateModel();
+        return solid;
     }
 
 }

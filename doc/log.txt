@@ -518,10 +518,11 @@ Changes in 2008 january 14 revition <<50min>>
   - 32min: Arrow.exportToPolyhedralBoundedSolid
   - 18min: Revisiting GlyphExample
 
-Changes in 2008 march 19 revition <<135min>>
+Changes in 2008 march 19 revition <<303min>>
   - 60min: revision of font management import at AwtFontReader, fixing
     a bug related with glyphs consisting of multiple contours.
   - 1h15min: fixed a bug on PolyhedralBoundedSolid.kemr operator
+  - 2h48min: writting and testing GeometricModeler.createBrepFromParametricCurve
 
 ---------------------------------------------------------------------------
 TODO:

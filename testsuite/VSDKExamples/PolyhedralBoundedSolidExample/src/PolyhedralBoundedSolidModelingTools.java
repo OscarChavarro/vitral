@@ -18,11 +18,14 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.render.awt.AwtFontReader;
+import vsdk.toolkit.processing.GeometricModeler;
 
 public class PolyhedralBoundedSolidModelingTools
 {
@@ -145,17 +148,31 @@ public class PolyhedralBoundedSolidModelingTools
         R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
-        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.5, 0));
-        solid.smev(1, 4, 3, new Vector3D(0.5, 0.5, 0));
+        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.0, 0));
+        solid.smev(1, 4, 3, new Vector3D(0.5, 0.0, 0));
         solid.smev(1, 3, 2, new Vector3D(0.5, -0.5, 0));
         solid.mef(1, 1, 1, 4, 2, 3, 2);
 
-        //- New shell -----------------------------------------------------
+        //- Hole ----------------------------------------------------------
+        solid.smev(1, 1, 5, new Vector3D(-0.3, 0.1, 0));
+        solid.kemr(1, 1, 1, 5, 5, 1);
+        solid.smev(1, 5, 6, new Vector3D(0.0, 0.4, 0));
+        solid.smev(1, 6, 7, new Vector3D(0.3, 0.1, 0));
+        solid.mef(1, /* face1 */
+                  1, /* face2 */
+                  5, /* v1 */
+                  6, /* v2 */
+                  7, /* v3 */
+                  6, /* v4 */
+                  3  /* newfaceid */);
+
+        solid.kfmrhSameShell(2, 3);
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
         solid.validateModel();
-	return solid;
+        return solid;
+
     }
 
     public static PolyhedralBoundedSolid createLaminaWithHole()
@@ -175,21 +192,45 @@ public class PolyhedralBoundedSolidModelingTools
         //- Hole ----------------------------------------------------------
         solid.smev(1, 1, 5, new Vector3D(-0.3, -0.3, 0));
         solid.kemr(1, 1, 1, 5, 5, 1);
+        solid.smev(1, 5, 6, new Vector3D(0.0, 0.3, 0));
+        solid.smev(1, 6, 7, new Vector3D(0.3, -0.3, 0));
+        solid.mef(1, /* face1 */
+                  1, /* face2 */
+                  5, /* v1 */
+                  6, /* v2 */
+                  7, /* v3 */
+                  6, /* v4 */
+                  3  /* newfaceid */);
 
-/*
-        solid.smev(1, 9-4, 10-4, new Vector3D(0.8, 0.3, 0));
-        solid.smev(1, 10-4, 11-4, new Vector3D(0.8, 0.8, 0));
-        solid.smev(1, 11-4, 12-4, new Vector3D(0.3, 0.8, 0));
-        solid.mef(6-4, 6-4, 9-4, 10-4, 12-4, 11-4, 7-4);
-*/
-//        solid.kfmrhSameShell(2, 5);
+        solid.kfmrhSameShell(2, 3);
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
         solid.validateModel();
-	return solid;
+        return solid;
     }
 
+    public static PolyhedralBoundedSolid createFontBlock(String fontFile, String msg)
+    {
+        //-----------------------------------------------------------------
+        AwtFontReader fontReader = new AwtFontReader();
+        ParametricCurve curve = null;
+
+        for ( int i = 0; i < msg.length(); i++ ) {
+            if ( i != 4 ) continue;
+            String character = msg.substring(i, i+1);
+            curve = fontReader.extractGlyph(fontFile, character);
+            curve.setApproximationSteps(2);
+            break;
+        }
+
+        //-----------------------------------------------------------------
+        PolyhedralBoundedSolid solid;
+
+        solid = GeometricModeler.createBrepFromParametricCurve(curve);
+
+        return solid;
+    }
 }
 
 //===========================================================================
