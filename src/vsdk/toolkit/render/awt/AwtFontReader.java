@@ -31,41 +31,49 @@ This class is a concrete factory in an abstract factory design pattern role.
 */
 public class AwtFontReader extends FontReader
 {
-    private Font fuente;
+    private Font currentFont;
     private String fileName;
 
     public AwtFontReader()
     {
-        fuente = null;
+        currentFont = null;
         fileName = null;
     }
 
     /**
     Given a font file and a character, this method return a parametric
-    curve representing ints glyph. If something goes wrong, this method
+    curve representing a glyph. If something goes wrong, this method
     returns null. The character string is usually a lone character,
     but under some circumstantes this chatacter is acommpanied with
     a context (i.e. in arabic languages where glyph selection depends
     on a bounding form).
+
+    Note that glyph vectorization in Java's AWT relys to much (perhaps
+    incorrectly) on current font size. When using a size of 1 point,
+    some glyphs composed of multiple curves get incorrectly placed components.
+    So this method works with fonts `factor` points in size, to later scale the
+    glyphs down by a factor of 1/`factor`.
     */
     public ParametricCurve extractGlyph(
         String fontFile, String characterAndItsContext)
     {
         //-----------------------------------------------------------------
-        if ( fuente == null || fileName == null || 
+        float factor = 10.0f;
+        if ( currentFont == null || fileName == null || 
              !fontFile.equals(fileName) ) {
             fileName = fontFile;
             try {
-                fuente = Font.createFont(Font.TRUETYPE_FONT, 
+                currentFont = Font.createFont(Font.TRUETYPE_FONT, 
                                          new File(fontFile));
+		currentFont = currentFont.deriveFont(factor);
             }
             catch ( Exception e ) {
                 System.err.println("Error loading font file " + fontFile);
                 return null;
             }
 /*
-            System.out.println("---- Fuente con " + 
-                fuente.getNumGlyphs() + " letras ----");
+            System.out.println("---- Font with " + 
+                currentFont.getNumGlyphs() + " char to glyph mappings ----");
 */
         }
 
@@ -76,42 +84,57 @@ public class AwtFontReader extends FontReader
 
         curve = new ParametricCurve();
 
-        //- Analisis de glyphs ---------------------------------------
+        //- Glyph analisys -------------------------------------------
         AffineTransform a = new AffineTransform();
 
         FontRenderContext frc = new FontRenderContext(a, true, true);
-        GlyphVector gv = fuente.createGlyphVector(frc, characterAndItsContext);
 
+        GlyphVector gv = currentFont.createGlyphVector(frc, characterAndItsContext);
         GeneralPath p = (GeneralPath)gv.getGlyphOutline(0);
 
         boolean endIt = false;
         int code = 0;
 
+
+//*****************************************************************
+// This code can be used to debug rasterization of corresponding font in
+// raster technique
+/*
+        vsdk.toolkit.media.RGBImage img = new vsdk.toolkit.media.RGBImage();
+        img.init(640, 480);
+
+        java.awt.image.BufferedImage bi;
+        bi = vsdk.toolkit.render.awt.AwtRGBImageRenderer.exportToAwtBufferedImage(img);
+
+        java.awt.Graphics2D offlineContext = (java.awt.Graphics2D)bi.getGraphics();
+        offlineContext.setFont(currentFont);
+        offlineContext.setColor(java.awt.Color.RED);
+        offlineContext.drawString(characterAndItsContext, 100, 100);
+
+        vsdk.toolkit.render.awt.AwtRGBImageRenderer.importFromAwtBufferedImage(bi, img);
+        vsdk.toolkit.io.image.ImagePersistence.exportJPG(new File("output.jpg"), img);
+*/
+//*****************************************************************
+
         for ( PathIterator pi = p.getPathIterator(a);
               !pi.isDone(); pi.next() ) {
             double coords[] = new double[6];
             int type = pi.currentSegment(coords);
-            String msg = "";
 
             code = 0;
             switch ( type ) {
               case PathIterator.SEG_CUBICTO:
-                msg = msg + "SEG_CUBICTO";
                 break;
               case PathIterator.SEG_LINETO:
-                msg = msg + "SEG_LINETO";
                 code = 1;
                 break;
               case PathIterator.SEG_MOVETO:
-                msg = msg + "SEG_MOVETO";
                 code = 0;
                 break;
               case PathIterator.SEG_QUADTO:
-                msg = msg + "SEG_QUADTO";
                 code = 2;
                 break;
               case PathIterator.SEG_CLOSE:
-                msg = msg + "SEG_CLOSE";
                 code = 3;
                 break;
               default:
@@ -126,19 +149,19 @@ public class AwtFontReader extends FontReader
 
                     pointParameters = new Vector3D[1];
                     pointParameters[0] = 
-                        new Vector3D(coords[0], -coords[1], 0);
+                        new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, curve.CORNER);
                     break;
                   case 1:
                     pointParameters = new Vector3D[1];
-                    pointParameters[0] = new Vector3D(coords[0], -coords[1], 0);
+                    pointParameters[0] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, curve.CORNER);
                     break;
                   case 2:
                     pointParameters = new Vector3D[2];
                     // Note the inverse order of awt with respect to VSDK!
-                    pointParameters[0] = new Vector3D(coords[2], -coords[3], 0);
-                    pointParameters[1] = new Vector3D(coords[0], -coords[1], 0);
+                    pointParameters[0] = new Vector3D(coords[2]/factor, -coords[3]/factor, 0);
+                    pointParameters[1] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, curve.QUAD);
                     break;
                   case 3:

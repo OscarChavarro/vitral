@@ -77,8 +77,8 @@ public class GlyphExample extends JFrame implements
 
         //-----------------------------------------------------------------
         AwtFontReader fontReader = new AwtFontReader();
-        String msg = "\u00e1\u00d1\u3055\u3042\u307d"; // ennie: \u00d1
-        //String msg = "Hello!";
+        //String msg = "\u00e1\u00d1\u3055\u3042\u307d"; // ennie: \u00d1
+        String msg = "Hello!";
 
         glyphs = new ArrayList<ParametricCurve>();
 
