@@ -51,11 +51,9 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
 
     public void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
     {
-        if ( boundaryStartHalfEdge == he ) {
-            boundaryStartHalfEdge = he.next();
-	}
         halfEdgesList.locateWindowAtElem(he);
         halfEdgesList.removeElemAtWindow();
+        boundaryStartHalfEdge = halfEdgesList.get(0);
     }
 
     /** Locates a half edge that goes from vertex with id `a` to vertex with

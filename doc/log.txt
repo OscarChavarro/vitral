@@ -528,10 +528,13 @@ Changes in 2008 march 20 revition <<30min>>
   - 30min: preparing example for testing BREP gluing operations
   - 45min: implementing 2/3 of gluing algorithm for BREP.
 
-Changes in 2008 march 22 revition <<600min>>
+Changes in 2008 march 22/23 revition <<600min>>
   - 10h: implementing PolyhedralBoundedSolid operators kvfs, lkev and lmekr.
     Revisiting [MANT1988] text about that operations and examples!
     Making work the loopglue operation! :)
+
+Changes in 2008 march 24 revition <<45min>>
+  - 45min: implementing rotationalSweepVersion1 on PolyhedralBoundedSolidExample.
 
 ---------------------------------------------------------------------------
 TODO:
