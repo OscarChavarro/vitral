@@ -184,6 +184,12 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         return window.data;
     }
 
+    public void remove(int pos)
+    {
+        locateWindowAtIndex(pos);
+        removeElemAtWindow();
+    }
+
     public void removeElemAtWindow()
     {
         if ( window == null ) return;

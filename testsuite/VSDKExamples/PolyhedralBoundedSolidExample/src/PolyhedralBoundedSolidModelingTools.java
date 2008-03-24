@@ -231,6 +231,102 @@ public class PolyhedralBoundedSolidModelingTools
 
         return solid;
     }
+
+    /**
+    After algorithm decribed a section [MANT1988].12.4, and program
+    [MANT1988].12.7.
+    */
+    private static void
+    glue(PolyhedralBoundedSolid solid1, PolyhedralBoundedSolid solid2,
+         int faceid1, int faceid2)
+    {
+        solid1.merge(solid2);
+        solid1.kfmrhSameShell(faceid1, faceid2);
+        solid1.loopGlue(faceid1);
+    }
+
+    /**    
+    After example on [MANT1988].12.4.
+    */
+    public static PolyhedralBoundedSolid createGluedCilinders()
+    {
+	//- Create cilynder 1 ---------------------------------------------
+        PolyhedralBoundedSolid solid1;
+
+        Matrix4x4 T = new Matrix4x4();
+        T.translation(0, 0, 0.4);
+
+        solid1 = GeometricModeler.createCircularLamina(
+            0.0, 0.0, 0.5, 0.0, 6
+        );
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            solid1, solid1.findFace(1), T);
+        solid1.validateModel();
+
+	//-----------------------------------------------------------------
+        double ang = (2*Math.PI) / 6;
+        Matrix4x4 R = new Matrix4x4();
+        Vector3D a = new Vector3D(0.5, 0, 0);
+        Vector3D b = new Vector3D(0.5*Math.cos(ang), 0.5*Math.sin(ang), 0);
+        Vector3D c = a.add(b);
+        c = c.multiply(0.5);
+        R.translation(-c.x, c.y, c.z);
+        solid1.applyTransformation(R);
+
+	//- Create cilynder 2 ---------------------------------------------
+        PolyhedralBoundedSolid solid2;
+
+        solid2 = GeometricModeler.createCircularLamina(
+            0.0, 0.0, 0.5, 0.0, 6
+        );
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            solid2, solid2.findFace(1), T);
+        solid2.validateModel();
+
+	//-----------------------------------------------------------------
+        R.translation(c.x, -c.y, c.z);
+        solid2.applyTransformation(R);
+
+	//-----------------------------------------------------------------
+        glue(solid1, solid2, 8, 13);
+
+	//-----------------------------------------------------------------
+        solid1.validateModel();
+	System.out.println(solid1);
+        return solid1;
+    }
+    
+    public static PolyhedralBoundedSolid eulerOperatorsTest()
+    {
+        PolyhedralBoundedSolid solid;
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(0.1, 0.1, 0), 1, 1);
+        solid.smev(1, 1, 2, new Vector3D(1.0, 0.2, 0));
+
+        _PolyhedralBoundedSolidFace face;
+        face = solid.findFace(1);
+        //solid.lkev(face.findHalfEdge(2), face.findHalfEdge(1));
+
+        solid.smev(1, 2, 3, new Vector3D(0.5, 1, 0));
+
+        //-----------------------------------------------------------------
+        _PolyhedralBoundedSolidHalfEdge h1, h2;
+
+        h1 = face.findHalfEdge(3);
+        h2 = face.findHalfEdge(1);
+
+        System.out.println("MEF:");
+	System.out.println("  - " + h1);
+	System.out.println("  - " + h2);
+
+        solid.lmef(h1, h2, 2);
+
+        //-----------------------------------------------------------------
+
+        System.out.println(solid);
+        return solid;
+    }
+
 }
 
 //===========================================================================

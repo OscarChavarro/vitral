@@ -11,6 +11,7 @@
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
@@ -114,6 +115,24 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
         return parentEdge.rightHalf;
     }
 
+    /**
+    Given `this` and `other` halfedges, returns true if their starting vertexes
+    position are nearly equal (with respect to a the given `tolerance`).
+    This method follows the suggested funcionality of procedure "match" from
+    program [MANT1988].12.9.
+    */
+    public boolean
+    vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge other, double tolerance)
+    {
+        if ( VSDK.vectorDistance(
+                 this.startingVertex.position,
+                 other.startingVertex.position
+             ) <= tolerance ) {
+	    return true;
+	}
+	return false;
+    }
+
     public String toString()
     {
         String msg;
@@ -122,7 +141,11 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
             msg = msg + "without parent edge. ";
           }
           else {
-            msg = msg + "with parent edge ";
+            msg = msg + "with parent edge " + parentEdge.id + "(";
+            msg = msg + parentEdge.leftHalf.startingVertex.id;
+	    msg = msg + ", ";
+            msg = msg + parentEdge.rightHalf.startingVertex.id;
+            msg = msg + ")";
             if ( this == parentEdge.leftHalf ) {
                 msg = msg + "(left side)";
               }

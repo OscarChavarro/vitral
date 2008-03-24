@@ -59,7 +59,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private int solidType = 12;
+    private int solidType = 13;
     private boolean debugEdges = false;
 
     public PolyhedralBoundedSolidExample() {
@@ -100,7 +100,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         PolyhedralBoundedSolid solid = null;
         Matrix4x4 T, R, S, M;
 
-        switch ( type % 13 ) {
+        switch ( type % 15 ) {
           case 0:
             solid = new PolyhedralBoundedSolid();
             solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
@@ -186,6 +186,19 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 	    break;
 	  case 12:
 	    solid = PolyhedralBoundedSolidModelingTools.createFontBlock("/users/jedilink/home/paradigmas/freetype2/etc/todas_las_ttf/ttf/486_arialuni.ttf", "\u00e1\u00d1\u3055\u3042\u307d");
+
+            T = new Matrix4x4();
+            T.translation(0.0, 0.0, 0.1);
+
+            GeometricModeler.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), T);
+
+	    break;
+	  case 13:
+            solid = PolyhedralBoundedSolidModelingTools.createGluedCilinders();
+	    break;
+	  case 14:
+            solid = PolyhedralBoundedSolidModelingTools.eulerOperatorsTest();
 	    break;
           case 2: default:
 	    solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
