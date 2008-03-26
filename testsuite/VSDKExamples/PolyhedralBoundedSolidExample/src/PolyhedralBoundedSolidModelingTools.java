@@ -359,7 +359,7 @@ public class PolyhedralBoundedSolidModelingTools
         M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
 
         int i;
-        for ( i = 0; i < nfaces; i++ ) {
+        for ( i = 0; i < nfaces-1; i++ ) {
             v = M.multiply(cfirst.next().startingVertex.position);
             solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
             scan = cfirst.next();
@@ -454,16 +454,19 @@ public class PolyhedralBoundedSolidModelingTools
     public static PolyhedralBoundedSolid rotationalSweepTest()
     {
         PolyhedralBoundedSolid solid;
-/*        
+        
+        //-----------------------------------------------------------------
+/*
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(0.75, 0.25, 0), 1, 1);
         GeometricModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
         rotationalSweepVersion1(solid, 20);
-        solid.validateModel();
-*/        
-
-        solid = GeometricModeler.createCircularLamina(1, 1, 0.5, 0.0, 8);
+*/
+      
+        solid = GeometricModeler.createCircularLamina(0.5, 0.5, 0.2, 0.0, 8);
         rotationalSweepVersion2(solid, 16);
+
+        //-----------------------------------------------------------------
         solid.validateModel();
 
         return solid;
