@@ -253,9 +253,15 @@ public class PolyhedralBoundedSolid extends Solid {
                      _PolyhedralBoundedSolidHalfEdge he2,
                      int vertexID, Vector3D p)
     {
+        //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidVertex newVertex;
         _PolyhedralBoundedSolidEdge newEdge;
+        boolean strutCase = false;
+
+        if ( he1 == he2 ) {
+            strutCase = true;
+        }
 
         if ( he1 == null && he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "lmev",
@@ -269,24 +275,35 @@ public class PolyhedralBoundedSolid extends Solid {
         newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexID);
         minMax = null;
 
+        //-----------------------------------------------------------------
         he = he1;
         while ( he != he2 ) {
             he.startingVertex = newVertex;
-            he = he.mirrorHalfEdge().next();
-            if ( he == he1 ) break;
+            he = (he.mirrorHalfEdge()).next();
         }
 
+        //-----------------------------------------------------------------
+        // Original [MANT1988] code...
+        //addhe(newEdge, newVertex, he2, PLUS);
+        //addhe(newEdge, he2.startingVertex, he1, MINUS);
+
+        // Modified code...
         _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
-        if ( he1.parentEdge != null ) {
+        if ( (he1.parentEdge != null) && strutCase ) {
             addhe(newEdge, oldVertex, he2, PLUS);
             addhe(newEdge, newVertex, he1, MINUS);
         }
-        else {
-            _PolyhedralBoundedSolidHalfEdge x, y;
-            x = addhe(newEdge, oldVertex, he1, PLUS);
-            y = addhe(newEdge, newVertex, he1, MINUS);
-            //halfEdgesList.swapElements(x, y);
+        else if ( (he1.parentEdge != null) && !strutCase ) {
+            addhe(newEdge, newVertex, he2, PLUS);
+            addhe(newEdge, he2.startingVertex, he1, MINUS);
         }
+        else {
+            // mvfs case
+            addhe(newEdge, oldVertex, he1, PLUS);
+            addhe(newEdge, newVertex, he1, MINUS);
+        }
+
+        //-----------------------------------------------------------------
         newVertex.emanatingHalfEdge = he2.previous();
         he2.startingVertex.emanatingHalfEdge = he2;
     }
@@ -402,7 +419,6 @@ public class PolyhedralBoundedSolid extends Solid {
         while ( he != he2 ) {
             migratedHalfEdges.add(he);
             he = he.next();
-            if ( he == he2 ) break;
         }
 
         he1.parentLoop.unlistHalfEdge(he1);
@@ -416,7 +432,7 @@ public class PolyhedralBoundedSolid extends Solid {
         polygonsList.removeElemAtWindow();
 
         int i;
-        for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
+        for ( i = migratedHalfEdges.size()-1; i >= 0; i-- ) {
             he = migratedHalfEdges.get(i);
             he.parentLoop = he1.parentLoop;
             he1.parentLoop.halfEdgesList.insertBefore(he, hepivot);

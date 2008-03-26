@@ -324,28 +324,24 @@ public class PolyhedralBoundedSolidModelingTools
     }
 
     /**
-    Current method implements a simple and restricted rotational sweep (lathe) algorithm
-    for wires (solids with one face, and one open loop) in the z=0 plane, to be rotated
-    about the x axis, as described in section [MANT1988].12.3.2, and presented in program
-    [MANT1988].12.5.
-    This version of the rotational sweep has some limitations and characteristics:
-      - It is the simpler form of rotational sweep, and serves as the base to develop
-        complex/generalized versions of the algorithm.
+    Current method implements a simple and restricted rotational sweep (lathe)
+    algorithm for wires (solids with one face, and one open loop) in the z=0
+    plane, to be rotated about the x axis, as described in section
+    [MANT1988].12.3.2, and presented in program [MANT1988].12.5.
+    This version of the rotational sweep has some limitations and
+    characteristics:
+      - It is the simpler form of rotational sweep, and serves as the base to
+        develop complex/generalized versions of the algorithm.
       - The rotation axis is fixed to be the x-axis
-      - The profile path must be open (a "wire" solid with just one face with one loop,
-        which is open, with a single, connected and nonforking string of edges)
-      - All edges must lie on the half plane [y>0,z=0], and must not touch the x axis.
-      - The resulting model is not a "complete" solid model:
-        . The expected result of a 360 degrees rotational sweep of a wire, is a two sided
-          laminar disk. The result model is not a disk, but a non-closed strip, with an
-          "undone sewing".
-        . The resulting model has its first face non-planar and not bounding any area, but
-          just delimiting the model planar limit (all borders are in that face).
-        . The resulting model has faces only for the external side of the rotated profile.
+      - The profile path must be open (a "wire" solid with just one face with
+        one loop, which is open, with a single, connected and nonforking string
+        of edges)
+      - All edges must lie on the half plane [y>0,z=0], and must not touch the
+        x axis.
     */
     public static void rotationalSweepVersion1(PolyhedralBoundedSolid solid, int nfaces)
     {
-        _PolyhedralBoundedSolidHalfEdge first, cfirst, last, scan;
+        _PolyhedralBoundedSolidHalfEdge first, cfirst, last, scan = null;
         _PolyhedralBoundedSolidFace tailf;
         Vector3D v;
         Matrix4x4 M;
@@ -353,18 +349,18 @@ public class PolyhedralBoundedSolidModelingTools
         first = solid.polygonsList.get(0).boundariesList.get(0).boundaryStartHalfEdge;
         while ( first.parentEdge != first.next().parentEdge ) {
             first = first.next();
-	}
+        }
         last = first.next();
         while ( last.parentEdge != last.next().parentEdge ) {
             last = last.next();
-	}
+        }
         cfirst = first;
         M = new Matrix4x4();
         M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
 
         int i;
-	for ( i = 0; i < nfaces; i++ ) {
-	    v = M.multiply(cfirst.next().startingVertex.position);
+        for ( i = 0; i < nfaces; i++ ) {
+            v = M.multiply(cfirst.next().startingVertex.position);
             solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
             scan = cfirst.next();
             while ( scan != last.next() ) {
@@ -372,20 +368,107 @@ public class PolyhedralBoundedSolidModelingTools
                 solid.lmev(scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
                 solid.lmef(scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
                 scan = (scan.next().next()).mirrorHalfEdge();
-	    }
+            }
             last = scan;
             cfirst = (cfirst.next().next()).mirrorHalfEdge();
+        }
+        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
+        while ( cfirst != scan ) {
+            solid.lmef(cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
+            cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
 	}
+    }
+
+    /**
+    Current method implements a variant of simple and restricted rotational
+    sweep (lathe) algorithm for wires and laminas in the z=0 plane, to be
+    rotated about the x axis, as described in section [MANT1988].12.5, and
+    presented in programs [MANT1988].12.5 and [MANT1988].12.11.
+    */
+    public static void rotationalSweepVersion2(PolyhedralBoundedSolid solid, int nfaces)
+    {
+        //-----------------------------------------------------------------
+        _PolyhedralBoundedSolidHalfEdge first, cfirst, last, scan = null;
+        _PolyhedralBoundedSolidHalfEdge h;
+        _PolyhedralBoundedSolidFace tailf = null;
+        _PolyhedralBoundedSolidFace headf = null;
+        boolean closedFigure = false;
+        Vector3D v;
+        Matrix4x4 M;
+
+        //-----------------------------------------------------------------
+        if ( solid.polygonsList.size() > 1 ) {
+            // Assume it's a lamina
+            closedFigure = true;
+            h = solid.polygonsList.get(0).boundariesList.get(0).boundaryStartHalfEdge;
+            solid.lmev(h, (h.mirrorHalfEdge()).next(),
+                       solid.getMaxVertexId()+1, h.startingVertex.position);
+
+            solid.lkef(h.previous(), (h.previous()).mirrorHalfEdge());
+            headf = solid.polygonsList.get(0);
+
+        }
+
+        //-----------------------------------------------------------------
+        first = solid.polygonsList.get(0).boundariesList.get(0).boundaryStartHalfEdge;
+        while ( first.parentEdge != first.next().parentEdge ) {
+            first = first.next();
+        }
+        last = first.next();
+        while ( last.parentEdge != last.next().parentEdge ) {
+            last = last.next();
+        }
+        cfirst = first;
+        M = new Matrix4x4();
+        M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
+
+        int i;
+        for ( i = 0; i < nfaces; i++ ) {
+            v = M.multiply(cfirst.next().startingVertex.position);
+            solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
+            scan = cfirst.next();
+            while ( scan != last.next() ) {
+                v = M.multiply(scan.previous().startingVertex.position);
+                solid.lmev(scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
+                solid.lmef(scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
+                scan = (scan.next().next()).mirrorHalfEdge();
+            }
+            last = scan;
+            cfirst = (cfirst.next().next()).mirrorHalfEdge();
+        }
+        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
+        while ( cfirst != scan ) {
+            solid.lmef(cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
+            cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
+	}
+
+        //-----------------------------------------------------------------
+        if ( closedFigure ) {
+            // TODO: Check why these operations appears to have some
+            // minor problem that leads to a near correct structure, but
+            // with non planar faces!
+            solid.lkfmrhSameShell(headf, tailf);
+            solid.loopGlue(headf.id);
+	}
+
+        //-----------------------------------------------------------------
     }
 
     public static PolyhedralBoundedSolid rotationalSweepTest()
     {
-        PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-
+        PolyhedralBoundedSolid solid;
+/*        
+        solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(0.75, 0.25, 0), 1, 1);
         GeometricModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
         rotationalSweepVersion1(solid, 20);
         solid.validateModel();
+*/        
+
+        solid = GeometricModeler.createCircularLamina(1, 1, 0.5, 0.0, 16);
+        rotationalSweepVersion2(solid, 16);
+        solid.validateModel();
+
         return solid;
     }
 
