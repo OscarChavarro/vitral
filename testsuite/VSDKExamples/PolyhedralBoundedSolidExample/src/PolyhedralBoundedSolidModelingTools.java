@@ -423,7 +423,7 @@ public class PolyhedralBoundedSolidModelingTools
         M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
 
         int i;
-        for ( i = 0; i < nfaces; i++ ) {
+        for ( i = 0; i < nfaces-1; i++ ) {
             v = M.multiply(cfirst.next().startingVertex.position);
             solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
             scan = cfirst.next();
@@ -444,9 +444,6 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         if ( closedFigure ) {
-            // TODO: Check why these operations appears to have some
-            // minor problem that leads to a near correct structure, but
-            // with non planar faces!
             solid.lkfmrhSameShell(headf, tailf);
             solid.loopGlue(headf.id);
 	}
@@ -465,7 +462,7 @@ public class PolyhedralBoundedSolidModelingTools
         solid.validateModel();
 */        
 
-        solid = GeometricModeler.createCircularLamina(1, 1, 0.5, 0.0, 16);
+        solid = GeometricModeler.createCircularLamina(1, 1, 0.5, 0.0, 8);
         rotationalSweepVersion2(solid, 16);
         solid.validateModel();
 

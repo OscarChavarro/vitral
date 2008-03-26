@@ -148,7 +148,7 @@ Changes in 2006 november 13 revition
     JoglTriangleMeshRenderer.
 
 Changes in 2006 november 19 revition
-  - Implementation of polyhedral bounded solid representation started! :)
+  - Implementation of PolyhedralBoundedSolid representation started! :)
   - Updates to TriangleMesh internal representation and ReaderObj /
     JoglTriangleMeshRenderer to simplify design.
   - Raytracer now support objects with sub-materials
@@ -525,8 +525,9 @@ Changes in 2008 march 19 revition <<303min>>
   - 2h48min: writting and testing GeometricModeler.createBrepFromParametricCurve
 
 Changes in 2008 march 20 revition <<30min>>
-  - 30min: preparing example for testing BREP gluing operations
-  - 45min: implementing 2/3 of gluing algorithm for BREP.
+  - 30min: preparing example for testing PolyhedralBoundedSolid gluing
+    operations
+  - 45min: implementing 2/3 of gluing algorithm for PolyhedralBoundedSolid.
 
 Changes in 2008 march 22/23 revition <<600min>>
   - 10h: implementing PolyhedralBoundedSolid operators kvfs, lkev and lmekr.
@@ -536,12 +537,12 @@ Changes in 2008 march 22/23 revition <<600min>>
 Changes in 2008 march 24 revition <<45min>>
   - 45min: implementing rotationalSweepVersion1 on PolyhedralBoundedSolidExample.
 
-Changes in 2008 march 24 revition <<85min>>
+Changes in 2008 march 24 revition <<110min>>
   - 1h10min: revisiting PolyhedralBoundedSolid.lmev operator, adding unhandled
     case.
   - 15min: revisiting PolyhedralBoundedSolid.lkef operator, fixing bug for
     face erasing for faces with multiple halfedges.
-  - 15min: first implementation of rotationalSweepVersion1
+  - 25min: first implementation of rotationalSweepVersion1, fully tested :)
 
 ---------------------------------------------------------------------------
 TODO:
