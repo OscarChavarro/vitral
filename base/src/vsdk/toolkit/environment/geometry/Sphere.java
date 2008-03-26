@@ -193,6 +193,13 @@ G                igual respecto al c&oacute;digo original de MIT.
         return brepCache;
     }
 
+    /**
+    Given current sphere, this method generates a "polyhedral ball" aproximation.
+    Note that this method follows a similar strategy to the one proposed on function
+    "ball", from program [MANT1988].12.6, but it is expressed entirely on "low level"
+    operators, and doesn't rely on the availability of previous generalized
+    rotational sween operations.
+    */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
         double theta = 0;
