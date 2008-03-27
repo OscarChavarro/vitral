@@ -1363,7 +1363,7 @@ public class PolyhedralBoundedSolid extends Solid {
     representation winged edge data structure, following procedure `comp`
     from program [MANT1988].13.2.
     */
-    public int compareValue(double a, double b, double tolerance)
+    public static int compareValue(double a, double b, double tolerance)
     {
         double delta;
 
