@@ -1358,6 +1358,25 @@ public class PolyhedralBoundedSolid extends Solid {
         return qi;
     }
 
+    /**
+    Utility routine used to compare floating values inside the boundary
+    representation winged edge data structure, following procedure `comp`
+    from program [MANT1988].13.2.
+    */
+    public int compareValue(double a, double b, double tolerance)
+    {
+        double delta;
+
+        delta = Math.abs(a - b);
+        if ( delta < tolerance ) {
+            return 0;
+	}
+	else if ( a > b ) {
+            return 1;
+	}
+	return -1;
+    }
+
     public String toString()
     {
         String msg = "";

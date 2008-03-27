@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
@@ -330,6 +331,23 @@ public class GeometricModeler extends ProcessingElement
 
         solid.validateModel();
         return solid;
+    }
+
+    /**
+    Given the input `inSolid` and the cutting plane `inSplittingPlane`,
+    this method appends to the `outSolidsAbove` list the solids resulting
+    from cutting the solid with the plane and resulting above the plane,
+    similarly, `outSolidsBelow` will be appended with solid pieces
+    resulting below the plane.
+    */
+    public static void split(
+                      PolyhedralBoundedSolid inSolid,
+                      InfinitePlane inSplittingPlane,
+                      ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
+                      ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
+    {
+	PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
+					     outSolidsAbove, outSolidsBelow);
     }
 
 }
