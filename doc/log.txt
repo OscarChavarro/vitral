@@ -545,7 +545,11 @@ Changes in 2008 march 26 revition <<275min>>
   - 25min: first implementation of rotationalSweepVersion1, fully tested :)
   - 45min: structural elements for PolyhedralBoundedSolidSplitter code
   - 50min: PolyhedralBoundedSolidSplitter.splitGenerate reduction step
-  - 2h PolyhedralBoundedSolidSplitter.splitClassify reduction step
+  - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
+
+Changes in 2008 march 27 revition <<210min>>
+  - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
+  - 2h30min: PolyhedralBoundedSolidSplitter.splitConnect
 
 ---------------------------------------------------------------------------
 TODO:

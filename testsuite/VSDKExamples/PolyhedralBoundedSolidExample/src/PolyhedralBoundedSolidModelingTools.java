@@ -476,6 +476,9 @@ public class PolyhedralBoundedSolidModelingTools
     public static PolyhedralBoundedSolid splitTest(int part)
     {
         //- Basic lamina --------------------------------------------------
+        PolyhedralBoundedSolid solid = createHoledBox();
+        //PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
+/*
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;
 
@@ -494,7 +497,7 @@ public class PolyhedralBoundedSolidModelingTools
         T.translation(0, 0, 0.4);
         GeometricModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
-
+*/
         //-----------------------------------------------------------------
         InfinitePlane sp;
         ArrayList <PolyhedralBoundedSolid> solidsAbove;
@@ -503,8 +506,11 @@ public class PolyhedralBoundedSolidModelingTools
         solidsAbove = new ArrayList <PolyhedralBoundedSolid>();
         solidsBelow = new ArrayList <PolyhedralBoundedSolid>();
 
-        sp = new InfinitePlane(new Vector3D(0, 1, 0) /*n*/,
-                               new Vector3D(0, 0.30+0.05, 0) /*p*/);
+//        sp = new InfinitePlane(new Vector3D(0, 1, 0) /*n*/,
+//                               new Vector3D(0, 0.30+0.05, 0) /*p*/);
+
+        sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
+                               new Vector3D(0, 0, 0.5) /*p*/);
 
         GeometricModeler.split(solid, sp, solidsAbove, solidsBelow);
 
