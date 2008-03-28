@@ -499,37 +499,26 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     private static void laringmv(_PolyhedralBoundedSolidFace oldf, _PolyhedralBoundedSolidFace newf)
     {
         System.out.println("laringmv not implemented!");
+        System.out.println("Check [MANT1988].14 for this untested operation case!");
+        System.exit(1);
     }
 
     /**
     */
     private static boolean isLoose(_PolyhedralBoundedSolidHalfEdge he)
     {
-/*
-        Vector3D a, b, c;
-
-        a = he.startingVertex.position;
-        b = he.next().startingVertex.position;
-
-        c = b.substract(a);
-        if ( c.length() < VSDK.EPSILON ) {
-            return true;
-        }
-        return false;
-*/
-
         int i;
 
-	//System.out.print("      Testing for isLoose to edge (" + he.startingVertex.id + "/" + he.next().startingVertex.id +  ") from: ");
-	for ( i = 0; i < tieds.size(); i++ ) {
+        //System.out.print("      Testing for isLoose to edge (" + he.startingVertex.id + "/" + he.next().startingVertex.id +  ") from: ");
+        for ( i = 0; i < tieds.size(); i++ ) {
             //System.out.print("[" + tieds.get(i).startingVertex.id + "/" + tieds.get(i).next().startingVertex.id + "]");
-	}
+        }
         //System.out.print("\n");
 
 
-	for ( i = 0; i < tieds.size(); i++ ) {
-	    if ( he == tieds.get(i) ) return false;
-	}
+        for ( i = 0; i < tieds.size(); i++ ) {
+            if ( he == tieds.get(i) ) return false;
+        }
 
 
         return true;
@@ -563,11 +552,11 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             //System.out.println("    . h1: " + h1);
 
             if ( h1 != null ) {
-		//System.out.println("    . -> JOIN H1");
+                //System.out.println("    . -> JOIN H1");
                 join(h1, nextedge.rightHalf);
                 tieds.add(nextedge.rightHalf);
                 if ( !isLoose(h1.mirrorHalfEdge()) ) {
-		    //System.out.println("    . -> CUT H1");
+                    //System.out.println("    . -> CUT H1");
                     cut(h1);
                 }
             }
@@ -577,16 +566,16 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             //System.out.println("    . h2: " + h2);
 
             if ( h2 != null ) {
-		//System.out.println("    . -> JOIN H2");
+                //System.out.println("    . -> JOIN H2");
                 join(h2, nextedge.leftHalf);
                 tieds.add(nextedge.leftHalf);
                 if ( !isLoose(h2.mirrorHalfEdge()) ) {
-		    //System.out.println("    . -> CUT H2");
+                    //System.out.println("    . -> CUT H2");
                     cut(h2);
                 }
             }
             if ( h1 != null && h2 != null ) {
-		//System.out.println("    . -> CUT DUAL");
+                //System.out.println("    . -> CUT DUAL");
                 cut(nextedge.rightHalf);
             }
 
@@ -595,12 +584,55 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    Following program [MANT1988].14.12.
+    */
+    private static void classify(PolyhedralBoundedSolid S,
+                                 PolyhedralBoundedSolid Above,
+                                 PolyhedralBoundedSolid Below)
+    {
+        System.out.println("classify");
+    }
+
+    /**
+    Following program [MANT1988].14.12.
+    */
+    private static void movefac(_PolyhedralBoundedSolidFace face,
+                                PolyhedralBoundedSolid s)
+    {
+        System.out.println("movefac");
+    }
+
+    /**
+    */
+    private static void cleanup(PolyhedralBoundedSolid s)
+    {
+        System.out.println("cleanup");
+    }
+
+    /**
+    Following program [MANT1988].14.11.
     */
     private static void splitFinish(PolyhedralBoundedSolid inSolid,
                              ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
                              ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
     {
-        System.out.println("splitFinish");
+        int i;
+        int firstHalfSize;
+        _PolyhedralBoundedSolidFace newface;
+        PolyhedralBoundedSolid newAbove, newBelow;
+
+        firstHalfSize = sonf.size();
+        for ( i = 0; i < firstHalfSize; i++ ) {
+            newface = inSolid.lmfkrh(sonf.get(i).boundariesList.get(1), inSolid.getMaxFaceId()+1);
+            sonf.add(newface);
+        }
+        newAbove = new PolyhedralBoundedSolid();
+        newBelow = new PolyhedralBoundedSolid();
+        classify(inSolid, newAbove, newBelow);
+        cleanup(newAbove);
+        cleanup(newBelow);
+        outSolidsAbove.add(newAbove);
+        outSolidsBelow.add(newBelow);
     }
 
     /**

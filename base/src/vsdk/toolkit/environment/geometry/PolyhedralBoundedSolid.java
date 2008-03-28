@@ -584,6 +584,14 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    */
+    public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceid)
+    {
+	System.out.println("lmfkrh NOT IMPLEMENTED!");
+        return null;
+    }
+
+    /**
     lkfmrhSameShell: LowlevelKillFaceMakeRingHoleinSameShell.
     Operator `lkfmrhSameShell` merges two faces `face1` and `face2` by making
     the loop of the latter a ring into the former. Face `face2` is hence

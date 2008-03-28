@@ -476,8 +476,8 @@ public class PolyhedralBoundedSolidModelingTools
     public static PolyhedralBoundedSolid splitTest(int part)
     {
         //- Basic lamina --------------------------------------------------
-        PolyhedralBoundedSolid solid = createHoledBox();
-        //PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
+        //PolyhedralBoundedSolid solid = createHoledBox();
+        PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
 /*
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;

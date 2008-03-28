@@ -551,6 +551,9 @@ Changes in 2008 march 27 revition <<210min>>
   - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
   - 2h30min: PolyhedralBoundedSolidSplitter.splitConnect
 
+Changes in 2008 march 28 revition <<15min>>
+  - 15min: PolyhedralBoundedSolidSplitter.splitFinish structure
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
