@@ -634,19 +634,28 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidFace newFace;
         newFace = new _PolyhedralBoundedSolidFace(this, newFaceId);
 
+        if ( newFaceId > maxFaceId ) maxFaceId = newFaceId;
+
         l.parentFace.boundariesList.locateWindowAtElem(l);
         l.parentFace.boundariesList.removeElemAtWindow();
         l.parentFace = newFace;
+        newFace.boundariesList.add(l);
 
         return newFace;
     }
 
     /**
-    Method `lringmv` moves the loop `l`
+    Method `lringmv` moves the loop `l` from its parent face to face `tofac`.
+    If `setAsOuterLoop` is false, `l` becomes an "inner" loop, and otherwise
+    the outer loop of `tofac`. If `l.parentFace` == `tofac`, `lringmv` has no
+    effect except for assigning the inner vs. outer information. Note that
+    `lringmv` is an addendum to `lmef`, and not an Euler operator.
+    This method follows the functional definition of section [MANT1988].11.5.2.
     */
-    public void lringmv(_PolyhedralBoundedSolidFace oldf, _PolyhedralBoundedSolidFace newf, boolean setAsOuterLoop)
+    public void lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
     {
         System.out.println("laringmv not implemented!");
+        System.exit(1);
     }
 
     /**

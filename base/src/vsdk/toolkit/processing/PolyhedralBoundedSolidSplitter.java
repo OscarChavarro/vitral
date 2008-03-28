@@ -18,6 +18,7 @@ import java.util.Collections;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
@@ -206,11 +207,14 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     Answer to problem [MANT1988].14.1.
 
     Current implementation assumes the following interpretation:
-    Given a vertex of interest `he.startingVertex`, one can measure the angle of incidence
-    of loop `he.parentLoop` on vertex of interest by measuring the angle between the
-    halfedges `he` (direction `a`) and `he.previous` (direction `b`).  The bisector
-    vector is the one having its tail on the vertex of interest position 
-    `he.startingVertex.position` and its end pointing in the middle of `a` and `b` directions.
+    Given a vertex of interest `he.startingVertex`, one can measure the angle
+    of incidence of loop `he.parentLoop` on vertex of interest by measuring the
+    angle between the halfedges `he` (direction `a`) and `he.previous` 
+    (direction `b`).  The bisector vector is the one having its tail on the
+    vertex of interest position `he.startingVertex.position` and its end
+    pointing in the middle of `a` and `b` directions.
+
+    This is the answer to problem [MANT1988].14.1.
     */
     private static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -592,23 +596,113 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
                                  PolyhedralBoundedSolid Above,
                                  PolyhedralBoundedSolid Below)
     {
-        System.out.println("classify");
+        int i;
+
+        for ( i = 0; i < sonf.size()/2; i++ ) {
+            movefac(sonf.get(i), Above);
+            movefac(sonf.get(i+sonf.size()/2), Below);
+        }
     }
 
     /**
     Following program [MANT1988].14.12.
     */
-    private static void movefac(_PolyhedralBoundedSolidFace face,
+    private static void movefac(_PolyhedralBoundedSolidFace f,
                                 PolyhedralBoundedSolid s)
     {
-	System.out.println("movefac");
+        _PolyhedralBoundedSolidLoop l;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidFace f2;
+        int i;
+
+        f.parentSolid.polygonsList.locateWindowAtElem(f);
+        f.parentSolid.polygonsList.removeElemAtWindow();
+        s.polygonsList.add(f);
+        f.parentSolid = s;
+
+        for ( i = 0; i < f.boundariesList.size(); i++ ) {
+            l = f.boundariesList.get(i);
+            he = l.boundaryStartHalfEdge;
+            do {
+                f2 = he.mirrorHalfEdge().parentLoop.parentFace;
+                if ( f2.parentSolid != s ) {
+                    movefac(f2, s);
+                }
+                he = he.next();
+            } while( he != l.boundaryStartHalfEdge );
+        }
+                
     }
 
     /**
     */
+    private static boolean searchForEdge(
+        CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> l,
+        _PolyhedralBoundedSolidEdge e)
+    {
+        int i;
+
+        for ( i = 0; i < l.size(); i++ ) {
+            if ( l.get(i) == e ) return true;
+        }
+        return false;
+    }
+
+    /**
+    */
+    private static boolean searchForVertex(
+        CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> l,
+        _PolyhedralBoundedSolidVertex v)
+    {
+        int i;
+
+        for ( i = 0; i < l.size(); i++ ) {
+            if ( l.get(i) == v ) return true;
+        }
+        return false;
+    }
+
+    /**
+    This is the answer to problem [MANT1988].14.2.
+    */
     private static void cleanup(PolyhedralBoundedSolid s)
     {
-	System.out.println("cleanup");
+        int i, j;
+        _PolyhedralBoundedSolidFace f;
+        _PolyhedralBoundedSolidLoop l;
+        _PolyhedralBoundedSolidHalfEdge he;
+
+        for ( i = 0; i < s.polygonsList.size(); i++ ) {
+            f = s.polygonsList.get(i);
+            for ( j = 0; j < f.boundariesList.size(); j++ ) {
+                l = f.boundariesList.get(j);
+                he = l.boundaryStartHalfEdge;
+                do {
+                    //
+                    if ( !searchForEdge(s.edgesList, he.parentEdge) ) {
+                        s.edgesList.add(he.parentEdge);
+                    }
+                    if ( !searchForVertex(s.verticesList, he.startingVertex) ) {
+                        s.verticesList.add(he.startingVertex);
+                    }
+                    //
+                    he = he.next();
+                } while( he != l.boundaryStartHalfEdge );
+            }
+        }
+        s.validateModel();
+    }
+
+    /**
+    */
+    private static void destroy(PolyhedralBoundedSolid inSolid)
+    {
+        inSolid.polygonsList =
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
+        inSolid.edgesList =
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
+        inSolid.verticesList =
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
     }
 
     /**
@@ -635,6 +729,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         cleanup(newBelow);
         outSolidsAbove.add(newAbove);
         outSolidsBelow.add(newBelow);
+        destroy(inSolid);
     }
 
     /**

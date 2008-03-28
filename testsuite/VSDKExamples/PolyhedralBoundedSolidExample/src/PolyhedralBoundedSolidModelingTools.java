@@ -512,10 +512,22 @@ public class PolyhedralBoundedSolidModelingTools
         sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
                                new Vector3D(0, 0, 0.5) /*p*/);
 
+        //-----------------------------------------------------------------
+        solid.validateModel();
+
+        if ( part == 1 ) {
+            return solid;
+        }
+
         GeometricModeler.split(solid, sp, solidsAbove, solidsBelow);
 
         //-----------------------------------------------------------------
-        solid.validateModel();
+        if ( part == 3 ) {
+            solid = solidsBelow.get(0);
+        }
+        else {
+            solid = solidsAbove.get(0);
+        }
 
         return solid;
     }

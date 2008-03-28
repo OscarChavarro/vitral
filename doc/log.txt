@@ -551,9 +551,12 @@ Changes in 2008 march 27 revition <<210min>>
   - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
   - 2h30min: PolyhedralBoundedSolidSplitter.splitConnect
 
-Changes in 2008 march 28 revition <<15min>>
+Changes in 2008 march 28 revition <<85min>>
   - 15min: PolyhedralBoundedSolidSplitter.splitFinish structure
   - 20min: PolyhedralBoundedSolid.lmfkrh and PolyhedralBoundedSolid.laringmv
+  - 50min: First complete but untested PolyhedralBoundedSolidSplitter,
+    only working in the simple cube test. Leaving wrong faces on cube with
+    hole and failing for complex test case object.
 
 ---------------------------------------------------------------------------
 TODO:
