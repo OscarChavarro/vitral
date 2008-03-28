@@ -501,6 +501,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         System.out.println("laringmv not implemented!");
         System.out.println("Check [MANT1988].14 for this untested operation case!");
         System.exit(1);
+        // Is this supposed to move all rings from `oldf` to `newf` using
+        // PolyhedralBoundedSolid.lringmv???
     }
 
     /**
@@ -599,14 +601,14 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     private static void movefac(_PolyhedralBoundedSolidFace face,
                                 PolyhedralBoundedSolid s)
     {
-        System.out.println("movefac");
+	System.out.println("movefac");
     }
 
     /**
     */
     private static void cleanup(PolyhedralBoundedSolid s)
     {
-        System.out.println("cleanup");
+	System.out.println("cleanup");
     }
 
     /**

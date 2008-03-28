@@ -553,6 +553,7 @@ Changes in 2008 march 27 revition <<210min>>
 
 Changes in 2008 march 28 revition <<15min>>
   - 15min: PolyhedralBoundedSolidSplitter.splitFinish structure
+  - 20min: PolyhedralBoundedSolid.lmfkrh and PolyhedralBoundedSolid.laringmv
 
 ---------------------------------------------------------------------------
 TODO:

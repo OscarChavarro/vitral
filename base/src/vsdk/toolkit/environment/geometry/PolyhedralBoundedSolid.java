@@ -584,14 +584,6 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    */
-    public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceid)
-    {
-	System.out.println("lmfkrh NOT IMPLEMENTED!");
-        return null;
-    }
-
-    /**
     lkfmrhSameShell: LowlevelKillFaceMakeRingHoleinSameShell.
     Operator `lkfmrhSameShell` merges two faces `face1` and `face2` by making
     the loop of the latter a ring into the former. Face `face2` is hence
@@ -627,6 +619,34 @@ public class PolyhedralBoundedSolid extends Solid {
 
         polygonsList.locateWindowAtElem(face2);
         polygonsList.removeElemAtWindow();
+    }
+
+    /**
+    lmfkrh: LowLevelMakeFaceKillRingHole.
+    Operator `lmfkrh` is the inverse of `lkfmrh`. It makes the loop `l`
+    the outer loop of a new face `newFaceId`. It is assumed that `l` is an
+    inner loop of its parent face.
+    Note that this method is a partial solution to problem [MANT1988].11.5, 
+    and follows the functional definition of section [MANT1988].11.5.2.
+    */
+    public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceId)
+    {
+        _PolyhedralBoundedSolidFace newFace;
+        newFace = new _PolyhedralBoundedSolidFace(this, newFaceId);
+
+        l.parentFace.boundariesList.locateWindowAtElem(l);
+        l.parentFace.boundariesList.removeElemAtWindow();
+        l.parentFace = newFace;
+
+        return newFace;
+    }
+
+    /**
+    Method `lringmv` moves the loop `l`
+    */
+    public void lringmv(_PolyhedralBoundedSolidFace oldf, _PolyhedralBoundedSolidFace newf, boolean setAsOuterLoop)
+    {
+        System.out.println("laringmv not implemented!");
     }
 
     /**
@@ -1378,11 +1398,11 @@ public class PolyhedralBoundedSolid extends Solid {
         delta = Math.abs(a - b);
         if ( delta < tolerance ) {
             return 0;
-	}
-	else if ( a > b ) {
+        }
+        else if ( a > b ) {
             return 1;
-	}
-	return -1;
+        }
+        return -1;
     }
 
     public String toString()
