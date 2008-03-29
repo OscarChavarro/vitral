@@ -268,7 +268,7 @@ public class GeometricModeler extends ProcessingElement
                 nextFaceId++;
 
                 if ( !firstLoop ) {
-                    solid.kfmrhSameShell(2, nextFaceId-1);
+                    solid.kfmrh(2, nextFaceId-1);
                 }
                 //----------
                 firstLoop = false;
@@ -326,7 +326,7 @@ public class GeometricModeler extends ProcessingElement
                   nextVertexId-1, nextVertexId-2, nextFaceId);
         nextFaceId++;
         if ( needAnEnding ) {
-            solid.kfmrhSameShell(2, nextFaceId-1);
+            solid.kfmrh(2, nextFaceId-1);
         }
 
         solid.validateModel();

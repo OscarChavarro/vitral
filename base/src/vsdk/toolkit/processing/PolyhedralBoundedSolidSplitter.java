@@ -128,6 +128,9 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     */
     private static ArrayList<_PolyhedralBoundedSolidFace> sonf;
 
+    private static ArrayList<_PolyhedralBoundedSolidFace> facesToFixAbove;
+    private static ArrayList<_PolyhedralBoundedSolidFace> facesToFixBelow;
+
     /**
     Following variable `nbr` from program [MANT1988].14.3.
     */
@@ -474,6 +477,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         if ( h1.next().next() != h2 ) {
             s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
+                System.out.println("*****");
                 laringmv(oldf, newf);
             }
         }
@@ -548,7 +552,11 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         sonf = new ArrayList<_PolyhedralBoundedSolidFace>();
 
         Collections.sort(sone);
+
+        //System.out.println(sone.get(0).e.rightHalf.parentLoop.parentFace.parentSolid);
+
         for ( i = 0; i < sone.size(); i++ ) {
+            //System.out.println("- " + i + " ---------------------------------------------------------------------");
             //System.out.println(" - " + sone.get(i).e + " / " + sone.get(i).e.rightHalf.startingVertex.position);
 
             nextedge = sone.get(i).e;
@@ -597,10 +605,14 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
                                  PolyhedralBoundedSolid Below)
     {
         int i;
+        facesToFixAbove = new ArrayList<_PolyhedralBoundedSolidFace>();
+        facesToFixBelow = new ArrayList<_PolyhedralBoundedSolidFace>();
 
         for ( i = 0; i < sonf.size()/2; i++ ) {
             movefac(sonf.get(i), Above);
+            facesToFixAbove.add(sonf.get(i));
             movefac(sonf.get(i+sonf.size()/2), Below);
+            facesToFixBelow.add(sonf.get(i+sonf.size()/2));
         }
     }
 
@@ -662,6 +674,16 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         return false;
     }
 
+    private static boolean isNullFace(_PolyhedralBoundedSolidFace f)
+    {
+        int i;
+
+        for ( i = 0; i < sonf.size(); i++ ) {
+            if ( sonf.get(i) == f ) return true;
+        }
+        return false;
+    }
+
     /**
     This is the answer to problem [MANT1988].14.2.
     */
@@ -706,6 +728,58 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    A face `a` is "inside" other `b` (and should be an internal loop) if
+    all vertices from `b` are inside the polygon of `a`.
+
+    PRE: given faces are coplanar.
+    */
+    private static boolean faceInsideFace(
+        _PolyhedralBoundedSolidFace a, _PolyhedralBoundedSolidFace b)
+    {
+        int i;
+        _PolyhedralBoundedSolidLoop l;
+        _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+        a.calculatePlane();
+        for ( i = 0; i < b.boundariesList.size(); i++ ) {
+            heStart = b.boundariesList.get(i).boundaryStartHalfEdge;
+            he = heStart;
+            do {
+                if ( a.testPointInside(he.startingVertex.position) == 1 ) {
+                    return false;
+                }
+                he = he.next();
+            } while ( he != heStart );
+        }
+        return true;
+    }
+
+    /**
+    */
+    private static void fixNullFaces(ArrayList<_PolyhedralBoundedSolidFace> l)
+    {
+        if ( l.size() == 1 ) {
+            l.remove(0);
+            return;
+        }
+
+        int i, j;
+
+        for ( i = 0; i < l.size(); i++ ) {
+            for ( j = 0; j < l.size(); j++ ) {
+                if ( i == j ) continue;
+                if ( faceInsideFace(l.get(j), l.get(i) ) ) {
+                    l.get(i).parentSolid.lkfmrh(l.get(i), l.get(j));
+                    l.remove(j);
+                    // Repeat he process with remaining list
+                    fixNullFaces(l);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
     Following program [MANT1988].14.11.
     */
     private static void splitFinish(PolyhedralBoundedSolid inSolid,
@@ -725,6 +799,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         newAbove = new PolyhedralBoundedSolid();
         newBelow = new PolyhedralBoundedSolid();
         classify(inSolid, newAbove, newBelow);
+        fixNullFaces(facesToFixAbove);
+        fixNullFaces(facesToFixBelow);
         cleanup(newAbove);
         cleanup(newBelow);
         outSolidsAbove.add(newAbove);

@@ -445,8 +445,8 @@ public class PolyhedralBoundedSolid extends Solid {
     Operator lmef adds a new edge between `he1.startingVertex` and
     `he2.startingVertex`, and "splits" their common face into two faces
     such that `he1` will occur in the new face `newFaceId`, and `he2` 
-    remains in the old face. The
-    new edge is oriented from he1.startingVertex to he2.startingVertex.
+    remains in the old face. The new edge is oriented from 
+    `he1.startingVertex` to `he2.startingVertex`.
     Halfedges `he1` and `he2` must belong to the same loop (i.e.
     he1.parentLoop == he2.parentLoop ). They may be equal, in which case
     a "circular" face with just one edge is created. A pointer to the new
@@ -584,20 +584,22 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    lkfmrhSameShell: LowlevelKillFaceMakeRingHoleinSameShell.
-    Operator `lkfmrhSameShell` merges two faces `face1` and `face2` by making
+    lkfmrh: LowlevelKillFaceMakeRingHoleinSameShell.
+    Operator `lkfmrh` merges two faces `face1` and `face2` by making
     the loop of the latter a ring into the former. Face `face2` is hence
     removed.
     PRE: It is assumed that `face2` is simple, i.e., has just one loop.
     Note that this method is a partial solution to problem [MANT1988].11.5, 
     and follows the functional definition of section [MANT1988].11.5.2.
+    This method should be shecket to see if it is managing only the
+    "same shell" case, or if it is done.
     */
-    public void lkfmrhSameShell(
+    public void lkfmrh(
         _PolyhedralBoundedSolidFace face1,
         _PolyhedralBoundedSolidFace face2)
     {
         if ( face2.boundariesList.size() > 1 ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "lkfmrhSameShell",
+            VSDK.reportMessage(this, VSDK.WARNING, "lkfmrh",
                 "Internal face to form new loop must have just one boundary!");
             return;
         }
@@ -933,7 +935,7 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    kfmrhSameShell: (High level version) KillFaceMakeRingHole
+    kfmrh: (High level version) KillFaceMakeRingHole
     (connected sum topological operation, global manipulation).
     Operator `kfmrhSameShell` "merges" two faces `f1` and `f2` by making
     the latter an interior loop of the former. Face `f2` is removed.
@@ -942,24 +944,26 @@ public class PolyhedralBoundedSolid extends Solid {
     Actualy, `kfmrh` creates a hole only if the two argument faces belong
     to the same shell.  This method implements that case, taking `this`
     solid as the only shell.
+    This method should be shecket to see if it is managing only the
+    "same shell" case, or if it is done.
     */
-    public boolean kfmrhSameShell(int f1, int f2)
+    public boolean kfmrh(int f1, int f2)
     {
         _PolyhedralBoundedSolidFace oldface1, oldface2;
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "kfmrhSameShell",
+            VSDK.reportMessage(this, VSDK.WARNING, "kfmrh",
             "Face " + f1 + " not found.");
             return false;
         }
         oldface2 = findFace(f2);
         if ( oldface2 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "kfmrhSameShell",
+            VSDK.reportMessage(this, VSDK.WARNING, "kfmrh",
             "Face " + f2 + " not found.");
             return false;
         }
-        lkfmrhSameShell(oldface1, oldface2);
+        lkfmrh(oldface1, oldface2);
         return true;
     }
 

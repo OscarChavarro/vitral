@@ -413,7 +413,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             brep.mef(7, 7, 13, 14, 16, 12, 11);
 
             //- Hole creation ---------------------------------------------
-            brep.kfmrhSameShell(2, 11);
+            brep.kfmrh(2, 11);
 
             R.translation(-0.55, -0.55, -0.55);
             brep.applyTransformation(R);

@@ -132,7 +132,7 @@ public class PolyhedralBoundedSolidModelingTools
         solid = PolyhedralBoundedSolidModelingTools.createBox(
                 new Vector3D(0.9, 0.9, 0.9));
         PolyhedralBoundedSolidModelingTools.extrudeBox(solid);
-        solid.kfmrhSameShell(2, 11);
+        solid.kfmrh(2, 11);
         //R.translation(-0.55, -0.55, -0.55);
         //solid.applyTransformation(R);
         solid.validateModel();
@@ -167,7 +167,7 @@ public class PolyhedralBoundedSolidModelingTools
                   6, /* v4 */
                   3  /* newfaceid */);
 
-        solid.kfmrhSameShell(2, 3);
+        solid.kfmrh(2, 3);
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
@@ -203,7 +203,7 @@ public class PolyhedralBoundedSolidModelingTools
                   6, /* v4 */
                   3  /* newfaceid */);
 
-        solid.kfmrhSameShell(2, 3);
+        solid.kfmrh(2, 3);
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
@@ -242,7 +242,7 @@ public class PolyhedralBoundedSolidModelingTools
          int faceid1, int faceid2)
     {
         solid1.merge(solid2);
-        solid1.kfmrhSameShell(faceid1, faceid2);
+        solid1.kfmrh(faceid1, faceid2);
         solid1.loopGlue(faceid1);
     }
 
@@ -445,7 +445,7 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         if ( closedFigure ) {
-            solid.lkfmrhSameShell(headf, tailf);
+            solid.lkfmrh(headf, tailf);
             solid.loopGlue(headf.id);
         }
 
@@ -476,8 +476,8 @@ public class PolyhedralBoundedSolidModelingTools
     public static PolyhedralBoundedSolid splitTest(int part)
     {
         //- Basic lamina --------------------------------------------------
-        //PolyhedralBoundedSolid solid = createHoledBox();
-        PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
+        PolyhedralBoundedSolid solid = createHoledBox();
+        //PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
 /*
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;

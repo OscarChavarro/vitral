@@ -558,6 +558,10 @@ Changes in 2008 march 28 revition <<85min>>
     only working in the simple cube test. Leaving wrong faces on cube with
     hole and failing for complex test case object.
 
+Changes in 2008 march 28 revition <<20min>>
+  - 20min: checking PolyhedralBoundedSolidSplitter for managing the splitting
+    of solids with holes.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
