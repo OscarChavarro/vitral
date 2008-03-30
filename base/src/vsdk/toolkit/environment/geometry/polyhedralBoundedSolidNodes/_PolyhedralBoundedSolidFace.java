@@ -137,22 +137,38 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
         heStart = he;
 
-        //do {
+        boolean colinearPoints = true;
+
+        do {
             // This is only considering the first three vertices, and not taking
             // in to account the possible case of too close vertices. Should be
             // replaced to consider the full vertices set.
 
             //- Do normal estimation on a three set of points -----------------
             Vector3D p0 = null, p1 = null;
-            Vector3D p2 = null, a, b;
+            Vector3D p2 = null;
+            Vector3D a, b;
             Vector3D n;
 
             p0 = he.startingVertex.position;
             p1 = he.next().startingVertex.position;
             p2 = he.next().next().startingVertex.position;
+
             a = p1.substract(p0);    a.normalize();
             b = p2.substract(p0);    b.normalize();
-            n = a.crossProduct(b);   n.normalize();
+            n = a.crossProduct(b);
+
+            if ( n.length() < VSDK.EPSILON ||
+                 a.length() < VSDK.EPSILON ||
+                 b.length() < VSDK.EPSILON ) {
+                he = he.next();
+                continue;
+	    }
+	    else {
+                colinearPoints = false;
+	    }
+
+            n.normalize();
             containingPlane = new InfinitePlane(n, p0);
 
             //- Determine if p1 region is convex or concave -------------------
@@ -169,7 +185,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             }
             containingPlane = new InfinitePlane(n, p0);
 
-        //} while ( colinearPoints );
+            he = he.next();
+
+        } while ( he != heStart && colinearPoints );
 
         /*
         do {

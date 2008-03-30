@@ -269,6 +269,12 @@ public class PolyhedralBoundedSolid extends Solid {
             return;
         }
 
+	if ( he1.startingVertex != he2.startingVertex ) {
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmev",
+            "Halfedges not starting at the same vertex. Not supported case!");
+            return;
+	}
+
         if ( vertexID > maxVertexId ) maxVertexId = vertexID;
 
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
@@ -289,18 +295,13 @@ public class PolyhedralBoundedSolid extends Solid {
 
         // Modified code...
         _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
-        if ( (he1.parentEdge != null) && strutCase ) {
+        if ( strutCase ) {
             addhe(newEdge, oldVertex, he2, PLUS);
             addhe(newEdge, newVertex, he1, MINUS);
         }
-        else if ( (he1.parentEdge != null) && !strutCase ) {
+        else {
             addhe(newEdge, newVertex, he2, PLUS);
             addhe(newEdge, he2.startingVertex, he1, MINUS);
-        }
-        else {
-            // mvfs case
-            addhe(newEdge, oldVertex, he1, PLUS);
-            addhe(newEdge, newVertex, he1, MINUS);
         }
 
         //-----------------------------------------------------------------
@@ -1112,7 +1113,10 @@ public class PolyhedralBoundedSolid extends Solid {
     validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
     {
         //- 1. Test no-surface case ---------------------------------------
-        if ( points.size() < 3 ) return false;
+        if ( points.size() < 3 ) {
+            System.out.println("Reason 1");
+            return false;
+	}
 
         //- 2. Test all-equal case ----------------------------------------
         Vector3D p0, p1, p2;
@@ -1128,31 +1132,46 @@ public class PolyhedralBoundedSolid extends Solid {
                 break;
             }
         }
-        if ( !test ) return false;
+        if ( !test ) {
+            System.out.println("Reason 2");
+            return false;
+	}
 
         //- 3. Test co-linear case ----------------------------------------
         Vector3D a, b, n;
         double aDotB;
         InfinitePlane facePlane = null;
+        int j, k;
 
-        for ( i = 1; i < points.size(); i++ ) {
-            p2 = points.get(i);
-            if ( VSDK.vectorDistance(p0, p2) > 10 * VSDK.EPSILON &&
-                 VSDK.vectorDistance(p1, p2) > 10 * VSDK.EPSILON ) {
-                a = p2.substract(p0);
-                b = p1.substract(p0);
-                a.normalize();
-                b.normalize();
-                aDotB = Math.abs(a.dotProduct(b));
-                if ( aDotB < 1 - 2*VSDK.EPSILON ) {
-                    n = a.crossProduct(b);
-                    n.normalize();
-                    facePlane = new InfinitePlane(n, p0);
+        for ( i = 0; i < points.size(); i++ ) {
+            for ( j = 0; j < points.size(); j++ ) {
+                for ( k = 0; k < points.size(); k++ ) {
+                    if ( i == j || i == k || j == k ) {
+                        continue;
+		    }
+                    p0 = points.get(i);
+                    p1 = points.get(j);
+                    p2 = points.get(k);
+                    if ( VSDK.vectorDistance(p0, p2) > 10 * VSDK.EPSILON &&
+                         VSDK.vectorDistance(p1, p2) > 10 * VSDK.EPSILON ) {
+                        a = p2.substract(p0);
+                        b = p1.substract(p0);
+                        a.normalize();
+                        b.normalize();
+                        aDotB = Math.abs(a.dotProduct(b));
+                        if ( aDotB < 1 - 2*VSDK.EPSILON ) {
+                            n = a.crossProduct(b);
+                            n.normalize();
+                            facePlane = new InfinitePlane(n, p0);
+                        }
+                        break;
+                    }
                 }
-                break;
-            }
-        }
+	    }
+    	}
+    
         if ( facePlane == null ) {
+            System.out.println("Reason 3");
             return false;
         }
 

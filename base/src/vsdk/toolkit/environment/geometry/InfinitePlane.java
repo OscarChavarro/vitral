@@ -198,8 +198,8 @@ public class InfinitePlane extends HalfSpace {
     }
 
     /**
-    Given point `p`, current method returns the minimum distance between such
-    a point and this plane.
+    Given point `p`, current method returns the minimum (signed) distance
+    between such a point and this plane.
     */
     public double pointDistance(Vector3D p)
     {

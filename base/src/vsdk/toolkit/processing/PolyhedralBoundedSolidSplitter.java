@@ -36,23 +36,43 @@ class _PolyhedralBoundedSolidSplitterHalfEdgeClassification extends GeometricMod
     public static final int ABOVE = 1;
     public static final int BELOW = -1;
     public static final int ON = 0;
+
+    public static final int COPLANAR_FACE = 10;
+    public static final int INPLANE_EDGE = 20;
+    public static final int CROSSING_EDGE = 30;
+    public static final int UNDEFINED = 40;
+
     public _PolyhedralBoundedSolidHalfEdge sector;
-    int cl;
-    boolean isWide = false;
+    public int cl;
+
+    // Following attributes are not taken from [MANT1988], and all operations
+    // on them are fine tunning options aditional to original algorithm.
+    public boolean isWide = false;
+    public Vector3D position;
+    public int situation = UNDEFINED;
 
     public String toString()
     {
         String msg = "{";
         msg = msg + sector;
         switch ( cl ) {
-          case ABOVE: msg = msg + "ABOVE"; break;
-          case BELOW: msg = msg + "BELOW"; break;
-          case ON: msg = msg + "ON"; break;
+          case ABOVE: msg = msg + " ABOVE"; break;
+          case BELOW: msg = msg + " BELOW"; break;
+          case ON: msg = msg + " ON"; break;
           default: msg = msg + "<INVALID!>"; break;
         }
         if ( isWide ) {
-            msg = msg + " (wide) ";
+            msg = msg + " (W) ";
         }
+        //msg = msg + ", pos: " + position;
+
+        switch ( situation ) {
+          case COPLANAR_FACE: msg = msg + "<COPLANAR_FACE>"; break;
+          case INPLANE_EDGE: msg = msg + "<INPLANE_EDGE>"; break;
+          case CROSSING_EDGE: msg = msg + "<CROSSING_EDGE>"; break;
+          default: msg = msg + "<UNDEFINED>"; break;
+        }
+
         msg = msg + "}";
         return msg;
     }
@@ -132,11 +152,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     private static ArrayList<_PolyhedralBoundedSolidFace> facesToFixBelow;
 
     /**
-    Following variable `nbr` from program [MANT1988].14.3.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr;
-
-    /**
     Following variable `ends` from program [MANT1988].14.9.
     */
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> ends;
@@ -204,6 +219,14 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
                 }
             }
         }
+
+        /*
+        System.out.println("-----");
+        for ( i = 0; i < soov.size(); i++ ) {
+            System.out.println("  - Vertex [" + i + "]: " + soov.get(i));
+        }
+        System.out.println("-----");
+        */
     }
 
     /**
@@ -221,19 +244,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     */
     private static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle = new Vector3D();
-        Vector3D a, b;
-
-        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
-        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
-
-        middle = (a.add(b)).multiply(0.5);
-
-        return middle;
-    }
-
-    private static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
-    {
+        Vector3D middle;
         Vector3D a, b;
 
         a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
@@ -241,7 +252,23 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         a.normalize();
         b.normalize();
 
-        if ( a.dotProduct(b) <= -1.0 + VSDK.EPSILON ) {
+        middle = he.startingVertex.position.add((a.add(b)).multiply(0.5));
+
+        return middle;
+    }
+
+    private static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
+    {
+        Vector3D a, b, c;
+
+        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
+        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
+        a.normalize();
+        b.normalize();
+
+        c = b.crossProduct(a);
+
+        if ( c.length() < 10*VSDK.EPSILON ) {
             // Angle greater than 180 degrees
             return true;
         }
@@ -252,14 +279,15 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     /**
     Following program [MANT1988].14.4.
     */
-    private static void getNeighborhood(_PolyhedralBoundedSolidVertex vtx, InfinitePlane inSplittingPlane)
+    private static ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> getNeighborhood(_PolyhedralBoundedSolidVertex vtx, InfinitePlane inSplittingPlane)
     {
         _PolyhedralBoundedSolidHalfEdge he;
         Vector3D bisect;
         double d;
         _PolyhedralBoundedSolidSplitterHalfEdgeClassification c;
 
-        nbr = new ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification>();
+        ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> neighborSectorsInfo;
+        neighborSectorsInfo = new ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification>();
         he = vtx.emanatingHalfEdge;
 
         do {
@@ -268,24 +296,61 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             d = inSplittingPlane.pointDistance((he.next()).startingVertex.position);
             c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
             c.isWide = false;
-            nbr.add(c);
+            c.position = new Vector3D((he.next()).startingVertex.position);
+            c.situation = c.UNDEFINED;
+            neighborSectorsInfo.add(c);
             if ( checkWideness(he) ) {
                 bisect = bisector(he);
+                c.situation = c.CROSSING_EDGE;
+
                 c = new _PolyhedralBoundedSolidSplitterHalfEdgeClassification();
                 c.sector = he;
                 d = inSplittingPlane.pointDistance(bisect);
                 c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
                 c.isWide = true;
-                nbr.add(c);
+                c.position = new Vector3D(bisect);
+                c.situation = c.CROSSING_EDGE;
+                neighborSectorsInfo.add(c);
             }
             he = (he.mirrorHalfEdge()).next();
         } while ( he != vtx.emanatingHalfEdge );
+
+        //-----------------------------------------------------------------
+        // Extra pass, not from original [MANT1988] code
+        int i;
+
+        for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
+            c = neighborSectorsInfo.get(i);
+            if ( c.cl == c.ON && c.situation == c.UNDEFINED ) {
+                c.situation = c.INPLANE_EDGE;
+            }
+        }
+
+        return neighborSectorsInfo;
+    }
+
+    private static boolean inplaneEdgesOn(
+        ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr)
+    {
+        int i;
+
+        for ( i = 0; i < nbr.size(); i++ ) {
+            if ( nbr.get(i).situation == nbr.get(i).INPLANE_EDGE ) return true;
+        }
+        return false;
     }
 
     /**
+    Current method applies the first reclassification rule presented at
+    section [MANT1988].14.5.1:
+    For the given vertex neigborhood, classify each edge according to whether
+    its final vertex lies above, on or below the `inSplittingPlane`. Tag
+    the edge with the corresponding label ABOVE, ON or BELOW.
     Following program [MANT1988].14.5.
     */
-    private static void reclassifyOnSectors(InfinitePlane inSplittingPlane)
+    private static void reclassifyOnSectors(
+        ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr,
+        InfinitePlane inSplittingPlane)
     {
         _PolyhedralBoundedSolidFace f;
         Vector3D c;
@@ -297,14 +362,18 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             l = nbr.get(i);
             f = l.sector.parentLoop.parentFace;
             c = f.containingPlane.getNormal().crossProduct(inSplittingPlane.getNormal());
-            if ( c.length() < 2*VSDK.EPSILON ) {
+            d = c.dotProduct(c);
+            if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 0 ) {
+                // Entering this if means "faces are coplanar"
                 d = f.containingPlane.getNormal().dotProduct(inSplittingPlane.getNormal());
                 if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
                     l.cl = l.BELOW;
+                    l.situation = l.COPLANAR_FACE;
                     nbr.get((i+1)%nbr.size()).cl = l.BELOW;
                 }
                 else {
                     l.cl = l.ABOVE;
+                    l.situation = l.COPLANAR_FACE;
                     nbr.get((i+1)%nbr.size()).cl = l.ABOVE;
                 }
             }
@@ -312,9 +381,20 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    Current method applies the second reclassification rule presented at
+    section [MANT1988].14.5.1:
+    After applying the first rule on method `reclassifyOnSectors`, ON edges
+    may appear in only four kinds of consecutive arrangements. For each
+    of the following arrangements, ON edge is reclassified as ABOVE or BELOW:
+      - Sequence ABOVE/ON/ABOVE -> reclassified as BELOW
+      - Sequence ABOVE/ON/BELOW -> reclassified as BELOW
+      - Sequence BELOW/ON/BELOW -> reclassified as ABOVE
+      - Sequence BELOW/ON/ABOVE -> reclassified as BELOW
+    Those 4 rules are designed so that nonmanifold results will be represented
+    as disconnected models.
     Following program [MANT1988].14.6.
     */
-    private static void reclassifyOnEdges()
+    private static void reclassifyOnEdges(ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr)
     {
         _PolyhedralBoundedSolidSplitterHalfEdgeClassification l;
         int i;
@@ -354,23 +434,29 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     /**
     Following section [MANT1988].14,6,2 and program [MANT1988].14.7.
     Note, this code is horrible! YUCK! :P
+
+    With respect to the original algorithm from [MANT1988], current
+    implementation adds an extra check to ensure the orientation of the
+    edges from below to above.
     */
-    private static void insertNullEdges(PolyhedralBoundedSolid inSolid)
+    private static void insertNullEdges(
+        ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr,
+        PolyhedralBoundedSolid inSolid, InfinitePlane inSplittingPlane)
     {
         int start, i;
         _PolyhedralBoundedSolidHalfEdge head, tail;
+        _PolyhedralBoundedSolidSplitterHalfEdgeClassification n;
+        int nnbr = nbr.size();
+
+        if ( nnbr <= 0 ) return;
+        n = nbr.get(0);
 
         //- Locate the head of an ABOVE-sequence --------------------------
-
         i = 0;
-        while ( 
-              !(
-                nbr.get(i).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.BELOW &&
-                nbr.get((i+1)%nbr.size()).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.ABOVE
-                )
-              ) {
+        while ( !( nbr.get(i).cl == n.BELOW &&
+                   nbr.get( (i+1)%nnbr ).cl == n.ABOVE )  ) {
             i++;
-            if ( i >= nbr.size() ) {
+            if ( i >= nnbr ) {
                 return;
             }
         }
@@ -380,25 +466,34 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         //-----------------------------------------------------------------
         while ( true ) {
             //- Locate the final sector of the sequence ------------------
-            while ( !(
-                      nbr.get(i).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.ABOVE &&
-                      nbr.get((i+1)%nbr.size()).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.BELOW
-                     ) ) {
-                i = (i+1) % nbr.size();
+            while ( !( nbr.get(i).cl == n.ABOVE &&
+                       nbr.get( (i+1)%nnbr ).cl == n.BELOW ) ) {
+                i = (i+1) % nnbr;
             }
             tail = nbr.get(i).sector;
 
             //- Insert null edge -----------------------------------------
-            inSolid.lmev(head, tail, inSolid.getMaxVertexId()+1, head.startingVertex.position);
-            sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(head.previous().parentEdge));
+            int d1;
+            d1 = inSplittingPlane.doContainmentTestHalfSpace(head.next().startingVertex.position, VSDK.EPSILON);
+
+            //System.out.println("LMEV:");
+            if ( d1 != inSplittingPlane.OUTSIDE ) {
+                //System.out.println("  - H1: " + tail);
+                //System.out.println("  - H2: " + head);
+                inSolid.lmev(tail, head, inSolid.getMaxVertexId()+1, head.startingVertex.position);
+                sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(tail.previous().parentEdge));
+            }
+            else {
+                //System.out.println("  - H1: " + head);
+                //System.out.println("  - H2: " + tail);
+                inSolid.lmev(head, tail, inSolid.getMaxVertexId()+1, head.startingVertex.position);
+                sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(head.previous().parentEdge));
+            }
 
             //- Locate the start of the next sequence --------------------
-            while ( !(
-                     nbr.get(i).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.BELOW &&
-                     nbr.get((i+1) % nbr.size()).cl == _PolyhedralBoundedSolidSplitterHalfEdgeClassification.ABOVE
-                    )
-                  ) {
-                i = (i+1) % nbr.size();
+            while ( !( nbr.get(i).cl == n.BELOW &&
+                       nbr.get( (i+1) % nnbr ).cl == n.ABOVE ) ) {
+                i = (i+1) % nnbr;
                 if ( i == start ) {
                     return;
                 }
@@ -409,6 +504,12 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     /**
     Vertex neighborhood classifier, as presented in section [MANT1988].14.5,
     and program 14.3.
+
+    It appears that original algorithm from [MANT1988] assumes a left handed
+    geometry or orientation or other difference to current Vitral SDK
+    implementation of the boundary representation. That difference implies
+    a reverse order in some cases, so `inplaneEdgesOn` check is added here
+    to keep current implementation's consistency.
     */
     private static void splitClassify(PolyhedralBoundedSolid inSolid, InfinitePlane inSplittingPlane)
     {
@@ -416,11 +517,17 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
 
         sone = new ArrayList<_PolyhedralBoundedSolidSplitterNullEdge>();
 
+        /// Following variable `nbr` from program [MANT1988].14.3.
+        ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> nbr;
+
         for ( i = 0; i < soov.size(); i++ ) {
-            getNeighborhood(soov.get(i), inSplittingPlane);
-            reclassifyOnSectors(inSplittingPlane);
-            reclassifyOnEdges();
-            insertNullEdges(inSolid);
+            nbr = getNeighborhood(soov.get(i), inSplittingPlane);
+            if ( inplaneEdgesOn(nbr) ) {
+                Collections.reverse(nbr);
+            }
+            reclassifyOnSectors(nbr, inSplittingPlane);
+            reclassifyOnEdges(nbr);
+            insertNullEdges(nbr, inSolid, inSplittingPlane);
         }
     }
 
@@ -445,12 +552,21 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         return null;
     }
 
+    private static void printNbr(ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> neighborSectorsInfo)
+    {
+        int i;
+
+        for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
+            System.out.println("  - " + neighborSectorsInfo.get(i));
+        }
+    }
+
     private static void printEnds()
     {
         int i;
 
         for ( i = 0; i < ends.size(); i++ ) {
-            //System.out.println("  - ends[" + i + "]: " + ends.get(i));
+            System.out.println("  - ends[" + i + "]: " + ends.get(i));
         }
     }
 
@@ -519,20 +635,11 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     {
         int i;
 
-        //System.out.print("      Testing for isLoose to edge (" + he.startingVertex.id + "/" + he.next().startingVertex.id +  ") from: ");
-        for ( i = 0; i < tieds.size(); i++ ) {
-            //System.out.print("[" + tieds.get(i).startingVertex.id + "/" + tieds.get(i).next().startingVertex.id + "]");
-        }
-        //System.out.print("\n");
-
-
         for ( i = 0; i < tieds.size(); i++ ) {
             if ( he == tieds.get(i) ) return false;
         }
 
-
         return true;
-
     }
 
     /**
@@ -593,7 +700,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
                 cut(nextedge.rightHalf);
             }
 
-            printEnds();
+            //printEnds();
         }
     }
 
@@ -828,12 +935,14 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         inSolid.validateModel();
         splitGenerate(inSolid, inSplittingPlane);
         splitClassify(inSolid, inSplittingPlane);
+
         if ( sone.size() <= 0 ) {
-            //VSDK.reportMessage(null, VSDK.FATAL_WARNING,
-            //"PolyhedralBoundedSolidSplitter.split",
-            //"Trying to build a halfedge from another, non-existing halfedge!");
+            // Plane should be tested here before asuming this order!
+            outSolidsAbove.add(inSolid);
+            outSolidsBelow.add(new PolyhedralBoundedSolid());
             return;
         }
+
         splitConnect();
         splitFinish(inSolid, outSolidsAbove, outSolidsBelow);
 
@@ -841,7 +950,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         soov = null;
         sone = null;
         sonf = null;
-        nbr = null;
     }
 }
 

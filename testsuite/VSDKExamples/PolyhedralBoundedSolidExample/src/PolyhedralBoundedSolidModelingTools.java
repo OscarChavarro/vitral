@@ -476,28 +476,42 @@ public class PolyhedralBoundedSolidModelingTools
     public static PolyhedralBoundedSolid splitTest(int part)
     {
         //- Basic lamina --------------------------------------------------
-        PolyhedralBoundedSolid solid = createHoledBox();
+        //PolyhedralBoundedSolid solid = createHoledBox();
         //PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
-/*
+
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;
-
         R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(0.00+0.05, 0.00+0.05, 0), 1, 1);
-        solid.smev(1, 1, 7, new Vector3D(0.94+0.05, 0.00+0.05, 0));
-        solid.smev(1, 7, 6, new Vector3D(0.94+0.05, 0.46+0.05, 0));
-        solid.smev(1, 6, 5, new Vector3D(0.60+0.05, 0.30+0.05, 0));
-        solid.smev(1, 5, 4, new Vector3D(0.37+0.05, 0.30+0.05, 0));
-        solid.smev(1, 4, 3, new Vector3D(0.18+0.05, 0.46+0.05, 0));
-        solid.smev(1, 3, 2, new Vector3D(0.00+0.05, 0.30+0.05, 0));
-        solid.mef(1, 1, 2, 3, 1, 7, 2);
+        solid.smev(1, 1, 2, new Vector3D(0.94+0.05, 0.00+0.05, 0));
+        solid.smev(1, 2, 3, new Vector3D(0.94+0.05, 0.46+0.05, 0));
+        solid.smev(1, 3, 4, new Vector3D(0.60+0.05, 0.30+0.05, 0));
+        solid.smev(1, 4, 5, new Vector3D(0.37+0.05, 0.30+0.05, 0));
+        solid.smev(1, 5, 6, new Vector3D(0.18+0.05, 0.46+0.05, 0));
+        solid.smev(1, 6, 7, new Vector3D(0.00+0.05, 0.30+0.05, 0));
+        solid.mef(1, 1, 7, 6, 1, 2, 2);
+        Matrix4x4 T = new Matrix4x4();
+        T.translation(0, 0, 0.4);
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), T);
 
+/*
+        Matrix4x4 R = new Matrix4x4();
+        PolyhedralBoundedSolid solid;
+        R.translation(0.55, 0.55, 0.55);
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(0.00+0.05, 0.00+0.05, 0), 1, 1);
+        solid.smev(1, 1, 2, new Vector3D(0.94+0.05, 0.00+0.05, 0));
+        solid.smev(1, 2, 3, new Vector3D(0.94+0.05, 0.46+0.05, 0));
+        solid.smev(1, 3, 4, new Vector3D(0.00+0.05, 0.30+0.05, 0));
+        solid.mef(1, 1, 4, 3, 1, 2, 2);
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, 0, 0.4);
         GeometricModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 */
+
         //-----------------------------------------------------------------
         InfinitePlane sp;
         ArrayList <PolyhedralBoundedSolid> solidsAbove;
@@ -506,11 +520,11 @@ public class PolyhedralBoundedSolidModelingTools
         solidsAbove = new ArrayList <PolyhedralBoundedSolid>();
         solidsBelow = new ArrayList <PolyhedralBoundedSolid>();
 
-//        sp = new InfinitePlane(new Vector3D(0, 1, 0) /*n*/,
-//                               new Vector3D(0, 0.30+0.05, 0) /*p*/);
+        sp = new InfinitePlane(new Vector3D(0, 1, 0) /*n*/,
+                               new Vector3D(0, 0.30+0.05, 0) /*p*/);
 
-        sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
-                               new Vector3D(0, 0, 0.5) /*p*/);
+//        sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
+//                               new Vector3D(0, 0, 0.5) /*p*/);
 
         //-----------------------------------------------------------------
         solid.validateModel();

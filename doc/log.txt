@@ -558,9 +558,13 @@ Changes in 2008 march 28 revition <<85min>>
     only working in the simple cube test. Leaving wrong faces on cube with
     hole and failing for complex test case object.
 
-Changes in 2008 march 28 revition <<20min>>
+Changes in 2008 march 28-30 revition <<690min>>
   - 20min: checking PolyhedralBoundedSolidSplitter for managing the splitting
     of solids with holes.
+  - 10h: studying wrong working of PolyhedralBoundedSolidSplitter for
+    some cases (edges on splitting plane and not on coplanar faces) and
+    making testing.
+  - 1h:10min: Fixing the encountered error (ordering on the `nbr` array).
 
 ---------------------------------------------------------------------------
 TODO:
