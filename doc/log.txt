@@ -566,6 +566,8 @@ Changes in 2008 march 28-30 revition <<690min>>
     making testing.
   - 1h:10min: Fixing the encountered error (ordering on the `nbr` array).
 
+Changes in 2008 march 28-30 revition <<30min>>
+  - 30min: PolyhedralBoundedSolid.maximizeFaces
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

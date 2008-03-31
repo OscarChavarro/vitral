@@ -218,7 +218,7 @@ public class PolyhedralBoundedSolidModelingTools
         ParametricCurve curve = null;
 
         for ( int i = 0; i < msg.length(); i++ ) {
-            if ( i != 4 ) continue;
+            if ( i != 5 ) continue;
             String character = msg.substring(i, i+1);
             curve = fontReader.extractGlyph(fontFile, character);
             curve.setApproximationSteps(2);
@@ -293,6 +293,9 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         solid1.validateModel();
+        solid1.maximizeFaces();
+        solid1.validateModel();
+
         return solid1;
     }
     
@@ -542,6 +545,9 @@ public class PolyhedralBoundedSolidModelingTools
         else {
             solid = solidsAbove.get(0);
         }
+
+        solid.maximizeFaces();
+        solid.validateModel();
 
         return solid;
     }

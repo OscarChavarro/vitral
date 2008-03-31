@@ -82,7 +82,7 @@ class _PolyhedralBoundedSolidSplitterHalfEdgeClassification extends GeometricMod
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
 design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
-class _PolyhedralBoundedSolidSplitterNullEdge implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
+class _PolyhedralBoundedSolidSplitterNullEdge extends GeometricModeler implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
 {
     public _PolyhedralBoundedSolidEdge e;
 

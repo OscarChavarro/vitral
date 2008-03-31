@@ -185,7 +185,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             solid = PolyhedralBoundedSolidModelingTools.createLaminaWithHole();
 	    break;
 	  case 12:
-	    solid = PolyhedralBoundedSolidModelingTools.createFontBlock("/users/jedilink/home/paradigmas/freetype2/etc/todas_las_ttf/ttf/486_arialuni.ttf", "\u00e1\u00d1\u3055\u3042\u307d");
+	    solid = PolyhedralBoundedSolidModelingTools.createFontBlock("/users/jedilink/home/paradigmas/freetype2/etc/todas_las_ttf/ttf/486_arialuni.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
             T = new Matrix4x4();
             T.translation(0.0, 0.0, 0.1);

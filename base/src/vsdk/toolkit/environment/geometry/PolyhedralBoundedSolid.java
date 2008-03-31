@@ -1437,6 +1437,37 @@ public class PolyhedralBoundedSolid extends Solid {
         return -1;
     }
 
+    /**
+    Removes all "inessential" edges of current solid (i.e. edges that
+    separates two coplanar faces, or that occurs just in a single face).
+    This is an answer to problem [MANT1988].15.2.
+    @todo current method does not fix faces that lies entirely over other
+    faces.
+    */
+    public void maximizeFaces()
+    {
+        int i;
+        _PolyhedralBoundedSolidEdge e;
+        InfinitePlane a, b;
+
+	for ( i = 0; i < edgesList.size(); i++ ) {
+	    e = edgesList.get(i);
+            a = e.rightHalf.parentLoop.parentFace.containingPlane;
+            b = e.leftHalf.parentLoop.parentFace.containingPlane;
+            if ( e.rightHalf.parentLoop.parentFace ==
+                 e.leftHalf.parentLoop.parentFace ) {
+		System.out.println("PolyhedralBoundedSolid - maximizeFaces - untested case, please verify!");
+		lkev(e.rightHalf, e.leftHalf);
+	    }
+	    else if ( a.coplanarWith(b, VSDK.EPSILON) ) {
+                lkef(e.rightHalf, e.leftHalf);
+                i = 0;
+	    }
+	}
+
+        // Here should be a code searching for faces inside faces ...
+    }
+
     public String toString()
     {
         String msg = "";

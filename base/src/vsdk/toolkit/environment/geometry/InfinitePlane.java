@@ -235,6 +235,46 @@ public class InfinitePlane extends HalfSpace {
         return p.substract(n);
     }
 
+    /**
+    Returns `true` if `this` plane is coplanar with `other` plane.
+    */
+    public boolean coplanarWith(InfinitePlane other, double tolerance)
+    {
+        double a1, b1, c1, d1;
+        double a2, b2, c2, d2;
+        double l1, l2;
+        Vector3D n1;
+        Vector3D n2;
+
+        a1 = this.a;
+        b1 = this.b;
+        c1 = this.c;
+        d1 = this.d;
+        a2 = other.a;
+        b2 = other.b;
+        c2 = other.c;
+        d2 = other.d;
+        n1 = new Vector3D(a1, b1, c1);
+        n2 = new Vector3D(a2, b2, c2);
+        l1 = n1.length();
+        l2 = n2.length();
+        a1 /= l1;
+        b1 /= l1;
+        c1 /= l1;
+        d1 /= l1;
+        a2 /= l2;
+        b2 /= l2;
+        c2 /= l2;
+        d2 /= l2;
+        if ( Math.abs(a2 - a1) < tolerance &&
+             Math.abs(b2 - b1) < tolerance &&
+             Math.abs(c2 - c1) < tolerance &&
+             Math.abs(d2 - d1) < tolerance ) {
+            return true;
+	}
+	return false;
+    }
+
     public String toString()
     {
         String msg = "InfinitePlane: N=<" + 
