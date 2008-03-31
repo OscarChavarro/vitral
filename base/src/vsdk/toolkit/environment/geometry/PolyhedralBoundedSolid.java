@@ -993,8 +993,7 @@ public class PolyhedralBoundedSolid extends Solid {
         return maxFaceId;
     }
 
-    public void
-    applyTransformation(Matrix4x4 T)
+    public void applyTransformation(Matrix4x4 T)
     {
         int i;
 
@@ -1010,8 +1009,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     */
-    public boolean
-    doIntersection(Ray inOutRay) {
+    public boolean doIntersection(Ray inOutRay) {
         int i;
         boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
@@ -1045,8 +1043,7 @@ public class PolyhedralBoundedSolid extends Solid {
         return intersection;
     }
 
-    public void
-    doExtraInformation(Ray inRay, double inT, 
+    public void doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         outData.clone(lastInfo);
     }
@@ -1109,8 +1106,7 @@ public class PolyhedralBoundedSolid extends Solid {
     If all four steps succeed, this method returns true. Otherwise returns
     false.
     */
-    private boolean
-    validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
+    private boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
     {
         //- 1. Test no-surface case ---------------------------------------
         if ( points.size() < 3 ) {
@@ -1333,8 +1329,7 @@ public class PolyhedralBoundedSolid extends Solid {
         Klain bottles)
       - Geometric integrity: there are no intersecting faces
     */
-    public boolean
-    validateModel()
+    public boolean validateModel()
     {
         int i;
         String msg = "";

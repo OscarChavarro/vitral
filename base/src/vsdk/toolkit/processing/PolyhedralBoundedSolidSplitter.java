@@ -158,7 +158,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> tieds;
 
     /**
-    Implements function `addsoov` from program [MANT1988].14.2.
+    Implements function `addsoov` from section [MANT1988].14.4. and program
+    [MANT1988].14.2.
     */
     private static void addsoov(_PolyhedralBoundedSolidVertex v)
     {
@@ -277,7 +278,16 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.4.
+    Current method is the first step for the initial classification of vertex
+    neighborhood for `vtk`, as indicated on section [MANT1988].14.5.2. and
+    program [MANT1988].14.4.
+
+    Vitral SDK's implementation of this procedure extends the original from
+    [MANT1988] by adding extra information flags to sector classifications
+    `.isWide`, `.position` and `.situation`. Those flags are an additional
+    aid for debugging purposes and specifically the `situation` flag will be
+    later used on `splitClassify` to correct the ordering of sectors in order
+    to keep consistency with Vitral SDK's interpretation of coordinate system.
     */
     private static ArrayList<_PolyhedralBoundedSolidSplitterHalfEdgeClassification> getNeighborhood(_PolyhedralBoundedSolidVertex vtx, InfinitePlane inSplittingPlane)
     {
@@ -923,7 +933,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     resulting below the plane.
 
     Current macro-algorithm follows the strategy outlined on sections
-    [MANT1988].14.2 and [MANT1988].14.3 and program [MANT1988].14.1.
+    [MANT1988].14.1, [MANT1988].14.2 and [MANT1988].14.3 and program
+    [MANT1988].14.1.
     */
     public static void split(
                       PolyhedralBoundedSolid inSolid,

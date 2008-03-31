@@ -64,7 +64,7 @@ public class GeometricModeler extends ProcessingElement
 
     /**
     This method implements the example presented in section [MANT1988].12.2,
-    and figure [MANT1988].12.1.
+    and program [MANT1988].12.1.
     Generate an arc based on the radius and the coordinates of the center on
     the plane z=h. This method assumes that the first vertex of the arc
     already exists, so its identifier (vertexId) must be supplied.
@@ -99,7 +99,7 @@ public class GeometricModeler extends ProcessingElement
 
     /**
     This method implements the example presented in section [MANT1988].12.2,
-    and figure [MANT1988].12.2.
+    and program [MANT1988].12.2.
     */
     public static PolyhedralBoundedSolid createCircularLamina(
         double cx, double cy, double rad, double h, int n)
@@ -339,6 +339,9 @@ public class GeometricModeler extends ProcessingElement
     from cutting the solid with the plane and resulting above the plane,
     similarly, `outSolidsBelow` will be appended with solid pieces
     resulting below the plane.
+
+    This is just a placeholder for method PolyhedralBoundedSolidSplitter.split.
+    Check its documentation for extra information.
     */
     public static void split(
                       PolyhedralBoundedSolid inSolid,
