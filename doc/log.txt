@@ -569,7 +569,7 @@ Changes in 2008 march 28-30 revition <<690min>>
 Changes in 2008 march 30 revition <<30min>>
   - 30min: PolyhedralBoundedSolid.maximizeFaces
 
-Changes in 2008 march 31 revition <<min>>
+Changes in 2008 march 31 revition <<140min>>
   - 2h20min: Revisiting [MANT1988] text and making correspondences table
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures.
