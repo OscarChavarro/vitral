@@ -102,7 +102,8 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     /**
     Given current half edge, this method returns complementary half edge
     with respect to parent edge. Note that this code corresponds to macro
-    `mate(he)`, defined in program 10.2, from [MANT1988].10.3.
+    `mate(he)`, defined in program [MANT1988] 10.2, and annotated in
+    sections [MANT1988].10.3. and [MANT1988].10.4.2.
     */
     public _PolyhedralBoundedSolidHalfEdge
     mirrorHalfEdge()

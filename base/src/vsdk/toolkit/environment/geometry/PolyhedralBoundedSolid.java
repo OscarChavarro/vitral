@@ -212,7 +212,7 @@ public class PolyhedralBoundedSolid extends Solid {
 
     Note that all correctly builded solids can be destroyed with a series of
     Euler operations over yielding to the "single skeletal plane model" 
-    ([MANT1988].9.2.2).
+    [MANT1988].9.2.2.
     */
     public void kvfs()
     {
@@ -1436,6 +1436,10 @@ public class PolyhedralBoundedSolid extends Solid {
     Removes all "inessential" edges of current solid (i.e. edges that
     separates two coplanar faces, or that occurs just in a single face).
     This is an answer to problem [MANT1988].15.2.
+    For some operations on solid polyhedra such as boolean set operations,
+    it is required that faces of solids be "maximal", i.e. that all coplanar
+    neighbor faces have been combined, and all "inessential" edges have been
+    removed, as noted on section [MANT1988].15.5.
     @todo current method does not fix faces that lies entirely over other
     faces.
     */

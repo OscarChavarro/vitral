@@ -231,6 +231,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    Constructs a vector along the bisector of the sector defined by `he`.
     Answer to problem [MANT1988].14.1.
 
     Current implementation assumes the following interpretation:
@@ -242,6 +243,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     pointing in the middle of `a` and `b` directions.
 
     This is the answer to problem [MANT1988].14.1.
+
+    @todo: check current assumptions!
     */
     private static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -258,6 +261,19 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         return middle;
     }
 
+    /**
+    This method checks whether the edges `he.previous().parentEdge` and
+    `he.parentEdge` make a convex (less than 180 degrees) or concave
+    (larger than 180 degrees) angle. In the first case the method returns
+    `false` and `true` for the second case.
+    This is an answer to problem [MANT1988].13.6.
+    @todo Pending to verify functionality against method proposed by [MANT1988].
+    This should be a method of `PolyhedralBoundedSolid`, as it is of
+    common utility to some other operations.
+
+    PRE: Parent solid should be previously validated to contain correct
+    face equations.
+    */
     private static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
     {
         Vector3D a, b, c;
@@ -268,6 +284,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         b.normalize();
 
         c = b.crossProduct(a);
+
+// HERE SHOULD COMPARE `c` WITH FACE NORMAL!
 
         if ( c.length() < 10*VSDK.EPSILON ) {
             // Angle greater than 180 degrees
@@ -352,7 +370,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
 
     /**
     Current method applies the first reclassification rule presented at
-    section [MANT1988].14.5.1:
+    sections [MANT1988].14.5.1 and [MANT1988].14.5.2:
     For the given vertex neigborhood, classify each edge according to whether
     its final vertex lies above, on or below the `inSplittingPlane`. Tag
     the edge with the corresponding label ABOVE, ON or BELOW.
@@ -392,7 +410,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
 
     /**
     Current method applies the second reclassification rule presented at
-    section [MANT1988].14.5.1:
+    sections [MANT1988].14.5.1 and [MANT1988].14.5.2:
     After applying the first rule on method `reclassifyOnSectors`, ON edges
     may appear in only four kinds of consecutive arrangements. For each
     of the following arrangements, ON edge is reclassified as ABOVE or BELOW:
@@ -428,7 +446,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.8.
+    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
     */
     private static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
     {
@@ -542,7 +560,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.9.
+    Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
     */
     private static _PolyhedralBoundedSolidHalfEdge
     canJoin(_PolyhedralBoundedSolidHalfEdge he)
@@ -581,7 +599,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.10.
+    Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
     private static void
     join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
@@ -610,7 +628,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.10.
+    Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
     private static void cut(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -629,8 +647,15 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    Moves those rings of `f1` that do not lie within its outer loop to
+    `f2`.
+    This procedure is used on the splitter algorithm to ensure that after
+    a face has been divided by a MEF, all loops will end up in the correct
+    halves.
+    This should be an answer to problem [MANT1988].13.5.
+    NOT YET IMPLEMENTED!
     */
-    private static void laringmv(_PolyhedralBoundedSolidFace oldf, _PolyhedralBoundedSolidFace newf)
+    private static void laringmv(_PolyhedralBoundedSolidFace f1, _PolyhedralBoundedSolidFace f2)
     {
         System.out.println("laringmv not implemented!");
         System.out.println("Check [MANT1988].14 for this untested operation case!");
@@ -653,7 +678,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.9.
+    Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
     */
     private static void splitConnect()
     {        
@@ -715,7 +740,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.12.
+    Following section [MANT1988].14.8. and program [MANT1988].14.12.
     */
     private static void classify(PolyhedralBoundedSolid S,
                                  PolyhedralBoundedSolid Above,
@@ -734,7 +759,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.12.
+    Following section [MANT1988].14.8. and program [MANT1988].14.12.
     */
     private static void movefac(_PolyhedralBoundedSolidFace f,
                                 PolyhedralBoundedSolid s)
@@ -803,6 +828,8 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
 
     /**
     This is the answer to problem [MANT1988].14.2.
+
+    @todo Check for consistency of `emanatingHalfEdge` pointers for vertices.
     */
     private static void cleanup(PolyhedralBoundedSolid s)
     {
@@ -897,7 +924,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following program [MANT1988].14.11.
+    Following section [MANT1988].14.8. and program [MANT1988].14.11.
     */
     private static void splitFinish(PolyhedralBoundedSolid inSolid,
                              ArrayList<PolyhedralBoundedSolid> outSolidsAbove,

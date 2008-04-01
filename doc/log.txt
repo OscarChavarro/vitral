@@ -573,6 +573,12 @@ Changes in 2008 march 31 revition <<140min>>
   - 2h20min: Revisiting [MANT1988] text and making correspondences table
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures.
+
+Changes in 2008 april 1 revition <<120min>>
+  - 2h: Revisiting [MANT1988] text and completing the correspondences table
+    between Vitral SDK's PolyhedralBoundedSolid implementation and original
+    text's procedures. Code documentation updated.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
