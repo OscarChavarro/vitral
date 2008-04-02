@@ -59,7 +59,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private int solidType = 16;
+    private int solidType = 19;
     private boolean debugEdges = false;
 
     public PolyhedralBoundedSolidExample() {
@@ -100,7 +100,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         PolyhedralBoundedSolid solid = null;
         Matrix4x4 T, R, S, M;
 
-        switch ( type % 19 ) {
+        switch ( type % 21 ) {
           case 0:
             solid = new PolyhedralBoundedSolid();
             solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
@@ -211,6 +211,12 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 	    break;
 	  case 18:
             solid = PolyhedralBoundedSolidModelingTools.splitTest(3);
+	    break;
+	  case 19:
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(1);
+	    break;
+	  case 20:
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(2);
 	    break;
           case 2: default:
 	    solid = PolyhedralBoundedSolidModelingTools.createHoledBox();

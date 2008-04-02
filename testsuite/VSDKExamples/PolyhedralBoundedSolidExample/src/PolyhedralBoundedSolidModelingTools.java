@@ -552,6 +552,51 @@ public class PolyhedralBoundedSolidModelingTools
         return solid;
     }
 
+    public static PolyhedralBoundedSolid csgTest(int part)
+    {
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b = createBox(new Vector3D(0.9, 0.9, 0.9));
+        PolyhedralBoundedSolid res;
+
+        //-----------------------------------------------------------------
+        a = new PolyhedralBoundedSolid();
+        a.mvfs(new Vector3D(0.00+0.05, 0.42+0.05, 0.00+0.05), 1, 1);
+        a.smev(1, 1, 2, new Vector3D(0.92+0.05, 0.42+0.05, 0.00+0.05));
+        a.smev(1, 2, 3, new Vector3D(0.92+0.05, 0.42+0.05, 0.72+0.05));
+        a.smev(1, 3, 4, new Vector3D(0.70+0.05, 0.42+0.05, 0.72+0.05));
+        a.smev(1, 4, 5, new Vector3D(0.70+0.05, 0.42+0.05, 0.18+0.05));
+        a.smev(1, 5, 6, new Vector3D(0.00+0.05, 0.42+0.05, 0.18+0.05));
+        a.mef(1, 1, 6, 5, 1, 2, 2);
+        a.validateModel();
+
+        Matrix4x4 T = new Matrix4x4();
+        T.translation(0, -0.42, 0);
+        GeometricModeler.translationalSweepExtrudeFacePlanar(
+            a, a.findFace(1), T);
+
+        //-----------------------------------------------------------------
+        Matrix4x4 R = new Matrix4x4();
+        R.translation(0.05 +0.58/2.0+(0.92-0.58),
+                      0.05 + 0.42/2.0 - 0.42/2.0,
+                      0.05 + 0.18/2.0 + 0.18);
+
+        Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
+        b = box.exportToPolyhedralBoundedSolid();
+        b.applyTransformation(R);
+        b.validateModel();
+
+        //-----------------------------------------------------------------
+        res = GeometricModeler.setOp(a, b, GeometricModeler.UNION);
+
+        //-----------------------------------------------------------------
+        res.validateModel();
+
+        if ( part == 1 ) {
+            return a;
+        }
+        return b;
+    }
+
 }
 
 //===========================================================================

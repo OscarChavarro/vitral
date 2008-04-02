@@ -579,6 +579,9 @@ Changes in 2008 april 1 revition <<120min>>
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures. Code documentation updated.
 
+Changes in 2008 april 2 revition <<45min>>
+  - 45min: structural elements for PolyhedralBoundedSolidSetOperator code
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

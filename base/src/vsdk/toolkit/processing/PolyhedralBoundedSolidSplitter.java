@@ -17,7 +17,6 @@ import java.util.Collections;
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;

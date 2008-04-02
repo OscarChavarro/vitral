@@ -40,6 +40,10 @@ any rendering, rasterizing or visualization; it only uses data structures.
 public class GeometricModeler extends ProcessingElement
 {
 
+    public static final int UNION = 1;
+    public static final int INTERSECTION = 2;
+    public static final int DIFFERENCE = 3;
+
     /**
     Creates a 3D line from point (x1, y1, z1) to point (x2, y2, z2).
     */
@@ -351,6 +355,19 @@ public class GeometricModeler extends ProcessingElement
     {
 	PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
 					     outSolidsAbove, outSolidsBelow);
+    }
+
+    /**
+    This is just a placeholder for method
+        PolyhedralBoundedSolidSetOperator.setOp.
+    Check its documentation for extra information.
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op)
+    {
+        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
     }
 
 }
