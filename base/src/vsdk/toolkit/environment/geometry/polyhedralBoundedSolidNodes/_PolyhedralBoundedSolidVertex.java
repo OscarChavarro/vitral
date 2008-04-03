@@ -51,7 +51,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
             msg = msg + "No associated halfedge.";
         }
         else {
-            msg = msg + "Associated halfedge " + emanatingHalfEdge.id + ", to vertex id " + emanatingHalfEdge.startingVertex.id;
+            msg = msg + "H.E. " + emanatingHalfEdge.id;
         }
         return msg;
     }

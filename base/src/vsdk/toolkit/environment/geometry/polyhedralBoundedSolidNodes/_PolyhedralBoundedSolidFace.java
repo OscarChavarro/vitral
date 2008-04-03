@@ -195,7 +195,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             testPoint = p0.add(middle);
 
             //- If concave, swap normal direction -----------------------------
-            if ( testPointInside(testPoint, VSDK.EPSILON) == Geometry.INSIDE ) {
+            if ( testPointInside(testPoint, VSDK.EPSILON) == Geometry.OUTSIDE ) {
                 n = n.multiply(-1.0);
             }
             containingPlane = new InfinitePlane(n, p0);
@@ -427,7 +427,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
 
         if ( (nc % 2) == 1 ) {
-            return Geometry.OUTSIDE;
+            return Geometry.INSIDE;
         }
 
         return Geometry.OUTSIDE;
