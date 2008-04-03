@@ -265,6 +265,7 @@ public class HiddenLineRenderer extends RenderingElement
         Ray ray = new Ray(new Vector3D(), new Vector3D());
         double t0;
         int i;
+        int pos;
         _AppelEdgeCache cl;          // Line "CL" on figure 5 of [APPE1967]
         Vector3D p = new Vector3D(); // Point "PP1" on figure 5 of [APPE1967]
         Vector3D n = new Vector3D();
@@ -312,7 +313,8 @@ public class HiddenLineRenderer extends RenderingElement
                     if ( cl.visibleEdgeForContourLine.containingPlane.
                          doIntersection(ray) ) {
                         J = ray.origin.add(ray.direction.multiply(ray.t));
-                        if ( cl.visibleEdgeForContourLine.testPointInside(J) >= 0 ) {
+                        pos = cl.visibleEdgeForContourLine.testPointInside(J, VSDK.EPSILON);
+                        if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                             segment.deltaQI = 1;
                         }
                         else {

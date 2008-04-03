@@ -18,6 +18,7 @@ import java.util.Collections;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
@@ -888,7 +889,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             heStart = b.boundariesList.get(i).boundaryStartHalfEdge;
             he = heStart;
             do {
-                if ( a.testPointInside(he.startingVertex.position) == 1 ) {
+                if ( a.testPointInside(he.startingVertex.position, VSDK.EPSILON) == Geometry.OUTSIDE ) {
                     return false;
                 }
                 he = he.next();

@@ -581,6 +581,9 @@ Changes in 2008 april 1 revition <<120min>>
 
 Changes in 2008 april 2 revition <<45min>>
   - 45min: structural elements for PolyhedralBoundedSolidSetOperator code
+  - 10min: PolyhedralBoundedSolidSetOperator.updmaxnames
+  - 51min + -> PolyhedralBoundedSolidSetOperator.setOpGenerate reduction step
+    procedures.
 
 ---------------------------------------------------------------------------
 TODO:

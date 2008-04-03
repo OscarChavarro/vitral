@@ -269,11 +269,11 @@ public class PolyhedralBoundedSolid extends Solid {
             return;
         }
 
-	if ( he1.startingVertex != he2.startingVertex ) {
+        if ( he1.startingVertex != he2.startingVertex ) {
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmev",
             "Halfedges not starting at the same vertex. Not supported case!");
             return;
-	}
+        }
 
         if ( vertexID > maxVertexId ) maxVertexId = vertexID;
 
@@ -1020,6 +1020,7 @@ public class PolyhedralBoundedSolid extends Solid {
         GeometryIntersectionInformation Info;
         Info = new GeometryIntersectionInformation();
         Vector3D p;
+        int pos;
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             Ray ray = new Ray(inOutRay);
@@ -1029,7 +1030,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( ray.t < min_t ) {
                     ray.direction.normalize();
                     p = ray.origin.add(ray.direction.multiply(ray.t));
-                    if ( face.testPointInside(p) <= 0 ) {
+                    pos = face.testPointInside(p, VSDK.EPSILON);
+                    if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                         min_t = ray.t;
                         // Stores standard doIntersection operation information
                         lastInfo.clone(Info);
@@ -1112,7 +1114,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( points.size() < 3 ) {
             System.out.println("Reason 1");
             return false;
-	}
+        }
 
         //- 2. Test all-equal case ----------------------------------------
         Vector3D p0, p1, p2;
@@ -1131,7 +1133,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( !test ) {
             System.out.println("Reason 2");
             return false;
-	}
+        }
 
         //- 3. Test co-linear case ----------------------------------------
         Vector3D a, b, n;
@@ -1144,7 +1146,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 for ( k = 0; k < points.size(); k++ ) {
                     if ( i == j || i == k || j == k ) {
                         continue;
-		    }
+                    }
                     p0 = points.get(i);
                     p1 = points.get(j);
                     p2 = points.get(k);
@@ -1163,8 +1165,8 @@ public class PolyhedralBoundedSolid extends Solid {
                         break;
                     }
                 }
-	    }
-    	}
+            }
+        }
     
         if ( facePlane == null ) {
             System.out.println("Reason 3");
@@ -1389,6 +1391,7 @@ public class PolyhedralBoundedSolid extends Solid {
         Vector3D pi;
         double t0 = d.length();
         d.normalize();
+        int pos;
 
         Ray ray = new Ray(origin, d);
         GeometryIntersectionInformation info;
@@ -1400,7 +1403,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( ray.t < t0-VSDK.EPSILON ) {
                     ray.direction.normalize();
                     pi = ray.origin.add(ray.direction.multiply(ray.t));
-                    if ( face.testPointInside(pi) < 0 ) {
+                    pos = face.testPointInside(pi, VSDK.EPSILON);
+                    if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                         face.containingPlane.doExtraInformation(ray, 0.0, info);
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             qi ++;
@@ -1449,20 +1453,20 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidEdge e;
         InfinitePlane a, b;
 
-	for ( i = 0; i < edgesList.size(); i++ ) {
-	    e = edgesList.get(i);
+        for ( i = 0; i < edgesList.size(); i++ ) {
+            e = edgesList.get(i);
             a = e.rightHalf.parentLoop.parentFace.containingPlane;
             b = e.leftHalf.parentLoop.parentFace.containingPlane;
             if ( e.rightHalf.parentLoop.parentFace ==
                  e.leftHalf.parentLoop.parentFace ) {
-		System.out.println("PolyhedralBoundedSolid - maximizeFaces - untested case, please verify!");
-		lkev(e.rightHalf, e.leftHalf);
-	    }
-	    else if ( a.coplanarWith(b, VSDK.EPSILON) ) {
+                System.out.println("PolyhedralBoundedSolid - maximizeFaces - untested case, please verify!");
+                lkev(e.rightHalf, e.leftHalf);
+            }
+            else if ( a.coplanarWith(b, VSDK.EPSILON) ) {
                 lkef(e.rightHalf, e.leftHalf);
                 i = 0;
-	    }
-	}
+            }
+        }
 
         // Here should be a code searching for faces inside faces ...
     }

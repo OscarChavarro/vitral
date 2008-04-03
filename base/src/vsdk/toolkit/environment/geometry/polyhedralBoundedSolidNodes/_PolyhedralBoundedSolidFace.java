@@ -13,14 +13,18 @@
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
+import java.util.ArrayList;
+
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ArrayListOfDoubles;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.processing.ComputationalGeometry;
 
 /**
 As noted in [MANT1988].10.2.1, class `_PolyhedralBoundedSolidFace` represents
@@ -59,6 +63,16 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /// Defined as presented in [MANT1988].10.2.1
     public InfinitePlane containingPlane;
 
+    /// Used by method testPointInside. Normally null, not null value when
+    /// a point intersected an edge. Following problem [MANT1988].13.3. and
+    /// variable `hitthe`  from program [MANT1988].15.3.
+    public _PolyhedralBoundedSolidHalfEdge lastIntersectedHalfedge;
+
+    /// Used by method testPointInside. Normally null, not null value when
+    /// a point intersected a vertex.  Following problem [MANT1988].13.3. and
+    /// variable `hitvertex`  from program [MANT1988].15.3.
+    public _PolyhedralBoundedSolidVertex lastIntersectedVertex;
+
     //=================================================================
 
     public _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid parent, int id)
@@ -68,6 +82,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         parentSolid.polygonsList.add(this);
         boundariesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
+        lastIntersectedHalfedge = null;
     }
 
     /**
@@ -163,10 +178,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                  b.length() < VSDK.EPSILON ) {
                 he = he.next();
                 continue;
-	    }
-	    else {
+            }
+            else {
                 colinearPoints = false;
-	    }
+            }
 
             n.normalize();
             containingPlane = new InfinitePlane(n, p0);
@@ -180,7 +195,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             testPoint = p0.add(middle);
 
             //- If concave, swap normal direction -----------------------------
-            if ( testPointInside(testPoint) > 0 ) {
+            if ( testPointInside(testPoint, VSDK.EPSILON) == Geometry.INSIDE ) {
                 n = n.multiply(-1.0);
             }
             containingPlane = new InfinitePlane(n, p0);
@@ -230,33 +245,58 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
     /**
     Given a point p in the containing plane of this face, the method returns:
-    @return 1 if point is outside polygon, 0 if its in the polygon border,
-    -1 if point is inside border.
+    @return Geometry.OUTSIDE if point is outside polygon, Geometry.LIMIT if
+    its in the polygon border, Geometry.INSIDE if point is inside border.
     PRE:
     - Polygon is planar
     - Point p is in the containing plane
     The structure of this algorithm follows the one outlined in
     [GLAS1989].2.3.2. with a little variation in the handlig of `sh`
     which allows this code to manage internal loops.
+
+    Functionally, this is equivalent to procedure `contfv` proposed at
+    problem [MANT1988].13.3. For [MANT1988] based algorithms compatibility
+    this method supports the generation oof extra information, and
+    stores .
+
+    When point is outside the border of the polygon, this method writes
+    null values to attributes `lastIntersectedHalfedge` and
+    `lastIntersectedVertex`. When the point is on the border of the polygon,
+    it can be over a vertex or over an edge.  If it is on a vertex, the
+    intersecting vertex is referenced on attribute `lastIntersectedVertex`
+    and `lastIntersectedHalfedge` is leaved null. Otherwise, when point
+    intersects an edge, the intersected edge is referenced at
+    `lastIntersectedHalfedge`, and `lastIntersectedVertex` is leaved null.
+
+    Altough should be seldom of a problem, note the decribed mechanism for
+    quering extra border intersection is not re-entrant (thread safe) for
+    current face.
     */
     public int
-    testPointInside(Vector3D p)
+    testPointInside(Vector3D p, double tolerance)
     {
         int nc; // Number of crossings
         int sh; // Sign holder for vertex crossings
         int nsh; // Next sign holder for vertex crossings
+
+        lastIntersectedHalfedge = null;
+        lastIntersectedVertex = null;
 
         //-----------------------------------------------------------------
         //- 1. For all vertices in face, project them in to dominant
         //- coordinate's plane
         ArrayListOfDoubles polygon2Du = new ArrayListOfDoubles(100);
         ArrayListOfDoubles polygon2Dv = new ArrayListOfDoubles(100);
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> polygon2Dh;
+        ArrayList<_PolyhedralBoundedSolidVertex> polygon2Dvv;
         double u, v;
         Vector3D projectedPoint = new Vector3D();
         int dominantCoordinate = 3;
         int i;
         Vector3D n;
 
+        polygon2Dh = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        polygon2Dvv = new ArrayList<_PolyhedralBoundedSolidVertex>();
         n = containingPlane.getNormal();
 
         if ( Math.abs(n.x) >= Math.abs(n.y) &&
@@ -271,33 +311,60 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             dominantCoordinate = 3;
         }
 
+        _PolyhedralBoundedSolidHalfEdge he;
+
         for ( i = 0; i < boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidLoop loop;
-            _PolyhedralBoundedSolidHalfEdge he, heStart;
+            _PolyhedralBoundedSolidHalfEdge heStart, heOld;
 
             loop = boundariesList.get(i);
-            he = loop.boundaryStartHalfEdge;
+            he = loop.boundaryStartHalfEdge;            
             if ( he == null ) {
                 // Loop without starting halfedge
-                return 1;
+                return Geometry.OUTSIDE;
             }
             heStart = he;
             do {
+                if ( VSDK.vectorDistance(p, he.startingVertex.position) 
+                     < 2*tolerance ) {
+                    lastIntersectedVertex = he.startingVertex;
+                    return Geometry.LIMIT;
+                }
+
                 dropCoordinate(he.startingVertex.position, projectedPoint,
                                dominantCoordinate);
                 polygon2Du.append(projectedPoint.x);
                 polygon2Dv.append(projectedPoint.y);
+                polygon2Dh.add(he);
+                heOld = he;
+                polygon2Dvv.add(he.startingVertex);
                 he = he.next();
                 if ( he == null ) {
                     // Loop is not closed!
-                    return 1;
+                    return Geometry.OUTSIDE;
                 }
                 dropCoordinate(he.startingVertex.position, projectedPoint,
                                dominantCoordinate);
                 polygon2Du.append(projectedPoint.x);
                 polygon2Dv.append(projectedPoint.y);
+                polygon2Dvv.add(he.startingVertex);
+
+                if ( VSDK.vectorDistance(p, he.startingVertex.position) 
+                     < 2*tolerance ) {
+                    lastIntersectedVertex = he.startingVertex;
+                    return Geometry.LIMIT;
+                }
+
+                if ( ComputationalGeometry.lineSegmentContainmentTest(
+                         heOld.startingVertex.position,
+                         he.startingVertex.position, p, tolerance
+                     ) == Geometry.LIMIT ) {
+                    lastIntersectedHalfedge = heOld;
+                    return Geometry.LIMIT;
+                }
             } while( he != heStart );
         }
+
         dropCoordinate(p, projectedPoint, dominantCoordinate);
         u = projectedPoint.x;
         v = projectedPoint.y;
@@ -314,6 +381,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         //-----------------------------------------------------------------
         //- 3. Iterate edges
         double ua, va, ub, vb;
+        _PolyhedralBoundedSolidVertex vva, vvb;
 
         for ( i = 0; i < polygon2Du.size - 1; i += 2 ) {
             // This iteration tests the line segment (ua, va) - (ub, vb)
@@ -321,6 +389,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             va = polygon2Dv.array[i];
             ub = polygon2Du.array[i+1];
             vb = polygon2Dv.array[i+1];
+            he = polygon2Dh.get(i/2);
+            vva = polygon2Dvv.get(i);
+            vvb = polygon2Dvv.get(i+1);
 
             // Note that testing line is (y = 0), so "segment crossed" can be
             // detected as a sign change in the v dimension.
@@ -352,13 +423,14 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                     }
                 }
             }
+
         }
 
         if ( (nc % 2) == 1 ) {
-            return -1;
+            return Geometry.OUTSIDE;
         }
 
-        return 1;
+        return Geometry.OUTSIDE;
     }
 
     /**

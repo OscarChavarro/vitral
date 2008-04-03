@@ -7,6 +7,8 @@
 //= [BAER2002] Baeentzen, Jakob Andreas. Aanaes, Henrik. "Generating Signed =
 //=     Distance Fields From Triangle Meshes",  Technical report            =
 //=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
 //===========================================================================
 
 package vsdk.toolkit.processing;
@@ -31,7 +33,7 @@ public class ComputationalGeometry extends ProcessingElement
     }
 
     /**
-    Given a line that passes between points `p0` and `p2`, this method 
+    Given a line that passes between points `p0` and `p1`, this method 
     determines if point `p` falls under `distanceTolerance` in such line.
     */
     public static int lineContainmentTest(Vector3D p0, Vector3D p1,
@@ -55,25 +57,27 @@ public class ComputationalGeometry extends ProcessingElement
     /**
     Given a line that passes between points `p0` and `p2`, this method 
     determines if point `p` falls under `distanceTolerance` in such line.
+
+    This method is functionaly equivalent to procedures `contev` and
+    `intrev` from program [MANT1988].13.3. and section [MANT1988].13.2.2.
     */
     public static int lineSegmentContainmentTest(Vector3D p0, Vector3D p1,
                                    Vector3D p, double distanceTolerance) {
         double d;
         Vector3D a, b;
-        Vector3D lineVector = p1.substract(p0);
-        Vector3D pointVector = p.substract(p0);
-
-        double denominator = lineVector.length();
-        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
 
         a = p1.substract(p0);
-        b = p0.substract(p);
+        b = p.substract(p0);
+
+        double denominator = a.length();
+        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
+
         double numerator = a.crossProduct(b).length();
-        d = (numerator / denominator);
+        d = numerator / denominator;
 
         if ( d <= distanceTolerance ) {
-            double t = pointVector.dotProduct(lineVector) / lineVector.length();
-            if ( t < 0 || t > 1 ) return Geometry.OUTSIDE;
+            double t = a.dotProduct(b) / a.dotProduct(a);
+            if ( t < -VSDK.EPSILON || t > 1+VSDK.EPSILON ) return Geometry.OUTSIDE;
 
             return Geometry.LIMIT;
         }
