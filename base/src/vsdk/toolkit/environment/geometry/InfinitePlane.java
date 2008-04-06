@@ -236,9 +236,11 @@ public class InfinitePlane extends HalfSpace {
     }
 
     /**
-    Returns `true` if `this` plane is coplanar with `other` plane.
+    Returns `true` if `this` plane is overlaping with `other` plane.
+    Note that two planes are overlaping if they are both coplanar and
+    at the same distance from the origin.
     */
-    public boolean coplanarWith(InfinitePlane other, double tolerance)
+    public boolean overlapsWith(InfinitePlane other, double tolerance)
     {
         double a1, b1, c1, d1;
         double a2, b2, c2, d2;

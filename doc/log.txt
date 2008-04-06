@@ -579,11 +579,19 @@ Changes in 2008 april 1 revition <<120min>>
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures. Code documentation updated.
 
-Changes in 2008 april 2 revition <<196min>>
+Changes in 2008 april 2 revition <<204min>>
   - 45min: structural elements for PolyhedralBoundedSolidSetOperator code
   - 10min: PolyhedralBoundedSolidSetOperator.updmaxnames
-  - 2h21min: PolyhedralBoundedSolidSetOperator.setOpGenerate reduction step
+  - 2h29min: PolyhedralBoundedSolidSetOperator.setOpGenerate reduction step
     procedures.
+
+Changes in 2008 april 3 revition <<113min>>
+  - 1h53min: PolyhedralBoundedSolidSetOperator.vtxFacClassify and related
+    study and tests.
+
+Changes in 2008 april 5 revition <<390min>>
+  - 6h30min: advancing on the vertex classification of sectors for 
+    PolyhedralBoundedSolidSetOperator, and re-studying [MANT1988].15.
 
 ---------------------------------------------------------------------------
 TODO:

@@ -370,6 +370,77 @@ public class GeometricModeler extends ProcessingElement
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
     }
 
+    /**
+    Constructs a vector along the bisector of the sector defined by `he`.
+    Answer to problem [MANT1988].14.1.
+
+    Current implementation assumes the following interpretation:
+    Given a vertex of interest `he.startingVertex`, one can measure the angle
+    of incidence of loop `he.parentLoop` on vertex of interest by measuring the
+    angle between the halfedges `he` (direction `a`) and `he.previous` 
+    (direction `b`).  The bisector vector is the one having its tail on the
+    vertex of interest position `he.startingVertex.position` and its end
+    pointing in the middle of `a` and `b` directions.
+
+    This is the answer to problem [MANT1988].14.1.
+
+    @todo: check current assumptions!
+
+    This protected method is here for exclusive use of subclasses
+    `PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    */
+    protected static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        Vector3D middle;
+        Vector3D a, b;
+
+        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
+        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
+        a.normalize();
+        b.normalize();
+
+        middle = he.startingVertex.position.add((a.add(b)).multiply(0.5));
+
+        return middle;
+    }
+
+    /**
+    This method checks whether the edges `he.previous().parentEdge` and
+    `he.parentEdge` make a convex (less than 180 degrees) or concave
+    (larger than 180 degrees) angle. In the first case the method returns
+    `false` and `true` for the second case.
+    This is an answer to problem [MANT1988].13.6.
+    @todo Pending to verify functionality against method proposed by [MANT1988].
+    This should be a method of `PolyhedralBoundedSolid`, as it is of
+    common utility to some other operations.
+
+    PRE: Parent solid should be previously validated to contain correct
+    face equations.
+
+    This protected method is here for exclusive use of subclasses
+    `PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    */
+    protected static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
+    {
+        Vector3D a, b, c;
+
+        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
+        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
+        a.normalize();
+        b.normalize();
+
+        c = b.crossProduct(a);
+
+// HERE SHOULD COMPARE `c` WITH FACE NORMAL!
+
+        if ( c.length() < 10*VSDK.EPSILON ) {
+            // Angle greater than 180 degrees
+            return true;
+        }
+
+        return false;
+    }
+
 }
 
 //===========================================================================

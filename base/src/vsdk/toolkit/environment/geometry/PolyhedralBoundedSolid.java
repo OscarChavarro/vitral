@@ -55,8 +55,8 @@ public class PolyhedralBoundedSolid extends Solid {
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
     private double[] minMax;
-    private int maxVertexId;
-    private int maxFaceId;
+    public int maxVertexId;
+    public int maxFaceId;
     private boolean modelIsValid;
     private GeometryIntersectionInformation lastInfo;
 
@@ -93,6 +93,21 @@ public class PolyhedralBoundedSolid extends Solid {
             facei = polygonsList.get(i);
             if ( facei.id == id ) {
                 return facei;
+            }
+        }
+        return null;
+    }
+
+    public _PolyhedralBoundedSolidVertex
+    findVertex(int id)
+    {
+        int i;
+        _PolyhedralBoundedSolidVertex v;
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            v = verticesList.get(i);
+            if ( v.id == id ) {
+                return v;
             }
         }
         return null;
@@ -1462,7 +1477,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 System.out.println("PolyhedralBoundedSolid - maximizeFaces - untested case, please verify!");
                 lkev(e.rightHalf, e.leftHalf);
             }
-            else if ( a.coplanarWith(b, VSDK.EPSILON) ) {
+            else if ( a.overlapsWith(b, VSDK.EPSILON) ) {
                 lkef(e.rightHalf, e.leftHalf);
                 i = 0;
             }
