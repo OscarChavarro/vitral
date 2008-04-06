@@ -405,6 +405,68 @@ public class GeometricModeler extends ProcessingElement
     }
 
     /**
+    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
+    */
+    protected static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
+    {
+        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
+            ( (
+              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
+              ) || 
+              (
+              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
+              ) );
+    }
+
+    /**
+    Moves those rings of `f1` that do not lie within its outer loop to
+    `f2`.
+    This procedure is used on the splitter algorithm to ensure that after
+    a face has been divided by a MEF, all loops will end up in the correct
+    halves.
+    This should be an answer to problem [MANT1988].13.5.
+    NOT YET IMPLEMENTED!
+    */
+    private static void laringmv(_PolyhedralBoundedSolidFace f1, _PolyhedralBoundedSolidFace f2)
+    {
+        System.out.println("laringmv not implemented!");
+        System.out.println("Check [MANT1988].14 for this untested operation case!");
+        System.exit(1);
+        // Is this supposed to move all rings from `oldf` to `newf` using
+        // PolyhedralBoundedSolid.lringmv???
+    }
+
+
+    /**
+    Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
+    */
+    protected static void
+    join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
+    {
+        _PolyhedralBoundedSolidFace oldf, newf;
+        PolyhedralBoundedSolid s;
+
+        oldf = h1.parentLoop.parentFace;
+        newf = null;
+        s = oldf.parentSolid;
+        if ( h1.parentLoop == h2.parentLoop ) {
+            if ( h1.previous().previous() != h2 ) {
+                newf = s.lmef(h1, h2.next(), s.getMaxFaceId()+1);
+            }
+        }
+        else {
+            s.lmekr(h1, h2.next());
+        }
+        if ( h1.next().next() != h2 ) {
+            s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
+            if ( newf != null && oldf.boundariesList.size() >= 2 ) {
+                System.out.println("*****");
+                laringmv(oldf, newf);
+            }
+        }
+    }
+
+    /**
     This method checks whether the edges `he.previous().parentEdge` and
     `he.parentEdge` make a convex (less than 180 degrees) or concave
     (larger than 180 degrees) angle. In the first case the method returns

@@ -381,20 +381,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
-    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
-    */
-    private static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
-    {
-        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
-            ( (
-              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
-              ) || 
-              (
-              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
-              ) );
-    }
-
-    /**
     Following section [MANT1988].14,6,2 and program [MANT1988].14.7.
     Note, this code is horrible! YUCK! :P
 
@@ -501,7 +487,7 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     canJoin(_PolyhedralBoundedSolidHalfEdge he)
     {
         _PolyhedralBoundedSolidHalfEdge ret;
-        int i, j;
+        int i;
 
         for ( i = 0; i < ends.size(); i++ ) {
             if ( neighbor(he, ends.get(i)) ) {
@@ -536,35 +522,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     /**
     Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
-    private static void
-    join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
-    {
-        _PolyhedralBoundedSolidFace oldf, newf;
-        PolyhedralBoundedSolid s;
-
-        oldf = h1.parentLoop.parentFace;
-        newf = null;
-        s = oldf.parentSolid;
-        if ( h1.parentLoop == h2.parentLoop ) {
-            if ( h1.previous().previous() != h2 ) {
-                newf = s.lmef(h1, h2.next(), s.getMaxFaceId()+1);
-            }
-        }
-        else {
-            s.lmekr(h1, h2.next());
-        }
-        if ( h1.next().next() != h2 ) {
-            s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
-            if ( newf != null && oldf.boundariesList.size() >= 2 ) {
-                System.out.println("*****");
-                laringmv(oldf, newf);
-            }
-        }
-    }
-
-    /**
-    Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
-    */
     private static void cut(_PolyhedralBoundedSolidHalfEdge he)
     {
         PolyhedralBoundedSolid s;
@@ -579,24 +536,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         else {
             s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
-    }
-
-    /**
-    Moves those rings of `f1` that do not lie within its outer loop to
-    `f2`.
-    This procedure is used on the splitter algorithm to ensure that after
-    a face has been divided by a MEF, all loops will end up in the correct
-    halves.
-    This should be an answer to problem [MANT1988].13.5.
-    NOT YET IMPLEMENTED!
-    */
-    private static void laringmv(_PolyhedralBoundedSolidFace f1, _PolyhedralBoundedSolidFace f2)
-    {
-        System.out.println("laringmv not implemented!");
-        System.out.println("Check [MANT1988].14 for this untested operation case!");
-        System.exit(1);
-        // Is this supposed to move all rings from `oldf` to `newf` using
-        // PolyhedralBoundedSolid.lringmv???
     }
 
     /**

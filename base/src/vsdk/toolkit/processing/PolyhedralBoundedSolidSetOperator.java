@@ -28,6 +28,51 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 
 /**
+Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
+design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
+*/
+class _PolyhedralBoundedSolidSetOperatorNullEdge extends GeometricModeler implements Comparable <_PolyhedralBoundedSolidSetOperatorNullEdge>
+{
+    public _PolyhedralBoundedSolidEdge e;
+
+    public _PolyhedralBoundedSolidSetOperatorNullEdge(_PolyhedralBoundedSolidEdge e)
+    {
+        this.e = e;
+    }
+
+    public int compareTo(_PolyhedralBoundedSolidSetOperatorNullEdge other)
+    {
+        Vector3D a;
+        Vector3D b;
+
+        a = this.e.rightHalf.startingVertex.position;
+        b = other.e.rightHalf.startingVertex.position;
+
+        if ( PolyhedralBoundedSolid.compareValue(a.x, b.x, 10*VSDK.EPSILON) != 0 ) {
+            if ( a.x < b.x ) {
+                return -1;
+            }
+            return 1;
+        }
+        else {
+            if ( PolyhedralBoundedSolid.compareValue(a.y, b.y, 10*VSDK.EPSILON) != 0 ) {
+                if ( a.y < b.y ) {
+                    return -1;
+                }
+                return 1;
+            }
+            else {
+                if ( a.z < b.z ) {
+                    return -1;
+                }
+                return 1;
+            }
+        }
+    }
+
+}
+
+/**
 This class is used to store vertex / halfedge neigborhood information for the
 vertex/vertex classifier as proposed on section [MANT1988].15.5. and program
 [MANT1988].15.6.
@@ -278,12 +323,12 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
     /**
     Following variable `sonea` from program [MANT1988].15.1.
     */
-    private static ArrayList<_PolyhedralBoundedSolidEdge> sonea;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
 
     /**
     Following variable `soneb` from program [MANT1988].15.1.
     */
-    private static ArrayList<_PolyhedralBoundedSolidEdge> soneb;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
 
     /**
     Following variable `sonfa` from program [MANT1988].15.1.
@@ -309,6 +354,18 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
     Following variable `sectors` from program [MANT1988].15.6.
     */
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector> sectors;
+
+    /**
+    Following variable `endsa` from program [MANT1988].15.13.
+    */
+    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
+    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> tiedsa;
+
+    /**
+    Following variable `endsb` from program [MANT1988].15.13.
+    */
+    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
+    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> tiedsb;
 
     /**
     Procedure `updmaxnames` functionality is described on section
@@ -774,14 +831,14 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
             System.out.println("  - (" + i + ") H2: " + tail);
             solida.lmev(head, tail, solida.getMaxVertexId()+1, head.startingVertex.position);
 
-            ArrayList<_PolyhedralBoundedSolidEdge> sone = null;
+            ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
             if ( BvsA == 0 ) {
                 sone = sonea;
             }
             else {
                 sone = soneb;
             }
-            sone.add(head.previous().parentEdge);
+            sone.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(head.previous().parentEdge));
 
             //- Locate the start of the next sequence --------------------
             while ( !( (nbr.get(i).cl == n.AinB || nbr.get(i).cl == n.BinA) &&
@@ -840,6 +897,16 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         solidb.lmev(he, he, vn, v.position);
         he = solidb.findVertex(vn).emanatingHalfEdge;
         solidb.lkemr(he.mirrorHalfEdge(), he);
+        vn = nextVertexId(solida, solidb);
+        solidb.lmev(he, he, vn, v.position);
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
+        if ( BvsA == 0 ) {
+            sone = sonea;
+        }
+        else {
+            sone = soneb;
+        }
+        sone.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(he.parentEdge));
     }
 
     /**
@@ -1245,12 +1312,154 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         }
     }
 
+    private static void ssortnulledges()
+    {
+        Collections.sort(sonea);
+        Collections.sort(soneb);
+    }
+
+    /**
+    Following section [MANT1988].15.7. and program [MANT1988].15.13.
+    */
+    private static _PolyhedralBoundedSolidHalfEdge[]
+    scanjoin(_PolyhedralBoundedSolidHalfEdge hea,
+             _PolyhedralBoundedSolidHalfEdge heb)
+    {
+        int i, j;
+        _PolyhedralBoundedSolidHalfEdge ret[];
+
+        ret = new _PolyhedralBoundedSolidHalfEdge[2];
+
+	System.out.println("Checking if can join:");
+	System.out.println("  - " + hea);
+	System.out.println("  - " + heb);
+
+        for ( i = 0; i < endsa.size(); i++ ) {
+            if ( neighbor(hea, endsa.get(i)) &&
+                 neighbor(heb, endsb.get(i)) ) {
+                ret[0] = endsa.get(i);
+                ret[1] = endsb.get(i);
+                endsa.remove(i);
+                endsb.remove(i);
+                tiedsa.add(ret[0]);
+                tiedsb.add(ret[1]);
+                return ret;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isLooseA(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        int i;
+
+        for ( i = 0; i < tiedsa.size(); i++ ) {
+            if ( he == tiedsa.get(i) ) return false;
+        }
+
+        return true;
+    }
+
+    private static boolean isLooseB(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        int i;
+
+        for ( i = 0; i < tiedsb.size(); i++ ) {
+            if ( he == tiedsb.get(i) ) return false;
+        }
+
+        return true;
+    }
+
+    private static void cuta(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        PolyhedralBoundedSolid s;
+
+        s = he.parentLoop.parentFace.parentSolid;
+
+        if ( he.parentEdge.rightHalf.parentLoop ==
+             he.parentEdge.leftHalf.parentLoop ) {
+            sonfa.add(he.parentLoop.parentFace);
+            s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+        }
+        else {
+            s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+        }
+    }
+
+    private static void cutb(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        PolyhedralBoundedSolid s;
+
+        s = he.parentLoop.parentFace.parentSolid;
+
+        if ( he.parentEdge.rightHalf.parentLoop ==
+             he.parentEdge.leftHalf.parentLoop ) {
+            sonfb.add(he.parentLoop.parentFace);
+            s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+        }
+        else {
+            s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+        }
+    }
+
     /**
     Following section [MANT1988].15.7. and program [MANT1988].15.14.
     */
     private static void setOpConnect()
     {
-        System.out.println("setOpConnect");
+        _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
+        _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
+        _PolyhedralBoundedSolidHalfEdge r[];
+
+
+	System.out.println("===========================================================================");
+
+        endsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        endsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        tiedsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        tiedsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+
+        sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
+        sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
+        ssortnulledges();
+        int i;
+        for ( i = 0; i < sonea.size(); i++ ) {
+            // This assumes that for each null edge on solid a there is
+            // another on solid b.
+            nextedgea = sonea.get(i).e;
+            nextedgeb = soneb.get(i).e;
+            r = scanjoin(nextedgea.rightHalf, nextedgea.leftHalf);
+            if ( r != null ) {
+                h1a = r[0];
+                h2b = r[1];
+                join(h1a, nextedgea.rightHalf);
+                if ( !isLooseA(h1a.mirrorHalfEdge()) ) {
+                    cuta(h1a);
+                }
+                join(h2b, nextedgea.leftHalf);
+                if ( !isLooseB(h2b.mirrorHalfEdge()) ) {
+                    cutb(h1a);
+                }
+            }
+            r = scanjoin(nextedgea.leftHalf, nextedgeb.rightHalf);
+            if ( r != null ) {
+                h2a = r[0];
+                h1b = r[1];
+                join(h2a, nextedgea.leftHalf);
+                if ( !isLooseA(h2a.mirrorHalfEdge()) ) {
+                    cuta(h2a);
+                }
+                join(h1b, nextedgeb.rightHalf);
+                if ( !isLooseB(h1b.mirrorHalfEdge()) ) {
+                    cutb(h1b);
+                }
+            }
+            if ( h1a != null && h1b != null && h2a != null && h2b != null ) {
+                cuta(nextedgea.rightHalf);
+                cuta(nextedgeb.rightHalf);
+            }
+        }
     }
 
     /**
@@ -1277,10 +1486,8 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid res = new PolyhedralBoundedSolid();
 
-        sonea = new ArrayList<_PolyhedralBoundedSolidEdge>();
-        soneb = new ArrayList<_PolyhedralBoundedSolidEdge>();
-        sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
-        sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
+        sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
+        soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
 
         //-----------------------------------------------------------------
         inSolidA.validateModel();

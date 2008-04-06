@@ -589,10 +589,11 @@ Changes in 2008 april 3 revition <<113min>>
   - 1h53min: PolyhedralBoundedSolidSetOperator.vtxFacClassify and related
     study and tests.
 
-Changes in 2008 april 5 revition <<390min>>
+Changes in 2008 april 5 revition <<450min>>
   - 6h30min: advancing on the vertex classification of sectors for 
     PolyhedralBoundedSolidSetOperator, and re-studying [MANT1988].15.
-
+  - 1h: studing algorithms for vertex joining at 
+    PolyhedralBoundedSolidSetOperator.
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
