@@ -503,6 +503,112 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         }
     }
 
+    public static void
+    drawDebugFace(GL gl, PolyhedralBoundedSolid solid, int faceIndex)
+    {
+        //- Draw face boundaries, one for each loop -----------------------
+        int i, j;
+
+        //- Prepare tesselator --------------------------------------------
+        if ( tesselatorProcessor == null ) {
+            glu = new GLU();
+            tesselatorProcessor = 
+                new _JoglPolygonTesselatorRoutines(gl, glu);
+        }
+
+        GLUtessellator tesselator;
+
+        //- Draw solid faces one by one -----------------------------------
+        gl.glCullFace(gl.GL_BACK);
+        gl.glEnable(gl.GL_CULL_FACE);
+
+        //-----------------------------------------------------------------
+        Vector3D p0, n;
+        for ( i = faceIndex;
+              i >= 0 && i == faceIndex && i < solid.polygonsList.size();
+              i++ ) {
+            // Logic
+            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            if ( face.containingPlane != null ) {
+                n = face.containingPlane.getNormal();
+                gl.glNormal3d(n.x, n.y, n.z);
+            }
+
+            // Count used vertex for current face
+            int totalNumberOfPoints = 0;
+
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null  ) {
+                        // Loop is not closed!
+                        break;
+                    }
+                    // Counting
+                    totalNumberOfPoints++;
+                } while( he != heStart );
+            }
+
+            // Tesselator preparation for current face
+            int count;
+            double list[][]; // JOGL GLU Tesselator needs a vertex memory
+
+            tesselator = glu.gluNewTess();
+            list = new double[totalNumberOfPoints][3];
+            count = 0;
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_VERTEX, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_BEGIN, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_END, tesselatorProcessor);
+            glu.gluTessCallback(tesselator,
+                glu.GLU_TESS_ERROR, tesselatorProcessor);
+            glu.gluTessBeginPolygon(tesselator, null);
+
+            // Face polygon generation via JOGL GLU tesselator
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                glu.gluTessBeginContour(tesselator);
+
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                heStart = he;
+                do {
+                    // Logic
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+
+                    // Draw polygon parts
+                    p0 = he.startingVertex.position;
+                    list[count][0] = p0.x;
+                    list[count][1] = p0.y;
+                    list[count][2] = p0.z;
+                    glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                    count++;
+
+                } while( he != heStart );
+
+                glu.gluTessEndContour(tesselator);
+            }
+
+            glu.gluTessEndPolygon(tesselator);
+            glu.gluDeleteTess(tesselator);
+        }
+
+    }
+
     /**
     PRE: Solid has been previously validated. This implies for example that
     all faces are planar and has its containing plane equation calculated, so

@@ -334,6 +334,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glEnable(gl.GL_LIGHTING);
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
+        JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, solid, faceIndex);
 
         //-----------------------------------------------------------------
         ArrayList <Vector3D> contourLines;
