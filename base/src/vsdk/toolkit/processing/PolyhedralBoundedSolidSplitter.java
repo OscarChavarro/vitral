@@ -481,6 +481,20 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
     }
 
     /**
+    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
+    */
+    private static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
+    {
+        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
+            ( (
+              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
+              ) || 
+              (
+              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
+              ) );
+    }
+
+    /**
     Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
     */
     private static _PolyhedralBoundedSolidHalfEdge

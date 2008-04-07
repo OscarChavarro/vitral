@@ -594,6 +594,12 @@ Changes in 2008 april 5 revition <<450min>>
     PolyhedralBoundedSolidSetOperator, and re-studying [MANT1988].15.
   - 1h: studing algorithms for vertex joining at 
     PolyhedralBoundedSolidSetOperator.
+
+Changes in 2008 april 7 revition <<70min>>
+  - 1h10min: Studying operation PolyhedralBoundedSolidSetOperator.setOpConnect.
+    Possible bugs founded, some Euler operators appears not to be handling
+    special cases propiertly. Check pending.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

@@ -111,7 +111,10 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     {
         halfEdgesList.locateWindowAtElem(he);
         halfEdgesList.removeElemAtWindow();
-        boundaryStartHalfEdge = halfEdgesList.get(0);
+
+        if ( halfEdgesList.size() > 0 ) {
+            boundaryStartHalfEdge = halfEdgesList.get(0);
+	}
     }
 
     public String toString()

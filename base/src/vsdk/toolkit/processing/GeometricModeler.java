@@ -353,8 +353,8 @@ public class GeometricModeler extends ProcessingElement
                       ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
                       ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
     {
-	PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
-					     outSolidsAbove, outSolidsBelow);
+        PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
+                                             outSolidsAbove, outSolidsBelow);
     }
 
     /**
@@ -405,35 +405,28 @@ public class GeometricModeler extends ProcessingElement
     }
 
     /**
-    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
-    */
-    protected static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
-    {
-        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
-            ( (
-              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
-              ) || 
-              (
-              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
-              ) );
-    }
-
-    /**
     Moves those rings of `f1` that do not lie within its outer loop to
     `f2`.
-    This procedure is used on the splitter algorithm to ensure that after
-    a face has been divided by a MEF, all loops will end up in the correct
-    halves.
-    This should be an answer to problem [MANT1988].13.5.
-    NOT YET IMPLEMENTED!
+    This procedure is used on the splitter and set operator algorithms to
+    ensure that after a face has been divided by a MEF, all loops will end up
+    in the correct halves.
+    This is an answer to problem [MANT1988].13.5. Its use in the context of
+    the splitter algorithm is briefly described on section [MANT1988].14.7.2.
     */
-    private static void laringmv(_PolyhedralBoundedSolidFace f1, _PolyhedralBoundedSolidFace f2)
+    private static void laringmv(_PolyhedralBoundedSolidFace f1,
+                                 _PolyhedralBoundedSolidFace f2)
     {
-        System.out.println("laringmv not implemented!");
-        System.out.println("Check [MANT1988].14 for this untested operation case!");
-        System.exit(1);
-        // Is this supposed to move all rings from `oldf` to `newf` using
-        // PolyhedralBoundedSolid.lringmv???
+        _PolyhedralBoundedSolidLoop l;
+        int i;
+
+        // It is supposed to move all (internal) rings from `f1` to `f2`
+        // using PolyhedralBoundedSolid.lringmv
+        for ( i = 1; i < f1.boundariesList.size(); i++ ) {
+        l = f1.boundariesList.get(i);
+            if ( f1.parentSolid.lringmv(l, f2, false) ) {
+                i--;
+            }
+        }
     }
 
 
@@ -445,6 +438,10 @@ public class GeometricModeler extends ProcessingElement
     {
         _PolyhedralBoundedSolidFace oldf, newf;
         PolyhedralBoundedSolid s;
+
+        System.out.println("     . JOINING:");
+        System.out.println("      -> " + h1);
+        System.out.println("      -> " + h2);
 
         oldf = h1.parentLoop.parentFace;
         newf = null;
@@ -460,7 +457,6 @@ public class GeometricModeler extends ProcessingElement
         if ( h1.next().next() != h2 ) {
             s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
-                System.out.println("*****");
                 laringmv(oldf, newf);
             }
         }

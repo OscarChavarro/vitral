@@ -582,16 +582,26 @@ public class PolyhedralBoundedSolid extends Solid {
             he3.parentLoop = newLoop;
         }
         newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
+
         //-----------------------------------------------------------------
         oldLoop.delhe(he1);
         oldLoop.delhe(he2);
 
         if ( newLoop.halfEdgesList.size() <= 1 ) {
             newLoop.boundaryStartHalfEdge.parentEdge = null;
+            if ( newLoop.halfEdgesList.size() <= 0 ) {
+                VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkemr",
+                "Case A Should not happen!");
+	    }
             newLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
         }
+
         if ( oldLoop.halfEdgesList.size() <= 1 ) {
             oldLoop.boundaryStartHalfEdge.parentEdge = null;
+            if ( oldLoop.halfEdgesList.size() <= 0 ) {
+                VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkemr",
+                "Case B Should not happen!");
+	    }
             oldLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
         }
 
@@ -670,10 +680,17 @@ public class PolyhedralBoundedSolid extends Solid {
     `lringmv` is an addendum to `lmef`, and not an Euler operator.
     This method follows the functional definition of section [MANT1988].11.5.2.
     */
-    public void lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
+    public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
     {
-        System.out.println("laringmv not implemented!");
-        System.exit(1);
+        if ( setAsOuterLoop ) {
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lringmv",
+                "Outer loop case not implemented!");
+	}
+        tofac.boundariesList.add(l);
+        l.parentFace.boundariesList.locateWindowAtElem(l);
+        l.parentFace.boundariesList.removeElemAtWindow();
+        l.parentFace = tofac;
+        return true;
     }
 
     /**

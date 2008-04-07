@@ -167,7 +167,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
     {
         if ( index < 0 || index >= currentSize ) {
             // Report index out of bounds exception!
-            System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - Trying index " + index + " in a list with " + currentSize + " elements.");
+            System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - Trying to `get` with index " + index + " in a list with " + currentSize + " elements.");
             System.exit(1);
             return null;
         }
