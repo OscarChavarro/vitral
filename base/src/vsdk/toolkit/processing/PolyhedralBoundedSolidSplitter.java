@@ -31,7 +31,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 This class is used to store vertex / halfedge neigborhood information, as presented
 in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
-class _PolyhedralBoundedSolidSplitterSectorClassification extends GeometricModeler
+class _PolyhedralBoundedSolidSplitterSectorClassification extends PolyhedralBoundedSolidOperator
 {
     public static final int ABOVE = 1;
     public static final int BELOW = -1;
@@ -82,7 +82,7 @@ class _PolyhedralBoundedSolidSplitterSectorClassification extends GeometricModel
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
 design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
-class _PolyhedralBoundedSolidSplitterNullEdge extends GeometricModeler implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
+class _PolyhedralBoundedSolidSplitterNullEdge extends PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
 {
     public _PolyhedralBoundedSolidEdge e;
 
@@ -131,7 +131,7 @@ at chapter [MANT1988].14.
 This class offers just one public method, which is supposed to be called
 from GeometricModeler class.
 */
-public class PolyhedralBoundedSolidSplitter extends GeometricModeler
+public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperator
 {
     /**
     Following variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
@@ -646,64 +646,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
         }
     }
 
-    /**
-    Following section [MANT1988].14.8. and program [MANT1988].14.12.
-    */
-    private static void movefac(_PolyhedralBoundedSolidFace f,
-                                PolyhedralBoundedSolid s)
-    {
-        _PolyhedralBoundedSolidLoop l;
-        _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidFace f2;
-        int i;
-
-        f.parentSolid.polygonsList.locateWindowAtElem(f);
-        f.parentSolid.polygonsList.removeElemAtWindow();
-        s.polygonsList.add(f);
-        f.parentSolid = s;
-
-        for ( i = 0; i < f.boundariesList.size(); i++ ) {
-            l = f.boundariesList.get(i);
-            he = l.boundaryStartHalfEdge;
-            do {
-                f2 = he.mirrorHalfEdge().parentLoop.parentFace;
-                if ( f2.parentSolid != s ) {
-                    movefac(f2, s);
-                }
-                he = he.next();
-            } while( he != l.boundaryStartHalfEdge );
-        }
-                
-    }
-
-    /**
-    */
-    private static boolean searchForEdge(
-        CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> l,
-        _PolyhedralBoundedSolidEdge e)
-    {
-        int i;
-
-        for ( i = 0; i < l.size(); i++ ) {
-            if ( l.get(i) == e ) return true;
-        }
-        return false;
-    }
-
-    /**
-    */
-    private static boolean searchForVertex(
-        CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> l,
-        _PolyhedralBoundedSolidVertex v)
-    {
-        int i;
-
-        for ( i = 0; i < l.size(); i++ ) {
-            if ( l.get(i) == v ) return true;
-        }
-        return false;
-    }
-
     private static boolean isNullFace(_PolyhedralBoundedSolidFace f)
     {
         int i;
@@ -712,39 +654,6 @@ public class PolyhedralBoundedSolidSplitter extends GeometricModeler
             if ( sonf.get(i) == f ) return true;
         }
         return false;
-    }
-
-    /**
-    This is the answer to problem [MANT1988].14.2.
-
-    @todo Check for consistency of `emanatingHalfEdge` pointers for vertices.
-    */
-    private static void cleanup(PolyhedralBoundedSolid s)
-    {
-        int i, j;
-        _PolyhedralBoundedSolidFace f;
-        _PolyhedralBoundedSolidLoop l;
-        _PolyhedralBoundedSolidHalfEdge he;
-
-        for ( i = 0; i < s.polygonsList.size(); i++ ) {
-            f = s.polygonsList.get(i);
-            for ( j = 0; j < f.boundariesList.size(); j++ ) {
-                l = f.boundariesList.get(j);
-                he = l.boundaryStartHalfEdge;
-                do {
-                    //
-                    if ( !searchForEdge(s.edgesList, he.parentEdge) ) {
-                        s.edgesList.add(he.parentEdge);
-                    }
-                    if ( !searchForVertex(s.verticesList, he.startingVertex) ) {
-                        s.verticesList.add(he.startingVertex);
-                    }
-                    //
-                    he = he.next();
-                } while( he != l.boundaryStartHalfEdge );
-            }
-        }
-        s.validateModel();
     }
 
     /**

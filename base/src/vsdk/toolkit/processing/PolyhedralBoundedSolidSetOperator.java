@@ -31,7 +31,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
 design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
-class _PolyhedralBoundedSolidSetOperatorNullEdge extends GeometricModeler implements Comparable <_PolyhedralBoundedSolidSetOperatorNullEdge>
+class _PolyhedralBoundedSolidSetOperatorNullEdge extends PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSetOperatorNullEdge>
 {
     public _PolyhedralBoundedSolidEdge e;
 
@@ -77,7 +77,7 @@ This class is used to store vertex / halfedge neigborhood information for the
 vertex/vertex classifier as proposed on section [MANT1988].15.5. and program
 [MANT1988].15.6.
 */
-class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex extends GeometricModeler
+class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex extends PolyhedralBoundedSolidOperator
 {
     public _PolyhedralBoundedSolidHalfEdge he;
     public Vector3D ref1;
@@ -91,7 +91,7 @@ This class is used to store sector / sector neigborhood information for the
 vertex/vertex classifier as proposed on section [MANT1988].15.5. and program
 [MANT1988].15.6.
 */
-class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector extends GeometricModeler
+class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector extends PolyhedralBoundedSolidOperator
 {
     public int secta;
     public int sectb;
@@ -148,7 +148,7 @@ vertex/face classifier, in a similar fashion to as presented in section
 operation algorithm as proposed on section [MANT1988].15..1. and problem
 [MANT1988].15.4.
 */
-class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extends GeometricModeler
+class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extends PolyhedralBoundedSolidOperator
 {
     public static final int ABOVE = 1;
     public static final int BELOW = -1;
@@ -281,7 +281,7 @@ class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extends Geome
     }
 }
 
-class _PolyhedralBoundedSolidSetOperatorVertexVertex extends GeometricModeler
+class _PolyhedralBoundedSolidSetOperatorVertexVertex extends PolyhedralBoundedSolidOperator
 {
     public _PolyhedralBoundedSolidVertex va;
     public _PolyhedralBoundedSolidVertex vb;
@@ -292,7 +292,7 @@ class _PolyhedralBoundedSolidSetOperatorVertexVertex extends GeometricModeler
     }
 }
 
-class _PolyhedralBoundedSolidSetOperatorVertexFace extends GeometricModeler
+class _PolyhedralBoundedSolidSetOperatorVertexFace extends PolyhedralBoundedSolidOperator
 {
     public _PolyhedralBoundedSolidVertex v;
     public _PolyhedralBoundedSolidFace f;
@@ -303,7 +303,7 @@ class _PolyhedralBoundedSolidSetOperatorVertexFace extends GeometricModeler
     }
 }
 
-public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
+public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOperator
 {
     /**
     Following variable `sonvv` from program [MANT1988].15.1.
@@ -1296,16 +1296,19 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
     {
         int i;
 
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Vertices on A touching faces on B:");
         for ( i = 0; i < sonva.size(); i++ ) {
             vtxFacClassify(sonva.get(i).v, sonva.get(i).f, op, 0);
         }
 
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Vertices on B touching faces on A:");
         for ( i = 0; i < sonvb.size(); i++ ) {
             vtxFacClassify(sonvb.get(i).v, sonvb.get(i).f, op, 1);
         }
 
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Vertex-Vertex pairs:");
         for ( i = 0; i < sonvv.size(); i++ ) {
             vtxVtxClassify(sonvv.get(i).va, sonvv.get(i).vb, op);
@@ -1435,6 +1438,9 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
     */
     private static void setOpConnect()
     {
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("setOpConnect");
+
         _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
         _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
@@ -1506,11 +1512,42 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         int op
     )
     {
-        System.out.println("setOpFinish");
-        int i;
+        int i, j, inda, indb;
+        _PolyhedralBoundedSolidFace f;
 
-        System.out.println("  - Null faces on A: " + sonfa.size());
-        System.out.println("  - Null faces on B: " + sonfb.size());
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("setOpFinish");
+
+        inda = (op == INTERSECTION) ? sonfa.size() : 0;
+        indb = (op == UNION) ? 0 : sonfb.size();
+
+        int oldsize = sonfa.size();
+        for ( i = 0; i < oldsize; i++ ) {
+            f = inSolidA.lmfkrh(sonfa.get(i).boundariesList.get(1),
+                                inSolidA.getMaxFaceId()+1);
+            sonfa.add(f);
+
+            f = inSolidB.lmfkrh(sonfb.get(i).boundariesList.get(1),
+                                inSolidB.getMaxFaceId()+1);
+            sonfb.add(f);
+        }
+/*
+        if ( op == DIFFERENCE ) {
+            inSolidB.revert();
+        }
+
+        for ( i = 0; i < sonfa.size(); i++ ) {
+            movefac(sonfa.get(i+inda), outRes);
+            movefac(sonfb.get(i+indb), outRes);
+        }
+
+        cleanup(outRes);
+
+        for ( i = 0; i < sonfa.size(); i++ ) {
+            outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
+            outRes.loopGlue(sonfa.get(i+inda).id);
+        }
+*/
     }
 
     /**

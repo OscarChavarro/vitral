@@ -499,6 +499,11 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
     }
 
+    public void revert()
+    {
+	System.out.println("Reverting face " + id);
+    }
+
     public String toString()
     {
         String msg;

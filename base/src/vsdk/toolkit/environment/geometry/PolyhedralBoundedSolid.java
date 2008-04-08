@@ -1469,6 +1469,27 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    This method get current solid in an "inverted" (geometrical sense) solid.
+    Works on half edge data structure by inverting the order of each loop
+    and twisting all face plane equations.
+    This is an answer to problem [MANT1988].15.6.
+    */
+    public void revert()
+    {
+        //-----------------------------------------------------------------
+        int i;
+
+	for ( i = 0; i < polygonsList.size(); i++ ) {
+	    polygonsList.get(i).revert();
+	}
+	System.out.println("revert not implemented!");
+        System.exit(0);
+
+        //-----------------------------------------------------------------
+        //validateModel();
+    }
+
+    /**
     Removes all "inessential" edges of current solid (i.e. edges that
     separates two coplanar faces, or that occurs just in a single face).
     This is an answer to problem [MANT1988].15.2.

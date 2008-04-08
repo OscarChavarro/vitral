@@ -603,6 +603,10 @@ Changes in 2008 april 7 revition <<70min>>
 Changes in 2008 april 7 revition <<120min>>
   - 2h: Fixing an error on PolyhedralBoundedSolidSetOperator.setOpConnect.
 
+Changes in 2008 april 8 revition <<120min>>
+   - 45min: PolyhedralBoundedSolidOperator class and starting 
+     PolyhedralBoundedSolidSetOperator.setOpFinish
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels
