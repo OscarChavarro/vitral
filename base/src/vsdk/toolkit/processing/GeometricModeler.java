@@ -439,10 +439,6 @@ public class GeometricModeler extends ProcessingElement
         _PolyhedralBoundedSolidFace oldf, newf;
         PolyhedralBoundedSolid s;
 
-        System.out.println("     . JOINING:");
-        System.out.println("      -> " + h1);
-        System.out.println("      -> " + h2);
-
         oldf = h1.parentLoop.parentFace;
         newf = null;
         s = oldf.parentSolid;
@@ -454,6 +450,7 @@ public class GeometricModeler extends ProcessingElement
         else {
             s.lmekr(h1, h2.next());
         }
+
         if ( h1.next().next() != h2 ) {
             s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {

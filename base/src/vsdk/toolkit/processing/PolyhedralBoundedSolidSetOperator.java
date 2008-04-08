@@ -305,8 +305,6 @@ class _PolyhedralBoundedSolidSetOperatorVertexFace extends GeometricModeler
 
 public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
 {
-    private static int MACHETEJ;
-
     /**
     Following variable `sonvv` from program [MANT1988].15.1.
     */
@@ -828,9 +826,9 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
             tail = nbr.get(i).sector;
 
             //- Insert null edge -----------------------------------------
-            System.out.println("LMEV:");
-            System.out.println("  - (" + start + ") H1: " + head);
-            System.out.println("  - (" + i + ") H2: " + tail);
+            //System.out.println("LMEV:");
+            //System.out.println("  - (" + start + ") H1: " + head);
+            //System.out.println("  - (" + i + ") H2: " + tail);
             solida.lmev(head, tail, solida.getMaxVertexId()+1, head.startingVertex.position);
 
             ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
@@ -868,7 +866,7 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         //- Following classification strategy from the splitter algorithm -
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr;
 
-        System.out.println("  - " + v + " / " + f);
+        //System.out.println("  - " + v + " / " + f);
 
         nbr = getNeighborhood(v, f.containingPlane, BvsA);
         if ( inplaneEdgesOn(nbr) ) {
@@ -1346,11 +1344,6 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
 
         condition3 = (h1.parentEdge != h2.parentEdge);
 
-        System.out.println("     . TEST: " + h1.id + " vs. " + h2.id);
-        System.out.println("      1.-> " + (condition1?"TRUE":"FALSE"));
-        System.out.println("      2.-> " + (condition2?"TRUE":"FALSE"));
-        System.out.println("      3.-> " + (condition3?"TRUE":"FALSE"));
-
         return condition1 && condition2 && condition3;
     }
 
@@ -1366,16 +1359,7 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
 
         ret = new _PolyhedralBoundedSolidHalfEdge[2];
 
-        System.out.println("[" + MACHETEJ + "] Checking if can join:");
-        MACHETEJ++;
-        System.out.println("  - A:" + hea);
-        System.out.println("  - B:" + heb);
-        System.out.println("  - Previously " + endsa.size() + " sequences:");
-
         for ( i = 0; i < endsa.size(); i++ ) {
-            System.out.println("     . SEQ:");
-            System.out.println("      a-> " + endsa.get(i));
-            System.out.println("      b-> " + endsb.get(i));
             if ( neighbor(hea, endsa.get(i)) &&
                  neighbor(heb, endsb.get(i)) ) {
                 ret[0] = endsa.get(i);
@@ -1387,7 +1371,6 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
                 return ret;
             }
         }
-        System.out.println("     . TEST GIVES FALSE, ADDING HEs.");
         endsa.add(hea);
         endsb.add(heb);
         return null;
@@ -1424,14 +1407,10 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             sonfa.add(he.parentLoop.parentFace);
-            System.out.println("cuta - lkemr");
             s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
-            System.out.println("ok");
         }
         else {
-            System.out.println("cuta - lkef");
             s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
-            System.out.println("ok");
         }
     }
 
@@ -1444,14 +1423,10 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             sonfb.add(he.parentLoop.parentFace);
-            System.out.println("cutb - lkemr");
             s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
-            System.out.println("ok");
         }
         else {
-            System.out.println("cutb - lkef");
             s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
-            System.out.println("ok");
         }
     }
 
@@ -1464,9 +1439,6 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
 
-
-        System.out.println("===========================================================================");
-
         endsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
         endsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
         tiedsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
@@ -1475,13 +1447,18 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
         sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
         sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
         ssortnulledges();
+
         int i;
-        MACHETEJ = 1;
+
         for ( i = 0; i < sonea.size(); i++ ) {
             // This assumes that for each null edge on solid a there is
             // another on solid b.
             nextedgea = sonea.get(i).e;
             nextedgeb = soneb.get(i).e;
+            h1a = null;
+            h2a = null;
+            h1b = null;
+            h2b = null;
 
             r = scanjoin(nextedgea.rightHalf, nextedgeb.leftHalf);
             if ( r != null ) {
@@ -1489,11 +1466,11 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
                 h2b = r[1];
                 join(h1a, nextedgea.rightHalf);
                 if ( !isLooseA(h1a.mirrorHalfEdge()) ) {
-                    //cuta(h1a);
+                    cuta(h1a);
                 }
                 join(h2b, nextedgeb.leftHalf);
                 if ( !isLooseB(h2b.mirrorHalfEdge()) ) {
-                    //cutb(h1a);
+                    cutb(h2b);
                 }
             }
 
@@ -1503,31 +1480,20 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
                 h1b = r[1];
                 join(h2a, nextedgea.leftHalf);
                 if ( !isLooseA(h2a.mirrorHalfEdge()) ) {
-                    //cuta(h2a);
+                    cuta(h2a);
                 }
                 join(h1b, nextedgeb.rightHalf);
                 if ( !isLooseB(h1b.mirrorHalfEdge()) ) {
-                    //cutb(h1b);
+                    cutb(h1b);
                 }
             }
 
             if ( h1a != null && h1b != null && h2a != null && h2b != null ) {
-                System.out.println("TRYING DUAL CUT!");
-                System.out.println("PART A:" + nextedgea.rightHalf);
-/*
-                if ( MACHETEJ > 7 ) {
-                    System.out.println("DUAL CUT ABORTED!");
-                    System.out.println(nextedgea.rightHalf.parentLoop.parentFace.parentSolid);
-                }
-*/
-                //cuta(nextedgea.rightHalf);
-
-                System.out.println("PART B:" + nextedgeb.rightHalf);
-
-                //cutb(nextedgeb.rightHalf);
-                System.out.println("DUAL CUT OK!");
+                cuta(nextedgea.rightHalf);
+                cutb(nextedgeb.rightHalf);
             }
         }
+
     }
 
     /**
@@ -1541,6 +1507,10 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
     )
     {
         System.out.println("setOpFinish");
+        int i;
+
+        System.out.println("  - Null faces on A: " + sonfa.size());
+        System.out.println("  - Null faces on B: " + sonfb.size());
     }
 
     /**
@@ -1575,9 +1545,6 @@ public class PolyhedralBoundedSolidSetOperator extends GeometricModeler
             System.out.println("Empty sonea.");
             return inSolidA;
         }
-
-        System.out.println(inSolidA);
-        System.out.println(inSolidB);
 
         setOpConnect();
         setOpFinish(inSolidA, inSolidB, res, op);
