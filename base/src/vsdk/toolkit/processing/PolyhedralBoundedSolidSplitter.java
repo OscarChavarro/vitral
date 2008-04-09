@@ -743,7 +743,9 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         fixNullFaces(facesToFixAbove);
         fixNullFaces(facesToFixBelow);
         cleanup(newAbove);
+        newAbove.validateModel();
         cleanup(newBelow);
+        newBelow.validateModel();
         outSolidsAbove.add(newAbove);
         outSolidsBelow.add(newBelow);
         destroy(inSolid);

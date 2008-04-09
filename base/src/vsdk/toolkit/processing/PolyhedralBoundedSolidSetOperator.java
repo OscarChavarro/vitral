@@ -1522,6 +1522,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         indb = (op == UNION) ? 0 : sonfb.size();
 
         int oldsize = sonfa.size();
+
         for ( i = 0; i < oldsize; i++ ) {
             f = inSolidA.lmfkrh(sonfa.get(i).boundariesList.get(1),
                                 inSolidA.getMaxFaceId()+1);
@@ -1531,19 +1532,27 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                                 inSolidB.getMaxFaceId()+1);
             sonfb.add(f);
         }
-/*
+
+	System.out.println(inSolidB);
+
         if ( op == DIFFERENCE ) {
             inSolidB.revert();
         }
 
-        for ( i = 0; i < sonfa.size(); i++ ) {
+        //inSolidA.validateModel();
+        //inSolidB.validateModel();
+
+        for ( i = 0; i < oldsize; i++ ) {
             movefac(sonfa.get(i+inda), outRes);
-            movefac(sonfb.get(i+indb), outRes);
+	    System.out.println("MOVING FROM B FACE " + sonfb.get(i+indb));
+            movefacTop(sonfb.get(i+indb), outRes, "");
         }
 
         cleanup(outRes);
+        outRes.validateModel();
 
-        for ( i = 0; i < sonfa.size(); i++ ) {
+/*
+        for ( i = 0; i < oldsize; i++ ) {
             outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
             outRes.loopGlue(sonfa.get(i+inda).id);
         }

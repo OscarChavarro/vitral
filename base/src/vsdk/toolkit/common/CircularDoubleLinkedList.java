@@ -232,6 +232,25 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         currentSize++;
     }
 
+    public void reverse()
+    {
+        _CircularDoubleLinkedListNode<E> ptr, qtr;
+        E tmp;
+        int i = 0;
+
+        ptr = head;
+        qtr = head.previous;
+        do {
+            tmp = ptr.data;
+            ptr.data = qtr.data;
+            qtr.data = tmp;
+
+            ptr = ptr.next;
+            qtr = qtr.previous;
+            i++;
+        } while ( ptr != head && i < currentSize/2 );
+    }
+
 }
 
 //===========================================================================

@@ -610,12 +610,18 @@ public class PolyhedralBoundedSolidModelingTools
         res = GeometricModeler.setOp(a, b, GeometricModeler.DIFFERENCE);
 
         //-----------------------------------------------------------------
-        res.validateModel();
+        //a.validateModel();
+        //b.validateModel();
+        //res.validateModel();
 
-        if ( part == 1 ) {
+        if ( part == 2 ) {
             return a;
         }
-        return b;
+        if ( part == 3 ) {
+            return b;
+        }
+        return res;
+
     }
 
 }

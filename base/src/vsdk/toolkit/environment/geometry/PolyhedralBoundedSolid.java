@@ -1344,6 +1344,94 @@ public class PolyhedralBoundedSolid extends Solid {
         }
     }
 
+    private boolean validateTopologicalIntegrity()
+    {
+        int i, j, k;
+        _PolyhedralBoundedSolidEdge e;
+        _PolyhedralBoundedSolidHalfEdge h1, h2;
+        _PolyhedralBoundedSolidFace f;
+        _PolyhedralBoundedSolidLoop l;
+
+        //-----------------------------------------------------------------
+	for ( i = 0; i < edgesList.size(); i++ ) {
+	    e = edgesList.get(i);
+	    h1 = e.rightHalf;
+	    h2 = e.leftHalf;
+            if ( h1 == null || h2 == null ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
+                "Edge with null halfedge!");
+  	        return false;
+	    }
+	    if ( h1.parentLoop.parentFace.parentSolid !=
+                 h2.parentLoop.parentFace.parentSolid ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
+                "Edge belonging to two different solids!");
+  	        return false;
+	    }
+	}
+
+        //-----------------------------------------------------------------
+        int edgeCount[];
+
+        edgeCount = new int[edgesList.size()];
+
+	for ( i = 0; i < edgeCount.length; i++ ) {
+	    edgeCount[i] = 0;
+	}
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            f = polygonsList.get(i);
+            for ( j = 0; j < f.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                l = f.boundariesList.get(j);
+
+                he = l.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
+                    "Loop without starting halfedge!");
+  	            return false;
+                }
+                heStart = he;
+                do {
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
+                        "Not closed loop!");
+  	                return false;
+                    }
+
+                    //-----
+		    for ( k = 0; k < edgeCount.length; k++ ) {
+			if ( he.parentEdge == edgesList.get(k) ) {
+                            edgeCount[k]++;
+                            break;
+			}
+		    }
+                    //-----
+
+                } while( he != heStart );
+            }
+        }
+
+	System.out.println("-----");
+	for ( i = 0; i < edgeCount.length; i++ ) {
+	    System.out.println("  - " + i + ": " + edgesList.get(i) + " - count " + edgeCount[i]);
+/*
+	    if ( edgeCount[i] != 2 ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
+                    "Edges with different halfedges than 2!");
+  	            return false;
+	    }
+*/
+	}
+
+        //-----------------------------------------------------------------
+
+        return true;
+    }
+
     /**
     This method runs a set of validity tests to check te integrity of the
     data structure. If all of the tests goes well, this method returns true.
@@ -1371,6 +1459,7 @@ public class PolyhedralBoundedSolid extends Solid {
 
         modelIsValid = false;
 
+        //-----------------------------------------------------------------
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
 
@@ -1383,6 +1472,14 @@ public class PolyhedralBoundedSolid extends Solid {
             }
         }
 
+        //-----------------------------------------------------------------
+
+        if ( !validateTopologicalIntegrity() ) {
+            msg += "  - Topological integrity test failed.\n";
+            test = false;
+	}
+
+        //-----------------------------------------------------------------
         if ( test ) {
             modelIsValid = true;
         }
@@ -1470,23 +1567,19 @@ public class PolyhedralBoundedSolid extends Solid {
 
     /**
     This method get current solid in an "inverted" (geometrical sense) solid.
-    Works on half edge data structure by inverting the order of each loop
-    and twisting all face plane equations.
+    Works on half edge data structure by inverting the order of each loop.
     This is an answer to problem [MANT1988].15.6.
+
+    Current implementation does NOT correct face normals. Explicit model
+    validation is encouraged after the application of this method.
     */
     public void revert()
     {
-        //-----------------------------------------------------------------
         int i;
 
 	for ( i = 0; i < polygonsList.size(); i++ ) {
 	    polygonsList.get(i).revert();
 	}
-	System.out.println("revert not implemented!");
-        System.exit(0);
-
-        //-----------------------------------------------------------------
-        //validateModel();
     }
 
     /**
@@ -1555,8 +1648,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 loop = face.boundariesList.get(j);
 
 
-                msg += "      | HeID | StartVertex | End Vertex | nccw He | pccwHe | parentEdge\n";
-                msg += "      +------+-------------+------------+---------+--------+-----------\n";
+                msg += "      | HeID  | StartVertex | End Vertex | nccw He | pccwHe | parentEdge\n";
+                msg += "      +-------+-------------+------------+---------+--------+-----------\n";
 
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
@@ -1579,7 +1672,9 @@ public class PolyhedralBoundedSolid extends Solid {
                         he.next().id, he.previous().id, he.parentEdge.id);
                     */
                     msg += "      | " +
-                        intPreSpaces(he.id, 4) + " | " +
+                        intPreSpaces(he.id, 4) + 
+                        ((he == loop.boundaryStartHalfEdge)?"*":" ") +
+                        " | " +
                         intPreSpaces(he.startingVertex.id, 11) + " | " +
                         intPreSpaces(he.next().startingVertex.id, 10) + " | " +
                         intPreSpaces(he.next().id, 7) + " | " +

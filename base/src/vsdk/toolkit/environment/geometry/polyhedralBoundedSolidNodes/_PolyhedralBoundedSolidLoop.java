@@ -114,7 +114,72 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
 
         if ( halfEdgesList.size() > 0 ) {
             boundaryStartHalfEdge = halfEdgesList.get(0);
+        }
+    }
+
+    public void revert()
+    {
+        int i;
+
+	System.out.println("BEFORE:");
+	for ( i = 0; i < halfEdgesList.size(); i++ ) {
+	    System.out.println("  - He, " + halfEdgesList.get(i).id + " parent edge: " + halfEdgesList.get(i).parentEdge.id);
 	}
+
+        //-----------------------------------------------------------------
+        if ( halfEdgesList.size() <= 0 ) {
+            return;
+        }
+        halfEdgesList.reverse();
+
+        //-----------------------------------------------------------------
+        _PolyhedralBoundedSolidEdge e, last;
+        _PolyhedralBoundedSolidHalfEdge heCurrent, hePrev;
+        boolean rightSided, lastSided;
+
+        hePrev = halfEdgesList.get(halfEdgesList.size()-1);
+        lastSided = false;
+        if ( hePrev.parentEdge.rightHalf == hePrev ) {
+            lastSided = true;
+        }
+        last = hePrev.parentEdge;
+
+        for ( i = halfEdgesList.size()-1; i > 1; i-- ) {
+            //----------
+            rightSided = false;
+            heCurrent = halfEdgesList.get(i);
+            hePrev = halfEdgesList.get(i-1);
+            if ( hePrev.parentEdge.rightHalf == hePrev ) {
+                rightSided = true;
+            }
+
+            //----------
+            heCurrent.parentEdge = hePrev.parentEdge;
+/*
+            if ( rightSided ) {
+                heCurrent.parentEdge.rightHalf = heCurrent;
+            }
+            else {
+                heCurrent.parentEdge.leftHalf = heCurrent;
+            }
+*/
+        }
+        heCurrent = halfEdgesList.get(0);
+        heCurrent.parentEdge = last;
+/*
+        if ( lastSided ) {
+            heCurrent.parentEdge.rightHalf = heCurrent;
+        }
+        else {
+            heCurrent.parentEdge.leftHalf = heCurrent;
+        }
+*/
+
+	System.out.println("AFTER:");
+	for ( i = 0; i < halfEdgesList.size(); i++ ) {
+	    System.out.println("  - He, " + halfEdgesList.get(i).id + " parent edge: " + halfEdgesList.get(i).parentEdge.id);
+	}
+
     }
 
     public String toString()

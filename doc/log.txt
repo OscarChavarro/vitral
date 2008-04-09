@@ -603,9 +603,12 @@ Changes in 2008 april 7 revition <<70min>>
 Changes in 2008 april 7 revition <<120min>>
   - 2h: Fixing an error on PolyhedralBoundedSolidSetOperator.setOpConnect.
 
-Changes in 2008 april 8 revition <<120min>>
+Changes in 2008 april 8 revition <<225min>>
    - 45min: PolyhedralBoundedSolidOperator class and starting 
      PolyhedralBoundedSolidSetOperator.setOpFinish
+   - 3h: studying PolyhedralBoundedSolidSetOperator.setOpFinish. First
+     partially successful tests for simple boolean operators on cases
+     not involving vertex/vertex classification.
 
 ---------------------------------------------------------------------------
 TODO:
