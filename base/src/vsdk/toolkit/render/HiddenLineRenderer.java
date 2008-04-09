@@ -128,16 +128,16 @@ public class HiddenLineRenderer extends RenderingElement
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
 
             int start, end;
-            start = e.getStartingVertexIndex();
-            end = e.getEndingVertexIndex();
+            start = e.getStartingVertexId();
+            end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
                 Vector3D startPosition;
                 Vector3D endPosition;
                 Vector3D middle;
                 Vector3D n;
 
-                startPosition = solid.getVertexPosition(start);
-                endPosition = solid.getVertexPosition(end);
+                startPosition = e.leftHalf.startingVertex.position;
+                endPosition = e.rightHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
                     //--------------------------------------------------------
                     face1 = e.leftHalf.parentLoop.parentFace;

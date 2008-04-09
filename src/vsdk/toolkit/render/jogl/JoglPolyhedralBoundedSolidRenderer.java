@@ -142,6 +142,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
         gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
         gl.glPolygonOffset(-0.5f, 1.0f);
+
         gl.glLineWidth(1.5f);
 
         // Warning: Change with configured color for borders
@@ -152,13 +153,13 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         for ( i = 0; i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
             int start, end;
-            start = e.getStartingVertexIndex();
-            end = e.getEndingVertexIndex();
+            start = e.getStartingVertexId();
+            end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
                 Vector3D startPosition;
                 Vector3D endPosition;
-                startPosition = solid.getVertexPosition(start);
-                endPosition = solid.getVertexPosition(end);
+                startPosition = e.rightHalf.startingVertex.position;
+                endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
                     gl.glVertex3d(startPosition.x, startPosition.y, 
                                   startPosition.z);
@@ -167,6 +168,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             }
         }
         gl.glEnd();
+
     }
 
     public static void
@@ -197,16 +199,16 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             }
 
             int start, end;
-            start = e.getStartingVertexIndex();
-            end = e.getEndingVertexIndex();
+            start = e.getStartingVertexId();
+            end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
                 Vector3D startPosition;
                 Vector3D endPosition;
                 Vector3D middle;
                 Vector3D n;
 
-                startPosition = solid.getVertexPosition(start);
-                endPosition = solid.getVertexPosition(end);
+                startPosition = e.rightHalf.startingVertex.position;
+                endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
                     //--------------------------------------------------------
                     face1 = e.leftHalf.parentLoop.parentFace;

@@ -119,67 +119,47 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
 
     public void revert()
     {
-        int i;
-
-	System.out.println("BEFORE:");
-	for ( i = 0; i < halfEdgesList.size(); i++ ) {
-	    System.out.println("  - He, " + halfEdgesList.get(i).id + " parent edge: " + halfEdgesList.get(i).parentEdge.id);
-	}
-
-        //-----------------------------------------------------------------
         if ( halfEdgesList.size() <= 0 ) {
             return;
         }
-        halfEdgesList.reverse();
 
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidEdge e, last;
-        _PolyhedralBoundedSolidHalfEdge heCurrent, hePrev;
-        boolean rightSided, lastSided;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidEdge edges[], elast;
+        boolean sides[], slast;
+        int i;
 
-        hePrev = halfEdgesList.get(halfEdgesList.size()-1);
-        lastSided = false;
-        if ( hePrev.parentEdge.rightHalf == hePrev ) {
-            lastSided = true;
-        }
-        last = hePrev.parentEdge;
+        edges = new _PolyhedralBoundedSolidEdge[halfEdgesList.size()];
+        sides = new boolean[halfEdgesList.size()];
 
-        for ( i = halfEdgesList.size()-1; i > 1; i-- ) {
-            //----------
-            rightSided = false;
-            heCurrent = halfEdgesList.get(i);
-            hePrev = halfEdgesList.get(i-1);
-            if ( hePrev.parentEdge.rightHalf == hePrev ) {
-                rightSided = true;
-            }
-
-            //----------
-            heCurrent.parentEdge = hePrev.parentEdge;
-/*
-            if ( rightSided ) {
-                heCurrent.parentEdge.rightHalf = heCurrent;
-            }
-            else {
-                heCurrent.parentEdge.leftHalf = heCurrent;
-            }
-*/
-        }
-        heCurrent = halfEdgesList.get(0);
-        heCurrent.parentEdge = last;
-/*
-        if ( lastSided ) {
-            heCurrent.parentEdge.rightHalf = heCurrent;
-        }
-        else {
-            heCurrent.parentEdge.leftHalf = heCurrent;
-        }
-*/
-
-	System.out.println("AFTER:");
 	for ( i = 0; i < halfEdgesList.size(); i++ ) {
-	    System.out.println("  - He, " + halfEdgesList.get(i).id + " parent edge: " + halfEdgesList.get(i).parentEdge.id);
+            he = halfEdgesList.get(i);
+            edges[i] = he.parentEdge;
+            sides[i] = false;
+            if ( he.parentEdge.rightHalf == he ) {
+                sides[i] = true;
+	    }
 	}
 
+	for ( i = 1; i < halfEdgesList.size(); i++ ) {
+            halfEdgesList.get(i).parentEdge = edges[i-1];
+            if ( sides[i-1] ) {
+                edges[i-1].rightHalf = halfEdgesList.get(i);
+	    }
+	    else {
+                edges[i-1].leftHalf = halfEdgesList.get(i);
+	    }
+	}
+        halfEdgesList.get(0).parentEdge = edges[i-1];
+        if ( sides[i-1] ) {
+            edges[i-1].rightHalf = halfEdgesList.get(0);
+        }
+        else {
+            edges[i-1].leftHalf = halfEdgesList.get(0);
+        }
+
+        //-----------------------------------------------------------------
+        halfEdgesList.reverse();
     }
 
     public String toString()

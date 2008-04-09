@@ -610,6 +610,11 @@ Changes in 2008 april 8 revition <<225min>>
      partially successful tests for simple boolean operators on cases
      not involving vertex/vertex classification.
 
+Changes in 2008 april 9 revition <<73min>>
+   - 1h13min: minor bug fixes in PolyhedralBoundedSolid. First
+     successful tests for simple boolean operators on cases not involving
+     vertex/vertex classification.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

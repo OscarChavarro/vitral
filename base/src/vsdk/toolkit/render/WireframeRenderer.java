@@ -82,11 +82,11 @@ public class WireframeRenderer extends RenderingElement
         for ( i = 0; i < brep.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = brep.edgesList.get(i);
             int start, end;
-            start = e.getStartingVertexIndex();
-            end = e.getEndingVertexIndex();
+            start = e.getStartingVertexId();
+            end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
-                mp0 = brep.getVertexPosition(start);
-                mp1 = brep.getVertexPosition(end);
+                mp0 = e.rightHalf.startingVertex.position;
+                mp1 = e.leftHalf.startingVertex.position;
                 if ( mp0 != null && mp1 != null ) {
                     mp0 = M.multiply(mp0);
                     mp1 = M.multiply(mp1);

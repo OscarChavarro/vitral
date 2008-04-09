@@ -89,38 +89,6 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
         }
     }
 
-    protected static void movefacTop(_PolyhedralBoundedSolidFace f,
-                                     PolyhedralBoundedSolid s,
-                                     String tab)
-    {
-        _PolyhedralBoundedSolidLoop l;
-        _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidFace f2;
-        int i;
-
-        f.parentSolid.polygonsList.locateWindowAtElem(f);
-        f.parentSolid.polygonsList.removeElemAtWindow();
-        s.polygonsList.add(f);
-        f.parentSolid = s;
-
-	System.out.println(tab + "Moving face " + f);
-
-        for ( i = 0; i < f.boundariesList.size(); i++ ) {
-            l = f.boundariesList.get(i);
-            he = l.boundaryStartHalfEdge;
-            do {
-		System.out.println(tab + "  - Checking he " + he);
-		System.out.println(tab + "  - Mirror he " + he.mirrorHalfEdge());
-                f2 = he.mirrorHalfEdge().parentLoop.parentFace;
-                if ( f2.parentSolid != s ) {
-		    System.out.println(tab + "  - Moving neighbor face " + f2);
-                    movefacTop(f2, s, tab + "  ");
-                }
-                he = he.next();
-            } while( he != l.boundaryStartHalfEdge );
-        }                
-    }
-
     /**
     Following section [MANT1988].14.8. and program [MANT1988].14.12.
     */

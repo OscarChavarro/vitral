@@ -1533,30 +1533,24 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             sonfb.add(f);
         }
 
-	System.out.println(inSolidB);
-
         if ( op == DIFFERENCE ) {
             inSolidB.revert();
         }
 
-        //inSolidA.validateModel();
-        //inSolidB.validateModel();
-
         for ( i = 0; i < oldsize; i++ ) {
             movefac(sonfa.get(i+inda), outRes);
-	    System.out.println("MOVING FROM B FACE " + sonfb.get(i+indb));
-            movefacTop(sonfb.get(i+indb), outRes, "");
+            movefac(sonfb.get(i+indb), outRes);
         }
 
         cleanup(outRes);
-        outRes.validateModel();
 
-/*
         for ( i = 0; i < oldsize; i++ ) {
             outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
             outRes.loopGlue(sonfa.get(i+inda).id);
         }
-*/
+
+        outRes.validateModel();
+
     }
 
     /**

@@ -54,7 +54,7 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
         currentId++;
     }
 
-    public int getStartingVertexIndex()
+    public int getEndingVertexId()
     {
         if ( leftHalf == null ) {
             return -1;
@@ -62,7 +62,7 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
         return leftHalf.startingVertex.id;
     }
 
-    public int getEndingVertexIndex()
+    public int getStartingVertexId()
     {
         if ( rightHalf == null ) {
             return -1;

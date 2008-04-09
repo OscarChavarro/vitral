@@ -113,20 +113,6 @@ public class PolyhedralBoundedSolid extends Solid {
         return null;
     }
 
-    public Vector3D getVertexPosition(int vertexid)
-    {
-        int i;
-
-        for ( i = 0; i < verticesList.size(); i++ ) {
-            _PolyhedralBoundedSolidVertex v;
-            v = verticesList.get(i);
-            if ( v.id == vertexid ) {
-                return v.position;
-            }
-        }
-        return null;
-    }
-
     /**
     addhe: addHalfEdge.
     As described in section [MANT1988].11.2.2 and following the structure
@@ -1415,16 +1401,12 @@ public class PolyhedralBoundedSolid extends Solid {
             }
         }
 
-	System.out.println("-----");
 	for ( i = 0; i < edgeCount.length; i++ ) {
-	    System.out.println("  - " + i + ": " + edgesList.get(i) + " - count " + edgeCount[i]);
-/*
 	    if ( edgeCount[i] != 2 ) {
                 VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                     "Edges with different halfedges than 2!");
   	            return false;
 	    }
-*/
 	}
 
         //-----------------------------------------------------------------
@@ -1648,8 +1630,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 loop = face.boundariesList.get(j);
 
 
-                msg += "      | HeID  | StartVertex | End Vertex | nccw He | pccwHe | parentEdge\n";
-                msg += "      +-------+-------------+------------+---------+--------+-----------\n";
+                msg += "      | HeID  | StartVertex | End Vertex | nccw He | pccw He | parentEdge | mirror He | neighbor face\n";
+                msg += "      +-------+-------------+------------+---------+---------+------------+-----------+-------------+\n";
 
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
@@ -1665,12 +1647,6 @@ public class PolyhedralBoundedSolid extends Solid {
                         break;
                     }
 
-                    /*
-                    System.out.printf("      %4d | %11d | %10d | %7d | %6d | %10d",
-                        he.id, he.startingVertex.id,
-                        he.next().startingVertex.id,
-                        he.next().id, he.previous().id, he.parentEdge.id);
-                    */
                     msg += "      | " +
                         intPreSpaces(he.id, 4) + 
                         ((he == loop.boundaryStartHalfEdge)?"*":" ") +
@@ -1678,9 +1654,13 @@ public class PolyhedralBoundedSolid extends Solid {
                         intPreSpaces(he.startingVertex.id, 11) + " | " +
                         intPreSpaces(he.next().startingVertex.id, 10) + " | " +
                         intPreSpaces(he.next().id, 7) + " | " +
-                        intPreSpaces(he.previous().id, 6) + " | ";
+                        intPreSpaces(he.previous().id, 7) + " | ";
                     msg += (he.parentEdge!=null)?
                         intPreSpaces(he.parentEdge.id, 10):"    <null>";
+                    msg += " | ";
+                    msg += intPreSpaces(he.mirrorHalfEdge().id, 9) + " | " +
+                        intPreSpaces(he.mirrorHalfEdge().parentLoop.parentFace.id, 11) + " | ";
+
                     msg += "\n";
 
                 } while( he != heStart );
