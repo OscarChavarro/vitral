@@ -108,7 +108,7 @@ public class HiddenLineRenderer extends RenderingElement
 
         if ( g == null ) {
             return;
-	}
+        }
 
         g = g.exportToPolyhedralBoundedSolid();
 
