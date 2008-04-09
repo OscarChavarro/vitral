@@ -266,7 +266,19 @@ public class PolyhedralBoundedSolid extends Solid {
 
         if ( he1 == null && he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "lmev",
-            "Calling with empty halfedges!");
+            "Calling with (both) empty halfedges!");
+            return;
+        }
+
+        if ( he1 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lmev",
+            "Calling with (first) empty halfedge!");
+            return;
+        }
+
+        if ( he2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lmev",
+            "Calling with (second) empty halfedge!");
             return;
         }
 

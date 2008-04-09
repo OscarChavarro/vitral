@@ -1254,6 +1254,105 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
     }
 
+
+    /**
+    Following program [MANT1988].15.12.
+    */
+    private static void separ1(_PolyhedralBoundedSolidHalfEdge from,
+                               _PolyhedralBoundedSolidHalfEdge to,
+                               int type,
+                               PolyhedralBoundedSolid inSolidA,
+                               PolyhedralBoundedSolid inSolidB)
+    {
+        System.out.println("    . SEPAR1 " + type);
+        System.out.println("        From: " + from);
+        System.out.println("        To: " + to);
+
+/*
+        PolyhedralBoundedSolid s;
+        s = from.parentLoop.parentFace.parentSolid;
+
+        s.lmev(from, to, nextVertexId(inSolidA, inSolidB),
+               from.startingVertex.position);
+        if ( type == 0 ) {
+            sonea.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(from.previous().parentEdge));
+        }
+        else {
+            soneb.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(from.previous().parentEdge));
+        }
+*/
+    }
+
+    /**
+    Following program [MANT1988].15.12.
+    */
+    private static void separ2(_PolyhedralBoundedSolidHalfEdge he,
+                               int type,
+                               PolyhedralBoundedSolid inSolidA,
+                               PolyhedralBoundedSolid inSolidB)
+    {
+        System.out.println("    . SEPAR2 " + type);
+        System.out.println("        From/To: " + he);
+
+        separ1(he, he, type, inSolidA, inSolidB);
+    }
+
+    /**
+    Following section [MANT1988].15.6.2. and program [MANT1988].15.11.
+    */
+    private static void sInsertNullEdges(PolyhedralBoundedSolid inSolidA,
+                                         PolyhedralBoundedSolid inSolidB)
+    {
+        _PolyhedralBoundedSolidHalfEdge ha1 = null;
+        _PolyhedralBoundedSolidHalfEdge ha2 = null;
+        _PolyhedralBoundedSolidHalfEdge hb1 = null;
+        _PolyhedralBoundedSolidHalfEdge hb2 = null;
+        int i = 0;
+
+        System.out.println("  - Null edges insertion:");
+
+        while ( true ) {
+            //-------------------------------------------------------------
+            while ( !sectors.get(i).intersect ) {
+                i++;
+                if ( i == sectors.size() ) {
+                    return;
+                }
+            }
+            if ( sectors.get(i).s1a == sectors.get(i).OUT ) {
+                ha1 = nba.get(sectors.get(i).secta).he;
+            }
+            else {
+                ha2 = nba.get(sectors.get(i).secta).he;
+            }
+            if ( sectors.get(i).s1b == sectors.get(i).IN ) {
+                hb1 = nbb.get(sectors.get(i).sectb).he;
+                i++;
+            }
+            else {
+                hb2 = nbb.get(sectors.get(i).sectb).he;
+                i++;
+            }
+
+            //-------------------------------------------------------------
+            if ( ha1 == ha2 ) {
+                separ2(ha1, 0, inSolidA, inSolidB);
+                separ1(hb1, hb2, 1, inSolidA, inSolidB);
+            }
+            else if ( hb1 == hb2 ) {
+                separ2(hb1, 1, inSolidA, inSolidB);
+                separ1(ha2, ha1, 0, inSolidA, inSolidB);
+            }
+            else {
+                separ1(ha2, ha1, 0, inSolidA, inSolidB);
+                separ1(hb1, hb2, 1, inSolidA, inSolidB);
+            }
+            if ( i == sectors.size() ) {
+                return;
+            }
+        }
+    }
+
     /**
     Following program [MANT1988].15.6. Similar in structure to program
     [MANT1988].14.3.
@@ -1261,7 +1360,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static void vtxVtxClassify(
         _PolyhedralBoundedSolidVertex va,
         _PolyhedralBoundedSolidVertex vb,
-        int op)
+        int op,
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
     {
         System.out.println("VERTEX/VERTEX PAIR (A/B): " + va.id + " / " + vb.id);
 
@@ -1286,13 +1387,15 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             System.out.println("   . " + sectors.get(i));
         }
 
-        //sinsertnulledges();
+        sInsertNullEdges(inSolidA, inSolidB);
     }
 
     /**
     Following program [MANT1988].15.5.
     */
-    private static void setOpClassify(int op)
+    private static void setOpClassify(int op,
+                                      PolyhedralBoundedSolid inSolidA,
+                                      PolyhedralBoundedSolid inSolidB)
     {
         int i;
 
@@ -1311,7 +1414,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         System.out.println("---------------------------------------------------------------------------");
         System.out.println("Vertex-Vertex pairs:");
         for ( i = 0; i < sonvv.size(); i++ ) {
-            vtxVtxClassify(sonvv.get(i).va, sonvv.get(i).vb, op);
+            vtxVtxClassify(sonvv.get(i).va, sonvv.get(i).vb, op, inSolidA, inSolidB);
         }
     }
 
@@ -1579,11 +1682,16 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         setOpGenerate(inSolidA, inSolidB);
 
-        setOpClassify(op);
+        setOpClassify(op, inSolidA, inSolidB);
         if ( sonea.size() == 0 ) {
             // No intersections found
             System.out.println("Empty sonea.");
             return inSolidA;
+        }
+
+        if ( sonvv.size() > 0 ) {
+            System.out.println("Vertex-vertex cases not suported yet!");
+            return res;
         }
 
         setOpConnect();

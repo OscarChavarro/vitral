@@ -558,7 +558,6 @@ public class PolyhedralBoundedSolidModelingTools
         PolyhedralBoundedSolid b = createBox(new Vector3D(0.9, 0.9, 0.9));
         PolyhedralBoundedSolid res;
 
-/*
         //-----------------------------------------------------------------
         a = new PolyhedralBoundedSolid();
         a.mvfs(new Vector3D(0.00+0.05, 0.42+0.05, 0.00+0.05), 1, 1);
@@ -585,9 +584,8 @@ public class PolyhedralBoundedSolidModelingTools
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
         b.validateModel();
-*/
 
-
+/*
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
         R.translation(0.5, 0.5, 0.5);
@@ -605,6 +603,7 @@ public class PolyhedralBoundedSolidModelingTools
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
         b.validateModel();
+*/
 
         //-----------------------------------------------------------------
         res = GeometricModeler.setOp(a, b, GeometricModeler.DIFFERENCE);
