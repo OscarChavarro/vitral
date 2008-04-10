@@ -616,6 +616,8 @@ Changes in 2008 april 9 revition <<73min>>
      vertex/vertex classification.
    - 50min: PolyhedralBoundedSolidSetOperator.sInsertNullEdges.
    - 1h: [MANT1988] book structure revisited
+   - 3h: extensive study of "on-sectors" reclassification and intersections
+     from [MANT1988].15.6.2. and [MANT1986].6.2.2.
 
 ---------------------------------------------------------------------------
 TODO:

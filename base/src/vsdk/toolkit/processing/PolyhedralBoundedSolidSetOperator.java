@@ -4,6 +4,9 @@
 //= - April 1 2008 - Oscar Chavarro: Original base version                  =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
+//= [MANT1986] Mantyla Martti. "Boolean Operations of 2-Manifolds through   =
+//=     Vertex Neighborhood Classification". ACM Transactions on Graphics,  =
+//=     Vol. 5, No. 1, January 1986, pp. 1-29.                              =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 //===========================================================================
@@ -84,6 +87,15 @@ class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex extends Pol
     public Vector3D ref2;
     public Vector3D ref12;
     public boolean wide;
+
+    public String toString()
+    {
+        String msg;
+
+        msg = "R1: " + ref1 + " R2: " + ref2;
+
+        return msg;
+    }
 }
 
 /**
@@ -134,7 +146,11 @@ class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector extends Pol
             msg = msg + "intersecting";
         }
         else {
-            msg = msg + "not intersecting";
+            msg = msg + "(droped)";
+        }
+
+        if ( s1a != 0 && s1b != 0 && s2a != 0 && s2b != 0 && intersect ) {
+            msg += " (**) ";
         }
 
         return msg;
@@ -915,22 +931,18 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     */
     protected static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle;
-        Vector3D a, b, c;
+        Vector3D middle = null;
+        Vector3D a, b, n;
 
         a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
         b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
         a.normalize();
         b.normalize();
-        c = (a.add(b)).multiply(0.5);
 
-        middle = he.startingVertex.position.add(c);
+        n = he.parentLoop.parentFace.containingPlane.getNormal();
 
-        if ( he.parentLoop.parentFace.testPointInside(middle, VSDK.EPSILON) ==
-                                                      Geometry.OUTSIDE ) {
-            c = c.multiply(-1);
-            middle = he.startingVertex.position.add(c);
-        }
+        middle = n.crossProduct(a);
+        middle.normalize();
 
         return middle;
     }
@@ -946,12 +958,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n, nold;
         Vector3D bisec;
         _PolyhedralBoundedSolidHalfEdge he;
-        int i;
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb;
 
         nb = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>();
 
         he = v.emanatingHalfEdge;
+        Vector3D oldref2;
 
         do {
             n = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex();
@@ -974,6 +986,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                     bisec = n.ref1.add(n.ref2);
                     bisec = bisec.multiply(-1);
                 }
+                oldref2 = n.ref2;
                 n.ref2 = bisec;
                 n.ref12 = n.ref1.crossProduct(n.ref2);
                 nold = n;
@@ -981,12 +994,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
                 n = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex();
                 n.he = he;
-                n.ref2 = nold.ref2;
+                n.ref2 = oldref2;
                 n.ref1 = bisec;
                 n.ref12 = n.ref1.crossProduct(n.ref2);
                 n.wide = true;
-
             }
+
             nb.add(n);
             he = (he.mirrorHalfEdge()).next();
         } while( he != v.emanatingHalfEdge );
@@ -994,12 +1007,85 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         return nb;
     }
 
+    private static double angleFromVectors(Vector3D u, Vector3D v, Vector3D a)
+    {
+        double x, y;
+        double an;
+
+        x = a.dotProduct(u);
+        y = a.dotProduct(v);
+
+        an = Math.acos(x);
+        if ( y < 0 ) an *= -1;
+        return an;
+    }
+
+    /**
+    Does a "sector within" test for coplanar sectorsL If the two given
+    sectors are coplanar and with overlaping faces but as sectors only
+    intersects in one point returns false. If sectors intersects on a line
+    or area returns true.
+    */
+    private static boolean angleOverlap(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb
+    )
+    {
+        //- Convert side vectors of sectors into angles -------------------
+        double a1, a2;
+        double b1, b2;
+        Vector3D u, v, a, b, c, n;
+
+        n = na.he.parentLoop.parentFace.containingPlane.getNormal();
+        u = new Vector3D(na.ref1);
+        u.normalize();
+        v = n.crossProduct(u);
+        v.normalize();
+
+        a = new Vector3D(na.ref2);
+        a.normalize();
+        b = new Vector3D(nb.ref1);
+        b.normalize();
+        c = new Vector3D(nb.ref2);
+        c.normalize();
+
+        a1 = angleFromVectors(u, v, u);
+        a2 = angleFromVectors(u, v, a);
+        b1 = angleFromVectors(u, v, b);
+        b2 = angleFromVectors(u, v, c);
+
+        //- Order the angles in ascending order angle intervals -----------
+        // Given angles are between -180 and 180 degrees
+        double t;
+
+        if ( a1 > a2 ) {
+            t = a1;
+            a1 = a2;
+            a2 = t;
+        }
+        if ( b1 > b2 ) {
+            t = b1;
+            b1 = b2;
+            b2 = t;
+        }
+
+        //- Calculate interval intersection -------------------------------
+        if ( a2 + VSDK.EPSILON > b1 - VSDK.EPSILON ) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
     Checks if two coplanar sectors overlaps.
     Following program [MANT1988].15.9. and section [MANT1988].15.6.2.
     */
-    private static boolean sectoroverlap(_PolyhedralBoundedSolidHalfEdge h1,
-                                         _PolyhedralBoundedSolidHalfEdge h2)
+    private static boolean sectoroverlap(
+        _PolyhedralBoundedSolidHalfEdge h1,
+        _PolyhedralBoundedSolidHalfEdge h2,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
     {
         InfinitePlane a, b, c;
         Vector3D n;
@@ -1014,7 +1100,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         if ( a.overlapsWith(b, VSDK.EPSILON) ||
              a.overlapsWith(c, VSDK.EPSILON) ) {
-            return true;
+            return angleOverlap(na, nb);
         }
         return false;
     }
@@ -1083,7 +1169,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         //-----------------------------------------------------------------
         if ( intrs.length() < VSDK.EPSILON ) {
-            return sectoroverlap(h1, h2);
+            return sectoroverlap(h1, h2, na, nb);
         }
 
         //-----------------------------------------------------------------
@@ -1105,21 +1191,28 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     }
 
     /**
-    Following program [MANT1988].15.7.
+    Given a pair of coincident vertices `va` (on solid A) and `vb` (on solid
+    B), this method creates the lists `nba`, `nbb` and `sectors`, as explained
+    in section [MANT1988].15.6.2. and program [MANT1988].15.7.
+
+    Note that from all possible sector pairs, this method does not include
+    in the `sectors` set any sector pair that touches just in one point.
     */
     private static void setopgetneighborhood(
         _PolyhedralBoundedSolidVertex va,
         _PolyhedralBoundedSolidVertex vb)
     {
+        //-----------------------------------------------------------------
+        nba = nbrpreproc(va);
+        nbb = nbrpreproc(vb);
+        sectors = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector>();
+
+        //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge ha, hb;
         double d1, d2, d3, d4;
         int na, nb, i, j;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s;
         Vector3D n1, n2;
-
-        nba = nbrpreproc(va);
-        nbb = nbrpreproc(vb);
-        sectors = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector>();
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa, xb;
 
         for ( i = 0; i < nba.size(); i++ ) {
@@ -1155,6 +1248,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
     /**
     Following section [MANT1988].15.6.2. and program [MANT1988].15.10.
+
+    Note that this sector deactivates the intersection flag for non-
+    interpenetrating coplanar sectors (those who touches just in an edge or
+    common line) and its neighbors.
     */
     private static void sreclsectors(int op)
     {
@@ -1232,8 +1329,14 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     }
 
     /**
-    Reclassification procedure for "on"-edges on the vertex/vertex clasiffier.
-    Following section [MANT1986].15.6.2.
+    Reclassification procedure for "on"-edges on the vertex/vertex clasiffier,
+    as expected to work from functional high level description on section
+    [MANT1986].15.6.2.  Astonishingly, the descriptions given on [MANT1988].15.
+    and figures [MANT1988].15.10., [MANT1988].15.11., and [MANT1988].15.12.
+    does not provides enough information to lead to a complete implementation
+    of the complex case analysis required for sectors on sector and sectors
+    on edge intersections.
+    Fortunately, the missing details can be found on [MANT1986].6.2.2.
     */
     private static void srecledges(int op)
     {
@@ -1244,6 +1347,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             si = sectors.get(i);
             if ( si.s1a == si.ON || si.s2a == si.ON ||
                  si.s1b == si.ON || si.s2b == si.ON ) {
+                si.intersect = false;
 /*
                 if ( si.s1a == si.ON ) si.s1a = -2;
                 if ( si.s2a == si.ON ) si.s2a = -2;
@@ -1370,21 +1474,25 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         System.out.println("  - Initial sector candidates:");
         for ( int i = 0; i < sectors.size(); i++ ) {
-            System.out.println("   . " + sectors.get(i));
+            System.out.println("   . [" + (i+1) + "]: " + sectors.get(i));
         }
 
         sreclsectors(op);
 
         System.out.println("  - On sector reclassified:");
         for ( int i = 0; i < sectors.size(); i++ ) {
-            System.out.println("   . " + sectors.get(i));
+            System.out.println("   . [" + (i+1) + "]: " + sectors.get(i));
+            if ( sectors.get(i).intersect ) {
+                System.out.println("      Sector A: " + nba.get(sectors.get(i).secta));
+                System.out.println("      Sector B: " + nbb.get(sectors.get(i).sectb));
+            }
         }
 
         srecledges(op);
 
         System.out.println("  - On edges reclassified:");
         for ( int i = 0; i < sectors.size(); i++ ) {
-            System.out.println("   . " + sectors.get(i));
+            System.out.println("   . [" + (i+1) + "]: " + sectors.get(i));
         }
 
         sInsertNullEdges(inSolidA, inSolidB);
@@ -1651,9 +1759,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
             outRes.loopGlue(sonfa.get(i+inda).id);
         }
-
-        outRes.validateModel();
-
     }
 
     /**
@@ -1696,6 +1801,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         setOpConnect();
         setOpFinish(inSolidA, inSolidB, res, op);
+        res.maximizeFaces();
+        res.validateModel();
 
         return res;
     }
