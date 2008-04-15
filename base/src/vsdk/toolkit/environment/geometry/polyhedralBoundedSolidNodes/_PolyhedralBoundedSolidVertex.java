@@ -13,6 +13,7 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
 /**
@@ -33,6 +34,8 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
     /// Defined as presented in [MANT1988].10.2.2
     public _PolyhedralBoundedSolidHalfEdge emanatingHalfEdge;
 
+    public ColorRgb debugColor;
+
     //=================================================================
     public _PolyhedralBoundedSolidVertex(PolyhedralBoundedSolid parentSolid,
                                          Vector3D position, int id)
@@ -41,6 +44,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         emanatingHalfEdge = null;
         this.position = new Vector3D(position);
         parentSolid.verticesList.add(this);
+        debugColor = new ColorRgb(1, 0, 0);
     }
 
     public String toString()

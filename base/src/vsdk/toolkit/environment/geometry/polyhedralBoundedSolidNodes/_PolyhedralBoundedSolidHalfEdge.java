@@ -120,7 +120,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     Given `this` and `other` halfedges, returns true if their starting vertexes
     position are nearly equal (with respect to a the given `tolerance`).
     This method follows the suggested funcionality of procedure "match" from
-    program [MANT1988].12.9.
+    program [MANT1988].12.9. and presented in section [MANT1988].12.4.2.
     */
     public boolean
     vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge other, double tolerance)
@@ -129,29 +129,30 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
                  this.startingVertex.position,
                  other.startingVertex.position
              ) <= tolerance ) {
-	    return true;
-	}
-	return false;
+            return true;
+        }
+        return false;
     }
 
     public String toString()
     {
         String msg;
-        msg = "HalfEdge id " + id + ". Parent face " + parentLoop.parentFace.id + ". ";
+        msg = "HalfEdge id " + id + ". ";
+
+        msg = msg + "From vertex [" + startingVertex.id + "] ";
+        msg = msg + "to vertex [" + next().startingVertex.id + "]. ";
+
+        msg += "Parent face [" + parentLoop.parentFace.id + "]. ";
         if ( parentEdge == null ) {
-            msg = msg + "without parent edge. ";
+            msg = msg + "<without parent edge>. ";
           }
           else {
-            msg = msg + "with parent edge " + parentEdge.id + "(";
-            msg = msg + parentEdge.leftHalf.startingVertex.id;
-	    msg = msg + ", ";
-            msg = msg + parentEdge.rightHalf.startingVertex.id;
-            msg = msg + ")";
+            msg = msg + "Parent edge " + parentEdge.id + " ";
             if ( this == parentEdge.leftHalf ) {
-                msg = msg + "(left side)";
+                msg = msg + "(left)";
               }
               else if ( this == parentEdge.rightHalf ) {
-                msg = msg + "(right side)";
+                msg = msg + "(right)";
               }
               else {
                 msg = msg + "(INCONSISTENT!)";
@@ -159,7 +160,6 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
             ;
             msg = msg + ". ";
         }
-        msg = msg + "Starting at vertex " + startingVertex.id + ". ";
         msg = msg + "Next halfedge: " + next().id + ".";
         return msg;
     }

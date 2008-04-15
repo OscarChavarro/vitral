@@ -481,20 +481,6 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
     }
 
     /**
-    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
-    */
-    private static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
-    {
-        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
-            ( (
-              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
-              ) || 
-              (
-              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
-              ) );
-    }
-
-    /**
     Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
     */
     private static _PolyhedralBoundedSolidHalfEdge
@@ -597,7 +583,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
             if ( h1 != null ) {
                 //System.out.println("    . -> JOIN H1");
-                join(h1, nextedge.rightHalf);
+                join(h1, nextedge.rightHalf, false);
                 tieds.add(nextedge.rightHalf);
                 if ( !isLoose(h1.mirrorHalfEdge()) ) {
                     //System.out.println("    . -> CUT H1");
@@ -611,7 +597,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
             if ( h2 != null ) {
                 //System.out.println("    . -> JOIN H2");
-                join(h2, nextedge.leftHalf);
+                join(h2, nextedge.leftHalf, false);
                 tieds.add(nextedge.leftHalf);
                 if ( !isLoose(h2.mirrorHalfEdge()) ) {
                     //System.out.println("    . -> CUT H2");

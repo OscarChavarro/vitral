@@ -18,8 +18,10 @@ import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGparameter;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
@@ -114,27 +116,41 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     private static void
     drawPoints(GL gl, PolyhedralBoundedSolid solid)
     {
+        ColorRgb c;
+
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
 
-        gl.glBegin(gl.GL_POINTS);
-
         int i;
         for ( i = 0; i < solid.verticesList.size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solid.verticesList.get(i);
             Vector3D p = v.position;
-            gl.glVertex3d(p.x, p.y, p.z);
+
+            c = v.debugColor;
+            if ( c.r >= 1-VSDK.EPSILON &&
+                 c.g <= VSDK.EPSILON &&
+                 c.b <= VSDK.EPSILON ) {
+                gl.glPointSize(5.0f);
+            }
+            else {
+                gl.glPointSize(15.0f);
+            }
+            gl.glColor3d(c.r, c.g, c.b);
+
+            gl.glBegin(gl.GL_POINTS);
+                gl.glVertex3d(p.x, p.y, p.z);
+            gl.glEnd();
         }
-        gl.glEnd();
     }
 
     private static void
     drawEdges(GL gl, PolyhedralBoundedSolid solid)
     {
         int i;
+        ColorRgb c;
 
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_CULL_FACE);
@@ -143,31 +159,43 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
         gl.glPolygonOffset(-0.5f, 1.0f);
 
-        gl.glLineWidth(1.5f);
-
         // Warning: Change with configured color for borders
+        gl.glLineWidth(1.5f);
         gl.glColor3d(1, 1, 1);
+
         gl.glDisable(gl.GL_TEXTURE_2D);
 
-        gl.glBegin(gl.GL_LINES);
         for ( i = 0; i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
             int start, end;
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();
+
+            c = e.debugColor;
+            if ( c.r >= 1-VSDK.EPSILON &&
+                 c.g >= 1-VSDK.EPSILON &&
+                 c.b >= 1-VSDK.EPSILON ) {
+                gl.glLineWidth(1.5f);
+            }
+            else {
+                gl.glLineWidth(6f);
+            }
+            gl.glColor3d(c.r, c.g, c.b);
+
             if ( start >= 0 && end >= 0 ) {
                 Vector3D startPosition;
                 Vector3D endPosition;
                 startPosition = e.rightHalf.startingVertex.position;
                 endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
+                    gl.glBegin(gl.GL_LINES);
                     gl.glVertex3d(startPosition.x, startPosition.y, 
                                   startPosition.z);
                     gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
+                    gl.glEnd();
                 }
             }
         }
-        gl.glEnd();
 
     }
 
@@ -453,6 +481,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;
 
+        gl.glDisable(gl.GL_CULL_FACE);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glDisable(gl.GL_LIGHTING);
         gl.glLineWidth(1.0f);

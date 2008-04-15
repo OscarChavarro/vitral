@@ -8,6 +8,9 @@
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
+//= [.wMANT2008] Mantyla Martti. "Personal Home Page", <<shar>> archive     =
+//=     containing the C programs from [MANT1988]. Available at             =
+//=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -353,42 +356,39 @@ public class PolyhedralBoundedSolid extends Solid {
             return;
         }        
 
+        if ( he1 == he2 ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lkev",
+            "Given halfedges must be different!");
+            return;
+        }        
+
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge heMirror;
-        heMirror = he1.mirrorHalfEdge();
-        if ( he1 == heMirror ) {
-            heMirror.parentLoop.unlistHalfEdge(heMirror.next());
+        // Answer borrowed from [.wMANT2008]
+        _PolyhedralBoundedSolidHalfEdge he, he2next;
+
+        he = he2.next();
+        while ( he != he1 ) {
+            he.startingVertex = he2.startingVertex;
+            he = he.mirrorHalfEdge().next();
         }
-        else {
-            heMirror.parentLoop.unlistHalfEdge(heMirror);
+
+        he2next = he2.next();
+        he1.parentLoop.unlistHalfEdge(he1);
+        he2.parentLoop.unlistHalfEdge(he2);
+        he2.startingVertex.emanatingHalfEdge = he2next;
+        if ( he2.parentLoop.halfEdgesList.size() < 1 ) {
+            he2.startingVertex.emanatingHalfEdge = null;
         }
 
         edgesList.locateWindowAtElem(he1.parentEdge);
         edgesList.removeElemAtWindow();
         verticesList.locateWindowAtElem(he1.startingVertex);
         verticesList.removeElemAtWindow();
-        he1.parentLoop.unlistHalfEdge(he1);
 
-        if ( verticesList.size() == 1 ) {
-            verticesList.get(0).emanatingHalfEdge = null;
+        if ( he2.parentLoop.halfEdgesList.size() <= 0 ) {
             he2.parentEdge = null;
+            he2.parentLoop.halfEdgesList.add(he2);
         }
-
-        //-----------------------------------------------------------------
-        // Brute force search for all edges starting at vertex to be deleted!
-        int i;
-        _PolyhedralBoundedSolidEdge e;
-
-        for ( i = 0; i < edgesList.size(); i++ ) {
-            e = edgesList.get(i);
-            if ( e.leftHalf.startingVertex == he1.startingVertex ) {
-                e.leftHalf.startingVertex = he2.startingVertex;
-            }
-            if ( e.rightHalf.startingVertex == he1.startingVertex ) {
-                e.rightHalf.startingVertex = he2.startingVertex;
-            }
-        }
-
     }
 
     /**
@@ -590,7 +590,7 @@ public class PolyhedralBoundedSolid extends Solid {
             if ( newLoop.halfEdgesList.size() <= 0 ) {
                 VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkemr",
                 "Case A Should not happen!");
-	    }
+            }
             newLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
         }
 
@@ -599,7 +599,7 @@ public class PolyhedralBoundedSolid extends Solid {
             if ( oldLoop.halfEdgesList.size() <= 0 ) {
                 VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkemr",
                 "Case B Should not happen!");
-	    }
+            }
             oldLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
         }
 
@@ -683,7 +683,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( setAsOuterLoop ) {
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lringmv",
                 "Outer loop case not implemented!");
-	}
+        }
         tofac.boundariesList.add(l);
         l.parentFace.boundariesList.locateWindowAtElem(l);
         l.parentFace.boundariesList.removeElemAtWindow();
@@ -1309,9 +1309,9 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    Given `this` and `other` solid, this method erases the `other` solid
-    while appending its parts to current one. This method follows section
-    [MANT1988].12.4.1 and program [MANT1988].12.8.
+    Given `this` and `other` solids, this method erases the `other` solid
+    while appending its parts to current one as a new shell. This method
+    follows section [MANT1988].12.4.1 and program [MANT1988].12.8.
     */
     public void merge(PolyhedralBoundedSolid other)
     {
@@ -1351,31 +1351,31 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidLoop l;
 
         //-----------------------------------------------------------------
-	for ( i = 0; i < edgesList.size(); i++ ) {
-	    e = edgesList.get(i);
-	    h1 = e.rightHalf;
-	    h2 = e.leftHalf;
+        for ( i = 0; i < edgesList.size(); i++ ) {
+            e = edgesList.get(i);
+            h1 = e.rightHalf;
+            h2 = e.leftHalf;
             if ( h1 == null || h2 == null ) {
                 VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                 "Edge with null halfedge!");
-  	        return false;
-	    }
-	    if ( h1.parentLoop.parentFace.parentSolid !=
+                return false;
+            }
+            if ( h1.parentLoop.parentFace.parentSolid !=
                  h2.parentLoop.parentFace.parentSolid ) {
                 VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                 "Edge belonging to two different solids!");
-  	        return false;
-	    }
-	}
+                return false;
+            }
+        }
 
         //-----------------------------------------------------------------
         int edgeCount[];
 
         edgeCount = new int[edgesList.size()];
 
-	for ( i = 0; i < edgeCount.length; i++ ) {
-	    edgeCount[i] = 0;
-	}
+        for ( i = 0; i < edgeCount.length; i++ ) {
+            edgeCount[i] = 0;
+        }
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             f = polygonsList.get(i);
@@ -1388,7 +1388,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( he == null ) {
                     VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                     "Loop without starting halfedge!");
-  	            return false;
+                    return false;
                 }
                 heStart = he;
                 do {
@@ -1397,34 +1397,83 @@ public class PolyhedralBoundedSolid extends Solid {
                         // Loop is not closed!
                         VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                         "Not closed loop!");
-  	                return false;
+                        return false;
                     }
 
                     //-----
-		    for ( k = 0; k < edgeCount.length; k++ ) {
-			if ( he.parentEdge == edgesList.get(k) ) {
+                    for ( k = 0; k < edgeCount.length; k++ ) {
+                        if ( he.parentEdge == edgesList.get(k) ) {
                             edgeCount[k]++;
                             break;
-			}
-		    }
+                        }
+                    }
                     //-----
 
                 } while( he != heStart );
             }
         }
 
-	for ( i = 0; i < edgeCount.length; i++ ) {
-	    if ( edgeCount[i] != 2 ) {
+        for ( i = 0; i < edgeCount.length; i++ ) {
+            if ( edgeCount[i] != 2 ) {
                 VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
                     "Edges with different halfedges than 2!");
-  	            return false;
-	    }
-	}
+                    return false;
+            }
+        }
 
         //-----------------------------------------------------------------
 
         return true;
     }
+
+    /**
+    For all given halfedges, this edge asign valid emanating half edges on
+    valid vertexes.
+
+    If all the operations in current implementation are perfectly done,
+    this method should not be needed.
+    */
+    private void remakeEmanatingHalfedgesReferences()
+    {
+        int i, j;
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            verticesList.get(i).emanatingHalfEdge = null;
+        }
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                loop = face.boundariesList.get(j);
+
+                he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+                }
+                heStart = he;
+                do {
+                    he.startingVertex.emanatingHalfEdge = he;
+                    he = he.next();
+                    if ( he == null ) {
+                        break;
+                    }
+                } while( he != heStart );
+            }
+        }
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            if ( verticesList.get(i).emanatingHalfEdge == null ) {
+                verticesList.locateWindowAtElem(verticesList.get(i));
+                verticesList.removeElemAtWindow();
+                i--;
+            }
+        }
+
+    }
+
 
     /**
     This method runs a set of validity tests to check te integrity of the
@@ -1453,6 +1502,9 @@ public class PolyhedralBoundedSolid extends Solid {
 
         modelIsValid = false;
 
+
+        remakeEmanatingHalfedgesReferences();
+
         //-----------------------------------------------------------------
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
@@ -1471,7 +1523,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( !validateTopologicalIntegrity() ) {
             msg += "  - Topological integrity test failed.\n";
             test = false;
-	}
+        }
 
         //-----------------------------------------------------------------
         if ( test ) {
@@ -1571,9 +1623,9 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         int i;
 
-	for ( i = 0; i < polygonsList.size(); i++ ) {
-	    polygonsList.get(i).revert();
-	}
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            polygonsList.get(i).revert();
+        }
     }
 
     /**
@@ -1592,23 +1644,142 @@ public class PolyhedralBoundedSolid extends Solid {
         int i;
         _PolyhedralBoundedSolidEdge e;
         InfinitePlane a, b;
+        Vector3D p0, p1, p2;
 
+        remakeEmanatingHalfedgesReferences();
+
+        //- Eliminate null edges ------------------------------------------
+        for ( i = 0; i < edgesList.size(); i++ ) {
+            e = edgesList.get(i);
+            p1 = e.rightHalf.startingVertex.position;
+            p2 = e.leftHalf.startingVertex.position;
+            if ( VSDK.vectorDistance(p1, p2) < 10*VSDK.EPSILON ) {
+                lkev(e.rightHalf, e.leftHalf);
+                // As this breaks the edge sequence, start again!
+                maximizeFaces();
+                return;
+            }
+        }
+
+        //- Join coplanar faces -------------------------------------------
         for ( i = 0; i < edgesList.size(); i++ ) {
             e = edgesList.get(i);
             a = e.rightHalf.parentLoop.parentFace.containingPlane;
             b = e.leftHalf.parentLoop.parentFace.containingPlane;
             if ( e.rightHalf.parentLoop.parentFace ==
                  e.leftHalf.parentLoop.parentFace ) {
-                System.out.println("PolyhedralBoundedSolid - maximizeFaces - untested case, please verify!");
-                lkev(e.rightHalf, e.leftHalf);
+                lkemr(e.rightHalf, e.leftHalf);
+                // As this breaks the face set, start again!
+                maximizeFaces();
+		return;
             }
             else if ( a.overlapsWith(b, VSDK.EPSILON) ) {
                 lkef(e.rightHalf, e.leftHalf);
-                i = 0;
+                // As this breaks the face set, start again!
+                maximizeFaces();
+		return;
             }
         }
 
+        //- Eliminate vertices between colinear edges ---------------------
+        _PolyhedralBoundedSolidHalfEdge he, heStart;
+        _PolyhedralBoundedSolidVertex v;
+        int nedges;
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            v = verticesList.get(i);
+            heStart = v.emanatingHalfEdge;
+            if ( heStart == null ) {
+                continue;
+            }
+            he = heStart;
+            nedges = 0;
+            do {
+                nedges++;
+                if ( nedges > 2 ) break;
+                he = he.mirrorHalfEdge().next();
+            } while ( he != heStart );
+
+            if ( nedges == 2 ) {
+                p0 = heStart.startingVertex.position;
+                p1 = heStart.next().startingVertex.position.substract(p0);
+                p2 = heStart.previous().startingVertex.position.substract(p0);
+                if ( p1.crossProduct(p2).length() < VSDK.EPSILON ) {
+                    if ( p1.dotProduct(p2) < 0 ) {
+                        lkev(heStart, heStart.mirrorHalfEdge());
+                        // As this breaks the edge sequence, start again!
+                        maximizeFaces();
+                        return;
+                    }
+                }
+            }
+        }
+
+        //- Eliminate rings with a single vertex --------------------------
+        int j;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            for ( j = 1; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+
+                loop = face.boundariesList.get(j);
+                he = loop.boundaryStartHalfEdge;
+                if ( he.parentEdge == null ||
+                     loop.halfEdgesList.size() == 1 ) {
+                    System.out.println("Please delete face " + face.id + " and null point from " + he);
+                }
+            }
+        }
         // Here should be a code searching for faces inside faces ...
+        remakeEmanatingHalfedgesReferences();
+    }
+
+    /**
+    Modifies ids for current solid's vertices, edges, faces and halfedges to
+    make them consecutive from 1. Note that ids does not impact current
+    solid geometry or topology, as they are use only for debugging and
+    furter construction / modification support.
+    User of this class should keep in mind id changes when using this method.
+    */
+    public void compactIds()
+    {
+        int i, j;
+
+        for ( i = 0; i < verticesList.size(); i++ ) {
+	    verticesList.get(i).id = i+1;
+	}
+        maxVertexId = i;
+        for ( i = 0; i < edgesList.size(); i++ ) {
+	    edgesList.get(i).id = i+1;
+	}
+
+        int k = 1;
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            face.id = i+1;
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he, heStart;
+
+                loop = face.boundariesList.get(j);
+
+                he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+                }
+                heStart = he;
+                do {
+                    he.id = k;
+                    k++;
+                    he = he.next();
+                    if ( he == null ) {
+                        break;
+                    }
+                } while( he != heStart );
+            }
+        }
+        maxFaceId = i;
     }
 
     public String toString()

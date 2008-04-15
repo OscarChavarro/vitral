@@ -3,6 +3,10 @@
 //= Module history:                                                         =
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //= - March 14 2006 - Oscar Chavarro: Get/set interface                     =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -189,16 +193,17 @@ G                igual respecto al c&oacute;digo original de MIT.
     {
         if ( brepCache == null ) {
             brepCache = buildPolyhedralBoundedSolid();
-	}
+        }
         return brepCache;
     }
 
     /**
-    Given current sphere, this method generates a "polyhedral ball" aproximation.
-    Note that this method follows a similar strategy to the one proposed on function
-    "ball", from program [MANT1988].12.6, but it is expressed entirely on "low level"
-    operators, and doesn't rely on the availability of previous generalized
-    rotational sween operations.
+    Given current sphere, this method generates a "polyhedral ball"
+    aproximation.
+    Note that this method follows a similar strategy to the one proposed on
+    function "ball", from program [MANT1988].12.6, but it is expressed entirely
+    on "low level" operators, and doesn't rely on the previous availability of
+    generalized rotational sweep operations.
     */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {

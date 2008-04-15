@@ -11,6 +11,7 @@
 package vsdk.toolkit.processing;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
@@ -54,6 +55,20 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
             if ( l.get(i) == v ) return true;
         }
         return false;
+    }
+
+    /**
+    Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
+    */
+    protected static boolean neighbor(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
+    {
+        return (h1.parentLoop.parentFace == h2.parentLoop.parentFace) &&
+            ( (
+              h1 == h1.parentEdge.rightHalf && h2 == h2.parentEdge.leftHalf
+              ) || 
+              (
+              h1 == h1.parentEdge.leftHalf && h2 == h2.parentEdge.rightHalf
+              ) );
     }
 
     /**
@@ -181,10 +196,16 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
     protected static void
-    join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2)
+    join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2, boolean withDebug)
     {
         _PolyhedralBoundedSolidFace oldf, newf;
         PolyhedralBoundedSolid s;
+
+        if ( withDebug ) {
+            System.out.println("       -> JOIN:");
+            System.out.println("          . H1: " + h1);
+            System.out.println("          . H2: " + h2);
+        }
 
         oldf = h1.parentLoop.parentFace;
         newf = null;
@@ -192,14 +213,23 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
         if ( h1.parentLoop == h2.parentLoop ) {
             if ( h1.previous().previous() != h2 ) {
                 newf = s.lmef(h1, h2.next(), s.getMaxFaceId()+1);
+                if ( withDebug ) {
+                    //h1.next().parentEdge.debugColor = new ColorRgb(1, 0, 0);
+                }
             }
         }
         else {
             s.lmekr(h1, h2.next());
+            if ( withDebug ) {
+                //h1.next().parentEdge.debugColor = new ColorRgb(0, 1, 0);
+            }
         }
 
         if ( h1.next().next() != h2 ) {
             s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
+            if ( withDebug ) {
+                //h2.next().parentEdge.debugColor = new ColorRgb(0, 0, 1);
+            }
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
                 laringmv(oldf, newf);
             }

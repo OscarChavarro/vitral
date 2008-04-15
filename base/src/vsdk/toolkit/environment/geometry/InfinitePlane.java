@@ -22,6 +22,11 @@ public class InfinitePlane extends HalfSpace {
     private double c;
     private double d;
 
+    public InfinitePlane(InfinitePlane other)
+    {
+        this.clone(other);
+    }
+
     public InfinitePlane(double a, double b, double c, double d) {
         this.a = a;
         this.b = b;
@@ -54,9 +59,9 @@ public class InfinitePlane extends HalfSpace {
     public void clone(InfinitePlane other)
     {
         this.a = other.a;
-        this.a = other.b;
-        this.a = other.c;
-        this.a = other.d;
+        this.b = other.b;
+        this.c = other.c;
+        this.d = other.d;
     }
 
     public boolean
@@ -268,10 +273,11 @@ public class InfinitePlane extends HalfSpace {
         b2 /= l2;
         c2 /= l2;
         d2 /= l2;
-        if ( Math.abs(a2 - a1) < tolerance &&
-             Math.abs(b2 - b1) < tolerance &&
-             Math.abs(c2 - c1) < tolerance &&
-             Math.abs(d2 - d1) < tolerance ) {
+
+        if ( Math.abs(a2 - a1) <= tolerance &&
+             Math.abs(b2 - b1) <= tolerance &&
+             Math.abs(c2 - c1) <= tolerance &&
+             Math.abs(d2 - d1) <= tolerance ) {
             return true;
 	}
 	return false;

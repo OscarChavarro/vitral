@@ -101,7 +101,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         lastAccessedIndex = i;
     }
 
-    public void locateWindowAtElem(E e)
+    public boolean locateWindowAtElem(E e)
     {
         int i;
 
@@ -111,10 +111,11 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
               i++, window = window.next ) {
             if ( window.data == e ) {
                 lastAccessedIndex = i;
-                return;
+                return true;
             }
         }
         window = null;
+        return false;
     }
 
     public void swapElements(E e1, E e2)
@@ -168,6 +169,14 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         if ( index < 0 || index >= currentSize ) {
             // Report index out of bounds exception!
             System.out.println("<CircularDoubleLinkedList> IndexOutOfBounds Exception! - Trying to `get` with index " + index + " in a list with " + currentSize + " elements.");
+
+            try {
+                throw new Exception("CircularDoubleLinkedList.get");
+	    }
+	    catch ( Exception e ) {
+                e.printStackTrace();
+	    }
+
             System.exit(1);
             return null;
         }

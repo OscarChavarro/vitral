@@ -12,6 +12,7 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
 /**
@@ -41,6 +42,7 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
 
     //
     public int id;
+    public ColorRgb debugColor;
     private static int currentId = 1;
 
     //=================================================================
@@ -52,6 +54,8 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
 
         id = currentId;
         currentId++;
+
+        debugColor = new ColorRgb(1, 1, 1);
     }
 
     public int getEndingVertexId()

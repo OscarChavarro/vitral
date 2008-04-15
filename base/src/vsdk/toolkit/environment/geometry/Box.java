@@ -2,6 +2,10 @@
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
 //= - February 12 2006 - Oscar Chavarro: Original base version              =
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
 //===========================================================================
 
 package vsdk.toolkit.environment.geometry;
@@ -264,10 +268,17 @@ public class Box extends Solid {
     {
         if ( brepCache == null ) {
             brepCache = buildPolyhedralBoundedSolid();
-	}
+        }
         return brepCache;
     }
 
+    /**
+    Current method creates a polyhedral boundary representation for
+    current box, following the strategy for Euler operators presented
+    at sections [MANT1988].9.3., [MANT1988].12.3.1., as depicted in
+    figure [MANT1988].9.11. and following the structure of the program
+    [MANT1988].12.4.
+    */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
         PolyhedralBoundedSolid solid;

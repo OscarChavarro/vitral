@@ -610,7 +610,7 @@ Changes in 2008 april 8 revition <<225min>>
      partially successful tests for simple boolean operators on cases
      not involving vertex/vertex classification.
 
-Changes in 2008 april 9 revition <<73min>>
+Changes in 2008 april 9 revition <<363min>>
    - 1h13min: minor bug fixes in PolyhedralBoundedSolid. First
      successful tests for simple boolean operators on cases not involving
      vertex/vertex classification.
@@ -618,6 +618,44 @@ Changes in 2008 april 9 revition <<73min>>
    - 1h: [MANT1988] book structure revisited
    - 3h: extensive study of "on-sectors" reclassification and intersections
      from [MANT1988].15.6.2. and [MANT1986].6.2.2.
+
+Changes in 2008 april 10 revition <<222min>>
+   - 3h42min: studying and implementing the [MANT1986] edge/edge sector
+     reclassification logic on
+     PolyhedralBoundedSolidSetOperator.processEdgeEdgeSectorIntersection.
+
+Changes in 2008 april 11 revition <<232min>>
+   - 3h: Studying some failing cases for PolyhedralBoundedSolidSetOperator.
+     In the process, debug code structure was implemented, and some
+     comments were added to the code.
+   - 52min: Revisiting [MANT1988] text and completing the correspondences table
+     between Vitral SDK's PolyhedralBoundedSolid implementation and original
+     text's procedures. Code documentation updated.
+   - 5h04min: Debugging and testing set operations algorithm. Hunting down an
+     bug on PolyhedralBoundedSolidSetOperator that didn't allowed to work
+     all simple cases. It resulted to be a bad management of loose ends. :)
+
+Changes in 2008 april 12/13 revition <<780min>>
+  - 13h: Studying in depth the implementation details for
+    PolyhedralBoundedSolidSetOperator. Finishing code, testing different cases,
+    understanding in detail the model and making tests in paper.
+    Some details pending. This is the first time to include code from
+    [.wMANT2008], the original code from [MANT1988] published in K&R C
+    from Martii Mantyla.
+
+Changes in 2008 april 14 revition <<120min>>
+  - 2h: First apparently working PolyhedralBoundedSolidSetOperator tests. :)
+    PolyhedralBoundedSolid.lkev bugs fixed.
+
+Changes in 2008 april 15 revition <<min>>
+  - 45min: Building CSG object samples from APPE1967 (CSG Test object 4)
+  - 1h20min: PolyhedralBoundedSolid tests debug, bug found on maximizeFaces
+  - 1h40min: The maximizeFaces case bug located at the case of lkev of edge
+    inside face.
+  - 47min: MaximizeFaces bug fixed. Operator lkev was incorrectly used where
+    a lkemr should be used :P - CSG Test object 4 working
+  - 30min: (CSG Test object 4) found not working - triple intersection point
+  - 4pm->5pm. working on CSG Test 4
 
 ---------------------------------------------------------------------------
 TODO:
