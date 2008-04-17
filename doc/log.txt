@@ -647,7 +647,7 @@ Changes in 2008 april 14 revition <<120min>>
   - 2h: First apparently working PolyhedralBoundedSolidSetOperator tests. :)
     PolyhedralBoundedSolid.lkev bugs fixed.
 
-Changes in 2008 april 15 revition <<min>>
+Changes in 2008 april 15 revition <<362min>>
   - 45min: Building CSG object samples from APPE1967 (CSG Test object 4)
   - 1h20min: PolyhedralBoundedSolid tests debug, bug found on maximizeFaces
   - 1h40min: The maximizeFaces case bug located at the case of lkev of edge
@@ -655,7 +655,10 @@ Changes in 2008 april 15 revition <<min>>
   - 47min: MaximizeFaces bug fixed. Operator lkev was incorrectly used where
     a lkemr should be used :P - CSG Test object 4 working
   - 30min: (CSG Test object 4) found not working - triple intersection point
-  - 4pm->5pm. working on CSG Test 4
+  - 362min: working on CSG Test 4
+
+Changes in 2008 april 15 revition <<120min>>
+  - 2h: Subversion control version system migrated to SourceForge.net.
 
 ---------------------------------------------------------------------------
 TODO:

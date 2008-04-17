@@ -34,6 +34,10 @@ IMPLEMENTATION ON OPENGL/JOGL
   - glMaterial, glShadingModel should be only inside Material renderers
 
 VERSION CONTROL
-  - Based on subversion
-  - To obtain first:
-svn checkout svn+ssh://ochavarr@orion.javeriana.edu.co/home/svn/repos/vitral/trunk vitral
+
+Latest version of the Vitral SDK project source code is available to the public
+on the internet and is hosted at SourceForge.net SVN service. To download
+vitral use the following command:
+
+svn co https://vitral.svn.sourceforge.net/svnroot/vitral/vitral/trunk vitral
+
