@@ -1219,7 +1219,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
             if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
                  (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
-                head.startingVertex.debugColor = new ColorRgb(0, 1, 0);
+                //head.startingVertex.debugColor = new ColorRgb(0, 1, 0);
                 System.out.println("          . New vertex: " + head.startingVertex.id);
             }
 
@@ -1420,7 +1420,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
              (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
             System.out.println("       -> MAKERING (Vertex/face pierce):");
             System.out.println("          . New vertexes: " + vn1 + "/" + vn2 + ".");
-            he.startingVertex.debugColor = new ColorRgb(0, 0, 1);
+            //he.startingVertex.debugColor = new ColorRgb(0, 0, 1);
         }
 
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
@@ -2126,32 +2126,32 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             // Look at orientation
             if( from.previous() == from.previous().parentEdge.leftHalf ) {
                 from = from.previous().previous();
-		System.out.println("****************");
-                from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
+                System.out.println("* NOT SUPPORTED CASE A ***************");
+                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
             }
         }
         if ( nulledge(to.previous()) && strutnulledge(to.previous()) ) {
             if ( to.previous() == to.previous().parentEdge.rightHalf ) {
                 to = to.previous().previous();
-		System.out.println("****************");
-                to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
+                System.out.println("* NOT SUPPORTED CASE B ***************");
+                //to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
             }
         }
         if ( from.startingVertex != to.startingVertex ) {
             if ( from.previous() == to.previous().mirrorHalfEdge() ) {
                 from = from.previous();
-		System.out.println("****************");
-                from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
+                System.out.println("* NOT SUPPORTED CASE C ***************");
+                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
             }
             else if ( from.previous().startingVertex == to.startingVertex ) {
                 from = from.previous();
-		System.out.println("****************");
-                from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
+                System.out.println("* NOT SUPPORTED CASE D ***************");
+                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
             }
             else if ( to.previous().startingVertex == from.startingVertex ) {
                 to = to.previous();
-		System.out.println("****************");
-                to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
+                System.out.println("* NOT SUPPORTED CASE E ***************");
+                //to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
             }
         }
 
@@ -2165,9 +2165,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         int id = nextVertexId(inSolidA, inSolidB);
-        s.lmev(to, from, id,
-               to.startingVertex.position);
 
+        s.lmev(to, from, id, to.startingVertex.position);
 
         if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
@@ -2329,10 +2328,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 /*
         if ( retcode ) {
             ref.startingVertex.debugColor = new ColorRgb(0, 1, 0);
-	}
-	else {
+        }
+        else {
             ref.startingVertex.debugColor = new ColorRgb(0, 0, 1);
-	}
+        }
 */
 
         return !retcode;
@@ -2759,11 +2758,17 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge ha, ham;
+            _PolyhedralBoundedSolidHalfEdge hb, hbm;
+            _PolyhedralBoundedSolidHalfEdge tmp;
+
+            ha = sonea.get(i).e.rightHalf;
+            ham = sonea.get(i).e.leftHalf;
+            hb = soneb.get(i).e.rightHalf;
+            hbm = soneb.get(i).e.leftHalf;
+
             //-----------------------------------------------------------------
             if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
-                _PolyhedralBoundedSolidHalfEdge ha, ham;
-                _PolyhedralBoundedSolidHalfEdge hb, hbm;
-
                 System.out.println("  - " + (endsa.size()+endsb.size()) + " = " + endsa.size() + "+" + endsb.size() + " loose ends before processing pair [" + i + "]:");
                 for ( j = 0; j < endsa.size(); j++ ) {
                     ha = endsa.get(j);
@@ -2774,10 +2779,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                                        " | He(B): " + hb.startingVertex.id +
                                        "/" + hb.next().startingVertex.id);
                 }
-                ha = sonea.get(i).e.rightHalf;
-                hb = soneb.get(i).e.rightHalf;
-                ham = sonea.get(i).e.leftHalf;
-                hbm = soneb.get(i).e.leftHalf;                
+
+                if ( ha.startingVertex.id > ham.startingVertex.id ) {
+                    // Force halfedges to go from old vertex to new vertex,
+                    // that is, from IN to OUT direction.
+                    System.out.println("********* FORCING ORDER!");
+                }
+
                 System.out.println("  - Processing pair [" + i + "]: "+
                     "He(A1): " + ha.startingVertex.id + "/" + ha.next().startingVertex.id + 
                     " He(A2): " + ham.startingVertex.id + "/" + ham.next().startingVertex.id + 
@@ -2788,12 +2796,28 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             //-----------------------------------------------------------------
             // This assumes that for each null edge on solid a there is
             // another on solid b.
+            boolean swap = false;
             nextedgea = sonea.get(i).e;
             nextedgeb = soneb.get(i).e;
             h1a = null;
             h2a = null;
             h1b = null;
             h2b = null;
+
+            //----
+            // Force correct order of neighborhoods: they always goes from
+            // IN to OUT.
+            if ( ha.startingVertex.id > ham.startingVertex.id ) {
+                tmp = nextedgea.rightHalf;
+                nextedgea.rightHalf = nextedgea.leftHalf;
+                nextedgea.leftHalf = tmp;
+                if ( hb.startingVertex.id > hbm.startingVertex.id ) {
+                    tmp = nextedgeb.rightHalf;
+                    nextedgeb.rightHalf = nextedgeb.leftHalf;
+                    nextedgeb.leftHalf = tmp;
+                }
+            }
+            //----
 
             r = canJoin(nextedgea.rightHalf, nextedgeb.leftHalf);
             if ( r != null ) {
@@ -2864,9 +2888,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             System.out.println("setOpFinish");
         }
 
-	if ( (debugFlags & DEBUG_06_FINISH) != 0x00 ) {
-	    System.out.println("TESTING FINISH: " + sonfa.size());
-	}
+        if ( (debugFlags & DEBUG_06_FINISH) != 0x00 ) {
+            System.out.println("TESTING FINISH: " + sonfa.size());
+        }
 
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
@@ -2920,10 +2944,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         if ( withDebug ) {
             //debugFlags = DEBUG_01_STRUCTURE | DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_03_VERTEXFACECLASIFFIER | DEBUG_05_CONNECT | DEBUG_99_SHOWOPERATIONS;
             debugFlags = DEBUG_01_STRUCTURE | DEBUG_05_CONNECT | DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_99_SHOWOPERATIONS;
-	}
-	else {
+        }
+        else {
             debugFlags = 0;
-	}
+        }
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("= [START OF SETOP REPORT] =================================================================================================================================");
@@ -2958,11 +2982,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         setOpClassify(op, inSolidA, inSolidB);
 
+/*
         if ( withDebug ) {
-	    System.out.println(inSolidA);
-	    System.out.println(inSolidB);
-	}
-
+            System.out.println(inSolidA);
+            System.out.println(inSolidB);
+            System.exit(1);
+        }
+*/
         if ( sonea.size() == 0 && sonvv.size() == 0 ) {
             // No intersections found
             if ( op == INTERSECTION ) {
@@ -2980,10 +3006,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         setOpConnect();
-
-	if ( withDebug ) {
-            //System.exit(1);
-	}
 
         setOpFinish(inSolidA, inSolidB, res, op);
         res.validateModel();

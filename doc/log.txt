@@ -654,11 +654,18 @@ Changes in 2008 april 15 revition <<362min>>
     inside face.
   - 47min: MaximizeFaces bug fixed. Operator lkev was incorrectly used where
     a lkemr should be used :P - CSG Test object 4 working
-  - 30min: (CSG Test object 4) found not working - triple intersection point
-  - 362min: working on CSG Test 4
+  - 30min: (CSG Test object 5) found not working - triple intersection point
+  - 362min: working on CSG Test 5
 
-Changes in 2008 april 15 revition <<120min>>
+Changes in 2008 april 16 revition <<120min>>
   - 2h: Subversion control version system migrated to SourceForge.net.
+
+Changes in 2008 april 17 revition <<120min>>
+  - 2h: Bug detected at the PolyhedralBoundedSolidSetOperator.setOpConnect
+    stage: halfedges at neigborhoods must be in a consistent order from IN
+    to OUT for connect to work. Perhaps other configurations will lead to
+    same problem. CSG Test object 5 working for UNION, failing for INTERSECTION
+    and DIFFERENCE. Case revition pending.
 
 ---------------------------------------------------------------------------
 TODO:

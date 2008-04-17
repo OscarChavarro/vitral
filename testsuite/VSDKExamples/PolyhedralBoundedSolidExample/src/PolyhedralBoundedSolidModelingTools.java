@@ -931,20 +931,20 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         if ( op == 0 ) {
-            res = vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator.setOp(operands[0], operands[1],
-                                         GeometricModeler.UNION, true);
+            res = GeometricModeler.setOp(operands[0], operands[1],
+                                         GeometricModeler.UNION);
 	}
 	else if ( op == 1 ) {
-            res = vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator.setOp(operands[0], operands[1],
-                                         GeometricModeler.INTERSECTION, true);
+            res = GeometricModeler.setOp(operands[0], operands[1],
+                                         GeometricModeler.INTERSECTION);
 	}
 	else if ( op == 2 ) {
-            res = vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator.setOp(operands[0], operands[1],
-                                         GeometricModeler.DIFFERENCE, true);
+            res = GeometricModeler.setOp(operands[0], operands[1],
+                                         GeometricModeler.DIFFERENCE);
 	}
 	else {
-            res = vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator.setOp(operands[1], operands[0],
-										  GeometricModeler.DIFFERENCE, true);
+            res = GeometricModeler.setOp(operands[1], operands[0],
+                                         GeometricModeler.DIFFERENCE);
 	}
 
         //-----------------------------------------------------------------
