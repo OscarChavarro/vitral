@@ -660,12 +660,13 @@ Changes in 2008 april 15 revition <<362min>>
 Changes in 2008 april 16 revition <<120min>>
   - 2h: Subversion control version system migrated to SourceForge.net.
 
-Changes in 2008 april 17 revition <<120min>>
+Changes in 2008 april 17 revition <<140min>>
   - 2h: Bug detected at the PolyhedralBoundedSolidSetOperator.setOpConnect
     stage: halfedges at neigborhoods must be in a consistent order from IN
     to OUT for connect to work. Perhaps other configurations will lead to
     same problem. CSG Test object 5 working for UNION, failing for INTERSECTION
     and DIFFERENCE. Case revition pending.
+  - 20min: Simple test model from figure [APPE1967].7. replicated. :)
 
 ---------------------------------------------------------------------------
 TODO:

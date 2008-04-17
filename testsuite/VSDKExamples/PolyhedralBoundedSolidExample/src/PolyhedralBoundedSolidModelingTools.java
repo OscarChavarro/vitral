@@ -805,7 +805,7 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         x = GeometricModeler.setOp(b, c, GeometricModeler.UNION);
-	y = GeometricModeler.setOp(a, d, GeometricModeler.UNION);
+        y = GeometricModeler.setOp(a, d, GeometricModeler.UNION);
 
         operands[0] = x;
         operands[1] = y;
@@ -902,7 +902,7 @@ public class PolyhedralBoundedSolidModelingTools
         //-----------------------------------------------------------------
 /*
         ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
-	bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
+        bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
         abcd = GeometricModeler.setOp(bd, ac, GeometricModeler.UNION);
         eg = GeometricModeler.setOp(e, g, GeometricModeler.UNION);
         fh = GeometricModeler.setOp(f, h, GeometricModeler.UNION);
@@ -922,30 +922,30 @@ public class PolyhedralBoundedSolidModelingTools
         PolyhedralBoundedSolid operands[] = null;
 
         switch ( set ) {
-  	    case 0: operands = buildCsgTest1(); break;
-  	    case 1: operands = buildCsgTest2(); break;
-  	    case 2: default: operands = buildCsgTest3(); break;
-	    case 3: operands = buildCsgTest4(); break;
-	    case 4: operands = buildCsgTest5(); break;
-	}
+            case 0: operands = buildCsgTest1(); break;
+            case 1: operands = buildCsgTest2(); break;
+            case 2: default: operands = buildCsgTest3(); break;
+            case 3: operands = buildCsgTest4(); break;
+            case 4: operands = buildCsgTest5(); break;
+        }
 
         //-----------------------------------------------------------------
         if ( op == 0 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.UNION);
-	}
-	else if ( op == 1 ) {
+        }
+        else if ( op == 1 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.INTERSECTION);
-	}
-	else if ( op == 2 ) {
+        }
+        else if ( op == 2 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.DIFFERENCE);
-	}
-	else {
+        }
+        else {
             res = GeometricModeler.setOp(operands[1], operands[0],
                                          GeometricModeler.DIFFERENCE);
-	}
+        }
 
         //-----------------------------------------------------------------
         //operands[0].validateModel();
@@ -960,6 +960,84 @@ public class PolyhedralBoundedSolidModelingTools
         }
         return res;
 
+    }
+
+    /**
+    This method uses basic blocks and constructive solid geometry to build up
+    a test object similar to the one appearing in the lower part of figure
+    [APPE1967].7. Note that this method returns a solid with two shells with
+    a total of 54 vertices, 84 edges and 32 faces, as expected from description
+    reported in [APPE1967]. From that paper, a hidden line calculation of this
+    object consumes 6.5 seconds of CPU time on an IBM 7094 mainframe. That
+    reported time could be useful when benchmarking hidden line and other
+    visualization algorithms :) This method is provided for benchmarking and
+    comparison purposes!
+    */
+    public static PolyhedralBoundedSolid createTestObjectAPPE1967_3()
+    {
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b;
+
+        a = createTestObjectAPPE1967_1();
+        b = createTestObjectAPPE1967_2();
+
+        return GeometricModeler.setOp(a, b, GeometricModeler.UNION);
+    }
+
+    /**
+    This method uses basic blocks and constructive solid geometry to build up
+    a test object similar to the one appearing in the upper part of figure
+    [APPE1967].7.
+    */
+    public static PolyhedralBoundedSolid createTestObjectAPPE1967_2()
+    {
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b;
+        PolyhedralBoundedSolid c;
+        PolyhedralBoundedSolid d;
+        PolyhedralBoundedSolid ab;
+        PolyhedralBoundedSolid cd;
+        PolyhedralBoundedSolid abcd;
+        Matrix4x4 T;
+        Box box;
+
+        //-----------------------------------------------------------------
+        T = new Matrix4x4();
+        T.translation(0.3, 0.1+0.4, 0.1+0.4);
+        box = new Box(new Vector3D(0.6, 0.2, 0.2));
+        a = box.exportToPolyhedralBoundedSolid();
+        a.applyTransformation(T);
+        a.validateModel();
+
+        //-----------------------------------------------------------------
+        T = new Matrix4x4();
+        T.translation(0.5, 0.5, 0.5);
+        box = new Box(new Vector3D(0.2, 0.2, 1.0));
+        b = box.exportToPolyhedralBoundedSolid();
+        b.applyTransformation(T);
+        b.validateModel();
+
+        //-----------------------------------------------------------------
+        T = new Matrix4x4();
+        T.translation(0.7, 0.5, 0.9);
+        box = new Box(new Vector3D(0.6, 0.2, 0.2));
+        c = box.exportToPolyhedralBoundedSolid();
+        c.applyTransformation(T);
+        c.validateModel();
+
+        //-----------------------------------------------------------------
+        T = new Matrix4x4();
+        T.translation(0.9, 0.5, 0.9);
+        box = new Box(new Vector3D(0.2, 1.0, 0.2));
+        d = box.exportToPolyhedralBoundedSolid();
+        d.applyTransformation(T);
+        d.validateModel();
+
+        //-----------------------------------------------------------------
+        ab = GeometricModeler.setOp(a, b, GeometricModeler.UNION);
+        cd = GeometricModeler.setOp(c, d, GeometricModeler.UNION);
+        abcd = GeometricModeler.setOp(ab, cd, GeometricModeler.UNION);
+        return abcd;
     }
 
     /**
@@ -1021,7 +1099,7 @@ public class PolyhedralBoundedSolidModelingTools
 
         //-----------------------------------------------------------------
         ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
-	bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
+        bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
         abcd = GeometricModeler.setOp(bd, ac, GeometricModeler.UNION);
 
         //-----------------------------------------------------------------
@@ -1067,7 +1145,7 @@ public class PolyhedralBoundedSolidModelingTools
 
     public static PolyhedralBoundedSolid featuredObject()
     {
-        return createTestObjectAPPE1967_1();
+        return createTestObjectAPPE1967_3();
     }
 }
 

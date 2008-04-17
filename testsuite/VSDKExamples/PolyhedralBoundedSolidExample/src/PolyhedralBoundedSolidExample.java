@@ -60,7 +60,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private int solidType = 19;
+    private int solidType = 22;
     private int csgOperation = 0;
     private int csgSample = 4;
     private boolean debugEdges = false;
