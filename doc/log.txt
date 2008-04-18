@@ -672,6 +672,9 @@ Changes in 2008 april 17 revition <<70min>>
   - 1h10min: [APPE1967] revisited. HiddenLineRenderer rechecked. It appears
     to be some error in special cases of
     PolyhedralBoundedSolid.computeQuantitativeInvisibility.
+  - 2h: main page for VitralSDK hosted at SourceForge.net is now under the
+    control of Media Wiki 1.5. An old version was installed due to
+    compatibility problems with SourceForge infraestructure.
 
 ---------------------------------------------------------------------------
 TODO:
