@@ -1,0 +1,8 @@
+Following a list of detected BUGS.
+  - PolyhedralBoundedSolid.computeQuantitativeInvisibility seems to be
+    failing. To repeat this error, the PolyhedralBoundedSolidExample with
+    Appel algorithm for hidden line visualization can be used.
+  - PolyhedralBoundedSolidSetOperator is still failing in some cases
+    after the vertex/vertex classification. It appears that the setOpConnect
+    procedure is not detecting all possible cases of orientation for
+    neighbor half edges.

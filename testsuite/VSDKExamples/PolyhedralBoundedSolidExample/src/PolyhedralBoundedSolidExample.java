@@ -282,6 +282,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
         gl.glDisable(gl.GL_DEPTH_TEST);
 
+        //-----------------------------------------------------------------
         gl.glLineWidth(4.0f);
         gl.glColor3d(0, 0, 0);
         gl.glBegin(gl.GL_LINES);
@@ -310,7 +311,22 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         }
         gl.glEnd();
 */
-
+        //-----------------------------------------------------------------
+/*
+        gl.glPointSize(4.0f);
+        gl.glColor3d(0.5, 0.5, 0.9);
+        gl.glBegin(gl.GL_POINTS);
+        for ( i = 0; i < contourLines.size(); i++ ) {
+            p = contourLines.get(i);
+            gl.glVertex3d(p.x, p.y, p.z);
+        }
+        for ( i = 0; i < visibleLines.size(); i++ ) {
+            p = visibleLines.get(i);
+            gl.glVertex3d(p.x, p.y, p.z);
+        }
+        gl.glEnd();
+*/
+        //-----------------------------------------------------------------
         gl.glPopAttrib();
     }
 

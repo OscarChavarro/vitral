@@ -3010,6 +3010,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         setOpFinish(inSolidA, inSolidB, res, op);
         res.validateModel();
         res.maximizeFaces();
+        res.compactIds();
         res.validateModel();
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {

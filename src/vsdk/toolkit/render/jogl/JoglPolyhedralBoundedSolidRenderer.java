@@ -238,33 +238,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 startPosition = e.rightHalf.startingVertex.position;
                 endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
-                    //--------------------------------------------------------
+                    //- Prepare data for visible line determination ----------
                     face1 = e.leftHalf.parentLoop.parentFace;
                     face2 = e.rightHalf.parentLoop.parentFace;
                     f1 = face1.isVisibleFrom(c) >= 0;
                     f2 = face2.isVisibleFrom(c) >= 0;
 
-/*
-                    System.out.println("Edge [" + i + "]:");
-                    if ( f1 ) {
-                        System.out.println("  - Face 1 IS visible. (normal " +
-                            face1.containingPlane.getNormal() + ")");
-                    }
-                    else {
-                        System.out.println("  - Face 1 is NOT visible. (normal " +
-                            face1.containingPlane.getNormal() + ")");
-                    }
-                    if ( f2 ) {
-                        System.out.println("  - Face 2 IS visible. (normal " +
-                            face2.containingPlane.getNormal() + ")");
-                    }
-                    else {
-                        System.out.println("  - Face 2 is NOT visible. (normal " +
-                            face2.containingPlane.getNormal() + ")");
-                    }
-*/
-
-                    //--------------------------------------------------------
+                    //- Determine if line is hidden, visible or contour ------
+                    boolean isVisible = false;
                     if ( !f1 && !f2 ) {
                         // Totally hidden lines
                         gl.glLineWidth(1.0f);
@@ -274,22 +255,25 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         // Contour lines
                         gl.glLineWidth(4.0f);
                         gl.glColor3d(1, 0, 0);
+                        isVisible = true;
                     }
                     else {
                         // Visible non contour lines
-                        gl.glLineWidth(1.0f);
-                        gl.glColor3d(0.5, 0, 0);
+                        gl.glLineWidth(2.0f);
+                        gl.glColor3d(0.8, 0, 0);
+                        isVisible = true;
                     }
 
-                    //--------------------------------------------------------
+                    //- Draw line --------------------------------------------
                     gl.glBegin(gl.GL_LINES);
                     gl.glVertex3d(startPosition.x, startPosition.y, 
                                   startPosition.z);
                     gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
                     gl.glEnd();
 
-                    //--------------------------------------------------------
+                    //- If debugging a single edge, draw extra information ---
                     if ( edgeIndex > -1 ) {
+                        // Draw containing face normals at the edge middle point
                         middle = startPosition.add(endPosition).multiply(0.5);
                         n = face1.containingPlane.getNormal();
                         gl.glLineWidth(1.0f);
@@ -309,6 +293,35 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                                           middle.y + n.y/10,
                                           middle.z + n.z/10);
                         gl.glEnd();
+
+                        // Draw som sample points for quantitative invisibility
+                        Vector3D d;
+                        Vector3D p;
+                        double l;
+                        double t;
+                        int qi;
+
+                        d = endPosition.substract(startPosition);
+                        l = d.length();
+                        d.normalize();
+
+                        for ( t = VSDK.EPSILON; isVisible && t < l; t += (l/20) ) {
+			    p = startPosition.add(d.multiply(t));
+                            qi = solid.computeQuantitativeInvisibility(c.getPosition(), p);
+                            switch ( qi ) {
+			      case 0:
+				gl.glPointSize(4);
+                                gl.glColor3f(0, 1, 0);
+				break;
+			      default:
+				gl.glPointSize(2);
+                                gl.glColor3f(0, 0, 1);
+				break;
+			    }
+                            gl.glBegin(gl.GL_POINTS);
+			        gl.glVertex3d(p.x, p.y, p.z);
+                            gl.glEnd();
+			}
                     }
                 }
             }

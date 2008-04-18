@@ -668,6 +668,11 @@ Changes in 2008 april 17 revition <<140min>>
     and DIFFERENCE. Case revition pending.
   - 20min: Simple test model from figure [APPE1967].7. replicated. :)
 
+Changes in 2008 april 17 revition <<70min>>
+  - 1h10min: [APPE1967] revisited. HiddenLineRenderer rechecked. It appears
+    to be some error in special cases of
+    PolyhedralBoundedSolid.computeQuantitativeInvisibility.
+
 ---------------------------------------------------------------------------
 TODO:
   - Implement OBHU technique in SearchEngineFor3DModels

@@ -1557,16 +1557,23 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.computeQuantitativeInvisibility.
+
+    This is not well understood for cases of intersection with face limits
+    (vertices and edges). In some cases, computation of quantitative
+    invisivility seems to be failing.
+    @todo check well all limiting cases.
     */
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
     {
         int qi = 0;
-        int i;
+        int i, j;
         Vector3D d = p.substract(origin);
         Vector3D pi;
         double t0 = d.length();
         d.normalize();
         int pos;
+        double distances[] = new double[polygonsList.size()];
+        int ndist = 0;
 
         Ray ray = new Ray(origin, d);
         GeometryIntersectionInformation info;
@@ -1579,10 +1586,21 @@ public class PolyhedralBoundedSolid extends Solid {
                     ray.direction.normalize();
                     pi = ray.origin.add(ray.direction.multiply(ray.t));
                     pos = face.testPointInside(pi, VSDK.EPSILON);
-                    if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
+                    if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
                         face.containingPlane.doExtraInformation(ray, 0.0, info);
                         if ( info.n.dotProduct(d) < 0.0 ) {
-                            qi ++;
+                            boolean considerIt = true;
+                            for ( j = 0; j < ndist; j++ ) {
+                                if ( Math.abs(distances[j]-ray.t) < 2*VSDK.EPSILON ) {
+                                    considerIt = false;
+                                    break;
+                                }
+                            }
+                            if ( considerIt ) {
+                                qi++;
+                                distances[ndist] = ray.t;
+                                ndist++;
+                            }
                         }
                     }
                 }
@@ -1671,13 +1689,13 @@ public class PolyhedralBoundedSolid extends Solid {
                 lkemr(e.rightHalf, e.leftHalf);
                 // As this breaks the face set, start again!
                 maximizeFaces();
-		return;
+                return;
             }
             else if ( a.overlapsWith(b, VSDK.EPSILON) ) {
                 lkef(e.rightHalf, e.leftHalf);
                 // As this breaks the face set, start again!
                 maximizeFaces();
-		return;
+                return;
             }
         }
 
@@ -1747,12 +1765,12 @@ public class PolyhedralBoundedSolid extends Solid {
         int i, j;
 
         for ( i = 0; i < verticesList.size(); i++ ) {
-	    verticesList.get(i).id = i+1;
-	}
+            verticesList.get(i).id = i+1;
+        }
         maxVertexId = i;
         for ( i = 0; i < edgesList.size(); i++ ) {
-	    edgesList.get(i).id = i+1;
-	}
+            edgesList.get(i).id = i+1;
+        }
 
         int k = 1;
         for ( i = 0; i < polygonsList.size(); i++ ) {
