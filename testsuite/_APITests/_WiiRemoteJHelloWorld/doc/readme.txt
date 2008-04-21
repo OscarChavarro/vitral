@@ -10,7 +10,8 @@ What you need dor this to work:
     (as of october 2007, internet users report that you have to pay for
     bluetooth programming tools on windows... Author (Oscar Chavarro) didn't
     search for Windows support)
-  - Avetana library for accessing bluez from java
+  - Some bluetooth stack library such as Avetana or Bluecove for accessing
+    bluez from java (tested in linux with both, Avetana and Bluecove)
   - A JDK (tested with 1.6)
   - Vitral SDK :)
 
@@ -43,14 +44,14 @@ Scanning ...
 
     if only "Scanning ..." appears, this means Nintendo Wii remote is not
     connected.
-  - The ./compile.sh script assumes you have "avetanaBT.jar" and
+  - The ./compile.sh script assumes you have "avetanaBT.jar" (or bluecove) and
     "WiiRemoteJ.jar" installed on  Java's extension directory (jre/lib/ext 
     - jdk/jre/lib/ext) and that previous tests are working fine.
   - Run this program (after compiling it with ./compile.sh)
     ./run.sh
     and press Nintendo Wii remotes buttons "1" and "2" again.
     Here program should correctly detect Nintendo Wii remote and plot
-    graphs for 3 eccelerometer axis.
+    graphs for 3 accelerometer axis.
 
 :)
 
