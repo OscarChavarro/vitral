@@ -34,3 +34,4 @@
   - Check when textures are great (more than 1024 in X or Y extend): when
     working with Linux or Nvidia Cg, they work fine, but they do not work
     on fixed function OpenGL on Windows.
+  - Implement OBHU technique in SearchEngineFor3DModels

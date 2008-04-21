@@ -6,3 +6,8 @@ Following a list of detected BUGS.
     after the vertex/vertex classification. It appears that the setOpConnect
     procedure is not detecting all possible cases of orientation for
     neighbor half edges.
+  - PolyhedralBoundedSolidSetOperator current detected failing cases:
+    . PolyhedralBoundedSolidModelingTools.buildCsgTest5() on operations
+      difference and intersection.
+    . SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); goes
+      well up to connect, fails on finish and maximize faces.
