@@ -4,12 +4,6 @@
 //= - April 21 2007 - Oscar Chavarro: Original base version                 =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
-//= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
-//=          the machine rendering of solids". Proceedings, ACM National    =
-//=          meeting 1967.                                                  =
-//= [MANT1986] Mantyla Martti. "Boolean Operations of 2-Manifolds through   =
-//=     Vertex Neighborhood Classification". ACM Transactions on Graphics,  =
-//=     Vol. 5, No. 1, January 1986, pp. 1-29.                              =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 //===========================================================================
@@ -33,6 +27,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
 public class PolyhedralBoundedSolidModelingTools
 {
@@ -488,11 +483,10 @@ public class PolyhedralBoundedSolidModelingTools
     The created solid is is similar to the solid shown on figure
     [MANT1988].12.5. (in particular when seting 4 sides);
     */
-    public static PolyhedralBoundedSolid createTestTorus()
+    public static PolyhedralBoundedSolid createTestTorus(int nsides, int nrad)
     {
         PolyhedralBoundedSolid solid;
         Vector3D center = new Vector3D(0.5, 0.5, 0);
-        int nsides = 4;
 
         solid = GeometricModeler.createCircularLamina(center.x, center.y,
                                                       0.2, 0.0, nsides);
@@ -510,7 +504,7 @@ public class PolyhedralBoundedSolidModelingTools
         M = T2.multiply(R.multiply(T1));
         solid.applyTransformation(M);
 
-        rotationalSweepVersion2(solid, 16);
+        rotationalSweepVersion2(solid, nrad);
         return solid;
     }
 
@@ -525,40 +519,10 @@ public class PolyhedralBoundedSolidModelingTools
         GeometricModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
         rotationalSweepVersion1(solid, 20);
 */
-        solid = createTestTorus();
+        solid = createTestTorus(4, 16);
         //-----------------------------------------------------------------
         solid.validateModel();
 
-        return solid;
-    }
-
-    /**
-    This method builds a test solid for evaluating the splitting algorithm in
-    a controlled way. The generated object is similar to that shown on figures
-    [MANT1986].4., [MANT1986].5., [MANT1986].8., [MANT1986].10.,
-    [MANT1988].14.2., [MANT1988].14.3., and [MANT1988].14.6.
-    Generated solid is interesting when intersecting with the plane Z=0.35
-    becase stress the splitting algorithm to consider multiple vertex
-    classification cases.
-    */
-    private static PolyhedralBoundedSolid buildSplitTest1()
-    {
-        Matrix4x4 R = new Matrix4x4();
-        PolyhedralBoundedSolid solid;
-        R.translation(0.55, 0.55, 0.55);
-        solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.00+0.05, 0.40+0.05, 0.00+0.05), 1, 1);
-        solid.smev(1, 1, 2, new Vector3D(0.94+0.05, 0.40+0.05, 0.00+0.05));
-        solid.smev(1, 2, 3, new Vector3D(0.94+0.05, 0.40+0.05, 0.46+0.05));
-        solid.smev(1, 3, 4, new Vector3D(0.60+0.05, 0.40+0.05, 0.30+0.05));
-        solid.smev(1, 4, 5, new Vector3D(0.37+0.05, 0.40+0.05, 0.30+0.05));
-        solid.smev(1, 5, 6, new Vector3D(0.18+0.05, 0.40+0.05, 0.46+0.05));
-        solid.smev(1, 6, 7, new Vector3D(0.00+0.05, 0.40+0.05, 0.30+0.05));
-        solid.mef(1, 1, 7, 6, 1, 2, 2);
-        Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -0.4, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
-            solid, solid.findFace(1), T);
         return solid;
     }
 
@@ -568,7 +532,7 @@ public class PolyhedralBoundedSolidModelingTools
         //PolyhedralBoundedSolid solid = createHoledBox();
         //PolyhedralBoundedSolid solid = createBox(new Vector3D(0.9, 0.9, 0.9));
 
-        PolyhedralBoundedSolid solid = buildSplitTest1();
+        PolyhedralBoundedSolid solid = SimpleTestGeometryLibrary.createTestObjectMANT1986_1();
 
 /*
         Matrix4x4 R = new Matrix4x4();
@@ -595,7 +559,7 @@ public class PolyhedralBoundedSolidModelingTools
         solidsBelow = new ArrayList <PolyhedralBoundedSolid>();
 
         sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
-                               new Vector3D(0, 0, 0.30+0.05) /*p*/);
+                               new Vector3D(0, 0, 0.30) /*p*/);
 
 //        sp = new InfinitePlane(new Vector3D(0, 0, 1) /*n*/,
 //                               new Vector3D(0, 0, 0.5) /*p*/);
@@ -626,57 +590,12 @@ public class PolyhedralBoundedSolidModelingTools
     /**
     This method builds a test sample pair of solids for evaluating
     the set operations algorithm in a controlled way.
-    The generated objects are similar to that shown on figures
-    [MANT1986].11. and [MANT1988].15.4.
-    This set correspond to the simpler of all cases for CSG operations
-    test, and its processing in set operations are characterized by
-    the following consecuences:
-      - Only the vertex-face classifier is called (can be processed
-        without using a verte-vertex classifier).
-      - On the vertex-face classifier, the second stage (reclassification
-        on sectors) is not used, due to non coplanar cases on neigborhoods.
-    */
-    private static PolyhedralBoundedSolid[] buildCsgTest1()
-    {
-        PolyhedralBoundedSolid operands[];
-        PolyhedralBoundedSolid a, b;
-
-        operands = new PolyhedralBoundedSolid[2];
-
-        //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
-        R.translation(0.5, 0.25, 0.3);
-
-        Box box = new Box(new Vector3D(1, 0.5, 0.6));
-        a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(R);
-        a.validateModel();
-
-        //-----------------------------------------------------------------
-        R = new Matrix4x4();
-        R.translation(0.5+0.24, 0.25-0.18, 0.3+0.42);
-
-        box = new Box(new Vector3D(1, 0.5, 0.6));
-        b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(R);
-        b.validateModel();
-
-        //-----------------------------------------------------------------
-        operands[0] = a;
-        operands[1] = b;
-
-        return operands;
-    }
-
-    /**
-    This method builds a test sample pair of solids for evaluating
-    the set operations algorithm in a controlled way.
     This set correspond to a simple cases for CSG operations test: two
     blocks without intersecting vertex pairs (only edge/face
     intersections are present). The resulting gluing face can be a variation
-    of the method `buildCsgTest1`, if blocks are translated so their parallel
-    faces don't touch; or can be one simple test case for the complex
-    sector intersection.
+    of the method `createTestObjectsPairMANT1986_2`, if blocks are translated
+    so their parallel faces don't touch; or can be one simple test case for
+    the complex sector intersection.
     */
     private static PolyhedralBoundedSolid[] buildCsgTest2()
     {
@@ -699,53 +618,6 @@ public class PolyhedralBoundedSolidModelingTools
         R.translation(0.5, 0.5, 0.15+0.3);
 
         box = new Box(new Vector3D(0.5, 1, 0.3));
-        b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(R);
-        b.validateModel();
-
-        //-----------------------------------------------------------------
-        operands[0] = a;
-        operands[1] = b;
-
-        return operands;
-    }
-
-    /**
-    This method builds a test sample pair of solids for evaluating
-    the set operations algorithm in a controlled way.
-    The generated objects are similar to that shown on figures
-    [MANT1986].12. and [MANT1988].15.5.
-    */
-    private static PolyhedralBoundedSolid[] buildCsgTest3()
-    {
-        PolyhedralBoundedSolid operands[];
-        PolyhedralBoundedSolid a, b;
-
-        operands = new PolyhedralBoundedSolid[2];
-
-        //-----------------------------------------------------------------
-        a = new PolyhedralBoundedSolid();
-        a.mvfs(         new Vector3D(0.00+0.05, 0.42+0.05, 0.00+0.05), 1, 1);
-        a.smev(1, 1, 2, new Vector3D(0.92+0.05, 0.42+0.05, 0.00+0.05));
-        a.smev(1, 2, 3, new Vector3D(0.92+0.05, 0.42+0.05, 0.72+0.05));
-        a.smev(1, 3, 4, new Vector3D(0.70+0.05, 0.42+0.05, 0.72+0.05));
-        a.smev(1, 4, 5, new Vector3D(0.70+0.05, 0.42+0.05, 0.18+0.05));
-        a.smev(1, 5, 6, new Vector3D(0.00+0.05, 0.42+0.05, 0.18+0.05));
-        a.mef(1, 1, 6, 5, 1, 2, 2);
-        a.validateModel();
-
-        Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -0.42, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
-            a, a.findFace(1), T);
-
-        //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
-        R.translation(0.05 +0.58/2.0+(0.92-0.58) /*+ 0.0001*/,
-                      0.05 + 0.42/2.0 - 0.42/2.0,
-                      0.05 + 0.18/2.0 + 0.18 /*+ 0.0001*/);
-
-        Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
         b.validateModel();
@@ -922,11 +794,12 @@ public class PolyhedralBoundedSolidModelingTools
         PolyhedralBoundedSolid operands[] = null;
 
         switch ( set ) {
-            case 0: operands = buildCsgTest1(); break;
+            case 0: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2(); break;
             case 1: operands = buildCsgTest2(); break;
-            case 2: default: operands = buildCsgTest3(); break;
+            case 2: default: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3(); break;
             case 3: operands = buildCsgTest4(); break;
             case 4: operands = buildCsgTest5(); break;
+	    case 5: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); break;
         }
 
         //-----------------------------------------------------------------
@@ -962,190 +835,15 @@ public class PolyhedralBoundedSolidModelingTools
 
     }
 
-    /**
-    This method uses basic blocks and constructive solid geometry to build up
-    a test object similar to the one appearing in the lower part of figure
-    [APPE1967].7. Note that this method returns a solid with two shells with
-    a total of 54 vertices, 84 edges and 32 faces, as expected from description
-    reported in [APPE1967]. From that paper, a hidden line calculation of this
-    object consumes 6.5 seconds of CPU time on an IBM 7094 mainframe. That
-    reported time could be useful when benchmarking hidden line and other
-    visualization algorithms :) This method is provided for benchmarking and
-    comparison purposes!
-    */
-    public static PolyhedralBoundedSolid createTestObjectAPPE1967_3()
-    {
-        PolyhedralBoundedSolid a;
-        PolyhedralBoundedSolid b;
-
-        a = createTestObjectAPPE1967_1();
-        b = createTestObjectAPPE1967_2();
-
-        return GeometricModeler.setOp(a, b, GeometricModeler.UNION);
-    }
-
-    /**
-    This method uses basic blocks and constructive solid geometry to build up
-    a test object similar to the one appearing in the upper part of figure
-    [APPE1967].7.
-    */
-    public static PolyhedralBoundedSolid createTestObjectAPPE1967_2()
-    {
-        PolyhedralBoundedSolid a;
-        PolyhedralBoundedSolid b;
-        PolyhedralBoundedSolid c;
-        PolyhedralBoundedSolid d;
-        PolyhedralBoundedSolid ab;
-        PolyhedralBoundedSolid cd;
-        PolyhedralBoundedSolid abcd;
-        Matrix4x4 T;
-        Box box;
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.3, 0.1+0.4, 0.1+0.4);
-        box = new Box(new Vector3D(0.6, 0.2, 0.2));
-        a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
-        a.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.5, 0.5, 0.5);
-        box = new Box(new Vector3D(0.2, 0.2, 1.0));
-        b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
-        b.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.7, 0.5, 0.9);
-        box = new Box(new Vector3D(0.6, 0.2, 0.2));
-        c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
-        c.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.9);
-        box = new Box(new Vector3D(0.2, 1.0, 0.2));
-        d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
-        d.validateModel();
-
-        //-----------------------------------------------------------------
-        ab = GeometricModeler.setOp(a, b, GeometricModeler.UNION);
-        cd = GeometricModeler.setOp(c, d, GeometricModeler.UNION);
-        abcd = GeometricModeler.setOp(ab, cd, GeometricModeler.UNION);
-        return abcd;
-    }
-
-    /**
-    This method uses basic blocks and constructive solid geometry to build up
-    a test object similar to the one appearing in the middle of figure
-    [APPE1967].7.
-    */
-    public static PolyhedralBoundedSolid createTestObjectAPPE1967_1()
-    {
-        PolyhedralBoundedSolid a;
-        PolyhedralBoundedSolid b;
-        PolyhedralBoundedSolid c;
-        PolyhedralBoundedSolid d;
-        PolyhedralBoundedSolid e;
-        PolyhedralBoundedSolid f;
-        PolyhedralBoundedSolid g;
-        PolyhedralBoundedSolid h;
-        PolyhedralBoundedSolid ac;
-        PolyhedralBoundedSolid bd;
-        PolyhedralBoundedSolid eg;
-        PolyhedralBoundedSolid fh;
-        PolyhedralBoundedSolid abcd;
-        PolyhedralBoundedSolid efgh;
-        PolyhedralBoundedSolid total;
-        Matrix4x4 T;
-        Box box;
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.5, 0.1, 0.1);
-        box = new Box(new Vector3D(1, 0.2, 0.2));
-        a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
-        a.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.5, 0.9, 0.1);
-        box = new Box(new Vector3D(1, 0.2, 0.2));
-        b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
-        b.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
-        box = new Box(new Vector3D(0.2, 1, 0.2));
-        c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
-        c.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.1);
-        box = new Box(new Vector3D(0.2, 1, 0.2));
-        d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
-        d.validateModel();
-
-        //-----------------------------------------------------------------
-        ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
-        bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
-        abcd = GeometricModeler.setOp(bd, ac, GeometricModeler.UNION);
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
-        box = new Box(new Vector3D(0.2, 1, 0.2));
-        e = box.exportToPolyhedralBoundedSolid();
-        e.applyTransformation(T);
-        e.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.9);
-        box = new Box(new Vector3D(0.2, 1, 0.2));
-        f = box.exportToPolyhedralBoundedSolid();
-        f.applyTransformation(T);
-        f.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.1, 0.1, 0.5);
-        box = new Box(new Vector3D(0.2, 0.2, 1));
-        g = box.exportToPolyhedralBoundedSolid();
-        g.applyTransformation(T);
-        g.validateModel();
-
-        //-----------------------------------------------------------------
-        T = new Matrix4x4();
-        T.translation(0.1, 0.9, 0.5);
-        box = new Box(new Vector3D(0.2, 0.2, 1));
-        h = box.exportToPolyhedralBoundedSolid();
-        h.applyTransformation(T);
-        h.validateModel();
-
-        //-----------------------------------------------------------------
-        eg = GeometricModeler.setOp(e, g, GeometricModeler.UNION);
-        fh = GeometricModeler.setOp(f, h, GeometricModeler.UNION);
-        efgh = GeometricModeler.setOp(eg, fh, GeometricModeler.UNION);
-        total = GeometricModeler.setOp(abcd, efgh, GeometricModeler.UNION);
-
-        return total;
-    }
-
     public static PolyhedralBoundedSolid featuredObject()
     {
-        return createTestObjectAPPE1967_3();
+        return SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
+/*
+        PolyhedralBoundedSolid ops[];
+        ops = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2();
+        return GeometricModeler.setOp(ops[0], ops[1],
+                                      GeometricModeler.DIFFERENCE);
+*/
     }
 }
 

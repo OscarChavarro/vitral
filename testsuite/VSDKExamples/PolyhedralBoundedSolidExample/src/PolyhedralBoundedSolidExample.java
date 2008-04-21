@@ -62,7 +62,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private GLCanvas canvas;
     private int solidType = 22;
     private int csgOperation = 0;
-    private int csgSample = 4;
+    private int csgSample = 0;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
 
@@ -547,7 +547,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
             case '6':
               csgSample++;
-              if ( csgSample > 4 ) csgSample = 0;
+              if ( csgSample > 5 ) csgSample = 0;
               solid = buildSolid(solidType);
               break;
 
