@@ -1,0 +1,90 @@
+colors {
+	bgColor: white;
+	highlightedBgColor: #7272f4;
+	titleColor: #7272f4;
+	screenBgColor: white;
+	fontColor: black;
+	focusedFontColor: black;
+	inactiveFontColor: gray;
+}
+
+.gradientFramedForm {
+	padding: 2;
+	background-color: screenBgColor;
+	layout: vertical-center | horizontal-center;
+}
+
+rightframe {
+	layout: vertical-expand | vertical-center;
+}
+
+.colorChoiceGroup {
+	padding: 2;
+	include-label: true;
+	/*
+	layout: expand | center;
+	*/
+	background-color: bgColor;
+
+	view-type: exclusive;
+	exclusiveview-right-arrow: url( right.png );
+	exclusiveview-left-arrow: url( left.png );
+	exclusiveview-roundtrip: true;
+	
+	/* Alternatively you might want to use the horizontal-choice view-type:
+	view-type: horizontal-choice;
+	horizontalview-right-arrow: url( right.png );
+	horizontalview-left-arrow: url( left.png );
+	horizontalview-roundtrip: true;
+	*/
+	
+}
+
+.colorChoiceItem {
+	padding: 2;
+	font-color: fontColor;
+	font-size: small;
+	layout: expand | center;
+	focused-style: .colorChoiceItemFocused;
+}
+
+.colorChoiceItemFocused {
+	padding: 2;
+	font-color: fontColor;
+	font-size: small;
+	layout: expand | center;
+}
+
+
+focused {
+	padding: 2;
+	font-color: focusedFontColor;
+	layout: expand | center;
+	background {
+		type: web20;
+		color: highlightedBgColor;
+		circle-anchor: top;
+		circle-color: #A2A2f9;
+		padding: 3;
+		padding-top: 0;
+		padding-bottom: 8;
+	}
+	label-style: .labelFocused;
+}
+
+title {
+	font-color: titleColor;
+	text-effect: shadow;
+	text-shadow-color: inactiveFontColor;
+	layout: expand | center;	
+}
+
+label {
+	padding-left: 2;
+	font-color: inactiveFontColor;
+	font-size: small;
+}
+
+.labelFocused extends label {
+	font-color: fontColor;
+}
