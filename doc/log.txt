@@ -1,4 +1,31 @@
-Revision de noviembre 1 de 2005
+===========================================================================
+= VitralSDK simplified Personal Software Process file                     =
+===========================================================================
+
+This text file contains the main "Personal Software Process" (PSP) for the
+VitralSDK project. Every contributor for VitralSDK is encourage to write
+in this file its major acomplishments in a session basis. Note that every
+entry in this file corresponds to a commit in the SVN control version system.
+
+Rough format in this file is:
+  - For each change, ther is a text line starting with the character '-',
+    followed by the time taken and the description of the activity.
+  - Each set of changes done the same day are grouped by a "title" in the
+    format
+
+YEAR month day, author1, author2 ... & author n: <<total sum of minutes>>
+
+Note that this log include the main work done on core VitralSDK libraries and
+"smaller" programs in testsuite folder. This PSP does not include work done
+on "big" programs, as such:
+  - ./testsuite/OfflineExamples/RaytracingOfflineExample
+  - ./testsuite/ApplicationCases/SciVisApplication
+  - ./testsuite/ApplicationCases/SceneEditorApplication
+for that, there are other similar "log.txt" files with its own PSP logs.
+
+---------------------------------------------------------------------------
+
+2005 november 1, Oscar Chavarro, Lina Rojas & Gabriel Sarmiento: <<?>>
   - Revision MESH: la etapa 141 original de Lhyna y Gabriel se pasa a la
     142, y se le annaden scripts de compilacion para linux y se le reviso el
     encoding para que no fallaran los comentarios en linux. El ejemplo de
@@ -7,11 +34,10 @@ Revision de noviembre 1 de 2005
     . Pendiente: revision de entorno JBuilder
     15 min
   - Revision QualitySelection: se renombro Shading para que fuera ShadingType
-  - Revision de clases y migracion a JOGL Beta: 6:30pm->
+  - Revision de clases y migracion a JOGL Beta
+  - Is class RGBAImageBuilder implementing a builder or Factory design pattern.
 
-  - Is class RGBAImageBuilder implementing a builder or Factory design pattern?
-
-Changes in 2006 march 14 revition
+2006 march 14, Oscar Chavarro, Eduardo Mendoza, Fabio Aroca: <<?>>
   - Library is now packaged in just one big dir, not using the old
     stages order directories. Now all the examples are inside the 
     testsuite directory.
@@ -35,22 +61,22 @@ Changes in 2006 march 14 revition
   - As a cylinder is a special case of cone, class Cylinder is now called
     Cone
 
-Changes in 2006 march 19 revition
+2006 march 19, Oscar Chavarro: <<?>>
   - Raytracing application example was set for full code reuse, now the
     raytracer is generic and lies in the main toolkit render package
   - SceneEditor application example in its first fully functional version :)
 
-Changes in 2006 march 31 revition
+2006 march 31, Oscar Chavarro: <<?>>
   - RGBColorPalette
 
-Changes in 2006 april 6 revition
+2006 april 6, Oscar Chavarro: <<?>>
   - RGBColorPalette completed, and AwtRGBColorPalette functions and sample
     working fine.
   - Exporting from ZBuffer to RGBImages now uses palettes :)
 
-Changes in 2006 april 28 revition
+2006 april 28, Oscar Chavarro: <<?>>
   - Integrated the models of ParametricCubicCurve and ParametricCubicPatches
-  - Mesh revition. Now it is called TriangleMesh / TriangleMeshGroup
+  - Mesh. Now it is called TriangleMesh / TriangleMeshGroup
   - A RayableObject is not a Geometry, but something that contains one.
     It is not inside the geometry package... And now is a SimpleThing.
   - RGBAImageBuilder renamed to ImagePersistence, and added exporting PPM
@@ -59,7 +85,7 @@ Changes in 2006 april 28 revition
   - Jogl*Renderer classes with draw/activate names normalized. There is no
     more activateGL or drawGL versions
 
-Changes in 2006 may 5 revition
+2006 may 5, Oscar Chavarro: <<?>>
   - Minor updates to ParametricCubicCurve code
   - JoglParametricCubicCurve.drawCurve is now JoglParametricCubicCurve.draw
   - First XML persistence classes for curves and patches
@@ -67,12 +93,12 @@ Changes in 2006 may 5 revition
     quality selection
   - ParametricCubicCurveRenderer::getMinMax working
 
-Changes in 2006 may 19 revition
+2006 may 19, Oscar Chavarro: <<?>>
   - Raytracer support for depth-maps by Alfonso Barbosa
   - Basic ReaderObj functionality fixed by David Diaz
   - XML persistence classes for curves and patches fixed by Gina Chiquillo
 
-Changes in 2006 may 22/may25 revition
+2006 may 22/may25, Oscar Chavarro: <<?>>
   - All Entities are now Serializable! Note the use of serialVersionUID static
     attribute in all classes and the implemented class hierarchy.
   - SimpleThing is now called SimpleBody
@@ -82,50 +108,48 @@ Changes in 2006 may 22/may25 revition
   - document.sh script now builds two versions for online literate programming
     style documentation: doxygen and javadoc
 
-Changes in 2006 july 25 revition
+2006 july 25, Oscar Chavarro: <<?>>
   - GUI infraestructure advanced inside the SceneEditorApplication
   - JoglRenderer interface
   - ParametricCubicCurve renamed to ParametricCurve, as is currently
     representing also linear curves (polylines) and will be extended to
     support quadric curves
 
-Changes in 2006 august 1 revition
+2006 august 1, Oscar Chavarro: <<?>>
   - Fixed a bug in ImagePersistence.exportPPM
   - Fixed a bug in Jogl Image renderers that caused large textures not to
     appear on Windows. Now glTexImage2D is not used directly, but with
     com.sun.opengl.util.texture.Texture rendering utility
 
-Changes in 2006 august 2 revition
+2006 august 2, Oscar Chavarro: <<?>>
   - ImagePersistence.exportJPG added
   - ImageOfflineExample added
 
-Changes in 2006 august 6 revition
+2006 august 6, Oscar Chavarro: <<?>>
   - Image JOGL Renderers revised
-
-Changes in 2006 august 6 revition
   - Mesh classes, including model, JOGL renderer and persistence revisited.
     This now seems to work quite well :)
 
-Changes in 2006 august 12 revition
+2006 august 12, Oscar Chavarro: <<?>>
   - Fixed a bug in TriangleMesh code that made some objects to die
   - Awt renderer convertion functions upgraded for images
 
-Changes in 2006 august 17 revition
+2006 august 17, Oscar Chavarro: <<?>>
   - GlyphExample in testsuite working fine :)
   - Fixed some minor bugs in ParametricCurve class code
   - JoglParametricCurve.drawTesselatedCurveInterior added
 
-Changes in 2006 october 8 revition
+2006 october 8, Oscar Chavarro: <<?>>
   - Checked TriangleMesh/JoglTriangleMeshRenderer tunning for manual
     construction (Bug fixes)
   - CameraControllerGravZero class removed
   - IlluminationTest example added to testsuite
 
-Changes in 2006 november 1 revition (Alfonso Barbosa / Diana Reyes)
+2006 november 1, Alfonso Barbosa & Diana Reyes: <<?>>
   - InfinitePlane.classifyPoint method added
   - Raytracing.excecute uptade (generalized for sub-viewport definition)
 
-Changes in 2006 november 5 revition
+2006 november 5, Oscar Chavarro: <<?>>
   - Added Cohen-Sutherland to Camera class
   - Fixed minor bugs in orthogonal projection handling of Camera class
   - Added Cohen-Sutherland technique example to testsuites :)
@@ -133,13 +157,13 @@ Changes in 2006 november 5 revition
     (architectural integration into the toolkit is pending due to
      non implemented exportToTriangleMesh operation in geometries)
 
-Changes in 2006 november 6 revition
+2006 november 6, Oscar Chavarro: <<?>>
   - Reorganized testsuite directory
   - Added bounding volumes in TriangleMesh and TriangleMeshGroup for
     doIntersection operation
   - Added normal interpolation in TriangleMesh doIntersection operation
 
-Changes in 2006 november 13 revition
+2006 november 13, Oscar Chavarro: <<?>>
   - Changed internal representation of triangle group to texture span range
     representation in TriangleMesh, JoglTriangleMeshRenderer and ReaderObj
   - Added support for multiple materials in a single TriangleMesh :)
@@ -147,25 +171,25 @@ Changes in 2006 november 13 revition
     traversal that uses a mixtured texture/material spans in
     JoglTriangleMeshRenderer.
 
-Changes in 2006 november 19 revition
+2006 november 19, Oscar Chavarro: <<?>>
   - Implementation of PolyhedralBoundedSolid representation started! :)
   - Updates to TriangleMesh internal representation and ReaderObj /
     JoglTriangleMeshRenderer to simplify design.
   - Raytracer now support objects with sub-materials
 
-Changes in 2006 december 8 to 10 revition
+2006 december 8 to 10, Oscar Chavarro: <<?>>
   - Organizer abstract classes incorporated for exceptions, renderers, gizmos,
     controllers and persistence classes
   - Implementation of reader 3ds started, first partial version operational
 
-Changes in 2006 december 16 to 17 revition
+2006 december 16 to 17, Oscar Chavarro: <<?>>
   - Material support double sided and single sided configurations
   - Added details to Reader3ds
   - object.getClass().getName().equals(...) hierarchy detection update to
     the use of "instanceof" Java operator
   - Advances in SceneEditorApplication
 
-Changes in 2006 december 18 to 21 revition
+2006 december 18 to 21, Oscar Chavarro: <<?>>
   - Continued implementation of IndexedColorImage and related classes
   - First version of ImagePersistenceSGI class for reading sgi format images
     (only grayscale images managed)
@@ -174,37 +198,37 @@ Changes in 2006 december 18 to 21 revition
   - First test in CameraExample towards dual application/applet running mode
   - First texture mapping tests based on Spheres and boxes
 
-Changes in 2006 december 24 revition
+2006 december 24, Oscar Chavarro: <<?>>
   - Ported to JDK1.6, some minor warnings fixed
 
-Changes in 2006 december 28-30 revition
+2006 december 28-30, Oscar Chavarro: <<?>>
   - First tests of Nvidia Cg support :)
   - Minor adjustments to Jogl*Renderer classes
   - toFloatVect method generalized to float and double and renamed to 'exportToArray',
     available in ColorRgb, Vector3D, Vector4D and Matrix4x4.
 
-Changes in 2007 january 2 revition
+2007 january 2, Oscar Chavarro: <<?>>
   - First functional and correct Nvidia Cg shader for bump-mapping! :)
 
-Changes in 2007 january 3 revition
+2007 january 3, Oscar Chavarro: <<?>>
   - First implementation for low level Euler operator in PolyhedralBoundedSolid
 
-Changes in 2007 january 17 revition
+2007 january 17, Oscar Chavarro: <<?>>
   - CameraExample and CameraSwingExample templates expanded to dual
     application / applet operation and quality checked for code comments.
 
-Changes in 2007 january 21 revition
+2007 january 21, Oscar Chavarro: <<?>>
   - CameraExample and CameraSwingExample applets configured and tested in
     web environments, and applets_index.html added.
 
-Changes in 2007 february 22 revition
+2007 february 22, Oscar Chavarro: <<?>>
   - First skeleton to support VoxelVolume
 
-Changes in 2007 april 8 revition
+2007 april 8, Oscar Chavarro: <<?>>
   - First succesful tests for the operators mks, mev and mef in the polyhedral
     boundary representation based upon Mantylla text.
 
-Changes in 2007 april 21 revition
+2007 april 21, Oscar Chavarro: <<?>>
   - Face triangle tesselation in JoglPolyhedralBoundedSolidRenderer, now
     compatible with multiple loop face polyhedra.
   - First succesful tests for the operator lkemr in the polyhedral boundary
@@ -216,29 +240,29 @@ Changes in 2007 april 21 revition
     hole creation for N-genus topological structures.
   - First version of PolyhedralBoundedSolid.validateModel method.
 
-Changes in 2007 april 22 revition
+2007 april 22, Oscar Chavarro: <<?>>
   - PolyhedralBoundedSolidExample in testsuite adds multiple mid-level 
     solid modeling operations from chapters 11 and 12 of Mantylla text. :)
   - Design level changes in class hierarchies. MediaEntity & FundamentalEntity
     abstract classes incorporated.
 
-Changes in 2007 may 1 revition
+2007 may 1, Oscar Chavarro: <<?>>
   - Image persistence linked directly to JDK's ImageIO class. Not depending
     on slow and deprecated sun propiertary API anymore.
 
-Changes in 2007 may 2 revition
+2007 may 2, Oscar Chavarro: <<?>>
   - Vector3D methods for spherical to cartesian and cartesian to spherical
     coordinate translations
   - Added visual debug ray control to SceneEditorApplication
   - CubemapBackground.colorInDireccion correctly implemented
 
-Changes in 2007 may 4 revition
+2007 may 4, Oscar Chavarro: <<?>>
   - ReaderObj modified to handle obj files with negative index integers
 
-Changes in 2007 may 8 revition
+2007 may 8, Oscar Chavarro: <<?>>
   - Minor checks and modifications to CgShader examples
 
-Changes in 2007 may 9 revition
+2007 may 9, Oscar Chavarro: <<?>>
   - New FixedBackground
   - SceneEditorApplication upgraded to support testing of FixedBackground
   - Image clonning operations added
@@ -248,37 +272,37 @@ Changes in 2007 may 9 revition
     applications based in raytracing)
   - First working and tested implementation of VoxelVolume
 
-Changes in 2007 may 11-13 revition
+2007 may 11-13, Oscar Chavarro: <<?>>
   - First implementation of doContainmentTest in ParametricCubicCurve, Sphere
     and TriangleMesh/TriangleMeshGroup classes
 
-Changes in 2007 may 15 revition
+2007 may 15, Oscar Chavarro: <<?>>
   - First implementation of sphere/voxel set intersection algorithm towards the
     search engine for 3D models technique decribed by [FUNK2003], visual 
     debugging incorporated to SceneEditorApplication. :)
 
-Changes in 2007 may 17-18 revition
+2007 may 17-18, Oscar Chavarro: <<?>>
   - Fixed a bug in Matrix4x4.invert
   - Geometry.doVoxelization and optimized version for TriangleMesh
 
-Changes in 2007 may 20-22 revition
+2007 may 20-22, Oscar Chavarro: <<?>>
   - Added the SpharmonicKit package to compute spherical harmonics (native
     JNI method tested only in linux)
 
-Changes in 2007 may 23 revition
+2007 may 23, Oscar Chavarro: <<?>>
   - First working implementation of a Search Engine for 3D models! :)
 
-Changes in 2007 may 24 revition
+2007 may 24, Oscar Chavarro: <<?>>
   - Spherical harmonics feature vector shape descriptor modified to have
     spheres centered at object center of mass (not geometric center)
   - Normalmap gradient technique for generating contourns drawings (from
     Zbuffer) incorporated into SceneEditorApplication
 
-Changes in 2007 may 26 revition
+2007 may 26, Oscar Chavarro: <<?>>
   - JoglSimpleBodyRenderer and JoglSimpleBodyGroupRenderer. Some new
     organization of SceneEditorApplication
 
-Changes in 2007 may 29-30 revition
+2007 may 29-30, Oscar Chavarro: <<?>>
   - Offline rendering generation (Pbuffer based technique) of orthogonal views
     for a selected object in SceneEditorApplication
   - First version of interface ImageProcessing!
@@ -286,33 +310,33 @@ Changes in 2007 may 29-30 revition
   - ReaderObj normalizes typical .obj aligment (Y is up) to typical
     Aquynza/VitralSDK alignment (Z is up)
 
-Changes in 2007 june 3 revition
+2007 june 3, Oscar Chavarro: <<?>>
   - Offline rendering generation (Pbuffer based technique) of orthogonal views
     for a selected object in SceneEditorApplication, now complemented with
     use of main GL context for use in computers without 3D acceleration
   - ImageProcessing.processDistanceFieldWithArray
 
-Changes in 2007 june 4 revition
+2007 june 4, Oscar Chavarro: <<?>>
   - SearchEngineFor3DModels compatible with machines without Pbuffer
   - SearchEngineFor3DModels computes Fourier coefficients for radial functions
     over projected views' distance fields
 
-Changes in 2007 june 5-6 revition
+2007 june 5-6, Oscar Chavarro: <<?>>
   - First implementation of 2D sketch functionality in the
     SearchEngineFor3DModels application
 
-Changes in 2007 june 8 revition
+2007 june 8, Oscar Chavarro: <<?>>
   - First working implementation of 2D sketch functionality, based on FFT
     for 1D functions :)
 
-Changes in 2007 june 11 revition
+2007 june 11, Oscar Chavarro: <<?>>
   - Reader3ds additions to load texture coordinates, support texture maps
     and handle more chunks :)
   - JoglTriangleMeshRenderer can manage texture coordinates for textures
     activated externally to TriangleMesh (i.e. global texture associated
     with containing Body)
 
-Changes in 2007 june 15, 16 revition
+2007 june 15/16, Oscar Chavarro: <<?>>
   - Refactoring SearchEngineFor3DModels towards a component paradigm based
     application.
   - First framework level components included (shape matching package)
@@ -320,41 +344,41 @@ Changes in 2007 june 15, 16 revition
   - PrimitiveCountShapeDescriptor incorporated
   - SearchEngineFor3DModels exportDatabase to text operation implemented
 
-Changes in 2007 june 17 revition
+2007 june 17, Oscar Chavarro: <<?>>
   - Testing of Reader3ds class
   - Fine tunning of Reader3ds error handling
   - Fine tunning of SearchEngineFor3DModels application and tests with the
     memory loaded database
 
-Changes in 2007 june 20 revition
+2007 june 20, Oscar Chavarro: <<?>>
   - First SVN controlled version in orion.javeriana.edu.co
   - First support for model previewing thumbnail image generation in
     SearchEngineFor3DModels
   - Offline rendering (hardware accelerated) and screenshot based automatic
     rendering have now a consistent design.
 
-Changes in 2007 june 21 revition
+2007 june 21, Oscar Chavarro: <<?>>
   - Network controlled console version for SearchEngineFor3DModels (sockets
     based).
 
-Changes in 2007 june 24-25 revition
+2007 june 24-25, Oscar Chavarro: <<?>>
   - First version of applet for controlling the SearchEngineFor3DModels system
     from web.
   - First version of servlet for accessing the SearchEngineFor3DModels system
     from web (empty J2EE / JSP / Servlet skeleton, not using Vitral yet).
 
-Changes in 2007 june 26 revition
+2007 june 26, Oscar Chavarro: <<?>>
   - SearchEngineFor3DModels refactorized and organized. Better results
     management for avoiding repeating hits.
 
-Changes in 2007 june 27 revition
+2007 june 27, Oscar Chavarro: <<?>>
   - First succesfully and fully working web application in
     SearchEngineFor3DModels, proved with applet / servlet test! :)
 
-Changes in 2007 july 1 revition
+2007 july 1, Oscar Chavarro: <<?>>
   - Fixed addList processing bug in SearchEngineFor3DModels
 
-Changes in 2007 july 2 revition
+2007 july 2, Oscar Chavarro: <<?>>
   - SearchEngineFor3DModels supporting 2D queries with multiple sketches!
   - SearchEngineFor3DModels supporting multiple simultaneous users with
     separate sessions, and cached results independent storage for each user,
@@ -362,45 +386,46 @@ Changes in 2007 july 2 revition
   - SearchEngineFor3DModels is able of managing not file-stored images, and
     sending them directly from servlet to browser.
 
-Changes in 2007 july 6 revition
+2007 july 6, Oscar Chavarro: <<?>>
   - SearchEngineFor3DModels includes a preprocessed views report in shape
     matching from 2D sketches.
 
-Changes in 2007 july 7 revition
+2007 july 7, Oscar Chavarro: <<?>>
   - SearchEngineFor3DModels algoritms generalized to support interface
     ShapeDatabase.
   - SearchEngineFor3DModels include spherical harmonics search method in
     find similar shapes option link in web results.
 
-Changes in 2007 july 11 revition
+2007 july 11, Oscar Chavarro: <<?>>
   - Design updates.  
 
-Changes in 2007 july 22 revition
+2007 july 22, Oscar Chavarro: <<?>>
   - Design update: EnvironmentPersistence.importEnvironment operation
     generalized and applied to VSDK testsuite samples. Legacy ReaderObj.read
-    removed (made private). Minor design revitions and tests.
+    removed (made private). Minor designs and tests.
   - Design update: EnvironmentPersistence.importEnvironment operations using
     newly incorporated "SimpleScene" class.
   - Starting up ReaderAse code.
 
-Changes in 2007 august 2 revition
+2007 august 2, Oscar Chavarro: <<?>>
   - Stating up ReaderVtk code and creating basic parsing structure for
     ReaderAse.
   - 1h25min: Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
-Changes in 2007 august 4 revition
+
+2007 august 4, Oscar Chavarro: <<?>>
   - SciVisApplication application added
   - SpharmonicKit native library ported to Windows
 
-Changes in 2007 august 28 revition
+2007 august 28, Oscar Chavarro: <<?>>
   - Polyhedral bounded solid model jogl rendering complete for the basic
     shading cases! :) (2h)
   - 2h40min: PolyhedralBoundedSolid.doIntersection working!!! :) :)
 
-Changes in 2007 september 4 revition
+2007 september 4, Oscar Chavarro: <<?>>
   - 1h48m: JoglPolyhedralBoundedSolidRenderer.drawDebugEdges implements 
     Zajac/Loutrel hidden edge identification for convex polyhedra.
 
-Changes in 2007 september 5 revition
+2007 september 5, Oscar Chavarro: <<?>>
   - 1h05min: HiddenLineRenderer with basic logic control structure for
     Appel algorithm support...
   - 50min: computing quantitative invisibility in PolyhedralBoundedSolid
@@ -410,16 +435,16 @@ Changes in 2007 september 5 revition
   - 1h15min: first working implementation of Appel's algorithm! :)
     (not tested with special cases).
 
-Changes in 2007 september 18 revition
+2007 september 18, Oscar Chavarro: <<?>>
   - 27min: Camera.generateRay supports operation with orthogonal mode.
   - 33min: Translation gizmo small review
 
-Changes in 2007 september 20 revition
+2007 september 20, Oscar Chavarro: <<?>>
   - 2h40min: Integrating generic Nvidia Cg automatic material shader management
   - 35min: Testing Nvidia Cg automatic material shader on systems without Cg
   - 50min: Nvidia Cg automatic material shader programming interface ready!
 
-Changes in 2007 september 22 revition
+2007 september 22, Oscar Chavarro: <<?>>
   - 26min: indenting and untabifying some modules.
   - 2h: Camera.projectPoint updated to support orthogonal cases, InfinitePlane
     operations for projectDistance, projectPoint and mirrorPoint.
@@ -428,21 +453,21 @@ Changes in 2007 september 22 revition
   - 1h50min: TranslationGizmo bettered, special case of click outside object
     but inside gizmo working.
 
-Changes in 2007 september 23 revition
+2007 september 23, Oscar Chavarro: <<?>>
   - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 
     3dstudio max like interaction and display. First version of
     GeometricModeler class.
   - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
 
-Changes in 2007 october 7 revition <<214min>>
+2007 october 7, Oscar Chavarro: <<214min>>
   - 38min: CommandServer (basic test app)
   - 38min: Researching how to get strokes from a JTextField :)
   - 42min: Command set data structures
   - 30min: Automatic erasing of command speech based on time outs
   - 36min: networking server funnctionality
 
-Changes in 2007 october 14 revition <<232min>>
+2007 october 14, Oscar Chavarro: <<232min>>
   - 46min: RegularExpression empty classes structure and example testsuite
     program
   - 44min: RegularExpression parser and some tree building research
@@ -450,42 +475,42 @@ Changes in 2007 october 14 revition <<232min>>
   - 1h39min: first RegularExpression implementation working, renamed to
     AlgebraicExpression
 
-Changes in 2007 october 15 revition <<135min>>
+2007 october 15, Oscar Chavarro: <<135min>>
   - 52min: FunctionalExplicitSurface :)
   - 37min: Fixing bugs in AlgebraicExpression
   - 46min: EnvironmentPersistence.exportObj
 
-Changes in 2007 october 20 revition <<247min>>
-  - 1h30min: ParametricBiCubicPatch and its renderer revition.
+2007 october 20, Oscar Chavarro: <<247min>>
+  - 1h30min: ParametricBiCubicPatch and its renderer.
   - 2h37min: Fixing an structural bug in Ferguson parametric patches
     management.
 
-Changes in 2007 october 21 revition <<240min>>
+2007 october 21, Oscar Chavarro: <<240min>>
   - 3h: Revisiting and cleaning parametric bicubic patch management,
     representation and Jogl rendering code.
   - 1h: Bezier parametric bicubic patch management revisited.
 
-Changes in 2007 october 25 revition <<68min>>
+2007 october 25, Oscar Chavarro: <<68min>>
   - 1h08min: ReaderGts class added
 
-Changes in 2007 october 26 revition <<40min>>
+2007 october 26, Oscar Chavarro: <<40min>>
   - 40min: WriterGts class added
 
-Changes in 2007 october 30 revition <<90min>>
+2007 october 30, Oscar Chavarro: <<90min>>
   - 1h30min: MatrixNxM basic class
 
-Changes in 2007 november 13 revition <<170min>>
+2007 november 13, Oscar Chavarro: <<170min>>
   - 50min: JoglInfinitePlaneRenderer, minor additions to 
     CameraControllerAquynza
   - 2h: Plane rendering and managing revisited. Camera.getBoundingPlanes added.
 
-Changes in 2007 december 28 revition <<60min>>
+2007 december 28, Oscar Chavarro: <<60min>>
   - 1h: studying WireframeOfflineExample, documenting it and generalizing it
 
-Changes in 2007 december 29 revition <<180min>>
+2007 december 29, Oscar Chavarro: <<180min>>
   - 3h: Camera.clipLineCohenSutherlandCanonicVolume
 
-Changes in 2007 december 30 revition <<401min>>
+2007 december 30, Oscar Chavarro: <<401min>>
   - 1h25min: Camera.clipLineCohenSutherlandCanonicVolume
   - 1h22min: WireframeRenderer class created, and supporting surfaces and
     solids
@@ -493,51 +518,51 @@ Changes in 2007 december 30 revition <<401min>>
     First working wireframe renderer running on a Nokia E61 cellphone!
   - 27min: J2meCalligraphic2DBufferRenderer
 
-Changes in 2007 december 31 revition <<67min>>
+2007 december 31, Oscar Chavarro: <<67min>>
   - 1h05min: KeyEvent, AwtSystem and updates to CameraControllers
   - 2h: J2eeSystem
 
-Changes in 2008 january 1 revition <<180min>>
+2008 january 1, Oscar Chavarro: <<180min>>
   - 3h: added camera control / KeyEvent management to Vitral J2ME port
 
-Changes in 2008 january 2 revition <<292min>>
+2008 january 2, Oscar Chavarro: <<292min>>
   - 1h: studying and fixing Camera normalization matrix generation
   - 2h52min: Sphere.exportToPolyhedralBoundedSolid :)
   - 1h: Migrating and testing J2ME example with raytracer included!
 
-Changes in 2008 january 2 revition <<60min>>
+2008 january 2, Oscar Chavarro: <<60min>>
   - 1h: First JNLP deployable example (CameraExample)
 
-Changes in 2008 january 12 revition <<60min>>
+2008 january 12, Oscar Chavarro: <<60min>>
   - 1h: study / review of PolyhedralBoundedSolidExample and [MANT1988].12
 
-Changes in 2008 january 13 revition <<60min>>
+2008 january 13, Oscar Chavarro: <<60min>>
   - 1h: Cone.exportToPolyhedralBoundedSolid
 
-Changes in 2008 january 14 revition <<50min>>
+2008 january 14, Oscar Chavarro: <<50min>>
   - 32min: Arrow.exportToPolyhedralBoundedSolid
   - 18min: Revisiting GlyphExample
 
-Changes in 2008 march 19 revition <<303min>>
+2008 march 19, Oscar Chavarro: <<303min>>
   - 60min: revision of font management import at AwtFontReader, fixing
     a bug related with glyphs consisting of multiple contours.
   - 1h15min: fixed a bug on PolyhedralBoundedSolid.kemr operator
   - 2h48min: writting and testing GeometricModeler.createBrepFromParametricCurve
 
-Changes in 2008 march 20 revition <<30min>>
+2008 march 20, Oscar Chavarro: <<30min>>
   - 30min: preparing example for testing PolyhedralBoundedSolid gluing
     operations
   - 45min: implementing 2/3 of gluing algorithm for PolyhedralBoundedSolid.
 
-Changes in 2008 march 22/23 revition <<600min>>
+2008 march 22/23, Oscar Chavarro: <<600min>>
   - 10h: implementing PolyhedralBoundedSolid operators kvfs, lkev and lmekr.
     Revisiting [MANT1988] text about that operations and examples!
     Making work the loopglue operation! :)
 
-Changes in 2008 march 24 revition <<45min>>
+2008 march 24, Oscar Chavarro: <<45min>>
   - 45min: implementing rotationalSweepVersion1 on PolyhedralBoundedSolidExample.
 
-Changes in 2008 march 26 revition <<275min>>
+2008 march 26, Oscar Chavarro: <<275min>>
   - 1h10min: revisiting PolyhedralBoundedSolid.lmev operator, adding unhandled
     case.
   - 15min: revisiting PolyhedralBoundedSolid.lkef operator, fixing bug for
@@ -547,18 +572,18 @@ Changes in 2008 march 26 revition <<275min>>
   - 50min: PolyhedralBoundedSolidSplitter.splitGenerate reduction step
   - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
 
-Changes in 2008 march 27 revition <<210min>>
+2008 march 27, Oscar Chavarro: <<210min>>
   - 1h: PolyhedralBoundedSolidSplitter.splitClassify reduction step
   - 2h30min: PolyhedralBoundedSolidSplitter.splitConnect
 
-Changes in 2008 march 28 revition <<85min>>
+2008 march 28, Oscar Chavarro: <<85min>>
   - 15min: PolyhedralBoundedSolidSplitter.splitFinish structure
   - 20min: PolyhedralBoundedSolid.lmfkrh and PolyhedralBoundedSolid.laringmv
   - 50min: First complete but untested PolyhedralBoundedSolidSplitter,
     only working in the simple cube test. Leaving wrong faces on cube with
     hole and failing for complex test case object.
 
-Changes in 2008 march 28-30 revition <<690min>>
+2008 march 28-30, Oscar Chavarro: <<690min>>
   - 20min: checking PolyhedralBoundedSolidSplitter for managing the splitting
     of solids with holes.
   - 10h: studying wrong working of PolyhedralBoundedSolidSplitter for
@@ -566,51 +591,51 @@ Changes in 2008 march 28-30 revition <<690min>>
     making testing.
   - 1h:10min: Fixing the encountered error (ordering on the `nbr` array).
 
-Changes in 2008 march 30 revition <<30min>>
+2008 march 30, Oscar Chavarro: <<30min>>
   - 30min: PolyhedralBoundedSolid.maximizeFaces
 
-Changes in 2008 march 31 revition <<140min>>
+2008 march 31, Oscar Chavarro: <<140min>>
   - 2h20min: Revisiting [MANT1988] text and making correspondences table
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures.
 
-Changes in 2008 april 1 revition <<120min>>
+2008 april 1, Oscar Chavarro: <<120min>>
   - 2h: Revisiting [MANT1988] text and completing the correspondences table
     between Vitral SDK's PolyhedralBoundedSolid implementation and original
     text's procedures. Code documentation updated.
 
-Changes in 2008 april 2 revition <<204min>>
+2008 april 2, Oscar Chavarro: <<204min>>
   - 45min: structural elements for PolyhedralBoundedSolidSetOperator code
   - 10min: PolyhedralBoundedSolidSetOperator.updmaxnames
   - 2h29min: PolyhedralBoundedSolidSetOperator.setOpGenerate reduction step
     procedures.
 
-Changes in 2008 april 3 revition <<113min>>
+2008 april 3, Oscar Chavarro: <<113min>>
   - 1h53min: PolyhedralBoundedSolidSetOperator.vtxFacClassify and related
     study and tests.
 
-Changes in 2008 april 5 revition <<450min>>
+2008 april 5, Oscar Chavarro: <<450min>>
   - 6h30min: advancing on the vertex classification of sectors for 
     PolyhedralBoundedSolidSetOperator, and re-studying [MANT1988].15.
   - 1h: studing algorithms for vertex joining at 
     PolyhedralBoundedSolidSetOperator.
 
-Changes in 2008 april 7 revition <<70min>>
+2008 april 7, Oscar Chavarro: <<70min>>
   - 1h10min: Studying operation PolyhedralBoundedSolidSetOperator.setOpConnect.
     Possible bugs founded, some Euler operators appears not to be handling
     special cases propiertly. Check pending.
 
-Changes in 2008 april 7 revition <<120min>>
+2008 april 7, Oscar Chavarro: <<120min>>
   - 2h: Fixing an error on PolyhedralBoundedSolidSetOperator.setOpConnect.
 
-Changes in 2008 april 8 revition <<225min>>
+2008 april 8, Oscar Chavarro: <<225min>>
    - 45min: PolyhedralBoundedSolidOperator class and starting 
      PolyhedralBoundedSolidSetOperator.setOpFinish
    - 3h: studying PolyhedralBoundedSolidSetOperator.setOpFinish. First
      partially successful tests for simple boolean operators on cases
      not involving vertex/vertex classification.
 
-Changes in 2008 april 9 revition <<363min>>
+2008 april 9, Oscar Chavarro: <<363min>>
    - 1h13min: minor bug fixes in PolyhedralBoundedSolid. First
      successful tests for simple boolean operators on cases not involving
      vertex/vertex classification.
@@ -619,12 +644,12 @@ Changes in 2008 april 9 revition <<363min>>
    - 3h: extensive study of "on-sectors" reclassification and intersections
      from [MANT1988].15.6.2. and [MANT1986].6.2.2.
 
-Changes in 2008 april 10 revition <<222min>>
+2008 april 10, Oscar Chavarro: <<222min>>
    - 3h42min: studying and implementing the [MANT1986] edge/edge sector
      reclassification logic on
      PolyhedralBoundedSolidSetOperator.processEdgeEdgeSectorIntersection.
 
-Changes in 2008 april 11 revition <<232min>>
+2008 april 11, Oscar Chavarro: <<232min>>
    - 3h: Studying some failing cases for PolyhedralBoundedSolidSetOperator.
      In the process, debug code structure was implemented, and some
      comments were added to the code.
@@ -635,7 +660,7 @@ Changes in 2008 april 11 revition <<232min>>
      bug on PolyhedralBoundedSolidSetOperator that didn't allowed to work
      all simple cases. It resulted to be a bad management of loose ends. :)
 
-Changes in 2008 april 12/13 revition <<780min>>
+2008 april 12/13, Oscar Chavarro: <<780min>>
   - 13h: Studying in depth the implementation details for
     PolyhedralBoundedSolidSetOperator. Finishing code, testing different cases,
     understanding in detail the model and making tests in paper.
@@ -643,11 +668,11 @@ Changes in 2008 april 12/13 revition <<780min>>
     [.wMANT2008], the original code from [MANT1988] published in K&R C
     from Martii Mantyla.
 
-Changes in 2008 april 14 revition <<120min>>
+2008 april 14, Oscar Chavarro: <<120min>>
   - 2h: First apparently working PolyhedralBoundedSolidSetOperator tests. :)
     PolyhedralBoundedSolid.lkev bugs fixed.
 
-Changes in 2008 april 15 revition <<362min>>
+2008 april 15, Oscar Chavarro: <<362min>>
   - 45min: Building CSG object samples from APPE1967 (CSG Test object 4)
   - 1h20min: PolyhedralBoundedSolid tests debug, bug found on maximizeFaces
   - 1h40min: The maximizeFaces case bug located at the case of lkev of edge
@@ -657,18 +682,18 @@ Changes in 2008 april 15 revition <<362min>>
   - 30min: (CSG Test object 5) found not working - triple intersection point
   - 362min: working on CSG Test 5
 
-Changes in 2008 april 16 revition <<120min>>
+2008 april 16, Oscar Chavarro: <<120min>>
   - 2h: Subversion control version system migrated to SourceForge.net.
 
-Changes in 2008 april 17 revition <<140min>>
+2008 april 17, Oscar Chavarro: <<140min>>
   - 2h: Bug detected at the PolyhedralBoundedSolidSetOperator.setOpConnect
     stage: halfedges at neigborhoods must be in a consistent order from IN
     to OUT for connect to work. Perhaps other configurations will lead to
     same problem. CSG Test object 5 working for UNION, failing for INTERSECTION
-    and DIFFERENCE. Case revition pending.
+    and DIFFERENCE. Case pending.
   - 20min: Simple test model from figure [APPE1967].7. replicated. :)
 
-Changes in 2008 april 17 revition <<70min>>
+2008 april 17, Oscar Chavarro: <<70min>>
   - 1h10min: [APPE1967] revisited. HiddenLineRenderer rechecked. It appears
     to be some error in special cases of
     PolyhedralBoundedSolid.computeQuantitativeInvisibility.
@@ -676,6 +701,24 @@ Changes in 2008 april 17 revition <<70min>>
     control of Media Wiki 1.5. An old version was installed due to
     compatibility problems with SourceForge infraestructure.
 
----------------------------------------------------------------------------
-TODO:
-  - Implement OBHU technique in SearchEngineFor3DModels
+2008 april 18, Oscar Chavarro: <<60min>>
+  - 1h: working on VitralWiki webpage content.
+
+2008 april 19, Oscar Chavarro: <<300min>>
+  - 5h: working on VitralWiki webpage content.
+
+2008 april 20, Oscar Chavarro: <<152min>>
+  - 30min: SimpleTestGeometryLibrary class created, and some test object
+    creations method promoted from PolyhedralBoundedSolidExample to this
+    class. Some other minor organization of code to place it in the processing
+    package.
+  - 10min: PSP log format unified.
+  - 20min: simple test model from figure [MANT1988].6.13.
+  - 20min: Revisiting [MANT1988] text and completing the correspondences table
+    for figure examples.
+  - 12min: simple test model from figure [MANT1988].15.1.
+  - 30min: simple test model from figure [MANT1988].15.2. Set operation
+    failing at finish and maximize faces.
+  - 1h: added J2ME application example to main sourcetree.
+
+===========================================================================
