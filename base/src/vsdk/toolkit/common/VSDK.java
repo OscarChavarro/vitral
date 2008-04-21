@@ -254,6 +254,12 @@ public class VSDK
         System.err.println(msg);
 
         if ( level == FATAL_ERROR ) {
+            try {
+                throw new Exception("VSDK.reportMessage(FATAL_ERROR)");
+	    }
+	    catch ( Exception e ) {
+                e.printStackTrace();
+	    }
             System.exit(1);
         }
     }

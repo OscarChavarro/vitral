@@ -32,6 +32,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.processing.ComputationalGeometry;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
@@ -263,7 +264,7 @@ public class HiddenLineRenderer extends RenderingElement
             t0 = ray.direction.length() - 6*VSDK.EPSILON;
             ray.direction.normalize();
             if (
-             Geometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c, p, n) &&
+             ComputationalGeometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c, p, n) &&
              ray.t < t0
             ) {
                 // The breaking point in the current testing edge corresponding

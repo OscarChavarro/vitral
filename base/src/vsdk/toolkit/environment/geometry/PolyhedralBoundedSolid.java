@@ -33,16 +33,35 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 
 /**
 This class encapsulates a polyhedral boundary representation for 2-manifold
-solids, as presented in [MANT1988]. As noted in [MANT1988].10.2.1:
-The `PolyhedralBoundedSolid` class uses a five-level hierarchic data structure,
-consisting of:
+solids, as presented in [MANT1988].
+
+As noted in [MANT1988].6.2.1., a "polyhedral model" is a boundary model
+that has only planar faces. So, the name of this class `PolyhedralBoundedSolid`
+implies that its faces should be planar. However, some intermediate steps
+in complex algorithms such as the splitter and the set operators, permits
+the use of "special" non planar faces for "gluing".  Check [MANT1988] book
+for more details on that.
+
+As noted in [MANT1988].10.2.1, current implementation of the
+`PolyhedralBoundedSolid` class uses a five-level hierarchical data
+structure, consisting of:
   - PolyhedralBoundedSolid
   - _PolyhedralBoundedSolidFace
   - _PolyhedralBoundedSolidLoop
   - _PolyhedralBoundedSolidHalfEdge (and _PolyhedralBoundedSolidEdge)
   - _PolyhedralBoundedSolidVertex
-Current class forms the root element that gives access to faces, edges and
-vertices of the model through agregations in CircularDoubleLinkedList's.
+Current class forms the root element (Facade) that gives access to faces,
+edges and vertices of the model through agregations in
+CircularDoubleLinkedList's.
+
+Note that this is a quite complex datastructure. It implementation follows
+the strategies outlined on book [MANT1988]. For the sake of clarity, it
+was decided to keep most of its internal datastructures public, breaking
+so the encapsulation concept. Note that if internal data structures are
+made private and a accesing get/set methods are provided for them, then
+the complexity of algorithms using current datastructure should become
+unmanageable, both in terms of code verbosity and bad performance (time
+complexity) due to extra calls to a lot of simple methods.
 */
 public class PolyhedralBoundedSolid extends Solid {
     /// Check the general attribute description in superclass Entity.
@@ -1476,9 +1495,20 @@ public class PolyhedralBoundedSolid extends Solid {
 
 
     /**
-    This method runs a set of validity tests to check te integrity of the
+    This method runs a set of validity tests to check the integrity of the
     data structure. If all of the tests goes well, this method returns true.
     If any of the test fails, this method return false.
+
+    As noted on section [MANT1988].6.3. a  boundary model is "valid" if:
+    1. The set of faces of the boundary model "closes", i.e., forms the
+       complete skin of the solid with no missing parts.
+    2. Faces of the model do not intersect each other except at common
+       vertices or edges (altough some relaxed criteria from [MANT1988].15.
+       allows faces to intersect with edges or vertices from other faces,
+       as long as the edges or vertex be the only parts of a face touching
+       the interior of other face).
+    3. The boundaries of faces are simple polygons that do not intersect
+       themselves (i.e. an "8" does not describe a correct face boundary).
 
     Current methods (already implemented):
       - All loops have an starting halfedge

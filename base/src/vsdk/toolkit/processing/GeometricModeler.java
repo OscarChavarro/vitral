@@ -24,7 +24,9 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 /**
 This is a utility class containing a lot of geometry operations (mostly
 geometry generating and modifying operations). This is a companion class
-for the `ComputationalGeometry` class, which holds geometrical querys.
+for the `ComputationalGeometry` class which holds geometrical querys and
+`SimpleTestGeometryLibrary` which contains another geometry generation
+procedures.
 
 This class is comprised of static methods, depending only of VSDK's Entity's.
 From a design point of view, it can be view as an "strategy" design pattern
