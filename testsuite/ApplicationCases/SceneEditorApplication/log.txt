@@ -3,24 +3,24 @@ but the necessary additions made to the toolkit
 
 Started from stage 041 CameraSwing
 
-August 8 2005, Oscar Chavarro: <<33min>>
+2005 august 8, Oscar Chavarro: <<33min>>
   - 23min: initial widget redistribution
   - 10min: initial splitpane tests
 
-August 8 2005, Oscar Chavarro: <<160min>>
+2005 august 8, Oscar Chavarro: <<160min>>
   - 2h: swing study and minor configurations, model/GUI decoupled, 
     look & feel dynamic changes tested, DecimalFormat added to toString
     methods in Vector3D and Matrix4x4
   - 40min Parser tests to load a GUI specification file 
 
-September 7 2005, Oscar Chavarro: <<45min>>
+2005 september 7, Oscar Chavarro: <<45min>>
   - 45min: first code to load menus from file and build them in swing
 
-March 14 2006, Oscar Chavarro: <<30min>>
+2006 march 14, Oscar Chavarro: <<30min>>
   - 30min: first simple Scene structure. All parts are public, a
     default scene is created and this Scene model is independent of JOGL
 
-March 15 2006, Oscar Chavarro: <<295min>>
+2006 march 15, Oscar Chavarro: <<295min>>
   - 2h: swing studying for Tab distribution of buttons commands in the
     left tabbed pane with inside scrollpanned areas.
   - 55min: added functionality of things inclusion to the GUI and first
@@ -30,7 +30,7 @@ March 15 2006, Oscar Chavarro: <<295min>>
     account the selected interaction mode.
   - 50min: Cursor feedback interaccion research... changing cursor image...
 
-March 15 2006, Oscar Chavarro: <<320min>>
+2006 march 15, Oscar Chavarro: <<320min>>
   - 1h40min: Building first gizmos into the vsdk toolkit, and testing in this
     program. This implied activating the QualitySelection Infraestructure.
     Basic interactive selection mechanisms implemented, using arrows keys
@@ -39,22 +39,22 @@ March 15 2006, Oscar Chavarro: <<320min>>
   - 1h15min: Implemented basic rotate and scale gizmos
   - 1h40min: Implemented basic Jogl gizmos renderers  :-)
 
-March 16 2006, Oscar Chavarro: <<65min>>
+2006 march 16, Oscar Chavarro: <<65min>>
   - 1h5min Adding lights to the model (incomplete)
 
-March 16 2006, Oscar Chavarro: <<85min>>
+2006 march 16, Oscar Chavarro: <<85min>>
   - 55min: Fixing lighting not anticipated issue: updated Material and light 
     renderers in the toolkit
   - 30min: Added cone feature
 
-March 19 2006, Oscar Chavarro: <<183min>>
+2006 march 19, Oscar Chavarro: <<183min>>
   - 14min: Cleaning jogl package in toolkit 
   - 40min: Developing interface ProgressMonitor and Console implementation
   - 35min: Adding raytracing render option to editor and image control window
   - 50min: Preparing raytracing example for reuse
   - 44min: Adding raytracing functionality to the application :)
 
-March 20 2006, Oscar Chavarro: <<106min>>
+20 march 2006, Oscar Chavarro: <<106min>>
   - 29min: Making reference plane for the editor
   - 35min: Updating toolkit to manage rendering of minmaxes and minmaxframes
            (first version, only accurate with Spheres)
@@ -62,22 +62,22 @@ March 20 2006, Oscar Chavarro: <<106min>>
            its base)
   - 32min: Integration of Box, and reconvertion from Cube
 
-March 28 2006, Oscar Chavarro: <<69min>>
+28 march 2006, Oscar Chavarro: <<69min>>
   - 1h09min: Implementing cylinder case intersection in class Cone
 
-March 29 2006, Oscar Chavarro: <<43min>>
+29 march 2006, Oscar Chavarro: <<43min>>
   - 43min: Creating Arrow geometry classes: model, Jogl Renderer,
     intersection and minmax operations and test schema in the scene application
 
-April 6 2006, Oscar Chavarro: <<175min>>
+2006 april 6, Oscar Chavarro: <<175min>>
   - 1:30min: Zbuffer access operations with palette color encoding
   - 25min: Palette selection option and testing
   - 1h Gizmo design (no coding, just analysis)
 
-April 7 2006, Oscar Chavarro: <<115min>>
+2006 april 7, Oscar Chavarro: <<115min>>
   - 1h55min: Basic TranslateGizmo geometric model  :-)
 
-April 8 2006, Oscar Chavarro: <<416min>>
+2006 april 8, Oscar Chavarro: <<416min>>
   - 1h:35min: TranslationGizmo geometry basic model complete, and consistent
     with ray intersection operations for element selection.
   - 50min: TranslationGizmo element selection behavior
@@ -89,7 +89,7 @@ April 8 2006, Oscar Chavarro: <<416min>>
 
 <<TOTAL>> 2140 min (35h40min)
 
-April 9 2006, Oscar Chavarro:
+2006 april 9, Oscar Chavarro:
   - 52min: Mouse drag behavior for TranslationGizmo axes from mouse deltaY with
     selection to combine with deltaX. Working for individual axes, but not
     for positions outside axes...
@@ -99,32 +99,32 @@ April 9 2006, Oscar Chavarro:
   - 30min: TranslationGizmo: Automatic resizing
   - 30min: JoglTranslationGizmoRenderer updated to manage its own lighting
 
-May 3 2006, Oscar Chavarro:
+2006 may 3, Oscar Chavarro:
   - 20min: Adding ParametricCubicCurve sample
   - 25min: Adding ParametricBiCubicPatch sample
 
-Jul 17 2006, Oscar Chavarro:
+2006 jul 17, Oscar Chavarro:
   - 1h10min: Checking current GUI structure, and fixing minor bugs in file
     import logic
 
-Jul 18 2006, Oscar Chavarro:
+2006 jul 18, Oscar Chavarro:
   - 1h42min: Migrating GuiCache to GuiCachePersistence scheme 
     (Builder design pattern) and separating swing functionality
   - 1h: Implementing first version of swing menu construction from GuiCache
 
-Jul 19 2006, Oscar Chavarro:
+2006 jul 19, Oscar Chavarro:
   - 53min: event managing for menus in swing
   - 1h: swing study on menu management and mnemonics
   - 1h11min: building gui menu files for spanish and english
 
-Aug 9 2006, Oscar Chavarro:
+2006 aug 9, Oscar Chavarro:
   - 1h: Adding GuiCommandCache class and persistence (input)
   - 30min: Adding GuiButtonGroupCache class and persistence (input)
 
-Aug 11 2006, Oscar Chavarro:
+2006 aug 11, Oscar Chavarro:
   - 30min: Adding GuiButtonGroupCache gui creation
 
-Aug 12 2006, Oscar Chavarro:
+2006 aug 12, Oscar Chavarro:
   - 1h: Adding image icon managing for GuiButtonGroupCache
   - 40min: Adding image icon transparency to GuiButtonGroupCache :)
   - 30min: Swing adjustment of JPanels used for icon bars
@@ -132,14 +132,14 @@ Aug 12 2006, Oscar Chavarro:
   - 2h23min: internationalization session on gui files (english->spanish)
     and ButtonGroup styles on Swing
 
-Aug 20 2006, Oscar Chavarro:
+20 aug 2006, Oscar Chavarro:
   - 1h: Unicode escape sequences added to GUI menus, and first working tests
     for Japanese GUIs :)
 
-Nov 10 2006, Oscar Chavarro:
+2006 nov 10, Oscar Chavarro:
   - 10min: added quality selection management
 
-Dec 17 2006, Oscar Chavarro:
+2006 dec 17, Oscar Chavarro:
   - 10min: added object deletion capability
   - 45min: Java reflection mechanisms study and testing, in preparation
     for naming management for selection set interface
@@ -152,10 +152,10 @@ Dec 17 2006, Oscar Chavarro:
   - 30min: Swing study for general user defined modal dialogs
   - 40min: Selection corners managing
 
-Dec 18 2006, Oscar Chavarro:
+2006 december 18, Oscar Chavarro:
   - 10min: Swing building of selector dialog
 
-Dec 20 2006, Oscar Chavarro:
+20 december 2006, Oscar Chavarro:
   - 25min: testing texture mapping
   - 1h37min: Painting JOGL Sphere by hand... (no GLUT)  :-)
   - 52min: Texture mapping on raytracer... :-)
@@ -164,30 +164,30 @@ Dec 20 2006, Oscar Chavarro:
   - 1h30min: Bumpmapping in raytracing. Pending to check normal map and process
     computation. Actually given some errors...
 
-Dec 22 2006, Oscar Chavarro:
+22 december 2006, Oscar Chavarro:
   - 1h: Activated non fullscreen viewport and multiple rendering modes in 
     editor :-)
 
-May 3 2007, Oscar Chavarro:
+2007 may 3, Oscar Chavarro:
   - 3h: Added visual debug ray control
 
-May 26 2007, Oscar Chavarro:
+26 may 2007, Oscar Chavarro:
   - 50min: Separating spherical harmonics debug entities into a simple group,
     and generilizing selection strategy for next object / previous object
     and selection report label.
 
-June 2 2007, Oscar Chavarro:
+2 june 2007, Oscar Chavarro:
   - 1h30min: adding support for perspective debug on main GL context and
     separate PBuffer if available
 
-June 3 2007, Oscar Chavarro:
+2007 june 3, Oscar Chavarro:
   - 4h: view projection debugging supports a selection of multiple objects
 
-August 28 2007, Oscar Chavarro:
+28 august 2007, Oscar Chavarro:
   - 2h50min: Visual debug ray tracing capability casting rays in
     SceneEditorApplication
 
-September 17 2007, Oscar Chavarro:
+2007 september 17, Oscar Chavarro:
   - 1h40min: Preparation for supporting multiple JoglView's
   - 37min: Border drawing
   - 2h00min: Nice layouts working for 1 to 4 views! :)
@@ -195,23 +195,23 @@ September 17 2007, Oscar Chavarro:
     scheme using 2D offline rendering based on Java2D/Awt and texturing
     transparently over GL! :)
 
-September 18 2007, Oscar Chavarro:
+2007 september 18, Oscar Chavarro:
   - 30min: particularizing rendering mode and grid to each view
   - 22min: front facing grid for orthogonal views
   - 54min: placing axis reference base on views :)
 
-September 23 2007, Oscar Chavarro:
+23 september 2007, Oscar Chavarro:
   - 1h13min: base Swing setup for supporting geometry editors
 
-September 30 2007, Oscar Chavarro:
+2007 september 30, Oscar Chavarro:
   - 33min: VitralEditorServer base structure for tcp socket servicing
   - 44min: VitralEditorServer basic protocol
 
-October 7 2007, Oscar Chavarro: <<1h48min>>
+2007 october 7, Oscar Chavarro: <<1h48min>>
   - 1h8min: VitralCommandClient basic structure
   - 40min: VitralCommandClient application level commands processing.
     First version of vitral with voice recognition enabled via Dragon
     Naturally speaking (spanish) :)
 
-October 15 2007, Oscar Chavarro: <<3h>>
+2007 october 15, Oscar Chavarro: <<3h>>
   - 3h: ModifyPanelForFunctionalExplicitSurface :)
