@@ -721,4 +721,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     failing at finish and maximize faces.
   - 1h: added J2ME application example to main sourcetree.
 
+2008 april 27, Oscar Chavarro: <<300min>>
+  - 5h: Added _JNIExample
+
 ===========================================================================
