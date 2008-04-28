@@ -49,20 +49,20 @@ class VitralCommandServerProtocol implements Runnable
         //-----------------------------------------------------------------
         String msg = parent.currentCommand;
         if ( in.equals("getCommand") && msg != null ) {
-	    System.out.println("Sending command [" + msg + "] over the network!");
+            System.out.println("Sending command [" + msg + "] over the network!");
             out = new byte[1+msg.length()+1];
             int i;
             out[0] = 5;
-	    for ( i = 0; i < msg.length(); i++ ) {
-		out[i+1] = (byte)msg.charAt(i);
-	    }
+            for ( i = 0; i < msg.length(); i++ ) {
+                out[i+1] = (byte)msg.charAt(i);
+            }
             out[i+1] = 0;
             parent.currentCommand = null;
-	}
-	else {
+        }
+        else {
             out = new byte[1];
             out[0] = 1;
-	}
+        }
 
         return out;
     }

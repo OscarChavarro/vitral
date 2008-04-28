@@ -57,7 +57,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         glu.gluCylinder(gluQuadric, r1, r2, h, slices, 1);
         gl.glPushMatrix();
         gl.glRotated(180, 1, 0, 0);
-	double p = 0.5;
+        double p = 0.5;
         gl.glColor3d(color.r*p, color.g*p, color.b*p);
         glu.gluDisk(gluQuadric, 0, r1, slices, 1);
         gl.glPopMatrix();

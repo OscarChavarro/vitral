@@ -52,39 +52,39 @@ class VitralEditorServerProtocol implements Runnable
 
         if ( firstThingSelected >= 0 && 
              firstThingSelected < parent.theScene.scene.getSimpleBodies().size() ) 
-	{
+        {
             pos = parent.theScene.scene.getSimpleBodies().get(firstThingSelected).getPosition();
             R = parent.theScene.scene.getSimpleBodies().get(firstThingSelected).getRotation();
-	}
-	else {
+        }
+        else {
             camera = parent.drawingArea.views.get(parent.drawingArea.selectedView).getCamera();
             pos = camera.getPosition();
             R = camera.getRotation();
-	}
+        }
         q = R.exportToQuaternion();
 
         //-----------------------------------------------------------------
         if ( in.equals("getSelectedPosition") ) {
-	    //System.out.println("Processing position vector " + pos);
+            //System.out.println("Processing position vector " + pos);
             out = new byte[13];
             out[0] = 3;
             PersistenceElement.float2byteArrayBE(out, 1, (float)pos.x);
             PersistenceElement.float2byteArrayBE(out, 5, (float)pos.y);
             PersistenceElement.float2byteArrayBE(out, 9, (float)pos.z);
-	}
-	else if ( in.equals("getSelectedRotation") ) {
-	    //System.out.println("Processing rotation quaternion " + q);
+        }
+        else if ( in.equals("getSelectedRotation") ) {
+            //System.out.println("Processing rotation quaternion " + q);
             out = new byte[17];
             out[0] = 4;
             PersistenceElement.float2byteArrayBE(out, 1, (float)q.direction.x);
             PersistenceElement.float2byteArrayBE(out, 5, (float)q.direction.y);
             PersistenceElement.float2byteArrayBE(out, 9, (float)q.direction.z);
             PersistenceElement.float2byteArrayBE(out, 13, (float)q.magnitude);
-	}
-	else {
+        }
+        else {
             out = new byte[1];
             out[0] = 1;
-	}
+        }
 
         return out;
     }

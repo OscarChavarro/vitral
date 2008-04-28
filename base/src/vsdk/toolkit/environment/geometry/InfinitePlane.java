@@ -279,8 +279,8 @@ public class InfinitePlane extends HalfSpace {
              Math.abs(c2 - c1) <= tolerance &&
              Math.abs(d2 - d1) <= tolerance ) {
             return true;
-	}
-	return false;
+        }
+        return false;
     }
 
     public String toString()

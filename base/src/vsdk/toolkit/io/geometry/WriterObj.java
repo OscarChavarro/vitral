@@ -31,41 +31,41 @@ public class WriterObj extends PersistenceElement {
     {
         Vertex v[] = mesh.getVertexes();
         Triangle t[] = mesh.getTriangles();
-	int i;
+        int i;
         Vector3D p, n;
         Matrix4x4 R = new Matrix4x4();
 
         R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
 
         writeAsciiLine(inOutputStream, "# " + v.length + " vertex positions");
-	for ( i = 0; i < v.length; i++ ) {
+        for ( i = 0; i < v.length; i++ ) {
             p = R.multiply(v[i].position);
             writeAsciiLine(inOutputStream, "v " + p.x + " " + p.y + " " + p.z);
-	}
+        }
 
         writeAsciiLine(inOutputStream, "# " + v.length + " vertex texture coordinates");
-	for ( i = 0; i < v.length; i++ ) {
+        for ( i = 0; i < v.length; i++ ) {
             writeAsciiLine(inOutputStream, "vt " + v[i].u + " " + v[i].v);
-	}
+        }
 
         writeAsciiLine(inOutputStream, "# " + v.length + " vertex normals");
-	for ( i = 0; i < v.length; i++ ) {
+        for ( i = 0; i < v.length; i++ ) {
             n = R.multiply(v[i].normal);
             writeAsciiLine(inOutputStream, "vn " + n.x + " " + n.y + " " + n.z);
-	}
+        }
 
         writeAsciiLine(inOutputStream, "# " + t.length + " triangles");
-	    long n0, n1, n2;
-	writeAsciiLine(inOutputStream, "o NewObject");
-	for ( i = 0; i < t.length; i++ ) {
+            long n0, n1, n2;
+        writeAsciiLine(inOutputStream, "o NewObject");
+        for ( i = 0; i < t.length; i++ ) {
             n0 = t[i].p0 + offset + 1;
             n1 = t[i].p1 + offset + 1;
             n2 = t[i].p2 + offset + 1;
             writeAsciiLine(inOutputStream, "f " + 
                 n0 + "/" + n0 + "/" + n0 + " " +
                 n1 + "/" + n1 + "/" + n1 + " " +
-		n2 + "/" + n2 + "/" + n2);
-	}
+                n2 + "/" + n2 + "/" + n2);
+        }
 
         return offset + v.length;
     }
@@ -83,26 +83,26 @@ public class WriterObj extends PersistenceElement {
         TriangleMesh mesh;
 
         objs = inScene.getSimpleBodies();
-	long baseVertexStart = 0;
+        long baseVertexStart = 0;
 
-	int i;
-	for ( i = 0; i < objs.size(); i++ ) {
+        int i;
+        for ( i = 0; i < objs.size(); i++ ) {
 
             //-----------------------------------------------------------------
             g = objs.get(i).getGeometry();
             mesh = null;
-	    if ( g instanceof FunctionalExplicitSurface ) {
+            if ( g instanceof FunctionalExplicitSurface ) {
                 mesh = ((FunctionalExplicitSurface)g).getInternalTriangleMesh();
-	    }
-	    else if ( g instanceof TriangleMesh ) {
+            }
+            else if ( g instanceof TriangleMesh ) {
                 mesh = (TriangleMesh)g;
-	    }
+            }
 
             //-----------------------------------------------------------------
             if ( mesh != null ) {
                 baseVertexStart += exportMesh(inOutputStream, mesh, baseVertexStart);
-	    }
-	}
+            }
+        }
     }
 }
 

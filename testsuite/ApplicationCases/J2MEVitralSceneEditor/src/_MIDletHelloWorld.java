@@ -44,7 +44,7 @@ public class _MIDletHelloWorld extends MIDlet implements CommandListener {
     Pause
     */
     public void pauseApp() {
-	;
+        ;
     }
 
     /**
@@ -52,7 +52,7 @@ public class _MIDletHelloWorld extends MIDlet implements CommandListener {
     @param unconditional true if must destroy
     */
     public void destroyApp(boolean unconditional) {
-	;
+        ;
     }
 
     /**
@@ -76,9 +76,9 @@ public class _MIDletHelloWorld extends MIDlet implements CommandListener {
             //canvas.removeCommand(command2);
             //canvas.addCommand(command1);
           }
-	;
+        ;
     }
-	
+        
 }
 
 //===========================================================================

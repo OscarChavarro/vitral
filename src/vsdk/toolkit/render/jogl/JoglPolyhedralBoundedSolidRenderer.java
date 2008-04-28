@@ -306,22 +306,22 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         d.normalize();
 
                         for ( t = VSDK.EPSILON; isVisible && t < l; t += (l/20) ) {
-			    p = startPosition.add(d.multiply(t));
+                            p = startPosition.add(d.multiply(t));
                             qi = solid.computeQuantitativeInvisibility(c.getPosition(), p);
                             switch ( qi ) {
-			      case 0:
-				gl.glPointSize(4);
+                              case 0:
+                                gl.glPointSize(4);
                                 gl.glColor3f(0, 1, 0);
-				break;
-			      default:
-				gl.glPointSize(2);
+                                break;
+                              default:
+                                gl.glPointSize(2);
                                 gl.glColor3f(0, 0, 1);
-				break;
-			    }
+                                break;
+                            }
                             gl.glBegin(gl.GL_POINTS);
-			        gl.glVertex3d(p.x, p.y, p.z);
+                                gl.glVertex3d(p.x, p.y, p.z);
                             gl.glEnd();
-			}
+                        }
                     }
                 }
             }

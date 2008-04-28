@@ -26,7 +26,7 @@ public class JoglFunctionalExplicitSurfaceRenderer extends JoglRenderer {
     */
     public static void
     draw(GL gl, FunctionalExplicitSurface surface, Camera camera, RendererConfiguration quality) {
-	TriangleMesh mesh;
+        TriangleMesh mesh;
         mesh = surface.getInternalTriangleMesh();
         JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);
     }

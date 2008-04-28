@@ -374,11 +374,11 @@ public class Camera extends Entity
         R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
 
         // 3. Translate such that the center of projection is at the origin
-	;
+        ;
 
         // 4. Shear such that the center line of the view volume becomes the
         //    z axis
-	;
+        ;
 
         // 5. Scale such that the view volume becomes the canonical perspective
         //    view volume
@@ -1260,7 +1260,7 @@ public class Camera extends Entity
                   case 5: // near plane
                     // Warning: near plane clipping
                     testRay.t = 
-			( /*(1-nearPlaneDistance)*/ -clippedPoint0.z * l) / 
+                        ( /*(1-nearPlaneDistance)*/ -clippedPoint0.z * l) / 
                           (clippedPoint1.z - clippedPoint0.z);
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));

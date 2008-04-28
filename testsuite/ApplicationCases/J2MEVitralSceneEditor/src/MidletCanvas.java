@@ -198,7 +198,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             g.setColor(0, 0, 0);
             g.drawString(message, 10, 10, Graphics.TOP | Graphics.LEFT);
             message = null;
-	}
+        }
     }
 
     private void grayPaint(Graphics g) {
@@ -258,7 +258,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             }
             break;
           case KeyEvent.KEY_5:
-	    connectBlueTooth();
+            connectBlueTooth();
             break;
         }
 
@@ -287,12 +287,12 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
 
     public void deviceDiscovered(RemoteDevice remoteDevice, DeviceClass cod) {
         try{
-	    remoteDevices.add(remoteDevice);
-	    message = "" + remoteDevices.size() + remoteDevice.getFriendlyName(true);
+            remoteDevices.add(remoteDevice);
+            message = "" + remoteDevices.size() + remoteDevice.getFriendlyName(true);
           }
           catch(Exception e) {
-	    message = "Bluetooth error (1)";
-	}
+            message = "Bluetooth error (1)";
+        }
         repaint();
     }
 */
@@ -301,17 +301,17 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
     {
         try {
             Class.forName("javax.bluetooth.LocalDevice");
-	    message = "Bluetooth API available!";
+            message = "Bluetooth API available!";
 /*
             LocalDevice localDevice = LocalDevice.getLocalDevice();
             DiscoveryAgent discoveryAgent;
             discoveryAgent = localDevice.getDiscoveryAgent();
             discoveryAgent.startInquiry(DiscoveryAgent.GIAC, this);
 */
-	}
-	catch ( Exception e ) {
-	    message = "Bluetooth not found.";
-	}
+        }
+        catch ( Exception e ) {
+            message = "Bluetooth not found.";
+        }
     }
 
 }

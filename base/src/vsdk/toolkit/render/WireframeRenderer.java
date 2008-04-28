@@ -41,7 +41,7 @@ public class WireframeRenderer extends RenderingElement
     `lineSet`.
     */
     private static void addLine(Calligraphic2DBuffer lineSet,
-				Vector3D cp0, Vector3D cp1, Matrix4x4 Proj,
+                                Vector3D cp0, Vector3D cp1, Matrix4x4 Proj,
                                 Camera c) {
         //-----------------------------------------------------------------
         Vector4D hp0, hp1; // Clipped points in homogeneous space

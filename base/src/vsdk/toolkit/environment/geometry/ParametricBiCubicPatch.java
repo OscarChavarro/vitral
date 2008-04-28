@@ -513,8 +513,8 @@ public class ParametricBiCubicPatch extends Surface {
     public double[] getMinMax() {
         if ( contourCurve != null ) {
             return contourCurve.getMinMax();
-	}
-	else {
+        }
+        else {
             // This gives convex hull's minmax
             double minX = Double.MAX_VALUE;
             double minY = Double.MAX_VALUE;
@@ -535,7 +535,7 @@ public class ParametricBiCubicPatch extends Surface {
                     if ( p.x > maxX ) maxX = p.x;
                     if ( p.y > maxY ) maxY = p.y;
                     if ( p.z > maxZ ) maxZ = p.z;
-		}
+                }
             }
             minMax[0] = minX;
             minMax[1] = minY;
@@ -544,7 +544,7 @@ public class ParametricBiCubicPatch extends Surface {
             minMax[4] = maxY;
             minMax[5] = maxZ;
             return minMax;
-	}
+        }
     }
 
 }

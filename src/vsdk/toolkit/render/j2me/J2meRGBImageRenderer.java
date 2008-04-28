@@ -31,9 +31,9 @@ public class J2meRGBImageRenderer extends J2meRenderer
                 gg = VSDK.signedByte2unsignedInteger(p.g);
                 bb = VSDK.signedByte2unsignedInteger(p.b);
                 scanline[x] = 0xFF000000 + (rr << 16) + (gg << 8) + (bb);
-	    }
+            }
             g.drawRGB(scanline, 0, img.getXSize(), x0, y0+y, img.getXSize(), 1, false);
-	}
+        }
 
         /*
         // This is soooo slowwww....

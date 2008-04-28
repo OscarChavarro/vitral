@@ -221,10 +221,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             solid = PolyhedralBoundedSolidModelingTools.csgTest(1, csgOperation, csgSample);
             break;
           case 20:
-	    solid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample);
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample);
             break;
           case 21:
-	    solid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample);
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample);
             break;
           case 22:
             solid = PolyhedralBoundedSolidModelingTools.featuredObject();

@@ -53,13 +53,13 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     {
         if ( halfEdgesList.locateWindowAtElem(he) ) {
             halfEdgesList.removeElemAtWindow();
-	}
+        }
         if ( halfEdgesList.size() > 0  ) {
             boundaryStartHalfEdge = halfEdgesList.get(0);
-	}
-	else {
+        }
+        else {
             boundaryStartHalfEdge = null;
-	}
+        }
     }
 
     /** Locates a half edge that goes from vertex with id `a` to vertex with
@@ -138,24 +138,24 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
         edges = new _PolyhedralBoundedSolidEdge[halfEdgesList.size()];
         sides = new boolean[halfEdgesList.size()];
 
-	for ( i = 0; i < halfEdgesList.size(); i++ ) {
+        for ( i = 0; i < halfEdgesList.size(); i++ ) {
             he = halfEdgesList.get(i);
             edges[i] = he.parentEdge;
             sides[i] = false;
             if ( he.parentEdge.rightHalf == he ) {
                 sides[i] = true;
-	    }
-	}
+            }
+        }
 
-	for ( i = 1; i < halfEdgesList.size(); i++ ) {
+        for ( i = 1; i < halfEdgesList.size(); i++ ) {
             halfEdgesList.get(i).parentEdge = edges[i-1];
             if ( sides[i-1] ) {
                 edges[i-1].rightHalf = halfEdgesList.get(i);
-	    }
-	    else {
+            }
+            else {
                 edges[i-1].leftHalf = halfEdgesList.get(i);
-	    }
-	}
+            }
+        }
         halfEdgesList.get(0).parentEdge = edges[i-1];
         if ( sides[i-1] ) {
             edges[i-1].rightHalf = halfEdgesList.get(0);

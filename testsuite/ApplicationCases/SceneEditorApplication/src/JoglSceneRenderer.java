@@ -114,10 +114,10 @@ public class JoglSceneRenderer
 
             if ( parent.modifyPanel.getTarget() != gi ) {
                 JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
-	    }
-	    else {
+            }
+            else {
                 parent.modifyPanel.draw(gl, s.activeCamera, quality);
-	    }
+            }
         }
         //JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
 

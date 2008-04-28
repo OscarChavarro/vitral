@@ -501,13 +501,13 @@ public class SceneEditorApplication {
     {
         if ( networkCommandClient != null ) {
             networkCommandClient.end();
-	}
+        }
         System.exit(0);
     }
 
     public void externalCommand(String label)
     {
-	executorPanel.executeCommand(label);
+        executorPanel.executeCommand(label);
     }
 
     public static void main(String[] args) {

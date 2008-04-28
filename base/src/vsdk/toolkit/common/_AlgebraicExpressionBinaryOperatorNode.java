@@ -43,10 +43,10 @@ public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpression
           case '-':    val = lval - rval;    break;
           case '*':    val = lval * rval;    break;
           case '/':    val = lval / rval;    break;
-	  case '^':    val = Math.pow(lval, rval);    break;
-	  default:
+          case '^':    val = Math.pow(lval, rval);    break;
+          default:
             throw new AlgebraicExpressionException("Unknown binary operator \"" + operator + "\"");
-	}
+        }
         return val;
     }
 

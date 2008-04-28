@@ -65,7 +65,7 @@ public class AwtFontReader extends FontReader
             try {
                 currentFont = Font.createFont(Font.TRUETYPE_FONT, 
                                          new File(fontFile));
-		currentFont = currentFont.deriveFont(factor);
+                currentFont = currentFont.deriveFont(factor);
             }
             catch ( Exception e ) {
                 System.err.println("Error loading font file " + fontFile);

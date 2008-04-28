@@ -91,7 +91,7 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
         JComboBox jcb = new JComboBox();
 
         // This is strange, but makes combobox heavyweight and integrable with JOGL!
-	jcb.getEditor().getEditorComponent().setBackground(java.awt.Color.WHITE);
+        jcb.getEditor().getEditorComponent().setBackground(java.awt.Color.WHITE);
 
         jcb.setLightWeightPopupEnabled(false);
         jcb.addActionListener(this);

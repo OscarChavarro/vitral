@@ -799,7 +799,7 @@ public class PolyhedralBoundedSolidModelingTools
             case 2: default: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3(); break;
             case 3: operands = buildCsgTest4(); break;
             case 4: operands = buildCsgTest5(); break;
-	    case 5: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); break;
+            case 5: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); break;
         }
 
         //-----------------------------------------------------------------

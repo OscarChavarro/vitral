@@ -54,14 +54,14 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         JoglMatrixRenderer.activate(gl, R);
         gl.glNormal3d(1, 0, 0);
         gl.glBegin(gl.GL_QUADS);
-	for ( i = 0, x = -5*dx; i < nx; i++, x+=dx ) {
-  	    for ( j = 0, y = -5*dy; j < ny; j++, y+=dy ) {
-	        gl.glVertex3d(0, x, y);
-	        gl.glVertex3d(0, x+dx, y);
-	        gl.glVertex3d(0, x+dx, y+dy);
-	        gl.glVertex3d(0, x, y+dy);
-	    }
-	}
+        for ( i = 0, x = -5*dx; i < nx; i++, x+=dx ) {
+            for ( j = 0, y = -5*dy; j < ny; j++, y+=dy ) {
+                gl.glVertex3d(0, x, y);
+                gl.glVertex3d(0, x+dx, y);
+                gl.glVertex3d(0, x+dx, y+dy);
+                gl.glVertex3d(0, x, y+dy);
+            }
+        }
         gl.glEnd();
         gl.glPopMatrix();
     }
@@ -95,16 +95,16 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         }
 
         if ( q.isPointsSet() ) {
-		//drawPoints(gl, s, slices, stacks);
+                //drawPoints(gl, s, slices, stacks);
         }
         if ( q.isNormalsSet() ) {
-		//drawVertexNormals(gl, s, slices, stacks);
+                //drawVertexNormals(gl, s, slices, stacks);
         }
         if ( q.isBoundingVolumeSet() ) {
-		//JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
+                //JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
         }
         if ( q.isSelectionCornersSet() ) {
-		//JoglGeometryRenderer.drawSelectionCorners(gl, s, q);
+                //JoglGeometryRenderer.drawSelectionCorners(gl, s, q);
         }
     }
 

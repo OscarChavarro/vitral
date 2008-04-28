@@ -98,7 +98,7 @@ public abstract class ImageProcessing extends ProcessingElement {
 
             if ( w > 50 ) {
                 w /= 2;
-	    }
+            }
 
             int xx, yy, x0, y0, x1, y1;
             acum = new RGBPixel();

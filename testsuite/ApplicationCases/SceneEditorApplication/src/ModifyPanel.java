@@ -44,13 +44,13 @@ public class ModifyPanel extends JPanel
         if ( target.getGeometry() instanceof FunctionalExplicitSurface ) {
             if ( functionalExplicitSurfaceEditor == null ) {
                 functionalExplicitSurfaceEditor = new ModifyPanelForFunctionalExplicitSurface(parent);
-	    }
+            }
             functionalExplicitSurfaceEditor.notifyTargetBeginEdit(target, this);
-	}
-	else {
+        }
+        else {
             JLabel label = new JLabel("No editor for " + target.getGeometry().getClass().getName());
             add(label);
-	}
+        }
     }
 
     public void notifyTargetEndEdit()

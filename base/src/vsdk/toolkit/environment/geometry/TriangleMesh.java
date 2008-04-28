@@ -709,7 +709,7 @@ public class TriangleMesh extends Surface {
         if ( triangleMeshGroupCache == null ) {
             triangleMeshGroupCache = new TriangleMeshGroup();
             triangleMeshGroupCache.addMesh(this);
-	}
+        }
         return triangleMeshGroupCache;
     }
 }

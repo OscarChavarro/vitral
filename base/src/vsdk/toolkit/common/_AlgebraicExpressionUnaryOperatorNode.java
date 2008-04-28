@@ -34,70 +34,70 @@ public class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionN
 
         if ( operatorName.equals("sin") ) {
             val = Math.sin(operandValue);
-	}
+        }
         else if ( operatorName.equals("cos") ) {
             val = Math.cos(operandValue);
-	}
+        }
         else if ( operatorName.equals("tan") ) {
             val = Math.tan(operandValue);
-	}
+        }
         else if ( operatorName.equals("asin") ) {
             val = Math.asin(operandValue);
-	}
+        }
         else if ( operatorName.equals("acos") ) {
             val = Math.acos(operandValue);
-	}
+        }
         else if ( operatorName.equals("atan") ) {
             val = Math.atan(operandValue);
-	}
+        }
         else if ( operatorName.equals("abs") ) {
             val = Math.abs(operandValue);
-	}
+        }
         else if ( operatorName.equals("cbrt") ) {
             val = Math.cbrt(operandValue);
-	}
+        }
         else if ( operatorName.equals("ceil") ) {
             val = Math.ceil(operandValue);
-	}
+        }
         else if ( operatorName.equals("sinh") ) {
             val = Math.sinh(operandValue);
-	}
+        }
         else if ( operatorName.equals("cosh") ) {
             val = Math.cosh(operandValue);
-	}
+        }
         else if ( operatorName.equals("tanh") ) {
             val = Math.tanh(operandValue);
-	}
+        }
         else if ( operatorName.equals("toDegrees") ) {
             val = Math.toDegrees(operandValue);
-	}
+        }
         else if ( operatorName.equals("toRadians") ) {
             val = Math.toRadians(operandValue);
-	}
+        }
         else if ( operatorName.equals("exp") ) {
             val = Math.exp(operandValue);
-	}
+        }
         else if ( operatorName.equals("floor") ) {
             val = Math.floor(operandValue);
-	}
+        }
         else if ( operatorName.equals("log") ) {
             val = Math.log(operandValue);
-	}
+        }
         else if ( operatorName.equals("ln") ) {
             val = Math.log(operandValue);
-	}
+        }
         else if ( operatorName.equals("log10") ) {
             val = Math.log10(operandValue);
-	}
+        }
         else if ( operatorName.equals("sqrt") ) {
             val = Math.sqrt(operandValue);
-	}
+        }
         else if ( operatorName.equals("-") ) {
             val = -operandValue;
-	}
-	else {
+        }
+        else {
             throw new AlgebraicExpressionException("Unknown unary operator or function \"" + operatorName + "\"");
-	}
+        }
         return val;
     }
 

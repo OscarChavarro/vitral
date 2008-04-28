@@ -56,7 +56,7 @@ public class CameraControllerBlender extends CameraController {
     }
   
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
-	System.out.println("MY EVENT!");
+        System.out.println("MY EVENT!");
         return false;
     }
 

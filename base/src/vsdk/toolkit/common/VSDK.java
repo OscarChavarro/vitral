@@ -194,9 +194,9 @@ public class VSDK
     {
         int i;
         String ff = "0.";
-	for ( i = 0; i < digits; i++ ) {
-	    ff = ff + "0";
-	}
+        for ( i = 0; i < digits; i++ ) {
+            ff = ff + "0";
+        }
         DecimalFormat f = new DecimalFormat(ff);
 
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
@@ -256,10 +256,10 @@ public class VSDK
         if ( level == FATAL_ERROR ) {
             try {
                 throw new Exception("VSDK.reportMessage(FATAL_ERROR)");
-	    }
-	    catch ( Exception e ) {
+            }
+            catch ( Exception e ) {
                 e.printStackTrace();
-	    }
+            }
             System.exit(1);
         }
     }

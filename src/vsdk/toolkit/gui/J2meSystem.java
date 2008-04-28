@@ -34,20 +34,20 @@ public class J2meSystem extends PresentationElement
             int action = context.getGameAction(keycode);
             switch ( action ) {
               case Canvas.UP:
-		evsdk.keycode = KeyEvent.KEY_UP;
+                evsdk.keycode = KeyEvent.KEY_UP;
                 break;
               case Canvas.DOWN:
-		evsdk.keycode = KeyEvent.KEY_DOWN;
+                evsdk.keycode = KeyEvent.KEY_DOWN;
                 break;
               case Canvas.LEFT:
-		evsdk.keycode = KeyEvent.KEY_LEFT;
+                evsdk.keycode = KeyEvent.KEY_LEFT;
                 break;
               case Canvas.RIGHT:
-		evsdk.keycode = KeyEvent.KEY_RIGHT;
+                evsdk.keycode = KeyEvent.KEY_RIGHT;
                 break;
             }
-	}
-	else {
+        }
+        else {
             char unicode_id;
             unicode_id = (char)keycode;
 
@@ -208,38 +208,38 @@ public class J2meSystem extends PresentationElement
               case 'z':
                 evsdk.keycode = KeyEvent.KEY_z;
                 break;
-	      case '0':
+              case '0':
                 evsdk.keycode = KeyEvent.KEY_0;
                 break;
-	      case '1':
+              case '1':
                 evsdk.keycode = KeyEvent.KEY_1;
                 break;
-	      case '2':
+              case '2':
                 evsdk.keycode = KeyEvent.KEY_2;
                 break;
-	      case '3':
+              case '3':
                 evsdk.keycode = KeyEvent.KEY_3;
                 break;
-	      case '4':
+              case '4':
                 evsdk.keycode = KeyEvent.KEY_4;
                 break;
-	      case '5':
+              case '5':
                 evsdk.keycode = KeyEvent.KEY_5;
                 break;
-	      case '6':
+              case '6':
                 evsdk.keycode = KeyEvent.KEY_6;
                 break;
-	      case '7':
+              case '7':
                 evsdk.keycode = KeyEvent.KEY_7;
                 break;
-	      case '8':
+              case '8':
                 evsdk.keycode = KeyEvent.KEY_8;
                 break;
-	      case '9':
+              case '9':
                 evsdk.keycode = KeyEvent.KEY_9;
                 break;
-	    }
-	}
+            }
+        }
     }
 }
 
