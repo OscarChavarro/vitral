@@ -34,7 +34,7 @@ public class CachedImage extends CachedInformation {
 
     public int getSizeInBytes()
     {
-        if ( image == null) {
+        if ( image == null ) {
             return 0;
         }
         return image.getSizeInBytes();

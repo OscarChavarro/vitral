@@ -48,29 +48,46 @@ public class RGBImage extends Image
     }
 
     /**
-    Inicializaci&oacute;n del contenido de una imagen.
+    Image initialize with black background fill.
 
-    Recibe el width y el height que debe tener esta RGBImage (n&oacute;tese
-    que una imagen puede asi cambiar de tama&ntilde;o en cualquier momento)
-    y asigna la memoria necesaria para hacerlo.
+    Given the desired width and height, this method asigns the needed memory
+    to hold such image uncompressed.
 
-    OJO: NO inicializa la imagen, solo asigna la memoria necesaria.
-
-    Este m&eacute;todo retorna true si todo sale bien, o false si no
-    se pudo asignar la cantidad de memoria necesaria para almacenar la
-    imagen del tama&ntilde;o seleccionado.
+    Returns true if memory allocation succeed, false if not.
     */
     public boolean init(int width, int height)
     {
         try {
-          data = new byte[width * height * 3];
-          for ( int i = 0; i < width*height*3; i++ ) {
-              data[i] = 0;
-          }
+            data = new byte[width * height * 3];
+            for ( int i = 0; i < width*height*3; i++ ) {
+                data[i] = 0;
+            }
         }
         catch ( Exception e ) {
-          data = null;
-          return false;
+            data = null;
+            return false;
+        }
+        xSize = width;        
+        ySize = height;        
+        return true;
+    }
+
+    /**
+    Image initialize.
+
+    Given the desired width and height, this method asigns the needed memory
+    to hold such image uncompressed.
+
+    Returns true if memory allocation succeed, false if not.
+    */
+    public boolean initNoFill(int width, int height)
+    {
+        try {
+            data = new byte[width * height * 3];
+        }
+        catch ( Exception e ) {
+            data = null;
+            return false;
         }
         xSize = width;        
         ySize = height;        

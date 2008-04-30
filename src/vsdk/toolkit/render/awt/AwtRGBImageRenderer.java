@@ -61,7 +61,7 @@ public class AwtRGBImageRenderer extends AwtRenderer
         int h2 = output.getYSize();
 
         if ( w != w2 || h != h2 ) {
-            if ( !output.init(w, h) ) {
+            if ( !output.initNoFill(w, h) ) {
                 return false;
             }
         }

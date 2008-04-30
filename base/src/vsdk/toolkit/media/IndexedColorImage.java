@@ -82,6 +82,23 @@ public class IndexedColorImage extends Image
         return true;
     }
 
+    public boolean initNoFill(int width, int height)
+    {
+        try {
+          data = new byte[width * height];
+          for ( int i = 0; i < width*height; i++ ) {
+              data[i] = 0;
+          }
+        }
+        catch ( Exception e ) {
+          data = null;
+          return false;
+        }
+        xSize = width;
+        ySize = height;
+        return true;
+    }
+
     public int getXSize()
     {
         return xSize;

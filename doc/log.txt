@@ -724,4 +724,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 april 27, Oscar Chavarro: <<300min>>
   - 5h: Added _JNIExample
 
+2008 april 30, Oscar Chavarro: <<50min>>
+  - 50min: RAM bandwidth benchmark
+
 ===========================================================================

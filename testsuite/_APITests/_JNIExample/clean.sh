@@ -18,3 +18,4 @@ rm -rf nativeProgram/*.ilk
 rm -rf nativeProgram/*.pdb
 rm -rf nativeProgram/lib/*
 rm -rf nativeProgram/tmp/*
+rm -rf nativeProgram/nativeProgram

@@ -39,6 +39,18 @@ public abstract class Image extends MediaEntity
     public abstract boolean init(int width, int height);
 
     /**
+    Given the width and height of the desired new size for this image, this
+    method is responsable of allocating the necesary memory to keep such
+    an image.
+    @param width - desired new width in pixels for the image. Must be greater
+    than 0.
+    @param height - desired new height in pixels for the image. Must be greater
+    than 0.
+    @return true if image memory could be allocated, false otherwise
+    */
+    public abstract boolean initNoFill(int width, int height);
+
+    /**
     Returns current image width in pixels
     @return current image width in pixels
     */
