@@ -84,7 +84,7 @@ public class RamBandwidthBenchmark
 
         stopWatch.stop();
         createTime = stopWatch.getElapsedRealTime();
-	System.out.println("Ok!");
+        System.out.println("Ok!");
         return mem;
     }
 
@@ -103,7 +103,7 @@ public class RamBandwidthBenchmark
 
         stopWatch.stop();
         initTime = stopWatch.getElapsedRealTime();
-	System.out.println("Ok!");
+        System.out.println("Ok!");
     }
 
     private void incrementArrays()
@@ -116,7 +116,7 @@ public class RamBandwidthBenchmark
         System.out.println("Incrementing numbers in memory ->");
 
         for ( n = 0; n < testIterations; n++ ) {
-	    System.out.print("{" + (n+1) + " / " + testIterations + "}: ");
+            System.out.print("{" + (n+1) + " / " + testIterations + "}: ");
             stopWatch.start();
 
             for ( i = 0; i < ramUsageLimitInMegaBytes; i++ ) {
@@ -129,9 +129,9 @@ public class RamBandwidthBenchmark
             stopWatch.stop();
             dt = stopWatch.getElapsedRealTime();
             runTime += dt;
-	    s = (1024*1024*ramUsageLimitInMegaBytes);
-	    System.out.println(s + " bytes incremented on RAM in " + VSDK.formatDouble(dt, 2) + " seconds (" + VSDK.formatDouble(((((double)s)*8/dt)/1000000.0), 2) + " Mbps).");
-	}
+            s = (1024*1024*ramUsageLimitInMegaBytes);
+            System.out.println(s + " bytes incremented on RAM in " + VSDK.formatDouble(dt, 2) + " seconds (" + VSDK.formatDouble(((((double)s)*8/dt)/1000000.0), 2) + " Mbps).");
+        }
     }
 
     private void printReport()
