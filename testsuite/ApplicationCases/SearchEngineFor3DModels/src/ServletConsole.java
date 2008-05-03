@@ -1,8 +1,6 @@
 //===========================================================================
 
 // Java basic classes
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
@@ -318,8 +316,6 @@ public class ServletConsole extends HttpServlet {
     {
         int id, i;
         id = Integer.parseInt(request.getParameter("id"));
-        DecimalFormat f1 = new DecimalFormat("0000000");
-        DecimalFormat f2 = new DecimalFormat("00");
 
         out.println("<HTML><BODY>\n");
         GeometryMetadata data;
@@ -337,7 +333,7 @@ public class ServletConsole extends HttpServlet {
             out.println("</UL><P>\n");
 
             // Include precomputed thumbnails
-            basename = serverUrl + "/images/previews/" + f1.format(id, new StringBuffer(""), new FieldPosition(0)).toString() + "/";
+            basename = serverUrl + "/images/previews/" + VSDK.formatNumberWithinZeroes(id, 7) + "/";
             out.println("Preprocessed views:<BR>\n");
             out.println("<CENTER><TABLE WIDTH=100% CELLPADDING=3 CELLSPACING=3 BORDER=0>\n");
             out.println("<TR>\n");
@@ -415,8 +411,6 @@ public class ServletConsole extends HttpServlet {
         }
         out.println("</TABLE></CENTER>\n");
         //-----------------------------------------------------------------
-        DecimalFormat f1 = new DecimalFormat("0000000");
-        DecimalFormat f2 = new DecimalFormat("00");
         String imgname, basename, name;
         FourierShapeDescriptor fourierShapeDescriptor1 = null;
         int j;
@@ -435,8 +429,8 @@ public class ServletConsole extends HttpServlet {
         out.println("<TR>\n");
         out.println("<TH>VIEW </TH>\n");
         for ( i = 0; i < 13; i++ ) {
-            basename = serverUrl + "/images/previews/" + f1.format(data.getId(), new StringBuffer(""), new FieldPosition(0)).toString() + "/";
-            imgname = f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString();
+            basename = serverUrl + "/images/previews/" + VSDK.formatNumberWithinZeroes(data.getId(), 7) + "/";
+            imgname = VSDK.formatNumberWithinZeroes(i, 2);
             out.println("<TD><CENTER><IMG SRC=\"" + (basename + "df" + imgname + ".jpg") + "\"></IMG></CENTER></TD>\n");
         }
         out.println("</TR>\n");

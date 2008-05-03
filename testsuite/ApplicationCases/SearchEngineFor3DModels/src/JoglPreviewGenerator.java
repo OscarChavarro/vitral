@@ -13,8 +13,6 @@
 //===========================================================================
 
 // Java basic classes
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
 import java.io.File;
 
 // JOGL classes
@@ -22,6 +20,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 
 // VSDK Classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -193,9 +192,7 @@ public class JoglPreviewGenerator
         GL gl, SimpleBodyGroup referenceBodies, long modelId, int viewportXSize, int viewportYSize, GLCanvas canvas)
     {
         //- Create directory for current model previews set ---------------
-        DecimalFormat f1 = new DecimalFormat("0000000");
-        DecimalFormat f2 = new DecimalFormat("00");
-        String dirName = "./output/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString();
+        String dirName = "./output/previews/" + VSDK.formatNumberWithinZeroes(modelId, 7);
         if ( !PersistenceElement.checkDirectory("./output") ||
              !PersistenceElement.checkDirectory("./output/previews") ||
              !PersistenceElement.checkDirectory(dirName) ) {
@@ -228,7 +225,7 @@ public class JoglPreviewGenerator
             renderView(gl, referenceBodies, cam, quality);
 
             //-----------------------------------------------------------------
-            String filename = dirName + "/" + f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString() + ".jpg";
+            String filename = dirName + "/" + VSDK.formatNumberWithinZeroes(i, 2) + ".jpg";
             if ( canvas != null ) {
                 canvas.swapBuffers();
             }
@@ -238,7 +235,7 @@ public class JoglPreviewGenerator
             thumbnail = new RGBImage();
             thumbnail.init(160, 120);
             ImageProcessing.resize(img, thumbnail);
-            filename = dirName + "/" + f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg";
+            filename = dirName + "/" + VSDK.formatNumberWithinZeroes(i, 2) + "small.jpg";
             ImagePersistence.exportJPG(new File(filename), thumbnail);
         }
     }

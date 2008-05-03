@@ -14,8 +14,6 @@
 //===========================================================================
 
 // Java basic classes
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileOutputStream;
@@ -196,9 +194,7 @@ public class SearchEngine
                         }
                     }
                     //---------------------------------------------------------
-                    DecimalFormat f1 = new DecimalFormat("0000000");
-                    DecimalFormat f2 = new DecimalFormat("00");
-                    String dirName = "./output/previews/" + f1.format(metadata.getId(), new StringBuffer(""), new FieldPosition(0)).toString();
+                    String dirName = "./output/previews/" + VSDK.formatNumberWithinZeroes(metadata.getId(), 7);
                     if ( !PersistenceElement.checkDirectory("./output") ||
                          !PersistenceElement.checkDirectory("./output/previews") ||
                          !PersistenceElement.checkDirectory(dirName) ) {
@@ -207,7 +203,7 @@ public class SearchEngine
                         continue;
                     }
 
-                    imageFilename = dirName + "/df" + f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString() + ".jpg";
+                    imageFilename = dirName + "/df" + VSDK.formatNumberWithinZeroes(i, 2) + ".jpg";
                     ImagePersistence.exportJPG(new File(imageFilename), distanceFieldRgb);
                     distanceFieldsArray[i] = null;
                 }
@@ -609,8 +605,6 @@ public class SearchEngine
 
         int i;
         GeometryMetadata data;
-        DecimalFormat f1 = new DecimalFormat("0000000");
-        DecimalFormat f2 = new DecimalFormat("00");
         long modelId;
         String filename, fullpath;
 
@@ -627,7 +621,7 @@ public class SearchEngine
             data = shapeDatabase.searchEntryById(modelId);
             if ( data != null ) {
                 out.write("<A HREF=\"ServletConsole?session=" + sessionId + "&input=model_detail&id=" + modelId + "\">\n");
-                out.write("<IMG BORDER=1 SRC=\"" + dir + "/previews/" + f1.format(modelId, new StringBuffer(""), new FieldPosition(0)).toString() + "/" + f2.format(0, new StringBuffer(""), new FieldPosition(0)).toString() + "small.jpg" + "\"></IMG>\n");
+                out.write("<IMG BORDER=1 SRC=\"" + dir + "/previews/" + VSDK.formatNumberWithinZeroes(modelId, 7) + "/" + VSDK.formatNumberWithinZeroes(0, 2) + "small.jpg" + "\"></IMG>\n");
             }
             else {
                 out.write("<B>No metadata descriptor for ID " + similarModels.get(i).getId() + "\n");
@@ -751,8 +745,7 @@ public class SearchEngine
                         stringSegment = "EOL\n";
                     }
                     else if ( op == 2 ) {
-                        DecimalFormat f1 = new DecimalFormat("0000000");
-                        stringSegment = "convert ./output/previews/" + f1.format(m.getId(), new StringBuffer(""), new FieldPosition(0)).toString() + "/00.jpg " + m.getFilename() + "_preview.png\n";
+                        stringSegment = "convert ./output/previews/" + VSDK.formatNumberWithinZeroes(m.getId(), 7) + "/00.jpg " + m.getFilename() + "_preview.png\n";
                     }
                     barr = stringSegment.getBytes();
                     writer.write(barr, 0, barr.length);

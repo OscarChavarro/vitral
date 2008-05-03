@@ -180,6 +180,19 @@ public class VSDK
         return a*a;
     }
 
+    public static String formatNumberWithinZeroes(long a, int n)
+    {
+        int i;
+        String z = "";
+
+	for ( i = 0; i < n; i++ ) {
+	    z += "0";
+	}
+
+        DecimalFormat f1 = new DecimalFormat(z);
+        return f1.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
+    }
+
     /**
     Given a double number, it formats it to print in a given precision
     */
