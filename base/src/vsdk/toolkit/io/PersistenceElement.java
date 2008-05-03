@@ -74,6 +74,18 @@ public abstract class PersistenceElement {
         return ext;
     }
 
+    public static int
+    readByteInt(InputStream is) throws Exception
+    {
+        byte[] byteBuffer = new byte[1];
+        int a;
+
+        is.read(byteBuffer, 0, 1);
+        a = (int)byteBuffer[0];
+
+        return a;
+    }
+
     /**
     Given a previously initialized array of bytes, this method fills it
     with information readed from the given input stream.  If it is not
@@ -422,6 +434,24 @@ public abstract class PersistenceElement {
         }
         long2byteArrayDirect(bytesForLong, 0, num);
         writeBytes(os, bytesForLong);
+    }
+
+    public static String readAsciiFixedSizeString(InputStream is, int size) throws Exception
+    {
+        byte characters[] = new byte[size];
+        char letter;
+        String msg = "";
+        int i;
+
+        readBytes(is, characters);
+        for ( i = 0; i < size && characters[0] != 0x00; i++ ) {
+            letter = (char)characters[i];
+            if ( letter != 0x00 ) {
+                msg = msg + letter;
+            }
+        }
+
+        return msg;
     }
 
     public static String readAsciiString(InputStream is) throws Exception

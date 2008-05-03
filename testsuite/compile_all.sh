@@ -73,6 +73,12 @@ cd IlluminationTest
 cd ..
 cd ..
 #---------------------------------------------------------------------------
+cd Benchmarks
+cd RamBandwidthBenchmark
+./compile.sh
+cd ..
+cd ..
+#---------------------------------------------------------------------------
 cd ApplicationCases
 cd SceneEditorApplication
 ./compile_lib.sh

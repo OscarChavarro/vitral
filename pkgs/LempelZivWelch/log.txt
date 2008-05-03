@@ -1,0 +1,7 @@
+2008 May 1:
+  - 2h18min: Studying K&C implementation, converted to ANSI C.
+  - 1h: Project clean, separated library from test program, makefile and POSIX
+    organization.
+  - 1h20min: Basic JNI wrapper
+  - 40min: file operations generalized
+  - 3h: JNI library for Unix compress working and tested.

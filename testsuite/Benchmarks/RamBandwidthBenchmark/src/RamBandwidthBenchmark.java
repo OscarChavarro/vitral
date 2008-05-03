@@ -1,36 +1,7 @@
 //===========================================================================
 
 import vsdk.toolkit.common.VSDK;
-
-class StopWatch
-{
-    private long t0;
-    private long t1;
-
-    public StopWatch()
-    {
-        t0 = 0;
-        t1 = 1;
-    }
-
-    public void start()
-    {
-        t0 = System.currentTimeMillis();
-    }
-
-    public void stop()
-    {
-        t1 = System.currentTimeMillis();
-    }
-
-    public double getElapsedRealTime()
-    {
-        double a, b;
-        a = (double)t0;
-        b = (double)t1;
-        return (b - a)/1000.0;
-    }
-}
+import vsdk.toolkit.common.StopWatch;
 
 /**
 This class implements a simple brute-force benchmark for testing the available

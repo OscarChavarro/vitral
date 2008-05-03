@@ -30,6 +30,7 @@ cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
 cd pkgs/SpharmonicKit27;make;cd ../..
+cd pkgs/LempelZivWelch;make;cd ../..
 
 # Set proper permisions
 chmod 755 `find ./classes -type d`
