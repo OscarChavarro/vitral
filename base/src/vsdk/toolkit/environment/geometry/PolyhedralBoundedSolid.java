@@ -17,9 +17,6 @@ package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
 
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
-
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -1571,10 +1568,9 @@ public class PolyhedralBoundedSolid extends Solid {
 
     private String intPreSpaces(int val, int fieldSize)
     {
-        DecimalFormat f = new DecimalFormat("0");
         String cad;
 
-        cad = f.format(val, new StringBuffer(""), new FieldPosition(0)).toString();
+        cad = VSDK.formatNumberWithinZeroes(val, 1);
 
         int remain = fieldSize - cad.length();
 
