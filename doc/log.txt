@@ -727,4 +727,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 april 30, Oscar Chavarro: <<50min>>
   - 50min: RAM bandwidth benchmark
 
+2008 may 2, Oscar Chavarro: <<480min>>
+  - 8h: LZW library for supporting reading UNIX compressed data
+  - 0 (time from vhireader project): PNM exporting and image grayscale
+    generic support.
+
 ===========================================================================

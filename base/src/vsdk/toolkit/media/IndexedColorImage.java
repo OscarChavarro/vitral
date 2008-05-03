@@ -126,6 +126,11 @@ public class IndexedColorImage extends Image
         data[index] = VSDK.unsigned8BitInteger2signedByte(val);
     }
 
+    public byte getPixel8bitGrayScale(int x, int y)
+    {
+        return data[xSize*y + x];
+    }
+
     public int getPixel(int x, int y)
     {
         int index = xSize*y + x;
@@ -144,6 +149,18 @@ public class IndexedColorImage extends Image
         p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
         p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
         return p;
+    }
+
+    public void getPixelRgb(int x, int y, RGBPixel p)
+    {
+        int index = xSize*y + x;
+        double val;
+        val = (double)(VSDK.signedByte2unsignedInteger(data[index])) / 255.0;
+
+        _static_color = colorTable.evalLinear(val);
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
     }
 
     public RGBColorPalette getColorTable()

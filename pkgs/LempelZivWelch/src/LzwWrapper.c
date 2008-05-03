@@ -142,6 +142,33 @@ extern "C"
  * Method:    decompress
  * Signature: ()V
  */
+JNIEXPORT void JNICALL Java_vsdk_toolkit_processing_LzwWrapper_decompressWithSize
+(JNIEnv *env, jclass cl, jobject is, jobject os, jlong size)
+{
+    GLOBAL_env = env;
+
+    jclass class1;
+    jclass class2;
+
+    class1 = (*env)->GetObjectClass(env, os);
+    GLOBAL_javaWriteMethod = (*env)->GetMethodID(env, class1, "write", "([B)V");
+
+    class2 = (*env)->GetObjectClass(env, is);
+    GLOBAL_javaReadMethod = (*env)->GetMethodID(env, class2, "read", "([B)I");
+    GLOBAL_javaAvailableMethod = (*env)->GetMethodID(env, class2, "available", "()I");
+
+    initLZW(size, myfread, myfwrite, myflush);
+    decompress(&is, &os);
+}
+
+#ifdef __cplusplus
+extern "C" 
+#endif
+/*
+ * Class:     LzwWrapper
+ * Method:    decompress
+ * Signature: ()V
+ */
 JNIEXPORT void JNICALL Java_vsdk_toolkit_processing_LzwWrapper_compress
 (JNIEnv *env, jclass cl, jobject is, jobject os)
 {

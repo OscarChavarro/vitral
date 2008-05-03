@@ -26,6 +26,8 @@ public abstract class Image extends MediaEntity
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20061220L;
 
+    private static RGBPixel rgb = new RGBPixel();
+
     /**
     Given the width and height of the desired new size for this image, this
     method is responsable of allocating the necesary memory to keep such
@@ -84,6 +86,36 @@ public abstract class Image extends MediaEntity
     inside the image.
     */
     public abstract RGBPixel getPixelRgb(int x, int y);
+
+    /**
+    Given an image position inside its current boundaries, an RGBPixel is
+    returned from internal color space representation.
+    @param x - x cooordinate of desired pixel, must be between 0 and image
+    width minus 1
+    @param y - y cooordinate of desired pixel, must be between 0 and image
+    height minus 1
+    @return the RGBPixel corresponding to requested pixel coordinate
+    inside the image.
+    */
+    public abstract void getPixelRgb(int x, int y, RGBPixel p);
+
+    /**
+    Given an image position inside its current boundaries, an RGBPixel is
+    returned from internal color space representation.
+    @param x - x cooordinate of desired pixel, must be between 0 and image
+    width minus 1
+    @param y - y cooordinate of desired pixel, must be between 0 and image
+    height minus 1
+    @return the RGBPixel corresponding to requested pixel coordinate
+    inside the image.
+    */
+    public byte getPixel8bitGrayScale(int x, int y)
+    {
+        getPixelRgb(x, y, rgb);
+
+        int sum = VSDK.signedByte2unsignedInteger(rgb.r) + VSDK.signedByte2unsignedInteger(rgb.g) + VSDK.signedByte2unsignedInteger(rgb.b);
+        return VSDK.unsigned8BitInteger2signedByte(sum / 3);
+    }
 
     /**
     Given a double value inside the integer limits of this image, this

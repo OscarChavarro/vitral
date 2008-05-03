@@ -292,7 +292,7 @@ public class ImagePersistence extends PersistenceElement
 
     /**
     This method writes the contents of the specified image to a file in 
-    binary RGB PPM format (i.e. P6 PNG sub-format). Returns true if everything
+    binary RGB PPM format (i.e. P6 PPM sub-format). Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
     */
@@ -323,6 +323,48 @@ public class ImagePersistence extends PersistenceElement
                     writer.write(p.r);
                     writer.write(p.g);
                     writer.write(p.b);
+                }
+            }
+
+            writer.flush();
+            writer.close();
+            fos.close();
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
+    binary GrayScale PPM format (i.e. P5 PPM sub-format). Returns true if
+    everything works fine, false if something fails, like a permission access
+    denied or if storage device runs out of space.
+    */
+    public static boolean exportPNM(File fd, Image img)
+    {
+        try {
+            BufferedOutputStream writer;
+            FileOutputStream fos = new FileOutputStream(fd);
+            writer = new BufferedOutputStream(fos);
+
+            String linea1 = "P5\n";
+            String linea2 = img.getXSize() + " " + img.getYSize() + "\n";
+            String linea3 = "255\n";
+            byte arr[];
+
+            arr = linea1.getBytes();
+            writer.write(arr, 0, arr.length);
+            arr = linea2.getBytes();
+            writer.write(arr, 0, arr.length);
+            arr = linea3.getBytes();
+            writer.write(arr, 0, arr.length);
+
+            int x = 0, y = 0;
+            for ( y = 0; y < img.getYSize(); y++ ) {
+                for ( x = 0; x < img.getXSize(); x++ ) {
+                    writer.write(img.getPixel8bitGrayScale(x, y));
                 }
             }
 

@@ -160,6 +160,19 @@ public class RGBImage extends Image
 
     /**
     Check the general signature contract in superclass method
+    Image.getPixelRgb.
+    */
+    public void getPixelRgb(int x, int y, RGBPixel p)
+    {
+        int index = (xSize*(ySize-1-y) + x)*3;
+
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
+    }
+
+    /**
+    Check the general signature contract in superclass method
     Image.getXSize.
     */
     public int getXSize()
