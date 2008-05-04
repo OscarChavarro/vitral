@@ -248,6 +248,64 @@ public class ImagePersistence extends PersistenceElement
 
     /**
     This method writes the contents of the specified image to a file in 
+    binary JPEG image format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */    
+    public static boolean exportPNG(File fd, Image img)
+    {
+        try {
+            FileOutputStream fos = new FileOutputStream(fd);
+
+            exportPNG(fos, img);
+
+            fos.close();
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+        return true;
+    }
+
+    private static void exportPNG_24bitRgb(OutputStream os, Image img)
+        throws Exception
+    {
+        BufferedImage bimg;
+        int x, y, xSize, ySize;
+        RGBPixel p;
+
+        xSize = img.getXSize();
+        ySize = img.getYSize();
+        bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                p = img.getPixelRgb(x, y);
+                bimg.setRGB(x, y, 
+                  (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.b))
+                );
+            }
+        }
+
+        ImageIO.write(bimg, "png", os);
+    }
+
+    public static void exportPNG(OutputStream os, Image img)
+        throws Exception
+    {
+/*
+        if ( img instanceof IndexedColorImage ) {
+//NOT WORKING
+            exportPNG_8bitGrayscale(os, (IndexedColorImage)img);
+	}
+	else {
+*/
+        exportPNG_24bitRgb(os, img);
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
     binary GIF image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
