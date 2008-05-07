@@ -9,6 +9,8 @@ package vsdk.toolkit.render.awt;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
@@ -57,24 +59,41 @@ public class AwtIndexedColorImageRenderer extends AwtRenderer
             }
         }
 
+        ColorModel cm = input.getColorModel();
         int x, y;
         int pixel;
         int val;
         RGBPixel p = new RGBPixel();
 
-        for ( y = 0; y < h; y++ ) {
-            for ( x = 0; x < w; x++ ) {
-                // Warning: This method call is so slow...
-                pixel = input.getRGB(x, y);
-                p.r = (byte)((pixel & 0x00FF0000) >> 16);
-                p.g = (byte)((pixel & 0x0000FF00) >> 8);
-                p.b = (byte)((pixel & 0x000000FF));
-                val = VSDK.signedByte2unsignedInteger(p.r);
-                val += VSDK.signedByte2unsignedInteger(p.g);
-                val += VSDK.signedByte2unsignedInteger(p.b);
-                val /= 3;
-                output.putPixel(x, y, val);
+        if ( cm.getNumColorComponents() == 3 ) {
+            for ( y = 0; y < h; y++ ) {
+                for ( x = 0; x < w; x++ ) {
+                    // Warning: This method call is so slow...
+                    pixel = input.getRGB(x, y);
+                    p.r = (byte)((pixel & 0x00FF0000) >> 16);
+                    p.g = (byte)((pixel & 0x0000FF00) >> 8);
+                    p.b = (byte)((pixel & 0x000000FF));
+                    val = VSDK.signedByte2unsignedInteger(p.r);
+                    val += VSDK.signedByte2unsignedInteger(p.g);
+                    val += VSDK.signedByte2unsignedInteger(p.b);
+                    val /= 3;
+                    output.putPixel(x, y, val);
+                }
             }
+        }
+        else if ( cm.getNumColorComponents() == 1 ) {
+            DataBuffer db = input.getData().getDataBuffer();
+            int i;
+            for ( i = 0, y = 0; y < h; y++ ) {
+                for ( x = 0; x < w; x++, i++ ) {
+                    val = db.getElem(i) & 0x000000FF;
+                    // Warning: This method call is so slow...
+                    output.putPixel(x, y, val);
+                }
+            }
+        }
+        else {
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
         }
         return true;
     }

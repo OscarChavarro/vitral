@@ -9,6 +9,8 @@ package vsdk.toolkit.render.awt;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
@@ -66,19 +68,36 @@ public class AwtRGBImageRenderer extends AwtRenderer
             }
         }
 
+        ColorModel cm = input.getColorModel();
         int x, y;
         int pixel;
         RGBPixel p = new RGBPixel();
 
-        for ( y = 0; y < h; y++ ) {
-            for ( x = 0; x < w; x++ ) {
-                // Warning: This method call is so slow...
-                pixel = input.getRGB(x, y);
-                p.r = (byte)((pixel & 0x00FF0000) >> 16);
-                p.g = (byte)((pixel & 0x0000FF00) >> 8);
-                p.b = (byte)((pixel & 0x000000FF));
-                output.putPixelRgb(x, y, p);
+        if ( cm.getNumColorComponents() == 3 ) {
+            for ( y = 0; y < h; y++ ) {
+                for ( x = 0; x < w; x++ ) {
+                    // Warning: This method call is so slow...
+                    pixel = input.getRGB(x, y);
+                    p.r = (byte)((pixel & 0x00FF0000) >> 16);
+                    p.g = (byte)((pixel & 0x0000FF00) >> 8);
+                    p.b = (byte)((pixel & 0x000000FF));
+                    output.putPixelRgb(x, y, p);
+                }
             }
+        }
+        else if ( cm.getNumColorComponents() == 1 ) {
+            DataBuffer db = input.getData().getDataBuffer();
+            int i;
+            for ( i = 0, y = 0; y < h; y++ ) {
+                for ( x = 0; x < w; x++, i++ ) {
+                    p.r = p.g = p.b = VSDK.unsigned8BitInteger2signedByte((db.getElem(i) & 0x000000FF));
+                    // Warning: This method call is so slow...
+                    output.putPixelRgb(x, y, p);
+                }
+            }
+        }
+        else {
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
         }
         return true;
     }

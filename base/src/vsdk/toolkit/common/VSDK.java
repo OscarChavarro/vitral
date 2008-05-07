@@ -227,6 +227,27 @@ public class VSDK
         return "" + guarismos[nibbleH] + guarismos[nibbleL];
     }
 
+    /**
+    Given an integer, it formats it to print as two hexagesimal nibbles
+    */
+    public static String formatIntAsHex(int a)
+    {
+        char guarismos[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        String msg = "";
+        byte b;
+
+        b = (byte)((a & 0xFF000000) >> 24);
+        msg += formatByteAsHex(b);
+        b = (byte)((a & 0x00FF0000) >> 16);
+        msg += formatByteAsHex(b);
+        b = (byte)((a & 0x0000FF00) >> 8);
+        msg += formatByteAsHex(b);
+        b = (byte)((a & 0x000000FF));
+        msg += formatByteAsHex(b);
+
+        return msg;
+    }
+
     /** Converts integers in the domain [-128, 127] to integers in the range
     [0, 256] */
     public static int signedByte2unsignedInteger(byte in) {

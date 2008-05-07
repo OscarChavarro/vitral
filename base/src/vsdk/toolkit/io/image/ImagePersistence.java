@@ -316,8 +316,8 @@ public class ImagePersistence extends PersistenceElement
         if ( img instanceof IndexedColorImage ) {
 //NOT WORKING
             exportPNG_8bitGrayscale(os, (IndexedColorImage)img);
-	}
-	else {
+        }
+        else {
 */
         exportPNG_24bitRgb(os, img);
     }
