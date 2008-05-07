@@ -28,6 +28,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.io.PersistenceElement;
@@ -172,6 +173,23 @@ public class ImagePersistence extends PersistenceElement
                 throw new ImageNotRecognizedException("Convertion needed", 
                 imagen);
             }
+            return retImage;
+        }
+        else if( type.equals("jpg") || type.equals("jpeg") ||
+                 type.equals("gif") || type.equals("png") )  {
+            BufferedImage bi = null;
+
+            try {
+                bi = ImageIO.read(imagen);
+              }
+              catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                                     "Cannot import image file \"" + imagen.getAbsolutePath() + "\"");
+                 throw new ImageNotRecognizedException("Error reading internal file:\n" + e, imagen);
+            }
+            retImage = new IndexedColorImage();
+            AwtIndexedColorImageRenderer.importFromAwtBufferedImage(bi, retImage);
+
             return retImage;
         }
         throw new ImageNotRecognizedException("Image not recognized", imagen);

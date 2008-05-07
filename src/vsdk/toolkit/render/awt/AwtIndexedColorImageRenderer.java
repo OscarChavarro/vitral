@@ -42,6 +42,43 @@ public class AwtIndexedColorImageRenderer extends AwtRenderer
         draw(dc, img, 0, 0);
     }
 
+    public static boolean importFromAwtBufferedImage(
+        BufferedImage input, IndexedColorImage output
+    )
+    {
+        int w = input.getWidth();
+        int h = input.getHeight();
+        int w2 = output.getXSize();
+        int h2 = output.getYSize();
+
+        if ( w != w2 || h != h2 ) {
+            if ( !output.initNoFill(w, h) ) {
+                return false;
+            }
+        }
+
+        int x, y;
+        int pixel;
+        int val;
+        RGBPixel p = new RGBPixel();
+
+        for ( y = 0; y < h; y++ ) {
+            for ( x = 0; x < w; x++ ) {
+                // Warning: This method call is so slow...
+                pixel = input.getRGB(x, y);
+                p.r = (byte)((pixel & 0x00FF0000) >> 16);
+                p.g = (byte)((pixel & 0x0000FF00) >> 8);
+                p.b = (byte)((pixel & 0x000000FF));
+                val = VSDK.signedByte2unsignedInteger(p.r);
+                val += VSDK.signedByte2unsignedInteger(p.g);
+                val += VSDK.signedByte2unsignedInteger(p.b);
+                val /= 3;
+                output.putPixel(x, y, val);
+            }
+        }
+        return true;
+    }
+
 }
 
 //===========================================================================
