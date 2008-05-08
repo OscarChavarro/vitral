@@ -11,9 +11,11 @@ package vsdk.toolkit.render.jogl;
 
 // Basic Java classes
 import java.util.ArrayList;
+import java.nio.DoubleBuffer;
 
 // JOGL classes
 import javax.media.opengl.GL;
+import com.sun.opengl.util.BufferUtil;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -26,6 +28,24 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.Material;
 
 public class JoglTriangleMeshRenderer extends JoglRenderer {
+
+    private static DoubleBuffer vertexPositionsBuffer;
+
+    private static DoubleBuffer
+    allocateVertexPositions(double[] vertexPositions)
+    {
+        if ( vertexPositionsBuffer == null ) {
+            vertexPositionsBuffer = BufferUtil.newDoubleBuffer(vertexPositions.length);
+
+            int i;
+            for ( i = 0; i < vertexPositions.length; i++ ) {
+                vertexPositionsBuffer.put(vertexPositions[i]);
+            }
+            vertexPositionsBuffer.rewind();
+        }
+        return vertexPositionsBuffer;
+    }
+
 
     /**
     @todo program this!
@@ -129,13 +149,29 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
 
+        //-----------------------------------------------------------------
+        // Old method
+/*
+        int i;
+        int nv;
+        double v[];
+
+        nv = mesh.getNumVertices();
+        v = mesh.getVertexPositions();
+
         gl.glBegin(gl.GL_POINTS);
-        for ( int i = 0; i < mesh.getVertexes().length; i++ ) {
-            gl.glVertex3d(mesh.getVertexAt(i).getPosition().x,
-                          mesh.getVertexAt(i).getPosition().y,
-                          mesh.getVertexAt(i).getPosition().z);
+        for ( i = 0; i < nv; i++ ) {
+            gl.glVertex3d(v[3*i], v[3*i+1], v[3*i+2]);
         }
         gl.glEnd();
+*/
+        // New method
+        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
+            gl.glVertexPointer(3, gl.GL_DOUBLE, 0, allocateVertexPositions(mesh.getVertexPositions()));
+        gl.glDrawArrays(gl.GL_POINTS, 0, mesh.getNumVertices());
+        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
+
+        //-----------------------------------------------------------------
     }
 
     private static void drawVertexNormals(GL gl, TriangleMesh mesh) {
@@ -146,12 +182,10 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glLineWidth(1.0f);
 
         gl.glBegin(gl.GL_LINES);
-        for ( int i = 0; i < mesh.getTriangles().length; i++ ) {
-            Vertex vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint0());
-            JoglGeometryRenderer.drawVertexNormal(gl, vertex);
-            vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint1());
-            JoglGeometryRenderer.drawVertexNormal(gl, vertex);
-            vertex = mesh.getVertexAt(mesh.getTriangleAt(i).getPoint2());
+        Vertex vertex = new Vertex(new Vector3D(), new Vector3D());
+        int i;
+        for ( i = 0; i < mesh.getNumVertices(); i++ ) {
+            mesh.getVertexAt(i, vertex);
             JoglGeometryRenderer.drawVertexNormal(gl, vertex);
         }
         gl.glEnd();
@@ -167,27 +201,22 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glLineWidth(2.0f);
 
         gl.glBegin(gl.GL_LINES);
-        for ( int i = 0; i < m.getTriangles().length; i++ ) {
-            double cx = m.getVertexAt(m.getTriangleAt(i).getPoint0()).getPosition().x;
-            cx += m.getVertexAt(m.getTriangleAt(i).getPoint1()).getPosition().x;
-            cx += m.getVertexAt(m.getTriangleAt(i).getPoint2()).getPosition().x;
-
-            double cy = m.getVertexAt(m.getTriangleAt(i).getPoint0()).getPosition().y;
-            cy += m.getVertexAt(m.getTriangleAt(i).getPoint1()).getPosition().y;
-            cy += m.getVertexAt(m.getTriangleAt(i).getPoint2()).getPosition().y;
-
-            double cz = m.getVertexAt(m.getTriangleAt(i).getPoint0()).getPosition().z;
-            cz += m.getVertexAt(m.getTriangleAt(i).getPoint1()).getPosition().z;
-            cz += m.getVertexAt(m.getTriangleAt(i).getPoint2()).getPosition().z;
-
-            cx /= 3;
-            cy /= 3;
-            cz /= 3;
+        double cx, cy, cz;
+        double v[];
+        double n[];
+        int t[];
+        v = m.getVertexPositions();
+        n = m.getTriangleNormals();
+        t = m.getTriangleIndexes();
+        for ( int i = 0; i < m.getNumTriangles(); i++ ) {
+            cx = (v[3*t[3*i]+0] + v[3*t[3*i+1]+0] + v[3*t[3*i+2]+0]) / 3;
+            cy = (v[3*t[3*i]+1] + v[3*t[3*i+1]+1] + v[3*t[3*i+2]+1]) / 3;
+            cz = (v[3*t[3*i]+2] + v[3*t[3*i+1]+2] + v[3*t[3*i+2]+2]) / 3;
 
             gl.glVertex3d(cx, cy, cz);
-            gl.glVertex3d(cx + m.getTriangleAt(i).normal.x * l,
-                          cy + m.getTriangleAt(i).normal.y * l,
-                          cz + m.getTriangleAt(i).normal.z * l);
+            gl.glVertex3d(cx + n[3*i+0] * l,
+                          cy + n[3*i+1] * l,
+                          cz + n[3*i+2] * l);
         }
         gl.glEnd();
     }
@@ -209,7 +238,9 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
 
         //-----------------------------------------------------------------
-        if ( mesh.getTriangles() == null ) {
+        int nt;
+        nt = mesh.getNumTriangles();
+        if ( nt < 1 ) {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "JoglTriangleMeshRenderer.activate",
                                "Trying to draw mesh without triangles?");
@@ -219,7 +250,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         if ( materialRanges == null ) {
             drawRangeWithoutTexture(gl, mesh,
-                                   0, mesh.getTriangles().length, flipNormals);
+                                    0, nt, flipNormals);
             return;
         }
 
@@ -237,10 +268,10 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             drawRangeWithoutTexture(gl, mesh, start, end, flipNormals);
             start = end;
         }
-        if ( end <= mesh.getTriangles().length ) {
+        if ( end <= nt ) {
             Material m = new Material();
             JoglMaterialRenderer.activate(gl, m);
-            drawRangeWithoutTexture(gl, mesh, start, mesh.getTriangles().length, flipNormals);
+            drawRangeWithoutTexture(gl, mesh, start, nt, flipNormals);
         }
     }
 
@@ -340,12 +371,17 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     drawRangeWithTexture(GL gl, TriangleMesh mesh, 
                          int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
+        int t[];
 
         gl.glBegin(gl.GL_TRIANGLES);
+        v0 = new Vertex(new Vector3D(), new Vector3D());
+        v1 = new Vertex(new Vector3D(), new Vector3D());
+        v2 = new Vertex(new Vector3D(), new Vector3D());
+        t = mesh.getTriangleIndexes();
         for ( int i = start; i < end; i++ ) {
-            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).p0);
-            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).p1);
-            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).p2);
+            mesh.getVertexAt(t[3*i], v0);
+            mesh.getVertexAt(t[3*i+1], v1);
+            mesh.getVertexAt(t[3*i+2], v2);
 
             if ( !flipNormals ) {
                 gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
@@ -382,12 +418,17 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     drawRangeWithoutTexture(GL gl, TriangleMesh mesh, 
                             int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
+        int t[];
 
         gl.glBegin(gl.GL_TRIANGLES);
+        v0 = new Vertex(new Vector3D(), new Vector3D());
+        v1 = new Vertex(new Vector3D(), new Vector3D());
+        v2 = new Vertex(new Vector3D(), new Vector3D());
+        t = mesh.getTriangleIndexes();
         for ( int i = start; i < end; i++ ) {
-            v0 = mesh.getVertexAt(mesh.getTriangleAt(i).p0);
-            v1 = mesh.getVertexAt(mesh.getTriangleAt(i).p1);
-            v2 = mesh.getVertexAt(mesh.getTriangleAt(i).p2);
+            mesh.getVertexAt(t[3*i], v0);
+            mesh.getVertexAt(t[3*i+1], v1);
+            mesh.getVertexAt(t[3*i+2], v2);
 
             //-----------------------------------------------------------------
             if ( !flipNormals ) {

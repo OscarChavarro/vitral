@@ -29,45 +29,62 @@ public class WriterObj extends PersistenceElement {
     exportMesh(OutputStream inOutputStream, TriangleMesh mesh, long offset)
         throws Exception
     {
-        Vertex v[] = mesh.getVertexes();
-        Triangle t[] = mesh.getTriangles();
+        int nv = mesh.getNumVertices();
+        int nt = mesh.getNumTriangles();
+        double vp[] = mesh.getVertexPositions();
+        double vn[] = mesh.getVertexNormals();
+        double vuv[] = mesh.getVertexUvs();
         int i;
-        Vector3D p, n;
+        Vector3D p, n, vpi, vni;
         Matrix4x4 R = new Matrix4x4();
 
         R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
 
-        writeAsciiLine(inOutputStream, "# " + v.length + " vertex positions");
-        for ( i = 0; i < v.length; i++ ) {
-            p = R.multiply(v[i].position);
+        //-----------------------------------------------------------------
+        vpi = new Vector3D();
+        writeAsciiLine(inOutputStream, "# " + nv + " vertex positions");
+        for ( i = 0; i < nv; i++ ) {
+            vpi.x = vp[3*i];
+            vpi.y = vp[3*i+1];
+            vpi.z = vp[3*i+2];
+            p = R.multiply(vpi);
             writeAsciiLine(inOutputStream, "v " + p.x + " " + p.y + " " + p.z);
         }
 
-        writeAsciiLine(inOutputStream, "# " + v.length + " vertex texture coordinates");
-        for ( i = 0; i < v.length; i++ ) {
-            writeAsciiLine(inOutputStream, "vt " + v[i].u + " " + v[i].v);
+        //-----------------------------------------------------------------
+        writeAsciiLine(inOutputStream, "# " + nv + " vertex texture coordinates");
+        for ( i = 0; i < nv; i++ ) {
+            writeAsciiLine(inOutputStream, "vt " + vuv[2*i] + " " + vuv[2*i+1]);
         }
 
-        writeAsciiLine(inOutputStream, "# " + v.length + " vertex normals");
-        for ( i = 0; i < v.length; i++ ) {
-            n = R.multiply(v[i].normal);
+        //-----------------------------------------------------------------
+        vni = new Vector3D();
+        writeAsciiLine(inOutputStream, "# " + nv + " vertex normals");
+        for ( i = 0; i < nv; i++ ) {
+            vni.x = vn[3*i];
+            vni.y = vn[3*i+1];
+            vni.z = vn[3*i+2];
+            n = R.multiply(vni);
             writeAsciiLine(inOutputStream, "vn " + n.x + " " + n.y + " " + n.z);
         }
 
-        writeAsciiLine(inOutputStream, "# " + t.length + " triangles");
+        //-----------------------------------------------------------------
+        int t[] = mesh.getTriangleIndexes();
+
+        writeAsciiLine(inOutputStream, "# " + nt + " triangles");
             long n0, n1, n2;
         writeAsciiLine(inOutputStream, "o NewObject");
-        for ( i = 0; i < t.length; i++ ) {
-            n0 = t[i].p0 + offset + 1;
-            n1 = t[i].p1 + offset + 1;
-            n2 = t[i].p2 + offset + 1;
+        for ( i = 0; i < nt; i++ ) {
+            n0 = t[3*i] + offset + 1;
+            n1 = t[3*i+1] + offset + 1;
+            n2 = t[3*i+2] + offset + 1;
             writeAsciiLine(inOutputStream, "f " + 
                 n0 + "/" + n0 + "/" + n0 + " " +
                 n1 + "/" + n1 + "/" + n1 + " " +
                 n2 + "/" + n2 + "/" + n2);
         }
 
-        return offset + v.length;
+        return offset + nv;
     }
 
     public static void

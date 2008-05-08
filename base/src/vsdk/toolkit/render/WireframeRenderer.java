@@ -107,8 +107,10 @@ public class WireframeRenderer extends RenderingElement
         int t;                     // triangle index
         TriangleMeshGroup mg;
         TriangleMesh mesh = null;
-        Vertex[] arrVertexes;
-        Triangle[] arrTriangles;
+        int nv;
+        int nt;
+        double v[];
+        int tr[];
         Matrix4x4 M;               // Modelview matrix
         int p0, p1, p2;
         Vector3D mp0, mp1;         // Mesh points
@@ -117,37 +119,53 @@ public class WireframeRenderer extends RenderingElement
         mg = body.getGeometry().exportToTriangleMeshGroup();
         if ( mg == null ) return;
 
+        mp0 = new Vector3D();
+        mp1 = new Vector3D();
         cp0 = new Vector3D();
         cp1 = new Vector3D();
 
         M = body.getTransformationMatrix();
         for ( j = 0; j < mg.getMeshes().size(); j++ ) {
             mesh = mg.getMeshes().get(j);
-            arrVertexes = mesh.getVertexes();
-            arrTriangles = mesh.getTriangles();
-            for ( t = 0; t < arrTriangles.length; t++ ) {
-                p0 = arrTriangles[t].p0;
-                p1 = arrTriangles[t].p1;
-                p2 = arrTriangles[t].p2;
+            nv = mesh.getNumVertices();
+            nt = mesh.getNumTriangles();
+            v = mesh.getVertexPositions();
+            tr = mesh.getTriangleIndexes();
+            for ( t = 0; t < nt; t++ ) {
+                p0 = tr[3*t];
+                p1 = tr[3*t+1];
+                p2 = tr[3*t+2];
 
-                mp0 = arrVertexes[p0].position;
-                mp1 = arrVertexes[p1].position;
+                mp0.x = v[3*p0];
+                mp0.y = v[3*p0+1];
+                mp0.z = v[3*p0+2];
+                mp1.x = v[3*p1];
+                mp1.y = v[3*p1+1];
+                mp1.z = v[3*p1+2];
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0 = arrVertexes[p1].position;
-                mp1 = arrVertexes[p2].position;
+                mp0.x = v[3*p1];
+                mp0.y = v[3*p1+1];
+                mp0.z = v[3*p1+2];
+                mp1.x = v[3*p2];
+                mp1.y = v[3*p2+1];
+                mp1.z = v[3*p2+2];
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0 = arrVertexes[p2].position;
-                mp1 = arrVertexes[p0].position;
+                mp0.x = v[3*p2];
+                mp0.y = v[3*p2+1];
+                mp0.z = v[3*p2+2];
+                mp1.x = v[3*p0];
+                mp1.y = v[3*p0+1];
+                mp1.z = v[3*p0+2];
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {

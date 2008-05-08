@@ -335,11 +335,13 @@ public class ReaderObj extends PersistenceElement
 
         //-----------------------------------------------------------------
         TriangleMeshGroup finalTriangleMeshGroup = new TriangleMeshGroup();
-        for( TriangleMesh auxTriangleMesh:meshGroup ) {
-            Vertex[] auxTriangleMeshVertexArray;
-            auxTriangleMeshVertexArray = auxTriangleMesh.getVertexes();
-            if ( auxTriangleMeshVertexArray.length > 0 ) {
-                finalTriangleMeshGroup.addMesh(auxTriangleMesh);
+        TriangleMesh tm;
+        int i;
+
+        for( i = 0; i < meshGroup.size(); i++ ) {
+            tm = meshGroup.get(i);
+            if ( tm.getNumVertices() > 0 ) {
+                finalTriangleMeshGroup.addMesh(tm);
             }
         }
         return finalTriangleMeshGroup;

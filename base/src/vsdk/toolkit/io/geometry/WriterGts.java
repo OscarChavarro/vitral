@@ -64,8 +64,8 @@ public class WriterGts extends PersistenceElement {
     exportMesh(OutputStream inOutputStream, TriangleMesh mesh, long offset)
         throws Exception
     {
-        Vertex v[] = mesh.getVertexes();
-        Triangle t[] = mesh.getTriangles();
+        int nv = mesh.getNumVertices();
+        int nt = mesh.getNumTriangles();
         ArrayList<_WriterGtsEdge> edges;
         ArrayList<_WriterGtsTriangle> triangles;
         edges = new ArrayList<_WriterGtsEdge>();
@@ -74,30 +74,39 @@ public class WriterGts extends PersistenceElement {
         _WriterGtsTriangle tt;
         int i;
 
-        for ( i = 0; i < t.length; i++ ) {
+        //- Compute edges -------------------------------------------------
+        int t[] = mesh.getTriangleIndexes();
+        for ( i = 0; i < nt; i++ ) {
             tt = new _WriterGtsTriangle();
-            tt.p0 = addEdge(edges, t[i].p0, t[i].p1);
-            tt.p1 = addEdge(edges, t[i].p1, t[i].p2);
-            tt.p2 = addEdge(edges, t[i].p2, t[i].p0);
+            tt.p0 = addEdge(edges, t[3*i], t[3*i+1]);
+            tt.p1 = addEdge(edges, t[3*i+1], t[3*i+2]);
+            tt.p2 = addEdge(edges, t[3*i+2], t[3*i]);
             triangles.add(tt);
         }
 
-        writeAsciiLine(inOutputStream, "" + v.length + " " + edges.size() + " " + triangles.size() + " GtsSurface GtsFace GtsEdge GtsVertex");
+        //- Write GTS header ----------------------------------------------
+        writeAsciiLine(inOutputStream, "" + nv + " " + edges.size() + " " + triangles.size() + " GtsSurface GtsFace GtsEdge GtsVertex");
 
-        for ( i = 0; i < v.length; i++ ) {
-            writeAsciiLine(inOutputStream, "" + v[i].position.x + " " +
-                v[i].position.y + " " + v[i].position.z);
+        //- Write vertices ------------------------------------------------
+        double v[] = mesh.getVertexPositions();
+        for ( i = 0; i < nv; i++ ) {
+            writeAsciiLine(inOutputStream, "" + v[3*i] + " " +
+                v[3*i+1] + " " + v[3*i+2]);
         }
+
+        //- Write edges ---------------------------------------------------
         for ( i = 0; i < edges.size(); i++ ) {
             e = edges.get(i);
             writeAsciiLine(inOutputStream, "" + (e.from+1) + " " + (e.to+1));
         }
+
+        //- Write triangles -----------------------------------------------
         for ( i = 0; i < triangles.size(); i++ ) {
             tt = triangles.get(i);
             writeAsciiLine(inOutputStream, "" + (tt.p0+1) + " " + (tt.p1+1) + " " + (tt.p2+1));
         }
 
-        return offset + v.length;
+        return offset + nv;
     }
 
     public static void

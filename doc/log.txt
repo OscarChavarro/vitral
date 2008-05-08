@@ -732,4 +732,12 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 0 (time from vhireader project): PNM exporting and image grayscale
     generic support.
 
+2008 may 7, Oscar Chavarro: <<150min>>
+  - 2h30min: Internal redesign for TriangleMesh class: not using arrays of 
+    Vertex and Triangles objects anymore (memory inefficient and slower
+    access), migration to flat static data arrays of doubles and ints.
+
+2008 may 7, Oscar Chavarro: <<30min>>
+  - 30min: Migrating TriangleMesh managing to new design.
+
 ===========================================================================

@@ -247,15 +247,15 @@ public class ShapeDescriptor3DGenerator extends Component
             referenceGeometry = referenceBody.getGeometry();
             if ( referenceGeometry instanceof TriangleMesh ) {
                 mesh = (TriangleMesh)referenceGeometry;
-                totalVertices += mesh.getVertexes().length;
-                totalTriangles += mesh.getTriangles().length;
+                totalVertices += mesh.getNumVertices();
+                totalTriangles += mesh.getNumTriangles();
             }
             else if ( referenceGeometry instanceof TriangleMeshGroup ) {
                 meshGroup = (TriangleMeshGroup)referenceGeometry;
                 for ( j = 0; j < meshGroup.getMeshes().size(); j++ ) {
                     mesh = meshGroup.getMeshes().get(j);
-                    totalVertices += mesh.getVertexes().length;
-                    totalTriangles += mesh.getTriangles().length;
+                    totalVertices += mesh.getNumVertices();
+                    totalTriangles += mesh.getNumTriangles();
                 }
             }
         }

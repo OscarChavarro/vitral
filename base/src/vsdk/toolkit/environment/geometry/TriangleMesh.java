@@ -67,8 +67,32 @@ public class TriangleMesh extends Surface {
 
     // Basic mesh data model
     private String name = "default";
+
     private Vertex[] vertexes;
+
+    // Consecutive triads of x/y/z point coordinates
+    private double[] vertexPositions;
+
+    // Consecutive triads of nx/ny/nz vertex normal coordinates
+    private double[] vertexNormals;
+
+    // Consecutive triads of nx/ny/nz vertex binormal coordinates (can be null)
+    private double[] vertexBinormals;
+
+    // Consecutive triads of nx/ny/nz vertex tangent coordinates (can be null)
+    private double[] vertexTangents;
+
+    // Consecutive triads of r/g/b vertex color components (can be null)
+    private double[] vertexColors;
+
+    // Consecutive pairs of u/v vertex texture coordinates (can be null)
+    private double[] vertexUvs;
+
     private Triangle[] triangles;
+    /// Consecutive triads of p0/p1/p2 indices into the vertex arrays
+    private int[] triangleIndexes;
+    /// Consecutive triads of nx/ny/nz for normal vectors, one per triangle
+    private double[] triangleNormals;
 
     // Auxiliary components for data model
     private Material[] materials;
@@ -113,11 +137,25 @@ public class TriangleMesh extends Surface {
         minMax = null;
         boundingVolume = null;
         triangleMeshGroupCache = null;
+
+        vertexPositions = null;
+        vertexNormals = null;
+        vertexBinormals = null;
+        vertexTangents = null;
+        vertexColors = null;
+        vertexUvs = null;
+        triangles = null;
+        triangleIndexes = null;
+        triangleNormals = null;
     }
 
+    /**
+    @deprecated
+    */
     public TriangleMesh(Vertex[] vertexes, Triangle[] triangles) {
-        this.vertexes = vertexes;
-        this.triangles = triangles;
+        setVertexes(vertexes);
+        setTriangles(triangles);
+
         minMax = null;
         lastInfo = new GeometryIntersectionInformation();
         lastRay = null;
@@ -129,20 +167,21 @@ public class TriangleMesh extends Surface {
         return this.name;
     }
 
-    public Vertex[] getVertexes() {
-        return this.vertexes;
-    }
-
-    public Vertex getVertexAt(int index) {
-        return this.vertexes[index];
-    }
-
-    public Triangle[] getTriangles() {
-        return this.triangles;
-    }
-
-    public Triangle getTriangleAt(int index) {
-        return this.triangles[index];
+    public void getVertexAt(int i, Vertex vertex) {
+        vertex.position.x = vertexPositions[3*i];
+        vertex.position.y = vertexPositions[3*i+1];
+        vertex.position.z = vertexPositions[3*i+2];
+        vertex.normal.x = vertexNormals[3*i];
+        vertex.normal.y = vertexNormals[3*i+1];
+        vertex.normal.z = vertexNormals[3*i+2];
+        vertex.binormal.x = vertexBinormals[3*i];
+        vertex.binormal.y = vertexBinormals[3*i+1];
+        vertex.binormal.z = vertexBinormals[3*i+2];
+        vertex.tangent.x = vertexTangents[3*i];
+        vertex.tangent.y = vertexTangents[3*i+1];
+        vertex.tangent.z = vertexTangents[3*i+2];
+        vertex.u = vertexUvs[2*i];
+        vertex.v = vertexUvs[2*i+1];
     }
 
     public Material[] getMaterials() {
@@ -161,13 +200,65 @@ public class TriangleMesh extends Surface {
         this.name = name;
     }
 
+    /**
+    @deprecated
+    */
     public void setVertexes(Vertex[] vertexes) {
         this.vertexes = vertexes;
+
+        int n, i;
+
+        n = vertexes.length;
+
+        vertexPositions = new double[n*3];
+        vertexNormals = new double[n*3];
+        vertexBinormals = new double[n*3];
+        vertexTangents = new double[n*3];
+        vertexUvs = new double[n*2];
+        vertexColors = null;
+
+        for ( i = 0; i < n; i++ ) {
+            vertexPositions[3*i] = vertexes[i].position.x;
+            vertexPositions[3*i+1] = vertexes[i].position.y;
+            vertexPositions[3*i+2] = vertexes[i].position.z;
+            vertexNormals[3*i] = vertexes[i].normal.x;
+            vertexNormals[3*i+1] = vertexes[i].normal.y;
+            vertexNormals[3*i+2] = vertexes[i].normal.z;
+            vertexBinormals[3*i] = vertexes[i].binormal.x;
+            vertexBinormals[3*i+1] = vertexes[i].binormal.y;
+            vertexBinormals[3*i+2] = vertexes[i].binormal.z;
+            vertexTangents[3*i] = vertexes[i].tangent.x;
+            vertexTangents[3*i+1] = vertexes[i].tangent.y;
+            vertexTangents[3*i+2] = vertexes[i].tangent.z;
+            vertexUvs[2*i] = vertexes[i].u;
+            vertexUvs[2*i+1] = vertexes[i].v;
+        }
+
         boundingVolume = null;
     }
 
+    /**
+    @deprecated
+    */
     public void setTriangles(Triangle[] triangles) {
         this.triangles = triangles;
+
+        int n, i;
+
+        n = triangles.length;
+
+        triangleIndexes = new int[n*3];
+        triangleNormals = new double [n*3];
+
+        for ( i = 0; i < n; i++ ) {
+            triangleIndexes[3*i] = triangles[i].p0;
+            triangleIndexes[3*i+1] = triangles[i].p1;
+            triangleIndexes[3*i+2] = triangles[i].p2;
+            triangleNormals[3*i] = triangles[i].normal.x;
+            triangleNormals[3*i+1] = triangles[i].normal.y;
+            triangleNormals[3*i+2] = triangles[i].normal.z;
+        }
+
         boundingVolume = null;
     }
 
@@ -179,29 +270,96 @@ public class TriangleMesh extends Surface {
         this.materials = materials;
     }
 
-    public void setTrianglesSize(int size) {
-        this.triangles = new Triangle[size];
+    /**
+    Given a vertex structure and an `i` position, this method copies
+    the information from the structure in to the i-th vertex arrays position.
+    PRE: 0 <= i < vertexPositions.length/3
+    */
+    public void setVertexAt(int i, Vertex vertex) {
+        vertexPositions[3*i] = vertex.position.x;
+        vertexPositions[3*i+1] = vertex.position.y;
+        vertexPositions[3*i+2] = vertex.position.z;
+        vertexNormals[3*i] = vertex.normal.x;
+        vertexNormals[3*i+1] = vertex.normal.y;
+        vertexNormals[3*i+2] = vertex.normal.z;
+        vertexBinormals[3*i] = vertex.binormal.x;
+        vertexBinormals[3*i+1] = vertex.binormal.y;
+        vertexBinormals[3*i+2] = vertex.binormal.z;
+        vertexTangents[3*i] = vertex.tangent.x;
+        vertexTangents[3*i+1] = vertex.tangent.y;
+        vertexTangents[3*i+2] = vertex.tangent.z;
+        vertexUvs[2*i] = vertex.u;
+        vertexUvs[2*i+1] = vertex.v;
+
         boundingVolume = null;
     }
 
-    public void setVertexesSize(int size) {
-        this.vertexes = new Vertex[size];
+    /**
+    Given a triangle structure and an `i` position, this method copies
+    the information from the structure in to the i-th triangles arrays position.
+    PRE: 0 <= i < vertexPositions.length/3
+    */
+    public void setTriangleAt(int i, Triangle triangle) {
+        triangleIndexes[3*i] = triangle.p0;
+        triangleIndexes[3*i+1] = triangle.p1;
+        triangleIndexes[3*i+2] = triangle.p2;
+        triangleNormals[3*i] = triangle.normal.x;
+        triangleNormals[3*i+1] = triangle.normal.y;
+        triangleNormals[3*i+2] = triangle.normal.z;
+
         boundingVolume = null;
     }
 
-    public void setTexturesSize(int size) {
-        this.textures = new Image[size];
-        boundingVolume = null;
+    public int getNumVertices()
+    {
+        if ( vertexPositions == null ) return 0;
+        return vertexPositions.length/3;
     }
 
-    public void setVertexAt(int index, Vertex vertex) {
-        this.vertexes[index] = vertex;
-        boundingVolume = null;
+    public int getNumTriangles()
+    {
+        if ( triangleIndexes == null ) return 0;
+        return triangleIndexes.length/3;
     }
 
-    public void setTriangleAt(int index, Triangle triangle) {
-        this.triangles[index] = triangle;
-        boundingVolume = null;
+    public double[] getVertexPositions()
+    {
+        return vertexPositions;
+    }
+
+    public double[] getVertexNormals()
+    {
+        return vertexNormals;
+    }
+
+    public double[] getVertexBinormals()
+    {
+        return vertexBinormals;
+    }
+
+    public double[] getVertexTangents()
+    {
+        return vertexTangents;
+    }
+
+    public double[] getVertexColors()
+    {
+        return vertexColors;
+    }
+
+    public double[] getVertexUvs()
+    {
+        return vertexUvs;
+    }
+
+    public int[] getTriangleIndexes()
+    {
+        return triangleIndexes;
+    }
+
+    public double[] getTriangleNormals()
+    {
+        return triangleNormals;
     }
 
     public void setTextureAt(int index, Image image) {
@@ -251,6 +409,7 @@ public class TriangleMesh extends Surface {
 
     public void calculateNormals() {
         boundingVolume = null;
+        Vector3D tn;
         for (int i = 0; i < triangles.length; i++) {
             Vertex v1 = vertexes[triangles[i].getPoint0()];
             Vertex v2 = vertexes[triangles[i].getPoint1()];
@@ -270,8 +429,12 @@ public class TriangleMesh extends Surface {
             a.normalize();
             b.normalize();
 
-            triangles[i].normal = a.crossProduct(b);
-            triangles[i].normal.normalize();
+            tn = a.crossProduct(b);
+            tn.normalize();
+            triangles[i].normal = tn;
+            triangleNormals[3*i] = tn.x;
+            triangleNormals[3*i+1] = tn.y;
+            triangleNormals[3*i+2] = tn.z;
         }
 
         ArrayList<ArrayList<vsdk.toolkit.common.Triangle>> vecinos;
@@ -295,6 +458,9 @@ public class TriangleMesh extends Surface {
                 vertexes[i].getNormal().z += vecinos.get(i).get(j).normal.z;
             }
             vertexes[i].getNormal().normalize();
+            vertexNormals[3*i] = vertexes[i].normal.x;
+            vertexNormals[3*i+1] = vertexes[i].normal.y;
+            vertexNormals[3*i+2] = vertexes[i].normal.z;
             vertexes[i].setIncidentTriangles(vecinos.get(i));
         }
     }
