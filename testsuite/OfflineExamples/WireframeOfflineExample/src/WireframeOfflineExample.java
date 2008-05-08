@@ -2,7 +2,6 @@
 
 // Java classes
 import java.io.File;
-import java.util.ArrayList;
 
 // VSDK classes
 import vsdk.toolkit.common.Matrix4x4;                   // Model elements
@@ -20,21 +19,35 @@ import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
 
 /**
 This example program is the most fundamental computer graphics example in
-Vitral SDK that does not depend on any external libraries to generate an image
+VitralSDK that does not depend on any external libraries to generate an image
 from a 3D scene. Note that it is based on:
   - A wireframe model imported from an external .obj file (requires a
     running platform with support to file systems, networked or "inline in
     code" reader).
   - Simple camera model and calligraphic renderer (100% java / Vitral SDK
     implementation)
-  - Raster output using Vitral SDK image and Bresenham algorithm
-  - This particular program exports the resulting image in a file
+  - Raster output using Vitral SDK image and Bresenham's line algorithm
+  - This particular program exports the resulting image in a file (requires
+    a platform supporting I/O to files).
 */
 public class WireframeOfflineExample {
     private Camera camera;
     private SimpleScene scene;
 
+    /**
+    Note the starting simplicity of this constructor. Compare it against
+    the Swing+JOGL version of this same example (VSDKExamples/WireframeExample)
+    and recall that the only difference is that the offline example must
+    update the virtual viewport space to the camera (in the interactive
+    version this is done on a Swing/JOGL controlled callback function).
+    */
     public WireframeOfflineExample() {
+        createModel();
+        camera.updateViewportResize(640, 480);
+    }
+
+    private void createModel()
+    {
         //-----------------------------------------------------------------
         camera = new Camera();
         Matrix4x4 R = new Matrix4x4();
@@ -44,7 +57,6 @@ public class WireframeOfflineExample {
         camera.setNearPlaneDistance(0.001);
         camera.setFarPlaneDistance(100);
         camera.setRotation(R);
-        camera.updateViewportResize(640, 480);
 
         //-----------------------------------------------------------------
         String sceneFile = "../../../etc/geometry/cow.obj";
@@ -103,4 +115,3 @@ public class WireframeOfflineExample {
 //===========================================================================
 //= EOF                                                                     =
 //===========================================================================
-

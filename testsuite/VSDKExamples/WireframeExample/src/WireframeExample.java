@@ -2,7 +2,8 @@
 
 // Java classes
 import java.io.File;
-import java.util.ArrayList;
+
+// Java AWT/Swing classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
@@ -13,46 +14,56 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
+
+// JOGL classes
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
-// VSDK classes
+// VitralSDK classes
+import vsdk.toolkit.common.Matrix4x4;                  // Model elements
 import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Vector4D;
-import vsdk.toolkit.common.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.gui.CameraController;
-import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.io.geometry.ReaderObj;
-import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.gui.CameraController;               // Interaction
+import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
+import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;     // View elements
 import vsdk.toolkit.render.jogl.JoglCalligraphic2DBufferRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer; 
 
+/**
+This example program is the most fundamental interactive computer graphics
+example in VitralSDK, showing the independence and modularity from the
+underlying rendering architectures. Using the keys '1', '2' and '3', end user
+can select three diferent rendering strategies:
+  - Fully accelerated 3D using JOGL/OpenGL
+  - Software wireframe rendering, using JOGL/OpenGL just as a portable
+    2D rasterizer
+  - Fully software based wireframe rendering, using Bresenham 2D line
+    rasterizer to send 3D projection to an image, still using JOGL/OpenGL
+    canvas to show the image.
+
+Current example is based on:
+  - WireframeOfflineExample
+  - CameraExample
+*/
 public class WireframeExample extends JFrame implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private Camera camera;
+    private SimpleScene scene;
+
     private CameraController cameraController;
     private GLCanvas canvas;
-
-    private TriangleMeshGroup meshGroup;
 
     private RendererConfiguration qualitySelection;
     private Calligraphic2DBuffer lineSet;
@@ -76,13 +87,10 @@ public class WireframeExample extends JFrame implements
         this.add(canvas, BorderLayout.CENTER);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        camera = new Camera();
-        camera.setPosition(new Vector3D(7, -4, 4));
-        Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(140),
-                              Math.toRadians(-30), 0);
-        camera.setRotation(R);
+        //-----------------------------------------------------------------
+        createModel();
 
+        //-----------------------------------------------------------------
         cameraController = new CameraControllerAquynza(camera);
         qualitySelection = new RendererConfiguration();
         qualitySelection.setSurfaces(false);
@@ -96,32 +104,41 @@ public class WireframeExample extends JFrame implements
 
         img = new RGBImage();
 
+    }
+
+    private void createModel()
+    {
         //-----------------------------------------------------------------
+        camera = new Camera();
+        Matrix4x4 R = new Matrix4x4();
+
+        camera.setPosition(new Vector3D(7, -4, 4));
+        R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
+        camera.setNearPlaneDistance(0.001);
+        camera.setFarPlaneDistance(100);
+        camera.setRotation(R);
+
+        //-----------------------------------------------------------------
+        String sceneFile = "../../../etc/geometry/cow.obj";
+        scene = new SimpleScene();
+
         try {
-            SimpleScene scene = new SimpleScene();
-            int i;
-            ArrayList<SimpleBody> bodies = scene.getSimpleBodies();
-            Geometry g;
-            ReaderObj.importEnvironment(new File("../../../etc/geometry/cow.obj"), scene);
-            meshGroup = null;
-            for ( i = 0; i < bodies.size(); i++ ) {
-                g = bodies.get(i).getGeometry();
-                if ( g instanceof TriangleMeshGroup ) {
-                    meshGroup = (TriangleMeshGroup)g;
-                    break;
-                }
-            }
-            if ( meshGroup == null ) {
-                System.err.println("ERROR: Can not find a TriangleMeshGroup inside file.");
-                System.exit(1);
-            }
+            EnvironmentPersistence.importEnvironment(new File(sceneFile), scene);
         }
-        catch (Exception ex) {
+        catch ( Exception ex ) {
             System.err.println("Failed to read file");
-            System.exit(0);
-            return;
+            ex.printStackTrace();
         }
 
+        //-----------------------------------------------------------------
+        SimpleBody b;
+        Box box;
+
+        b = new SimpleBody();
+        box = new Box(1, 1, 1);
+        b.setGeometry(box);
+        b.setPosition(new Vector3D(1, 2, 3));
+        scene.addBody(b);
     }
 
     public Dimension getPreferredSize() {
@@ -159,25 +176,14 @@ public class WireframeExample extends JFrame implements
 
         gl.glColor3d(0.9, 0.5, 0.5);
         if ( drawJogl == true ) {
-          JoglTriangleMeshGroupRenderer.draw(gl, meshGroup, qualitySelection);
+            int i;
+            for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+                JoglSimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i),
+                                            camera, qualitySelection);
+            }
         }
         gl.glDisable(gl.GL_TEXTURE_2D);
         //-----------------------------------------------------------------
-    }
-
-    private void addLine(Calligraphic2DBuffer lineSet,
-                         Vector3D cp0, Vector3D cp1, Matrix4x4 R)
-    {
-        Vector4D hp0, hp1; // Clipped points in homogeneous space
-        Vector4D pp0, pp1; // Projected points
-
-        hp0 = new Vector4D(cp0);
-        hp1 = new Vector4D(cp1);
-        pp0 = R.multiply(hp0);
-        pp0.divideByW();
-        pp1 = R.multiply(hp1);
-        pp1.divideByW();
-        lineSet.add2DLine(pp0.x, pp0.y, pp1.x, pp1.y);
     }
 
     /** Called by drawable to initiate drawing */
@@ -189,55 +195,14 @@ public class WireframeExample extends JFrame implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activate(gl, camera);
-
         //-----------------------------------------------------------------
+        JoglCameraRenderer.activate(gl, camera);
         drawObjectsGL(gl);
 
         //-----------------------------------------------------------------
         if ( drawWires || drawImage ) {
-            TriangleMesh mesh = null;
-            int i;
-            Vertex[] arrVertexes;
-            Triangle[] arrTriangles;
-            int t;
-            int p0, p1, p2;
-            Vector3D mp0, mp1; // Mesh points
-            Vector3D cp0, cp1; // Clipped points
-            Matrix4x4 R;
-
-            cp0 = new Vector3D();
-            cp1 = new Vector3D();
-            R = camera.calculateProjectionMatrix(camera.STEREO_MODE_CENTER);
-
-            for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
-                mesh = meshGroup.getMeshes().get(i);
-                arrVertexes = mesh.getVertexes();
-                arrTriangles = mesh.getTriangles();
-                for ( t = 0; t < arrTriangles.length; t++ ) {
-                    p0 = arrTriangles[t].p0;
-                    p1 = arrTriangles[t].p1;
-                    p2 = arrTriangles[t].p2;
-
-                    mp0 = arrVertexes[p0].position;
-                    mp1 = arrVertexes[p1].position;
-                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
-                        addLine(lineSet, cp0, cp1, R);
-                    }
-
-                    mp0 = arrVertexes[p1].position;
-                    mp1 = arrVertexes[p2].position;
-                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
-                        addLine(lineSet, cp0, cp1, R);
-                    }
-
-                    mp0 = arrVertexes[p2].position;
-                    mp1 = arrVertexes[p0].position;
-                    if ( camera.clipLineCohenSutherlandPlanes(mp0, mp1, cp0, cp1) ) {
-                        addLine(lineSet, cp0, cp1, R);
-                    }
-                }
-            }
+            //-----------------------------------------------------------------
+            WireframeRenderer.execute(lineSet, scene.getSimpleBodies(), camera);
 
             //-----------------------------------------------------------------
             gl.glMatrixMode(gl.GL_PROJECTION);
@@ -245,28 +210,10 @@ public class WireframeExample extends JFrame implements
             gl.glMatrixMode(gl.GL_MODELVIEW);
             gl.glLoadIdentity();
 
+            //-----------------------------------------------------------------
             if ( drawImage ) {
-                double xt = camera.getViewportXSize();
-                double yt = camera.getViewportYSize();
-
-                Vector3D e0 = new Vector3D();
-                Vector3D e1 = new Vector3D();
-                int x0, y0, x1, y1;
-                RGBPixel pixel = new RGBPixel();
-
-                img.init((int)xt, (int)yt);
-                pixel.r = (byte)255;
-                pixel.g = 0;
-                pixel.b = 0;
-
-                for ( int j = 0; j < lineSet.getNumLines(); j++ ) {
-                    lineSet.get2DLine(j, e0, e1);
-                    x0 = (int)((xt-1)*((e0.x+1)/2));
-                    y0 = (int)((yt-1)*(1-((e0.y+1)/2)));
-                    x1 = (int)((xt-1)*((e1.x+1)/2));
-                    y1 = (int)((yt-1)*(1-((e1.y+1)/2)));
-                    img.drawLine(x0, y0, x1, y1, pixel);
-                }
+                img.init(img.getXSize(), img.getYSize());
+                lineSet.exportRgbImage(img);
                 JoglRGBImageRenderer.draw(gl, img);
             }
             else {
@@ -278,7 +225,7 @@ public class WireframeExample extends JFrame implements
             lineSet.init();
         }
     }
-   
+
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
         ;
@@ -299,6 +246,7 @@ public class WireframeExample extends JFrame implements
         gl.glViewport(0, 0, width, height); 
 
         camera.updateViewportResize(width, height);
+        img.init(width, height);
     }   
 
   public void mouseEntered(MouseEvent e) {
