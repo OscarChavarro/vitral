@@ -102,43 +102,46 @@ public class IlluminationTest
         int iy;
         int index;
 
+        TriangleMesh m = new TriangleMesh();
+
         //-----------------------------------------------------------------
-        Vertex v[] = new Vertex[(nx+1)*(ny+1)];
-        Vector3D k = new Vector3D(0, 0, 1);
+        m.initVertexArrays((nx+1)*(ny+1));
+        double vp[] = m.getVertexPositions();
+        double vn[] = m.getVertexNormals();
 
         index = 0;
         for ( iy = 0, y = -((double)ny)/2*dy; iy <= ny; iy++, y += dy ) {
             for ( ix = 0, x = -((double)nx)/2*dx; ix <= nx; ix++, x += dx ) {
-                v[index] = new Vertex(new Vector3D(x, y, 0), k);
+                vp[3*index] = x;
+                vp[3*index+1] = y;
+                vp[3*index+2] = 0;
+                vn[3*index] = 0;
+                vn[3*index+1] = 0;
+                vn[3*index+2] = 1;
                 index++;
             }
         }
 
         //-----------------------------------------------------------------
-        Triangle t[] = new Triangle[nx*ny*2];
-        int a, b, c;
+        m.initTriangleArrays(nx*ny*2);
+        int t[] = m.getTriangleIndexes();
 
         index = 0;
         for ( iy = 0; iy < ny; iy++ ) {
             for ( ix = 0; ix < nx; ix++ ) {
-                a = coord(nx, ny, ix, iy);
-                b = coord(nx, ny, ix+1, iy);
-                c = coord(nx, ny, ix+1, iy+1);
-                t[index] = new Triangle(a, b, c);
+                t[3*index] = coord(nx, ny, ix, iy);
+                t[3*index+1] = coord(nx, ny, ix+1, iy);
+                t[3*index+2] = coord(nx, ny, ix+1, iy+1);
                 index++;
 
-                a = coord(nx, ny, ix, iy);
-                b = coord(nx, ny, ix+1, iy+1);
-                c = coord(nx, ny, ix, iy+1);
-                t[index] = new Triangle(a, b, c);
+                t[3*index] = coord(nx, ny, ix, iy);
+                t[3*index+1] = coord(nx, ny, ix+1, iy+1);
+                t[3*index+2] = coord(nx, ny, ix, iy+1);
                 index++;
             }
         }
 
         //-----------------------------------------------------------------
-        TriangleMesh m = new TriangleMesh();
-        m.setVertexes(v);
-        m.setTriangles(t);
         m.calculateNormals();
         return m;
     }
@@ -158,12 +161,15 @@ public class IlluminationTest
         int iy;
         int index;
 
+        TriangleMesh m = new TriangleMesh();
+
         //- Prepare illumination model vectors ----------------------------
         Vector3D L = new Vector3D(lightPosition);
         L.normalize();
 
         //-----------------------------------------------------------------
-        Vertex v[] = new Vertex[(nx+1)*(ny+1)];
+        m.initVertexArrays((nx+1)*(ny+1));
+        double v[] = m.getVertexPositions();
         double dtetha = 360.0 / ((double)ny);
         double dphi = 90.0 / ((double)nx);
         double tetha, phi, z;
@@ -197,51 +203,46 @@ public class IlluminationTest
                         Math.cos(Math.toRadians(phi));
                 z = r * Math.cos(Math.toRadians(90-phi));
 
-                v[index] = new Vertex(new Vector3D(x, y, z));
+                v[3*index] = x;
+                v[3*index+1] = y;
+                v[3*index+2] = z;
                 index++;
             }
         }
 
         //-----------------------------------------------------------------
-        Triangle t[] = new Triangle[nx*ny*2];
-        int a, b, c;
+        m.initTriangleArrays(nx*ny*2);
+        int t[] = m.getTriangleIndexes();
 
         index = 0;
         for ( iy = 0; iy < ny; iy++ ) {
             for ( ix = 0; ix < nx; ix++ ) {
                 if ( iy < ny - 1 ) {
-                    a = coord(nx, ny, ix, iy);
-                    c = coord(nx, ny, ix+1, iy);
-                    b = coord(nx, ny, ix+1, iy+1);
-                    t[index] = new Triangle(a, b, c);
+                    t[3*index] = coord(nx, ny, ix, iy);
+                    t[3*index+2] = coord(nx, ny, ix+1, iy);
+                    t[3*index+1] = coord(nx, ny, ix+1, iy+1);
                     index++;
 
-                    a = coord(nx, ny, ix, iy);
-                    c = coord(nx, ny, ix+1, iy+1);
-                    b = coord(nx, ny, ix, iy+1);
-                    t[index] = new Triangle(a, b, c);
+                    t[3*index] = coord(nx, ny, ix, iy);
+                    t[3*index+2] = coord(nx, ny, ix+1, iy+1);
+                    t[3*index+1] = coord(nx, ny, ix, iy+1);
                     index++;
                 }
                 else {
-                    a = coord(nx, ny, ix, iy);
-                    c = coord(nx, ny, ix+1, iy);
-                    b = coord(nx, ny, ix+1, 0);
-                    t[index] = new Triangle(a, b, c);
+                    t[3*index] = coord(nx, ny, ix, iy);
+                    t[3*index+2] = coord(nx, ny, ix+1, iy);
+                    t[3*index+1] = coord(nx, ny, ix+1, 0);
                     index++;
 
-                    a = coord(nx, ny, ix, iy);
-                    c = coord(nx, ny, ix+1, 0);
-                    b = coord(nx, ny, ix, 0);
-                    t[index] = new Triangle(a, b, c);
+                    t[3*index] = coord(nx, ny, ix, iy);
+                    t[3*index+2] = coord(nx, ny, ix+1, 0);
+                    t[3*index+1] = coord(nx, ny, ix, 0);
                     index++;
                 }
             }
         }
 
         //-----------------------------------------------------------------
-        TriangleMesh m = new TriangleMesh();
-        m.setVertexes(v);
-        m.setTriangles(t);
         m.calculateNormals();
         return m;
     }

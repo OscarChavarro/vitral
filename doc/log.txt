@@ -737,7 +737,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     Vertex and Triangles objects anymore (memory inefficient and slower
     access), migration to flat static data arrays of doubles and ints.
 
-2008 may 7, Oscar Chavarro: <<30min>>
-  - 30min: Migrating TriangleMesh managing to new design.
+2008 may 7, Oscar Chavarro: <<130min>>
+  - 2h10min: Migrating TriangleMesh managing to new design.
 
 ===========================================================================

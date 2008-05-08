@@ -62,6 +62,8 @@ public class ReaderGts extends PersistenceElement
         TriangleMesh internalGeometry;
         internalGeometry = new TriangleMesh();
 
+        internalGeometry = new TriangleMesh();
+
         //-----------------------------------------------------------------
         BufferedReader br;
         String lineOfText;
@@ -73,9 +75,9 @@ public class ReaderGts extends PersistenceElement
         int numPoints = 0;
         int numEdges = 0;
         int numTriangles = 0;
-        Vertex v[] = null;
         int edges[][] = null; // Ne*2
         int triangles[][] = null; // Nt*3
+        double v[] = null;
 
         for ( i = 0; (lineOfText = br.readLine()) != null; i++ ) {
             if ( i == 0 ) {
@@ -83,7 +85,8 @@ public class ReaderGts extends PersistenceElement
                 numPoints = Integer.parseInt(auxStringTokenizer.nextToken());
                 numEdges = Integer.parseInt(auxStringTokenizer.nextToken());
                 numTriangles = Integer.parseInt(auxStringTokenizer.nextToken());
-                v = new Vertex[numPoints];
+                internalGeometry.initVertexArrays(numPoints);
+                v = internalGeometry.getVertexPositions();
                 edges = new int[numEdges][2];
                 triangles = new int[numTriangles][3];
             }
@@ -95,7 +98,9 @@ public class ReaderGts extends PersistenceElement
                 x = Double.parseDouble(auxStringTokenizer.nextToken());
                 y = Double.parseDouble(auxStringTokenizer.nextToken());
                 z = Double.parseDouble(auxStringTokenizer.nextToken());
-                v[i-1] = new Vertex(new Vector3D(x, y, z));
+                v[3*(i-1)+0] = x;
+                v[3*(i-1)+1] = y;
+                v[3*(i-1)+2] = z;
             }
             else if ( i >= 1+numPoints && i < 1+numPoints+numEdges ) {
                 // Reading an edge
@@ -114,9 +119,12 @@ public class ReaderGts extends PersistenceElement
             }
         }
         //-----------------------------------------------------------------
-        Triangle t[] = new Triangle[numTriangles];
         int ie1, ie2, ie3;
         int ip1, ip2 = -2, ip3 = -1;
+        int t[];
+
+        internalGeometry.initTriangleArrays(numTriangles);
+        t = internalGeometry.getTriangleIndexes();
 
         for ( i = 0; i < numTriangles; i++ ) {
             ie1 = triangles[i][0]-1;
@@ -138,12 +146,13 @@ public class ReaderGts extends PersistenceElement
                 ip3 = edges[ie3][1];
             }
 
-            t[i] = new Triangle(ip1-1, ip2-1, ip3-1);
+            t[3*i+0] = ip1-1;
+            t[3*i+1] = ip2-1;
+            t[3*i+2] = ip3-1;
         }
 
         //-----------------------------------------------------------------
 
-        internalGeometry = new TriangleMesh(v, t);
         internalGeometry.calculateNormals();
         addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
     }

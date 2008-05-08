@@ -147,9 +147,11 @@ public class FunctionalExplicitSurface extends Surface
         int iy;
         int index;
 
+        internalGeometry = new TriangleMesh();
+
         //-----------------------------------------------------------------
-        Vertex v[] = new Vertex[(nx+1)*(ny+1)];
-        Vector3D k = new Vector3D(0, 0, 1);
+        internalGeometry.initVertexArrays((nx+1)*(ny+1));
+        double v[] = internalGeometry.getVertexPositions();
         double z;
 
         try {
@@ -165,7 +167,9 @@ public class FunctionalExplicitSurface extends Surface
                     if ( z < minz ) {
                         z = minz;
                     }
-                    v[index] = new Vertex(new Vector3D(x, y, z), k);
+                    v[3*index] = x;
+                    v[3*index+1] = y;
+                    v[3*index+2] = z;
                     index++;
                 }
             }
@@ -178,28 +182,25 @@ public class FunctionalExplicitSurface extends Surface
         }
 
         //-----------------------------------------------------------------
-        Triangle t[] = new Triangle[nx*ny*2];
-        int a, b, c;
+        internalGeometry.initTriangleArrays(nx*ny*2);
+        int t[] = internalGeometry.getTriangleIndexes();
 
         index = 0;
         for ( iy = 0; iy < ny; iy++ ) {
             for ( ix = 0; ix < nx; ix++ ) {
-                a = coord(nx, ny, ix, iy);
-                b = coord(nx, ny, ix+1, iy);
-                c = coord(nx, ny, ix+1, iy+1);
-                t[index] = new Triangle(a, b, c);
+                t[3*index] = coord(nx, ny, ix, iy);
+                t[3*index+1] = coord(nx, ny, ix+1, iy);
+                t[3*index+2] = coord(nx, ny, ix+1, iy+1);
                 index++;
 
-                a = coord(nx, ny, ix, iy);
-                b = coord(nx, ny, ix+1, iy+1);
-                c = coord(nx, ny, ix, iy+1);
-                t[index] = new Triangle(a, b, c);
+                t[3*index] = coord(nx, ny, ix, iy);
+                t[3*index+1] = coord(nx, ny, ix+1, iy+1);
+                t[3*index+2] = coord(nx, ny, ix, iy+1);
                 index++;
             }
         }
 
         //-----------------------------------------------------------------
-        internalGeometry = new TriangleMesh(v, t);
         internalGeometry.calculateNormals();
     }
 
