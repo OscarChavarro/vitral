@@ -205,7 +205,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                                        Camera c, RendererConfiguration q,
                                        ColorRgb color) {
         // Now we draw the points
-        if (patch.type == ParametricCurve.BEZIER) {
+        if ( patch.type == ParametricCurve.BEZIER ) {
             gl.glDisable(gl.GL_LIGHTING);
             gl.glColor3d(color.r, color.g, color.b);
             gl.glLineWidth(1);
@@ -225,7 +225,6 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                 }
                 gl.glEnd();
             }
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 
             JoglParametricCurveRenderer.drawPoints(gl, patch.contourCurve.points);
 
@@ -278,9 +277,11 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                            RendererConfiguration q) {
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
+
             if ( q.isTextureSet() ) {
                 gl.glEnable(gl.GL_TEXTURE_2D);
             }
@@ -296,8 +297,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glShadeModel(gl.GL_FLAT);
 
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             ColorRgb co = q.getWireColor();
@@ -307,8 +307,6 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);
         }
         if ( q.isNormalsSet() ) {
-            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(0.5f, 0.0f);
             drawNormals(gl, p, 1, 1, 0, 0);
         }
         if ( q.isPointsSet() ) {
@@ -333,8 +331,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             gl.glShadeModel(gl.GL_FLAT);
 
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
             drawSurfaceGrid(gl, p, textureUSizeFactor, tilling_y,
                             textureURelaviteStart, textureVRelativeStart, q);
@@ -342,7 +339,8 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
             drawSurfaceGrid(gl, p, textureUSizeFactor, tilling_y,
                             textureURelaviteStart, textureVRelativeStart, q);
         }

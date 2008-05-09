@@ -156,11 +156,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glDisable(gl.GL_CULL_FACE);
         gl.glShadeModel(gl.GL_FLAT);
 
-        gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-        gl.glPolygonOffset(-0.5f, 1.0f);
-
         // Warning: Change with configured color for borders
-        gl.glLineWidth(1.5f);
+        gl.glLineWidth(1.0f);
         gl.glColor3d(1, 1, 1);
 
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -175,7 +172,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             if ( c.r >= 1-VSDK.EPSILON &&
                  c.g >= 1-VSDK.EPSILON &&
                  c.b >= 1-VSDK.EPSILON ) {
-                gl.glLineWidth(1.5f);
+                gl.glLineWidth(1.0f);
             }
             else {
                 gl.glLineWidth(6f);
@@ -211,8 +208,6 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glDisable(gl.GL_CULL_FACE);
         gl.glShadeModel(gl.GL_FLAT);
 
-        gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-        gl.glPolygonOffset(-0.5f, 0.0f);
         gl.glDisable(gl.GL_TEXTURE_2D);
 
         _PolyhedralBoundedSolidFace face1;
@@ -671,11 +666,11 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         if ( quality.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.5f, 1.0f);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
             drawSurfaces(gl, solid);
         }
         if ( quality.isWiresSet() ) {
-            gl.glPolygonOffset(-0.5f, 0.0f);
             drawEdges(gl, solid);
         }
         if ( quality.isPointsSet() ) {

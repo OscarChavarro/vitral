@@ -10,6 +10,7 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.geometry.TriangleStripMesh;
@@ -82,9 +83,28 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
         if ( quality.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
+
             drawSurfacesWithoutTexture(gl, mesh, flip);
         }
+        if ( quality.isWiresSet() ) {
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glShadeModel(gl.GL_FLAT);
+
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glLineWidth(1.0f);
+
+            // Warning: Change with configured color for borders
+            ColorRgb c = quality.getWireColor();
+            gl.glColor3d(c.r, c.g, c.b);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
+            // Warning: pending definition of this behavior...
+            drawSurfacesWithoutTexture(gl, mesh, flip);
+	}
 
         //- Drawing control of elements with no surface -------------------
         if ( quality.isPointsSet() ) {

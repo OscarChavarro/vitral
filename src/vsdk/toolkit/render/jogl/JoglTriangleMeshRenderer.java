@@ -87,7 +87,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glPolygonOffset(0.0f, 0.0f);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
                 drawSurfacesWithTexture(gl, mesh, flip);
@@ -102,8 +103,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             gl.glShadeModel(gl.GL_FLAT);
 
             gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(-0.5f, 0.0f);
+            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
@@ -151,7 +151,6 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         //-----------------------------------------------------------------
         // Old method
-/*
         int i;
         int nv;
         double v[];
@@ -164,13 +163,14 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             gl.glVertex3d(v[3*i], v[3*i+1], v[3*i+2]);
         }
         gl.glEnd();
-*/
+
         // New method
+/*
         gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
             gl.glVertexPointer(3, gl.GL_DOUBLE, 0, allocateVertexPositions(mesh.getVertexPositions()));
         gl.glDrawArrays(gl.GL_POINTS, 0, mesh.getNumVertices());
         gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
-
+*/
         //-----------------------------------------------------------------
     }
 
