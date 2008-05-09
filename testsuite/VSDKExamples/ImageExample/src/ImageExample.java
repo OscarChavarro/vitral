@@ -181,7 +181,6 @@ public class ImageExample extends JFrame implements
 
         gl.glDisable(gl.GL_BLEND);
         gl.glEnable(gl.GL_DEPTH_TEST);
-        gl.glDepthFunc(gl.GL_LESS);
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
