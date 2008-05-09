@@ -407,4 +407,9 @@ public class CameraControllerBlender extends CameraController {
     {
         this.camera = camera;
     }
+
+    public void setDeltaMovement(double factor)
+    {
+        ;
+    }
 }
