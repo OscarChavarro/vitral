@@ -10,6 +10,8 @@ package vsdk.toolkit.render.jogl;
 // Java base classes
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 // JOGL clases
 import javax.media.opengl.GL;
@@ -17,6 +19,7 @@ import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGcontext;
 import com.sun.opengl.cg.CGprogram;
 import com.sun.opengl.cg.CGparameter;
+import com.sun.opengl.util.BufferUtil;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -465,6 +468,36 @@ public abstract class JoglRenderer extends RenderingElement {
         param = CgGL.cgGetNamedParameter(pixelShader, "textureMap");
         CgGL.cgGLEnableTextureParameter(param);
         JoglRenderer.disableNvidiaCgProfiles();
+    }
+
+    protected static FloatBuffer
+    cloneDoubleArrayToFloatBuffer(double v[])
+    {
+        FloatBuffer buffer;
+        int i;
+
+        buffer = BufferUtil.newFloatBuffer(v.length);
+        for ( i = 0; i < v.length; i++ ) {
+            buffer.put((float)v[i]);
+        }
+        buffer.rewind();
+
+        return buffer;
+    }
+
+    protected static IntBuffer
+    cloneIntArrayToIntBuffer(int v[])
+    {
+        IntBuffer buffer;
+        int i;
+
+        buffer = BufferUtil.newIntBuffer(v.length);
+        for ( i = 0; i < v.length; i++ ) {
+            buffer.put(v[i]);
+        }
+        buffer.rewind();
+
+        return buffer;
     }
 
 }

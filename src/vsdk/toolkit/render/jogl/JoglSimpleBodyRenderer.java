@@ -18,7 +18,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 
 public class JoglSimpleBodyRenderer extends JoglRenderer {
-    public static void draw(GL gl, SimpleBody b,
+    private static void drawCommon(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
         Image texture;
@@ -28,7 +28,6 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         p = b.getPosition();
         scale = b.getScale();
 
-        gl.glPushMatrix();
         gl.glTranslated(p.x, p.y, p.z);
         JoglMatrixRenderer.activate(gl, b.getRotation());
         gl.glScaled(scale.x, scale.y, scale.z);
@@ -52,7 +51,28 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         }
 
         gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+    }
+
+    public static void draw(GL gl, SimpleBody b,
+                            Camera c, RendererConfiguration q)
+    {
+        gl.glPushMatrix();
+
+        drawCommon(gl, b, c, q);
+
         JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
+
+        gl.glPopMatrix();
+    }
+
+    public static void drawWithVertexArrays(GL gl, SimpleBody b,
+                            Camera c, RendererConfiguration q)
+    {
+        gl.glPushMatrix();
+
+        drawCommon(gl, b, c, q);
+
+        JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
 
         gl.glPopMatrix();
     }

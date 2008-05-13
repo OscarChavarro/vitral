@@ -211,6 +211,38 @@ public class JoglGeometryRenderer extends JoglRenderer
         drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
+    public static void activateNvidiaGpuParameters(GL gl, Geometry g,
+        Camera camera, CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Matrix4x4 MProjection;
+        Matrix4x4 MModelviewGlobal;
+        Matrix4x4 MModelviewLocal, MModelviewLocalIT, MCombined;
+        double matrixarray[];
+
+        MProjection = camera.calculateViewVolumeMatrix();
+        MModelviewGlobal = camera.calculateTransformationMatrix();
+        MModelviewLocal = MModelviewGlobal.multiply(
+            JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
+        MCombined = MProjection.multiply(MModelviewLocal);
+        MModelviewLocalIT = MModelviewLocal.inverse();
+        MModelviewLocalIT.transpose();
+
+        matrixarray = MCombined.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewProjectionLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocal.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocalIT.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocalIT"),
+            matrixarray, 0);
+    }
+
     /**
     @todo Homogenize all of the draw method signatures. Perhaps this code can
     be generalized to search the corresponding rendering class to a given
@@ -269,38 +301,63 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
     }
 
-    public static void activateNvidiaGpuParameters(GL gl, Geometry g,
-        Camera camera, CGprogram vertexShader, CGprogram pixelShader)
+    /**
+    @todo Homogenize all of the draw method signatures. Perhaps this code can
+    be generalized to search the corresponding rendering class to a given
+    Geometry via reflection, so this search should not be done explicitly.
+    */
+    public static void drawWithVertexArrays(GL gl, Geometry g, Camera c, RendererConfiguration q)
     {
-        Matrix4x4 MProjection;
-        Matrix4x4 MModelviewGlobal;
-        Matrix4x4 MModelviewLocal, MModelviewLocalIT, MCombined;
-        double matrixarray[];
+        if ( g == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING,
+                               "JoglGeometryRenderer.draw",
+                               "null Geometry reference recieved");
+            return;
+        }
 
-        MProjection = camera.calculateViewVolumeMatrix();
-        MModelviewGlobal = camera.calculateTransformationMatrix();
-        MModelviewLocal = MModelviewGlobal.multiply(
-            JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
-        MCombined = MProjection.multiply(MModelviewLocal);
-        MModelviewLocalIT = MModelviewLocal.inverse();
-        MModelviewLocalIT.transpose();
-
-        matrixarray = MCombined.exportToDoubleArrayRowOrder();
-        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-            vertexShader, "modelViewProjectionLocal"),
-            matrixarray, 0);
-
-        matrixarray = MModelviewLocal.exportToDoubleArrayRowOrder();
-        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-            vertexShader, "modelViewLocal"),
-            matrixarray, 0);
-
-        matrixarray = MModelviewLocalIT.exportToDoubleArrayRowOrder();
-        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
-            vertexShader, "modelViewLocalIT"),
-            matrixarray, 0);
+        if ( g instanceof Sphere ) {
+            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+        }
+        if ( g instanceof InfinitePlane ) {
+            JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
+        }
+        else if ( g instanceof Box ) {
+            JoglBoxRenderer.draw(gl, (Box)g, c, q);
+        }
+        else if ( g instanceof Cone ) {
+            JoglConeRenderer.draw(gl, (Cone)g, c, q);
+        }
+        else if ( g instanceof Arrow ) {
+            JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+        }
+        else if ( g instanceof ParametricCurve ) {
+            JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
+        }
+        else if ( g instanceof ParametricBiCubicPatch ) {
+            JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
+        }
+        else if ( g instanceof PolyhedralBoundedSolid ) {
+            JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
+        }
+        else if ( g instanceof TriangleMesh ) {
+            JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+        }
+        else if ( g instanceof QuadMesh ) {
+            JoglQuadMeshRenderer.drawWithVertexArrays(gl, (QuadMesh)g, q, false);
+        }
+        else if ( g instanceof FunctionalExplicitSurface ) {
+            JoglFunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
+        }
+        else if ( g instanceof TriangleStripMesh ) {
+            JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
+        }
+        else if ( g instanceof TriangleMeshGroup ) {
+            JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
+        }
+        else if ( g instanceof VoxelVolume ) {
+            JoglVoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
+        }
     }
-
 }
 
 //===========================================================================

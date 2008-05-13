@@ -740,7 +740,10 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 may 7, Oscar Chavarro: <<130min>>
   - 2h10min: Migrating TriangleMesh managing to new design.
 
-2008 may 12, Oscar Chavarro: <<124>>
+2008 may 12, Oscar Chavarro: <<124min>>
   - 2h4min: QuadMesh
+
+2008 may 13, Oscar Chavarro: <<60min>>
+  - 1h Added VitralSDK support to drawWithVertexArrays :)
 
 ===========================================================================

@@ -1,4 +1,6 @@
 //===========================================================================
+// This example is based on the original SPECViewperf benckmark. Currently
+// supports just a very limited subset of SPECViewperf: quad data.
 
 // Basic Java classes
 import java.io.File;
@@ -44,7 +46,7 @@ Note that this program is designed to work as a java application, or as a
 java applet.  If current class does not extends from Applet, and `init` method
 is deleted, this will continue working as a simple java application.
 
-This is a simple programme recommended for use as a template in the development
+This is a simple program recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
 public class QuadBenchmark extends Applet implements 
@@ -90,7 +92,7 @@ public class QuadBenchmark extends Applet implements
 
         //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
-        cameraController.setDeltaMovement(1.0);
+        //cameraController.setDeltaMovement(1.0);
 
         scene = new SimpleScene();
         try {
@@ -171,7 +173,15 @@ public class QuadBenchmark extends Applet implements
         gl.glEnd();
 
         int i;
-        for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+        for ( i = 0;
+              options.withVertexArrays && i < scene.getSimpleBodies().size();
+              i++ ) {
+            JoglSimpleBodyRenderer.drawWithVertexArrays(gl,
+                scene.getSimpleBodies().get(i), camera, qualitySelection);
+        }
+        for ( i = 0;
+              !options.withVertexArrays && i < scene.getSimpleBodies().size();
+              i++ ) {
             JoglSimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i),
                                         camera, qualitySelection);
         }
@@ -200,6 +210,7 @@ public class QuadBenchmark extends Applet implements
                     System.err.println("ERROR, out of memory compiling display list. Aborting.");
                     System.exit(1);
                 }
+                canvas.repaint();
             }
             else {
                 gl.glCallList(listName);

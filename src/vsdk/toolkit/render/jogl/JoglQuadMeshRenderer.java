@@ -6,6 +6,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Java classes
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
 // JOGL classes
 import javax.media.opengl.GL;
 
@@ -44,6 +48,60 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         gl.glEnd();
     }
 
+    private static void
+    drawSurfaceWithVertexArrays(GL gl, QuadMesh mesh)
+    {
+        FloatBuffer vertexPositionsBuffer;
+        FloatBuffer vertexColorsBuffer;
+        IntBuffer quadIndicesBuffer;
+        double v[] = mesh.getVertexPositions();
+        double n[] = mesh.getVertexNormals();
+        double c[] = mesh.getVertexColors();
+        int q[] = mesh.getQuadIndices();
+
+        vertexPositionsBuffer = cloneDoubleArrayToFloatBuffer(v);
+        vertexColorsBuffer = cloneDoubleArrayToFloatBuffer(c);
+        quadIndicesBuffer = cloneIntArrayToIntBuffer(q);
+
+        gl.glDisable(gl.GL_LIGHTING);
+
+        //-----------------------------------------------------------------
+        int info[] = new int[2];
+        int i;
+        int block;
+
+        gl.glGetIntegerv(gl.GL_MAX_ELEMENTS_INDICES, info, 0);
+        block = info[0];
+
+        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
+        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
+        gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
+        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(gl.GL_COLOR_ARRAY);
+
+            gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
+            gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
+
+            for ( i = 0; i+block < q.length; i += block ) {
+                quadIndicesBuffer.position(i);
+                gl.glDrawElements(gl.GL_QUADS, block, gl.GL_UNSIGNED_INT, quadIndicesBuffer);
+            }
+            if ( i < q.length ) {
+                quadIndicesBuffer.position(i);
+                gl.glDrawElements(gl.GL_QUADS, q.length-i, gl.GL_UNSIGNED_INT, quadIndicesBuffer);
+            }
+
+        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(gl.GL_COLOR_ARRAY);
+        //-----------------------------------------------------------------
+
+        vertexPositionsBuffer = null;
+        vertexColorsBuffer = null;
+        quadIndicesBuffer = null;
+    }
+
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
@@ -52,6 +110,16 @@ public class JoglQuadMeshRenderer extends JoglRenderer
     draw(GL gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
     {
         drawSurfaceBasic(gl, mesh);
+    }
+
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+    */
+    public static void
+    drawWithVertexArrays(GL gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
+    {
+        drawSurfaceWithVertexArrays(gl, mesh);
     }
 }
 

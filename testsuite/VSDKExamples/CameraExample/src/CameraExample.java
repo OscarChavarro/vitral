@@ -36,7 +36,7 @@ Note that this program is designed to work as a java application, or as a
 java applet.  If current class does not extends from Applet, and `init` method
 is deleted, this will continue working as a simple java application.
 
-This is a simple programme recommended for use as a template in the development
+This is a simple program recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
 public class CameraExample extends Applet implements 
