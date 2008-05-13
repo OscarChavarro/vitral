@@ -77,6 +77,9 @@ cd Benchmarks
 cd RamBandwidthBenchmark
 ./compile.sh
 cd ..
+cd QuadBenchmark
+./compile.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd ApplicationCases
