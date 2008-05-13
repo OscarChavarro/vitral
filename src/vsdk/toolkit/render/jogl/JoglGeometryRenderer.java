@@ -29,6 +29,7 @@ import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleStripMesh;
+import vsdk.toolkit.environment.geometry.QuadMesh;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 
 public class JoglGeometryRenderer extends JoglRenderer 
@@ -250,6 +251,9 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
         else if ( g instanceof TriangleMesh ) {
             JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+        }
+        else if ( g instanceof QuadMesh ) {
+            JoglQuadMeshRenderer.draw(gl, (QuadMesh)g, q, false);
         }
         else if ( g instanceof FunctionalExplicitSurface ) {
             JoglFunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
