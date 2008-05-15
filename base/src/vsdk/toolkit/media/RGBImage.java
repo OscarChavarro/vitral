@@ -42,6 +42,15 @@ public class RGBImage extends Image
         }
     }
 
+    /**
+    Experimental method. Used for rendering-only applications that has
+    transfered image contents to a JOGL context (GPU's Video memory) */
+    public void dettach() {
+        if ( data != null ) {
+            data = null;
+        }
+    }
+
     public int getSizeInBytes()
     {
         return xSize*ySize*3 + 2*VSDK.sizeofInt + VSDK.sizeofReference;
