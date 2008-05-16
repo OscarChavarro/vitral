@@ -48,6 +48,8 @@ public class JoglSceneRenderer
         }
 
         //- Draw and activate lights --------------------------------------
+        int i;
+
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             Light l = s.scene.getLights().get(i);
             JoglLightRenderer.activate(gl, l);
@@ -59,6 +61,7 @@ public class JoglSceneRenderer
 
         //- Draw scene bodies ---------------------------------------------
         SimpleBody gi;
+        RendererConfiguration quality;
 
         if ( s.scene.getLights().size() > 0 ) {
             gl.glEnable(gl.GL_LIGHTING);
