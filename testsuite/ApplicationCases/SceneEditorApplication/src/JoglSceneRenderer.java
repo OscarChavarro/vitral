@@ -70,9 +70,9 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
         }
 
-        //JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
-        //    JoglRenderer.getCurrentVertexShader(), 
-        //    JoglRenderer.getCurrentPixelShader());
+        JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
 
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             quality = s.qualityTemplate.clone();
@@ -92,7 +92,7 @@ public class JoglSceneRenderer
                 modifyPanel.draw(gl, s.activeCamera, quality);
             }
         }
-        //JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
+        JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
     }
 
     public static void draw(GL gl, Scene s, SceneEditorApplication parent)

@@ -725,9 +725,9 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
-        //JoglRenderer.activateNvidiaGpuParameters(gl, view.getRendererConfiguration(),
-        //    JoglRenderer.getCurrentVertexShader(), 
-        //    JoglRenderer.getCurrentPixelShader());
+        JoglRenderer.activateNvidiaGpuParameters(gl, view.getRendererConfiguration(),
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
 
         drawVisualRayDebug(gl);
 
@@ -744,7 +744,7 @@ public class JoglDrawingArea implements
         gl.glPopAttrib();
 */
 
-        //JoglRenderer.deactivateNvidiaGpuParameters(gl, view.getRendererConfiguration());
+        JoglRenderer.deactivateNvidiaGpuParameters(gl, view.getRendererConfiguration());
 
         view.drawGrid(gl);
 
@@ -782,6 +782,8 @@ public class JoglDrawingArea implements
         //-----------------------------------------------------------------
         gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+
         gl.glViewport(0, 0, globalViewportXSize, globalViewportYSize);
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();

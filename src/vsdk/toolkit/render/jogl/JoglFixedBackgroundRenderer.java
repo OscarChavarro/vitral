@@ -31,7 +31,7 @@ public class JoglFixedBackgroundRenderer extends JoglRenderer
         gl.glLoadIdentity();
 
         //- Clear background ----------------------------------------------
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        //gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
         gl.glShadeModel(gl.GL_FLAT);
         gl.glDisable(gl.GL_BLEND);
         gl.glDisable(gl.GL_LIGHTING);
