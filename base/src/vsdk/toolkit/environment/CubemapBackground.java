@@ -105,6 +105,11 @@ public class CubemapBackground extends Background {
     {
         return camera;
     }
+
+    public void setCamera(Camera camera)
+    {
+        this.camera = camera;
+    }
 }
 
 //===========================================================================

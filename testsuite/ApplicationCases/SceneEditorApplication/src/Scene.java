@@ -232,6 +232,43 @@ public class Scene
         }
     }
 
+    public void activateSelectedBackground()
+    {
+        Background currentBackground;
+
+        currentBackground = simpleBackground;
+        switch ( selectedBackground ) {
+          case 2:
+            if ( cubemapBackground == null ) {
+                buildCubemap();
+            }
+            if ( cubemapBackground != null ) {
+                cubemapBackground.setCamera(activeCamera);
+                currentBackground = cubemapBackground;
+            }
+            break;
+          case 1:
+            if ( fixedBackground == null ) {
+                buildFixedmap();
+            }
+            if ( fixedBackground != null ) {
+                currentBackground = fixedBackground;
+            }
+            break;
+        }
+
+        ArrayList<Background> list;
+        list = scene.getBackgrounds();
+        if ( list.size() < 1 ) {
+            list.add(currentBackground);
+	}
+	else {
+            list.remove(0);
+            list.add(0, currentBackground);
+	}
+        scene.setActiveBackgroundIndex(0);
+    }
+
     public void print()
     {
         ArrayList<SimpleBody> things = scene.getSimpleBodies();

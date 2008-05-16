@@ -746,4 +746,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 may 13, Oscar Chavarro: <<60min>>
   - 1h Added VitralSDK support to drawWithVertexArrays :)
 
+2008 may 15, Oscar Chavarro: <<50min>>
+  - 50min: Revisiting the structure of rendering a Scene (added class
+    JoglBackgroundRenderer & minor structural changes to SceneEditorApplication)
+
 ===========================================================================

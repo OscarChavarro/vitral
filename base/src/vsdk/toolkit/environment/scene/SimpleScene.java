@@ -24,6 +24,8 @@ public class SimpleScene extends Entity
     private ArrayList<Light> lightsArray;
     private ArrayList<Background> backgroundsArray;
     private ArrayList<Camera> camerasArray;
+    private int activeCameraIndex;
+    private int activeBackgroundIndex;
 
     public SimpleScene()
     {
@@ -31,6 +33,26 @@ public class SimpleScene extends Entity
         lightsArray = new ArrayList<Light>();
         backgroundsArray = new ArrayList<Background>();
         camerasArray = new ArrayList<Camera>();
+    }
+
+    public int getActiveCameraIndex()
+    {
+        return activeCameraIndex;
+    }
+
+    public int getActiveBackgroundIndex()
+    {
+        return activeBackgroundIndex;
+    }
+
+    public void setActiveCameraIndex(int i)
+    {
+        activeCameraIndex = i;
+    }
+
+    public void setActiveBackgroundIndex(int i)
+    {
+        activeBackgroundIndex = i;
     }
 
     public void addBody(SimpleBody b)

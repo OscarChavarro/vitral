@@ -59,6 +59,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.jogl.JoglRenderer;
+import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
@@ -704,7 +705,9 @@ public class JoglDrawingArea implements
             JoglSceneRenderer.draw(gl, theScene, parent);
         }
         else {
-            JoglSceneRenderer.drawBackground(gl, theScene);
+            theScene.activateSelectedBackground();
+            JoglBackgroundRenderer.draw(gl,
+            theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
             parent.raytracedImageWidth = view.getViewportSizeX();
             parent.raytracedImageHeight = view.getViewportSizeY();
             parent.doRaytracedImage();

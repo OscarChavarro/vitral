@@ -12,12 +12,11 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglCubemapBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglFixedBackgroundRenderer;
+import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
@@ -28,46 +27,17 @@ import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 
 public class JoglSceneRenderer
 {
-    public static void drawBackground(GL gl, Scene s)
+    /**
+    Follows similar strategy to general JoglSimpleSceneRenderer, except that
+    incorporates draw controlled under interface editor.
+    */
+    private static void drawBase(GL gl, Scene s, ModifyPanel modifyPanel)
     {
-        switch ( s.selectedBackground ) {
-          case 2:
-            if ( s.cubemapBackground == null ) {
-                s.buildCubemap();
-            }
-            if ( s.cubemapBackground != null ) {
-                JoglCubemapBackgroundRenderer.draw(gl, s.cubemapBackground);
-            }
-            else {
-                JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
-            }
-            break;
-          case 1:
-            if ( s.fixedBackground == null ) {
-                s.buildFixedmap();
-            }
-            if ( s.fixedBackground != null ) {
-                JoglFixedBackgroundRenderer.draw(gl, s.fixedBackground);
-            }
-            else {
-                JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
-            }
-            break;
-          case 0: default:
-            JoglSimpleBackgroundRenderer.draw(gl, s.simpleBackground);
-            break;
-        }
-    }
+        //- Draw scene background -----------------------------------------
+        JoglBackgroundRenderer.draw(gl,
+            s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
 
-    public static void draw(GL gl, Scene s, SceneEditorApplication parent)
-    {
-        int i, j;
-        Image texture;
-        SimpleBodyGroup ggi;
-        RendererConfiguration quality;
-
-        //-----------------------------------------------------------------
-        drawBackground(gl, s);
+        //- Activate camera -----------------------------------------------
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -77,7 +47,7 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        //- Draw lights ---------------------------------------------------
+        //- Draw and activate lights --------------------------------------
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             Light l = s.scene.getLights().get(i);
             JoglLightRenderer.activate(gl, l);
@@ -112,14 +82,24 @@ public class JoglSceneRenderer
             }
             gi = s.scene.getSimpleBodies().get(i);
 
-            if ( parent.modifyPanel.getTarget() != gi ) {
+            if ( modifyPanel == null || modifyPanel.getTarget() != gi ) {
                 JoglSimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
             }
             else {
-                parent.modifyPanel.draw(gl, s.activeCamera, quality);
+                modifyPanel.draw(gl, s.activeCamera, quality);
             }
         }
         //JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
+    }
+
+    public static void draw(GL gl, Scene s, SceneEditorApplication parent)
+    {
+        RendererConfiguration quality;
+        SimpleBodyGroup ggi;
+        int i;
+
+        s.activateSelectedBackground();
+        drawBase(gl, s, parent.modifyPanel);
 
         //- Draw visual debug entities (usually transparent) --------------
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
@@ -138,7 +118,6 @@ public class JoglSceneRenderer
             JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
             gl.glEnable(gl.GL_DEPTH_TEST);
         }
-
 
     }
 
