@@ -95,29 +95,36 @@ public abstract class ImageProcessing extends ProcessingElement {
             int xfi = (int)xf + 1;
             int yfi = (int)yf + 1;
             double w = (xfi * yfi);
-
-            if ( w > 50 ) {
-                w /= 2;
-            }
+            double acumr;
+            double acumg;
+            double acumb;
 
             int xx, yy, x0, y0, x1, y1;
             acum = new RGBPixel();
             for ( xx = 0; xx < xSizeOut; xx++ ) {
                 for ( yy = 0; yy < ySizeOut; yy++ ) {
-                    acum.r = acum.g = acum.b = 0;
+                    acumr = acumg = acumb = 0.0;
 
                     x0 = (int)(((double)xx)*xf);
-                    x1 = x0 + xfi;;
+                    x1 = x0 + xfi;
                     for ( x = x0; x < x1 && x < xSizeIn; x++ ) {
                         y0 = (int)(((double)yy)*yf);
                         y1 = y0 + yfi;
                         for ( y = y0; y < y1 && y < ySizeIn; y++ ) {
                             target = input.getPixelRgb(x, y);
-                            acum.r += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.r)) / w));
-                            acum.g += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.g)) / w));
-                            acum.b += VSDK.unsigned8BitInteger2signedByte((int)(((double)VSDK.signedByte2unsignedInteger(target.b)) / w));
+			    acumr += ((double)VSDK.signedByte2unsignedInteger(target.r)) / w;
+			    acumg += ((double)VSDK.signedByte2unsignedInteger(target.g)) / w;
+			    acumb += ((double)VSDK.signedByte2unsignedInteger(target.b)) / w;
                         }
                     }
+
+                    if ( acumr >= 255.0 ) acumr = 255.0;
+                    if ( acumg >= 255.0 ) acumg = 255.0;
+                    if ( acumb >= 255.0 ) acumb = 255.0;
+
+                    acum.r = VSDK.unsigned8BitInteger2signedByte((int)(acumr));
+                    acum.g = VSDK.unsigned8BitInteger2signedByte((int)(acumg));
+                    acum.b = VSDK.unsigned8BitInteger2signedByte((int)(acumb));
 
                     output.putPixelRgb(xx, yy, acum);
                 }

@@ -780,11 +780,11 @@ public class JoglDrawingArea implements
         int i;
 
         //-----------------------------------------------------------------
+        gl.glViewport(0, 0, globalViewportXSize, globalViewportYSize);
         gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 
-        gl.glViewport(0, 0, globalViewportXSize, globalViewportYSize);
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
         gl.glMatrixMode(gl.GL_MODELVIEW);

@@ -67,6 +67,19 @@ public class JoglImageRenderer extends JoglRenderer
         return -1;
     }
 
+    public static void unload(GL gl, Image img)
+    {
+        if ( img instanceof RGBImage ) {
+            JoglRGBImageRenderer.unload(gl, (RGBImage)img);
+        }
+        else {
+            String c = img.getClass().getName();
+
+            VSDK.reportMessage(null, VSDK.WARNING, "JoglImageRenderer.unload",
+            "Image GL unloading not implemented for subclass " + c);
+        }
+    }
+
     public static void draw(GL gl, Image img)
     {
         if ( img instanceof RGBAImage ) {

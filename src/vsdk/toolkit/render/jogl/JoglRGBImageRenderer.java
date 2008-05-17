@@ -189,6 +189,28 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return list;
     }
 
+    public static void unload(GL gl, RGBImage img)
+    {
+        _JoglRGBImageRendererImageAssociation item = null;
+
+        try { 
+            int i;
+            for ( i = 0; i < compiledImages.size(); i++ ) {
+                item = compiledImages.get(i);
+                if ( item.image == img ) {
+                    item.renderer.disable();
+                    item.renderer.dispose();
+                    compiledImages.remove(i);
+                    return;
+                }
+            }
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.unload", "Error unloading image.");
+
+	}
+    }
+
     public static void draw(GL gl, RGBImage img)
     {
         gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
