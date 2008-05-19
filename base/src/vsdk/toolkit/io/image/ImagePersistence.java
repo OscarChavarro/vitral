@@ -13,8 +13,10 @@
 package vsdk.toolkit.io.image;
 
 // Basic JDK classes
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
@@ -79,7 +81,14 @@ public class ImagePersistence extends PersistenceElement
             //bi = toBufferedImage(image);
 
             try {
-                bi = ImageIO.read(imagen);
+                BufferedInputStream bis;
+                FileInputStream fis;
+
+                fis = new FileInputStream(imagen);
+                bis = new BufferedInputStream(fis);
+                bi = ImageIO.read(bis);
+                bis.close();
+                fis.close();
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
@@ -129,7 +138,14 @@ public class ImagePersistence extends PersistenceElement
             //bi = toBufferedImage(image);
 
             try {
-                bi = ImageIO.read(inImageFd);
+                BufferedInputStream bis;
+                FileInputStream fis;
+
+                fis = new FileInputStream(inImageFd);
+                bis = new BufferedInputStream(fis);
+                bi = ImageIO.read(bis);
+                bis.close();
+                fis.close();
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
@@ -180,7 +196,14 @@ public class ImagePersistence extends PersistenceElement
             BufferedImage bi = null;
 
             try {
-                bi = ImageIO.read(imagen);
+                BufferedInputStream bis;
+                FileInputStream fis;
+
+                fis = new FileInputStream(imagen);
+                bis = new BufferedInputStream(fis);
+                bi = ImageIO.read(bis);
+                bis.close();
+                fis.close();
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
