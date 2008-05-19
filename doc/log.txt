@@ -753,4 +753,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 may 18, Oscar Chavarro: <<41min>>
   - 41min: ReaderVtk handling POLYGON data.
 
+2008 may 19, Oscar Chavarro: <<57min>>
+  - 57min: WriterVtk (basic support to TriangleMesh)
+
 ===========================================================================

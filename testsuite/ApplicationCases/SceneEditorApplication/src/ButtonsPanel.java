@@ -632,7 +632,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     repaint();
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to read file...\n" + ex);
+                    System.out.println("Failed to write file...\n" + ex);
                     return;
                 }
             }
@@ -659,12 +659,38 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     repaint();
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to read file...\n" + ex);
+                    System.out.println("Failed to write file...\n" + ex);
                     ex.printStackTrace();
                     return;
                 }
             }
+        }
+        else if ( label.equals("IDC_EXPORT_OBJECTS_TO_VTK") ) {
+            JFileChooser jfc = null;
+            jfc = new JFileChooser(currentFilePathForWriting);
+            jfc.removeChoosableFileFilter(jfc.getFileFilter());
 
+            int opc = jfc.showOpenDialog(new JPanel());
+            if ( opc == JFileChooser.APPROVE_OPTION ) {
+                try {
+                    File file = jfc.getSelectedFile();
+                    FileOutputStream fos = new FileOutputStream(file);
+
+                    EnvironmentPersistence.exportEnvironmentVtk(fos,
+                        parent.theScene.scene);
+
+                    fos.close();
+
+                    currentFilePathForWriting = file.getParentFile().getAbsolutePath();
+
+                    repaint();
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed to write file...\n" + ex);
+                    ex.printStackTrace();
+                    return;
+                }
+            }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));

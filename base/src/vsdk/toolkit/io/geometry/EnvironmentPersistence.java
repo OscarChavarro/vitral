@@ -57,6 +57,13 @@ public class EnvironmentPersistence extends PersistenceElement {
     {
         WriterGts.exportEnvironment(inOutputStream, inScene);
     }
+
+    public static void
+    exportEnvironmentVtk(OutputStream inOutputStream, SimpleScene inScene)
+        throws Exception
+    {
+        WriterVtk.exportEnvironment(inOutputStream, inScene);
+    }
 }
 
 //===========================================================================

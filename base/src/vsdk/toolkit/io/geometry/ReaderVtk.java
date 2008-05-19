@@ -130,7 +130,7 @@ public class ReaderVtk extends PersistenceElement
                         normals[i] = new Vector3D();
                         normals[i].x = readFloatBE(fis);
                         normals[i].y = readFloatBE(fis);
-                        normals[i].z = -readFloatBE(fis);
+                        normals[i].z = readFloatBE(fis);
                     }
                     readAsciiLine(fis); // Closing string
                     System.out.println("Ok.");
