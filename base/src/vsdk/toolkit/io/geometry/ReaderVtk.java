@@ -9,6 +9,7 @@ package vsdk.toolkit.io.geometry;
 // Java basic classes
 import java.io.File;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -40,6 +41,8 @@ public class ReaderVtk extends PersistenceElement
     private static Vector3D points[] = null;
     private static Vector3D normals[] = null;
     private static long stripData[] = null;
+    private static long polygonData[] = null;
+    private static int numPolygons;
 
     private static boolean
     importVtkFragment(InputStream fis) throws Exception
@@ -51,6 +54,7 @@ public class ReaderVtk extends PersistenceElement
         int i, j;
         long numPointsInStrip;
         int numIndexesInStripSet;
+        int numIndexesInPolygonSet;
         StringTokenizer auxStringTokenizer;
 
         if ( vtkDataFragment != null && vtkDataFragment.startsWith("POINTS ") ) {
@@ -63,9 +67,9 @@ public class ReaderVtk extends PersistenceElement
                 points = new Vector3D[numElements];
                 for ( i = 0; i < numElements; i++ ) {
                     points[i] = new Vector3D();
-                    points[i].x = readFloatBE(fis) / 100.0;
-                    points[i].y = readFloatBE(fis) / 100.0;
-                    points[i].z = -readFloatBE(fis) / 100.0;
+                    points[i].x = readFloatBE(fis) / 1000.0;
+                    points[i].y = readFloatBE(fis) / 1000.0;
+                    points[i].z = readFloatBE(fis) / 1000.0;
                 }
                 System.out.println("Ok.");
             }
@@ -88,6 +92,21 @@ public class ReaderVtk extends PersistenceElement
                 stripData[i] = readLongBE(fis);
             }
             readAsciiLine(fis); // Closing string
+            System.out.println("Ok.");
+        }
+        else if ( vtkDataFragment != null && vtkDataFragment.startsWith("POLYGONS ") ) {
+            System.out.print("Reading polygons... ");
+
+            auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
+            auxStringTokenizer.nextToken();
+            numPolygons = Integer.parseInt(auxStringTokenizer.nextToken());
+            numIndexesInPolygonSet = Integer.parseInt(auxStringTokenizer.nextToken());
+            polygonData = new long[numIndexesInPolygonSet];
+            for ( i = 0; i < numIndexesInPolygonSet; i++ ) {
+                polygonData[i] = readLongBE(fis);
+            }
+            readAsciiLine(fis); // Closing string
+
             System.out.println("Ok.");
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("CELL_DATA ") ) {
@@ -154,11 +173,12 @@ public class ReaderVtk extends PersistenceElement
 
         //-----------------------------------------------------------------
         FileInputStream fis = new FileInputStream(inSceneFileFd);
+        BufferedInputStream bis = new BufferedInputStream(fis);
 
         //-----------------------------------------------------------------
         String header;
 
-        header = readAsciiLine(fis);
+        header = readAsciiLine(bis);
 
         if ( header == null ||
              header.length() < 1 ||
@@ -173,8 +193,8 @@ public class ReaderVtk extends PersistenceElement
         String vtkHeader;
         String vtkBinaryMode;
 
-        header = readAsciiLine(fis);
-        vtkBinaryMode = readAsciiLine(fis);
+        header = readAsciiLine(bis);
+        vtkBinaryMode = readAsciiLine(bis);
 
         if ( vtkBinaryMode == null ||
              vtkBinaryMode.length() < 1 ||
@@ -188,7 +208,7 @@ public class ReaderVtk extends PersistenceElement
         //-----------------------------------------------------------------
         String vtkDataset;
 
-        vtkDataset = readAsciiLine(fis);
+        vtkDataset = readAsciiLine(bis);
         if ( vtkDataset == null ||
              vtkDataset.length() < 1 ||
              !vtkDataset.startsWith("DATASET") ) {
@@ -204,19 +224,14 @@ public class ReaderVtk extends PersistenceElement
         //-----------------------------------------------------------------
         int resting;
         do {
-            if ( !importVtkFragment(fis) ) return;
-            resting = fis.available();
+            if ( !importVtkFragment(bis) ) return;
+            resting = bis.available();
         } while ( resting > 0 );
 
         //-----------------------------------------------------------------
         int acum;
         int i, j;
         long deltaTam;
-        SimpleBody newThing = new SimpleBody();
-        TriangleStripMesh geometry = new TriangleStripMesh();
-        newThing.setGeometry(geometry);
-
-        simpleBodiesArray.add(newThing);
 
         Vertex[] vertexes = new Vertex[points.length];
         Vector3D n;
@@ -229,33 +244,81 @@ public class ReaderVtk extends PersistenceElement
             }
             vertexes[i] = new Vertex(points[i], n);
         }
-        geometry.setVertexes(vertexes);
 
-        // Count strips
-        for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
-            deltaTam = stripData[i];
-            for ( j = 0; j < deltaTam; j++ ) {
-                i++;
+        if ( stripData != null ) {
+            // Count strips
+            for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
+                deltaTam = stripData[i];
+                for ( j = 0; j < deltaTam; j++ ) {
+                    i++;
+                }
             }
+
+            // Build strips
+            int strips[][];
+
+            strips = new int[acum][];
+
+            for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
+                deltaTam = stripData[i];
+                strips[acum] = new int[(int)deltaTam];
+                for ( j = 0; j < deltaTam; j++ ) {
+                    i++;
+                    strips[acum][j] = (int)stripData[i];
+                }
+            }
+
+            // Add triangle strip mesh
+            SimpleBody newThing = new SimpleBody();
+            TriangleStripMesh geometryStrip = new TriangleStripMesh();
+
+            geometryStrip.setVertexes(vertexes);
+            geometryStrip.setStrips(strips);
+            newThing.setGeometry(geometryStrip);
+            simpleBodiesArray.add(newThing);
         }
 
-        // Build strips
-        int strips[][];
+        //-----------------------------------------------------------------
+        boolean warningDisplayed = false;
 
-        strips = new int[acum][];
+        if ( polygonData != null ) {
+            TriangleMesh triangleMesh = new TriangleMesh();
+            triangleMesh.setVertexes(vertexes);
 
-        for ( acum = 0, i = 0; i < stripData.length; i++, acum++ ) {
-            deltaTam = stripData[i];
-            strips[acum] = new int[(int)deltaTam];
-            for ( j = 0; j < deltaTam; j++ ) {
-                i++;
-                strips[acum][j] = (int)stripData[i];
+            triangleMesh.initTriangleArrays(numPolygons);
+
+            int t[] = triangleMesh.getTriangleIndexes();
+            // 
+            long p;
+            int nn;
+            nn = 0;
+            for ( i = 0; i < polygonData.length; i++ ) {
+                p = polygonData[i];
+                if ( !warningDisplayed && p != 3  ) {
+                    VSDK.reportMessage(null, VSDK.WARNING,
+                           "ReaderVtk.importEnvironment",
+                           "Current implementation does not manage general polygon meshes, only triangles being added");
+                    warningDisplayed = true;
+                    continue;
+                }
+                for ( j = 0; j < p; j++ ) {
+                    i++;
+                    t[nn] = (int)(polygonData[i]);
+                    nn++;
+                }
             }
+            triangleMesh.calculateNormals();
+
+            // Add triangle strip mesh
+            SimpleBody newThing = new SimpleBody();
+
+            newThing.setGeometry(triangleMesh);
+            simpleBodiesArray.add(newThing);
         }
-        geometry.setStrips(strips);
 
         //-----------------------------------------------------------------
         System.out.println("VTK import done.");
+        bis.close();
         fis.close();
 
     }
