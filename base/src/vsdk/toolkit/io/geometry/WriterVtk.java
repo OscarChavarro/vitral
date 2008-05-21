@@ -9,6 +9,7 @@ package vsdk.toolkit.io.geometry;
 // Java basic classes
 import java.util.ArrayList;
 import java.io.OutputStream;
+import java.io.BufferedOutputStream;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
@@ -68,22 +69,35 @@ public class WriterVtk extends PersistenceElement {
             writeAsciiLine(inOutputStream, line);
             line = "NORMALS Normals float";
             writeAsciiLine(inOutputStream, line);
-            for ( i = 0; i < n.length; i++ ) {
-                val = (float)(n[i]);
+            for ( i = 0; i < v.length/3; i++ ) {
+                val = (float)(n[3*i+0]);
+                writeFloatBE(inOutputStream, val);
+                val = (float)(n[3*i+1]);
+                writeFloatBE(inOutputStream, val);
+                val = (float)(n[3*i+2]);
                 writeFloatBE(inOutputStream, val);
             }
             writeAsciiLine(inOutputStream, "");
         }
+        inOutputStream.close();
     }
 
     public static void
     exportEnvironment(OutputStream inOutputStream, SimpleScene inScene)
         throws Exception
     {
+        BufferedOutputStream bos = null;
+        if ( inOutputStream instanceof BufferedOutputStream ) {
+            bos = (BufferedOutputStream)inOutputStream;
+	}
+	else {
+            bos = new BufferedOutputStream(inOutputStream);
+	}
+
         //-----------------------------------------------------------------
-        writeAsciiLine(inOutputStream, "# vtk DataFile Version 3.0");
-        writeAsciiLine(inOutputStream, "vtk output");
-        writeAsciiLine(inOutputStream, "BINARY");
+        writeAsciiLine(bos, "# vtk DataFile Version 3.0");
+        writeAsciiLine(bos, "vtk output");
+        writeAsciiLine(bos, "BINARY");
 
         //-----------------------------------------------------------------
         ArrayList<SimpleBody> objs;
@@ -113,7 +127,7 @@ public class WriterVtk extends PersistenceElement {
             //-----------------------------------------------------------------
             if ( mesh != null ) {
                 if ( !exported ) {
-                    exportMesh(inOutputStream, mesh);
+                    exportMesh(bos, mesh);
                     exported = true;
                 }
                 else {

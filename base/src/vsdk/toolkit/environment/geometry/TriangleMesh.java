@@ -83,6 +83,9 @@ public class TriangleMesh extends Surface {
     // Consecutive triads of r/g/b vertex color components (can be null)
     private double[] vertexColors;
 
+    // Consecutive values of boolean. If true, then vertex is selected.
+    private boolean[] vertexSelections;
+
     // Consecutive pairs of u/v vertex texture coordinates (can be null)
     private double[] vertexUvs;
 
@@ -143,6 +146,7 @@ public class TriangleMesh extends Surface {
         vertexTangents = null;
         vertexColors = null;
         vertexUvs = null;
+        vertexSelections = null;
         triangleIndices = null;
         triangleNormals = null;
         incidentTrianglesPerVertexArray = null;
@@ -189,11 +193,12 @@ public class TriangleMesh extends Surface {
     {
         vertexPositions = new double[n*3];
         vertexNormals = new double[n*3];
-        vertexBinormals = new double[n*3];
-        vertexTangents = new double[n*3];
-        vertexUvs = new double[n*2];
-        vertexColors = null;
         incidentTrianglesPerVertexArray = new ArrayList<ArrayList<Integer>>();
+
+        //vertexBinormals = new double[n*3];
+        //vertexTangents = new double[n*3];
+        vertexUvs = new double[n*2];
+        //vertexColors = null;
     }
 
     /**
@@ -212,17 +217,25 @@ public class TriangleMesh extends Surface {
             vertexPositions[3*i] = vertexes[i].position.x;
             vertexPositions[3*i+1] = vertexes[i].position.y;
             vertexPositions[3*i+2] = vertexes[i].position.z;
-            vertexNormals[3*i] = vertexes[i].normal.x;
-            vertexNormals[3*i+1] = vertexes[i].normal.y;
-            vertexNormals[3*i+2] = vertexes[i].normal.z;
-            vertexBinormals[3*i] = vertexes[i].binormal.x;
-            vertexBinormals[3*i+1] = vertexes[i].binormal.y;
-            vertexBinormals[3*i+2] = vertexes[i].binormal.z;
-            vertexTangents[3*i] = vertexes[i].tangent.x;
-            vertexTangents[3*i+1] = vertexes[i].tangent.y;
-            vertexTangents[3*i+2] = vertexes[i].tangent.z;
-            vertexUvs[2*i] = vertexes[i].u;
-            vertexUvs[2*i+1] = vertexes[i].v;
+            if ( vertexNormals != null ) {
+                vertexNormals[3*i] = vertexes[i].normal.x;
+                vertexNormals[3*i+1] = vertexes[i].normal.y;
+                vertexNormals[3*i+2] = vertexes[i].normal.z;
+            }
+            if ( vertexBinormals != null ) {
+                vertexBinormals[3*i] = vertexes[i].binormal.x;
+                vertexBinormals[3*i+1] = vertexes[i].binormal.y;
+                vertexBinormals[3*i+2] = vertexes[i].binormal.z;
+            }
+            if ( vertexTangents != null ) {
+                vertexTangents[3*i] = vertexes[i].tangent.x;
+                vertexTangents[3*i+1] = vertexes[i].tangent.y;
+                vertexTangents[3*i+2] = vertexes[i].tangent.z;
+            }
+            if ( vertexUvs != null ) {
+                vertexUvs[2*i] = vertexes[i].u;
+                vertexUvs[2*i+1] = vertexes[i].v;
+            }
         }
 
         boundingVolume = null;
@@ -316,6 +329,19 @@ public class TriangleMesh extends Surface {
     {
         if ( triangleIndices == null ) return 0;
         return triangleIndices.length/3;
+    }
+
+    public boolean[] getVertexSelections()
+    {
+        if ( vertexSelections == null ||
+             vertexSelections.length != (vertexPositions.length/3) ) {
+            vertexSelections = new boolean[vertexPositions.length/3];
+            int i;
+            for ( i = 0; i < vertexSelections.length; i++ ) {
+                vertexSelections[i] = false;
+            }
+        }
+        return vertexSelections;
     }
 
     public double[] getVertexPositions()
@@ -968,6 +994,162 @@ public class TriangleMesh extends Surface {
             triangleMeshGroupCache.addMesh(this);
         }
         return triangleMeshGroupCache;
+    }
+
+    /**
+    This method does the following:
+    1. Detect all triangles with "incorrect" vertex indices and removes them.
+    2. Detect all vertices without incident triangles.
+    3. Reacomodate mesh representation arrays to fit the new situation. This
+       can imply that some triangle indices gets updated.
+    */
+    public void compact()
+    {
+        vertexNormals = null;
+
+        //- Count triangle incidences on vertices -------------------------
+        boolean count[];
+        int i;
+        int a, b, c;
+        int n;
+
+        n = vertexPositions.length/3;
+        count = new boolean[n];
+
+        for ( i = 0; i < n; i++ ) {
+            count[i] = false;
+        }
+
+        for ( i = 0; i < triangleIndices.length; i++ ) {
+            a = triangleIndices[i];
+            if ( a >= 0 && a < n ) {
+                count[a] = true;
+            }
+        }
+
+        //- Calculate new index map ---------------------------------------
+        int j = 0;
+        int map[];
+
+        map = new int[n];
+        for ( i = 0; i < n; i++ ) {
+            if ( count[i] ) {
+                map[i] = j;
+                j++;
+            }
+            else {
+                map[i] = -1;
+            }
+        }
+
+        //- Calculate new vertex arrays -----------------------------------
+
+        lastInfo = new GeometryIntersectionInformation();
+        lastRay = null;
+        minMax = null;
+        boundingVolume = null;
+        triangleMeshGroupCache = null;
+
+        double oldVertexPositions[] = vertexPositions;
+        double oldVertexNormals[] = vertexNormals;
+
+        initVertexArrays(j);
+
+        j = 0;
+        for ( i = 0; i < n; i++ ) {
+            if ( count[i] ) {
+                vertexPositions[3*j+0] = oldVertexPositions[3*i+0];
+                vertexPositions[3*j+1] = oldVertexPositions[3*i+1];
+                vertexPositions[3*j+2] = oldVertexPositions[3*i+2];
+                if ( oldVertexNormals != null ) {
+                    vertexNormals[3*j+0] = oldVertexNormals[3*i+0];
+                    vertexNormals[3*j+1] = oldVertexNormals[3*i+1];
+                    vertexNormals[3*j+2] = oldVertexNormals[3*i+2];
+                }
+                j++;
+            }
+        }
+
+        //- Calculate new triangle indices arrays -------------------------
+        j = 0;
+        int oldTriangleIndices[] = triangleIndices;
+
+        for ( i = 0; i < oldTriangleIndices.length/3; i++ ) {
+            a = oldTriangleIndices[3*i+0];
+            b = oldTriangleIndices[3*i+1];
+            c = oldTriangleIndices[3*i+2];
+            if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ) {
+                // This triangle is not copied
+                ;
+            }
+            else {
+                j++;
+            }
+        }
+
+        initTriangleArrays(j);
+        j = 0;
+        for ( i = 0; i < oldTriangleIndices.length/3; i++ ) {
+            a = oldTriangleIndices[3*i+0];
+            b = oldTriangleIndices[3*i+1];
+            c = oldTriangleIndices[3*i+2];
+            if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ) {
+                // This triangle is not copied
+                ;
+            }
+            else {
+                triangleIndices[3*j+0] = map[oldTriangleIndices[3*i+0]];
+                triangleIndices[3*j+1] = map[oldTriangleIndices[3*i+1]];
+                triangleIndices[3*j+2] = map[oldTriangleIndices[3*i+2]];
+                j++;
+            }
+        }
+
+    }
+
+    /**
+    This method removes all currently selected vertices, and its
+    corresponding incident triangles.
+
+    Note that this method also removes "dangling" vertices, selected or not.
+    */
+    public void removeSelectedVertices()
+    {
+        //-----------------------------------------------------------------
+        if ( vertexSelections == null ) {
+            return;
+        }
+        //-----------------------------------------------------------------
+        int i, a, b, c, n;
+        n = vertexPositions.length/3;
+        for ( i = 0; i < triangleIndices.length/3; i++ ) {
+            a = triangleIndices[3*i+0];
+            b = triangleIndices[3*i+1];
+            c = triangleIndices[3*i+2];
+            if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ||
+                 vertexSelections[a] || vertexSelections[b] ||
+                 vertexSelections[c] ) {
+                triangleIndices[3*i+0] = -1;
+                triangleIndices[3*i+1] = -1;
+                triangleIndices[3*i+2] = -1;
+            }
+        }
+
+        //-----------------------------------------------------------------
+        compact();
+
+/*
+        int i;
+        for ( i = 0; i < vertexPositions.length/3; i++ ) {
+            if ( vertexSelections[i] ) {
+                vertexPositions[3*i] += 0.01;
+            }
+        }
+*/
+        //-----------------------------------------------------------------
+        vertexSelections = null;
+
+        calculateNormals();
     }
 }
 

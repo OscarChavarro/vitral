@@ -58,7 +58,7 @@ public class ReaderVtk extends PersistenceElement
         StringTokenizer auxStringTokenizer;
 
         if ( vtkDataFragment != null && vtkDataFragment.startsWith("POINTS ") ) {
-            System.out.print("Reading points... ");
+            //System.out.print("Reading points... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
@@ -71,7 +71,7 @@ public class ReaderVtk extends PersistenceElement
                     points[i].y = readFloatBE(fis) / 1000.0;
                     points[i].z = readFloatBE(fis) / 1000.0;
                 }
-                System.out.println("Ok.");
+                //System.out.println("Ok.");
             }
             else {
                 VSDK.reportMessage(null, VSDK.WARNING,
@@ -82,7 +82,7 @@ public class ReaderVtk extends PersistenceElement
             readAsciiLine(fis); // Closing string
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("TRIANGLE_STRIPS ") ) {
-            System.out.print("Reading triangle strips... ");
+            //System.out.print("Reading triangle strips... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
@@ -92,10 +92,10 @@ public class ReaderVtk extends PersistenceElement
                 stripData[i] = readLongBE(fis);
             }
             readAsciiLine(fis); // Closing string
-            System.out.println("Ok.");
+            //System.out.println("Ok.");
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("POLYGONS ") ) {
-            System.out.print("Reading polygons... ");
+            //System.out.print("Reading polygons... ");
 
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
@@ -107,13 +107,12 @@ public class ReaderVtk extends PersistenceElement
             }
             readAsciiLine(fis); // Closing string
 
-            System.out.println("Ok.");
+            //System.out.println("Ok.");
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("CELL_DATA ") ) {
             // Just ignore...
         }
         else if ( vtkDataFragment != null && vtkDataFragment.startsWith("POINT_DATA ") ) {
-            System.out.print("Reading point data... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
@@ -124,7 +123,7 @@ public class ReaderVtk extends PersistenceElement
                 auxStringTokenizer.nextToken();
                 elementType = auxStringTokenizer.nextToken();
                 if ( elementType.startsWith("float") ) {
-                    System.out.print("Reading normals... ");
+                    //System.out.print("Reading normals... ");
                     normals = new Vector3D[numElements];
                     for ( i = 0; i < numElements; i++ ) {
                         normals[i] = new Vector3D();
@@ -133,7 +132,7 @@ public class ReaderVtk extends PersistenceElement
                         normals[i].z = readFloatBE(fis);
                     }
                     readAsciiLine(fis); // Closing string
-                    System.out.println("Ok.");
+                    //System.out.println("Ok.");
                 }
                 else {
                     VSDK.reportMessage(null, VSDK.WARNING,
@@ -141,7 +140,6 @@ public class ReaderVtk extends PersistenceElement
                            "Current implementation can not read normals in data type " + elementType);
                     return false;
                 }
-                System.out.println("Ok.");
             }
             else {
                 VSDK.reportMessage(null, VSDK.WARNING,
@@ -169,7 +167,7 @@ public class ReaderVtk extends PersistenceElement
         ArrayList<Background> backgroundsArray = inoutSimpleScene.getBackgrounds();
         ArrayList<Camera> camerasArray = inoutSimpleScene.getCameras();
 
-        System.out.println("Reading " + inSceneFileFd.getAbsolutePath());
+        //System.out.println("Reading " + inSceneFileFd.getAbsolutePath());
 
         //-----------------------------------------------------------------
         FileInputStream fis = new FileInputStream(inSceneFileFd);
@@ -207,6 +205,7 @@ public class ReaderVtk extends PersistenceElement
 
         //-----------------------------------------------------------------
         String vtkDataset;
+
 
         vtkDataset = readAsciiLine(bis);
         if ( vtkDataset == null ||
@@ -307,7 +306,7 @@ public class ReaderVtk extends PersistenceElement
                     nn++;
                 }
             }
-            triangleMesh.calculateNormals();
+            //triangleMesh.calculateNormals();
 
             // Add triangle strip mesh
             SimpleBody newThing = new SimpleBody();
@@ -317,7 +316,7 @@ public class ReaderVtk extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        System.out.println("VTK import done.");
+        //System.out.println("VTK import done.");
         bis.close();
         fis.close();
 
