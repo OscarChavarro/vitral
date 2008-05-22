@@ -120,11 +120,12 @@ public class JoglView implements KeyListener
         Matrix4x4 R = new Matrix4x4();
 
         cameraPerspective = new Camera();
-        cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
-        R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
 
-        //cameraPerspective.setPosition(new Vector3D(0, -4, 0));
-        //R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
+        //cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
+        //R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
+
+        cameraPerspective.setPosition(new Vector3D(0, -4, 0));
+        R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
 
         cameraPerspective.setRotation(R);
         cameraPerspective.setName("Perspective");
@@ -463,7 +464,7 @@ public class JoglView implements KeyListener
     */
     public void drawBorderGL(GL gl, int viewportXsize, int viewportYsize)
     {
-        if ( !active ) {
+        if ( !active || viewportBorder <= 0 ) {
             return;
         }
         gl.glPushAttrib(gl.GL_DEPTH_TEST);

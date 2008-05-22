@@ -37,19 +37,19 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglRenderer;
+import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 
 /**
 This program is an extended variation of the program
@@ -79,12 +79,11 @@ public class CgAutomaticShaderExample
     private Material material;               // 3. Surface properties
     private RGBImage textureMap;
     private NormalMap normalMap;
-    private RGBImage convertedNormalMap = null;
     private RendererConfiguration quality;
     private double xrotation;                // 4. Geometrical transformations
     private double yrotation;
     private double zrotation;
-    private Geometry geometry;                   // 5. Geometry
+    private SimpleBody thing;                // 5. Geometry
 
     //----------------------------------------------------------------------
 
@@ -136,13 +135,14 @@ public class CgAutomaticShaderExample
             textureMap = ImagePersistence.importRGB(new File(imageFilename));
 
             //-------------------------------------------------------
+            //RGBImage convertedNormalMap = null;
+
             normalMap = new NormalMap();
             //imageFilename = "../../../etc/bumpmaps/blinn2.bw";
             imageFilename = "../../../etc/bumpmaps/earth.bw";
             IndexedColorImage source = ImagePersistence.importIndexedColor(new File(imageFilename));
             normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
-            convertedNormalMap = normalMap.exportToRgbImage();
-            normalMap = null;
+            //convertedNormalMap = normalMap.exportToRgbImage();
             //ImagePersistence.exportPPM(new File("./outputmap.ppm"), convertedNormalMap);
         }
         catch (Exception e) {
@@ -162,7 +162,13 @@ public class CgAutomaticShaderExample
         zrotation = 0;
 
         // 5. Object attribute -> geometry
-        geometry = new Sphere(1.0);
+        thing = new SimpleBody();
+        thing.setGeometry(new Sphere(1.0));
+        thing.setTexture(textureMap);
+        thing.setNormalMap(normalMap);
+        thing.setMaterial(material);
+        thing.setPosition(new Vector3D(0, 0, 0));
+        thing.setRotation(new Matrix4x4());
 
         //- Initialize GUI helpers ----------------------------------------
         cameraController = new CameraControllerAquynza(camera);
@@ -201,9 +207,9 @@ public class CgAutomaticShaderExample
         }
         needPaint--;
 
+        //-----------------------------------------------------------------
         if ( firstTimer ) {
             firstTimer = false;
-            // IMPORTANT POINT 1/4
             JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
         }
 
@@ -213,14 +219,8 @@ public class CgAutomaticShaderExample
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
         //- Shader configuration from scene data --------------------------
-        // IMPORTANT POINT 2/4
-        JoglRenderer.activateNvidiaGpuParameters(gl, quality,
-            JoglRenderer.getCurrentVertexShader(), 
-            JoglRenderer.getCurrentPixelShader());
-
         JoglCameraRenderer.activate(gl, camera);
         JoglLightRenderer.activate(gl, light);
-        JoglMaterialRenderer.activate(gl, material);
 
         //- Body transforms -----------------------------------------------
         gl.glLoadIdentity();
@@ -228,49 +228,10 @@ public class CgAutomaticShaderExample
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
-        activateTextures(gl, quality);
-
-        if ( quality.isTextureSet() ) {
-            gl.glEnable(gl.GL_TEXTURE_2D);
-        }
-        else {
-            gl.glDisable(gl.GL_TEXTURE_2D);
-        }
-
-        JoglGeometryRenderer.draw(gl, geometry, camera, quality);
-
-        // IMPORTANT POINT 3/4
-        JoglRenderer.deactivateNvidiaGpuParameters(gl, quality);
+        JoglSimpleBodyRenderer.draw(gl, thing, camera, quality);
 
         gl.glLoadIdentity();
         JoglLightRenderer.draw(gl, light);
-    }
-
-    void activateTextures(GL gl, RendererConfiguration quality) {
-        //-----------------------------------------------------------------
-        gl.glEnable(gl.GL_TEXTURE_2D);
-        JoglImageRenderer.activate(gl, textureMap);
-
-        //- Basic OpenGL texture state setup ------------------------------
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-           gl.GL_GENERATE_MIPMAP_SGIS, gl.GL_TRUE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-           gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-           gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-           gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-           gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
-
-        //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-        //   gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-           gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
-
-        //-----------------------------------------------------------------
-        // IMPORTANT POINT 4/4
-        JoglImageRenderer.activateAsNormalMap(gl, convertedNormalMap, quality);
     }
 
     public void
@@ -410,6 +371,7 @@ public class CgAutomaticShaderExample
         canvas.addGLEventListener(instance);
         canvas.addMouseListener(instance);
         canvas.addMouseMotionListener(instance);
+        canvas.addMouseWheelListener(instance);
         canvas.addKeyListener(instance);
         canvas.addGLEventListener(instance);
         Animator animator = new Animator(canvas);

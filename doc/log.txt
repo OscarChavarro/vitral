@@ -757,4 +757,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 57min: WriterVtk (basic support to TriangleMesh)
   - 1h15min: TriangleMesh support for vertex selection
 
+2008 may 21, Oscar Chavarro: <<60min>>
+  - 1h: Fixing Nvidia Cg automatic shader management support structure.
+
 ===========================================================================

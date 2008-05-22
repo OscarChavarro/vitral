@@ -6,10 +6,15 @@
 
 package vsdk.toolkit.render.jogl;
 
+// Java basic
+import java.util.ArrayList;
+
+// JOGL classes
 import javax.media.opengl.GL;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGprogram;
 
+// VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.environment.Light;
@@ -32,8 +37,18 @@ public class JoglLightRenderer extends JoglRenderer {
     {
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
-            activateNvidiaGpuParameters(gl, l,
-                currentVertexShader, currentPixelShader);
+            ArrayList<CGprogram> allVertexShaders;
+            ArrayList<CGprogram> allTextureShaders;
+            allVertexShaders = getAllVertexShaders();
+            allTextureShaders = getAllPixelShaders();
+
+            int i;
+
+            for ( i = 0; i < allVertexShaders.size(); i++ ) {
+                activateNvidiaGpuParameters(gl, l,
+                                            allVertexShaders.get(i),
+                                            allTextureShaders.get(i));
+            }
         }
 
         //-----------------------------------------------------------------

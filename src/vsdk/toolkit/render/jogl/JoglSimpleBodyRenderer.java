@@ -21,7 +21,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
     private static void drawCommon(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
-        Image texture;
+        //-----------------------------------------------------------------
         Vector3D scale;
         Vector3D p;
 
@@ -34,6 +34,9 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         gl.glColor3d(1, 1, 1);
         JoglMaterialRenderer.activate(gl, b.getMaterial());
+
+        //-----------------------------------------------------------------
+        Image texture;
 
         texture = b.getTexture();
 
@@ -61,6 +64,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             gl.glDisable(gl.GL_TEXTURE_2D);
         }
 
+        //-----------------------------------------------------------------
         RGBImage nm = b.getNormalMapRgb();
         if ( q.isBumpMapSet() && (nm != null) ) {
             JoglImageRenderer.activateAsNormalMap(gl, nm, q);
@@ -70,6 +74,10 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
     public static void draw(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
+        activateNvidiaGpuParameters(gl, q,
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
+
         gl.glPushMatrix();
 
         drawCommon(gl, b, c, q);
@@ -77,11 +85,17 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
 
         gl.glPopMatrix();
+
+        deactivateNvidiaGpuParameters(gl, q);
     }
 
     public static void drawWithVertexArrays(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
+        activateNvidiaGpuParameters(gl, q,
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
+
         gl.glPushMatrix();
 
         drawCommon(gl, b, c, q);
@@ -89,6 +103,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
 
         gl.glPopMatrix();
+        deactivateNvidiaGpuParameters(gl, q);
     }
 }
 

@@ -1615,9 +1615,9 @@ public class JoglDrawingArea implements
                     SimpleBody gi;
                     IndexedColorImage source = null;
                     NormalMap normalMap;
-                    RGBImage exported;
+                    //RGBImage exported;
                     gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-                     normalMap = gi.getNormalMap();
+                    normalMap = gi.getNormalMap();
                     if ( normalMap == null ) {
                         try {
                             normalMap = new NormalMap();
@@ -1625,8 +1625,8 @@ public class JoglDrawingArea implements
                             String imageFilename = "../../../etc/bumpmaps/earth.bw";
                             source = ImagePersistence.importIndexedColor(new File(imageFilename));
                             normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
-                             exported = normalMap.exportToRgbImage();
-                                //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
+                            //exported = normalMap.exportToRgbImage();
+                            //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                         }
                         catch ( Exception ee ) {
                             System.err.println(ee);

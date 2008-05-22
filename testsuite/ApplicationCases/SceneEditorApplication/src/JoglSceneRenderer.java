@@ -38,10 +38,6 @@ public class JoglSceneRenderer
             s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
 
         //- Activate camera -----------------------------------------------
-        JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
-            JoglRenderer.getCurrentVertexShader(), 
-            JoglRenderer.getCurrentPixelShader());
-
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -88,8 +84,6 @@ public class JoglSceneRenderer
                 modifyPanel.draw(gl, s.activeCamera, quality);
             }
         }
-
-        JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
     }
 
     public static void draw(GL gl, Scene s, SceneEditorApplication parent)
@@ -103,7 +97,6 @@ public class JoglSceneRenderer
         drawBase(gl, s, parent.modifyPanel);
 
         //- Draw 3D Gizmos ------------------------------------------------
-/*
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             JoglLightRenderer.draw(gl, s.scene.getLights().get(i));
         }
@@ -125,7 +118,6 @@ public class JoglSceneRenderer
             JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
             gl.glEnable(gl.GL_DEPTH_TEST);
         }
-*/
     }
 
 }

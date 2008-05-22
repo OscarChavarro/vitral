@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 // JOGL clases
 import javax.media.opengl.GL;
@@ -69,6 +70,8 @@ public abstract class JoglRenderer extends RenderingElement {
     public static CGprogram NvidiaGpuPixelProgramTexture;
     public static CGprogram NvidiaGpuVertexProgramTextureBump;
     public static CGprogram NvidiaGpuPixelProgramTextureBump;
+    private static ArrayList<CGprogram> NvidiaGuiAllVertexShaders = null;
+    private static ArrayList<CGprogram> NvidiaGuiAllPixelShaders = null;
 
     public static CGprogram getCurrentVertexShader()
     {
@@ -78,6 +81,30 @@ public abstract class JoglRenderer extends RenderingElement {
     public static CGprogram getCurrentPixelShader()
     {
         return currentPixelShader;
+    }
+
+    protected static ArrayList<CGprogram>
+    getAllVertexShaders()
+    {
+        if ( NvidiaGuiAllVertexShaders == null ) {
+            NvidiaGuiAllVertexShaders = new ArrayList<CGprogram>();
+	}
+
+        NvidiaGuiAllVertexShaders.add(NvidiaGpuVertexProgramTexture);
+        NvidiaGuiAllVertexShaders.add(NvidiaGpuVertexProgramTextureBump);
+        return NvidiaGuiAllVertexShaders;
+    }
+
+    protected static ArrayList<CGprogram>
+    getAllPixelShaders()
+    {
+        if ( NvidiaGuiAllPixelShaders == null ) {
+            NvidiaGuiAllPixelShaders = new ArrayList<CGprogram>();
+	}
+
+        NvidiaGuiAllPixelShaders.add(NvidiaGpuPixelProgramTexture);
+        NvidiaGuiAllPixelShaders.add(NvidiaGpuPixelProgramTextureBump);
+        return NvidiaGuiAllPixelShaders;
     }
 
     public static void createDefaultAutomaticNvidiaCgShaders()
