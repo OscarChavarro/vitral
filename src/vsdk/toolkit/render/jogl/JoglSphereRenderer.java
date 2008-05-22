@@ -137,34 +137,26 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     /**
-    @todo implement tangent/binormal parameter passing to CG / shader when
-    available
+    Generates the relevant JOGL/OpenGL + Cg primitives for a sphere's vertex.
     */
     private static void
     drawVertex(GL gl, double theta, double phi, double s, double t,
                Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
     {
-        //- Calculate vertex parameters -----------------------------------
-        sphereNormal(N, theta, phi);
-        spherePosition(P, theta, phi, r);
-        sphereTangent(T, theta, phi);
-        sphereBinormal(B, theta, phi);
-
-        //- Pass standard vertex parameters to OpenGL ---------------------
-        gl.glTexCoord2d(1.0-s, t);
-        gl.glNormal3d(N.x, N.y, N.z);
-
         //- If inside a Cg schema, pass non standard OpenGL parameters ----
         if ( renderingWithNvidiaGpu() ) {
             CGparameter tangentParam;
             CGparameter binormalParam;
             double vectorarray[];
 
+            sphereTangent(T, theta, phi);
             tangentParam = accessNvidiaGpuVertexParameter("TObject");
             if ( tangentParam != null ) {
                 vectorarray = T.exportToDoubleArrayVect();
                 CgGL.cgGLSetParameter3dv(tangentParam, vectorarray, 0);
             }
+
+            sphereBinormal(B, theta, phi);
             binormalParam = accessNvidiaGpuVertexParameter("BObject");
             if ( binormalParam != null ) {
                 B.x = 1;
@@ -175,7 +167,13 @@ public class JoglSphereRenderer extends JoglRenderer {
             }
         }
 
-        //-----------------------------------------------------------------
+        //- Pass standard vertex parameters to OpenGL ---------------------
+        sphereNormal(N, theta, phi);
+        gl.glTexCoord2d(1.0-s, t);
+        gl.glNormal3d(N.x, N.y, N.z);
+
+        //- Execute vertex -----------------------------------------------
+        spherePosition(P, theta, phi, r);
         gl.glVertex3d(P.x, P.y, P.z);
     }
 

@@ -26,11 +26,15 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import com.sun.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.QuadMesh;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
@@ -39,6 +43,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.common.StopWatch;
 import vsdk.toolkit.io.geometry.ViewpointBinaryPersistence; // Persistence elements
 
 /**
@@ -64,8 +69,10 @@ public class QuadBenchmark extends Applet implements
     private RendererConfiguration qualitySelection;
     private RendererConfigurationController qualityController;
     private Configuration options;
-    private boolean firstTimer;
-    private int listName;
+    private boolean withAutomaticAnimation;
+    private double angle;
+    private StopWatch clock;
+    private int framesToGo;
 
 //= PROGRAM PART 2/5: CONSTRUCTORS ==========================================
 
@@ -87,7 +94,6 @@ public class QuadBenchmark extends Applet implements
     {
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
-        firstTimer = true;
         camera = new Camera();
 
         //cameraController = new CameraControllerBlender(camera);
@@ -111,11 +117,14 @@ public class QuadBenchmark extends Applet implements
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+        withAutomaticAnimation = false;
+        angle = 0.0;
+        clock = null;
     }
 
 //= PROGRAM PART 3/5: ENTRY POINTS ==========================================
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
 
         // Common VitralSDK initialization
         JoglRenderer.verifyOpenGLAvailability();
@@ -138,6 +147,13 @@ public class QuadBenchmark extends Applet implements
         frame.setSize(size);
         frame.setVisible(true);
         instance.canvas.requestFocusInWindow();
+
+        if ( instance.options.numberOfFrames >= 0 ) {
+            Animator animator = new Animator(instance.canvas);
+            instance.withAutomaticAnimation = true;
+            animator.start();
+            instance.framesToGo = instance.options.numberOfFrames;
+        }
     }
 
     public void init()
@@ -156,6 +172,42 @@ public class QuadBenchmark extends Applet implements
         gl.glEnable(gl.GL_DEPTH_TEST);
 
         gl.glLoadIdentity();
+
+        if ( withAutomaticAnimation ) {
+            gl.glRotated(angle, 0, 0, 1);
+            angle += 1.0;
+            if ( angle > 360.0 ) {
+                angle = 0.0;
+            }
+            framesToGo--;
+            if ( framesToGo <= 0 ) {
+                clock.stop();
+                double t;
+                double n;
+                Geometry g;
+                QuadMesh qm;
+                long quads = 0;
+                int qi[];
+
+                t = clock.getElapsedRealTime();
+                n = (double)options.numberOfFrames;
+                int i;
+                for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+                    g = scene.getSimpleBodies().get(i).getGeometry();
+                    if ( g instanceof QuadMesh ) {
+                        qm = (QuadMesh)g;
+                        qi = qm.getQuadIndices();
+                        quads += qi.length/4;
+                    }
+                }
+
+
+                System.out.println(options.numberOfFrames + " frames rendered on " + VSDK.formatDouble(t) + " seconds.");
+                System.out.println("  - Frames per second: " + VSDK.formatDouble(n/t));
+                System.out.println("  - Quads per second: " + VSDK.formatDouble((((double)quads)*n)/t));
+                System.exit(1);
+            }
+        }
 
         gl.glLineWidth((float)3.0);
         gl.glBegin(GL.GL_LINES);
@@ -186,6 +238,13 @@ public class QuadBenchmark extends Applet implements
                                         camera, qualitySelection);
         }
 
+        if ( clock == null ) {
+            // Placing this code at this point gets to not counting the time
+            // of the first frame. This is to not account for display list
+            // compile time, but to measure only sustained framerate.
+            clock = new StopWatch();
+            clock.start();
+        }
     }
 
     /** Called by drawable to initiate drawing */
@@ -196,30 +255,17 @@ public class QuadBenchmark extends Applet implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activate(gl, camera);
+        JoglCameraRenderer.activate(gl, camera);        
 
         //-----------------------------------------------------------------
         if ( options.withDisplayList ) {
-            if ( firstTimer ) {
-                firstTimer = false;
-                listName = gl.glGenLists(1);
-                gl.glNewList(listName, gl.GL_COMPILE);
-                    drawObjectsGL(gl);
-                gl.glEndList();
-                if ( gl.glGetError() != 0 ) {
-                    System.err.println("ERROR, out of memory compiling display list. Aborting.");
-                    System.exit(1);
-                }
-                canvas.repaint();
-            }
-            else {
-                gl.glCallList(listName);
-            }
+            JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(true);
         }
         else {
-            drawObjectsGL(gl);
+            JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(false);
         }
-    }
+        drawObjectsGL(gl); 
+   }
    
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {

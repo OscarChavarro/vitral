@@ -760,10 +760,11 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 may 21, Oscar Chavarro: <<60min>>
   - 1h: Fixing Nvidia Cg automatic shader management support structure.
 
-2008 may 22, Oscar Chavarro: <<96min>>
+2008 may 22, Oscar Chavarro: <<106min>>
   - 1h36min: experimental support for automatic GL display lists on
     JoglSimpleBodyRenderer code. Not working when using Nvidia Cg
     vertex / pixel shaders, because Cg parameters goes freezed for
     first time GL list compilation.
+  - 15min: Simple update to QuadBenchmark. Now reporting performance results!
 
 ===========================================================================

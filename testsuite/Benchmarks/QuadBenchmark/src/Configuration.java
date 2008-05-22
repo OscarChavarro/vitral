@@ -23,7 +23,7 @@ public class Configuration
         fisGeometry = null;
         fisColors = null;
         withDisplayList = false;
-        numberOfFrames = 30000;
+        numberOfFrames = -1;
         withVertexArrays = false;
     }
 

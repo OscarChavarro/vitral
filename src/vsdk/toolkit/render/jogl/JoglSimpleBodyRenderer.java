@@ -219,6 +219,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
     public static void draw(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
+        //-----------------------------------------------------------------
         activateNvidiaGpuParameters(gl, q,
             JoglRenderer.getCurrentVertexShader(), 
             JoglRenderer.getCurrentPixelShader());
@@ -227,6 +228,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         drawCommon(gl, b, c, q);
 
+        //-----------------------------------------------------------------
         if ( !usingDisplayLists ) {
             JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
         }
@@ -249,6 +251,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             }
         }
 
+        //-----------------------------------------------------------------
         gl.glPopMatrix();
 
         deactivateNvidiaGpuParameters(gl, q);
@@ -257,6 +260,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
     public static void drawWithVertexArrays(GL gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
+        //-----------------------------------------------------------------
         activateNvidiaGpuParameters(gl, q,
             JoglRenderer.getCurrentVertexShader(), 
             JoglRenderer.getCurrentPixelShader());
@@ -265,8 +269,30 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         drawCommon(gl, b, c, q);
 
-        JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
+        //-----------------------------------------------------------------
+        if ( !usingDisplayLists ) {
+            JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
+        }
+        else {
+            int id;
+            id = getDisplayList(b.getGeometry(), q);
 
+            if ( id >= 0 ) {
+                gl.glCallList(id);
+            }
+            else {
+                id = createDisplayListId(gl, b.getGeometry(), q);
+                gl.glNewList(id, gl.GL_COMPILE);
+                JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
+                gl.glEndList();
+                if ( gl.glGetError() != 0 ) {
+                    VSDK.reportMessage(null, VSDK.WARNING, "JoglSimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
+                }
+                gl.glCallList(id);
+            }
+        }
+
+        //-----------------------------------------------------------------
         gl.glPopMatrix();
         deactivateNvidiaGpuParameters(gl, q);
     }
