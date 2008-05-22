@@ -725,10 +725,6 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
-        JoglRenderer.activateNvidiaGpuParameters(gl, view.getRendererConfiguration(),
-            JoglRenderer.getCurrentVertexShader(), 
-            JoglRenderer.getCurrentPixelShader());
-
         drawVisualRayDebug(gl);
 
         // Nice debugging for Camera.projectPoint operation :)
@@ -743,8 +739,6 @@ public class JoglDrawingArea implements
         }
         gl.glPopAttrib();
 */
-
-        JoglRenderer.deactivateNvidiaGpuParameters(gl, view.getRendererConfiguration());
 
         view.drawGrid(gl);
 
@@ -867,8 +861,12 @@ public class JoglDrawingArea implements
 
     private void drawVisualRayDebug(GL gl, Ray ray, int level)
     {
+        if ( level < 0 ) {
+            return;
+        }
+
+        gl.glPushMatrix();
         gl.glLoadIdentity();
-        if ( level < 0 ) return;
 
         //-----------------------------------------------------------------
         Vector3D p;
@@ -911,6 +909,7 @@ public class JoglDrawingArea implements
             p = ray.origin.add(d);
             drawVisualRayDebugSegment(gl, ray.origin, p, true, 0.07, 0.4);
         }
+        gl.glPopMatrix();
     }
 
     private void drawVisualRayDebug(GL gl)

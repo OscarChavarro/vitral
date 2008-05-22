@@ -122,6 +122,10 @@ public class JoglView implements KeyListener
         cameraPerspective = new Camera();
         cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
         R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
+
+        //cameraPerspective.setPosition(new Vector3D(0, -4, 0));
+        //R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
+
         cameraPerspective.setRotation(R);
         cameraPerspective.setName("Perspective");
 

@@ -59,8 +59,9 @@ public class Scene
         debugThingGroups = new ArrayList<SimpleBodyGroup>();
 
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
         camera = new Camera();
+
+        R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
         camera.setPosition(new Vector3D(-5, -5, 5));
         camera.setRotation(R);
 
@@ -147,11 +148,21 @@ public class Scene
     {
         Material m = new Material();
 
+/*
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
         m.setDoubleSided(false);
-        m.setPhongExponent(100);
+        m.setPhongExponent(100.0);
+*/
+
+        m.setAmbient(new ColorRgb(0, 0, 0));
+        m.setDiffuse(new ColorRgb(1, 1, 1));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
+        m.setPhongExponent(40.0);
+
+
         return m;
     }
 

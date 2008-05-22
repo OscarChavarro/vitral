@@ -39,7 +39,6 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -213,25 +212,23 @@ public class CgAutomaticShaderExample
         gl.glClearColor(0, 0, 0, 1.0f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-        //-----------------------------------------------------------------
-        JoglCameraRenderer.activate(gl, camera);
-
-        //-----------------------------------------------------------------
-        gl.glLoadIdentity();
-        gl.glRotated(xrotation, 1, 0, 0);
-        gl.glRotated(yrotation, 0, 1, 0);
-        gl.glRotated(zrotation, 0, 0, 1);
-
-        activateTextures(gl, quality);
-
         //- Shader configuration from scene data --------------------------
         // IMPORTANT POINT 2/4
         JoglRenderer.activateNvidiaGpuParameters(gl, quality,
             JoglRenderer.getCurrentVertexShader(), 
             JoglRenderer.getCurrentPixelShader());
 
+        JoglCameraRenderer.activate(gl, camera);
         JoglLightRenderer.activate(gl, light);
         JoglMaterialRenderer.activate(gl, material);
+
+        //- Body transforms -----------------------------------------------
+        gl.glLoadIdentity();
+        gl.glRotated(xrotation, 1, 0, 0);
+        gl.glRotated(yrotation, 0, 1, 0);
+        gl.glRotated(zrotation, 0, 0, 1);
+
+        activateTextures(gl, quality);
 
         if ( quality.isTextureSet() ) {
             gl.glEnable(gl.GL_TEXTURE_2D);
@@ -255,19 +252,21 @@ public class CgAutomaticShaderExample
         JoglImageRenderer.activate(gl, textureMap);
 
         //- Basic OpenGL texture state setup ------------------------------
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_GENERATE_MIPMAP_SGIS, GL.GL_TRUE);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-           GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+           gl.GL_GENERATE_MIPMAP_SGIS, gl.GL_TRUE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+           gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+           gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+           gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D,
+           gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
         //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-        //   GL.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+        //   gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+           gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
 
         //-----------------------------------------------------------------
         // IMPORTANT POINT 4/4

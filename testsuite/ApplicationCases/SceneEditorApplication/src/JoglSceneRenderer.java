@@ -38,6 +38,10 @@ public class JoglSceneRenderer
             s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
 
         //- Activate camera -----------------------------------------------
+        JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
+            JoglRenderer.getCurrentVertexShader(), 
+            JoglRenderer.getCurrentPixelShader());
+
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
         gl.glEnable(gl.GL_DEPTH_TEST);
@@ -47,16 +51,12 @@ public class JoglSceneRenderer
             s.corridor.drawGL(gl);
         }
 
-        //- Draw and activate lights --------------------------------------
+        //- Activate lights -----------------------------------------------
         int i;
 
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             Light l = s.scene.getLights().get(i);
             JoglLightRenderer.activate(gl, l);
-        }
-
-        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
-            JoglLightRenderer.draw(gl, s.scene.getLights().get(i));
         }
 
         //- Draw scene bodies ---------------------------------------------
@@ -69,10 +69,6 @@ public class JoglSceneRenderer
         else {
             gl.glDisable(gl.GL_LIGHTING);
         }
-
-        JoglRenderer.activateNvidiaGpuParameters(gl, s.qualityTemplate,
-            JoglRenderer.getCurrentVertexShader(), 
-            JoglRenderer.getCurrentPixelShader());
 
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             quality = s.qualityTemplate.clone();
@@ -92,6 +88,7 @@ public class JoglSceneRenderer
                 modifyPanel.draw(gl, s.activeCamera, quality);
             }
         }
+
         JoglRenderer.deactivateNvidiaGpuParameters(gl, s.qualityTemplate);
     }
 
@@ -102,7 +99,14 @@ public class JoglSceneRenderer
         int i;
 
         s.activateSelectedBackground();
+
         drawBase(gl, s, parent.modifyPanel);
+
+        //- Draw 3D Gizmos ------------------------------------------------
+/*
+        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
+            JoglLightRenderer.draw(gl, s.scene.getLights().get(i));
+        }
 
         //- Draw visual debug entities (usually transparent) --------------
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
@@ -121,7 +125,7 @@ public class JoglSceneRenderer
             JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
             gl.glEnable(gl.GL_DEPTH_TEST);
         }
-
+*/
     }
 
 }

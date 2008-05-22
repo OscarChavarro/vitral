@@ -195,8 +195,8 @@ public class TriangleMesh extends Surface {
         vertexNormals = new double[n*3];
         incidentTrianglesPerVertexArray = new ArrayList<ArrayList<Integer>>();
 
-        //vertexBinormals = new double[n*3];
-        //vertexTangents = new double[n*3];
+        vertexBinormals = new double[n*3];
+        vertexTangents = new double[n*3];
         vertexUvs = new double[n*2];
         //vertexColors = null;
     }

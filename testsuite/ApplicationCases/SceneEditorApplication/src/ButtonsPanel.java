@@ -255,7 +255,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         //- EDIT ----------------------------------------------------------
         //- CREATE --------------------------------------------------------
         else if ( label.equals("IDC_CREATE_SPHERE") ) {
-            parent.theScene.addThing(new Sphere(1));
+            parent.theScene.addThing(new Sphere(1.0));
         }
         else if ( label.equals("IDC_CREATE_CONE") ) {
             parent.theScene.addThing(new Cone(1, 0, 2));
@@ -694,6 +694,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
+            //light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
             parent.theScene.scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------

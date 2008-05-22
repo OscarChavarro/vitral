@@ -40,6 +40,22 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         if ( q.isTextureSet() && (texture != null) ) {
             gl.glEnable(gl.GL_TEXTURE_2D);
             JoglImageRenderer.activate(gl, texture);
+
+            gl.glTexParameteri(gl.GL_TEXTURE_2D,
+               gl.GL_GENERATE_MIPMAP_SGIS, gl.GL_TRUE);
+            gl.glTexParameteri(gl.GL_TEXTURE_2D,
+               gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR);
+            gl.glTexParameteri(gl.GL_TEXTURE_2D,
+               gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+            gl.glTexParameteri(gl.GL_TEXTURE_2D,
+               gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
+            gl.glTexParameteri(gl.GL_TEXTURE_2D,
+               gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
+
+            //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+            //   gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+            gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+               gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         }
         else {
             gl.glDisable(gl.GL_TEXTURE_2D);
@@ -49,8 +65,6 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         if ( q.isBumpMapSet() && (nm != null) ) {
             JoglImageRenderer.activateAsNormalMap(gl, nm, q);
         }
-
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
     }
 
     public static void draw(GL gl, SimpleBody b,
