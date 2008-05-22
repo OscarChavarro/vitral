@@ -11,3 +11,11 @@ Following a list of detected BUGS.
       difference and intersection.
     . SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); goes
       well up to connect, fails on finish and maximize faces.
+  - NVidia Cg related
+    . Shader selection must be based on the current availability
+      of maps (texture and normal maps), and not only on selected
+      RendererConfiguration. This leads to incorrectly renderings when
+      requesting for example bump mapping on an object without a loaded
+      normal map.
+    . Display lists freezes CG parameters to the values valid only for
+      object when compiling the list, making object inalterable.

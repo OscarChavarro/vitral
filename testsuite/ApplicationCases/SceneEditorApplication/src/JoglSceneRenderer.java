@@ -66,6 +66,9 @@ public class JoglSceneRenderer
             gl.glDisable(gl.GL_LIGHTING);
         }
 
+        // Not working for NvidiaGPU!
+        //JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(true);
+
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             quality = s.qualityTemplate.clone();
 

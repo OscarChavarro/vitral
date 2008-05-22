@@ -16,7 +16,7 @@ responsible of display any data, it is just an a suggestion on how to draw it.
 
 @todo: Rename to 'RenderConfiguration' or something similar...
 */
-public class RendererConfiguration extends FundamentalEntity {
+public class RendererConfiguration extends FundamentalEntity /*implements Comparable <RendererConfiguration>*/ {
 
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
@@ -41,6 +41,59 @@ public class RendererConfiguration extends FundamentalEntity {
     private boolean normals;
     private boolean trianglesNormals;
     private ColorRgb wireColor;
+
+    public int compareTo(RendererConfiguration other)
+    {
+        long valThis;
+        long valOther;
+
+        valThis = 0x00;
+        if ( this.surfaces ) valThis += 0x0001;
+        if ( this.wires ) valThis += 0x0002;
+        if ( this.boundingVolume ) valThis += 0x0004;
+        if ( this.selectionCorners ) valThis += 0x0008;
+        if ( this.texture ) valThis += 0x0010;
+        if ( this.bumpMap ) valThis += 0x0020;
+        if ( this.points ) valThis += 0x0040;
+        if ( this.normals ) valThis += 0x0080;
+        if ( this.trianglesNormals ) valThis += 0x0100;
+        valThis += this.shadingType * 0x1000;
+
+        valOther = 0x00;
+        if ( other.surfaces ) valOther += 0x0001;
+        if ( other.wires ) valOther += 0x0002;
+        if ( other.boundingVolume ) valOther += 0x0004;
+        if ( other.selectionCorners ) valOther += 0x0008;
+        if ( other.texture ) valOther += 0x0010;
+        if ( other.bumpMap ) valOther += 0x0020;
+        if ( other.points ) valOther += 0x0040;
+        if ( other.normals ) valOther += 0x0080;
+        if ( other.trianglesNormals ) valOther += 0x0100;
+        valOther += other.shadingType * 0x1000;
+
+        if ( valThis > valOther ) {
+            return 1;
+	}
+	else if ( valThis < valOther ) {
+            return -1;
+	}
+	return 0;
+    }
+
+    public void clone(RendererConfiguration other)
+    {
+        this.shadingType = other.shadingType;
+        this.surfaces = other.surfaces;
+        this.wires = other.wires;
+        this.boundingVolume = other.boundingVolume;
+        this.selectionCorners = other.selectionCorners;
+        this.texture = other.texture;
+        this.bumpMap = other.bumpMap;
+        this.points = other.points;
+        this.normals = other.normals;
+        this.trianglesNormals = other.trianglesNormals;
+        this.wireColor.clone(other.wireColor);
+    }
 
     // To be used in future: depending of the rendering implementation for
     // each geometry, this can be used to specify the desired amount of
