@@ -574,7 +574,7 @@ public class JoglDrawingArea implements
             materialRanges[0][1] = 0;
 
             mesh = new TriangleMesh();
-            mesh.setVertexes(vertexArray);
+            mesh.setVertexes(vertexArray, true, false, false, true);
             mesh.setTriangles(triangleArray);
             mesh.setTextures(textureArray);
             mesh.setTextureRanges(textureRanges);
