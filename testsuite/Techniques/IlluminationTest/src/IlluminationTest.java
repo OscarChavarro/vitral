@@ -319,7 +319,7 @@ public class IlluminationTest
         gl.glLineWidth((float)3.0);
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);
@@ -352,8 +352,8 @@ public class IlluminationTest
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glClearColor(0, 0, 0, 1.0f);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
         gl.glLineWidth(1.0f);
         

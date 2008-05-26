@@ -11,6 +11,11 @@ Following a list of detected BUGS.
       difference and intersection.
     . SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); goes
       well up to connect, fails on finish and maximize faces.
+  - JOGL/OpenGL related
+    . On JoglView (SceneEditorApplication), tex labels renderered using the
+      transparent image technique changes the colors wrongly when a scene
+      with textured objects is displayed. This bug is appearing only
+      on Windows Vista with intel videocards.
   - NVidia Cg related
     . Shader selection must be based on the current availability
       of maps (texture and normal maps), and not only on selected

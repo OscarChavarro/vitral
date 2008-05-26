@@ -189,6 +189,26 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return list;
     }
 
+    public static void deactivate(GL gl, RGBImage img)
+    {
+        _JoglRGBImageRendererImageAssociation item = null;
+
+        try { 
+            int i;
+            for ( i = 0; i < compiledImages.size(); i++ ) {
+                item = compiledImages.get(i);
+                if ( item.image == img ) {
+                    item.renderer.disable();
+                    return;
+                }
+            }
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.deactivate", "Error unloading image.");
+
+	}
+    }
+
     public static void unload(GL gl, RGBImage img)
     {
         _JoglRGBImageRendererImageAssociation item = null;
@@ -223,13 +243,13 @@ public class JoglRGBImageRenderer extends JoglRenderer
     public static ByteBuffer importJOGLimage(GL gl) {
         int[] view= new int[4];
         //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
-        gl.glReadBuffer(GL.GL_FRONT_LEFT);
-        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
+        gl.glReadBuffer(gl.GL_FRONT_LEFT);
+        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE,
                         bb);
         gl.glFlush();
         return bb;
@@ -238,7 +258,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
     public static RGBImage getImageJOGL(GL gl) {
         RGBImage image = new RGBImage();
         int[] view= new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         image.init(width, height);

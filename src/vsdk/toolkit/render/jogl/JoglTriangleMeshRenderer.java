@@ -226,16 +226,16 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         //-----------------------------------------------------------------
         // Warning: Shoult this be here? or not ...
         // Just in case using external texture...
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-            gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D,
-            gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D,
-            gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D,
-            gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-            gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+        //gl.glTexParameteri(gl.GL_TEXTURE_2D,
+        //    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+        //gl.glTexParameteri(gl.GL_TEXTURE_2D,
+        //    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+        //gl.glTexParameterf(gl.GL_TEXTURE_2D,
+        //    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+        //gl.glTexParameterf(gl.GL_TEXTURE_2D,
+        //    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+        //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+        //    gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
 
         //-----------------------------------------------------------------
         int nt;
@@ -326,16 +326,16 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
                     JoglImageRenderer.activate(gl,
                         texturesArray[currentTextureIndex]);
                     // Warning: Shoult this be here? or not ...
-                    gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                        gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-                    gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                        gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-                    gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                        gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-                    gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                        gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-                    gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-                        gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+                    //gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                    //    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+                    //gl.glTexParameteri(gl.GL_TEXTURE_2D,
+                    //    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+                    //gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                    //    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+                    //gl.glTexParameterf(gl.GL_TEXTURE_2D,
+                    //    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+                    //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
+                    //    gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
                 }
                 else {
                     gl.glDisable(gl.GL_TEXTURE_2D);

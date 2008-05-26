@@ -14,6 +14,22 @@ import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
 public class JoglCubemapBackgroundRenderer extends JoglRenderer 
 {
+    private static void setTextureParameters(GL gl)
+    {
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+            gl.GL_TRUE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
+            gl.GL_LINEAR_MIPMAP_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
+            gl.GL_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
+            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
+            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE,
+            gl.GL_REPLACE);
+    }
+
     public static void draw(GL gl, CubemapBackground background)
     {
         //-----------------------------------------------------------------
@@ -47,10 +63,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Front
         JoglRGBAImageRenderer.activate(gl, images[0]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glBegin(gl.GL_QUADS);
             gl.glNormal3d(0, -1, 0);
@@ -66,10 +81,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Right
         JoglRGBAImageRenderer.activate(gl, images[1]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glRotated(-90, 0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
@@ -86,10 +100,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Left
         JoglRGBAImageRenderer.activate(gl, images[3]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glRotated(90, 0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
@@ -106,10 +119,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Back
         JoglRGBAImageRenderer.activate(gl, images[2]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glRotated(180, 0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
@@ -126,10 +138,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Down
         JoglRGBAImageRenderer.activate(gl, images[4]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glRotated(-90, 1, 0, 0);
         gl.glBegin(gl.GL_QUADS);
@@ -146,10 +157,9 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
 
         // Up
         JoglRGBAImageRenderer.activate(gl, images[5]);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        setTextureParameters(gl);
+
         gl.glLoadIdentity();
         gl.glRotated(90, 1, 0, 0);
         gl.glBegin(gl.GL_QUADS);

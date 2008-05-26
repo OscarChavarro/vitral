@@ -651,7 +651,7 @@ public class JoglView implements KeyListener
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glColor3d(0.37, 0.37, 0.37);
         for ( x = 0; x <= nx; x++ ) {
             if ( x == nx/2 ) continue;
@@ -715,16 +715,35 @@ public class JoglView implements KeyListener
 
     private void drawTextureString3D(GL gl, RGBAImage i)
     {
+        gl.glPushAttrib(gl.GL_ENABLE_BIT);
         gl.glRasterPos3d(-1, -1, 0);
         gl.glEnable(gl.GL_TEXTURE_2D);
-        gl.glEnable(GL.GL_BLEND);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glDisable(gl.GL_LIGHTING);
+        gl.glEnable(gl.GL_BLEND);
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 
-        // First: activate texture, Second: set texture parameters
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_BLEND);
+        // Set texture parameters
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+            gl.GL_TRUE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
+            gl.GL_NEAREST);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
+            gl.GL_NEAREST);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
+            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
+            gl.GL_CLAMP_TO_EDGE);
+
+        // Calling this configuration with GL_BLEND here generates an error on
+        // some Windows Vista machines with Intel graphics, as such on
+        // Dell Inspiron 1525 laptop with Mobile Intel 965 (BIOS 1566).
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_REPLACE);
+
+        //float c[] = {1f, 1f, 1f, 1f};
+        //gl.glTexEnvfv(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_COLOR, c, 0);
+
         JoglImageRenderer.draw(gl, i);
+        gl.glPopAttrib();
     }
 
     public void drawTitle(GL gl)

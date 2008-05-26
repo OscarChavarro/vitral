@@ -90,8 +90,8 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         }
 
         //- 3. If there is no glList, create it ---------------------------
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(gl.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
             item = new _JoglRGBAImageRendererImageAssociation();
@@ -155,7 +155,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
         }
         */
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+        //gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
         return item.glList;
     }
 
@@ -202,13 +202,13 @@ public class JoglRGBAImageRenderer extends JoglRenderer
     public static ByteBuffer importJOGLimage(GL gl) {
         int[] view= new int[4];
         //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
-        gl.glReadBuffer(GL.GL_FRONT_LEFT);
-        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
+        gl.glReadBuffer(gl.GL_FRONT_LEFT);
+        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE,
                         bb);
         gl.glFlush();
         return bb;
@@ -217,7 +217,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
     public static RGBAImage getImageJOGL(GL gl) {
         RGBAImage image = new RGBAImage();
         int[] view= new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         image.init(width, height);

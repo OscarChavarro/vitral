@@ -134,11 +134,11 @@ public class ImageExample extends JFrame implements
 
         // First: activate texture, Second: set texture parameters
         JoglImageRenderer.activate(gl, img);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+        //gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+        //gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+        //gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
+        //gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
+        //gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
 
         // Draw textured geometry
         double dx = (double)img.getXSize()/(double)img.getYSize();
@@ -148,16 +148,16 @@ public class ImageExample extends JFrame implements
             gl.glColor3d(1, 1, 1);
 
             gl.glTexCoord2d(0, 0);
-            gl.glVertex3d(0, 0, 0);
+            gl.glVertex3d(0, 0, 0.01);
 
             gl.glTexCoord2d(1, 0);
-            gl.glVertex3d(dx, 0, 0);
+            gl.glVertex3d(dx, 0, 0.01);
 
             gl.glTexCoord2d(1, 1);
-            gl.glVertex3d(dx, 1, 0);
+            gl.glVertex3d(dx, 1, 0.01);
 
             gl.glTexCoord2d(0, 1);
-            gl.glVertex3d(0, 1, 0);
+            gl.glVertex3d(0, 1, 0.01);
         gl.glEnd();
 
         // Draw image directly over screen

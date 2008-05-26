@@ -17,13 +17,13 @@ public class JoglZBufferRenderer extends JoglRenderer
 {
     public static byte[] importZBuffer(GL gl) {
         int[] view = new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];
         byte[] data = new byte[4 * width * height];
         FloatBuffer bb = FloatBuffer.allocate(width * height);
 
-        gl.glReadPixels( -1, -1, width, height, GL.GL_DEPTH_COMPONENT,
-                        GL.GL_FLOAT, bb);
+        gl.glReadPixels( -1, -1, width, height, gl.GL_DEPTH_COMPONENT,
+                        gl.GL_FLOAT, bb);
         gl.glFlush();
 
         int pos = 0;
@@ -42,14 +42,14 @@ public class JoglZBufferRenderer extends JoglRenderer
 
     public static ZBuffer importJOGLZBuffer(GL gl) {
         int[] view = new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
+        gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];
         FloatBuffer bb = FloatBuffer.allocate(width * height);
 
-        gl.glReadBuffer(GL.GL_FRONT_LEFT);
-        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, GL.GL_DEPTH_COMPONENT,
-                        GL.GL_FLOAT, bb);
+        gl.glReadBuffer(gl.GL_FRONT_LEFT);
+        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, gl.GL_DEPTH_COMPONENT,
+                        gl.GL_FLOAT, bb);
         gl.glFlush();
 
         ZBuffer result = new ZBuffer(width, height);

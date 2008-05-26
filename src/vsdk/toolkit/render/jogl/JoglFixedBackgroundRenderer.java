@@ -43,10 +43,19 @@ public class JoglFixedBackgroundRenderer extends JoglRenderer
         //- Put image background ------------------------------------------
         gl.glEnable(gl.GL_TEXTURE_2D);
         JoglRGBAImageRenderer.activate(gl, background.getImage());
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, 
-                           gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, 
-                           gl.GL_NEAREST);
+
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+            gl.GL_TRUE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
+            gl.GL_LINEAR_MIPMAP_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
+            gl.GL_LINEAR);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
+            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
+            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE,
+            gl.GL_REPLACE);
 
         gl.glColor3d(1, 1, 1);
         gl.glBegin(gl.GL_QUADS);

@@ -42,15 +42,15 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
         GL gl = drawable.getGL();
 
         gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         gl.glColor3d(1, 1, 1); 
 
-        gl.glMatrixMode(GL.GL_PROJECTION);
+        gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0.5, 0.5, 0);
         gl.glEnd();

@@ -214,9 +214,9 @@ public class CgAutomaticShaderExample
         }
 
         //-----------------------------------------------------------------
-        gl.glEnable(GL.GL_DEPTH_TEST);
+        gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glClearColor(0, 0, 0, 1.0f);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
         //- Shader configuration from scene data --------------------------
         JoglCameraRenderer.activate(gl, camera);

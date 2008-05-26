@@ -54,7 +54,7 @@ public class JoglPreviewGenerator
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glColor3d(0.37, 0.37, 0.37);
         for ( x = 0; x <= nx; x++ ) {
             if ( x == nx/2 ) continue;
@@ -80,8 +80,8 @@ public class JoglPreviewGenerator
         double minmax[];
 
         gl.glClearColor(0.62f, 0.72f, 0.83f, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 
         JoglCameraRenderer.activate(gl, camera);
         gl.glMatrixMode(gl.GL_MODELVIEW);

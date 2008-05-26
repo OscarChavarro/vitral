@@ -40,7 +40,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
                             ColorRgb color) {
         int i, j;
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
-        gl.glDisable(GL.GL_LIGHTING);
+        gl.glDisable(gl.GL_LIGHTING);
 
         gl.glColor3d(color.r, color.g, color.b);
         for ( i = 1; i < curve.types.size(); i++ ) {
@@ -53,7 +53,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
             ArrayList polyline = curve.calculatePoints(i, false);
 
             // Draw the polyline
-            gl.glBegin(GL.GL_LINE_STRIP);
+            gl.glBegin(gl.GL_LINE_STRIP);
             for ( j = 0; j < polyline.size(); j++ ) {
                 Vector3D vec = (Vector3D) polyline.get(j);
 
@@ -92,7 +92,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
                                               ColorRgb colorLine,
                                               ColorRgb colorCenterPoint,
                                               ColorRgb colorTangPoint) {
-        gl.glDisable(GL.GL_LIGHTING);
+        gl.glDisable(gl.GL_LIGHTING);
 
         int typeseg = curve.types.get(0);
 
@@ -134,7 +134,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         for (int i = 0; i < pts.size(); i++) {
             gl.glColor3d(1, 0, 0);
             Vector3D vec = ( (Vector3D[]) pts.get(i))[0];
-            gl.glBegin(GL.GL_LINES);
+            gl.glBegin(gl.GL_LINES);
             gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
             gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
             gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
@@ -147,7 +147,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     static public void drawOneControlPoints(GL gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
         gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
@@ -157,7 +157,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     static public void drawFirstControlPoint(GL gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
-        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glBegin(gl.GL_LINE_STRIP);
         gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
@@ -174,7 +174,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         //p1
         gl.glColor3d(colorCenterPoint.r, colorCenterPoint.g, colorCenterPoint.b);
         Vector3D vec = ptsB[0];
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
         gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
@@ -184,7 +184,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         //p2
         gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
         Vector3D vec2 = ptsB[tangPoint];
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
         gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
@@ -192,7 +192,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
-        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glBegin(gl.GL_LINE_STRIP);
         gl.glVertex3d(vec.x, vec.y, vec.z);
         gl.glVertex3d(vec2.x, vec2.y, vec2.z);
         gl.glEnd();
@@ -206,7 +206,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glColor3d(colorCenterPoint.r, colorCenterPoint.g, colorCenterPoint.b);
         // p1
         Vector3D vec = ptsB[0];
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
         gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
         gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
@@ -216,7 +216,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         // p2
         gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
         Vector3D vec2 = ptsB[1];
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
 
         gl.glVertex3d(vec2.x + 0.02, vec2.y - 0.02, vec2.z);
         gl.glVertex3d(vec2.x - 0.02, vec2.y + 0.02, vec2.z);
@@ -225,14 +225,14 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
-        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glBegin(gl.GL_LINE_STRIP);
         gl.glVertex3d(vec.x, vec.y, vec.z);
         gl.glVertex3d(vec2.x, vec2.y, vec2.z);
         gl.glEnd();
 
         gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
         vec2 = ptsB[2];
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
 
         gl.glVertex3d(vec2.x + 0.02, vec2.y - 0.02, vec2.z);
         gl.glVertex3d(vec2.x - 0.02, vec2.y + 0.02, vec2.z);
@@ -241,7 +241,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
-        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glBegin(gl.GL_LINE_STRIP);
         gl.glVertex3d(vec.x, vec.y, vec.z);
         gl.glVertex3d(vec2.x, vec2.y, vec2.z);
         gl.glEnd();

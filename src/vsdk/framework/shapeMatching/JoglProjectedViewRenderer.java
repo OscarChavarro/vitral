@@ -170,17 +170,17 @@ public class JoglProjectedViewRenderer extends Component {
 
         //-----------------------------------------------------------------
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         JoglCameraRenderer.activate(gl, camera);
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
 
         if ( bodies == null ) {
             gl.glColor3d(1, 1, 1); 
-            gl.glBegin(GL.GL_LINES);
+            gl.glBegin(gl.GL_LINES);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(0.5, 0.5, 0);
             gl.glEnd();

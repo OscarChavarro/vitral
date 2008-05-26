@@ -60,7 +60,7 @@ public class JoglCameraRenderer extends JoglRenderer
     private static void drawBase(GL gl)
     {
         gl.glLineWidth((float)1.0);
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(gl.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);

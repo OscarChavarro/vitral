@@ -20,7 +20,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
 
     /**
     matrixId must be one of the internal JOGL/OpenGL variable names associated
-    with matrices, like GL.GL_PROJECTION_MATRIX or GL.GL_MODELVIEW_MATRIX
+    with matrices, like gl.GL_PROJECTION_MATRIX or gl.GL_MODELVIEW_MATRIX
     */
     public static Matrix4x4 importJOGL(GL gl, int matrixId) {
         double Mgl[] = new double[16];

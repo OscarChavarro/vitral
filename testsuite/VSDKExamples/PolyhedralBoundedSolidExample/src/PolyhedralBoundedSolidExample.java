@@ -339,7 +339,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glLineWidth((float)3.0);
 
         if ( edgeIndex > -3 && showCoordinateSystem ) {
-            gl.glBegin(GL.GL_LINES);
+            gl.glBegin(gl.GL_LINES);
                 gl.glColor3d(1, 0, 0);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(1, 0, 0);
@@ -404,7 +404,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         GL gl = drawable.getGL();
 
         gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
         gl.glEnable(gl.GL_DEPTH_TEST);
 
