@@ -282,7 +282,7 @@ public class ReaderVtk extends PersistenceElement
 
         if ( polygonData != null ) {
             TriangleMesh triangleMesh = new TriangleMesh();
-            triangleMesh.setVertexes(vertexes);
+            triangleMesh.setVertexes(vertexes, true, false, false, false);
 
             triangleMesh.initTriangleArrays(numPolygons);
 

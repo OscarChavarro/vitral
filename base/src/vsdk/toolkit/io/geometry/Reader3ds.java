@@ -1056,7 +1056,7 @@ public class Reader3ds extends PersistenceElement
                     v[i].u = currentUTextureMapping[i];
                     v[i].v = currentVTextureMapping[i];
                 }
-                currentTriangleMesh.setVertexes(v);
+                currentTriangleMesh.setVertexes(v, true, false, false, true);
 
                 // Triangle processing
                 int numMappedTriangles = 0;

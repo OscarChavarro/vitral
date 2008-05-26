@@ -85,7 +85,7 @@ public class ReaderGts extends PersistenceElement
                 numPoints = Integer.parseInt(auxStringTokenizer.nextToken());
                 numEdges = Integer.parseInt(auxStringTokenizer.nextToken());
                 numTriangles = Integer.parseInt(auxStringTokenizer.nextToken());
-                internalGeometry.initVertexArrays(numPoints);
+                internalGeometry.initVertexPositionsArray(numPoints);
                 v = internalGeometry.getVertexPositions();
                 edges = new int[numEdges][2];
                 triangles = new int[numTriangles][3];

@@ -150,7 +150,7 @@ public class FunctionalExplicitSurface extends Surface
         internalGeometry = new TriangleMesh();
 
         //-----------------------------------------------------------------
-        internalGeometry.initVertexArrays((nx+1)*(ny+1));
+        internalGeometry.initVertexPositionsArray((nx+1)*(ny+1));
         double v[] = internalGeometry.getVertexPositions();
         double z;
 

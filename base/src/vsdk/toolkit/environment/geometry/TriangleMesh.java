@@ -160,17 +160,25 @@ public class TriangleMesh extends Surface {
         vertex.position.x = vertexPositions[3*i];
         vertex.position.y = vertexPositions[3*i+1];
         vertex.position.z = vertexPositions[3*i+2];
-        vertex.normal.x = vertexNormals[3*i];
-        vertex.normal.y = vertexNormals[3*i+1];
-        vertex.normal.z = vertexNormals[3*i+2];
-        vertex.binormal.x = vertexBinormals[3*i];
-        vertex.binormal.y = vertexBinormals[3*i+1];
-        vertex.binormal.z = vertexBinormals[3*i+2];
-        vertex.tangent.x = vertexTangents[3*i];
-        vertex.tangent.y = vertexTangents[3*i+1];
-        vertex.tangent.z = vertexTangents[3*i+2];
-        vertex.u = vertexUvs[2*i];
-        vertex.v = vertexUvs[2*i+1];
+        if ( vertexNormals != null ) {
+            vertex.normal.x = vertexNormals[3*i];
+            vertex.normal.y = vertexNormals[3*i+1];
+            vertex.normal.z = vertexNormals[3*i+2];
+        }
+        if ( vertexBinormals != null ) {
+            vertex.binormal.x = vertexBinormals[3*i];
+            vertex.binormal.y = vertexBinormals[3*i+1];
+            vertex.binormal.z = vertexBinormals[3*i+2];
+        }
+        if ( vertexTangents != null ) {
+            vertex.tangent.x = vertexTangents[3*i];
+            vertex.tangent.y = vertexTangents[3*i+1];
+            vertex.tangent.z = vertexTangents[3*i+2];
+        }
+        if ( vertexUvs != null ) {
+            vertex.u = vertexUvs[2*i];
+            vertex.v = vertexUvs[2*i+1];
+        }
     }
 
     public Material[] getMaterials() {
@@ -189,16 +197,58 @@ public class TriangleMesh extends Surface {
         this.name = name;
     }
 
-    public void initVertexArrays(int n)
+    public void initVertexPositionsArray(int n)
     {
         vertexPositions = new double[n*3];
-        vertexNormals = new double[n*3];
-        incidentTrianglesPerVertexArray = new ArrayList<ArrayList<Integer>>();
+    }
 
-        vertexBinormals = new double[n*3];
-        vertexTangents = new double[n*3];
-        vertexUvs = new double[n*2];
-        //vertexColors = null;
+    public void initVertexNormalsArray()
+    {
+        int n = vertexPositions.length / 3;
+        if ( vertexNormals == null ||
+             vertexNormals.length != vertexPositions.length ) {
+            vertexNormals = new double[n*3];
+        }
+    }
+
+    public void initVertexBinormalsArray()
+    {
+        int n = vertexPositions.length / 3;
+        if ( vertexBinormals == null ||
+             vertexBinormals.length != vertexPositions.length ) {
+            vertexBinormals = new double[n*3];
+        }
+    }
+
+    public void initVertexTangentsArray()
+    {
+        int n = vertexPositions.length / 3;
+        if ( vertexTangents == null ||
+             vertexTangents.length != vertexPositions.length ) {
+            vertexTangents = new double[n*3];
+        }
+    }
+
+    public void initVertexColorsArray()
+    {
+        int n = vertexPositions.length / 3;
+        if ( vertexColors == null ||
+             vertexColors.length != vertexPositions.length ) {
+            vertexColors = new double[n*3];
+        }
+    }
+
+    public void initVertexUvsArray()
+    {
+        int n = vertexPositions.length / 3;
+        if ( vertexUvs == null ||
+             vertexUvs.length/2 != vertexPositions.length/3 ) {
+            vertexUvs = new double[n*2];
+        }
+    }
+
+    public void initIncidentTrianglesPerVertexArray() {
+        incidentTrianglesPerVertexArray = new ArrayList<ArrayList<Integer>>();
     }
 
     /**
@@ -206,12 +256,26 @@ public class TriangleMesh extends Surface {
     but it is inefficient. Its use is discouraged for applications manipulating
     big meshes.
     */
-    public void setVertexes(Vertex[] vertexes) {
+    public void setVertexes(Vertex[] vertexes,
+			    boolean withNormals, boolean withBinormals,
+                            boolean withTangents, boolean withUvs) {
         int n, i;
 
         n = vertexes.length;
 
-        initVertexArrays(n);
+        initVertexPositionsArray(n);
+        if ( withNormals ) {
+            initVertexNormalsArray();
+	}
+        if ( withBinormals ) {
+            initVertexBinormalsArray();
+	}
+        if ( withTangents ) {
+            initVertexTangentsArray();
+	}
+        if ( withUvs ) {
+            initVertexUvsArray();
+	}
 
         for ( i = 0; i < n; i++ ) {
             vertexPositions[3*i] = vertexes[i].position.x;
@@ -263,9 +327,11 @@ public class TriangleMesh extends Surface {
             triangleIndices[3*i] = triangles[i].p0;
             triangleIndices[3*i+1] = triangles[i].p1;
             triangleIndices[3*i+2] = triangles[i].p2;
-            triangleNormals[3*i] = triangles[i].normal.x;
-            triangleNormals[3*i+1] = triangles[i].normal.y;
-            triangleNormals[3*i+2] = triangles[i].normal.z;
+            if ( triangleNormals != null ) {
+                triangleNormals[3*i] = triangles[i].normal.x;
+                triangleNormals[3*i+1] = triangles[i].normal.y;
+                triangleNormals[3*i+2] = triangles[i].normal.z;
+            }
         }
 
         boundingVolume = null;
@@ -312,9 +378,11 @@ public class TriangleMesh extends Surface {
         triangleIndices[3*i] = triangle.p0;
         triangleIndices[3*i+1] = triangle.p1;
         triangleIndices[3*i+2] = triangle.p2;
-        triangleNormals[3*i] = triangle.normal.x;
-        triangleNormals[3*i+1] = triangle.normal.y;
-        triangleNormals[3*i+2] = triangle.normal.z;
+        if ( triangleNormals != null ) {
+            triangleNormals[3*i] = triangle.normal.x;
+            triangleNormals[3*i+1] = triangle.normal.y;
+            triangleNormals[3*i+2] = triangle.normal.z;
+        }
 
         boundingVolume = null;
     }
@@ -470,6 +538,7 @@ public class TriangleMesh extends Surface {
             triangleNormals[3*i+2] = tn.z;
         }
 
+        initIncidentTrianglesPerVertexArray();
         for ( i = 0; i < getNumVertices(); i++ ) {
             incidentTrianglesPerVertexArray.add(new ArrayList<Integer>());
         }
@@ -481,6 +550,9 @@ public class TriangleMesh extends Surface {
         }
 
         Vector3D n = new Vector3D();
+
+        initVertexNormalsArray();
+
         for ( i = 0; i < getNumVertices(); i++ ) {
             n.x = n.y = n.z = 0.0;
             for ( j = 0; j < incidentTrianglesPerVertexArray.get(i).size(); j++ ) {
@@ -545,9 +617,11 @@ public class TriangleMesh extends Surface {
             v = c.substract(a);
             n = u.crossProduct(v);
             n.normalize();
-            triangleNormals[3*i+0] = n.x;
-            triangleNormals[3*i+1] = n.y;
-            triangleNormals[3*i+2] = n.z;
+            if ( triangleNormals != null ) {
+                triangleNormals[3*i+0] = n.x;
+                triangleNormals[3*i+1] = n.y;
+                triangleNormals[3*i+2] = n.z;
+            }
             if ( n.dotProduct(an) < 0 ) {
                 an = an.multiply(-1);
                 vertexNormals[3*triangleIndices[3*i]+0] = an.x;
@@ -1053,7 +1127,10 @@ public class TriangleMesh extends Surface {
         double oldVertexPositions[] = vertexPositions;
         double oldVertexNormals[] = vertexNormals;
 
-        initVertexArrays(j);
+        initVertexPositionsArray(j);
+        if ( oldVertexNormals != null ) {
+            initVertexNormalsArray();
+        }
 
         j = 0;
         for ( i = 0; i < n; i++ ) {
@@ -1119,6 +1196,11 @@ public class TriangleMesh extends Surface {
         if ( vertexSelections == null ) {
             return;
         }
+
+        vertexNormals = null;
+        vertexBinormals = null;
+        vertexTangents = null;
+
         //-----------------------------------------------------------------
         int i, a, b, c, n;
         n = vertexPositions.length/3;

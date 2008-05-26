@@ -36,18 +36,8 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
     private static void drawSurfacesWithoutTexture(GL gl, 
                                      TriangleStripMesh mesh, boolean flipNormals) {
         //-----------------------------------------------------------------
-        // Warning: Shoult this be here? or not ...
-        // Just in case using external texture...
-        //gl.glTexParameteri(gl.GL_TEXTURE_2D,
-        //    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        //gl.glTexParameteri(gl.GL_TEXTURE_2D,
-        //    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        //gl.glTexParameterf(gl.GL_TEXTURE_2D,
-        //    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-        //gl.glTexParameterf(gl.GL_TEXTURE_2D,
-        //    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-        //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-        //    gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+        // Note that glTexParameter and glTexEnv settings should be
+        // configured before calling this method.
 
         //-----------------------------------------------------------------
         int strips[][] = mesh.getStrips();

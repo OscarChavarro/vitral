@@ -105,7 +105,8 @@ public class IlluminationTest
         TriangleMesh m = new TriangleMesh();
 
         //-----------------------------------------------------------------
-        m.initVertexArrays((nx+1)*(ny+1));
+        m.initVertexPositionsArray((nx+1)*(ny+1));
+        m.initVertexNormalsArray();
         double vp[] = m.getVertexPositions();
         double vn[] = m.getVertexNormals();
 
@@ -168,7 +169,7 @@ public class IlluminationTest
         L.normalize();
 
         //-----------------------------------------------------------------
-        m.initVertexArrays((nx+1)*(ny+1));
+        m.initVertexPositionsArray((nx+1)*(ny+1));
         double v[] = m.getVertexPositions();
         double dtetha = 360.0 / ((double)ny);
         double dphi = 90.0 / ((double)nx);

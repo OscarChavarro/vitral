@@ -185,8 +185,9 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         texture = b.getTexture();
 
-        if ( q.isTextureSet() && (texture != null) ) {
-
+        if ( q.isTextureSet() ) {
+            // Define texture parameters, including for further local
+            // textures activated within JoglGeometryRenderers
             gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
                 gl.GL_TRUE);
             gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
@@ -200,9 +201,11 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE,
                 gl.GL_MODULATE);
 
-            gl.glEnable(gl.GL_TEXTURE_2D);
-
-            JoglImageRenderer.activate(gl, texture);
+            // Activate global texture
+            if ( (texture != null) ) {
+                gl.glEnable(gl.GL_TEXTURE_2D);
+                JoglImageRenderer.activate(gl, texture);
+	    }
         }
         else {
             gl.glDisable(gl.GL_TEXTURE_2D);

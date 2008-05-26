@@ -767,4 +767,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     first time GL list compilation.
   - 15min: Simple update to QuadBenchmark. Now reporting performance results!
 
+2008 may 25, Oscar Chavarro: <<72min>>
+  - 30min: Checking JOGL structures and texture parameters
+  - 42min: Disgregating TriangleMesh vertex management
+
 ===========================================================================
+

@@ -442,7 +442,7 @@ public class ReaderObj extends PersistenceElement
                 newVertexArray[i].setNormal(new Vector3D(0, 0, 0));
             }
         }
-        newTriangleMesh.setVertexes(newVertexArray);
+        newTriangleMesh.setVertexes(newVertexArray, true, false, false, true);
         
         //- Build the mesh triangles --------------------------------------
         Triangle newTriangleArray[];
