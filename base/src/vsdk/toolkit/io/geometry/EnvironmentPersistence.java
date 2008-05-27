@@ -22,7 +22,7 @@ public class EnvironmentPersistence extends PersistenceElement {
     importEnvironment(File inSceneFileFd, SimpleScene inoutScene)
         throws Exception
     {
-        String type = extractExtensionFromFile(inSceneFileFd);
+        String type = extractExtensionFromFile(inSceneFileFd).toLowerCase();
 
         if ( type.equals("obj") ) {
             ReaderObj.importEnvironment(inSceneFileFd, inoutScene);

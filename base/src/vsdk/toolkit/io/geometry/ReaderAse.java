@@ -37,7 +37,7 @@ public class ReaderAse extends PersistenceElement
 {
     private static ArrayList <String> ids = new ArrayList<String>();
 
-// Identifiers found inside a test set of 6500 .ase files imported from .max
+// Identifiers found inside a test set of 7588 .ase files imported from .max
 /*
 *3DSMAX_ASCIIEXPORT
 *BITMAP
@@ -59,6 +59,8 @@ public class ReaderAse extends PersistenceElement
 *CONTROL_BEZIER_SCALE_KEY
 *CONTROL_FLOAT_KEY
 *CONTROL_FLOAT_SAMPLE
+*CONTROL_POINT3_KEY
+*CONTROL_POINT3_SAMPLE
 *CONTROL_POS_BEZIER
 *CONTROL_POS_KEY
 *CONTROL_POS_LINEAR
@@ -155,12 +157,22 @@ public class ReaderAse extends PersistenceElement
 *MESH
 *MESH_FACE
 *MESH_FACE_LIST
+*MESH_FACENORMAL
 *MESH_MTLID
+*MESH_NORMALS
+*MESH_NUMCVERTEX
 *MESH_NUMFACES
+*MESH_NUMTVERTEX
+*MESH_NUMTVFACES
 *MESH_NUMVERTEX
 *MESH_SMOOTHING
+*MESH_TFACE
+*MESH_TFACELIST
+*MESH_TVERT
+*MESH_TVERTLIST
 *MESH_VERTEX
 *MESH_VERTEX_LIST
+*MESH_VERTEXNORMAL
 *NODE_NAME
 *NODE_PARENT
 *NODE_TM
@@ -171,6 +183,7 @@ public class ReaderAse extends PersistenceElement
 *PROP_RECVSHADOW
 *SCENE
 *SCENE_AMBIENT_STATIC
+*SCENE_BACKGROUND_ANIM
 *SCENE_BACKGROUND_STATIC
 *SCENE_ENVMAP
 *SCENE_FILENAME
@@ -216,7 +229,7 @@ public class ReaderAse extends PersistenceElement
     {
         int i;
         for ( i = 0; i < ids.size(); i++ ) {
-            System.out.println(ids.get(i));
+            System.err.println(ids.get(i));
         }
     }
 
@@ -347,7 +360,7 @@ public class ReaderAse extends PersistenceElement
             }
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
-        //printList();
+        printList();
         System.out.print(inSceneFileFd.getAbsolutePath());
 
         if ( level == 0 ) { 
