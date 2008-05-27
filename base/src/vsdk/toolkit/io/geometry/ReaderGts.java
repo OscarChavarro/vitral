@@ -36,6 +36,7 @@ public class ReaderGts extends PersistenceElement
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
         return m;
     }
 
@@ -53,6 +54,22 @@ public class ReaderGts extends PersistenceElement
         thing.setRotationInverse(new Matrix4x4());
         thing.setMaterial(defaultMaterial());
         inoutSimpleBodiesArray.add(thing);
+    }
+
+    private static int commonIndexBetweenEdgePair(int edges[][], int i, int j)
+    {
+        int a = edges[i][0];
+        int b = edges[i][1];
+        int c = edges[j][0];
+        int d = edges[j][1];
+
+        if ( a == c || a == d ) {
+            return a;
+        }
+        if ( b == c || b == d ) {
+            return b;
+        }
+        return -1;
     }
 
     public static void
@@ -75,12 +92,13 @@ public class ReaderGts extends PersistenceElement
         int numPoints = 0;
         int numEdges = 0;
         int numTriangles = 0;
+        double v[] = null;
         int edges[][] = null; // Ne*2
         int triangles[][] = null; // Nt*3
-        double v[] = null;
 
         for ( i = 0; (lineOfText = br.readLine()) != null; i++ ) {
             if ( i == 0 ) {
+                // Read file header
                 auxStringTokenizer = new StringTokenizer(lineOfText, " ");
                 numPoints = Integer.parseInt(auxStringTokenizer.nextToken());
                 numEdges = Integer.parseInt(auxStringTokenizer.nextToken());
@@ -118,6 +136,7 @@ public class ReaderGts extends PersistenceElement
                 triangles[i-(1+numPoints+numEdges)][2] = Integer.parseInt(auxStringTokenizer.nextToken());
             }
         }
+
         //-----------------------------------------------------------------
         int ie1, ie2, ie3;
         int ip1, ip2 = -2, ip3 = -1;
@@ -131,20 +150,9 @@ public class ReaderGts extends PersistenceElement
             ie2 = triangles[i][1]-1;
             ie3 = triangles[i][2]-1;
 
-            ip1 = edges[ie1][0];
-            if ( ip1 != ip3 || ip1 == ip2 ) {
-                ip1 = edges[ie1][1];
-            }
-
-            ip2 = edges[ie2][0];
-            if ( ip2 == ip1 || ip2 == ip3 ) {
-                ip2 = edges[ie2][1];
-            }
-
-            ip3 = edges[ie3][0];
-            if ( ip3 == ip2 || ip3 == ip1 ) {
-                ip3 = edges[ie3][1];
-            }
+            ip1 = commonIndexBetweenEdgePair(edges, ie1, ie2);
+            ip2 = commonIndexBetweenEdgePair(edges, ie2, ie3);
+            ip3 = commonIndexBetweenEdgePair(edges, ie3, ie1);
 
             t[3*i+0] = ip1-1;
             t[3*i+1] = ip2-1;

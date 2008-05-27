@@ -774,5 +774,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2008 may 26, Oscar Chavarro: <<123min>>
   - 2h03min: JoglTriangleMeshRenderer.drawWithVertexArrays :)
 
+2008 may 26, Oscar Chavarro: <<30min>>
+  - 30min: Fixing bug in ReaderGts (some triangles where incorrectly assembled)
+
 ===========================================================================
 
