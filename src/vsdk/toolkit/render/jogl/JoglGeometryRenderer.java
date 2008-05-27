@@ -340,7 +340,7 @@ public class JoglGeometryRenderer extends JoglRenderer
             JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
         }
         else if ( g instanceof TriangleMesh ) {
-            JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+            JoglTriangleMeshRenderer.drawWithVertexArrays(gl, (TriangleMesh)g, q, false);
         }
         else if ( g instanceof QuadMesh ) {
             JoglQuadMeshRenderer.drawWithVertexArrays(gl, (QuadMesh)g, q, false);
@@ -352,7 +352,7 @@ public class JoglGeometryRenderer extends JoglRenderer
             JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
         }
         else if ( g instanceof TriangleMeshGroup ) {
-            JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
+            JoglTriangleMeshGroupRenderer.drawWithVertexArrays(gl, (TriangleMeshGroup)g,q);
         }
         else if ( g instanceof VoxelVolume ) {
             JoglVoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);

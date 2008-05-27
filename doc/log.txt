@@ -771,5 +771,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 30min: Checking JOGL structures and texture parameters
   - 42min: Disgregating TriangleMesh vertex management
 
+2008 may 26, Oscar Chavarro: <<123min>>
+  - 2h03min: JoglTriangleMeshRenderer.drawWithVertexArrays :)
+
 ===========================================================================
 

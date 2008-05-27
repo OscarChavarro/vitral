@@ -78,6 +78,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
         gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
         gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
+        gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
         gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
         gl.glEnableClientState(gl.GL_COLOR_ARRAY);
 

@@ -11,7 +11,8 @@ package vsdk.toolkit.render.jogl;
 
 // Basic Java classes
 import java.util.ArrayList;
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -29,23 +30,11 @@ import vsdk.toolkit.environment.Material;
 
 public class JoglTriangleMeshRenderer extends JoglRenderer {
 
-    private static DoubleBuffer vertexPositionsBuffer;
-
-    private static DoubleBuffer
-    allocateVertexPositions(double[] vertexPositions)
-    {
-        if ( vertexPositionsBuffer == null ) {
-            vertexPositionsBuffer = BufferUtil.newDoubleBuffer(vertexPositions.length);
-
-            int i;
-            for ( i = 0; i < vertexPositions.length; i++ ) {
-                vertexPositionsBuffer.put(vertexPositions[i]);
-            }
-            vertexPositionsBuffer.rewind();
-        }
-        return vertexPositionsBuffer;
-    }
-
+    private static FloatBuffer vertexPositionsBuffer = null;
+    private static FloatBuffer vertexNormalsBuffer = null;
+    private static FloatBuffer vertexColorsBuffer = null;
+    private static FloatBuffer vertexUvsBuffer = null;
+    private static IntBuffer triangleIndicesBuffer = null;
 
     /**
     @todo program this!
@@ -120,6 +109,117 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               }
               else {
                 drawSurfacesWithoutTexture(gl, mesh, flip);
+            }
+*/
+        }
+
+        //- Drawing control of elements with no surface -------------------
+        if ( quality.isPointsSet() ) {
+            drawPoints(gl, mesh);
+        }
+        if ( quality.isNormalsSet() ) {
+            drawVertexNormals(gl, mesh);
+        }
+        if ( quality.isTrianglesNormalsSet() ) {
+            drawTriangleNormals(gl, mesh);
+        }
+        if ( quality.isBoundingVolumeSet() ) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, mesh, quality);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, mesh, quality);
+        }
+    }
+
+    public static void
+    drawWithVertexArrays(GL gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
+
+        //-----------------------------------------------------------------
+        double vp[];
+        double vn[];
+        double vc[];
+        double vt[];
+        int t[];
+
+        vp = mesh.getVertexPositions();
+        vn = mesh.getVertexNormals();
+        vc = mesh.getVertexColors();
+        vt = mesh.getVertexUvs();
+        t = mesh.getTriangleIndexes();
+
+        vertexPositionsBuffer = null;
+        vertexNormalsBuffer = null;
+        vertexColorsBuffer = null;
+        vertexUvsBuffer = null;
+
+        vertexPositionsBuffer = cloneDoubleArrayToFloatBuffer(vp);
+        if ( vn != null ) {
+            vertexNormalsBuffer = cloneDoubleArrayToFloatBuffer(vn);
+        }
+        if ( vc != null ) {
+            vertexColorsBuffer = cloneDoubleArrayToFloatBuffer(vc);
+	}
+        if ( vt != null ) {
+            vertexUvsBuffer = cloneDoubleArrayToFloatBuffer(vt);
+	}
+        triangleIndicesBuffer = cloneIntArrayToIntBuffer(t);
+
+        //-----------------------------------------------------------------
+        boolean withTextures = false;
+        if ( mesh.getTextures() != null && mesh.getTextures().length > 0 ) {
+            withTextures = true;
+        }
+
+        gl.glEnable(gl.GL_NORMALIZE);
+
+        //-----------------------------------------------------------------
+        if ( quality.isBumpMapSet() ) {
+            // Prepare bump mapping and shaders...
+            ;
+        }
+
+        if ( quality.isSurfacesSet() ) {
+            // This line doesn't make sense (as it will later reactivated),
+            // but it is needed in some graphics cards/driver/os combinations
+            // like AMD Athlon64 running 32 bit Fedora Core 6 with Nvidia C51
+            gl.glDisable(gl.GL_LIGHTING);
+            //
+
+            JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(1.0f, 1.0f);
+            if ( quality.isTextureSet() && withTextures ) {
+                // drawSurfacesWithTexture can enable GL_TEXTURE_2D
+                drawSurfacesWithTexture(gl, mesh, flip);
+              }
+              else {
+                drawSurfacesWithoutTextureWithVertexArrays(gl, mesh, flip);
+            }
+        }
+        if ( quality.isWiresSet() ) {
+            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glShadeModel(gl.GL_FLAT);
+
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glLineWidth(1.0f);
+
+            // Warning: Change with configured color for borders
+            ColorRgb c = quality.getWireColor();
+            gl.glColor3d(c.r, c.g, c.b);
+            gl.glDisable(gl.GL_TEXTURE_2D);
+
+            // Warning: pending definition of this behavior...
+            drawSurfacesWithoutTextureWithVertexArrays(gl, mesh, flip);
+/*
+            if ( quality.isTextureSet() && withTextures ) {
+                // drawSurfacesWithTexture can enable GL_TEXTURE_2D
+                drawSurfacesWithTexture(gl, mesh, flip);
+              }
+              else {
+                drawSurfacesWithoutTextureWithVertexArrays(gl, mesh, flip);
             }
 */
         }
@@ -262,6 +362,50 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             Material m = new Material();
             JoglMaterialRenderer.activate(gl, m);
             drawRangeWithoutTexture(gl, mesh, start, nt, flipNormals);
+        }
+    }
+
+    private static void drawSurfacesWithoutTextureWithVertexArrays(GL gl, 
+                                     TriangleMesh mesh, boolean flipNormals) {
+        //-----------------------------------------------------------------
+        // Note that glTexParameter and glTexEnv settings should be
+        // configured before calling this method.
+
+        //-----------------------------------------------------------------
+        int nt;
+        nt = mesh.getNumTriangles();
+        if ( nt < 1 ) {
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "JoglTriangleMeshRenderer.activate",
+                               "Trying to draw mesh without triangles?");
+            return;
+        }
+        int materialRanges[][] = mesh.getMaterialRanges();
+
+        if ( materialRanges == null ) {
+            drawRangeWithVertexArrays(gl, mesh,
+				      0, nt, flipNormals, false);
+            return;
+        }
+
+        int start = 0;
+        int end = 0;
+        int materialIndex;
+        Material materialsArray[] = mesh.getMaterials();
+        for ( int i = 0; i < materialRanges.length; i++ ) {
+            end = materialRanges[i][0];
+            materialIndex = materialRanges[i][1];
+            if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
+                JoglMaterialRenderer.activate(gl,
+                    materialsArray[materialIndex]);
+            }
+            drawRangeWithVertexArrays(gl, mesh, start, end, flipNormals, false);
+            start = end;
+        }
+        if ( end <= nt ) {
+            Material m = new Material();
+            JoglMaterialRenderer.activate(gl, m);
+            drawRangeWithVertexArrays(gl, mesh, start, nt, flipNormals, false);
         }
     }
 
@@ -427,7 +571,6 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               else {
                 gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
             }
-            gl.glTexCoord2d(v0.u, v0.v);
             gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
 
             //-----------------------------------------------------------------
@@ -437,7 +580,6 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             else {
                 gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
             }
-            gl.glTexCoord2d(v1.u, v1.v);
             gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
 
             //-----------------------------------------------------------------
@@ -447,10 +589,83 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
               else {
                 gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
             }
-            gl.glTexCoord2d(v2.u, v2.v);
             gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
         }
         gl.glEnd();
+    }
+
+    private static void
+    drawRangeWithVertexArrays(GL gl, TriangleMesh mesh, 
+			      int start, int end, boolean flipNormals,
+                              boolean withTexture) {
+        if ( end <= start ) {
+            return;
+	}
+
+        //-----------------------------------------------------------------
+        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
+        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
+        if ( vertexNormalsBuffer == null ) {
+            gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
+	}
+	else {
+            gl.glEnableClientState(gl.GL_NORMAL_ARRAY);
+	}
+        if ( vertexColorsBuffer == null ) {
+            gl.glDisableClientState(gl.GL_COLOR_ARRAY);
+	}
+	else {
+            gl.glEnableClientState(gl.GL_COLOR_ARRAY);
+	}
+        if ( vertexUvsBuffer == null || !withTexture ) {
+            gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
+	}
+	else {
+            gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
+	}
+
+        gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
+        if ( vertexNormalsBuffer != null ) {
+            gl.glNormalPointer(gl.GL_FLOAT, 0, vertexNormalsBuffer);
+	}
+        if ( vertexColorsBuffer != null ) {
+            gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
+	}
+        if ( vertexUvsBuffer != null && withTexture ) {
+            gl.glTexCoordPointer(2, gl.GL_FLOAT, 0, vertexUvsBuffer);
+	}
+
+        //-----------------------------------------------------------------
+        int info[] = new int[2];
+        int block;
+
+        gl.glGetIntegerv(gl.GL_MAX_ELEMENTS_INDICES, info, 0);
+        block = info[0] / 3;
+
+        //-----------------------------------------------------------------
+        int t[] = mesh.getTriangleIndexes();
+        int i = start;
+        for ( i = start; i+block < end; i += block ) {
+            triangleIndicesBuffer.position(3*i);
+            gl.glDrawElements(gl.GL_TRIANGLES, 3*block, gl.GL_UNSIGNED_INT, triangleIndicesBuffer);
+        }
+        if ( i < end ) {
+            triangleIndicesBuffer.position(3*i);
+            gl.glDrawElements(gl.GL_TRIANGLES, 3*(end-i), gl.GL_UNSIGNED_INT, triangleIndicesBuffer);
+        }
+
+        //-----------------------------------------------------------------
+        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
+        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
+        gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
+        gl.glDisableClientState(gl.GL_COLOR_ARRAY);
+        gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
     }
 
 }

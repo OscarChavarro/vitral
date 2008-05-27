@@ -36,6 +36,26 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
         }
     }
 
+    public static void
+    drawWithVertexArrays(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
+        TriangleMesh mesh = null;
+        int i;
+
+        for ( i = 0; i < meshGroup.getMeshes().size(); i++ ) {
+            mesh = meshGroup.getMeshes().get(i);
+            boolean c = quality.isSelectionCornersSet()?true:false;
+            quality.setSelectionCorners(false);
+            JoglTriangleMeshRenderer.drawWithVertexArrays(gl, mesh, quality, false);
+            quality.setSelectionCorners(c);
+        }
+        if ( quality.isBoundingVolumeSet() ) {
+            JoglGeometryRenderer.drawMinMaxBox(gl, mesh, quality);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            JoglGeometryRenderer.drawSelectionCorners(gl, meshGroup, quality);
+        }
+    }
+
     /**
     @todo program this!
     */

@@ -183,9 +183,11 @@ public class MeshExample
         gl.glDisable(gl.GL_CULL_FACE);
         //gl.glCullFace(gl.GL_BACK);
 
+        JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(true);
+
         int i;
         for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
-            JoglSimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i), camera, qualitySelection);
+            JoglSimpleBodyRenderer.drawWithVertexArrays(gl, scene.getSimpleBodies().get(i), camera, qualitySelection);
         }
     }
 
