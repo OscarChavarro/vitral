@@ -77,7 +77,6 @@ public class ReaderGts extends PersistenceElement
         throws Exception
     {
         TriangleMesh internalGeometry;
-        internalGeometry = new TriangleMesh();
 
         internalGeometry = new TriangleMesh();
 

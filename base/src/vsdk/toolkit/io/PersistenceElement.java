@@ -488,6 +488,36 @@ public abstract class PersistenceElement {
         return msg;
     }
 
+    private static boolean isInSet(char key, String set)
+    {
+        int i;
+
+        for ( i = 0; i < set.length(); i++ ) {
+            if ( key == set.charAt(i) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String readAsciiToken(InputStream is, String separators) throws Exception
+    {
+        byte character[] = new byte[1];
+        char letter;
+        String msg = "";
+        int i;
+
+        do {
+            readBytes(is, character);
+            letter = (char)character[0];
+            if ( !isInSet(letter, separators) ) {
+                msg = msg + letter;
+            }
+        } while ( !isInSet((char)character[0], separators) );
+
+        return msg;
+    }
+
     public static void
     writeAsciiString(OutputStream writer, String cad)
         throws Exception

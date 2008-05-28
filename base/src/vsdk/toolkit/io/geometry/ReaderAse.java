@@ -9,6 +9,7 @@ package vsdk.toolkit.io.geometry;
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
 
@@ -260,7 +261,8 @@ public class ReaderAse extends PersistenceElement
         //System.out.println("Reading " + inSceneFileFd.getAbsolutePath());
 
         //-----------------------------------------------------------------
-        StreamTokenizer parser = new StreamTokenizer(new FileReader(inSceneFileFd));
+        BufferedReader br = new BufferedReader(new FileReader(inSceneFileFd));
+        StreamTokenizer parser = new StreamTokenizer(br);
 
         parser.resetSyntax();
         parser.eolIsSignificant(true);

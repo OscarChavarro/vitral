@@ -158,11 +158,13 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
         if ( vc != null ) {
             vertexColorsBuffer = cloneDoubleArrayToFloatBuffer(vc);
-	}
+        }
         if ( vt != null ) {
             vertexUvsBuffer = cloneDoubleArrayToFloatBuffer(vt);
-	}
-        triangleIndicesBuffer = cloneIntArrayToIntBuffer(t);
+        }
+        if ( t != null ) {
+            triangleIndicesBuffer = cloneIntArrayToIntBuffer(t);
+        }
 
         //-----------------------------------------------------------------
         boolean withTextures = false;
@@ -384,7 +386,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         if ( materialRanges == null ) {
             drawRangeWithVertexArrays(gl, mesh,
-				      0, nt, flipNormals, false);
+                                      0, nt, flipNormals, false);
             return;
         }
 
@@ -596,11 +598,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     private static void
     drawRangeWithVertexArrays(GL gl, TriangleMesh mesh, 
-			      int start, int end, boolean flipNormals,
+                              int start, int end, boolean flipNormals,
                               boolean withTexture) {
-        if ( end <= start ) {
+        if ( end <= start || mesh.getTriangleIndexes() == null ) {
             return;
-	}
+        }
 
         //-----------------------------------------------------------------
         gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
@@ -610,33 +612,33 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
         if ( vertexNormalsBuffer == null ) {
             gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
-	}
-	else {
+        }
+        else {
             gl.glEnableClientState(gl.GL_NORMAL_ARRAY);
-	}
+        }
         if ( vertexColorsBuffer == null ) {
             gl.glDisableClientState(gl.GL_COLOR_ARRAY);
-	}
-	else {
+        }
+        else {
             gl.glEnableClientState(gl.GL_COLOR_ARRAY);
-	}
+        }
         if ( vertexUvsBuffer == null || !withTexture ) {
             gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-	}
-	else {
+        }
+        else {
             gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-	}
+        }
 
         gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
         if ( vertexNormalsBuffer != null ) {
             gl.glNormalPointer(gl.GL_FLOAT, 0, vertexNormalsBuffer);
-	}
+        }
         if ( vertexColorsBuffer != null ) {
             gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
-	}
+        }
         if ( vertexUvsBuffer != null && withTexture ) {
             gl.glTexCoordPointer(2, gl.GL_FLOAT, 0, vertexUvsBuffer);
-	}
+        }
 
         //-----------------------------------------------------------------
         int info[] = new int[2];
