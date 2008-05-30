@@ -251,13 +251,28 @@ public class TriangleMesh extends Surface {
         incidentTrianglesPerVertexArray = new ArrayList<ArrayList<Integer>>();
     }
 
+    public void detachColors()
+    {
+        vertexColors = null;
+    }
+
+    public void detachNormals()
+    {
+        vertexNormals = null;
+    }
+
+    public void detachUvs()
+    {
+        vertexUvs = null;
+    }
+
     /**
     This method provides a clear structured form of defining the mesh vertexes,
     but it is inefficient. Its use is discouraged for applications manipulating
     big meshes.
     */
     public void setVertexes(Vertex[] vertexes,
-			    boolean withNormals, boolean withBinormals,
+                            boolean withNormals, boolean withBinormals,
                             boolean withTangents, boolean withUvs) {
         int n, i;
 
@@ -266,16 +281,16 @@ public class TriangleMesh extends Surface {
         initVertexPositionsArray(n);
         if ( withNormals ) {
             initVertexNormalsArray();
-	}
+        }
         if ( withBinormals ) {
             initVertexBinormalsArray();
-	}
+        }
         if ( withTangents ) {
             initVertexTangentsArray();
-	}
+        }
         if ( withUvs ) {
             initVertexUvsArray();
-	}
+        }
 
         for ( i = 0; i < n; i++ ) {
             vertexPositions[3*i] = vertexes[i].position.x;

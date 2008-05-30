@@ -45,6 +45,7 @@ class _ReaderPlyElement
     private String elementName;
     private int elementCount;
     private int elementType; // One of the "TYPE_*" constants
+    private int colorType; // One of the "TYPE_*" constants
     private int listCountType; // One of the "TYPE_*" constants
     private int elementFamily;
 
@@ -53,6 +54,9 @@ class _ReaderPlyElement
     private int xindex;
     private int yindex;
     private int zindex;
+    private int rindex;
+    private int gindex;
+    private int bindex;
     private int listindex;
     private ArrayListOfInts skipTypes;
 
@@ -65,6 +69,9 @@ class _ReaderPlyElement
         xindex = -1;
         yindex = -1;
         zindex = -1;
+        rindex = -1;
+        gindex = -1;
+        bindex = -1;
         listindex = -1;
         skipTypes = new ArrayListOfInts(10);
     }
@@ -105,6 +112,18 @@ class _ReaderPlyElement
             else if ( var.equals("z") ) {
                 elementType = skiptype;
                 zindex = currentPropertyIndex;
+            }
+            if ( var.equals("r") || var.equals("red") ) {
+                colorType = skiptype;
+                rindex = currentPropertyIndex;
+            }
+            if ( var.equals("g") || var.equals("green") ) {
+                colorType = skiptype;
+                gindex = currentPropertyIndex;
+            }
+            if ( var.equals("b") || var.equals("blue") ) {
+                colorType = skiptype;
+                bindex = currentPropertyIndex;
             }
         }
         if ( elementName.equals("face") ) {
@@ -156,7 +175,7 @@ class _ReaderPlyElement
         }
     }
 
-    private boolean readVertexData(_ReaderPlyElementReader reader, int i, double v[]) throws Exception
+    private boolean readVertexData(_ReaderPlyElementReader reader, int i, double v[], double c[]) throws Exception
     {
         int j;
         double val;
@@ -173,6 +192,38 @@ class _ReaderPlyElement
                     }
                     else if ( j == zindex ) {
                         v[3*i+2] = val;
+                    }
+                }
+                else {
+                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
+                    "Wrong element type!");
+                    return false;
+                }
+            }
+            else if ( j == rindex || j == gindex || j == bindex ) {
+                if ( colorType == TYPE_FLOAT ) {
+                    val = reader.readFloat();
+                    if ( j == rindex ) {
+                        c[3*i+0] = val;
+                    }
+                    else if ( j == gindex ) {
+                        c[3*i+1] = val;
+                    }
+                    else if ( j == bindex ) {
+                        c[3*i+2] = val;
+                    }
+                }
+                if ( colorType == TYPE_UNSIGNED_CHARACTER ) {
+                    int cc = reader.readUnsignedCharacter();
+                    val = ((double)cc) / 255.0;
+                    if ( j == rindex ) {
+                        c[3*i+0] = val;
+                    }
+                    else if ( j == gindex ) {
+                        c[3*i+1] = val;
+                    }
+                    else if ( j == bindex ) {
+                        c[3*i+2] = val;
                     }
                 }
                 else {
@@ -251,9 +302,20 @@ class _ReaderPlyElement
             mesh.initVertexPositionsArray(elementCount);
             double v[];
             v = mesh.getVertexPositions();
+            double c[] = null;
+
+            if ( rindex != -1 && gindex != -1 && bindex != -1 ) {
+                mesh.initVertexColorsArray();
+                c = mesh.getVertexColors();
+            }
+            else {
+                rindex = -1;
+                gindex = -1;
+                bindex = -1;
+            }
 
             for ( i = 0; i < elementCount; i++ ) {
-                if ( !readVertexData(reader, i, v) ) {
+                if ( !readVertexData(reader, i, v, c) ) {
                     return false;
                 }
             }
@@ -391,14 +453,14 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     {
         byte arr[] = new byte[1];
         readBytes(parentInputStream, arr);
-        return VSDK.signedByte2unsignedInteger(arr[0]);
+        return (int)arr[0];
     }
 
     public int readUnsignedCharacter() throws Exception
     {
         byte arr[] = new byte[1];
         readBytes(parentInputStream, arr);
-        return (int)arr[0];
+        return VSDK.signedByte2unsignedInteger(arr[0]);
     }
 
     public int readSignedShortInteger() throws Exception
@@ -517,10 +579,10 @@ public class ReaderPly extends PersistenceElement
         return m;
     }
 
-    private static void addThing(Geometry g,
+    private static SimpleBody addThing(Geometry g,
         ArrayList<SimpleBody> inoutSimpleBodiesArray)
     {
-        if ( inoutSimpleBodiesArray == null ) return;
+        if ( inoutSimpleBodiesArray == null ) return null;
 
         SimpleBody thing;
 
@@ -531,6 +593,7 @@ public class ReaderPly extends PersistenceElement
         thing.setRotationInverse(new Matrix4x4());
         thing.setMaterial(defaultMaterial());
         inoutSimpleBodiesArray.add(thing);
+        return thing;
     }
 
     private static boolean processHeader(InputStream is, TriangleMesh internalGeometry) throws Exception
@@ -616,6 +679,20 @@ public class ReaderPly extends PersistenceElement
         return true;
     }
 
+    public static int compareValue(double a, double b, double tolerance)
+    {
+        double delta;
+
+        delta = Math.abs(a - b);
+        if ( delta < tolerance ) {
+            return 0;
+        }
+        else if ( a > b ) {
+            return 1;
+        }
+        return -1;
+    }
+
     public static void
     importEnvironment(File inSceneFileFd, SimpleScene inoutSimpleScene)
         throws Exception
@@ -652,8 +729,44 @@ public class ReaderPly extends PersistenceElement
         fis.close();
 
         //-----------------------------------------------------------------
-        internalGeometry.calculateNormals();
-        addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
+        double c[];
+        c = internalGeometry.getVertexColors();
+        boolean allColorsAreTheSame = true;
+        double r = 1.0, g = 1.0, b = 1.0;
+
+        if ( c != null ) {
+            int i;
+
+            r = c[0];
+            g = c[1];
+            b = c[2];
+
+            for ( i = 1; i < c.length/3; i++ ) {
+                if ( compareValue(r, c[3*i+0], VSDK.EPSILON) != 0 ||
+                     compareValue(g, c[3*i+1], VSDK.EPSILON) != 0 ||
+                     compareValue(b, c[3*i+2], VSDK.EPSILON) != 0 ) {
+                    allColorsAreTheSame = false;
+                    break;
+                }
+            }
+        }
+
+        if ( allColorsAreTheSame ) {
+            internalGeometry.detachColors();
+        }
+        c = internalGeometry.getVertexColors();
+
+        //-----------------------------------------------------------------
+        SimpleBody thing;
+
+        if ( c == null ) {
+            internalGeometry.calculateNormals();
+        }
+        thing = addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
+
+        if ( allColorsAreTheSame && thing != null ) {
+            thing.getMaterial().setDiffuse(new ColorRgb(r, g, b));
+        }
     }
 }
 

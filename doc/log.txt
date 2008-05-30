@@ -778,5 +778,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 30min: Fixing bug in ReaderGts (some triangles where incorrectly assembled)
   - 2h45min: ReaderPly
 
+2008 may 30, Oscar Chavarro: <<58min>>
+  - 58min: ReaderPly imports colors
+
 ===========================================================================
 

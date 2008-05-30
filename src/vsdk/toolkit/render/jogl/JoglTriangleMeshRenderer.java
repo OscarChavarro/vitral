@@ -154,7 +154,12 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         vertexPositionsBuffer = cloneDoubleArrayToFloatBuffer(vp);
         if ( vn != null ) {
-            vertexNormalsBuffer = cloneDoubleArrayToFloatBuffer(vn);
+            if ( flip ) {
+                vertexNormalsBuffer = cloneDoubleArrayToInvertedFloatBuffer(vn);
+            }
+            else {
+                vertexNormalsBuffer = cloneDoubleArrayToFloatBuffer(vn);
+            }
         }
         if ( vc != null ) {
             vertexColorsBuffer = cloneDoubleArrayToFloatBuffer(vc);
@@ -630,12 +635,23 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
 
         gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
+
         if ( vertexNormalsBuffer != null ) {
             gl.glNormalPointer(gl.GL_FLOAT, 0, vertexNormalsBuffer);
         }
+
         if ( vertexColorsBuffer != null ) {
+            if ( vertexNormalsBuffer == null ) {
+                gl.glDisable(gl.GL_LIGHTING);
+                gl.glDisable(gl.GL_COLOR_MATERIAL);
+            }
+            else {
+                gl.glEnable(gl.GL_COLOR_MATERIAL);
+                gl.glColorMaterial(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE);
+            }
             gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
         }
+
         if ( vertexUvsBuffer != null && withTexture ) {
             gl.glTexCoordPointer(2, gl.GL_FLOAT, 0, vertexUvsBuffer);
         }

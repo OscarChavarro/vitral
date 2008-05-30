@@ -512,6 +512,21 @@ public abstract class JoglRenderer extends RenderingElement {
         return buffer;
     }
 
+    protected static FloatBuffer
+    cloneDoubleArrayToInvertedFloatBuffer(double v[])
+    {
+        FloatBuffer buffer;
+        int i;
+
+        buffer = BufferUtil.newFloatBuffer(v.length);
+        for ( i = 0; i < v.length; i++ ) {
+            buffer.put((float)(v[i]*-1));
+        }
+        buffer.rewind();
+
+        return buffer;
+    }
+
     protected static IntBuffer
     cloneIntArrayToIntBuffer(int v[])
     {
