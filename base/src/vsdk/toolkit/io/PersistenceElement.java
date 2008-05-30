@@ -488,19 +488,19 @@ public abstract class PersistenceElement {
         return msg;
     }
 
-    private static boolean isInSet(char key, String set)
+    private static boolean isInSet(byte key, byte set[])
     {
         int i;
 
-        for ( i = 0; i < set.length(); i++ ) {
-            if ( key == set.charAt(i) ) {
+        for ( i = 0; i < set.length; i++ ) {
+            if ( key == set[i] ) {
                 return true;
             }
         }
         return false;
     }
 
-    public static String readAsciiToken(InputStream is, String separators) throws Exception
+    public static String readAsciiToken(InputStream is, byte separators[]) throws Exception
     {
         byte character[] = new byte[1];
         char letter;
@@ -509,11 +509,10 @@ public abstract class PersistenceElement {
 
         do {
             readBytes(is, character);
-            letter = (char)character[0];
-            if ( !isInSet(letter, separators) ) {
-                msg = msg + letter;
+            if ( !isInSet(character[0], separators) ) {
+                msg = msg + ((char)character[0]);
             }
-        } while ( !isInSet((char)character[0], separators) );
+        } while ( !isInSet(character[0], separators) );
 
         return msg;
     }

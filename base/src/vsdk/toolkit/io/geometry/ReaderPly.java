@@ -93,15 +93,17 @@ class _ReaderPlyElement
         skiptype = getType(type);
 
         if ( elementName.equals("vertex") ) {
-            elementType = skiptype;
             var = line.nextToken();
             if ( var.equals("x") ) {
+                elementType = skiptype;
                 xindex = currentPropertyIndex;
             }
             else if ( var.equals("y") ) {
+                elementType = skiptype;
                 yindex = currentPropertyIndex;
             }
             else if ( var.equals("z") ) {
+                elementType = skiptype;
                 zindex = currentPropertyIndex;
             }
         }
@@ -160,22 +162,27 @@ class _ReaderPlyElement
         double val;
 
         for ( j = 0; j < currentPropertyIndex; j++ ) {
-            if ( elementType == TYPE_FLOAT ) {
-                val = reader.readFloat();
-                if ( j == xindex ) {
-                    v[3*i+0] = val;
+            if ( j == xindex || j == yindex || j == zindex ) {
+                if ( elementType == TYPE_FLOAT ) {
+                    val = reader.readFloat();
+                    if ( j == xindex ) {
+                        v[3*i+0] = val;
+                    }
+                    else if ( j == yindex ) {
+                        v[3*i+1] = val;
+                    }
+                    else if ( j == zindex ) {
+                        v[3*i+2] = val;
+                    }
                 }
-                if ( j == yindex ) {
-                    v[3*i+1] = val;
-                }
-                if ( j == zindex ) {
-                    v[3*i+2] = val;
+                else {
+                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
+                    "Wrong element type!");
+                    return false;
                 }
             }
             else {
-                VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
-                "Wrong element type!");
-                return false;
+                skipRead(reader, skipTypes.array[j]);
             }
         }
         return true;
@@ -255,7 +262,7 @@ class _ReaderPlyElement
         //-----------------------------------------------------------------
         else if ( elementName.equals("face") ) {
             ArrayListOfInts triangles;
-            triangles = new ArrayListOfInts(1024);
+            triangles = new ArrayListOfInts(2000000);
 
             for ( i = 0; i < elementCount; i++ ) {
                 if ( !readPolygonData(reader, i, triangles) ) {
@@ -316,7 +323,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Integer.parseInt(token);
     }
@@ -325,7 +332,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Integer.parseInt(token);
     }
@@ -334,7 +341,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Integer.parseInt(token);
     }
@@ -343,7 +350,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Integer.parseInt(token);
     }
@@ -352,7 +359,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Integer.parseInt(token);
     }
@@ -361,7 +368,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     {
         String token;
         do {
-            token = readAsciiToken(parentInputStream, separators);
+            token = readAsciiToken(parentInputStream, separators.getBytes());
         } while( token == null || token.length() < 1 );
         return Float.parseFloat(token);
     }
@@ -506,7 +513,7 @@ public class ReaderPly extends PersistenceElement
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
+        m.setDoubleSided(true);
         return m;
     }
 
