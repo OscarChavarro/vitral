@@ -121,7 +121,7 @@ public class ReaderVrml extends PersistenceElement
         } while ( tokenType != StreamTokenizer.TT_EOF );
     }
 
-    private static void readVertexPositions(StreamTokenizer parser, TriangleMesh mesh)
+    private static boolean readVertexPositions(StreamTokenizer parser, TriangleMesh mesh)
     {
         //-----------------------------------------------------------------
         int tokenType;
@@ -146,7 +146,15 @@ public class ReaderVrml extends PersistenceElement
                     inside = true;
                 }
                 else if ( inside ) {
-                    vals.append(Double.parseDouble(parser.sval));
+                    double val;
+                    try {
+                        val = Double.parseDouble(parser.sval);
+                    }
+                    catch ( Exception e ) {
+                        System.out.println("Parse error trying to read double at readVertexPositions, number expected, recieved \"" + parser.sval + "\".");
+                        return false;
+                    }
+                    vals.append(val);
                 }
                 break;
               default:
@@ -180,9 +188,10 @@ public class ReaderVrml extends PersistenceElement
         for ( i = 0; i < vals.size; i++ ) {
             v[i] = vals.array[i];
         }
+        return true;
     }
 
-    private static void readVertexColors(StreamTokenizer parser, TriangleMesh mesh)
+    private static boolean readVertexColors(StreamTokenizer parser, TriangleMesh mesh)
     {
         //-----------------------------------------------------------------
         int tokenType;
@@ -210,7 +219,15 @@ public class ReaderVrml extends PersistenceElement
                     // Exponent!
                 }
                 else if ( inside ) {
-                    vals.append(Double.parseDouble(parser.sval));
+                    double val;
+                    try {
+                        val = Double.parseDouble(parser.sval);
+                    }
+                    catch ( Exception e ) {
+                        System.out.println("Parse error trying to read double at readVertexColors, number expected, recieved \"" + parser.sval + "\".");
+                        return false;
+                    }
+                    vals.append(val);
                 }
                 break;
               default:
@@ -243,9 +260,10 @@ public class ReaderVrml extends PersistenceElement
         for ( i = 0; i < vals.size && i < c.length; i++ ) {
             c[i] = vals.array[i];
         }
+        return true;
     }
 
-    private static void readPolygons(StreamTokenizer parser, TriangleMesh mesh)
+    private static boolean readPolygons(StreamTokenizer parser, TriangleMesh mesh)
     {
         //-----------------------------------------------------------------
         int tokenType;
@@ -266,7 +284,15 @@ public class ReaderVrml extends PersistenceElement
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
               case StreamTokenizer.TT_WORD:
-                vals.append(Integer.parseInt(parser.sval));
+                int val;
+                try {
+                    val = Integer.parseInt(parser.sval);
+                }
+                catch ( Exception e ) {
+                    System.out.println("Parse error trying to read integer at readPolygons, number expected, recieved \"" + parser.sval + "\".");
+                    return false;
+                }
+                vals.append(val);
                 break;
               default:
                 if ( parser.ttype != '\"' ) {
@@ -349,6 +375,7 @@ public class ReaderVrml extends PersistenceElement
                 n++;
             }
         }
+        return true;
     }
 
     private static void processTransformationChildren(
@@ -417,7 +444,15 @@ public class ReaderVrml extends PersistenceElement
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
               case StreamTokenizer.TT_WORD:
-		vals[i] = Double.parseDouble(parser.sval);
+                double val;
+                try {
+                    val = Double.parseDouble(parser.sval);
+                }
+                catch ( Exception e ) {
+                    System.out.println("Parse error trying to read double at processRotation, number expected, recieved \"" + parser.sval + "\".");
+                    return null;
+                }
+                vals[i] = val;
                 break;
               default:
                 return R;
@@ -454,6 +489,9 @@ public class ReaderVrml extends PersistenceElement
                 if ( parser.sval.equals("rotation") ) {
                     Matrix4x4 R;
                     R = processRotation(parser);
+                    if ( R == null ) {
+                        return;
+                    }
                     M = M.multiply(R);
                 }
                 else if ( parser.sval.equals("children") ) {
@@ -548,13 +586,19 @@ public class ReaderVrml extends PersistenceElement
                     readBoolean(parser);
                 }
                 else if ( parser.sval.equals("coord") ) {
-                    readVertexPositions(parser, mesh);
+                    if ( !readVertexPositions(parser, mesh) ) {
+                        return null;
+                    }
                 }
                 else if ( parser.sval.equals("color") ) {
-                    readVertexColors(parser, mesh);
+                    if ( !readVertexColors(parser, mesh) ) {
+                        return null;
+                    }
                 }
                 else if ( parser.sval.equals("coordIndex") ) {
-                    readPolygons(parser, mesh);
+                    if ( !readPolygons(parser, mesh) ) {
+                        return null;
+                    }
                 }
                 else {
                     skipGroup(parser);
@@ -768,35 +812,48 @@ public class ReaderVrml extends PersistenceElement
 
         parser.resetSyntax();
         parser.eolIsSignificant(true);
-        parser.quoteChar('\"');
         parser.slashSlashComments(false);
         parser.slashStarComments(false);
         parser.commentChar('#');
+        parser.quoteChar('\"');
         parser.whitespaceChars(' ', ' ');
         parser.whitespaceChars(',', ',');
         parser.whitespaceChars('\t', '\t');
         parser.whitespaceChars('\n', '\n');
         parser.whitespaceChars('\r', '\r');
-        //parser.parseNumbers();
-        parser.wordChars('*', '*');
-        parser.wordChars('0', '9');
-        parser.wordChars('.', '.');
         parser.wordChars('A', 'Z');
         parser.wordChars('a', 'z');
-        parser.wordChars('_', '_');
-        parser.wordChars('`', '`');
+        parser.wordChars('0', '9');
+        parser.wordChars('&', '&');
         parser.wordChars('(', '(');
         parser.wordChars(')', ')');
-        parser.wordChars('\'', '\'');
-        parser.wordChars('+', '+');
-        parser.wordChars('?', '?');
-        parser.wordChars('!', '!');
-        parser.wordChars('=', '=');
-        parser.wordChars('&', '&');
-        parser.wordChars('/', '/');
-        parser.wordChars('\\', '\\');
-        parser.wordChars(':', ':');
         parser.wordChars('-', '-');
+        parser.wordChars('_', '_');
+        parser.wordChars('.', '.');
+        parser.wordChars('/', '/');
+        parser.wordChars('!', '!');
+        parser.wordChars('$', '$');
+        parser.wordChars('%', '%');
+        parser.wordChars('\'', '\'');
+        parser.wordChars('*', '*');
+        parser.wordChars('+', '+');
+        parser.wordChars(':', ':');
+        parser.wordChars(';', ';');
+        parser.wordChars('<', '<');
+        parser.wordChars('=', '=');
+        parser.wordChars('>', '>');
+        parser.wordChars('?', '?');
+        parser.wordChars('@', '@');
+        parser.wordChars('|', '|');
+        parser.wordChars('\\', '\\');
+        parser.wordChars('~', '~');
+        parser.wordChars(169, 169); // Copyright
+        parser.wordChars('`', '`');
+        // Note that following delimiters are outsiders: '{', '}', '[', ']'.
+
+        // Important: do not use parsenumbers, as this functionality doesn't
+        // recognize numbers in scientific notation (with exponents)
+        //parser.parseNumbers();
 
         int tokenType;
         long line = 0;
