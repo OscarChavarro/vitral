@@ -20,6 +20,7 @@ import java.util.zip.GZIPInputStream;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ArrayListOfDoubles;
+import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Vector3D;
 import vsdk.toolkit.common.Matrix4x4;
@@ -96,7 +97,6 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD: break;
               default:
                 if ( parser.ttype != '\"' ) {
@@ -126,7 +126,6 @@ public class ReaderVrml extends PersistenceElement
         //-----------------------------------------------------------------
         int tokenType;
         int level = 0;
-        int i;
         boolean inside = false;
 
         ArrayListOfDoubles vals = new ArrayListOfDoubles(100000);
@@ -142,14 +141,12 @@ public class ReaderVrml extends PersistenceElement
             switch ( tokenType ) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                if ( inside ) {
-                    vals.append(parser.nval);
-                }
-                break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.toLowerCase().equals("point") ) {
                     inside = true;
+                }
+                else if ( inside ) {
+                    vals.append(Double.parseDouble(parser.sval));
                 }
                 break;
               default:
@@ -175,12 +172,182 @@ public class ReaderVrml extends PersistenceElement
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
         //-----------------------------------------------------------------
-        System.out.println("  - Detected points: " + vals.size);
-        mesh.initVertexPositionsArray(vals.size);
+        int i;
         double v[];
+
+        mesh.initVertexPositionsArray(vals.size);
         v = mesh.getVertexPositions();
         for ( i = 0; i < vals.size; i++ ) {
             v[i] = vals.array[i];
+        }
+    }
+
+    private static void readVertexColors(StreamTokenizer parser, TriangleMesh mesh)
+    {
+        //-----------------------------------------------------------------
+        int tokenType;
+        int level = 0;
+        int i = 0;
+        boolean inside = false;
+
+        ArrayListOfDoubles vals = new ArrayListOfDoubles(100000);
+
+        do {
+            try {
+                tokenType = parser.nextToken();
+            }
+            catch ( Exception e ) {
+                break;
+            }
+            switch ( tokenType ) {
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
+              case StreamTokenizer.TT_WORD:
+                if ( parser.sval.toLowerCase().equals("color") && i > 1 ) {
+                    inside = true;
+                }
+                else if ( inside && parser.sval.charAt(0) == 'e' ) {
+                    // Exponent!
+                }
+                else if ( inside ) {
+                    vals.append(Double.parseDouble(parser.sval));
+                }
+                break;
+              default:
+                if ( parser.ttype != '\"' ) {
+                    // Only supposed to contain '{' or '}'
+                    String report;
+                    report = parser.toString();
+                    if ( report.length() >= 8 ) {
+                        char content = report.charAt(7);
+                        if ( content == '{' ) {
+                            level++;
+                          }
+                          else if ( content == '}' ) {
+                            level--;
+                        }
+                    }
+                }
+                break;
+            }
+            if ( level == 0 && inside ) {
+                break;
+            }
+            i++;
+        } while ( tokenType != StreamTokenizer.TT_EOF );
+
+        //-----------------------------------------------------------------
+        mesh.initVertexColorsArray();
+        double c[];
+        c = mesh.getVertexColors();
+        for ( i = 0; i < vals.size && i < c.length; i++ ) {
+            c[i] = vals.array[i];
+        }
+    }
+
+    private static void readPolygons(StreamTokenizer parser, TriangleMesh mesh)
+    {
+        //-----------------------------------------------------------------
+        int tokenType;
+        int level = 0;
+        boolean inside = false;
+
+        ArrayListOfInts vals = new ArrayListOfInts(100000);
+
+        do {
+            try {
+                tokenType = parser.nextToken();
+            }
+            catch ( Exception e ) {
+                break;
+            }
+
+            switch ( tokenType ) {
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
+              case StreamTokenizer.TT_WORD:
+                vals.append(Integer.parseInt(parser.sval));
+                break;
+              default:
+                if ( parser.ttype != '\"' ) {
+                    // Only supposed to contain '{' or '}'
+                    String report;
+                    report = parser.toString();
+                    if ( report.length() >= 8 ) {
+                        char content = report.charAt(7);
+                        if ( content == '[' ) {
+                            level++;
+                          }
+                          else if ( content == ']' ) {
+                            level--;
+                        }
+                    }
+                }
+                break;
+            }
+            if ( level == 0 && inside ) {
+                break;
+            }
+        } while ( tokenType != StreamTokenizer.TT_EOF );
+
+        //-----------------------------------------------------------------
+        int i;
+        int n;
+        int triangleCount;
+        int index;
+
+        for ( i = 0, n = 0, triangleCount = 0; i < vals.size; i++ ) {
+            index = vals.array[i];
+            if ( index == -1 ) {
+                if ( n >= 3 ) {
+                    triangleCount += (n-2);
+                }
+                n = 0;
+            }
+            else {
+                n++;
+            }
+        }
+
+        int t[];
+        int p0 = 0;
+        int p1 = 0;
+        int p2 = 0;
+        int j;
+        int k;
+        int tindex;
+
+        mesh.initTriangleArrays(triangleCount);
+        t = mesh.getTriangleIndexes();
+
+        for ( i = 0, n = 0, tindex = 0; i < vals.size; i++ ) {
+            index = vals.array[i];
+            if ( index == -1 ) {
+                for ( j = n, k = 0; n >=3 && j > 0; j--, k++ ) {
+                    index = vals.array[i-j];
+
+                    if( k == 0 ) {
+                        p0 = index;
+                    }
+                    else if( k == 1 ) {
+                        p1 = index;
+                    }
+                    else {
+                        p2 = index;
+                        // Add a triangle over <p0, p1, p2>
+                        t[3*tindex+0] = p0;
+                        t[3*tindex+1] = p1;
+                        t[3*tindex+2] = p2;
+                        tindex++;
+                        //
+                        p1 = index;
+                    }
+                }
+                n = 0;
+            }
+            else {
+                n++;
+            }
         }
     }
 
@@ -205,7 +372,6 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 processGroup(parser, simpleBodiesArray, lightsArray, backgroundsArray, camerasArray, M);
                 break;
@@ -250,10 +416,9 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                vals[i] = parser.nval;
+              case StreamTokenizer.TT_WORD:
+		vals[i] = Double.parseDouble(parser.sval);
                 break;
-              case StreamTokenizer.TT_WORD: break;
               default:
                 return R;
             }
@@ -285,12 +450,10 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("rotation") ) {
                     Matrix4x4 R;
                     R = processRotation(parser);
-                    System.out.println("Adding rotation to transform: " + R);
                     M = M.multiply(R);
                 }
                 else if ( parser.sval.equals("children") ) {
@@ -331,10 +494,9 @@ public class ReaderVrml extends PersistenceElement
         catch ( Exception e ) {
             return false;
         }
-        switch (tokenType) {
+        switch ( tokenType ) {
           case StreamTokenizer.TT_EOL: break;
           case StreamTokenizer.TT_EOF: break;
-          case StreamTokenizer.TT_NUMBER: break;
           case StreamTokenizer.TT_WORD:
             if ( parser.sval.toLowerCase().equals("true") ) {
                 val = true;
@@ -353,7 +515,7 @@ public class ReaderVrml extends PersistenceElement
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(true);
+        m.setDoubleSided(false);
         return m;
     }
 
@@ -376,14 +538,23 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("solid") ) {
                     // Value ignored!
                     readBoolean(parser);
                 }
+                if ( parser.sval.equals("colorPerVertex") ) {
+                    // Value ignored!
+                    readBoolean(parser);
+                }
                 else if ( parser.sval.equals("coord") ) {
                     readVertexPositions(parser, mesh);
+                }
+                else if ( parser.sval.equals("color") ) {
+                    readVertexColors(parser, mesh);
+                }
+                else if ( parser.sval.equals("coordIndex") ) {
+                    readPolygons(parser, mesh);
                 }
                 else {
                     skipGroup(parser);
@@ -437,7 +608,6 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("IndexedFaceSet") ) {
                     g = processIndexedFaceGroup(parser);
@@ -511,7 +681,6 @@ public class ReaderVrml extends PersistenceElement
             switch (tokenType) {
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("geometry") ) {
                     g = processGeometryGroup(parser, simpleBodiesArray, lightsArray, backgroundsArray, camerasArray, M);
@@ -544,7 +713,6 @@ public class ReaderVrml extends PersistenceElement
 
         //-----------------------------------------------------------------
         if ( g != null ) {
-            System.out.println("Added something!");
             thing.setGeometry(g);
             simpleBodiesArray.add(thing);
         }
@@ -558,7 +726,6 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Camera> camerasArray,
         Matrix4x4 M)
     {
-        System.out.println("Processing group " + parser.sval);
         if ( parser.sval.equals("WorldInfo") ) {
             skipGroup(parser);
         }
@@ -610,7 +777,7 @@ public class ReaderVrml extends PersistenceElement
         parser.whitespaceChars('\t', '\t');
         parser.whitespaceChars('\n', '\n');
         parser.whitespaceChars('\r', '\r');
-        parser.parseNumbers();
+        //parser.parseNumbers();
         parser.wordChars('*', '*');
         parser.wordChars('0', '9');
         parser.wordChars('.', '.');
@@ -658,9 +825,6 @@ public class ReaderVrml extends PersistenceElement
                 break;
               case StreamTokenizer.TT_EOF:
                 break;
-              case StreamTokenizer.TT_NUMBER:
-                //System.out.println("NUMBER " + parser.nval);
-                break;
               case StreamTokenizer.TT_WORD:
                 Matrix4x4 M;
 
@@ -696,6 +860,7 @@ public class ReaderVrml extends PersistenceElement
             }
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
+/*
         System.out.print(inSceneFileFd.getAbsolutePath());
 
         if ( level == 0 ) { 
@@ -704,6 +869,8 @@ public class ReaderVrml extends PersistenceElement
         else {
             System.out.println(" BADBAD: Final level " + level);
         }
+        System.exit(0);
+*/
     }
 }
 

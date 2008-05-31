@@ -782,5 +782,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 58min: ReaderPly imports colors
   - 2h: Basic ReaderVrml structure, reading points of IndexedFaceSet
 
+2008 may 31, Oscar Chavarro: <<40min>>
+  - 40min: ReaderVrml, working fine for Renderpark exported meshes
+    (IndexedFaceSet)
+
 ===========================================================================
 
