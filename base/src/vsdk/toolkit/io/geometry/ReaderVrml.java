@@ -868,20 +868,8 @@ public class ReaderVrml extends PersistenceElement
                 break;
             }
             switch (tokenType) {
-              case StreamTokenizer.TT_EOL:
-/*
-                if ( line % 1000000L == 0 ) {
-                    group++;
-                    System.out.print("\n" + group + " ");
-                }
-                line++;
-                if ( line % 100000L == 0 ) {
-                    System.out.print(".");
-                }
-*/
-                break;
-              case StreamTokenizer.TT_EOF:
-                break;
+              case StreamTokenizer.TT_EOL: break;
+              case StreamTokenizer.TT_EOF: break;
               case StreamTokenizer.TT_WORD:
                 Matrix4x4 M;
 
