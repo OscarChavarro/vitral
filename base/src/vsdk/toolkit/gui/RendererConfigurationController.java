@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 import vsdk.toolkit.common.RendererConfiguration;
 
 public class RendererConfigurationController extends Controller {
@@ -20,42 +20,41 @@ public class RendererConfigurationController extends Controller {
       qualitySelection = q;
   }
 
-  public boolean processKeyPressedEventAwt(KeyEvent keyEvent) {
+  public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
+      return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
+  }
+
+  public boolean processKeyPressedEvent(KeyEvent keyEvent) {
     boolean updated = false;
     char unicode_id;
-    int keycode;
     int st;
 
-    unicode_id = keyEvent.getKeyChar();
-    keycode = keyEvent.getKeyCode();
-
-    if (unicode_id == keyEvent.CHAR_UNDEFINED) {
-      switch (keycode) {
-        case KeyEvent.VK_F1:
+    switch ( keyEvent.keycode ) {
+        case KeyEvent.KEY_F1:
           qualitySelection.changePoints();
           updated = true;
           break;
-        case KeyEvent.VK_F2:
+        case KeyEvent.KEY_F2:
           qualitySelection.changeWires();
           updated = true;
           break;
-        case KeyEvent.VK_F3:
+        case KeyEvent.KEY_F3:
           qualitySelection.changeSurfaces();
           updated = true;
           break;
-        case KeyEvent.VK_F4:
+        case KeyEvent.KEY_F4:
           qualitySelection.changeBoundingVolume();
           updated = true;
           break;
-        case KeyEvent.VK_F5:
+        case KeyEvent.KEY_F5:
           qualitySelection.changeNormals();
           updated = true;
           break;
-        case KeyEvent.VK_F6:
+        case KeyEvent.KEY_F6:
           qualitySelection.changeTrianglesNormals();
           updated = true;
           break;
-        case KeyEvent.VK_F7:
+        case KeyEvent.KEY_F7:
           st = qualitySelection.getShadingType();
           if ( st == qualitySelection.SHADING_TYPE_NOLIGHT ) {
               st = qualitySelection.SHADING_TYPE_FLAT;
@@ -73,21 +72,24 @@ public class RendererConfigurationController extends Controller {
           qualitySelection.setShadingType(st);
           updated = true;
           break;
-        case KeyEvent.VK_F8:
+        case KeyEvent.KEY_F8:
           qualitySelection.changeTexture();
           updated = true;
           break;
-        case KeyEvent.VK_F9:
+        case KeyEvent.KEY_F9:
           qualitySelection.changeBumpMap();
           updated = true;
           break;
-      }
     }
     return updated;
   }
 
-  public boolean processKeyReleasedEventAwt(KeyEvent keyEvent) {
-    return false;
+  public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
+      return processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
+  }
+
+  public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
+      return false;
   }
 
 }

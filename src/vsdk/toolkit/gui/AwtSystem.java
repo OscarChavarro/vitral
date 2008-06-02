@@ -41,6 +41,42 @@ public class AwtSystem extends PresentationElement
 
         if ( unicode_id == eawt.CHAR_UNDEFINED ) {
             switch ( keycode ) {
+              case java.awt.event.KeyEvent.VK_F1:
+                evsdk.keycode = KeyEvent.KEY_F1;
+                break;
+              case java.awt.event.KeyEvent.VK_F2:
+                evsdk.keycode = KeyEvent.KEY_F2;
+                break;
+              case java.awt.event.KeyEvent.VK_F3:
+                evsdk.keycode = KeyEvent.KEY_F3;
+                break;
+              case java.awt.event.KeyEvent.VK_F4:
+                evsdk.keycode = KeyEvent.KEY_F4;
+                break;
+              case java.awt.event.KeyEvent.VK_F5:
+                evsdk.keycode = KeyEvent.KEY_F5;
+                break;
+              case java.awt.event.KeyEvent.VK_F6:
+                evsdk.keycode = KeyEvent.KEY_F6;
+                break;
+              case java.awt.event.KeyEvent.VK_F7:
+                evsdk.keycode = KeyEvent.KEY_F7;
+                break;
+              case java.awt.event.KeyEvent.VK_F8:
+                evsdk.keycode = KeyEvent.KEY_F8;
+                break;
+              case java.awt.event.KeyEvent.VK_F9:
+                evsdk.keycode = KeyEvent.KEY_F9;
+                break;
+              case java.awt.event.KeyEvent.VK_F10:
+                evsdk.keycode = KeyEvent.KEY_F10;
+                break;
+              case java.awt.event.KeyEvent.VK_F11:
+                evsdk.keycode = KeyEvent.KEY_F11;
+                break;
+              case java.awt.event.KeyEvent.VK_F12:
+                evsdk.keycode = KeyEvent.KEY_F12;
+                break;
               case java.awt.event.KeyEvent.VK_UP:
                 evsdk.keycode = KeyEvent.KEY_UP;
                 break;
