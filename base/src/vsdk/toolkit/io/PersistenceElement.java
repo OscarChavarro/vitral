@@ -349,6 +349,14 @@ public abstract class PersistenceElement {
         long2byteArrayInvert(arr, start, a);
     }
 
+    public static void float2byteArrayLE(byte[] arr, int start, float num) {
+        long a = Float.floatToIntBits(num);
+        if ( bigEndianArchitecture ) {
+            long2byteArrayInvert(arr, start, a);
+        }
+        long2byteArrayDirect(arr, start, a);
+    }
+
     /**
     This method is responsible of taking into account the endianess of the 
     original data
@@ -413,6 +421,13 @@ public abstract class PersistenceElement {
         throws Exception
     {
         float2byteArrayBE(bytesForFloat, 0, num);
+        writeBytes(os, bytesForFloat);
+    }
+
+    public static void writeFloatLE(OutputStream os, float num)
+        throws Exception
+    {
+        float2byteArrayLE(bytesForFloat, 0, num);
         writeBytes(os, bytesForFloat);
     }
 
