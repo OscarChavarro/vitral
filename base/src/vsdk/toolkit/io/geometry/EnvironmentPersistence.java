@@ -48,6 +48,9 @@ public class EnvironmentPersistence extends PersistenceElement {
         else if ( type.equals("vtk") ) {
             ReaderVtk.importEnvironment(inSceneFileFd, inoutScene);
         }
+        else if ( type.equals("bin") ) {
+            ReaderBinNeedForSpeed.importEnvironment(inSceneFileFd, inoutScene);
+        }
     }
 
     public static void

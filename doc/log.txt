@@ -787,5 +787,16 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     (IndexedFaceSet)
   - 2h20min: ReaderAse importing base meshes
 
+2008 june 4, Oscar Chavarro: <<min>>
+  - 1h21min: ReaderBinNeedForSpeed basic functionality :) Note that before
+    this reader was posible, an estimate of 12 hours of work was needed to
+    "crack" (better, to study and understand) the GEOMETRY.BIN files'
+    binary format from EA Games' "Need for Speed Underground" system.
+    Altough some tools existed previously on the internet (most notably
+    "bin2ase"), none of them seems to provide an open sourced code. Some
+    users reported about 11 days of work to crack that format. This remaking
+    of such a work was by far simplified by the availability of the
+    "bin2ase" tool.
+
 ===========================================================================
 
