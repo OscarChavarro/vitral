@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.StringTokenizer;
 
+import vsdk.toolkit.common.VSDK;
+
 /**
 DEFINITION: A `PersistenceElement` in VitralSDK is a software element with
 algorithms and data structures (i.e. a class) with the specific functionality
@@ -35,6 +37,7 @@ public abstract class PersistenceElement {
 
     private static final boolean bigEndianArchitecture = false;
 
+    private static byte[] byteBufferLone = new byte[1];
     private static byte[] bytesForInt = new byte[2];
     private static byte[] bytesForLong = new byte[4];
     private static byte[] bytesForFloat = new byte[4];
@@ -77,11 +80,21 @@ public abstract class PersistenceElement {
     public static int
     readByteInt(InputStream is) throws Exception
     {
-        byte[] byteBuffer = new byte[1];
         int a;
 
-        is.read(byteBuffer, 0, 1);
-        a = (int)byteBuffer[0];
+        is.read(byteBufferLone, 0, 1);
+        a = (int)byteBufferLone[0];
+
+        return a;
+    }
+
+    public static int
+    readByteUnsignedInt(InputStream is) throws Exception
+    {
+        int a;
+
+        is.read(byteBufferLone, 0, 1);
+        a = VSDK.signedByte2unsignedInteger(byteBufferLone[0]);
 
         return a;
     }
