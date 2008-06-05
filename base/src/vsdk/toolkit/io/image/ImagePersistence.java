@@ -19,11 +19,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 // Extended JDK classes
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
+// JOGL classes
+import com.sun.opengl.util.texture.spi.DDSImage;
+import com.sun.opengl.util.texture.spi.DDSImage.ImageInfo;
+
+// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
@@ -155,6 +161,69 @@ public class ImagePersistence extends PersistenceElement
             AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
+        }
+        else if( type.equals("dds") ) {
+            try {
+                DDSImage dximage = DDSImage.read(inImageFd);
+                System.out.println("Reading DirectX texture: ");
+                System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
+                int i;
+                int maxindex = 0;
+                ImageInfo maxinfo = dximage.getMipMap(0);
+                //dximage.debugPrint();
+                for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
+                    ImageInfo info;
+                    info = dximage.getMipMap(i);
+                    System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
+
+                    if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
+                        maxindex = i;
+                        maxinfo = info;
+                    }
+
+                }
+
+                if ( maxinfo.isCompressed() ) {
+                    VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importRGB",
+                    "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                }
+
+                ByteBuffer bb = maxinfo.getData();
+                retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
+                //bb.reset();
+                System.out.println("SIZE: " + bb.capacity());
+                int format = dximage.getPixelFormat();
+                if ( format == dximage.D3DFMT_R8G8B8 ) {
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                    "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.createTestPattern();
+                }
+                else if ( format == dximage.D3DFMT_A8R8G8B8 ||
+                          format == dximage.D3DFMT_X8R8G8B8 ) {
+                    int x, y;
+                    byte r, g, b, a;
+                    for ( y = 0; y < retImage.getYSize(); y++ ) {
+                        for ( x = 0; x < retImage.getXSize(); x++ ) {
+                            r = bb.get();
+                            g = bb.get();
+                            b = bb.get();
+                            a = bb.get();
+                            retImage.putPixel(x, y, r, g, b);
+                        }
+                    }
+                }
+                else {
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                    "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.createTestPattern();
+                }
+                return retImage;
+            }
+            catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+                return null;
+            }
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }

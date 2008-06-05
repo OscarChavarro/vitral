@@ -39,23 +39,38 @@ import vsdk.toolkit.io.image.ImagePersistence;
 public class ReaderBinNeedForSpeed extends PersistenceElement
 {
     private static final long MAGIC_ZEROES = 0x00000000;
+    private static final long MAGIC_FILESTART = 0x00134002;
     private static final long MAGIC_OBJECTINIT = 0x00134011;
     private static final long MAGIC_OBJECTSTART = 0x0012F800;
     private static final long MAGIC_ENDNAME = 0x00134012;
     private static final long MAGIC_MESHNUMS = 0x00134900;
     private static final long MAGIC_MESHVERTICES = 0x00134B01;
-    private static final long MAGIC_MESHUNKNOWN1 = 0x00134B02;
     private static final long MAGIC_MESHTRIANGLES = 0x00134B03;
 
-    private static final long MAGIC_MESHUNKNOWNT = 0x00134018;
+    private static final long MAGIC_MESHUNKNOWN1 = 0x00134B02;
     private static final long MAGIC_MESHUNKNOWN2 = 0x00134013;
     private static final long MAGIC_MESHUNKNOWN3 = 0x00134017;
     private static final long MAGIC_MESHUNKNOWN4 = 0x0013401A;
     private static final long MAGIC_MESHUNKNOWN5 = 0x00134019;
     private static final long MAGIC_MESHUNKNOWN6 = 0x00134000;
     private static final long MAGIC_MESHUNKNOWN7 = 0x00039202;
+    private static final long MAGIC_MESHUNKNOWN8 = 0x00134018;
+
+    private static final long MAGIC_TABLEUNKNOWN1 = 0x00134003;
+    private static final long MAGIC_TABLEUNKNOWN2 = 0x00134004;
 
     private static long skippedKeys;
+
+    private static long readChunkStart(InputStream is, byte arr[]) throws Exception
+    {
+        long param = readLongLE(is);
+
+        do {
+            readBytes(is, arr);
+        } while ( isFill(arr) );
+
+        return param;
+    }
 
     private static boolean isFill(byte arr[])
     {
@@ -113,10 +128,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             System.out.println("No mesh found! Aborting.");
             System.exit(0);
         }
-        skipKeys(is, 1); // ??
-        do {
-            readBytes(is, arr);
-        } while ( isFill(arr) );
+        readChunkStart(is, arr);
         skipKeys(is, 8); // ??
 
         nt = readLongLE(is);
@@ -131,7 +143,6 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             System.exit(0);
         }
         skipHeader = skippedKeys;
-        skipKeys(is, 1); // ??
 
         //-----------------------------------------------------------------
         TriangleMesh mesh = new TriangleMesh();
@@ -145,10 +156,11 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         vt = mesh.getVertexUvs();
         vn = mesh.getVertexNormals();
 
-        do {
-            readBytes(is, arr);
-        } while ( isFill(arr) );
+        if ( nv == 0 ) {
+            return null;
+	}
 
+        readChunkStart(is, arr);
         vp[0] = byteArray2floatLE(arr, 0);
 
         int i;
@@ -202,10 +214,17 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             System.out.println("Warning: missed binary stream! Check model" + name + "!");
             return null;
         }
-        skipKeys(is, 1); // ??
-        do {
-            readBytes(is, arr);
-        } while ( isFill(arr) );
+/*
+
+        long ntable = readLongLE(is)/2;
+
+        long a = 0;
+
+	for ( i = 0; i < ntable; i++ ) {
+	    a = readLongLE(is);
+	    //System.out.println(" - " + i + ": 0x" + VSDK.formatIntAsHex(a) + " = " + a);
+	}
+*/
 
         //-----------------------------------------------------------------
         skippedKeys = 0;
@@ -214,7 +233,6 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             System.exit(0);
         }
         skipTriangles = skippedKeys;
-        skipKeys(is, 1); // ??
 
         //-----------------------------------------------------------------
         mesh.initTriangleArrays((int)nt);
@@ -222,10 +240,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         t = mesh.getTriangleIndexes();
 
-        do {
-            readBytes(is, arr);
-        } while ( isFill(arr) );
-
+        readChunkStart(is, arr);
         t[0] = byteArray2intLE(arr, 0);
         t[1] = byteArray2intLE(arr, 2);
 
@@ -297,9 +312,9 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                     i == MAGIC_MESHVERTICES ||
                     i == MAGIC_MESHUNKNOWN1 ||
                     i == MAGIC_MESHTRIANGLES ||
-                    i == MAGIC_MESHUNKNOWNT ||
+                    i == MAGIC_MESHUNKNOWN8 ||
                     i == MAGIC_MESHUNKNOWN2 ||
-                    //i == MAGIC_MESHUNKNOWN3 ||
+                    i == MAGIC_MESHUNKNOWN3 ||
                     i == MAGIC_MESHUNKNOWN4 ||
                     i == MAGIC_MESHUNKNOWN5 ||
                     i == MAGIC_MESHUNKNOWN6 ||
@@ -326,9 +341,71 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
     private static long processHeader(InputStream is) throws Exception
     {
-        skipKeys(is, 11);
+        //-----------------------------------------------------------------
+        skipKeys(is, 6);
+
+        long headerChunkKey = readLongLE(is);
+
+        if ( headerChunkKey != MAGIC_FILESTART ) {
+            System.out.println("Wrong header!");
+            return 0;
+        }
+
+        long count = readLongLE(is);
+        if ( count != 128 ) {
+            System.out.println("Wrong header!");
+            return 0;
+	}
+
+        skipKeys(is, 3);
+
         long n;
         n = readLongLE(is);
+
+        //-----------------------------------------------------------------
+        if ( !skipKeysUntil(is, MAGIC_TABLEUNKNOWN1) ) {
+            System.out.println("Wrong header!");
+            return 0;
+        }
+        long ntable = readLongLE(is)/8;
+
+        if ( n != ntable ) {
+            System.out.println("Wrong header!");
+            return 0;
+        }
+
+        //System.out.println("Skipping unknown table with " + ntable + " elements.");
+        int i;
+        long a = 0, b = 0;
+
+	for ( i = 0; i < ntable; i++ ) {
+	    a = readLongLE(is);
+	    b = readLongLE(is);
+	    //System.out.println(" - " + i + ": " + VSDK.formatIntAsHex((int)a));
+            if ( b != 0 ) {
+                System.out.println("Warning: wrong table entry!");
+	    }
+	}
+
+        //-----------------------------------------------------------------
+        long key;
+
+        key = readLongLE(is);
+        if ( key != MAGIC_TABLEUNKNOWN2 ) {
+            System.out.println("Wrong header!");
+            return 0;
+	}
+
+        ntable = readLongLE(is)/8;
+        //System.out.println("Skipping unknown table with " + ntable + " elements.");
+
+	for ( i = 0; i < ntable; i++ ) {
+	    a = readLongLE(is);
+	    b = readLongLE(is);
+	}
+
+        //-----------------------------------------------------------------
+
         return n;
     }
 
