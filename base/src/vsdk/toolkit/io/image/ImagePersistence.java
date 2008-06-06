@@ -165,8 +165,8 @@ public class ImagePersistence extends PersistenceElement
         else if( type.equals("dds") ) {
             try {
                 DDSImage dximage = DDSImage.read(inImageFd);
-                System.out.println("Reading DirectX texture: ");
-                System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
+                //System.out.println("Reading DirectX texture: ");
+                //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
                 int i;
                 int maxindex = 0;
                 ImageInfo maxinfo = dximage.getMipMap(0);
@@ -174,7 +174,7 @@ public class ImagePersistence extends PersistenceElement
                 for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
                     ImageInfo info;
                     info = dximage.getMipMap(i);
-                    System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
+                    //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
 
                     if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
                         maxindex = i;
@@ -190,16 +190,27 @@ public class ImagePersistence extends PersistenceElement
 
                 ByteBuffer bb = maxinfo.getData();
                 retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
-                //bb.reset();
-                System.out.println("SIZE: " + bb.capacity());
                 int format = dximage.getPixelFormat();
                 if ( format == dximage.D3DFMT_R8G8B8 ) {
                     VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
                     "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                     retImage.createTestPattern();
                 }
-                else if ( format == dximage.D3DFMT_A8R8G8B8 ||
-                          format == dximage.D3DFMT_X8R8G8B8 ) {
+                else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
+                    int x, y;
+                    byte r, g, b, a;
+		    System.out.println("HEY");
+                    for ( y = 0; y < retImage.getYSize(); y++ ) {
+                        for ( x = 0; x < retImage.getXSize(); x++ ) {
+                            r = bb.get();
+                            g = bb.get();
+                            b = bb.get();
+                            a = bb.get();
+                            retImage.putPixel(x, y, r, g, b);
+                        }
+                    }
+		}
+		else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
                     int x, y;
                     byte r, g, b, a;
                     for ( y = 0; y < retImage.getYSize(); y++ ) {
