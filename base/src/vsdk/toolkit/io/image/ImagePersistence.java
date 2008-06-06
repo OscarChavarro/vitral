@@ -66,13 +66,13 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static RGBAImage importRGBA(File imagen) throws ImageNotRecognizedException
+    public static RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException
     {
-        String type = extractExtensionFromFile(imagen);
+        String type = extractExtensionFromFile(inImageFd);
         RGBAImage retImage = new RGBAImage();
 
         if( type.equals("tga") ) {
-            TargaImage t = new TargaImage(imagen);
+            TargaImage t = new TargaImage(inImageFd);
             t.exportRGBA(retImage);
             return retImage;
         }
@@ -83,14 +83,14 @@ public class ImagePersistence extends PersistenceElement
             // OLD SLOW METHOD, DO NOT USE!
             //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
             //java.awt.Image image;
-            //image = awtTools.getImage(imagen.getAbsolutePath());
+            //image = awtTools.getImage(inImageFd.getAbsolutePath());
             //bi = toBufferedImage(image);
 
             try {
                 BufferedInputStream bis;
                 FileInputStream fis;
 
-                fis = new FileInputStream(imagen);
+                fis = new FileInputStream(inImageFd);
                 bis = new BufferedInputStream(fis);
                 bi = ImageIO.read(bis);
                 bis.close();
@@ -98,14 +98,90 @@ public class ImagePersistence extends PersistenceElement
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
-                                     "Cannot import image file \"" + imagen.getAbsolutePath() + "\"");
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
                 return null;
             }
             AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
             return retImage;
         }
-        throw new ImageNotRecognizedException("Image not recognized", imagen);
+        else if( type.equals("dds") ) {
+            try {
+                DDSImage dximage = DDSImage.read(inImageFd);
+                //System.out.println("Reading DirectX texture: ");
+                //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
+                int i;
+                int maxindex = 0;
+                ImageInfo maxinfo = dximage.getMipMap(0);
+                //dximage.debugPrint();
+                for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
+                    ImageInfo info;
+                    info = dximage.getMipMap(i);
+                    //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
+
+                    if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
+                        maxindex = i;
+                        maxinfo = info;
+                    }
+
+                }
+
+                if ( maxinfo.isCompressed() ) {
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                    "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.init(64, 64);
+                    retImage.createTestPattern();
+                    return retImage;
+                }
+
+                ByteBuffer bb = maxinfo.getData();
+                retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
+                int format = dximage.getPixelFormat();
+                if ( format == dximage.D3DFMT_R8G8B8 ) {
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                    "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.createTestPattern();
+                }
+                else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
+                    int x, y;
+                    byte r, g, b, a;
+                    for ( y = 0; y < retImage.getYSize(); y++ ) {
+                        for ( x = 0; x < retImage.getXSize(); x++ ) {
+                            r = bb.get();
+                            g = bb.get();
+                            b = bb.get();
+                            a = bb.get();
+                            retImage.putPixel(x, y, r, g, b, a);
+                        }
+                    }
+                }
+                else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
+                    int x, y;
+                    byte r, g, b, a;
+                    for ( y = 0; y < retImage.getYSize(); y++ ) {
+                        for ( x = 0; x < retImage.getXSize(); x++ ) {
+                            r = bb.get();
+                            g = bb.get();
+                            b = bb.get();
+                            a = bb.get();
+                            retImage.putPixel(x, y, r, g, b, a);
+                        }
+                    }
+                }
+                else {
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                    "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.createTestPattern();
+                }
+                return retImage;
+            }
+            catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+                return null;
+            }
+        }
+        throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
 
     /**
@@ -184,8 +260,11 @@ public class ImagePersistence extends PersistenceElement
                 }
 
                 if ( maxinfo.isCompressed() ) {
-                    VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importRGB",
+                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
                     "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                    retImage.init(64, 64);
+                    retImage.createTestPattern();
+                    return retImage;
                 }
 
                 ByteBuffer bb = maxinfo.getData();
@@ -199,7 +278,7 @@ public class ImagePersistence extends PersistenceElement
                 else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
                     int x, y;
                     byte r, g, b, a;
-		    System.out.println("HEY");
+                    System.out.println("HEY");
                     for ( y = 0; y < retImage.getYSize(); y++ ) {
                         for ( x = 0; x < retImage.getXSize(); x++ ) {
                             r = bb.get();
@@ -209,8 +288,8 @@ public class ImagePersistence extends PersistenceElement
                             retImage.putPixel(x, y, r, g, b);
                         }
                     }
-		}
-		else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
+                }
+                else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
                     int x, y;
                     byte r, g, b, a;
                     for ( y = 0; y < retImage.getYSize(); y++ ) {

@@ -33,6 +33,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 
@@ -42,7 +43,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
     private static final long MAGIC_FILESTART = 0x00134002;
     private static final long MAGIC_OBJECTINIT = 0x00134011;
     private static final long MAGIC_OBJECTSTART = 0x0012F800;
-    private static final long MAGIC_ENDNAME = 0x00134012;
+    private static final long MAGIC_MESHTEXTURES = 0x00134012;
     private static final long MAGIC_MESHNUMS = 0x00134900;
     private static final long MAGIC_MESHVERTICES = 0x00134B01;
     private static final long MAGIC_MESHTRIANGLES = 0x00134B03;
@@ -60,6 +61,19 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
     private static final long MAGIC_TABLEUNKNOWN2 = 0x00134004;
 
     private static long skippedKeys;
+
+    private static ArrayList<RGBAImage> images = null;
+    private static ArrayList<Long> ids = null;
+    private static ArrayList<String> labels = null;
+
+    public static void setTextures(ArrayList<RGBAImage> a, 
+                                    ArrayList<Long> b,
+                                    ArrayList<String> c)
+    {
+        images = a;
+        ids = b;
+        labels = c;
+    }
 
     private static long readChunkStart(InputStream is, byte arr[]) throws Exception
     {
@@ -88,7 +102,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         Material m = new Material();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
         m.setSpecular(new ColorRgb(1, 1, 1));
         m.setDoubleSided(false);
         return m;
@@ -102,6 +116,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         long skipTriangles;
         long nt;
         long nv;
+        int i;
 
         //-----------------------------------------------------------------
         if ( !skipKeysUntil(is, MAGIC_OBJECTSTART) ||
@@ -114,13 +129,58 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         String name;
         name = readAsciiFixedSizeString(is, 28);
 
+        //-----------------------------------------------------------------
         long key;
 
         key = readLongLE(is);
 
-        if ( key != MAGIC_ENDNAME ) {
+        if ( key != MAGIC_MESHTEXTURES ) {
             System.out.println("Bad name end! Aborting.");
             System.exit(0);
+        }
+        int ntextures;
+        ntextures = (int)(readLongLE(is) / 8);
+        //System.out.println("Part " + name + " with " + ntextures + " textures");
+
+        long textureid;
+        long skip;
+
+        ArrayList<RGBAImage> localTextures = new ArrayList<RGBAImage>();
+
+        for ( i = 0; i < ntextures; i++ ) {
+            textureid = readLongLE(is);
+            System.out.print("  - " + VSDK.formatIntAsHex((int)textureid));
+            skip = readLongLE(is);
+            if ( skip != 0 ) {
+                System.out.println("Texture chunk error!");
+                System.exit(0);
+            }
+            RGBAImage img = null;
+            if ( ids != null ) {
+                for ( int j = 0; j < ids.size(); j++ ) {
+                    long id = ids.get(j).longValue();
+                    if ( id == textureid ) {
+                        //System.out.println(" OK");
+                        img = images.get(i);
+                        break;
+                    }
+                }
+            }
+            if ( img == null ) {
+                img = new RGBAImage();
+                img.init(64, 64);
+                img.createTestPattern();
+                //System.out.println(" NOT FOUND");
+            }
+            localTextures.add(img);
+        }
+
+        Image[] textures = null;
+        if ( localTextures.size() > 0 ) {
+            textures = new Image[localTextures.size()];
+            for ( i = 0; i < localTextures.size(); i++ ) {
+                textures[i] = localTextures.get(i);
+            }
         }
 
         //-----------------------------------------------------------------
@@ -158,12 +218,10 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         if ( nv == 0 ) {
             return null;
-	}
+        }
 
         readChunkStart(is, arr);
         vp[0] = byteArray2floatLE(arr, 0);
-
-        int i;
 
         /////
         long val;
@@ -220,10 +278,10 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         long a = 0;
 
-	for ( i = 0; i < ntable; i++ ) {
-	    a = readLongLE(is);
-	    //System.out.println(" - " + i + ": 0x" + VSDK.formatIntAsHex(a) + " = " + a);
-	}
+        for ( i = 0; i < ntable; i++ ) {
+            a = readLongLE(is);
+            //System.out.println(" - " + i + ": 0x" + VSDK.formatIntAsHex(a) + " = " + a);
+        }
 */
 
         //-----------------------------------------------------------------
@@ -254,6 +312,23 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         if ( (nt % 2) != 0 ) {
             readIntLE(is);
+        }
+
+        //-----------------------------------------------------------------
+        if ( localTextures.size() > 0 ) {
+            int ranges[][] = new int[1][2];
+            ranges[0][0] = (int)nt;
+            ranges[0][1] = 1;
+            mesh.setTextures(textures);
+            mesh.setTextureRanges(ranges);
+
+            Material[] ma = new Material[1];
+            ma[0] = defaultMaterial();
+            int mranges[][] = new int[1][2];
+            mranges[0][0] = (int)nt;
+            mranges[0][1] = 0;
+            mesh.setMaterials(ma);
+            mesh.setMaterialRanges(mranges);
         }
 
         //mesh.calculateNormals();
@@ -307,7 +382,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 if (
                     i == MAGIC_OBJECTINIT ||
                     i == MAGIC_OBJECTSTART ||
-                    i == MAGIC_ENDNAME ||
+                    i == MAGIC_MESHTEXTURES ||
                     i == MAGIC_MESHNUMS ||
                     i == MAGIC_MESHVERTICES ||
                     i == MAGIC_MESHUNKNOWN1 ||
@@ -355,7 +430,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         if ( count != 128 ) {
             System.out.println("Wrong header!");
             return 0;
-	}
+        }
 
         skipKeys(is, 3);
 
@@ -378,14 +453,14 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         int i;
         long a = 0, b = 0;
 
-	for ( i = 0; i < ntable; i++ ) {
-	    a = readLongLE(is);
-	    b = readLongLE(is);
-	    //System.out.println(" - " + i + ": " + VSDK.formatIntAsHex((int)a));
+        for ( i = 0; i < ntable; i++ ) {
+            a = readLongLE(is);
+            b = readLongLE(is);
+            //System.out.println(" - " + i + ": " + VSDK.formatIntAsHex((int)a));
             if ( b != 0 ) {
                 System.out.println("Warning: wrong table entry!");
-	    }
-	}
+            }
+        }
 
         //-----------------------------------------------------------------
         long key;
@@ -394,15 +469,15 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         if ( key != MAGIC_TABLEUNKNOWN2 ) {
             System.out.println("Wrong header!");
             return 0;
-	}
+        }
 
         ntable = readLongLE(is)/8;
         //System.out.println("Skipping unknown table with " + ntable + " elements.");
 
-	for ( i = 0; i < ntable; i++ ) {
-	    a = readLongLE(is);
-	    b = readLongLE(is);
-	}
+        for ( i = 0; i < ntable; i++ ) {
+            a = readLongLE(is);
+            b = readLongLE(is);
+        }
 
         //-----------------------------------------------------------------
 

@@ -105,9 +105,9 @@ public class TriangleMesh extends Surface {
     `triangles` and `textures` sets. Each pair 
     <textureRanges[i][0], textureRanges[i][1]> means that the triangles
     from textureRanges[i-1][0] to textureRanges[i][0] (from triangle 0 
-    when i = 0), are associated with the texture textureRanges[i][1]
+    when i = 0), are associated with the texture textureRanges[i][1]-1
     (or no texture for unspecified range or when textureRanges[i][1]
-    contains a value out of textures array bounds).
+    contains a value out of textures array bounds or a value of 0).
     */
     private int[][] textureRanges;
 
