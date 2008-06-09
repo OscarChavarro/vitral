@@ -26,12 +26,11 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.PersistenceElement;
@@ -48,14 +47,14 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
     private static final long MAGIC_MESHVERTICES = 0x00134B01;
     private static final long MAGIC_MESHTRIANGLES = 0x00134B03;
 
-    private static final long MAGIC_MESHUNKNOWN1 = 0x00134B02;
+    private static final long MAGIC_MESHBITMASKS = 0x00134B02;
     private static final long MAGIC_MESHUNKNOWN2 = 0x00134013;
-    private static final long MAGIC_MESHUNKNOWN3 = 0x00134017;
-    private static final long MAGIC_MESHUNKNOWN4 = 0x0013401A;
-    private static final long MAGIC_MESHUNKNOWN5 = 0x00134019;
-    private static final long MAGIC_MESHUNKNOWN6 = 0x00134000;
-    private static final long MAGIC_MESHUNKNOWN7 = 0x00039202;
-    private static final long MAGIC_MESHUNKNOWN8 = 0x00134018;
+    private static final long MAGIC_MESHUNKNOWN3 = 0x0013401A;
+    private static final long MAGIC_MESHUNKNOWN4 = 0x00134017;
+    private static final long MAGIC_MESHUNKNOWN5 = 0x00134018; // related to V
+    private static final long MAGIC_MESHUNKNOWN6 = 0x00134019;
+    private static final long MAGIC_MESHUNKNOWN7 = 0x00134000;
+    private static final long MAGIC_MESHUNKNOWN8 = 0x00039202;
 
     private static final long MAGIC_TABLEUNKNOWN1 = 0x00134003;
     private static final long MAGIC_TABLEUNKNOWN2 = 0x00134004;
@@ -77,10 +76,11 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
     private static long readChunkStart(InputStream is, byte arr[]) throws Exception
     {
-        long param = readLongLE(is);
+        long param = readLongLE(is); // Typically size in bytes of current chunk data
 
         do {
             readBytes(is, arr);
+            skippedKeys++;
         } while ( isFill(arr) );
 
         return param;
@@ -104,18 +104,81 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
         m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
+        m.setDoubleSided(true);
         return m;
+    }
+
+    private static void fillImageWithColor(RGBAImage img, RGBAPixel p)
+    {
+        int xxx, yyy;
+        for ( xxx = 0; xxx < img.getXSize(); xxx++ ) {
+            for ( yyy = 0; yyy < img.getYSize(); yyy++ ) {
+                img.putPixel(xxx, yyy, p);
+            }
+        }
+    }
+
+    public static RGBAPixel classifyTextureColor(long id)
+    {
+        RGBAPixel p = new RGBAPixel();
+        byte maxp = (byte)0xff;
+        byte minp = (byte)0x00;
+        p = new RGBAPixel();
+
+        if ( id == 0x5DD503ADL ) {
+            p.r = minp; p.g = maxp; p.b = minp;
+        }
+        else if ( id == 0x96D34D66L ) {
+            p.r = minp; p.g = minp; p.b = maxp;
+        }
+        else if ( id == 0x18E440E0L ) {
+            p.r = maxp; p.g = maxp; p.b = minp;
+        }
+        else if ( id == 0x71ABC1B9L ) {
+            p.r = minp; p.g = maxp; p.b = maxp;
+        }
+        // Known common texture identifiers from Need for Speed Underground:
+        // Base elements
+/*
+        if (
+            id == 0x12A4882BL || id == 0x1B0763A0L || 
+            id == 0x21551B25L || id == 0x2433DF4EL || id == 0x29C86189L ||
+            id == 0x3ED0EF41L || id == 0x3EDA2CA3L || id == 0x4C66A479L ||
+            id == 0x4CDA56E4L || id == 0x4CDEBFCAL || 
+            id == 0x5B979314L || id == 0x5E534BFAL || id == 0x60F8B13CL ||
+            id == 0x67076CD2L || id == 0x6B79283AL || id == 0x7491F7BFL ||
+            id == 0x77A20245L || id == 0x7B9B8F22L ||
+            id == 0x7EDD4496L || id == 0x9509E20EL || id == 0x96B8F88BL ||
+            id == 0x9A6D73B2L || id == 0x9B50E870L || id == 0x9F92A08CL ||
+            id == 0xA43D9817L || id == 0xA6754656L ||
+            id == 0xB3DC27ABL || id == 0xB87C200AL || id == 0xB8F3415CL ||
+            id == 0xBA40B34DL || id == 0xBDD2BC4EL || id == 0xCABB1DB4L ||
+            id == 0xCC5226DFL || id == 0xD195BE56L || id == 0xD689A31BL ||
+            id == 0xE3F59A82L || id == 0xE490B3FCL || id == 0xE7E4EF49L ||
+            id == 0xECBB8329L || id == 0xECBB832AL || id == 0xEFD842C5L ||
+            id == 0xF95D432FL || id == 0xFC42D35CL ||
+            id == 0xA2BF8E18L || id == 0x7B220DDFL ||
+            id == 0x027A43A7L || id == 0x06BCBD59L || id == 0x0AB88F5DL ||
+            id == 0x0ECB3D67L || id == 0x11D467B1L || id == 0x12466978L ||
+            id == 0x1C8BF43EL || id == 0x5799E60BL ) {    
+            p.r = minp; p.g = maxp; p.b = minp;
+        }
+*/
+        else {
+            p.r = maxp; p.g = minp; p.b = minp;
+        }
+
+        p.a = maxp;
+        return p;
     }
 
     private static SimpleBody
     readBody(InputStream is) throws Exception
     {
-        byte arr[] = new byte[4];
-        long skipHeader;
-        long skipTriangles;
+        byte arr4[] = new byte[4];
         long nt;
         long nv;
+        long size;
         int i;
 
         //-----------------------------------------------------------------
@@ -140,8 +203,16 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         }
         int ntextures;
         ntextures = (int)(readLongLE(is) / 8);
-        //System.out.println("Part " + name + " with " + ntextures + " textures");
 
+        boolean debug = false;
+
+        if ( name.contains("PEUGOT_KIT00_HEADLIGHT_A") ) {
+            debug = true;
+        }
+
+        if ( debug ) {
+            System.out.println("Part " + name + " with " + ntextures + " textures");
+        }
         long textureid;
         long skip;
 
@@ -149,7 +220,9 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         for ( i = 0; i < ntextures; i++ ) {
             textureid = readLongLE(is);
-            System.out.print("  - " + VSDK.formatIntAsHex((int)textureid));
+            if ( debug ) {
+                System.out.print("  - " + VSDK.formatIntAsHex((int)textureid));
+            }
             skip = readLongLE(is);
             if ( skip != 0 ) {
                 System.out.println("Texture chunk error!");
@@ -160,17 +233,26 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 for ( int j = 0; j < ids.size(); j++ ) {
                     long id = ids.get(j).longValue();
                     if ( id == textureid ) {
-                        //System.out.println(" OK");
-                        img = images.get(i);
-                        break;
+                        if ( debug ) {
+                            System.out.println(" OK");
+                        }
+                        img = images.get(j);
+                        j = ids.size() + 1;
                     }
                 }
             }
             if ( img == null ) {
                 img = new RGBAImage();
                 img.init(64, 64);
-                img.createTestPattern();
-                //System.out.println(" NOT FOUND");
+
+                //img.createTestPattern();
+
+                RGBAPixel p;
+                p = classifyTextureColor(textureid);
+                fillImageWithColor(img, p);
+                if ( debug ) {
+                    System.out.println(" NOT FOUND");
+                }
             }
             localTextures.add(img);
         }
@@ -188,7 +270,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             System.out.println("No mesh found! Aborting.");
             System.exit(0);
         }
-        readChunkStart(is, arr);
+        readChunkStart(is, arr4);
         skipKeys(is, 8); // ??
 
         nt = readLongLE(is);
@@ -197,12 +279,14 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         nv = readLongLE(is);
         skipKeys(is, 2); // ??
 
-        skippedKeys = 0;
+        if ( debug ) {
+            System.out.println(name + " (NT: " + nt + ", NV: " + nv + ")");
+        }
+
         if ( !skipKeysUntil(is, MAGIC_MESHVERTICES) ) {
             System.out.println("No mesh found! Aborting.");
             System.exit(0);
         }
-        skipHeader = skippedKeys;
 
         //-----------------------------------------------------------------
         TriangleMesh mesh = new TriangleMesh();
@@ -220,8 +304,8 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             return null;
         }
 
-        readChunkStart(is, arr);
-        vp[0] = byteArray2floatLE(arr, 0);
+        readChunkStart(is, arr4);
+        vp[0] = byteArray2floatLE(arr4, 0);
 
         /////
         long val;
@@ -245,52 +329,61 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             a = (val >> 16) & 0x000000FF;
             b = (val >> 8) & 0x000000FF;
             c = (val) & 0x000000FF;
-            if ( a != b || a != c || b != c ) {
+
+            //if ( a != b || a != c || b != c ) {
                 int index;
                 Long l = new Long(val);
                 index = java.util.Collections.binarySearch(vals, l);
                 if ( index < 0 ) {
                     vals.add((-index)-1, l);
                 }
-            }
+            //}
             /////
 
             vt[2*i+0] = readFloatLE(is); // u
-            vt[2*i+1] = readFloatLE(is); // v
+            vt[2*i+1] = 1 - readFloatLE(is); // v
         }
 
         /////
-        //for ( i = 0; i < vals.size(); i++ ) {
-        //    System.err.println(VSDK.formatIntAsHex(vals.get(i).intValue()));
-        //}
+
+        for ( i = 0; debug && i <  vals.size(); i++ ) {
+            System.err.println(VSDK.formatIntAsHex(vals.get(i).intValue()));
+        }
+
         /////
 
         //-----------------------------------------------------------------
         key = readLongLE(is);
-        if ( key != MAGIC_MESHUNKNOWN1 ) {
-            System.out.print("NV: " + nv + ", NT: " + nt + ", skipHeader: " + skipHeader + ", ");
+        if ( key != MAGIC_MESHBITMASKS ) {
             System.out.println("Warning: missed binary stream! Check model" + name + "!");
             return null;
         }
-/*
+        size = readChunkStart(is, arr4);
+        //System.out.println(name + " SIZE: " + (size) + ", NTEXTURES " + numTextureSpans + ", RATIO: " + (((double)size)/60.0)/(double)numTextureSpans);
 
-        long ntable = readLongLE(is)/2;
+        long ntable = size/2;
 
         long a = 0;
+        int j;
 
-        for ( i = 0; i < ntable; i++ ) {
-            a = readLongLE(is);
-            //System.out.println(" - " + i + ": 0x" + VSDK.formatIntAsHex(a) + " = " + a);
+        for ( i = 0; i < ntextures; i++ ) {
+            for ( j = 0; j < 15; j++ ) {
+                if ( j== 0 && i == 0 ) {
+                    a = byteArray2intLE(arr4, 0);
+                }
+                else {
+                    a = readLongLE(is);
+                }
+	    }
         }
-*/
 
         //-----------------------------------------------------------------
-        skippedKeys = 0;
+        //key = readLongLE(is);
+        //if ( key != MAGIC_MESHTRIANGLES ) {
         if ( !skipKeysUntil(is, MAGIC_MESHTRIANGLES) ) {
             System.out.println("No mesh found! Aborting.");
             System.exit(0);
         }
-        skipTriangles = skippedKeys;
 
         //-----------------------------------------------------------------
         mesh.initTriangleArrays((int)nt);
@@ -298,9 +391,9 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         t = mesh.getTriangleIndexes();
 
-        readChunkStart(is, arr);
-        t[0] = byteArray2intLE(arr, 0);
-        t[1] = byteArray2intLE(arr, 2);
+        readChunkStart(is, arr4);
+        t[0] = byteArray2intLE(arr4, 0);
+        t[1] = byteArray2intLE(arr4, 2);
 
         for ( i = 0; i < nt; i++ ) {
             if ( i != 0 ) {
@@ -316,11 +409,24 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         //-----------------------------------------------------------------
         if ( localTextures.size() > 0 ) {
-            int ranges[][] = new int[1][2];
-            ranges[0][0] = (int)nt;
-            ranges[0][1] = 1;
             mesh.setTextures(textures);
-            mesh.setTextureRanges(ranges);
+
+            if ( name.contains("PEUGOT_KIT00_HEADLIGHT_A") ) {
+                int ranges[][] = new int[3][2];
+                ranges[1][0] = (int)nt - 142;
+                ranges[1][1] = 1;
+                ranges[0][0] = (int)nt - 284;
+                ranges[0][1] = 2;
+                ranges[2][0] = (int)nt;
+                ranges[2][1] = 3;
+                mesh.setTextureRanges(ranges);
+            }
+            else {
+                int ranges[][] = new int[1][2];
+                ranges[0][0] = (int)nt;
+                ranges[0][1] = 1;
+                mesh.setTextureRanges(ranges);
+            }
 
             Material[] ma = new Material[1];
             ma[0] = defaultMaterial();
@@ -332,6 +438,23 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         }
 
         //mesh.calculateNormals();
+
+        //-----------------------------------------------------------------
+        boolean endIt = false;
+        do {
+            long surpriseMe = readLongLE(is);
+            if ( surpriseMe == MAGIC_MESHUNKNOWN4 || 
+                 surpriseMe == MAGIC_MESHUNKNOWN5 ||
+                 surpriseMe == MAGIC_MESHUNKNOWN6 ) {
+                skippedKeys = 0;
+                size = readChunkStart(is, arr4);
+                //System.out.println(name + ": SKIPPING CHUNK " + VSDK.formatIntAsHex((int)surpriseMe) + ", size " + (size/4 - skippedKeys));
+                skipKeys(is, (int)(size/4)-1);
+            }
+            else {
+                endIt = true;
+            }
+        } while ( !endIt );
 
         //-----------------------------------------------------------------
         SimpleBody thing;
@@ -348,7 +471,6 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         thing.setGeometry(mesh);
 
         //-----------------------------------------------------------------
-        //System.out.print("NV: " + nv + ", NT: " + nt + ", skipHeader: " + skipHeader + ", skipTriangles: " + skipTriangles + ", ");
 
         return thing;
     }
@@ -370,40 +492,6 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         return true;
     }
 
-    private static long
-    skipUnknownKeys(InputStream is) throws Exception
-    {
-        long i;
-
-        do {
-            try {
-                i = readLongLE(is);
-                skippedKeys++;
-                if (
-                    i == MAGIC_OBJECTINIT ||
-                    i == MAGIC_OBJECTSTART ||
-                    i == MAGIC_MESHTEXTURES ||
-                    i == MAGIC_MESHNUMS ||
-                    i == MAGIC_MESHVERTICES ||
-                    i == MAGIC_MESHUNKNOWN1 ||
-                    i == MAGIC_MESHTRIANGLES ||
-                    i == MAGIC_MESHUNKNOWN8 ||
-                    i == MAGIC_MESHUNKNOWN2 ||
-                    i == MAGIC_MESHUNKNOWN3 ||
-                    i == MAGIC_MESHUNKNOWN4 ||
-                    i == MAGIC_MESHUNKNOWN5 ||
-                    i == MAGIC_MESHUNKNOWN6 ||
-                    i == MAGIC_MESHUNKNOWN7
-                ) {
-                    return i;
-                }
-            }
-            catch ( Exception e ) {
-                return 0;
-            }
-        } while ( true );
-    }
-
     private static void
     skipKeys(InputStream is, int n) throws Exception
     {
@@ -417,7 +505,14 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
     private static long processHeader(InputStream is) throws Exception
     {
         //-----------------------------------------------------------------
-        skipKeys(is, 6);
+        long magic_chunk_id;
+        long size;
+
+        magic_chunk_id = readLongLE(is);
+        size = readLongLE(is);
+
+        //-----------------------------------------------------------------
+        skipKeys(is, 4);
 
         long headerChunkKey = readLongLE(is);
 
@@ -494,7 +589,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         ArrayList<Background> backgroundsArray = inoutSimpleScene.getBackgrounds();
         ArrayList<Camera> camerasArray = inoutSimpleScene.getCameras();
 
-        //System.out.println("Reading " + inSceneFileFd.getAbsolutePath());
+        System.out.println("Reading " + inSceneFileFd.getAbsolutePath());
 
         //-----------------------------------------------------------------
         FileInputStream fis = new FileInputStream(inSceneFileFd);
@@ -507,46 +602,16 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         boolean started = false;
 
         for ( i = 0; i < n; i++ ) {
-            skippedKeys = 0;
             if ( started || skipKeysUntil(bis, MAGIC_OBJECTINIT) ) {
-                long s = skippedKeys;
-                //System.out.print("Skipped before: " + s + ", ");
-
                 thing = readBody(bis);
                 if ( thing != null ) {
                     simpleBodiesArray.add(thing);
-                    //System.out.println(thing.getName());
                 }
                 else {
                     System.out.println("Error!");
                     System.exit(0);                
                 }
-
                 started = false;
-/*
-                long k = skipUnknownKeys(bis);
-                if ( k == MAGIC_OBJECTINIT ) {
-                    started = true;
-                }
-                else if ( k == MAGIC_MESHUNKNOWN5 ) {
-                    TriangleMesh mesh = (TriangleMesh)thing.getGeometry();
-                    double v[] = mesh.getVertexPositions();
-                    int t[] = mesh.getTriangleIndexes();
-                    int nv = v.length/3;
-                    int nt = t.length/3;
-                    skippedKeys = 0;
-                    k = skipUnknownKeys(bis);
-                    boolean selected = skippedKeys > nv; 
-                    System.out.println("NV: " + nv + ", NT: " + nt + " skip: " + skippedKeys + ", Criteria: " + (selected?"true":"false"));
-
-                    if ( k == MAGIC_OBJECTINIT ) {
-                        started = true;
-                    }
-                }
-                else {
-                    System.out.println("MMM... " + VSDK.formatIntAsHex((int)k));
-                }
-*/
             }
         }
 
