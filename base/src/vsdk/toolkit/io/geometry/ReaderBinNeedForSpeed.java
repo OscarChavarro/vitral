@@ -250,6 +250,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 RGBAPixel p;
                 p = classifyTextureColor(textureid);
                 fillImageWithColor(img, p);
+
                 if ( debug ) {
                     System.out.println(" NOT FOUND");
                 }
