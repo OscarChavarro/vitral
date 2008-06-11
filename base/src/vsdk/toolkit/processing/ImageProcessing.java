@@ -92,8 +92,8 @@ public abstract class ImageProcessing extends ProcessingElement {
             output.init(xSizeOut, ySizeOut);
             double xf = (((double)xSizeIn) / ((double)xSizeOut));
             double yf = (((double)ySizeIn) / ((double)ySizeOut));
-            int xfi = (int)xf + 1;
-            int yfi = (int)yf + 1;
+            int xfi = (int)xf;
+            int yfi = (int)yf;
             double w = (xfi * yfi);
             double acumr;
             double acumg;
