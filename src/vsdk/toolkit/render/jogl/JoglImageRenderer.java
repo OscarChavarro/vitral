@@ -79,6 +79,9 @@ public class JoglImageRenderer extends JoglRenderer
         if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.unload(gl, (RGBImage)img);
         }
+        else if ( img instanceof RGBAImage ) {
+            JoglRGBAImageRenderer.unload(gl, (RGBAImage)img);
+        }
         else {
             String c = img.getClass().getName();
 

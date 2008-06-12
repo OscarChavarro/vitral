@@ -26,13 +26,25 @@ public class AwtSystem extends PresentationElement
 
     public static void awt2vsdkEvent(KeyEvent evsdk, java.awt.event.KeyEvent eawt)
     {
+        //-----------------------------------------------------------------
         char unicode_id;
         int keycode;
 
         unicode_id = eawt.getKeyChar();
         keycode = eawt.getKeyCode();
 
+        //-----------------------------------------------------------------
+        if ( ((eawt.getModifiersEx()) & eawt.ALT_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= evsdk.MASK_ALT;
+	}
+        if ( ((eawt.getModifiersEx()) & eawt.CTRL_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= evsdk.MASK_CTRL;
+	}
+        if ( ((eawt.getModifiersEx()) & eawt.SHIFT_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= evsdk.MASK_SHIFT;
+	}
 
+        //-----------------------------------------------------------------
         switch ( keycode ) {
           case java.awt.event.KeyEvent.VK_ESCAPE:
           evsdk.keycode = KeyEvent.KEY_ESC;
@@ -278,6 +290,12 @@ public class AwtSystem extends PresentationElement
                 break;
               case '9':
                 evsdk.keycode = KeyEvent.KEY_9;
+                break;
+              case ',':
+                evsdk.keycode = KeyEvent.KEY_COMMA;
+                break;
+              case '.':
+                evsdk.keycode = KeyEvent.KEY_PERIOD;
                 break;
             }
         }

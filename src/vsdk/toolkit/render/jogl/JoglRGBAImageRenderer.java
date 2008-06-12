@@ -24,6 +24,7 @@ import com.sun.opengl.cg.CGparameter;
 import com.sun.opengl.cg.CgGL;
 
 // VitralSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.common.RendererConfiguration;
 
@@ -188,6 +189,28 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             CgGL.cgGLSetTextureParameter(param, list);
         }
         return list;
+    }
+
+    public static void unload(GL gl, RGBAImage img)
+    {
+        _JoglRGBAImageRendererImageAssociation item = null;
+
+        try { 
+            int i;
+            for ( i = 0; i < compiledImages.size(); i++ ) {
+                item = compiledImages.get(i);
+                if ( item.image == img ) {
+                    item.renderer.disable();
+                    item.renderer.dispose();
+                    compiledImages.remove(i);
+                    return;
+                }
+            }
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBAImageRenderer.unload", "Error unloading image.");
+
+	}
     }
 
     public static void draw(GL gl, RGBAImage img)
