@@ -228,6 +228,16 @@ public class Camera extends Entity
         return up;
     }
 
+    public Vector3D getUpWithScale()
+    {
+        return upWithScale;
+    }
+
+    public Vector3D getRightWithScale()
+    {
+        return rightWithScale;
+    }
+
     public Vector3D getFront()
     {
         return front;
@@ -1316,6 +1326,8 @@ public class Camera extends Entity
     - As part of complex interaction techniques involving a 3D point image
       in camera viewport, for example to calculate relative movement in 3D
       with respect to aparent current view from camera.
+    - When estimating the projected area of a polygon from camera's point
+      of view, for example as part of a level of detail selection criteria.
 
     TODO: Current implementation is suspicious. It should use a simple
     multiplication of point with projection matrix... but this idea is not
