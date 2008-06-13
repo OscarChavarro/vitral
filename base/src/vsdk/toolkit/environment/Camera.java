@@ -1412,6 +1412,36 @@ public class Camera extends Entity
         return planes;
     }
 
+    /**
+    Given a pointdescription of a paralelogram or other convex polyhedra 
+    this method determines if that paralelogram is visible.
+    In other words, this method determines if the paralelogram and the
+    view volume intersects.
+    */
+    public boolean
+    boundingConvexPolyhedraIsVisible(Vector3D[] cornerCoordinates)
+    {
+        InfinitePlane[] viewVolumePlanes = getBoundingPlanes();
+
+        int i, j;
+        boolean isOutside;
+        Vector3D p;
+
+        for ( i = 0; i < 6; i++ ) {
+            isOutside = true;
+            for ( j = 0; j < cornerCoordinates.length; j++ ) {
+                p = cornerCoordinates[j];
+                if ( viewVolumePlanes[i].doContainmentTestHalfSpace(p, VSDK.EPSILON) == 1 ) {
+                    isOutside = false;
+                    break;
+                }
+            }
+            if ( isOutside ) return false;
+        }
+
+        return true;
+    }
+
 }
 
 //===========================================================================
