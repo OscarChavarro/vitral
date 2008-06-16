@@ -7,6 +7,8 @@
 
 package vsdk.toolkit.media;
 
+import vsdk.toolkit.common.VSDK;
+
 public class RGBAImage extends Image
 {
     /// Check the general attribute description in superclass Entity.
@@ -161,6 +163,16 @@ public class RGBAImage extends Image
         p.b = data[index+2];
 
         return p;
+    }
+
+    public void getPixelRgba(int x, int y, RGBAPixel p)
+    {
+        int index = ((xSize*(ySize-1-y)) + x)*4;
+
+        p.r = data[index];
+        p.g = data[index+1];
+        p.b = data[index+2];
+        p.a = data[index+3];
     }
 
     /**
