@@ -248,6 +248,11 @@ public class RGBAImage extends Image
         return copy;
     }
 
+    public int getSizeInBytes()
+    {
+        return xSize*ySize*4 + 2*VSDK.sizeofInt + VSDK.sizeofReference;
+    }
+
 }
 
 //===========================================================================
