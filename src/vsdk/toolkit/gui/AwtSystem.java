@@ -36,19 +36,57 @@ public class AwtSystem extends PresentationElement
         //-----------------------------------------------------------------
         if ( ((eawt.getModifiersEx()) & eawt.ALT_DOWN_MASK) != 0x0 ) {
             evsdk.modifierMask |= evsdk.MASK_ALT;
-	}
+        }
         if ( ((eawt.getModifiersEx()) & eawt.CTRL_DOWN_MASK) != 0x0 ) {
             evsdk.modifierMask |= evsdk.MASK_CTRL;
-	}
+        }
         if ( ((eawt.getModifiersEx()) & eawt.SHIFT_DOWN_MASK) != 0x0 ) {
             evsdk.modifierMask |= evsdk.MASK_SHIFT;
-	}
+        }
 
         //-----------------------------------------------------------------
+        if ( eawt.getKeyLocation() == eawt.KEY_LOCATION_NUMPAD ) {
+            switch ( keycode ) {
+            /*case 110:
+                evsdk.keycode = KeyEvent.KEY_NUMPERIOD;
+                break;*/
+            }
+        }
+
         switch ( keycode ) {
           case java.awt.event.KeyEvent.VK_ESCAPE:
-          evsdk.keycode = KeyEvent.KEY_ESC;
-          break;
+            evsdk.keycode = KeyEvent.KEY_ESC;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD0:
+            evsdk.keycode = KeyEvent.KEY_NUM0;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD1:
+            evsdk.keycode = KeyEvent.KEY_NUM1;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD2:
+            evsdk.keycode = KeyEvent.KEY_NUM2;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD3:
+            evsdk.keycode = KeyEvent.KEY_NUM3;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD4:
+            evsdk.keycode = KeyEvent.KEY_NUM4;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD5:
+            evsdk.keycode = KeyEvent.KEY_NUM5;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD6:
+            evsdk.keycode = KeyEvent.KEY_NUM6;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD7:
+            evsdk.keycode = KeyEvent.KEY_NUM7;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD8:
+            evsdk.keycode = KeyEvent.KEY_NUM8;
+            return;
+          case java.awt.event.KeyEvent.VK_NUMPAD9:
+            evsdk.keycode = KeyEvent.KEY_NUM9;
+            return;
         }
 
         if ( unicode_id == eawt.CHAR_UNDEFINED ) {

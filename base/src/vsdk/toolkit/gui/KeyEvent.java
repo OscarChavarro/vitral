@@ -140,6 +140,7 @@ public class KeyEvent extends PresentationElement
     public static final int KEY_TAB = 0x0072;
     public static final int KEY_COMMA = 0x0073;
     public static final int KEY_PERIOD = 0x0074;
+    public static final int KEY_NUMPERIOD = 0x0075;
 
     public  KeyEvent()
     {
