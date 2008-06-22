@@ -6,7 +6,21 @@
 
 package vsdk.toolkit.gui;
 
-//import java.awt.event.KeyEvent;
+// Java GUI classes
+//import java.awt.event.KeyEvent; // Do not import!
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.awt.FontMetrics;
+import java.awt.Rectangle;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Rectangle2D;
+
+// VitralSDK classes
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 /**
 This class gives VitralSDK access to GUI operations in the AwtSystem, as
@@ -15,6 +29,8 @@ events.
 */
 public class AwtSystem extends PresentationElement
 {
+    private static Font font = null;
+
     public static KeyEvent awt2vsdkEvent(java.awt.event.KeyEvent eawt)
     {
         KeyEvent evsdk;
@@ -337,6 +353,54 @@ public class AwtSystem extends PresentationElement
                 break;
             }
         }
+    }
+
+    public static RGBAImage calculateLabelImage(String label, ColorRgb color)
+    {
+        //-----------------------------------------------------------------
+        if ( font == null ) {
+            font = new Font("Arial", Font.PLAIN, 14);
+        }
+
+        //-----------------------------------------------------------------
+        RGBAImage labelImage;
+
+        //- Obtain an offline Java2D graphics context ---------------------
+        labelImage = new RGBAImage();
+        labelImage.init(1, 1);
+
+        BufferedImage bi;
+        Graphics offlineContext;
+
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
+        offlineContext = bi.getGraphics();
+        offlineContext.setFont(font);
+        FontMetrics fm = offlineContext.getFontMetrics();
+
+        //- Calculate the required image area for current label & font ----
+        Rectangle2D r = fm.getStringBounds(label, offlineContext);
+        Rectangle ri = r.getBounds();
+
+        LineMetrics metrics;
+        int up;
+
+        metrics = fm.getLineMetrics(label, offlineContext);
+
+        up = (int)(Math.ceil(metrics.getAscent()));
+
+        labelImage.init(ri.width, ri.height);
+
+        //- Calculate label image -----------------------------------------
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
+        offlineContext = bi.getGraphics();
+        offlineContext.setFont(font);
+        offlineContext.setColor(
+            new Color((float)color.r, (float)color.g, (float)color.b));
+        offlineContext.drawString(label, 0, up);
+
+        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
+
+        return labelImage;
     }
 }
 

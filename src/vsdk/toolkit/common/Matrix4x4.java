@@ -7,6 +7,7 @@
 //= - May 2 2006 - David Diaz / Oscar Chavarro: documentation added         =
 //= - November 3 2006 - Oscar Chavarro: New versions of determinant and     =
 //=   invert that takes into account 4x4 matrices, not just the 3x3 case    =
+//= - May 2007 - Liliana Baquero: Revitions to matrix math code             =
 //=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =

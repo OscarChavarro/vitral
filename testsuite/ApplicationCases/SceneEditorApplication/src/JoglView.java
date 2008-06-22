@@ -1,4 +1,9 @@
 //===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - June 22 2008 - Oscar Chavarro: Original base version (promoted from   =
+//=   previous "JoglView" class at SceneEditorApplication example).         =
+//===========================================================================
 
 // Java basic classes
 import java.util.ArrayList;
@@ -7,14 +12,9 @@ import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Rectangle;
-import java.awt.font.LineMetrics;
-import java.awt.geom.Rectangle2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -34,37 +34,17 @@ import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.TranslateGizmo;
+import vsdk.toolkit.gui.ViewportWindow;
 
-/**
-A `JoglView` represents an specific Jogl viewport inside a canvas. One Jogl
-canvas may contain one ore more `JoglView`s, arrange geometrically in 2D,
-ussually forming a partition (or at least a set of non overlaping 2D
-rectangles).
-
-The JoglView covers an area defined in terms of percentages.  For example,
-a Jogl canvas with a single JoglView covering all of its area, will have
-a view located at start percent (0%, 0%) with size (100%, 100%). When
-the containing canvas resizes, the internal `JoglView`s will resize
-accordingly and will keep its ocupation percentages (see 
-`viewportStartXPercent`, `viewportStartYPercent`, `viewportSizeXPercent` and
-`viewportSizeYPercent` attributes.
-).
-*/
-public class JoglView implements KeyListener
+public class JoglView extends ViewportWindow implements KeyListener
 {
-    // JoglView occupancy specification with respect to containing canvas
-    private double viewportStartXPercent;
-    private double viewportStartYPercent;
-    private double viewportSizeXPercent;
-    private double viewportSizeYPercent;
-
     // Current configuration, available only after a call to activateViewportGL
     private int viewportStartX;
     private int viewportStartY;
     private int viewportSizeX;
     private int viewportSizeY;
-    private int viewportBorder; // In pixels
 
     // A JoglView can request an specific size in pixels. If this size gets
     // smaller than percent-based area, the viewport is assigned to match the
@@ -73,7 +53,8 @@ public class JoglView implements KeyListener
     // viewport will get the percent-based size. The smaller requested size
     // viewport will always be centered inside the given percent-based area.
     // A requested size of 0 means the requested size match the percent-based
-    // size.
+    // size. This is usefull in applications willing to use just a subset of
+    // the area, for example when previewing slow raytracing visualizations.
     private int viewportRequestedSizeXInPixels;
     private int viewportRequestedSizeYInPixels;
 
@@ -97,7 +78,6 @@ public class JoglView implements KeyListener
     private RGBAImage xLabelImageSelected;
     private RGBAImage yLabelImageSelected;
     private RGBAImage zLabelImageSelected;
-    private Font font;
 
     // Each JoglView can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = 1;
@@ -109,13 +89,9 @@ public class JoglView implements KeyListener
     public JoglView()
     {
         //-----------------------------------------------------------------
-        viewportStartXPercent = 0.0;
-        viewportStartYPercent = 0.0;
-        viewportSizeXPercent = 1.0;
-        viewportSizeYPercent = 1.0;
+        super();
         viewportRequestedSizeXInPixels = 0;
         viewportRequestedSizeYInPixels = 0;
-        viewportBorder = 2;
 
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
@@ -172,15 +148,13 @@ public class JoglView implements KeyListener
         active = true;
 
         setTitle(camera.getName());
-        xLabelImage = calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
-        yLabelImage = calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
-        zLabelImage = calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
+        xLabelImage = AwtSystem.calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
+        yLabelImage = AwtSystem.calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
+        zLabelImage = AwtSystem.calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
 
-        xLabelImageSelected = calculateLabelImage("X", new ColorRgb(1, 1, 0));
-        yLabelImageSelected = calculateLabelImage("Y", new ColorRgb(1, 1, 0));
-        zLabelImageSelected = calculateLabelImage("Z", new ColorRgb(1, 1, 0));
-
-        font = new Font("Arial", Font.PLAIN, 14);
+        xLabelImageSelected = AwtSystem.calculateLabelImage("X", new ColorRgb(1, 1, 0));
+        yLabelImageSelected = AwtSystem.calculateLabelImage("Y", new ColorRgb(1, 1, 0));
+        zLabelImageSelected = AwtSystem.calculateLabelImage("Z", new ColorRgb(1, 1, 0));
 
         this.renderMode = RENDER_MODE_ZBUFFER;
 
@@ -277,46 +251,6 @@ public class JoglView implements KeyListener
     public int getRenderMode()
     {
         return renderMode;
-    }
-
-    public double getViewportStartXPercent()
-    {
-        return viewportStartXPercent;
-    }
-
-    public double getViewportStartYPercent()
-    {
-        return viewportStartYPercent;
-    }
-
-    public double getViewportSizeXPercent()
-    {
-        return viewportSizeXPercent;
-    }
-
-    public double getViewportSizeYPercent()
-    {
-        return viewportSizeYPercent;
-    }
-
-    public void setViewportStartXPercent(double viewportStartXPercent)
-    {
-        this.viewportStartXPercent = viewportStartXPercent;
-    }
-
-    public void setViewportStartYPercent(double viewportStartYPercent)
-    {
-        this.viewportStartYPercent = viewportStartYPercent;
-    }
-
-    public void setViewportSizeXPercent(double viewportSizeXPercent)
-    {
-        this.viewportSizeXPercent = viewportSizeXPercent;
-    }
-
-    public void setViewportSizeYPercent(double viewportSizeYPercent)
-    {
-        this.viewportSizeYPercent = viewportSizeYPercent;
     }
 
     public int getViewportRequestedSizeXInPixels()
@@ -509,52 +443,10 @@ public class JoglView implements KeyListener
         gl.glPopAttrib();
     }
 
-    public RGBAImage calculateLabelImage(String label, ColorRgb color)
-    {
-        RGBAImage labelImage;
-
-        //- Obtain an offline Java2D graphics context ---------------------
-        labelImage = new RGBAImage();
-        labelImage.init(1, 1);
-
-        BufferedImage bi;
-        Graphics offlineContext;
-
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
-        offlineContext = bi.getGraphics();
-        offlineContext.setFont(font);
-        FontMetrics fm = offlineContext.getFontMetrics();
-
-        //- Calculate the required image area for current label & font ----
-        Rectangle2D r = fm.getStringBounds(label, offlineContext);
-        Rectangle ri = r.getBounds();
-
-        LineMetrics metrics;
-        int up;
-
-        metrics = fm.getLineMetrics(label, offlineContext);
-
-        up = (int)(Math.ceil(metrics.getAscent()));
-
-        labelImage.init(ri.width, ri.height);
-
-        //- Calculate label image -----------------------------------------
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
-        offlineContext = bi.getGraphics();
-        offlineContext.setFont(font);
-        offlineContext.setColor(
-            new Color((float)color.r, (float)color.g, (float)color.b));
-        offlineContext.drawString(label, 0, up);
-
-        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
-
-        return labelImage;
-    }
-
     public void setTitle(String name)
     {
         title = new String(name);
-        titleImage = calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
+        titleImage = AwtSystem.calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
     }
 
     public void drawReferenceBase(GL gl)
