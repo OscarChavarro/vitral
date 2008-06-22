@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
+import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -512,31 +513,41 @@ public class JoglView implements KeyListener
     {
         RGBAImage labelImage;
 
-        //-----------------------------------------------------------------
+        //- Obtain an offline Java2D graphics context ---------------------
         labelImage = new RGBAImage();
-        labelImage.init(200, 30);
+        labelImage.init(1, 1);
 
         BufferedImage bi;
         Graphics offlineContext;
 
         bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
         offlineContext = bi.getGraphics();
+        offlineContext.setFont(font);
         FontMetrics fm = offlineContext.getFontMetrics();
+
+        //- Calculate the required image area for current label & font ----
         Rectangle2D r = fm.getStringBounds(label, offlineContext);
         Rectangle ri = r.getBounds();
 
-        //-----------------------------------------------------------------
-        labelImage.init(ri.width-ri.x+10, (ri.height-ri.y)/2+5);
+        LineMetrics metrics;
+        int up;
+
+        metrics = fm.getLineMetrics(label, offlineContext);
+
+        up = (int)(Math.ceil(metrics.getAscent()));
+
+        labelImage.init(ri.width, ri.height);
+
+        //- Calculate label image -----------------------------------------
         bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
         offlineContext = bi.getGraphics();
-
-        //-----------------------------------------------------------------
+        offlineContext.setFont(font);
         offlineContext.setColor(
             new Color((float)color.r, (float)color.g, (float)color.b));
-        offlineContext.setFont(font);
-        offlineContext.drawString(label, -ri.x, -ri.y);
+        offlineContext.drawString(label, 0, up);
 
         AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
+
         return labelImage;
     }
 

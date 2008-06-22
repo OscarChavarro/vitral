@@ -215,3 +215,7 @@ Started from stage 041 CameraSwing
 
 2007 october 15, Oscar Chavarro: <<3h>>
   - 3h: ModifyPanelForFunctionalExplicitSurface :)
+
+2008 june 22, Oscar Chavarro: <<30 min>>
+  - 30min: JoglView.calculateLabelImage corrected to generated minimum framing
+    image with respect to text.
