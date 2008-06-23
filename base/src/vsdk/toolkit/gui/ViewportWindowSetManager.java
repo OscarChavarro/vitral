@@ -5,11 +5,12 @@
 //=   previous "ViewportOrganizer" class at SceneEditorApplication example).=
 //===========================================================================
 
+package vsdk.toolkit.gui;
+
 // Basic Java classes
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.gui.ViewportWindow;
 
 public class ViewportWindowSetManager
 {

@@ -79,6 +79,7 @@ import vsdk.toolkit.gui.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.toolkit.gui.ViewportWindow;
+import vsdk.toolkit.gui.ViewportWindowSetManager;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
 public class JoglDrawingArea implements 
