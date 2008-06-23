@@ -57,7 +57,7 @@ class VitralEditorServerProtocol implements Runnable
             R = parent.theScene.scene.getSimpleBodies().get(firstThingSelected).getRotation();
         }
         else {
-            camera = parent.drawingArea.views.get(parent.drawingArea.selectedView).getCamera();
+            camera = ((JoglAwtViewportWindow)(parent.drawingArea.views.get(parent.drawingArea.selectedView))).getCamera();
             pos = camera.getPosition();
             R = camera.getRotation();
         }

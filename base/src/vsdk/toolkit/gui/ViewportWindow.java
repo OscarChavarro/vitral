@@ -28,6 +28,17 @@ a multiple viewport application). A ViewportWindow has an associated border
 projected on the ViewportWindow's defined area, leaving `border` pixels
 out of the projection area (the border is assigned a color and drawed to
 mark the limits between ViewportWindow's).
+
+A ViewportWindow can be `active` or inactive.  An active status means that
+current viewport is visible and should be rendered. An inactive status means
+that viewport is not visible and thus should not be rendered. This behavior
+is designed to support applications with multiple views, where some of the
+views are not rendered all the time.
+
+A ViewportWindow can be `selected`. In applications with multiple viewports
+sharing one windows canvas, this is usually used to distinguish a viewport
+by drawing its border in some highlighted color, and give feedback to the
+user about the viewport recieving interaction events.
 */
 public class ViewportWindow
 {
@@ -39,13 +50,20 @@ public class ViewportWindow
 
     protected int viewportBorder; // In pixels
 
+    protected boolean selected;
+    protected boolean active;
+
     public ViewportWindow()
     {
         viewportStartXPercent = 0.0;
         viewportStartYPercent = 0.0;
         viewportSizeXPercent = 1.0;
         viewportSizeYPercent = 1.0;
+
         viewportBorder = 2;
+
+        selected = true;
+        active = true;
     }
 
     public int getBorder()
@@ -98,6 +116,25 @@ public class ViewportWindow
         this.viewportSizeYPercent = viewportSizeYPercent;
     }
 
+    public void setSelected(boolean val)
+    {
+        selected = val;
+    }
+
+    public boolean getSelected()
+    {
+        return selected;
+    }
+
+    public boolean isActive()
+    {
+        return active;
+    }
+
+    public void setActive(boolean val)
+    {
+        active = val;
+    }
 }
 
 //===========================================================================

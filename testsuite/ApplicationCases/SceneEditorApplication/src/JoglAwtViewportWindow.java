@@ -38,7 +38,7 @@ import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
 
-public class JoglView extends ViewportWindow implements KeyListener
+public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 {
     // Current configuration, available only after a call to activateViewportGL
     private int viewportStartX;
@@ -46,7 +46,7 @@ public class JoglView extends ViewportWindow implements KeyListener
     private int viewportSizeX;
     private int viewportSizeY;
 
-    // A JoglView can request an specific size in pixels. If this size gets
+    // A JoglAwtViewportWindow can request an specific size in pixels. If this size gets
     // smaller than percent-based area, the viewport is assigned to match the
     // requested size. If a requested size dimension in pixels is greater
     // than the percent-based area, the requested size is ignored and the
@@ -58,7 +58,7 @@ public class JoglView extends ViewportWindow implements KeyListener
     private int viewportRequestedSizeXInPixels;
     private int viewportRequestedSizeYInPixels;
 
-    // Every JoglView has an internal camera and renderer configuration
+    // Every JoglAwtViewportWindow has an internal camera and renderer configuration
     private Camera camera;
     private Camera cameraPerspective;
     private Camera cameraTop;
@@ -68,8 +68,6 @@ public class JoglView extends ViewportWindow implements KeyListener
     private RendererConfiguration quality;
 
     //
-    private boolean selected;
-    private boolean active;
     private String title;
     private RGBAImage titleImage;
     private RGBAImage xLabelImage;
@@ -79,14 +77,14 @@ public class JoglView extends ViewportWindow implements KeyListener
     private RGBAImage yLabelImageSelected;
     private RGBAImage zLabelImageSelected;
 
-    // Each JoglView can call a different visualization algorithm
+    // Each JoglAwtViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = 1;
     public static final int RENDER_MODE_RAYTRACING = 2;
     private int renderMode;
 
     public boolean showGrid;
 
-    public JoglView()
+    public JoglAwtViewportWindow()
     {
         //-----------------------------------------------------------------
         super();
@@ -143,9 +141,6 @@ public class JoglView extends ViewportWindow implements KeyListener
 
         //-----------------------------------------------------------------
         quality = new RendererConfiguration();
-
-        selected = true;
-        active = true;
 
         setTitle(camera.getName());
         xLabelImage = AwtSystem.calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
@@ -298,26 +293,6 @@ public class JoglView extends ViewportWindow implements KeyListener
         return selected;
     }
 
-    public void setSelected(boolean val)
-    {
-        selected = val;
-    }
-
-    public boolean getSelected()
-    {
-        return selected;
-    }
-
-    public boolean isActive()
-    {
-        return active;
-    }
-
-    public void setActive(boolean val)
-    {
-        active = val;
-    }
-
     public boolean useFullContainerViewportArea()
     {
         int x, y;
@@ -342,11 +317,11 @@ public class JoglView extends ViewportWindow implements KeyListener
 
     /**
     A given container canvas has valid pixel coordinates from (0, 0) to
-    (canvasXSize-1, canvasYSize-1). Current JoglView is defined inside that
+    (canvasXSize-1, canvasYSize-1). Current JoglAwtViewportWindow is defined inside that
     area in terms of a start point (upper left corner) and size given in
     area percentages.
     This method calculates the (viewportStartX, viewportStartY,
-    viewportSizeX, viewportSizeY) variables that defines current JoglView
+    viewportSizeX, viewportSizeY) variables that defines current JoglAwtViewportWindow
     viewport in container canvas' integer pixel coordinates.
     */
     public void updateViewportConfiguration(int canvasXSize, int canvasYSize)

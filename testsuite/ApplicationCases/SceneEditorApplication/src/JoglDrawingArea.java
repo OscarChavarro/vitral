@@ -78,6 +78,7 @@ import vsdk.toolkit.gui.RotateGizmo;
 import vsdk.toolkit.gui.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.toolkit.gui.ViewportWindow;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
 public class JoglDrawingArea implements 
@@ -104,7 +105,7 @@ public class JoglDrawingArea implements
     private Scene theScene;
     private JLabel statusMessage;
 
-    public ArrayList<JoglView> views;
+    public ArrayList<ViewportWindow> views;
 
     public int interactionMode;
     public int lastInteractionMode;
@@ -126,7 +127,7 @@ public class JoglDrawingArea implements
     //
     private int globalViewportXSize;
     private int globalViewportYSize;
-    private ViewOrganizer viewOrganizer;
+    private ViewportWindowSetManager viewOrganizer;
     public int selectedView;
     private boolean fullViewport;
     private int viewOrderStyle;
@@ -190,17 +191,17 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
-        JoglView view;
+        JoglAwtViewportWindow view;
         int i;
 
-        views = new ArrayList<JoglView>();
-        viewOrganizer = new ViewOrganizer();
+        views = new ArrayList<ViewportWindow>();
+        viewOrganizer = new ViewportWindowSetManager();
         fullViewport = false;
         viewOrderStyle = 0;
         selectedView = 2;
 
         for ( i = 0; i < 4; i++ ) {
-            view = new JoglView();
+            view = new JoglAwtViewportWindow();
             view.hintConfig(4, i);
             views.add(view);
         }
@@ -692,10 +693,10 @@ public class JoglDrawingArea implements
 
     public void toggleGrid()
     {
-        views.get(selectedView).toggleGrid();
+        ((JoglAwtViewportWindow)(views.get(selectedView))).toggleGrid();
     }
 
-    private void drawView(GL gl, JoglView view)
+    private void drawView(GL gl, JoglAwtViewportWindow view)
     {
         if ( !view.isActive() ) {
             return;
@@ -770,7 +771,7 @@ public class JoglDrawingArea implements
 
         debugProjectedViewsIfNeeded(gl);
 
-        JoglView view;
+        JoglAwtViewportWindow view;
         int i;
 
         //-----------------------------------------------------------------
@@ -785,13 +786,13 @@ public class JoglDrawingArea implements
         gl.glLoadIdentity();
 
         for ( i = 0; i < views.size(); i++ ) {
-            view = views.get(i);
+            view = (JoglAwtViewportWindow)views.get(i);
             view.drawBorderGL(gl, globalViewportXSize, globalViewportYSize);
         }
 
         //-----------------------------------------------------------------
         for ( i = 0; i < views.size(); i++ ) {
-            view = views.get(i);
+            view = (JoglAwtViewportWindow)views.get(i);
 
             if ( !view.isActive() ) {
                 continue;
@@ -950,7 +951,7 @@ public class JoglDrawingArea implements
         int i;
 
         for ( i = 0; i < views.size(); i++ ) {
-            views.get(i).updateViewportConfiguration(globalViewportXSize, globalViewportYSize);
+            ((JoglAwtViewportWindow)(views.get(i))).updateViewportConfiguration(globalViewportXSize, globalViewportYSize);
         }
     }   
 
@@ -975,10 +976,10 @@ public class JoglDrawingArea implements
         //System.out.println("Mouse exited");
     }
 
-    private JoglView getSelectedView(MouseEvent e, boolean changeSelection)
+    private JoglAwtViewportWindow getSelectedView(MouseEvent e, boolean changeSelection)
     {
-        JoglView view = null;
-        JoglView theView = null;
+        JoglAwtViewportWindow view = null;
+        JoglAwtViewportWindow theView = null;
 
         //-----------------------------------------------------------------
         int i;
@@ -989,7 +990,7 @@ public class JoglDrawingArea implements
         ypercent = 1-((double)e.getY()) / ((double)globalViewportYSize);
 
         for ( i = 0; i < views.size(); i++ ) {
-            view = views.get(i);
+            view = (JoglAwtViewportWindow)(views.get(i));
             if ( view.isActive() && view.inside(xpercent, ypercent) ) {
                 if ( changeSelection ) {
                     view.setSelected(true);
@@ -1008,8 +1009,8 @@ public class JoglDrawingArea implements
 
     public void mousePressed(MouseEvent e)
     {
-        JoglView view = getSelectedView(e, true);
-        JoglView mouseView = getSelectedView(e, false);
+        JoglAwtViewportWindow view = getSelectedView(e, true);
+        JoglAwtViewportWindow mouseView = getSelectedView(e, false);
 
         //-----------------------------------------------------------------
         // WARNING / TODO
@@ -1048,7 +1049,7 @@ public class JoglDrawingArea implements
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();
-            view = views.get(selectedView);
+            view = (JoglAwtViewportWindow)(views.get(selectedView));
             if ( mouseView == null ) {
                 return;
             }
@@ -1095,8 +1096,8 @@ public class JoglDrawingArea implements
 
     public void mouseReleased(MouseEvent e)
     {
-        JoglView view = views.get(selectedView);
-        JoglView mouseView = getSelectedView(e, false);
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)views.get(selectedView);
+        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedView(e, false);
 
         // WARNING / TODO
         // There should be a cameraController.getFutureAction(e) that calculates
@@ -1155,8 +1156,8 @@ public class JoglDrawingArea implements
 
     public void mouseClicked(MouseEvent e)
     {
-        JoglView view = getSelectedView(e, true);
-        JoglView mouseView = getSelectedView(e, false);
+        JoglAwtViewportWindow view = getSelectedView(e, true);
+        JoglAwtViewportWindow mouseView = getSelectedView(e, false);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -1200,8 +1201,8 @@ public class JoglDrawingArea implements
     public void mouseMoved(MouseEvent e)
     {
         //-----------------------------------------------------------------
-        JoglView view = views.get(selectedView);
-        JoglView mouseView = getSelectedView(e, false);
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(views.get(selectedView));
+        JoglAwtViewportWindow mouseView = getSelectedView(e, false);
 
         //-----------------------------------------------------------------
         int firstThingSelected = theScene.selectedThings.firstSelected();
@@ -1245,8 +1246,8 @@ public class JoglDrawingArea implements
 
     public void mouseDragged(MouseEvent e)
     {
-        JoglView view = views.get(selectedView);
-        JoglView mouseView = getSelectedView(e, false);
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(views.get(selectedView));
+        JoglAwtViewportWindow mouseView = getSelectedView(e, false);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -1470,7 +1471,7 @@ public class JoglDrawingArea implements
 
         // In view command propagation
         if ( !skipKey ) {
-            views.get(selectedView).keyPressed(e);
+            ((JoglAwtViewportWindow)(views.get(selectedView))).keyPressed(e);
         }
 
         double theta = 0;
@@ -1760,7 +1761,7 @@ public class JoglDrawingArea implements
 
     public void newView()
     {
-        views.add(new JoglView());
+        views.add(new JoglAwtViewportWindow());
         selectedView = viewOrganizer.doLayout(views, fullViewport?selectedView:-1, viewOrderStyle);
     }
 

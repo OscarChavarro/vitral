@@ -1,9 +1,19 @@
 //===========================================================================
+//=-------------------------------------------------------------------------=
+//= Module history:                                                         =
+//= - June 22 2008 - Oscar Chavarro: Original base version (promoted from   =
+//=   previous "ViewportOrganizer" class at SceneEditorApplication example).=
+//===========================================================================
+
+// Basic Java classes
 import java.util.ArrayList;
 
-public class ViewOrganizer
+// VitralSDK classes
+import vsdk.toolkit.gui.ViewportWindow;
+
+public class ViewportWindowSetManager
 {
-    private static void doLayout1(JoglView view)
+    private static void doLayout1(ViewportWindow view)
     {
         view.setActive(true);
         view.setViewportStartXPercent(0.0);
@@ -12,7 +22,7 @@ public class ViewOrganizer
         view.setViewportSizeYPercent(1.0);
     }
 
-    private static void doLayout2(ArrayList <JoglView> views, int style)
+    private static void doLayout2(ArrayList <ViewportWindow> views, int style)
     {
         views.get(0).setActive(true);
         views.get(1).setActive(true);
@@ -40,7 +50,7 @@ public class ViewOrganizer
         }
     }
 
-    private static void doLayout3(ArrayList <JoglView> views, int style)
+    private static void doLayout3(ArrayList <ViewportWindow> views, int style)
     {
         //-----------------------------------------------------------------
         double Pstart[][] = new double[3][2];
@@ -113,7 +123,7 @@ public class ViewOrganizer
         }
     }
 
-    private static void doLayout4(ArrayList <JoglView> views, int style)
+    private static void doLayout4(ArrayList <ViewportWindow> views, int style)
     {
         //-----------------------------------------------------------------
         double Pstart[][] = new double[4][2];
@@ -190,10 +200,10 @@ public class ViewOrganizer
         }
     }
 
-    public static int doLayout(ArrayList <JoglView> views, int selectedForFullScreen, int style)
+    public static int doLayout(ArrayList <ViewportWindow> views, int selectedForFullScreen, int style)
     {
         int i, selected = 0;
-        JoglView view;
+        ViewportWindow view;
 
         if ( selectedForFullScreen >= 0 &&
              selectedForFullScreen < views.size() ) {
