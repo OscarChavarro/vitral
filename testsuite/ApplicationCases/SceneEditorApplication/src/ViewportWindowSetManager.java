@@ -13,6 +13,112 @@ import vsdk.toolkit.gui.ViewportWindow;
 
 public class ViewportWindowSetManager
 {
+    private int selectedViewIndex;
+    private int globalViewportXSize;
+    private int globalViewportYSize;
+    private int viewOrderStyle;
+    private boolean fullViewport;
+
+    public void ViewportWindowSetManager()
+    {
+        globalViewportXSize = 0;
+        globalViewportYSize = 0;
+        fullViewport = false;
+        viewOrderStyle = 0;
+        selectedViewIndex = 0;
+    }
+
+    public int getViewOrderStyle()
+    {
+        return viewOrderStyle;
+    }
+
+    public void setViewOrderStyle(int o)
+    {
+        viewOrderStyle = o;
+    }
+
+    public boolean isFullViewportScreen()
+    {
+        return fullViewport;
+    }
+
+    public void setFullViewportScreen(boolean val)
+    {
+        fullViewport = val;
+    }
+
+    public void toogleFullViewportScreen()
+    {
+        if ( fullViewport ) {
+            fullViewport = false;
+        }
+        else {
+            fullViewport = true;
+        }
+    }
+
+    public int getSelectedViewIndex()
+    {
+        return selectedViewIndex;
+    }
+
+    public void setSelectedViewIndex(int i)
+    {
+        selectedViewIndex = i;
+    }
+
+    public void setGlobalViewportXSize(int x)
+    {
+        globalViewportXSize = x;
+    }
+
+    public void setGlobalViewportYSize(int y)
+    {
+        globalViewportYSize = y;
+    }
+
+    public int getGlobalViewportXSize()
+    {
+        return globalViewportXSize;
+    }
+
+    public int getGlobalViewportYSize()
+    {
+        return globalViewportYSize;
+    }
+
+    public ViewportWindow getSelectedViewFromPointerPosition(ArrayList<ViewportWindow> views, int x, int y, boolean changeSelection)
+    {
+        ViewportWindow view = null;
+        ViewportWindow theView = null;
+
+        //-----------------------------------------------------------------
+        int i;
+        double xpercent;
+        double ypercent;
+
+        xpercent = ((double)x) / ((double)getGlobalViewportXSize());
+        ypercent = 1-((double)y) / ((double)getGlobalViewportYSize());
+
+        for ( i = 0; i < views.size(); i++ ) {
+            view = views.get(i);
+            if ( view.isActive() && view.inside(xpercent, ypercent) ) {
+                if ( changeSelection ) {
+                    view.setSelected(true);
+                    selectedViewIndex = i;
+                }
+                theView = view;
+            }
+            else {
+                if ( changeSelection ) {
+                    view.setSelected(false);
+                }
+            }
+        }
+        return theView;
+    }
+
     private static void doLayout1(ViewportWindow view)
     {
         view.setActive(true);
@@ -257,6 +363,13 @@ public class ViewportWindowSetManager
         }
         return selected;
     }
+
+    public void updateLayout(ArrayList<ViewportWindow> views)
+    {
+        setSelectedViewIndex(doLayout(views, fullViewport?selectedViewIndex:-1, viewOrderStyle));
+    }
+
+
 }
 
 //===========================================================================

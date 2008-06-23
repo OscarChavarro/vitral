@@ -631,17 +631,6 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
 
-    public boolean inside(double x, double y)
-    {
-        if ( x >= viewportStartXPercent &&
-             x <= viewportStartXPercent + viewportSizeXPercent &&
-             y >= viewportStartYPercent &&
-             y <= viewportStartYPercent + viewportSizeYPercent ) {
-            return true;
-        }
-        return false;
-    }
-
     public void updateMouseEvent(MouseEvent e, int globalViewportXSize, int globalViewportYSize)
     {
           e.translatePoint(-getViewportStartX(),
