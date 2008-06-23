@@ -129,7 +129,6 @@ public class JoglDrawingArea implements
 
     //=================================================================
     public ViewportWindowSetManager viewOrganizer;
-    public ArrayList<ViewportWindow> views;
 
     //=================================================================
 
@@ -188,7 +187,6 @@ public class JoglDrawingArea implements
         JoglAwtViewportWindow view;
         int i;
 
-        views = new ArrayList<ViewportWindow>();
         viewOrganizer = new ViewportWindowSetManager();
 
         viewOrganizer.setSelectedViewIndex(2);
@@ -196,9 +194,9 @@ public class JoglDrawingArea implements
         for ( i = 0; i < 4; i++ ) {
             view = new JoglAwtViewportWindow();
             view.hintConfig(4, i);
-            views.add(view);
+            viewOrganizer.getViews().add(view);
         }
-        viewOrganizer.updateLayout(views);
+        viewOrganizer.updateLayout();
     }
 
     private void createCursors()
@@ -686,7 +684,7 @@ public class JoglDrawingArea implements
 
     public void toggleGrid()
     {
-        ((JoglAwtViewportWindow)(views.get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
+        ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
     }
 
     private void drawView(GL gl, JoglAwtViewportWindow view)
@@ -778,14 +776,14 @@ public class JoglDrawingArea implements
         gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        for ( i = 0; i < views.size(); i++ ) {
-            view = (JoglAwtViewportWindow)views.get(i);
+        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
+            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
             view.drawBorderGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
         }
 
         //-----------------------------------------------------------------
-        for ( i = 0; i < views.size(); i++ ) {
-            view = (JoglAwtViewportWindow)views.get(i);
+        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
+            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
 
             if ( !view.isActive() ) {
                 continue;
@@ -943,8 +941,8 @@ public class JoglDrawingArea implements
         viewOrganizer.setGlobalViewportYSize(height);
         int i;
 
-        for ( i = 0; i < views.size(); i++ ) {
-            ((JoglAwtViewportWindow)(views.get(i))).updateViewportConfiguration(viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
+            ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(i))).updateViewportConfiguration(viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
         }
     }   
 
@@ -971,7 +969,7 @@ public class JoglDrawingArea implements
 
     private ViewportWindow getSelectedViewFromPointerPosition(MouseEvent e, boolean changeSelection)
     {
-        return viewOrganizer.getSelectedViewFromPointerPosition(views, e.getX(), e.getY(), changeSelection);
+        return viewOrganizer.getSelectedViewFromPointerPosition(e.getX(), e.getY(), changeSelection);
     }
 
     public void mousePressed(MouseEvent e)
@@ -1016,7 +1014,7 @@ public class JoglDrawingArea implements
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();
-            view = (JoglAwtViewportWindow)(views.get(viewOrganizer.getSelectedViewIndex()));
+            view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
             if ( mouseView == null ) {
                 return;
             }
@@ -1063,7 +1061,7 @@ public class JoglDrawingArea implements
 
     public void mouseReleased(MouseEvent e)
     {
-        JoglAwtViewportWindow view = (JoglAwtViewportWindow)views.get(viewOrganizer.getSelectedViewIndex());
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex());
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         // WARNING / TODO
@@ -1168,7 +1166,7 @@ public class JoglDrawingArea implements
     public void mouseMoved(MouseEvent e)
     {
         //-----------------------------------------------------------------
-        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(views.get(viewOrganizer.getSelectedViewIndex()));
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         //-----------------------------------------------------------------
@@ -1213,7 +1211,7 @@ public class JoglDrawingArea implements
 
     public void mouseDragged(MouseEvent e)
     {
-        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(views.get(viewOrganizer.getSelectedViewIndex()));
+        JoglAwtViewportWindow view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
@@ -1438,7 +1436,7 @@ public class JoglDrawingArea implements
 
         // In view command propagation
         if ( !skipKey ) {
-            ((JoglAwtViewportWindow)(views.get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
+            ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
         }
 
         double theta = 0;
@@ -1451,18 +1449,18 @@ public class JoglDrawingArea implements
               case '.':
                 val = viewOrganizer.getSelectedViewIndex();
                 val++;
-                if ( val >= views.size() ) {
+                if ( val >= viewOrganizer.getViews().size() ) {
                     val = 0;
                 }
                 viewOrganizer.setSelectedViewIndex(val);
 
-                viewOrganizer.updateLayout(views);
+                viewOrganizer.updateLayout();
                 break;
               case ',':
                 val = viewOrganizer.getViewOrderStyle();
                 val++;
                 viewOrganizer.setViewOrderStyle(val);
-                viewOrganizer.updateLayout(views);
+                viewOrganizer.updateLayout();
                 break;
                 //- Visual debug ray control ---------------------------------
               case '4': // Numpad 4
@@ -1662,7 +1660,7 @@ public class JoglDrawingArea implements
               case 'w':
                 if ( ((e.getModifiersEx()) & e.ALT_DOWN_MASK) != 0x0 ) {
                     viewOrganizer.toogleFullViewportScreen();
-                    viewOrganizer.updateLayout(views);
+                    viewOrganizer.updateLayout();
                 }
                 else {
                     statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
@@ -1729,16 +1727,16 @@ public class JoglDrawingArea implements
 
     public void newView()
     {
-        views.add(new JoglAwtViewportWindow());
-        viewOrganizer.updateLayout(views);
+        viewOrganizer.getViews().add(new JoglAwtViewportWindow());
+        viewOrganizer.updateLayout();
     }
 
     public void delView()
     {
-        if ( views.size() > 1 ) {
-            views.remove(views.size()-1);
+        if ( viewOrganizer.getViews().size() > 1 ) {
+            viewOrganizer.getViews().remove(viewOrganizer.getViews().size()-1);
         }
-        viewOrganizer.updateLayout(views);
+        viewOrganizer.updateLayout();
     }
 
     private void reportObjectSelection()

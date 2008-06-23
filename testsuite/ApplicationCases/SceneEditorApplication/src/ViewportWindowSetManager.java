@@ -18,14 +18,21 @@ public class ViewportWindowSetManager
     private int globalViewportYSize;
     private int viewOrderStyle;
     private boolean fullViewport;
+    private ArrayList<ViewportWindow> views;
 
-    public void ViewportWindowSetManager()
+    public ViewportWindowSetManager()
     {
         globalViewportXSize = 0;
         globalViewportYSize = 0;
         fullViewport = false;
         viewOrderStyle = 0;
         selectedViewIndex = 0;
+        views = new ArrayList<ViewportWindow>();
+    }
+
+    public ArrayList<ViewportWindow> getViews()
+    {
+        return views;
     }
 
     public int getViewOrderStyle()
@@ -88,7 +95,7 @@ public class ViewportWindowSetManager
         return globalViewportYSize;
     }
 
-    public ViewportWindow getSelectedViewFromPointerPosition(ArrayList<ViewportWindow> views, int x, int y, boolean changeSelection)
+    public ViewportWindow getSelectedViewFromPointerPosition(int x, int y, boolean changeSelection)
     {
         ViewportWindow view = null;
         ViewportWindow theView = null;
@@ -306,7 +313,7 @@ public class ViewportWindowSetManager
         }
     }
 
-    public static int doLayout(ArrayList <ViewportWindow> views, int selectedForFullScreen, int style)
+    private static int doLayout(ArrayList <ViewportWindow> views, int selectedForFullScreen, int style)
     {
         int i, selected = 0;
         ViewportWindow view;
@@ -364,7 +371,7 @@ public class ViewportWindowSetManager
         return selected;
     }
 
-    public void updateLayout(ArrayList<ViewportWindow> views)
+    public void updateLayout()
     {
         setSelectedViewIndex(doLayout(views, fullViewport?selectedViewIndex:-1, viewOrderStyle));
     }

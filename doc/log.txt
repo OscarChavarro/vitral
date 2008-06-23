@@ -799,11 +799,11 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     "bin2ase" tool.
   - 39min: Basic support for reading DirectX' dds textures.
 
-2008 june 22, Oscar Chavarro <<98min>>:
+2008 june 22, Oscar Chavarro <<110min>>:
   - 30min: design overview: calculateLabelImage promoted to AwtSystem,
     JoglView prepared to be promoted: basic functionality on superclass
     ViewportWindow.
-  - 1h08min: design overview: some ViewportWindow management classes
+  - 1h20min: design overview: some ViewportWindow management classes
     renorganized.
 
 ===========================================================================
