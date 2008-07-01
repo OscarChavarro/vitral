@@ -192,8 +192,9 @@ public class IndexedColorImage extends Image
         copy.init(xSize, ySize);
         for ( x = 0; x < xSize; x++ ) {
             for ( y = 0; y < ySize; y++ ) {
-                source = getPixel(x, y);
-                target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
+                //source = getPixel(x, y);
+                //target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
+                getPixelRgb(x, y, target);
                 copy.putPixel(x, y, target);
             }
         }
