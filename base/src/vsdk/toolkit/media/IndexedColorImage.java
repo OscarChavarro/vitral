@@ -168,6 +168,11 @@ public class IndexedColorImage extends Image
         return colorTable;
     }
 
+    public void setColorTable(RGBColorPalette p)
+    {
+        colorTable = p;
+    }
+
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
         ColorRgb c = new ColorRgb();
