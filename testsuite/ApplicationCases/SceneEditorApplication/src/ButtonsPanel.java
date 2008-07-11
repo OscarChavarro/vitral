@@ -590,6 +590,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             jfc.addChoosableFileFilter(new MyFilter("vtk", "vtk Kitware vtk legacy binary file (mesh only)"));
             jfc.addChoosableFileFilter(new MyFilter("gts", "gts Gts mesh ASCII file"));
             jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
+            jfc.addChoosableFileFilter(new MyFilter("ply", "ply Ply mesh"));
 
             int opc = jfc.showOpenDialog(new JPanel());
             if (opc == JFileChooser.APPROVE_OPTION) {
