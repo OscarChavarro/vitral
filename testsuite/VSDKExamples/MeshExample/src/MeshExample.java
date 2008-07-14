@@ -300,9 +300,9 @@ public class MeshExample
     }
 
     /**
-       Do NOT call your controller from the `keyTyped` method, or the controller
-       will be invoked twice for each key. Call it only from the `keyPressed` and
-       `keyReleased` method
+    Do NOT call your controller from the `keyTyped` method, or the controller
+    will be invoked twice for each key. Call it only from the `keyPressed` and
+    `keyReleased` method
     */
     public void keyTyped(KeyEvent e) {
         ;
