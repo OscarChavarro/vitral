@@ -1248,6 +1248,47 @@ public class TriangleMesh extends Surface {
 
         calculateNormals();
     }
+
+    /**
+    Given current mesh and a plane p, this method modifies the current mesh,
+    leaving on it only the triangles which lies on the INSIDE part of the
+    plane `p`. For triangles cutting the plane, new triangles are generated.
+    */
+    public void
+    slice(InfinitePlane p)
+    {
+        int i;
+        Vector3D p1, p2, p3;
+        p1 = new Vector3D();
+        p2 = new Vector3D();
+        p3 = new Vector3D();
+
+	for ( i = 0; i < triangleIndices.length/3; i++ ) {
+
+            p1.x = vertexPositions[3*triangleIndices[3*i+0]+0];
+            p1.y = vertexPositions[3*triangleIndices[3*i+0]+1];
+            p1.z = vertexPositions[3*triangleIndices[3*i+0]+2];
+
+            p2.x = vertexPositions[3*triangleIndices[3*i+1]+0];
+            p2.y = vertexPositions[3*triangleIndices[3*i+1]+1];
+            p2.z = vertexPositions[3*triangleIndices[3*i+1]+2];
+
+            p3.x = vertexPositions[3*triangleIndices[3*i+2]+0];
+            p3.y = vertexPositions[3*triangleIndices[3*i+2]+1];
+            p3.z = vertexPositions[3*triangleIndices[3*i+2]+2];
+
+            if ( p.doContainmentTestHalfSpace(p1, VSDK.EPSILON) == OUTSIDE &&
+                 p.doContainmentTestHalfSpace(p2, VSDK.EPSILON) == OUTSIDE &&
+                 p.doContainmentTestHalfSpace(p3, VSDK.EPSILON) == OUTSIDE ) {
+	        triangleIndices[3*i+0] = -1;
+	        triangleIndices[3*i+1] = -1;
+  	        triangleIndices[3*i+2] = -1;
+	    }
+	}
+
+        compact();
+	calculateNormals();
+    }
 }
 
 //===========================================================================
