@@ -53,14 +53,14 @@ public class WriterObj extends PersistenceElement {
 
         //-----------------------------------------------------------------
         writeAsciiLine(inOutputStream, "# " + nv + " vertex texture coordinates");
-        for ( i = 0; i < nv; i++ ) {
+        for ( i = 0; i < nv && vuv != null; i++ ) {
             writeAsciiLine(inOutputStream, "vt " + vuv[2*i] + " " + vuv[2*i+1]);
         }
 
         //-----------------------------------------------------------------
         vni = new Vector3D();
         writeAsciiLine(inOutputStream, "# " + nv + " vertex normals");
-        for ( i = 0; i < nv; i++ ) {
+        for ( i = 0; i < nv && vn != null; i++ ) {
             vni.x = vn[3*i];
             vni.y = vn[3*i+1];
             vni.z = vn[3*i+2];
@@ -78,10 +78,18 @@ public class WriterObj extends PersistenceElement {
             n0 = t[3*i] + offset + 1;
             n1 = t[3*i+1] + offset + 1;
             n2 = t[3*i+2] + offset + 1;
-            writeAsciiLine(inOutputStream, "f " + 
-                n0 + "/" + n0 + "/" + n0 + " " +
-                n1 + "/" + n1 + "/" + n1 + " " +
-                n2 + "/" + n2 + "/" + n2);
+            if ( vuv != null && vn != null ) {
+                writeAsciiLine(inOutputStream, "f " + 
+                    n0 + "/" + n0 + "/" + n0 + " " +
+                    n1 + "/" + n1 + "/" + n1 + " " +
+                    n2 + "/" + n2 + "/" + n2);
+	    }
+	    else {
+                writeAsciiLine(inOutputStream, "f " + 
+                    n0 + " " +
+                    n1 + " " +
+                    n2);
+	    }
         }
 
         return offset + nv;

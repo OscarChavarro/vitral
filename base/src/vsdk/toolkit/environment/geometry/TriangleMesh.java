@@ -21,6 +21,8 @@ package vsdk.toolkit.environment.geometry;
 import java.util.ArrayList;
 
 // VitralSDK classes
+import vsdk.toolkit.common.ArrayListOfInts;
+import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
@@ -150,6 +152,99 @@ public class TriangleMesh extends Surface {
         triangleIndices = null;
         triangleNormals = null;
         incidentTrianglesPerVertexArray = null;
+    }
+
+    private double[] cloneDoubleArray(double in[])
+    {
+        double[] out = null;
+
+        if ( in != null ) {
+            out = new double[in.length];
+            int i;
+	    for ( i = 0; i < in.length; i++ ) {
+		out[i] = in[i];
+	    }
+	}
+
+        return out;
+    }
+
+    private boolean[] cloneBooleanArray(boolean in[])
+    {
+        boolean[] out = null;
+
+        if ( in != null ) {
+            out = new boolean[in.length];
+            int i;
+	    for ( i = 0; i < in.length; i++ ) {
+		out[i] = in[i];
+	    }
+	}
+
+        return out;
+    }
+
+    private int[] cloneIntArray(int in[])
+    {
+        int[] out = null;
+
+        if ( in != null ) {
+            out = new int[in.length];
+            int i;
+	    for ( i = 0; i < in.length; i++ ) {
+		out[i] = in[i];
+	    }
+	}
+
+        return out;
+    }
+
+    /**
+    @todo copy full structure!
+    */
+    public TriangleMesh clone()
+    {
+        TriangleMesh other = new TriangleMesh();
+
+        other.name = new String(this.name);
+        other.vertexPositions = cloneDoubleArray(this.vertexPositions);
+        other.vertexPositions = cloneDoubleArray(this.vertexPositions);
+        other.vertexNormals = cloneDoubleArray(this.vertexNormals);
+        other.vertexBinormals = cloneDoubleArray(this.vertexBinormals);
+        other.vertexTangents = cloneDoubleArray(this.vertexTangents);
+        other.vertexColors = cloneDoubleArray(this.vertexColors);
+        other.vertexUvs = cloneDoubleArray(this.vertexUvs);
+        other.triangleNormals = cloneDoubleArray(this.triangleNormals);
+        other.minMax = cloneDoubleArray(this.minMax);
+
+        other. vertexSelections = cloneBooleanArray(this.vertexSelections);
+        other.triangleIndices = cloneIntArray(this.triangleIndices);
+        other.selectedTriangle = this.selectedTriangle;
+
+        // Pending!
+        other.incidentTrianglesPerVertexArray = null;
+        other.materials = null;
+        other.textures = null;
+        other.textureRanges = null;
+        other.materialRanges = null;
+        other.boundingVolume = null;
+        other.lastInfo = null;
+        other.lastRay = null;
+        other.triangleMeshGroupCache = null;
+         
+/*
+        ArrayList<ArrayList<Integer>> incidentTrianglesPerVertexArray;
+        Material[] materials;
+        Image[] textures;
+        int[][] textureRanges;
+        int[][] materialRanges;
+        int selectedTriangle;
+        SimpleBody boundingVolume;
+        GeometryIntersectionInformation lastInfo;
+        Ray lastRay;
+        TriangleMeshGroup triangleMeshGroupCache;
+*/
+        return other;
     }
 
     public String getName() {
@@ -1249,6 +1344,170 @@ public class TriangleMesh extends Surface {
         calculateNormals();
     }
 
+    private void appendVertices(ArrayListOfDoubles ev)
+    {
+        int i;
+        double newVertexPositions[] = new double[vertexPositions.length + ev.size];
+
+        for ( i = 0; i < vertexPositions.length; i++ ) {
+            newVertexPositions[i] = vertexPositions[i];
+        }
+        for ( i = 0; i < ev.size; i++ ) {
+            newVertexPositions[i+vertexPositions.length] = ev.array[i];
+        }
+
+        vertexPositions = newVertexPositions;
+    }
+
+    private void appendTriangles(ArrayListOfInts et)
+    {
+        int i;
+        int newTriangleIndices[] = new int[triangleIndices.length + et.size];
+
+        for ( i = 0; i < triangleIndices.length; i++ ) {
+            newTriangleIndices[i] = triangleIndices[i];
+        }
+
+        for ( i = 0; i < et.size; i++ ) {
+            newTriangleIndices[i+triangleIndices.length] = et.array[i];
+        }
+
+        triangleIndices = newTriangleIndices;
+    }
+
+    private void
+    simpleTriangleCut(InfinitePlane p,
+                      ArrayListOfDoubles extraVertices,
+                      ArrayListOfInts extraTriangles, 
+                      int nv, int i,
+                      Vector3D p1, Vector3D p2, Vector3D p3)
+    {
+        Vector3D a, b, ma = null, mb = null;
+        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
+        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        a = (p2.substract(p1));
+        b = (p3.substract(p1));
+        a.normalize();
+        b.normalize();
+
+        Ray ra = new Ray(p1, a);
+        Ray rb = new Ray(p1, b);
+
+        if ( p.doIntersectionWithNegative(ra) ) {
+            p.doExtraInformation(ra, ra.t, gia);
+            ma = gia.p;
+        }
+        if ( p.doIntersectionWithNegative(rb) ) {
+            p.doExtraInformation(rb, rb.t, gib);
+            mb = gib.p;
+        }
+
+        extraTriangles.append(i);
+
+        extraTriangles.append(((extraVertices.size/3 + nv)));
+
+        extraVertices.append(ma.x);
+        extraVertices.append(ma.y);
+        extraVertices.append(ma.z);
+
+        extraTriangles.append(((extraVertices.size/3 + nv)));
+
+        extraVertices.append(mb.x);
+        extraVertices.append(mb.y);
+        extraVertices.append(mb.z);
+
+        triangleIndices[3*i+0] = -1;
+        triangleIndices[3*i+1] = -1;
+        triangleIndices[3*i+2] = -1;
+    }
+
+    private void
+    halfTriangleCut(InfinitePlane p,
+                    ArrayListOfDoubles extraVertices,
+                    ArrayListOfInts extraTriangles, 
+                    int nv, int i, int j,
+                    Vector3D p1, Vector3D p2, Vector3D p3)
+    {
+        Vector3D a, b, ma = null;
+        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
+        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        a = (p2.substract(p3));
+        a.normalize();
+
+        Ray ra = new Ray(p2, a);
+
+        if ( p.doIntersectionWithNegative(ra) ) {
+            p.doExtraInformation(ra, ra.t, gia);
+            ma = gia.p;
+        }
+
+        extraTriangles.append(i);
+
+        extraTriangles.append(((extraVertices.size/3 + nv)));
+
+        extraVertices.append(ma.x);
+        extraVertices.append(ma.y);
+        extraVertices.append(ma.z);
+
+        extraTriangles.append(j);
+
+        triangleIndices[3*i+0] = -1;
+        triangleIndices[3*i+1] = -1;
+        triangleIndices[3*i+2] = -1;
+    }
+
+    private void
+    doubleTriangleCut(InfinitePlane p,
+                      ArrayListOfDoubles extraVertices,
+                      ArrayListOfInts extraTriangles, 
+                      int nv, int i, int j,
+                      Vector3D p1, Vector3D p2, Vector3D p3)
+    {
+        Vector3D a, b, ma = null, mb = null;
+        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
+        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        a = (p1.substract(p3));
+        b = (p2.substract(p3));
+        a.normalize();
+        b.normalize();
+
+        Ray ra = new Ray(p3, a);
+        Ray rb = new Ray(p3, b);
+
+        if ( p.doIntersectionWithNegative(ra) ) {
+            p.doExtraInformation(ra, ra.t, gia);
+            ma = gia.p;
+        }
+        if ( p.doIntersectionWithNegative(rb) ) {
+            p.doExtraInformation(rb, rb.t, gib);
+            mb = gib.p;
+        }
+
+        //-----------------------------------------------------------------
+        extraTriangles.append(3*triangleIndices[3*i+0]+0);
+
+        extraTriangles.append(((extraVertices.size/3 + nv)));
+
+        extraVertices.append(ma.x);
+        extraVertices.append(ma.y);
+        extraVertices.append(ma.z);
+
+        extraTriangles.append(((extraVertices.size/3 + nv)));
+
+        extraTriangles.append(i); // for next tri.
+        extraTriangles.append(((extraVertices.size/3 + nv))); 
+        extraTriangles.append(j);
+
+        extraVertices.append(mb.x);
+        extraVertices.append(mb.y);
+        extraVertices.append(mb.z);
+
+        //-----------------------------------------------------------------
+        triangleIndices[3*i+0] = -1;
+        triangleIndices[3*i+1] = -1;
+        triangleIndices[3*i+2] = -1;
+    }
+
     /**
     Given current mesh and a plane p, this method modifies the current mesh,
     leaving on it only the triangles which lies on the INSIDE part of the
@@ -1262,8 +1521,14 @@ public class TriangleMesh extends Surface {
         p1 = new Vector3D();
         p2 = new Vector3D();
         p3 = new Vector3D();
+        int t1, t2, t3;
 
-	for ( i = 0; i < triangleIndices.length/3; i++ ) {
+        ArrayListOfInts extraTriangles = new ArrayListOfInts(10);
+        ArrayListOfDoubles extraVertices = new ArrayListOfDoubles(10);
+
+        int nv = vertexPositions.length/3;
+
+        for ( i = 0; i < triangleIndices.length/3; i++ ) {
 
             p1.x = vertexPositions[3*triangleIndices[3*i+0]+0];
             p1.y = vertexPositions[3*triangleIndices[3*i+0]+1];
@@ -1277,17 +1542,103 @@ public class TriangleMesh extends Surface {
             p3.y = vertexPositions[3*triangleIndices[3*i+2]+1];
             p3.z = vertexPositions[3*triangleIndices[3*i+2]+2];
 
-            if ( p.doContainmentTestHalfSpace(p1, VSDK.EPSILON) == OUTSIDE &&
-                 p.doContainmentTestHalfSpace(p2, VSDK.EPSILON) == OUTSIDE &&
-                 p.doContainmentTestHalfSpace(p3, VSDK.EPSILON) == OUTSIDE ) {
-	        triangleIndices[3*i+0] = -1;
-	        triangleIndices[3*i+1] = -1;
-  	        triangleIndices[3*i+2] = -1;
-	    }
-	}
+            t1 = p.doContainmentTestHalfSpace(p1, VSDK.EPSILON);
+            t2 = p.doContainmentTestHalfSpace(p2, VSDK.EPSILON);
+            t3 = p.doContainmentTestHalfSpace(p3, VSDK.EPSILON);
 
+            if ( (t1 == OUTSIDE && t2 == OUTSIDE && t3 == OUTSIDE) ||
+                 (t1 == LIMIT && t2 == OUTSIDE && t3 == OUTSIDE) ||
+                 (t1 == OUTSIDE && t2 == LIMIT && t3 == OUTSIDE) ||
+                 (t1 == OUTSIDE && t2 == OUTSIDE && t3 == LIMIT) ||
+                 (t1 == LIMIT && t2 == LIMIT && t3 == OUTSIDE) ||
+                 (t1 == LIMIT && t2 == OUTSIDE && t3 == LIMIT) ||
+                 (t1 == OUTSIDE && t2 == LIMIT && t3 == LIMIT) 
+               ) {
+                triangleIndices[3*i+0] = -1;
+                triangleIndices[3*i+1] = -1;
+                triangleIndices[3*i+2] = -1;
+            }
+            else if ( t1 == LIMIT && t2 == LIMIT && t3 == LIMIT ) {
+                Vector3D a, b, n;
+                a = p2.substract(p1);
+                b = p3.substract(p1);
+                n = a.crossProduct(b);
+                if ( n.dotProduct(p.getNormal()) > 0 ) {
+                    triangleIndices[3*i+0] = -1;
+                    triangleIndices[3*i+1] = -1;
+                    triangleIndices[3*i+2] = -1;
+                }
+            }
+            else if (
+                 (t1 == LIMIT && t2 == INSIDE && t3 == INSIDE) ||
+                 (t1 == INSIDE && t2 == LIMIT && t3 == INSIDE) ||
+                 (t1 == INSIDE && t2 == INSIDE && t3 == LIMIT) ||
+                 (t1 == LIMIT && t2 == LIMIT && t3 == INSIDE) ||
+                 (t1 == LIMIT && t2 == INSIDE && t3 == LIMIT) ||
+                 (t1 == INSIDE && t2 == LIMIT && t3 == LIMIT) ||
+                 (t1 == INSIDE && t2 == INSIDE && t3 == INSIDE)
+                     )
+            {
+                ;
+            }
+            else {
+                if ( t1 == INSIDE && t2 == OUTSIDE && t3 == OUTSIDE ) {
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p1, p2, p3);
+                }
+                else if ( t2 == INSIDE && t1 == OUTSIDE && t3 == OUTSIDE ) {
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p2, p1, p3);
+                }
+                else if ( t3 == INSIDE && t1 == OUTSIDE && t2 == OUTSIDE ) {
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p3, p1, p2);
+                }
+                else if ( t1 == INSIDE && t2 == INSIDE && t3 == OUTSIDE ) {
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p1, p2, p3);
+                }
+                else if ( t1 == INSIDE && t3 == INSIDE && t2 == OUTSIDE ) {
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p1, p3, p2);
+                }
+                else if ( t2 == INSIDE && t3 == INSIDE && t1 == OUTSIDE ) {
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+1, 3*triangleIndices[3*i+0]+2, p2, p3, p1);
+                }
+
+
+                else if ( t1 == INSIDE && t2 == LIMIT && t3 == OUTSIDE ) {
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p2, p1, p3);
+                }
+                else if ( t2 == INSIDE && t1 == LIMIT && t3 == OUTSIDE ) {
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+0, p1, p2, p3);
+                }
+                else if ( t2 == INSIDE && t3 == LIMIT && t1 == OUTSIDE ) {
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p3, p2, p1);
+                }
+                else if ( t3 == INSIDE && t2 == LIMIT && t1 == OUTSIDE ) {
+                    System.out.println("MyCase4");
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p2, p3, p1);
+                }
+                else if ( t3 == INSIDE && t1 == LIMIT && t2 == OUTSIDE ) {
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+0, p1, p3, p2);
+                }
+                else if ( t1 == INSIDE && t3 == LIMIT && t2 == OUTSIDE ) {
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p3, p1, p2);
+                }
+                else {
+                    System.out.println("Unhandled case: ");
+                    System.out.println("  - P1: " + t1);
+                    System.out.println("  - P2: " + t2);
+                    System.out.println("  - P3: " + t3);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------
+        appendVertices(extraVertices);
+        appendTriangles(extraTriangles);
+
+        //-----------------------------------------------------------------
         compact();
-	calculateNormals();
+
+        //-----------------------------------------------------------------
+        calculateNormals();
     }
 }
 
