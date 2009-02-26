@@ -195,6 +195,17 @@ public class ColorRgb extends FundamentalEntity
         this.g = other.g;
         this.b = other.b;
     }
+
+    /**
+    Given a 8 bit signed RGB integer triplet, this method computes the
+    corresponding [0.0, 1.0] clamped interval values for color.
+    */
+    public void importFromSigned8bitPixel(byte r, byte g, byte b)
+    {
+	this.r = ((double)VSDK.signedByte2unsignedInteger(r)) / 255.0;
+	this.g = ((double)VSDK.signedByte2unsignedInteger(g)) / 255.0;
+	this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
+    }
 }
 
 //===========================================================================
