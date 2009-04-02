@@ -590,7 +590,7 @@ public class SearchEngine
 
         //-----------------------------------------------------------------
         if ( similarModels.size() <= 0 ) {
-            out.write("<FONT SIZE=\"+3\"><CENTER>No results founded for current search.</CENTER></FONT>");
+            out.write("<FONT SIZE=\"+3\"><CENTER>No results found for current search.</CENTER></FONT>");
         }
 
         //- Next / previous links -----------------------------------------

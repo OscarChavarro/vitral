@@ -34,10 +34,8 @@ import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 
 public class ServletConsole extends HttpServlet {
 
-    //public static final String serverUrl = "http://10.0.0.1:8081";
-    public static final String serverUrl = "http://10.6.2.49:8080";
-    //public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
-    public static final String databaseFile = "/home/jedilink/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
+    public static final String serverUrl = "http://192.168.0.101:8080";
+    public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
@@ -174,13 +172,16 @@ public class ServletConsole extends HttpServlet {
                 if ( i >= 0 && i < 3 ) {
                     extractImage(workingImages.get(i), request.getParameter(cad));
                 }
+		else {
+		    System.out.println("IGNORING IMAGE ID " + i);
+		}
                 out.println("filespec: " + cad);
             }
         }
         out.println("done");
 
         //-----------------------------------------------------------------
-        System.out.print("Log message: (ServletConsole::" + id + ").");
+        System.out.println("Log message: (ServletConsole::" + id + ").");
         parametersList = request.getParameterNames();
         System.out.println("  - Parameters:");
         while ( parametersList.hasMoreElements() ) {
@@ -189,7 +190,8 @@ public class ServletConsole extends HttpServlet {
                 System.out.println("    . Recieving an image (" + cad + ")!");
               }
               else {
-                System.out.println("    . " + cad + " = " + request.getParameter(cad));
+                //System.out.println("    . " + cad + " = " + request.getParameter(cad));
+                System.out.println("    . Unknown parameter " + cad + " recieved (and ignored).");
             }
         }
 
@@ -281,13 +283,12 @@ public class ServletConsole extends HttpServlet {
             distanceField = new IndexedColorImage();
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
-
             if ( j == 0 ) {
-                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase, 5, i);
+                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase, 10.0, i);
                 j++;
             }
             else {
-                similarModels = searchEngine.matchSketchRestricted(distanceField, 5, similarModels, i);
+                similarModels = searchEngine.matchSketchRestricted(distanceField, 10.0, similarModels, i);
                 j++;
             }
 
@@ -528,6 +529,7 @@ public class ServletConsole extends HttpServlet {
             minSize = similarSize;
         }
         currentSession.setMethod(currentSession.METHOD_2D_SKETCH_CUBE13);
+
         searchEngine.writeResultsAsHtml(out, currentSession.getSimilarModels(), shapeDatabase, serverUrl + "/images", currentSession.getId(), 0, minSize);
     }
 
