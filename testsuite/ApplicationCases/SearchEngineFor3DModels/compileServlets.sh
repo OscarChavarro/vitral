@@ -1,5 +1,5 @@
 #= Config ==================================================================
-TOMCAT_DIR="/usr/local/apache-tomcat-6.0.13"
+TOMCAT_DIR="/usr/local/apache-tomcat-6.0.18"
 
 #= Create empty working directories if they does not exist =================
 if [ ! -d ./tmp ]; then

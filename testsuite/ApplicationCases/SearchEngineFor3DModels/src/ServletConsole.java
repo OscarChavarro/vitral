@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
 
 // Java servlet classes
 import javax.servlet.ServletException;
@@ -338,6 +340,7 @@ public class ServletConsole extends HttpServlet {
             out.println("<CENTER><TABLE WIDTH=100% CELLPADDING=3 CELLSPACING=3 BORDER=0>\n");
             out.println("<TR>\n");
             for ( i = 0; i < 8; i++ ) {
+                DecimalFormat f2 = new DecimalFormat("00");
                 imgname = f2.format(i, new StringBuffer(""), new FieldPosition(0)).toString();
                 out.println("<TD><A HREF=\"" + basename + imgname + ".jpg" + "\"><CENTER><IMG SRC=\"" + basename + imgname + "small.jpg" + "\"></IMG></CENTER></A></TD\n");
                 if ( i == 3 ) {
