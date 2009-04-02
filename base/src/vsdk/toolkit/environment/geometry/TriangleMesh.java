@@ -1096,7 +1096,6 @@ public class TriangleMesh extends Surface {
     It is spected that with few changes, this algorithm manages the scalar
     (multivalued) voxel case for antialiased voxelization.
     */
-/*
     public void
     doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {
@@ -1170,7 +1169,7 @@ public class TriangleMesh extends Surface {
             }
         }
     }
-*/
+
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         if ( triangleMeshGroupCache == null ) {

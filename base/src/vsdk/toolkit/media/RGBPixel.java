@@ -11,6 +11,7 @@
 package vsdk.toolkit.media;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.ColorRgb;
 
 /**
 Respect to data representation:
@@ -96,6 +97,23 @@ public class RGBPixel extends MediaEntity {
     public byte getB()
     {
         return b;
+    }
+
+    public void importFromColorRgb(ColorRgb c)
+    {
+        double ir = c.r;
+        double ig = c.g;
+        double ib = c.b;
+
+        if ( ir < 0 ) ir = 0;
+        if ( ig < 0 ) ig = 0;
+        if ( ib < 0 ) ib = 0;
+        if ( ir > 1.0 ) ir = 1.0;
+        if ( ig > 1.0 ) ig = 1.0;
+        if ( ib > 1.0 ) ib = 1.0;
+        this.r = VSDK.unsigned8BitInteger2signedByte((int)(ir * 255.0));
+        this.g = VSDK.unsigned8BitInteger2signedByte((int)(ig * 255.0));
+        this.b = VSDK.unsigned8BitInteger2signedByte((int)(ib * 255.0));
     }
 
     /**
