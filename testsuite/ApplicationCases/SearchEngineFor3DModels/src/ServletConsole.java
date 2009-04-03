@@ -25,6 +25,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;
@@ -200,6 +201,57 @@ public class ServletConsole extends HttpServlet {
         }
     }
 
+    private boolean blackNeighborhood(Image target, int x, int y)
+    {
+        int xx, yy;
+        RGBPixel p;
+
+        for ( yy = y - 1; yy <= y + 1; yy++ ) {
+            for ( xx = x - 1; xx <= x + 1; xx++ ) {
+                p = target.getPixelRgb(xx, yy);
+                if ( p.r != 0 || p.g != 0 || p.b != 0 ) {
+                    return false;
+		}
+	    }
+	}
+
+        return true;
+    }
+
+    /**
+    For relatively large images, resizing them down can change the topology
+    of the descriptor, due to very thin lines getting partialy removed.
+    To aliviate that problem, an image dilation will make lines thicker.
+    */
+    private void mydilate(Image target)
+    {
+        int x, y;
+        RGBPixel white = new RGBPixel();
+
+        if ( target.getXSize() <= 64 || target.getYSize() <= 64 ) {
+            return;
+	}
+
+        Image destiny = new RGBImage();
+
+        ImageProcessing.copy(target, destiny);
+
+        white.r = VSDK.unsigned8BitInteger2signedByte((int)(255));
+        white.g = VSDK.unsigned8BitInteger2signedByte((int)(255));
+        white.b = VSDK.unsigned8BitInteger2signedByte((int)(255));
+
+        for ( y = 1; y < target.getYSize()-1; y++ ) {
+            for ( x = 1; x < target.getXSize()-1; x++ ) {
+                if ( !blackNeighborhood(target, x, y) ) {
+                    destiny.putPixelRgb(x, y, white);
+                }
+	    }
+	}
+
+        ImageProcessing.copy(destiny, target);
+
+    }
+
     private void extractOutlineImage(
         IndexedColorImage source, IndexedColorImage target)
     {
@@ -231,6 +283,7 @@ public class ServletConsole extends HttpServlet {
         ImageProcessing.squareFill(roi, squaredRoi);
         ImageProcessing.frame(squaredRoi, framedRoi,
                               squaredRoi.getXSize()/10);
+        mydilate(framedRoi);
         ImageProcessing.resize(framedRoi, target);
         for ( y = 0; y < target.getYSize(); y++ ) {
             for ( x = 0; x < target.getXSize(); x++ ) {
@@ -284,11 +337,11 @@ public class ServletConsole extends HttpServlet {
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
             if ( j == 0 ) {
-                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase, 10.0, i);
+                similarModels = searchEngine.matchSketch(distanceField, shapeDatabase, 5.0, i);
                 j++;
             }
             else {
-                similarModels = searchEngine.matchSketchRestricted(distanceField, 10.0, similarModels, i);
+                similarModels = searchEngine.matchSketchRestricted(distanceField, 5.0, similarModels, i);
                 j++;
             }
 
