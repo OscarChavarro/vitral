@@ -331,6 +331,7 @@ public class PolyhedralBoundedSolidModelingTools
         solid.lmev(h1, h1, solid.getMaxVertexId()+1, new Vector3D(0.1, 0.1, 0.4));
 */
 
+/*
         solid = createBox(new Vector3D(1, 1, 1));
 
         //-----------------------------------------------------------------
@@ -342,8 +343,16 @@ public class PolyhedralBoundedSolidModelingTools
         solid.lmev(h1, h2, solid.getMaxVertexId()+1, new Vector3D(0.55, 0.05, 0.05));
 
         solid.lkev(h1, h1.mirrorHalfEdge());
+*/
 
-        solid.validateModel();
+        //-----------------------------------------------------------------
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(new Vector3D(0.0, 0.0, 0.0), 1, 1);
+        solid.smev(1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
+        solid.smev(1, 2, 3, new Vector3D(1.0, 1.0, 0.0));
+
+        //-----------------------------------------------------------------
+        //solid.validateModel();
         System.out.println(solid);
         return solid;
     }

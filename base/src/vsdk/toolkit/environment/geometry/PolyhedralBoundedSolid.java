@@ -1885,8 +1885,13 @@ public class PolyhedralBoundedSolid extends Solid {
                     msg += (he.parentEdge!=null)?
                         intPreSpaces(he.parentEdge.id, 10):"    <null>";
                     msg += " | ";
-                    msg += intPreSpaces(he.mirrorHalfEdge().id, 9) + " | " +
-                        intPreSpaces(he.mirrorHalfEdge().parentLoop.parentFace.id, 11) + " | ";
+		    if ( he.mirrorHalfEdge() != null ) {
+                        msg += intPreSpaces(he.mirrorHalfEdge().id, 9) + " | " +
+                            intPreSpaces(he.mirrorHalfEdge().parentLoop.parentFace.id, 11) + " | ";
+		    }
+		    else {
+                        msg += " No Mirror Half Edge!   | ";
+		    }
 
                     msg += "\n";
 

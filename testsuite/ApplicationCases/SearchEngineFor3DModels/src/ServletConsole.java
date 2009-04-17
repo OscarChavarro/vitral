@@ -35,7 +35,7 @@ import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 
 public class ServletConsole extends HttpServlet {
 
-    public static final String serverUrl = "http://192.168.0.101:8080";
+    public static final String serverUrl = "http://10.106.100.10:8080";
     public static final String databaseFile = "/users/jedilink/home/LABORAL_JAVERIANA/VITRAL/vitral/testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin";
 
 
