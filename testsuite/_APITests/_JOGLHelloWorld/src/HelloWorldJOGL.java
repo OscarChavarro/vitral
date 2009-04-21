@@ -5,14 +5,11 @@
 // involved. This will help him to dominate the involved libraries.
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 public class HelloWorldJOGL extends JFrame implements GLEventListener {
@@ -26,24 +23,14 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
         this.add(canvas, BorderLayout.CENTER);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    
-    public Dimension getPreferredSize() {
-        return new Dimension (640, 480);
-    }
-    
-    public static void main (String[] args) {
-        JFrame f = new HelloWorldJOGL();
-        f.pack();
-        f.setVisible(true);
-    }
-    
+
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glColor3d(1, 1, 1); 
+        gl.glColor3d(1, 1, 1);
 
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
@@ -55,7 +42,7 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
             gl.glVertex3d(0.5, 0.5, 0);
         gl.glEnd();
     }
-   
+
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable) {
         ;
@@ -65,16 +52,26 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
-    
+
     /** Called to indicate the drawing surface has been moved and/or resized */
-    public void reshape (GLAutoDrawable drawable,
-                         int x,
-                         int y,
-                         int width,
-                         int height) {
+    public void reshape(GLAutoDrawable drawable,
+                        int x,
+                        int y,
+                        int width,
+                        int height) {
         GL gl = drawable.getGL();
-        gl.glViewport(0, 0, width, height); 
-    }   
+        gl.glViewport(0, 0, width, height);
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new HelloWorldJOGL();
+        frame.pack();
+        frame.setSize(640, 480);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+
 }
 
 //===========================================================================
