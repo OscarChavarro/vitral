@@ -219,3 +219,7 @@ Started from stage 041 CameraSwing
 2008 june 22, Oscar Chavarro: <<30 min>>
   - 30min: JoglView.calculateLabelImage corrected to generated minimum framing
     image with respect to text.
+
+2009 may 1, Oscar Chavarro:
+  - 1h47min: Added <Ctrl><Shift>f support for fullscreen GUI mode, and
+    multiple viewports management revisited.

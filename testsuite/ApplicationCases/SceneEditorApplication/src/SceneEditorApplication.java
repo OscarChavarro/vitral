@@ -190,6 +190,7 @@ public class SceneEditorApplication {
     public String languageGuiFile;
     public ModifyPanel modifyPanel;
     public boolean modifyPanelSelected;
+    public boolean fullScreenGuiMode;
 
     // Networking
     private VitralEditorServer networkServer;
@@ -244,7 +245,7 @@ public class SceneEditorApplication {
         try {
             palette = RGBColorPalettePersistence.importGimpPalette(new java.io.FileReader("../../../etc/palettes/Cranes.gpl"));
         }
-        catch (Exception e) {
+        catch ( Exception e ) {
             System.err.println(e);
             System.exit(0);
         }
@@ -321,7 +322,42 @@ public class SceneEditorApplication {
         return container;
     }
 
-    private void createGUI()
+    private void createGUIFullScreen()
+    {
+        mainWindowWidget = new JFrame("VITRAL Scene Editor");
+
+        mainWindowWidget.setUndecorated(true);
+
+        Toolkit tk = mainWindowWidget.getToolkit();
+        Dimension d = tk.getScreenSize();
+
+        //-----------------------------------------------------------------
+        try {
+            gui = GuiCachePersistence.importAquynzaGui(
+                                new FileReader(languageGuiFile)  );
+        }
+        catch ( Exception e ) {
+            System.err.println("Fatal error: can not open GUI file");
+            System.exit(0);
+        }
+
+	if ( drawingArea == null ) {
+            drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
+	}
+
+        mainWindowWidget.add(drawingArea.getCanvas(), BorderLayout.CENTER);
+        mainWindowWidget.setPreferredSize(d);
+        mainWindowWidget.pack();
+        mainWindowWidget.setVisible(true);
+        drawingArea.getCanvas().requestFocusInWindow();
+
+        //-----------------------------------------------------------------
+        imageControlWindow = null;
+        selectorDialog = null;
+        modifyPanelSelected = false;
+    }
+
+    private void createGUIWindowed()
     {
         //- Configure the application Look & feel -------------------------
         try {
@@ -331,10 +367,10 @@ public class SceneEditorApplication {
             System.err.println("Warning: Can not set " +
               lookAndFeel + "look and feel");
         }
-        JFrame.setDefaultLookAndFeelDecorated(true);
 
         //- Configure this JFrame -----------------------------------------
         mainWindowWidget = new JFrame("VITRAL Scene Editor");
+        mainWindowWidget.setUndecorated(false);
         mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Toolkit tk = mainWindowWidget.getToolkit();
         Dimension d = tk.getScreenSize();
@@ -344,7 +380,7 @@ public class SceneEditorApplication {
             gui = GuiCachePersistence.importAquynzaGui(
                                 new FileReader(languageGuiFile)  );
         }
-        catch (Exception e) {
+        catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
             System.exit(0);
         }
@@ -362,7 +398,9 @@ public class SceneEditorApplication {
         JSplitPane splitPane;
         statusBarPanel = createStatusBar();
 
-        drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
+	if ( drawingArea == null ) {
+            drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
+	}
 
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
@@ -412,7 +450,17 @@ public class SceneEditorApplication {
         modifyPanelSelected = false;
     }
 
-    private void destroyGUI()
+    public void createGUI()
+    {
+        if ( fullScreenGuiMode ) {
+            createGUIFullScreen();
+	}
+	else {
+            createGUIWindowed();
+	}
+    }
+
+    public void destroyGUI()
     {
         mainWindowWidget.setVisible(false);
         mainWindowWidget.dispose();
@@ -424,6 +472,9 @@ public class SceneEditorApplication {
     public SceneEditorApplication(String[] args) {
         lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
         languageGuiFile = "./etc/english.gui";
+
+        fullScreenGuiMode = false;
+	drawingArea = null;
 
         createModel();
         createGUI();

@@ -114,7 +114,7 @@ public class ViewportWindowSetManager
             if ( view.isActive() && view.inside(xpercent, ypercent) ) {
                 if ( changeSelection ) {
                     view.setSelected(true);
-                    selectedViewIndex = i;
+                    setSelectedViewIndex(i);
                 }
                 theView = view;
             }
@@ -377,7 +377,21 @@ public class ViewportWindowSetManager
         setSelectedViewIndex(doLayout(views, fullViewport?selectedViewIndex:-1, viewOrderStyle));
     }
 
+    public int countActiveViews()
+    {
+        int i;
+	ViewportWindow view;
+        int n = 0;
+         
+        for ( i = 0; i < getViews().size(); i++ ) {
+            view = getViews().get(i);
 
+            if ( view.isActive() ) {
+                n++;
+            }
+	}
+        return n;
+    }
 }
 
 //===========================================================================

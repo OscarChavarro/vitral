@@ -190,13 +190,20 @@ public class JoglDrawingArea implements
 
         viewOrganizer = new ViewportWindowSetManager();
 
-        viewOrganizer.setSelectedViewIndex(2);
+        viewOrganizer.setSelectedViewIndex(1);
 
         for ( i = 0; i < 4; i++ ) {
             view = new JoglAwtViewportWindow();
             view.hintConfig(4, i);
             viewOrganizer.getViews().add(view);
+            if ( i == viewOrganizer.getSelectedViewIndex() ) {
+                view.setSelected(true);
+	    }
+	    else {
+                view.setSelected(false);
+	    }
         }
+
         viewOrganizer.updateLayout();
     }
 
@@ -751,32 +758,12 @@ public class JoglDrawingArea implements
         }
     }
 
-    /** Called by drawable to initiate drawing */
-    public void display(GLAutoDrawable drawable)
+    private void drawMultipleViews(GL gl)
     {
-        GL gl = drawable.getGL();
-
-        if ( firstTimer ) {
-            firstTimer = false;
-            JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
-        }
-
-        debugProjectedViewsIfNeeded(gl);
-
         JoglAwtViewportWindow view;
         int i;
 
         //-----------------------------------------------------------------
-        gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-        gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-
-        gl.glMatrixMode(gl.GL_PROJECTION);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-        gl.glLoadIdentity();
-
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
             view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
             view.drawBorderGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
@@ -803,6 +790,69 @@ public class JoglDrawingArea implements
             drawView(gl, view);
             view.drawTitle(gl);
         }
+    }
+
+    private void drawSelectedViewFullScreen(GL gl)
+    {
+        JoglAwtViewportWindow view;
+        int i;
+
+        //-----------------------------------------------------------------
+        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
+            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
+
+            if ( !view.isActive() ) {
+                continue;
+            }
+            //
+            if ( view.isSelected() ) {
+                view.activateViewportGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+                gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+                cameraController.setCamera(view.getCamera());
+                qualityController.setRendererConfiguration(view.getRendererConfiguration());
+                qualitySelection = view.getRendererConfiguration();
+                theScene.activeCamera = view.getCamera();
+
+                //
+                theScene.qualityTemplate = view.getRendererConfiguration();
+                drawView(gl, view);
+                view.drawTitle(gl);
+            }
+        }
+
+    }
+
+    /** Called by drawable to initiate drawing */
+    public void display(GLAutoDrawable drawable)
+    {
+        GL gl = drawable.getGL();
+
+        if ( firstTimer ) {
+            firstTimer = false;
+            JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
+        }
+
+        debugProjectedViewsIfNeeded(gl);
+
+        //-----------------------------------------------------------------
+        gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+        gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glLoadIdentity();
+
+        int n = viewOrganizer.countActiveViews();
+
+        if ( n == 1 && parent.fullScreenGuiMode ) {
+            drawSelectedViewFullScreen(gl);
+	}
+	else {
+            drawMultipleViews(gl);
+	}
     }
 
     private void drawVisualRayDebugSegment(GL gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
@@ -1444,19 +1494,39 @@ public class JoglDrawingArea implements
         double phi = Math.PI/2;
         int val;
 
+        if ( ((e.getModifiersEx()) & e.SHIFT_DOWN_MASK) != 0x0 &&
+             ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
+            switch ( keycode ) {
+              case KeyEvent.VK_F:
+		if ( parent.fullScreenGuiMode ) {
+                    parent.fullScreenGuiMode = false;
+		}
+		else {
+                    parent.fullScreenGuiMode = true;
+		}
+                parent.destroyGUI();
+                parent.createGUI();
+                break;
+            }
+	}
+
         if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
+
                 //- Multiple views control -----------------------------------
               case '.':
                 val = viewOrganizer.getSelectedViewIndex();
-                val++;
+		viewOrganizer.getViews().get(val).setSelected(false);
+                val ++;
                 if ( val >= viewOrganizer.getViews().size() ) {
                     val = 0;
                 }
-                viewOrganizer.setSelectedViewIndex(val);
+		viewOrganizer.getViews().get(val).setSelected(true);
 
+                viewOrganizer.setSelectedViewIndex(val);
                 viewOrganizer.updateLayout();
                 break;
+
               case ',':
                 val = viewOrganizer.getViewOrderStyle();
                 val++;
