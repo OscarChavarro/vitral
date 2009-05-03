@@ -2,7 +2,7 @@
 
 // VITRAL recomendation: Use explicit class imports (not .*) in hello world 
 // type programs so the user/programmer can be exposed to all the complexity 
-// involved. This will help him to dominate the involved libraries.
+// involved. This will help him to know better the involved libraries.
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -12,16 +12,23 @@ import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
-public class HelloWorldJOGL extends JFrame implements GLEventListener {
+public class HelloWorldJOGL implements GLEventListener {
 
     public HelloWorldJOGL() {
-        super("VITRAL concept test - JOGL Hello World");
-
+        //-----------------------------------------------------------------
         GLCanvas canvas = new GLCanvas();
         canvas.addGLEventListener(this);
 
-        this.add(canvas, BorderLayout.CENTER);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //-----------------------------------------------------------------
+        JFrame frame;
+
+        frame = new JFrame("VITRAL concept test - JOGL Hello World");
+        frame.add(canvas, BorderLayout.CENTER);
+        frame.pack();
+        frame.setSize(640, 480);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
     /** Called by drawable to initiate drawing */
@@ -64,12 +71,7 @@ public class HelloWorldJOGL extends JFrame implements GLEventListener {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new HelloWorldJOGL();
-        frame.pack();
-        frame.setSize(640, 480);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        HelloWorldJOGL instance = new HelloWorldJOGL();
     }
 
 }
