@@ -801,23 +801,21 @@ public class JoglDrawingArea implements
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
             view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
 
-            if ( !view.isActive() ) {
+            if ( !view.isActive() || !view.isSelected() ) {
                 continue;
             }
-            //
-            if ( view.isSelected() ) {
-                view.activateViewportGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-                gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-                cameraController.setCamera(view.getCamera());
-                qualityController.setRendererConfiguration(view.getRendererConfiguration());
-                qualitySelection = view.getRendererConfiguration();
-                theScene.activeCamera = view.getCamera();
+            
+            view.activateViewportGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+            gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+            cameraController.setCamera(view.getCamera());
+            qualityController.setRendererConfiguration(view.getRendererConfiguration());
+            qualitySelection = view.getRendererConfiguration();
+            theScene.activeCamera = view.getCamera();
 
-                //
-                theScene.qualityTemplate = view.getRendererConfiguration();
-                drawView(gl, view);
-                view.drawTitle(gl);
-            }
+            //
+            theScene.qualityTemplate = view.getRendererConfiguration();
+            drawView(gl, view);
+            view.drawTitle(gl);
         }
 
     }

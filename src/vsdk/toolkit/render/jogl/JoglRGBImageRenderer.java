@@ -255,8 +255,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return bb;
     }
 
-    public static RGBImage getImageJOGL(GL gl) {
-        RGBImage image = new RGBImage();
+    public static void getImageJOGL(GL gl, RGBImage image) {
         int[] view= new int[4];
         gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
@@ -275,6 +274,12 @@ public class JoglRGBImageRenderer extends JoglRenderer
                 pos += 3;
             }
         }
+    }
+
+    public static RGBImage getImageJOGL(GL gl) {
+        RGBImage image = new RGBImage();
+
+        getImageJOGL(gl, image);
         return image;
     }
 
