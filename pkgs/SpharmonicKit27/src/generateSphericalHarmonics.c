@@ -10,7 +10,7 @@
 #define MAX_LINE 1024
 
 void
-importPPM(char *filename, double *data, int size)
+importPPM(const char *filename, double *data, int size)
 {
     int xsize = 0, ysize = 0;
     int i, j;
@@ -87,7 +87,7 @@ importPPM(char *filename, double *data, int size)
 }
 
 void
-exportPPM(char *filename, double *data, int size)
+exportPPM(const char *filename, double *data, int size)
 {
     unsigned char pixel;
     FILE *fd;
