@@ -19,12 +19,14 @@ public class StopWatch
 
     public void start()
     {
-        t0 = System.currentTimeMillis();
+        //t0 = System.currentTimeMillis();
+        t0 = System.nanoTime();
     }
 
     public void stop()
     {
-        t1 = System.currentTimeMillis();
+        //t1 = System.currentTimeMillis();
+        t1 = System.nanoTime();
     }
 
     public double getElapsedRealTime()
@@ -32,7 +34,8 @@ public class StopWatch
         double a, b;
         a = (double)t0;
         b = (double)t1;
-        return (b - a)/1000.0;
+        //return (b - a)/1000.0;
+        return (b - a)/1000000000.0;
     }
 }
 

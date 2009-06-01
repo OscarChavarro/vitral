@@ -58,10 +58,6 @@ public class Camera extends Entity
     public static final int OPCODE_UP = (0x01 << 5);
     public static final int OPCODE_DOWN = (0x01 << 6);
 
-    public static final int STEREO_MODE_CENTER = 1;
-    public static final int STEREO_MODE_LEFT_EYE = 2;
-    public static final int STEREO_MODE_RIGHT_EYE = 3;
-
     public static final int PROJECTION_MODE_ORTHOGONAL = 4;
     public static final int PROJECTION_MODE_PERSPECTIVE = 5;
 
@@ -539,14 +535,10 @@ public class Camera extends Entity
         return P;
     }
 
-    public Matrix4x4 calculateTransformationMatrix()
-    {
-        return calculateTransformationMatrix(STEREO_MODE_CENTER);
-    }
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
     */
-    public Matrix4x4 calculateTransformationMatrix(int stereoMode)
+    public Matrix4x4 calculateTransformationMatrix()
     {
         //- Take into account the camera position and orientation ----------
         Matrix4x4 R;
@@ -555,9 +547,6 @@ public class Camera extends Entity
         Matrix4x4 R_adic2 = new Matrix4x4();
         Matrix4x4 R_adic1 = new Matrix4x4();
         Matrix4x4 R2 = new Matrix4x4();
-        Matrix4x4 Tstereo = new Matrix4x4();
-        Vector3D pstereo = new Vector3D();
-        double factor_distancia_entre_ojos = 0.04;
 
         R1 = getRotation();
         R1.invert();
@@ -568,30 +557,16 @@ public class Camera extends Entity
 
         R = R_adic1.multiply(R_adic2.multiply(R1.multiply(T1)));
 
-        if ( stereoMode == STEREO_MODE_LEFT_EYE ) {
-            pstereo.x = -R.M[0][0] * factor_distancia_entre_ojos;
-            pstereo.y = -R.M[0][1] * factor_distancia_entre_ojos;
-            pstereo.z = -R.M[0][2] * factor_distancia_entre_ojos;
-            Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
-            R = R.multiply(Tstereo);
-        }
-        if ( stereoMode == STEREO_MODE_RIGHT_EYE ) {
-            pstereo.x = R.M[0][0] * factor_distancia_entre_ojos;
-            pstereo.y = R.M[0][1] * factor_distancia_entre_ojos;
-            pstereo.z = R.M[0][2] * factor_distancia_entre_ojos;
-            Tstereo.translation(pstereo.x, pstereo.y, pstereo.z);
-            R = R.multiply(Tstereo);
-        }
         return R;
     }
 
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
     */
-    public Matrix4x4 calculateProjectionMatrix(int stereoMode)
+    public Matrix4x4 calculateProjectionMatrix()
     {
         Matrix4x4 P = calculateViewVolumeMatrix();
-        Matrix4x4 R = calculateTransformationMatrix(stereoMode);
+        Matrix4x4 R = calculateTransformationMatrix();
         return P.multiply(R);
     }
 
@@ -626,7 +601,7 @@ public class Camera extends Entity
         Matrix4x4 R, TP;
         double yaw, pitch, roll;
 
-        TP = calculateProjectionMatrix(STEREO_MODE_CENTER);
+        TP = calculateProjectionMatrix();
         R = getRotation();
         yaw = R.obtainEulerYawAngle();
         pitch = R.obtainEulerPitchAngle();

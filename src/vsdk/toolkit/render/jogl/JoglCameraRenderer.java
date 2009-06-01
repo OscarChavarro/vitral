@@ -19,23 +19,15 @@ import vsdk.toolkit.environment.Camera;
 
 public class JoglCameraRenderer extends JoglRenderer
 {
-    /**
-    stereoMode must have one of the STEREO_MODE values
-    */
-    public static void activate(GL gl, int stereoMode, Camera cam)
+    public static void activate(GL gl, Camera cam)
     {
         Matrix4x4 R;
 
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
-        R = cam.calculateProjectionMatrix(stereoMode);
+        R = cam.calculateProjectionMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glMatrixMode(gl.GL_MODELVIEW);
-    }
-
-    public static void activate(GL gl, Camera cam)
-    {
-        activate(gl, Camera.STEREO_MODE_CENTER, cam);
     }
 
     public static void activateCenter(GL gl, Camera cam)
@@ -52,7 +44,7 @@ public class JoglCameraRenderer extends JoglRenderer
         camera2.setFocusedPositionDirect(newcenter);
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
-        R = camera2.calculateProjectionMatrix(Camera.STEREO_MODE_CENTER);
+        R = camera2.calculateProjectionMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
@@ -175,13 +167,11 @@ public class JoglCameraRenderer extends JoglRenderer
             gl.glVertex3d(npd, -xn/2, yn/2);
             gl.glVertex3d(fpd, -xf/2, yf/2);
         gl.glEnd();
-
     }
 
     public static void draw(GL gl, Camera cam)
     {
         gl.glPushMatrix();
-        //Matrix4x4 R = cam.calculateProjectionMatrix(cam.STEREO_MODE_CENTER);
 
         Matrix4x4 R = cam.getRotation();
         Vector3D p = cam.getPosition();
