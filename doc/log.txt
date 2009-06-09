@@ -806,5 +806,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 1h20min: design overview: some ViewportWindow management classes
     renorganized.
 
+2009 june 9, Oscar Chavarro <<26min>>:
+  - 26min: Adding PPM read support to ImagePersistence (just "P6" subformat)
+
 ===========================================================================
 
