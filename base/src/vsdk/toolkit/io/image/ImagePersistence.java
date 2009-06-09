@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.StringTokenizer;
 
 // Extended JDK classes
 import javax.imageio.ImageIO;
@@ -185,6 +186,24 @@ public class ImagePersistence extends PersistenceElement
     }
 
     /**
+    Given a text string, this method determines if is a Unix style single
+    line comment, that is, if line begins with a '#' character.
+    */
+    private static boolean
+    isTextComment(String line)
+    {
+        char arr[] = line.toCharArray();
+        int i;
+
+        for ( i = 0; i < arr.length && (arr[i] != ' ' && arr[i] != '\t'); i++ );
+
+        if ( i < arr.length && arr[i] == '#' ) {
+            return true;
+	}
+        return false;
+    }
+
+    /**
     Given the filename of an input data file which contains an image, this
     method tries to recognize the file format and load the contents of it
     to the image.
@@ -313,6 +332,61 @@ public class ImagePersistence extends PersistenceElement
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
                                      "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
                 return null;
+            }
+        }
+        else if( type.equals("ppm") )  {
+            BufferedImage bi = null;
+
+            try {
+                BufferedInputStream bis;
+                FileInputStream fis;
+
+                fis = new FileInputStream(inImageFd);
+                bis = new BufferedInputStream(fis);
+
+                boolean exit = false;
+                String line;
+                int stage = 1;
+                int xSize = 0, ySize = 0;
+
+                do {
+                    line = readAsciiLine(bis);
+                    if ( line.equals("255") ) {
+                        exit = true;
+                    }
+                    if ( isTextComment(line) ) {
+                        continue;
+                    }
+                    switch ( stage ) {
+                      case 1: // PPM signature - data type
+                        if ( !line.startsWith("P6") ) {
+                            throw new ImageNotRecognizedException("Error reading internal PPM file subformat:\n" + line, inImageFd);
+                        }
+                        break;
+		      case 2:
+			StringTokenizer parser;
+			parser = new StringTokenizer(line);
+                        xSize = Integer.parseInt(parser.nextToken());
+                        ySize = Integer.parseInt(parser.nextToken());
+                        break;
+                    }
+		    stage++;
+
+		} while ( !exit );
+
+                retImage = new RGBImage();
+                retImage.init(xSize, ySize);
+                byte barr[] = retImage.getRawImage();
+	        readBytes(bis, barr);
+		retImage.createTestPattern();
+                bis.close();
+                fis.close();
+		return retImage;
+              }
+              catch ( Exception e ) {
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+                 throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
