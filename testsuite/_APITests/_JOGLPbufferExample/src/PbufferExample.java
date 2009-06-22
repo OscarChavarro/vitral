@@ -10,11 +10,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 
-/*
-import com.sun.opengl.utils.BufferUtils;
-import java.nio.ByteBuffer;
-*/
-
 import java.io.File;
 
 import vsdk.toolkit.media.RGBImage;
