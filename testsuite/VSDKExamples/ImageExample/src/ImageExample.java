@@ -3,9 +3,6 @@
 //= applying JoglImageRenderer class methods.                               =
 //===========================================================================
 
-import java.nio.ByteBuffer;
-import com.sun.opengl.util.BufferUtil;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.awt.BorderLayout;
@@ -49,12 +46,6 @@ public class ImageExample extends JFrame implements
     private GLCanvas canvas;
     private SimpleCorridor corridor;
     private RGBImage img;
-
-    private static int checkImageWidth = 128;
-    private static int checkImageHeight = 128;
-    private static final int color = 3;
-    private ByteBuffer checkImageBuf = 
-    BufferUtil.newByteBuffer(checkImageHeight * checkImageWidth * color);
 
     public ImageExample() {
         super("VITRAL concept test - Image use example");
