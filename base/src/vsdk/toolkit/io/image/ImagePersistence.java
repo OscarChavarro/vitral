@@ -52,6 +52,8 @@ exported and/or imported to/from files.
  */
 public class ImagePersistence extends PersistenceElement
 {
+    public static boolean nativeWarningGiven = false;
+
     /**
     Given the filename of an input data file which contains an image, this
     method tries to recognize the file format and load the contents of it
@@ -67,11 +69,29 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException
+    public static RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         RGBAImage retImage = new RGBAImage();
 
+        //- Try optimized reading, if native library is available ---------
+        if ( NativeImageReaderWrapper.available && type.equals("png") ) {
+            _NativeImageReaderWrapperHeaderInfo header;
+            header = new _NativeImageReaderWrapperHeaderInfo();
+            NativeImageReaderWrapper.readPngHeader(header,
+                inImageFd.getAbsolutePath());
+            retImage.initNoFill((int)header.xSize, (int)header.ySize);
+            NativeImageReaderWrapper.readPngDataRGBA(header, retImage.getRawImageDirectBuffer());
+            return retImage;
+	}
+
+        if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
+             type.equals("png") ) {
+            nativeWarningGiven = true;
+            VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGBA", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
+	}
+
+        //-----------------------------------------------------------------
         if( type.equals("tga") ) {
             TargaImage t = new TargaImage(inImageFd);
             t.exportRGBA(retImage);
@@ -218,11 +238,29 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException
+    public static RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         RGBImage retImage = new RGBImage();
 
+        //- Try optimized reading, if native library is available ---------
+        if ( NativeImageReaderWrapper.available && type.equals("png") ) {
+            _NativeImageReaderWrapperHeaderInfo header;
+            header = new _NativeImageReaderWrapperHeaderInfo();
+            NativeImageReaderWrapper.readPngHeader(header,
+                inImageFd.getAbsolutePath());
+            retImage.initNoFill((int)header.xSize, (int)header.ySize);
+            NativeImageReaderWrapper.readPngDataRGB(header, retImage.getRawImageDirectBuffer());
+            return retImage;
+	}
+
+        if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
+             type.equals("png") ) {
+            nativeWarningGiven = true;
+            VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGB", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
+	}
+
+        //-----------------------------------------------------------------
         if( type.equals("tga") ) {
             TargaImage t = new TargaImage(inImageFd);
             t.exportRGB(retImage);

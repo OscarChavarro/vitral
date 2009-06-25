@@ -574,7 +574,7 @@ public class ReaderObj extends PersistenceElement
             return ImagePersistence.importRGBA(
               new File(dirObj+System.getProperty("file.separator")+nomImage));
         }
-        catch(ImageNotRecognizedException inre) {
+        catch( Exception inre ) {
             return null;
         }
     }

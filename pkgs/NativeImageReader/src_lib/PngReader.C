@@ -139,7 +139,7 @@ readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BO
     rowPointers = new unsigned char *[1];
     rowPointers[0] = new unsigned char [3 * HeaderInfo->xSize];
 
-    size = HeaderInfo->ySize*HeaderInfo->ySize*3;
+    size = HeaderInfo->xSize*HeaderInfo->ySize*3;
 
     for ( y = 0; y < HeaderInfo->ySize; y++ ) {
         png_read_rows(HeaderInfo->libpngEngine, &rowPointers[0], NULL, 1);
@@ -150,6 +150,7 @@ readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BO
         else {
             base = y * (3*HeaderInfo->xSize);
         }
+
         for ( x = 0, idx = 0; x < HeaderInfo->xSize; x++, idx += 3, base += 3 ) {
             r = rowPointers[0][idx];
             g = rowPointers[0][idx+1];
@@ -157,6 +158,48 @@ readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BO
             arr[base] = r;
             arr[base+1] = g;
             arr[base+2] = b;
+        }
+
+    }
+
+    delete rowPointers[0];
+    delete rowPointers;
+
+    png_read_end(HeaderInfo->libpngEngine, HeaderInfo->imageInformation);
+    png_destroy_read_struct(&HeaderInfo->libpngEngine, &HeaderInfo->imageInformation, NULL);
+}
+
+void
+readPngDataRGBA(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BOOLEAN flip)
+{
+    //----------------------------------------------------------------------
+    unsigned char **rowPointers;
+    unsigned long int y;
+    unsigned long int x, idx, base, size;
+    BYTE r, g, b;
+
+    rowPointers = new unsigned char *[1];
+    rowPointers[0] = new unsigned char [3 * HeaderInfo->xSize];
+
+    size = HeaderInfo->xSize*HeaderInfo->ySize*4;
+
+    for ( y = 0; y < HeaderInfo->ySize; y++ ) {
+        png_read_rows(HeaderInfo->libpngEngine, &rowPointers[0], NULL, 1);
+
+        if ( flip ) {
+            base = size - (1+y) * (HeaderInfo->xSize*4);
+        }
+        else {
+            base = y * (3*HeaderInfo->xSize);
+        }
+        for ( x = 0, idx = 0; x < HeaderInfo->xSize; x++, idx += 3, base += 4 ) {
+            r = rowPointers[0][idx];
+            g = rowPointers[0][idx+1];
+            b = rowPointers[0][idx+2];
+            arr[base] = r;
+            arr[base+1] = g;
+            arr[base+2] = b;
+            arr[base+3] = 255;
         }
     }
 

@@ -28,5 +28,7 @@ class _NativeImageReaderHeaderInfo
 extern _NativeImageReaderHeaderInfo *readPngHeader(FILE *fd);
 extern void
 readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BOOLEAN flip);
+extern void
+readPngDataRGBA(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BOOLEAN flip);
 
 #endif
