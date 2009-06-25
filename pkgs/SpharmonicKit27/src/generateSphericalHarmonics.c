@@ -31,9 +31,10 @@ importPPM(const char *filename, double *data, int size)
     }
 
     /*- Lea y procese el encabezado ppm ----------------------------------*/
+    size_t dummy;
     for ( i = 0; !feof(fd); i++ ) {
         if ( i >= MAX_LINE ) i = 0;
-        fread(&buffer[i], sizeof(unsigned char), 1, fd);
+        dummy = fread(&buffer[i], sizeof(unsigned char), 1, fd);
         buffer[i + 1] = '\0';
 
         if ( buffer[i] == '\n' && buffer[0] == 'P' && buffer[1] == '5' ) {
@@ -75,9 +76,9 @@ importPPM(const char *filename, double *data, int size)
         index = 0;
         for ( i = ysize - 1; i >= 0 ; i-- ) {
             for ( j = 0; j < xsize ; j++ ) {
-                fread(&r, sizeof(unsigned char), 1, fd);
-                fread(&g, sizeof(unsigned char), 1, fd);
-                fread(&b, sizeof(unsigned char), 1, fd);
+                dummy = fread(&r, sizeof(unsigned char), 1, fd);
+                dummy = fread(&g, sizeof(unsigned char), 1, fd);
+                dummy = fread(&b, sizeof(unsigned char), 1, fd);
                 val = ((double)r + (double)g + (double)b) / (3*255);
                 data[index] = val;
                 index++;

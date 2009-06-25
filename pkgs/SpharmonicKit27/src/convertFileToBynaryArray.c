@@ -16,8 +16,10 @@ main(int argc, char *argv[] ) {
 
     printf("unsigned char data[] = {\n");
 
+    size_t dummy;
+
     for ( i = 0; !feof(fd); i++ ) {
-        fread(&byte, 1, 1, fd);
+        dummy = fread(&byte, 1, 1, fd);
 	printf("0x%02X, ", byte);
 	if ( i != 0 && i % 13 == 0 ) {
 	    printf("\n");

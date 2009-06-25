@@ -4,8 +4,8 @@ JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
 PLATFORM=linux
 LIB_DIR=../../lib
 CLASSES_DIR = ./classes
-SRC_DIR=./src/
-TMP_DIR=./tmp/
+SRC_DIR=./src
+TMP_DIR=./tmp
 #CCO=gcc -O4 -ansi -Wall -pedantic -I./src_lib
 CCO=gcc -std=c99 -m32 -fPIC -Wall -pedantic -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
 JC = javac -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)

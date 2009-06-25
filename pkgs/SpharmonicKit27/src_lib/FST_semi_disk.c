@@ -7818,9 +7818,10 @@ void FZT_semi_disk(double *rdata, double *idata,
 
   /*** have to copy data to arrays ***/
   /* first get how many elements in cos_array */
-  fread ( &data_amount, sizeof(int), 1, fp );
+  size_t dummyf;
+  dummyf = fread ( &data_amount, sizeof(int), 1, fp );
   /* now read in that amount */
-  fread (cos_data, sizeof(double), data_amount, fp );
+  dummyf = fread (cos_data, sizeof(double), data_amount, fp );
 
   /* do the real part */
   SemiNaiveReduced(r0, 
