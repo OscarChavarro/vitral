@@ -1,0 +1,18 @@
+2009, june 7 <<30 min>>:
+  - 30min: First C++ stand-alone project from previous AQUYNZA 0.7.4 code for
+    importing PNG files using png library.
+
+2009, june 24 <<152 min>>:
+  - 33min: Algorithm layout for png header reporting on image size plus
+    actual image reading/decoding
+  - 11min: encapsulating functions as library, and building test program
+  - 50min: building JNI project (empty native methods linked, simple test
+    program, java version)
+  - 50min: Filling readPngHeader native method
+  - 8min: Filling readPngDataRGB (pending for support of native buffers for
+    RGBImage class on VSDK toolkit)
+
+2009, june 25 <<15 min>>:
+  - 25min: Filling readPngDataRGB and testing
+
+<<<207min = 3h27min>>>

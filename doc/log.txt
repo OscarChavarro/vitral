@@ -807,13 +807,13 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     renorganized.
 
 2009 june 9, Oscar Chavarro <<26min>>:
-  - 26min: Adding PPM read support to ImagePersistence (just "P6" subformat)
+  - 26min: Adding PPM read support to ImagePersistence (just "P6" subformat).
 
 2009 june 22, Oscar Chavarro <<50min>>:
-  - 50min: Optimization on RGBAImage class to support direct memory buffers
+  - 50min: Optimization on RGBAImage class to support direct memory buffers.
 
 2009 june 25, Oscar Chavarro <<>>:
-  - 15min: Optimization on RGBImage class to support direct memory buffers
+  - 15min: Optimization on RGBImage class to support direct memory buffers.
 
 ===========================================================================
 
