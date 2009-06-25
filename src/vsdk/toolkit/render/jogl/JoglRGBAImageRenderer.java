@@ -118,7 +118,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
                    true,           // boolean mipmap
                    false,          // boolean dataIsCompressed
                    false,          // boolean mustFlipVertically
-                   ByteBuffer.wrap(img.getRawImage()), // Buffer buffer
+                   img.getRawImageDirectBuffer(), // Buffer buffer
                    null            // TextureData.Flusher flusher
                 );
 
@@ -131,13 +131,13 @@ public class JoglRGBAImageRenderer extends JoglRenderer
             //----
             /*
             //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, x_tam, y_tam, gl.GL_RGBA, 
-            //                  gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(img.getRawImage()));
+            //                  gl.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
             gl.glTexImage2D(gl.GL_TEXTURE_2D, 
                             0, 4, 
                             x_tam, y_tam, 
                             0, gl.GL_RGBA,
                             gl.GL_UNSIGNED_BYTE, 
-                            ByteBuffer.wrap(img.getRawImage()));
+                            img.getRawImageDirectBuffer());
             */    
         }
 
@@ -219,7 +219,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         gl.glRasterPos2f(-1, -1);
         gl.glDrawPixels(img.getXSize(), img.getYSize(), 
                         gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, 
-                        ByteBuffer.wrap(img.getRawImage()));
+                        img.getRawImageDirectBuffer());
     }
 
     public static ByteBuffer importJOGLimage(GL gl) {
