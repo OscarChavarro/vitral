@@ -413,9 +413,17 @@ public class ImagePersistence extends PersistenceElement
 		} while ( !exit );
 
                 retImage = new RGBImage();
-                retImage.init(xSize, ySize);
-                byte barr[] = retImage.getRawImage();
-	        readBytes(bis, barr);
+                retImage.initNoFill(xSize, ySize);
+                //byte barr[] = retImage.getRawImage();
+	        //readBytes(bis, barr);
+
+                ByteBuffer bb = retImage.getRawImageDirectBuffer();
+                byte barr[] = new byte[xSize*3];
+                for ( int i = 0; i < ySize; i++ ) {
+		    readBytes(bis, barr);
+		    bb.put(barr);
+		}
+
 		retImage.createTestPattern();
                 bis.close();
                 fis.close();
