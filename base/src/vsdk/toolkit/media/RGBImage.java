@@ -181,7 +181,6 @@ public class RGBImage extends Image
         data.put(r);
         data.put(g);
         data.put(b);
-        data.put((byte)-1);
 //#endif
 
     }
