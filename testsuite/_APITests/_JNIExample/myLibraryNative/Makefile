@@ -2,7 +2,7 @@
 
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
 PLATFORM=linux
-CCO = gcc -std=c99 -m32 -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM) -O2 -fPIC -Wall -pedantic
+CCO = gcc -I./src -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM) -O2 -fPIC -Wall -pedantic
 
 all: ./lib/libmyLibraryNative.so
 

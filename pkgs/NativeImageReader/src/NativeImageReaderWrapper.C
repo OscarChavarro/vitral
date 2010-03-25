@@ -16,7 +16,7 @@ JNIEXPORT void JNICALL Java_vsdk_toolkit_io_image_NativeImageReaderWrapper_readP
     jclass headerClass = Env->GetObjectClass(Header);
 
     _NativeImageReaderHeaderInfo *NativeHeader;
-    
+
     FILE *fd;
     fd = fopen(mfilename, "rb");
 
@@ -83,7 +83,9 @@ Java_vsdk_toolkit_io_image_NativeImageReaderWrapper_readPngDataRGB
     }
 
     NativeHeader = (_NativeImageReaderHeaderInfo *)dir;
+
     readPngDataRGB(NativeHeader, NativeHeader->fd, (BYTE*)Env->GetDirectBufferAddress(Buffer), TRUE);
+
     fclose(NativeHeader->fd);
     delete NativeHeader;
 }
