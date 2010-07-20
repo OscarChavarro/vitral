@@ -60,6 +60,11 @@ public class SimpleScene extends Entity
         simpleBodiesArray.add(b);
     }
 
+    public void addCamera(Camera c)
+    {
+        camerasArray.add(c);
+    }
+
     public void addBackground(Background b)
     {
         backgroundsArray.add(b);
@@ -103,6 +108,16 @@ public class SimpleScene extends Entity
     public void setBackgrounds(ArrayList<Background> backgrounds)
     {
         backgroundsArray = backgrounds;
+    }
+
+    public Background getActiveBackground()
+    {
+        return backgroundsArray.get(activeBackgroundIndex);
+    }
+
+    public Camera getActiveCamera()
+    {
+        return camerasArray.get(activeCameraIndex);
     }
 
     public void setCameras(ArrayList<Camera> cameras)
