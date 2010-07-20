@@ -817,10 +817,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 40min: integrating NativeImageReader to ImagePersistence (including RGBA
     case) and testing.
 
-2010 july 19, Oscar Chavarro <<>>:
+2010 july 19, Oscar Chavarro <<40min>>:
   - 40min: Revisiting simple raytracing (all comments retranslated to
     english, Universe class variables factorized to appear as using a
     SimpleScene.
 
 ===========================================================================
-
