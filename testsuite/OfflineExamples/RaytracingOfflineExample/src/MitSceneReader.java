@@ -29,7 +29,7 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-public class Universe
+public class MitSceneReader
 {
     // Debug flag
     private static final boolean showDebugMessages = false;
@@ -42,7 +42,7 @@ public class Universe
     public int viewportXSize;
     public int viewportYSize;
 
-    public Universe()
+    public MitSceneReader()
     {
         currentCamera = new Camera();
         currentBackground = new SimpleBackground();

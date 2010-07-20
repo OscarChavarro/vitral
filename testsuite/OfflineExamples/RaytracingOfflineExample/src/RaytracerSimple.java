@@ -26,14 +26,14 @@ import vsdk.toolkit.io.image.ImagePersistence;
 
 public class RaytracerSimple {
     // Application model
-    private Universe theSceneReader;
+    private MitSceneReader theSceneReader;
     private SimpleScene theScene;
     private RGBImage theResultingImage;
     private Raytracer visualizationEngine;
 
     public RaytracerSimple()
     {
-        theSceneReader = new Universe();
+        theSceneReader = new MitSceneReader();
         theScene = new SimpleScene();
     }
 
