@@ -47,6 +47,11 @@ public class SimpleBody extends Entity {
     /// This string should be used for specific application defined
     /// functionality. Can be null.
     private String name;
+
+    //- Temporary working variable ------------------------------------
+    private Ray _static_ray;
+    private Vector3D _static_vector3d;
+
     //=======================================================================
 
     public SimpleBody()
@@ -59,6 +64,9 @@ public class SimpleBody extends Entity {
         globalMaterial = new Material();
         globalTextureMap = null;
         globalNormalMap = null;
+
+        _static_ray = new Ray();
+        _static_vector3d = new Vector3D();
     }
 
     public void finalize()
@@ -200,22 +208,29 @@ public class SimpleBody extends Entity {
     VSDK geometric modeling proposal, where geometric transformations are
     not included in the geometries representations, making the internal
     code of `doIntersection` methods much easier to develop and maintain.
+
+    Optimization note: class attributes `_static_vector3d` and
+    `_static_ray` are used by this method to avoid several calls to
+    `new` methods, and to avoid extra garbage collector memory de-allocation.
+    This two variables would be temporary local variables in this method
+    if C/C++ style "static" functionallity exist in Java.
     */
-    public boolean doIntersection(Ray inOutRay)
+    public final boolean doIntersection(Ray inOutRay)
     {
-        Ray myRay;
         boolean answer;
 
-        myRay = new Ray (
-            rotation_i.multiply(inOutRay.origin.substract(position)),
-            rotation_i.multiply(inOutRay.direction)
-        );
-        myRay.t = inOutRay.t;
+        // Take in to account current body geometric transformations...
+        _static_vector3d.substract(inOutRay.origin, position);
+        _static_ray.origin.multiply(rotation_i, _static_vector3d);
+        _static_ray.direction.multiply(rotation_i, inOutRay.direction);
+        _static_ray.direction.normalize();
+        _static_ray.t = inOutRay.t;
 
+        // ... and compute doIntersection operation on object's coordinates
         answer = false;
-        if ( geometry.doIntersection(myRay) ) {
+        if ( geometry.doIntersection(_static_ray) ) {
             answer = true;
-            inOutRay.t = myRay.t;
+            inOutRay.t = _static_ray.t;
         }
 
         return answer;

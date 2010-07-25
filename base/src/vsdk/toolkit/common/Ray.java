@@ -14,6 +14,12 @@ public class Ray  extends FundamentalEntity
     public Vector3D direction;
     public double t;
 
+    public Ray()
+    {
+        origin = new Vector3D(0, 0, 0);
+        direction = new Vector3D(1, 0, 0);
+    }
+
     public Ray(Vector3D origin, Vector3D direction)
     {
         this.origin = new Vector3D(origin.x, origin.y, origin.z);

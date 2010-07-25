@@ -205,10 +205,7 @@ public class Camera extends Entity
      */
     public void setFocusedPositionMaintainingOrthogonality(Vector3D focusedPosition)
     {
-        Vector3D partial1;
-
-        partial1 = focusedPosition.substract(eyePosition);
-        front.clone(partial1);
+        front.substract(focusedPosition, eyePosition);
         focalDistance = front.length();
         front.normalize();
 

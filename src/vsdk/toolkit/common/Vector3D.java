@@ -56,6 +56,13 @@ public class Vector3D extends FundamentalEntity
         this.x = B.x; this.y = B.y; this.z = B.z;
     }
 
+    public final void multiply(Matrix4x4 M, Vector3D E)
+    {
+        this.x = M.M[0][0] * E.x + M.M[0][1] * E.y + M.M[0][2] * E.z + M.M[0][3];
+        this.y = M.M[1][0] * E.x + M.M[1][1] * E.y + M.M[1][2] * E.z + M.M[1][3];
+        this.z = M.M[2][0] * E.x + M.M[2][1] * E.y + M.M[2][2] * E.z + M.M[2][3];
+    }
+
     public final Vector3D multiply(double a) {
         return new Vector3D(a * x, a * y, a * z);
     }
@@ -103,9 +110,8 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-     *
-     * @return double
-     */
+    @return double
+    */
     public final double length() {
         return Math.sqrt(x*x + y*y + z*z);
     }
@@ -115,9 +121,29 @@ public class Vector3D extends FundamentalEntity
         return new Vector3D(x + b.x, y + b.y, z + b.z);
     }
 
+    /**
+    Stores in `this` Vector3D the result of adding the operands `a` and `b`
+    */
+    public final void add(Vector3D a, Vector3D b)
+    {
+        this.x = a.x + b.x;
+        this.y = a.y + b.y;
+        this.z = a.z + b.z;
+    }
+
     public final Vector3D substract(Vector3D b)
     {
         return new Vector3D(x - b.x, y - b.y, z - b.z);
+    }
+
+    /**
+    Stores in `this` Vector3D the result of substracting the operands `a` and `b`
+    */
+    public final void substract(Vector3D a, Vector3D b)
+    {
+        this.x = a.x - b.x;
+        this.y = a.y - b.y;
+        this.z = a.z - b.z;
     }
 
     public float[] exportToFloatArrayVect()

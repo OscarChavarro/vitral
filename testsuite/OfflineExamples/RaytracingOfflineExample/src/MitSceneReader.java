@@ -75,21 +75,21 @@ public class MitSceneReader
         StreamTokenizer st = new StreamTokenizer(parsero);
         st.commentChar('#');
         boolean fin_de_lectura = false;
-        Material material_actual;
+        Material currentMaterial;
 
         // Material por defecto...
         /*
-        material_actual = new Material(0.8f, 0.2f, 0.9f, 
+        currentMaterial = new Material(0.8f, 0.2f, 0.9f, 
                                        0.2f, 0.4f, 0.4f, 
                                        10.0f, 0f, 0f, 1f);
         */
-        material_actual = new Material();
-        material_actual.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
-        material_actual.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
-        material_actual.setSpecular(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
-        material_actual.setReflectionCoefficient(0);
-        material_actual.setRefractionCoefficient(0);
-        material_actual.setPhongExponent(10);
+        currentMaterial = new Material();
+        currentMaterial.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
+        currentMaterial.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
+        currentMaterial.setSpecular(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
+        currentMaterial.setReflectionCoefficient(0);
+        currentMaterial.setRefractionCoefficient(0);
+        currentMaterial.setPhongExponent(10);
         SimpleBody thing;
         Matrix4x4 R, Ri;
         double yaw_actual = 0;
@@ -108,7 +108,7 @@ public class MitSceneReader
                   showDebugMessage("sphere");
                   thing = new SimpleBody();
                   thing.setGeometry(new Sphere(r));
-                  thing.setMaterial(material_actual);
+                  thing.setMaterial(currentMaterial);
 
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
@@ -128,7 +128,7 @@ public class MitSceneReader
                   showDebugMessage("cube");
                   thing = new SimpleBody();
                   thing.setGeometry(new Box(r, r, r));
-                  thing.setMaterial(material_actual);
+                  thing.setMaterial(currentMaterial);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
@@ -149,7 +149,7 @@ public class MitSceneReader
                   showDebugMessage("cylinder");
                   thing = new SimpleBody();
                   thing.setGeometry(new Cone(r1, r2, h));
-                  thing.setMaterial(material_actual);
+                  thing.setMaterial(currentMaterial);
                   R = new Matrix4x4();
                   R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
@@ -164,7 +164,7 @@ public class MitSceneReader
                   showDebugMessage("triangles");
                   thing = new SimpleBody();
                   thing.setGeometry(new MESH(st));
-                  thing.setMaterial(material_actual);
+                  thing.setMaterial(currentMaterial);
                   theScene.addBody(thing);
                 } 
                 */
@@ -295,17 +295,17 @@ public class MitSceneReader
                   float kt = readNumber(st);
                   float index = readNumber(st);
                   /*
-                  material_actual = new Material(r, g, b, 
+                  currentMaterial = new Material(r, g, b, 
                                                 ka, kd, ks, 
                                                 ns, kr, kt, index);
                   */
-                  material_actual = new Material();
-                  material_actual.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
-                  material_actual.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
-                  material_actual.setSpecular(new ColorRgb(r*ks, g*ks, b*ks));
-                  material_actual.setPhongExponent(ns);
-                  material_actual.setReflectionCoefficient(kr);
-                  material_actual.setRefractionCoefficient(kt);
+                  currentMaterial = new Material();
+                  currentMaterial.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
+                  currentMaterial.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
+                  currentMaterial.setSpecular(new ColorRgb(r*ks, g*ks, b*ks));
+                  currentMaterial.setPhongExponent(ns);
+                  currentMaterial.setReflectionCoefficient(kr);
+                  currentMaterial.setRefractionCoefficient(kt);
                 }
               ;
               break;
