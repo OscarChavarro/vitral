@@ -31,12 +31,12 @@ public class ArrayListOfDoubles extends FundamentalEntity {
 
     public double get(int i)
     {
-        return array[mysize];
+        return array[i];
     }
 
     public void set(int i, double val)
     {
-        array[mysize] = val;
+        array[i] = val;
     }
 
     public void add(double val)
