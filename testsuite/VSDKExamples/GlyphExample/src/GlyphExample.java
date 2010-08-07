@@ -29,10 +29,10 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.gui.CameraController;

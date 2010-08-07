@@ -10,7 +10,7 @@ package scivis;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 
 

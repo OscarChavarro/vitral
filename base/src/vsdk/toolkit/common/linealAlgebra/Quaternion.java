@@ -4,7 +4,10 @@
 //= - August 8 2005 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.linealAlgebra;
+
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.FundamentalEntity;
 
 public class Quaternion extends FundamentalEntity
 {

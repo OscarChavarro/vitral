@@ -3,7 +3,7 @@
 package vsdk.toolkit.environment;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 
 // All the public variables here are ugly, but I

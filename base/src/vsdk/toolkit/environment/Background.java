@@ -3,7 +3,7 @@ package vsdk.toolkit.environment;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public abstract class Background extends Entity
 {

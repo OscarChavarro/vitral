@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
 The Calligraphic2DBuffer class represents a set of elements suitable for a

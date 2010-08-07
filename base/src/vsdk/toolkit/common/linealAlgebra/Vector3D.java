@@ -6,9 +6,10 @@
 //= - March 17 2006 - Oscar Chavarro: added exportToFloatArrayVect method   =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.linealAlgebra;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.FundamentalEntity;
 
 /**
 Class Vector3D represents a one dimensional array of three values, usually

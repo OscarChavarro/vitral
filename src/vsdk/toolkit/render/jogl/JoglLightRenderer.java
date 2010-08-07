@@ -16,7 +16,7 @@ import com.sun.opengl.cg.CGprogram;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
 
 public class JoglLightRenderer extends JoglRenderer {

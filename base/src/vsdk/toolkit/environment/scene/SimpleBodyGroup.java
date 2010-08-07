@@ -9,8 +9,8 @@ package vsdk.toolkit.environment.scene;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 
 public class SimpleBodyGroup extends Entity {

@@ -7,8 +7,8 @@
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.processing.GeometricModeler;

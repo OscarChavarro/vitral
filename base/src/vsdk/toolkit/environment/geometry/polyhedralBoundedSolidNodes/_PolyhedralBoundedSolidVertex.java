@@ -12,7 +12,7 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 

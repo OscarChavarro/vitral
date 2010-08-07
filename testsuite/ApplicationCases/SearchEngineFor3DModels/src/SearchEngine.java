@@ -32,7 +32,7 @@ import javax.media.opengl.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;

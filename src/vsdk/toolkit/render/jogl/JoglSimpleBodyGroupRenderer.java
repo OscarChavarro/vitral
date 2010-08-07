@@ -14,7 +14,7 @@ import javax.media.opengl.GL;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;

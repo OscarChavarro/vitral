@@ -20,7 +20,7 @@ import java.util.Collections;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;

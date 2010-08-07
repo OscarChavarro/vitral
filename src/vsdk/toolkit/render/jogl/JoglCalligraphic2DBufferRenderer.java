@@ -8,7 +8,7 @@ package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class JoglCalligraphic2DBufferRenderer extends JoglRenderer

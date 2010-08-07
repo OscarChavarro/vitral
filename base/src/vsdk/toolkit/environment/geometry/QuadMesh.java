@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 /**

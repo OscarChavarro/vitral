@@ -7,7 +7,7 @@
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;

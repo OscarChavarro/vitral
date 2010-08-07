@@ -11,7 +11,7 @@ import javax.microedition.lcdui.Graphics;
 
 // VitralSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class J2meCalligraphic2DBufferRenderer extends J2meRenderer

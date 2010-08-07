@@ -4,9 +4,10 @@
 //= - November 3 2006 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.linealAlgebra;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.FundamentalEntity;
 
 public class Vector4D extends FundamentalEntity 
 {

@@ -8,11 +8,11 @@ package vsdk.toolkit.environment.geometry;
 
 // VitralSDK classes
 import vsdk.toolkit.common.AlgebraicExpression;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.gui.ProgressMonitor;
 

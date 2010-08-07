@@ -4,9 +4,10 @@
 //= - October 30 2007 - Oscar Chavarro: Original base version               =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.linealAlgebra;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.FundamentalEntity;
 
 /**
 This class is a data structure that represents a 4x4 matrix

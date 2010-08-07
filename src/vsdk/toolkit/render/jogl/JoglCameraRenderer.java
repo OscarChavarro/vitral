@@ -13,8 +13,8 @@ import javax.media.opengl.GL;
 import com.sun.opengl.cg.CgGL;
 import com.sun.opengl.cg.CGprogram;
 
-import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 
 public class JoglCameraRenderer extends JoglRenderer

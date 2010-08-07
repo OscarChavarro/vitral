@@ -18,7 +18,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.PersistenceElement;

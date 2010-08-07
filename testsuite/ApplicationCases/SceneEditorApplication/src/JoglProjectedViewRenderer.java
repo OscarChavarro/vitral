@@ -12,8 +12,8 @@ import javax.media.opengl.GL;
 
 // VSDK Classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.Matrix4x4;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.IndexedColorImage;

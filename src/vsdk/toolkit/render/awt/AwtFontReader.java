@@ -15,7 +15,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.AffineTransform;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.geometry.FontReader;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 

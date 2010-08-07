@@ -10,7 +10,7 @@ package vsdk.toolkit.common;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
 \mainpage Vitral SDK Toolkit documentation.

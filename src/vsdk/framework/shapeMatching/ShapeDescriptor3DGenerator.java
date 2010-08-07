@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import javax.media.opengl.GL;
 
 // VSDK Classes
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;

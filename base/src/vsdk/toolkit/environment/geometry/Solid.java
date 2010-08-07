@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.environment.geometry;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public abstract class Solid extends Geometry {
     /**

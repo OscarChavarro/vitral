@@ -8,6 +8,7 @@
 package vsdk.toolkit.common;
 
 import java.util.ArrayList;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
 A vertex is a basic data pack for tipically used operations in computer

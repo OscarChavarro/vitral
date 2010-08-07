@@ -12,7 +12,7 @@ import java.awt.Graphics;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class AwtCalligraphic2DBufferRenderer extends AwtRenderer

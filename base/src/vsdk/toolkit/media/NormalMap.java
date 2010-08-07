@@ -13,7 +13,7 @@ package vsdk.toolkit.media;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;

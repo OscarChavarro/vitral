@@ -13,7 +13,7 @@ package vsdk.toolkit.processing;
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;

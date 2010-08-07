@@ -14,7 +14,7 @@ import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;

@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 // VitralSDK classes
-import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Quaternion;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Quaternion;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.io.PersistenceElement;
 

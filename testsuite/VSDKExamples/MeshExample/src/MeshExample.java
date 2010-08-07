@@ -29,7 +29,7 @@ import javax.media.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;

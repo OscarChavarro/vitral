@@ -6,6 +6,7 @@
 //===========================================================================
 
 package vsdk.toolkit.common;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public class Triangle extends FundamentalEntity 
 {

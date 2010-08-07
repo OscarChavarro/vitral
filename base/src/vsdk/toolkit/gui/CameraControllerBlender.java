@@ -3,8 +3,8 @@ package vsdk.toolkit.gui;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent;
-import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 
 public class CameraControllerBlender extends CameraController {

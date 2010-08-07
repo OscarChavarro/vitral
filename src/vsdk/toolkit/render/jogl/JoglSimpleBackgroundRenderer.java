@@ -7,7 +7,7 @@
 package vsdk.toolkit.render.jogl;
 
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.SimpleBackground;
 import javax.media.opengl.GL;
 

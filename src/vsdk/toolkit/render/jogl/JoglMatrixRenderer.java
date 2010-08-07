@@ -7,7 +7,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import javax.media.opengl.GL;
 
 /**

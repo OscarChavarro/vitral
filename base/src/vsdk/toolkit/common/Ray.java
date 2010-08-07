@@ -2,7 +2,7 @@
 
 package vsdk.toolkit.common;
 
-import vsdk.toolkit.common.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
 
 public class Ray  extends FundamentalEntity

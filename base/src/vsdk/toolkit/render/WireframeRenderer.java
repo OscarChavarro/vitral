@@ -15,10 +15,10 @@ package vsdk.toolkit.render;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Vector4D;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector4D;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Surface;

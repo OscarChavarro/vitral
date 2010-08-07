@@ -22,8 +22,8 @@ import javax.media.opengl.GLCanvas;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Vector3D;
-import vsdk.toolkit.common.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
