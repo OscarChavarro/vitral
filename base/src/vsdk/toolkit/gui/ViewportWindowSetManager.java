@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 // VitralSDK classes
 
-public class ViewportWindowSetManager
+public class ViewportWindowSetManager extends PresentationElement
 {
     private int selectedViewIndex;
     private int globalViewportXSize;

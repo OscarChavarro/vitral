@@ -40,7 +40,7 @@ sharing one windows canvas, this is usually used to distinguish a viewport
 by drawing its border in some highlighted color, and give feedback to the
 user about the viewport recieving interaction events.
 */
-public class ViewportWindow
+public class ViewportWindow extends PresentationElement
 {
     // Occupancy specification with respect to containing canvas
     protected double viewportStartXPercent;

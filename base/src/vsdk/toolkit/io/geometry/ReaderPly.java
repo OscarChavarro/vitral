@@ -30,7 +30,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.PersistenceElement;
 
-class _ReaderPlyElement
+class _ReaderPlyElement extends PersistenceElement
 {
     private static final int TYPE_SIGNED_CHARACTER = 1;
     private static final int TYPE_UNSIGNED_CHARACTER = 2;

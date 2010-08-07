@@ -1,6 +1,8 @@
 package vsdk.toolkit.io.image;
 
-public class _NativeImageReaderWrapperHeaderInfo
+import vsdk.toolkit.io.PersistenceElement;
+
+public class _NativeImageReaderWrapperHeaderInfo extends PersistenceElement
 {
     public long xSize;
     public long ySize;

@@ -3,7 +3,7 @@ package vsdk.toolkit.processing;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class LzwWrapper
+public class LzwWrapper extends ProcessingElement
 {
     static {
         System.loadLibrary("LZW");

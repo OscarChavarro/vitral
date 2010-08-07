@@ -41,7 +41,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-class _ReaderAseTriangleCache implements Comparable <_ReaderAseTriangleCache>
+class _ReaderAseTriangleCache extends PersistenceElement implements Comparable <_ReaderAseTriangleCache>
 {
     public int p0;
     public int p1;
@@ -67,7 +67,7 @@ class _ReaderAseTriangleCache implements Comparable <_ReaderAseTriangleCache>
     }
 }
 
-class _ReaderAseMeshCache
+class _ReaderAseMeshCache extends PersistenceElement
 {
     public ArrayList<_ReaderAseTriangleCache> triangles;
 
