@@ -135,7 +135,7 @@ class _ReaderPlyElement
                 listindex = currentPropertyIndex;
             }
         }
-        skipTypes.append(skiptype);
+        skipTypes.add(skiptype);
 
         currentPropertyIndex++;
         return true;
@@ -233,7 +233,7 @@ class _ReaderPlyElement
                 }
             }
             else {
-                skipRead(reader, skipTypes.array[j]);
+                skipRead(reader, skipTypes.get(j));
             }
         }
         return true;
@@ -272,9 +272,9 @@ class _ReaderPlyElement
                         else {
                             p2 = val;
                             // Add a triangle over <p0, p1, p2>
-                            triangles.append(p0);
-                            triangles.append(p1);
-                            triangles.append(p2);
+                            triangles.add(p0);
+                            triangles.add(p1);
+                            triangles.add(p2);
                             //
                             p1 = val;
                         }
@@ -287,7 +287,7 @@ class _ReaderPlyElement
                 }
             }
             else {
-                skipRead(reader, skipTypes.array[j]);
+                skipRead(reader, skipTypes.get(j));
             }
         }
         return true;
@@ -335,13 +335,13 @@ class _ReaderPlyElement
             //-----------------------------------------------------------------
             int t[];
 
-            mesh.initTriangleArrays(triangles.size/3);
+            mesh.initTriangleArrays(triangles.size()/3);
             t = mesh.getTriangleIndexes();
 
-            for ( i = 0; i < triangles.size; i++ ) {
-                t[i] = triangles.array[i];
+            for ( i = 0; i < triangles.size(); i++ ) {
+                t[i] = triangles.get(i);
             }
-            triangles.array = null;
+            //triangles.array = null;
             triangles = null;
         }
 

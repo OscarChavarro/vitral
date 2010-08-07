@@ -333,8 +333,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
                 dropCoordinate(he.startingVertex.position, projectedPoint,
                                dominantCoordinate);
-                polygon2Du.append(projectedPoint.x);
-                polygon2Dv.append(projectedPoint.y);
+                polygon2Du.add(projectedPoint.x);
+                polygon2Dv.add(projectedPoint.y);
                 polygon2Dh.add(he);
                 heOld = he;
                 polygon2Dvv.add(he.startingVertex);
@@ -345,8 +345,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 }
                 dropCoordinate(he.startingVertex.position, projectedPoint,
                                dominantCoordinate);
-                polygon2Du.append(projectedPoint.x);
-                polygon2Dv.append(projectedPoint.y);
+                polygon2Du.add(projectedPoint.x);
+                polygon2Dv.add(projectedPoint.y);
                 polygon2Dvv.add(he.startingVertex);
 
                 if ( VSDK.vectorDistance(p, he.startingVertex.position) 
@@ -372,9 +372,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         //-----------------------------------------------------------------
         //- 2. Translate the 2D polygon such that the intersection point is
         //- in the origin
-        for ( i = 0; i < polygon2Du.size; i++ ) {
-            polygon2Du.array[i] -= u;
-            polygon2Dv.array[i] -= v;
+        for ( i = 0; i < polygon2Du.size(); i++ ) {
+            double val;
+            val = polygon2Du.get(i) - u;
+            polygon2Du.set(i, val);
+            val = polygon2Dv.get(i) - v;
+            polygon2Dv.set(i, val);
         }
         nc = 0;
 
@@ -383,12 +386,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         double ua, va, ub, vb;
         _PolyhedralBoundedSolidVertex vva, vvb;
 
-        for ( i = 0; i < polygon2Du.size - 1; i += 2 ) {
+        for ( i = 0; i < polygon2Du.size() - 1; i += 2 ) {
             // This iteration tests the line segment (ua, va) - (ub, vb)
-            ua = polygon2Du.array[i];
-            va = polygon2Dv.array[i];
-            ub = polygon2Du.array[i+1];
-            vb = polygon2Dv.array[i+1];
+            ua = polygon2Du.get(i);
+            va = polygon2Dv.get(i);
+            ub = polygon2Du.get(i+1);
+            vb = polygon2Dv.get(i+1);
             he = polygon2Dh.get(i/2);
             vva = polygon2Dvv.get(i);
             vvb = polygon2Dvv.get(i+1);

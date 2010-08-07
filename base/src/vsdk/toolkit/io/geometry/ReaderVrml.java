@@ -154,7 +154,7 @@ public class ReaderVrml extends PersistenceElement
                         System.out.println("Parse error trying to read double at readVertexPositions, number expected, recieved \"" + parser.sval + "\".");
                         return false;
                     }
-                    vals.append(val);
+                    vals.add(val);
                 }
                 break;
               default:
@@ -183,10 +183,10 @@ public class ReaderVrml extends PersistenceElement
         int i;
         double v[];
 
-        mesh.initVertexPositionsArray(vals.size);
+        mesh.initVertexPositionsArray(vals.size());
         v = mesh.getVertexPositions();
-        for ( i = 0; i < vals.size; i++ ) {
-            v[i] = vals.array[i];
+        for ( i = 0; i < vals.size(); i++ ) {
+            v[i] = vals.get(i);
         }
         return true;
     }
@@ -227,7 +227,7 @@ public class ReaderVrml extends PersistenceElement
                         System.out.println("Parse error trying to read double at readVertexColors, number expected, recieved \"" + parser.sval + "\".");
                         return false;
                     }
-                    vals.append(val);
+                    vals.add(val);
                 }
                 break;
               default:
@@ -257,8 +257,8 @@ public class ReaderVrml extends PersistenceElement
         mesh.initVertexColorsArray();
         double c[];
         c = mesh.getVertexColors();
-        for ( i = 0; i < vals.size && i < c.length; i++ ) {
-            c[i] = vals.array[i];
+        for ( i = 0; i < vals.size() && i < c.length; i++ ) {
+            c[i] = vals.get(i);
         }
         return true;
     }
@@ -292,7 +292,7 @@ public class ReaderVrml extends PersistenceElement
                     System.out.println("Parse error trying to read integer at readPolygons, number expected, recieved \"" + parser.sval + "\".");
                     return false;
                 }
-                vals.append(val);
+                vals.add(val);
                 break;
               default:
                 if ( parser.ttype != '\"' ) {
@@ -322,8 +322,8 @@ public class ReaderVrml extends PersistenceElement
         int triangleCount;
         int index;
 
-        for ( i = 0, n = 0, triangleCount = 0; i < vals.size; i++ ) {
-            index = vals.array[i];
+        for ( i = 0, n = 0, triangleCount = 0; i < vals.size(); i++ ) {
+            index = vals.get(i);
             if ( index == -1 ) {
                 if ( n >= 3 ) {
                     triangleCount += (n-2);
@@ -346,11 +346,11 @@ public class ReaderVrml extends PersistenceElement
         mesh.initTriangleArrays(triangleCount);
         t = mesh.getTriangleIndexes();
 
-        for ( i = 0, n = 0, tindex = 0; i < vals.size; i++ ) {
-            index = vals.array[i];
+        for ( i = 0, n = 0, tindex = 0; i < vals.size(); i++ ) {
+            index = vals.get(i);
             if ( index == -1 ) {
                 for ( j = n, k = 0; n >=3 && j > 0; j--, k++ ) {
-                    index = vals.array[i-j];
+                    index = vals.get(i-j);
 
                     if( k == 0 ) {
                         p0 = index;

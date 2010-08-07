@@ -13,24 +13,39 @@ public class ArrayListOfInts extends FundamentalEntity {
     private int increment;
     private int assignedSize;    
   
-    public int size; // Currently used elements
-    public int array[];
+    private int mysize; // Currently used elements
+    private int array[];
     private int array2[];
 
     public ArrayListOfInts(int increment) {
         this.increment = increment;
         array = new int[this.increment];
         assignedSize = this.increment;
-        size = 0;
+        mysize = 0;
     }
 
-    public void append(int val)
+    public int size()
     {
-        if ( size >= assignedSize ) {
+        return mysize;
+    }
+
+    public int get(int i)
+    {
+        return array[i];
+    }
+
+    public void set(int i, int val)
+    {
+        array[i] = val;
+    }
+
+    public void add(int val)
+    {
+        if ( mysize >= assignedSize ) {
             grow();
         }
-        array[size] = val;
-        size++;
+        array[mysize] = val;
+        mysize++;
     }
 
     private void grow()
@@ -39,7 +54,7 @@ public class ArrayListOfInts extends FundamentalEntity {
         assignedSize += increment;
 
         int i;
-        for ( i = 0; i < size; i++ ) {
+        for ( i = 0; i < mysize; i++ ) {
             array2[i] = array[i];
         }
 
@@ -48,7 +63,7 @@ public class ArrayListOfInts extends FundamentalEntity {
 
     public void clean()
     {
-        size = 0;
+        mysize = 0;
     }
 }
 

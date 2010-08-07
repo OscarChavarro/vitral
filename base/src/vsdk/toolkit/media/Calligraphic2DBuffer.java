@@ -60,29 +60,29 @@ public class Calligraphic2DBuffer extends MediaEntity {
     Adds a 2D line to the calligraphic buffer.
     */
     public void add2DLine(double x0, double y0, double x1, double y1) {
-        lineData.append(x0);
-        lineData.append(y0);
-        lineData.append(x1);
-        lineData.append(y1);
-        lineData.append(0);  // R
-        lineData.append(0);  // G
-        lineData.append(0);  // B
-        lineData.append(1.0); // Width
+        lineData.add(x0);
+        lineData.add(y0);
+        lineData.add(x1);
+        lineData.add(y1);
+        lineData.add(0);  // R
+        lineData.add(0);  // G
+        lineData.add(0);  // B
+        lineData.add(1.0); // Width
     }
 
     public void get2DLine(int i, Vector3D outP0, Vector3D outP1)
     {
-        outP0.x = lineData.array[8*i];
-        outP0.y = lineData.array[8*i+1];
+        outP0.x = lineData.get(8*i);
+        outP0.y = lineData.get(8*i+1);
         outP0.z = 0.0;
-        outP1.x = lineData.array[8*i+2];
-        outP1.y = lineData.array[8*i+3];
+        outP1.x = lineData.get(8*i+2);
+        outP1.y = lineData.get(8*i+3);
         outP1.z = 0.0;
     }
 
     public int getNumLines()
     {
-        return lineData.size/8;
+        return lineData.size()/8;
     }
 
     public void exportRgbImage(RGBImage inOutRasterViewport)

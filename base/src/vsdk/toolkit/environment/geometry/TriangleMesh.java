@@ -1346,13 +1346,13 @@ public class TriangleMesh extends Surface {
     private void appendVertices(ArrayListOfDoubles ev)
     {
         int i;
-        double newVertexPositions[] = new double[vertexPositions.length + ev.size];
+        double newVertexPositions[] = new double[vertexPositions.length + ev.size()];
 
         for ( i = 0; i < vertexPositions.length; i++ ) {
             newVertexPositions[i] = vertexPositions[i];
         }
-        for ( i = 0; i < ev.size; i++ ) {
-            newVertexPositions[i+vertexPositions.length] = ev.array[i];
+        for ( i = 0; i < ev.size(); i++ ) {
+            newVertexPositions[i+vertexPositions.length] = ev.get(i);
         }
 
         vertexPositions = newVertexPositions;
@@ -1361,14 +1361,14 @@ public class TriangleMesh extends Surface {
     private void appendTriangles(ArrayListOfInts et)
     {
         int i;
-        int newTriangleIndices[] = new int[triangleIndices.length + et.size];
+        int newTriangleIndices[] = new int[triangleIndices.length + et.size()];
 
         for ( i = 0; i < triangleIndices.length; i++ ) {
             newTriangleIndices[i] = triangleIndices[i];
         }
 
-        for ( i = 0; i < et.size; i++ ) {
-            newTriangleIndices[i+triangleIndices.length] = et.array[i];
+        for ( i = 0; i < et.size(); i++ ) {
+            newTriangleIndices[i+triangleIndices.length] = et.get(i);
         }
 
         triangleIndices = newTriangleIndices;
@@ -1401,19 +1401,19 @@ public class TriangleMesh extends Surface {
             mb = gib.p;
         }
 
-        extraTriangles.append(i);
+        extraTriangles.add(i);
 
-        extraTriangles.append(((extraVertices.size/3 + nv)));
+        extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        extraVertices.append(ma.x);
-        extraVertices.append(ma.y);
-        extraVertices.append(ma.z);
+        extraVertices.add(ma.x);
+        extraVertices.add(ma.y);
+        extraVertices.add(ma.z);
 
-        extraTriangles.append(((extraVertices.size/3 + nv)));
+        extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        extraVertices.append(mb.x);
-        extraVertices.append(mb.y);
-        extraVertices.append(mb.z);
+        extraVertices.add(mb.x);
+        extraVertices.add(mb.y);
+        extraVertices.add(mb.z);
 
         triangleIndices[3*i+0] = -1;
         triangleIndices[3*i+1] = -1;
@@ -1440,15 +1440,15 @@ public class TriangleMesh extends Surface {
             ma = gia.p;
         }
 
-        extraTriangles.append(i);
+        extraTriangles.add(i);
 
-        extraTriangles.append(((extraVertices.size/3 + nv)));
+        extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        extraVertices.append(ma.x);
-        extraVertices.append(ma.y);
-        extraVertices.append(ma.z);
+        extraVertices.add(ma.x);
+        extraVertices.add(ma.y);
+        extraVertices.add(ma.z);
 
-        extraTriangles.append(j);
+        extraTriangles.add(j);
 
         triangleIndices[3*i+0] = -1;
         triangleIndices[3*i+1] = -1;
@@ -1483,23 +1483,23 @@ public class TriangleMesh extends Surface {
         }
 
         //-----------------------------------------------------------------
-        extraTriangles.append(3*triangleIndices[3*i+0]+0);
+        extraTriangles.add(3*triangleIndices[3*i+0]+0);
 
-        extraTriangles.append(((extraVertices.size/3 + nv)));
+        extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        extraVertices.append(ma.x);
-        extraVertices.append(ma.y);
-        extraVertices.append(ma.z);
+        extraVertices.add(ma.x);
+        extraVertices.add(ma.y);
+        extraVertices.add(ma.z);
 
-        extraTriangles.append(((extraVertices.size/3 + nv)));
+        extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        extraTriangles.append(i); // for next tri.
-        extraTriangles.append(((extraVertices.size/3 + nv))); 
-        extraTriangles.append(j);
+        extraTriangles.add(i); // for next tri.
+        extraTriangles.add(((extraVertices.size()/3 + nv))); 
+        extraTriangles.add(j);
 
-        extraVertices.append(mb.x);
-        extraVertices.append(mb.y);
-        extraVertices.append(mb.z);
+        extraVertices.add(mb.x);
+        extraVertices.add(mb.y);
+        extraVertices.add(mb.z);
 
         //-----------------------------------------------------------------
         triangleIndices[3*i+0] = -1;

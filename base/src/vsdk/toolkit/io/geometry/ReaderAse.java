@@ -88,7 +88,7 @@ class _ReaderAseMeshCache
         Collections.sort(triangles);
     }
 
-    public TriangleMesh exportToMesh(double[] vertexData, int[] vertexMap)
+    public TriangleMesh exportToMesh(ArrayListOfDoubles vertexData, int[] vertexMap)
     {
         int i;
         TriangleMesh mesh;
@@ -133,9 +133,9 @@ class _ReaderAseMeshCache
         for ( i = 0, j = 0; i < n; i++ ) {
             if ( vertexMap[i] >= 0 ) {
                 j = vertexMap[i];
-                v[3*j+0] = vertexData[3*i+0]/100.0;
-                v[3*j+1] = vertexData[3*i+1]/100.0;
-                v[3*j+2] = vertexData[3*i+2]/100.0;
+                v[3*j+0] = vertexData.get(3*i+0)/100.0;
+                v[3*j+1] = vertexData.get(3*i+1)/100.0;
+                v[3*j+2] = vertexData.get(3*i+2)/100.0;
             }
         }
 
@@ -471,7 +471,7 @@ public class ReaderAse extends PersistenceElement
                 try {
                     if ( i == 0 ) {
                         index = Integer.parseInt(parser.sval);
-                        if ( index != vertexData.size/3 ) {
+                        if ( index != vertexData.size()/3 ) {
                             System.out.println("readVertex: non consecutive vertex list!");
                             System.exit(0);
                         }
@@ -492,9 +492,9 @@ public class ReaderAse extends PersistenceElement
             i++;
         } while ( tokenType != StreamTokenizer.TT_EOF && i <= 3 );
 
-        vertexData.append(vals[1]);
-        vertexData.append(vals[2]);
-        vertexData.append(vals[3]);
+        vertexData.add(vals[1]);
+        vertexData.add(vals[2]);
+        vertexData.add(vals[3]);
     }
 
     private static int[] parseGroupsIds(String groups) throws Exception
@@ -603,7 +603,7 @@ public class ReaderAse extends PersistenceElement
         for ( i = 0; i < g.length; i++ ) {
             vals[3] = g[i];
             for ( j = 0; j < 5; j++ ) {
-                triangleData.append(vals[j]);
+                triangleData.add(vals[j]);
             }
         }
     }
@@ -804,15 +804,15 @@ public class ReaderAse extends PersistenceElement
 
         int i;
         int p0, p1, p2, smoothGroupId, materialId;
-        for ( i = 0; i < triangleData.size/5; i++ ) {
+        for ( i = 0; i < triangleData.size()/5; i++ ) {
             _ReaderAseMeshCache group;
 
-            p0 = triangleData.array[5*i+0];
-            p1 = triangleData.array[5*i+1];
-            p2 = triangleData.array[5*i+2];
-            smoothGroupId = triangleData.array[5*i+3];
+            p0 = triangleData.get(5*i+0);
+            p1 = triangleData.get(5*i+1);
+            p2 = triangleData.get(5*i+2);
+            smoothGroupId = triangleData.get(5*i+3);
 
-            materialId = triangleData.array[5*i+4];
+            materialId = triangleData.get(5*i+4);
             group = smoothGroups.get(new Integer(smoothGroupId));
             if ( group == null ) {
                 group = new _ReaderAseMeshCache();
@@ -841,13 +841,13 @@ public class ReaderAse extends PersistenceElement
 
         System.out.println("Resulting hashmap size: " + smoothGroups.size());
 
-        vertexIndexMap = new int[vertexData.size/3];
+        vertexIndexMap = new int[vertexData.size()/3];
         Iterator<_ReaderAseMeshCache> it;
         for ( i = 0, it = set.iterator(); it.hasNext(); i++ ) {
             _ReaderAseMeshCache e;
             e = it.next();
 
-            mesh = e.exportToMesh(vertexData.array, vertexIndexMap);
+            mesh = e.exportToMesh(vertexData, vertexIndexMap);
             if ( mesh != null ) {
                 mg.addMesh(mesh);
             }

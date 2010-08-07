@@ -13,24 +13,39 @@ public class ArrayListOfDoubles extends FundamentalEntity {
     private int increment;
     private int assignedSize;    
   
-    public int size; // Currently used elements
-    public double array[];
+    private int mysize; // Currently used elements
+    private double array[];
     private double array2[];
 
     public ArrayListOfDoubles(int increment) {
         this.increment = increment;
         array = new double[this.increment];
         assignedSize = this.increment;
-        size = 0;
+        mysize = 0;
     }
 
-    public void append(double val)
+    public int size()
     {
-        if ( size >= assignedSize ) {
+        return mysize;
+    }
+
+    public double get(int i)
+    {
+        return array[mysize];
+    }
+
+    public void set(int i, double val)
+    {
+        array[mysize] = val;
+    }
+
+    public void add(double val)
+    {
+        if ( mysize >= assignedSize ) {
             grow();
         }
-        array[size] = val;
-        size++;
+        array[mysize] = val;
+        mysize++;
     }
 
     private void grow()
@@ -39,7 +54,7 @@ public class ArrayListOfDoubles extends FundamentalEntity {
         assignedSize += increment;
 
         int i;
-        for ( i = 0; i < size; i++ ) {
+        for ( i = 0; i < mysize; i++ ) {
             array2[i] = array[i];
         }
 
@@ -48,7 +63,7 @@ public class ArrayListOfDoubles extends FundamentalEntity {
 
     public void clean()
     {
-        size = 0;
+        mysize = 0;
     }
 }
 

@@ -822,4 +822,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     english, Universe class variables factorized to appear as using a
     SimpleScene.
 
+2010 august 6, Oscar Chavarro <<40min>>:
+  - 40min: ArrayOfDoubles signature update to comply with java ArrayList
+    Note: CSG operations on Polyhedral model start failing...
+
 ===========================================================================
