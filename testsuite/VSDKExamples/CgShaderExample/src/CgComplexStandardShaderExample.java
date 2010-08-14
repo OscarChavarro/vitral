@@ -543,7 +543,6 @@ public class CgComplexStandardShaderExample
 
         JFrame frame = new JFrame("Vitral SDK / Nvidia Cg demo");
         canvas = new GLCanvas();
-        canvas.addGLEventListener(instance);
         canvas.addMouseListener(instance);
         canvas.addMouseMotionListener(instance);
         canvas.addKeyListener(instance);

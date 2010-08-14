@@ -1,4 +1,3 @@
-
 //===========================================================================
 
 // VITRAL recomendation: Use explicit class imports (not .*) in hello world 
@@ -29,9 +28,9 @@ import com.jogamp.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImage;
@@ -374,7 +373,6 @@ public class CgAutomaticShaderExample
 
         JFrame frame = new JFrame("Vitral SDK / Nvidia Cg demo");
         canvas = new GLCanvas();
-        canvas.addGLEventListener(instance);
         canvas.addMouseListener(instance);
         canvas.addMouseMotionListener(instance);
         canvas.addMouseWheelListener(instance);
