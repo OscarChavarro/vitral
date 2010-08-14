@@ -24,8 +24,8 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JLabel;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -238,7 +238,7 @@ public class JoglDrawingArea implements
         return canvas;
     }
 
-    private void drawGizmos(GL gl)
+    private void drawGizmos(GL2 gl)
     {
         // Pending: Turn off scene light and turn on gizmo specific lighting
         translationGizmoDrawn = false;
@@ -299,7 +299,7 @@ public class JoglDrawingArea implements
         gl.glEnable(gl.GL_DEPTH_TEST);
     }
 
-    private Image createProjectedView(GL gl, SimpleBodyGroup referenceBodies, int cam)
+    private Image createProjectedView(GL2 gl, SimpleBodyGroup referenceBodies, int cam)
     {
         //- Will render a normalized body inside the unit cube ------------
         double minmax[];
@@ -413,7 +413,7 @@ public class JoglDrawingArea implements
     }
 
     private SimpleBodyGroup
-    addDebugProjectedView(GL gl, SimpleBodyGroup referenceBodies)
+    addDebugProjectedView(GL2 gl, SimpleBodyGroup referenceBodies)
     {
         SimpleBody boxBody;
         Image texture;
@@ -601,7 +601,7 @@ public class JoglDrawingArea implements
         return group;
     }
 
-    private void debugProjectedViewsIfNeeded(GL glAppContext)
+    private void debugProjectedViewsIfNeeded(GL2 glAppContext)
     {
         //-----------------------------------------------------------------
         if ( wantToDebugProjectedViews == false ) {
@@ -644,7 +644,7 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void copyColorBufferIfNeeded(GL gl)
+    private void copyColorBufferIfNeeded(GL2 gl)
     {
         if ( wantToGetColor ) {
             parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
@@ -660,7 +660,7 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void copyZBufferIfNeeded(GL gl)
+    private void copyZBufferIfNeeded(GL2 gl)
     {
         if ( wantToGetDepth ) {
             if ( wantToGetContourns ) {
@@ -695,7 +695,7 @@ public class JoglDrawingArea implements
         ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
     }
 
-    private void drawView(GL gl, JoglAwtViewportWindow view)
+    private void drawView(GL2 gl, JoglAwtViewportWindow view)
     {
         if ( !view.isActive() ) {
             return;
@@ -758,7 +758,7 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawMultipleViews(GL gl)
+    private void drawMultipleViews(GL2 gl)
     {
         JoglAwtViewportWindow view;
         int i;
@@ -792,7 +792,7 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawSelectedViewFullScreen(GL gl)
+    private void drawSelectedViewFullScreen(GL2 gl)
     {
         JoglAwtViewportWindow view;
         int i;
@@ -823,7 +823,7 @@ public class JoglDrawingArea implements
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable)
     {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         if ( firstTimer ) {
             firstTimer = false;
@@ -853,7 +853,7 @@ public class JoglDrawingArea implements
 	}
     }
 
-    private void drawVisualRayDebugSegment(GL gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
+    private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
     {
         double l;
         Vector3D diff = end.substract(start);
@@ -900,7 +900,7 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawVisualRayDebug(GL gl, Ray ray, int level)
+    private void drawVisualRayDebug(GL2 gl, Ray ray, int level)
     {
         if ( level < 0 ) {
             return;
@@ -953,7 +953,7 @@ public class JoglDrawingArea implements
         gl.glPopMatrix();
     }
 
-    private void drawVisualRayDebug(GL gl)
+    private void drawVisualRayDebug(GL2 gl)
     {
         //-----------------------------------------------------------------
         if ( !parent.withVisualDebugRay ) {
@@ -970,6 +970,11 @@ public class JoglDrawingArea implements
     /** Not used method, but needed to instanciate GLEventListener */
     public void init(GLAutoDrawable drawable)
     {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
         ;
     }
 

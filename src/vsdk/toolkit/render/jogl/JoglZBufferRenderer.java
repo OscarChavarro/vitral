@@ -8,14 +8,14 @@
 package vsdk.toolkit.render.jogl;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.ZBuffer;
 
 public class JoglZBufferRenderer extends JoglRenderer 
 {
-    public static byte[] importZBuffer(GL gl) {
+    public static byte[] importZBuffer(GL2 gl) {
         int[] view = new int[4];
         gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];
@@ -40,7 +40,7 @@ public class JoglZBufferRenderer extends JoglRenderer
         return data;
     }
 
-    public static ZBuffer importJOGLZBuffer(GL gl) {
+    public static ZBuffer importJOGLZBuffer(GL2 gl) {
         int[] view = new int[4];
         gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];

@@ -33,9 +33,6 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-// JOGL Classes
-import javax.media.opengl.GLCanvas;
-
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;

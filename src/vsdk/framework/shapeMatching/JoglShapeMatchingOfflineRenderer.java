@@ -10,7 +10,8 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -32,16 +33,19 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         ready = false;
 
         // Create a GLCapabilities object for the pbuffer
-        GLCapabilities pbCaps = new GLCapabilities();
-        pbCaps.setDoubleBuffered(false);
+        GLCapabilities pbCaps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
+        GLDrawableFactory drawableFactory;
 
-        if ( !GLDrawableFactory.getFactory().canCreateGLPbuffer() ) {
+        pbCaps.setDoubleBuffered(false);
+        drawableFactory = GLDrawableFactory.getFactory(GLProfile.get(GLProfile.GL3));
+
+        if ( !drawableFactory.canCreateGLPbuffer(null) ) {
               pbufferSupported = false;
               return;
         }
 
         try {
-            pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = drawableFactory.createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
             pbufferSupported = true;
             pbuffer.addGLEventListener(this);
           }
@@ -75,7 +79,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
     }
 
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         target.executeRendering(gl);
         ready = true;
     }
@@ -94,10 +98,15 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
     public void init( GLAutoDrawable drawable ) {
     }
   
-    public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
+    }
+
+    public void dispose(GLAutoDrawable drawable)
+    {
+        ;
     }
 }
 

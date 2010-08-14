@@ -21,9 +21,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
@@ -312,7 +312,7 @@ public class IlluminationTest
         f.setVisible(true);
     }
 
-    private void drawObjectsGL(GL gl) {
+    private void drawObjectsGL(GL2 gl) {
         gl.glLoadIdentity();
 
 /*
@@ -349,7 +349,7 @@ public class IlluminationTest
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glClearColor(0, 0, 0, 1.0f);
@@ -405,6 +405,11 @@ public class IlluminationTest
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -415,7 +420,7 @@ public class IlluminationTest
                         int y,
                         int width,
                         int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
 
         camera.updateViewportResize(width, height);

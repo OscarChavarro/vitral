@@ -9,9 +9,9 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL clases
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGparameter;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -70,7 +70,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     Warning: Change with configured color for vertex normals, tangents and
     binormals
     */
-    private static void drawVertexNormals(GL gl, double r, int slices, int stacks) {
+    private static void drawVertexNormals(GL2 gl, double r, int slices, int stacks) {
         JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -112,7 +112,7 @@ public class JoglSphereRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    private static void drawPoints(GL gl, double r, int slices, int stacks) {
+    private static void drawPoints(GL2 gl, double r, int slices, int stacks) {
         JoglRenderer.disableNvidiaCgProfiles();
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -140,7 +140,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     Generates the relevant JOGL/OpenGL + Cg primitives for a sphere's vertex.
     */
     private static void
-    drawVertex(GL gl, double theta, double phi, double s, double t,
+    drawVertex(GL2 gl, double theta, double phi, double s, double t,
                Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
     {
         //- If inside a Cg schema, pass non standard OpenGL parameters ----
@@ -178,7 +178,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     private static void
-    drawSphereElements(GL gl, double r, int slices, int stacks)
+    drawSphereElements(GL2 gl, double r, int slices, int stacks)
     {
         VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
         VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
@@ -238,12 +238,12 @@ public class JoglSphereRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Sphere s, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, Sphere s, Camera c, RendererConfiguration q)
     {
         draw(gl, s, c, q, 20, 10);
     }
 
-    public static void draw(GL gl, Sphere s, Camera c, RendererConfiguration q,
+    public static void draw(GL2 gl, Sphere s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
         JoglGeometryRenderer.activateShaders(gl, s, c);

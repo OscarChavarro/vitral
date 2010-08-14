@@ -10,13 +10,13 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // Vitral classes
 import vsdk.framework.Component;
 
 public abstract class JoglShapeMatchingOfflineRenderable extends Component {
-    public abstract void executeRendering(GL gl);
+    public abstract void executeRendering(GL2 gl);
 }
 
 //===========================================================================

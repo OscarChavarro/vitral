@@ -8,7 +8,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -22,7 +22,7 @@ public class JoglConeRenderer extends JoglRenderer {
     private static GLU glu = null;
     private static GLUquadric gluQuadric = null;
 
-    private static void drawParts(GL gl, Cone cone)
+    private static void drawParts(GL2 gl, Cone cone)
     {
         double r1, r2, h;
         int slices = 16;
@@ -52,7 +52,7 @@ public class JoglConeRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Cone cone, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, Cone cone, Camera c, RendererConfiguration q)
     {
         if ( glu == null ) {
             glu = new GLU();

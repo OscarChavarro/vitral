@@ -12,15 +12,16 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 // JOGL clases
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGcontext;
-import com.sun.opengl.cg.CGprogram;
-import com.sun.opengl.cg.CGparameter;
-import com.sun.opengl.util.BufferUtil;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGcontext;
+import com.jogamp.opengl.cg.CGprogram;
+import com.jogamp.opengl.cg.CGparameter;
+import com.jogamp.common.nio.Buffers;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -204,18 +205,20 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static boolean verifyOpenGLAvailability()
     {
-        if ( !PersistenceElement.verifyLibrary("jogl") ) {
+        if ( !PersistenceElement.verifyLibrary("jogl_gl2es12") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
                 "JoglRenderer.verifyOpenGLAvailability",
                 "JOGL Library not found.  Check your installation.");
             return false;
         }
+/*
         if ( !PersistenceElement.verifyLibrary("jogl_awt") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
                 "JoglRenderer.verifyOpenGLAvailability",
                 "JOGL-AWT Library not found.  Check your installation.");
             return false;
         }
+*/
         if ( !PersistenceElement.verifyLibrary("jogl_cg") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
                 "JoglRenderer.verifyOpenGLAvailability",
@@ -403,7 +406,7 @@ public abstract class JoglRenderer extends RenderingElement {
         return true;
     }
 
-    public static void deactivateNvidiaGpuParameters(GL gl, RendererConfiguration quality)
+    public static void deactivateNvidiaGpuParameters(GL2 gl, RendererConfiguration quality)
     {
         if ( nvidiaCgErrorReported ) {
             return;
@@ -428,7 +431,7 @@ public abstract class JoglRenderer extends RenderingElement {
         }
     }
 
-    public static void activateNvidiaGpuParameters(GL gl,
+    public static void activateNvidiaGpuParameters(GL2 gl,
         RendererConfiguration quality,
         CGprogram vertexShader, CGprogram pixelShader)
     {
@@ -503,7 +506,9 @@ public abstract class JoglRenderer extends RenderingElement {
         FloatBuffer buffer;
         int i;
 
-        buffer = BufferUtil.newFloatBuffer(v.length);
+        //buffer = BufferUtil.newFloatBuffer(v.length);
+        //buffer = ByteBuffer.allocateDirect(v.length*4).asFloatBuffer();
+        buffer = Buffers.newDirectFloatBuffer(v.length);
         for ( i = 0; i < v.length; i++ ) {
             buffer.put((float)v[i]);
         }
@@ -518,7 +523,9 @@ public abstract class JoglRenderer extends RenderingElement {
         FloatBuffer buffer;
         int i;
 
-        buffer = BufferUtil.newFloatBuffer(v.length);
+	//buffer = BufferUtil.newFloatBuffer(v.length);
+        //buffer = ByteBuffer.allocateDirect(v.length*4).asFloatBuffer();
+        buffer = Buffers.newDirectFloatBuffer(v.length);
         for ( i = 0; i < v.length; i++ ) {
             buffer.put((float)(v[i]*-1));
         }
@@ -533,7 +540,9 @@ public abstract class JoglRenderer extends RenderingElement {
         IntBuffer buffer;
         int i;
 
-        buffer = BufferUtil.newIntBuffer(v.length);
+        //buffer = BufferUtil.newIntBuffer(v.length);
+        //buffer = ByteBuffer.allocateDirect(v.length*4).asIntBuffer();
+        buffer = Buffers.newDirectIntBuffer(v.length);
         for ( i = 0; i < v.length; i++ ) {
             buffer.put(v[i]);
         }

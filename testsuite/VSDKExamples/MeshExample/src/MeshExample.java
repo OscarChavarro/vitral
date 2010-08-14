@@ -21,9 +21,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
@@ -74,10 +74,10 @@ public class MeshExample
             jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../etc/geometry");
 
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
             jfc.addChoosableFileFilter(new ObjectFilter("3ds", "3ds Files"));
             jfc.addChoosableFileFilter(new ObjectFilter("ase", "3ds Files (Ascii Scene Export)"));
             jfc.addChoosableFileFilter(new ObjectFilter("vtk", "kitware's VTK legacy binary file"));
+            jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
             int opc = jfc.showOpenDialog(new JPanel());
 
             if ( opc == JFileChooser.APPROVE_OPTION ) {
@@ -158,7 +158,7 @@ public class MeshExample
         f.setVisible(true);
     }
 
-    private void drawObjectsGL(GL gl) {
+    private void drawObjectsGL(GL2 gl) {
         gl.glLoadIdentity();
 
         // Draw reference frame
@@ -193,7 +193,7 @@ public class MeshExample
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1.0f);
@@ -223,7 +223,7 @@ public class MeshExample
                         int y,
                         int width,
                         int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
 
         camera.updateViewportResize(width, height);
@@ -305,6 +305,11 @@ public class MeshExample
     `keyReleased` method
     */
     public void keyTyped(KeyEvent e) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
         ;
     }
 

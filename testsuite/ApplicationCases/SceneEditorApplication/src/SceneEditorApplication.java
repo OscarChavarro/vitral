@@ -43,7 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 // JOGL Classes
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;

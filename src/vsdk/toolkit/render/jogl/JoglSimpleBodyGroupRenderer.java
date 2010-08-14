@@ -10,7 +10,7 @@ package vsdk.toolkit.render.jogl;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -21,7 +21,7 @@ import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.media.Image;
 
 public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
-    public static void draw(GL gl, SimpleBodyGroup b,
+    public static void draw(GL2 gl, SimpleBodyGroup b,
                             Camera c, RendererConfiguration q)
     {
         Image texture;

@@ -9,11 +9,11 @@ package vsdk.toolkit.render.jogl;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.SimpleBackground;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 public class JoglSimpleBackgroundRenderer extends JoglRenderer 
 {
-    public static void draw(GL gl, SimpleBackground background)
+    public static void draw(GL2 gl, SimpleBackground background)
     {
         Vector3D d = new Vector3D(1, 0, 0);
         ColorRgb color;

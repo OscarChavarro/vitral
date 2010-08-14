@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -62,7 +62,7 @@ public class ModifyPanel extends JPanel
         target = null;
     }
 
-    public void draw(GL gl, Camera camera, RendererConfiguration quality)
+    public void draw(GL2 gl, Camera camera, RendererConfiguration quality)
     {
         JoglSimpleBodyRenderer.draw(gl, target, camera, quality);
     }

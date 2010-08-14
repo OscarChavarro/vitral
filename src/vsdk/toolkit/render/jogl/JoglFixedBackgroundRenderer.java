@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.FixedBackground;
@@ -18,7 +18,7 @@ public class JoglFixedBackgroundRenderer extends JoglRenderer
     @todo in the case of equal size, polygon rendering should not be used,
     direct texel to pixel copy should be used...
     */
-    public static void draw(GL gl, FixedBackground background)
+    public static void draw(GL2 gl, FixedBackground background)
     {
         //-----------------------------------------------------------------
         gl.glMatrixMode(gl.GL_PROJECTION);
@@ -44,7 +44,7 @@ public class JoglFixedBackgroundRenderer extends JoglRenderer
         gl.glEnable(gl.GL_TEXTURE_2D);
         JoglRGBAImageRenderer.activate(gl, background.getImage());
 
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
             gl.GL_TRUE);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
             gl.GL_LINEAR_MIPMAP_LINEAR);

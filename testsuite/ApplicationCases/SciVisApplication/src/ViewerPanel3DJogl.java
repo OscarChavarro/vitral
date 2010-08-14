@@ -1,4 +1,4 @@
-yes
+
 // AWT/Swing classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -11,8 +11,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLJPanel;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLJPanel;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -96,6 +96,11 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -113,7 +118,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
         this.viewportResizeNeeded = true;
     }   
 
-    private void display3DSlices(GL gl)
+    private void display3DSlices(GL2 gl)
     {
         JoglCameraRenderer.activate(gl, camera);
 
@@ -218,7 +223,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         //-----------------------------------------------------------------
         gl.glClearColor(0, 0, 0, 1);

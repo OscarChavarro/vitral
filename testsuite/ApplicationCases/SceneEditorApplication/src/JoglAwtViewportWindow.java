@@ -17,7 +17,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -359,7 +359,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         camera.updateViewportResize(viewportSizeX, viewportSizeY);
     }
 
-    public void activateViewportGL(GL gl, int canvasXSize, int canvasYSize)
+    public void activateViewportGL(GL2 gl, int canvasXSize, int canvasYSize)
     {
         if ( !active ) {
             return;
@@ -372,7 +372,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     PRE: glViewport is set to full canvas area, and projection and modelview
     matrices are set to identity.
     */
-    public void drawBorderGL(GL gl, int viewportXsize, int viewportYsize)
+    public void drawBorderGL(GL2 gl, int viewportXsize, int viewportYsize)
     {
         if ( !active || viewportBorder <= 0 ) {
             return;
@@ -424,7 +424,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         titleImage = AwtSystem.calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
     }
 
-    public void drawReferenceBase(GL gl)
+    public void drawReferenceBase(GL2 gl)
     {
         //-----------------------------------------------------------------
         int basesize = 64;
@@ -493,7 +493,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glPopAttrib();
     }
 
-    private void drawGridRectangle(GL gl)
+    private void drawGridRectangle(GL2 gl)
     {
         gl.glPushMatrix();
 
@@ -561,13 +561,13 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         }
     }
 
-    public void drawGrid(GL gl)
+    public void drawGrid(GL2 gl)
     {
         //- Draw reference grid plane -------------------------------------
         if ( showGrid ) drawGridRectangle(gl);
     }
 
-    public void drawTextureString2D(GL gl, int x, int y, RGBAImage i)
+    public void drawTextureString2D(GL2 gl, int x, int y, RGBAImage i)
     {
         double dx;
         double dy;
@@ -591,7 +591,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
 
-    private void drawTextureString3D(GL gl, RGBAImage i)
+    private void drawTextureString3D(GL2 gl, RGBAImage i)
     {
         gl.glPushAttrib(gl.GL_ENABLE_BIT);
         gl.glRasterPos3d(-1, -1, 0);
@@ -601,7 +601,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 
         // Set texture parameters
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
             gl.GL_TRUE);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
             gl.GL_NEAREST);
@@ -624,7 +624,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glPopAttrib();
     }
 
-    public void drawTitle(GL gl)
+    public void drawTitle(GL2 gl)
     {
         int borderx = 4;
         int bordery = 1;
@@ -664,7 +664,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         }
     }
 
-    public void drawLabelsForTranslateGizmo(GL gl, TranslateGizmo gizmo)
+    public void drawLabelsForTranslateGizmo(GL2 gl, TranslateGizmo gizmo)
     {
         ArrayList<SimpleBody> things = gizmo.getElements();
         int i;

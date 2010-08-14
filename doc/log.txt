@@ -826,4 +826,10 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 40min: ArrayOfDoubles signature update to comply with java ArrayList
     Note: CSG operations on Polyhedral model start failing...
 
+2010 august 9, Oscar Chavarro <<60min>>:
+  - 1h: Migrating from JOGL1 to JOGL2 (library)
+
+2010 august 13, Oscar Chavarro
+  - 2h: Migrating from JOGL1 to JOGL2 (programs)
+
 ===========================================================================

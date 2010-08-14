@@ -7,7 +7,7 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 
 public class JoglTriangleStripMeshRenderer extends JoglRenderer {
 
-    private static void drawPoints(GL gl, TriangleStripMesh mesh) {
+    private static void drawPoints(GL2 gl, TriangleStripMesh mesh) {
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
@@ -33,7 +33,7 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    private static void drawSurfacesWithoutTexture(GL gl, 
+    private static void drawSurfacesWithoutTexture(GL2 gl, 
                                      TriangleStripMesh mesh, boolean flipNormals) {
         //-----------------------------------------------------------------
         // Note that glTexParameter and glTexEnv settings should be
@@ -65,7 +65,7 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
     @todo Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
     */
     public static void
-    draw(GL gl, TriangleStripMesh mesh, RendererConfiguration quality, boolean flip)
+    draw(GL2 gl, TriangleStripMesh mesh, RendererConfiguration quality, boolean flip)
     {
         //-----------------------------------------------------------------
         gl.glEnable(gl.GL_NORMALIZE);

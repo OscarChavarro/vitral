@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
@@ -17,7 +17,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     Geometry object.
     */
     public static void
-    draw(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
+    draw(GL2 gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
         TriangleMesh mesh = null;
         int i;
 
@@ -37,7 +37,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     }
 
     public static void
-    drawWithVertexArrays(GL gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
+    drawWithVertexArrays(GL2 gl, TriangleMeshGroup meshGroup, RendererConfiguration quality) {
         TriangleMesh mesh = null;
         int i;
 
@@ -59,7 +59,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     /**
     @todo program this!
     */
-    public static void drawWithSelection(GL gl, TriangleMeshGroup meshGroup,
+    public static void drawWithSelection(GL2 gl, TriangleMeshGroup meshGroup,
                                          RendererConfiguration quality,
                                          int selectedMesh,
                                          ArrayList<int[]> selectedTriangles) {

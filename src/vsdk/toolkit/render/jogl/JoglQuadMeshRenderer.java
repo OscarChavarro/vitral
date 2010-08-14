@@ -11,7 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -21,7 +21,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
 {
 
     private static void
-    drawSurfaceBasic(GL gl, QuadMesh mesh)
+    drawSurfaceBasic(GL2 gl, QuadMesh mesh)
     {
         int i, p0, p1, p2, p3;
         double v[] = mesh.getVertexPositions();
@@ -49,7 +49,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
     }
 
     private static void
-    drawSurfaceWithVertexArrays(GL gl, QuadMesh mesh)
+    drawSurfaceWithVertexArrays(GL2 gl, QuadMesh mesh)
     {
         FloatBuffer vertexPositionsBuffer;
         FloatBuffer vertexColorsBuffer;
@@ -108,7 +108,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
     Geometry object.
     */
     public static void
-    draw(GL gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
+    draw(GL2 gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
     {
         drawSurfaceBasic(gl, mesh);
     }
@@ -118,7 +118,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
     Geometry object.
     */
     public static void
-    drawWithVertexArrays(GL gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
+    drawWithVertexArrays(GL2 gl, QuadMesh mesh, RendererConfiguration quality, boolean flip) 
     {
         drawSurfaceWithVertexArrays(gl, mesh);
     }

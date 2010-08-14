@@ -7,7 +7,7 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL clases
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.VoxelVolume;
@@ -31,7 +31,7 @@ public class JoglVoxelVolumeRenderer extends JoglRenderer
         return threshold;
     }
 
-    public static void drawBinaryCubes(GL gl, VoxelVolume v,
+    public static void drawBinaryCubes(GL2 gl, VoxelVolume v,
         Camera c, RendererConfiguration q)
     {
         int xSize, ySize, zSize, x, y, z;

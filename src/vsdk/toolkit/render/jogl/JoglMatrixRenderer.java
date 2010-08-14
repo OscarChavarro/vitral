@@ -8,7 +8,7 @@
 package vsdk.toolkit.render.jogl;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
 This class is meant to support rendering operations in the JOGL API from
@@ -22,7 +22,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
     matrixId must be one of the internal JOGL/OpenGL variable names associated
     with matrices, like gl.GL_PROJECTION_MATRIX or gl.GL_MODELVIEW_MATRIX
     */
-    public static Matrix4x4 importJOGL(GL gl, int matrixId) {
+    public static Matrix4x4 importJOGL(GL2 gl, int matrixId) {
         double Mgl[] = new double[16];
 
         int row, column, pos;
@@ -41,7 +41,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
     This method acumulates the matrix represented in `A` in the currently
     selected matrix stack inside the JOGL state machine.
     */
-    public static void activate(GL gl, Matrix4x4 A)
+    public static void activate(GL2 gl, Matrix4x4 A)
     {
         double Mgl[] = new double[16];
         int row, column, pos;
@@ -72,7 +72,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
 
     THIS METHOD WILL BE CHANGED TO ALLOW CUSTOMIZATION
     */
-    public static void draw(GL gl, Matrix4x4 A)
+    public static void draw(GL2 gl, Matrix4x4 A)
     {
         gl.glPushMatrix();
         gl.glDisable(gl.GL_LIGHTING);

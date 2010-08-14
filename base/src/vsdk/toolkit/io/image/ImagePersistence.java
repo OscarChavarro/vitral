@@ -27,8 +27,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 // JOGL classes
-import com.sun.opengl.util.texture.spi.DDSImage;
-import com.sun.opengl.util.texture.spi.DDSImage.ImageInfo;
+import com.jogamp.opengl.util.texture.spi.DDSImage;
+import com.jogamp.opengl.util.texture.spi.DDSImage.ImageInfo;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;

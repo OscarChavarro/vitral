@@ -8,7 +8,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
@@ -22,7 +22,7 @@ import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
 
 public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
-    public static void drawControlPoints(GL gl, ParametricBiCubicPatch p)
+    public static void drawControlPoints(GL2 gl, ParametricBiCubicPatch p)
     {
         //-----------------------------------------------------------------
         gl.glDisable(gl.GL_LIGHTING);
@@ -57,7 +57,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    public static void drawNormals(GL gl, ParametricBiCubicPatch p,
+    public static void drawNormals(GL2 gl, ParametricBiCubicPatch p,
                                    double textureUSizeFactor,
                                    double textureVSizeFactor, 
                                    double textureURelaviteStart,
@@ -139,7 +139,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     and can be understood as a matrix of [NumberU][NumberV] points
     with coordinates (x, y, z).    
     */
-    public static void drawSurfaceGrid(GL gl,
+    public static void drawSurfaceGrid(GL2 gl,
                                        ParametricBiCubicPatch p,
                                        double textureUSizeFactor,
                                        double textureVSizeFactor, 
@@ -201,7 +201,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         }
     }
 
-    public static void drawControlGrid(GL gl, ParametricBiCubicPatch patch,
+    public static void drawControlGrid(GL2 gl, ParametricBiCubicPatch patch,
                                        Camera c, RendererConfiguration q,
                                        ColorRgb color) {
         // Now we draw the points
@@ -273,7 +273,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
+    public static void draw(GL2 gl, ParametricBiCubicPatch p, Camera c,
                            RendererConfiguration q) {
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
@@ -320,7 +320,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         }
     }
 
-    public static void draw(GL gl, ParametricBiCubicPatch p, Camera c,
+    public static void draw(GL2 gl, ParametricBiCubicPatch p, Camera c,
                            RendererConfiguration q,
                            int textureUSizeFactor, int tilling_y,
                            double textureURelaviteStart,

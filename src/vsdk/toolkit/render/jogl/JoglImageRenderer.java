@@ -9,7 +9,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -33,7 +33,7 @@ public class JoglImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    public static int activate(GL gl, Image img)
+    public static int activate(GL2 gl, Image img)
     {
         if ( img instanceof RGBAImage ) {
             return JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
@@ -50,14 +50,14 @@ public class JoglImageRenderer extends JoglRenderer
         return -1;
     }
 
-    public static void deactivate(GL gl, Image img)
+    public static void deactivate(GL2 gl, Image img)
     {
         if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.deactivate(gl, ((RGBImage)img));
 	}
     }
 
-    public static int activateAsNormalMap(GL gl, Image img, RendererConfiguration quality)
+    public static int activateAsNormalMap(GL2 gl, Image img, RendererConfiguration quality)
     {
         if ( img instanceof RGBAImage ) {
             return JoglRGBAImageRenderer.activateAsNormalMap(gl, (RGBAImage)img, quality);
@@ -74,7 +74,7 @@ public class JoglImageRenderer extends JoglRenderer
         return -1;
     }
 
-    public static void unload(GL gl, Image img)
+    public static void unload(GL2 gl, Image img)
     {
         if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.unload(gl, (RGBImage)img);
@@ -90,7 +90,7 @@ public class JoglImageRenderer extends JoglRenderer
         }
     }
 
-    public static void draw(GL gl, Image img)
+    public static void draw(GL2 gl, Image img)
     {
         if ( img instanceof RGBAImage ) {
             JoglRGBAImageRenderer.draw(gl, (RGBAImage)img);

@@ -15,7 +15,7 @@ package vsdk.framework.shapeMatching;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VSDK Classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -51,7 +51,7 @@ public class ShapeDescriptor3DGenerator extends Component
     the viewport image to be rendered.
     */
     private IndexedColorImage
-    createCube13ProjectedViewDistanceField(GL gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer)
+    createCube13ProjectedViewDistanceField(GL2 gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer)
     {
         //- Execute posing ------------------------------------------------
         SimpleBodyGroup bodySet = calculateUnitCubePosing(referenceBodies);
@@ -318,7 +318,7 @@ public class ShapeDescriptor3DGenerator extends Component
       - Adds newly computed shape descriptor to specified `descriptorsList`
     */
     public IndexedColorImage[]
-    calculateCube13ProjectedViewsShapeDescriptors(GL gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer, boolean exportDistanceFields) throws Exception
+    calculateCube13ProjectedViewsShapeDescriptors(GL2 gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, JoglProjectedViewRenderer projectedViewRenderer, boolean exportDistanceFields) throws Exception
     {
         FourierShapeDescriptor fourierShapeDescriptor;
         IndexedColorImage distanceField;

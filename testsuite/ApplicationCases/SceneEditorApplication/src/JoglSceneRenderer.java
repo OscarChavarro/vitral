@@ -4,7 +4,7 @@
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -31,7 +31,7 @@ public class JoglSceneRenderer
     Follows similar strategy to general JoglSimpleSceneRenderer, except that
     incorporates draw controlled under interface editor.
     */
-    private static void drawBase(GL gl, Scene s, ModifyPanel modifyPanel)
+    private static void drawBase(GL2 gl, Scene s, ModifyPanel modifyPanel)
     {
         //- Draw scene background -----------------------------------------
         JoglBackgroundRenderer.draw(gl,
@@ -89,7 +89,7 @@ public class JoglSceneRenderer
         }
     }
 
-    public static void draw(GL gl, Scene s, SceneEditorApplication parent)
+    public static void draw(GL2 gl, Scene s, SceneEditorApplication parent)
     {
         RendererConfiguration quality;
         SimpleBodyGroup ggi;

@@ -6,9 +6,9 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGprogram;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.Material;
 public class JoglMaterialRenderer extends JoglRenderer {
     private static boolean errorReported = false;
 
-    public static void activate(GL gl, Material m)
+    public static void activate(GL2 gl, Material m)
     {
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
@@ -74,7 +74,7 @@ public class JoglMaterialRenderer extends JoglRenderer {
         gl.glMaterialf(gl.GL_FRONT_AND_BACK, gl.GL_SHININESS, phongExp);
     }
 
-    public static void activateNvidiaGpuParameters(GL gl, Material material,
+    public static void activateNvidiaGpuParameters(GL2 gl, Material material,
         CGprogram vertexShader, CGprogram pixelShader)
     {
         double Ka[] = material.getAmbient().exportToDoubleArrayVect();

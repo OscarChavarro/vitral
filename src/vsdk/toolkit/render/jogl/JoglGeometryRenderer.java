@@ -6,9 +6,9 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGprogram;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
@@ -37,7 +37,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     private static Vector3D p = new Vector3D();
     private static Vector3D n = new Vector3D();
 
-    protected static void activateShaders(GL gl, Geometry g, Camera c)
+    protected static void activateShaders(GL2 gl, Geometry g, Camera c)
     {
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
@@ -48,7 +48,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
     }
 
-    public static void prepareSurfaceQuality(GL gl, RendererConfiguration quality)
+    public static void prepareSurfaceQuality(GL2 gl, RendererConfiguration quality)
     {
         int shadingType = quality.getShadingType();
 
@@ -71,7 +71,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
     }
 
-    public static void drawVertexNormal(GL gl, Vertex vertex) {
+    public static void drawVertexNormal(GL2 gl, Vertex vertex) {
         double l = 0.2;
         p = vertex.getPosition();
         n = vertex.getNormal();
@@ -84,7 +84,7 @@ public class JoglGeometryRenderer extends JoglRenderer
                       p.z + (n.z * l));
     }
 
-    public static void drawMinMaxBox(GL gl, double minmax[], RendererConfiguration q)
+    public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)
     {
         gl.glPushAttrib(gl.GL_LIGHTING_BIT);
         JoglRenderer.disableNvidiaCgProfiles();
@@ -118,12 +118,12 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
-    public static void drawMinMaxBox(GL gl, Geometry g, RendererConfiguration q)
+    public static void drawMinMaxBox(GL2 gl, Geometry g, RendererConfiguration q)
     {
         drawMinMaxBox(gl, g.getMinMax(), q);
     }
 
-    public static void drawSelectionCorners(GL gl, double minmax[], RendererConfiguration q)
+    public static void drawSelectionCorners(GL2 gl, double minmax[], RendererConfiguration q)
     {
         double borderPercent = 0.01;
         double linePercent = 0.25;
@@ -206,12 +206,12 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glPopAttrib();
     }
 
-    public static void drawSelectionCorners(GL gl, Geometry g, RendererConfiguration q)
+    public static void drawSelectionCorners(GL2 gl, Geometry g, RendererConfiguration q)
     {
         drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
-    public static void activateNvidiaGpuParameters(GL gl, Geometry g,
+    public static void activateNvidiaGpuParameters(GL2 gl, Geometry g,
         Camera camera, CGprogram vertexShader, CGprogram pixelShader)
     {
         Matrix4x4 MProjection;
@@ -248,7 +248,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     be generalized to search the corresponding rendering class to a given
     Geometry via reflection, so this search should not be done explicitly.
     */
-    public static void draw(GL gl, Geometry g, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
             VSDK.reportMessage(null, VSDK.WARNING,
@@ -306,7 +306,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     be generalized to search the corresponding rendering class to a given
     Geometry via reflection, so this search should not be done explicitly.
     */
-    public static void drawWithVertexArrays(GL gl, Geometry g, Camera c, RendererConfiguration q)
+    public static void drawWithVertexArrays(GL2 gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
             VSDK.reportMessage(null, VSDK.WARNING,

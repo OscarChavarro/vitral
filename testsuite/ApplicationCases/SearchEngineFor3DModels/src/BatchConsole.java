@@ -20,8 +20,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLAutoDrawable;
 
@@ -85,7 +85,7 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         }
     }
 
-    public void executeRendering(GL gl)
+    public void executeRendering(GL2 gl)
     {
         //-----------------------------------------------------------------
         ArrayList <Result> similarModels;
@@ -107,6 +107,11 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -117,13 +122,13 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height); 
     }   
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         executeRendering(gl);
         System.exit(1);

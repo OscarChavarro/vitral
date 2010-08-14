@@ -1,3 +1,4 @@
+
 //===========================================================================
 
 // VITRAL recomendation: Use explicit class imports (not .*) in hello world 
@@ -20,11 +21,11 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
-import com.sun.opengl.util.Animator;
+import com.jogamp.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -179,12 +180,17 @@ public class CgAutomaticShaderExample
         System.out.println("Ok!");
     }
 
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
     public void init(GLAutoDrawable drawable) {
         // Not used in VitralSDK style applications... check 'firstTimer'
     }
 
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         if ( withRotationAnimation ) {
             zrotation += 0.5*2;
@@ -242,7 +248,7 @@ public class CgAutomaticShaderExample
 
     public void reshape(GLAutoDrawable drawable,
         int x, int y, int width, int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         
         gl.glViewport(x, y, width, height); 
         camera.updateViewportResize(width, height);

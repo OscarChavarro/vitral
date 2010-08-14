@@ -20,15 +20,15 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGcontext;
-import com.sun.opengl.cg.CGparameter;
-import com.sun.opengl.cg.CGprogram;
-import com.sun.opengl.util.Animator;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGcontext;
+import com.jogamp.opengl.cg.CGparameter;
+import com.jogamp.opengl.cg.CGprogram;
+import com.jogamp.opengl.util.Animator;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -189,7 +189,7 @@ public class CgComplexStandardShaderExample
         System.out.println("Ok!");
     }
 
-    public void createCgElements(GL gl) {
+    public void createCgElements(GL2 gl) {
         if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
             System.out.println("Nvidia Cg not available. Turning off GPU support!");
             NvidiaGpuActive = false;
@@ -241,8 +241,13 @@ public class CgComplexStandardShaderExample
         // Not used in VitralSDK style applications... check 'firstTimer'
     }
 
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         if ( withRotationAnimation ) {
             zrotation += 0.5*2;
@@ -369,13 +374,13 @@ public class CgComplexStandardShaderExample
         JoglLightRenderer.draw(gl, light);
     }
 
-    void enableTexture(GL gl, boolean withMap) {
+    void enableTexture(GL2 gl, boolean withMap) {
         //-----------------------------------------------------------------
         gl.glEnable(gl.GL_TEXTURE_2D);
         textureMapList = JoglImageRenderer.activate(gl, textureMap);
 
         //- Basic OpenGL texture state setup ------------------------------
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
             gl.GL_TRUE);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
             gl.GL_LINEAR_MIPMAP_LINEAR);
@@ -402,7 +407,7 @@ public class CgComplexStandardShaderExample
 
     public void reshape(GLAutoDrawable drawable,
         int x, int y, int width, int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         
         gl.glViewport(x, y, width, height); 
         camera.updateViewportResize(width, height);

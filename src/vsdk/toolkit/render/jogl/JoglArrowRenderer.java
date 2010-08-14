@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -19,7 +19,7 @@ public class JoglArrowRenderer extends JoglRenderer {
     private static GLU glu = null;
     private static GLUquadric gluQuadric = null;
 
-    private static void drawParts(GL gl, Arrow arrow)
+    private static void drawParts(GL2 gl, Arrow arrow)
     {
         double r1, r2, h1, h2;
 
@@ -47,7 +47,7 @@ public class JoglArrowRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Arrow arrow, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, Arrow arrow, Camera c, RendererConfiguration q)
     {
         if (glu == null) {
             glu = new GLU();

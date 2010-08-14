@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 // JOGL clases
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -130,7 +130,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         return displayLists.get(prev).displayListId;
     }
 
-    private static int createDisplayListId(GL gl, Geometry thing, RendererConfiguration q)
+    private static int createDisplayListId(GL2 gl, Geometry thing, RendererConfiguration q)
     {
         if ( displayLists == null ) {
             displayLists = new ArrayList<_JoglSimpleBodyRendererDisplayList>();
@@ -163,7 +163,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         return displayLists.size();
     }
 
-    private static void drawCommon(GL gl, SimpleBody b,
+    private static void drawCommon(GL2 gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
@@ -188,7 +188,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         if ( q.isTextureSet() ) {
             // Define texture parameters, including for further local
             // textures activated within JoglGeometryRenderers
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
                 gl.GL_TRUE);
             gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
                 gl.GL_LINEAR_MIPMAP_LINEAR);
@@ -218,7 +218,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         }
     }
 
-    public static void draw(GL gl, SimpleBody b,
+    public static void draw(GL2 gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
@@ -259,7 +259,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         deactivateNvidiaGpuParameters(gl, q);
     }
 
-    public static void drawWithVertexArrays(GL gl, SimpleBody b,
+    public static void drawWithVertexArrays(GL2 gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------

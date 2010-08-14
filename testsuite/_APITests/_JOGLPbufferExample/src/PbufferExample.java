@@ -1,4 +1,5 @@
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -22,11 +23,14 @@ public class PbufferExample implements GLEventListener {
     private RGBImage  image;
 
     public PbufferExample() {
+        GLProfile profile;
+
+        profile = GLProfile.get(GLProfile.GL2);
         // Create a GLCapabilities object for the pbuffer
-        GLCapabilities pbCaps = new GLCapabilities();
+        GLCapabilities pbCaps = new GLCapabilities(profile);
         pbCaps.setDoubleBuffered(false);
         try {
-            pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
@@ -37,7 +41,7 @@ public class PbufferExample implements GLEventListener {
     }
 
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
@@ -64,9 +68,14 @@ public class PbufferExample implements GLEventListener {
     public void init( GLAutoDrawable drawable ) {
     }
   
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
     public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
     }
   

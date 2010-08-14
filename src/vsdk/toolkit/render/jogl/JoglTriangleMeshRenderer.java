@@ -15,8 +15,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import com.sun.opengl.util.BufferUtil;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -39,7 +38,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     /**
     @todo program this!
     */
-    public static void drawWithSelection(GL gl, TriangleMesh mesh,
+    public static void drawWithSelection(GL2 gl, TriangleMesh mesh,
                                          RendererConfiguration quality, 
                                          boolean flip,
                                          ArrayList<int[]> selectedTriangles) {
@@ -53,7 +52,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     @todo Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
     */
     public static void
-    draw(GL gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
+    draw(GL2 gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
         boolean withTextures = false;
         if ( mesh.getTextures() != null && mesh.getTextures().length > 0 ) {
             withTextures = true;
@@ -132,7 +131,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
     public static void
-    drawWithVertexArrays(GL gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
+    drawWithVertexArrays(GL2 gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
 
         //-----------------------------------------------------------------
         double vp[];
@@ -249,7 +248,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
     }
 
-    private static void drawPoints(GL gl, TriangleMesh mesh) {
+    private static void drawPoints(GL2 gl, TriangleMesh mesh) {
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
@@ -281,7 +280,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         //-----------------------------------------------------------------
     }
 
-    private static void drawVertexNormals(GL gl, TriangleMesh mesh) {
+    private static void drawVertexNormals(GL2 gl, TriangleMesh mesh) {
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
         // Warning: Change with configured color for vertex normals
@@ -298,7 +297,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    private static void drawTriangleNormals(GL gl, TriangleMesh m) {
+    private static void drawTriangleNormals(GL2 gl, TriangleMesh m) {
         double l = 0.15;
 
         gl.glDisable(gl.GL_LIGHTING);
@@ -328,7 +327,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    private static void drawSurfacesWithoutTexture(GL gl, 
+    private static void drawSurfacesWithoutTexture(GL2 gl, 
                                      TriangleMesh mesh, boolean flipNormals) {
         //-----------------------------------------------------------------
         // Note that glTexParameter and glTexEnv settings should be
@@ -372,7 +371,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
     }
 
-    private static void drawSurfacesWithoutTextureWithVertexArrays(GL gl, 
+    private static void drawSurfacesWithoutTextureWithVertexArrays(GL2 gl, 
                                      TriangleMesh mesh, boolean flipNormals) {
         //-----------------------------------------------------------------
         // Note that glTexParameter and glTexEnv settings should be
@@ -424,7 +423,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     texturesRanges and materialsRanges arrays.
     */
     private static void
-    drawSurfacesWithTexture(GL gl, TriangleMesh mesh, boolean flip) {
+    drawSurfacesWithTexture(GL2 gl, TriangleMesh mesh, boolean flip) {
         // Support variables
         Image[] texturesArray = mesh.getTextures();
         Material materialsArray[] = mesh.getMaterials();
@@ -509,7 +508,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
     private static void
-    drawRangeWithTexture(GL gl, TriangleMesh mesh, 
+    drawRangeWithTexture(GL2 gl, TriangleMesh mesh, 
                          int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
         int t[];
@@ -556,7 +555,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
     private static void
-    drawRangeWithoutTexture(GL gl, TriangleMesh mesh, 
+    drawRangeWithoutTexture(GL2 gl, TriangleMesh mesh, 
                             int start, int end, boolean flipNormals) {
         Vertex v0, v1, v2;
         int t[];
@@ -605,7 +604,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
     private static void
-    drawRangeWithVertexArrays(GL gl, TriangleMesh mesh, 
+    drawRangeWithVertexArrays(GL2 gl, TriangleMesh mesh, 
                               int start, int end, boolean flipNormals,
                               boolean withTexture) {
         if ( end <= start || mesh.getTriangleIndexes() == null ) {

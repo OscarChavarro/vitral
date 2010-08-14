@@ -10,7 +10,7 @@ package vsdk.toolkit.render.jogl;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -36,7 +36,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
     private static GLU glu = null;
     private static GLUquadric gluQuadric = null;
 
-    private static void drawConeWithShadow(GL gl, Cone cone, ColorRgb color)
+    private static void drawConeWithShadow(GL2 gl, Cone cone, ColorRgb color)
     {
         if ( glu == null ) {
             glu = new GLU();
@@ -63,7 +63,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         gl.glPopMatrix();
     }
 
-    private static void draw3dsmax(GL gl, TranslateGizmo gizmo)
+    private static void draw3dsmax(GL2 gl, TranslateGizmo gizmo)
     {
         RendererConfiguration q = new RendererConfiguration();
         ArrayList<SimpleBody> things = gizmo.getElements3dsmax();
@@ -133,7 +133,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 
     }
 
-    private static void drawAquynza(GL gl, TranslateGizmo gizmo)
+    private static void drawAquynza(GL2 gl, TranslateGizmo gizmo)
     {
         RendererConfiguration q = new RendererConfiguration();
         ArrayList<SimpleBody> things = gizmo.getElements();
@@ -169,7 +169,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         }
     }
 
-    public static void draw(GL gl, TranslateGizmo gizmo)
+    public static void draw(GL2 gl, TranslateGizmo gizmo)
     {
 /*
         JoglLightRenderer.turnOffAllLights(gl);

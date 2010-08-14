@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Set;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
@@ -83,7 +83,7 @@ public class SearchEngine
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
     */
-    private GeometryMetadata analyzeModel(GL gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer)
+    private GeometryMetadata analyzeModel(GL2 gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer)
     {
         //- Variables -----------------------------------------------------
         SimpleScene scene = new SimpleScene();
@@ -483,7 +483,7 @@ public class SearchEngine
     /**
     This method implements the indexing step as described in [FUNK2003].3.2.
     */
-    public void indexFiles(GL gl, String filenamesList[],
+    public void indexFiles(GL2 gl, String filenamesList[],
                            ShapeDatabase shapeDatabase,
                            int distanceFieldSide, GLCanvas canvas,
                            JoglShapeMatchingOfflineRenderer offlineRenderer,
@@ -764,7 +764,7 @@ public class SearchEngine
     }
 
     public ArrayList <Result> runCommand(
-        GL gl,
+        GL2 gl,
         JoglShapeMatchingOfflineRenderer offlineRenderer,
         GLCanvas canvas,
         JoglProjectedViewRenderer projectedViewRenderer,

@@ -9,7 +9,7 @@ package vsdk.toolkit.render.jogl;
 // Basic Java classes
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -25,7 +25,7 @@ public class JoglFunctionalExplicitSurfaceRenderer extends JoglRenderer {
     Geometry object.
     */
     public static void
-    draw(GL gl, FunctionalExplicitSurface surface, Camera camera, RendererConfiguration quality) {
+    draw(GL2 gl, FunctionalExplicitSurface surface, Camera camera, RendererConfiguration quality) {
         TriangleMesh mesh;
         mesh = surface.getInternalTriangleMesh();
         JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);

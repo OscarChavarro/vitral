@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -15,7 +15,7 @@ import vsdk.toolkit.environment.SimpleBackground;
 
 public class JoglBackgroundRenderer extends JoglRenderer 
 {
-    public static void draw(GL gl, Background background)
+    public static void draw(GL2 gl, Background background)
     {
         if ( background instanceof CubemapBackground ) {
             JoglCubemapBackgroundRenderer.draw(gl, (CubemapBackground)background);

@@ -7,9 +7,9 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL clases
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGparameter;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -25,13 +25,13 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, InfinitePlane s, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, InfinitePlane s, Camera c, RendererConfiguration q)
     {
         draw(gl, s, c, q, 10, 10);
     }
 
     public static void
-    drawInfinitePlaneElements(GL gl, InfinitePlane s, int nx, int ny)
+    drawInfinitePlaneElements(GL2 gl, InfinitePlane s, int nx, int ny)
     {
         int i, j;
         double x, y;
@@ -66,7 +66,7 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         gl.glPopMatrix();
     }
 
-    public static void draw(GL gl, InfinitePlane s, Camera c, RendererConfiguration q,
+    public static void draw(GL2 gl, InfinitePlane s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
         JoglGeometryRenderer.activateShaders(gl, s, c);

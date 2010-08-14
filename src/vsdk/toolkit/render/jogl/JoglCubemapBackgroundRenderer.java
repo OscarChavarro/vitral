@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -14,9 +14,9 @@ import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
 public class JoglCubemapBackgroundRenderer extends JoglRenderer 
 {
-    private static void setTextureParameters(GL gl)
+    private static void setTextureParameters(GL2 gl)
     {
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP_SGIS,
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
             gl.GL_TRUE);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
             gl.GL_LINEAR_MIPMAP_LINEAR);
@@ -30,7 +30,7 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
             gl.GL_REPLACE);
     }
 
-    public static void draw(GL gl, CubemapBackground background)
+    public static void draw(GL2 gl, CubemapBackground background)
     {
         //-----------------------------------------------------------------
         gl.glMatrixMode(gl.GL_PROJECTION);

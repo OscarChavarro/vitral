@@ -30,9 +30,9 @@ import javax.swing.BoxLayout;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -180,7 +180,7 @@ KeyListener
     }
 
     private void
-    drawMark(GL gl, double delta)
+    drawMark(GL2 gl, double delta)
     {
         gl.glBegin(gl.GL_LINES);
             gl.glVertex3d(-delta/2, 0, 0);
@@ -192,7 +192,7 @@ KeyListener
         gl.glEnd();
     }
     
-    private void drawObjectsGL(GL gl)
+    private void drawObjectsGL(GL2 gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
 
@@ -269,7 +269,7 @@ KeyListener
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
@@ -289,6 +289,11 @@ KeyListener
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -299,7 +304,7 @@ KeyListener
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height); 
 
         camera1.updateViewportResize(width, height);

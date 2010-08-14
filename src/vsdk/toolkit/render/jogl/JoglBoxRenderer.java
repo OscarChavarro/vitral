@@ -6,10 +6,12 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
-import com.sun.opengl.util.GLUT;
+import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGparameter;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -20,7 +22,7 @@ public class JoglBoxRenderer extends JoglRenderer {
 
     private static GLUT glut = null;
 
-    private static void drawSolidUnitCube(GL gl)
+    private static void drawSolidUnitCube(GL2 gl)
     {
         double l = 0.5;
 
@@ -97,7 +99,7 @@ public class JoglBoxRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
     */
-    public static void draw(GL gl, Box box, Camera c, RendererConfiguration q)
+    public static void draw(GL2 gl, Box box, Camera c, RendererConfiguration q)
     {
         if (glut == null) {
             glut = new GLUT();

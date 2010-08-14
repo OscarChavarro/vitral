@@ -15,13 +15,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
 // import javax.media.opengl.glu.GLU;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.cg.CGparameter;
-import com.sun.opengl.cg.CgGL;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.cg.CGparameter;
+import com.jogamp.opengl.cg.CgGL;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -54,7 +55,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    private static int activateBase(GL gl, RGBImage img)
+    private static int activateBase(GL2 gl, RGBImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -104,8 +105,12 @@ public class JoglRGBImageRenderer extends JoglRenderer
             //gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
 
             try {
+		GLProfile glprof;
                 TextureData textureData;
+
+                glprof = GLProfile.get(GLProfile.GL2);
                 textureData = new TextureData(
+		   glprof,
                    3, // int internalFormat (number of components)
                    x_tam, // int width
                    y_tam, // int height
@@ -158,7 +163,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return item.glList;
     }
 
-    public static int activate(GL gl, RGBImage img)
+    public static int activate(GL2 gl, RGBImage img)
     {
         int list = activateBase(gl, img);
 
@@ -175,7 +180,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return list;
     }
 
-    public static int activateAsNormalMap(GL gl, RGBImage img, RendererConfiguration quality)
+    public static int activateAsNormalMap(GL2 gl, RGBImage img, RendererConfiguration quality)
     {
         int list = -1;
         //-----------------------------------------------------------------
@@ -189,7 +194,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return list;
     }
 
-    public static void deactivate(GL gl, RGBImage img)
+    public static void deactivate(GL2 gl, RGBImage img)
     {
         _JoglRGBImageRendererImageAssociation item = null;
 
@@ -209,7 +214,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 	}
     }
 
-    public static void unload(GL gl, RGBImage img)
+    public static void unload(GL2 gl, RGBImage img)
     {
         _JoglRGBImageRendererImageAssociation item = null;
 
@@ -219,7 +224,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
                 item = compiledImages.get(i);
                 if ( item.image == img ) {
                     item.renderer.disable();
-                    item.renderer.dispose();
+                    //item.renderer.dispose();
+                    item.renderer = null;
                     compiledImages.remove(i);
                     return;
                 }
@@ -231,7 +237,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 	}
     }
 
-    public static void draw(GL gl, RGBImage img)
+    public static void draw(GL2 gl, RGBImage img)
     {
         gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
         gl.glRasterPos2f(-1, -1);
@@ -240,7 +246,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
                         img.getRawImageDirectBuffer());
     }
 
-    public static ByteBuffer importJOGLimage(GL gl) {
+    public static ByteBuffer importJOGLimage(GL2 gl) {
         int[] view= new int[4];
         //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
         gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
@@ -255,7 +261,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         return bb;
     }
 
-    public static void getImageJOGL(GL gl, RGBImage image) {
+    public static void getImageJOGL(GL2 gl, RGBImage image) {
         int[] view= new int[4];
         gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
@@ -276,7 +282,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         }
     }
 
-    public static RGBImage getImageJOGL(GL gl) {
+    public static RGBImage getImageJOGL(GL2 gl) {
         RGBImage image = new RGBImage();
 
         getImageJOGL(gl, image);

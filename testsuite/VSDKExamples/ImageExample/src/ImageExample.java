@@ -14,17 +14,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JFrame;
-
-// test classes
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
 
 // VSDK classes
 
@@ -89,7 +85,7 @@ public class ImageExample extends JFrame implements
         f.setVisible(true);
     }
 
-    private void drawObjectsGL(GL gl)
+    private void drawObjectsGL(GL2 gl)
     {
         // Preparation
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -166,7 +162,7 @@ public class ImageExample extends JFrame implements
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         JoglCameraRenderer.activate(gl, camera);
 
@@ -186,6 +182,11 @@ public class ImageExample extends JFrame implements
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -196,7 +197,7 @@ public class ImageExample extends JFrame implements
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
 
         camera.updateViewportResize(width, height);

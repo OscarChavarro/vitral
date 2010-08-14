@@ -9,12 +9,12 @@ package vsdk.toolkit.render.jogl;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.RotateGizmo;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 public class JoglRotateGizmoRenderer extends JoglRenderer 
 {
 
-    public static void draw(GL gl, RotateGizmo gizmo, Vector3D position)
+    public static void draw(GL2 gl, RotateGizmo gizmo, Vector3D position)
     {
         Matrix4x4 R, giro;
 

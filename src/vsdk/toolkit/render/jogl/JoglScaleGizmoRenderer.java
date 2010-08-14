@@ -9,12 +9,12 @@ package vsdk.toolkit.render.jogl;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.ScaleGizmo;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 public class JoglScaleGizmoRenderer extends JoglRenderer 
 {
 
-    public static void draw(GL gl, ScaleGizmo gizmo, Vector3D position)
+    public static void draw(GL2 gl, ScaleGizmo gizmo, Vector3D position)
     {
         Matrix4x4 R;
 

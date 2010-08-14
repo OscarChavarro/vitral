@@ -6,14 +6,14 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class JoglCalligraphic2DBufferRenderer extends JoglRenderer
 {
-    public static void draw(GL gl, Calligraphic2DBuffer vectors)
+    public static void draw(GL2 gl, Calligraphic2DBuffer vectors)
     {
         int i;
         Vector3D p0 = new Vector3D();

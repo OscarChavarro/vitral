@@ -89,6 +89,11 @@ public class JoglOfflineRenderer implements GLEventListener {
     public void init( GLAutoDrawable drawable ) {
     }
   
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
     public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
         GL gl = drawable.getGL();

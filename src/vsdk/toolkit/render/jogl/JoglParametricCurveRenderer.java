@@ -9,7 +9,7 @@ package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 
@@ -35,7 +35,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     @todo Do not turn off lighting here, that's a wrongly supposed used.
     */
-    static public void draw(GL gl, ParametricCurve curve, 
+    static public void draw(GL2 gl, ParametricCurve curve, 
                             Camera c, RendererConfiguration q,
                             ColorRgb color) {
         int i, j;
@@ -73,12 +73,12 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     }
 
-    static public void draw(GL gl, ParametricCurve curve,
+    static public void draw(GL2 gl, ParametricCurve curve,
                             Camera c, RendererConfiguration q) {
         draw(gl, curve, c, q, q.getWireColor());
     }
 
-    static public void drawControlPointsCurve(GL gl, 
+    static public void drawControlPointsCurve(GL2 gl, 
                                               ParametricCurve curve) {
         ColorRgb colorLine = new ColorRgb(1, 1, 0);
         ColorRgb colorCenterPoint = new ColorRgb(1, 0, 0);
@@ -87,7 +87,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
                                colorTangPoint);
     }
 
-    static public void drawControlPointsCurve(GL gl,
+    static public void drawControlPointsCurve(GL2 gl,
                                               ParametricCurve curve,
                                               ColorRgb colorLine,
                                               ColorRgb colorCenterPoint,
@@ -128,7 +128,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
 
     }
 
-    static public void drawPoints(GL gl, ArrayList pts) {
+    static public void drawPoints(GL2 gl, ArrayList pts) {
         gl.glColor3d(1, 0, 0);
         gl.glLineWidth(1);
         for (int i = 0; i < pts.size(); i++) {
@@ -145,7 +145,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glLineWidth(1);
     }
 
-    static public void drawOneControlPoints(GL gl, Vector3D vec, ColorRgb color) {
+    static public void drawOneControlPoints(GL2 gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
         gl.glBegin(gl.GL_LINES);
         gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
@@ -155,7 +155,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    static public void drawFirstControlPoint(GL gl, Vector3D vec, ColorRgb color) {
+    static public void drawFirstControlPoint(GL2 gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
         gl.glBegin(gl.GL_LINE_STRIP);
         gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
@@ -166,7 +166,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    static public void drawTwoControlPoints(GL gl, Vector3D[] ptsB,
+    static public void drawTwoControlPoints(GL2 gl, Vector3D[] ptsB,
                                             int tangPoint, ColorRgb colorLine,
                                             ColorRgb colorCenterPoint,
                                             ColorRgb colorTangPoint) {
@@ -198,7 +198,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glEnd();
     }
 
-    static public void drawThreeControlPoints(GL gl, Vector3D[] ptsB,
+    static public void drawThreeControlPoints(GL2 gl, Vector3D[] ptsB,
                                               ColorRgb colorLine,
                                               ColorRgb colorCenterPoint,
                                               ColorRgb colorTangPoint) {
@@ -248,7 +248,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     }
 
     public static void
-    drawTesselatedCurveInterior(GL gl, ParametricCurve curve)
+    drawTesselatedCurveInterior(GL2 gl, ParametricCurve curve)
     {
         if ( tesselatorProcessor == null ) {
             glu = new GLU();

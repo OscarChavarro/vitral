@@ -6,16 +6,16 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellatorCallback;
 
 public class _JoglPolygonTesselatorRoutines extends JoglRenderer 
 implements GLUtessellatorCallback
 {
-    private GL gl;
+    private GL2 gl;
     private GLU glu;
-    public _JoglPolygonTesselatorRoutines(GL gl, GLU glu) {
+    public _JoglPolygonTesselatorRoutines(GL2 gl, GLU glu) {
         this.gl = gl;
         this.glu = glu;
     }

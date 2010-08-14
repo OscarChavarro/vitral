@@ -16,8 +16,8 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -122,7 +122,7 @@ public class CameraExample extends Applet implements
     
 //= PROGRAM PART 4/5: JOGL-OPENGL PROCEDURES ================================
 
-    private void drawObjectsGL(GL gl)
+    private void drawObjectsGL(GL2 gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
 
@@ -148,7 +148,7 @@ public class CameraExample extends Applet implements
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
@@ -165,6 +165,11 @@ public class CameraExample extends Applet implements
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
         ;
     }
@@ -175,7 +180,7 @@ public class CameraExample extends Applet implements
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height); 
 
         camera.updateViewportResize(width, height);

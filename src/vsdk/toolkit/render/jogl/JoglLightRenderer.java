@@ -10,9 +10,9 @@ package vsdk.toolkit.render.jogl;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGprogram;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -23,7 +23,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
     public static int supportedLightsInOpenGL = 8;
 
-    public static void deactivate(GL gl, Light l)
+    public static void deactivate(GL2 gl, Light l)
     {
         int lightNumber = l.getId();
 
@@ -33,7 +33,7 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glDisable(gl.GL_LIGHT0 + lightNumber);
     }
 
-    public static void activate(GL gl, Light l)
+    public static void activate(GL2 gl, Light l)
     {
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
@@ -88,7 +88,7 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glPopMatrix();
     }
 
-    public static void activateNvidiaGpuParameters(GL gl, Light light,
+    public static void activateNvidiaGpuParameters(GL2 gl, Light light,
         CGprogram vertexShader, CGprogram pixelShader)
     {
         Vector3D lp = light.getPosition();
@@ -101,7 +101,7 @@ public class JoglLightRenderer extends JoglRenderer {
             pixelShader, "lightColor"), lightColor, 0);
     }
 
-    public static void draw(GL gl, Light l)
+    public static void draw(GL2 gl, Light l)
     {
         Vector3D p = l.getPosition();
         ColorRgb c = l.getSpecular();
@@ -123,7 +123,7 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glPopMatrix();
     }
 
-    public static void turnOffAllLights(GL gl)
+    public static void turnOffAllLights(GL2 gl)
     {
         int i;
 

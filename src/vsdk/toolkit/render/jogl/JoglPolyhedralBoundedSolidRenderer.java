@@ -11,11 +11,11 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL clases
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGparameter;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -49,7 +49,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
-    drawHalfEdge(GL gl, _PolyhedralBoundedSolidHalfEdge he, 
+    drawHalfEdge(GL2 gl, _PolyhedralBoundedSolidHalfEdge he, 
                  Vector3D startP, Vector3D endP, InfinitePlane loopPlane)
     {
         // Algorithm parameters
@@ -97,7 +97,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glPopMatrix();
     }
 
-    private static void setColor(GL gl, int i)
+    private static void setColor(GL2 gl, int i)
     {
         double r = 0.0, g = 0.0, b = 0.0;
         switch ( i%8 ) {
@@ -114,7 +114,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
-    drawPoints(GL gl, PolyhedralBoundedSolid solid)
+    drawPoints(GL2 gl, PolyhedralBoundedSolid solid)
     {
         ColorRgb c;
 
@@ -147,7 +147,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
-    drawEdges(GL gl, PolyhedralBoundedSolid solid)
+    drawEdges(GL2 gl, PolyhedralBoundedSolid solid)
     {
         int i;
         ColorRgb c;
@@ -197,7 +197,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     public static void
-    drawDebugEdges(GL gl, PolyhedralBoundedSolid solid, Camera c, int edgeIndex)
+    drawDebugEdges(GL2 gl, PolyhedralBoundedSolid solid, Camera c, int edgeIndex)
     {
         int i;
 
@@ -326,7 +326,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
-    drawVertexNormals(GL gl, PolyhedralBoundedSolid solid)
+    drawVertexNormals(GL2 gl, PolyhedralBoundedSolid solid)
     {
         gl.glDisable(gl.GL_LIGHTING);
         gl.glDisable(gl.GL_TEXTURE_2D);
@@ -377,7 +377,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     private static void
-    drawSurfaces(GL gl, PolyhedralBoundedSolid solid)
+    drawSurfaces(GL2 gl, PolyhedralBoundedSolid solid)
     {
         int i, j;
 
@@ -479,7 +479,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     public static void
-    drawDebugFaceBoundary(GL gl, PolyhedralBoundedSolid solid, int faceIndex)
+    drawDebugFaceBoundary(GL2 gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
         int i, j;
         Vector3D startP, endP;
@@ -543,7 +543,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     public static void
-    drawDebugFace(GL gl, PolyhedralBoundedSolid solid, int faceIndex)
+    drawDebugFace(GL2 gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
         //- Draw face boundaries, one for each loop -----------------------
         int i, j;
@@ -654,7 +654,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     they are correctly formed geometrical and topological entities.
     */
     public static void
-    draw(GL gl, PolyhedralBoundedSolid solid,
+    draw(GL2 gl, PolyhedralBoundedSolid solid,
          Camera c, RendererConfiguration quality)
     {
         //-----------------------------------------------------------------

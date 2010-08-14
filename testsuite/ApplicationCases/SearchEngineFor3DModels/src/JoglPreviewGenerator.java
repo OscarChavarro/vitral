@@ -16,8 +16,8 @@
 import java.io.File;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
@@ -39,7 +39,7 @@ import vsdk.toolkit.processing.ImageProcessing;
 
 public class JoglPreviewGenerator
 {
-    private static void drawGridRectangle(GL gl, double z)
+    private static void drawGridRectangle(GL2 gl, double z)
     {
         int nx = 14; // Must be an even number
         int ny = 14; // Must be an even number
@@ -75,7 +75,7 @@ public class JoglPreviewGenerator
         gl.glEnd();
     }
 
-    private void renderView(GL gl, SimpleBodyGroup bodies, Camera camera, RendererConfiguration quality)
+    private void renderView(GL2 gl, SimpleBodyGroup bodies, Camera camera, RendererConfiguration quality)
     {
         double minmax[];
 
@@ -189,7 +189,7 @@ public class JoglPreviewGenerator
     }
 
     public void calculatePreviews(
-        GL gl, SimpleBodyGroup referenceBodies, long modelId, int viewportXSize, int viewportYSize, GLCanvas canvas)
+        GL2 gl, SimpleBodyGroup referenceBodies, long modelId, int viewportXSize, int viewportYSize, GLCanvas canvas)
     {
         //- Create directory for current model previews set ---------------
         String dirName = "./output/previews/" + VSDK.formatNumberWithinZeroes(modelId, 7);

@@ -9,9 +9,9 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL;
-import com.sun.opengl.cg.CgGL;
-import com.sun.opengl.cg.CGprogram;
+import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -19,7 +19,7 @@ import vsdk.toolkit.environment.Camera;
 
 public class JoglCameraRenderer extends JoglRenderer
 {
-    public static void activate(GL gl, Camera cam)
+    public static void activate(GL2 gl, Camera cam)
     {
         Matrix4x4 R;
 
@@ -30,7 +30,7 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
 
-    public static void activateCenter(GL gl, Camera cam)
+    public static void activateCenter(GL2 gl, Camera cam)
     {
         Matrix4x4 R;
         Camera camera2 = new Camera(cam);
@@ -49,7 +49,7 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glMatrixMode(gl.GL_MODELVIEW);
     }
 
-    private static void drawBase(GL gl)
+    private static void drawBase(GL2 gl)
     {
         gl.glLineWidth((float)1.0);
         gl.glBegin(gl.GL_LINES);
@@ -67,7 +67,7 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glEnd();
     }
 
-    public static void drawVolume(GL gl, Camera cam)
+    public static void drawVolume(GL2 gl, Camera cam)
     {
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
         gl.glDisable(gl.GL_LIGHTING);
@@ -169,7 +169,7 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glEnd();
     }
 
-    public static void draw(GL gl, Camera cam)
+    public static void draw(GL2 gl, Camera cam)
     {
         gl.glPushMatrix();
 
@@ -185,7 +185,7 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glPopMatrix();
     }
 
-    public static void activateNvidiaGpuParameters(GL gl, Camera camera,
+    public static void activateNvidiaGpuParameters(GL2 gl, Camera camera,
         CGprogram vertexShader, CGprogram pixelShader)
     {
         Matrix4x4 MProjection;

@@ -1,4 +1,4 @@
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 public class SimpleCorridor
 {
@@ -21,7 +21,7 @@ public class SimpleCorridor
         interSpace = 0.05;
     }
 
-    private void drawTilesCenter(GL gl)
+    private void drawTilesCenter(GL2 gl)
     {
         double da;
         double x, y;
@@ -44,7 +44,7 @@ public class SimpleCorridor
         gl.glEnd();
     }
 
-    private void drawTilesLong(GL gl)
+    private void drawTilesLong(GL2 gl)
     {
         double da;
         double db;
@@ -69,7 +69,7 @@ public class SimpleCorridor
         gl.glEnd();
     }
 
-    private void drawTilesWallA(GL gl)
+    private void drawTilesWallA(GL2 gl)
     {
         double y, z, da, dc;
         int i, j;
@@ -90,7 +90,7 @@ public class SimpleCorridor
         gl.glEnd();
     }
 
-    private void drawTilesWallB(GL gl)
+    private void drawTilesWallB(GL2 gl)
     {
         double y, z, db, dc;
         int i, j;
@@ -111,7 +111,7 @@ public class SimpleCorridor
         gl.glEnd();
     }
 
-    private void drawTilesWallC(GL gl)
+    private void drawTilesWallC(GL2 gl)
     {
         double x, z, db, dc;
         int i, j;
@@ -132,7 +132,7 @@ public class SimpleCorridor
         gl.glEnd();
     }
 
-    public void drawGL(GL gl)
+    public void drawGL(GL2 gl)
     {
         int i;
 

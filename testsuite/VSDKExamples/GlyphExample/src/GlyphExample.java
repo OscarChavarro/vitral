@@ -22,8 +22,8 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
@@ -78,8 +78,8 @@ public class GlyphExample extends JFrame implements
         //-----------------------------------------------------------------
         AwtFontReader fontReader = new AwtFontReader();
         //String msg = "\u00e1\u00d1\u3055\u3042\u307d"; // ennie: \u00d1
-        //String msg = "Hello!";
-        String msg = "\u7c8b";
+        String msg = "Hello!";
+        //String msg = "\u7c8b";
 
         glyphs = new ArrayList<ParametricCurve>();
 
@@ -108,7 +108,7 @@ public class GlyphExample extends JFrame implements
         f.setVisible(true);
     }
 
-    private void drawObjectsGL(GL gl)
+    private void drawObjectsGL(GL2 gl)
     {
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glLoadIdentity();
@@ -155,7 +155,7 @@ public class GlyphExample extends JFrame implements
 
     /** Called by drawable to initiate drawing */
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
@@ -167,7 +167,12 @@ public class GlyphExample extends JFrame implements
     }
    
     public void init(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        ;
+    }
+
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
@@ -181,7 +186,7 @@ public class GlyphExample extends JFrame implements
                          int y,
                          int width,
                          int height) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height); 
 
         camera.updateViewportResize(width, height);
