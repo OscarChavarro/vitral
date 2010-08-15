@@ -53,6 +53,8 @@ public class Material extends Entity
         doubleSided=m.doubleSided;
         opacity=m.getOpacity();
         phongExponent=m.phongExponent;
+        reflectionCoefficient=m.reflectionCoefficient;
+        refractionCoefficient=m.refractionCoefficient;
     }
     
     public void setName(String n)
