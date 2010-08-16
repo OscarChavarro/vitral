@@ -719,6 +719,66 @@ public class ImagePersistence extends PersistenceElement
 
     /**
     This method writes the contents of the specified image to a file in 
+    binary RGB uncompressed BMP format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */
+    public static boolean exportBMP(File fd, Image img)
+    {
+        try {
+            BufferedOutputStream writer;
+            FileOutputStream fos = new FileOutputStream(fd);
+            writer = new BufferedOutputStream(fos);
+
+            int y, x;
+
+            //- Write BMP header ----------------------------------------------
+            byte magic[] = new byte[2];
+            magic[0] = 'B';
+            magic[1] = 'M';
+
+            writeBytes(writer, magic);
+            writeLongLE(writer, img.getXSize()*img.getYSize()*3 + 54);
+            writeLongLE(writer, 0);
+            writeLongLE(writer, 54);
+
+            //- Write Windows V3 DIB header -----------------------------------
+            writeLongLE(writer, 40);
+            writeLongLE(writer, img.getXSize());
+            writeLongLE(writer, img.getYSize());
+            writeIntLE(writer, 1);
+            writeIntLE(writer, 24);
+            writeLongLE(writer, 0);
+            writeLongLE(writer, 16);
+            writeLongLE(writer, 2835);
+            writeLongLE(writer, 2835);
+            writeLongLE(writer, 0);
+            writeLongLE(writer, 0);
+
+            //- Manejo de imagenes nativas de 24 bits por pixel ---------------
+            RGBPixel pixel;
+
+            for ( y = img.getYSize() - 1; y >= 0; y-- ) {
+                for ( x = 0; x < img.getXSize() ; x++ ) {
+                    pixel = img.getPixelRgb(x, y);
+                    writer.write(pixel.b);
+                    writer.write(pixel.g);
+                    writer.write(pixel.r);
+                }
+            }
+
+            writer.flush();
+            writer.close();
+            fos.close();
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
     binary GrayScale PPM format (i.e. P5 PPM sub-format). Returns true if
     everything works fine, false if something fails, like a permission access
     denied or if storage device runs out of space.

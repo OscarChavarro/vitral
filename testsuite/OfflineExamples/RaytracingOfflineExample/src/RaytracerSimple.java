@@ -86,10 +86,10 @@ public class RaytracerSimple {
 
         //- 4. Export resulting image to an image file --------------------
         if ( save == true ) {
-            File fd = new File("./output.ppm");
+            File fd = new File("./output.bmp");
 
-            System.out.print("Exporting result image to file \"output.ppm\": ");
-            if ( !ImagePersistence.exportPPM(fd, theResultingImage) )
+            System.out.print("Exporting result image to file \"output.bmp\": ");
+            if ( !ImagePersistence.exportBMP(fd, theResultingImage) )
             {
                 System.err.println("Error grabando la imagen!!");
                 System.exit(1);
