@@ -18,6 +18,11 @@ cd ..
 cd ImageOfflineExample
 ./run.sh
 cd ..
+cd Rasterizer2DExample
+./run1.sh
+./run2.sh
+./run3.sh
+cd ..
 cd WireframeOfflineExample
 ./run.sh
 cd ..

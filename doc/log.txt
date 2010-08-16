@@ -829,11 +829,14 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2010 august 9, Oscar Chavarro <<60min>>:
   - 1h: Migrating from JOGL1 to JOGL2 (library)
 
-2010 august 13, Oscar Chavarro
+2010 august 13, Oscar Chavarro <<120min>>:
   - 2h: Migrating from JOGL1 to JOGL2 (programs)
 
-2010 august 15, Oscar Chavarro
+2010 august 15, Oscar Chavarro <<55min>>:
   - 45min: optimizing raytracer
   - 10min: moving bresenham line algorithm to Rasterizer2D
+
+2010 august 16, Oscar Chavarro <<>>
+  - 1h: Added Polygon2D and Rasterizer2DTest operations for polygons
 
 ===========================================================================

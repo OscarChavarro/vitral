@@ -18,6 +18,11 @@ cd ..
 cd ImageOfflineExample
 ./compile.sh
 cd ..
+cd Rasterizer2DExample
+./compile1.sh
+./compile2.sh
+./compile3.sh
+cd ..
 cd WireframeOfflineExample
 ./compile.sh
 cd ..
