@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.render.Rasterizer2D;
 
 /**
 The Calligraphic2DBuffer class represents a set of elements suitable for a
@@ -105,7 +106,7 @@ public class Calligraphic2DBuffer extends MediaEntity {
             y0 = (int)((yt-1)*(1-((e0.y+1)/2)));
             x1 = (int)((xt-1)*((e1.x+1)/2));
             y1 = (int)((yt-1)*(1-((e1.y+1)/2)));
-            inOutRasterViewport.drawLine(x0, y0, x1, y1, pixel);
+            Rasterizer2D.drawLine(inOutRasterViewport, x0, y0, x1, y1, pixel);
         }
     }
 

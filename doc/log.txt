@@ -834,5 +834,6 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 
 2010 august 15, Oscar Chavarro
   - 45min: optimizing raytracer
+  - 10min: moving bresenham line algorithm to Rasterizer2D
 
 ===========================================================================
