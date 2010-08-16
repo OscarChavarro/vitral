@@ -18,6 +18,8 @@ import java.io.IOException;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.StopWatch;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
@@ -70,14 +72,17 @@ public class RaytracerSimple {
         theScene.getActiveCamera().updateViewportResize(
             theResultingImage.getXSize(), theResultingImage.getYSize());
 
-        long initialTime = System.currentTimeMillis();
+        StopWatch clock = new StopWatch();
+
+        clock.start();
         visualizationEngine.execute(theResultingImage, rendererConfiguration,
                                 theScene.getSimpleBodies(),
                                 theScene.getLights(),
                                 theScene.getActiveBackground(),
-				theScene.getActiveCamera(), null/*reporter*/, null);
-        long finalTime = System.currentTimeMillis();
-        System.out.println("Image generated in " + ((double)(finalTime-initialTime))/1000.0 + " seconds.");
+				theScene.getActiveCamera(), reporter, null);
+        clock.stop();
+
+        System.out.println("Image generated in " + VSDK.formatDouble(clock.getElapsedRealTime(), 3) + " seconds.");
 
         //- 4. Export resulting image to an image file --------------------
         if ( save == true ) {
@@ -90,8 +95,6 @@ public class RaytracerSimple {
                 System.exit(1);
             }
             System.out.println(" OK!");
-
-            System.out.println("An image has been created in the file output.jpg");
         }
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Free image reference
