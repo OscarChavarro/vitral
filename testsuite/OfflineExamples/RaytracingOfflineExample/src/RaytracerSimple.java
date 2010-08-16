@@ -56,7 +56,7 @@ public class RaytracerSimple {
 
         //- 2. Create an empty image --------------------------------------
         theResultingImage = new RGBImage();
-        if ( !theResultingImage.init(
+        if ( !theResultingImage.initNoFill(
                   theSceneReader.viewportXSize, theSceneReader.viewportYSize) ) {
             System.err.println("Error creando la imagen!!");
             System.exit(1);
@@ -81,10 +81,10 @@ public class RaytracerSimple {
 
         //- 4. Export resulting image to an image file --------------------
         if ( save == true ) {
-            File fd = new File("./output.jpg");
+            File fd = new File("./output.ppm");
 
             System.out.print("Exporting result image to file: ");
-            if ( !ImagePersistence.exportJPG(fd, theResultingImage) )
+            if ( !ImagePersistence.exportPPM(fd, theResultingImage) )
             {
                 System.err.println("Error grabando la imagen!!");
                 System.exit(1);
