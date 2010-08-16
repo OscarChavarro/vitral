@@ -75,7 +75,7 @@ public class RaytracerSimple {
                                 theScene.getSimpleBodies(),
                                 theScene.getLights(),
                                 theScene.getActiveBackground(),
-                                theScene.getActiveCamera(), reporter, null);
+				theScene.getActiveCamera(), null/*reporter*/, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + ((double)(finalTime-initialTime))/1000.0 + " seconds.");
 
@@ -83,7 +83,7 @@ public class RaytracerSimple {
         if ( save == true ) {
             File fd = new File("./output.ppm");
 
-            System.out.print("Exporting result image to file: ");
+            System.out.print("Exporting result image to file \"output.ppm\": ");
             if ( !ImagePersistence.exportPPM(fd, theResultingImage) )
             {
                 System.err.println("Error grabando la imagen!!");

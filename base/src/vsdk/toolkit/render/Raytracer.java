@@ -68,7 +68,7 @@ public class Raytracer extends RenderingElement {
     /*
     @param info.p the point of intersection
     @param info.n unit-length surface normal
-    @param v unit-length vector towards the ray's origin
+    @param viewVector unit-length vector towards the ray's origin
 
     Note: The info datastructure must contain point and normal in world
     coordinates.
@@ -82,7 +82,7 @@ public class Raytracer extends RenderingElement {
     calculation... it is non sense to always be <0, 1, 0>.
     */
     private ColorRgb evaluateIlluminationModel(
-        GeometryIntersectionInformation info, Vector3D v, 
+        GeometryIntersectionInformation info, Vector3D viewVector, 
         ArrayList <Light> lights, ArrayList <SimpleBody> objects,
         Background background,
         Material material, RendererConfiguration inQualitySelection) {
@@ -185,6 +185,7 @@ public class Raytracer extends RenderingElement {
                         result.b += lambert*diffuse.b*lightEmission.b;
                     }
                     specular = material.getSpecular();
+
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
 
@@ -192,7 +193,7 @@ public class Raytracer extends RenderingElement {
                         static_tmp.y = lambert*info.n.y - l.y;
                         static_tmp.z = lambert*info.n.z - l.z;
                         double spec = 
-                            v.dotProduct(static_tmp);
+                            viewVector.dotProduct(static_tmp);
 
                         if ( spec > 0 ) {
                             // OJO: Raro...
@@ -210,12 +211,12 @@ public class Raytracer extends RenderingElement {
         // Compute illumination due to reflection
         double kr = material.getReflectionCoefficient();
         if ( kr > 0 ) {
-            double t = v.dotProduct(info.n);
+            double t = viewVector.dotProduct(info.n);
             if ( t > 0 ) {
                 t *= 2;
-                Vector3D reflect = new Vector3D(t*info.n.x - v.x, 
-                                                t*info.n.y - v.y, 
-                                                t*info.n.z - v.z);
+                Vector3D reflect = new Vector3D(t*info.n.x - viewVector.x, 
+                                                t*info.n.y - viewVector.y, 
+                                                t*info.n.z - viewVector.z);
                 Vector3D poffset = new Vector3D(info.p.x + VSDK.EPSILON*reflect.x, 
                                                 info.p.y + VSDK.EPSILON*reflect.y, 
                                                 info.p.z + VSDK.EPSILON*reflect.z);
@@ -327,7 +328,6 @@ public class Raytracer extends RenderingElement {
                                   RendererConfiguration inQualitySelection)
     {
         ColorRgb c;
-        Vector3D v = new Vector3D();
         SimpleBody nearestObject;
         Ray myRay;
         GeometryIntersectionInformation info = 
@@ -353,9 +353,10 @@ public class Raytracer extends RenderingElement {
             }
 
             //------------------------------------------------------------
-            v.x = -inRay.direction.x;
-            v.y = -inRay.direction.y;
-            v.z = -inRay.direction.z;
+            Vector3D viewVector = new Vector3D();
+            viewVector.x = -inRay.direction.x;
+            viewVector.y = -inRay.direction.y;
+            viewVector.z = -inRay.direction.z;
 
             Material material;
             if ( info.material != null ) {
@@ -366,8 +367,9 @@ public class Raytracer extends RenderingElement {
             }
 
             c = evaluateIlluminationModel(
-                info, v, inLightsArray, inSimpleBodiesArray, in_background, material,
+                info, viewVector, inLightsArray, inSimpleBodiesArray, in_background, material,
                 inQualitySelection);
+            //delete viewVector;
           }
           else {
             c = in_background.colorInDireccion(inRay.direction);
