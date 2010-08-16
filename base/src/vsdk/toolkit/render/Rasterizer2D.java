@@ -18,7 +18,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
 
-public class Rasterizer2D
+public class Rasterizer2D extends RenderingElement
 {
     /**
     This algorithm implements the Bresenham line algoritm with NO CLIPPING!
@@ -195,7 +195,6 @@ public class Rasterizer2D
     {
         int x;
         int y;
-
         _Polygon2DContour l;
         Vertex2D va = null;
         Vertex2D vb = null;

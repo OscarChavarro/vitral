@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
 
-public class Polygon2D extends Geometry
+public class Polygon2D extends Surface
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20090816L;
