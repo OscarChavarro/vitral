@@ -842,5 +842,6 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2010 august 31, Oscar Chavarro <<>>
   - 25min: Preparing raytrace offline example for parallel/distributed
     implementation.
-  - 8:26pm->
+  - 22min: Preparing raytrace parallel/distributed example application
+    structure (phase 1)
 ===========================================================================
