@@ -13,6 +13,15 @@ package vsdk.toolkit.media;
 // (not the direct buffer optimized).
 import java.nio.ByteBuffer;
 
+//#define WITH_JAVA_DIRECT_BUFFERS
+
+//#ifdef WITH_JAVA_DIRECT_BUFFERS
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import vsdk.toolkit.io.PersistenceElement;
+//#endif
+
 import vsdk.toolkit.common.VSDK;
 
 /**
@@ -38,14 +47,12 @@ public class RGBAImage extends Image
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-//#define WITH_JAVA_DIRECT_BUFFERS
-
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //    private byte data[];
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-    private ByteBuffer data;
+    transient private ByteBuffer data;
 //#endif
 
     private int xSize;
@@ -140,6 +147,11 @@ public class RGBAImage extends Image
     */
     public boolean initNoFill(int width, int height)
     {
+        if ( data != null && width == xSize && height == ySize ) {
+            data.rewind();
+            return true;
+        }
+
         try {
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
@@ -378,10 +390,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-	if ( !data.hasArray() ) {
+        if ( !data.hasArray() ) {
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
-	}
-	return data.array();
+        }
+        return data.array();
 //#endif
 
     }
@@ -456,6 +468,61 @@ public class RGBAImage extends Image
         }
         return copy;
     }
+
+//#ifdef WITH_JAVA_DIRECT_BUFFERS
+    private void writeObject(ObjectOutputStream out) throws IOException
+    {
+        try {
+            int x, y;
+
+            PersistenceElement.writeIntBE(out, xSize);
+            PersistenceElement.writeIntBE(out, ySize);
+            byte arr[] = new byte[4];
+
+            data.rewind();
+            for ( y = 0; y < ySize; y++ ) {
+                for ( x = 0; x < xSize; x++ ) {
+                    arr[0] = data.get();
+                    arr[1] = data.get();
+                    arr[2] = data.get();
+                    arr[3] = data.get();
+                    PersistenceElement.writeBytes(out, arr);
+                }
+            }
+        }
+        catch ( Exception e ) {
+            throw new IOException("Error in custom RGBAImage writeObject");
+        }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException
+    {
+        try {
+            int x, y;
+
+            xSize = PersistenceElement.readIntBE(in);
+            ySize = PersistenceElement.readIntBE(in);
+
+            initNoFill(xSize, ySize);
+            data.rewind();
+
+            byte arr[] = new byte[4];
+            for ( y = 0; y < ySize; y++ ) {
+                for ( x = 0; x < xSize; x++ ) {
+                    PersistenceElement.readBytes(in, arr);
+                    data.put(arr[0]);
+                    data.put(arr[1]);
+                    data.put(arr[2]);
+                    data.put(arr[3]);
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+            throw new IOException("Error in custom RGBAImage readObject");
+        }
+    }
+//#endif
 
 }
 

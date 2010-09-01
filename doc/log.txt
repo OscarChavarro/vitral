@@ -844,4 +844,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     implementation.
   - 22min: Preparing raytrace parallel/distributed example application
     structure (phase 1)
+  - 23min: Preparing RaytracerDistributedServer basic socket listening
+    structure
+  - 1h:45min: trying to serialize a SimpleScene object on parallel/distributed
+    raytracing example
+  - 2h: working on RGBImage custom serialization when using direct buffers
 ===========================================================================
