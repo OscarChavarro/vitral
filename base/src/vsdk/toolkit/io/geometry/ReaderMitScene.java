@@ -1,4 +1,16 @@
 //===========================================================================
+           /***************************************************
+            *   An instructional Ray-Tracing Renderer written
+            *   for MIT 6.837  Fall '98 by Leonard McMillan.
+            *   Modified by Tomas Lozano-Perez for Fall '01
+            *   Modified by Oscar Chavarro for Spring '04 
+            *   FUSM 05061.
+            *   Modified by Oscar Chavarro for PUJ Vitral 
+            *   VSDK '05, '06, '10
+            ****************************************************/
+//===========================================================================
+
+package vsdk.toolkit.io.geometry;
 
 // Java classes
 import java.util.ArrayList;
@@ -28,8 +40,16 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.io.PersistenceElement;
 
-public class MitSceneReader
+/**
+This class implements an scene reader based on the instructional raytracer
+from Tomas Lozano-Perez from computer graphics class at MIT on spring 2001,
+and from Leonard McMillan 1998. This material was adapted by Oscar Chavarro
+for computer graphics classes at Colombia, and later as anoter scene reader
+for Vitral.
+*/
+public class ReaderMitScene extends PersistenceElement
 {
     // Debug flag
     private static final boolean showDebugMessages = false;
@@ -42,7 +62,7 @@ public class MitSceneReader
     public int viewportXSize;
     public int viewportYSize;
 
-    public MitSceneReader()
+    public ReaderMitScene()
     {
         currentCamera = new Camera();
         currentBackground = new SimpleBackground();
@@ -60,13 +80,13 @@ public class MitSceneReader
         }
     }
 
-    private float
+    private double
     readNumber(StreamTokenizer st) throws IOException {
         if (st.nextToken() != StreamTokenizer.TT_NUMBER) {
             System.err.println("ERROR: number expected in line "+st.lineno());
             throw new IOException(st.toString());
         }
-        return (float)(st.nval);
+        return st.nval;
     }
 
     public void
@@ -100,10 +120,10 @@ public class MitSceneReader
           switch ( st.nextToken() ) {
             case StreamTokenizer.TT_WORD:
               if ( st.sval.equals("sphere") ) {
-                  Vector3D c = new Vector3D((float) readNumber(st), 
-                                            (float) readNumber(st), 
-                                            (float) readNumber(st));
-                  float r = (float)readNumber(st);
+                  Vector3D c = new Vector3D(readNumber(st), 
+                                            readNumber(st), 
+                                            readNumber(st));
+                  double r = readNumber(st);
 
                   showDebugMessage("sphere");
                   thing = new SimpleBody();
@@ -120,10 +140,10 @@ public class MitSceneReader
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("cube") ) {
-                  Vector3D c = new Vector3D((float) readNumber(st), 
-                                            (float) readNumber(st), 
-                                            (float) readNumber(st));
-                  float r = (float)readNumber(st);
+                  Vector3D c = new Vector3D(readNumber(st), 
+                                            readNumber(st), 
+                                            readNumber(st));
+                  double r = readNumber(st);
 
                   showDebugMessage("cube");
                   thing = new SimpleBody();
@@ -139,12 +159,12 @@ public class MitSceneReader
                   theScene.addBody(thing);
                 } 
                 else if ( st.sval.equals("cylinder") ) {
-                  Vector3D c = new Vector3D((float) readNumber(st), 
-                                            (float) readNumber(st), 
-                                            (float) readNumber(st));
-                  float r1 = (float)readNumber(st);
-                  float r2 = (float)readNumber(st);
-                  float h = (float)readNumber(st);
+                  Vector3D c = new Vector3D(readNumber(st), 
+                                            readNumber(st), 
+                                            readNumber(st));
+                  double r1 = readNumber(st);
+                  double r2 = readNumber(st);
+                  double h = readNumber(st);
 
                   showDebugMessage("cylinder");
                   thing = new SimpleBody();
@@ -242,9 +262,9 @@ public class MitSceneReader
                 }
                 else if (st.sval.equals("light")) {
                   showDebugMessage("light");
-                  float r = readNumber(st);
-                  float g = readNumber(st);
-                  float b = readNumber(st);
+                  double r = readNumber(st);
+                  double g = readNumber(st);
+                  double b = readNumber(st);
                   if ( st.nextToken() != StreamTokenizer.TT_WORD ) {
                       System.err.println("ERROR: in line "+st.lineno() + 
                                          " at "+st.sval);
@@ -284,16 +304,16 @@ public class MitSceneReader
                 }
                 else if ( st.sval.equals("surface") ) {
                   showDebugMessage("surface");
-                  float r = readNumber(st);
-                  float g = readNumber(st);
-                  float b = readNumber(st);
-                  float ka = readNumber(st);
-                  float kd = readNumber(st);
-                  float ks = readNumber(st);
-                  float ns = readNumber(st);
-                  float kr = readNumber(st);
-                  float kt = readNumber(st);
-                  float index = readNumber(st);
+                  double r = readNumber(st);
+                  double g = readNumber(st);
+                  double b = readNumber(st);
+                  double ka = readNumber(st);
+                  double kd = readNumber(st);
+                  double ks = readNumber(st);
+                  double ns = readNumber(st);
+                  double kr = readNumber(st);
+                  double kt = readNumber(st);
+                  double index = readNumber(st);
                   /*
                   currentMaterial = new Material(r, g, b, 
                                                 ka, kd, ks, 

@@ -25,17 +25,18 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.io.geometry.ReaderMitScene;
 
 public class RaytracerSimple {
     // Application model
-    private MitSceneReader theSceneReader;
+    private ReaderMitScene theSceneReader;
     private SimpleScene theScene;
     private RGBImage theResultingImage;
     private Raytracer visualizationEngine;
 
     public RaytracerSimple()
     {
-        theSceneReader = new MitSceneReader();
+        theSceneReader = new ReaderMitScene();
         theScene = new SimpleScene();
     }
 
@@ -52,6 +53,7 @@ public class RaytracerSimple {
           }
           catch ( Exception e ) {
             System.err.println("Error reading " + nombre_de_archivo);
+            System.err.println("There are scene samples on ../../../etc/geometry/mitscenes/");
             System.exit(-1);
         }
         System.out.println("Scene loaded OK!");
@@ -123,7 +125,7 @@ public class RaytracerSimple {
         }
 
         if ( args.length < 1 ) {
-            instance.offlineExecution("./etc/object.ray", save);
+            instance.offlineExecution("../../../etc/geometry/mitscenes/object.ray", save);
           }
           else {
             instance.offlineExecution(args[0], save);

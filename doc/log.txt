@@ -836,7 +836,11 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 45min: optimizing raytracer
   - 10min: moving bresenham line algorithm to Rasterizer2D
 
-2010 august 16, Oscar Chavarro <<>>
+2010 august 16, Oscar Chavarro <<60min>>
   - 1h: Added Polygon2D and Rasterizer2DTest operations for polygons
 
+2010 august 31, Oscar Chavarro <<>>
+  - 25min: Preparing raytrace offline example for parallel/distributed
+    implementation.
+  - 8:26pm->
 ===========================================================================
