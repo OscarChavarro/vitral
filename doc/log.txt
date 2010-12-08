@@ -849,4 +849,11 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 1h:45min: trying to serialize a SimpleScene object on parallel/distributed
     raytracing example
   - 2h: working on RGBImage custom serialization when using direct buffers
+
+2010 september 1, Oscar Chavarro <<>>
+  - 41min: implementing basic communications protocol for
+    parallel/distributed implementation of raytracing example.
+  - 6min: resulting image
+  - 50min: first parallel implementation - not efficient
+
 ===========================================================================

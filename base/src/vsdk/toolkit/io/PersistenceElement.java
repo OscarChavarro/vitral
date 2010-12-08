@@ -503,17 +503,18 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        String msg = "";
+        StringBuffer msg = new StringBuffer("");
 
         do {
+            if ( is.available() < 1 ) return "";
             readBytes(is, character);
             letter = (char)character[0];
             if ( character[0] != '\n' && character[0] != '\r' ) {
-                msg = msg + letter;
+                msg.append(letter);
             }
         } while ( character[0] != '\n' );
 
-        return msg;
+        return msg.toString();
     }
 
     private static boolean isInSet(byte key, byte set[])

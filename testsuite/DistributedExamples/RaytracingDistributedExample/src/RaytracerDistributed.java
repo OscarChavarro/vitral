@@ -82,8 +82,7 @@ public class RaytracerDistributed {
             File fd = new File("./output.bmp");
 
             System.out.print("Exporting result image to file \"output.bmp\": ");
-            if ( !ImagePersistence.exportBMP(fd, theResultingImage) )
-            {
+            if ( !ImagePersistence.exportBMP(fd, theResultingImage) ) {
                 System.err.println("Error grabando la imagen!!");
                 System.exit(1);
             }
@@ -100,6 +99,7 @@ public class RaytracerDistributed {
 
         // 5.3. Suggest the garbage collector to free unused memory
         System.gc();
+        System.exit(0);
     }
 
     public static void

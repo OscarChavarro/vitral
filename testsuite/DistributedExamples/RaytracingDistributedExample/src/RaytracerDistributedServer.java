@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.File;
 
@@ -25,6 +26,11 @@ class VitralVisualizationServerProtocol implements Runnable
     private RendererConfiguration rendererConfiguration;
     private RGBImage theResultingImage;
     private ProgressMonitorConsole reporter;
+    private int id;
+    private int x0;
+    private int y0;
+    private int x1;
+    private int y1;
 
     public VitralVisualizationServerProtocol(Socket socket)
     {
@@ -33,8 +39,11 @@ class VitralVisualizationServerProtocol implements Runnable
         visualizationEngine = new Raytracer();
         rendererConfiguration = new RendererConfiguration();
         theResultingImage = new RGBImage();
-        theResultingImage.init(640, 480);
-        reporter = new ProgressMonitorConsole();
+        id = 0;
+        x0 = 0;
+        y0 = 0;
+        x1 = 100;
+        y1 = 100;
     }
 
     /**
@@ -44,6 +53,12 @@ class VitralVisualizationServerProtocol implements Runnable
       - ping
       - scene: after this command is recieved, it is expected a serialized
         java object containing a SimpleScene.
+      - render
+      - id
+      - x0
+      - y0
+      - x1
+      - y1
     Current selected data is extracted from selected object (if one object is
     selected) or from current camera if no object is selected.
 
@@ -57,7 +72,7 @@ class VitralVisualizationServerProtocol implements Runnable
       - 5 - String answer followed by zero terminated string
       - 6 - Image answer... (?)
     */
-    private byte[] servePetition(String in, InputStream is)
+    private byte[] servePetition(String in, InputStream is, OutputStream os) throws Exception
     {
         //-----------------------------------------------------------------
         byte[] out = new byte[5];
@@ -67,39 +82,69 @@ class VitralVisualizationServerProtocol implements Runnable
             out = new byte[1];
             out[0] = 1;
         }
-        else if ( in.equals("scene") ) {
-            try {
-                ObjectInputStream inserializer;
-                inserializer = new ObjectInputStream(is);
-                theScene = (SimpleScene)inserializer.readObject();
-                System.out.println("SCENE RECIEVED!");
-		System.out.println("VIS: " + visualizationEngine);
-
-                if ( theScene != null ) {
-  		    System.out.println("SCENE: " + theScene);
-                    visualizationEngine.execute(
-                                    theResultingImage,
-                                    rendererConfiguration,
-                                    theScene.getSimpleBodies(),
-                                    theScene.getLights(),
-                                    theScene.getActiveBackground(),
-                                    theScene.getActiveCamera(),
-                                    reporter, null,
-                                    0, 0, 640, 480);
-                    System.out.println("SCENE RAYTRACED!");
-
-  		    File fd = new File("distributed.bmp");
-                    if ( !ImagePersistence.exportBMP(fd, theResultingImage) ) {
-                        System.err.println("Error grabando la imagen!!");
-                    }
-
-		}
-            }
-            catch ( Exception e ) {
-                e.printStackTrace();
-            }
+        else if ( in.equals("id") ) {
+            id = PersistenceElement.readIntBE(is);
+	    System.out.println("Server set to id " + id);
             out = new byte[1];
             out[0] = 1;
+        }
+        else if ( in.equals("x0") ) {
+            x0 = PersistenceElement.readIntBE(is);
+            out = new byte[1];
+            out[0] = 1;
+        }
+        else if ( in.equals("y0") ) {
+            y0 = PersistenceElement.readIntBE(is);
+            out = new byte[1];
+            out[0] = 1;
+        }
+        else if ( in.equals("x1") ) {
+            x1 = PersistenceElement.readIntBE(is);
+            out = new byte[1];
+            out[0] = 1;
+        }
+        else if ( in.equals("y1") ) {
+            y1 = PersistenceElement.readIntBE(is);
+            out = new byte[1];
+            out[0] = 1;
+        }
+        else if ( in.equals("scene") ) {
+            ObjectInputStream inserializer;
+            inserializer = new ObjectInputStream(is);
+            theScene = (SimpleScene)inserializer.readObject();
+            System.out.println("SCENE RECIEVED!");
+            out = new byte[1];
+            out[0] = 1;
+        }
+	else if ( in.equals("render") ) {
+            if ( theScene != null ) {
+                theResultingImage.init(x1 - x0, y1 - y0);
+                reporter = null; //new ProgressMonitorConsole();
+
+                visualizationEngine.execute(
+                                theResultingImage,
+                                rendererConfiguration,
+                                theScene.getSimpleBodies(),
+                                theScene.getLights(),
+                                theScene.getActiveBackground(),
+                                theScene.getActiveCamera(),
+                                reporter, null,
+                                x0, y0, x1, y1);
+                System.out.println("SCENE RAYTRACED!");
+                System.out.printf("Extends: <%d, %d> - <%d, %d>\n", x0, y0, x1, y1);
+                ObjectOutputStream oos = new ObjectOutputStream(os);
+                oos.writeObject(theResultingImage);
+                oos.flush();
+
+                /*
+                File fd = new File("distributed" + id + ".png");
+                if ( !ImagePersistence.exportPNG(fd, theResultingImage) ) {
+                    System.err.println("Error grabando la imagen!!");
+                }
+		*/
+                out = new byte[1];
+                out[0] = 1;
+            }
         }
         //-----------------------------------------------------------------
         //String msg = "HOLA";
@@ -125,9 +170,9 @@ class VitralVisualizationServerProtocol implements Runnable
             os = socket.getOutputStream();
             while ( true ) {
                 msg = PersistenceElement.readAsciiString(is);
-                System.out.println("Recieved: " + msg);
+                //System.out.println("Recieved: " + msg);
                 if ( msg != null && !msg.equals("") ) {
-                    os.write(servePetition(msg, is));
+                    os.write(servePetition(msg, is, os));
                 }
                 else {
                     System.out.println("Connection dropped!");
@@ -146,9 +191,9 @@ class VitralVisualizationServerProtocol implements Runnable
 public class RaytracerDistributedServer implements Runnable
 {
     private int tcpPort;
-    public RaytracerDistributedServer()
+    public RaytracerDistributedServer(int port)
     {
-        tcpPort = 1235;
+        tcpPort = port;
         Thread networkThread = new Thread(this);
         networkThread.start();
     }
@@ -178,8 +223,14 @@ public class RaytracerDistributedServer implements Runnable
 
     public static void main(String args[])
     {
+        int port = 1234;
         RaytracerDistributedServer instance;
-        instance = new RaytracerDistributedServer();
+
+        if ( args.length > 0 ) {
+            port = Integer.parseInt(args[0]);
+        }
+
+        instance = new RaytracerDistributedServer(port);
     }
 
 }
