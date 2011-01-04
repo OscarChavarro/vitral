@@ -856,4 +856,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 6min: resulting image
   - 50min: first parallel implementation - not efficient
 
+2010 january 4, Oscar Chavarro <<>>
+  - 4min: ArrayListOfBytes
+
 ===========================================================================
