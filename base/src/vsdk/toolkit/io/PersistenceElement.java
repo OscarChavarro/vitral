@@ -499,6 +499,79 @@ public abstract class PersistenceElement {
         return msg;
     }
 
+    public static String readUtf8String(InputStream is) throws Exception
+    {
+        byte character[] = new byte[1];
+        char letter;
+        String msg = "";
+        byte a[] = new byte[2];
+
+        do {
+            readBytes(is, character);
+            letter = (char)character[0];
+            if ( character[0] != 0x00 && ((letter >> 7) == 0) ) {
+                msg = msg + letter;
+            }
+            else if ( character[0] != 0x00 ) {
+                a[0] = character[0];
+                if ( is.available() >= 1 ) {
+                    readBytes(is, character);
+                    a[1] = character[0];
+                    msg += buildUtf8Char(a);
+                }
+            }
+        } while ( character[0] != 0x00 );
+
+        return msg;
+    }
+
+    public static String buildUtf8Char(byte arr[])
+    {
+        String c = null;
+        int a = VSDK.signedByte2unsignedInteger(arr[0]);
+        int b = VSDK.signedByte2unsignedInteger(arr[1]);
+
+        if ( ((a >> 5) == 0x06) &&
+             ((b >> 6) == 0x02) ) {
+            c = new String(arr);
+        }
+        else {
+            System.out.println("VSDK: Unhandled UTF-8 binary encoding!");
+            System.out.println("  - Byte 0: " + a + " / " + (a >> 5) );
+            System.out.println("  - Byte 1: " + b + " / " + (b >> 6) );
+            System.exit(1);
+        }
+        return c;
+    }
+
+    public static String readUtf8Line(InputStream is) throws Exception
+    {
+        byte character[] = new byte[1];
+        char letter;
+        StringBuffer msg = new StringBuffer("");
+        byte a[] = new byte[2];
+
+        do {
+            if ( is.available() < 1 ) return "";
+            readBytes(is, character);
+            letter = (char)character[0];
+            if ( character[0] != '\n' && character[0] != '\r' &&
+                 ((letter >> 7) == 0) ) {
+                msg.append(letter);
+            }
+            else if ( character[0] != '\n' && character[0] != '\r' ) {
+                a[0] = character[0];
+                if ( is.available() >= 1 ) {
+                    readBytes(is, character);
+                    a[1] = character[0];
+                    msg.append(buildUtf8Char(a));
+                }
+            }
+        } while ( character[0] != '\n' );
+
+        return msg.toString();
+    }
+
     public static String readAsciiLine(InputStream is) throws Exception
     {
         byte character[] = new byte[1];
@@ -560,7 +633,32 @@ public abstract class PersistenceElement {
     }
 
     public static void
+    writeUtf8String(OutputStream writer, String cad) throws Exception
+    {
+        byte arr[];
+        arr = cad.getBytes();
+        writer.write(arr, 0, arr.length);
+
+        byte end[] = new byte[1];
+        end[0] = '\0';
+        writer.write(end, 0, end.length);
+    }
+
+    public static void
     writeAsciiLine(OutputStream writer, String cad)
+        throws Exception
+    {
+        byte arr[];
+        arr = cad.getBytes();
+        writer.write(arr, 0, arr.length);
+
+        byte end[] = new byte[1];
+        end[0] = '\n';
+        writer.write(end, 0, end.length);
+    }
+
+    public static void
+    writeUtf8Line(OutputStream writer, String cad)
         throws Exception
     {
         byte arr[];
