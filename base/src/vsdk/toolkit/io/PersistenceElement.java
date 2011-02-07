@@ -517,7 +517,14 @@ public abstract class PersistenceElement {
                 if ( is.available() >= 1 ) {
                     readBytes(is, character);
                     a[1] = character[0];
-                    msg += buildUtf8Char(a);
+                    String cc;
+                    cc = buildUtf8Char(a);
+		    if ( cc != null ) {
+                        msg += cc;
+		    }
+		    else {
+			System.out.println("* UNHANDLED UTF! ********************************************************** ->" + msg);
+		    }
                 }
             }
         } while ( character[0] != 0x00 );
@@ -539,7 +546,7 @@ public abstract class PersistenceElement {
             System.out.println("VSDK: Unhandled UTF-8 binary encoding!");
             System.out.println("  - Byte 0: " + a + " / " + (a >> 5) );
             System.out.println("  - Byte 1: " + b + " / " + (b >> 6) );
-            System.exit(1);
+            return null;
         }
         return c;
     }
