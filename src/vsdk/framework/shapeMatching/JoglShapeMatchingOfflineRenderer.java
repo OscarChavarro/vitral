@@ -45,7 +45,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         }
 
         try {
-            pbuffer = drawableFactory.createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = drawableFactory.createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
             pbufferSupported = true;
             pbuffer.addGLEventListener(this);
           }
