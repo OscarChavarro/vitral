@@ -205,12 +205,14 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static boolean verifyOpenGLAvailability()
     {
+/*
         if ( !PersistenceElement.verifyLibrary("jogl_gl2es12") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
                 "JoglRenderer.verifyOpenGLAvailability",
                 "JOGL Library not found.  Check your installation.");
             return false;
         }
+*/
 /*
         if ( !PersistenceElement.verifyLibrary("jogl_awt") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
@@ -219,12 +221,14 @@ public abstract class JoglRenderer extends RenderingElement {
             return false;
         }
 */
+/*
         if ( !PersistenceElement.verifyLibrary("jogl_cg") ) {
             VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
                 "JoglRenderer.verifyOpenGLAvailability",
                 "JOGL-CG Library not found.  Check your installation.");
             return false;
         }
+*/
         return true;
     }
 
