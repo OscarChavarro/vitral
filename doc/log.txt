@@ -864,6 +864,6 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 
 2011 march 21, Oscar Chavarro <<>>
   - SVN branch commited to the trunk: Jogl Stereopsis support modules,
-    datafiles and example program. This branch's net cost was 10h49min.
+    datafiles and example program. This branch's net cost was 10h49min. :)
 
 ===========================================================================
