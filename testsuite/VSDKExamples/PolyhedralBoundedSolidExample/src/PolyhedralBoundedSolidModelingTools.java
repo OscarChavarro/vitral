@@ -841,7 +841,6 @@ public class PolyhedralBoundedSolidModelingTools
             return operands[1];
         }
         return res;
-
     }
 
     public static PolyhedralBoundedSolid featuredObject()
