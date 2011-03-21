@@ -108,7 +108,7 @@ public abstract class JoglRenderer extends RenderingElement {
         return NvidiaGuiAllPixelShaders;
     }
 
-    public static void createDefaultAutomaticNvidiaCgShaders()
+    public static void createDefaultAutomaticNvidiaCgShaders(String path)
     {
         nvidiaCgAutomaticMode = true;
 
@@ -120,19 +120,19 @@ public abstract class JoglRenderer extends RenderingElement {
                 nvidiaCgAutomaticMode = false;
                 return;
             }
-            fis = new FileInputStream("./etc/PhongTextureVertexShader.cg");
+            fis = new FileInputStream(path + "/PhongTextureVertexShader.cg");
             NvidiaGpuVertexProgramTexture =
                 JoglRenderer.loadNvidiaGpuVertexShader(fis);
             fis.close();
-            fis = new FileInputStream("./etc/PhongTexturePixelShader.cg");
+            fis = new FileInputStream(path + "/PhongTexturePixelShader.cg");
             NvidiaGpuPixelProgramTexture =
               JoglRenderer.loadNvidiaGpuPixelShader(fis);
             fis.close();
-            fis = new FileInputStream("./etc/PhongTextureBumpVertexShader.cg");
+            fis = new FileInputStream(path + "/PhongTextureBumpVertexShader.cg");
             NvidiaGpuVertexProgramTextureBump =
               JoglRenderer.loadNvidiaGpuVertexShader(fis);
             fis.close();
-            fis = new FileInputStream("./etc/PhongTextureBumpPixelShader.cg");
+            fis = new FileInputStream(path + "/PhongTextureBumpPixelShader.cg");
             NvidiaGpuPixelProgramTextureBump =
               JoglRenderer.loadNvidiaGpuPixelShader(fis);
             fis.close();

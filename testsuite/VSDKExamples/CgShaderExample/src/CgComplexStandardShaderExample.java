@@ -202,16 +202,16 @@ public class CgComplexStandardShaderExample
             //-----------------------------------------------------------------
             NvidiaGpuVertexProgramTexture =
               JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTextureVertexShader.cg"));
             NvidiaGpuPixelProgramTexture =
               JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTexturePixelShader.cg"));
             NvidiaGpuVertexProgramTextureBump =
               JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureBumpVertexShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTextureBumpVertexShader.cg"));
             NvidiaGpuPixelProgramTextureBump =
               JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTextureBumpPixelShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTextureBumpPixelShader.cg"));
 
             //-----------------------------------------------------------------
             CGparameter param;

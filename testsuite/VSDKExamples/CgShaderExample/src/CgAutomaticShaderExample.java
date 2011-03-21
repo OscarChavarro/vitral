@@ -215,7 +215,7 @@ public class CgAutomaticShaderExample
         //-----------------------------------------------------------------
         if ( firstTimer ) {
             firstTimer = false;
-            JoglRenderer.createDefaultAutomaticNvidiaCgShaders();
+            JoglRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
         }
 
         //-----------------------------------------------------------------

@@ -181,10 +181,10 @@ public class CgSimpleUnrestrictedShaderExample
             //-----------------------------------------------------------------
             NvidiaGpuVertexProgramTexture =
               JoglRenderer.loadNvidiaGpuVertexShader(
-                new FileInputStream("./etc/PhongTextureVertexShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTextureVertexShader.cg"));
             NvidiaGpuPixelProgramTexture =
               JoglRenderer.loadNvidiaGpuPixelShader(
-                new FileInputStream("./etc/PhongTexturePixelShader.cg"));
+                new FileInputStream("../../../etc/cgShaders/PhongTexturePixelShader.cg"));
         }
         catch ( Exception e ) {
             System.err.println("Error loading shaders!");
