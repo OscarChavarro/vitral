@@ -1,0 +1,38 @@
+2009, may 3: <<305min>>
+  - 2h: basic template with support for interlaced stereo and (untested)
+    quad buffer stereo
+  - 1h: adding anaglyph stereo support
+  - 5min: adding multiview stereo support
+  - 2h: adding pfuffer stereo support
+
+2009, may 4: <<3min>>
+  - 3min: structuring application
+
+2010, aug 26: <<150min>>
+  - 15min: migrating from JOGL to JOGL2
+  - 21min: Architecture organization
+  - 13min: Drawing "L" and "R" letters.
+  - 6min: Managing interaction events
+  - 43min: cheking functionallity, fixing bug on
+    JoglStereoStrategyInterlaceRenderer
+  - 52min: Fixing bugs on JoglStereoStrategyAnaglyphRenderer
+
+2011, mar 18: <<43min>>
+  - 4min: Changing GLCanvas for GLJPanel
+  - 39min: refactoring code to support fullscreen mode
+
+2011, mar 20: <<8min>>
+  - 8min: drawCenterModel
+
+2011, mar 21: <<140min>>
+  - 33min: JoglStereoStrategyCyclopeanZBufferRenderer class
+  - 34min: basic JoglStereoStrategyAutostereogramRenderer class
+  - 41min: Fine tunning JoglStereoStrategyAutostereogramRenderer
+  - 32min: JoglStereoWiggleRenderer
+
+<<< TOTAL TIME: 649min - 10h49min >>>
+
+PENDING:
+  - Think on how to use JoglStereoStrategyPBufferRenderer to calculate
+    two images as PBuffers without rendering on a third GL context (useful
+    for pure offline stereo rendering).
