@@ -70,6 +70,9 @@ cd ..
 cd StereoExample
 ./run.sh
 cd ..
+cd StereoSceneExample
+./run.sh
+cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques

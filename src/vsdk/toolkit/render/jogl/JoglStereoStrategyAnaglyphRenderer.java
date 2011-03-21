@@ -30,7 +30,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
     public JoglStereoStrategyAnaglyphRenderer()
     {
         super();
-        colorBlendMethod = false;
+        colorBlendMethod = true;
         colormasklr = true;
         colormasklg = false;
         colormasklb = false;

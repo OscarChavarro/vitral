@@ -41,7 +41,7 @@ import vsdk.toolkit.render.jogl.JoglStereoStrategyWiggleRenderer;
 
 //===========================================================================
 
-public class StereoApplicationExample {
+public class StereoSceneExample {
 
     public JoglStereoStrategyRenderer stereoStrategy;
     private JFrame mainWindowWidget;
@@ -55,7 +55,9 @@ public class StereoApplicationExample {
     private boolean fullScreenGuiMode;
     private int stereoStrategyId;
 
-    public StereoApplicationExample(int stereoStrategyId)
+    public Scene scene;
+
+    public StereoSceneExample(int stereoStrategyId)
     {
         fullScreenGuiMode = false;
         this.stereoStrategyId = stereoStrategyId;
@@ -88,7 +90,7 @@ public class StereoApplicationExample {
     }
 
     private void initGLCanvas(int xSize, int ySize) {
-        drawingArea = new JoglDrawingArea();
+        drawingArea = new JoglDrawingArea(this);
         eventDispatcher = new EventDispatcher(this);
         animator = null;
 
@@ -194,6 +196,11 @@ public class StereoApplicationExample {
         System.gc();
     }
 
+    public void createModel()
+    {
+        scene = new Scene();
+    }
+
     public void createGUI()
     {
         if ( fullScreenGuiMode ) {
@@ -253,15 +260,16 @@ public class StereoApplicationExample {
     }
 
     public static void main(String[] args) {
-        StereoApplicationExample instance;
-        int id = 5;
+        StereoSceneExample instance;
+        int id = 6;
 
         if ( args.length > 0 ) {
             id = Integer.parseInt(args[0]);
         }
 
-        instance = new StereoApplicationExample(id);
+        instance = new StereoSceneExample(id);
         instance.usage();
+        instance.createModel();
         instance.createGUI();
     }
 

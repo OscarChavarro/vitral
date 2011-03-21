@@ -84,6 +84,7 @@ public class CameraExample extends Applet implements
         canvas.addGLEventListener(this);
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
+        canvas.addMouseWheelListener(this);
         canvas.addKeyListener(this);
     }
 
@@ -226,11 +227,7 @@ public class CameraExample extends Applet implements
         }
     }
 
-    /**
-    WARNING: It is not working... check pending
-    */
     public void mouseWheelMoved(MouseWheelEvent e) {
-        System.out.println(".");
         if ( cameraController.processMouseWheelEventAwt(e) ) {
             canvas.repaint();
         }

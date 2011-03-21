@@ -16,6 +16,7 @@ import vsdk.toolkit.environment.Material;
 
 public class JoglMaterialRenderer extends JoglRenderer {
     private static boolean errorReported = false;
+    private static boolean disablingTransparency = false;
 
     public static void activate(GL2 gl, Material m)
     {
@@ -44,9 +45,14 @@ public class JoglMaterialRenderer extends JoglRenderer {
         if ( opacity < 1.0f - Float.MIN_VALUE ) {
             gl.glEnable(gl.GL_BLEND);
             gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+            disablingTransparency = true;
           }
           else {
-            gl.glDisable(gl.GL_BLEND);
+            // Note: Transparency blending is not compatible with
+            // blending technique for anaglyphs...
+            if ( disablingTransparency ) {
+                gl.glDisable(gl.GL_BLEND);
+            }
         }
 
         float phongExp = (float)m.getPhongExponent();
