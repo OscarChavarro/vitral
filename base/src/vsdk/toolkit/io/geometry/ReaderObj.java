@@ -370,6 +370,7 @@ public class ReaderObj extends PersistenceElement
             Material m;
             m = new Material();
             m.setName("default obj material");
+            m.setDoubleSided(false);
             nextMaterialsArray.add(m);
         }
 
@@ -467,6 +468,7 @@ public class ReaderObj extends PersistenceElement
             materials[i] = nextMaterialsArray.get(i);
             if ( materials[i] == null ) {
                 materials[i] = new Material();
+                materials[i].setDoubleSided(false);
             }
         }
         newTriangleMesh.setMaterials(materials);
@@ -750,6 +752,7 @@ public class ReaderObj extends PersistenceElement
             String lineOfText="";
 
             Material activeMaterial=new Material();
+            activeMaterial.setDoubleSided(false);
             activeMaterial.setName("default");
 
             while( (lineOfText = in.readLine()) != null ) {
@@ -796,6 +799,7 @@ public class ReaderObj extends PersistenceElement
                     stMat.nextToken();//newmtl
                     ret.put(activeMaterial.getName(), activeMaterial);
                     activeMaterial = new Material();
+                    activeMaterial.setDoubleSided(false);
                     activeMaterial.setName(stMat.nextToken());
                 }
             }
@@ -813,6 +817,7 @@ public class ReaderObj extends PersistenceElement
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
         return m;
     }
 
