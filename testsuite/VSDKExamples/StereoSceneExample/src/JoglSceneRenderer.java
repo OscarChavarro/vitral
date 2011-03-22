@@ -14,9 +14,6 @@ public class JoglSceneRenderer
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
         //-----------------------------------------------------------------
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-        gl.glLoadIdentity();
-
         int i;
 
 	for ( i = 0; i < s.lights.size(); i++ ) {

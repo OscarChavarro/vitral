@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.io.File;
 
+import vsdk.toolkit.common.ColorRgb;                     // Model elements
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
@@ -12,6 +13,8 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.io.geometry.EnvironmentPersistence;  // Persistence elements
 
 public class Scene
 {
@@ -21,6 +24,7 @@ public class Scene
     public ArrayList<Light> lights;
     public RendererConfiguration qualitySelection;
     public double eyeDistance;
+    public double eyeTorsionAngle;
 
     public Scene()
     {
@@ -44,10 +48,23 @@ public class Scene
 
         SimpleBody b;
 
-        b = new SimpleBody();
-        b.setGeometry(new Sphere(1.0));
-        b.setMaterial(defaultMaterial(new ColorRgb(0.7, 0.7, 0.7)));
-        bodies.add(b);
+        SimpleScene scene = new SimpleScene();
+        try {
+            File file = new File("../../../etc/geometry/cow.obj");
+            EnvironmentPersistence.importEnvironment(file, scene);
+            int i;
+	    for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+		b = scene.getSimpleBodies().get(i);
+                b.getMaterial().setDoubleSided(false);
+                b.setScale(new Vector3D(0.5, 0.5, 0.5));
+		bodies.add(b);
+	    }
+        }
+        catch ( Exception ex ) {
+            System.err.println("Failed to read file.");
+            ex.printStackTrace();
+            System.exit(0);
+        }
 
         //-----------------------------------------------------------------
         lights = new ArrayList<Light>();
@@ -60,6 +77,7 @@ public class Scene
         //-----------------------------------------------------------------
         qualitySelection = new RendererConfiguration();
         eyeDistance = 0.06;
+        eyeTorsionAngle = 0.00;
     }
 
     private Material defaultMaterial(ColorRgb d)

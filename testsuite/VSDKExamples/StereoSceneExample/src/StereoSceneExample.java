@@ -45,9 +45,7 @@ public class StereoSceneExample {
 
     public JoglStereoStrategyRenderer stereoStrategy;
     private JFrame mainWindowWidget;
-    private GLJPanel canvas;
     private JoglDrawingArea drawingArea;
-    private Animator animator;
     private EventDispatcher eventDispatcher;
     private RGBColorPalette palette;
     private RGBImage stereogramTilePattern;
@@ -55,11 +53,17 @@ public class StereoSceneExample {
     private boolean fullScreenGuiMode;
     private int stereoStrategyId;
 
+    public GLJPanel canvas;
     public Scene scene;
+    public double angle;
+    public Animator animator;
+    public boolean isRotating;
 
     public StereoSceneExample(int stereoStrategyId)
     {
-        fullScreenGuiMode = false;
+        angle = -90;
+        isRotating = false;
+        fullScreenGuiMode = true;
         this.stereoStrategyId = stereoStrategyId;
 
         try {
@@ -189,6 +193,7 @@ public class StereoSceneExample {
                 animator.stop();
 	    }
 	}
+ 	animator = null;
         mainWindowWidget.setVisible(false);
         mainWindowWidget.dispose();
         System.gc();
@@ -256,6 +261,8 @@ public class StereoSceneExample {
         System.out.println("  - c: swap stereo channels");
         System.out.println("  - f: toggle fullscreen mode");
         System.out.println("  - 1-9 numbers: switch stereo strategy");
+        System.out.println("  - 0 numbers: switch animation rotation");
+        System.out.println("  - d/D: control eye distance");
         System.out.println("  - <Esc>: Quit program");
     }
 

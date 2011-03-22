@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.util.Animator;
 
 import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -44,6 +45,25 @@ public class EventDispatcher implements
         vsdke = AwtSystem.awt2vsdkEvent(e);
 
         switch ( vsdke.keycode ) {
+          case KeyEvent.KEY_0:
+            if ( parent.animator == null ) {
+                parent.animator = new Animator(parent.canvas);
+                parent.animator.start();
+                parent.isRotating = true;
+            }
+            else if ( !parent.animator.isStarted() ) {
+                parent.animator.start();
+                parent.isRotating = true;
+	    }
+	    else if ( parent.animator.isAnimating() ) {
+                parent.animator.pause();
+                parent.isRotating = false;
+	    }
+	    else {
+                parent.animator.resume();
+                parent.isRotating = true;
+	    }
+            break;
           case KeyEvent.KEY_ESC:
             System.exit(0);
             break;
@@ -102,11 +122,23 @@ public class EventDispatcher implements
             if ( parent.scene.eyeDistance < 0.0 ) {
                 parent.scene.eyeDistance = 0.0;
 	    }
-	    System.out.println("Eye distance: " + parent.scene.eyeDistance);
+	    System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
             break;
           case KeyEvent.KEY_D:
 	    parent.scene.eyeDistance += 0.01;
-	    System.out.println("Eye distance: " + parent.scene.eyeDistance);
+	    System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
+            break;
+
+          case KeyEvent.KEY_t:
+	    parent.scene.eyeTorsionAngle -= 0.1;
+            if ( parent.scene.eyeTorsionAngle < 0.0 ) {
+                parent.scene.eyeTorsionAngle = 0.0;
+	    }
+	    System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
+            break;
+          case KeyEvent.KEY_T:
+	    parent.scene.eyeTorsionAngle += 0.1;
+	    System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
             break;
 
           case KeyEvent.KEY_c:
