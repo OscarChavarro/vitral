@@ -51,7 +51,7 @@ public class JoglDrawingArea implements GLEventListener
         Vector3D p = new Vector3D(parent.scene.camera.getPosition());
 
         parent.scene.activeCamera = new Camera(parent.scene.camera);
-        parent.scene.activeCamera.setPosition(p.substract(l));
+        parent.scene.activeCamera.setPosition(p.add(l));
         
         //-----------------------------------------------------------------
         Matrix4x4 R1;
@@ -62,7 +62,7 @@ public class JoglDrawingArea implements GLEventListener
 
         R1 = parent.scene.camera.getRotation();
         R2 = new Matrix4x4();
-        R2.axisRotation(Math.toRadians(parent.scene.eyeTorsionAngle), u);
+        R2.axisRotation(-Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));
 
@@ -84,7 +84,7 @@ public class JoglDrawingArea implements GLEventListener
         Vector3D p = new Vector3D(parent.scene.camera.getPosition());
 
         parent.scene.activeCamera = new Camera(parent.scene.camera);
-        parent.scene.activeCamera.setPosition(p.add(l));
+        parent.scene.activeCamera.setPosition(p.substract(l));
         
         //-----------------------------------------------------------------
         Matrix4x4 R1;
@@ -95,7 +95,7 @@ public class JoglDrawingArea implements GLEventListener
 
         R1 = parent.scene.camera.getRotation();
         R2 = new Matrix4x4();
-        R2.axisRotation(-Math.toRadians(parent.scene.eyeTorsionAngle), u);
+        R2.axisRotation(Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));
 
@@ -119,12 +119,12 @@ public class JoglDrawingArea implements GLEventListener
         if ( parent.animator != null && parent.animator.isAnimating() &&
              parent.isRotating ) {
             parent.angle += 1.0;
-	}
+        }
         //-----------------------------------------------------------------
         if ( stereoStrategy == null ) {
             drawCenterModel(gl);
         }
-	else if ( 
+        else if ( 
         stereoStrategy instanceof JoglStereoStrategyCyclopeanZBufferRenderer ||
         stereoStrategy instanceof JoglStereoStrategyAutostereogramRenderer
         ) {
@@ -135,7 +135,7 @@ public class JoglDrawingArea implements GLEventListener
             }
 
             stereoStrategy.deactivateStereoMode(gl);
-	}
+        }
         else {
             stereoStrategy.activateStereoMode(gl);
  

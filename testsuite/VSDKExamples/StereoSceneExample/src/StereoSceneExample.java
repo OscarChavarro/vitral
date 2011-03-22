@@ -263,6 +263,7 @@ public class StereoSceneExample {
         System.out.println("  - 1-9 numbers: switch stereo strategy");
         System.out.println("  - 0 numbers: switch animation rotation");
         System.out.println("  - d/D: control eye distance");
+        System.out.println("  - t/T: control eye torsion angle");
         System.out.println("  - <Esc>: Quit program");
     }
 
