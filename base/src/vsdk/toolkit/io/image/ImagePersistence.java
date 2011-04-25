@@ -54,6 +54,87 @@ public class ImagePersistence extends PersistenceElement
 {
     public static boolean nativeWarningGiven = false;
 
+    private static RGBAImage importDDSRGBA(File inImageFd)
+    {
+         RGBAImage retImage = new RGBAImage();
+
+         try {
+            DDSImage dximage = DDSImage.read(inImageFd);
+            //System.out.println("Reading DirectX texture: ");
+            //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
+            int i;
+            int maxindex = 0;
+            ImageInfo maxinfo = dximage.getMipMap(0);
+            //dximage.debugPrint();
+            for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
+                ImageInfo info;
+                info = dximage.getMipMap(i);
+                //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
+
+                if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
+                    maxindex = i;
+                    maxinfo = info;
+                }
+
+            }
+
+            if ( maxinfo.isCompressed() ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.init(64, 64);
+                retImage.createTestPattern();
+                return retImage;
+            }
+
+            ByteBuffer bb = maxinfo.getData();
+            retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
+            int format = dximage.getPixelFormat();
+            if ( format == dximage.D3DFMT_R8G8B8 ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.createTestPattern();
+            }
+            else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
+                int x, y;
+                byte r, g, b, a;
+                for ( y = 0; y < retImage.getYSize(); y++ ) {
+                    for ( x = 0; x < retImage.getXSize(); x++ ) {
+                        r = bb.get();
+                        g = bb.get();
+                        b = bb.get();
+                        a = bb.get();
+                        retImage.putPixel(x, y, r, g, b, a);
+                    }
+                }
+            }
+            else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
+                int x, y;
+                byte r, g, b, a;
+                for ( y = 0; y < retImage.getYSize(); y++ ) {
+                    for ( x = 0; x < retImage.getXSize(); x++ ) {
+                        r = bb.get();
+                        g = bb.get();
+                        b = bb.get();
+                        a = bb.get();
+                        retImage.putPixel(x, y, r, g, b, a);
+                    }
+                }
+            }
+            else {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.createTestPattern();
+            }
+            return retImage;
+        }
+        catch ( Exception e ) {
+              VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                 "Cannot import image file \"" + inImageFd.getAbsolutePath() + 
+                 "\"");
+            return null;
+        }
+    }
+
     /**
     Given the filename of an input data file which contains an image, this
     method tries to recognize the file format and load the contents of it
@@ -83,13 +164,13 @@ public class ImagePersistence extends PersistenceElement
             retImage.initNoFill((int)header.xSize, (int)header.ySize);
             NativeImageReaderWrapper.readPngDataRGBA(header, retImage.getRawImageDirectBuffer());
             return retImage;
-	}
+        }
 
         if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
              type.equals("png") ) {
             nativeWarningGiven = true;
             VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGBA", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
-	}
+        }
 
         //-----------------------------------------------------------------
         if( type.equals("tga") ) {
@@ -127,80 +208,8 @@ public class ImagePersistence extends PersistenceElement
             return retImage;
         }
         else if( type.equals("dds") ) {
-            try {
-                DDSImage dximage = DDSImage.read(inImageFd);
-                //System.out.println("Reading DirectX texture: ");
-                //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
-                int i;
-                int maxindex = 0;
-                ImageInfo maxinfo = dximage.getMipMap(0);
-                //dximage.debugPrint();
-                for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
-                    ImageInfo info;
-                    info = dximage.getMipMap(i);
-                    //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
-
-                    if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
-                        maxindex = i;
-                        maxinfo = info;
-                    }
-
-                }
-
-                if ( maxinfo.isCompressed() ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.init(64, 64);
-                    retImage.createTestPattern();
-                    return retImage;
-                }
-
-                ByteBuffer bb = maxinfo.getData();
-                retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
-                int format = dximage.getPixelFormat();
-                if ( format == dximage.D3DFMT_R8G8B8 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.createTestPattern();
-                }
-                else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
-                    int x, y;
-                    byte r, g, b, a;
-                    for ( y = 0; y < retImage.getYSize(); y++ ) {
-                        for ( x = 0; x < retImage.getXSize(); x++ ) {
-                            r = bb.get();
-                            g = bb.get();
-                            b = bb.get();
-                            a = bb.get();
-                            retImage.putPixel(x, y, r, g, b, a);
-                        }
-                    }
-                }
-                else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
-                    int x, y;
-                    byte r, g, b, a;
-                    for ( y = 0; y < retImage.getYSize(); y++ ) {
-                        for ( x = 0; x < retImage.getXSize(); x++ ) {
-                            r = bb.get();
-                            g = bb.get();
-                            b = bb.get();
-                            a = bb.get();
-                            retImage.putPixel(x, y, r, g, b, a);
-                        }
-                    }
-                }
-                else {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.createTestPattern();
-                }
-                return retImage;
-            }
-            catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
-                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-                return null;
-            }
+            //delete retImage;
+            return importDDSRGBA(inImageFd);
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
@@ -219,8 +228,87 @@ public class ImagePersistence extends PersistenceElement
 
         if ( i < arr.length && arr[i] == '#' ) {
             return true;
-	}
+        }
         return false;
+    }
+
+    private static RGBImage importDDSRGB(File inImageFd)
+    {
+        RGBImage retImage = new RGBImage();
+        try {
+            DDSImage dximage = DDSImage.read(inImageFd);
+            //System.out.println("Reading DirectX texture: ");
+            //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
+            int i;
+            int maxindex = 0;
+            ImageInfo maxinfo = dximage.getMipMap(0);
+            //dximage.debugPrint();
+            for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
+                ImageInfo info;
+                info = dximage.getMipMap(i);
+                //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
+
+                if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
+                    maxindex = i;
+                    maxinfo = info;
+                }
+
+            }
+
+            if ( maxinfo.isCompressed() ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.init(64, 64);
+                retImage.createTestPattern();
+                return retImage;
+            }
+
+            ByteBuffer bb = maxinfo.getData();
+            retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
+            int format = dximage.getPixelFormat();
+            if ( format == dximage.D3DFMT_R8G8B8 ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.createTestPattern();
+            }
+            else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
+                int x, y;
+                byte r, g, b, a;
+                for ( y = 0; y < retImage.getYSize(); y++ ) {
+                    for ( x = 0; x < retImage.getXSize(); x++ ) {
+                        r = bb.get();
+                        g = bb.get();
+                        b = bb.get();
+                        a = bb.get();
+                        retImage.putPixel(x, y, r, g, b);
+                    }
+                }
+            }
+            else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
+                int x, y;
+                byte r, g, b, a;
+                for ( y = 0; y < retImage.getYSize(); y++ ) {
+                    for ( x = 0; x < retImage.getXSize(); x++ ) {
+                        r = bb.get();
+                        g = bb.get();
+                        b = bb.get();
+                        a = bb.get();
+                        retImage.putPixel(x, y, r, g, b);
+                    }
+                }
+            }
+            else {
+                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.createTestPattern();
+            }
+            return retImage;
+        }
+        catch ( Exception e ) {
+              VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                                 "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+            return null;
+        }
     }
 
     /**
@@ -252,13 +340,13 @@ public class ImagePersistence extends PersistenceElement
             retImage.initNoFill((int)header.xSize, (int)header.ySize);
             NativeImageReaderWrapper.readPngDataRGB(header, retImage.getRawImageDirectBuffer());
             return retImage;
-	}
+        }
 
         if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
              type.equals("png") ) {
             nativeWarningGiven = true;
             VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGB", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
-	}
+        }
 
         //-----------------------------------------------------------------
         if( type.equals("tga") ) {
@@ -296,81 +384,8 @@ public class ImagePersistence extends PersistenceElement
             return retImage;
         }
         else if( type.equals("dds") ) {
-            try {
-                DDSImage dximage = DDSImage.read(inImageFd);
-                //System.out.println("Reading DirectX texture: ");
-                //System.out.println("  - Number of mipmap levels: " + dximage.getNumMipMaps());
-                int i;
-                int maxindex = 0;
-                ImageInfo maxinfo = dximage.getMipMap(0);
-                //dximage.debugPrint();
-                for ( i = 0; i < dximage.getNumMipMaps(); i++ ) {
-                    ImageInfo info;
-                    info = dximage.getMipMap(i);
-                    //System.out.println("   . " + info.getWidth() + " x " + info.getHeight());
-
-                    if ( info.getWidth() > dximage.getMipMap(i).getWidth() ) {
-                        maxindex = i;
-                        maxinfo = info;
-                    }
-
-                }
-
-                if ( maxinfo.isCompressed() ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.init(64, 64);
-                    retImage.createTestPattern();
-                    return retImage;
-                }
-
-                ByteBuffer bb = maxinfo.getData();
-                retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
-                int format = dximage.getPixelFormat();
-                if ( format == dximage.D3DFMT_R8G8B8 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.createTestPattern();
-                }
-                else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
-                    int x, y;
-                    byte r, g, b, a;
-                    System.out.println("HEY");
-                    for ( y = 0; y < retImage.getYSize(); y++ ) {
-                        for ( x = 0; x < retImage.getXSize(); x++ ) {
-                            r = bb.get();
-                            g = bb.get();
-                            b = bb.get();
-                            a = bb.get();
-                            retImage.putPixel(x, y, r, g, b);
-                        }
-                    }
-                }
-                else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
-                    int x, y;
-                    byte r, g, b, a;
-                    for ( y = 0; y < retImage.getYSize(); y++ ) {
-                        for ( x = 0; x < retImage.getXSize(); x++ ) {
-                            r = bb.get();
-                            g = bb.get();
-                            b = bb.get();
-                            a = bb.get();
-                            retImage.putPixel(x, y, r, g, b);
-                        }
-                    }
-                }
-                else {
-                    VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                    "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                    retImage.createTestPattern();
-                }
-                return retImage;
-            }
-            catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
-                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-                return null;
-            }
+            //delete retImage;
+            return importDDSRGB(inImageFd);
         }
         else if( type.equals("ppm") )  {
             BufferedImage bi = null;
@@ -401,33 +416,33 @@ public class ImagePersistence extends PersistenceElement
                             throw new ImageNotRecognizedException("Error reading internal PPM file subformat:\n" + line, inImageFd);
                         }
                         break;
-		      case 2:
-			StringTokenizer parser;
-			parser = new StringTokenizer(line);
+                      case 2:
+                        StringTokenizer parser;
+                        parser = new StringTokenizer(line);
                         xSize = Integer.parseInt(parser.nextToken());
                         ySize = Integer.parseInt(parser.nextToken());
                         break;
                     }
-		    stage++;
+                    stage++;
 
-		} while ( !exit );
+                } while ( !exit );
 
                 retImage = new RGBImage();
                 retImage.initNoFill(xSize, ySize);
                 //byte barr[] = retImage.getRawImage();
-	        //readBytes(bis, barr);
+                //readBytes(bis, barr);
 
                 ByteBuffer bb = retImage.getRawImageDirectBuffer();
                 byte barr[] = new byte[xSize*3];
                 for ( int i = 0; i < ySize; i++ ) {
-		    readBytes(bis, barr);
-		    bb.put(barr);
-		}
+                    readBytes(bis, barr);
+                    bb.put(barr);
+                }
 
-		retImage.createTestPattern();
+                retImage.createTestPattern();
                 bis.close();
                 fis.close();
-		return retImage;
+                return retImage;
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
