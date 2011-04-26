@@ -54,6 +54,11 @@ public class ImagePersistence extends PersistenceElement
 {
     public static boolean nativeWarningGiven = false;
 
+    /**
+    Reads an RGBAImage from a .dds (DirectDraw Surface) file format
+    source.
+    /todo recieve an input stream instead of a file.
+    */
     private static RGBAImage importDDSRGBA(File inImageFd)
     {
          RGBAImage retImage = new RGBAImage();
@@ -78,60 +83,152 @@ public class ImagePersistence extends PersistenceElement
 
             }
 
-            if ( maxinfo.isCompressed() ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
-                retImage.init(64, 64);
-                retImage.createTestPattern();
-                return retImage;
-            }
+            int format = dximage.getPixelFormat();
 
             ByteBuffer bb = maxinfo.getData();
             retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
-            int format = dximage.getPixelFormat();
-            if ( format == dximage.D3DFMT_R8G8B8 ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+
+            if ( maxinfo.isCompressed() && format == dximage.D3DFMT_DXT3 ) {
+                // 4-bit nonpremultiplied alpha
+                System.out.println("Compressed format: [D3DFMT_DXT3]");
+
+                int x, xx, y, yy, dx;
+                byte r, g, b, a;
+                dx = retImage.getXSize();
+
+                int n; // Number of 128bits (16bytes) compression chunks
+                int j; // Chunk index
+                int k, kk; // Byte index inside the chunk
+                int l; // Pixel counter;
+                n = retImage.getXSize() * retImage.getYSize() / 16;
+                byte[] chunk = new byte[16];
+
+                x = 0;
+                y = 0;
+                for ( j = 0; j < n; j++ ) {
+                    // Read compression chunk
+                    for ( k = 0; k < 16; k++ ) {
+                        chunk[k] = bb.get();
+                    }
+
+                    xx = 0;
+                    yy = 0;
+                    for ( l = 0; l < 16; l++ ) {
+                        // First 64 bits (8bytes) are alpha channels for
+                        // 16 input pixels (4bits per alpha pixel).
+                        // Second 64 bits (8bytes) are RGB colors for
+                        // 16 input pixels (4 bits per color pixel).
+                        kk = ((l) / 2);
+                        int aval = VSDK.signedByte2unsignedInteger(chunk[kk]);
+                        int cval = VSDK.signedByte2unsignedInteger(chunk[8+kk]);
+                        if ( (l % 2) != 0 ) {
+                            aval = (aval >> 4) * 16;
+                            cval = (cval >> 4) * 16;
+                        }
+                        else {
+                            aval = (aval & 0x0F) * 16;
+                            cval = (aval & 0x0F) * 16;
+                        }
+
+                        // Put pixel (to ckeck!)
+                        a = (byte) aval;
+                        r = VSDK.unsigned8BitInteger2signedByte(((cval&0x01))*255);
+                        g = VSDK.unsigned8BitInteger2signedByte(((cval&0x02)>>1)*255);
+                        b = VSDK.unsigned8BitInteger2signedByte(((cval&0x04)>>2)*255);
+
+                        retImage.putPixel(x + xx, y+yy, r, g, b, a);
+
+                        // Go to next pixel
+                        xx++;
+                        if ( xx >= 4 ) {
+                            xx = 0;
+                            yy++;
+                        }
+                    }
+                    x += 4;
+                    if ( x >= dx ) {
+                        x = 0;
+                        y += 4;
+                    }
+                }
+            }
+            else if ( maxinfo.isCompressed() ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
+                "Compressed image subformats unsupported - file \"" + inImageFd.getAbsolutePath() + "\"");
+                retImage.createTestPattern();
+		if ( format == dximage.D3DFMT_DXT1 ) {
+                    // 1-bit alpha
+		    System.out.println("Compressed format: [D3DFMT_DXT1]");
+		}
+		else if ( format == dximage.D3DFMT_DXT2 ) {
+                    // 4-bit premultiplied alpha
+		    System.out.println("Compressed format: [D3DFMT_DXT2]");
+		}
+		else if ( format == dximage.D3DFMT_DXT4 ) {
+                    // interpolated premultiplied alpha
+		    System.out.println("Compressed format: [D3DFMT_DXT4]");
+		}
+		else if ( format == dximage.D3DFMT_DXT5 ) {
+                    // interpolated nonpremultiplied alpha
+		    System.out.println("Compressed format: [D3DFMT_DXT5]");
+		}
+		else {
+		    System.out.println("Compressed format: [*UNKNOWN*]");
+		}
+                return retImage;
+            }
+            else if ( format == dximage.D3DFMT_R8G8B8 ) {
+                System.out.println("[D3DFMT_R8G8B8]");
+
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
                 "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
+                System.out.println("[D3DFMT_A8R8G8B8]");
+
                 int x, y;
                 byte r, g, b, a;
                 for ( y = 0; y < retImage.getYSize(); y++ ) {
                     for ( x = 0; x < retImage.getXSize(); x++ ) {
-                        r = bb.get();
-                        g = bb.get();
                         b = bb.get();
+                        g = bb.get();
+                        r = bb.get();
                         a = bb.get();
                         retImage.putPixel(x, y, r, g, b, a);
                     }
                 }
             }
             else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
+                System.out.println("[D3DFMT_X8R8G8B8]");
+
                 int x, y;
                 byte r, g, b, a;
                 for ( y = 0; y < retImage.getYSize(); y++ ) {
                     for ( x = 0; x < retImage.getXSize(); x++ ) {
-                        r = bb.get();
-                        g = bb.get();
                         b = bb.get();
+                        g = bb.get();
+                        r = bb.get();
                         a = bb.get();
                         retImage.putPixel(x, y, r, g, b, a);
                     }
                 }
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                System.out.println("[**INVALID**]");
+
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
                 "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             return retImage;
         }
         catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+              VSDK.reportMessage(null, VSDK.ERROR, "importDDSRGBA",
                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + 
                  "\"");
-            return null;
+	      e.printStackTrace();
+              return null;
         }
     }
 
@@ -256,8 +353,8 @@ public class ImagePersistence extends PersistenceElement
             }
 
             if ( maxinfo.isCompressed() ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
-                "Compressed image subformat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGB",
+                "Compressed image subformats unsupported - file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.init(64, 64);
                 retImage.createTestPattern();
                 return retImage;
@@ -267,7 +364,7 @@ public class ImagePersistence extends PersistenceElement
             retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
             int format = dximage.getPixelFormat();
             if ( format == dximage.D3DFMT_R8G8B8 ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGB",
                 "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
@@ -298,14 +395,14 @@ public class ImagePersistence extends PersistenceElement
                 }
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGB",
                 "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             return retImage;
         }
         catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+              VSDK.reportMessage(null, VSDK.ERROR, "importDDSRGB",
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
             return null;
         }

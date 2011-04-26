@@ -868,5 +868,9 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 
 2011 april 25, Oscar Chavarro <<>>
   - 8min: DDS texture loading code refactoring.
+  - 47min: Studying and implementing base traversal of S3 Texture decompressor
+    for DXT3 loading of DDS images, without pixel processing.
+  - 32min: Understanding DXT3/DDS pixel packaging
+  - 20min: Finishing first version of DXT3/DDS loader.
 
 ===========================================================================
