@@ -137,6 +137,10 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         else if ( id == 0x71ABC1B9L ) {
             p.r = minp; p.g = maxp; p.b = maxp;
         }
+        else if ( id == 0xA2BF8E18L ) {
+            // Car body color on PEAUGEOT
+            p.r = maxp; p.g = maxp; p.b = minp;
+	}
         // Known common texture identifiers from Need for Speed Underground:
         // Base elements
 /*
@@ -156,8 +160,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             id == 0xCC5226DFL || id == 0xD195BE56L || id == 0xD689A31BL ||
             id == 0xE3F59A82L || id == 0xE490B3FCL || id == 0xE7E4EF49L ||
             id == 0xECBB8329L || id == 0xECBB832AL || id == 0xEFD842C5L ||
-            id == 0xF95D432FL || id == 0xFC42D35CL ||
-            id == 0xA2BF8E18L || id == 0x7B220DDFL ||
+            id == 0xF95D432FL || id == 0xFC42D35CL || id == 0x7B220DDFL ||
             id == 0x027A43A7L || id == 0x06BCBD59L || id == 0x0AB88F5DL ||
             id == 0x0ECB3D67L || id == 0x11D467B1L || id == 0x12466978L ||
             id == 0x1C8BF43EL || id == 0x5799E60BL ) {    
@@ -165,7 +168,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         }
 */
         else {
-            p.r = maxp; p.g = minp; p.b = minp;
+            p.r = maxp; p.g = maxp; p.b = maxp;
         }
 
         p.a = maxp;
@@ -204,14 +207,10 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         int ntextures;
         ntextures = (int)(readLongLE(is) / 8);
 
-        boolean debug = false;
-
-        if ( name.contains("PEUGOT_KIT00_HEADLIGHT_A") ) {
-            debug = true;
-        }
+        boolean debug = true;
 
         if ( debug ) {
-            System.out.println("Part " + name + " with " + ntextures + " textures");
+            System.err.println("Part " + name + " with " + ntextures + " textures");
         }
         long textureid;
         long skip;
@@ -221,7 +220,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         for ( i = 0; i < ntextures; i++ ) {
             textureid = readLongLE(is);
             if ( debug ) {
-                System.out.print("  - " + VSDK.formatIntAsHex((int)textureid));
+                System.err.print("  - " + VSDK.formatIntAsHex((int)textureid));
             }
             skip = readLongLE(is);
             if ( skip != 0 ) {
@@ -234,7 +233,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                     long id = ids.get(j).longValue();
                     if ( id == textureid ) {
                         if ( debug ) {
-                            System.out.println(" OK");
+                            System.err.println(" OK");
                         }
                         img = images.get(j);
                         j = ids.size() + 1;
@@ -252,7 +251,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 fillImageWithColor(img, p);
 
                 if ( debug ) {
-                    System.out.println(" NOT FOUND");
+                    System.err.println(" NOT FOUND");
                 }
             }
             localTextures.add(img);
@@ -281,7 +280,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         skipKeys(is, 2); // ??
 
         if ( debug ) {
-            System.out.println(name + " (NT: " + nt + ", NV: " + nv + ")");
+            //System.err.println(name + " (NT: " + nt + ", NV: " + nv + ")");
         }
 
         if ( !skipKeysUntil(is, MAGIC_MESHVERTICES) ) {
@@ -348,7 +347,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         /////
 
         for ( i = 0; debug && i <  vals.size(); i++ ) {
-            System.err.println(VSDK.formatIntAsHex(vals.get(i).intValue()));
+            System.err.println("  - Part flags: " + VSDK.formatIntAsHex(vals.get(i).intValue()) + "\n");
         }
 
         /////

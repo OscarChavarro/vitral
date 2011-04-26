@@ -90,7 +90,7 @@ public class ImagePersistence extends PersistenceElement
 
             if ( maxinfo.isCompressed() && format == dximage.D3DFMT_DXT3 ) {
                 // 4-bit nonpremultiplied alpha
-                System.out.println("Compressed format: [D3DFMT_DXT3]");
+                //System.out.println("Compressed format: [D3DFMT_DXT3]");
 
                 int x, xx, y, yy, dx;
                 byte r, g, b, a;
@@ -178,14 +178,14 @@ public class ImagePersistence extends PersistenceElement
                 return retImage;
             }
             else if ( format == dximage.D3DFMT_R8G8B8 ) {
-                System.out.println("[D3DFMT_R8G8B8]");
+                //System.out.println("[D3DFMT_R8G8B8]");
 
                 VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
                 "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             else if ( format == dximage.D3DFMT_A8R8G8B8 ) {
-                System.out.println("[D3DFMT_A8R8G8B8]");
+                //System.out.println("[D3DFMT_A8R8G8B8]");
 
                 int x, y;
                 byte r, g, b, a;
@@ -200,7 +200,7 @@ public class ImagePersistence extends PersistenceElement
                 }
             }
             else if ( format == dximage.D3DFMT_X8R8G8B8 ) {
-                System.out.println("[D3DFMT_X8R8G8B8]");
+                //System.out.println("[D3DFMT_X8R8G8B8]");
 
                 int x, y;
                 byte r, g, b, a;
@@ -215,7 +215,7 @@ public class ImagePersistence extends PersistenceElement
                 }
             }
             else {
-                System.out.println("[**INVALID**]");
+                //System.out.println("[**INVALID**]");
 
                 VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
                 "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
