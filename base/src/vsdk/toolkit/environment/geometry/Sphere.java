@@ -67,7 +67,7 @@ public class Sphere extends Solid {
                 de tipo Vector3D dentro del m&eacute;todo.  Esto no es bueno 
                 porque gasta memoria, pero ... que m&aacute;s podr&aacute; 
                 hacerse? Al menos el tiempo de ejecuci&oacute;n se mantiene 
-G                igual respecto al c&oacute;digo original de MIT.
+                igual respecto al c&oacute;digo original de MIT.
                 NOTA: Comparar este m&eacute;todo modificado con la 
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */

@@ -472,7 +472,7 @@ public class ImagePersistence extends PersistenceElement
                 fis.close();
               }
               catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (A)",
                                      "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
@@ -512,15 +512,22 @@ public class ImagePersistence extends PersistenceElement
                         if ( !line.startsWith("P6") ) {
                             throw new ImageNotRecognizedException("Error reading internal PPM file subformat:\n" + line, inImageFd);
                         }
+                        stage++;
                         break;
                       case 2:
-                        StringTokenizer parser;
-                        parser = new StringTokenizer(line);
-                        xSize = Integer.parseInt(parser.nextToken());
-                        ySize = Integer.parseInt(parser.nextToken());
+			if ( line.startsWith("#") ) {
+                            // Skip comment line
+			    ;
+			  }
+			  else {
+                            StringTokenizer parser;
+                            parser = new StringTokenizer(line);
+                            xSize = Integer.parseInt(parser.nextToken());
+                            ySize = Integer.parseInt(parser.nextToken());
+                            stage++;
+			}
                         break;
                     }
-                    stage++;
 
                 } while ( !exit );
 
@@ -536,14 +543,30 @@ public class ImagePersistence extends PersistenceElement
                     bb.put(barr);
                 }
 
-                retImage.createTestPattern();
+                //-------------------------------------------------------------
+                // Invert image
+                int x, y;
+                RGBPixel pa = new RGBPixel();
+                RGBPixel pb = new RGBPixel();
+
+                for ( y = 0; y < ySize/2; y++ ) {
+		    for ( x = 0; x < xSize; x++ ) {
+		        retImage.getPixelRgb(x, y, pa);
+		        retImage.getPixelRgb(x, ySize-y-1, pb);
+		        retImage.putPixelRgb(x, y, pb);
+		        retImage.putPixelRgb(x, ySize-y-1, pa);
+		    }
+		}
+                //-------------------------------------------------------------
+
                 bis.close();
                 fis.close();
                 return retImage;
               }
               catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (B)",
                                      "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+		  e.printStackTrace();
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }
@@ -597,7 +620,7 @@ public class ImagePersistence extends PersistenceElement
                 fis.close();
               }
               catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (C)",
                                      "Cannot import image file \"" + imagen.getAbsolutePath() + "\"");
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, imagen);
             }
