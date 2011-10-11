@@ -33,7 +33,9 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         ready = false;
 
         // Create a GLCapabilities object for the pbuffer
-        GLCapabilities pbCaps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
+        GLProfile profile;
+        profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities pbCaps = new GLCapabilities(profile);
         GLDrawableFactory drawableFactory;
 
         pbCaps.setDoubleBuffered(false);

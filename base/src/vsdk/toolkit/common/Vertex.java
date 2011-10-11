@@ -21,6 +21,11 @@ structure for operation signatures.
 Note that this is NOT a class, but merely a data structure, and as such,
 all its attributes are public.  This structure is not supposed to evolve or
 change in time radically.
+
+This class is supposed to be used as basic element for building polygons in
+three dimensional space. Note that is being currently used in polygon meshes
+(surfaces as such TriangleMesh) and on structured solid polygons, as such
+BinarySpacePartitioningTreeSolid.
 */
 public class Vertex extends FundamentalEntity
 {
