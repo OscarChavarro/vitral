@@ -20,13 +20,23 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
 
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
-        gl.glDrawBuffer(gl.GL_BACK_LEFT);
+        if ( swapChannels == false ) {
+            gl.glDrawBuffer(gl.GL_BACK_LEFT);
+        }
+        else {
+            gl.glDrawBuffer(gl.GL_BACK_RIGHT);
+        }
         return true;
     }
 
     public boolean configureDefaultRightChannel(GL2 gl)
     {
-        gl.glDrawBuffer(gl.GL_BACK_RIGHT);
+        if ( swapChannels == false ) {
+            gl.glDrawBuffer(gl.GL_BACK_RIGHT);
+        }
+        else {
+            gl.glDrawBuffer(gl.GL_BACK_LEFT);
+        }
         return true;
     }
 
