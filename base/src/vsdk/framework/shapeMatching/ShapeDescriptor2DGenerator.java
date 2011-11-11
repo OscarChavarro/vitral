@@ -2,6 +2,11 @@
 
 package vsdk.framework.shapeMatching;
 
+// Java classes
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.io.InputStream;
+
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Complex;
@@ -9,9 +14,25 @@ import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.processing.SignalProcessing;
 import vsdk.framework.Component;
+import vsdk.toolkit.media.ShapeDescriptor;
 
+/**
+This class constitutes a Singleton design pattern: code is not re-entrant!
+*/
 public class ShapeDescriptor2DGenerator extends Component
 {
+    /**
+    This method returns a shape descriptor. Its specific behavior is implemented
+    in each of the subclases.
+    */
+    public ShapeDescriptor calculateShapeDescriptor(
+        InputStream sceneSource,
+        String sceneSourceUrl,
+        HashMap<String, InputStream> subObjects)
+    {
+        return null;
+    }
+
     public FourierShapeDescriptor calculateCircularHarmonicsShapeDescriptor(Image distanceField, String label)
     {
         FourierShapeDescriptor fourierShapeDescriptor;

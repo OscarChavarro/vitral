@@ -873,4 +873,11 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 32min: Understanding DXT3/DDS pixel packaging
   - 20min: Finishing first version of DXT3/DDS loader.
 
+2011 november 10, Andrés Harker & Oscar Chavarro
+  - 2h: researching how to list loaded jars:
+    URL urls[] = ((URLClassLoader)ClassLoader.getSystemClassLoader()).getURLs();
+    and how to inspect contents of a jar file (java.util.jar.JarFile class)
+    to make a plugin loader for vitral subclasses :)
+  - 1h: ShapeDescriptor2DGeneratorFourier class and test program
+
 ===========================================================================
