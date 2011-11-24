@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.File;
 
-
 // VSDK Classes
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
