@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+static size_t dummy;
+
 int
 main(int argc, char *argv[] ) {
     FILE *fd;
@@ -15,8 +17,6 @@ main(int argc, char *argv[] ) {
     fd = fopen(argv[1], "rb");
 
     printf("unsigned char data[] = {\n");
-
-    size_t dummy;
 
     for ( i = 0; !feof(fd); i++ ) {
         dummy = fread(&byte, 1, 1, fd);
