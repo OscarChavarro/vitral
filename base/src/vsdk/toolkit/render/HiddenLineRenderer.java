@@ -176,11 +176,11 @@ public class HiddenLineRenderer extends RenderingElement
                     }
                     if ( !f1 && !f2 ) {
                         // Totally hidden lines
-                        materialLine.edgeType = materialLine.HIDDEN_LINE;
+                        materialLine.edgeType = _AppelEdgeCache.HIDDEN_LINE;
                     }
                     else if ( f1 && !f2 || !f1 && f2 ) {
                         // Contour lines
-                        materialLine.edgeType = materialLine.CONTOUR_LINE;
+                        materialLine.edgeType = _AppelEdgeCache.CONTOUR_LINE;
                         if ( f1 ) {
                             materialLine.visibleEdgeForContourLine = face1;
                         }
@@ -191,7 +191,7 @@ public class HiddenLineRenderer extends RenderingElement
                     }
                     else {
                         // Visible non contour lines
-                        materialLine.edgeType = materialLine.VISIBLE_LINE;
+                        materialLine.edgeType = _AppelEdgeCache.VISIBLE_LINE;
                     }
                     cache.add(materialLine);
                     //--------------------------------------------------------
@@ -342,7 +342,7 @@ public class HiddenLineRenderer extends RenderingElement
             //
 
             if ( qi == 0 ) {
-                if ( inEdge.edgeType == inEdge.CONTOUR_LINE ) {
+                if ( inEdge.edgeType == _AppelEdgeCache.CONTOUR_LINE ) {
                     outVisibleContourLineEndPoints.add(new Vector3D(pos1));
                     outVisibleContourLineEndPoints.add(new Vector3D(pos2));
                 }

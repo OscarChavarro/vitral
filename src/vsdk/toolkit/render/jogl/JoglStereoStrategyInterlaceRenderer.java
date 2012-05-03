@@ -2,6 +2,8 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCapabilities;
@@ -27,32 +29,32 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         /* setring screen-corresponding geometry */
         gl.glViewport(0, 0, viewportXSize, viewportYSize);
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         glu.gluOrtho2D(0.0, viewportXSize-1, 0.0, viewportYSize - 1);
 
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
                 
         /* clearing and configuring stencil drawing */
-        gl.glDrawBuffer(gl.GL_BACK);
-        gl.glEnable(gl.GL_STENCIL_TEST);
+        gl.glDrawBuffer(GL.GL_BACK);
+        gl.glEnable(GL.GL_STENCIL_TEST);
 
         gl.glClearStencil(0);
-        gl.glClear(gl.GL_STENCIL_BUFFER_BIT);
+        gl.glClear(GL.GL_STENCIL_BUFFER_BIT);
 
         /* Colorbuffer is copied to stencil */
-        gl.glStencilOp(gl.GL_REPLACE, gl.GL_REPLACE, gl.GL_REPLACE);
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        gl.glStencilOp(GL.GL_REPLACE, GL.GL_REPLACE, GL.GL_REPLACE);
+        gl.glDisable(GL.GL_DEPTH_TEST);
 
         /* to avoid interaction with stencil content */
-        gl.glStencilFunc(gl.GL_ALWAYS, 1, 1);
+        gl.glStencilFunc(GL.GL_ALWAYS, 1, 1);
         
         /* drawing stencil pattern */
         gl.glColor4f(1,1,1,0);  /* alfa is 0 not to interfere with alpha tests */
         gl.glLineWidth(1.0f);
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         for ( i = 0; i < viewportYSize; i += 2 ) {
             gl.glVertex2f(0, i);
             gl.glVertex2f(viewportXSize, i);
@@ -60,9 +62,9 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         gl.glEnd();     
 
         /* Disabling changes in stencil buffer */
-        gl.glStencilOp(gl.GL_KEEP, gl.GL_KEEP, gl.GL_KEEP);
-        gl.glDisable(gl.GL_STENCIL_TEST);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT); // Lines are not visible, they
+        gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP);
+        gl.glDisable(GL.GL_STENCIL_TEST);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT); // Lines are not visible, they
                                             // are just on the stencil buffer
         gl.glFlush();
     }
@@ -80,10 +82,10 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
     {
         /* following comand replace glDrawBuffer(GL_BACK_LEFT); */
         if ( swapChannels  ) {
-            gl.glStencilFunc(gl.GL_EQUAL, 1, 1); /* draws if stencil != 1 */
+            gl.glStencilFunc(GL.GL_EQUAL, 1, 1); /* draws if stencil != 1 */
         }
         else {
-            gl.glStencilFunc(gl.GL_NOTEQUAL, 1, 1); /* draws if stencil != 1 */
+            gl.glStencilFunc(GL.GL_NOTEQUAL, 1, 1); /* draws if stencil != 1 */
         }
         return true;
     }
@@ -92,10 +94,10 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
     {
         /* following comand replace glDrawBuffer(GL_BACK_RIGHT); */
         if ( swapChannels  ) {
-            gl.glStencilFunc(gl.GL_NOTEQUAL, 1, 1); /* draws if stencil == 1 */
+            gl.glStencilFunc(GL.GL_NOTEQUAL, 1, 1); /* draws if stencil == 1 */
         }
         else {
-            gl.glStencilFunc(gl.GL_EQUAL, 1, 1); /* draws if stencil == 1 */
+            gl.glStencilFunc(GL.GL_EQUAL, 1, 1); /* draws if stencil == 1 */
         }
         return true;
     }
@@ -104,7 +106,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
     {
         /* Generating the pattern in stencil buffer */
         int viewport[] = new int[4];
-        gl.glGetIntegerv(gl.GL_VIEWPORT, viewport, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
         if ( viewportXSize != viewport[2] ||
              viewportYSize != viewport[3] ) {
             stencilReady = false;
@@ -118,12 +120,12 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
             stencilReady = true;
         }
 
-        gl.glEnable(gl.GL_STENCIL_TEST);
+        gl.glEnable(GL.GL_STENCIL_TEST);
     }
 
     public void deactivateStereoMode(GL2 gl)
     {
-        gl.glDisable(gl.GL_STENCIL_TEST);
+        gl.glDisable(GL.GL_STENCIL_TEST);
     }
 
 }

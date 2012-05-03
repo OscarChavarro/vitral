@@ -6,8 +6,10 @@
 
 package vsdk.toolkit.render.jogl;
 
-// JOGL clases
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGparameter;
 
@@ -53,7 +55,7 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         gl.glTranslated(n.x, n.y, n.z);
         JoglMatrixRenderer.activate(gl, R);
         gl.glNormal3d(1, 0, 0);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( i = 0, x = -5*dx; i < nx; i++, x+=dx ) {
             for ( j = 0, y = -5*dy; j < ny; j++, y+=dy ) {
                 gl.glVertex3d(0, x, y);
@@ -72,24 +74,24 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         JoglGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             drawInfinitePlaneElements(gl, s, slices, stacks);
         }
         if ( q.isWiresSet() ) {
             JoglRenderer.disableNvidiaCgProfiles();
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             gl.glColor3d(1, 1, 1);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             drawInfinitePlaneElements(gl, s, slices, stacks);
         }

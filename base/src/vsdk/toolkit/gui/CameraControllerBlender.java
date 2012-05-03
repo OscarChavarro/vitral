@@ -79,8 +79,8 @@ public class CameraControllerBlender extends CameraController {
         boolean updated = false;
         double EPSILON = 0.0001;
         int mask;
-        int SHIFT_MASK = keyEvent.SHIFT_DOWN_MASK;
-        int CTRL_MASK = keyEvent.CTRL_DOWN_MASK;
+        int SHIFT_MASK = java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
+        int CTRL_MASK = java.awt.event.KeyEvent.CTRL_DOWN_MASK;
         Vector3D u, v, w;
         Matrix4x4 DR, T1, T2, COMPUESTA;
 

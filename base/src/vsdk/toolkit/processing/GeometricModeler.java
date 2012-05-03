@@ -59,11 +59,11 @@ public class GeometricModeler extends ProcessingElement
         lineModel = new ParametricCurve();
         pointParameters = new Vector3D[1];
         pointParameters[0] = new Vector3D(x1, y1, z1);
-        lineModel.addPoint(pointParameters, lineModel.CORNER);
+        lineModel.addPoint(pointParameters, ParametricCurve.CORNER);
 
         pointParameters = new Vector3D[1];
         pointParameters[0] = new Vector3D(x2, y2, z2);
-        lineModel.addPoint(pointParameters, lineModel.CORNER);
+        lineModel.addPoint(pointParameters, ParametricCurve.CORNER);
 
         return lineModel;
     }
@@ -240,11 +240,11 @@ public class GeometricModeler extends ProcessingElement
         totalNumberOfPoints = 0;
 
         for ( i = 1; i < curve.types.size(); i++ ) {
-            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+            if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
                 i++;
                 continue;
             }
-            ArrayList polyline = curve.calculatePoints(i, false);
+            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
             totalNumberOfPoints += polyline.size();
         }
 
@@ -264,7 +264,7 @@ public class GeometricModeler extends ProcessingElement
         first = new Vector3D();
         beginning = true;
         for ( i = 1; i < curve.types.size(); i++ ) {
-            if ( curve.types.get(i).intValue() == curve.BREAK ) {
+            if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
                 i++;
 
                 //----------
@@ -283,11 +283,11 @@ public class GeometricModeler extends ProcessingElement
             }
 
             // Build a polyline for approximating the [i] curve segment
-            ArrayList polyline = curve.calculatePoints(i, false);
+            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
 
             // Insert into current contour the polyline
             for ( j = 0; j < polyline.size(); j++ ) {
-                Vector3D vec = (Vector3D)polyline.get(j);
+                Vector3D vec = polyline.get(j);
                 if ( !beginning ) {
                     Vector3D prev = new Vector3D(list[count-1][0], 
                                                  list[count-1][1],

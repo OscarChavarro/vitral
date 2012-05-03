@@ -2,7 +2,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCapabilities;
 
@@ -21,10 +24,10 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         if ( swapChannels == false ) {
-            gl.glDrawBuffer(gl.GL_BACK_LEFT);
+            gl.glDrawBuffer(GL2GL3.GL_BACK_LEFT);
         }
         else {
-            gl.glDrawBuffer(gl.GL_BACK_RIGHT);
+            gl.glDrawBuffer(GL2GL3.GL_BACK_RIGHT);
         }
         return true;
     }
@@ -32,10 +35,10 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         if ( swapChannels == false ) {
-            gl.glDrawBuffer(gl.GL_BACK_RIGHT);
+            gl.glDrawBuffer(GL2GL3.GL_BACK_RIGHT);
         }
         else {
-            gl.glDrawBuffer(gl.GL_BACK_LEFT);
+            gl.glDrawBuffer(GL2GL3.GL_BACK_LEFT);
         }
         return true;
     }

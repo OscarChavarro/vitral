@@ -6,10 +6,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.RotateGizmo;
-import javax.media.opengl.GL2;
 
 public class JoglRotateGizmoRenderer extends JoglRenderer 
 {
@@ -39,7 +42,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         gl.glPushMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(1, 0, 0);
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 1, 0, 0);
             p = giro.multiply(agujay);
@@ -51,7 +54,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         gl.glPushMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(0, 1, 0);
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 0, 1, 0);
             p = giro.multiply(agujax);
@@ -63,7 +66,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         gl.glPushMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(0, 0, 1);
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 0, 0, 1);
             p = giro.multiply(agujax);

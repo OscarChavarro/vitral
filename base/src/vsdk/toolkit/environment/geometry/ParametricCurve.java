@@ -578,9 +578,9 @@ public class ParametricCurve extends Curve {
         Vector3D p;
 
         for ( i = 1; i < types.size(); i++ ) {
-            ArrayList polyline = calculatePoints(i, false);
+            ArrayList<Vector3D> polyline = calculatePoints(i, false);
             for ( j = 0; j < polyline.size(); j++ ) {
-                p = (Vector3D)polyline.get(j);
+                p = polyline.get(j);
                 if ( p.x < minmax[0] ) minmax[0] = p.x;
                 if ( p.y < minmax[1] ) minmax[1] = p.y;
                 if ( p.z < minmax[2] ) minmax[2] = p.z;
@@ -612,11 +612,11 @@ public class ParametricCurve extends Curve {
             }
 
             // Build a polyline for approximating the [i] curve segment
-            ArrayList polyline = calculatePoints(i, false);
+            ArrayList<Vector3D> polyline = calculatePoints(i, false);
 
             // Solve problem for the polyline
             for ( j = 0; j < polyline.size(); j++ ) {
-                vec = (Vector3D) polyline.get(j);
+                vec = polyline.get(j);
                 if ( VSDK.vectorDistance(vec, p) < distanceTolerance ) {
                     return LIMIT;
                 }

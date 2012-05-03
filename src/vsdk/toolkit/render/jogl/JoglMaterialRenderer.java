@@ -6,6 +6,8 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGprogram;
@@ -43,15 +45,15 @@ public class JoglMaterialRenderer extends JoglRenderer {
         if ( opacity > 1.0f ) opacity = 1.0f;
         if ( opacity < 0.0f ) opacity = 0.0f;
         if ( opacity < 1.0f - Float.MIN_VALUE ) {
-            gl.glEnable(gl.GL_BLEND);
-            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL.GL_BLEND);
+            gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
             disablingTransparency = true;
           }
           else {
             // Note: Transparency blending is not compatible with
             // blending technique for anaglyphs...
             if ( disablingTransparency ) {
-                gl.glDisable(gl.GL_BLEND);
+                gl.glDisable(GL.GL_BLEND);
             }
         }
 
@@ -66,18 +68,18 @@ public class JoglMaterialRenderer extends JoglRenderer {
         //emission[3] = opacity;
 
         if ( m.isDoubleSided() ) {
-            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glDisable(GL.GL_CULL_FACE);
           }
           else {
-            gl.glEnable(gl.GL_CULL_FACE);
-            gl.glCullFace(gl.GL_BACK);
+            gl.glEnable(GL.GL_CULL_FACE);
+            gl.glCullFace(GL.GL_BACK);
         }
 
-        gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_AMBIENT, ambient, 0);
-        gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE, diffuse, 0);
-        gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_SPECULAR, specular, 0);
-        //gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_EMISSION, emission, 0); // Do not set! take care!
-        gl.glMaterialf(gl.GL_FRONT_AND_BACK, gl.GL_SHININESS, phongExp);
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT, ambient, 0);
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_DIFFUSE, diffuse, 0);
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, specular, 0);
+        //gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_EMISSION, emission, 0); // Do not set! take care!
+        gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, phongExp);
     }
 
     public static void activateNvidiaGpuParameters(GL2 gl, Material material,

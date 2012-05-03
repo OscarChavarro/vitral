@@ -8,8 +8,10 @@
 
 package vsdk.toolkit.render.jogl;
 
-// JOGL clases
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGparameter;
 
@@ -72,8 +74,8 @@ public class JoglSphereRenderer extends JoglRenderer {
     */
     private static void drawVertexNormals(GL2 gl, double r, int slices, int stacks) {
         JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
 
 
@@ -82,7 +84,7 @@ public class JoglSphereRenderer extends JoglRenderer {
         Vector3D T = new Vector3D();
         Vector3D b = new Vector3D();
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         for( int i = 0; i < stacks; i++ ) {
             double t1 = i/(stacks-1.f);
             double phi1 = Math.PI*t1 - Math.PI/2;
@@ -114,14 +116,14 @@ public class JoglSphereRenderer extends JoglRenderer {
 
     private static void drawPoints(GL2 gl, double r, int slices, int stacks) {
         JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
 
         Vector3D p = new Vector3D();
 
-        gl.glBegin(gl.GL_POINTS);
+        gl.glBegin(GL.GL_POINTS);
         for( int i = 0; i < stacks; i++ ) {
             double t1 = i/(stacks-1.f);
             double phi1 = Math.PI*t1 - Math.PI/2;
@@ -205,7 +207,7 @@ public class JoglSphereRenderer extends JoglRenderer {
             phi1 = Math.PI*t1 - Math.PI/2;
             phi2 = Math.PI*t2 - Math.PI/2;
     
-            gl.glBegin(gl.GL_QUAD_STRIP);
+            gl.glBegin(GL2.GL_QUAD_STRIP);
             for( j = 0; j < slices; j++ ) {
                 s = j/(slices-1.f);
                 theta = 2*Math.PI*s;
@@ -223,7 +225,7 @@ public class JoglSphereRenderer extends JoglRenderer {
         phi1 = Math.PI*t1 - Math.PI/2;
         phi2 = Math.PI*t2 - Math.PI/2;
     
-        gl.glBegin(gl.GL_QUAD_STRIP);
+        gl.glBegin(GL2.GL_QUAD_STRIP);
         for( j = slices-1; j >= 0; j-- ) {
             s = j/(slices-1.f);
             theta = 2*Math.PI*s;
@@ -249,24 +251,24 @@ public class JoglSphereRenderer extends JoglRenderer {
         JoglGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             drawSphereElements(gl, s.getRadius(), slices, stacks);
         }
         if ( q.isWiresSet() ) {
             JoglRenderer.disableNvidiaCgProfiles();
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             gl.glColor3d(1, 1, 1);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             drawSphereElements(gl, s.getRadius(), slices, stacks);
         }

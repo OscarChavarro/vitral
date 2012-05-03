@@ -10,18 +10,20 @@ package vsdk.toolkit.render.jogl;
 // Java base classes
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-// JOGL clases
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGcontext;
 import com.jogamp.opengl.cg.CGprogram;
 import com.jogamp.opengl.cg.CGparameter;
-import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.GLBuffers;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -403,7 +405,7 @@ public abstract class JoglRenderer extends RenderingElement {
 
     public static boolean needCg(RendererConfiguration quality)
     {
-        if ( quality.getShadingType() != quality.SHADING_TYPE_PHONG ||
+        if ( quality.getShadingType() != RendererConfiguration.SHADING_TYPE_PHONG ||
              nvidiaCgErrorReported ) {
             return false;
         }
@@ -507,12 +509,13 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static FloatBuffer
     cloneDoubleArrayToFloatBuffer(double v[])
     {
-        FloatBuffer buffer;
+        FloatBuffer buffer = null;
         int i;
 
         //buffer = BufferUtil.newFloatBuffer(v.length);
         //buffer = ByteBuffer.allocateDirect(v.length*4).asFloatBuffer();
-        buffer = Buffers.newDirectFloatBuffer(v.length);
+        buffer = (FloatBuffer)GLBuffers.newDirectGLBuffer(GL.GL_FLOAT, v.length);
+
         for ( i = 0; i < v.length; i++ ) {
             buffer.put((float)v[i]);
         }
@@ -524,12 +527,13 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static FloatBuffer
     cloneDoubleArrayToInvertedFloatBuffer(double v[])
     {
-        FloatBuffer buffer;
+        FloatBuffer buffer = null;
         int i;
 
 	//buffer = BufferUtil.newFloatBuffer(v.length);
         //buffer = ByteBuffer.allocateDirect(v.length*4).asFloatBuffer();
-        buffer = Buffers.newDirectFloatBuffer(v.length);
+        buffer = (FloatBuffer)GLBuffers.newDirectGLBuffer(GL.GL_FLOAT, v.length);
+
         for ( i = 0; i < v.length; i++ ) {
             buffer.put((float)(v[i]*-1));
         }
@@ -541,12 +545,13 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static IntBuffer
     cloneIntArrayToIntBuffer(int v[])
     {
-        IntBuffer buffer;
+        IntBuffer buffer = null;
         int i;
 
         //buffer = BufferUtil.newIntBuffer(v.length);
         //buffer = ByteBuffer.allocateDirect(v.length*4).asIntBuffer();
-        buffer = Buffers.newDirectIntBuffer(v.length);
+        buffer = (IntBuffer)GLBuffers.newDirectGLBuffer(GL2.GL_INT, v.length);
+
         for ( i = 0; i < v.length; i++ ) {
             buffer.put(v[i]);
         }

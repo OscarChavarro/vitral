@@ -56,17 +56,17 @@ public class RendererConfigurationController extends Controller {
           break;
         case KeyEvent.KEY_F7:
           st = qualitySelection.getShadingType();
-          if ( st == qualitySelection.SHADING_TYPE_NOLIGHT ) {
-              st = qualitySelection.SHADING_TYPE_FLAT;
+          if ( st == RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
+              st = RendererConfiguration.SHADING_TYPE_FLAT;
             }
-            else if ( st == qualitySelection.SHADING_TYPE_FLAT ) {
-              st = qualitySelection.SHADING_TYPE_GOURAUD;
+            else if ( st == RendererConfiguration.SHADING_TYPE_FLAT ) {
+              st = RendererConfiguration.SHADING_TYPE_GOURAUD;
             }
-            else if ( st == qualitySelection.SHADING_TYPE_GOURAUD ) {
-              st = qualitySelection.SHADING_TYPE_PHONG;
+            else if ( st == RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+              st = RendererConfiguration.SHADING_TYPE_PHONG;
             }
             else {
-              st = qualitySelection.SHADING_TYPE_NOLIGHT;
+              st = RendererConfiguration.SHADING_TYPE_NOLIGHT;
             }
           ;
           qualitySelection.setShadingType(st);

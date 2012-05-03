@@ -15,7 +15,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 // JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
 // import javax.media.opengl.glu.GLU;
 import com.jogamp.opengl.util.texture.Texture;
@@ -64,13 +66,13 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         /*
         if ( (x_tam % 4) == 0 ) {
-            gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 4);
+            gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4);
           }
           else if ( (x_tam % 2) == 0 ) {
-            gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 2);
+            gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 2);
           }
           else {
-            gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
+            gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
         }
 
         if ( glu == null ) {
@@ -102,7 +104,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
             //----
             //gl.glGenTextures(1, lists, 0);
             //item.glList=lists[0];
-            //gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
+            //gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
 
             try {
 		GLProfile glprof;
@@ -115,8 +117,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
                    x_tam, // int width
                    y_tam, // int height
                    0, // int border
-                   gl.GL_RGB, // int pixelFormat
-                   gl.GL_UNSIGNED_BYTE, // int pixelType
+                   GL.GL_RGB, // int pixelFormat
+                   GL.GL_UNSIGNED_BYTE, // int pixelType
                    true, // boolean mipmap
                    false, // boolean dataIsCompressed
                    false, // boolean mustFlipVertically
@@ -124,16 +126,16 @@ public class JoglRGBImageRenderer extends JoglRenderer
                    null // TextureData.Flusher flusher
                 );
                 item.renderer = TextureIO.newTexture(textureData);
-                item.glList = item.renderer.getTextureObject();
+                item.glList = item.renderer.getTextureObject(gl);
             }
             catch ( Exception e ) {
                 System.err.println(e);
             }
             /*
-            //glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 3, x_tam, y_tam, gl.GL_RGB, 
-            //                  gl.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, gl.GL_RGB, 
-                            gl.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
+            //glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 3, x_tam, y_tam, GL.GL_RGB, 
+            //                  GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
+            gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, GL.GL_RGB, 
+                            GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
             */
         }
 
@@ -147,8 +149,8 @@ public class JoglRGBImageRenderer extends JoglRenderer
                 VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
                 return -1;
             }
-            item.renderer.bind();
-            item.renderer.enable();
+            item.renderer.bind(gl);
+            item.renderer.enable(gl);
 /*
           }
           else {
@@ -157,7 +159,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 */
         /*
         if ( item != null ) {
-            gl.glBindTexture(gl.GL_TEXTURE_2D, item.glList);
+            gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
         }
         */
         return item.glList;
@@ -203,7 +205,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
             for ( i = 0; i < compiledImages.size(); i++ ) {
                 item = compiledImages.get(i);
                 if ( item.image == img ) {
-                    item.renderer.disable();
+                    item.renderer.disable(gl);
                     return;
                 }
             }
@@ -223,7 +225,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
             for ( i = 0; i < compiledImages.size(); i++ ) {
                 item = compiledImages.get(i);
                 if ( item.image == img ) {
-                    item.renderer.disable();
+                    item.renderer.disable(gl);
                     //item.renderer.dispose();
                     item.renderer = null;
                     compiledImages.remove(i);
@@ -239,23 +241,23 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void draw(GL2 gl, RGBImage img)
     {
-        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1);
+        gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
         gl.glRasterPos2f(-1, -1);
         gl.glDrawPixels(img.getXSize(), img.getYSize(), 
-                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, 
+                        GL.GL_RGB, GL.GL_UNSIGNED_BYTE, 
                         img.getRawImageDirectBuffer());
     }
 
     public static ByteBuffer importJOGLimage(GL2 gl) {
         int[] view= new int[4];
         //IntBuffer vpBuffer = BufferUtils.newIntBuffer(16);
-        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
-        gl.glReadBuffer(gl.GL_FRONT_LEFT);
-        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE,
+        gl.glReadBuffer(GL2GL3.GL_FRONT_LEFT);
+        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
                         bb);
         gl.glFlush();
         return bb;
@@ -263,7 +265,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void getImageJOGL(GL2 gl, RGBImage image) {
         int[] view= new int[4];
-        gl.glGetIntegerv(gl.GL_VIEWPORT, view,0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
         int width = view[2], height = view[3];
 
         image.init(width, height);

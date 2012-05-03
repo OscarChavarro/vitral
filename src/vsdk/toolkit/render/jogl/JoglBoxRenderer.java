@@ -6,7 +6,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -26,7 +29,7 @@ public class JoglBoxRenderer extends JoglRenderer {
     {
         double l = 0.5;
 
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
             // Down
             gl.glNormal3d(0, 0, -1);
             gl.glTexCoord2d(0, 0);
@@ -108,11 +111,11 @@ public class JoglBoxRenderer extends JoglRenderer {
         Vector3D size = box.getSize();
 
         gl.glPushMatrix();
-        gl.glEnable(gl.GL_NORMALIZE);
+        gl.glEnable(GL2.GL_NORMALIZE);
         gl.glScaled(size.x, size.y, size.z);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             drawSolidUnitCube(gl);
         }
 

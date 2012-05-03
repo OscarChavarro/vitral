@@ -8,7 +8,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -60,13 +63,13 @@ public class JoglConeRenderer extends JoglRenderer {
         }
 
         if ( q.isSurfacesSet() ) {
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             drawParts(gl, cone);
         }
 
         if ( q.isWiresSet() ) {
             gl.glLineWidth(1);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
             drawParts(gl, cone);
         }
 

@@ -6,7 +6,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -56,43 +59,43 @@ public class JoglArrowRenderer extends JoglRenderer {
 
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             drawParts(gl, arrow);
         }
 
         if ( q.isWiresSet() ) {
             JoglRenderer.disableNvidiaCgProfiles();
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             gl.glColor3d(1, 1, 1);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             drawParts(gl, arrow);
         }
 
         if ( q.isPointsSet() ) {
             JoglRenderer.disableNvidiaCgProfiles();
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_POINTS);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_POINTS);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             gl.glColor3d(1, 1, 1);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             drawParts(gl, arrow);
         }

@@ -6,6 +6,8 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -19,7 +21,7 @@ public class JoglCalligraphic2DBufferRenderer extends JoglRenderer
         Vector3D p0 = new Vector3D();
         Vector3D p1 = new Vector3D();
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         for ( i = 0; i < vectors.getNumLines(); i++ ) {
             vectors.get2DLine(i, p0, p1);
             gl.glVertex3d(p0.x, p0.y, p0.z);

@@ -1,1 +1,2 @@
-dirname `which javac`
+#dirname `which javac`
+echo $JAVA_HOME/bin

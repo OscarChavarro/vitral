@@ -145,24 +145,24 @@ public class AwtFontReader extends FontReader
             if ( !endIt ) {
                 switch ( code ) {
                   case 0:
-                    curve.addPoint(null, curve.BREAK);
+                    curve.addPoint(null, ParametricCurve.BREAK);
 
                     pointParameters = new Vector3D[1];
                     pointParameters[0] = 
                         new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, curve.CORNER);
+                    curve.addPoint(pointParameters, ParametricCurve.CORNER);
                     break;
                   case 1:
                     pointParameters = new Vector3D[1];
                     pointParameters[0] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, curve.CORNER);
+                    curve.addPoint(pointParameters, ParametricCurve.CORNER);
                     break;
                   case 2:
                     pointParameters = new Vector3D[2];
                     // Note the inverse order of awt with respect to VSDK!
                     pointParameters[0] = new Vector3D(coords[2]/factor, -coords[3]/factor, 0);
                     pointParameters[1] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, curve.QUAD);
+                    curve.addPoint(pointParameters, ParametricCurve.QUAD);
                     break;
                   case 3:
                     //endIt = true;

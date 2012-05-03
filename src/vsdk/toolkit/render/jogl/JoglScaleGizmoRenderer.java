@@ -6,10 +6,13 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.ScaleGizmo;
-import javax.media.opengl.GL2;
 
 public class JoglScaleGizmoRenderer extends JoglRenderer 
 {
@@ -30,7 +33,7 @@ public class JoglScaleGizmoRenderer extends JoglRenderer
         gl.glPushMatrix();
         JoglMatrixRenderer.activate(gl, R);
         gl.glColor3d(1, 1, 0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(-0.2, -0.2, 0);
             gl.glVertex3d(0.2, 0.2, 0);
             gl.glVertex3d(-0.2, 0.2, 0);

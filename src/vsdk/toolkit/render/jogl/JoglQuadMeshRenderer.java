@@ -11,6 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 // JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 // VitralSDK classes
@@ -29,8 +30,8 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         double c[] = mesh.getVertexColors();
         int q[] = mesh.getQuadIndices();
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glBegin(GL2.GL_QUADS);
         for ( i = 0; i < mesh.getNumQuads(); i++ ) {
             p0 = q[4*i];
             p1 = q[4*i+1];
@@ -63,39 +64,39 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         vertexColorsBuffer = cloneDoubleArrayToFloatBuffer(c);
         quadIndicesBuffer = cloneIntArrayToIntBuffer(q);
 
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
 
         //-----------------------------------------------------------------
         int info[] = new int[2];
         int i;
         int block;
 
-        gl.glGetIntegerv(gl.GL_MAX_ELEMENTS_INDICES, info, 0);
+        gl.glGetIntegerv(GL2.GL_MAX_ELEMENTS_INDICES, info, 0);
         block = info[0];
 
-        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
-        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
-        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
-        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
-        gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
-        gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(gl.GL_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(GL2.GL_INDEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_FOG_COORD_ARRAY);
+        gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
 
-            gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
-            gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
+            gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertexPositionsBuffer);
+            gl.glColorPointer(3, GL.GL_FLOAT, 0, vertexColorsBuffer);
 
             for ( i = 0; i+block < q.length; i += block ) {
                 quadIndicesBuffer.position(i);
-                gl.glDrawElements(gl.GL_QUADS, block, gl.GL_UNSIGNED_INT, quadIndicesBuffer);
+                gl.glDrawElements(GL2.GL_QUADS, block, GL.GL_UNSIGNED_INT, quadIndicesBuffer);
             }
             if ( i < q.length ) {
                 quadIndicesBuffer.position(i);
-                gl.glDrawElements(gl.GL_QUADS, q.length-i, gl.GL_UNSIGNED_INT, quadIndicesBuffer);
+                gl.glDrawElements(GL2.GL_QUADS, q.length-i, GL.GL_UNSIGNED_INT, quadIndicesBuffer);
             }
 
-        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(gl.GL_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
         //-----------------------------------------------------------------
 
         vertexPositionsBuffer = null;

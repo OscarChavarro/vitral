@@ -2,7 +2,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCapabilities;
 
@@ -103,7 +106,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
     {
         if ( swapChannels  ) {
             if ( colorBlendMethod ) {
-                gl.glBlendFunc(gl.GL_ONE_MINUS_CONSTANT_COLOR, gl.GL_CONSTANT_COLOR);
+                gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
                 gl.glBlendColor((float)(1-rr), (float)(1-rg), (float)(1-rb), 1);
             }
             else {
@@ -112,7 +115,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
         }
         else {
             if ( colorBlendMethod ) {
-                gl.glBlendFunc(gl.GL_ONE_MINUS_CONSTANT_COLOR, gl.GL_CONSTANT_COLOR);
+                gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
                 gl.glBlendColor((float)(1-lr), (float)(1-lg), (float)(1-lb), 1);
             }
             else {
@@ -126,7 +129,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
     {
         if ( swapChannels  ) {
             if ( colorBlendMethod ) {
-                gl.glBlendFunc(gl.GL_ONE_MINUS_CONSTANT_COLOR, gl.GL_CONSTANT_COLOR);
+                gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
                 gl.glBlendColor((float)(1-lr), (float)(1-lg), (float)(1-lb), 1);
             }
             else {
@@ -135,7 +138,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
         }
         else {
             if ( colorBlendMethod ) {
-                gl.glBlendFunc(gl.GL_ONE_MINUS_CONSTANT_COLOR, gl.GL_CONSTANT_COLOR);
+                gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
                 gl.glBlendColor((float)(1-rr), (float)(1-rg), (float)(1-rb), 1);
             }
             else {
@@ -148,23 +151,23 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
     public void activateStereoMode(GL2 gl)
     {
         if ( colorBlendMethod ) {
-            gl.glEnable(gl.GL_BLEND);
-            gl.glEnable(gl.GL_BLEND_COLOR);
+            gl.glEnable(GL.GL_BLEND);
+            gl.glEnable(GL2ES2.GL_BLEND_COLOR);
         }
         else {
-            gl.glEnable(gl.GL_COLOR_WRITEMASK);
+            gl.glEnable(GL.GL_COLOR_WRITEMASK);
         }
     }
 
     public void deactivateStereoMode(GL2 gl)
     {
         if ( colorBlendMethod ) {
-            gl.glDisable(gl.GL_BLEND);
-            gl.glDisable(gl.GL_BLEND_COLOR);
+            gl.glDisable(GL.GL_BLEND);
+            gl.glDisable(GL2ES2.GL_BLEND_COLOR);
         }
         else {
             gl.glColorMask(true, true, true, true);
-            gl.glDisable(gl.GL_COLOR_WRITEMASK);
+            gl.glDisable(GL.GL_COLOR_WRITEMASK);
         }
     }
 

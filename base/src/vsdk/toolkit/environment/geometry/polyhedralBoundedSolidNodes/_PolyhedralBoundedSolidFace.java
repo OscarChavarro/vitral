@@ -455,7 +455,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         int i;
         Vector3D p;
 
-        if ( c.getProjectionMode() == c.PROJECTION_MODE_ORTHOGONAL ) {
+        if ( c.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
             viewingVector.normalize();
             dot = n.dotProduct(viewingVector);
             if ( dot > VSDK.EPSILON ) {

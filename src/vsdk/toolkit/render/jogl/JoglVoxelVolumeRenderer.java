@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.render.jogl;
 
-// JOGL clases
+// JOGL classes
 import javax.media.opengl.GL2;
 
 // VitralSDK classes

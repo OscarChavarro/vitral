@@ -24,3 +24,4 @@ Following a list of detected BUGS.
       normal map.
     . Display lists freezes CG parameters to the values valid only for
       object when compiling the list, making object inalterable.
+

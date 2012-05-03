@@ -93,17 +93,21 @@ double csecond( )
 	struct tms buf;
     static struct tms buf0;			/* times structure */
     static int firstcall=1;
+#ifdef WALLCLOCK
     clock_t  rv;
     static clock_t rv0;
+#endif
 
     if (firstcall) {
        firstcall=0;
+#ifdef WALLCLOCK
        rv0=times(&buf0);
+#endif
     }
 
+#ifdef WALLCLOCK
     rv=times(&buf);
     /*    if ( rv < 0 ) {fprintf( stderr, "csecond failed  %d \n",rv ); } */
-#ifdef WALLCLOCK
     return( (double) (rv-rv0) / (double)DIVIDER );
 #else
     return( (double)( (buf.tms_utime + buf.tms_stime + buf.tms_cutime + buf.tms_cstime) -

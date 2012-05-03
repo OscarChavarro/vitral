@@ -361,7 +361,7 @@ public class TranslateGizmo extends Gizmo {
         boolean jPar;
         boolean kPar;
 
-        orthogonalCamera = (camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL);
+        orthogonalCamera = (camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL);
         iPar = (Math.abs(front.dotProduct(axisI)) > 1.0-VSDK.EPSILON);
         jPar = (Math.abs(front.dotProduct(axisJ)) > 1.0-VSDK.EPSILON);
         kPar = (Math.abs(front.dotProduct(axisK)) > 1.0-VSDK.EPSILON);
@@ -728,7 +728,7 @@ public class TranslateGizmo extends Gizmo {
                                R, selectedResizing, aparentSizeInPixels, 
                                camera);
 
-        if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
+        if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
             switch ( unicode_id ) {
               // Position
               case 'x':

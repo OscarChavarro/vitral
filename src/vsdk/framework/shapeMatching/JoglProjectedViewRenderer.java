@@ -10,6 +10,7 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 // VSDK Classes
@@ -47,7 +48,7 @@ public class JoglProjectedViewRenderer extends Component {
         quality.setSurfaces(true);
         camera = new Camera();
         camera.setFov(90);
-        camera.setProjectionMode(camera.PROJECTION_MODE_ORTHOGONAL);
+        camera.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera.setNearPlaneDistance(2);
         camera.setFarPlaneDistance(20);
         isTransparent = transparent;
@@ -170,17 +171,17 @@ public class JoglProjectedViewRenderer extends Component {
 
         //-----------------------------------------------------------------
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL.GL_DEPTH_TEST);
         JoglCameraRenderer.activate(gl, camera);
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
         if ( bodies == null ) {
             gl.glColor3d(1, 1, 1); 
-            gl.glBegin(gl.GL_LINES);
+            gl.glBegin(GL.GL_LINES);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(0.5, 0.5, 0);
             gl.glEnd();

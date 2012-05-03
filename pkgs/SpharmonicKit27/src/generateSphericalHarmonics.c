@@ -9,6 +9,8 @@
 
 #define MAX_LINE 1024
 
+static size_t dummy;
+
 void
 importPPM(const char *filename, double *data, int size)
 {
@@ -31,7 +33,6 @@ importPPM(const char *filename, double *data, int size)
     }
 
     /*- Lea y procese el encabezado ppm ----------------------------------*/
-    size_t dummy;
     for ( i = 0; !feof(fd); i++ ) {
         if ( i >= MAX_LINE ) i = 0;
         dummy = fread(&buffer[i], sizeof(unsigned char), 1, fd);

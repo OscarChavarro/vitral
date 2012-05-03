@@ -58,7 +58,7 @@ public class RotateGizmo extends Gizmo {
       left = new Vector3D(1, 0, 0);
       left.normalize();
 
-      if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
+      if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
             switch ( unicode_id ) {
               // Position
               case 'x':

@@ -8,7 +8,12 @@
 package vsdk.toolkit.render.jogl;
 
 import java.nio.FloatBuffer;
+
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL2GL3;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.ZBuffer;
@@ -17,13 +22,13 @@ public class JoglZBufferRenderer extends JoglRenderer
 {
     public static byte[] importZBuffer(GL2 gl) {
         int[] view = new int[4];
-        gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];
         byte[] data = new byte[4 * width * height];
         FloatBuffer bb = FloatBuffer.allocate(width * height);
 
-        gl.glReadPixels( -1, -1, width, height, gl.GL_DEPTH_COMPONENT,
-                        gl.GL_FLOAT, bb);
+        gl.glReadPixels( -1, -1, width, height, GL2ES2.GL_DEPTH_COMPONENT,
+                        GL.GL_FLOAT, bb);
         gl.glFlush();
 
         int pos = 0;
@@ -42,14 +47,14 @@ public class JoglZBufferRenderer extends JoglRenderer
 
     public static ZBuffer importJOGLZBuffer(GL2 gl) {
         int[] view = new int[4];
-        gl.glGetIntegerv(gl.GL_VIEWPORT, view, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
         int width = view[2], height = view[3];
         FloatBuffer bb = FloatBuffer.allocate(width * height);
 
-        gl.glReadBuffer(gl.GL_FRONT_LEFT);
-        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
-        gl.glReadPixels( -1, -1, width, height, gl.GL_DEPTH_COMPONENT,
-                        gl.GL_FLOAT, bb);
+        gl.glReadBuffer(GL2GL3.GL_FRONT_LEFT);
+        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels( -1, -1, width, height, GL2ES2.GL_DEPTH_COMPONENT,
+                        GL.GL_FLOAT, bb);
         gl.glFlush();
 
         ZBuffer result = new ZBuffer(width, height);

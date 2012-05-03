@@ -2,7 +2,11 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES1;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -61,20 +65,20 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
 
     private void drawTexturedQuad(GL2 gl, double minx, double miny, double maxx, double maxy)
     {
-        gl.glPolygonMode(gl.GL_FRONT, gl.GL_FILL);
-        gl.glPolygonMode(gl.GL_BACK, gl.GL_LINE);
-        gl.glShadeModel(gl.GL_FLAT);
-        gl.glEnable(gl.GL_TEXTURE_2D);
+        gl.glPolygonMode(GL.GL_FRONT, GL2GL3.GL_FILL);
+        gl.glPolygonMode(GL.GL_BACK, GL2GL3.GL_LINE);
+        gl.glShadeModel(GL2.GL_FLAT);
+        gl.glEnable(GL.GL_TEXTURE_2D);
 
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
-        gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2ES1.GL_DECAL);
 
         gl.glColor3d(1, 1, 1);
         gl.glNormal3d(0, 0, 1);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
             gl.glTexCoord2d(0, 0);
             gl.glVertex3d(minx, miny, 0);
 
@@ -87,7 +91,7 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
             gl.glTexCoord2d(0, 1);
             gl.glVertex3d(minx, maxy, 0);
         gl.glEnd();
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL.GL_TEXTURE_2D);
     }
 
     private void drawResultSideBySide(GL2 gl, RGBImage a, RGBImage b)

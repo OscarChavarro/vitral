@@ -15,7 +15,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 // JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -58,7 +60,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             withTextures = true;
         }
 
-        gl.glEnable(gl.GL_NORMALIZE);
+        gl.glEnable(GL2.GL_NORMALIZE);
 
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
@@ -70,12 +72,12 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             // This line doesn't make sense (as it will later reactivated),
             // but it is needed in some graphics cards/driver/os combinations
             // like AMD Athlon64 running 32 bit Fedora Core 6 with Nvidia C51
-            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHTING);
             //
 
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
@@ -86,18 +88,18 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             }
         }
         if ( quality.isWiresSet() ) {
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             ColorRgb c = quality.getWireColor();
             gl.glColor3d(c.r, c.g, c.b);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             // Warning: pending definition of this behavior...
             drawSurfacesWithoutTexture(gl, mesh, flip);
@@ -176,7 +178,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             withTextures = true;
         }
 
-        gl.glEnable(gl.GL_NORMALIZE);
+        gl.glEnable(GL2.GL_NORMALIZE);
 
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
@@ -188,12 +190,12 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             // This line doesn't make sense (as it will later reactivated),
             // but it is needed in some graphics cards/driver/os combinations
             // like AMD Athlon64 running 32 bit Fedora Core 6 with Nvidia C51
-            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHTING);
             //
 
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
@@ -204,18 +206,18 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             }
         }
         if ( quality.isWiresSet() ) {
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-            gl.glDisable(gl.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
             ColorRgb c = quality.getWireColor();
             gl.glColor3d(c.r, c.g, c.b);
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
 
             // Warning: pending definition of this behavior...
             drawSurfacesWithoutTextureWithVertexArrays(gl, mesh, flip);
@@ -249,8 +251,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
     private static void drawPoints(GL2 gl, TriangleMesh mesh) {
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
@@ -264,7 +266,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         nv = mesh.getNumVertices();
         v = mesh.getVertexPositions();
 
-        gl.glBegin(gl.GL_POINTS);
+        gl.glBegin(GL.GL_POINTS);
         for ( i = 0; i < nv; i++ ) {
             gl.glVertex3d(v[3*i], v[3*i+1], v[3*i+2]);
         }
@@ -272,22 +274,22 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         // New method
 /*
-        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
-            gl.glVertexPointer(3, gl.GL_DOUBLE, 0, allocateVertexPositions(mesh.getVertexPositions()));
-        gl.glDrawArrays(gl.GL_POINTS, 0, mesh.getNumVertices());
-        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+            gl.glVertexPointer(3, GL.GL_DOUBLE, 0, allocateVertexPositions(mesh.getVertexPositions()));
+        gl.glDrawArrays(GL.GL_POINTS, 0, mesh.getNumVertices());
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 */
         //-----------------------------------------------------------------
     }
 
     private static void drawVertexNormals(GL2 gl, TriangleMesh mesh) {
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for vertex normals
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         Vertex vertex = new Vertex(new Vector3D(), new Vector3D());
         int i;
         for ( i = 0; i < mesh.getNumVertices(); i++ ) {
@@ -300,13 +302,13 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     private static void drawTriangleNormals(GL2 gl, TriangleMesh m) {
         double l = 0.15;
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for surface normals
         gl.glColor3d(0.9, 0.9, 0.5);
         gl.glLineWidth(2.0f);
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         double cx, cy, cz;
         double v[];
         double n[];
@@ -462,23 +464,23 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             }
             if ( currentTextureIndex != previousTextureIndex ) {
                 if ( currentTextureIndex >= 0 ) {
-                    gl.glEnable(gl.GL_TEXTURE_2D);
+                    gl.glEnable(GL.GL_TEXTURE_2D);
                     JoglImageRenderer.activate(gl,
                         texturesArray[currentTextureIndex]);
                     // Warning: Shoult this be here? or not ...
-                    //gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                    //    gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-                    //gl.glTexParameteri(gl.GL_TEXTURE_2D,
-                    //    gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-                    //gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                    //    gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-                    //gl.glTexParameterf(gl.GL_TEXTURE_2D,
-                    //    gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
-                    //gl.glTexEnvf(gl.GL_TEXTURE_ENV,
-                    //    gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+                    //gl.glTexParameteri(GL.GL_TEXTURE_2D,
+                    //    GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+                    //gl.glTexParameteri(GL.GL_TEXTURE_2D,
+                    //    GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+                    //gl.glTexParameterf(GL.GL_TEXTURE_2D,
+                    //    GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
+                    //gl.glTexParameterf(GL.GL_TEXTURE_2D,
+                    //    GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT);
+                    //gl.glTexEnvf(GL2.GL_TEXTURE_ENV,
+                    //    GL2.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
                 }
                 else {
-                    gl.glDisable(gl.GL_TEXTURE_2D);
+                    gl.glDisable(GL.GL_TEXTURE_2D);
                 }
                 previousTextureIndex = currentTextureIndex;
             }
@@ -513,7 +515,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         Vertex v0, v1, v2;
         int t[];
 
-        gl.glBegin(gl.GL_TRIANGLES);
+        gl.glBegin(GL.GL_TRIANGLES);
         v0 = new Vertex(new Vector3D(), new Vector3D());
         v1 = new Vertex(new Vector3D(), new Vector3D());
         v2 = new Vertex(new Vector3D(), new Vector3D());
@@ -560,7 +562,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         Vertex v0, v1, v2;
         int t[];
 
-        gl.glBegin(gl.GL_TRIANGLES);
+        gl.glBegin(GL.GL_TRIANGLES);
         v0 = new Vertex(new Vector3D(), new Vector3D());
         v1 = new Vertex(new Vector3D(), new Vector3D());
         v2 = new Vertex(new Vector3D(), new Vector3D());
@@ -612,57 +614,57 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         }
 
         //-----------------------------------------------------------------
-        gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
-        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
-        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
-        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(GL2.GL_INDEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_FOG_COORD_ARRAY);
         if ( vertexNormalsBuffer == null ) {
-            gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
+            gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
         }
         else {
-            gl.glEnableClientState(gl.GL_NORMAL_ARRAY);
+            gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
         }
         if ( vertexColorsBuffer == null ) {
-            gl.glDisableClientState(gl.GL_COLOR_ARRAY);
+            gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
         }
         else {
-            gl.glEnableClientState(gl.GL_COLOR_ARRAY);
+            gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
         }
         if ( vertexUvsBuffer == null || !withTexture ) {
-            gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
+            gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         }
         else {
-            gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
+            gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         }
 
-        gl.glVertexPointer(3, gl.GL_FLOAT, 0, vertexPositionsBuffer);
+        gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertexPositionsBuffer);
 
         if ( vertexNormalsBuffer != null ) {
-            gl.glNormalPointer(gl.GL_FLOAT, 0, vertexNormalsBuffer);
+            gl.glNormalPointer(GL.GL_FLOAT, 0, vertexNormalsBuffer);
         }
 
         if ( vertexColorsBuffer != null ) {
             if ( vertexNormalsBuffer == null ) {
-                gl.glDisable(gl.GL_LIGHTING);
-                gl.glDisable(gl.GL_COLOR_MATERIAL);
+                gl.glDisable(GL2.GL_LIGHTING);
+                gl.glDisable(GL2.GL_COLOR_MATERIAL);
             }
             else {
-                gl.glEnable(gl.GL_COLOR_MATERIAL);
-                gl.glColorMaterial(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE);
+                gl.glEnable(GL2.GL_COLOR_MATERIAL);
+                gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL2.GL_DIFFUSE);
             }
-            gl.glColorPointer(3, gl.GL_FLOAT, 0, vertexColorsBuffer);
+            gl.glColorPointer(3, GL.GL_FLOAT, 0, vertexColorsBuffer);
         }
 
         if ( vertexUvsBuffer != null && withTexture ) {
-            gl.glTexCoordPointer(2, gl.GL_FLOAT, 0, vertexUvsBuffer);
+            gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, vertexUvsBuffer);
         }
 
         //-----------------------------------------------------------------
         int info[] = new int[2];
         int block;
 
-        gl.glGetIntegerv(gl.GL_MAX_ELEMENTS_INDICES, info, 0);
+        gl.glGetIntegerv(GL2GL3.GL_MAX_ELEMENTS_INDICES, info, 0);
         block = info[0] / 3;
 
         //-----------------------------------------------------------------
@@ -670,22 +672,22 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         int i = start;
         for ( i = start; i+block < end; i += block ) {
             triangleIndicesBuffer.position(3*i);
-            gl.glDrawElements(gl.GL_TRIANGLES, 3*block, gl.GL_UNSIGNED_INT, triangleIndicesBuffer);
+            gl.glDrawElements(GL.GL_TRIANGLES, 3*block, GL.GL_UNSIGNED_INT, triangleIndicesBuffer);
         }
         if ( i < end ) {
             triangleIndicesBuffer.position(3*i);
-            gl.glDrawElements(gl.GL_TRIANGLES, 3*(end-i), gl.GL_UNSIGNED_INT, triangleIndicesBuffer);
+            gl.glDrawElements(GL.GL_TRIANGLES, 3*(end-i), GL.GL_UNSIGNED_INT, triangleIndicesBuffer);
         }
 
         //-----------------------------------------------------------------
-        gl.glDisableClientState(gl.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(gl.GL_EDGE_FLAG_ARRAY);
-        gl.glDisableClientState(gl.GL_INDEX_ARRAY);
-        gl.glDisableClientState(gl.GL_SECONDARY_COLOR_ARRAY);
-        gl.glDisableClientState(gl.GL_FOG_COORD_ARRAY);
-        gl.glDisableClientState(gl.GL_NORMAL_ARRAY);
-        gl.glDisableClientState(gl.GL_COLOR_ARRAY);
-        gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_EDGE_FLAG_ARRAY);
+        gl.glDisableClientState(GL2.GL_INDEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_SECONDARY_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_FOG_COORD_ARRAY);
+        gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+        gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     }
 
 }

@@ -2,6 +2,8 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCapabilities;
@@ -42,7 +44,7 @@ public class JoglStereoStrategyMultiviewRenderer extends JoglStereoStrategyRende
 
     public void activateStereoMode(GL2 gl)
     {
-        gl.glGetIntegerv(gl.GL_VIEWPORT, viewport, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
     }
 
     public void deactivateStereoMode(GL2 gl)

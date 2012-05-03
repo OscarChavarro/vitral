@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-// JOGL clases
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES1;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -188,27 +190,27 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         if ( q.isTextureSet() ) {
             // Define texture parameters, including for further local
             // textures activated within JoglGeometryRenderers
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
-                gl.GL_TRUE);
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
-                gl.GL_LINEAR_MIPMAP_LINEAR);
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
-                gl.GL_LINEAR);
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
-                gl.GL_CLAMP_TO_EDGE);
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
-                gl.GL_CLAMP_TO_EDGE);
-            gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE,
-                gl.GL_MODULATE);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
+                GL.GL_TRUE);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
+                GL.GL_LINEAR_MIPMAP_LINEAR);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
+                GL.GL_LINEAR);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
+                GL.GL_CLAMP_TO_EDGE);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
+                GL.GL_CLAMP_TO_EDGE);
+            gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE,
+                GL2ES1.GL_MODULATE);
 
             // Activate global texture
             if ( (texture != null) ) {
-                gl.glEnable(gl.GL_TEXTURE_2D);
+                gl.glEnable(GL.GL_TEXTURE_2D);
                 JoglImageRenderer.activate(gl, texture);
-	    }
+            }
         }
         else {
-            gl.glDisable(gl.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_TEXTURE_2D);
         }
 
         //-----------------------------------------------------------------
@@ -243,7 +245,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             }
             else {
                 id = createDisplayListId(gl, b.getGeometry(), q);
-                gl.glNewList(id, gl.GL_COMPILE);
+                gl.glNewList(id, GL2.GL_COMPILE);
                 JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
@@ -284,7 +286,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             }
             else {
                 id = createDisplayListId(gl, b.getGeometry(), q);
-                gl.glNewList(id, gl.GL_COMPILE);
+                gl.glNewList(id, GL2.GL_COMPILE);
                 JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {

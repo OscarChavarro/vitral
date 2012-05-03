@@ -44,7 +44,7 @@ public class ScaleGizmo extends Gizmo {
 
       Vector3D s = new Vector3D(T.M[0][0], T.M[1][1], T.M[2][2]);
 
-      if ( unicode_id != keyEvent.CHAR_UNDEFINED ) {
+      if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
             switch ( unicode_id ) {
               // Position
               case 'x':

@@ -823,12 +823,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
             c.isWide = false;
             c.position = new Vector3D((he.next()).startingVertex.position);
-            c.situation = c.UNDEFINED;
+            c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
             c.referencePlane = referencePlane;
             neighborSectorsInfo.add(c);
             if ( checkWideness(he) ) {
                 bisect = inside(he).add(vtx.position);
-                c.situation = c.CROSSING_EDGE;
+                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
 
                 c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
                 c.sector = he;
@@ -836,7 +836,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
                 c.isWide = true;
                 c.position = new Vector3D(bisect);
-                c.situation = c.CROSSING_EDGE;
+                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
                 c.referencePlane = referencePlane;
                 neighborSectorsInfo.add(c);
             }
@@ -849,8 +849,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
             c = neighborSectorsInfo.get(i);
-            if ( c.cl == c.ON && c.situation == c.UNDEFINED ) {
-                c.situation = c.INPLANE_EDGE;
+            if ( c.cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.ON && c.situation == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED ) {
+                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.INPLANE_EDGE;
             }
         }
 
@@ -903,27 +903,27 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
                     // Identical
                     if ( BvsA != 0 ) {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                     else {
-                        nbr.get(i).cl = (op == UNION)?ni.OUT:ni.IN;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.OUT:ni.IN;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     }
                 }
                 else {
                     // Opposite
                     if ( BvsA != 0 ) {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                     else {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                 }
             }
@@ -935,7 +935,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int outs = 0;
 
         for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == ni.OUT ) {
+            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 outs++;
             }
             else {
@@ -1000,27 +1000,27 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
                     // Identical
                     if ( BvsA != 0 ) {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                     else {
-                        nbr.get(i).cl = (op == UNION)?ni.OUT:ni.IN;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.OUT:ni.IN;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     }
                 }
                 else {
                     // Opposite
                     if ( BvsA != 0 ) {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                     else {
-                        nbr.get(i).cl = (op == UNION)?ni.IN:ni.OUT;
+                        nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                         nbr.get((i+1)%nnbr).cl =
-                            (op == UNION)?ni.IN:ni.OUT;
+                            (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                 }
             }
@@ -1032,7 +1032,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int outs = 0;
 
         for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == ni.OUT ) {
+            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 outs++;
             }
             else {
@@ -1063,7 +1063,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int i;
 
         for ( i = 0; i < nbr.size(); i++ ) {
-            if ( nbr.get(i).situation == nbr.get(i).INPLANE_EDGE ) return true;
+            if ( nbr.get(i).situation == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.INPLANE_EDGE ) return true;
         }
         return false;
     }
@@ -1114,22 +1114,22 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         ni = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector();
 
         for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == ni.ON ) {
-                if ( nbr.get((nnbr+i-1)%nnbr).cl == ni.IN ) {
-                    if ( nbr.get((i+1)%nnbr).cl == ni.IN ) {
-                        nbr.get(i).cl = ni.IN;
+            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
+                if ( nbr.get((nnbr+i-1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
+                    if ( nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     }
                     else {
-                        nbr.get(i).cl = ni.IN;
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     }
                 }
                 else {
                     // OUT 
-                    if ( nbr.get((i+1)%nnbr).cl == ni.IN ) {
-                        nbr.get(i).cl = ni.IN;
+                    if ( nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     }
                     else {
-                        nbr.get(i).cl = ni.OUT;
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                     }
                 }
             }
@@ -1185,9 +1185,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         //- Locate the head of an ABOVE-sequence --------------------------
         i = 0;
-        while ( !( (nbr.get(i).cl == n.AinB || nbr.get(i).cl == n.BinA) &&
-                   ((nbr.get( (i+1)%nnbr ).cl == n.AoutB) ||
-                     nbr.get( (i+1)%nnbr ).cl == n.BoutA))  ) {
+        while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
+                   ((nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB) ||
+                     nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA))  ) {
             i++;
             if ( i >= nnbr ) {
                 //System.out.println("**** EMPTY CASE!");
@@ -1200,9 +1200,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         //-----------------------------------------------------------------
         while ( true ) {
             //- Locate the final sector of the sequence ------------------
-            while ( !( (nbr.get(i).cl == n.AoutB || nbr.get(i).cl == n.BoutA) &&
-                       (nbr.get( (i+1)%nnbr ).cl == n.AinB ||
-                        nbr.get( (i+1)%nnbr ).cl == n.BinA) ) ) {
+            while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA) &&
+                       (nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB ||
+                        nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) ) ) {
                 i = (i+1) % nnbr;
             }
             tail = nbr.get(i).sector;
@@ -1235,9 +1235,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             makering(f, v, BvsA, inSolidA, inSolidB);
 
             //- Locate the start of the next sequence --------------------
-            while ( !( (nbr.get(i).cl == n.AinB || nbr.get(i).cl == n.BinA) &&
-                       ((nbr.get( (i+1) % nnbr ).cl == n.AoutB ||
-                         nbr.get( (i+1) % nnbr ).cl == n.BoutA)) ) ) {
+            while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
+                       ((nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB ||
+                         nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA)) ) ) {
                 i = (i+1) % nnbr;
                 if ( i == start ) {
                     return;
@@ -1272,8 +1272,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         //- Locate the head of an ABOVE-sequence --------------------------
         i = 0;
-        while ( !( nbr.get(i).cl == ni.IN &&
-                   nbr.get((i+1)%nnbr).cl == ni.OUT ) ) {
+        while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN &&
+                   nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) ) {
             i++;
             if ( i >= nnbr ) {
                 //System.out.println("**** EMPTY CASE!");
@@ -1286,8 +1286,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         //-----------------------------------------------------------------
         while ( true ) {
             //- Locate the final sector of the sequence ------------------
-            while ( !( nbr.get(i).cl == ni.OUT &&
-                       nbr.get((i+1)%nnbr).cl == ni.IN ) ) {
+            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT &&
+                       nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) ) {
                 i = (i+1) % nnbr;
             }
             tail = nbr.get(i).sector;
@@ -1313,8 +1313,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             makering(f, v, BvsA, inSolidA, inSolidB);
 
             //- Locate the start of the next sequence --------------------
-            while ( !( nbr.get(i).cl == ni.IN &&
-                       nbr.get((i+1)%nnbr).cl == ni.OUT ) ) {
+            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN &&
+                       nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) ) {
                 i = (i+1) % nnbr;
                 if ( i == start ) {
                     return;
@@ -1845,10 +1845,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si, sj;
 
         for ( i = 0; i < sectors.size(); i++ ) {
-            if ( sectors.get(i).s1a == sectors.get(i).ON &&
-                 sectors.get(i).s2a == sectors.get(i).ON &&
-                 sectors.get(i).s1b == sectors.get(i).ON &&
-                 sectors.get(i).s2b == sectors.get(i).ON ) {
+            if ( sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
+                 sectors.get(i).s2a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
+                 sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
+                 sectors.get(i).s2b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                 // This condition means: "current sectors are coplanar"
 
                 // Determine orientation for current sector pair
@@ -1865,12 +1865,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 d = VSDK.vectorDistance(n1, n2);
                 nonopposite = ( d < VSDK.EPSILON );
                 if ( nonopposite ) {
-                    newsa = (op == UNION)?sectors.get(i).OUT:sectors.get(i).IN;
-                    newsb = (op == UNION)?sectors.get(i).IN:sectors.get(i).OUT;
+                    newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                    newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                 }
                 else {
-                    newsa = (op == UNION)?sectors.get(i).IN:sectors.get(i).OUT;
-                    newsb = (op == UNION)?sectors.get(i).IN:sectors.get(i).OUT;
+                    newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                    newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                 }
                 si = sectors.get(i);
 
@@ -1878,31 +1878,31 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 for ( j = 0; j < sectors.size(); j++ ) {
                     sj = sectors.get(j);
                     if ( (sj.secta == prevsecta) && (sj.sectb == sectb) ) {
-                        if ( sj.s1a != si.ON ) {
+                        if ( sj.s1a != _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                             sj.s2a = newsa;
                         }
                     }
                     if ( (sj.secta == nextsecta) && (sj.sectb == sectb) ) {
-                        if ( sj.s2a != si.ON ) {
+                        if ( sj.s2a != _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                             sj.s1a = newsa;
                         }
                     }
                     if ( (sj.secta == secta) && (sj.sectb == prevsectb) ) {
-                        if ( sj.s1b != si.ON ) {
+                        if ( sj.s1b != _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                             sj.s2b = newsb;
                         }
                     }
                     if ( (sj.secta == secta) && (sj.sectb == nextsectb) ) {
-                        if ( sj.s2b != si.ON ) {
+                        if ( sj.s2b != _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                             sj.s1b = newsb;
                         }
                     }
                     if ( (sj.s1a == sj.s2a) && 
-                         (sj.s1a == si.IN || sj.s1a == si.OUT) ) {
+                         (sj.s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN || sj.s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                         sj.intersect = false;
                     }
                     if ( (sj.s1b == sj.s2b) && 
-                         (sj.s1b == si.IN || sj.s1b == si.OUT) ) {
+                         (sj.s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN || sj.s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                         sj.intersect = false;
                     }
                 }
@@ -1977,11 +1977,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         for ( i = 0; i < sectors.size(); i++ ) {
             // Double "on"-edge ?
             if ( sectors.get(i).intersect &&
-                 sectors.get(i).s1a == sectors.get(i).ON &&
-                 sectors.get(i).s1b == sectors.get(i).ON ) {
+                 sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
+                 sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                 // Figure out the new classifications for the "on"-edges
-                newsa = (op == UNION)?sectors.get(i).OUT:sectors.get(i).IN;
-                newsb = (op == UNION)?sectors.get(i).IN:sectors.get(i).OUT;
+                newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
 
                 secta = sectors.get(i).secta;
                 sectb = sectors.get(i).sectb;
@@ -2016,13 +2016,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                         }
 
                         if ( sectors.get(j).s1a == sectors.get(j).s2a &&
-                            (sectors.get(j).s1a == sectors.get(j).IN ||
-                             sectors.get(j).s1a == sectors.get(j).OUT) ) {
+                            (sectors.get(j).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ||
+                             sectors.get(j).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                             sectors.get(j).intersect = false;
                         }
                         if ( sectors.get(j).s1b == sectors.get(j).s2b &&
-                             (sectors.get(j).s1b == sectors.get(j).IN ||
-                            sectors.get(j).s1b == sectors.get(j).OUT) ) {
+                             (sectors.get(j).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ||
+                            sectors.get(j).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                             sectors.get(j).intersect = false;
                         }
                     }
@@ -2032,12 +2032,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         // Search for singly coplanar edges
         for ( i = 0; i < sectors.size(); i++ ) {
-            if ( sectors.get(i).intersect && sectors.get(i).s1a == sectors.get(i).ON ) {
+            if ( sectors.get(i).intersect && sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                 secta = sectors.get(i).secta;
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0)?nba.size()-1:secta-1;
                 prevsectb = (sectb == 0)?nbb.size()-1:sectb-1;
-                newsa = (op == UNION)?sectors.get(i).OUT:sectors.get(i).IN;
+                newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
 
                 for ( j = 0; j < sectors.size(); j++ ) {
                     if ( sectors.get(j).intersect ) {
@@ -2052,19 +2052,19 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                         }
 
                         if ( sectors.get(j).s1a == sectors.get(j).s2a &&
-                             (sectors.get(j).s1a == sectors.get(j).IN ||
-                              sectors.get(j).s1a == sectors.get(j).OUT) ) {
+                             (sectors.get(j).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ||
+                              sectors.get(j).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                             sectors.get(j).intersect = false;
                         }
                     }
                 }
             }
-            else if ( sectors.get(i).intersect && sectors.get(i).s1b == sectors.get(i).ON ) {
+            else if ( sectors.get(i).intersect && sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
                 secta = sectors.get(i).secta;
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0)?nba.size()-1:secta-1;
                 prevsectb = (sectb == 0)?nbb.size()-1:sectb-1;
-                newsb = (op == UNION)?sectors.get(i).OUT:sectors.get(i).IN;
+                newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
 
                 for ( j=0; j < sectors.size(); j++ ) {
                     if ( sectors.get(j).intersect ) {
@@ -2079,8 +2079,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                         }
 
                         if ( sectors.get(j).s1b == sectors.get(j).s2b &&
-                             (sectors.get(j).s1b == sectors.get(j).IN ||
-                              sectors.get(j).s1b == sectors.get(j).OUT) ) {
+                             (sectors.get(j).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ||
+                              sectors.get(j).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT) ) {
                             sectors.get(j).intersect = false;
                         }
                     }
@@ -2374,13 +2374,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                     return;
                 }
             }
-            if ( sectors.get(i).s1a == sectors.get(i).OUT ) {
+            if ( sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = nba.get(sectors.get(i).secta).he;
             }
             else {
                 ha2 = nba.get(sectors.get(i).secta).he;
             }
-            if ( sectors.get(i).s1b == sectors.get(i).IN ) {
+            if ( sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
                 hb1 = nbb.get(sectors.get(i).sectb).he;
                 i++;
             }
@@ -2396,13 +2396,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                     return;
                 }
             }
-            if ( sectors.get(i).s1a == sectors.get(i).OUT ) {
+            if ( sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = nba.get(sectors.get(i).secta).he;
             }
             else {
                 ha2 = nba.get(sectors.get(i).secta).he;
             }
-            if ( sectors.get(i).s1b == sectors.get(i).IN ) {
+            if ( sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
                 hb1 = nbb.get(sectors.get(i).sectb).he;
                 i++;
             }

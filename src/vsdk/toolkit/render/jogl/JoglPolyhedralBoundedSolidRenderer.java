@@ -10,8 +10,10 @@
 
 package vsdk.toolkit.render.jogl;
 
-// JOGL clases
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 import com.jogamp.opengl.cg.CgGL;
@@ -37,7 +39,6 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     private static GLU glu;
     private static _JoglPolygonTesselatorRoutines tesselatorProcessor;
     static {
-        glu = null;
         tesselatorProcessor = null;
     }
 
@@ -70,7 +71,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
         gl.glPushMatrix();
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             for ( i = 0, t = 0; i < N; i++, t += delta ) {
                 P = startP.add(v.multiply(t).add(u.multiply(curveFactor(t, factor))));
                 gl.glVertex3d(P.x, P.y, P.z);
@@ -82,7 +83,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         Vector3D Pi = u.multiply(factor*0.1);
         gl.glTranslated(Pi.x, Pi.y, Pi.z);
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(P.x, P.y, P.z);
             P = startP.add(v.multiply(factor*0.9).add(u.multiply(factor*0.05)));
             gl.glVertex3d(P.x, P.y, P.z);
@@ -118,8 +119,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     {
         ColorRgb c;
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for point
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(2.0f);
@@ -140,7 +141,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             }
             gl.glColor3d(c.r, c.g, c.b);
 
-            gl.glBegin(gl.GL_POINTS);
+            gl.glBegin(GL.GL_POINTS);
                 gl.glVertex3d(p.x, p.y, p.z);
             gl.glEnd();
         }
@@ -152,15 +153,15 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         int i;
         ColorRgb c;
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_CULL_FACE);
-        gl.glShadeModel(gl.GL_FLAT);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_CULL_FACE);
+        gl.glShadeModel(GL2.GL_FLAT);
 
         // Warning: Change with configured color for borders
         gl.glLineWidth(1.0f);
         gl.glColor3d(1, 1, 1);
 
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL.GL_TEXTURE_2D);
 
         for ( i = 0; i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
@@ -185,7 +186,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 startPosition = e.rightHalf.startingVertex.position;
                 endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
-                    gl.glBegin(gl.GL_LINES);
+                    gl.glBegin(GL.GL_LINES);
                     gl.glVertex3d(startPosition.x, startPosition.y, 
                                   startPosition.z);
                     gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
@@ -201,14 +202,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     {
         int i;
 
-        gl.glPushAttrib(gl.GL_DEPTH_TEST);
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL.GL_DEPTH_TEST);
+        gl.glDisable(GL.GL_DEPTH_TEST);
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_CULL_FACE);
-        gl.glShadeModel(gl.GL_FLAT);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_CULL_FACE);
+        gl.glShadeModel(GL2.GL_FLAT);
 
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL.GL_TEXTURE_2D);
 
         _PolyhedralBoundedSolidFace face1;
         _PolyhedralBoundedSolidFace face2;
@@ -260,7 +261,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     }
 
                     //- Draw line --------------------------------------------
-                    gl.glBegin(gl.GL_LINES);
+                    gl.glBegin(GL.GL_LINES);
                     gl.glVertex3d(startPosition.x, startPosition.y, 
                                   startPosition.z);
                     gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
@@ -273,7 +274,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         n = face1.containingPlane.getNormal();
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(1, 1, 0);
-                        gl.glBegin(gl.GL_LINES);
+                        gl.glBegin(GL.GL_LINES);
                             gl.glVertex3d(middle.x, middle.y, middle.z);
                             gl.glVertex3d(middle.x + n.x/10,
                                           middle.y + n.y/10,
@@ -282,7 +283,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         n = face2.containingPlane.getNormal();
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(0, 1, 1);
-                        gl.glBegin(gl.GL_LINES);
+                        gl.glBegin(GL.GL_LINES);
                             gl.glVertex3d(middle.x, middle.y, middle.z);
                             gl.glVertex3d(middle.x + n.x/10,
                                           middle.y + n.y/10,
@@ -313,7 +314,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                                 gl.glColor3f(0, 0, 1);
                                 break;
                             }
-                            gl.glBegin(gl.GL_POINTS);
+                            gl.glBegin(GL.GL_POINTS);
                                 gl.glVertex3d(p.x, p.y, p.z);
                             gl.glEnd();
                         }
@@ -328,8 +329,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     private static void
     drawVertexNormals(GL2 gl, PolyhedralBoundedSolid solid)
     {
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for vertex normals
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
@@ -339,7 +340,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         Vector3D p0 = null, n;
         Vertex vertex = new Vertex(p0);
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
@@ -383,7 +384,6 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
         //- Prepare tesselator --------------------------------------------
         if ( tesselatorProcessor == null ) {
-            glu = new GLU();
             tesselatorProcessor = 
                 new _JoglPolygonTesselatorRoutines(gl, glu);
         }
@@ -391,8 +391,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         GLUtessellator tesselator;
 
         //- Draw solid faces one by one -----------------------------------
-        gl.glCullFace(gl.GL_BACK);
-        gl.glEnable(gl.GL_CULL_FACE);
+        gl.glCullFace(GL.GL_BACK);
+        gl.glEnable(GL.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
         Vector3D p0, n;
@@ -429,25 +429,25 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             int count;
             double list[][]; // JOGL GLU Tesselator needs a vertex memory
 
-            tesselator = glu.gluNewTess();
+            tesselator = GLU.gluNewTess();
             list = new double[totalNumberOfPoints][3];
             count = 0;
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_VERTEX, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_BEGIN, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_END, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_ERROR, tesselatorProcessor);
-            glu.gluTessBeginPolygon(tesselator, null);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_VERTEX, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_BEGIN, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_END, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_ERROR, tesselatorProcessor);
+            GLU.gluTessBeginPolygon(tesselator, null);
 
             // Face polygon generation via JOGL GLU tesselator
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
 
-                glu.gluTessBeginContour(tesselator);
+                GLU.gluTessBeginContour(tesselator);
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
@@ -465,16 +465,16 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     list[count][0] = p0.x;
                     list[count][1] = p0.y;
                     list[count][2] = p0.z;
-                    glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                    GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
                     count++;
 
                 } while( he != heStart );
 
-                glu.gluTessEndContour(tesselator);
+                GLU.gluTessEndContour(tesselator);
             }
 
-            glu.gluTessEndPolygon(tesselator);
-            glu.gluDeleteTess(tesselator);
+            GLU.gluTessEndPolygon(tesselator);
+            GLU.gluDeleteTess(tesselator);
         }
     }
 
@@ -489,9 +489,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;
 
-        gl.glDisable(gl.GL_CULL_FACE);
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL.GL_CULL_FACE);
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
         gl.glLineWidth(1.0f);
 
         //- Draw face boundaries, one for each loop -----------------------
@@ -558,8 +558,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         GLUtessellator tesselator;
 
         //- Draw solid faces one by one -----------------------------------
-        gl.glCullFace(gl.GL_BACK);
-        gl.glEnable(gl.GL_CULL_FACE);
+        gl.glCullFace(GL.GL_BACK);
+        gl.glEnable(GL.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
         Vector3D p0, n;
@@ -598,25 +598,25 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             int count;
             double list[][]; // JOGL GLU Tesselator needs a vertex memory
 
-            tesselator = glu.gluNewTess();
+            tesselator = GLU.gluNewTess();
             list = new double[totalNumberOfPoints][3];
             count = 0;
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_VERTEX, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_BEGIN, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_END, tesselatorProcessor);
-            glu.gluTessCallback(tesselator,
-                glu.GLU_TESS_ERROR, tesselatorProcessor);
-            glu.gluTessBeginPolygon(tesselator, null);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_VERTEX, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_BEGIN, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_END, tesselatorProcessor);
+            GLU.gluTessCallback(tesselator,
+                GLU.GLU_TESS_ERROR, tesselatorProcessor);
+            GLU.gluTessBeginPolygon(tesselator, null);
 
             // Face polygon generation via JOGL GLU tesselator
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
 
-                glu.gluTessBeginContour(tesselator);
+                GLU.gluTessBeginContour(tesselator);
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
@@ -634,16 +634,16 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     list[count][0] = p0.x;
                     list[count][1] = p0.y;
                     list[count][2] = p0.z;
-                    glu.gluTessVertex(tesselator, list[count], 0, list[count]);
+                    GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
                     count++;
 
                 } while( he != heStart );
 
-                glu.gluTessEndContour(tesselator);
+                GLU.gluTessEndContour(tesselator);
             }
 
-            glu.gluTessEndPolygon(tesselator);
-            glu.gluDeleteTess(tesselator);
+            GLU.gluTessEndPolygon(tesselator);
+            GLU.gluDeleteTess(tesselator);
         }
 
     }
@@ -659,14 +659,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     {
         //-----------------------------------------------------------------
         JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glEnable(gl.GL_NORMALIZE);
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glEnable(GL2.GL_NORMALIZE);
 
         //-----------------------------------------------------------------
         if ( quality.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
-            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-            gl.glEnable(gl.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             drawSurfaces(gl, solid);
         }

@@ -202,8 +202,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             v2 = e.leftHalf.startingVertex;
             d1 = inSplittingPlane.pointDistance(v1.position);
             d2 = inSplittingPlane.pointDistance(v2.position);
-            s1 = inSolid.compareValue(d1, 0.0, VSDK.EPSILON);
-            s2 = inSolid.compareValue(d2, 0.0, VSDK.EPSILON);
+            s1 = PolyhedralBoundedSolid.compareValue(d1, 0.0, VSDK.EPSILON);
+            s2 = PolyhedralBoundedSolid.compareValue(d2, 0.0, VSDK.EPSILON);
             if ( (s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1) ) {
                 t = d1 / (d1 - d2);
                 p = v1.position.add((v2.position.substract(v1.position)).multiply(t));
@@ -260,11 +260,11 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
             c.isWide = false;
             c.position = new Vector3D((he.next()).startingVertex.position);
-            c.situation = c.UNDEFINED;
+            c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED;
             neighborSectorsInfo.add(c);
             if ( checkWideness(he) ) {
                 bisect = bisector(he);
-                c.situation = c.CROSSING_EDGE;
+                c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
 
                 c = new _PolyhedralBoundedSolidSplitterSectorClassification();
                 c.sector = he;
@@ -272,7 +272,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
                 c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
                 c.isWide = true;
                 c.position = new Vector3D(bisect);
-                c.situation = c.CROSSING_EDGE;
+                c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
                 neighborSectorsInfo.add(c);
             }
             he = (he.mirrorHalfEdge()).next();
@@ -284,8 +284,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
         for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
             c = neighborSectorsInfo.get(i);
-            if ( c.cl == c.ON && c.situation == c.UNDEFINED ) {
-                c.situation = c.INPLANE_EDGE;
+            if ( c.cl == _PolyhedralBoundedSolidSplitterSectorClassification.ON && c.situation == _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED ) {
+                c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.INPLANE_EDGE;
             }
         }
 
@@ -298,7 +298,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         int i;
 
         for ( i = 0; i < nbr.size(); i++ ) {
-            if ( nbr.get(i).situation == nbr.get(i).INPLANE_EDGE ) return true;
+            if ( nbr.get(i).situation == _PolyhedralBoundedSolidSplitterSectorClassification.INPLANE_EDGE ) return true;
         }
         return false;
     }
@@ -330,14 +330,14 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
                 // Entering this means "faces are coplanar"
                 d = f.containingPlane.getNormal().dotProduct(inSplittingPlane.getNormal());
                 if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
-                    l.cl = l.BELOW;
-                    l.situation = l.COPLANAR_FACE;
-                    nbr.get((i+1)%nbr.size()).cl = l.BELOW;
+                    l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
+                    l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
+                    nbr.get((i+1)%nbr.size()).cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                 }
                 else {
-                    l.cl = l.ABOVE;
-                    l.situation = l.COPLANAR_FACE;
-                    nbr.get((i+1)%nbr.size()).cl = l.ABOVE;
+                    l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
+                    l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
+                    nbr.get((i+1)%nbr.size()).cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
                 }
             }
         }
@@ -364,17 +364,17 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
         for ( i = 0; i < nbr.size(); i++ ) {
             l = nbr.get(i);
-            if ( l.cl == l.ON ) {
-                if ( nbr.get((nbr.size()+i-1) % nbr.size()).cl == l.BELOW ) {
-                    if ( nbr.get((i+1) % nbr.size()).cl == l.BELOW ) {
-                        nbr.get(i).cl = l.ABOVE;
+            if ( l.cl == _PolyhedralBoundedSolidSplitterSectorClassification.ON ) {
+                if ( nbr.get((nbr.size()+i-1) % nbr.size()).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) {
+                    if ( nbr.get((i+1) % nbr.size()).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) {
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
                     }
                     else {
-                        nbr.get(i).cl = l.BELOW;
+                        nbr.get(i).cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                     }
                 }
                 else {
-                    nbr.get(i).cl = l.BELOW;
+                    nbr.get(i).cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                 }
             }
         }
@@ -402,8 +402,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
         //- Locate the head of an ABOVE-sequence --------------------------
         i = 0;
-        while ( !( nbr.get(i).cl == n.BELOW &&
-                   nbr.get( (i+1)%nnbr ).cl == n.ABOVE )  ) {
+        while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
+                   nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE )  ) {
             i++;
             if ( i >= nnbr ) {
                 return;
@@ -415,8 +415,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         //-----------------------------------------------------------------
         while ( true ) {
             //- Locate the final sector of the sequence ------------------
-            while ( !( nbr.get(i).cl == n.ABOVE &&
-                       nbr.get( (i+1)%nnbr ).cl == n.BELOW ) ) {
+            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE &&
+                       nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) ) {
                 i = (i+1) % nnbr;
             }
             tail = nbr.get(i).sector;
@@ -426,7 +426,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             d1 = inSplittingPlane.doContainmentTestHalfSpace(head.next().startingVertex.position, VSDK.EPSILON);
 
             //System.out.println("LMEV:");
-            if ( d1 != inSplittingPlane.OUTSIDE ) {
+            if ( d1 != Geometry.OUTSIDE ) {
                 //System.out.println("  - H1: " + tail);
                 //System.out.println("  - H2: " + head);
                 inSolid.lmev(tail, head, inSolid.getMaxVertexId()+1, head.startingVertex.position);
@@ -440,8 +440,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             }
 
             //- Locate the start of the next sequence --------------------
-            while ( !( nbr.get(i).cl == n.BELOW &&
-                       nbr.get( (i+1) % nnbr ).cl == n.ABOVE ) ) {
+            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
+                       nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE ) ) {
                 i = (i+1) % nnbr;
                 if ( i == start ) {
                     return;

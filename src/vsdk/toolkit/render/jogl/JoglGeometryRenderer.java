@@ -6,7 +6,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGprogram;
 
@@ -54,19 +57,19 @@ public class JoglGeometryRenderer extends JoglRenderer
 
         switch ( shadingType ) {
           case RendererConfiguration.SHADING_TYPE_NOLIGHT:
-            gl.glDisable(gl.GL_LIGHTING);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glShadeModel(GL2.GL_FLAT);
             // Warning: Change with configured color for ambient lightning
             gl.glColor3d(1, 1, 1);
             break;
           case RendererConfiguration.SHADING_TYPE_FLAT:
-            gl.glEnable(gl.GL_LIGHTING);
-            gl.glShadeModel(gl.GL_FLAT);
+            gl.glEnable(GL2.GL_LIGHTING);
+            gl.glShadeModel(GL2.GL_FLAT);
             break;
           case RendererConfiguration.SHADING_TYPE_PHONG:
           case RendererConfiguration.SHADING_TYPE_GOURAUD: default:
-            gl.glEnable(gl.GL_LIGHTING);
-            gl.glShadeModel(gl.GL_SMOOTH);
+            gl.glEnable(GL2.GL_LIGHTING);
+            gl.glShadeModel(GL2.GL_SMOOTH);
             break;
         }
     }
@@ -86,14 +89,14 @@ public class JoglGeometryRenderer extends JoglRenderer
 
     public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)
     {
-        gl.glPushAttrib(gl.GL_LIGHTING_BIT);
+        gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
         JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(minmax[0], minmax[1], minmax[5]); // 6
             gl.glVertex3d(minmax[3], minmax[1], minmax[5]); // 5
             gl.glVertex3d(minmax[3], minmax[4], minmax[5]); // 8
@@ -104,7 +107,7 @@ public class JoglGeometryRenderer extends JoglRenderer
             gl.glVertex3d(minmax[0], minmax[4], minmax[5]); // 7
         gl.glEnd();
 
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(minmax[3], minmax[1], minmax[2]); // 4
             gl.glVertex3d(minmax[3], minmax[4], minmax[2]); // 3
             gl.glVertex3d(minmax[0], minmax[4], minmax[2]); // 2
@@ -136,14 +139,14 @@ public class JoglGeometryRenderer extends JoglRenderer
         max = max.add(delta.multiply(borderPercent));
         delta = delta.multiply(linePercent);
 
-        gl.glPushAttrib(gl.GL_LIGHTING_BIT);
+        gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
         JoglRenderer.disableNvidiaCgProfiles();
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
         gl.glColor3d(1, 1, 1);
         gl.glLineWidth(1.0f);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
 
             gl.glVertex3d(min.x, min.y, min.z);
             gl.glVertex3d(min.x+delta.x, min.y, min.z);
@@ -222,7 +225,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         MProjection = camera.calculateViewVolumeMatrix();
         MModelviewGlobal = camera.calculateTransformationMatrix();
         MModelviewLocal = MModelviewGlobal.multiply(
-            JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
+            JoglMatrixRenderer.importJOGL(gl, GL2.GL_MODELVIEW_MATRIX));
         MCombined = MProjection.multiply(MModelviewLocal);
         MModelviewLocalIT = MModelviewLocal.inverse();
         MModelviewLocalIT.transpose();

@@ -850,131 +850,237 @@ public class Reader3ds extends PersistenceElement
     {
         if (
 (father == null) ||
-(father.id == father.ID_MAIN && son.id == son.ID_MESH) ||
-(father.id == father.ID_MAIN && son.id == son.ID_BOTTOM) ||
-(father.id == father.ID_MAIN && son.id == son.ID_KEYFRAMER) ||
-(father.id == father.ID_MESH && son.id == son.ID_TOP) ||
-(father.id == father.ID_MESH && son.id == son.ID_MATERIAL) ||
-(father.id == father.ID_MESH && son.id == son.ID_OBJECT_BLOCK) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_CONFIG1) ||
-(father.id == father.ID_MESH && son.id == son.ID_VIEWPORT) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_01) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_02) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_03) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_04) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_05) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_06) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_07) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_08) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_09) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_10) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_11) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_12) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_13) ||
-(father.id == father.ID_MESH && son.id == son.ID_EDIT_UNKNOWN_14) ||
-(father.id == father.ID_MESH && son.id == son.ID_AMBIENT_COLOR) ||
-(father.id == father.ID_MESH && son.id == son.ID_BACKGROUND_COLOR) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_NAME) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_AMBIENT) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_DIFFUSE) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SPECULAR) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TYPE) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SHININESS_EXP) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SHININESS_KTE) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY_F) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TRANSPARENCY_FI) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_REFLECT_BLUR) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TWOSIDED) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_WIREON) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_WIRE_THICKNESS) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_SOFTEN) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TEXTURE1) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_TEXTURE2) ||
-(father.id == father.ID_MATERIAL && son.id == son.ID_MATERIAL_BUMPMAP) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPOPTIONS) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPFILTERBLUR) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPUOFFSET) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPVOFFSET) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAP1USCALE) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAP1VSCALE) ||
-(father.id == father.ID_MATERIAL_TEXTURE1 && son.id == son.ID_MATERIAL_MAPFILENAME) ||
-(father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_MATERIAL_MAPPING_TABLE) ||
-(father.id == father.ID_TRIANGLE_LIST && son.id == son.ID_SMOOTH_LIST) ||
-(father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_TRIANGLE_MESH) ||
-(father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_LIGHT) ||
-(father.id == father.ID_OBJECT_BLOCK && son.id == son.ID_CAMERA) ||
-(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_VERTEX_LIST) ||
-(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_TRIANGLE_LIST) ||
-(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_MAP_LIST) ||
-(father.id == father.ID_MATERIAL_SHININESS_KTE && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_SHININESS_EXP && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_TRANSPARENCY && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_TRANSPARENCY_F && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_TRANSPARENCY_FI && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_MATERIAL_REFLECT_BLUR && son.id == son.ID_AMOUNT) ||
-(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_OBJECT_IS_VISIBLE) ||
-(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_TRI_VERTEX_OPTIONS) ||(father.id == father.ID_TRIANGLE_MESH && son.id == son.ID_MATRIX) ||
-((father.id == father.ID_MATERIAL_AMBIENT || 
-  father.id == father.ID_MATERIAL_DIFFUSE || 
-  father.id == father.ID_MATERIAL_SPECULAR)  && son.id == son.ID_COLOR_RGB1) ||
-((father.id == father.ID_MATERIAL_AMBIENT || 
-  father.id == father.ID_MATERIAL_DIFFUSE || 
-  father.id == father.ID_MATERIAL_SPECULAR)  && son.id == son.ID_COLOR_RGB2) ||
-((father.id == father.ID_MATERIAL_AMBIENT || 
-  father.id == father.ID_MATERIAL_DIFFUSE || 
-  father.id == father.ID_MATERIAL_SPECULAR)  && son.id == son.ID_COLOR_RGB3)
+(father.id == _Reader3dsChunk.ID_MAIN &&
+    son.id == _Reader3dsChunk.ID_MESH) ||
+(father.id == _Reader3dsChunk.ID_MAIN &&
+    son.id == _Reader3dsChunk.ID_BOTTOM) ||
+(father.id == _Reader3dsChunk.ID_MAIN &&
+    son.id == _Reader3dsChunk.ID_KEYFRAMER) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_TOP) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_MATERIAL) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_OBJECT_BLOCK) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_CONFIG1) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_VIEWPORT) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_01) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_02) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_03) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_04) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_05) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_06) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_07) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_08) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_09) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_10) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_11) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_12) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_13) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_EDIT_UNKNOWN_14) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_AMBIENT_COLOR) ||
+(father.id == _Reader3dsChunk.ID_MESH &&
+    son.id == _Reader3dsChunk.ID_BACKGROUND_COLOR) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_NAME) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TYPE) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_EXP) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_KTE) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_F) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_FI) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_REFLECT_BLUR) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TWOSIDED) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_WIREON) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_WIRE_THICKNESS) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_SOFTEN) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE2) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_BUMPMAP) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPOPTIONS) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPFILTERBLUR) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPUOFFSET) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPVOFFSET) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAP1USCALE) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAP1VSCALE) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPFILENAME) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_LIST &&
+    son.id == _Reader3dsChunk.ID_MATERIAL_MAPPING_TABLE) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_LIST &&
+    son.id == _Reader3dsChunk.ID_SMOOTH_LIST) ||
+(father.id == _Reader3dsChunk.ID_OBJECT_BLOCK &&
+    son.id == _Reader3dsChunk.ID_TRIANGLE_MESH) ||
+(father.id == _Reader3dsChunk.ID_OBJECT_BLOCK &&
+    son.id == _Reader3dsChunk.ID_LIGHT) ||
+(father.id == _Reader3dsChunk.ID_OBJECT_BLOCK &&
+    son.id == _Reader3dsChunk.ID_CAMERA) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH &&
+    son.id == _Reader3dsChunk.ID_VERTEX_LIST) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH &&
+    son.id == _Reader3dsChunk.ID_TRIANGLE_LIST) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH &&
+    son.id == _Reader3dsChunk.ID_MAP_LIST) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_KTE &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_EXP &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_F &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_FI &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_MATERIAL_REFLECT_BLUR &&
+    son.id == _Reader3dsChunk.ID_AMOUNT) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH &&
+    son.id == _Reader3dsChunk.ID_OBJECT_IS_VISIBLE) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH &&
+    son.id == _Reader3dsChunk.ID_TRI_VERTEX_OPTIONS) ||
+(father.id == _Reader3dsChunk.ID_TRIANGLE_MESH && son.id == _Reader3dsChunk.ID_MATRIX) ||
+((father.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR)  &&
+    son.id == _Reader3dsChunk.ID_COLOR_RGB1) ||
+((father.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR)  &&
+    son.id == _Reader3dsChunk.ID_COLOR_RGB2) ||
+((father.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE || 
+  father.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR)  &&
+    son.id == _Reader3dsChunk.ID_COLOR_RGB3)
         ) {
             return true;
         }
 
-        if ( son.id == son.ID_UNKNOWN_01 || son.id == son.ID_UNKNOWN_02 ||
-             son.id == son.ID_UNKNOWN_03 || son.id == son.ID_UNKNOWN_04 ||
-             son.id == son.ID_UNKNOWN_05 || son.id == son.ID_UNKNOWN_06 ||
-             son.id == son.ID_UNKNOWN_07 || son.id == son.ID_UNKNOWN_08 ||
-             son.id == son.ID_UNKNOWN_09 || son.id == son.ID_UNKNOWN_10 ||
-             son.id == son.ID_UNKNOWN_11 || son.id == son.ID_UNKNOWN_12 ||
-             son.id == son.ID_UNKNOWN_13 || son.id == son.ID_UNKNOWN_14 ||
-             son.id == son.ID_UNKNOWN_15 || son.id == son.ID_UNKNOWN_16 ||
-             son.id == son.ID_UNKNOWN_17 || son.id == son.ID_UNKNOWN_18 ||
-             son.id == son.ID_UNKNOWN_19 || son.id == son.ID_UNKNOWN_20 ||
-             son.id == son.ID_UNKNOWN_21 || son.id == son.ID_UNKNOWN_22 ||
-             son.id == son.ID_UNKNOWN_23 || son.id == son.ID_UNKNOWN_24 ||
-             son.id == son.ID_UNKNOWN_25 || son.id == son.ID_UNKNOWN_26 ||
-             son.id == son.ID_UNKNOWN_27 || son.id == son.ID_UNKNOWN_28 ||
-             son.id == son.ID_UNKNOWN_29 || son.id == son.ID_UNKNOWN_30 ||
-             son.id == son.ID_UNKNOWN_31 || son.id == son.ID_UNKNOWN_32 ||
-             son.id == son.ID_UNKNOWN_33 || son.id == son.ID_UNKNOWN_34 ||
-             son.id == son.ID_UNKNOWN_35 || son.id == son.ID_UNKNOWN_36 ||
-             son.id == son.ID_UNKNOWN_37 || son.id == son.ID_UNKNOWN_38 ||
-             son.id == son.ID_UNKNOWN_39 || son.id == son.ID_UNKNOWN_40 ||
-             son.id == son.ID_UNKNOWN_41 || son.id == son.ID_UNKNOWN_42 ||
-             son.id == son.ID_UNKNOWN_43 || son.id == son.ID_UNKNOWN_44 ||
-             son.id == son.ID_UNKNOWN_45 || son.id == son.ID_UNKNOWN_46 ||
-             son.id == son.ID_UNKNOWN_47 || son.id == son.ID_UNKNOWN_48 ||
-             son.id == son.ID_UNKNOWN_49 || son.id == son.ID_UNKNOWN_50 ||
-             son.id == son.ID_UNKNOWN_51 || son.id == son.ID_UNKNOWN_52 ||
-             son.id == son.ID_UNKNOWN_53 || son.id == son.ID_UNKNOWN_54 ||
-             son.id == son.ID_UNKNOWN_55 || son.id == son.ID_UNKNOWN_56 ||
-             son.id == son.ID_UNKNOWN_57 || son.id == son.ID_UNKNOWN_58 ||
-             son.id == son.ID_UNKNOWN_59 || son.id == son.ID_UNKNOWN_60 ||
-             son.id == son.ID_UNKNOWN_61 || son.id == son.ID_UNKNOWN_62 ||
-             son.id == son.ID_UNKNOWN_63 || son.id == son.ID_UNKNOWN_64 ||
-             son.id == son.ID_UNKNOWN_65 || son.id == son.ID_UNKNOWN_66 ||
-             son.id == son.ID_UNKNOWN_67 || son.id == son.ID_UNKNOWN_67 ||
-             son.id == son.ID_UNKNOWN_68 || son.id == son.ID_UNKNOWN_69 ||
-             son.id == son.ID_UNKNOWN_70 || son.id == son.ID_UNKNOWN_71 ||
-             son.id == son.ID_UNKNOWN_72 ) {
+        if ( son.id == _Reader3dsChunk.ID_UNKNOWN_01 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_02 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_03 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_04 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_05 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_06 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_07 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_08 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_09 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_10 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_11 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_12 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_13 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_14 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_15 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_16 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_17 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_18 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_19 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_20 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_21 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_22 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_23 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_24 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_25 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_26 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_27 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_28 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_29 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_30 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_31 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_32 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_33 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_34 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_35 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_36 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_37 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_38 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_39 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_40 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_41 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_42 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_43 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_44 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_45 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_46 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_47 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_48 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_49 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_50 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_51 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_52 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_53 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_54 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_55 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_56 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_57 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_58 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_59 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_60 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_61 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_62 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_63 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_64 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_65 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_66 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_67 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_67 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_68 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_69 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_70 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_71 ||
+             son.id == _Reader3dsChunk.ID_UNKNOWN_72 ) {
             // WARNING: Not implemented features!
             return true;
         }
 
         VSDK.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.checkChunkHierarchy",
-                           "" + son.chunkToString(son.id) + 
+                           "" + _Reader3dsChunk.chunkToString(son.id) + 
                            " chunk is not supposed to be a level under a " +
-                           father.chunkToString(father.id) + " chunk");
+                           _Reader3dsChunk.chunkToString(father.id) + " chunk");
         return false;
     }
 
@@ -997,29 +1103,29 @@ public class Reader3ds extends PersistenceElement
         //-----------------------------------------------------------------
         int i;
 
-        if ( (currentChunk.id == currentChunk.ID_MAIN) ||
-             (currentChunk.id == currentChunk.ID_MESH) || 
-             (currentChunk.id == currentChunk.ID_OBJECT_BLOCK) ||
-             (currentChunk.id == currentChunk.ID_MATERIAL) ||
-             (currentChunk.id == currentChunk.ID_TRIANGLE_MESH)
+        if ( (currentChunk.id == _Reader3dsChunk.ID_MAIN) ||
+             (currentChunk.id == _Reader3dsChunk.ID_MESH) || 
+             (currentChunk.id == _Reader3dsChunk.ID_OBJECT_BLOCK) ||
+             (currentChunk.id == _Reader3dsChunk.ID_MATERIAL) ||
+             (currentChunk.id == _Reader3dsChunk.ID_TRIANGLE_MESH)
            ) {
             //-------------------------------------------------------------
             long internalBytes = 6; // skip current chunk header
 
             // Build operations preprocessing phase
-            if ( currentChunk.id == currentChunk.ID_OBJECT_BLOCK ) {
+            if ( currentChunk.id == _Reader3dsChunk.ID_OBJECT_BLOCK ) {
                 // Object block starts with a name string
                 //System.out.print(indent(level) + "Reading object \"");
                 String cad = readAsciiString(is);
                 internalBytes += cad.length()+1;
                 //System.out.println(cad + "\"");
             }
-            if ( currentChunk.id == currentChunk.ID_TRIANGLE_MESH ) {
+            if ( currentChunk.id == _Reader3dsChunk.ID_TRIANGLE_MESH ) {
                 currentTriangleMesh = new TriangleMesh();
                 currentMaterialMappingArray =
                     new ArrayList<_Reader3dsMaterialMapping>();
             }
-            if ( currentChunk.id == currentChunk.ID_MATERIAL ) {
+            if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL ) {
                 currentTextureFilename = null;
                 currentBuildingMaterial = new Material();
                 currentBuildingMaterial.setDoubleSided(false);
@@ -1039,11 +1145,11 @@ public class Reader3ds extends PersistenceElement
                       (internalBytes < currentChunk.length) );
 
             // Build operations postprocessing phase
-            if ( currentChunk.id == currentChunk.ID_MATERIAL ) {
+            if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL ) {
                 currentMaterialArray.add(currentBuildingMaterial);
                 currentTextureFilenamesArray.add(currentTextureFilename);
             }
-            if ( currentChunk.id == currentChunk.ID_TRIANGLE_MESH ) {
+            if ( currentChunk.id == _Reader3dsChunk.ID_TRIANGLE_MESH ) {
                 // Vertex processing
                 Vertex v[] = new Vertex[currentVertexPositionArray.size()];
                 for ( i = 0; i < v.length; i++ ) {
@@ -1148,7 +1254,7 @@ public class Reader3ds extends PersistenceElement
                 addThing(currentTriangleMesh, currentSimpleBodiesArray);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_VERTEX_LIST ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_VERTEX_LIST ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             int numVertexes = readIntLE(is);
@@ -1168,7 +1274,7 @@ public class Reader3ds extends PersistenceElement
                 is.skip(currentChunk.length-8-numVertexes*12);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_TRIANGLE_LIST ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_TRIANGLE_LIST ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
 
@@ -1216,12 +1322,12 @@ public class Reader3ds extends PersistenceElement
             } while ( is.available() > 0 && 
                       (internalBytes < currentChunk.length) );
         }
-        else if ( currentChunk.id == currentChunk.ID_MATRIX ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATRIX ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             is.skip(12*4);
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_NAME ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_NAME ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             String materialName = readAsciiString(is);
@@ -1229,7 +1335,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setName(materialName);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_COLOR_RGB2 ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_COLOR_RGB2 ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             byte r[] = new byte[1];
@@ -1247,16 +1353,16 @@ public class Reader3ds extends PersistenceElement
                     (double)(VSDK.signedByte2unsignedInteger(b[0])) / 255.0;
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_AMOUNT ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_AMOUNT ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             currentAmount = readIntLE(is);
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPFILENAME ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPFILENAME ) {
             //-------------------------------------------------------------
             currentTextureFilename = new String(readAsciiString(is));
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_SHININESS_KTE ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_KTE ) {
             //System.out.println(indent(level) + currentChunk);
             currentAmount = 0;
             // Processing of recursive chunks
@@ -1274,7 +1380,7 @@ public class Reader3ds extends PersistenceElement
                 ;
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY ) {
             //System.out.println(indent(level) + currentChunk);
             currentAmount = 0;
             // Processing of recursive chunks
@@ -1292,7 +1398,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setOpacity(1.0-((double)currentAmount)/100.0);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY_F ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_F ) {
             //System.out.println(indent(level) + currentChunk);
             currentAmount = 0;
             // Processing of recursive chunks
@@ -1308,15 +1414,15 @@ public class Reader3ds extends PersistenceElement
                 // Warning: don't know well how to handle this
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TRANSPARENCY_FI ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_FI ) {
             // Warning: don't know well how to handle this
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TWOSIDED ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TWOSIDED ) {
             if ( currentBuildingMaterial != null ) {
                 currentBuildingMaterial.setDoubleSided(true);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_REFLECT_BLUR ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_REFLECT_BLUR ) {
             //System.out.println(indent(level) + currentChunk);
             currentAmount = 0;
             // Processing of recursive chunks
@@ -1332,7 +1438,7 @@ public class Reader3ds extends PersistenceElement
                 // Warning: don't know well how to handle this
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_SHININESS_EXP ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_EXP ) {
             //System.out.println(indent(level) + currentChunk);
             currentAmount = 0;
             // Processing of recursive chunks
@@ -1348,7 +1454,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setPhongExponent((double)currentAmount);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_AMBIENT ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             currentColor = new ColorRgb();
@@ -1366,7 +1472,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setAmbient(currentColor);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_DIFFUSE ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             currentColor = new ColorRgb();
@@ -1384,7 +1490,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setDiffuse(currentColor);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_SPECULAR ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             currentColor = new ColorRgb();
@@ -1402,7 +1508,7 @@ public class Reader3ds extends PersistenceElement
                 currentBuildingMaterial.setSpecular(currentColor);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPPING_TABLE ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPPING_TABLE ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
             _Reader3dsMaterialMapping range = new _Reader3dsMaterialMapping();
@@ -1417,7 +1523,7 @@ public class Reader3ds extends PersistenceElement
             }
             currentMaterialMappingArray.add(range);
         }
-        else if ( currentChunk.id == currentChunk.ID_MAP_LIST ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MAP_LIST ) {
             //-------------------------------------------------------------
             int numVerticesUVMaps = readIntLE(is);
             currentUTextureMapping = new double[numVerticesUVMaps];
@@ -1427,7 +1533,7 @@ public class Reader3ds extends PersistenceElement
                 currentVTextureMapping[i] = readFloatLE(is);
             }
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TEXTURE1 ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE1 ) {
             //-------------------------------------------------------------
             // Prepare values
             currentAmount = 0;
@@ -1445,7 +1551,7 @@ public class Reader3ds extends PersistenceElement
             // Texture building
             // Consider currentAmount
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_BUMPMAP ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_BUMPMAP ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             if ( !bumpNotImplementedReported ) {
@@ -1457,7 +1563,7 @@ public class Reader3ds extends PersistenceElement
             }
             skipChunk = true;
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_TEXTURE2 ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TEXTURE2 ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             if ( !t2NotImplementedReported ) {
@@ -1469,29 +1575,29 @@ public class Reader3ds extends PersistenceElement
             }
             skipChunk = true;
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_WIREON ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_WIREON ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPOPTIONS ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPOPTIONS ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             int dummyOptions = readIntLE(is);
             //System.out.println("Options: " + dummyOptions);
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPFILTERBLUR ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPFILTERBLUR ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             double dummyBlur = readFloatLE(is);
             //System.out.println("Blur: " + dummyBlur);
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPUOFFSET ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPUOFFSET ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             double currentUOffset = readFloatLE(is);
             //System.out.println("DU: " + currentUOffset);
         }
-        else if ( currentChunk.id == currentChunk.ID_MATERIAL_MAPVOFFSET ) {
+        else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPVOFFSET ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             double currentVOffset = readFloatLE(is);
@@ -1535,7 +1641,7 @@ public class Reader3ds extends PersistenceElement
         //- Main level chunk hierarchy processing -------------------------
         chunk.readHeader(is);
 
-        if ( chunk.id != chunk.ID_MAIN ) {
+        if ( chunk.id != _Reader3dsChunk.ID_MAIN ) {
             Exception e = new Exception("\"" + sourcename +
                 "\" is not a 3DS format file, doesn't start with 0x4D4D " +
                 "header chunk.");

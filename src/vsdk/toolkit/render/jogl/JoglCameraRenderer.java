@@ -9,7 +9,10 @@
 
 package vsdk.toolkit.render.jogl;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGprogram;
 
@@ -23,11 +26,11 @@ public class JoglCameraRenderer extends JoglRenderer
     {
         Matrix4x4 R;
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         R = cam.calculateProjectionMatrix();
         JoglMatrixRenderer.activate(gl, R);
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
     public static void activateCenter(GL2 gl, Camera cam)
@@ -42,17 +45,17 @@ public class JoglCameraRenderer extends JoglRenderer
         newcenter = center.substract(eye);
         camera2.setPosition(neweye);
         camera2.setFocusedPositionDirect(newcenter);
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         R = camera2.calculateProjectionMatrix();
         JoglMatrixRenderer.activate(gl, R);
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
     private static void drawBase(GL2 gl)
     {
         gl.glLineWidth((float)1.0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);
@@ -69,10 +72,10 @@ public class JoglCameraRenderer extends JoglRenderer
 
     public static void drawVolume(GL2 gl, Camera cam)
     {
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glShadeModel(gl.GL_FLAT);
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glShadeModel(GL2.GL_FLAT);
 
 
         //- Calcule los extremos del volumen de visualizacion ---------------
@@ -84,7 +87,7 @@ public class JoglCameraRenderer extends JoglRenderer
         npd = cam.getNearPlaneDistance();
         fpd = cam.getFarPlaneDistance();
 
-        if ( cam.getProjectionMode() != cam.PROJECTION_MODE_ORTHOGONAL ) {
+        if ( cam.getProjectionMode() != Camera.PROJECTION_MODE_ORTHOGONAL ) {
             yn = 2 * npd * Math.tan(Math.toRadians(cam.getFov()) / 2);
             xn = yn * (cam.getViewportXSize() / cam.getViewportYSize());
         }
@@ -101,7 +104,7 @@ public class JoglCameraRenderer extends JoglRenderer
 
         xf = xn;
         yf = yn;
-        if ( cam.getProjectionMode() != cam.PROJECTION_MODE_ORTHOGONAL ) {
+        if ( cam.getProjectionMode() != Camera.PROJECTION_MODE_ORTHOGONAL ) {
             yf = 2 * fpd * Math.tan(Math.toRadians(cam.getFov()) / 2);
             xf = yf * (cam.getViewportXSize()/cam.getViewportYSize());
         }
@@ -110,7 +113,7 @@ public class JoglCameraRenderer extends JoglRenderer
         double delta = 0.1;
         gl.glColor3d(1, 0.5, 0.5);   // Origen de la camara
         gl.glLineWidth((float)1.0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(delta, 0, 0);
             gl.glVertex3d(0, -delta, 0);
@@ -119,16 +122,16 @@ public class JoglCameraRenderer extends JoglRenderer
             gl.glVertex3d(0, 0, delta);
         gl.glEnd();
 
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
         gl.glColor3f(0, 1, 1);       // Plano de proyeccion
         gl.glLineWidth((float)2.0);
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(npd, -xn/2, -yn/2);
             gl.glVertex3d(npd, xn/2, -yn/2);
             gl.glVertex3d(npd, xn/2, yn/2);
             gl.glVertex3d(npd, -xn/2, yn/2);
         gl.glEnd();
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(npd, -xn/10, -yn/10);
             gl.glVertex3d(npd, xn/10, yn/10);
             gl.glVertex3d(npd, xn/10, -yn/10);
@@ -140,13 +143,13 @@ public class JoglCameraRenderer extends JoglRenderer
         gl.glEnd();
 
         gl.glColor3f(0, 1, 1);       // Plano lejano
-        gl.glBegin(gl.GL_LINE_LOOP);
+        gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(fpd, -xf/2, -yf/2);
             gl.glVertex3d(fpd, xf/2, -yf/2);
             gl.glVertex3d(fpd, xf/2, yf/2);
             gl.glVertex3d(fpd, -xf/2, yf/2);
         gl.glEnd();
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(fpd, -xf/10, -yf/10);
             gl.glVertex3d(fpd, xf/10, yf/10);
             gl.glVertex3d(fpd, xf/10, -yf/10);
@@ -157,7 +160,7 @@ public class JoglCameraRenderer extends JoglRenderer
             gl.glVertex3d(fpd, xf/10, yf/2);
         gl.glEnd();
 
-        gl.glBegin(gl.GL_LINES);  // Lineas de los bordes
+        gl.glBegin(GL.GL_LINES);  // Lineas de los bordes
             gl.glVertex3d(npd, -xn/2, -yn/2);
             gl.glVertex3d(fpd, -xf/2, -yf/2);
             gl.glVertex3d(npd, xn/2, -yn/2);

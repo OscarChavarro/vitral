@@ -4,6 +4,8 @@ package vsdk.toolkit.render.jogl;
 
 import java.util.Random;
 
+// JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLCapabilities;
 
@@ -207,12 +209,12 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
             randomNumberGenerator.nextInt(),
             randomNumberGenerator.nextInt());
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 
         JoglImageRenderer.draw(gl, stereogramResult);
     }

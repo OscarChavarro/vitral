@@ -178,7 +178,7 @@ public class CameraControllerAquynza extends CameraController {
   
           // View volume modification
           case KeyEvent.KEY_A:
-            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+            if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom /= 2;
               }
               else {
@@ -189,7 +189,7 @@ public class CameraControllerAquynza extends CameraController {
             updated = true;
             break;
           case KeyEvent.KEY_a:
-            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+            if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2;
               }
               else {
@@ -328,7 +328,7 @@ public class CameraControllerAquynza extends CameraController {
         v = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
         w = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
 
-        if ( (modifiers & e.BUTTON1_DOWN_MASK) != 0 ) {
+        if ( (modifiers & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             // Turn
             ax = -Math.min(2, 0.01*deltaX);
             ay = Math.min(2, 0.01*deltaY);
@@ -342,7 +342,7 @@ public class CameraControllerAquynza extends CameraController {
 
             updated = true;
         }
-        else if ( (modifiers & e.BUTTON2_DOWN_MASK) != 0 ) {
+        else if ( (modifiers & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             // Move
             eyePosition = eyePosition.substract(v.multiply(senseFactor*((double)deltaX)));
             eyePosition = eyePosition.substract(w.multiply(senseFactor*((double)deltaY)));
@@ -350,7 +350,7 @@ public class CameraControllerAquynza extends CameraController {
             focusedPosition = focusedPosition.substract(w.multiply(senseFactor*((double)deltaY)));
             updated = true;
         }
-        else if ( (modifiers & e.BUTTON3_DOWN_MASK) != 0 ) {
+        else if ( (modifiers & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             // Advance
             eyePosition = eyePosition.substract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
@@ -393,7 +393,7 @@ public class CameraControllerAquynza extends CameraController {
 
         //------------------------------------------------------------
         if ( clicks > 0 ) {
-            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+            if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom /= clicks;
               }
               else {
@@ -404,7 +404,7 @@ public class CameraControllerAquynza extends CameraController {
             updated = true;
         }
         else if ( clicks < 0 ) {
-            if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL ) {
+            if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2*clicks;
               }
               else {

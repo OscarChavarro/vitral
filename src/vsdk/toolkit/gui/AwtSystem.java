@@ -50,21 +50,21 @@ public class AwtSystem extends PresentationElement
         keycode = eawt.getKeyCode();
 
         //-----------------------------------------------------------------
-        if ( ((eawt.getModifiersEx()) & eawt.ALT_DOWN_MASK) != 0x0 ) {
-            evsdk.modifierMask |= evsdk.MASK_ALT;
+        if ( ((eawt.getModifiersEx()) & java.awt.event.KeyEvent.ALT_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= KeyEvent.MASK_ALT;
         }
-        if ( ((eawt.getModifiersEx()) & eawt.CTRL_DOWN_MASK) != 0x0 ) {
-            evsdk.modifierMask |= evsdk.MASK_CTRL;
+        if ( ((eawt.getModifiersEx()) & java.awt.event.KeyEvent.CTRL_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= KeyEvent.MASK_CTRL;
         }
-        if ( ((eawt.getModifiersEx()) & eawt.SHIFT_DOWN_MASK) != 0x0 ) {
-            evsdk.modifierMask |= evsdk.MASK_SHIFT;
+        if ( ((eawt.getModifiersEx()) & java.awt.event.KeyEvent.SHIFT_DOWN_MASK) != 0x0 ) {
+            evsdk.modifierMask |= KeyEvent.MASK_SHIFT;
         }
 
         //-----------------------------------------------------------------
-        if ( eawt.getKeyLocation() == eawt.KEY_LOCATION_NUMPAD ) {
+        if ( eawt.getKeyLocation() == java.awt.event.KeyEvent.KEY_LOCATION_NUMPAD ) {
             switch ( keycode ) {
             /*case 110:
-                evsdk.keycode = KeyEvent.KEY_NUMPERIOD;
+                evsdk.keycode = java.awt.event.KeyEvent.KEY_NUMPERIOD;
                 break;*/
             }
         }
@@ -105,7 +105,7 @@ public class AwtSystem extends PresentationElement
             return;
         }
 
-        if ( unicode_id == eawt.CHAR_UNDEFINED ) {
+        if ( unicode_id == java.awt.event.KeyEvent.CHAR_UNDEFINED ) {
             switch ( keycode ) {
               case java.awt.event.KeyEvent.VK_F1:
                 evsdk.keycode = KeyEvent.KEY_F1;

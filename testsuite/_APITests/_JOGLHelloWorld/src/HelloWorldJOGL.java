@@ -6,6 +6,10 @@
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+
+// JOGL classes
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLDrawable;
@@ -16,7 +20,9 @@ public class HelloWorldJOGL implements GLEventListener {
 
     public HelloWorldJOGL() {
         //-----------------------------------------------------------------
-        GLCanvas canvas = new GLCanvas();
+        GLProfile glp = GLProfile.get(GLProfile.GL2); 
+        GLCapabilities caps = new GLCapabilities(glp);
+        GLCanvas canvas = new GLCanvas(caps);
         canvas.addGLEventListener(this);
 
         //-----------------------------------------------------------------

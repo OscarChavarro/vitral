@@ -10,7 +10,9 @@ package vsdk.toolkit.render.jogl;
 import java.util.ArrayList;
 
 // JOGL classes
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -43,7 +45,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
             gluQuadric = glu.gluNewQuadric();
         }
 
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 
         double r1, r2, h;
         int slices = 8;
@@ -75,16 +77,16 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         q.setPoints(false);
         q.setBumpMap(false);
         q.setNormals(false);
-        q.setShadingType(q.SHADING_TYPE_FLAT);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
 
-        gl.glShadeModel(gl.GL_SMOOTH);
+        gl.glShadeModel(GL2.GL_SMOOTH);
 
         ColorRgb c;
 
         int i;
 
         //-----------------------------------------------------------------
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
         for ( i = 0; i < things.size(); i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
@@ -97,7 +99,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
                 position = r.getPosition();
                 gl.glTranslated(position.x, position.y, position.z);
                 JoglMatrixRenderer.activate(gl, r.getRotation());
-                gl.glDisable(gl.GL_LIGHTING);
+                gl.glDisable(GL2.GL_LIGHTING);
                 c = r.getMaterial().getDiffuse();
                 gl.glColor3d(c.r, c.g, c.b);
                 q.setWireColor(c);
@@ -112,7 +114,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         }
 
         //-----------------------------------------------------------------
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHTING);
         for ( i = 9; i < things.size() && i < 12; i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
@@ -145,9 +147,9 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         q.setPoints(false);
         q.setBumpMap(false);
         q.setNormals(false);
-        q.setShadingType(q.SHADING_TYPE_GOURAUD);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
 
-        gl.glShadeModel(gl.GL_SMOOTH);
+        gl.glShadeModel(GL2.GL_SMOOTH);
 
         int i;
         for ( i = 0; i < things.size(); i++ ) {
