@@ -10,8 +10,6 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
-import com.jogamp.opengl.cg.CgGL;
-import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -71,7 +69,7 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
     public static void draw(GL2 gl, InfinitePlane s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
-        JoglGeometryRenderer.activateShaders(gl, s, c);
+        //JoglCgGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
@@ -80,7 +78,7 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
             drawInfinitePlaneElements(gl, s, slices, stacks);
         }
         if ( q.isWiresSet() ) {
-            JoglRenderer.disableNvidiaCgProfiles();
+            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);

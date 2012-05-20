@@ -880,4 +880,12 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     to make a plugin loader for vitral subclasses :)
   - 1h: ShapeDescriptor2DGeneratorFourier class and test program
 
+2012 may 1, Oscar Chavarro <<>>
+  - 4h: Upgrading JOGL code to make it compatible with may 1 2012 version 
+    of JOGL2 library and Java7.
+
+2012 may 20, Oscar Chavarro <<>>
+  - 1h48min: joglcg package created, and Nvidia Cg functionality refactored,
+    jme functionality refactored
+
 ===========================================================================

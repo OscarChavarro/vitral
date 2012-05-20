@@ -1,17 +1,13 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 14 2006 - Oscar Chavarro: Original base version                 =
-//= - December 20 2006 - Oscar Chavarro: Explicit mesh building independent =
-//=   of GLUT/GLU utilities.                                                =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -19,8 +15,10 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgGeometryRenderer;
 
-public class JoglSphereRenderer extends JoglRenderer {
+public class JoglCgSphereRenderer extends JoglCgRenderer {
 
     /**
     @todo check this method for efficiency improvement
@@ -71,6 +69,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     binormals
     */
     private static void drawVertexNormals(GL2 gl, double r, int slices, int stacks) {
+        JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
@@ -112,6 +111,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     private static void drawPoints(GL2 gl, double r, int slices, int stacks) {
+        JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glColor3d(1, 0, 0);
@@ -135,12 +135,36 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     /**
-    Generates the relevant JOGL/OpenGL primitives for a sphere's vertex.
+    Generates the relevant JOGL/OpenGL + Cg primitives for a sphere's vertex.
     */
     private static void
     drawVertex(GL2 gl, double theta, double phi, double s, double t,
                Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
     {
+        //- If inside a Cg schema, pass non standard OpenGL parameters ----
+        if ( renderingWithNvidiaGpu() ) {
+            CGparameter tangentParam;
+            CGparameter binormalParam;
+            double vectorarray[];
+
+            sphereTangent(T, theta, phi);
+            tangentParam = accessNvidiaGpuVertexParameter("TObject");
+            if ( tangentParam != null ) {
+                vectorarray = T.exportToDoubleArrayVect();
+                CgGL.cgGLSetParameter3dv(tangentParam, vectorarray, 0);
+            }
+
+            sphereBinormal(B, theta, phi);
+            binormalParam = accessNvidiaGpuVertexParameter("BObject");
+            if ( binormalParam != null ) {
+                B.x = 1;
+                B.y = 0;
+                B.z = 0;
+                vectorarray = B.exportToDoubleArrayVect();
+                CgGL.cgGLSetParameter3dv(binormalParam, vectorarray, 0);
+            }
+        }
+
         //- Pass standard vertex parameters to OpenGL ---------------------
         sphereNormal(N, theta, phi);
         gl.glTexCoord2d(1.0-s, t);
@@ -220,14 +244,16 @@ public class JoglSphereRenderer extends JoglRenderer {
     public static void draw(GL2 gl, Sphere s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
+        JoglCgGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
-            JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
+            JoglCgGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
             drawSphereElements(gl, s.getRadius(), slices, stacks);
         }
         if ( q.isWiresSet() ) {
+            JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);
@@ -250,10 +276,10 @@ public class JoglSphereRenderer extends JoglRenderer {
             drawVertexNormals(gl, s.getRadius(), slices, stacks);
         }
         if ( q.isBoundingVolumeSet() ) {
-            JoglGeometryRenderer.drawMinMaxBox(gl, s, q);
+            JoglCgGeometryRenderer.drawMinMaxBox(gl, s, q);
         }
         if ( q.isSelectionCornersSet() ) {
-            JoglGeometryRenderer.drawSelectionCorners(gl, s, q);
+            JoglCgGeometryRenderer.drawSelectionCorners(gl, s, q);
         }
     }
 

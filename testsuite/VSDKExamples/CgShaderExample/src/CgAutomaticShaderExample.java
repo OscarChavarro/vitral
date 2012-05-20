@@ -44,12 +44,10 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.jogl.JoglRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgLightRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgSimpleBodyRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
 /**
 This program is an extended variation of the program
@@ -155,6 +153,8 @@ public class CgAutomaticShaderExample
         // 3.3. Object attribute -> how it will render
         quality = new RendererConfiguration();
         quality.setBumpMap(true);
+        quality.setTexture(true);
+        quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         // 4. Object attribute -> geometrical transformations
         xrotation = 0;
@@ -215,7 +215,7 @@ public class CgAutomaticShaderExample
         //-----------------------------------------------------------------
         if ( firstTimer ) {
             firstTimer = false;
-            JoglRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
+            JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
         }
 
         //-----------------------------------------------------------------
@@ -225,7 +225,7 @@ public class CgAutomaticShaderExample
 
         //- Shader configuration from scene data --------------------------
         JoglCameraRenderer.activate(gl, camera);
-        JoglLightRenderer.activate(gl, light);
+        JoglCgLightRenderer.activate(gl, light);
 
         //- Body transforms -----------------------------------------------
         gl.glLoadIdentity();
@@ -233,10 +233,10 @@ public class CgAutomaticShaderExample
         gl.glRotated(yrotation, 0, 1, 0);
         gl.glRotated(zrotation, 0, 0, 1);
 
-        JoglSimpleBodyRenderer.draw(gl, thing, camera, quality);
+        JoglCgSimpleBodyRenderer.draw(gl, thing, camera, quality);
 
         gl.glLoadIdentity();
-        JoglLightRenderer.draw(gl, light);
+        JoglCgLightRenderer.draw(gl, light);
     }
 
     public void
@@ -365,8 +365,8 @@ public class CgAutomaticShaderExample
 
     public static void main(String[] argv) {
         //-----------------------------------------------------------------
-        JoglRenderer.verifyOpenGLAvailability();
-        JoglRenderer.verifyNvidiaCgAvailability();
+        JoglCgRenderer.verifyOpenGLAvailability();
+        JoglCgRenderer.verifyNvidiaCgAvailability();
 
         //-----------------------------------------------------------------
         CgAutomaticShaderExample instance = new CgAutomaticShaderExample(false);

@@ -24,4 +24,5 @@ Following a list of detected BUGS.
       normal map.
     . Display lists freezes CG parameters to the values valid only for
       object when compiling the list, making object inalterable.
-
+  - On testsuite/VSDKExamples/CgShaderExample CgAutomaticShaderExample.java
+    test object fails to activate texture map on first frame.

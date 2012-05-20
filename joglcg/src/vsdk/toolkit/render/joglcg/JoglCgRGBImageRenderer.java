@@ -1,13 +1,6 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 25 2005 - Oscar Chavarro: Original base version              =
-//= - December 7 2005 - Fabio Aroca / Eduardo Mendoza: importJOGLimage and  =
-//=   getImageJOGL methods added                                            =
-//= - March 14 2006 - Oscar Chavarro: quality check                         =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // Java base classes
 import java.io.FileInputStream;
@@ -22,13 +15,17 @@ import javax.media.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.cg.CGparameter;
+import com.jogamp.opengl.cg.CgGL;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.render.jogl._JoglRGBImageRendererImageAssociation;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
-public class JoglRGBImageRenderer extends JoglRenderer 
+public class JoglCgRGBImageRenderer extends JoglCgRenderer 
 {
     private static ArrayList<_JoglRGBImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererImageAssociation>();
     //private static GLU glu = null;
@@ -159,13 +156,30 @@ public class JoglRGBImageRenderer extends JoglRenderer
     {
         int list = activateBase(gl, img);
 
+        //-----------------------------------------------------------------
+        CGparameter param;
+        if ( nvidiaCgAutomaticMode ) {
+            param = CgGL.cgGetNamedParameter(JoglCgRenderer.NvidiaGpuPixelProgramTexture,
+            "textureMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+            param = CgGL.cgGetNamedParameter(JoglCgRenderer.NvidiaGpuPixelProgramTextureBump,
+            "textureMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+        }
         return list;
     }
 
     public static int activateAsNormalMap(GL2 gl, RGBImage img, RendererConfiguration quality)
     {
         int list = -1;
-
+        //-----------------------------------------------------------------
+        CGparameter param;
+        if ( nvidiaCgAutomaticMode && !nvidiaCgErrorReported &&
+             needCg(quality) ) {
+            list = activateBase(gl, img);
+            param = CgGL.cgGetNamedParameter(JoglCgRenderer.NvidiaGpuPixelProgramTextureBump, "normalMap");
+            CgGL.cgGLSetTextureParameter(param, list);
+        }
         return list;
     }
 

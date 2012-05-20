@@ -1,10 +1,6 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - May 27 2007 - Oscar Chavarro: Original base version                   =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // Java classes
 import java.util.ArrayList;
@@ -25,11 +21,11 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl._JoglSimpleBodyRendererDisplayList;
 
 /**
-The `JoglSimpleBodyRenderer` class is a helper for the JOGL/OpenGL rendering
+The `JoglCgSimpleBodyRenderer` class is a helper for the JOGL/OpenGL rendering
 of geometries. Note that this class is responsible of:
   - Defining one object transforms
   - Activating global materials and maps (i.e. texture and normal maps)
@@ -37,7 +33,7 @@ of geometries. Note that this class is responsible of:
 Optionally, this class can do an automatic managing of display lists for
 (geometry / renderer configuration)s.
 */
-public class JoglSimpleBodyRenderer extends JoglRenderer {
+public class JoglCgSimpleBodyRenderer extends JoglCgRenderer {
 
     private static boolean usingDisplayLists = false;
     private static ArrayList<_JoglSimpleBodyRendererDisplayList> displayLists = null;
@@ -118,7 +114,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         gl.glScaled(scale.x, scale.y, scale.z);
 
         gl.glColor3d(1, 1, 1);
-        JoglMaterialRenderer.activate(gl, b.getMaterial());
+        JoglCgMaterialRenderer.activate(gl, b.getMaterial());
 
         //-----------------------------------------------------------------
         Image texture;
@@ -127,7 +123,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         if ( q.isTextureSet() ) {
             // Define texture parameters, including for further local
-            // textures activated within JoglGeometryRenderers
+            // textures activated within JoglCgGeometryRenderers
             gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
                 GL.GL_TRUE);
             gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
@@ -144,7 +140,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             // Activate global texture
             if ( (texture != null) ) {
                 gl.glEnable(GL.GL_TEXTURE_2D);
-                JoglImageRenderer.activate(gl, texture);
+                JoglCgImageRenderer.activate(gl, texture);
             }
         }
         else {
@@ -154,7 +150,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         //-----------------------------------------------------------------
         RGBImage nm = b.getNormalMapRgb();
         if ( q.isBumpMapSet() && (nm != null) ) {
-            JoglImageRenderer.activateAsNormalMap(gl, nm, q);
+            JoglCgImageRenderer.activateAsNormalMap(gl, nm, q);
         }
     }
 
@@ -162,13 +158,17 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
+        activateNvidiaGpuParameters(gl, q,
+            JoglCgRenderer.getCurrentVertexShader(), 
+            JoglCgRenderer.getCurrentPixelShader());
+
         gl.glPushMatrix();
 
         drawCommon(gl, b, c, q);
 
         //-----------------------------------------------------------------
         if ( !usingDisplayLists ) {
-            JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
+            JoglCgGeometryRenderer.draw(gl, b.getGeometry(), c, q);
         }
         else {
             int id;
@@ -180,7 +180,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             else {
                 id = createDisplayListId(gl, b.getGeometry(), q);
                 gl.glNewList(id, GL2.GL_COMPILE);
-                JoglGeometryRenderer.draw(gl, b.getGeometry(), c, q);
+                JoglCgGeometryRenderer.draw(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
                     VSDK.reportMessage(null, VSDK.WARNING, "JoglSimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
@@ -191,20 +191,25 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         //-----------------------------------------------------------------
         gl.glPopMatrix();
-        JoglImageRenderer.deactivate(gl, b.getTexture());
+        JoglCgImageRenderer.deactivate(gl, b.getTexture());
+        deactivateNvidiaGpuParameters(gl, q);
     }
 
     public static void drawWithVertexArrays(GL2 gl, SimpleBody b,
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
+        activateNvidiaGpuParameters(gl, q,
+            JoglCgRenderer.getCurrentVertexShader(), 
+            JoglCgRenderer.getCurrentPixelShader());
+
         gl.glPushMatrix();
 
         drawCommon(gl, b, c, q);
 
         //-----------------------------------------------------------------
         if ( !usingDisplayLists ) {
-            JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
+            JoglCgGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
         }
         else {
             int id;
@@ -216,7 +221,7 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
             else {
                 id = createDisplayListId(gl, b.getGeometry(), q);
                 gl.glNewList(id, GL2.GL_COMPILE);
-                JoglGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
+                JoglCgGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
                     VSDK.reportMessage(null, VSDK.WARNING, "JoglSimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
@@ -227,7 +232,8 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
 
         //-----------------------------------------------------------------
         gl.glPopMatrix();
-        JoglImageRenderer.deactivate(gl, b.getTexture());
+        JoglCgImageRenderer.deactivate(gl, b.getTexture());
+        deactivateNvidiaGpuParameters(gl, q);
     }
 }
 

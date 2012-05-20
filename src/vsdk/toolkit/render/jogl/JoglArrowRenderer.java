@@ -13,6 +13,7 @@ import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
+// VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
@@ -66,7 +67,7 @@ public class JoglArrowRenderer extends JoglRenderer {
         }
 
         if ( q.isWiresSet() ) {
-            JoglRenderer.disableNvidiaCgProfiles();
+            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);
@@ -83,7 +84,7 @@ public class JoglArrowRenderer extends JoglRenderer {
         }
 
         if ( q.isPointsSet() ) {
-            JoglRenderer.disableNvidiaCgProfiles();
+            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);

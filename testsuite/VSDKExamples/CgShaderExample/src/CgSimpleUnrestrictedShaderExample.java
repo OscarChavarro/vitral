@@ -47,11 +47,11 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.jogl.JoglRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgMaterialRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgImageRenderer;
 
 /**
 This program constitutes a template for VitralSDK based applications which
@@ -171,7 +171,7 @@ public class CgSimpleUnrestrictedShaderExample
     }
 
     public void createCgElements() {
-        if ( !JoglRenderer.tryToEnableNvidiaCg() ) {
+        if ( !JoglCgRenderer.tryToEnableNvidiaCg() ) {
             System.out.println("Nvidia Cg not available. Turning off GPU support!");
             NvidiaGpuActive = false;
             NvidiaGpuAvailable = false;
@@ -180,10 +180,10 @@ public class CgSimpleUnrestrictedShaderExample
         try {
             //-----------------------------------------------------------------
             NvidiaGpuVertexProgramTexture =
-              JoglRenderer.loadNvidiaGpuVertexShader(
+              JoglCgRenderer.loadNvidiaGpuVertexShader(
                 new FileInputStream("../../../etc/cgShaders/PhongTextureVertexShader.cg"));
             NvidiaGpuPixelProgramTexture =
-              JoglRenderer.loadNvidiaGpuPixelShader(
+              JoglCgRenderer.loadNvidiaGpuPixelShader(
                 new FileInputStream("../../../etc/cgShaders/PhongTexturePixelShader.cg"));
         }
         catch ( Exception e ) {
@@ -246,7 +246,7 @@ public class CgSimpleUnrestrictedShaderExample
 
         if ( NvidiaGpuActive ) {
             //- Global per-frame shader activation ----------------------------
-            JoglRenderer.enableNvidiaCgProfiles();
+            JoglCgRenderer.enableNvidiaCgProfiles();
             CGprogram currentVertexProgram; // Use this variables to choose
             CGprogram currentPixelProgram;  // between various shaders...
             currentVertexProgram = NvidiaGpuVertexProgramTexture;
@@ -256,7 +256,7 @@ public class CgSimpleUnrestrictedShaderExample
             CgGL.cgGLBindProgram(currentPixelProgram);
 
             //- Shader configuration for special features ---------------------
-            // (This should be managed by JoglRenderer, usually with the help
+            // (This should be managed by JoglCgRenderer, usually with the help
             // of RendererConfiguration)
             {
             double withTexture = 0.0;
@@ -299,7 +299,7 @@ public class CgSimpleUnrestrictedShaderExample
             }
 
             //- Shader configuration from material data -----------------------
-            // (This should be managed by JoglMaterialRenderer)
+            // (This should be managed by JoglCgMaterialRenderer)
             {
             double Ka[] = material.getAmbient().exportToDoubleArrayVect();
             double Kd[] = material.getDiffuse().exportToDoubleArrayVect();
@@ -348,7 +348,7 @@ public class CgSimpleUnrestrictedShaderExample
         }
         else {
             JoglLightRenderer.activate(gl, light);
-            JoglMaterialRenderer.activate(gl, material);
+            JoglCgMaterialRenderer.activate(gl, material);
             if ( quality.isTextureSet() ) {
                 gl.glEnable(gl.GL_TEXTURE_2D);
             }
@@ -362,7 +362,7 @@ public class CgSimpleUnrestrictedShaderExample
         JoglGeometryRenderer.draw(gl, geometry, camera, quality);
 
         if ( NvidiaGpuActive ) {
-            JoglRenderer.disableNvidiaCgProfiles();
+            JoglCgRenderer.disableNvidiaCgProfiles();
         }
         gl.glLoadIdentity();
         JoglLightRenderer.draw(gl, light);
@@ -383,7 +383,7 @@ public class CgSimpleUnrestrictedShaderExample
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
             gl.GL_CLAMP_TO_EDGE);
 
-        glList = JoglImageRenderer.activate(gl, textureMap);
+        glList = JoglCgImageRenderer.activate(gl, textureMap);
     }
 
     public void
@@ -521,9 +521,9 @@ public class CgSimpleUnrestrictedShaderExample
 
     public static void main(String[] argv) {
         //-----------------------------------------------------------------
-        JoglRenderer.verifyOpenGLAvailability();
-        JoglRenderer.verifyNvidiaCgAvailability();
-        JoglRenderer.setNvidiaCgAutomaticMode(false);
+        JoglCgRenderer.verifyOpenGLAvailability();
+        JoglCgRenderer.verifyNvidiaCgAvailability();
+        JoglCgRenderer.setNvidiaCgAutomaticMode(false);
 
         //-----------------------------------------------------------------
         CgSimpleUnrestrictedShaderExample instance = new CgSimpleUnrestrictedShaderExample(false);

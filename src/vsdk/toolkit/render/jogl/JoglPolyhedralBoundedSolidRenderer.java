@@ -16,8 +16,6 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
-import com.jogamp.opengl.cg.CgGL;
-import com.jogamp.opengl.cg.CGparameter;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -658,7 +656,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
          Camera c, RendererConfiguration quality)
     {
         //-----------------------------------------------------------------
-        JoglRenderer.disableNvidiaCgProfiles();
+        //JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glEnable(GL2.GL_NORMALIZE);
 

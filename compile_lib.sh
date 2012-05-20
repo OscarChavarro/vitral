@@ -1,15 +1,15 @@
 #!/bin/sh
 #===========================================================================
 
-BASIC_CLASSES="vsdk/toolkit/common/*.java vsdk/toolkit/common/linealAlgebra/*.java vsdk/toolkit/environment/*.java vsdk/toolkit/environment/geometry/*.java vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java vsdk/toolkit/environment/scene/*.java vsdk/toolkit/media/*.java vsdk/toolkit/render/*.java vsdk/toolkit/gui/Gizmo.java vsdk/toolkit/gui/ViewportWindow.java vsdk/toolkit/gui/ViewportWindowSetManager.java vsdk/toolkit/gui/ProgressMonitor.java vsdk/toolkit/gui/ProgressMonitorConsole.java vsdk/toolkit/gui/Controller.java vsdk/toolkit/gui/PresentationElement.java vsdk/toolkit/processing/*.java vsdk/toolkit/gui/KeyEvent.java"
+BASIC_CLASSES="./src/vsdk/toolkit/common/*.java ./src/vsdk/toolkit/common/linealAlgebra/*.java ./src/vsdk/toolkit/environment/*.java ./src/vsdk/toolkit/environment/geometry/*.java ./src/vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java ./src/vsdk/toolkit/environment/scene/*.java ./src/vsdk/toolkit/media/*.java ./src/vsdk/toolkit/render/*.java ./src/vsdk/toolkit/gui/Gizmo.java ./src/vsdk/toolkit/gui/ViewportWindow.java ./src/vsdk/toolkit/gui/ViewportWindowSetManager.java ./src/vsdk/toolkit/gui/ProgressMonitor.java ./src/vsdk/toolkit/gui/ProgressMonitorConsole.java ./src/vsdk/toolkit/gui/Controller.java ./src/vsdk/toolkit/gui/PresentationElement.java ./src/vsdk/toolkit/processing/*.java ./src/vsdk/toolkit/gui/KeyEvent.java"
 
-IO_CLASSES="vsdk/toolkit/io/*.java vsdk/toolkit/io/metadata/*.java vsdk/toolkit/io/image/ImageNotRecognizedException.java vsdk/toolkit/io/image/ImagePersistenceSGI.java vsdk/toolkit/io/image/RGBColorPalettePersistence.java vsdk/toolkit/io/image/NativeImageReaderWrapper.java vsdk/toolkit/io/image/_NativeImageReaderWrapperHeaderInfo.java vsdk/toolkit/io/geometry/EnvironmentPersistence.java vsdk/toolkit/io/geometry/ViewpointBinaryPersistence.java vsdk/toolkit/io/geometry/FontReader.java vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.java vsdk/toolkit/io/geometry/ParametricCurvePersistence.java vsdk/toolkit/io/geometry/Reader3ds.java vsdk/toolkit/io/geometry/ReaderAse.java vsdk/toolkit/io/geometry/ReaderMitScene.java"
+IO_CLASSES="./src/vsdk/toolkit/io/*.java ./src/vsdk/toolkit/io/metadata/*.java ./src/vsdk/toolkit/io/image/ImageNotRecognizedException.java ./src/vsdk/toolkit/io/image/ImagePersistenceSGI.java ./src/vsdk/toolkit/io/image/RGBColorPalettePersistence.java ./src/vsdk/toolkit/io/image/NativeImageReaderWrapper.java ./src/vsdk/toolkit/io/image/_NativeImageReaderWrapperHeaderInfo.java ./src/vsdk/toolkit/io/geometry/EnvironmentPersistence.java ./src/vsdk/toolkit/io/geometry/ViewpointBinaryPersistence.java ./src/vsdk/toolkit/io/geometry/FontReader.java ./src/vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.java ./src/vsdk/toolkit/io/geometry/ParametricCurvePersistence.java ./src/vsdk/toolkit/io/geometry/Reader3ds.java ./src/vsdk/toolkit/io/geometry/ReaderAse.java ./src/vsdk/toolkit/io/geometry/ReaderMitScene.java"
 
-AWT_CLASSES="vsdk/toolkit/render/awt/*.java vsdk/toolkit/gui/CameraController.java vsdk/toolkit/gui/AwtSystem.java vsdk/toolkit/gui/CameraControllerAquynza.java vsdk/toolkit/gui/CameraControllerBlender.java vsdk/toolkit/gui/TranslateGizmo.java vsdk/toolkit/gui/RotateGizmo.java vsdk/toolkit/gui/ScaleGizmo.java vsdk/toolkit/gui/RendererConfigurationController.java vsdk/toolkit/io/image/ImagePersistence.java vsdk/toolkit/io/image/TargaImage.java vsdk/toolkit/io/geometry/ReaderObj.java"
+AWT_CLASSES="./src/vsdk/toolkit/render/awt/*.java ./src/vsdk/toolkit/gui/CameraController.java ./src/vsdk/toolkit/gui/AwtSystem.java ./src/vsdk/toolkit/gui/CameraControllerAquynza.java ./src/vsdk/toolkit/gui/CameraControllerBlender.java ./src/vsdk/toolkit/gui/TranslateGizmo.java ./src/vsdk/toolkit/gui/RotateGizmo.java ./src/vsdk/toolkit/gui/ScaleGizmo.java ./src/vsdk/toolkit/gui/RendererConfigurationController.java ./src/vsdk/toolkit/io/image/ImagePersistence.java ./src/vsdk/toolkit/io/image/TargaImage.java ./src/vsdk/toolkit/io/geometry/ReaderObj.java"
 
-JOGL_CLASSES="vsdk/toolkit/render/jogl/*.java"
+JOGL_CLASSES="./src/vsdk/toolkit/render/jogl/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java"
 
-VITRALARCHITECTURE_CLASSES="vsdk/framework/*.java vsdk/framework/shapeMatching/*.java vsdk/framework/shapeMatching/plugins/*.java"
+VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java"
 
 #---------------------------------------------------------------------------
 
@@ -23,9 +23,7 @@ if [ ! -d ./lib ]; then
 fi
 
 clear
-cd src
-javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath .:$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar -d ../classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
-cd ..
+javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_joglcg:$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..

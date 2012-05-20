@@ -1,10 +1,6 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 17 2006 - Oscar Chavarro: Original base version                 =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // Java basic
 import java.util.ArrayList;
@@ -12,13 +8,16 @@ import java.util.ArrayList;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
-public class JoglLightRenderer extends JoglRenderer {
+public class JoglCgLightRenderer extends JoglCgRenderer {
 
     public static int supportedLightsInOpenGL = 8;
 
@@ -34,6 +33,22 @@ public class JoglLightRenderer extends JoglRenderer {
 
     public static void activate(GL2 gl, Light l)
     {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            ArrayList<CGprogram> allVertexShaders;
+            ArrayList<CGprogram> allTextureShaders;
+            allVertexShaders = getAllVertexShaders();
+            allTextureShaders = getAllPixelShaders();
+
+            int i;
+
+            for ( i = 0; i < allVertexShaders.size(); i++ ) {
+                activateNvidiaGpuParameters(gl, l,
+                                            allVertexShaders.get(i),
+                                            allTextureShaders.get(i));
+            }
+        }
+
         //-----------------------------------------------------------------
         float[] lightPosition=l.getPosition().exportToFloatArrayVect();
         float global_ambient[] = {0, 0, 0, 1};
@@ -69,6 +84,19 @@ public class JoglLightRenderer extends JoglRenderer {
         gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_QUADRATIC_ATTENUATION, quadricAtenuation);
 */
         gl.glPopMatrix();
+    }
+
+    public static void activateNvidiaGpuParameters(GL2 gl, Light light,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Vector3D lp = light.getPosition();
+        double lpos[] = {lp.x, lp.y, lp.z};
+        double lightColor[] = {1.0, 1.0, 1.0};
+
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "lightPositionGlobal"), lpos, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            pixelShader, "lightColor"), lightColor, 0);
     }
 
     public static void draw(GL2 gl, Light l)

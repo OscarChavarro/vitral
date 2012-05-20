@@ -1,26 +1,31 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 17 2006 - Oscar Chavarro: Original base version                 =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
-public class JoglMaterialRenderer extends JoglRenderer {
+public class JoglCgMaterialRenderer extends JoglCgRenderer {
     private static boolean errorReported = false;
     private static boolean disablingTransparency = false;
 
     public static void activate(GL2 gl, Material m)
     {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            activateNvidiaGpuParameters(gl, m,
+                currentVertexShader, currentPixelShader);
+        }
+
         //-----------------------------------------------------------------
         if ( m == null ) {
             if ( errorReported == false ) {
@@ -73,6 +78,22 @@ public class JoglMaterialRenderer extends JoglRenderer {
         gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, specular, 0);
         //gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_EMISSION, emission, 0); // Do not set! take care!
         gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, phongExp);
+    }
+
+    public static void activateNvidiaGpuParameters(GL2 gl, Material material,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        double Ka[] = material.getAmbient().exportToDoubleArrayVect();
+        double Kd[] = material.getDiffuse().exportToDoubleArrayVect();
+        double Ks[] = material.getSpecular().exportToDoubleArrayVect();
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "ambientColor"), Ka, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "diffuseColor"), Kd, 0);
+        CgGL.cgGLSetParameter3dv(CgGL.cgGetNamedParameter(
+            vertexShader, "specularColor"), Ks, 0);
+        CgGL.cgGLSetParameter1d(CgGL.cgGetNamedParameter(
+            pixelShader, "phongExponent"), material.getPhongExponent());
     }
 
 }

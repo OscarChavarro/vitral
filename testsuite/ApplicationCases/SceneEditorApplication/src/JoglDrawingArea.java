@@ -58,7 +58,6 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
@@ -69,6 +68,7 @@ import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
@@ -198,10 +198,10 @@ public class JoglDrawingArea implements
             viewOrganizer.getViews().add(view);
             if ( i == viewOrganizer.getSelectedViewIndex() ) {
                 view.setSelected(true);
-	    }
-	    else {
+            }
+            else {
                 view.setSelected(false);
-	    }
+            }
         }
 
         viewOrganizer.updateLayout();
@@ -827,7 +827,7 @@ public class JoglDrawingArea implements
 
         if ( firstTimer ) {
             firstTimer = false;
-            JoglRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
+            JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
         }
 
         debugProjectedViewsIfNeeded(gl);
@@ -847,10 +847,10 @@ public class JoglDrawingArea implements
 
         if ( n == 1 && parent.fullScreenGuiMode ) {
             drawSelectedViewFullScreen(gl);
-	}
-	else {
+        }
+        else {
             drawMultipleViews(gl);
-	}
+        }
     }
 
     private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
@@ -1501,17 +1501,17 @@ public class JoglDrawingArea implements
              ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
             switch ( keycode ) {
               case KeyEvent.VK_F:
-		if ( parent.fullScreenGuiMode ) {
+                if ( parent.fullScreenGuiMode ) {
                     parent.fullScreenGuiMode = false;
-		}
-		else {
+                }
+                else {
                     parent.fullScreenGuiMode = true;
-		}
+                }
                 parent.destroyGUI();
                 parent.createGUI();
                 break;
             }
-	}
+        }
 
         if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
@@ -1519,12 +1519,12 @@ public class JoglDrawingArea implements
                 //- Multiple views control -----------------------------------
               case '.':
                 val = viewOrganizer.getSelectedViewIndex();
-		viewOrganizer.getViews().get(val).setSelected(false);
+                viewOrganizer.getViews().get(val).setSelected(false);
                 val ++;
                 if ( val >= viewOrganizer.getViews().size() ) {
                     val = 0;
                 }
-		viewOrganizer.getViews().get(val).setSelected(true);
+                viewOrganizer.getViews().get(val).setSelected(true);
 
                 viewOrganizer.setSelectedViewIndex(val);
                 viewOrganizer.updateLayout();

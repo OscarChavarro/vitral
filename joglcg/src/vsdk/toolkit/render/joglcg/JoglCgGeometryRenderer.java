@@ -1,15 +1,13 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 15 2006 - Oscar Chavarro: Original base version                 =
-//===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -33,11 +31,38 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 import vsdk.toolkit.environment.geometry.QuadMesh;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
+import vsdk.toolkit.render.jogl.JoglArrowRenderer;
+import vsdk.toolkit.render.jogl.JoglBoxRenderer;
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglConeRenderer;
+import vsdk.toolkit.render.jogl.JoglFunctionalExplicitSurfaceRenderer;
+import vsdk.toolkit.render.jogl.JoglInfinitePlaneRenderer;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer;
+import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;
+import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.JoglQuadMeshRenderer;
+import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
+import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
+import vsdk.toolkit.render.jogl.JoglTriangleStripMeshRenderer;
+import vsdk.toolkit.render.jogl.JoglVoxelVolumeRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
-public class JoglGeometryRenderer extends JoglRenderer 
+public class JoglCgGeometryRenderer extends JoglCgRenderer 
 {
     private static Vector3D p = new Vector3D();
     private static Vector3D n = new Vector3D();
+
+    public static void activateShaders(GL2 gl, Geometry g, Camera c)
+    {
+        //-----------------------------------------------------------------
+        if ( nvidiaCgAutomaticMode ) {
+            JoglCameraRenderer.activateNvidiaGpuParameters(gl, c,
+                currentVertexShader, currentPixelShader);
+            activateNvidiaGpuParameters(gl, g, c,
+                currentVertexShader, currentPixelShader);
+        }
+    }
 
     public static void prepareSurfaceQuality(GL2 gl, RendererConfiguration quality)
     {
@@ -78,6 +103,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)
     {
         gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
+        JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
@@ -127,6 +153,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         delta = delta.multiply(linePercent);
 
         gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
+        JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
@@ -200,6 +227,38 @@ public class JoglGeometryRenderer extends JoglRenderer
         drawSelectionCorners(gl, g.getMinMax(), q);
     }
 
+    public static void activateNvidiaGpuParameters(GL2 gl, Geometry g,
+        Camera camera, CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Matrix4x4 MProjection;
+        Matrix4x4 MModelviewGlobal;
+        Matrix4x4 MModelviewLocal, MModelviewLocalIT, MCombined;
+        double matrixarray[];
+
+        MProjection = camera.calculateViewVolumeMatrix();
+        MModelviewGlobal = camera.calculateTransformationMatrix();
+        MModelviewLocal = MModelviewGlobal.multiply(
+            JoglMatrixRenderer.importJOGL(gl, GL2.GL_MODELVIEW_MATRIX));
+        MCombined = MProjection.multiply(MModelviewLocal);
+        MModelviewLocalIT = MModelviewLocal.inverse();
+        MModelviewLocalIT.transpose();
+
+        matrixarray = MCombined.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewProjectionLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocal.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocal"),
+            matrixarray, 0);
+
+        matrixarray = MModelviewLocalIT.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(
+            vertexShader, "modelViewLocalIT"),
+            matrixarray, 0);
+    }
+
     /**
     @todo Homogenize all of the draw method signatures. Perhaps this code can
     be generalized to search the corresponding rendering class to a given
@@ -215,7 +274,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
 
         if ( g instanceof Sphere ) {
-            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+            JoglCgSphereRenderer.draw(gl, (Sphere)g, c, q);
         }
         if ( g instanceof InfinitePlane ) {
             JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
@@ -273,7 +332,7 @@ public class JoglGeometryRenderer extends JoglRenderer
         }
 
         if ( g instanceof Sphere ) {
-            JoglSphereRenderer.draw(gl, (Sphere)g, c, q);
+            JoglCgSphereRenderer.draw(gl, (Sphere)g, c, q);
         }
         if ( g instanceof InfinitePlane ) {
             JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
