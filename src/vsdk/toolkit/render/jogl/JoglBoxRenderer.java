@@ -13,8 +13,6 @@ import javax.media.opengl.GL2GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
-import com.jogamp.opengl.cg.CgGL;
-import com.jogamp.opengl.cg.CGparameter;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;

@@ -1,11 +1,4 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 22 2005 - David Diaz: Original base version                    =
-//= - November 15 2005 - Oscar Chavarro: Migrated to JOGL Beta Version      =
-//= - November 28 2005 - Oscar Chavarro: Added activateCenter method        =
-//= - February 27 2006 - Oscar Chavarro: Added drawGL method                =
-//===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
@@ -13,6 +6,8 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.cg.CgGL;
+import com.jogamp.opengl.cg.CGprogram;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -184,6 +179,26 @@ public class JoglCameraRenderer extends JoglRenderer
         //drawBase(gl);
         drawVolume(gl, cam);
         gl.glPopMatrix();
+    }
+
+    public static void activateNvidiaGpuParameters(GL2 gl, Camera camera,
+        CGprogram vertexShader, CGprogram pixelShader)
+    {
+        Matrix4x4 MProjection;
+        Matrix4x4 MModelviewGlobal;
+        Vector3D cp = camera.getPosition();
+        double matrixarray[];
+        double vectorarray[] = {cp.x, cp.y, cp.z};
+
+        MProjection = camera.calculateViewVolumeMatrix();
+        MModelviewGlobal = camera.calculateTransformationMatrix();
+        matrixarray = MModelviewGlobal.exportToDoubleArrayRowOrder();
+        CgGL.cgGLSetMatrixParameterdr(
+            CgGL.cgGetNamedParameter(vertexShader,
+                "modelViewGlobal"), matrixarray, 0);
+        CgGL.cgGLSetParameter3dv(
+            CgGL.cgGetNamedParameter(vertexShader,
+                "cameraPositionGlobal"), vectorarray, 0);
     }
 
 }

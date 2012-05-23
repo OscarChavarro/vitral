@@ -43,8 +43,8 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgCameraRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgLightRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgSimpleBodyRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgRenderer;
@@ -224,7 +224,7 @@ public class CgAutomaticShaderExample
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
         //- Shader configuration from scene data --------------------------
-        JoglCameraRenderer.activate(gl, camera);
+        JoglCgCameraRenderer.activate(gl, camera);
         JoglCgLightRenderer.activate(gl, light);
 
         //- Body transforms -----------------------------------------------
