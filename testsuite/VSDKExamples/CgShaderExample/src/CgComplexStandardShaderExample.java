@@ -281,7 +281,7 @@ public class CgComplexStandardShaderExample
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
         //-----------------------------------------------------------------
-        JoglCameraRenderer.activate(gl, camera);
+        JoglCgCameraRenderer.activate(gl, camera);
 
         //-----------------------------------------------------------------
         gl.glLoadIdentity();
@@ -320,7 +320,7 @@ public class CgComplexStandardShaderExample
             //- Shader configuration from scene data --------------------------
             JoglCgRenderer.activateNvidiaGpuParameters(gl, quality,
                 currentVertexProgram, currentPixelProgram);
-            JoglCameraRenderer.activateNvidiaGpuParameters(gl, camera,
+            JoglCgCameraRenderer.activateNvidiaGpuParameters(gl, camera,
                 currentVertexProgram, currentPixelProgram);
             JoglCgLightRenderer.activateNvidiaGpuParameters(gl, light,
                 currentVertexProgram, currentPixelProgram);

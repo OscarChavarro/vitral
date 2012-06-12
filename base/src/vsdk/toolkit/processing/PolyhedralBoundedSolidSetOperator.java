@@ -527,8 +527,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     identifiers of `solidToUpdate` so that they do not overlap with
     `referenceSolid` identifiers.
     */
-    private static void updmaxnames(PolyhedralBoundedSolid solidToUpdate,
-                             PolyhedralBoundedSolid referenceSolid)
+    public static void updmaxnames(PolyhedralBoundedSolid solidToUpdate,
+                                   PolyhedralBoundedSolid referenceSolid)
     {
         _PolyhedralBoundedSolidVertex v;
         _PolyhedralBoundedSolidFace f;
@@ -665,7 +665,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     }
 
     /**
-    Following program [MANT1988].3.
+    Following program [MANT1988].15.3.
     */
     private static void doSetOpGenerate(
         _PolyhedralBoundedSolidEdge e,
@@ -2942,8 +2942,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int op, boolean withDebug)
     {
         if ( withDebug ) {
-            //debugFlags = DEBUG_01_STRUCTURE | DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_03_VERTEXFACECLASIFFIER | DEBUG_05_CONNECT | DEBUG_99_SHOWOPERATIONS;
-            debugFlags = DEBUG_01_STRUCTURE | DEBUG_05_CONNECT | DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_99_SHOWOPERATIONS;
+            debugFlags = DEBUG_01_STRUCTURE | DEBUG_02_GENERATOR | DEBUG_03_VERTEXFACECLASIFFIER |
+                DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_05_CONNECT | DEBUG_06_FINISH | 
+                DEBUG_99_SHOWOPERATIONS;
         }
         else {
             debugFlags = 0;
@@ -2975,20 +2976,21 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         inSolidB.maximizeFaces();
         inSolidA.validateModel();
         inSolidB.validateModel();
-
+        inSolidA.compactIds();
+        inSolidB.compactIds();
         updmaxnames(inSolidB, inSolidA);
+
+        if ( withDebug ) {
+            System.out.println("SOLID A:");
+            System.out.println(inSolidA);
+            System.out.println("SOLID B:");
+            System.out.println(inSolidB);
+        }
 
         setOpGenerate(inSolidA, inSolidB);
 
         setOpClassify(op, inSolidA, inSolidB);
 
-/*
-        if ( withDebug ) {
-            System.out.println(inSolidA);
-            System.out.println(inSolidB);
-            System.exit(1);
-        }
-*/
         if ( sonea.size() == 0 && sonvv.size() == 0 ) {
             // No intersections found
             if ( op == INTERSECTION ) {
@@ -3009,6 +3011,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         setOpFinish(inSolidA, inSolidB, res, op);
         res.validateModel();
+        res.compactIds();
         res.maximizeFaces();
         res.compactIds();
         res.validateModel();

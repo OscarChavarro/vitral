@@ -33,7 +33,6 @@ import vsdk.toolkit.environment.geometry.QuadMesh;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
 import vsdk.toolkit.render.jogl.JoglArrowRenderer;
 import vsdk.toolkit.render.jogl.JoglBoxRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglConeRenderer;
 import vsdk.toolkit.render.jogl.JoglFunctionalExplicitSurfaceRenderer;
 import vsdk.toolkit.render.jogl.JoglInfinitePlaneRenderer;
@@ -47,6 +46,7 @@ import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
 import vsdk.toolkit.render.jogl.JoglTriangleStripMeshRenderer;
 import vsdk.toolkit.render.jogl.JoglVoxelVolumeRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgRenderer;
+import vsdk.toolkit.render.joglcg.JoglCgCameraRenderer;
 
 public class JoglCgGeometryRenderer extends JoglCgRenderer 
 {
@@ -57,7 +57,7 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
     {
         //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
-            JoglCameraRenderer.activateNvidiaGpuParameters(gl, c,
+            JoglCgCameraRenderer.activateNvidiaGpuParameters(gl, c,
                 currentVertexShader, currentPixelShader);
             activateNvidiaGpuParameters(gl, g, c,
                 currentVertexShader, currentPixelShader);

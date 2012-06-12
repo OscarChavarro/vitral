@@ -1,3 +1,9 @@
+//===========================================================================
+
+// Java classes
+import java.io.File;
+
+// JOGL classes
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
@@ -6,13 +12,8 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
+// VSDK classes
 import vsdk.toolkit.io.image.ImagePersistence;
-
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
-
-import java.io.File;
-
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 
@@ -83,3 +84,7 @@ public class PbufferExample implements GLEventListener {
         PbufferExample demo = new PbufferExample();
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

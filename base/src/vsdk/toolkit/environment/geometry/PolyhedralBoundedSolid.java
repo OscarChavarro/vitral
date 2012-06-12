@@ -630,7 +630,7 @@ public class PolyhedralBoundedSolid extends Solid {
     removed.
     PRE: It is assumed that `face2` is simple, i.e., has just one loop.
     Note that this method is a partial solution to problem [MANT1988].11.5, 
-    and follows the functional definition of section [MANT1988].11.5.2.
+    and follows the functional definition of section [MANT1988].11.5.1.
     This method should be shecket to see if it is managing only the
     "same shell" case, or if it is done.
     */
@@ -669,7 +669,7 @@ public class PolyhedralBoundedSolid extends Solid {
     the outer loop of a new face `newFaceId`. It is assumed that `l` is an
     inner loop of its parent face.
     Note that this method is a partial solution to problem [MANT1988].11.5, 
-    and follows the functional definition of section [MANT1988].11.5.2.
+    and follows the functional definition of section [MANT1988].11.5.1.
     */
     public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceId)
     {
@@ -692,7 +692,7 @@ public class PolyhedralBoundedSolid extends Solid {
     the outer loop of `tofac`. If `l.parentFace` == `tofac`, `lringmv` has no
     effect except for assigning the inner vs. outer information. Note that
     `lringmv` is an addendum to `lmef`, and not an Euler operator.
-    This method follows the functional definition of section [MANT1988].11.5.2.
+    This method follows the functional definition of section [MANT1988].11.5.1.
     */
     public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
     {
@@ -717,9 +717,9 @@ public class PolyhedralBoundedSolid extends Solid {
         `he1` and `he2` belong to two distinct loops.
       - `he1.parentLoop.parentFace` and `he2.parentLoop.parentFace`
         are equal, i.e. they occur in a single face.
-    Current implementation was builded as an answer to exercise
+    Current implementation was programmed as an answer to exercise
     [MANT1988].11.4, and follows the signature from section
-    [MANT1988].11.5.2.
+    [MANT1988].11.5.1.
     */
     public void lmekr(
         _PolyhedralBoundedSolidHalfEdge he1,
@@ -776,7 +776,12 @@ public class PolyhedralBoundedSolid extends Solid {
         newEdge.rightHalf = addhe(newEdge, v1, heLast, MINUS);
         newEdge.leftHalf = heLast;
 
-        for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
+        // Alas! This rare condition of not adding a migrated half edges list
+        // list of size 1 is to avoid adding an 0-length halfedge with no
+        // parent edge and no mirror edge when loop is of size 1 vertex.
+        for ( i = 0;
+              i < migratedHalfEdges.size() && migratedHalfEdges.size() > 1;
+              i++ ) {
             he = migratedHalfEdges.get(i);
             he.parentLoop = he1.parentLoop;
             he1.parentLoop.halfEdgesList.insertBefore(he, heLast);
@@ -1402,8 +1407,11 @@ public class PolyhedralBoundedSolid extends Solid {
 
                 he = l.boundaryStartHalfEdge;
                 if ( he == null ) {
-                    VSDK.reportMessage(this, VSDK.WARNING, "validateTopologicalIntegrity",
-                    "Loop without starting halfedge!");
+                    VSDK.reportMessage(this, VSDK.WARNING,
+                    "validateTopologicalIntegrity",
+                    "Loop without starting halfedge\n" +
+                    "Offending solid:\n" +
+                    toString());
                     return false;
                 }
                 heStart = he;
@@ -1686,7 +1694,9 @@ public class PolyhedralBoundedSolid extends Solid {
     public void maximizeFaces()
     {
         int i;
+        int j;
         _PolyhedralBoundedSolidEdge e;
+        _PolyhedralBoundedSolidHalfEdge he;
         InfinitePlane a, b;
         Vector3D p0, p1, p2;
 
@@ -1706,19 +1716,131 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         //- Join coplanar faces -------------------------------------------
+        _PolyhedralBoundedSolidHalfEdge heStart;
+
         for ( i = 0; i < edgesList.size(); i++ ) {
             e = edgesList.get(i);
             a = e.rightHalf.parentLoop.parentFace.containingPlane;
             b = e.leftHalf.parentLoop.parentFace.containingPlane;
             if ( e.rightHalf.parentLoop.parentFace ==
-                 e.leftHalf.parentLoop.parentFace ) {
+                 e.leftHalf.parentLoop.parentFace &&
+                 e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
+                // Case 1: need to remove an edge separating to
+                // different coplanar faces (join faces). Order doesn't
+                // matter.
                 lkemr(e.rightHalf, e.leftHalf);
+
                 // As this breaks the face set, start again!
                 maximizeFaces();
                 return;
             }
-            else if ( a.overlapsWith(b, VSDK.EPSILON) ) {
+            else if ( a.overlapsWith(b, VSDK.EPSILON) &&
+                e.rightHalf.parentLoop != e.leftHalf.parentLoop
+                ) {
+                // Case 2: Not tested!
                 lkef(e.rightHalf, e.leftHalf);
+
+                // As this breaks the face set, start again!
+                maximizeFaces();
+                return;
+            }
+            else if ( e.rightHalf.parentLoop.parentFace ==
+                 e.leftHalf.parentLoop.parentFace &&
+                 e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
+                 (e.leftHalf == e.rightHalf.next() ||
+                  e.rightHalf == e.leftHalf.next())
+                 ) {
+                // Case 3:. Need to remove a dangling edge, with two
+                // halfedges lying over the same face. Do not remove any
+                // face, rather, remove the dangling edge and its dangling
+                // vertex. To test, use object from figure [MANT1988].15.1.
+                // or code from SimpleTestGeometryLibrary method
+                // createTestObjectPairMANT1988_15_1
+                if ( e.leftHalf == e.rightHalf.next() ) {
+                    heStart = e.leftHalf;
+                }
+                else {
+                    heStart = e.rightHalf;
+                }
+                lkev(heStart, heStart.mirrorHalfEdge());
+
+                // As this breaks the face set, start again!
+                maximizeFaces();
+                return;
+            }
+            else if ( e.rightHalf.parentLoop.parentFace ==
+                 e.leftHalf.parentLoop.parentFace &&
+                 e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
+                 (e.leftHalf != e.rightHalf.next() &&
+                  e.rightHalf != e.leftHalf.next())
+                 ) {
+                // Case 4. Need to remove an edge on a self-intersecting
+                // loop, causing that loop to break on two rings. To test
+                // use "buildCsgTest4" pair on 
+                // PolyhedralBoundedSolidModelingTools testsuite program
+                // (union of two L-shaped boxes to form a hollowed brick).
+                // It is important to break the loops in such a way that
+                // bigger loop be the first loop, and smaller loop is the
+                // inner ring.
+
+                // Estimate the size of semiloop starting at e.leftHalf
+                double minmax[] = getMinMax();
+                Vector3D min = new Vector3D(minmax[3], minmax[4], minmax[5]);
+                Vector3D max = new Vector3D(minmax[0], minmax[1], minmax[2]);
+                Vector3D p;
+                heStart = e.leftHalf;
+                he = heStart;
+                do {
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+                    p = he.startingVertex.position;
+                    if ( p.x > max.x ) max.x = p.x;
+                    if ( p.y > max.y ) max.y = p.y;
+                    if ( p.z > max.z ) max.z = p.z;
+                    if ( p.x < min.x ) min.x = p.x;
+                    if ( p.y < min.y ) min.y = p.y;
+                    if ( p.z < min.z ) min.z = p.z;
+                } while( he != heStart && he != e.rightHalf);
+                double leftDistance = VSDK.vectorDistance(min, max);
+
+                // Estimate the size of semiloop starting at e.rightHalf
+                min = new Vector3D(minmax[3], minmax[4], minmax[5]);
+                max = new Vector3D(minmax[0], minmax[1], minmax[2]);
+                heStart = e.rightHalf;
+                he = heStart;
+                do {
+                    he = he.next();
+                    if ( he == null ) {
+                        // Loop is not closed!
+                        break;
+                    }
+                    p = he.startingVertex.position;
+                    if ( p.x > max.x ) max.x = p.x;
+                    if ( p.y > max.y ) max.y = p.y;
+                    if ( p.z > max.z ) max.z = p.z;
+                    if ( p.x < min.x ) min.x = p.x;
+                    if ( p.y < min.y ) min.y = p.y;
+                    if ( p.z < min.z ) min.z = p.z;
+                } while( he != heStart && he != e.leftHalf);
+                double rightDistance = VSDK.vectorDistance(min, max);
+
+                // Determine outer loop acording to major extent
+                _PolyhedralBoundedSolidHalfEdge heOuter;
+                _PolyhedralBoundedSolidHalfEdge heInner;
+
+                if ( leftDistance > rightDistance ) {
+                    heOuter = e.leftHalf;
+                    heInner = e.rightHalf;
+                }
+                else {
+                    heOuter = e.rightHalf;
+                    heInner = e.leftHalf;
+                }
+                lkemr(heInner, heOuter);
+
                 // As this breaks the face set, start again!
                 maximizeFaces();
                 return;
@@ -1726,7 +1848,7 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         //- Eliminate vertices between colinear edges ---------------------
-        _PolyhedralBoundedSolidHalfEdge he, heStart;
+        _PolyhedralBoundedSolidHalfEdge heMirror;
         _PolyhedralBoundedSolidVertex v;
         int nedges;
 
@@ -1738,10 +1860,37 @@ public class PolyhedralBoundedSolid extends Solid {
             }
             he = heStart;
             nedges = 0;
+            j = 0;
             do {
                 nedges++;
                 if ( nedges > 2 ) break;
-                he = he.mirrorHalfEdge().next();
+
+                if ( he == null ) {
+                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
+                        "Inconsistent model! Null HalfEdge. Check.");
+                }
+
+                heMirror = he.mirrorHalfEdge();
+                if ( heMirror == null ) {
+                    /*
+                    VSDK.reportMessage(this, VSDK.WARNING, "maximizeFaces",
+                        "Inconsistent model! halfedge " + he.id +
+                        " of face " + he.parentLoop.parentFace.id +
+                        " at position " + j + " emanating from \nvertex " +
+                        v.id + 
+                        " without mirror halfedge. Check."
+                    );
+                    */
+                    nedges = 0;
+                    continue;
+                }
+
+                he = heMirror.next();
+                if ( he == null ) {
+                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
+                        "Inconsistent model! HalfEdge without next. Check.");
+                }
+                j++;
             } while ( he != heStart );
 
             if ( nedges == 2 ) {
@@ -1760,10 +1909,12 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         //- Eliminate rings with a single vertex --------------------------
-        int j;
-
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            _PolyhedralBoundedSolidHalfEdge outerloophe;
+
+            outerloophe = face.boundariesList.get(0).boundaryStartHalfEdge;
+
             for ( j = 1; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
 
@@ -1771,7 +1922,29 @@ public class PolyhedralBoundedSolid extends Solid {
                 he = loop.boundaryStartHalfEdge;
                 if ( he.parentEdge == null ||
                      loop.halfEdgesList.size() == 1 ) {
-                    System.out.println("Please delete face " + face.id + " and null point from " + he);
+                    // Kill ring
+                    _PolyhedralBoundedSolidVertex vtodelete;
+                    vtodelete = he.startingVertex;
+                    lmekr(outerloophe, he);
+
+                    // Kill edge and vertex
+                    _PolyhedralBoundedSolidLoop newloop;
+                    newloop = outerloophe.parentLoop;
+                                    heStart = he;
+
+                    _PolyhedralBoundedSolidHalfEdge hej;
+                    hej = outerloophe;
+                    do {
+                        hej = hej.next();
+                        if ( hej == null ) {
+                            // Loop is not closed!
+                            break;
+                        }
+                        if ( hej.startingVertex == vtodelete) {
+                            lkev(hej, hej.mirrorHalfEdge());
+                            break;
+                        }
+                    } while( hej != outerloophe );
                 }
             }
         }
@@ -1885,13 +2058,13 @@ public class PolyhedralBoundedSolid extends Solid {
                     msg += (he.parentEdge!=null)?
                         intPreSpaces(he.parentEdge.id, 10):"    <null>";
                     msg += " | ";
-		    if ( he.mirrorHalfEdge() != null ) {
+                    if ( he.mirrorHalfEdge() != null ) {
                         msg += intPreSpaces(he.mirrorHalfEdge().id, 9) + " | " +
                             intPreSpaces(he.mirrorHalfEdge().parentLoop.parentFace.id, 11) + " | ";
-		    }
-		    else {
+                    }
+                    else {
                         msg += " No Mirror Half Edge!   | ";
-		    }
+                    }
 
                     msg += "\n";
 

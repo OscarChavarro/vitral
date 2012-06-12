@@ -55,6 +55,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private PolyhedralBoundedSolid solid;
     private int faceIndex = -2;
     private int edgeIndex = -2;
+    private boolean debugVertices = false;
 
     private RendererConfiguration quality;
     private RendererConfigurationController qualityController;
@@ -62,9 +63,10 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private GLCanvas canvas;
     private int solidType = 19;
     private int csgOperation = 0;
-    private int csgSample = 5;
+    private int csgSample = 3;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
+    private boolean debugCsg = false;
 
     public PolyhedralBoundedSolidExample() {
         camera = new Camera();
@@ -83,9 +85,6 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
         //- Solid building ------------------------------------------------
         solid = buildSolid(solidType);
-        //- Topology joining from 0-genus to 1-genus ----------------------
-
-        //-----------------------------------------------------------------
     }
 
     private Material defaultMaterial()
@@ -93,7 +92,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         Material m = new Material();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m.setDiffuse(new ColorRgb(0.5, 0.5, 0.9));
         m.setSpecular(new ColorRgb(1, 1, 1));
         m.setDoubleSided(false);
         m.setPhongExponent(100);
@@ -218,13 +217,16 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             solid = PolyhedralBoundedSolidModelingTools.splitTest(3);
             break;
           case 19:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(1, csgOperation, csgSample);
+	    solid = PolyhedralBoundedSolidModelingTools.csgTest(1, csgOperation, csgSample, debugCsg);
+            debugCsg = false;
             break;
           case 20:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample);
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample, debugCsg);
+            debugCsg = false;
             break;
           case 21:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample);
+            solid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample, debugCsg);
+            debugCsg = false;
             break;
           case 22:
             solid = PolyhedralBoundedSolidModelingTools.featuredObject();
@@ -258,7 +260,8 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         frame.add(canvas, BorderLayout.CENTER);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Dimension size = new Dimension(640, 480);
+        Dimension size = new Dimension(1024, 768);
+        //Dimension size = new Dimension(1366, 768);
         //frame.setMinimumSize(size);
         frame.setSize(size);
         frame.setVisible(true);
@@ -270,7 +273,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         setLayout(new BorderLayout());
         add("Center", createGUI());
     }
-    
+
     private void
     renderLinesResult(GL2 gl, ArrayList <Vector3D> contourLines,
                       ArrayList <Vector3D> visibleLines,
@@ -364,6 +367,9 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, solid, faceIndex);
+        if ( debugVertices ) {
+            JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, solid, camera);
+        }
 
         //-----------------------------------------------------------------
         ArrayList <Vector3D> contourLines;
@@ -552,7 +558,16 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
             case '6':
               csgSample++;
-              if ( csgSample > 5 ) csgSample = 0;
+              if ( csgSample > 7 ) csgSample = 0;
+              solid = buildSolid(solidType);
+              break;
+
+            case 'v':
+              debugVertices = !debugVertices;
+              break;
+
+            case 'd':
+              debugCsg = !debugCsg;
               solid = buildSolid(solidType);
               break;
 

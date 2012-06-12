@@ -27,6 +27,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator;
 import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
 public class PolyhedralBoundedSolidModelingTools
@@ -638,6 +639,11 @@ public class PolyhedralBoundedSolidModelingTools
         return operands;
     }
 
+    /**
+    Makes a hollowed brick from two L-shaped boxes. Note that on UNION
+    operation this object leads to an interesting topological problem for
+    PolyhedralBoundedSolid.maximizeFaces operation.
+    */
     public static PolyhedralBoundedSolid[] buildCsgTest4()
     {
         PolyhedralBoundedSolid operands[];
@@ -797,36 +803,87 @@ public class PolyhedralBoundedSolidModelingTools
         return operands;
     }
 
-    public static PolyhedralBoundedSolid csgTest(int part, int op, int set)
+    public static PolyhedralBoundedSolid csgTest(int part, int op, int set,
+        boolean withDebug)
     {
         PolyhedralBoundedSolid res = null;
         PolyhedralBoundedSolid operands[] = null;
 
+	System.out.printf("Creating C.S.G. test object with parts %d, " + 
+            "operation %s, and sample pair %d\n", part, 
+            op==0?"UNION":
+                (op==1?"INTERSECTION":
+                    (op==2?"DIFERENCE A-B":"DIFFERENCE B-A")), set);
+
         switch ( set ) {
-            case 0: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2(); break;
-            case 1: operands = buildCsgTest2(); break;
-            case 2: default: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3(); break;
-            case 3: operands = buildCsgTest4(); break;
-            case 4: operands = buildCsgTest5(); break;
-            case 5: operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(); break;
+            case 0:
+              operands =
+                  SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
+              break;
+            case 1:
+              operands = buildCsgTest2(); break;
+            case 2: default:
+              operands = 
+                  SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+              break;
+            case 3:
+              operands = buildCsgTest4();
+              break;
+            case 4:
+              operands = buildCsgTest5();
+              break;
+            case 5:
+              operands =
+                SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+              break;
+            case 6:
+              operands =
+                  SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
+              break;
+            case 7:
+              operands =
+                  SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+              break;
         }
+
+        //-----------------------------------------------------------------
+        if ( withDebug ) {
+            PbufferSolidVisualDebugger offlineRenderer;
+            offlineRenderer = new PbufferSolidVisualDebugger();
+
+            operands[0].compactIds();
+            operands[1].compactIds();
+            operands[0].validateModel();
+            operands[1].validateModel();
+            operands[0].maximizeFaces();
+            operands[1].maximizeFaces();
+            operands[0].validateModel();
+            operands[1].validateModel();
+            operands[0].compactIds();
+            operands[1].compactIds();
+            PolyhedralBoundedSolidSetOperator.updmaxnames(operands[1], operands[0]);
+
+
+            offlineRenderer.execute(operands[0], "outputA.png");
+            offlineRenderer.execute(operands[1], "outputB.png");
+	}
 
         //-----------------------------------------------------------------
         if ( op == 0 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.UNION);
+                                         GeometricModeler.UNION, withDebug);
         }
         else if ( op == 1 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.INTERSECTION);
+                                         GeometricModeler.INTERSECTION, withDebug);
         }
         else if ( op == 2 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.DIFFERENCE);
+                                         GeometricModeler.DIFFERENCE, withDebug);
         }
         else {
             res = GeometricModeler.setOp(operands[1], operands[0],
-                                         GeometricModeler.DIFFERENCE);
+                                         GeometricModeler.DIFFERENCE, withDebug);
         }
 
         //-----------------------------------------------------------------

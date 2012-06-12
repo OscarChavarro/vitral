@@ -1,38 +1,39 @@
 ===========================================================================
 = VitralSDK simplified Personal Software Process file                     =
 ===========================================================================
-
-This text file contains the main "Personal Software Process" (PSP) for the
-VitralSDK project. Every contributor for VitralSDK is encourage to write
-in this file its major acomplishments in a session basis. Note that every
-entry in this file corresponds to a commit in the SVN control version system.
-
-Rough format in this file is:
-  - For each change, ther is a text line starting with the character '-',
-    followed by the time taken and the description of the activity.
-  - Each set of changes done the same day are grouped by a "title" in the
-    format
-
-YEAR month day, author1, author2 ... & author n: <<total sum of minutes>>
-
-Note that this log include the main work done on core VitralSDK libraries and
-"smaller" programs in testsuite folder. This PSP does not include work done
-on "big" programs, as such:
-  - ./testsuite/OfflineExamples/RaytracingOfflineExample
-  - ./testsuite/ApplicationCases/SciVisApplication
-  - ./testsuite/ApplicationCases/SceneEditorApplication
-for that, there are other similar "log.txt" files with its own PSP logs.
+= 
+= This text file contains the main "Personal Software Process" (PSP) for the
+= VitralSDK project. Every contributor for VitralSDK is encourage to write
+= in this file its major acomplishments in a session basis. Note that every
+= entry in this file corresponds to a commit in the SVN control version system.
+= 
+= Rough format in this file is:
+=   - Every line starting with a '=' character is a comment
+=   - Every line containing only characters '=', '-' or ' ' are comments
+=   - For each change, ther is a text line starting with the character '-',
+=     followed by the time taken and the description of the activity.
+=   - Each set of changes done the same day are grouped by a "title" in the
+=     format
+= 
+= YEAR month day, author1, author2, ... author n: <<total sum of minutes>>
+= 
+= Note that this log include the main work done on core VitralSDK libraries and
+= "smaller" programs in testsuite folder. This PSP does not include work done
+= on "big" programs, as such:
+=   - ./testsuite/OfflineExamples/RaytracingOfflineExample
+=   - ./testsuite/ApplicationCases/SciVisApplication
+=   - ./testsuite/ApplicationCases/SceneEditorApplication
+= for that, there are other similar "log.txt" files with its own PSP logs.
 
 ---------------------------------------------------------------------------
 
-2005 november 1, Oscar Chavarro, Lina Rojas & Gabriel Sarmiento: <<?>>
-  - Revision MESH: la etapa 141 original de Lhyna y Gabriel se pasa a la
-    142, y se le annaden scripts de compilacion para linux y se le reviso el
-    encoding para que no fallaran los comentarios en linux. El ejemplo de
-    testsuite no imprime nada.
+2005 november 1, Oscar Chavarro, Lina Rojas, Gabriel Sarmiento: <<?>>
+  - 15min: Revision MESH: la etapa 141 original de Lhyna y Gabriel se pasa a la
+    etapa 142, y se le annaden scripts de compilacion para linux y se le
+    reviso el encoding para que no fallaran los comentarios en linux. El 
+    ejemplo de testsuite no imprime nada.
     . Pendiente: Tipificar Arraylist en Mesh.java
     . Pendiente: revision de entorno JBuilder
-    15 min
   - Revision QualitySelection: se renombro Shading para que fuera ShadingType
   - Revision de clases y migracion a JOGL Beta
   - Is class RGBAImageBuilder implementing a builder or Factory design pattern.
@@ -145,7 +146,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - CameraControllerGravZero class removed
   - IlluminationTest example added to testsuite
 
-2006 november 1, Alfonso Barbosa & Diana Reyes: <<?>>
+2006 november 1, Alfonso Barbosa, Diana Reyes: <<?>>
   - InfinitePlane.classifyPoint method added
   - Raytracing.excecute uptade (generalized for sub-viewport definition)
 
@@ -454,9 +455,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     but inside gizmo working.
 
 2007 september 23, Oscar Chavarro: <<?>>
-  - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 
-    3dstudio max like interaction and display. First version of
-    GeometricModeler class.
+  - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 3dstudio
+    max like interaction and display. First version of GeometricModeler class.
   - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
 
@@ -589,7 +589,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 10h: studying wrong working of PolyhedralBoundedSolidSplitter for
     some cases (edges on splitting plane and not on coplanar faces) and
     making testing.
-  - 1h:10min: Fixing the encountered error (ordering on the `nbr` array).
+  - 1h10min: Fixing the encountered error (ordering on the `nbr` array).
 
 2008 march 30, Oscar Chavarro: <<30min>>
   - 30min: PolyhedralBoundedSolid.maximizeFaces
@@ -660,7 +660,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
      bug on PolyhedralBoundedSolidSetOperator that didn't allowed to work
      all simple cases. It resulted to be a bad management of loose ends. :)
 
-2008 april 12/13, Oscar Chavarro: <<780min>>
+2008 april 12-13, Oscar Chavarro: <<780min>>
   - 13h: Studying in depth the implementation details for
     PolyhedralBoundedSolidSetOperator. Finishing code, testing different cases,
     understanding in detail the model and making tests in paper.
@@ -788,6 +788,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 2h20min: ReaderAse importing base meshes
 
 2008 june 4, Oscar Chavarro: <<120min>>
+  - 12h: Studing the estructure of Need for Speed Underground file formats.
   - 1h21min: ReaderBinNeedForSpeed basic functionality :) Note that before
     this reader was posible, an estimate of 12 hours of work was needed to
     "crack" (better, to study and understand) the GEOMETRY.BIN files'
@@ -846,7 +847,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
     structure (phase 1)
   - 23min: Preparing RaytracerDistributedServer basic socket listening
     structure
-  - 1h:45min: trying to serialize a SimpleScene object on parallel/distributed
+  - 1h45min: trying to serialize a SimpleScene object on parallel/distributed
     raytracing example
   - 2h: working on RGBImage custom serialization when using direct buffers
 
@@ -863,8 +864,8 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 25min: Support for UTF8-Unicode encoded strings persistence
 
 2011 march 21, Oscar Chavarro <<>>
-  - SVN branch commited to the trunk: Jogl Stereopsis support modules,
-    datafiles and example program. This branch's net cost was 10h49min. :)
+  - 10h49min: SVN branch commited to the trunk: Jogl Stereopsis support modules,
+    datafiles and example program. :)
 
 2011 april 25, Oscar Chavarro <<>>
   - 8min: DDS texture loading code refactoring.
@@ -873,7 +874,7 @@ for that, there are other similar "log.txt" files with its own PSP logs.
   - 32min: Understanding DXT3/DDS pixel packaging
   - 20min: Finishing first version of DXT3/DDS loader.
 
-2011 november 10, Andrés Harker & Oscar Chavarro
+2011 november 10, Andres Harker, Oscar Chavarro
   - 2h: researching how to list loaded jars:
     URL urls[] = ((URLClassLoader)ClassLoader.getSystemClassLoader()).getURLs();
     and how to inspect contents of a jar file (java.util.jar.JarFile class)
@@ -887,5 +888,23 @@ for that, there are other similar "log.txt" files with its own PSP logs.
 2012 may 20, Oscar Chavarro <<>>
   - 1h48min: joglcg package created, and Nvidia Cg functionality refactored,
     jme functionality refactored
+
+2012 june 3, Oscar Chavarro <<>>
+  - 47min: LogAnalyzer tool
+
+2012 june 10, Oscar Chavarro <<518min>>
+  - 1h33min: JoglPolyhedralBoundedSolidRenderer.drawDebugVertices
+  - 2h38min: Studying [MANT1988] structure of chapters, sections, programs,
+    figures and problems, and updating polihedralBoundedSolidImplementation.xls
+    document (Chapters 1 to 5).
+  - 3h20min: fixing bugs at PolyhedralBoundedSolid.maximizeFaces and
+    PolyhedralBoundedSolid.lmekr.
+  - 1h7min: developing pbuffer based visual debugger for 
+    PolyhedralBoundedSolidExample and testing object set from figure
+    [MANT1988].15.3.b.
+
+2012 june 11, Oscar Chavarro <<112min>>
+  - 1h52min: Revisiting PolyhedralBoundedSolid setOp cases and [MANT1988].8
+    code. Fixing a case on PolyhedralBoundedSolid.maximizeFaces.
 
 ===========================================================================

@@ -68,7 +68,7 @@ import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
-import vsdk.toolkit.render.joglcg.JoglCgRenderer;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
@@ -827,7 +827,7 @@ public class JoglDrawingArea implements
 
         if ( firstTimer ) {
             firstTimer = false;
-            JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
+            //JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
         }
 
         debugProjectedViewsIfNeeded(gl);

@@ -475,8 +475,13 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     shown on figures [MANT1988].15.2. and [MANT1988].15.3. These pair of solid
     are interesing when the position of the wedge is such that its upper edge
     touches the upper face of the block.
+    Situation can be: 
+      -1: Holed object
+      0: Limit case
+      1: Open object
     */
-    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_2()
+    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_2(
+        int situation)
     {
         PolyhedralBoundedSolid operands[];
 
@@ -497,10 +502,34 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid wedge;
+        //double delta = 0.00001;
+        double delta = 0.05;
+
         wedge = new PolyhedralBoundedSolid();
-        wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
-        wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
-        wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
+
+        switch ( situation ) {
+          case 0: default:
+            // Original on edge wedge, generating non manifold object
+            wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
+            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
+            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
+            break;
+
+	  case -1:
+            // Lowered wedge, generating a closed holed object
+            wedge.mvfs(new Vector3D(0, 0.225, 0.3-delta), 1, 1);
+            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3-delta));
+            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6-delta));
+            break;
+
+	  case 1:
+            // Raised wedge, generating an open object with no holes
+            wedge.mvfs(new Vector3D(0, 0.225, 0.3+delta), 1, 1);
+            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3+delta));
+            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6+delta));
+            break;
+        }
+
         wedge.mef(1, 1, 3, 2, 1, 2, 2);
 
         T = new Matrix4x4();

@@ -1,6 +1,6 @@
 //===========================================================================
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.joglcg;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -9,11 +9,13 @@ import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGprogram;
 
+// VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 
-public class JoglCameraRenderer extends JoglRenderer
+public class JoglCgCameraRenderer extends JoglCgRenderer
 {
     public static void activate(GL2 gl, Camera cam)
     {

@@ -31,6 +31,8 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.media.RGBAImage;
 
 public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 {
@@ -195,6 +197,114 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
     }
 
+    private static void drawTextureString3D(GL2 gl, RGBAImage i)
+    {
+        gl.glPushAttrib(GL2.GL_ENABLE_BIT);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_BLEND);
+        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+
+        // Set texture parameters
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
+            GL2.GL_TRUE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
+            GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
+            GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S,
+            GL2.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T,
+            GL2.GL_CLAMP_TO_EDGE);
+
+        // Calling this configuration with GL_BLEND here generates an error on
+        // some Windows Vista machines with Intel graphics, as such on
+        // Dell Inspiron 1525 laptop with Mobile Intel 965 (BIOS 1566).
+        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
+
+        //float c[] = {1f, 1f, 1f, 1f};
+        //gl.glTexEnvfv(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_COLOR, c, 0);
+        gl.glTranslated(1, 1, 0); // gl.glRasterPos3d(0, 0, 0);, check draw...
+        JoglImageRenderer.draw(gl, i);
+        gl.glPopAttrib();
+    }
+
+    public static void
+    drawDebugVertices(GL2 gl, PolyhedralBoundedSolid solid, Camera camera)
+    {
+        //-----------------------------------------------------------------
+        double minmax[] = solid.getMinMax();
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glColor3d(1, 0, 0);
+
+        Vector3D midpoint = new Vector3D();
+        midpoint.x = (minmax[3] + minmax[0]) / 2;
+        midpoint.y = (minmax[4] + minmax[1]) / 2;
+        midpoint.z = (minmax[5] + minmax[2]) / 2;
+
+        camera.updateVectors();
+        Vector3D u = camera.getLeft().multiply(-1.0);
+        Vector3D v = camera.getUp();
+        u.normalize();
+        v.normalize();
+
+        //-----------------------------------------------------------------
+        int i;
+        RGBAImage label;
+
+        for ( i = 0; i < solid.verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex ve = solid.verticesList.get(i);
+            Vector3D p = ve.position;
+
+            // Draw original vertex point
+            //gl.glPointSize(8.0f);
+            //gl.glColor3d(1, 1, 0);
+            //gl.glBegin(GL.GL_POINTS);
+            //    gl.glVertex3d(p.x, p.y, p.z);
+            //gl.glEnd();
+
+            // Explode point with respect to camera
+            double perspectiveDistance;
+            Vector3D delta = p.substract(midpoint);
+            delta.normalize();
+            double projected_u = u.dotProduct(delta);
+            double projected_v = v.dotProduct(delta);
+            Vector3D projected = u.multiply(projected_u).add(
+                v.multiply(projected_v));
+            if ( projected.length() > VSDK.EPSILON ) {
+                projected.normalize();
+            }
+            perspectiveDistance = VSDK.vectorDistance(camera.getPosition(), p);
+            projected = projected.multiply(perspectiveDistance/80.0);
+
+            // Bring point a little nearest towards the camera
+            Vector3D ep = p.add(projected);
+            Vector3D deltaView = camera.getPosition().substract(ep);
+            deltaView.normalize();
+            deltaView = deltaView.multiply(0.01);
+            ep = ep.add(deltaView);
+
+            // Draw exploded reference point for label
+            //gl.glPointSize(4.0f);
+            //gl.glColor3d(0.9, 0.9, 0.5);
+            //gl.glBegin(GL.GL_POINTS);
+            //    gl.glVertex3d(ep.x, ep.y, ep.z);
+            //gl.glEnd();
+
+            // Draw vertex id label
+            label = AwtSystem.calculateLabelImage("" + ve.id,
+                new ColorRgb(0, 0, 0));
+
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
+            gl.glPushMatrix();
+            gl.glLoadIdentity();
+            gl.glTranslated(ep.x, ep.y, ep.z);
+            drawTextureString3D(gl, label);
+            gl.glPopMatrix();
+        }
+    }
+
     public static void
     drawDebugEdges(GL2 gl, PolyhedralBoundedSolid solid, Camera c, int edgeIndex)
     {
@@ -356,6 +466,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
                 heStart = he;
                 do {
                     // Logic
@@ -410,6 +523,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
                 heStart = he;
                 do {
                     // Logic
@@ -449,6 +565,10 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
+
                 heStart = he;
                 do {
                     // Logic
@@ -507,6 +627,10 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
+
                 heStart = he;
                 do {
                     // Logic
@@ -558,6 +682,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         //- Draw solid faces one by one -----------------------------------
         gl.glCullFace(GL.GL_BACK);
         gl.glEnable(GL.GL_CULL_FACE);
+        gl.glPolygonOffset(-1.0f, 1.0f);
 
         //-----------------------------------------------------------------
         Vector3D p0, n;
@@ -579,6 +704,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 _PolyhedralBoundedSolidHalfEdge he, heStart;
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
                 heStart = he;
                 do {
                     // Logic
@@ -618,6 +746,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+		}
                 heStart = he;
                 do {
                     // Logic
@@ -643,7 +774,6 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             GLU.gluTessEndPolygon(tesselator);
             GLU.gluDeleteTess(tesselator);
         }
-
     }
 
     /**

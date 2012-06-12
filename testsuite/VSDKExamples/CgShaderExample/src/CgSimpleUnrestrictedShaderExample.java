@@ -236,7 +236,7 @@ public class CgSimpleUnrestrictedShaderExample
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
         //-----------------------------------------------------------------
-        JoglCameraRenderer.activate(gl, camera);
+        JoglCgCameraRenderer.activate(gl, camera);
 
         //-----------------------------------------------------------------
         gl.glLoadIdentity();

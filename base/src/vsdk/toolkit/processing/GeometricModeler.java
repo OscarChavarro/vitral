@@ -372,6 +372,19 @@ public class GeometricModeler extends ProcessingElement
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
     }
 
+    /**
+    This is just a placeholder for method
+        PolyhedralBoundedSolidSetOperator.setOp.
+    Check its documentation for extra information.
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op, boolean withDebug)
+    {
+        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op, withDebug);
+    }
+
 }
 
 //===========================================================================
