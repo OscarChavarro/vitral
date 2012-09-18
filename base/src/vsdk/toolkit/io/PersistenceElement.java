@@ -176,6 +176,30 @@ public abstract class PersistenceElement {
         return ( low << 8 | high );
     }
 
+    private static int byteArray2signedIntDirect(byte[] arr, int start) {
+        int low = arr[start] & 0xff;
+        int high = arr[start+1] & 0xff;
+        System.out.println("NOT IMPLEMENTED YET!");
+        System.exit(1);
+        return ( high << 8 | low );
+    }
+
+    private static int byteArray2signedIntInvert(byte[] arr, int start) {
+        int hw = VSDK.signedByte2unsignedInteger(arr[start]);
+        int lw = VSDK.signedByte2unsignedInteger(arr[start+1]);
+        int result;
+
+        if ( ((hw >> 7) & 0x01) == 0 ) {
+           result = ( hw << 8 | lw );
+        }
+        else {
+           // signed 16 bit 2-complement representation
+           hw &= (hw & 0x7F);
+           result = -(32768 - ( (hw << 8) + lw ));
+        }
+        return result;
+    }
+
     private static long byteArray2longDirect(byte[] arr, int start) {
         int i = 0;
         int len = 4;
@@ -295,6 +319,13 @@ public abstract class PersistenceElement {
         return byteArray2intInvert(arr, start);
     }
 
+    public static int byteArray2signedIntBE(byte[] arr, int start) {
+        if ( bigEndianArchitecture ) {
+            return byteArray2signedIntDirect(arr, start);
+        }
+        return byteArray2signedIntInvert(arr, start);
+    }
+
     public static void int2byteArrayBE(byte[] arr, int start, int num) {
         if ( bigEndianArchitecture ) {
             int2byteArrayDirect(arr, start, num);
@@ -391,6 +422,13 @@ public abstract class PersistenceElement {
     {
         readBytes(is, bytesForInt);
         return byteArray2intBE(bytesForInt, 0);
+    }
+
+
+    public static int readSignedIntBE(InputStream is) throws Exception
+    {
+        readBytes(is, bytesForInt);
+        return byteArray2signedIntBE(bytesForInt, 0);
     }
 
     public static void writeIntBE(OutputStream os, int num) throws Exception

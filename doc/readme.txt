@@ -41,3 +41,7 @@ vitral use the following command on linux or UNIX command line:
 
 svn co https://vitral.svn.sourceforge.net/svnroot/vitral/vitral/trunk vitral
 
+On windows, using tortoise:
+  - Create an empty folder named "vitral" and double click on it
+  - Right click on explorer context menu, and select "SVN Checkout"
+  - On URL of repository use
