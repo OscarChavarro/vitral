@@ -5,6 +5,9 @@ package vsdk.toolkit.common;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
 
+/**
+ This class models a mathematical RAY.
+ */
 public class Ray  extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
