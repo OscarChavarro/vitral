@@ -49,9 +49,13 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         return 0.1 * factor * Math.sin(0.5*percent*Math.PI);
     }
 
+    /**
+    Invert is 1.0 for first loop, -1.0 for remaining loops
+    */
     private static void
     drawHalfEdge(GL2 gl, _PolyhedralBoundedSolidHalfEdge he, 
-                 Vector3D startP, Vector3D endP, InfinitePlane loopPlane)
+                 Vector3D startP, Vector3D endP, InfinitePlane loopPlane,
+                 double invert)
     {
         // Algorithm parameters
         int N = 10;
@@ -73,14 +77,14 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
         gl.glBegin(GL.GL_LINES);
             for ( i = 0, t = 0; i < N; i++, t += delta ) {
-                P = startP.add(v.multiply(t).add(u.multiply(curveFactor(t, factor))));
+                P = startP.add(v.multiply(t).add(u.multiply(invert*curveFactor(t, factor))));
                 gl.glVertex3d(P.x, P.y, P.z);
-                P = startP.add(v.multiply(t+delta).add(u.multiply(curveFactor(t+delta, factor))));
+                P = startP.add(v.multiply(t+delta).add(u.multiply(invert*curveFactor(t+delta, factor))));
                 gl.glVertex3d(P.x, P.y, P.z);
             }
         gl.glEnd();
         P = startP.add(v.multiply(factor).add(u.multiply(0)));
-        Vector3D Pi = u.multiply(factor*0.1);
+        Vector3D Pi = u.multiply(invert*factor*0.1);
         gl.glTranslated(Pi.x, Pi.y, Pi.z);
 
         gl.glBegin(GL.GL_LINES);
@@ -90,7 +94,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
             P = startP.add(v.multiply(factor).add(u.multiply(0)));
             gl.glVertex3d(P.x, P.y, P.z);
-            P = startP.add(v.multiply(factor*0.9).add(u.multiply(-factor*0.05)));
+            P = startP.add(v.multiply(factor*0.9).add(u.multiply((-factor)*0.05)));
             gl.glVertex3d(P.x, P.y, P.z);
 
         gl.glEnd();
@@ -658,7 +662,12 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         gl.glLineWidth(1);
                     }
                     setColor(gl, i);
-                    drawHalfEdge(gl, he, p0, p1, loopPlane);
+                    if ( j == 0 ) {
+                        drawHalfEdge(gl, he, p0, p1, loopPlane, 1.0);
+		    }
+		    else {
+                        drawHalfEdge(gl, he, p0, p1, loopPlane, -1.0);
+		    }
                 } while( he != heStart );
             }
         }

@@ -26,6 +26,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.render.awt.AwtFontReader;
+import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.processing.GeometricModeler;
 import vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator;
 import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
@@ -845,28 +846,6 @@ public class PolyhedralBoundedSolidModelingTools
                   SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
               break;
         }
-
-        //-----------------------------------------------------------------
-        if ( withDebug ) {
-            PbufferSolidVisualDebugger offlineRenderer;
-            offlineRenderer = new PbufferSolidVisualDebugger();
-
-            operands[0].compactIds();
-            operands[1].compactIds();
-            operands[0].validateModel();
-            operands[1].validateModel();
-            operands[0].maximizeFaces();
-            operands[1].maximizeFaces();
-            operands[0].validateModel();
-            operands[1].validateModel();
-            operands[0].compactIds();
-            operands[1].compactIds();
-            PolyhedralBoundedSolidSetOperator.updmaxnames(operands[1], operands[0]);
-
-
-            offlineRenderer.execute(operands[0], "outputA.png");
-            offlineRenderer.execute(operands[1], "outputB.png");
-	}
 
         //-----------------------------------------------------------------
         if ( op == 0 ) {

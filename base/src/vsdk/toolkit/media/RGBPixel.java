@@ -116,6 +116,14 @@ public class RGBPixel extends MediaEntity {
         this.b = VSDK.unsigned8BitInteger2signedByte((int)(ib * 255.0));
     }
 
+    public boolean isBlack()
+    {
+        if ( r == 0 && g == 0 && b == 0 ) {
+            return true;
+	}
+        return false;
+    }
+
     /**
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence

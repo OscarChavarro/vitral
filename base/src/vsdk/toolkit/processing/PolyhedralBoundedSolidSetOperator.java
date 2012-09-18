@@ -19,6 +19,9 @@ package vsdk.toolkit.processing;
 // Java classes
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -33,6 +36,8 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
+import vsdk.toolkit.io.PersistenceElement;
 
 /**
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
@@ -460,6 +465,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     used to control debug messages printed on the standard output.
     */
     private static int debugFlags = 0;
+
+    /**
+    Used for exporting internal state in graphical form.
+    */
+    private static JoglPolyhedralBoundedSolidDebugger offlineRenderer = null;
 
     /**
     Following variable `sonvv` from program [MANT1988].15.1.
@@ -2601,7 +2611,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                    heb.parentLoop.parentFace.id + 
                    " / " + 
                    endsb.get(i).parentLoop.parentFace.id);
-
             }
 
             if ( condition1 && condition2 ) {
@@ -2769,15 +2778,19 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
             //-----------------------------------------------------------------
             if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
-                System.out.println("  - " + (endsa.size()+endsb.size()) + " = " + endsa.size() + "+" + endsb.size() + " loose ends before processing pair [" + i + "]:");
+                System.out.println("  - " + (endsa.size()+endsb.size()) + 
+                    " = " + endsa.size() + "+" + endsb.size() + 
+                    " loose ends before processing pair [" + i + "]:");
+
                 for ( j = 0; j < endsa.size(); j++ ) {
-                    ha = endsa.get(j);
-                    hb = endsb.get(j);
+                    _PolyhedralBoundedSolidHalfEdge hat, hbt;
+                    hat = endsa.get(j);
+                    hbt = endsb.get(j);
                     System.out.println("    . [" + j + "]: He(A): " +
-                                       ha.startingVertex.id +
-                                       "/" + ha.next().startingVertex.id + 
-                                       " | He(B): " + hb.startingVertex.id +
-                                       "/" + hb.next().startingVertex.id);
+                                       hat.startingVertex.id +
+                                       "/" + hat.next().startingVertex.id + 
+                                       " | He(B): " + hbt.startingVertex.id +
+                                       "/" + hbt.next().startingVertex.id);
                 }
 
                 if ( ha.startingVertex.id > ham.startingVertex.id ) {
@@ -2934,6 +2947,26 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     }
 
     /**
+    */
+    private static void debugSolid(PolyhedralBoundedSolid solid, String pattern)
+    {
+        System.out.println("**** DEBUGGING SOLID INFORMATION WRITEN TO FILES " +
+            pattern + " ****");
+        try {
+            File fd = new File(pattern + ".txt");
+            FileOutputStream fos = new FileOutputStream(fd);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+            offlineRenderer.execute(solid, pattern + ".png");
+            PersistenceElement.writeAsciiLine(bos, solid.toString());
+            bos.close();
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
     Following program [MANT1988].15.1.
     */
     public static PolyhedralBoundedSolid setOp(
@@ -2942,9 +2975,16 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int op, boolean withDebug)
     {
         if ( withDebug ) {
-            debugFlags = DEBUG_01_STRUCTURE | DEBUG_02_GENERATOR | DEBUG_03_VERTEXFACECLASIFFIER |
-                DEBUG_04_VERTEXVERTEXCLASIFFIER | DEBUG_05_CONNECT | DEBUG_06_FINISH | 
-                DEBUG_99_SHOWOPERATIONS;
+            debugFlags = 0
+              | DEBUG_01_STRUCTURE
+              | DEBUG_02_GENERATOR
+              | DEBUG_03_VERTEXFACECLASIFFIER
+              | DEBUG_04_VERTEXVERTEXCLASIFFIER
+              | DEBUG_05_CONNECT
+              | DEBUG_06_FINISH
+              | DEBUG_99_SHOWOPERATIONS
+              ;
+            offlineRenderer = new JoglPolyhedralBoundedSolidDebugger();
         }
         else {
             debugFlags = 0;
@@ -2968,6 +3008,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
 
         //-----------------------------------------------------------------
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage00");
+            debugSolid(inSolidB, "outputB_stage00");
+        }
+
         inSolidA.compactIds();
         inSolidB.compactIds();
         inSolidA.validateModel();
@@ -2981,15 +3026,23 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         updmaxnames(inSolidB, inSolidA);
 
         if ( withDebug ) {
-            System.out.println("SOLID A:");
-            System.out.println(inSolidA);
-            System.out.println("SOLID B:");
-            System.out.println(inSolidB);
+            debugSolid(inSolidA, "outputA_stage01");
+            debugSolid(inSolidB, "outputB_stage01");
         }
 
         setOpGenerate(inSolidA, inSolidB);
 
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage02");
+            debugSolid(inSolidB, "outputB_stage02");
+        }
+
         setOpClassify(op, inSolidA, inSolidB);
+
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage03");
+            debugSolid(inSolidB, "outputB_stage03");
+        }
 
         if ( sonea.size() == 0 && sonvv.size() == 0 ) {
             // No intersections found
@@ -3007,14 +3060,35 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             }
         }
 
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage04");
+            debugSolid(inSolidB, "outputB_stage04");
+        }
+
         setOpConnect();
 
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage05");
+            debugSolid(inSolidB, "outputB_stage05");
+        }
+
         setOpFinish(inSolidA, inSolidB, res, op);
+
+        if ( withDebug ) {
+            debugSolid(inSolidA, "outputA_stage06");
+            debugSolid(inSolidB, "outputB_stage06");
+            debugSolid(res, "outputR_stage06");
+        }
+
         res.validateModel();
         res.compactIds();
         res.maximizeFaces();
         res.compactIds();
         res.validateModel();
+
+        if ( withDebug ) {
+            debugSolid(res, "outputR_stage07");
+        }
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("= [END OF SETOP REPORT] ===================================================================================================================================");

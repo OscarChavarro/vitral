@@ -907,4 +907,9 @@
   - 1h52min: Revisiting PolyhedralBoundedSolid setOp cases and [MANT1988].8
     code. Fixing a case on PolyhedralBoundedSolid.maximizeFaces.
 
+2012 june 13, Oscar Chavarro <<>>
+  - 1h: Adapting PolyhedralBoundedSolid visual debugging to internal
+    monitoring of PolyhedralBoundedSolidSetOperator stages, and fixing
+    debugging code bugs! :).
+
 ===========================================================================

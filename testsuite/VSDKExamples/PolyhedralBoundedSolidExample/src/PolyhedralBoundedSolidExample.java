@@ -63,7 +63,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private GLCanvas canvas;
     private int solidType = 19;
     private int csgOperation = 0;
-    private int csgSample = 3;
+    private int csgSample = 5;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
     private boolean debugCsg = false;

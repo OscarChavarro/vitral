@@ -486,17 +486,17 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        String msg = "";
+        StringBuffer msg = new StringBuffer("");
 
         do {
             readBytes(is, character);
             letter = (char)character[0];
             if ( character[0] != 0x00 ) {
-                msg = msg + letter;
+                msg.append(letter);
             }
         } while ( character[0] != 0x00 );
 
-        return msg;
+        return msg.toString();
     }
 
     public static String readUtf8String(InputStream is) throws Exception
@@ -543,9 +543,9 @@ public abstract class PersistenceElement {
             c = new String(arr);
         }
         else {
-            System.out.println("VSDK: Unhandled UTF-8 binary encoding!");
-            System.out.println("  - Byte 0: " + a + " / " + (a >> 5) );
-            System.out.println("  - Byte 1: " + b + " / " + (b >> 6) );
+            System.err.println("VSDK: Unhandled UTF-8 binary encoding!");
+            System.err.println("  - Byte 0: " + a + " / " + (a >> 5) );
+            System.err.println("  - Byte 1: " + b + " / " + (b >> 6) );
             return null;
         }
         return c;
@@ -583,18 +583,19 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        StringBuffer msg = new StringBuffer("");
+        StringBuffer stringBuffer = new StringBuffer("");
 
         do {
-            if ( is.available() < 1 ) return "";
+            // Warning: this line makes this goes to slow!
+            //if ( is.available() < 1 ) return "";
             readBytes(is, character);
             letter = (char)character[0];
             if ( character[0] != '\n' && character[0] != '\r' ) {
-                msg.append(letter);
+                stringBuffer.append(letter);
             }
         } while ( character[0] != '\n' );
 
-        return msg.toString();
+	return stringBuffer.toString();
     }
 
     private static boolean isInSet(byte key, byte set[])

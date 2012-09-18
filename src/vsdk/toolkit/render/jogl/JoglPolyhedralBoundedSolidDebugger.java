@@ -1,0 +1,143 @@
+//===========================================================================
+package vsdk.toolkit.render.jogl;
+
+// Java classes
+import java.io.File;
+
+// JOGL classes
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLDrawableFactory;
+
+// VSDK classes
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
+import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
+
+public class JoglPolyhedralBoundedSolidDebugger implements GLEventListener
+{
+    private int imageWidth = 800;
+    private int imageHeight = 600;
+    private GLPbuffer pbuffer;
+    private RGBImage image;
+    private String filename;
+    private PolyhedralBoundedSolid solid;
+    private Camera camera;
+    private RendererConfiguration quality;
+    private Material material;
+    private Light light1;
+    private Light light2;
+
+    public JoglPolyhedralBoundedSolidDebugger()
+    {
+        GLProfile profile;
+
+        profile = GLProfile.get(GLProfile.GL2);
+        // Create a GLCapabilities object for the pbuffer
+        GLCapabilities pbCaps = new GLCapabilities(profile);
+        pbCaps.setDoubleBuffered(true);
+        try {
+            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+          }
+          catch ( Exception e ) {
+              System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
+              System.exit(1);
+        }
+        pbuffer.addGLEventListener(this);
+
+        //-----------------------------------------------------------------
+        camera = new Camera();
+        camera.setPosition(new Vector3D(2, -1, 2));
+        Matrix4x4 R = new Matrix4x4();
+        R.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
+        camera.setRotation(R);
+        camera.setFov(45.0);
+
+        quality = new RendererConfiguration();
+        quality.setSurfaces(false);
+        quality.setPoints(true);
+        quality.setWires(true);
+
+        material = defaultMaterial();
+        light1 = new Light(Light.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
+        light2 = new Light(Light.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
+
+    }
+
+    private Material defaultMaterial()
+    {
+        Material m = new Material();
+
+        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m.setDiffuse(new ColorRgb(0.5, 0.5, 0.9));
+        m.setSpecular(new ColorRgb(1, 1, 1));
+        m.setDoubleSided(false);
+        m.setPhongExponent(100);
+        return m;
+    }
+
+    public void execute(PolyhedralBoundedSolid solid, String filename)
+    {
+        this.filename = filename;
+        this.solid = solid;
+        pbuffer.display();
+    }
+
+    public void display(GLAutoDrawable drawable) {
+        GL2 gl = drawable.getGL().getGL2();
+
+        gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+
+        JoglCameraRenderer.activate(gl, camera);
+        JoglMaterialRenderer.activate(gl, material);
+        JoglLightRenderer.activate(gl, light1);
+        JoglLightRenderer.draw(gl, light1);
+        JoglLightRenderer.activate(gl, light2);
+        JoglLightRenderer.draw(gl, light2);
+        gl.glEnable(GL2.GL_LIGHTING);
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
+        JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, solid, camera);
+        
+        image=JoglRGBImageRenderer.getImageJOGL(gl);
+        ImagePersistence.exportPNG(new File(filename), image);
+    }
+
+    public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {
+    }
+
+    public void init( GLAutoDrawable drawable ) {
+    }
+  
+    /** Not used method, but needed to instanciate GLEventListener */
+    public void dispose(GLAutoDrawable drawable) {
+        ;
+    }
+
+    public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
+    {
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glViewport(0, 0, width, height);
+    }
+
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
