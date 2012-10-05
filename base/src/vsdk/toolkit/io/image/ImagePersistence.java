@@ -656,7 +656,7 @@ public class ImagePersistence extends PersistenceElement
     binary JPEG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
-    */    
+    */
     public static boolean exportJPG(File fd, Image img)
     {
         try {
