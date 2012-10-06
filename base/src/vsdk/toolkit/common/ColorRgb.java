@@ -202,9 +202,9 @@ public class ColorRgb extends FundamentalEntity
     */
     public void importFromSigned8bitPixel(byte r, byte g, byte b)
     {
-	this.r = ((double)VSDK.signedByte2unsignedInteger(r)) / 255.0;
-	this.g = ((double)VSDK.signedByte2unsignedInteger(g)) / 255.0;
-	this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
+        this.r = ((double)VSDK.signedByte2unsignedInteger(r)) / 255.0;
+        this.g = ((double)VSDK.signedByte2unsignedInteger(g)) / 255.0;
+        this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
     }
 }
 

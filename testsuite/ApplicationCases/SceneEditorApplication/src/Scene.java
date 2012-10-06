@@ -272,11 +272,11 @@ public class Scene
         list = scene.getBackgrounds();
         if ( list.size() < 1 ) {
             list.add(currentBackground);
-	}
-	else {
+        }
+        else {
             list.remove(0);
             list.add(0, currentBackground);
-	}
+        }
         scene.setActiveBackgroundIndex(0);
     }
 

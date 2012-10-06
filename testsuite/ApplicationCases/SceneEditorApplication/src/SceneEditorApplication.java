@@ -341,9 +341,9 @@ public class SceneEditorApplication {
             System.exit(0);
         }
 
-	if ( drawingArea == null ) {
+        if ( drawingArea == null ) {
             drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
-	}
+        }
 
         mainWindowWidget.add(drawingArea.getCanvas(), BorderLayout.CENTER);
         mainWindowWidget.setPreferredSize(d);
@@ -398,9 +398,9 @@ public class SceneEditorApplication {
         JSplitPane splitPane;
         statusBarPanel = createStatusBar();
 
-	if ( drawingArea == null ) {
+        if ( drawingArea == null ) {
             drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
-	}
+        }
 
         Component left = drawingArea.getCanvas();
         Component right = createPanel();
@@ -454,10 +454,10 @@ public class SceneEditorApplication {
     {
         if ( fullScreenGuiMode ) {
             createGUIFullScreen();
-	}
-	else {
+        }
+        else {
             createGUIWindowed();
-	}
+        }
     }
 
     public void destroyGUI()
@@ -476,7 +476,7 @@ public class SceneEditorApplication {
         languageGuiFile = "./etc/english.gui";
 
         fullScreenGuiMode = false;
-	drawingArea = null;
+        drawingArea = null;
 
         createModel();
         createGUI();

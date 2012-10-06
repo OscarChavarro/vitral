@@ -16,15 +16,15 @@ public class JoglSceneRenderer
         //-----------------------------------------------------------------
         int i;
 
-	for ( i = 0; i < s.lights.size(); i++ ) {
+        for ( i = 0; i < s.lights.size(); i++ ) {
             JoglLightRenderer.activate(gl, s.lights.get(i));
                                       
-	}
+        }
 
-	for ( i = 0; i < s.bodies.size(); i++ ) {
+        for ( i = 0; i < s.bodies.size(); i++ ) {
             JoglSimpleBodyRenderer.draw(gl, s.bodies.get(i),
                                         s.camera, s.qualitySelection);
-	}
+        }
 
         //-----------------------------------------------------------------
     }

@@ -380,7 +380,7 @@ public class ViewportWindowSetManager extends PresentationElement
     public int countActiveViews()
     {
         int i;
-	ViewportWindow view;
+        ViewportWindow view;
         int n = 0;
          
         for ( i = 0; i < getViews().size(); i++ ) {
@@ -389,7 +389,7 @@ public class ViewportWindowSetManager extends PresentationElement
             if ( view.isActive() ) {
                 n++;
             }
-	}
+        }
         return n;
     }
 }

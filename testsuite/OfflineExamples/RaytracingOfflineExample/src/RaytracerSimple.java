@@ -81,7 +81,7 @@ public class RaytracerSimple {
                                 theScene.getSimpleBodies(),
                                 theScene.getLights(),
                                 theScene.getActiveBackground(),
-				theScene.getActiveCamera(), reporter, null);
+                                theScene.getActiveCamera(), reporter, null);
         clock.stop();
 
         System.out.println("Image generated in " + VSDK.formatDouble(clock.getElapsedRealTime(), 3) + " seconds.");

@@ -140,7 +140,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         else if ( id == 0xA2BF8E18L ) {
             // Car body color on PEAUGEOT
             p.r = maxp; p.g = maxp; p.b = minp;
-	}
+        }
         // Known common texture identifiers from Need for Speed Underground:
         // Base elements
 /*
@@ -374,7 +374,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 else {
                     a = readLongLE(is);
                 }
-	    }
+            }
         }
 
         //-----------------------------------------------------------------

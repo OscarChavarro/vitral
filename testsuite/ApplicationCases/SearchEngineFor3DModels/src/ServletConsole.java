@@ -173,9 +173,9 @@ public class ServletConsole extends HttpServlet {
                 if ( i >= 0 && i < 3 ) {
                     extractImage(workingImages.get(i), request.getParameter(cad));
                 }
-		else {
-		    System.out.println("IGNORING IMAGE ID " + i);
-		}
+                else {
+                    System.out.println("IGNORING IMAGE ID " + i);
+                }
                 out.println("filespec: " + cad);
             }
         }
@@ -211,9 +211,9 @@ public class ServletConsole extends HttpServlet {
                 p = target.getPixelRgb(xx, yy);
                 if ( p.r != 0 || p.g != 0 || p.b != 0 ) {
                     return false;
-		}
-	    }
-	}
+                }
+            }
+        }
 
         return true;
     }
@@ -230,7 +230,7 @@ public class ServletConsole extends HttpServlet {
 
         if ( target.getXSize() <= 64 || target.getYSize() <= 64 ) {
             return;
-	}
+        }
 
         Image destiny = new RGBImage();
 
@@ -245,8 +245,8 @@ public class ServletConsole extends HttpServlet {
                 if ( !blackNeighborhood(target, x, y) ) {
                     destiny.putPixelRgb(x, y, white);
                 }
-	    }
-	}
+            }
+        }
 
         ImageProcessing.copy(destiny, target);
 

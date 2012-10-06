@@ -53,12 +53,12 @@ public class Scene
             File file = new File("../../../etc/geometry/cow.obj");
             EnvironmentPersistence.importEnvironment(file, scene);
             int i;
-	    for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
-		b = scene.getSimpleBodies().get(i);
+            for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
+                b = scene.getSimpleBodies().get(i);
                 b.getMaterial().setDoubleSided(false);
                 b.setScale(new Vector3D(0.5, 0.5, 0.5));
-		bodies.add(b);
-	    }
+                bodies.add(b);
+            }
         }
         catch ( Exception ex ) {
             System.err.println("Failed to read file.");

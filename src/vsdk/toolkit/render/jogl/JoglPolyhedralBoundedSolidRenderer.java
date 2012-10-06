@@ -472,7 +472,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
                 heStart = he;
                 do {
                     // Logic
@@ -529,7 +529,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
                 heStart = he;
                 do {
                     // Logic
@@ -571,7 +571,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
 
                 heStart = he;
                 do {
@@ -633,7 +633,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
 
                 heStart = he;
                 do {
@@ -664,10 +664,10 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     setColor(gl, i);
                     if ( j == 0 ) {
                         drawHalfEdge(gl, he, p0, p1, loopPlane, 1.0);
-		    }
-		    else {
+                    }
+                    else {
                         drawHalfEdge(gl, he, p0, p1, loopPlane, -1.0);
-		    }
+                    }
                 } while( he != heStart );
             }
         }
@@ -715,7 +715,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
                 heStart = he;
                 do {
                     // Logic
@@ -757,7 +757,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
                     continue;
-		}
+                }
                 heStart = he;
                 do {
                     // Logic

@@ -73,11 +73,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
 
         if ( valThis > valOther ) {
             return 1;
-	}
-	else if ( valThis < valOther ) {
+        }
+        else if ( valThis < valOther ) {
             return -1;
-	}
-	return 0;
+        }
+        return 0;
     }
 
     public void clone(RendererConfiguration other)

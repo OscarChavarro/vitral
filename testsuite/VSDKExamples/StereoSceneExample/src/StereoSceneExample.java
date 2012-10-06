@@ -87,10 +87,10 @@ public class StereoSceneExample {
     {
         if ( fullScreenGuiMode ) {
             fullScreenGuiMode = false;
-	}
-	else {
+        }
+        else {
             fullScreenGuiMode = true;
-	}
+        }
     }
 
     private void initGLCanvas(int xSize, int ySize) {
@@ -137,7 +137,7 @@ public class StereoSceneExample {
             break;
 
           case 8:
-	    stereoStrategy = new JoglStereoStrategyAutostereogramRenderer(
+            stereoStrategy = new JoglStereoStrategyAutostereogramRenderer(
                 stereogramTilePattern, 14.0, 2.3228, 12.0, 6.0, 112, 112);
             break;
 
@@ -166,7 +166,7 @@ public class StereoSceneExample {
             if ( stereoStrategy instanceof JoglStereoStrategyWiggleRenderer ) {
                 animator = new Animator(canvas);
                 animator.start();
-	    }
+            }
 
             canvas.addGLEventListener(drawingArea);
 
@@ -191,9 +191,9 @@ public class StereoSceneExample {
         if ( animator != null ) {
             if ( animator.isAnimating() ) {
                 animator.stop();
-	    }
-	}
- 	animator = null;
+            }
+        }
+        animator = null;
         mainWindowWidget.setVisible(false);
         mainWindowWidget.dispose();
         System.gc();

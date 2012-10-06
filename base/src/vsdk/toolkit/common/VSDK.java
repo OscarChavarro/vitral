@@ -185,9 +185,9 @@ public class VSDK
         int i;
         String z = "";
 
-	for ( i = 0; i < n; i++ ) {
-	    z += "0";
-	}
+        for ( i = 0; i < n; i++ ) {
+            z += "0";
+        }
 
         DecimalFormat f1 = new DecimalFormat(z);
         return f1.format(a, new StringBuffer(""), new FieldPosition(0)).toString();

@@ -149,7 +149,7 @@ public class RGBImage extends Image
         if ( data != null && width == xSize && height == ySize ) {
             data.rewind();
             return true;
-	}
+        }
 
         try {
 

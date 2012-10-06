@@ -515,14 +515,14 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
             wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
             break;
 
-	  case -1:
+          case -1:
             // Lowered wedge, generating a closed holed object
             wedge.mvfs(new Vector3D(0, 0.225, 0.3-delta), 1, 1);
             wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3-delta));
             wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6-delta));
             break;
 
-	  case 1:
+          case 1:
             // Raised wedge, generating an open object with no holes
             wedge.mvfs(new Vector3D(0, 0.225, 0.3+delta), 1, 1);
             wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3+delta));

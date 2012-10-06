@@ -54,7 +54,7 @@ public class JoglImageRenderer extends JoglRenderer
     {
         if ( img instanceof RGBImage ) {
             JoglRGBImageRenderer.deactivate(gl, ((RGBImage)img));
-	}
+        }
     }
 
     public static int activateAsNormalMap(GL2 gl, Image img, RendererConfiguration quality)

@@ -96,7 +96,7 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
 
             // Warning: pending definition of this behavior...
             drawSurfacesWithoutTexture(gl, mesh, flip);
-	}
+        }
 
         //- Drawing control of elements with no surface -------------------
         if ( quality.isPointsSet() ) {

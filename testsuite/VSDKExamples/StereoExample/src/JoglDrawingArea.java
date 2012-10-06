@@ -36,7 +36,7 @@ public class JoglDrawingArea implements GLEventListener
         //gl.glMatrixMode(gl.GL_PROJECTION);
         //gl.glLoadIdentity();
         gl.glEnable(gl.GL_DEPTH_TEST);
-	Camera c = new Camera();
+        Camera c = new Camera();
         c.setNearPlaneDistance(1);
         c.setFarPlaneDistance(6.0);
         Vector3D v = new Vector3D(0, 0, 4);
@@ -170,7 +170,7 @@ public class JoglDrawingArea implements GLEventListener
         if ( stereoStrategy == null ) {
             drawCenterModel(gl);
         }
-	else if ( 
+        else if ( 
         stereoStrategy instanceof JoglStereoStrategyCyclopeanZBufferRenderer ||
         stereoStrategy instanceof JoglStereoStrategyAutostereogramRenderer
         ) {
@@ -181,7 +181,7 @@ public class JoglDrawingArea implements GLEventListener
             }
 
             stereoStrategy.deactivateStereoMode(gl);
-	}
+        }
         else {
             stereoStrategy.activateStereoMode(gl);
  

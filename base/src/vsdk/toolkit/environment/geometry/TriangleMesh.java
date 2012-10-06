@@ -161,10 +161,10 @@ public class TriangleMesh extends Surface {
         if ( in != null ) {
             out = new double[in.length];
             int i;
-	    for ( i = 0; i < in.length; i++ ) {
-		out[i] = in[i];
-	    }
-	}
+            for ( i = 0; i < in.length; i++ ) {
+                out[i] = in[i];
+            }
+        }
 
         return out;
     }
@@ -176,10 +176,10 @@ public class TriangleMesh extends Surface {
         if ( in != null ) {
             out = new boolean[in.length];
             int i;
-	    for ( i = 0; i < in.length; i++ ) {
-		out[i] = in[i];
-	    }
-	}
+            for ( i = 0; i < in.length; i++ ) {
+                out[i] = in[i];
+            }
+        }
 
         return out;
     }
@@ -191,10 +191,10 @@ public class TriangleMesh extends Surface {
         if ( in != null ) {
             out = new int[in.length];
             int i;
-	    for ( i = 0; i < in.length; i++ ) {
-		out[i] = in[i];
-	    }
-	}
+            for ( i = 0; i < in.length; i++ ) {
+                out[i] = in[i];
+            }
+        }
 
         return out;
     }

@@ -171,7 +171,7 @@ public class Raytracer extends RenderingElement {
 
                 // Check if the surface point is in shadow
                 static_poffset.x = info.p.x + VSDK.EPSILON*l.x;
-		static_poffset.y = info.p.y + VSDK.EPSILON*l.y;
+                static_poffset.y = info.p.y + VSDK.EPSILON*l.y;
                 static_poffset.z = info.p.z + VSDK.EPSILON*l.z;
                 static_shadowRay.origin.clone(static_poffset);
                 static_shadowRay.direction.clone(l);
@@ -343,7 +343,7 @@ public class Raytracer extends RenderingElement {
                                ArrayList <SimpleBody> inSimpleBodiesArray, 
                                ArrayList <Light> inLightsArray,
                                Background in_background,
-		               RendererConfiguration inQualitySelection,
+                               RendererConfiguration inQualitySelection,
                                ColorRgb outColor)
     {
         SimpleBody nearestObject;
@@ -388,7 +388,7 @@ public class Raytracer extends RenderingElement {
             //delete viewVector;
           }
           else {
-	    ColorRgb c;
+            ColorRgb c;
             c = in_background.colorInDireccion(inRay.direction);
             outColor.r = c.r;
             outColor.g = c.g;
@@ -508,7 +508,7 @@ public class Raytracer extends RenderingElement {
                 color.b = 0;
                 followRayPath(rayo, inSimpleBodiesArray,
                               inLightsArray, inBackground, 
-			      inQualitySelection, color);
+                              inQualitySelection, color);
                 if ( outDepthmap != null ) {
                     outDepthmap.setZ(x, y, (float)rayo.t);
                 }

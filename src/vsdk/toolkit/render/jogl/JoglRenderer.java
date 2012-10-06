@@ -103,7 +103,7 @@ public abstract class JoglRenderer extends RenderingElement {
         FloatBuffer buffer = null;
         int i;
 
-	//buffer = BufferUtil.newFloatBuffer(v.length);
+        //buffer = BufferUtil.newFloatBuffer(v.length);
         //buffer = ByteBuffer.allocateDirect(v.length*4).asFloatBuffer();
         buffer = (FloatBuffer)GLBuffers.newDirectGLBuffer(GL.GL_FLOAT, v.length);
 

@@ -100,12 +100,12 @@ public class JoglRGBAImageRenderer extends JoglRenderer
 
             //----
             try {
-		GLProfile glprof;
+                GLProfile glprof;
                 TextureData textureData;
 
                 glprof = GLProfile.get(GLProfile.GL2);
                 textureData = new TextureData(
-		   glprof,
+                   glprof,
                    4,              // int internalFormat (number of components)
                    x_tam,          // int width
                    y_tam,          // int height
@@ -191,7 +191,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBAImageRenderer.unload", "Error unloading image.");
 
-	}
+        }
     }
 
     public static void draw(GL2 gl, RGBAImage img)

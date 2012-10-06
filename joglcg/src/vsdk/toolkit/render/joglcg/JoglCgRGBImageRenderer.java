@@ -94,12 +94,12 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
             //gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
 
             try {
-		GLProfile glprof;
+                GLProfile glprof;
                 TextureData textureData;
 
                 glprof = GLProfile.get(GLProfile.GL2);
                 textureData = new TextureData(
-		   glprof,
+                   glprof,
                    3, // int internalFormat (number of components)
                    x_tam, // int width
                    y_tam, // int height
@@ -200,7 +200,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.deactivate", "Error unloading image.");
 
-	}
+        }
     }
 
     public static void unload(GL2 gl, RGBImage img)
@@ -223,7 +223,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.unload", "Error unloading image.");
 
-	}
+        }
     }
 
     public static void draw(GL2 gl, RGBImage img)

@@ -570,7 +570,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         for ( int i = start; i < end; i++ ) {
             if ( i >= t.length/3 ) {
                 break;
-	    }
+            }
             mesh.getVertexAt(t[3*i], v0);
             mesh.getVertexAt(t[3*i+1], v1);
             mesh.getVertexAt(t[3*i+2], v2);

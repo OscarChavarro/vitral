@@ -810,7 +810,7 @@ public class PolyhedralBoundedSolidModelingTools
         PolyhedralBoundedSolid res = null;
         PolyhedralBoundedSolid operands[] = null;
 
-	System.out.printf("Creating C.S.G. test object with parts %d, " + 
+        System.out.printf("Creating C.S.G. test object with parts %d, " + 
             "operation %s, and sample pair %d\n", part, 
             op==0?"UNION":
                 (op==1?"INTERSECTION":

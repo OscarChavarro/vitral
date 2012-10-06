@@ -557,12 +557,12 @@ public abstract class PersistenceElement {
                     a[1] = character[0];
                     String cc;
                     cc = buildUtf8Char(a);
-		    if ( cc != null ) {
+                    if ( cc != null ) {
                         msg += cc;
-		    }
-		    else {
-			System.out.println("* UNHANDLED UTF! ********************************************************** ->" + msg);
-		    }
+                    }
+                    else {
+                        System.out.println("* UNHANDLED UTF! ********************************************************** ->" + msg);
+                    }
                 }
             }
         } while ( character[0] != 0x00 );
@@ -633,7 +633,7 @@ public abstract class PersistenceElement {
             }
         } while ( character[0] != '\n' );
 
-	return stringBuffer.toString();
+        return stringBuffer.toString();
     }
 
     private static boolean isInSet(byte key, byte set[])

@@ -54,91 +54,91 @@ public class EventDispatcher implements
             else if ( !parent.animator.isStarted() ) {
                 parent.animator.start();
                 parent.isRotating = true;
-	    }
-	    else if ( parent.animator.isAnimating() ) {
+            }
+            else if ( parent.animator.isAnimating() ) {
                 parent.animator.pause();
                 parent.isRotating = false;
-	    }
-	    else {
+            }
+            else {
                 parent.animator.resume();
                 parent.isRotating = true;
-	    }
+            }
             break;
           case KeyEvent.KEY_ESC:
             System.exit(0);
             break;
           case KeyEvent.KEY_1:
-	    parent.setStereoStrategyId(1);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(1);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_2:
-	    parent.setStereoStrategyId(2);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(2);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_3:
-	    parent.setStereoStrategyId(3);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(3);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_4:
-	    parent.setStereoStrategyId(4);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(4);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_5:
-	    parent.setStereoStrategyId(5);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(5);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_6:
-	    parent.setStereoStrategyId(6);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(6);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_7:
-	    parent.setStereoStrategyId(7);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(7);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_8:
-	    parent.setStereoStrategyId(8);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(8);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_9:
-	    parent.setStereoStrategyId(9);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(9);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_f:
-	    parent.destroyGUI();
+            parent.destroyGUI();
             parent.swithFullScreenMode();
-	    parent.createGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_d:
-	    parent.scene.eyeDistance -= 0.01;
+            parent.scene.eyeDistance -= 0.01;
             if ( parent.scene.eyeDistance < 0.0 ) {
                 parent.scene.eyeDistance = 0.0;
-	    }
-	    System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
+            }
+            System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
             break;
           case KeyEvent.KEY_D:
-	    parent.scene.eyeDistance += 0.01;
-	    System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
+            parent.scene.eyeDistance += 0.01;
+            System.out.printf("Eye distance: %.3f\n", parent.scene.eyeDistance);
             break;
 
           case KeyEvent.KEY_t:
-	    parent.scene.eyeTorsionAngle -= 0.1;
+            parent.scene.eyeTorsionAngle -= 0.1;
             if ( parent.scene.eyeTorsionAngle < 0.0 ) {
                 parent.scene.eyeTorsionAngle = 0.0;
-	    }
-	    System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
+            }
+            System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
             break;
           case KeyEvent.KEY_T:
-	    parent.scene.eyeTorsionAngle += 0.1;
-	    System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
+            parent.scene.eyeTorsionAngle += 0.1;
+            System.out.printf("Eye angle: %.2f\n", parent.scene.eyeTorsionAngle);
             break;
 
           case KeyEvent.KEY_c:
@@ -154,7 +154,7 @@ public class EventDispatcher implements
         }
 
         if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-	    ;
+            ;
         }
 
         canvas.repaint();

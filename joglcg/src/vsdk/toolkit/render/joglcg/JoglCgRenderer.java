@@ -67,7 +67,7 @@ public abstract class JoglCgRenderer extends JoglRenderer
     {
         if ( NvidiaGuiAllVertexShaders == null ) {
             NvidiaGuiAllVertexShaders = new ArrayList<CGprogram>();
-	}
+        }
 
         NvidiaGuiAllVertexShaders.add(NvidiaGpuVertexProgramTexture);
         NvidiaGuiAllVertexShaders.add(NvidiaGpuVertexProgramTextureBump);
@@ -79,7 +79,7 @@ public abstract class JoglCgRenderer extends JoglRenderer
     {
         if ( NvidiaGuiAllPixelShaders == null ) {
             NvidiaGuiAllPixelShaders = new ArrayList<CGprogram>();
-	}
+        }
 
         NvidiaGuiAllPixelShaders.add(NvidiaGpuPixelProgramTexture);
         NvidiaGuiAllPixelShaders.add(NvidiaGpuPixelProgramTextureBump);

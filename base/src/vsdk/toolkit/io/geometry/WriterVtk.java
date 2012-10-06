@@ -89,10 +89,10 @@ public class WriterVtk extends PersistenceElement {
         BufferedOutputStream bos = null;
         if ( inOutputStream instanceof BufferedOutputStream ) {
             bos = (BufferedOutputStream)inOutputStream;
-	}
-	else {
+        }
+        else {
             bos = new BufferedOutputStream(inOutputStream);
-	}
+        }
 
         //-----------------------------------------------------------------
         writeAsciiLine(bos, "# vtk DataFile Version 3.0");

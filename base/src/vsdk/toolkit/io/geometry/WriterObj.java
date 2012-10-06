@@ -83,13 +83,13 @@ public class WriterObj extends PersistenceElement {
                     n0 + "/" + n0 + "/" + n0 + " " +
                     n1 + "/" + n1 + "/" + n1 + " " +
                     n2 + "/" + n2 + "/" + n2);
-	    }
-	    else {
+            }
+            else {
                 writeAsciiLine(inOutputStream, "f " + 
                     n0 + " " +
                     n1 + " " +
                     n2);
-	    }
+            }
         }
 
         return offset + nv;

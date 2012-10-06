@@ -253,8 +253,8 @@ public class DistributerByArea
             e.printStackTrace();
         }
 
-	System.out.print("Waiting for visualizers to end... ");
+        System.out.print("Waiting for visualizers to end... ");
         while ( pendingends.size() > 0 );
-	System.out.println("Ended!");
+        System.out.println("Ended!");
     }
 }

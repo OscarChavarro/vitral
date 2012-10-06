@@ -20,13 +20,13 @@ public class JoglBackgroundRenderer extends JoglRenderer
     {
         if ( background instanceof CubemapBackground ) {
             JoglCubemapBackgroundRenderer.draw(gl, (CubemapBackground)background);
-	}
+        }
         else if ( background instanceof FixedBackground ) {
             JoglFixedBackgroundRenderer.draw(gl, (FixedBackground)background);
-	}
+        }
         else if ( background instanceof SimpleBackground ) {
             JoglSimpleBackgroundRenderer.draw(gl, (SimpleBackground)background);
-	}
+        }
     }
 }
 

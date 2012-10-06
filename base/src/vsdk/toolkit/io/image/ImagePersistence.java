@@ -156,25 +156,25 @@ public class ImagePersistence extends PersistenceElement
                 VSDK.reportMessage(null, VSDK.WARNING, "importDDSRGBA",
                 "Compressed image subformats unsupported - file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
-		if ( format == DDSImage.D3DFMT_DXT1 ) {
+                if ( format == DDSImage.D3DFMT_DXT1 ) {
                     // 1-bit alpha
-		    System.out.println("Compressed format: [D3DFMT_DXT1]");
-		}
-		else if ( format == DDSImage.D3DFMT_DXT2 ) {
+                    System.out.println("Compressed format: [D3DFMT_DXT1]");
+                }
+                else if ( format == DDSImage.D3DFMT_DXT2 ) {
                     // 4-bit premultiplied alpha
-		    System.out.println("Compressed format: [D3DFMT_DXT2]");
-		}
-		else if ( format == DDSImage.D3DFMT_DXT4 ) {
+                    System.out.println("Compressed format: [D3DFMT_DXT2]");
+                }
+                else if ( format == DDSImage.D3DFMT_DXT4 ) {
                     // interpolated premultiplied alpha
-		    System.out.println("Compressed format: [D3DFMT_DXT4]");
-		}
-		else if ( format == DDSImage.D3DFMT_DXT5 ) {
+                    System.out.println("Compressed format: [D3DFMT_DXT4]");
+                }
+                else if ( format == DDSImage.D3DFMT_DXT5 ) {
                     // interpolated nonpremultiplied alpha
-		    System.out.println("Compressed format: [D3DFMT_DXT5]");
-		}
-		else {
-		    System.out.println("Compressed format: [*UNKNOWN*]");
-		}
+                    System.out.println("Compressed format: [D3DFMT_DXT5]");
+                }
+                else {
+                    System.out.println("Compressed format: [*UNKNOWN*]");
+                }
                 return retImage;
             }
             else if ( format == DDSImage.D3DFMT_R8G8B8 ) {
@@ -227,7 +227,7 @@ public class ImagePersistence extends PersistenceElement
               VSDK.reportMessage(null, VSDK.ERROR, "importDDSRGBA",
                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + 
                  "\"");
-	      e.printStackTrace();
+              e.printStackTrace();
               return null;
         }
     }
@@ -515,17 +515,17 @@ public class ImagePersistence extends PersistenceElement
                         stage++;
                         break;
                       case 2:
-			if ( line.startsWith("#") ) {
+                        if ( line.startsWith("#") ) {
                             // Skip comment line
-			    ;
-			  }
-			  else {
+                            ;
+                          }
+                          else {
                             StringTokenizer parser;
                             parser = new StringTokenizer(line);
                             xSize = Integer.parseInt(parser.nextToken());
                             ySize = Integer.parseInt(parser.nextToken());
                             stage++;
-			}
+                        }
                         break;
                     }
 
@@ -550,13 +550,13 @@ public class ImagePersistence extends PersistenceElement
                 RGBPixel pb = new RGBPixel();
 
                 for ( y = 0; y < ySize/2; y++ ) {
-		    for ( x = 0; x < xSize; x++ ) {
-		        retImage.getPixelRgb(x, y, pa);
-		        retImage.getPixelRgb(x, ySize-y-1, pb);
-		        retImage.putPixelRgb(x, y, pb);
-		        retImage.putPixelRgb(x, ySize-y-1, pa);
-		    }
-		}
+                    for ( x = 0; x < xSize; x++ ) {
+                        retImage.getPixelRgb(x, y, pa);
+                        retImage.getPixelRgb(x, ySize-y-1, pb);
+                        retImage.putPixelRgb(x, y, pb);
+                        retImage.putPixelRgb(x, ySize-y-1, pa);
+                    }
+                }
                 //-------------------------------------------------------------
 
                 bis.close();
@@ -566,7 +566,7 @@ public class ImagePersistence extends PersistenceElement
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB (B)",
                                      "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-		  e.printStackTrace();
+                  e.printStackTrace();
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }

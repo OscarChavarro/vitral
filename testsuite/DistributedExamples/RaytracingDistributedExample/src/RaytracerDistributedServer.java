@@ -84,7 +84,7 @@ class VitralVisualizationServerProtocol implements Runnable
         }
         else if ( in.equals("id") ) {
             id = PersistenceElement.readIntBE(is);
-	    System.out.println("Server set to id " + id);
+            System.out.println("Server set to id " + id);
             out = new byte[1];
             out[0] = 1;
         }
@@ -116,7 +116,7 @@ class VitralVisualizationServerProtocol implements Runnable
             out = new byte[1];
             out[0] = 1;
         }
-	else if ( in.equals("render") ) {
+        else if ( in.equals("render") ) {
             if ( theScene != null ) {
                 theResultingImage.init(x1 - x0, y1 - y0);
                 reporter = null; //new ProgressMonitorConsole();
@@ -141,7 +141,7 @@ class VitralVisualizationServerProtocol implements Runnable
                 if ( !ImagePersistence.exportPNG(fd, theResultingImage) ) {
                     System.err.println("Error grabando la imagen!!");
                 }
-		*/
+                */
                 out = new byte[1];
                 out[0] = 1;
             }

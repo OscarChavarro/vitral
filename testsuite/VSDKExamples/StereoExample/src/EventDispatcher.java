@@ -44,54 +44,54 @@ public class EventDispatcher implements
             System.exit(0);
             break;
           case KeyEvent.KEY_1:
-	    parent.setStereoStrategyId(1);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(1);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_2:
-	    parent.setStereoStrategyId(2);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(2);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_3:
-	    parent.setStereoStrategyId(3);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(3);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_4:
-	    parent.setStereoStrategyId(4);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(4);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_5:
-	    parent.setStereoStrategyId(5);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(5);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_6:
-	    parent.setStereoStrategyId(6);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(6);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_7:
-	    parent.setStereoStrategyId(7);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(7);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_8:
-	    parent.setStereoStrategyId(8);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(8);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_9:
-	    parent.setStereoStrategyId(9);
-	    parent.destroyGUI();
-	    parent.createGUI();
+            parent.setStereoStrategyId(9);
+            parent.destroyGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_f:
-	    parent.destroyGUI();
+            parent.destroyGUI();
             parent.swithFullScreenMode();
-	    parent.createGUI();
+            parent.createGUI();
             break;
           case KeyEvent.KEY_c:
             if ( parent.stereoStrategy != null ) {

@@ -28,11 +28,11 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
             //    ImagePersistence class.
             File fd = new File("temp.png");
             FileOutputStream fos = new FileOutputStream(fd);
-	    while ( sceneSource.available() > 0 ) {
+            while ( sceneSource.available() > 0 ) {
                 byte arr[] = new byte [sceneSource.available()];
                 sceneSource.read(arr);
                 fos.write(arr);
-	    }
+            }
 
             // 2. Reimport the exported data from temporary file
             IndexedColorImage distanceField;
@@ -42,14 +42,14 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
             if ( distanceField.getXSize() != 64 || distanceField.getYSize() != 64 ) {
                 System.err.println("Error: current processor can only compare 64x64 sized images!");
                 return null;
-	    }
+            }
             calculateCircularHarmonicsShapeDescriptor(distanceField, "DETACHED_DATA");
 
-	}
-	catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             System.err.println("ERROR: could not import image data input!");
             return null;
-	}
+        }
 
 
         return null;
