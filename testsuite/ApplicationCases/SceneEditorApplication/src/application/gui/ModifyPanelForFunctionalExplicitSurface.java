@@ -93,7 +93,11 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
         label = new JLabel("Predefined configurations:", SwingConstants.LEFT);
         container2.add(label);
 
+        // If using Java 7 use this line:
         JComboBox<String> jcb = new JComboBox<String>();
+
+        // If using Java 6 use this line:
+        //JComboBox jcb = new JComboBox();
 
         // This is strange, but makes combobox heavyweight and integrable with JOGL!
         jcb.getEditor().getEditorComponent().setBackground(java.awt.Color.WHITE);
