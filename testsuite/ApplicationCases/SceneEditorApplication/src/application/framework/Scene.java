@@ -1,4 +1,7 @@
 //===========================================================================
+
+package application.framework;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -24,6 +27,10 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.Raytracer;
+
+// Application classes
+import application.SceneEditorApplication;
+import application.render.jogl.SimpleCorridor;
 
 public class Scene
 {
@@ -51,7 +58,7 @@ public class Scene
     public RendererConfiguration qualityTemplate;
     private int acumObject = 1;
 
-    Scene()
+    public Scene()
     {
         scene = new SimpleScene();
 

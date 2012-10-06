@@ -5,6 +5,8 @@
 //=   previous "JoglView" class at SceneEditorApplication example).         =
 //===========================================================================
 
+package application.render.jogl;
+
 // Java basic classes
 import java.util.ArrayList;
 

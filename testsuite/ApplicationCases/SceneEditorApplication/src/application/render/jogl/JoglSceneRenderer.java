@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.render.jogl;
+
 // Java basic classes
 import java.util.ArrayList;
 
@@ -24,6 +26,11 @@ import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
+
+// Application classes
+import application.SceneEditorApplication;
+import application.framework.Scene;
+import application.gui.ModifyPanel;
 
 public class JoglSceneRenderer
 {

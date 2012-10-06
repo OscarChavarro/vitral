@@ -6,6 +6,8 @@
 //= - Since august 2005 - Oscar Chavarro                                    =
 //===========================================================================
 
+package application;
+
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
@@ -37,10 +39,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import javax.swing.SingleSelectionModel;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 // JOGL Classes
 import javax.media.opengl.awt.GLCanvas;
@@ -84,86 +83,23 @@ import vsdk.transition.gui.GuiCache;
 import vsdk.transition.io.presentation.GuiCachePersistence;
 import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 
-abstract class SuffixAwareFilter
-    extends javax.swing.filechooser.FileFilter {
-
-  public String getSuffix(File f) {
-    String s = f.getPath(), suffix = null;
-    int i = s.lastIndexOf('.');
-
-    if (i > 0 && i < s.length() - 1) {
-      suffix = s.substring(i + 1).toLowerCase();
-    }
-
-    return suffix;
-  }
-
-  public boolean accept(File f) {
-    return f.isDirectory();
-  }
-
-}
-
-class MainThread implements Runnable
-{
-    private String args[];
-    public MainThread(String args[])
-    {
-        this.args = args;
-    }
-    public void run()
-    {
-        SceneEditorApplication app;
-        app = new SceneEditorApplication(args);
-    }
-}
-
-class MyFilter
-    extends SuffixAwareFilter {
-  private String suffix;
-  private String description;
-
-  public MyFilter(String suffix, String description) {
-    this.suffix = suffix;
-    this.description = description;
-  }
-
-  public boolean accept(File f) {
-    boolean accept = super.accept(f);
-    if (!accept) {
-      String _suffix = getSuffix(f);
-      if (suffix != null) {
-        accept = suffix.equals(_suffix);
-      }
-    }
-    return accept;
-  }
-
-  public String getDescription() {
-    return description + " (*." + suffix + ")";
-  }
-}
-
-class MyChangeListener implements ChangeListener
-{
-    public SceneEditorApplication parent;
-    public MyChangeListener(SceneEditorApplication parent)
-    {
-        this.parent = parent;
-    }
-
-    public void stateChanged(ChangeEvent e)
-    {
-        SingleSelectionModel sm = (SingleSelectionModel)e.getSource();
-        if ( sm.getSelectedIndex() == 1 ) {
-            parent.modifyPanelSelected = true;
-            parent.drawingArea.reportTargetToModifyPanel();
-        }
-        else {
-            parent.modifyPanelSelected = false;
-        }
-    }
-}
+// Application classes
+import application.framework.Scene;
+import application.framework.SelectionSet;
+import application.gui.ButtonsPanel;
+import application.gui.ModifyPanel;
+import application.gui.ModifyPanelForFunctionalExplicitSurface;
+import application.gui.SuffixAwareFilter;
+import application.gui.SwingImageControlWindow;
+import application.gui.SwingSelectorDialog;
+import application.gui.MyFilter;
+import application.gui.MyChangeListener;
+import application.net.VitralEditorServer;
+import application.net.VitralCommandClient;
+import application.render.jogl.JoglDrawingArea;
+import application.render.jogl.JoglOfflineRenderer;
+import application.render.jogl.JoglProjectedViewRenderer;
+import application.render.jogl.JoglSceneRenderer;
 
 public class SceneEditorApplication {
     // Application model

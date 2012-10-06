@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.net;
+
 // Java basic classes
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -12,6 +14,10 @@ import vsdk.toolkit.common.linealAlgebra.Quaternion;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.io.PersistenceElement;
+
+// Application classes
+import application.SceneEditorApplication;
+import application.render.jogl.JoglAwtViewportWindow;
 
 class VitralEditorServerProtocol implements Runnable
 {

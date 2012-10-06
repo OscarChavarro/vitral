@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.gui;
+
 // Java basic classes
 import java.util.StringTokenizer;
 
@@ -25,6 +27,9 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+
+// Application classes
+import application.SceneEditorApplication;
 
 public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel implements ActionListener
 {

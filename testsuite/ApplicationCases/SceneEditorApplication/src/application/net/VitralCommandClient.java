@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.net;
+
 // Java basic classes
 import java.net.Socket;
 import java.io.InputStream;
@@ -7,6 +9,9 @@ import java.io.OutputStream;
 
 // VitralSDK classes
 import vsdk.toolkit.io.PersistenceElement;
+
+// Application classes
+import application.SceneEditorApplication;
 
 public class VitralCommandClient implements Runnable
 {

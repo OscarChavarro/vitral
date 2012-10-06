@@ -1,3 +1,7 @@
+//===========================================================================
+
+package application.gui;
+
 // Java basic classes
 import java.io.FileReader;
 
@@ -108,3 +112,7 @@ class ImageDisplayPanel extends JPanel
         AwtRGBImageRenderer.draw(g, imageToPaint, 10, 10);
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

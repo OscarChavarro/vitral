@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.gui;
+
 // Java GUI classes
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,6 +16,10 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+
+// Application classes
+import application.SceneEditorApplication;
+import application.framework.Scene;
 
 public class ModifyPanel extends JPanel
 {

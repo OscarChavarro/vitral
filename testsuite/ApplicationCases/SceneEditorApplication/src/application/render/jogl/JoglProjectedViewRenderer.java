@@ -7,8 +7,10 @@
 //=     January 2003. Pp. 83-105                                            =
 //===========================================================================
 
+package application.render.jogl;
+
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 // VSDK Classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -162,7 +164,7 @@ public class JoglProjectedViewRenderer {
         camera.setRotation(R);
     }
 
-    public void draw(GL gl) {
+    public void draw(GL2 gl) {
         gl.glViewport(0, 0, xSize, ySize);
 
         //-----------------------------------------------------------------

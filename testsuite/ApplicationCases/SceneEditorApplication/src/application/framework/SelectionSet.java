@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.framework;
+
 import java.util.ArrayList;
 
 public class SelectionSet

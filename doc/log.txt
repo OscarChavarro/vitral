@@ -912,4 +912,7 @@
     monitoring of PolyhedralBoundedSolidSetOperator stages, and fixing
     debugging code bugs! :).
 
+2012 october 6, Oscar Chavarro
+  - 50min: reorganizing design on SceneEditorApplication example
+
 ===========================================================================

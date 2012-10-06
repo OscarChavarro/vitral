@@ -1,5 +1,6 @@
 //===========================================================================
-//===========================================================================
+
+package application.render.jogl;
 
 // JDK Basic classes
 import java.lang.reflect.Method;
@@ -81,6 +82,12 @@ import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.toolkit.gui.ViewportWindow;
 import vsdk.toolkit.gui.ViewportWindowSetManager;
 import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
+
+// Application classes
+import application.SceneEditorApplication;
+import application.framework.Scene;
+import application.gui.SwingImageControlWindow;
+import application.gui.SwingSelectorDialog;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,

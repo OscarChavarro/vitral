@@ -1,14 +1,10 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= References:                                                             =
-//= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
-//=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
-//=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
-//=     January 2003. Pp. 83-105                                            =
-//===========================================================================
+
+package application.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -27,16 +23,21 @@ public class JoglOfflineRenderer implements GLEventListener {
         ready = false;
 
         // Create a GLCapabilities object for the pbuffer
-        GLCapabilities pbCaps = new GLCapabilities();
+        GLProfile profile;
+        profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities pbCaps = new GLCapabilities(profile);
         pbCaps.setDoubleBuffered(false);
 
-        if ( !GLDrawableFactory.getFactory().canCreateGLPbuffer() ) {
+        /*
+        if ( !GLDrawableFactory.getFactory(profile).canCreateGLPbuffer() ) {
               pbufferSupported = false;
               return;
         }
+        */
+        pbufferSupported = false;
 
         try {
-            pbuffer = GLDrawableFactory.getFactory().createGLPbuffer(pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
             pbufferSupported = true;
             pbuffer.addGLEventListener(this);
           }
@@ -70,7 +71,7 @@ public class JoglOfflineRenderer implements GLEventListener {
     }
 
     public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         renderer.draw(gl);
         ready = true;
     }
@@ -96,7 +97,7 @@ public class JoglOfflineRenderer implements GLEventListener {
 
     public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
     }
 }

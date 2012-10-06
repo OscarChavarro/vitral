@@ -1,5 +1,7 @@
 //===========================================================================
 
+package application.gui;
+
 // Java basic classes
 import java.io.File;
 import java.io.FileReader;
@@ -73,6 +75,9 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.transition.gui.GuiCache;
 import vsdk.transition.io.presentation.GuiCachePersistence;
 import vsdk.transition.render.swing.SwingGuiCacheRenderer;
+
+// Application classes
+import application.SceneEditorApplication;
 
 public class ButtonsPanel extends JPanel implements ActionListener
 {
