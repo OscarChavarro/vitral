@@ -1,6 +1,6 @@
 package vsdk.transition.gui;
 
-public class GuiMenuItemCache extends GuiElementCache
+public class GuiMenuItem extends GuiElement
 {
     private String name;
     private String commandName;
@@ -13,7 +13,7 @@ public class GuiMenuItemCache extends GuiElementCache
         return isSeparatorFlag;
     }
 
-    public GuiMenuItemCache(GuiCache c)
+    public GuiMenuItem(Gui c)
     {
         context = c;
         name = null;

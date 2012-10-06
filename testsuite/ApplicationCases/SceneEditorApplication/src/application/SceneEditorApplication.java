@@ -79,9 +79,9 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
-import vsdk.transition.gui.GuiCache;
-import vsdk.transition.io.presentation.GuiCachePersistence;
-import vsdk.transition.render.swing.SwingGuiCacheRenderer;
+import vsdk.transition.gui.Gui;
+import vsdk.transition.io.presentation.GuiPersistence;
+import vsdk.transition.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
@@ -114,7 +114,7 @@ public class SceneEditorApplication {
     public int visualDebugRayLevels;
 
     // Application GUI
-    public GuiCache gui;
+    public Gui gui;
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
     public JPanel statusBarPanel;
@@ -269,7 +269,7 @@ public class SceneEditorApplication {
 
         //-----------------------------------------------------------------
         try {
-            gui = GuiCachePersistence.importAquynzaGui(
+            gui = GuiPersistence.importAquynzaGui(
                                 new FileReader(languageGuiFile)  );
         }
         catch ( Exception e ) {
@@ -313,7 +313,7 @@ public class SceneEditorApplication {
 
         //-----------------------------------------------------------------
         try {
-            gui = GuiCachePersistence.importAquynzaGui(
+            gui = GuiPersistence.importAquynzaGui(
                                 new FileReader(languageGuiFile)  );
         }
         catch ( Exception e ) {
@@ -328,7 +328,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         JMenuBar menubar;
 
-        menubar = SwingGuiCacheRenderer.buildMenubar(gui, null, executorPanel);
+        menubar = SwingGuiRenderer.buildMenubar(gui, null, executorPanel);
 
         //-----------------------------------------------------------------
         JSplitPane splitPane;

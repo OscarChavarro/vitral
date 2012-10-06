@@ -2,21 +2,21 @@ package vsdk.transition.gui;
 
 import java.util.ArrayList;
 
-public class GuiMenuCache extends GuiElementCache
+public class GuiMenu extends GuiElement
 {
-    private ArrayList <GuiElementCache> children;
+    private ArrayList <GuiElement> children;
     private String name;
     private char mnemonic;
     private String accelerator;
 
-    public GuiMenuCache(GuiCache c)
+    public GuiMenu(Gui c)
     {
         context = c;
-        children = new ArrayList<GuiElementCache>();
+        children = new ArrayList<GuiElement>();
         name = null;
     }
 
-    public ArrayList <GuiElementCache> getChildren()
+    public ArrayList <GuiElement> getChildren()
     {
         return children;
     }
@@ -28,7 +28,7 @@ public class GuiMenuCache extends GuiElementCache
         accelerator = processAccelerator(n);
     }
 
-    public void addChild(GuiElementCache i)
+    public void addChild(GuiElement i)
     {
         children.add(i);
     }

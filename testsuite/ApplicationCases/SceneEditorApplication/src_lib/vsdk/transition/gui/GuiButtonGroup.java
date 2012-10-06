@@ -5,10 +5,10 @@ package vsdk.transition.gui;
 
 import java.util.ArrayList;
 
-public class GuiButtonGroupCache
+public class GuiButtonGroup
 {
-    private ArrayList<GuiCommandCache> commandReferenceList;
-    private GuiCache context;
+    private ArrayList<GuiCommand> commandReferenceList;
+    private Gui context;
     private String name;
 
     private boolean showText;
@@ -20,9 +20,9 @@ public class GuiButtonGroupCache
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
 
-    public GuiButtonGroupCache(GuiCache parent)
+    public GuiButtonGroup(Gui parent)
     {
-        commandReferenceList = new ArrayList<GuiCommandCache>();
+        commandReferenceList = new ArrayList<GuiCommand>();
         context = parent;
     }
 
@@ -66,7 +66,7 @@ public class GuiButtonGroupCache
         return showTitle;
     }
 
-    public ArrayList<GuiCommandCache> getCommands()
+    public ArrayList<GuiCommand> getCommands()
     {
         return commandReferenceList;
     }
@@ -83,7 +83,7 @@ public class GuiButtonGroupCache
 
     public void addCommandByName(String commandName)
     {
-        GuiCommandCache command = context.getCommandByName(commandName);
+        GuiCommand command = context.getCommandByName(commandName);
 
         if ( command != null ) {
             commandReferenceList.add(command);

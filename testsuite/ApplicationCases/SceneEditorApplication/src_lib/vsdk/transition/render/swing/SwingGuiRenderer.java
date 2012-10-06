@@ -32,14 +32,14 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 // Application specific classes
-import vsdk.transition.gui.GuiCache;
-import vsdk.transition.gui.GuiMenuCache;
-import vsdk.transition.gui.GuiMenuItemCache;
-import vsdk.transition.gui.GuiElementCache;
-import vsdk.transition.gui.GuiButtonGroupCache;
-import vsdk.transition.gui.GuiCommandCache;
+import vsdk.transition.gui.Gui;
+import vsdk.transition.gui.GuiMenu;
+import vsdk.transition.gui.GuiMenuItem;
+import vsdk.transition.gui.GuiElement;
+import vsdk.transition.gui.GuiButtonGroup;
+import vsdk.transition.gui.GuiCommand;
 
-public class SwingGuiCacheRenderer
+public class SwingGuiRenderer
 {
     private static int convertMnemonic2Swing(char in)
     {
@@ -88,7 +88,7 @@ public class SwingGuiCacheRenderer
         return output;
     }
 
-    public static JMenu buildPopupMenu(GuiCache context, String name,
+    public static JMenu buildPopupMenu(Gui context, String name,
                                        ActionListener executor)
     {
         JMenu widgetPopup;
@@ -99,32 +99,32 @@ public class SwingGuiCacheRenderer
         widgetPopup = new JMenu(name);
         widgetPopup.getPopupMenu().setLightWeightPopupEnabled(false);
 
-        GuiMenuCache menu = context.getPopup(name);
+        GuiMenu menu = context.getPopup(name);
 
         if ( menu == null ) {
             widgetOption = 
                 widgetPopup.add(new JMenuItem("Popup menu not found on GUI"));
           }
           else {
-            ArrayList<GuiElementCache> children;
+            ArrayList<GuiElement> children;
             children = menu.getChildren();
 
             int i;
-            GuiElementCache element;
+            GuiElement element;
             String className;
 
             for ( i = 0; i < children.size(); i++ ) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
-                    GuiMenuCache submenu = (GuiMenuCache)element;
+                if ( className.equals("vsdk.transition.gui.GuiMenu") ) {
+                    GuiMenu submenu = (GuiMenu)element;
                     JMenu widgetSubmenu = buildPopupMenu(context, 
                                                          submenu.getName(), 
                                                          executor);
                     widgetPopup.add(widgetSubmenu);
                 }
-                else if ( className.equals("vsdk.transition.gui.GuiMenuItemCache") ) {
-                    GuiMenuItemCache option = (GuiMenuItemCache)element;
+                else if ( className.equals("vsdk.transition.gui.GuiMenuItem") ) {
+                    GuiMenuItem option = (GuiMenuItem)element;
                     if ( option.isSeparator() ) {
                         widgetPopup.addSeparator();
                       }
@@ -146,14 +146,14 @@ public class SwingGuiCacheRenderer
     }
 
     public static JPanel
-    buildButtonGroup(GuiCache context, String name, ActionListener executor)
+    buildButtonGroup(Gui context, String name, ActionListener executor)
     {
         JPanel frame;
         JLabel l;
         JButton b;
 
         frame = new JPanel();
-        GuiButtonGroupCache group;
+        GuiButtonGroup group;
         group = context.getButtonGroup(name);
 
         if ( group == null ) {
@@ -177,9 +177,9 @@ public class SwingGuiCacheRenderer
             return frame;
         }
 
-        ArrayList<GuiCommandCache> list = group.getCommands();
+        ArrayList<GuiCommand> list = group.getCommands();
         int i;
-        GuiCommandCache element;
+        GuiCommand element;
         RGBAImage img;
 
         for ( i = 0; i < list.size(); i++ ) {
@@ -232,12 +232,12 @@ public class SwingGuiCacheRenderer
     @todo: permit the selection of a diferent name menu
     */
     public static JMenuBar 
-    buildMenubar(GuiCache context, String name, ActionListener executor)
+    buildMenubar(Gui context, String name, ActionListener executor)
     {
         JMenu widgetPopup;
         JMenuItem widgetOption;
         JMenuBar widgetMenubar;
-        GuiMenuCache menubar = null;
+        GuiMenu menubar = null;
         String errorMenu = null;
         int mnemonic;
 
@@ -248,7 +248,7 @@ public class SwingGuiCacheRenderer
             }
           }
           else {
-            errorMenu = "No GuiCache specified!";
+            errorMenu = "No Gui specified!";
         }
 
         widgetMenubar = new JMenuBar();
@@ -265,19 +265,19 @@ public class SwingGuiCacheRenderer
             widgetPopup.getPopupMenu().setLightWeightPopupEnabled(false);
           }
           else {
-            ArrayList<GuiElementCache> children;
+            ArrayList<GuiElement> children;
             children = menubar.getChildren();
 
             int i;
-            GuiElementCache element;
-            GuiMenuCache menu;
+            GuiElement element;
+            GuiMenu menu;
             String className;
 
             for ( i = 0; i < children.size(); i++ ) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if ( className.equals("vsdk.transition.gui.GuiMenuCache") ) {
-                    menu = (GuiMenuCache)element;
+                if ( className.equals("vsdk.transition.gui.GuiMenu") ) {
+                    menu = (GuiMenu)element;
                     widgetPopup = buildPopupMenu(context, menu.getName(),
                                                  executor);
                     mnemonic = convertMnemonic2Swing(menu.getMnemonic());

@@ -6,22 +6,22 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 
-import vsdk.transition.gui.GuiButtonGroupCache;
-import vsdk.transition.gui.GuiCache;
-import vsdk.transition.gui.GuiCommandCache;
-import vsdk.transition.gui.GuiMenuCache;
-import vsdk.transition.gui.GuiMenuItemCache;
-import vsdk.transition.gui.ExceptionGuiCacheBadName;
-import vsdk.transition.gui.ExceptionGuiCacheParseError;
+import vsdk.transition.gui.GuiButtonGroup;
+import vsdk.transition.gui.Gui;
+import vsdk.transition.gui.GuiCommand;
+import vsdk.transition.gui.GuiMenu;
+import vsdk.transition.gui.GuiMenuItem;
+import vsdk.transition.gui.ExceptionGuiBadName;
+import vsdk.transition.gui.ExceptionGuiParseError;
 
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-public class GuiCachePersistence {
+public class GuiPersistence {
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,
-            GuiCache context) throws Exception {
+            Gui context) throws Exception {
         int tokenType;
         int level = 0;
 
@@ -56,7 +56,7 @@ public class GuiCachePersistence {
                     if ( content == '{' ) {
                          level++;
                          if ( level > 2 ) {
-                             throw new ExceptionGuiCacheParseError();
+                             throw new ExceptionGuiParseError();
                          }
                       }
                       else if ( content == '}' ) {
@@ -66,7 +66,7 @@ public class GuiCachePersistence {
                          }
                       }
                       else {
-                        //throw new ExceptionGuiCacheParseError();
+                        //throw new ExceptionGuiParseError();
                     }
                 }
                 break;
@@ -74,12 +74,12 @@ public class GuiCachePersistence {
         } while ( tokenType != StreamTokenizer.TT_EOF );
     }
 
-    private static GuiButtonGroupCache importAquynzaGuiButtonGroup(
+    private static GuiButtonGroup importAquynzaGuiButtonGroup(
             StreamTokenizer parser,
-            GuiCache context) throws Exception {
-        GuiButtonGroupCache item;
+            Gui context) throws Exception {
+        GuiButtonGroup item;
 
-        item = new GuiButtonGroupCache(context);
+        item = new GuiButtonGroup(context);
         int tokenType;
         int level = 0;
 
@@ -167,7 +167,7 @@ public class GuiCachePersistence {
                     if ( content == '{' ) {
                          level++;
                          if ( level > 2 ) {
-                             throw new ExceptionGuiCacheParseError();
+                             throw new ExceptionGuiParseError();
                          }
                       }
                       else if ( content == '}' ) {
@@ -177,7 +177,7 @@ public class GuiCachePersistence {
                          }
                       }
                       else {
-                        //throw new ExceptionGuiCacheParseError();
+                        //throw new ExceptionGuiParseError();
                     }
                 }
                 break;
@@ -186,20 +186,20 @@ public class GuiCachePersistence {
 
         if ( name == null ) {
             System.out.println("Salida 2");
-            throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiBadName();
         }
 
         return item;
     }
 
-    private static GuiCommandCache importAquynzaGuiCommand(
+    private static GuiCommand importAquynzaGuiCommand(
             StreamTokenizer parser,
-            GuiCache context) throws Exception {
-        GuiCommandCache item;
+            Gui context) throws Exception {
+        GuiCommand item;
         RGBAImage img;
         RGBImage mask;
 
-        item = new GuiCommandCache();
+        item = new GuiCommand();
 
         int tokenType;
 
@@ -284,7 +284,7 @@ public class GuiCachePersistence {
                     char content = parser.toString().charAt(7);
                     if ( content == '{' ) {
                         if ( idString == null ) {
-                            throw new ExceptionGuiCacheParseError();
+                            throw new ExceptionGuiParseError();
                         }
                       }
                       else if ( content == '}' ) {
@@ -294,7 +294,7 @@ public class GuiCachePersistence {
                           return item;
                       }
                       else {
-                        //throw new ExceptionGuiCacheParseError();
+                        //throw new ExceptionGuiParseError();
                     }
                 }
                 break;
@@ -302,7 +302,7 @@ public class GuiCachePersistence {
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
         if ( idString == null ) {
-            throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiBadName();
         }
 
         item.applyTransparency();
@@ -310,12 +310,12 @@ public class GuiCachePersistence {
         return item;
     }
 
-    private static GuiMenuItemCache importAquynzaGuiMenuItem(
+    private static GuiMenuItem importAquynzaGuiMenuItem(
             StreamTokenizer parser,
-            GuiCache context) throws Exception {
-        GuiMenuItemCache item;
+            Gui context) throws Exception {
+        GuiMenuItem item;
 
-        item = new GuiMenuItemCache(context);
+        item = new GuiMenuItem(context);
 
         int tokenType;
 
@@ -351,7 +351,7 @@ public class GuiCachePersistence {
                     // Only supposed to contain '{' or '}'
                     char content = parser.toString().charAt(7);
                     if ( content == '{' ) {
-                        throw new ExceptionGuiCacheParseError();
+                        throw new ExceptionGuiParseError();
                       }
                       else if ( content == '}' ) {
                           parser.pushBack();
@@ -359,7 +359,7 @@ public class GuiCachePersistence {
                           return item;
                       }
                       else {
-                        //throw new ExceptionGuiCacheParseError();
+                        //throw new ExceptionGuiParseError();
                     }
                 }
                 break;
@@ -367,17 +367,17 @@ public class GuiCachePersistence {
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
         if ( name == null ) {
-            throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiBadName();
         }
         item.setName(name);
         return item;
     }
 
-    private static GuiMenuCache importAquynzaGuiMenu(StreamTokenizer parser,
-            GuiCache context) throws Exception {
-        GuiMenuCache menu;
+    private static GuiMenu importAquynzaGuiMenu(StreamTokenizer parser,
+            Gui context) throws Exception {
+        GuiMenu menu;
 
-        menu = new GuiMenuCache(context);
+        menu = new GuiMenu(context);
 
         int level = 0;
 
@@ -398,13 +398,13 @@ public class GuiCachePersistence {
               case StreamTokenizer.TT_NUMBER: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("POPUP") ) {
-                    GuiMenuCache popup = importAquynzaGuiMenu(parser, context);
+                    GuiMenu popup = importAquynzaGuiMenu(parser, context);
                     context.addPopupMenu(popup);
                     menu.addChild(popup);
                 }
 
                 else if ( parser.sval.equals("MENUITEM") ) {
-                    GuiMenuItemCache item;
+                    GuiMenuItem item;
                     item = importAquynzaGuiMenuItem(parser, context);
                     menu.addChild(item);
                 }
@@ -429,7 +429,7 @@ public class GuiCachePersistence {
                         }
                       }
                       else {
-                        //throw new ExceptionGuiCacheParseError();
+                        //throw new ExceptionGuiParseError();
                     }
                 }
                 break;
@@ -437,17 +437,17 @@ public class GuiCachePersistence {
         } while ( tokenType != StreamTokenizer.TT_EOF );
 
         if ( name == null ) {
-            throw new ExceptionGuiCacheBadName();
+            throw new ExceptionGuiBadName();
         }
         menu.setName(name);
 
         return menu;
     }
 
-    public static GuiCache importAquynzaGui(Reader source) throws Exception {
-        GuiCache context;
+    public static Gui importAquynzaGui(Reader source) throws Exception {
+        Gui context;
 
-        context = new GuiCache();
+        context = new Gui();
 
         StreamTokenizer parser = new StreamTokenizer(source);
 
@@ -482,22 +482,22 @@ public class GuiCachePersistence {
                 break;
             case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("MENU") ) {
-                    GuiMenuCache menubar =
+                    GuiMenu menubar =
                             importAquynzaGuiMenu(parser, context);
                     context.setMenubar(menubar);
                 }
                 else if ( parser.sval.equals("POPUP") ) {
-                    GuiMenuCache popup =
+                    GuiMenu popup =
                             importAquynzaGuiMenu(parser, context);
                     context.addPopupMenu(popup);
                 }
                 else if ( parser.sval.equals("COMMAND") ) {
-                    GuiCommandCache command = 
+                    GuiCommand command = 
                             importAquynzaGuiCommand(parser, context);
                     context.addCommand(command);
                 }
                 else if ( parser.sval.equals("BUTTON_GROUP") ) {
-                    GuiButtonGroupCache bg = 
+                    GuiButtonGroup bg = 
                             importAquynzaGuiButtonGroup(parser, context);
                     context.addButtonGroup(bg);
                 }

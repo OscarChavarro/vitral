@@ -9,7 +9,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAPixel;
 
-public class GuiCommandCache
+public class GuiCommand
 {
     private String id;
     private String name;
@@ -18,7 +18,7 @@ public class GuiCommandCache
     private RGBAImage icon;
     private RGBImage iconTransparency;
 
-    public GuiCommandCache()
+    public GuiCommand()
     {
         id = null;
         name = null;

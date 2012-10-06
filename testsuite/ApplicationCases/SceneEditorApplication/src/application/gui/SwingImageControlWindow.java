@@ -23,9 +23,9 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
 // Application classes
-import vsdk.transition.io.presentation.GuiCachePersistence;
-import vsdk.transition.gui.GuiCache;
-import vsdk.transition.render.swing.SwingGuiCacheRenderer;
+import vsdk.transition.io.presentation.GuiPersistence;
+import vsdk.transition.gui.Gui;
+import vsdk.transition.render.swing.SwingGuiRenderer;
 
 public class SwingImageControlWindow
 {
@@ -35,14 +35,14 @@ public class SwingImageControlWindow
     private ImageDisplayPanel workArea;
 
     public SwingImageControlWindow(RGBImage image, 
-                                 GuiCache gui, ActionListener executor) {
+                                 Gui gui, ActionListener executor) {
         controlledImage = image;
 
         windowWidget = new JFrame("Image control tool");
         windowWidget.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE );
 
         JMenuBar menubar;
-        menubar = SwingGuiCacheRenderer.buildMenubar(gui, null, executor);
+        menubar = SwingGuiRenderer.buildMenubar(gui, null, executor);
 
         JPanel statusBar = createStatusBar();
         workArea = new ImageDisplayPanel(controlledImage);

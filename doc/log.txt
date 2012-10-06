@@ -914,5 +914,7 @@
 
 2012 october 6, Oscar Chavarro
   - 50min: reorganizing design on SceneEditorApplication example
+  - 10min: reorganizing design on SceneEditorApplication transition
+    package
 
 ===========================================================================

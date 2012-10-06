@@ -1,8 +1,8 @@
 package vsdk.transition.gui;
 
-public abstract class GuiElementCache
+public abstract class GuiElement
 {
-    protected GuiCache context;
+    protected Gui context;
 
     public abstract String toString();
     public abstract String toString(int level);

@@ -72,9 +72,9 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 // Internal classes
-import vsdk.transition.gui.GuiCache;
-import vsdk.transition.io.presentation.GuiCachePersistence;
-import vsdk.transition.render.swing.SwingGuiCacheRenderer;
+import vsdk.transition.gui.Gui;
+import vsdk.transition.io.presentation.GuiPersistence;
+import vsdk.transition.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
@@ -112,23 +112,23 @@ public class ButtonsPanel extends JPanel implements ActionListener
         switch ( group ) {
           case 1:
             internal = 
-            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "CREATION", this);
+            SwingGuiRenderer.buildButtonGroup(parent.gui, "CREATION", this);
             break;
           case 2:
             internal = 
-            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "GUI", this);
+            SwingGuiRenderer.buildButtonGroup(parent.gui, "GUI", this);
             break;
           case 3:
             internal = 
-            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "OTHER", this);
+            SwingGuiRenderer.buildButtonGroup(parent.gui, "OTHER", this);
             break;
           case 4:
             internal = 
-            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "RENDER", this);
+            SwingGuiRenderer.buildButtonGroup(parent.gui, "RENDER", this);
             break;
           case 101:
             internal = 
-            SwingGuiCacheRenderer.buildButtonGroup(parent.gui, "GLOBAL", this);
+            SwingGuiRenderer.buildButtonGroup(parent.gui, "GLOBAL", this);
             break;
         }
 

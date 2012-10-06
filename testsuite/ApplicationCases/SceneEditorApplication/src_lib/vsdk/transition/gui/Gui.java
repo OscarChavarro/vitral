@@ -5,20 +5,20 @@ package vsdk.transition.gui;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GuiCache
+public class Gui
 {
-    private GuiMenuCache menubar;
-    private ArrayList<GuiMenuCache> popupMenuList;
-    private ArrayList<GuiCommandCache> commandList;
-    private ArrayList<GuiButtonGroupCache> buttonGroupList;
+    private GuiMenu menubar;
+    private ArrayList<GuiMenu> popupMenuList;
+    private ArrayList<GuiCommand> commandList;
+    private ArrayList<GuiButtonGroup> buttonGroupList;
     private HashMap<String, String> messagesTable;
 
-    public GuiCache()
+    public Gui()
     {
         menubar = null;
-        popupMenuList = new ArrayList<GuiMenuCache>();
-        commandList = new ArrayList<GuiCommandCache>();
-        buttonGroupList = new ArrayList<GuiButtonGroupCache>();
+        popupMenuList = new ArrayList<GuiMenu>();
+        commandList = new ArrayList<GuiCommand>();
+        buttonGroupList = new ArrayList<GuiButtonGroup>();
         messagesTable = new HashMap<String, String>();
     }
 
@@ -39,20 +39,20 @@ public class GuiCache
         return msg;
     }
 
-    public void setMenubar(GuiMenuCache m)
+    public void setMenubar(GuiMenu m)
     {
         menubar = m;
     }
 
-    public GuiMenuCache getMenubar()
+    public GuiMenu getMenubar()
     {
         return menubar;
     }
 
-    public GuiCommandCache getCommandByName(String name)
+    public GuiCommand getCommandByName(String name)
     {
-        GuiCommandCache command = null;
-        GuiCommandCache candidate = null;
+        GuiCommand command = null;
+        GuiCommand candidate = null;
         int i;
 
         for ( i = 0; i < commandList.size(); i++ ) {
@@ -65,12 +65,12 @@ public class GuiCache
         return command;
     }
 
-    public GuiButtonGroupCache getButtonGroup(String name) {
+    public GuiButtonGroup getButtonGroup(String name) {
         if ( name == null ) {
             return null;
         }
 
-        GuiButtonGroupCache group = null, candidate;
+        GuiButtonGroup group = null, candidate;
         int i;
 
         for ( i = 0; i < buttonGroupList.size(); i++ ) {
@@ -84,10 +84,10 @@ public class GuiCache
     }
 
 
-    public GuiMenuCache getPopup(String name)
+    public GuiMenu getPopup(String name)
     {
-        GuiMenuCache menu = null;
-        GuiMenuCache candidate;
+        GuiMenu menu = null;
+        GuiMenu candidate;
 
         int i;
         for ( i = 0; i < popupMenuList.size(); i++ ) {
@@ -100,31 +100,31 @@ public class GuiCache
         return menu;
     }
 
-    public void addPopupMenu(GuiMenuCache p)
+    public void addPopupMenu(GuiMenu p)
     {
         popupMenuList.add(p);
     }
 
-    public void addCommand(GuiCommandCache c)
+    public void addCommand(GuiCommand c)
     {
         commandList.add(c);
     }
 
-    public void addButtonGroup(GuiButtonGroupCache b)
+    public void addButtonGroup(GuiButtonGroup b)
     {
         buttonGroupList.add(b);
     }
 
     public String toString()
     {
-        String msg = "= GuiCache report =========================================================\n";
+        String msg = "= Gui report =========================================================\n";
         msg = msg + "Gui cache structure contains " + popupMenuList.size() +
             " popup submenu structures registered\n";
         msg = msg + "Gui cache structure contains " + commandList.size() +
             " commands registered\n";
 
         int i;
-        GuiCommandCache command;
+        GuiCommand command;
         for ( i = 0; i < commandList.size(); i++ ) {
             command = commandList.get(i);
             msg = msg + command;
