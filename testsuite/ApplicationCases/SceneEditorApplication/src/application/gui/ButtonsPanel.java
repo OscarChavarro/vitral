@@ -72,9 +72,9 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 // Internal classes
-import vsdk.transition.gui.Gui;
-import vsdk.transition.io.presentation.GuiPersistence;
-import vsdk.transition.render.swing.SwingGuiRenderer;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.io.gui.GuiPersistence;
+import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.SceneEditorApplication;

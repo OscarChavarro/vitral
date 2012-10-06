@@ -23,9 +23,9 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
 // Application classes
-import vsdk.transition.io.presentation.GuiPersistence;
-import vsdk.transition.gui.Gui;
-import vsdk.transition.render.swing.SwingGuiRenderer;
+import vsdk.toolkit.io.gui.GuiPersistence;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 public class SwingImageControlWindow
 {

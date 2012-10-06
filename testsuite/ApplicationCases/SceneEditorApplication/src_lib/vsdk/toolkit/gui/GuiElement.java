@@ -1,4 +1,4 @@
-package vsdk.transition.gui;
+package vsdk.toolkit.gui;
 
 public abstract class GuiElement
 {

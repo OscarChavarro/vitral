@@ -1,4 +1,6 @@
-package vsdk.transition.gui;
+//===========================================================================
+
+package vsdk.toolkit.gui;
 
 public class ExceptionGuiParseError extends Exception {
     public String toString(){

@@ -1,6 +1,6 @@
 //===========================================================================
 
-package vsdk.transition.gui;
+package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;

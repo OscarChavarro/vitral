@@ -1,7 +1,7 @@
 //===========================================================================
 //===========================================================================
 
-package vsdk.transition.render.swing;
+package vsdk.toolkit.render.swing;
 
 // Basic JAVA JDK classes
 import java.util.ArrayList;
@@ -32,12 +32,12 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 // Application specific classes
-import vsdk.transition.gui.Gui;
-import vsdk.transition.gui.GuiMenu;
-import vsdk.transition.gui.GuiMenuItem;
-import vsdk.transition.gui.GuiElement;
-import vsdk.transition.gui.GuiButtonGroup;
-import vsdk.transition.gui.GuiCommand;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.GuiMenu;
+import vsdk.toolkit.gui.GuiMenuItem;
+import vsdk.toolkit.gui.GuiElement;
+import vsdk.toolkit.gui.GuiButtonGroup;
+import vsdk.toolkit.gui.GuiCommand;
 
 public class SwingGuiRenderer
 {
@@ -116,14 +116,14 @@ public class SwingGuiRenderer
             for ( i = 0; i < children.size(); i++ ) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if ( className.equals("vsdk.transition.gui.GuiMenu") ) {
+                if ( className.equals("vsdk.toolkit.gui.GuiMenu") ) {
                     GuiMenu submenu = (GuiMenu)element;
                     JMenu widgetSubmenu = buildPopupMenu(context, 
                                                          submenu.getName(), 
                                                          executor);
                     widgetPopup.add(widgetSubmenu);
                 }
-                else if ( className.equals("vsdk.transition.gui.GuiMenuItem") ) {
+                else if ( className.equals("vsdk.toolkit.gui.GuiMenuItem") ) {
                     GuiMenuItem option = (GuiMenuItem)element;
                     if ( option.isSeparator() ) {
                         widgetPopup.addSeparator();
@@ -276,7 +276,7 @@ public class SwingGuiRenderer
             for ( i = 0; i < children.size(); i++ ) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if ( className.equals("vsdk.transition.gui.GuiMenu") ) {
+                if ( className.equals("vsdk.toolkit.gui.GuiMenu") ) {
                     menu = (GuiMenu)element;
                     widgetPopup = buildPopupMenu(context, menu.getName(),
                                                  executor);

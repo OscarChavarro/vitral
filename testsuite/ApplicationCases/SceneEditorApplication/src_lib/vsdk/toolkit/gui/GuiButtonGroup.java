@@ -1,7 +1,7 @@
 //===========================================================================
 //= Initial version: august 9 2007
 
-package vsdk.transition.gui;
+package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 

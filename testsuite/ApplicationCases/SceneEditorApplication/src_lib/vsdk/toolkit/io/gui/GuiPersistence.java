@@ -1,18 +1,18 @@
 //===========================================================================
 
-package vsdk.transition.io.presentation;
+package vsdk.toolkit.io.gui;
 
 import java.io.File;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 
-import vsdk.transition.gui.GuiButtonGroup;
-import vsdk.transition.gui.Gui;
-import vsdk.transition.gui.GuiCommand;
-import vsdk.transition.gui.GuiMenu;
-import vsdk.transition.gui.GuiMenuItem;
-import vsdk.transition.gui.ExceptionGuiBadName;
-import vsdk.transition.gui.ExceptionGuiParseError;
+import vsdk.toolkit.gui.GuiButtonGroup;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.GuiCommand;
+import vsdk.toolkit.gui.GuiMenu;
+import vsdk.toolkit.gui.GuiMenuItem;
+import vsdk.toolkit.gui.ExceptionGuiBadName;
+import vsdk.toolkit.gui.ExceptionGuiParseError;
 
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;

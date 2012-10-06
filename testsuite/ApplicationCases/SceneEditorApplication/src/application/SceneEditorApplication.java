@@ -79,9 +79,9 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
-import vsdk.transition.gui.Gui;
-import vsdk.transition.io.presentation.GuiPersistence;
-import vsdk.transition.render.swing.SwingGuiRenderer;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.io.gui.GuiPersistence;
+import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
