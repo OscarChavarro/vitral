@@ -11,6 +11,9 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
+// VSDK classes
+import vsdk.toolkit.common.VSDK;
+
 public class JoglOfflineRenderer implements GLEventListener {
     private GLPbuffer  pbuffer;
     private boolean ready;
@@ -42,10 +45,9 @@ public class JoglOfflineRenderer implements GLEventListener {
             pbuffer.addGLEventListener(this);
           }
           catch ( Exception e ) {
-              System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
+              VSDK.reportMessage(this, VSDK.WARNING, "JoglOfflineRenderer", "Error creating OpenGL Pbuffer. This program requires a 3D accelerator card." + e);
               pbuffer = null;
               pbufferSupported = false;
-              return;
         }
     }
 
@@ -70,6 +72,7 @@ public class JoglOfflineRenderer implements GLEventListener {
         }
     }
 
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
         renderer.draw(gl);
@@ -87,14 +90,17 @@ public class JoglOfflineRenderer implements GLEventListener {
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {
     }
 
+    @Override
     public void init( GLAutoDrawable drawable ) {
     }
   
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
         ;
     }
 
+    @Override
     public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
         GL2 gl = drawable.getGL().getGL2();

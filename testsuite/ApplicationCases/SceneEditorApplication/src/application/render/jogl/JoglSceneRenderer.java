@@ -3,27 +3,19 @@
 package application.render.jogl;
 
 // Java basic classes
-import java.util.ArrayList;
 
 // JOGL classes
 import javax.media.opengl.GL2;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 
@@ -47,7 +39,7 @@ public class JoglSceneRenderer
         //- Activate camera -----------------------------------------------
         JoglCameraRenderer.activate(gl, s.activeCamera);
 
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
         gl.glLoadIdentity();
 
         if ( s.showCorridor ) {
@@ -67,10 +59,10 @@ public class JoglSceneRenderer
         RendererConfiguration quality;
 
         if ( s.scene.getLights().size() > 0 ) {
-            gl.glEnable(gl.GL_LIGHTING);
+            gl.glEnable(GL2.GL_LIGHTING);
         }
         else {
-            gl.glDisable(gl.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHTING);
         }
 
         // Not working for NvidiaGPU!
@@ -114,7 +106,7 @@ public class JoglSceneRenderer
         //- Draw visual debug entities (usually transparent) --------------
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
             quality = s.qualityTemplate.clone();
-            quality.setShadingType(quality.SHADING_TYPE_NOLIGHT);
+            quality.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             if ( s.selectedDebugThingGroups.isSelected(i) ) {
                 quality.setSelectionCorners(true);
             }
@@ -123,10 +115,10 @@ public class JoglSceneRenderer
             }
             ggi = s.debugThingGroups.get(i);
             if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
-                gl.glDisable(gl.GL_DEPTH_TEST);
+                gl.glDisable(GL2.GL_DEPTH_TEST);
             }
             JoglSimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
-            gl.glEnable(gl.GL_DEPTH_TEST);
+            gl.glEnable(GL2.GL_DEPTH_TEST);
         }
     }
 

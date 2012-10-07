@@ -3,7 +3,6 @@
 package application.gui;
 
 // Java basic classes
-import java.io.FileReader;
 
 // Java GUI classes
 import java.awt.BorderLayout;
@@ -23,7 +22,6 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 
 // Application classes
-import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
@@ -106,6 +104,7 @@ class ImageDisplayPanel extends JPanel
         imageToPaint = i;
     }
 
+    @Override
     public void paint(Graphics g)
     {
         super.paint(g);

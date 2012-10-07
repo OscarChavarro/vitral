@@ -127,6 +127,7 @@ public class GuiCommand
         iconTransparency = i;
     }
 
+    @Override
     public String toString()
     {
         String msg =  "  - Command [" + id + "]:\n";

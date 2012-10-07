@@ -65,6 +65,7 @@ public class GuiMenuItem extends GuiElement
         }
     }
 
+    @Override
     public String toString(int level)
     {
         String leadingSpace = "";
@@ -88,6 +89,7 @@ public class GuiMenuItem extends GuiElement
         return msg;
     }
 
+    @Override
     public String toString()
     {
         return toString(0);

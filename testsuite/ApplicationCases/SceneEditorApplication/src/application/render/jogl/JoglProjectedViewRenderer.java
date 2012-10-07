@@ -17,14 +17,10 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
@@ -46,7 +42,7 @@ public class JoglProjectedViewRenderer {
         quality.setSurfaces(true);
         camera = new Camera();
         camera.setFov(90);
-        camera.setProjectionMode(camera.PROJECTION_MODE_ORTHOGONAL);
+        camera.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera.setNearPlaneDistance(2);
         camera.setFarPlaneDistance(20);
         isTransparent = transparent;
@@ -169,17 +165,17 @@ public class JoglProjectedViewRenderer {
 
         //-----------------------------------------------------------------
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
         JoglCameraRenderer.activate(gl, camera);
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
         if ( bodies == null ) {
             gl.glColor3d(1, 1, 1); 
-            gl.glBegin(gl.GL_LINES);
+            gl.glBegin(GL2.GL_LINES);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(0.5, 0.5, 0);
             gl.glEnd();

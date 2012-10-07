@@ -9,27 +9,18 @@
 package application;
 
 // Java basic classes
-import java.io.File;
 import java.io.FileReader;
-import java.io.BufferedReader;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
 
 // Java GUI classes
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory; 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JFileChooser;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -38,44 +29,15 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-// JOGL Classes
-import javax.media.opengl.awt.GLCanvas;
-
 // VSDK Classes
-import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.VSDK; 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
-import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBColorPalette;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Arrow;
-import vsdk.toolkit.environment.geometry.VoxelVolume;
-import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.environment.geometry.Cone;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.io.XmlException;
-import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
-import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
@@ -85,21 +47,15 @@ import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
-import application.framework.SelectionSet;
 import application.gui.ButtonsPanel;
 import application.gui.ModifyPanel;
-import application.gui.ModifyPanelForFunctionalExplicitSurface;
-import application.gui.SuffixAwareFilter;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
-import application.gui.MyFilter;
 import application.gui.MyChangeListener;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
 import application.render.jogl.JoglDrawingArea;
-import application.render.jogl.JoglOfflineRenderer;
-import application.render.jogl.JoglProjectedViewRenderer;
-import application.render.jogl.JoglSceneRenderer;
+import javax.swing.*;
 
 public class SceneEditorApplication {
     // Application model
@@ -198,20 +154,20 @@ public class SceneEditorApplication {
 
     private JPanel createStatusBar()
     {
-        JPanel statusBarPanel;
+        JPanel newStatusBarPanel;
 
         statusMessage = new JLabel(gui.getMessage("IDM_INTRO_MESSAGE"));
         Border border = BorderFactory.createLoweredBevelBorder();
         statusMessage.setBorder(border);
 
-        statusBarPanel = new JPanel();
-        statusBarPanel.setLayout(new GridLayout());
+        newStatusBarPanel = new JPanel();
+        newStatusBarPanel.setLayout(new GridLayout());
 
         border = BorderFactory.createEmptyBorder(3, 3, 3, 3);
-        statusBarPanel.setBorder(border);
-        statusBarPanel.add(statusMessage);
+        newStatusBarPanel.setBorder(border);
+        newStatusBarPanel.add(statusMessage);
 
-        return statusBarPanel;
+        return newStatusBarPanel;
     }
 
     private JTabbedPane createPanel()
@@ -299,9 +255,10 @@ public class SceneEditorApplication {
         try {
             UIManager.setLookAndFeel(lookAndFeel);
           }
-          catch (Exception e) {
-            System.err.println("Warning: Can not set " +
-              lookAndFeel + "look and feel");
+          catch ( ClassNotFoundException | InstantiationException | 
+                  IllegalAccessException | UnsupportedLookAndFeelException e ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "createGUIWindowed", 
+                "Warning: Can not set " + lookAndFeel + " look and feel\n" + e);
         }
 
         //- Configure this JFrame -----------------------------------------
@@ -370,7 +327,9 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         int ancho_panel;
 
-        if ( d.width < 640 ) ancho_panel = 320;
+        //if ( d.width < 640 ) {
+        //    ancho_panel = 320;
+        //}
         ancho_panel = d.width - 320;
 
         splitPane.setDividerLocation(ancho_panel);
@@ -386,7 +345,7 @@ public class SceneEditorApplication {
         modifyPanelSelected = false;
     }
 
-    public void createGUI()
+    public final void createGUI()
     {
         if ( fullScreenGuiMode ) {
             createGUIFullScreen();

@@ -920,5 +920,7 @@
 2012 october 7, Oscar Chavarro
   - 3h: removing several programming warnings from library: @Override
     annotations, unused imports, unused initializations and others.
+  - 50min: removing several programming warnings from SceneEditorApplication
+    example.
 
 ===========================================================================

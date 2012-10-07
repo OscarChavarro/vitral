@@ -11,9 +11,6 @@ package application.render.jogl;
 import java.util.ArrayList;
 
 // AWT/Swing classes
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -32,10 +29,8 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
@@ -108,7 +103,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraPerspective.setName("Perspective");
 
         cameraTop = new Camera();
-        cameraTop.setProjectionMode(cameraTop.PROJECTION_MODE_ORTHOGONAL);
+        cameraTop.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraTop.setPosition(new Vector3D(0, 0, 5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         cameraTop.setRotation(R);
@@ -116,7 +111,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraTop.setName("Top");
 
         cameraBottom = new Camera();
-        cameraBottom.setProjectionMode(cameraBottom.PROJECTION_MODE_ORTHOGONAL);
+        cameraBottom.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraBottom.setPosition(new Vector3D(0, 0, -5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
         cameraBottom.setRotation(R);
@@ -124,7 +119,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraBottom.setName("Bottom");
 
         cameraLeft = new Camera();
-        cameraLeft.setProjectionMode(cameraLeft.PROJECTION_MODE_ORTHOGONAL);
+        cameraLeft.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraLeft.setPosition(new Vector3D(-5, 0, 0));
         R.identity();
         cameraLeft.setRotation(R);
@@ -132,7 +127,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraLeft.setName("Left");
 
         cameraFront = new Camera();
-        cameraFront.setProjectionMode(cameraFront.PROJECTION_MODE_ORTHOGONAL);
+        cameraFront.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraFront.setPosition(new Vector3D(0, -5, 0));
         R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         cameraFront.setRotation(R);
@@ -163,10 +158,12 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method.
     */
+    @Override
     public void keyTyped(KeyEvent e) {
         ;
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         int keycode;
         char unicode_id;
@@ -188,7 +185,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
             }
         }
 
-        if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
+        if ( unicode_id != KeyEvent.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
               case 'g':
                 if ( showGrid == true ) {
@@ -242,6 +239,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
     }
 
@@ -379,12 +377,12 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         if ( !active || viewportBorder <= 0 ) {
             return;
         }
-        gl.glPushAttrib(gl.GL_DEPTH_TEST);
-        gl.glPushAttrib(gl.GL_TEXTURE_2D);
-        gl.glPushAttrib(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL2.GL_TEXTURE_2D);
+        gl.glPushAttrib(GL2.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_DEPTH_TEST);
 
         double x1, y1, x2, y2;
         double epsilonx = 2.0 / ((double)viewportXsize);
@@ -397,8 +395,8 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         x2 = x1 + viewportSizeXPercent*2;
         y2 = y1 + viewportSizeYPercent*2;
 
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        gl.glBegin(GL2.GL_QUADS);
             if ( selected ) {
                 gl.glColor3d(1, 0.96, 0);
             }
@@ -420,9 +418,9 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glPopAttrib();
     }
 
-    public void setTitle(String name)
+    public final void setTitle(String name)
     {
-        title = new String(name);
+        title = name;
         titleImage = AwtSystem.calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
     }
 
@@ -430,21 +428,21 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     {
         //-----------------------------------------------------------------
         int basesize = 64;
-        gl.glPushAttrib(gl.GL_VIEWPORT_BIT);
-        gl.glPushAttrib(gl.GL_DEPTH_TEST);
-        gl.glPushAttrib(gl.GL_TEXTURE_2D);
-        gl.glPushAttrib(gl.GL_LIGHTING);
+        gl.glPushAttrib(GL2.GL_VIEWPORT_BIT);
+        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL2.GL_TEXTURE_2D);
+        gl.glPushAttrib(GL2.GL_LIGHTING);
         gl.glViewport(viewportStartX, viewportStartY, basesize, basesize);
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
         gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_DEPTH_TEST);
 
         //-----------------------------------------------------------------
         Matrix4x4 R = camera.getRotation();
@@ -471,7 +469,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glPopMatrix();
 
         //gl.glLoadIdentity();
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glColor3d(0.78, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);
@@ -485,9 +483,9 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
         //-----------------------------------------------------------------
         gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
 
         gl.glPopAttrib();
         gl.glPopAttrib();
@@ -506,7 +504,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         yaw = Math.toDegrees(R.obtainEulerYawAngle());
         pitch = Math.toDegrees(R.obtainEulerPitchAngle());
 
-        if ( camera.getProjectionMode() == camera.PROJECTION_MODE_ORTHOGONAL &&
+        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL &&
               (pitch > -45 && pitch < 45) ) {
             if ( (yaw > 45 && yaw < 135) ||
                  (yaw < -45 && yaw > -135) ) {
@@ -528,10 +526,10 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         double miny = -(((double)ny)/2) * dy;
         double maxy = (((double)ny)/2) * dy;
 
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glDisable(gl.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL2.GL_TEXTURE_2D);
         gl.glLineWidth(1.0f);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
         gl.glColor3d(0.37, 0.37, 0.37);
         for ( x = 0; x <= nx; x++ ) {
             if ( x == nx/2 ) continue;
@@ -577,10 +575,10 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         dx = ((double)(2*x)) / ((double)viewportSizeX);
         dy = ((double)(2*(viewportSizeY - y))) / ((double)viewportSizeY);
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
         gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glTranslated(dx, dy, 0);
@@ -588,36 +586,36 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         drawTextureString3D(gl, i);
 
         gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPopMatrix();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
     private void drawTextureString3D(GL2 gl, RGBAImage i)
     {
-        gl.glPushAttrib(gl.GL_ENABLE_BIT);
+        gl.glPushAttrib(GL2.GL_ENABLE_BIT);
         gl.glRasterPos3d(-1, -1, 0);
-        gl.glEnable(gl.GL_TEXTURE_2D);
-        gl.glDisable(gl.GL_LIGHTING);
-        gl.glEnable(gl.GL_BLEND);
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_BLEND);
+        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
         // Set texture parameters
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_GENERATE_MIPMAP,
-            gl.GL_TRUE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
-            gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
-            gl.GL_NEAREST);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
-            gl.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
-            gl.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
+            GL2.GL_TRUE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
+            GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
+            GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S,
+            GL2.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T,
+            GL2.GL_CLAMP_TO_EDGE);
 
         // Calling this configuration with GL_BLEND here generates an error on
         // some Windows Vista machines with Intel graphics, as such on
         // Dell Inspiron 1525 laptop with Mobile Intel 965 (BIOS 1566).
-        gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_REPLACE);
+        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
 
         //float c[] = {1f, 1f, 1f, 1f};
         //gl.glTexEnvfv(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_COLOR, c, 0);

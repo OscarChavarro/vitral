@@ -49,7 +49,7 @@ class VitralEditorServerProtocol implements Runnable
     private byte[] servePetition(String in)
     {
         //-----------------------------------------------------------------
-        byte[] out = null;
+        byte[] out;
         Vector3D pos;
         Quaternion q;
         Matrix4x4 R;
@@ -95,6 +95,7 @@ class VitralEditorServerProtocol implements Runnable
         return out;
     }
 
+    @Override
     public void run()
     {
         InputStream is;
@@ -137,6 +138,7 @@ public class VitralEditorServer implements Runnable
         networkThread.start();
     }
 
+    @Override
     public void run()
     {
         ServerSocket ss;

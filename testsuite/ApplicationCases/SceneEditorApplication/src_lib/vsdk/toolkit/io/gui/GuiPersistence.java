@@ -43,7 +43,7 @@ public class GuiPersistence {
                 break;
               case StreamTokenizer.TT_WORD:
                 if ( level == 1 ) {
-                    lastId = new String(parser.sval);
+                    lastId = parser.sval;
                 }
                 break;
               default:
@@ -110,10 +110,10 @@ public class GuiPersistence {
                 }
                 else if ( param == 1 ) {
                     if ( parser.sval.equals("horizontal") ) {
-                        item.setDirection(item.HORIZONTAL);
+                        item.setDirection(GuiButtonGroup.HORIZONTAL);
                     }
                     else {
-                        item.setDirection(item.VERTICAL);
+                        item.setDirection(GuiButtonGroup.VERTICAL);
                     }
                     param = 0;
                 }
@@ -344,7 +344,7 @@ public class GuiPersistence {
                 break;
               default:
                 if ( parser.ttype == '\"' ) {
-                    name = new String(parser.sval);
+                    name = parser.sval;
                     item.setName(name);
                   }
                   else {
@@ -412,7 +412,7 @@ public class GuiPersistence {
                 break;
               default:
                 if ( parser.ttype == '\"' ) {
-                    name = new String(parser.sval);
+                    name = parser.sval;
                   }
                   else {
                     // Only supposed to contain '{' or '}'

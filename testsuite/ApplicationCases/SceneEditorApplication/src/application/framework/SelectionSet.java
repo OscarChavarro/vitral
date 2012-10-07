@@ -21,19 +21,20 @@ public class SelectionSet
     Checks the size of the element list. If it is different to current
     selection list, selection list is updated.
     */
-    public void sync()
+    public final void sync()
     {
         if ( elements.size() == selection.size() ) {
             return;
         }
         while ( elements.size() > selection.size() ) {
-            selection.add(new Boolean(false));
+            boolean add = selection.add(false);
         }
         while ( elements.size() < selection.size() ) {
             selection.remove(selection.size()-1);
         }
     }
 
+    @Override
     public String toString()
     {
         String msg = "Selection set: [";
@@ -74,7 +75,7 @@ public class SelectionSet
         int i;
 
         for ( i = 0; i < selection.size(); i++ ) {
-            selection.set(i, new Boolean(true));
+            Boolean set = selection.set(i, true);
         }
     }
 
@@ -83,7 +84,7 @@ public class SelectionSet
         int i;
 
         for ( i = 0; i < selection.size(); i++ ) {
-            selection.set(i, new Boolean(false));
+            Boolean set = selection.set(i, false);
         }
     }
 
@@ -91,14 +92,14 @@ public class SelectionSet
     {
         sync();
         if ( i < 0 || i >= selection.size() ) return;
-        selection.set(i, new Boolean(true));
+        Boolean set = selection.set(i, true);
     }
 
     public void unselect(int i)
     {
         sync();
         if ( i < 0 || i >= selection.size() ) return;
-        selection.set(i, new Boolean(false));
+        Boolean set = selection.set(i, false);
     }
 
     public void change(int i)
@@ -106,10 +107,10 @@ public class SelectionSet
         sync();
         if ( i < 0 || i >= selection.size() ) return;
         if ( isSelected(i) ) {
-            selection.set(i, new Boolean(false));
+            Boolean set = selection.set(i, false);
           }
           else {
-            selection.set(i, new Boolean(true));
+            Boolean set = selection.set(i, true);
         }
     }
 
@@ -167,7 +168,7 @@ public class SelectionSet
     }
 
     public int size()
-    {
+    {        
         return selection.size();
     }
 }

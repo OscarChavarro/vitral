@@ -19,14 +19,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 // JOGL classes
-import javax.media.opengl.GL;
-
-// VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
@@ -232,6 +226,7 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
 
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         //-----------------------------------------------------------------
         String label = ev.getActionCommand();

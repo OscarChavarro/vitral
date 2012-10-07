@@ -4,6 +4,7 @@ public abstract class GuiElement
 {
     protected Gui context;
 
+    @Override
     public abstract String toString();
     public abstract String toString(int level);
 
@@ -62,7 +63,11 @@ public abstract class GuiElement
                 // Process UNICODE escape sequences...
                 int start = i;
                 i++;
-                int num1=0, num2=0, num3=0, num4=0, num;
+                int num1=0;
+                int num2=0;
+                int num3=0;
+                int num4;
+                int num;
                 for ( ; i < codedName.length(); i++ ) {
                     c = codedName.charAt(i);
                     if ( c == '#' ) {

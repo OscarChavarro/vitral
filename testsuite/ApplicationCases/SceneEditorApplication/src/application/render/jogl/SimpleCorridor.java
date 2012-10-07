@@ -34,7 +34,7 @@ public class SimpleCorridor
         da = a / ((double)na);
 
         gl.glNormal3d(0, 0, 1);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( x = -a/2, i = 0; i < na; i++, x += da ) {
             for ( y = -a/2, j = 0; j < na; j++, y += da ) {
                 gl.glVertex3d(x+interSpace/2, y+interSpace/2, -EPSILON);
@@ -59,7 +59,7 @@ public class SimpleCorridor
         db = b / ((double)nb);
 
         gl.glNormal3d(0, 0, 1);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( x = -a/2 - b, i = 0; i < nb; i++, x += db ) {
             for ( y = -a/2, j = 0; j < na; j++, y += da ) {
                 gl.glVertex3d(x+interSpace/2, y+interSpace/2, -EPSILON);
@@ -80,7 +80,7 @@ public class SimpleCorridor
         dc = c / ((double)nc);
 
         gl.glNormal3d(1, 0, 0);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( z = 0, i = 0; i < nc; i++, z += dc ) {
             for ( y = -a/2, j = 0; j < na; j++, y += da ) {
                 gl.glVertex3d(-a/2-b, y+interSpace/2, z+dc-interSpace/2);
@@ -101,7 +101,7 @@ public class SimpleCorridor
         dc = c / ((double)nc);
 
         gl.glNormal3d(1, 0, 0);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( z = 0, i = 0; i < nc; i++, z += dc ) {
             for ( y = a/2, j = 0; j < nb; j++, y += db ) {
                 gl.glVertex3d(-a/2, y+interSpace/2, z+dc-interSpace/2);
@@ -122,7 +122,7 @@ public class SimpleCorridor
         dc = c / ((double)nc);
 
         gl.glNormal3d(0, -1, 0);
-        gl.glBegin(gl.GL_QUADS);
+        gl.glBegin(GL2.GL_QUADS);
         for ( x = -a/2-b, i = 0; i < nb; i++, x += db ) {
             for ( z = 0, j = 0; j < nc; j++, z += dc ) {
                 gl.glVertex3d(x+interSpace/2, a/2, z+interSpace/2);
@@ -139,9 +139,9 @@ public class SimpleCorridor
         int i;
 
         // Configure for inside looking
-        gl.glEnable(gl.GL_CULL_FACE);
-        gl.glCullFace(gl.GL_BACK);
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_CULL_FACE);
+        gl.glCullFace(GL2.GL_BACK);
+        gl.glDisable(GL2.GL_LIGHTING);
 
         // Build floor
         gl.glColor3d(0.5, 0.5, 0.9);

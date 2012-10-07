@@ -14,6 +14,7 @@ public class MyFilter
     this.description = description;
   }
 
+    @Override
   public boolean accept(File f) {
     boolean accept = super.accept(f);
     if (!accept) {
@@ -25,6 +26,7 @@ public class MyFilter
     return accept;
   }
 
+    @Override
   public String getDescription() {
     return description + " (*." + suffix + ")";
   }

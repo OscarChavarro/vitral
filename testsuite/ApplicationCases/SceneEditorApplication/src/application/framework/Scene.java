@@ -16,7 +16,6 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -29,7 +28,6 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.Raytracer;
 
 // Application classes
-import application.SceneEditorApplication;
 import application.render.jogl.SimpleCorridor;
 
 public class Scene

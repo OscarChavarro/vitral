@@ -4,24 +4,20 @@ package application.io;
 
 // JDK basic classes
 import java.io.File;
+import java.io.IOException;
 
 // XML classes
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
@@ -78,10 +74,11 @@ public class XmlManager {
             // Warning: what encoding to use?
             xformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             xformer.transform(source, result);
-            return;
         }
-        catch ( Exception ex ) {
-            System.err.println(ex);
+        catch ( ParserConfigurationException | XmlException | DOMException | 
+                TransformerFactoryConfigurationError | 
+                IllegalArgumentException | TransformerException ex ) {
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "exportXml", "" + ex);
         }
     }
 
@@ -103,8 +100,8 @@ public class XmlManager {
             Node rootNode = document.getFirstChild();
             NodeList nodeList;
 
-            if ( rootNode.getNodeName() == 
-                 ParametricCurvePersistence.rootName ) {
+            if ( rootNode.getNodeName().equals( 
+                 ParametricCurvePersistence.rootName) ) {
                 nodeList = document.getElementsByTagName(
                     ParametricCurvePersistence.rootName);
                 Node firstNode = nodeList.item(0);
@@ -113,8 +110,8 @@ public class XmlManager {
                     firstNode);
                 return curve;
             }
-            else if ( rootNode.getNodeName() ==
-                      ParametricBiCubicPatchPersistence.rootName ) {
+            else if ( rootNode.getNodeName().equals(
+                      ParametricBiCubicPatchPersistence.rootName) ) {
                 nodeList = document.getElementsByTagName(
                     ParametricBiCubicPatchPersistence.rootName);
                 Node firstNode = nodeList.item(0);
@@ -125,8 +122,9 @@ public class XmlManager {
             }
             //-----------------------------------------------------------------
         }
-        catch ( Exception ex ) {
-            System.err.println(ex);
+        catch ( ParserConfigurationException | SAXException | IOException | 
+                XmlException ex ) {
+            VSDK.reportMessage(null, VSDK.WARNING, "importXml", "" + ex);
         }
         return null;
     }

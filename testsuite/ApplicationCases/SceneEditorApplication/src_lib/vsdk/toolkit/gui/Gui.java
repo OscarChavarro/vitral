@@ -52,7 +52,7 @@ public class Gui
     public GuiCommand getCommandByName(String name)
     {
         GuiCommand command = null;
-        GuiCommand candidate = null;
+        GuiCommand candidate;
         int i;
 
         for ( i = 0; i < commandList.size(); i++ ) {
@@ -115,6 +115,7 @@ public class Gui
         buttonGroupList.add(b);
     }
 
+    @Override
     public String toString()
     {
         String msg = "= Gui report =========================================================\n";

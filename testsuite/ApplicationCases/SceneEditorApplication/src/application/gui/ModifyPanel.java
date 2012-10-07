@@ -19,7 +19,6 @@ import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
-import application.framework.Scene;
 
 public class ModifyPanel extends JPanel
 {
@@ -59,7 +58,7 @@ public class ModifyPanel extends JPanel
         }
     }
 
-    public void notifyTargetEndEdit()
+    public final void notifyTargetEndEdit()
     {
         removeAll();
         JLabel label = new JLabel("No selected object for modifying.");

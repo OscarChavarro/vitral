@@ -13,8 +13,6 @@ import java.awt.Dimension;
 //import java.awt.Image; // Do not define! conflicts with VSDK's Image
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -28,7 +26,6 @@ import javax.swing.JLabel;
 import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
 // VSDK classes
@@ -43,13 +40,9 @@ import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.SimpleBackground;
-import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -58,7 +51,6 @@ import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
 import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
@@ -69,10 +61,8 @@ import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
-import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.RotateGizmo;
@@ -159,7 +149,7 @@ public class JoglDrawingArea implements
         qualityController = new RendererConfigurationController(qualitySelection);
         qualitySelectionVisualDebug = new RendererConfiguration();
         qualitySelectionVisualDebug.setShadingType(
-            qualitySelectionVisualDebug.SHADING_TYPE_GOURAUD);
+            RendererConfiguration.SHADING_TYPE_GOURAUD);
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
 
@@ -252,7 +242,7 @@ public class JoglDrawingArea implements
 
         translationGizmo.setCamera(theScene.activeCamera);
 
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -303,7 +293,7 @@ public class JoglDrawingArea implements
                 JoglScaleGizmoRenderer.draw(gl, scaleGizmo, position);
             }
         }
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
     }
 
     private Image createProjectedView(GL2 gl, SimpleBodyGroup referenceBodies, int cam)
@@ -427,7 +417,7 @@ public class JoglDrawingArea implements
         SimpleBodyGroup group;
         Vector3D position = new Vector3D(0, 0, 0);
         Vector3D scale = new Vector3D(1, 1, 1);
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4 R;
         Matrix4x4 R1 = new Matrix4x4();
         Matrix4x4 R2 = new Matrix4x4();
         int i;
@@ -708,7 +698,7 @@ public class JoglDrawingArea implements
             return;
         }
 
-        if ( view.getRenderMode() == view.RENDER_MODE_ZBUFFER ) {
+        if ( view.getRenderMode() == JoglAwtViewportWindow.RENDER_MODE_ZBUFFER ) {
             JoglSceneRenderer.draw(gl, theScene, parent);
         }
         else {
@@ -718,17 +708,17 @@ public class JoglDrawingArea implements
             parent.raytracedImageWidth = view.getViewportSizeX();
             parent.raytracedImageHeight = view.getViewportSizeY();
             parent.doRaytracedImage();
-            gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glPushMatrix();
             gl.glLoadIdentity();
-            gl.glMatrixMode(gl.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glPushMatrix();
             gl.glLoadIdentity();
             JoglImageRenderer.draw(gl, parent.raytracedImage);
             gl.glPopMatrix();
-            gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glPopMatrix();
-            gl.glMatrixMode(gl.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
         }
 
         //-----------------------------------------------------------------
@@ -828,6 +818,7 @@ public class JoglDrawingArea implements
     }
 
     /** Called by drawable to initiate drawing */
+    @Override
     public void display(GLAutoDrawable drawable)
     {
         GL2 gl = drawable.getGL().getGL2();
@@ -842,12 +833,12 @@ public class JoglDrawingArea implements
         //-----------------------------------------------------------------
         gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
         gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
         int n = viewOrganizer.countActiveViews();
@@ -866,7 +857,7 @@ public class JoglDrawingArea implements
         Vector3D diff = end.substract(start);
         l = diff.length();
 
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHTING);
         JoglMaterialRenderer.activate(gl, visualDebugMaterial);
 
         //-----------------------------------------------------------------
@@ -968,19 +959,21 @@ public class JoglDrawingArea implements
         }
 
         //-----------------------------------------------------------------
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHTING);
         drawVisualRayDebug(gl, parent.visualDebugRay, parent.visualDebugRayLevels);
         //-----------------------------------------------------------------
     }
 
 
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void init(GLAutoDrawable drawable)
     {
         ;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
         ;
     }
@@ -992,6 +985,7 @@ public class JoglDrawingArea implements
     }
     
     /** Called to indicate the drawing surface has been moved and/or resized */
+    @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
@@ -1007,6 +1001,7 @@ public class JoglDrawingArea implements
         }
     }   
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {
         canvas.requestFocusInWindow();
@@ -1023,6 +1018,7 @@ public class JoglDrawingArea implements
         }
     }
 
+    @Override
     public void mouseExited(MouseEvent e) 
     {
         //System.out.println("Mouse exited");
@@ -1033,9 +1029,11 @@ public class JoglDrawingArea implements
         return viewOrganizer.getSelectedViewFromPointerPosition(e.getX(), e.getY(), changeSelection);
     }
 
+    @Override
     public void mousePressed(MouseEvent e)
     {
-        JoglAwtViewportWindow view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
+        JoglAwtViewportWindow view;
+        //view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         //-----------------------------------------------------------------
@@ -1046,15 +1044,15 @@ public class JoglDrawingArea implements
         int m = e.getModifiersEx();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             (m & e.BUTTON1_DOWN_MASK) != 0 ) {
+             (m & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             canvas.setCursor(camrotateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & e.BUTTON2_DOWN_MASK) != 0 ) {
+                  (m & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             canvas.setCursor(camtranslateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & e.BUTTON3_DOWN_MASK) != 0 ) {
+                  (m & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             canvas.setCursor(camadvanceCursor);
         }
         else {
@@ -1071,7 +1069,7 @@ public class JoglDrawingArea implements
                   interactionMode == SCALE_INTERACTION_MODE 
                   ) {
             boolean composite = false;
-            if ( ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
+            if ( ((e.getModifiersEx()) & MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();
@@ -1120,6 +1118,7 @@ public class JoglDrawingArea implements
         canvas.repaint();
     }
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex());
@@ -1180,6 +1179,7 @@ public class JoglDrawingArea implements
 
     }
 
+    @Override
     public void mouseClicked(MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
@@ -1224,6 +1224,7 @@ public class JoglDrawingArea implements
         }
     }
 
+    @Override
     public void mouseMoved(MouseEvent e)
     {
         //-----------------------------------------------------------------
@@ -1270,6 +1271,7 @@ public class JoglDrawingArea implements
         }
     }
 
+    @Override
     public void mouseDragged(MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
@@ -1320,6 +1322,7 @@ public class JoglDrawingArea implements
     /**
     WARNING: It is not working... check pending
     */
+    @Override
     public void mouseWheelMoved(MouseWheelEvent e)
     {
         System.out.println(".");
@@ -1329,6 +1332,7 @@ public class JoglDrawingArea implements
         }
     }
 
+    @Override
     public void keyPressed(KeyEvent e)
     {
         char unicode_id;
@@ -1345,7 +1349,7 @@ public class JoglDrawingArea implements
             ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
-            if ( unicode_id == e.CHAR_UNDEFINED ) {
+            if ( unicode_id == KeyEvent.CHAR_UNDEFINED ) {
                 switch ( keycode ) {
                   case KeyEvent.VK_LEFT:
                     if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
@@ -1500,12 +1504,12 @@ public class JoglDrawingArea implements
             ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
         }
 
-        double theta = 0;
-        double phi = Math.PI/2;
+        double theta;
+        double phi;
         int val;
 
-        if ( ((e.getModifiersEx()) & e.SHIFT_DOWN_MASK) != 0x0 &&
-             ((e.getModifiersEx()) & e.CTRL_DOWN_MASK) != 0x0 ) {
+        if ( ((e.getModifiersEx()) & KeyEvent.SHIFT_DOWN_MASK) != 0x0 &&
+             ((e.getModifiersEx()) & KeyEvent.CTRL_DOWN_MASK) != 0x0 ) {
             switch ( keycode ) {
               case KeyEvent.VK_F:
                 if ( parent.fullScreenGuiMode ) {
@@ -1520,7 +1524,7 @@ public class JoglDrawingArea implements
             }
         }
 
-        if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
+        if ( unicode_id != KeyEvent.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
 
                 //- Multiple views control -----------------------------------
@@ -1666,7 +1670,7 @@ public class JoglDrawingArea implements
               case 'B':
                 if ( firstThingSelected >= 0 ) {
                     SimpleBody gi;
-                    IndexedColorImage source = null;
+                    IndexedColorImage source;
                     NormalMap normalMap;
                     //RGBImage exported;
                     gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
@@ -1682,8 +1686,7 @@ public class JoglDrawingArea implements
                             //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                         }
                         catch ( Exception ee ) {
-                            System.err.println(ee);
-                            ee.printStackTrace();
+                            VSDK.reportMessage(this, VSDK.WARNING, "keyPressed", "" + ee);
                         }
                         gi.setNormalMap(normalMap);
                     }
@@ -1739,7 +1742,7 @@ public class JoglDrawingArea implements
                 break;
 
               case 'w':
-                if ( ((e.getModifiersEx()) & e.ALT_DOWN_MASK) != 0x0 ) {
+                if ( ((e.getModifiersEx()) & KeyEvent.ALT_DOWN_MASK) != 0x0 ) {
                     viewOrganizer.toogleFullViewportScreen();
                     viewOrganizer.updateLayout();
                 }
@@ -1875,6 +1878,7 @@ public class JoglDrawingArea implements
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) 
     {
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1888,6 +1892,7 @@ public class JoglDrawingArea implements
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method
     */
+    @Override
     public void keyTyped(KeyEvent e)
     {
         ;

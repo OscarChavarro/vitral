@@ -62,6 +62,7 @@ public class VitralCommandClient implements Runnable
         }
     }
 
+    @Override
     public void run()
     {
         System.out.println("Starting VitralCommandClient thread.");

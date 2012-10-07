@@ -9,6 +9,8 @@ public class MainThread implements Runnable
     {
         this.args = args;
     }
+
+    @Override
     public void run()
     {
         SceneEditorApplication app;

@@ -4,51 +4,26 @@ package application.gui;
 
 // Java basic classes
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileOutputStream;
-import java.io.BufferedReader;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
 
 // Java GUI classes
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JFileChooser;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
-import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBColorPalette;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
@@ -61,23 +36,15 @@ import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
-import vsdk.toolkit.io.image.ImagePersistence;
-
-// Internal classes
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
+import application.render.jogl.JoglDrawingArea;
 
 public class ButtonsPanel extends JPanel implements ActionListener
 {
@@ -234,6 +201,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         solid.validateModel();
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
         String label = ev.getActionCommand();
 
@@ -350,7 +318,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -
             int selectedThing = parent.theScene.selectedThings.firstSelected();
-            Geometry referenceGeometry = null;
+            Geometry referenceGeometry;
             SimpleBody thing = null;
 
             if ( selectedThing < 0 ) {
@@ -441,19 +409,19 @@ public class ButtonsPanel extends JPanel implements ActionListener
             pointParameters[0] = new Vector3D(0, 0, 0); // Position 0
             pointParameters[1] = new Vector3D(0, 0, 0); // Not used
             pointParameters[2] = new Vector3D(0, 1, 0); // Salient tangent end
-            curve.addPoint(pointParameters, curve.BEZIER);
+            curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(1, 1, 0); // Position 1
             pointParameters[1] = new Vector3D(0, 1, 0); // Entry tangent end
             pointParameters[2] = new Vector3D(2, 1, 0); // Salient tangent end
-            curve.addPoint(pointParameters, curve.BEZIER);
+            curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(2, 0, 1); // Position 2
             pointParameters[1] = new Vector3D(2, 0, 0); // Entry tangent end
             pointParameters[2] = new Vector3D(0, 0, 0); // Not used
-            curve.addPoint(pointParameters, curve.BEZIER);
+            curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
             parent.theScene.addThing(curve);
 
@@ -499,27 +467,27 @@ public class ButtonsPanel extends JPanel implements ActionListener
             pointParameters[0] = new Vector3D(0, 0, 0);  // Position 0
             pointParameters[1] = new Vector3D(0, -1, 0); // Entry tangent
             pointParameters[2] = new Vector3D(1, 0, 0);  // Salient tangent
-            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
+            contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(1, 0, 0);  // Position 1
             pointParameters[1] = new Vector3D(1, 0, 0);  // Entry tangent
             pointParameters[2] = new Vector3D(0, 1, 0);  // Salient tangent
-            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
+            contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(1, 1, 0.4);  // Position 2
             pointParameters[1] = new Vector3D(0, 1, 0);  // Entry tangent
             pointParameters[2] = new Vector3D(-1, 0, 0);  // Salient tangent
-            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
+            contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
             pointParameters = new Vector3D[3];
             pointParameters[0] = new Vector3D(0, 1, 0);  // Position 3
             pointParameters[1] = new Vector3D(-1, 0, 0);  // Entry tangent
             pointParameters[2] = new Vector3D(0, -1, 0);  // Salient tangent
-            contourHermiteLine.addPoint(pointParameters, contourHermiteLine.HERMITE);
+            contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
-            contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), contourHermiteLine.HERMITE);
+            contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), ParametricCurve.HERMITE);
 
             ParametricBiCubicPatch patch;
             patch = new ParametricBiCubicPatch();
@@ -585,7 +553,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
 */
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
-            JFileChooser jfc = null;
+            JFileChooser jfc;
             jfc = new JFileChooser(currentFilePathForReading);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
@@ -606,16 +574,15 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
                     repaint();
                 }
-                catch (Exception ex) {
-                    System.out.println("Failed to read file...\n" + ex);
-                    ex.printStackTrace();
+                catch ( Exception ex ) {
+                    VSDK.reportMessage(this, VSDK.WARNING, "executeCommand", "Failed to read file...\n" + ex);
                     return;
                 }
             }
 
         }
         else if ( label.equals("IDC_EXPORT_OBJECTS_TO_OBJ") ) {
-            JFileChooser jfc = null;
+            JFileChooser jfc;
             jfc = new JFileChooser(currentFilePathForWriting);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
 
@@ -623,7 +590,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    FileOutputStream fos = new FileOutputStream(file);
+                    FileOutputStream fos;
+                    fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentObj(fos,
                         parent.theScene.scene);
@@ -642,7 +610,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
 
         }
         else if ( label.equals("IDC_EXPORT_OBJECTS_TO_GTS") ) {
-            JFileChooser jfc = null;
+            JFileChooser jfc;
             jfc = new JFileChooser(currentFilePathForWriting);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
 
@@ -650,7 +618,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    FileOutputStream fos = new FileOutputStream(file);
+                    FileOutputStream fos;
+                    fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentGts(fos,
                         parent.theScene.scene);
@@ -662,14 +631,13 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     repaint();
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to write file...\n" + ex);
-                    ex.printStackTrace();
+                    VSDK.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
                     return;
                 }
             }
         }
         else if ( label.equals("IDC_EXPORT_OBJECTS_TO_VTK") ) {
-            JFileChooser jfc = null;
+            JFileChooser jfc;
             jfc = new JFileChooser(currentFilePathForWriting);
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
 
@@ -677,7 +645,8 @@ public class ButtonsPanel extends JPanel implements ActionListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    FileOutputStream fos = new FileOutputStream(file);
+                    FileOutputStream fos;
+                    fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentVtk(fos,
                         parent.theScene.scene);
@@ -689,8 +658,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
                     repaint();
                 }
                 catch (Exception ex) {
-                    System.out.println("Failed to write file...\n" + ex);
-                    ex.printStackTrace();
+                    VSDK.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
                     return;
                 }
             }
@@ -703,7 +671,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         //- RENDERING -----------------------------------------------------
         else if ( label.equals("Select palette for depthmap display") ||
                   label.equals("IDC_RENDERING_SELECTPALETTEDEPTH") ) {
-            JFileChooser jfc = null;
+            JFileChooser jfc;
             jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../etc/palettes");
             jfc.removeChoosableFileFilter(jfc.getFileFilter());
             jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
@@ -792,31 +760,31 @@ public class ButtonsPanel extends JPanel implements ActionListener
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_CAMERA_MODE"));
             parent.drawingArea.interactionMode = 
-                parent.drawingArea.CAMERA_INTERACTION_MODE;
+                JoglDrawingArea.CAMERA_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SELECTION_MODE"));
             parent.drawingArea.interactionMode = 
-            parent.drawingArea.SELECT_INTERACTION_MODE;
+            JoglDrawingArea.SELECT_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_TRANSLATION_MODE"));
             parent.drawingArea.interactionMode = 
-            parent.drawingArea.TRANSLATE_INTERACTION_MODE;
+            JoglDrawingArea.TRANSLATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_ROTATION_MODE"));
             parent.drawingArea.interactionMode = 
-                parent.drawingArea.ROTATE_INTERACTION_MODE;
+                JoglDrawingArea.ROTATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SCALE_MODE"));
             parent.drawingArea.interactionMode = 
-                parent.drawingArea.SCALE_INTERACTION_MODE;
+                JoglDrawingArea.SCALE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_RAY") ) {
             if ( parent.withVisualDebugRay ) {

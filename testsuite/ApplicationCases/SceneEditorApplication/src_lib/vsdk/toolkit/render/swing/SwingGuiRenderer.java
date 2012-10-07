@@ -22,7 +22,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.border.Border; 
@@ -163,7 +162,7 @@ public class SwingGuiRenderer
 
         Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
         frame.setBorder(empty);
-        if ( group.getDirection() == group.HORIZONTAL ) {
+        if ( group.getDirection() == GuiButtonGroup.HORIZONTAL ) {
             //frame.setLayout(new BoxLayout(frame, BoxLayout.X_AXIS));
             frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         }
@@ -258,6 +257,7 @@ public class SwingGuiRenderer
             widgetMenubar.add(widgetPopup);
             widgetOption = widgetPopup.add(new JMenuItem("Exit"));
             widgetOption.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     System.exit(0);
                 }});

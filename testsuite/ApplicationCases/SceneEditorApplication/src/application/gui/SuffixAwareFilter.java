@@ -19,6 +19,7 @@ public abstract class SuffixAwareFilter
     return suffix;
   }
 
+    @Override
   public boolean accept(File f) {
     return f.isDirectory();
   }
