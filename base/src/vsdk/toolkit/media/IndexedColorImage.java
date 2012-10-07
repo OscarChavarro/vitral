@@ -56,6 +56,7 @@ public class IndexedColorImage extends Image
     /**
     This is the class destructor.
     */
+    @Override
     public void finalize()
     {
         if ( data != null ) {
@@ -63,8 +64,13 @@ public class IndexedColorImage extends Image
             ySize = 0;
             data = null;
         }
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+        }
     }
 
+    @Override
     public boolean init(int width, int height)
     {
         try {
@@ -82,6 +88,7 @@ public class IndexedColorImage extends Image
         return true;
     }
 
+    @Override
     public boolean initNoFill(int width, int height)
     {
         try {
@@ -99,11 +106,13 @@ public class IndexedColorImage extends Image
         return true;
     }
 
+    @Override
     public int getXSize()
     {
         return xSize;
     }
 
+    @Override
     public int getYSize()
     {
         return ySize;
@@ -126,6 +135,7 @@ public class IndexedColorImage extends Image
         data[index] = VSDK.unsigned8BitInteger2signedByte(val);
     }
 
+    @Override
     public byte getPixel8bitGrayScale(int x, int y)
     {
         return data[xSize*y + x];
@@ -137,6 +147,7 @@ public class IndexedColorImage extends Image
         return VSDK.signedByte2unsignedInteger(data[index]);
     }
 
+    @Override
     public RGBPixel getPixelRgb(int x, int y)
     {
         int index = xSize*y + x;
@@ -151,6 +162,7 @@ public class IndexedColorImage extends Image
         return p;
     }
 
+    @Override
     public void getPixelRgb(int x, int y, RGBPixel p)
     {
         int index = xSize*y + x;
@@ -173,6 +185,7 @@ public class IndexedColorImage extends Image
         colorTable = p;
     }
 
+    @Override
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
         ColorRgb c = new ColorRgb();
@@ -187,16 +200,16 @@ public class IndexedColorImage extends Image
     public RGBImage exportToRgbImage()
     {
         RGBImage copy;
-        int xSize = getXSize();
-        int ySize = getYSize();
+        int xxSize = getXSize();
+        int yySize = getYSize();
         int x, y;
         int source;
         RGBPixel target = new RGBPixel();
 
         copy = new RGBImage();
-        copy.init(xSize, ySize);
-        for ( x = 0; x < xSize; x++ ) {
-            for ( y = 0; y < ySize; y++ ) {
+        copy.init(xxSize, yySize);
+        for ( x = 0; x < xxSize; x++ ) {
+            for ( y = 0; y < yySize; y++ ) {
                 //source = getPixel(x, y);
                 //target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
                 getPixelRgb(x, y, target);
@@ -209,17 +222,17 @@ public class IndexedColorImage extends Image
     public RGBAImage exportToRgbaImage()
     {
         RGBAImage copy;
-        int xSize = getXSize();
-        int ySize = getYSize();
+        int xxSize = getXSize();
+        int yySize = getYSize();
         int x, y;
         int source;
         RGBAPixel target = new RGBAPixel();
 
         copy = new RGBAImage();
-        copy.init(xSize, ySize);
+        copy.init(xxSize, yySize);
         target.a = VSDK.unsigned8BitInteger2signedByte(128);
-        for ( x = 0; x < xSize; x++ ) {
-            for ( y = 0; y < ySize; y++ ) {
+        for ( x = 0; x < xxSize; x++ ) {
+            for ( y = 0; y < yySize; y++ ) {
                 source = getPixel(x, y);
                 target.r = target.g = target.b = VSDK.unsigned8BitInteger2signedByte(source);
                 copy.putPixel(x, y, target);

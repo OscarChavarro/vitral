@@ -160,8 +160,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             // replaced to consider the full vertices set.
 
             //- Do normal estimation on a three set of points -----------------
-            Vector3D p0 = null, p1 = null;
-            Vector3D p2 = null;
+            Vector3D p0;
+            Vector3D p1;
+            Vector3D p2;
             Vector3D a, b;
             Vector3D n;
 
@@ -291,7 +292,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         ArrayList<_PolyhedralBoundedSolidVertex> polygon2Dvv;
         double u, v;
         Vector3D projectedPoint = new Vector3D();
-        int dominantCoordinate = 3;
+        int dominantCoordinate;
         int i;
         Vector3D n;
 
@@ -392,7 +393,6 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             va = polygon2Dv.get(i);
             ub = polygon2Du.get(i+1);
             vb = polygon2Dv.get(i+1);
-            he = polygon2Dh.get(i/2);
             vva = polygon2Dvv.get(i);
             vvb = polygon2Dvv.get(i+1);
 
@@ -511,6 +511,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
     }
 
+    @Override
     public String toString()
     {
         String msg;

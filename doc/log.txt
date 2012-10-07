@@ -917,4 +917,8 @@
   - 10min: reorganizing design on SceneEditorApplication transition
     package
 
+2012 october 7, Oscar Chavarro
+  - 3h: removing several programming warnings from library: @Override
+    annotations, unused imports, unused initializations and others.
+
 ===========================================================================

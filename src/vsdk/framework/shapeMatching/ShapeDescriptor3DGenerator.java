@@ -23,7 +23,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.PrimitiveCountShapeDescriptor;
-import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -71,7 +70,7 @@ public class ShapeDescriptor3DGenerator extends Component
         //vsdk.toolkit.io.image.ImagePersistence.exportGIF(new java.io.File("distanceField"+(100+cam)+".gif"), distanceFieldIndexed);
 
         //- Mark unused objects for garbage collection --------------------
-        bodySet = null;
+        //bodySet = null;
         projectedViewRenderer.configureScene(null, cam);
 
         //- Obtain Pbuffer's rendered image -------------------------------

@@ -34,7 +34,6 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -258,8 +257,8 @@ class _Reader3dsChunk extends PersistenceElement
     public static String
     chunkToString(int chunkid)
     {
-        String chunkname = "<Unknown chunk id>";
-
+        String chunkname;
+        
         switch ( chunkid ) {
           case ID_MAIN:
             chunkname = "ID_MAIN";
@@ -698,6 +697,7 @@ class _Reader3dsChunk extends PersistenceElement
         length = 0;
     }
 
+    @Override
     public String toString()
     {
         String msg;
@@ -799,7 +799,7 @@ public class Reader3ds extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        RGBImage img = null;
+        RGBImage img;
         String fullFilename = workingDirectory + "/" + imageFilename.toLowerCase();
 
         try {
@@ -833,7 +833,7 @@ public class Reader3ds extends PersistenceElement
     }
 
     private static String indent(int level) {
-        String tab = "";
+        String tab;
         switch ( level ) {
           case 0: tab = ""; break;
           case 1: tab = "  - "; break;
@@ -1360,7 +1360,7 @@ public class Reader3ds extends PersistenceElement
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPFILENAME ) {
             //-------------------------------------------------------------
-            currentTextureFilename = new String(readAsciiString(is));
+            currentTextureFilename = readAsciiString(is);
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_SHININESS_KTE ) {
             //System.out.println(indent(level) + currentChunk);

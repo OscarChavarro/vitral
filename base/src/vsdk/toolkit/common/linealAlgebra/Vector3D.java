@@ -164,6 +164,7 @@ public class Vector3D extends FundamentalEntity
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString()
     {
         String msg;

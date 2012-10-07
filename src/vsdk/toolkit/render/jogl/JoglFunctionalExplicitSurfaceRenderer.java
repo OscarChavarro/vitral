@@ -12,7 +12,6 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL2;
 
 // VitralSDK classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.TriangleMesh;

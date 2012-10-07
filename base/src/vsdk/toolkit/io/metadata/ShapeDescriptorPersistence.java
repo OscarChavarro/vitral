@@ -8,7 +8,6 @@ package vsdk.toolkit.io.metadata;
 
 import java.io.OutputStream;
 import java.io.InputStream;
-import java.io.File;
 import java.util.ArrayList;
 
 import vsdk.toolkit.io.PersistenceElement;

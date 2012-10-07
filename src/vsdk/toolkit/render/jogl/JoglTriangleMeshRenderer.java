@@ -434,7 +434,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         // Main cycle variables / cycle initialization
         int start = 0;
-        int end = 0;
+        int end;
         int it = 0;
         int im =  0;
         int currentTextureIndex;
@@ -669,7 +669,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
         //-----------------------------------------------------------------
         int t[] = mesh.getTriangleIndexes();
-        int i = start;
+        int i;
         for ( i = start; i+block < end; i += block ) {
             triangleIndicesBuffer.position(3*i);
             gl.glDrawElements(GL.GL_TRIANGLES, 3*block, GL.GL_UNSIGNED_INT, triangleIndicesBuffer);

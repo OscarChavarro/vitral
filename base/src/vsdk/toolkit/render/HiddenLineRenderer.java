@@ -28,10 +28,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.processing.ComputationalGeometry;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
@@ -40,6 +37,7 @@ class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEd
     public double t;
     public int deltaQI; // Relative change in quantitative invisibility
 
+    @Override
     public int compareTo(_AppelEdgeSegment other)
     {
         if ( this.t < other.t - VSDK.EPSILON ) return -1;
@@ -357,8 +355,7 @@ public class HiddenLineRenderer extends RenderingElement
             }
         }
 
-        segments = null;
-
+        //segments = null;
     }
 
     /**
@@ -417,8 +414,8 @@ public class HiddenLineRenderer extends RenderingElement
             }
         }
         //-----------------------------------------------------------------
-        cache = null;
-        contourCache = null;
+        //cache = null;
+        //contourCache = null;
     }
 
 }

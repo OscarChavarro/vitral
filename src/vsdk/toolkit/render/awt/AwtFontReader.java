@@ -54,6 +54,7 @@ public class AwtFontReader extends FontReader
     So this method works with fonts `factor` points in size, to later scale the
     glyphs down by a factor of 1/`factor`.
     */
+    @Override
     public ParametricCurve extractGlyph(
         String fontFile, String characterAndItsContext)
     {
@@ -93,7 +94,7 @@ public class AwtFontReader extends FontReader
         GeneralPath p = (GeneralPath)gv.getGlyphOutline(0);
 
         boolean endIt = false;
-        int code = 0;
+        int code;
 
 
 //*****************************************************************

@@ -5,13 +5,9 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLCapabilities;
 
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBColorPalette;
-import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.media.RGBColorPalette;
 
 public class JoglStereoStrategyCyclopeanZBufferRenderer extends JoglStereoStrategyRenderer
@@ -29,21 +25,25 @@ public class JoglStereoStrategyCyclopeanZBufferRenderer extends JoglStereoStrate
         this.palette = palette;
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         return false;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         ;
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         ZBuffer zbuffer;

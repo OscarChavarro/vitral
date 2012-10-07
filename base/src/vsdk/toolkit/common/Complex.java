@@ -12,8 +12,6 @@
 
 package vsdk.toolkit.common;
 
-import vsdk.toolkit.common.VSDK;
-
 /**
 A complex child is one with a real mother and an imaginary father.
 
@@ -153,6 +151,7 @@ public class Complex extends FundamentalEntity {
     /**
     Return a string representation of the invoking Complex object
     */
+    @Override
     public String toString() {
         if ( i <  0 ) {
             return VSDK.formatDouble(r) + " - " + VSDK.formatDouble(-i) + "i";

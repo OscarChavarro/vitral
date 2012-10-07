@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.File;
 
 // VSDK Classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 import vsdk.toolkit.media.IndexedColorImage;
@@ -16,6 +17,7 @@ import vsdk.toolkit.io.image.ImagePersistence;
 
 public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerator
 {
+    @Override
     public ShapeDescriptor calculateShapeDescriptor(
         InputStream sceneSource,
         String sceneSourceUrl,
@@ -47,7 +49,7 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
 
         }
         catch ( Exception e ) {
-            System.err.println("ERROR: could not import image data input!");
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "calculateShapeDescriptor", "" + e);
             return null;
         }
 

@@ -10,7 +10,6 @@
 package vsdk.toolkit.render.jogl;
 
 // Java base classes
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -19,7 +18,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
-import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.util.texture.TextureData;
 
@@ -119,7 +117,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
                 item.glList = item.renderer.getTextureObject(gl);
             }
             catch ( Exception e ) {
-                System.err.println(e);
+                VSDK.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
             }
             /*
             //glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 3, x_tam, y_tam, GL.GL_RGB, 
@@ -171,7 +169,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void deactivate(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglRGBImageRendererImageAssociation item;
 
         try { 
             int i;
@@ -191,7 +189,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void unload(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglRGBImageRendererImageAssociation item;
 
         try { 
             int i;

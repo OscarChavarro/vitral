@@ -38,29 +38,34 @@ public abstract class RGBProceduralColorPalette extends RGBColorPalette {
         pure = true;
     }
 
+    @Override
     public int selectNearestIndexToRgb(ColorRgb c)
     {
         return super.selectNearestIndexToRgb(c);
     }
 
+    @Override
     public void setColorAt(int i, ColorRgb c)
     {
         pure = false;
         super.setColorAt(i, c);
     }
 
+    @Override
     public void setColorAt(int i, double r, double g, double b)
     {
         pure = false;
         super.setColorAt(i, r, g, b);
     }
 
+    @Override
     public void addColor(ColorRgb c)
     {
         pure = false;
         super.addColor(c);
     }
 
+    @Override
     public void addColor(double r, double g, double b)
     {
         pure = false;

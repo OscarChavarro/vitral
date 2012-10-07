@@ -15,7 +15,6 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2GL3;
 
-import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.ZBuffer;
 
 public class JoglZBufferRenderer extends JoglRenderer 

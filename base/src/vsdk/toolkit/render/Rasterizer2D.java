@@ -95,7 +95,7 @@ public class Rasterizer2D extends RenderingElement
     public static void drawPolygon(Image img, Polygon2D p, RGBPixel color)
     {
         _Polygon2DContour l;
-        Vertex2D va = null;
+        Vertex2D va;
         Vertex2D vb = null;
         int i;
         int j;
@@ -196,7 +196,7 @@ public class Rasterizer2D extends RenderingElement
         int x;
         int y;
         _Polygon2DContour l;
-        Vertex2D va = null;
+        Vertex2D va;
         Vertex2D vb = null;
         int i;
         int j;
@@ -247,7 +247,7 @@ public class Rasterizer2D extends RenderingElement
             }
 
             //-------------------------------------------------------------
-            int s = 0;
+            int s;
 
             //- X-order quick sort of span line intersections distances ---
             spanBuffer.sort();
@@ -280,7 +280,7 @@ public class Rasterizer2D extends RenderingElement
 
             //-------------------------------------------------------------
             //spanBuffer.reset();
-            spanBuffer = null;
+            //spanBuffer = null;
         }
     }
 
@@ -291,7 +291,7 @@ public class Rasterizer2D extends RenderingElement
     public static void
     fillSmoothPolygonCalculateColor(Polygon2D p, double x, double y, ColorRgb outColor)
     {
-        Vertex2D va = null;
+        Vertex2D va;
         Vertex2D vb = null;
         int i;
         int j;
@@ -337,7 +337,7 @@ public class Rasterizer2D extends RenderingElement
         int x;
         int y;
         _Polygon2DContour l;
-        Vertex2D va = null;
+        Vertex2D va;
         Vertex2D vb = null;
         int i;
         int j;
@@ -388,7 +388,7 @@ public class Rasterizer2D extends RenderingElement
             }
 
             //-------------------------------------------------------------
-            int s = 0;
+            int s;
 
             //- X-order quick sort of span line intersections distances ---
             spanBuffer.sort();
@@ -447,7 +447,7 @@ public class Rasterizer2D extends RenderingElement
 
             //-------------------------------------------------------------
             //spanBuffer.reset();
-            spanBuffer = null;
+            //spanBuffer = null;
         }
     }
 

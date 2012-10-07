@@ -16,10 +16,8 @@ import java.util.ArrayList;
 
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Vector4D;
-import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Surface;
 import vsdk.toolkit.environment.geometry.Solid;
@@ -106,7 +104,7 @@ public class WireframeRenderer extends RenderingElement
         int j;                     // subobject index
         int t;                     // triangle index
         TriangleMeshGroup mg;
-        TriangleMesh mesh = null;
+        TriangleMesh mesh;
         int nv;
         int nt;
         double v[];

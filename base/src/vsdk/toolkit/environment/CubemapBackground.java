@@ -8,15 +8,12 @@
 
 package vsdk.toolkit.environment;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBAPixel;
 
 public class CubemapBackground extends Background {
     /// Check the general attribute description in superclass Entity.
@@ -48,12 +45,12 @@ public class CubemapBackground extends Background {
 
     /**
     */
+    @Override
     public ColorRgb colorInDireccion(Vector3D d)
     {
-        double u = 0, v = 0;
-        RGBAImage img = null;
-
-        img = backgroundImages[0];
+        double u;
+        double v;
+        RGBAImage img;
 
         d.normalize();
         Ray r = new Ray(new Vector3D(0, 0, 0), d);

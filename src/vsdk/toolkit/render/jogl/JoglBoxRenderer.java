@@ -10,8 +10,6 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

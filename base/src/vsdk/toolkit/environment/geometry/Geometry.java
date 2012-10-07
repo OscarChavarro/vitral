@@ -12,7 +12,6 @@
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
@@ -225,7 +224,7 @@ public abstract class Geometry extends Entity {
         if ( nz > nmax ) nmax = nz;
         int containmentStatus;
         int x, y, z;
-        Vector3D p = new Vector3D();
+        Vector3D p;
         Vector3D transformedP;
 
         if ( reporter != null ) {

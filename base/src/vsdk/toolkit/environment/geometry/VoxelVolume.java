@@ -232,6 +232,7 @@ public class VoxelVolume extends Solid {
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         double minMax[];
 
@@ -254,6 +255,7 @@ public class VoxelVolume extends Solid {
        al objeto se retorna 0, y de lo contrario se retorna la distancia desde
        el origen del rayo hasta el punto de interseccion mas cercano de todas las mallas.
      */
+    @Override
     public boolean doIntersection(Ray inOut_Ray) {
         return false;
     }
@@ -262,6 +264,7 @@ public class VoxelVolume extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -309,6 +312,7 @@ public class VoxelVolume extends Solid {
     Check the general interface contract in superclass method
     Solid.doCenterOfMass
     */
+    @Override
     public Vector3D doCenterOfMass() {
         Vector3D cm, p;
         cm = new Vector3D(0, 0, 0);

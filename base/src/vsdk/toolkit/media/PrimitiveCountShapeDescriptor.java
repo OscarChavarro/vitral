@@ -40,6 +40,7 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
         featureVector[primitiveType] = count;
     }
 
+    @Override
     public String toString()
     {
         String msg;
@@ -51,10 +52,12 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
         return msg;
     }
 
+    @Override
     public double [] getFeatureVector() {
         return featureVector;
     }
 
+    @Override
     public void setFeatureVector(double vector[]) {
         if ( vector.length != numberOfElements ) {
             VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
@@ -68,10 +71,15 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
         }
     }
 
+    @Override
     public void finalize()
     {
         label = null;
         featureVector = null;
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+        }
     }
 }
 

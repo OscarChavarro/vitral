@@ -15,12 +15,10 @@
 
 package vsdk.toolkit.environment.geometry;
 
-import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.Geometry;
 
 public class ParametricBiCubicPatch extends Surface {
     /// Check the general attribute description in superclass Entity.
@@ -135,7 +133,7 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
     public void setType(int type) {
-        type = type;
+        this.type = type;
     }
 
     private void buildGeometryMatricesXYZ_Bezier() {
@@ -479,6 +477,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     @todo implement the method
     */
+    @Override
     public boolean doIntersection(Ray r) {
         return false;
     }
@@ -498,10 +497,11 @@ public class ParametricBiCubicPatch extends Surface {
 
     @todo implement the method
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double intT, 
                                    GeometryIntersectionInformation outData) {
-        return;
+        
     }
 
     /** 
@@ -510,6 +510,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     @bug current contour curve asumption is not valid
     */
+    @Override
     public double[] getMinMax() {
         if ( contourCurve != null ) {
             return contourCurve.getMinMax();

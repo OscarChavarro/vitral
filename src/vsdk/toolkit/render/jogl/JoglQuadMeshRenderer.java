@@ -99,9 +99,9 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
         //-----------------------------------------------------------------
 
-        vertexPositionsBuffer = null;
-        vertexColorsBuffer = null;
-        quadIndicesBuffer = null;
+        //vertexPositionsBuffer = null;
+        //vertexColorsBuffer = null;
+        //quadIndicesBuffer = null;
     }
 
     /**

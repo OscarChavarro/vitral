@@ -76,6 +76,7 @@ public class TriangleStripMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         if ( minMax == null ) {
             calculateMinMaxPositions();
@@ -112,6 +113,7 @@ public class TriangleStripMesh extends Surface {
 
     @todo Method not implemented!
     */
+    @Override
     public boolean
     doIntersection(Ray inOut_Ray) {
         return false;
@@ -123,6 +125,7 @@ public class TriangleStripMesh extends Surface {
 
     @todo Method not implemented!
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {

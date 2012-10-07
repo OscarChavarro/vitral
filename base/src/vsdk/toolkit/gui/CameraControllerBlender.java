@@ -15,6 +15,8 @@ public class CameraControllerBlender extends CameraController {
         this.camera = camera;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseEventAwt(MouseEvent mouseEvent) {
       return true;
     }
@@ -55,11 +57,14 @@ public class CameraControllerBlender extends CameraController {
         return val;
     }
   
+    @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         System.out.println("MY EVENT!");
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
@@ -90,7 +95,6 @@ public class CameraControllerBlender extends CameraController {
         R = camera.getRotation();
         projectionMode = camera.getProjectionMode();
         fov = camera.getFov();
-        orthogonalZoom = camera.getOrthogonalZoom();
         nearPlaneDistance = camera.getNearPlaneDistance();
         farPlaneDistance = camera.getFarPlaneDistance();
 
@@ -364,50 +368,67 @@ public class CameraControllerBlender extends CameraController {
         return updated;
     }
 
+    @Deprecated
+    @Override
     public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMousePressedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseReleasedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseClickedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseMovedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseDraggedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseWheelEventAwt(MouseWheelEvent e)
     {
         return false;
     }
 
+    @Override
     public Camera getCamera()
     {
         return camera;
     }
 
+    @Override
     public void setCamera(Camera camera)
     {
         this.camera = camera;
     }
 
+    @Override
     public void setDeltaMovement(double factor)
     {
         ;

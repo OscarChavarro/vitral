@@ -6,10 +6,7 @@
 
 package vsdk.toolkit.media;
 
-import java.util.ArrayList;
-
 import vsdk.toolkit.common.ArrayListOfDoubles;
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.render.Rasterizer2D;
 
@@ -110,9 +107,14 @@ public class Calligraphic2DBuffer extends MediaEntity {
         }
     }
 
+    @Override
     public void finalize()
     {
         init();
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+        }
     }
 }
 

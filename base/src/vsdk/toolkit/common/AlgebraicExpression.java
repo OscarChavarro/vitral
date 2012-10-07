@@ -13,7 +13,6 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 
 // VSDK classes
-import vsdk.toolkit.common.VSDK;
 
 /**
 A `AlgebraicExpression` is an algebraic expression composed of algebraic
@@ -47,6 +46,7 @@ public class AlgebraicExpression extends FundamentalEntity
         values.put(name, new Double(val));
     }
 
+    @Override
     public String toString()
     {
         String msg;
@@ -73,7 +73,7 @@ public class AlgebraicExpression extends FundamentalEntity
 
     private boolean isOperator(String cad)
     {
-        boolean answer = true;
+        boolean answer;
         if ( cad.length() > 1 ) return false;
         switch ( cad.charAt(0) ) {
           case '+':
@@ -285,7 +285,7 @@ public class AlgebraicExpression extends FundamentalEntity
                 tokens.add("" + parser.nval);
                 break;
               case StreamTokenizer.TT_WORD:
-                tokens.add(new String(parser.sval));
+                tokens.add(parser.sval);
                 break;
               default:
                 String content;

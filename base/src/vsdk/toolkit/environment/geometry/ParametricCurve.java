@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.Geometry;
 
 /**
 This class represents a set of curve segments, forming a poly-line.
@@ -567,6 +565,7 @@ public class ParametricCurve extends Curve {
     This method returns an aproximate minmax of current curve, based on a
     sampling (evaluation) of points.
     */
+    @Override
     public double[] getMinMax()
     {
         double minmax[] = new double[6];
@@ -600,6 +599,7 @@ public class ParametricCurve extends Curve {
     to provide another method, to add voxels after a path following
     over the line.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         int i, j;

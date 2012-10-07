@@ -3,7 +3,6 @@
 package vsdk.framework.shapeMatching;
 
 // Java classes
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.InputStream;
 

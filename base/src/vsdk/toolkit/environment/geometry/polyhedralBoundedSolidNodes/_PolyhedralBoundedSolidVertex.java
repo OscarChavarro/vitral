@@ -47,6 +47,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         debugColor = new ColorRgb(1, 0, 0);
     }
 
+    @Override
     public String toString()
     {
         String msg;

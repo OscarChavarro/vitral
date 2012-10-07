@@ -36,7 +36,7 @@ public class RGBColorPalette extends MediaEntity {
     @param size Initial size of gray scale for current color palette's 
     initialization
     */
-    public void init(int size)
+    public final void init(int size)
     {
         colors = new ArrayList<ColorRgb>();
         int i;

@@ -32,6 +32,7 @@ public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpression
         this.rightOperand = operand;
     }
 
+    @Override
     public double eval() throws AlgebraicExpressionException
     {
         double lval = leftOperand.eval();
@@ -50,6 +51,7 @@ public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpression
         return val;
     }
 
+    @Override
     public String toString()
     {
         String msg;

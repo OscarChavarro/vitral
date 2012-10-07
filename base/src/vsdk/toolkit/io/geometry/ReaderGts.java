@@ -10,14 +10,11 @@ package vsdk.toolkit.io.geometry;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Material;
@@ -137,8 +134,12 @@ public class ReaderGts extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        int ie1, ie2, ie3;
-        int ip1, ip2 = -2, ip3 = -1;
+        int ie1;
+        int ie2;
+        int ie3;
+        int ip1;
+        int ip2;
+        int ip3;
         int t[];
 
         internalGeometry.initTriangleArrays(numTriangles);

@@ -14,7 +14,6 @@ import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 
 public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRenderer
 {
@@ -46,18 +45,21 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
         rightPbuffer.addGLEventListener(rightRenderer);
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         leftPbuffer.display();
         return false;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         rightPbuffer.display();
         return false;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         ;
@@ -103,6 +105,7 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
         drawTexturedQuad(gl, 0, -1, 1, 1);
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         RGBImage a = leftImage;

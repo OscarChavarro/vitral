@@ -21,12 +21,9 @@ import java.util.Iterator;
 // VSDK Classes
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.ArrayListOfInts;
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -36,10 +33,7 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.io.image.ImagePersistence;
 
 class _ReaderAseTriangleCache extends PersistenceElement implements Comparable <_ReaderAseTriangleCache>
 {
@@ -56,6 +50,7 @@ class _ReaderAseTriangleCache extends PersistenceElement implements Comparable <
         this.materialId = materialId;
     }
 
+    @Override
     public int compareTo(_ReaderAseTriangleCache other) {
         if ( this.materialId > other.materialId ) {
             return 1;
@@ -130,7 +125,7 @@ class _ReaderAseMeshCache extends PersistenceElement
         v = mesh.getVertexPositions();
 
         int j;
-        for ( i = 0, j = 0; i < n; i++ ) {
+        for ( i = 0; i < n; i++ ) {
             if ( vertexMap[i] >= 0 ) {
                 j = vertexMap[i];
                 v[3*j+0] = vertexData.get(3*i+0)/100.0;
@@ -454,7 +449,7 @@ public class ReaderAse extends PersistenceElement
         int i = 0;
         double vals[];
         vals = new double[4];
-        int index = -1;
+        int index;
 
         do {
             try {

@@ -6,8 +6,6 @@
 
 package vsdk.toolkit.common;
 
-import vsdk.toolkit.common.VSDK;
-
 public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
 {
     /// Check the general attribute description in superclass Entity.
@@ -19,11 +17,13 @@ public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
         this.val = val;
     }
 
+    @Override
     public double eval() throws AlgebraicExpressionException
     {
         return val;
     }
 
+    @Override
     public String toString()
     {
         String msg;

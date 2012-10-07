@@ -304,6 +304,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         }
     }
 
+    @Override
     public String toString()
     {
         String msg;
@@ -342,6 +343,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         return msg;
     }
 
+    @Override
     public RendererConfiguration clone()
     {
         RendererConfiguration copy = new RendererConfiguration();

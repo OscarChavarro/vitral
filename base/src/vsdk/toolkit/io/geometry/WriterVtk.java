@@ -13,13 +13,8 @@ import java.io.BufferedOutputStream;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -86,7 +81,7 @@ public class WriterVtk extends PersistenceElement {
     exportEnvironment(OutputStream inOutputStream, SimpleScene inScene)
         throws Exception
     {
-        BufferedOutputStream bos = null;
+        BufferedOutputStream bos;
         if ( inOutputStream instanceof BufferedOutputStream ) {
             bos = (BufferedOutputStream)inOutputStream;
         }

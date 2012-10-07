@@ -53,6 +53,7 @@ public class _JoglSimpleBodyRendererDisplayList extends JoglRenderer implements 
         qualitySubset.clone(q);
     }
 
+    @Override
     public int compareTo(_JoglSimpleBodyRendererDisplayList other)
     {
         int thisId;

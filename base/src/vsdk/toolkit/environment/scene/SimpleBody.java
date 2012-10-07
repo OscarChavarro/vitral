@@ -69,6 +69,7 @@ public class SimpleBody extends Entity {
         _static_vector3d = new Vector3D();
     }
 
+    @Override
     public void finalize()
     {
         geometry = null;
@@ -80,6 +81,11 @@ public class SimpleBody extends Entity {
         globalTextureMap = null;
         globalNormalMap = null;
         name = null;
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+            
+        }
     }
 
     public String getName()

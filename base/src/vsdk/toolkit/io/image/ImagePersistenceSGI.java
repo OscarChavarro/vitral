@@ -11,7 +11,6 @@
 
 package vsdk.toolkit.io.image;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 
@@ -186,7 +185,6 @@ public class ImagePersistenceSGI extends PersistenceElement
             VSDK.reportMessage(null, VSDK.ERROR, 
                 "ImagePersistenceSGI.readImageSGI",
                                "Error reading image from " + filename + "\n" + e);
-            e.printStackTrace();
         }
         //-----------------------------------------------------------------
         return img;

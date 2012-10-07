@@ -13,6 +13,7 @@ public abstract class _AlgebraicExpressionNode extends FundamentalEntity
 
     public abstract double eval() throws AlgebraicExpressionException;
 
+    @Override
     public abstract String toString();
 }
 

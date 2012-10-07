@@ -13,7 +13,6 @@
 package vsdk.toolkit.io.geometry;
 
 // Java classes
-import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -32,7 +31,6 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;

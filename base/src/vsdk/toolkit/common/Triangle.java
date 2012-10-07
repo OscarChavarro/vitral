@@ -77,6 +77,7 @@ public class Triangle extends FundamentalEntity
     readability and debugging. Do not use this method for serialization
     or persistence purposes.
     */
+    @Override
     public String toString() {
 
         return "f < " + p0 + ", " + p1 + ", " + p2 + " >";

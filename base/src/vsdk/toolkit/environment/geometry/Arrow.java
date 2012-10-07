@@ -9,8 +9,6 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.Cone;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.processing.GeometricModeler;
 
 public class Arrow extends Solid {
@@ -87,6 +85,7 @@ public class Arrow extends Solid {
      Check the general interface contract in superclass method
      Geometry.doIntersection.
     */
+    @Override
     public boolean
     doIntersection(Ray inOutRay) {
         boolean headTest, baseTest;
@@ -124,8 +123,9 @@ public class Arrow extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
-           doExtraInformation(Ray inRay, double inT, 
+    doExtraInformation(Ray inRay, double inT, 
            GeometryIntersectionInformation outData) {
         lastElement.doExtraInformation(inRay, inT, outData);
         if ( lastElement == headCone ) {
@@ -134,6 +134,7 @@ public class Arrow extends Solid {
         }
     }
 
+    @Override
     public double[] getMinMax()
     {
         double [] minmax = new double[6];
@@ -149,6 +150,7 @@ public class Arrow extends Solid {
         return minmax;
     }
 
+    @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {
@@ -190,7 +192,7 @@ public class Arrow extends Solid {
 
         // Cone case
         Vector3D apex;
-        int i = 0;
+        int i;
         int base1 = 2*nsides+1;
         int base2 = 3*nsides+1;
 

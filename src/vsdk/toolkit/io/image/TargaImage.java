@@ -55,11 +55,11 @@ public class TargaImage extends PersistenceElement
     }
     
     private void open(File srcFile) throws ImageNotRecognizedException, IOException {
-        byte red = 0;
-        byte green = 0;
-        byte blue = 0;
+        byte red ;
+        byte green;
+        byte blue;
         byte alpha = FULL_TRANSPARENCY;
-        int srcLine = 0;
+        int srcLine;
         
         FileInputStream fis = new FileInputStream(srcFile);
         BufferedInputStream bis = new BufferedInputStream(fis, 8192);

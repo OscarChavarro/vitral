@@ -108,7 +108,7 @@ public abstract class PersistenceElement {
     readBytes(InputStream is, byte[] bytesBuffer) throws Exception
     {
         int offset = 0;
-        int numRead = 0;
+        int numRead;
         int length = bytesBuffer.length;
         do {
             numRead = is.read(bytesBuffer, 
@@ -130,7 +130,7 @@ public abstract class PersistenceElement {
 
     private static void int2byteArrayDirect(byte[] arr, int start, int num)
     {
-        int i = 0;
+        int i;
         int len = 2;
         byte[] tmp = new byte[len];
 
@@ -148,7 +148,7 @@ public abstract class PersistenceElement {
 
     private static void int2byteArrayInvert(byte[] arr, int start, int num)
     {
-        int i = 0;
+        int i;
         int len = 2;
         byte[] tmp = new byte[len];
 
@@ -201,7 +201,7 @@ public abstract class PersistenceElement {
     }
 
     private static long byteArray2longDirect(byte[] arr, int start) {
-        int i = 0;
+        int i;
         int len = 4;
         int cnt = 0;
         byte[] tmp = new byte[len];
@@ -220,7 +220,7 @@ public abstract class PersistenceElement {
 
     private static void long2byteArrayDirect(
         byte[] arr, int start, long num) {
-        int i = 0;
+        int i;
         int len = 4;
         byte[] tmp = new byte[len];
 
@@ -238,7 +238,7 @@ public abstract class PersistenceElement {
 
     private static void long2byteArrayInvert(
         byte[] arr, int start, long num) {
-        int i = 0;
+        int i;
         int len = 4;
         byte[] tmp = new byte[len];
 
@@ -255,7 +255,7 @@ public abstract class PersistenceElement {
     }
 
     private static long byteArray2longInvert(byte[] arr, int start) {
-        int i = 0;
+        int i;
         int len = 4;
         int cnt = 3;
         byte[] tmp = new byte[len];
@@ -273,7 +273,7 @@ public abstract class PersistenceElement {
     }
 
     private static float byteArray2floatDirect(byte[] arr, int start) {
-        int i = 0;
+        int i;
         int len = 4;
         int cnt;
         byte[] tmp = new byte[len];
@@ -291,7 +291,7 @@ public abstract class PersistenceElement {
     }
 
     private static float byteArray2floatInvert(byte[] arr, int start) {
-        int i = 0;
+        int i;
         int len = 4;
         int cnt = 3;
         byte[] tmp = new byte[len];
@@ -572,7 +572,7 @@ public abstract class PersistenceElement {
 
     public static String buildUtf8Char(byte arr[])
     {
-        String c = null;
+        String c;
         int a = VSDK.signedByte2unsignedInteger(arr[0]);
         int b = VSDK.signedByte2unsignedInteger(arr[1]);
 

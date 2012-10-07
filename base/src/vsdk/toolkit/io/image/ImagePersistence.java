@@ -226,8 +226,7 @@ public class ImagePersistence extends PersistenceElement
         catch ( Exception e ) {
               VSDK.reportMessage(null, VSDK.ERROR, "importDDSRGBA",
                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + 
-                 "\"");
-              e.printStackTrace();
+                 "\"" + e);
               return null;
         }
     }
@@ -565,8 +564,7 @@ public class ImagePersistence extends PersistenceElement
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB (B)",
-                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-                  e.printStackTrace();
+                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"" + e);
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }
@@ -641,7 +639,7 @@ public class ImagePersistence extends PersistenceElement
             bPos++;
             dest[bPos]=(byte)(ori[i]>>8);
             bPos++;
-            dest[bPos]=(byte)(ori[i]>>0);
+            dest[bPos]=(byte)(ori[i]);
             bPos++;
             if(pixelDepth==32)
             {
@@ -832,7 +830,8 @@ public class ImagePersistence extends PersistenceElement
             writer.write(arr, 0, arr.length);
 
             RGBPixel p;
-            int x = 0, y = 0;
+            int x;
+            int y;
             for ( y = 0; y < img.getYSize(); y++ ) {
                 for ( x = 0; x < img.getXSize(); x++ ) {
                     p = img.getPixelRgb(x, y);
@@ -940,7 +939,8 @@ public class ImagePersistence extends PersistenceElement
             arr = line4.getBytes();
             writer.write(arr, 0, arr.length);
 
-            int x = 0, y = 0;
+            int x;
+            int y;
             for ( y = 0; y < img.getYSize(); y++ ) {
                 for ( x = 0; x < img.getXSize(); x++ ) {
                     writer.write(img.getPixel8bitGrayScale(x, y));

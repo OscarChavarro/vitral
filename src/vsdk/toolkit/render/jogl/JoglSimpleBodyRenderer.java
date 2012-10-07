@@ -9,7 +9,6 @@ package vsdk.toolkit.render.jogl;
 // Java classes
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -25,8 +24,6 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 /**
 The `JoglSimpleBodyRenderer` class is a helper for the JOGL/OpenGL rendering

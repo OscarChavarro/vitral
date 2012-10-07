@@ -77,8 +77,10 @@ public class JoglCameraRenderer extends JoglRenderer
 
 
         //- Calcule los extremos del volumen de visualizacion ---------------
-        double xn = 1, yn = 1;
-        double xf = 1, yf = 1;
+        double xn;
+        double yn;
+        double xf;
+        double yf;
         double npd; // Near plane distance
         double fpd; // Far plane distance
 

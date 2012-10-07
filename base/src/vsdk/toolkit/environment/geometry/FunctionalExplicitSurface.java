@@ -11,9 +11,7 @@ import vsdk.toolkit.common.AlgebraicExpression;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.gui.ProgressMonitor;
 
 /**
@@ -38,7 +36,7 @@ public class FunctionalExplicitSurface extends Surface
 
     public FunctionalExplicitSurface(String fxy)
     {
-        functionExpression = new String(fxy);
+        functionExpression = fxy;
         xyFunction = new AlgebraicExpression();
         try {
             xyFunction.setExpression(fxy);
@@ -213,6 +211,7 @@ public class FunctionalExplicitSurface extends Surface
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         return internalGeometry.getMinMax();
     }
@@ -224,6 +223,7 @@ public class FunctionalExplicitSurface extends Surface
     @todo Should not delegate work over tesselated geometry version. Should
     evaluate directly from algebraic function surface!
     */
+    @Override
     public boolean
     doIntersection(Ray inOut_Ray) {
         return internalGeometry.doIntersection(inOut_Ray);
@@ -233,6 +233,7 @@ public class FunctionalExplicitSurface extends Surface
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -243,6 +244,7 @@ public class FunctionalExplicitSurface extends Surface
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         return internalGeometry.doContainmentTest(p, distanceTolerance);
@@ -252,6 +254,7 @@ public class FunctionalExplicitSurface extends Surface
     Check the general interface contract in superclass method
     Geometry.doVoxelization.
     */
+    @Override
     public void
     doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {

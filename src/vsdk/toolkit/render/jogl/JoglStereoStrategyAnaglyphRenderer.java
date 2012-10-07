@@ -6,8 +6,6 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES2;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.GLCapabilities;
 
 /**
 JoglStereoStrategyAnaglyphRenderer supports two methods for color blending
@@ -102,6 +100,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
 
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         if ( swapChannels  ) {
@@ -125,6 +124,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
         return true;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         if ( swapChannels  ) {
@@ -148,6 +148,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         if ( colorBlendMethod ) {
@@ -159,6 +160,7 @@ public class JoglStereoStrategyAnaglyphRenderer extends JoglStereoStrategyRender
         }
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         if ( colorBlendMethod ) {

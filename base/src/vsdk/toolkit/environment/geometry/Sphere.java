@@ -47,6 +47,7 @@ public class Sphere extends Solid {
     contenga la distancia entre el punto de intersecci&oacute;n y el origen
     del `inout_rayo`.
     */
+    @Override
     public boolean
     doIntersection(Ray inout_rayo) {
         /* OJO: Como en Java, a diferencia de C no hay sino objetos por
@@ -100,6 +101,7 @@ public class Sphere extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
@@ -146,6 +148,7 @@ public class Sphere extends Solid {
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         double l = p.length();
@@ -158,6 +161,7 @@ public class Sphere extends Solid {
         return LIMIT;
     }
 
+    @Override
     public double[] getMinMax()
     {
         for ( int i = 0; i < 3; i++ ) {
@@ -189,6 +193,7 @@ public class Sphere extends Solid {
         p.z = Math.sin(phi) * r;
     }
 
+    @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {
@@ -207,8 +212,8 @@ public class Sphere extends Solid {
     */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
-        double theta = 0;
-        double phi = 0;
+        double theta;
+        double phi;
         int nparalels = 8;
         int nmeridians = 16;
         double dtheta = 2*Math.PI / ((double)nmeridians);

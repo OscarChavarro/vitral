@@ -56,7 +56,6 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
               pbuffer = null;
               pbufferSupported = false;
-              return;
         }
     }
 
@@ -81,6 +80,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         }
     }
 
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
         target.executeRendering(gl);
@@ -98,15 +98,18 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {
     }
 
+    @Override
     public void init( GLAutoDrawable drawable ) {
     }
   
+    @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
         GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
     }
 
+    @Override
     public void dispose(GLAutoDrawable drawable)
     {
         ;

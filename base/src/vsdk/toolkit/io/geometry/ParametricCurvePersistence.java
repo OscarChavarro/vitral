@@ -7,9 +7,6 @@
 
 package vsdk.toolkit.io.geometry;
 
-import java.io.File;
-import java.io.IOException;
-
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.w3c.dom.Node;
@@ -18,6 +15,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
@@ -37,9 +35,8 @@ public class ParametricCurvePersistence extends PersistenceElement {
     public static ParametricCurve nodeToParametricCurve(Node nodeRoot) throws
         XmlException {
 
-        if (nodeRoot.getNodeName() != rootName) {
-            new XmlException("The node no is a curve ");
-            return null;
+        if ( !nodeRoot.getNodeName().equals(rootName) ) {
+            throw new XmlException("The node no is a curve ");
         }
         ParametricCurve curve = new ParametricCurve();
         NamedNodeMap atts = nodeRoot.getAttributes();
@@ -115,7 +112,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
         }
 
         catch (TransformerFactoryConfigurationError ex1) {
-            new XmlException("Exception: " + ex1);
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "toElement", "" + ex1);
         }
 
         return nodeCurve;

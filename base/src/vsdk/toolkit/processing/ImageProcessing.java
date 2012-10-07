@@ -10,8 +10,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBPixel;
 
 /**
@@ -70,7 +68,7 @@ public abstract class ImageProcessing extends ProcessingElement {
         int x, y;
         ColorRgb source;
         RGBPixel target = new RGBPixel();
-        RGBPixel acum = new RGBPixel();
+        RGBPixel acum;
 
         if ( xSizeOut == xSizeIn && ySizeOut == ySizeIn ) {
             copy(input, output);
@@ -142,7 +140,7 @@ public abstract class ImageProcessing extends ProcessingElement {
         int xSize = input.getXSize();
         int ySize = input.getYSize();
         int x, y;
-        RGBPixel target = new RGBPixel();
+        RGBPixel target;
 
         output.init(xSize, ySize);
         for ( x = 0; x < xSize; x++ ) {
@@ -163,7 +161,7 @@ public abstract class ImageProcessing extends ProcessingElement {
         int xSize = input.getXSize();
         int ySize = input.getYSize();
         int x, y;
-        RGBPixel target = new RGBPixel();
+        RGBPixel target;
         int maxSize = xSize;
 
         if ( ySize > maxSize ) {
@@ -191,7 +189,7 @@ public abstract class ImageProcessing extends ProcessingElement {
         int xSize = input.getXSize();
         int ySize = input.getYSize();
         int x, y;
-        RGBPixel target = new RGBPixel();
+        RGBPixel target;
 
         output.init(xSize+2*border, ySize+2*border);
 
@@ -237,7 +235,7 @@ public abstract class ImageProcessing extends ProcessingElement {
         dy = y1Roi - y0Roi + 1;
 
         //-----------------------------------------------------------------
-        RGBPixel target = new RGBPixel();
+        RGBPixel target;
         int x, y;
 
         roi.init(dx, dy);

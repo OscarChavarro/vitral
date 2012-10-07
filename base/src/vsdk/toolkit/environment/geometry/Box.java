@@ -12,8 +12,6 @@ package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
 
 public class Box extends Solid {
@@ -49,13 +47,14 @@ public class Box extends Solid {
      Check the general interface contract in superclass method
      Geometry.doIntersection.
     */
+    @Override
     public boolean
     doIntersection(Ray inOutRay) {
         double t, min_t = Double.MAX_VALUE;
         double x2 = size.x/2;  // OJO: Esto deberia venir precalculado
         double y2 = size.y/2;  // OJO: Esto deberia venir precalculado
         double z2 = size.z/2;  // OJO: Esto deberia venir precalculado
-        Vector3D p = new Vector3D();
+        Vector3D p;
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
 
@@ -163,6 +162,7 @@ public class Box extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
@@ -236,6 +236,7 @@ public class Box extends Solid {
         }
     }
 
+    @Override
     public double[] getMinMax()
     {
         // TODO!
@@ -264,6 +265,7 @@ public class Box extends Solid {
         size = new Vector3D(s);
     }
 
+    @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {

@@ -6,7 +6,6 @@
 
 package vsdk.toolkit.io;
 
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import vsdk.toolkit.common.VSDKException;
 
 public class XmlException extends VSDKException {

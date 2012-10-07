@@ -10,7 +10,6 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.Geometry;
 
 public class InfinitePlane extends HalfSpace {
     /// Check the general attribute description in superclass Entity.
@@ -43,12 +42,14 @@ public class InfinitePlane extends HalfSpace {
     }
 
     public InfinitePlane(Vector3D p0, Vector3D p1, Vector3D p2) {
-        Vector3D a, b, normal;
-        a = p1.substract(p0);
-        a.normalize();
-        b = p2.substract(p0);
-        b.normalize();
-        normal = a.crossProduct(b);
+        Vector3D aa;
+        Vector3D bb;
+        Vector3D normal;
+        aa = p1.substract(p0);
+        aa.normalize();
+        bb = p2.substract(p0);
+        bb.normalize();
+        normal = aa.crossProduct(bb);
         normal.normalize();
         this.a = normal.x;
         this.b = normal.y;
@@ -64,6 +65,7 @@ public class InfinitePlane extends HalfSpace {
         this.d = other.d;
     }
 
+    @Override
     public boolean
     doIntersection(Ray inout_rayo) {
         double denominator = a*inout_rayo.direction.x + b*inout_rayo.direction.y + c*inout_rayo.direction.z;
@@ -124,6 +126,7 @@ public class InfinitePlane extends HalfSpace {
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         double num = a*p.x + b*p.y + c*p.z + d;
@@ -142,6 +145,7 @@ public class InfinitePlane extends HalfSpace {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
@@ -155,6 +159,7 @@ public class InfinitePlane extends HalfSpace {
     /**
     TODO: Current returned values are not always true!
     */
+    @Override
     public double[] getMinMax()
     {
         double minmax[] = new double[6];
@@ -283,6 +288,7 @@ public class InfinitePlane extends HalfSpace {
         return false;
     }
 
+    @Override
     public String toString()
     {
         String msg = "InfinitePlane: N=<" + 

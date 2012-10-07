@@ -8,7 +8,6 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 

@@ -17,15 +17,17 @@ public class _AlgebraicExpressionVariableNode extends _AlgebraicExpressionNode
     public _AlgebraicExpressionVariableNode(AlgebraicExpression parent, String name)
     {
         this.parent = parent;
-        this.name = new String(name);
+        this.name = name;
     }
 
+    @Override
     public double eval() throws AlgebraicExpressionException
     {
         double val = parent.getVariableValue(name);
         return val;
     }
 
+    @Override
     public String toString()
     {
         String msg;

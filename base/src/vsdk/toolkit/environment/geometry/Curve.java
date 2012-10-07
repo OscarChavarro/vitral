@@ -21,6 +21,7 @@ public abstract class Curve extends Geometry {
     will always fail as the operation is regularized for constructive
     solid modelling compatible interpretation.
     */
+    @Override
     public boolean doIntersection(Ray r)
     {
         return false;
@@ -30,11 +31,12 @@ public abstract class Curve extends Geometry {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double intT, 
                                       GeometryIntersectionInformation outData)
     {
-        return;
+        
     }
 }
 

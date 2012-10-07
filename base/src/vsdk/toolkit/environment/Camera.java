@@ -137,7 +137,7 @@ public class Camera extends Entity
 
     public void setName(String n)
     {
-        name = new String(n);
+        name = n;
     }
 
     public double getViewportXSize()
@@ -369,7 +369,7 @@ public class Camera extends Entity
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
         //    become the -z axis
-        Matrix4x4 R1 = new Matrix4x4();
+        Matrix4x4 R1;
         Matrix4x4 R2 = new Matrix4x4();
 
         R1 = getRotation();
@@ -387,19 +387,19 @@ public class Camera extends Entity
         //    view volume
         Matrix4x4 S1 = new Matrix4x4();
         Matrix4x4 S2 = new Matrix4x4();
-        double dx, dy, dz;
+        double ddx, ddy, ddz;
 
         // 5.1. Non proportional scaling to adjust the slopes of the piramid
         // planes to fix 45 degrees in u and v directions
-        dx = rightWithScale.length();
-        dy = upWithScale.length();
-        S1.scale(dx, dy, 1);
+        ddx = rightWithScale.length();
+        ddy = upWithScale.length();
+        S1.scale(ddx, ddy, 1);
         S1.invert();
 
         // 5.2. Proportional scaling to adjust near / far clipping planes
         // maintaining the piramid form
-        dz = nearPlaneDistance;
-        S2.scale(dz, dz, dz);
+        ddz = nearPlaneDistance;
+        S2.scale(ddz, ddz, ddz);
         S2.invert();
 
         //
@@ -572,6 +572,7 @@ public class Camera extends Entity
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString()
     {
         //------------------------------------------------------------
@@ -990,7 +991,6 @@ public class Camera extends Entity
         downPlane = calculateVPlane(-0.5);
         nearPlane = calculateNearPlane();
         farPlane = calculateFarPlane();
-        clippingPlane = null;
         outcode0 = calculateOutcodeBits(point0, rightPlane, leftPlane, 
                                       upPlane, downPlane, nearPlane, farPlane);
         outcode1 = calculateOutcodeBits(point1, rightPlane, leftPlane,
@@ -1310,8 +1310,8 @@ public class Camera extends Entity
         // 1. Calculate vectors
         Vector3D upCopy = null;
         Vector3D rightCopy = null;
-        double fovFactor = 0.0;
-        double scaleFactor = 0.0;
+        double fovFactor;
+        double scaleFactor;
 
         fovFactor = viewportXSize/viewportYSize;
         updateVectors(); // Should be made a prerequisite for efficiency!

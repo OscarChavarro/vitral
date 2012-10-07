@@ -304,6 +304,7 @@ public class MatrixNxM extends FundamentalEntity
      so precision is lost in sake of readability.
      @return The String representation of this matrix
      */
+    @Override
     public String toString()
     {
         String msg;

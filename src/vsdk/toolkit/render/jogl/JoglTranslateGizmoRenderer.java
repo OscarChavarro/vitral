@@ -20,14 +20,11 @@ import javax.media.opengl.glu.GLUquadric;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.TranslateGizmo;
-import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Cone;
 
 public class JoglTranslateGizmoRenderer extends JoglRenderer 

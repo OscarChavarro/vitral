@@ -13,10 +13,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBPixel;
 
 public class AwtIndexedColorImageRenderer extends AwtRenderer

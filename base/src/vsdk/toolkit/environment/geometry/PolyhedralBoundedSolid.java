@@ -566,7 +566,8 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he2)
     {
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge he3 = null, he4;
+        _PolyhedralBoundedSolidHalfEdge he3;
+        _PolyhedralBoundedSolidHalfEdge he4;
         _PolyhedralBoundedSolidLoop newLoop;
         _PolyhedralBoundedSolidLoop oldLoop;
         _PolyhedralBoundedSolidEdge killedEdge;
@@ -1060,6 +1061,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     */
+    @Override
     public boolean doIntersection(Ray inOutRay) {
         int i;
         boolean intersection; // true if intersection founded
@@ -1096,6 +1098,7 @@ public class PolyhedralBoundedSolid extends Solid {
         return intersection;
     }
 
+    @Override
     public void doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         outData.clone(lastInfo);
@@ -1141,6 +1144,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         if ( minMax == null ) {
             calculateMinMaxPositions();
@@ -1170,7 +1174,6 @@ public class PolyhedralBoundedSolid extends Solid {
         //- 2. Test all-equal case ----------------------------------------
         Vector3D p0, p1, p2;
         p0 = points.get(0);
-        p1 = null;
         boolean test = false;
 
         int i;
@@ -1597,6 +1600,7 @@ public class PolyhedralBoundedSolid extends Solid {
     invisivility seems to be failing.
     @todo check well all limiting cases.
     */
+    @Override
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
     {
         int qi = 0;
@@ -1930,7 +1934,6 @@ public class PolyhedralBoundedSolid extends Solid {
                     // Kill edge and vertex
                     _PolyhedralBoundedSolidLoop newloop;
                     newloop = outerloophe.parentLoop;
-                                    heStart = he;
 
                     _PolyhedralBoundedSolidHalfEdge hej;
                     hej = outerloophe;
@@ -1999,6 +2002,7 @@ public class PolyhedralBoundedSolid extends Solid {
         maxFaceId = i;
     }
 
+    @Override
     public String toString()
     {
         String msg = "";
@@ -2075,6 +2079,7 @@ public class PolyhedralBoundedSolid extends Solid {
         return msg;
     }
 
+    @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         return this;

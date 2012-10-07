@@ -15,6 +15,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.PersistenceElement;
@@ -32,9 +33,8 @@ public class ParametricBiCubicPatchPersistence extends PersistenceElement {
       nodeRoot) throws
       XmlException {
 
-    if (nodeRoot.getNodeName() != rootName) {
-      new XmlException("The node no is a patch ");
-      return null;
+    if ( !nodeRoot.getNodeName().equals(rootName) ) {
+      throw new XmlException("The node no is a patch ");
     }
     ParametricBiCubicPatch patch = null;
     NamedNodeMap atts = nodeRoot.getAttributes();
@@ -91,7 +91,7 @@ public class ParametricBiCubicPatchPersistence extends PersistenceElement {
 
     }
     catch (TransformerFactoryConfigurationError ex1) {
-      new XmlException("Exception: " + ex1);
+      VSDK.reportMessage(null, VSDK.FATAL_ERROR, "toElement", ""  + ex1);
     }
     return nodeRoot;
 

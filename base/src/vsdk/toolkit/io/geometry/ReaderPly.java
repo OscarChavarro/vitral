@@ -8,7 +8,6 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -18,8 +17,6 @@ import java.util.StringTokenizer;
 // VSDK Classes
 import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -63,7 +60,7 @@ class _ReaderPlyElement extends PersistenceElement
     public _ReaderPlyElement(StringTokenizer headerLine, TriangleMesh mesh)
     {
         this.mesh = mesh;
-        elementName = new String(headerLine.nextToken());
+        elementName = headerLine.nextToken();
         elementCount = Integer.parseInt(headerLine.nextToken());
         currentPropertyIndex = 0;
         xindex = -1;
@@ -149,28 +146,28 @@ class _ReaderPlyElement extends PersistenceElement
     {
         switch ( type ) {
           case TYPE_SIGNED_CHARACTER:
-            reader.readSignedCharacter();
+            reader.readSignedCharacterText();
             break;
           case TYPE_UNSIGNED_CHARACTER:
-            reader.readUnsignedCharacter();
+            reader.readUnsignedCharacterText();
             break;
           case TYPE_SIGNED_SHORT_INTEGER:
-            reader.readSignedShortInteger();
+            reader.readSignedShortIntegerText();
             break;
           case TYPE_UNSIGNED_SHORT_INTEGER:
-            reader.readUnsignedShortInteger();
+            reader.readUnsignedShortIntegerText();
             break;
           case TYPE_SIGNED_INTEGER:
-            reader.readSignedInteger();
+            reader.readSignedIntegerText();
             break;
           case TYPE_UNSIGNED_INTEGER:
-            reader.readUnsignedInteger();
+            reader.readUnsignedIntegerText();
             break;
           case TYPE_FLOAT:
-            reader.readFloat();
+            reader.readFloatText();
             break;
           case TYPE_DOUBLE:
-            reader.readDouble();
+            reader.readDoubleText();
             break;
         }
     }
@@ -183,7 +180,7 @@ class _ReaderPlyElement extends PersistenceElement
         for ( j = 0; j < currentPropertyIndex; j++ ) {
             if ( j == xindex || j == yindex || j == zindex ) {
                 if ( elementType == TYPE_FLOAT ) {
-                    val = reader.readFloat();
+                    val = reader.readFloatText();
                     if ( j == xindex ) {
                         v[3*i+0] = val;
                     }
@@ -202,7 +199,7 @@ class _ReaderPlyElement extends PersistenceElement
             }
             else if ( j == rindex || j == gindex || j == bindex ) {
                 if ( colorType == TYPE_FLOAT ) {
-                    val = reader.readFloat();
+                    val = reader.readFloatText();
                     if ( j == rindex ) {
                         c[3*i+0] = val;
                     }
@@ -214,7 +211,7 @@ class _ReaderPlyElement extends PersistenceElement
                     }
                 }
                 if ( colorType == TYPE_UNSIGNED_CHARACTER ) {
-                    int cc = reader.readUnsignedCharacter();
+                    int cc = reader.readUnsignedCharacterText();
                     val = ((double)cc) / 255.0;
                     if ( j == rindex ) {
                         c[3*i+0] = val;
@@ -246,13 +243,12 @@ class _ReaderPlyElement extends PersistenceElement
         int val;
         int p0 = 0;
         int p1 = 0;
-        int p2 = 0;
+        int p2;
 
         for ( j = 0; j < currentPropertyIndex; j++ ) {
             if ( j == listindex ) {
-                n = 0;
                 if ( listCountType == TYPE_UNSIGNED_CHARACTER ) {
-                    n = reader.readUnsignedCharacter();
+                    n = reader.readUnsignedCharacterText();
                 }
                 else {
                     VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",
@@ -261,7 +257,7 @@ class _ReaderPlyElement extends PersistenceElement
                 }
                 for ( j = 0; j < n; j++ ) {
                     if ( elementType == TYPE_SIGNED_INTEGER ) {
-                        val = reader.readSignedInteger();
+                        val = reader.readSignedIntegerText();
     
                         if( j == 0 ) {
                             p0 = val;
@@ -342,7 +338,6 @@ class _ReaderPlyElement extends PersistenceElement
                 t[i] = triangles.get(i);
             }
             //triangles.array = null;
-            triangles = null;
         }
 
         return true;
@@ -356,14 +351,14 @@ abstract class _ReaderPlyElementReader extends PersistenceElement
     {
         parentInputStream = is;
     }
-    public abstract int readSignedCharacter() throws Exception;
-    public abstract int readUnsignedCharacter() throws Exception;
-    public abstract int readSignedShortInteger() throws Exception;
-    public abstract int readUnsignedShortInteger() throws Exception;
-    public abstract int readSignedInteger() throws Exception;
-    public abstract int readUnsignedInteger() throws Exception;
-    public abstract float readFloat() throws Exception;
-    public abstract float readDouble() throws Exception;
+    public abstract int readSignedCharacterText() throws Exception;
+    public abstract int readUnsignedCharacterText() throws Exception;
+    public abstract int readSignedShortIntegerText() throws Exception;
+    public abstract int readUnsignedShortIntegerText() throws Exception;
+    public abstract int readSignedIntegerText() throws Exception;
+    public abstract int readUnsignedIntegerText() throws Exception;
+    public abstract float readFloatText() throws Exception;
+    public abstract float readDoubleText() throws Exception;
 }
 
 class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
@@ -374,14 +369,14 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         super(is);
         separators = " \t\n\r";
     }
-    public int readSignedCharacter() throws Exception
+    public int readSignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readUnsignedCharacter() throws Exception
+    public int readUnsignedCharacterText() throws Exception
     {
         String token;
         do {
@@ -390,7 +385,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
-    public int readSignedShortInteger() throws Exception
+    public int readSignedShortIntegerText() throws Exception
     {
         String token;
         do {
@@ -399,7 +394,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
-    public int readUnsignedShortInteger() throws Exception
+    public int readUnsignedShortIntegerText() throws Exception
     {
         String token;
         do {
@@ -408,7 +403,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
-    public int readSignedInteger() throws Exception
+    public int readSignedIntegerText() throws Exception
     {
         String token;
         do {
@@ -417,7 +412,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
-    public int readUnsignedInteger() throws Exception
+    public int readUnsignedIntegerText() throws Exception
     {
         String token;
         do {
@@ -426,7 +421,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
-    public float readFloat() throws Exception
+    public float readFloatText() throws Exception
     {
         String token;
         do {
@@ -435,7 +430,8 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Float.parseFloat(token);
     }
 
-    public float readDouble() throws Exception
+    @Override
+    public float readDoubleText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
@@ -449,52 +445,52 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     {
         super(is);
     }
-    public int readSignedCharacter() throws Exception
+    public int readSignedCharacterText() throws Exception
     {
         byte arr[] = new byte[1];
         readBytes(parentInputStream, arr);
         return (int)arr[0];
     }
 
-    public int readUnsignedCharacter() throws Exception
+    public int readUnsignedCharacterText() throws Exception
     {
         byte arr[] = new byte[1];
         readBytes(parentInputStream, arr);
         return VSDK.signedByte2unsignedInteger(arr[0]);
     }
 
-    public int readSignedShortInteger() throws Exception
+    public int readSignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readUnsignedShortInteger() throws Exception
+    public int readUnsignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readSignedInteger() throws Exception
+    public int readSignedIntegerText() throws Exception
     {
         return (int)readLongBE(parentInputStream);
     }
 
-    public int readUnsignedInteger() throws Exception
+    public int readUnsignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public float readFloat() throws Exception
+    public float readFloatText() throws Exception
     {
         return readFloatBE(parentInputStream);
     }
 
-    public float readDouble() throws Exception
+    public float readDoubleText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
@@ -508,54 +504,54 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     {
         super(is);
     }
-    public int readSignedCharacter() throws Exception
+    public int readSignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readUnsignedCharacter() throws Exception
+    public int readUnsignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedCharacter",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readSignedShortInteger() throws Exception
+    public int readSignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readUnsignedShortInteger() throws Exception
+    public int readUnsignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readSignedInteger() throws Exception
+    public int readSignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public int readUnsignedInteger() throws Exception
+    public int readUnsignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
             "Operation not implemented!");
         return 0;
     }
 
-    public float readFloat() throws Exception
+    public float readFloatText() throws Exception
     {
         return readFloatLE(parentInputStream);
     }
 
-    public float readDouble() throws Exception
+    public float readDoubleText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
@@ -563,6 +559,10 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     }
 }
 
+/**
+Warning: this class is using operations which could be replaced with already
+existing methods on PersistenceElement class.
+ */
 public class ReaderPly extends PersistenceElement
 {
     private static _ReaderPlyElementReader elementReader = null;
@@ -721,7 +721,7 @@ public class ReaderPly extends PersistenceElement
         }
         catch ( Exception e ) {
             VSDK.reportMessage(null, VSDK.ERROR,
-                               "ReaderPly.importEnvironment", "Error reading PLY data!");                  e.printStackTrace();
+                               "ReaderPly.importEnvironment", "Error reading PLY data!" + e);
         }
 
         //-----------------------------------------------------------------

@@ -3,7 +3,6 @@
 package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLCapabilities;
 
 import vsdk.toolkit.common.StopWatch;
 
@@ -39,6 +38,7 @@ public class JoglStereoStrategyWiggleRenderer extends JoglStereoStrategyRenderer
     }
 
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         if ( !inFrame || channelToShow != 1 ) {
@@ -51,6 +51,7 @@ public class JoglStereoStrategyWiggleRenderer extends JoglStereoStrategyRenderer
         }
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         if ( !inFrame || channelToShow != 2 ) {
@@ -63,11 +64,13 @@ public class JoglStereoStrategyWiggleRenderer extends JoglStereoStrategyRenderer
         }
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         inFrame = true;
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         inFrame = false;

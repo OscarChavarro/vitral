@@ -29,11 +29,14 @@ public class CameraControllerAquynza extends CameraController {
         return deltaMov;
     }
 
+    @Override
     public void setDeltaMovement(double val)
     {
         deltaMov = val;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseEventAwt(MouseEvent mouseEvent) {
       return true;
     }
@@ -74,6 +77,7 @@ public class CameraControllerAquynza extends CameraController {
         return val;
     }
   
+    @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
@@ -261,14 +265,19 @@ public class CameraControllerAquynza extends CameraController {
     deleted by june 1st 2008.
     */
     @Deprecated
+    @Override
     public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
         return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
     }
 
+    @Deprecated
+    @Override
     public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMousePressedEventAwt(MouseEvent e)
     {
         oldMouseX = e.getX();
@@ -276,21 +285,29 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseReleasedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseClickedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseMovedEventAwt(MouseEvent e)
     {
         return false;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseDraggedEventAwt(MouseEvent e)
     {
         //------------------------------------------------------------
@@ -372,6 +389,8 @@ public class CameraControllerAquynza extends CameraController {
         return updated;
     }
 
+    @Deprecated
+    @Override
     public boolean processMouseWheelEventAwt(MouseWheelEvent e)
     {
         //------------------------------------------------------------
@@ -422,11 +441,13 @@ public class CameraControllerAquynza extends CameraController {
         return updated;
     }
 
+    @Override
     public Camera getCamera()
     {
         return camera;
     }
 
+    @Override
     public void setCamera(Camera camera)
     {
         this.camera = camera;

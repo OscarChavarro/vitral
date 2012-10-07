@@ -98,7 +98,7 @@ public class ViewportWindowSetManager extends PresentationElement
 
     public ViewportWindow getSelectedViewFromPointerPosition(int x, int y, boolean changeSelection)
     {
-        ViewportWindow view = null;
+        ViewportWindow view;
         ViewportWindow theView = null;
 
         //-----------------------------------------------------------------

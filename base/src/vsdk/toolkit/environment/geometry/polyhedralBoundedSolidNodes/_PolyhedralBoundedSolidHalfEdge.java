@@ -134,6 +134,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
         return false;
     }
 
+    @Override
     public String toString()
     {
         String msg;

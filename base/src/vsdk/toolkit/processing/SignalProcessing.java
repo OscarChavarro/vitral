@@ -132,17 +132,21 @@ public class SignalProcessing extends ProcessingElement {
 
     /**
     Compute the linear convolution of x and y.
-    Current implementation of complex number based on (borrowed from, jeje)
+    Current implementation of complex number based on (borrowed from, he he)
     sample in [.wPRIN2007].9 course notes.
     */
     public static Complex[] linearConvolve(Complex[] x, Complex[] y) {
         Complex ZERO = new Complex(0, 0);
 
         Complex[] a = new Complex[2*x.length];
+
+        //System.arraycopy(x, 0, a, 0, x.length);
         for (int i = 0;        i <   x.length; i++) a[i] = x[i];
         for (int i = x.length; i < 2*x.length; i++) a[i] = ZERO;
 
         Complex[] b = new Complex[2*y.length];
+
+        //System.arraycopy(y, 0, b, 0, y.length);
         for (int i = 0;        i <   y.length; i++) b[i] = y[i];
         for (int i = y.length; i < 2*y.length; i++) b[i] = ZERO;
 

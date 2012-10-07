@@ -2,9 +2,6 @@
 
 package vsdk.toolkit.common;
 
-import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
-
 public class Vertex2D extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
@@ -28,6 +25,7 @@ public class Vertex2D extends FundamentalEntity
         this.color = new ColorRgb(r, g, b);
     }
 
+    @Override
     public String toString()
     {
         String msg = "<" + VSDK.formatDouble(x) + ", " +

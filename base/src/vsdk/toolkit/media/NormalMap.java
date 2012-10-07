@@ -14,9 +14,6 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
 
 public class NormalMap extends MediaEntity
 {
@@ -272,13 +269,13 @@ public class NormalMap extends MediaEntity
     public void importBumpMap(IndexedColorImage inBumpmap, Vector3D inOutScale)
     {
         //-------------------------------------------------------------------
-        int xSize = inBumpmap.getXSize();
-        int ySize = inBumpmap.getYSize();
+        int xxSize = inBumpmap.getXSize();
+        int yySize = inBumpmap.getYSize();
 
         //- 1. Si el vector de escala dado es erroneo, crear uno base -------
         if( inOutScale.x < VSDK.EPSILON || inOutScale.y < VSDK.EPSILON ||
             inOutScale.z < VSDK.EPSILON ) {
-            double val = ((double)xSize) / ((double)ySize);
+            double val = ((double)xxSize) / ((double)yySize);
             if( val < 1.0 ) {
                 inOutScale.x = 1.0;
                 inOutScale.y = 1.0 / val;
@@ -289,7 +286,7 @@ public class NormalMap extends MediaEntity
             }
             inOutScale.z = 1.0;
         }
-        init(xSize, ySize);
+        init(xxSize, yySize);
 
         //- 2. Calculo de las derivadas parciales al interior de la imagen --
         Vector3D df_du = new Vector3D();
@@ -298,8 +295,8 @@ public class NormalMap extends MediaEntity
         int a, b, c, d;
         int u, v;
 
-        for( u = 1; u < xSize - 1; u++ ) {
-            for( v = 1; v < ySize - 1; v++ ) {
+        for( u = 1; u < xxSize - 1; u++ ) {
+            for( v = 1; v < yySize - 1; v++ ) {
                 a = inBumpmap.getPixel(u+1, v);
                 b = inBumpmap.getPixel(u-1, v);
                 c = inBumpmap.getPixel(u, v+1);
@@ -327,15 +324,15 @@ public class NormalMap extends MediaEntity
 
         //- 3. Copia de las derivadas para los bordes de la imagen ----------
         // @todo: check why are two pixels down and left needed!
-        for( u = 0; u < xSize; u++ ) {
+        for( u = 0; u < xxSize; u++ ) {
             putNormal(u, 0, getNormal(u, 1));
-            putNormal(u, ySize-2, getNormal(u, ySize-3));
-            putNormal(u, ySize-1, getNormal(u, ySize-2));
+            putNormal(u, yySize-2, getNormal(u, yySize-3));
+            putNormal(u, yySize-1, getNormal(u, yySize-2));
         }
-        for( v = 0; v < ySize; v++ ) {
+        for( v = 0; v < yySize; v++ ) {
             putNormal(1, v, getNormal(2, v));
             putNormal(0, v, getNormal(1, v));
-            putNormal(xSize-1, v, getNormal(xSize-2, v));
+            putNormal(xxSize-1, v, getNormal(xxSize-2, v));
         }
     }
 }

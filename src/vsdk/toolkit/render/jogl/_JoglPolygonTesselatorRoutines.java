@@ -20,14 +20,17 @@ implements GLUtessellatorCallback
         this.glu = glu;
     }
 
+    @Override
     public void begin(int type) {
         gl.glBegin(type);
     }
 
+    @Override
     public void end() {
         gl.glEnd();
     }
 
+    @Override
     public void vertex(Object vertexData) {
         double[] pointer;
         if ( vertexData instanceof double[] ) {
@@ -37,6 +40,7 @@ implements GLUtessellatorCallback
 
     }
 
+    @Override
     public void vertexData(Object vertexData, Object polygonData) {
     }
 
@@ -44,6 +48,7 @@ implements GLUtessellatorCallback
     coordinate location is trivial to calculate, but weight[4] may be
     used to average color, normal, or texture coordinate data. In this
     program, color is weighted. */
+    @Override
     public void combine(double[] coords, Object[] data, 
                         float[] weight, Object[] outData) {
         double[] vertex = new double[6];
@@ -61,12 +66,14 @@ implements GLUtessellatorCallback
         outData[0] = vertex;
     }
 
+    @Override
     public void combineData(double[] coords, Object[] data, //
                             float[] weight, Object[] outData, Object polygonData) {
     }
 
+    @Override
     public void error(int errnum) {
-        String estring = null;
+        String estring;
 
         try {
             estring = glu.gluErrorString(errnum);
@@ -79,18 +86,23 @@ implements GLUtessellatorCallback
         //System.exit(0);
     }
 
+    @Override
     public void beginData(int type, Object polygonData) {
     }
 
+    @Override
     public void endData(Object polygonData) {
     }
 
+    @Override
     public void edgeFlag(boolean boundaryEdge) {
     }
 
+    @Override
     public void edgeFlagData(boolean boundaryEdge, Object polygonData) {
     }
 
+    @Override
     public void errorData(int errnum, Object polygonData) {
     }
 }

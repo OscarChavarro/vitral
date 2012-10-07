@@ -38,7 +38,7 @@ public class Light extends Entity
 
     public void setName(String n)
     {
-        name = new String(n);
+        name = n;
     }
 
     public Light(int type, Vector3D pos, ColorRgb emission) 

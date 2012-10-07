@@ -11,34 +11,26 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.StreamTokenizer;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
 // VSDK Classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.io.image.ImagePersistence;
 
 public class ReaderVrml extends PersistenceElement
 {
@@ -338,7 +330,7 @@ public class ReaderVrml extends PersistenceElement
         int t[];
         int p0 = 0;
         int p1 = 0;
-        int p2 = 0;
+        int p2;
         int j;
         int k;
         int tindex;
@@ -562,7 +554,7 @@ public class ReaderVrml extends PersistenceElement
     {
         int tokenType;
         int level = 0;
-        TriangleMesh mesh = null;
+        TriangleMesh mesh;
 
         mesh = new TriangleMesh();
 

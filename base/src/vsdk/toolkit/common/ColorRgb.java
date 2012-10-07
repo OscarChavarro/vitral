@@ -9,8 +9,6 @@
 
 package vsdk.toolkit.common;
 
-import vsdk.toolkit.common.VSDK;
-
 /**
 Respect to data representation:
 
@@ -173,6 +171,7 @@ public class ColorRgb extends FundamentalEntity
     current implementation it is biased for human readability, not for
     precision, so the use of an approximation formating.
     */
+    @Override
     public String toString()
     {
         return "<" + VSDK.formatDouble(r) + ", " + 

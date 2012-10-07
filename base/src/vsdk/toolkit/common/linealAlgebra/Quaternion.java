@@ -37,6 +37,7 @@ public class Quaternion extends FundamentalEntity
         direction = direction.multiply(1/l);
     }
 
+    @Override
     public String toString()
     {
         String msg;

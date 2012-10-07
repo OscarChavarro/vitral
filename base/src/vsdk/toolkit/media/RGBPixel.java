@@ -129,6 +129,7 @@ public class RGBPixel extends MediaEntity {
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString()
     {
         return "<" + 

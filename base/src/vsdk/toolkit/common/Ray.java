@@ -3,7 +3,6 @@
 package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.VSDK;
 
 /**
  This class models a mathematical RAY.
@@ -49,6 +48,7 @@ public class Ray  extends FundamentalEntity
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString()
     {
         return "Ray Origin: " + origin + "; Direction: " + direction + " T: " + VSDK.formatDouble(t);

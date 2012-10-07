@@ -13,7 +13,6 @@ import javax.media.opengl.GL2GL3;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
 public class JoglCubemapBackgroundRenderer extends JoglRenderer 
 {

@@ -13,8 +13,6 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.processing.GeometricModeler;
 
@@ -222,6 +220,7 @@ public class Cone extends Solid {
      Check the general interface contract in superclass method
      Geometry.doIntersection.
     */
+    @Override
     public boolean
     doIntersection(Ray inOutRay) {
         Ray bodyRay;
@@ -314,6 +313,7 @@ public class Cone extends Solid {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData)
@@ -323,6 +323,7 @@ public class Cone extends Solid {
         outData.n.normalize();
     }
 
+    @Override
     public double[] getMinMax()
     {
         // TODO!
@@ -340,6 +341,7 @@ public class Cone extends Solid {
         return minmax;
     }
 
+    @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {
@@ -378,7 +380,7 @@ public class Cone extends Solid {
         else {
             // Cone case
             Vector3D apex;
-            int i = 0;
+            int i;
             int base1 = 1;
             int base2 = nsides+1;
 

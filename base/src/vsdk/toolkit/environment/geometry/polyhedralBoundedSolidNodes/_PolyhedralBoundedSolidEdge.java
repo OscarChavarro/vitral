@@ -74,6 +74,7 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
         return rightHalf.startingVertex.id;
     }
 
+    @Override
     public String toString()
     {
         String msg;

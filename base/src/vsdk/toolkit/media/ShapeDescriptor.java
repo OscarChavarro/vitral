@@ -20,9 +20,9 @@ public abstract class ShapeDescriptor extends MediaEntity
         return label;
     }
 
-    public void setLabel(String label)
+    public final void setLabel(String label)
     {
-        this.label = new String(label);
+        this.label = label;
     }
 
     public double [] getFeatureVector() {

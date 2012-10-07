@@ -10,7 +10,6 @@
 package vsdk.toolkit.render.jogl;
 
 // Java base classes
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -19,7 +18,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
-import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -122,7 +120,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
                 item.renderer = TextureIO.newTexture(textureData);
             }
             catch ( Exception e ) {
-                System.err.println(e);
+                VSDK.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
             }
 
             //----
@@ -173,7 +171,7 @@ public class JoglRGBAImageRenderer extends JoglRenderer
 
     public static void unload(GL2 gl, RGBAImage img)
     {
-        _JoglRGBAImageRendererImageAssociation item = null;
+        _JoglRGBAImageRendererImageAssociation item;
 
         try { 
             int i;

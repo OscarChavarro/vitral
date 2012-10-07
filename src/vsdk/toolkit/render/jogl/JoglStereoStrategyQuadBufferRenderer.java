@@ -3,14 +3,13 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.GLCapabilities;
 
 public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRenderer
 {
+    @Override
     public void requestCapabilities(GLCapabilities caps)
     {
         caps.setStereo(true);
@@ -21,6 +20,7 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
         super();
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         if ( swapChannels == false ) {
@@ -32,6 +32,7 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
         return true;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         if ( swapChannels == false ) {
@@ -43,11 +44,13 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         ;
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         ;

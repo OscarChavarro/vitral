@@ -104,7 +104,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
     private static void setColor(GL2 gl, int i)
     {
-        double r = 0.0, g = 0.0, b = 0.0;
+        double r;
+        double g;
+        double b;
         switch ( i%8 ) {
           case 0:  r = 1; g = 0; b = 0; break;
           case 1:  r = 0; g = 1; b = 0; break;
@@ -605,8 +607,11 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     {
         int i, j;
         Vector3D startP, endP;
-        Vector3D p0 = null, p1 = null;
-        Vector3D p2 = null, a, b;
+        Vector3D p0;
+        Vector3D p1;
+        Vector3D p2;
+        Vector3D a;
+        Vector3D b;
         Vector3D n;
         _PolyhedralBoundedSolidHalfEdge hePrev;
         InfinitePlane loopPlane;

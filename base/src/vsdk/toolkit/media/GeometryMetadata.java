@@ -115,7 +115,7 @@ public class GeometryMetadata extends MediaEntity
     public void setFilename(String filename)
     {
         if ( filename != null && filename.length() > 0 ) {
-            objectFilename = new String(filename);
+            objectFilename = filename;
         }
         else {
             objectFilename = null;
@@ -146,9 +146,10 @@ public class GeometryMetadata extends MediaEntity
         return null;
     }
 
+    @Override
     public String toString()
     {
-        String msg = new String(objectFilename);
+        String msg = objectFilename;
         msg += "\n    . " + descriptorsList.size() + " shape descriptors\n";
         int i;
         for ( i = 0; i < descriptorsList.size(); i++ ) {
@@ -157,6 +158,7 @@ public class GeometryMetadata extends MediaEntity
         return msg;
     }
 
+    @Override
     public void finalize()
     {
         int i;
@@ -168,6 +170,11 @@ public class GeometryMetadata extends MediaEntity
         }
         objectFilename = null;
         descriptorsList = null;
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+           
+        }
     }
 }
 

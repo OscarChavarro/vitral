@@ -8,13 +8,8 @@
 
 package vsdk.toolkit.media;
 
-import java.util.ArrayList;
-
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBColorPalette;
 
 /**
 This class represents a depth map. A depth map can be used to:
@@ -109,6 +104,8 @@ public class ZBuffer extends MediaEntity {
     */
     public void setZBuffer(float[] dep) {
         depth = new float[dep.length];
+
+        //System.arraycopy(dep, 0, depth, 0, dep.length);
         for (int i = 0; i < dep.length; i++) {
             depth[i] = dep[i];
         }

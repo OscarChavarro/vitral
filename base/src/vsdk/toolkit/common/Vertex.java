@@ -182,6 +182,7 @@ public class Vertex extends FundamentalEntity
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString() {
         return "v " + position +" n " + normal + " UV<" +
             VSDK.formatDouble(u) + ", " + VSDK.formatDouble(v) + ">";

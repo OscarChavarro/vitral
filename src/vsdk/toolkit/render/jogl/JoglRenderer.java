@@ -8,10 +8,8 @@
 package vsdk.toolkit.render.jogl;
 
 // Java base classes
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.ByteBuffer;
 
 // JOGL classes
 import javax.media.opengl.GL;
@@ -19,8 +17,6 @@ import javax.media.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 
 // VitralSDK classes
-import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.render.RenderingElement;
 
 /**
@@ -82,7 +78,7 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static FloatBuffer
     cloneDoubleArrayToFloatBuffer(double v[])
     {
-        FloatBuffer buffer = null;
+        FloatBuffer buffer;
         int i;
 
         //buffer = BufferUtil.newFloatBuffer(v.length);
@@ -100,7 +96,7 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static FloatBuffer
     cloneDoubleArrayToInvertedFloatBuffer(double v[])
     {
-        FloatBuffer buffer = null;
+        FloatBuffer buffer;
         int i;
 
         //buffer = BufferUtil.newFloatBuffer(v.length);
@@ -118,7 +114,7 @@ public abstract class JoglRenderer extends RenderingElement {
     protected static IntBuffer
     cloneIntArrayToIntBuffer(int v[])
     {
-        IntBuffer buffer = null;
+        IntBuffer buffer;
         int i;
 
         //buffer = BufferUtil.newIntBuffer(v.length);

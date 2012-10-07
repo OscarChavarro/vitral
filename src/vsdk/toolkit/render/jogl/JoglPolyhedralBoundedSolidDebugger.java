@@ -24,12 +24,11 @@ import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
 
+/**
+Warning: check why this class implements a GLEventListener. Advanced debug
+features?
+*/
 public class JoglPolyhedralBoundedSolidDebugger implements GLEventListener
 {
     private int imageWidth = 800;
@@ -99,6 +98,7 @@ public class JoglPolyhedralBoundedSolidDebugger implements GLEventListener
         pbuffer.display();
     }
 
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
@@ -122,14 +122,17 @@ public class JoglPolyhedralBoundedSolidDebugger implements GLEventListener
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {
     }
 
+    @Override
     public void init( GLAutoDrawable drawable ) {
     }
   
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
         ;
     }
 
+    @Override
     public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height ) 
     {
         GL2 gl = drawable.getGL().getGL2();

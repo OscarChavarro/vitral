@@ -7,7 +7,6 @@
 package vsdk.toolkit.render.jogl;
 
 // Java basic
-import java.util.ArrayList;
 
 // JOGL classes
 import javax.media.opengl.GL;

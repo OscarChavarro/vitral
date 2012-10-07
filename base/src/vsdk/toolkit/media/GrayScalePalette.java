@@ -19,6 +19,7 @@ public class GrayScalePalette extends RGBProceduralColorPalette {
         super();
     }
 
+    @Override
     public int selectNearestIndexToRgb(ColorRgb c)
     {
         if ( !pure ) {

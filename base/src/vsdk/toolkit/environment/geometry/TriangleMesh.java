@@ -202,11 +202,12 @@ public class TriangleMesh extends Surface {
     /**
     @todo copy full structure!
     */
+    @Override
     public TriangleMesh clone()
     {
         TriangleMesh other = new TriangleMesh();
 
-        other.name = new String(this.name);
+        other.name = this.name;
         other.vertexPositions = cloneDoubleArray(this.vertexPositions);
         other.vertexPositions = cloneDoubleArray(this.vertexPositions);
         other.vertexNormals = cloneDoubleArray(this.vertexNormals);
@@ -802,6 +803,7 @@ public class TriangleMesh extends Surface {
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString() {
         String msg;
         int i;
@@ -859,6 +861,7 @@ public class TriangleMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     */
+    @Override
     public boolean
     doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating triangles
@@ -930,6 +933,7 @@ public class TriangleMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -1046,6 +1050,7 @@ public class TriangleMesh extends Surface {
     to provide another method, to add voxels after a path following
     over the line.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         int i;
@@ -1080,6 +1085,7 @@ public class TriangleMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         if ( minMax == null ) {
             calculateMinMaxPositions();
@@ -1096,6 +1102,7 @@ public class TriangleMesh extends Surface {
     It is spected that with few changes, this algorithm manages the scalar
     (multivalued) voxel case for antialiased voxelization.
     */
+    @Override
     public void
     doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {
@@ -1170,6 +1177,7 @@ public class TriangleMesh extends Surface {
         }
     }
 
+    @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         if ( triangleMeshGroupCache == null ) {

@@ -14,6 +14,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
     private int viewportXSize;
     private int viewportYSize;
 
+    @Override
     public void requestCapabilities(GLCapabilities caps)
     {
         caps.setStencilBits(8);
@@ -78,6 +79,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         viewportYSize = -1;
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         /* following comand replace glDrawBuffer(GL_BACK_LEFT); */
@@ -90,6 +92,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         return true;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         /* following comand replace glDrawBuffer(GL_BACK_RIGHT); */
@@ -102,6 +105,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         /* Generating the pattern in stencil buffer */
@@ -123,6 +127,7 @@ public class JoglStereoStrategyInterlaceRenderer extends JoglStereoStrategyRende
         gl.glEnable(GL.GL_STENCIL_TEST);
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         gl.glDisable(GL.GL_STENCIL_TEST);

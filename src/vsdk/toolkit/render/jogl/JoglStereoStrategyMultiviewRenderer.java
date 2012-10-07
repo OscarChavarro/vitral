@@ -5,8 +5,6 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.GLCapabilities;
 
 public class JoglStereoStrategyMultiviewRenderer extends JoglStereoStrategyRenderer
 {
@@ -18,6 +16,7 @@ public class JoglStereoStrategyMultiviewRenderer extends JoglStereoStrategyRende
         viewport = new int[4];
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         if ( swapChannels  ) {
@@ -30,6 +29,7 @@ public class JoglStereoStrategyMultiviewRenderer extends JoglStereoStrategyRende
         return true;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         if ( swapChannels  ) {
@@ -42,11 +42,13 @@ public class JoglStereoStrategyMultiviewRenderer extends JoglStereoStrategyRende
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         gl.glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);

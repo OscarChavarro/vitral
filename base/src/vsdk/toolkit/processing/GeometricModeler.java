@@ -221,7 +221,6 @@ public class GeometricModeler extends ProcessingElement
         for ( i = 0; newfaces.size() > 0; i++ ) {
             newfaces.remove(0);
         }
-        newfaces = null;
 
         solid.validateModel();
     }

@@ -19,9 +19,6 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
-import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;
-import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
-import vsdk.toolkit.render.jogl.JoglRGBAImageRenderer;
 
 public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 

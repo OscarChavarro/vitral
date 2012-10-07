@@ -12,29 +12,23 @@ import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAPixel;
-import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.io.image.ImagePersistence;
 
 public class ReaderBinNeedForSpeed extends PersistenceElement
 {
@@ -120,7 +114,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
     public static RGBAPixel classifyTextureColor(long id)
     {
-        RGBAPixel p = new RGBAPixel();
+        RGBAPixel p;
         byte maxp = (byte)0xff;
         byte minp = (byte)0x00;
         p = new RGBAPixel();
@@ -546,7 +540,8 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         //System.out.println("Skipping unknown table with " + ntable + " elements.");
         int i;
-        long a = 0, b = 0;
+        long a = 0;
+        long b;
 
         for ( i = 0; i < ntable; i++ ) {
             a = readLongLE(is);
@@ -571,7 +566,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         for ( i = 0; i < ntable; i++ ) {
             a = readLongLE(is);
-            b = readLongLE(is);
+            readLongLE(is);
         }
 
         //-----------------------------------------------------------------

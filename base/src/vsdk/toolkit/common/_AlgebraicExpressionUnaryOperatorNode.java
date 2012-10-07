@@ -27,6 +27,7 @@ public class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionN
         this.operand = operand;
     }
 
+    @Override
     public double eval() throws AlgebraicExpressionException
     {
         double operandValue = operand.eval();
@@ -101,6 +102,7 @@ public class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionN
         return val;
     }
 
+    @Override
     public String toString()
     {
         String msg;

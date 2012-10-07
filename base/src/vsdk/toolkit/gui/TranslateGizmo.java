@@ -14,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.KeyEvent;
 //import java.awt.Robot;
-import java.awt.Point;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -140,7 +139,7 @@ public class TranslateGizmo extends Gizmo {
         aparentSizeInPixels = du;
     }
 
-    public void setCamera(Camera cam)
+    public final void setCamera(Camera cam)
     {
         camera = cam;
     }
@@ -821,7 +820,7 @@ public class TranslateGizmo extends Gizmo {
         //- Implement interaction technique for selected element ----------
         Vector3D o = getPosition();
         Vector3D p = new Vector3D(0, 0, 0);
-        Ray r = null;
+        Ray r;
         InfinitePlane plane;
         int mousex = e.getX();
         int mousey = e.getY();
@@ -1076,7 +1075,7 @@ public class TranslateGizmo extends Gizmo {
         //- Implement interaction technique for selected element ----------
         Vector3D o = getPosition();
         Vector3D p = new Vector3D(0, 0, 0);
-        Ray r = null;
+        Ray r;
         InfinitePlane plane;
         int mousex = e.getX();
         int mousey = e.getY();

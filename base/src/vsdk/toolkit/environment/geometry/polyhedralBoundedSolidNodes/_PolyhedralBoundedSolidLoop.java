@@ -168,6 +168,7 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
         halfEdgesList.reverse();
     }
 
+    @Override
     public String toString()
     {
         String msg;

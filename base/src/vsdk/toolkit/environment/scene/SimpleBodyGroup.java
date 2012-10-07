@@ -50,6 +50,7 @@ public class SimpleBodyGroup extends Entity {
         scale = new Vector3D(1, 1, 1);
     }
 
+    @Override
     public void finalize()
     {
         int i;
@@ -66,6 +67,11 @@ public class SimpleBodyGroup extends Entity {
         rotation = null;
         rotation_i = null;
         name = null;
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+            
+        }
     }
 
     public ArrayList <SimpleBody> getBodies()
@@ -80,7 +86,7 @@ public class SimpleBodyGroup extends Entity {
 
     public void setName(String n)
     {
-        name = new String(n);
+        name = n;
     }
 
     public Matrix4x4 getRotation()

@@ -73,12 +73,17 @@ public class RGBAImage extends Image
     /**
     This is the class destructor.
     */
+    @Override
     public void finalize()
     {
         if ( data != null ) {
             xSize = 0;
             ySize = 0;
             data = null;
+        }
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
         }
     }
 
@@ -91,6 +96,7 @@ public class RGBAImage extends Image
         }
     }
 
+    @Override
     public int getSizeInBytes()
     {
         // Warning: it is not taking into account the internal occupancy of the
@@ -106,6 +112,7 @@ public class RGBAImage extends Image
 
     Returns true if memory allocation succeed, false if not.
     */
+    @Override
     public boolean init(int width, int height)
     {
         try {
@@ -145,6 +152,7 @@ public class RGBAImage extends Image
 
     Returns true if memory allocation succeed, false if not.
     */
+    @Override
     public boolean initNoFill(int width, int height)
     {
         if ( data != null && width == xSize && height == ySize ) {
@@ -247,6 +255,7 @@ public class RGBAImage extends Image
     Check the general signature contract in superclass method
     Image.putPixelRgb.
     */
+    @Override
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
@@ -299,6 +308,7 @@ public class RGBAImage extends Image
     Check the general signature contract in superclass method
     Image.getPixelRgb.
     */
+    @Override
     public RGBPixel getPixelRgb(int x, int y)
     {
         RGBPixel p = new RGBPixel();
@@ -345,6 +355,7 @@ public class RGBAImage extends Image
     Check the general signature contract in superclass method
     Image.getPixelRgb.
     */
+    @Override
     public void getPixelRgb(int x, int y, RGBPixel p)
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
@@ -368,6 +379,7 @@ public class RGBAImage extends Image
     Check the general signature contract in superclass method
     Image.getXSize.
     */
+    @Override
     public int getXSize()
     {
         return xSize;
@@ -377,6 +389,7 @@ public class RGBAImage extends Image
     Check the general signature contract in superclass method
     Image.getYSize.
     */
+    @Override
     public int getYSize()
     {
         return ySize;
@@ -428,17 +441,18 @@ public class RGBAImage extends Image
     }
     
     /** Returns a copy of current image in its own memory */
+    @Override
     public RGBAImage clone()
     {
         RGBAImage copy;
-        int xSize = getXSize();
-        int ySize = getYSize();
+        int xxSize = getXSize();
+        int yySize = getYSize();
         int x, y;
 
         copy = new RGBAImage();
-        copy.init(xSize, ySize);
-        for ( x = 0; x < xSize; x++ ) {
-            for ( y = 0; y < ySize; y++ ) {
+        copy.init(xxSize, yySize);
+        for ( x = 0; x < xxSize; x++ ) {
+            for ( y = 0; y < yySize; y++ ) {
                 copy.putPixel(x, y, getPixel(x, y));
             }
         }
@@ -449,16 +463,16 @@ public class RGBAImage extends Image
     public RGBImage exportToRgbImage()
     {
         RGBImage copy;
-        int xSize = getXSize();
-        int ySize = getYSize();
+        int xxSize = getXSize();
+        int yySize = getYSize();
         int x, y;
         RGBAPixel source;
         RGBPixel target = new RGBPixel();
 
         copy = new RGBImage();
-        copy.init(xSize, ySize);
-        for ( x = 0; x < xSize; x++ ) {
-            for ( y = 0; y < ySize; y++ ) {
+        copy.init(xxSize, yySize);
+        for ( x = 0; x < xxSize; x++ ) {
+            for ( y = 0; y < yySize; y++ ) {
                 source = getPixel(x, y);
                 target.r = source.r;
                 target.g = source.g;
@@ -495,31 +509,25 @@ public class RGBAImage extends Image
         }
     }
 
-    private void readObject(ObjectInputStream in) throws IOException
+    private void readObject(ObjectInputStream in) throws Exception
     {
-        try {
-            int x, y;
+        int x, y;
 
-            xSize = PersistenceElement.readIntBE(in);
-            ySize = PersistenceElement.readIntBE(in);
+        xSize = PersistenceElement.readIntBE(in);
+        ySize = PersistenceElement.readIntBE(in);
 
-            initNoFill(xSize, ySize);
-            data.rewind();
+        initNoFill(xSize, ySize);
+        data.rewind();
 
-            byte arr[] = new byte[4];
-            for ( y = 0; y < ySize; y++ ) {
-                for ( x = 0; x < xSize; x++ ) {
-                    PersistenceElement.readBytes(in, arr);
-                    data.put(arr[0]);
-                    data.put(arr[1]);
-                    data.put(arr[2]);
-                    data.put(arr[3]);
-                }
+        byte arr[] = new byte[4];
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                PersistenceElement.readBytes(in, arr);
+                data.put(arr[0]);
+                data.put(arr[1]);
+                data.put(arr[2]);
+                data.put(arr[3]);
             }
-        }
-        catch ( Exception e ) {
-            e.printStackTrace();
-            throw new IOException("Error in custom RGBAImage readObject");
         }
     }
 //#endif

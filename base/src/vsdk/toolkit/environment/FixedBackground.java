@@ -6,14 +6,9 @@
 
 package vsdk.toolkit.environment;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBAPixel;
 
 public class FixedBackground extends Background {
     /// Check the general attribute description in superclass Entity.
@@ -42,6 +37,7 @@ public class FixedBackground extends Background {
     /**
     @bug not working math!
     */
+    @Override
     public ColorRgb colorInDireccion(Vector3D d)
     {
         return null;

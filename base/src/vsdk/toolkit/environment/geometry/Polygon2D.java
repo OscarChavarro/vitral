@@ -31,17 +31,18 @@ public class Polygon2D extends Surface
         currentLoop.addVertex(x, y);
     }
 
-    public void nextLoop()
+    public final void nextLoop()
     {
         currentLoop = new _Polygon2DContour();
         loops.add(currentLoop);
     }
 
+    @Override
     public double[] getMinMax()
     {
         double minMax[];
         _Polygon2DContour l;
-        Vertex2D v = null;
+        Vertex2D v;
         int i;
         int j;
         minMax = new double[6];
@@ -79,11 +80,13 @@ public class Polygon2D extends Surface
         return minMax;
     }
 
+    @Override
     public boolean doIntersection(Ray inOut_ray)
     {
         return false;
     }
 
+    @Override
     public void
     doExtraInformation(Ray inRay, double intT, 
                        GeometryIntersectionInformation outData)

@@ -51,6 +51,7 @@ class _PolyhedralBoundedSolidSplitterSectorClassification extends PolyhedralBoun
     public Vector3D position;
     public int situation = UNDEFINED;
 
+    @Override
     public String toString()
     {
         String msg = "{";
@@ -91,6 +92,7 @@ class _PolyhedralBoundedSolidSplitterNullEdge extends PolyhedralBoundedSolidOper
         this.e = e;
     }
 
+    @Override
     public int compareTo(_PolyhedralBoundedSolidSplitterNullEdge other)
     {
         Vector3D a;

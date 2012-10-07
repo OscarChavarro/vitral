@@ -16,6 +16,7 @@ public class ProgressMonitorConsole extends ProgressMonitor {
     {
     }
 
+    @Override
     public void begin()
     {
         currentPercent = 0;
@@ -24,6 +25,7 @@ public class ProgressMonitorConsole extends ProgressMonitor {
         System.out.print("[ 0% ");
     }
 
+    @Override
     public void end()
     {
         System.out.println(" 100% ]");
@@ -44,6 +46,7 @@ public class ProgressMonitorConsole extends ProgressMonitor {
         return false;
     }
 
+    @Override
     public void
     update(double minValue, double maxValue, double currentValue)
     {

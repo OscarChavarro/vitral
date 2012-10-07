@@ -65,6 +65,7 @@ public class TriangleMeshGroup extends Surface {
         return this.meshes.get(index);
     }
 
+    @Override
     public double[] getMinMax() {
         calculateMinMaxPositions();
         return this.MinMax;
@@ -146,6 +147,7 @@ public class TriangleMeshGroup extends Surface {
        al objeto se retorna 0, y de lo contrario se retorna la distancia desde
        el origen del rayo hasta el punto de interseccion mas cercano de todas las mallas.
      */
+    @Override
     public boolean doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating meshes
         boolean intersection; // true if intersection founded
@@ -205,6 +207,7 @@ public class TriangleMeshGroup extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -224,6 +227,7 @@ public class TriangleMeshGroup extends Surface {
     to provide another method, to add voxels after a path following
     over the line.
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         TriangleMesh mesh;
@@ -246,6 +250,7 @@ public class TriangleMeshGroup extends Surface {
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString() {
         return "TriangleMeshGroup < #Mesh: " + this.meshes.size() + " >";
     }
@@ -254,6 +259,7 @@ public class TriangleMeshGroup extends Surface {
     Check the general interface contract in superclass method
     Geometry.doVoxelization.
     */
+    @Override
     public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {
         int i;
@@ -264,6 +270,7 @@ public class TriangleMeshGroup extends Surface {
         }
     }
 
+    @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         return this;

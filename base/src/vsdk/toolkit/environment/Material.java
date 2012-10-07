@@ -162,6 +162,7 @@ public class Material extends Entity
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString()
     {
         return "Material [" + name + "]:\n" +

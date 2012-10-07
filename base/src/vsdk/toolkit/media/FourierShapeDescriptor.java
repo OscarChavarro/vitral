@@ -46,6 +46,7 @@ public class FourierShapeDescriptor extends ShapeDescriptor
         featureVector[sphere*numberOfHarmonics+harmonic] = harmonicAmplitude;
     }
 
+    @Override
     public String toString()
     {
         String msg;
@@ -57,10 +58,12 @@ public class FourierShapeDescriptor extends ShapeDescriptor
         return msg;
     }
 
+    @Override
     public double [] getFeatureVector() {
         return featureVector;
     }
 
+    @Override
     public void setFeatureVector(double vector[]) {
         if ( vector.length != numberOfElements*numberOfHarmonics ) {
             VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
@@ -74,10 +77,15 @@ public class FourierShapeDescriptor extends ShapeDescriptor
         }
     }
 
+    @Override
     public void finalize()
     {
         label = null;
         featureVector = null;
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+        }
     }
 }
 

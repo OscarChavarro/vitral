@@ -7,12 +7,10 @@ import java.util.Random;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLCapabilities;
 
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.AutoStereogramGenerator;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategyRenderer
 {
@@ -49,7 +47,6 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
         this.stereogramTilePattern = stereogramTilePattern;
 
         randomNumberGenerator = null;
-        stereogramTilePattern = null;
         stereogramResult = null;
 
         // Set some common default values for SIRD parameters
@@ -75,7 +72,6 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
         this.stereogramTilePattern = stereogramTilePattern;
 
         randomNumberGenerator = null;
-        stereogramTilePattern = null;
         stereogramResult = null;
 
         // Set some common default values for SIRD parameters
@@ -159,21 +155,25 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
         this.verticalPPISIRD = verticalPPISIRD;
     }
 
+    @Override
     public boolean configureDefaultLeftChannel(GL2 gl)
     {
         return false;
     }
 
+    @Override
     public boolean configureDefaultRightChannel(GL2 gl)
     {
         return true;
     }
 
+    @Override
     public void activateStereoMode(GL2 gl)
     {
         ;
     }
 
+    @Override
     public void deactivateStereoMode(GL2 gl)
     {
         ZBuffer zbuffer;

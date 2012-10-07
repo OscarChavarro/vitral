@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 // VitralSDK classes
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -316,6 +315,7 @@ public class QuadMesh extends Surface {
     readability and debugging. Do not use for serialization or persistence
     purposes.
     */
+    @Override
     public String toString() {
         String msg;
         int i;
@@ -339,6 +339,7 @@ public class QuadMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     */
+    @Override
     public boolean
     doIntersection(Ray inOut_Ray) {
         // TODO!
@@ -349,6 +350,7 @@ public class QuadMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     */
+    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -357,6 +359,7 @@ public class QuadMesh extends Surface {
 
     /**
     */
+    @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
         // TODO!
@@ -367,6 +370,7 @@ public class QuadMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.getMinMax.
     */
+    @Override
     public double[] getMinMax() {
         if ( minMax == null ) {
             calculateMinMaxPositions();
@@ -375,6 +379,7 @@ public class QuadMesh extends Surface {
     }
 
     // Todo!
+    @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         /*

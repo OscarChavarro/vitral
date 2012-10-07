@@ -12,7 +12,6 @@ import javax.media.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
 
 public class JoglMaterialRenderer extends JoglRenderer {
