@@ -2,7 +2,6 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Component;
-import java.awt.Adjustable;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.ActionListener;
@@ -27,26 +26,21 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollBar;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 
 import javax.media.opengl.GL2;
-import javax.media.opengl.glu.GLU;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
-public class CohenSutherlandClipping extends JFrame implements 
+public class CohenSutherlandClipping implements 
 GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, 
 KeyListener
 {
@@ -72,25 +66,6 @@ KeyListener
     public static final int PERSPECTIVEVIEW = 4;
 
     public CohenSutherlandClipping() {
-        super("VITRAL concept test - Perspective tests");
-
-        cameraMode = PERSPECTIVEVIEW;
-
-        canvas = new GLCanvas();
-
-        canvas.addGLEventListener(this);
-        canvas.addMouseListener(this);
-        canvas.addMouseMotionListener(this);
-        canvas.addKeyListener(this);
-
-        controls = new ControlPanel(this);
-        menubar = this.buildMenu();
-
-        this.add(canvas, BorderLayout.CENTER);
-        this.add(controls, BorderLayout.SOUTH);
-        this.setJMenuBar(menubar);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
 
@@ -118,12 +93,39 @@ KeyListener
         //point1 = new Vector3D(0, 0, 0.5);
     }
 
+    public void createGUI()
+    {
+        JFrame mainWindowWidget;
+        mainWindowWidget = new JFrame("VITRAL concept test - Cohen Sutherland 3D line clipping");
+
+        cameraMode = PERSPECTIVEVIEW;
+
+        canvas = new GLCanvas();
+
+        canvas.addGLEventListener(this);
+        canvas.addMouseListener(this);
+        canvas.addMouseMotionListener(this);
+        canvas.addKeyListener(this);
+
+        controls = new ControlPanel(this);
+        menubar = this.buildMenu();
+
+        mainWindowWidget.setPreferredSize(new Dimension(800, 600));
+        mainWindowWidget.add(canvas, BorderLayout.CENTER);
+        mainWindowWidget.add(controls, BorderLayout.SOUTH);
+        mainWindowWidget.setJMenuBar(menubar);
+        mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        mainWindowWidget.pack();
+        mainWindowWidget.setVisible(true);
+    } 
+    
     public void setPerspectiveView()
     {
         if ( cameraMode != PERSPECTIVEVIEW ) {
             camera1.setPosition(lastPerspectiveCamera.getPosition());
             camera1.setRotation(lastPerspectiveCamera.getRotation());
-            camera1.setProjectionMode(camera1.PROJECTION_MODE_PERSPECTIVE);
+            camera1.setProjectionMode(Camera.PROJECTION_MODE_PERSPECTIVE);
             cameraMode = PERSPECTIVEVIEW;
         }
     }
@@ -138,7 +140,7 @@ KeyListener
         camera1.setPosition(new Vector3D(0, 0, 5));
         R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera1.setRotation(R);
-        camera1.setProjectionMode(camera1.PROJECTION_MODE_ORTHOGONAL);
+        camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);
     }
 
@@ -152,7 +154,7 @@ KeyListener
         camera1.setPosition(new Vector3D(0, -10, 0));
         R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         camera1.setRotation(R);
-        camera1.setProjectionMode(camera1.PROJECTION_MODE_ORTHOGONAL);
+        camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);
     }
 
@@ -165,24 +167,19 @@ KeyListener
         cameraMode = TOPVIEW;
         camera1.setPosition(new Vector3D(-10, 0, 0));
         camera1.setRotation(R);
-        camera1.setProjectionMode(camera1.PROJECTION_MODE_ORTHOGONAL);
+        camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);
-    }
-
-    public Dimension getPreferredSize() {
-        return new Dimension (800, 600);
     }
     
     public static void main (String[] args) {
-        JFrame f = new CohenSutherlandClipping();
-        f.pack();
-        f.setVisible(true);
+        CohenSutherlandClipping instance = new CohenSutherlandClipping();
+        instance.createGUI();
     }
 
     private void
     drawMark(GL2 gl, double delta)
     {
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glVertex3d(-delta/2, 0, 0);
             gl.glVertex3d(delta/2, 0, 0);
             gl.glVertex3d(0, -delta/2, 0);
@@ -194,13 +191,13 @@ KeyListener
     
     private void drawObjectsGL(GL2 gl)
     {
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
 
         gl.glLoadIdentity();
 
         //-----------------------------------------------------------------
         gl.glLineWidth((float)2.0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
         gl.glColor3d(1, 0, 0);
         gl.glVertex3d(0, 0, 0);
         gl.glVertex3d(1, 0, 0);
@@ -251,13 +248,13 @@ KeyListener
         gl.glLoadIdentity();
         gl.glLineWidth((float)1.0);
         gl.glColor3d(1, 0, 1);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glVertex3d(point0.x, point0.y, point0.z);
             gl.glVertex3d(point1.x, point1.y, point1.z);
         gl.glEnd();
         if ( linePasses == true ) {
             gl.glLineWidth((float)5.0);
-            gl.glBegin(gl.GL_LINES);
+            gl.glBegin(GL2.GL_LINES);
                 gl.glVertex3d(clippedPoint0.x, clippedPoint0.y,
                     clippedPoint0.z);
                 gl.glVertex3d(clippedPoint1.x, clippedPoint1.y,
@@ -268,11 +265,12 @@ KeyListener
     }
 
     /** Called by drawable to initiate drawing */
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
         JoglCameraRenderer.activate(gl, camera1);
@@ -284,11 +282,13 @@ KeyListener
     }
    
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void init(GLAutoDrawable drawable) {
         ;
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
         ;
     }
@@ -299,6 +299,7 @@ KeyListener
     }
     
     /** Called to indicate the drawing surface has been moved and/or resized */
+    @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
@@ -310,38 +311,45 @@ KeyListener
         camera1.updateViewportResize(width, height);
     }   
 
+    @Override
     public void mouseEntered(MouseEvent e) {
         canvas.requestFocusInWindow();
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
         //System.out.println("Mouse exited");
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         if ( cameraController.processMousePressedEventAwt(e) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         if ( cameraController.processMouseReleasedEventAwt(e) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
         if ( cameraController.processMouseClickedEventAwt(e) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
         if ( cameraController.processMouseMovedEventAwt(e) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         if ( cameraController.processMouseDraggedEventAwt(e) ) {
             canvas.repaint();
@@ -351,6 +359,7 @@ KeyListener
     /**
        WARNING: It is not working... check pending
     */
+    @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
         if ( cameraController.processMouseWheelEventAwt(e) ) {
@@ -358,6 +367,7 @@ KeyListener
         }
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
             System.exit(0);
@@ -368,6 +378,7 @@ KeyListener
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
         if ( cameraController.processKeyReleasedEventAwt(e) ) {
             canvas.repaint();
@@ -379,6 +390,7 @@ KeyListener
        will be invoked twice for each key. Call it only from the `keyPressed` and
        `keyReleased` method
     */
+    @Override
     public void keyTyped(KeyEvent e) {
         ;
     }
@@ -386,17 +398,18 @@ KeyListener
     public JMenuBar buildMenu()
     {
         //------------------------------------------------------------
-        JMenuBar menubar;
+        JMenuBar newMenubar;
         JMenu popup;
         JMenuItem option;
 
-        menubar = new JMenuBar();
+        newMenubar = new JMenuBar();
 
         //------------------------------------------------------------
         popup = new JMenu("File");
-        menubar.add(popup);
+        newMenubar.add(popup);
         option = popup.add(new JMenuItem("Exit"));
         option.addActionListener(new ActionListener() {
+            @Override
                 public void actionPerformed(ActionEvent e) {
                     System.exit(0);
                 }});
@@ -404,15 +417,15 @@ KeyListener
 
         //------------------------------------------------------------
         popup = new JMenu("Help");
-        menubar.add(popup);
+        newMenubar.add(popup);
         option = popup.add(new JMenuItem("About"));
-        MyActionListener mostrador_ayuda = new MyActionListener(menubar);
+        MyActionListener mostrador_ayuda = new MyActionListener(newMenubar);
         option.addActionListener(mostrador_ayuda);
         popup.getPopupMenu().setLightWeightPopupEnabled(false);
 
         //------------------------------------------------------------
 
-        return menubar;
+        return newMenubar;
     }
 
 }
@@ -425,6 +438,7 @@ class MyActionListener implements ActionListener {
             this.parent = parent;
         }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JOptionPane.showMessageDialog(parent, 
                                       "This program is a test for the Cohen-Sutherland 3D line clipping algorithm " +
@@ -442,8 +456,8 @@ class ControlPanel extends JPanel implements AdjustmentListener, ActionListener
         //-----------------------------------------------------------------
         JScrollBar sb;
         JLabel jl;
-        JPanel frame = null;
-        JPanel innerframe = null;
+        JPanel frame;
+        JPanel innerframe;
         String names[] = new String[6];
 
         this.parent = parent;
@@ -534,6 +548,7 @@ class ControlPanel extends JPanel implements AdjustmentListener, ActionListener
         //-----------------------------------------------------------------
     }
 
+    @Override
     public void adjustmentValueChanged(AdjustmentEvent ev) {
         double val = (((double)ev.getValue()) - 50.0) / 10.0;
 
@@ -558,33 +573,33 @@ class ControlPanel extends JPanel implements AdjustmentListener, ActionListener
         parent.canvas.repaint();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
-        {
-            if ( ((String)e.getActionCommand()).equals("ActivateCamera1") ) {
-                parent.cameraController = 
-                    new CameraControllerAquynza(parent.camera1);
-            }
-            else if ( ((String)e.getActionCommand()).equals("Top view") ) {
-                parent.setTopView();
-            }
-            else if ( ((String)e.getActionCommand()).equals("Front view") ) {
-                parent.setFrontView();
-            }
-            else if ( ((String)e.getActionCommand()).equals("Left view") ) {
-                parent.setLeftView();
-            }
-            else if ( ((String)e.getActionCommand()).equals("Perspective view") ) {
-                parent.setPerspectiveView();
-            }
-            else {
-                parent.cameraController = 
-                    new CameraControllerAquynza(parent.camera2);
-            }
-
-            parent.canvas.repaint();
+    {
+        if ( ((String)e.getActionCommand()).equals("ActivateCamera1") ) {
+            parent.cameraController = 
+                new CameraControllerAquynza(parent.camera1);
         }
-}
+        else if ( ((String)e.getActionCommand()).equals("Top view") ) {
+            parent.setTopView();
+        }
+        else if ( ((String)e.getActionCommand()).equals("Front view") ) {
+            parent.setFrontView();
+        }
+        else if ( ((String)e.getActionCommand()).equals("Left view") ) {
+            parent.setLeftView();
+        }
+        else if ( ((String)e.getActionCommand()).equals("Perspective view") ) {
+            parent.setPerspectiveView();
+        }
+        else {
+            parent.cameraController = 
+                new CameraControllerAquynza(parent.camera2);
+        }
 
+        parent.canvas.repaint();
+    }
+}
 //===========================================================================
 //= EOF                                                                     =
 //===========================================================================

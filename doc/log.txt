@@ -923,4 +923,7 @@
   - 50min: removing several programming warnings from SceneEditorApplication
     example.
 
+2012 october 9, Oscar Chavarro
+  - 10min: organizing CohenSutherlandClippingTechnique example.
+
 ===========================================================================
