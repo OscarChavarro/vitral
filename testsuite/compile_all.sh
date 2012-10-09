@@ -76,7 +76,7 @@ cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques
-cd CohenSutherlandClippingTechnique
+cd CohenSutherlandClippingTechnique3D
 ./compile.sh
 cd ..
 cd IlluminationTest
