@@ -21,7 +21,7 @@ of vertexes and triangles (the edges are not store explicitly, and there
 can not be an edge not forming part of a quad).
 
 As every model class or `Entity` in VSDK, this class only can represent
-(store in memory) the mesh model. It doesn´t provide persistence or rendering
+(store in memory) the mesh model. It doesn't provide persistence or rendering
 functionality, as this could be found at `io` and `render` packages.
 Nevertheles, this class will be highly coupled with both of those, so
 making any change here will impact highly that code.

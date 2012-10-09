@@ -9,8 +9,8 @@
  * <p>License: Free use only for non-commercial purpose</p>
  * <p>If you want to use all or part of this class for commercial applications then take into account these conditions:</p>
  * <p>1. I need a one copy of your product which includes my class with license key and so on</p>
- * <p>2. Please append my copyright information henson.midp.Float (C) by Nikolay Klimchuk on About screen of your product</p>
- * <p>3. If you have web site please append link <a href=http://henson.newmail.ru>Nikolay Klimchuk</a> on the page with description of your product</p>
+ * <p>2. Please append my copyright information henson.midp.Float (C) by Nikolay Klimchuk on 'About' screen of your product</p>
+ * <p>3. If you have web site please append link <a href="http://henson.newmail.ru">Nikolay Klimchuk</a> on the page with description of your product</p>
  * <p>That's all, thank you!</p>
  * @author Nikolay Klimchuk http://henson.newmail.ru
  * @version 0.51

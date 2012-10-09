@@ -45,7 +45,7 @@ material (this could change in future), but can have multiple textures,
 and each texture can be mapped to a different set of triangles.
 
 As every model class or `Entity` in VSDK, this class only can represent
-(store in memory) the mesh model. It doesn´t provide persistence or rendering
+(store in memory) the mesh model. It doesn't provide persistence or rendering
 functionality, as this could be found at `io` and `render` packages.
 Nevertheles, this class will be highly coupled with both of those, so
 making any change here will impact highly that code.
