@@ -1,0 +1,557 @@
+//===========================================================================
+//= english.gui                                                             =
+//=-------------------------------------------------------------------------=
+//= Oscar Chavarro                                                          =
+//= Grupo de investigacion de informatica grafica TAKINA/VITRAL             =
+//===========================================================================
+
+//===========================================================================
+//= APPLICATION MENUS                                                       =
+//===========================================================================
+
+MENU "GLOBAL" {
+    POPUP "&File" {
+        MENUITEM "&New...\tCtrl+N", IDC_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O", IDC_FILE_OPEN
+        MENUITEM "&Merge...", IDC_FILE_MERGE
+        POPUP "Open Recent" {
+            //DYNAMIC_INCLUDE "recentfiles"
+        }
+        MENUITEM SEPARATOR
+        MENUITEM "&Save\tCtrl+S", IDC_FILE_SAVE
+        MENUITEM "Save &As...", IDC_FILE_SAVE_AS
+        MENUITEM "Save Selecte&d...", IDC_FILE_SAVE_SELECTED
+        MENUITEM SEPARATOR
+        MENUITEM "&Import...", IDC_FILE_IMPORT
+        MENUITEM "&Export...", IDC_FILE_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Project Propierties...", IDC_FILE_PROPIERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "&Exit", IDC_FILE_QUIT
+    }
+    POPUP "&Edit" {
+        MENUITEM "&Undo", IDC_EDIT_UNDO
+        MENUITEM "&Redo", IDC_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "&Delete\tDelete", IDC_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All\tCtrl+A", IDC_EDIT_SELECT_ALL
+        MENUITEM "Select &None\tCtrl+D", IDC_EDIT_SELECT_NONE
+        MENUITEM "Select &Invert \tCtrl+I", IDC_EDIT_SELECT_INVERT
+        POPUP "Select &By" {
+            MENUITEM "&Color", IDC_EDIT_SELECT_BYCOLOR
+            MENUITEM "&Name", IDC_EDIT_SELECT_BYNAME
+            MENUITEM SEPARATOR
+            MENUITEM "Rectangular Region", IDC_EDIT_SELECT_RECTANGULAR
+            MENUITEM "Circular Region", IDC_EDIT_SELECT_CIRCULAR
+            MENUITEM "Fence Region", IDC_EDIT_SELECT_FENCE
+            MENUITEM "Lasso Region", IDC_EDIT_SELECT_LASSO
+        }
+        MENUITEM SEPARATOR
+        MENUITEM "&Cut\tCtrl+X", IDC_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C", IDC_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V", IDC_EDIT_PASTE
+    }
+    POPUP "&Create" {
+        POPUP "0D bodies" {
+            MENUITEM "Particle", IDC_CREATE_PARTICLE, GRAYED
+            MENUITEM "Particle System", IDC_CREATE_PARTICLE_SYSTEM, GRAYED
+        }
+        POPUP "1D bodies" {
+            MENUITEM "Parametric Cubic Curve", IDC_CREATE_PARAMETRICCUBICCURVE
+        }
+        POPUP "2D bodies" {
+            MENUITEM "Parametric Bi-Cubic Patch", IDC_CREATE_PARAMETRICBICUBICPATCH
+            MENUITEM "Functional Explicit Surface", IDC_CREATE_FUNCTIONALEXPLICITSURFACE
+            MENUITEM "Objects from file ...", IDC_IMPORT_OBJECTS_FROM_FILE
+            MENUITEM "Plane", IDC_CREATE_PLANE
+        }
+        POPUP "3D bodies" {
+            MENUITEM "Sphere", IDC_CREATE_SPHERE
+            MENUITEM "Cone", IDC_CREATE_CONE
+            MENUITEM "Cylinder", IDC_CREATE_CYLINDER
+            MENUITEM "Cube", IDC_CREATE_CUBE
+            MENUITEM "Box", IDC_CREATE_BOX
+            MENUITEM "Arrow", IDC_CREATE_ARROW
+            MENUITEM "Volume", IDC_CREATE_VOXELSET
+            MENUITEM "Spherical Harmonic Debug from voxel", IDC_CREATE_SPHERE_HARMONIC
+            MENUITEM SEPARATOR
+            MENUITEM "CSG", IDC_CREATE_CSG, GRAYED
+        }
+        MENUITEM SEPARATOR
+        POPUP "Lights" {
+            MENUITEM "Omni Light", IDC_CREATE_OMNILIGHT
+        }
+        POPUP "Cameras" {
+        }
+    }
+    POPUP "&Tools" {
+        MENUITEM "&Camera Control Mode", IDC_TOOLS_CAMERA
+        MENUITEM "&Select Mode", IDC_TOOLS_SELECT
+        MENUITEM "Select and &Translate Mode", IDC_TOOLS_TRANSLATE
+        MENUITEM "Select and &Rotate Mode", IDC_TOOLS_ROTATE
+        MENUITEM "Select and S&cale Mode", IDC_TOOLS_SCALE
+    }
+    POPUP "&View" {
+        POPUP "&Visualizador" {
+            //INCLUDE "VISUALIZADOR"
+        }
+        POPUP "&Camara" {
+            //INCLUDE "CAMARA"
+        }
+        POPUP "Calidad &visual" {
+            //INCLUDE "CALIDAD_VISUAL"
+        }
+        MENUITEM SEPARATOR
+        MENUITEM "&New View", IDC_NEW_VIEW
+        MENUITEM "&Delete View", IDC_DEL_VIEW
+        MENUITEM "&Remote Display ...", IDC_MESSAGE
+        MENUITEM SEPARATOR
+        MENUITEM "!&Print all!", IDC_PRINT_ALL
+    }
+    POPUP "&Rendering" {
+        MENUITEM "Render Using &Raytracing\tF9", IDC_RENDERING_RAYTRACING
+        MENUITEM "Render Using &ZBuffer (OpenGL/JOGL)", IDC_RENDERING_OBTAINZBUFFERIMAGE
+        MENUITEM SEPARATOR
+        MENUITEM "Select &Palette For Depthmap Display", IDC_RENDERING_SELECTPALETTEDEPTH
+        MENUITEM "Obtain &ZBuffer Depthmap Image", IDC_RENDERING_OBTAINZBUFFERDEPTHMAP
+    }
+    POPUP "&Customize" {
+        POPUP "&Language" {
+            MENUITEM "&English", IDC_CUSTOMIZE_LANGUAGE_ENGLISH
+            MENUITEM "&Spanish (Espa#00f1ol)", IDC_CUSTOMIZE_LANGUAGE_SPANISH
+        }
+        POPUP "Look And &Feel" {
+            MENUITEM "&Motif", IDC_CUSTOMIZE_LAF_MOTIF
+            MENUITEM "&Java metal", IDC_CUSTOMIZE_LAF_JAVA
+            MENUITEM "&Gtk+", IDC_CUSTOMIZE_LAF_GTK
+            MENUITEM "&Microsoft Windows", IDC_CUSTOMIZE_LAF_WINDOWS
+        }
+    }
+    POPUP "&Help" {
+        MENUITEM "&About...", IDC_AYUDA_ACERCADE
+    }
+
+}
+
+POPUP "ESCENA" {
+    //INCLUDE "VISUALIZADOR"
+    MENUITEM SEPARATOR
+    //INCLUDE "CAMARA"
+    MENUITEM SEPARATOR
+    //INCLUDE "CALIDAD_VISUAL"
+}
+
+POPUP "CAMARA" {
+    MENUITEM "&Perspectiva", IDC_CAMARA_PERSPECTIVA, CHECKED
+    MENUITEM "&Etiqueta", IDC_CAMARA_ETIQUETA, CHECKED
+    MENUITEM "&Mostrar", IDC_CAMARA_MOSTRAR, UNCHECKED
+}
+
+POPUP "VISUALIZADOR" {
+    MENUITEM "&Zbuffer usando OpenGL", IDC_OPENGL_RENDER
+    MENUITEM "&Raytracing criollo", IDC_RAYTRACING_CRIOLLO
+    MENUITEM "Raytracing usando &POVray", IDC_RAYTRACER_POVRAY
+}
+
+POPUP "CALIDAD_VISUAL" {
+    POPUP "Calidad &visual" {
+        MENUITEM "&Wireframe", IDC_WIREFRAME_RENDER, UNCHECKED
+        MENUITEM "&Superficie", IDC_SURFACE_RENDER, UNCHECKED
+        MENUITEM "Modelo &Phong", IDC_PHONG_RENDER, UNCHECKED
+        MENUITEM "&Textura", IDC_TEXTURE_RENDER, UNCHECKED
+    }
+    POPUP "Calidad &interactiva" {
+        MENUITEM "&Igual", IDC_SAME_INTER, CHECKED
+        MENUITEM SEPARATOR
+        MENUITEM "&Wireframe", IDC_WIREFRAME_INTER, UNCHECKED
+        MENUITEM "&Lineas ocultas", IDC_HIDDEN_INTER, UNCHECKED
+        MENUITEM "Superficie pla&na", IDC_FLAT_INTER, UNCHECKED
+        MENUITEM "Superficie &suave", IDC_SMOOTH_INTER, UNCHECKED
+        MENUITEM "&Textura", IDC_TEXTURE_INTER, UNCHECKED, GRAYED
+    }
+    POPUP "Calidad &espacio" {
+        MENUITEM "&Ninguno", IDC_ESPACIO_NONE, CHECKED
+        MENUITEM "&Marco", IDC_ESPACIO_MARCO, UNCHECKED
+        MENUITEM "&Lineas", IDC_ESPACIO_LINEAS, UNCHECKED
+        MENUITEM "&Superficie", IDC_ESPACIO_SUPERFICIE, UNCHECKED
+        MENUITEM "&Piso a cuadros", IDC_ESPACIO_PISO, UNCHECKED, GRAYED
+        POPUP "Modelo de &iluminacion" {
+            MENUITEM "Superficie pla&na", IDC_FLAT_ESPACIO, CHECKED
+            MENUITEM "Superficie &suave", IDC_SMOOTH_ESPACIO, UNCHECKED
+            MENUITEM "&Textura", IDC_TEXTURE_ESPACIO, UNCHECKED, GRAYED
+        }
+        POPUP "&Transparencia" {
+            MENUITEM "Paredes &ocultas", IDC_OPAC_ESPACIO, CHECKED
+            MENUITEM "Paredes &transparentes", IDC_TRANS_ESPACIO, UNCHECKED
+        }
+        POPUP "&Fondo" {
+            MENUITEM "&Uniforme", IDC_FONDO_UNIFORME, CHECKED
+            MENUITEM "&Degrade", IDC_FONDO_DEGRADE, UNCHECKED, GRAYED
+            MENUITEM "&Color...", IDC_FONDO_COLOR, UNCHECKED, GRAYED
+        }
+    }
+}
+
+//===========================================================================
+//= ESPECIFICACION DE COMANDOS                                              =
+//===========================================================================
+
+/*---------------------------------------------------------------------------
+Un COMANDO es una accion en particular que puede tomar la aplicacion.
+Cada COMANDO tiene por lo menos un identificador y un nombre, y su
+informacion es usada dinamicamente por la GUI para guiar al usuario y para
+lanzar acciones.
+NOTA: El directorio de los iconos es "./etc/icons"
+---------------------------------------------------------------------------*/
+
+COMMAND IDC_FILE_QUIT {
+    name "Exit", icon "./etc/icons/f_quit.gif",
+    brief "End current interactive session",
+    help "La opcion salir termina los procesos de edicion y/o simulacion y "
+    help "da por concluida la ejecucion de la aplicacion.  Este comando "
+    help "solicita confirmacion si la sesion de edicion actual no ha sido "
+    help "guardada.  Para terminar la sesion de edicion y dejar corriendo "
+    help "una simulacion en modo batch (procesamiento por lotes), vea el "
+    help "comando <eat>."
+}
+
+COMMAND IDC_FILE_NEW {
+    name "New", icon "./etc/icons/f_new.gif",
+    brief "Cierra la sesion actual (si la hay) y empieza una nueva",
+    help "El comando solicita confirmacion si la sesion actual no ha sido "
+    help "grabada. En la version profesional de Nukak puede especificarse "
+    help "la edicion distribuida."
+}
+
+COMMAND IDC_FILE_OPEN {
+    name "Open", icon "./etc/icons/f_load.gif",
+    brief "Lee un entorno AQUYNZA previamente creado",
+    help "<Aun no disponible>"
+}
+
+COMMAND IDC_FILE_SAVE {
+    name "Save", icon "./etc/icons/f_save.gif",
+    brief "Graba el entorno actual AQUYNZA",
+    help "<Aun no disponible>"
+}
+
+COMMAND IDC_VOICECOMMAND_CLIENT {
+    name "Voice recognition", 
+    brief "Activates the networked voice recognition client",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
+}
+
+COMMAND IDC_TOOLS_SELECT {
+    name "Select", 
+    brief "Select objects",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
+}
+
+COMMAND IDC_TOOLS_TRANSLATE {
+    name "Select and translate",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
+}
+
+COMMAND IDC_TOOLS_ROTATE {
+    name "Select and rotate",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
+}
+
+COMMAND IDC_TOOLS_SCALE {
+    name "Select and scale",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1024.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1024Mask.png"
+}
+
+COMMAND IDC_TOOLS_CAMERA {
+    name "Camera control",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
+}
+
+COMMAND IDC_TOOLS_RAY {
+    name "Ray control", 
+    brief "Activates or desactivates ray debug control",
+#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1060.png",
+#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
+}
+
+COMMAND IDC_CREATE_SPHERE {
+    name "Create Sphere"
+}
+
+COMMAND IDC_CREATE_PLANE {
+    name "Create Plane"
+}
+
+COMMAND IDC_CREATE_CONE {
+    name "Create Cone"
+}
+
+COMMAND IDC_CREATE_CYLINDER {
+    name "Create Cylinder"
+}
+
+COMMAND IDC_CREATE_CUBE {
+    name "Create Cube"
+}
+
+COMMAND IDC_CREATE_BOX {
+    name "Create Box"
+}
+
+COMMAND IDC_CREATE_ARROW {
+    name "Create Arrow"
+}
+
+COMMAND IDC_CREATE_VOLUME {
+    name "Create Volume (voxels)"
+}
+
+COMMAND IDC_CREATE_SPHERE_HARMONIC {
+    name "Debug Spherical Harmonic Voxel"
+}
+
+COMMAND IDC_CREATE_PROJECTED_VIEWS {
+    name "Debug Projected Object Views"
+}
+
+COMMAND IDC_CREATE_BREP {
+    name "Create Solid (BREP)"
+}
+
+COMMAND IDC_IMPORT_OBJECTS_FROM_FILE {
+    name "Import objects from file"
+}
+
+COMMAND IDC_EXPORT_OBJECTS_TO_OBJ {
+    name "Export objects to obj"
+}
+
+COMMAND IDC_EXPORT_OBJECTS_TO_GTS {
+    name "Export objects to gts"
+}
+
+COMMAND IDC_EXPORT_OBJECTS_TO_VTK {
+    name "Export objects to VTK"
+}
+
+COMMAND IDC_CREATE_PARAMETRICCUBICCURVE {
+    name "Create ParametricCurve"
+}
+
+COMMAND IDC_CREATE_FUNCTIONALEXPLICITSURFACE {
+    name "Create Functional Explicit Surface"
+}
+
+COMMAND IDC_CREATE_PARAMETRICBICUBICPATCH {
+    name "Create ParametricBiCubicPatch"
+}
+
+COMMAND IDC_CREATE_OMNILIGHT {
+    name "Create Light"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_MOTIF {
+    name "Motif"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_JAVA {
+    name "Java"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_WINDOWS {
+    name "Windows"
+}
+
+COMMAND IDC_CUSTOMIZE_LAF_GTK {
+    name "GTK+"
+}
+
+COMMAND IDC_OTHERS_CYCLE_BACKGROUND {
+    name "Cycle background"
+}
+
+COMMAND IDC_OTHERS_TOGGLE_TEST_CORRIDOR {
+    name "Toggle test corridor"
+}
+
+COMMAND IDC_OTHERS_TOGGLE_GRID {
+    name "Toggle grid"
+}
+
+COMMAND IDC_OTHERS_PRINT_SCENE_ON_CONSOLE {
+    name "Print scene report in console"
+}
+
+COMMAND IDC_RENDERING_SELECTPALETTEDEPTH {
+    name "Select palette for depthmap display"
+}
+
+COMMAND IDC_RENDERING_OBTAINZBUFFERDEPTHMAP {
+    name "Obtain Zbuffer Depthmap"
+}
+
+COMMAND IDC_RENDERING_OBTAINZBUFFERIMAGE {
+    name "Obtain Zbuffer Image"
+}
+
+COMMAND IDC_RENDERING_OBTAINCONTOURNS {
+    name "Obtain contourns"
+}
+
+COMMAND IDC_RENDERING_RAYTRACING {
+    name "Raytrace Scene"
+}
+
+//===========================================================================
+//= ESPECIFICACION DE GRUPOS DE BOTONES                                     =
+//===========================================================================
+
+/*---------------------------------------------------------------------------
+Los posibles estilos son los siguientes flags:
+    HORIZONTAL, CON_SEPARADOR, CON_TITULO, ACTIVABLE
+y cualquier combinacion de ellos se puede incluir (separados por comas) en
+el grupo opcional "ESTILO { ... }" dentro de los bloques BOTONERA.  Notese
+que si no se especifica el estilo "HORIZONTAL" se supone que es VERTICAL, 
+pero no es valido especificarlo explicitamente (!). Notese que el flag
+ACTIVABLE solo tiene sentido cuando la botonera tiene titulo.  El
+parametro `tam` debe ser seguido por un entero e indica el grosor o la
+altura de los grupos (en botones), y es opcional (por defecto tam es 2).
+---------------------------------------------------------------------------*/
+
+BUTTON_GROUP "GLOBAL" {
+    showTitle false, side 1
+    title "Global bar",
+#    showIcons on,
+    showText off,
+    direction horizontal
+    BUTTONS  {
+        IDC_TOOLS_SELECT,
+        IDC_TOOLS_TRANSLATE, IDC_TOOLS_ROTATE, IDC_TOOLS_SCALE,
+        IDC_TOOLS_CAMERA, IDC_TOOLS_RAY, IDC_VOICECOMMAND_CLIENT
+    }
+}
+
+BUTTON_GROUP "CREATION" {
+    showTitle true, side 1
+    title "Global bar",
+#    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_CREATE_SPHERE, 
+        IDC_CREATE_CONE, 
+        IDC_CREATE_CYLINDER, 
+        IDC_CREATE_CUBE, 
+        IDC_CREATE_BOX, 
+        IDC_CREATE_ARROW, 
+        IDC_CREATE_VOLUME, 
+        IDC_CREATE_BREP, 
+        IDC_IMPORT_OBJECTS_FROM_FILE, 
+        IDC_EXPORT_OBJECTS_TO_OBJ, 
+        IDC_EXPORT_OBJECTS_TO_GTS, 
+        IDC_EXPORT_OBJECTS_TO_VTK, 
+        IDC_CREATE_PARAMETRICCUBICCURVE, 
+        IDC_CREATE_PARAMETRICBICUBICPATCH, 
+        IDC_CREATE_PLANE, 
+        IDC_CREATE_FUNCTIONALEXPLICITSURFACE,
+        IDC_CREATE_SPHERE_HARMONIC,
+        IDC_CREATE_PROJECTED_VIEWS,
+        IDC_CREATE_OMNILIGHT
+    }
+}
+
+BUTTON_GROUP "GUI" {
+    showTitle true, side 1
+    title "Global bar",
+#    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_CUSTOMIZE_LAF_MOTIF,
+        IDC_CUSTOMIZE_LAF_JAVA,
+        IDC_CUSTOMIZE_LAF_WINDOWS,
+        IDC_CUSTOMIZE_LAF_GTK
+    }
+}
+
+BUTTON_GROUP "OTHER" {
+    showTitle true, side 1
+    title "Global bar",
+#    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_OTHERS_CYCLE_BACKGROUND,
+        IDC_OTHERS_TOGGLE_TEST_CORRIDOR,
+        IDC_OTHERS_TOGGLE_GRID,
+        IDC_OTHERS_PRINT_SCENE_ON_CONSOLE,
+    }
+}
+
+BUTTON_GROUP "RENDER" {
+    showTitle true, side 1
+    title "Global bar",
+#    showIcons off,
+    showText on,
+    direction vertical
+    BUTTONS  {
+        IDC_RENDERING_SELECTPALETTEDEPTH,
+        IDC_RENDERING_OBTAINZBUFFERDEPTHMAP,
+        IDC_RENDERING_OBTAINZBUFFERIMAGE,
+        IDC_RENDERING_OBTAINCONTOURNS,
+        IDC_RENDERING_RAYTRACING
+    }
+}
+
+MESSAGES {
+    IDM_EXIT, "Close application"
+    IDM_CREATION_TAB, "Creation"
+    IDM_OTHERS_TAB, "Scene components"
+    IDM_GUI_TAB, "GUI Control"
+    IDM_RENDER_TAB, "Render"
+    IDM_MODIFY_TAB, "Modify"
+
+    IDM_PENDING_ZBUFFER_COLOR_IMAGE, 
+        "Pending to obtaining ZBuffer Color Image ..."
+    IDM_PENDING_ZBUFFER_DEPTH,
+        "Pending to obtaining ZBuffer Depth ..."
+    IDM_PENDING_CONTOURNS,
+        "Pending to calculate contourns ..."
+    IDM_COMPUTING_RAYTRACING,
+        "Computing raytracing, this may take some time ..."
+    IDM_CAMERA_MODE,
+        "Camera mode interaction - drag mouse with different buttons over the scene to change current camera."
+    IDM_SELECTION_MODE,
+        "Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy."
+    IDM_TRANSLATION_MODE,
+        "Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it."
+    IDM_ROTATION_MODE,
+        "Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it."
+    IDM_SCALE_MODE,
+        "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it."
+    IDM_VOICECOMMAND_DISABLED,
+        "Voice recognition feature disabled."
+    IDM_VOICECOMMAND_ENABLED,
+        "Voice recognition feature enabled."
+    IDM_VOICECOMMAND_TITLE,
+        "Voice recognition client network connection"
+    IDM_VOICECOMMAND_IPQUESTION,
+        "Please specify the IP network direction or Internet machine name where the voice recognition server application is running:"
+    IDM_VOICECOMMAND_PORTQUESTION,
+        "Please specify the TCP PORT for network connection to the running voice recognition server application:"
+    IDM_OPERATION_CANCELLED_BY_USER,
+        "Operation cancelled by user."
+    IDM_INTRO_MESSAGE,
+        "VSDK 3D Editor example - (c) Copyright, Pontificia Universidad Javeriana, 2005-2007"
+}
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
