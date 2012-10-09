@@ -2,10 +2,13 @@
 
 package vsdk.toolkit.io.gui;
 
+// Java basic classes
 import java.io.File;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 
+// Vitral classes
 import vsdk.toolkit.gui.GuiButtonGroup;
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.gui.GuiCommand;
@@ -13,7 +16,6 @@ import vsdk.toolkit.gui.GuiMenu;
 import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.ExceptionGuiBadName;
 import vsdk.toolkit.gui.ExceptionGuiParseError;
-
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -444,12 +446,19 @@ public class GuiPersistence {
         return menu;
     }
 
-    public static Gui importAquynzaGui(Reader source) throws Exception {
+    /**
+     * WARNING, pending to check character format
+     * 
+     * @param source
+     * @return
+     * @throws Exception 
+     */
+    public static Gui importAquynzaGui(InputStream source) throws Exception {
         Gui context;
 
         context = new Gui();
 
-        StreamTokenizer parser = new StreamTokenizer(source);
+        StreamTokenizer parser = new StreamTokenizer(new InputStreamReader(source));
 
         parser.resetSyntax();
         parser.eolIsSignificant(false);
@@ -511,7 +520,7 @@ public class GuiPersistence {
             default:
                 if (parser.ttype == '\"') {
                     //System.out.println("STRING " + parser.sval);
-                    ;
+                    
                 } else {
                     // Only supposed to contain '{' or '}'
                     String report;
