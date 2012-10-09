@@ -28,6 +28,13 @@ over gemetries.
 public class ComputationalGeometry extends ProcessingElement
 {
     private static InfinitePlane workPlane;
+	
+	// For 2D line clipping an 4 bit outcode is used
+    private static final int COHEN_SUTHERLAND_2D_INSIDE = 0; // 0000
+    private static final int COHEN_SUTHERLAND_2D_LEFT = 1;  // 0001
+    private static final int COHEN_SUTHERLAND_2D_RIGHT = 2; // 0010
+    private static final int COHEN_SUTHERLAND_2D_BOTTOM = 4;// 0100
+    private static final int COHEN_SUTHERLAND_2D_TOP = 8;   // 1000
 
     static {
         workPlane = new InfinitePlane(1, 1, 1, 0);
@@ -306,6 +313,106 @@ public class ComputationalGeometry extends ProcessingElement
         minMax[3] = maxX;
         minMax[4] = maxY;
         minMax[5] = maxZ;
+    }
+
+    /**
+     * Implementation of the Cohen-Sutherland line clipping algorithm on two
+     * Dimensions
+     * @param p0 first point of the line to be clipped
+     * @param p1 second point of the line to be clipped
+     * @param min coordinate with the minimum (x,y) values of the clipping
+     * rectangle
+     * @param max coordinate with the maximum (x,y) values of the clipping
+     * rectangle
+     * @return <code> true </code> when there is at least a portion of the line
+     * inside the clipping rectangle and <code> false </code> when the line is
+     * outside the clipping rectangle.
+     *
+     * WARNING: This method would be more efficient if there were
+     * an Vector2D class on VITRAL
+     *
+     * @author Andrés Felipe Mejía (Paco el Caco)
+     */
+    public static boolean cohenSutherlandLineClipping2D(Vector3D p0, Vector3D p1,
+            Vector3D min, Vector3D max){
+
+        if(min.x > max.x){
+            double aux = min.x;
+            min.x = max.x;
+            max.x = aux;
+        }
+        if(min.y > max.y){
+            double aux = min.y;
+            min.y = max.y;
+            max.y = aux;
+        }
+
+        int outCode0 = computeCohenSutherland2DCode(p0, min, max);
+        int outCode1 = computeCohenSutherland2DCode(p1, min, max);
+        int outCodeOut = 0;
+        boolean accept = false;
+        double x = 0.0;
+        double y = 0.0;
+
+        while(true){
+            if((outCode0 | outCode1) == 0){
+                accept = true;
+                break;
+            } else if ((outCode0 & outCode1) != 0){
+                p0 = new Vector3D(0.0, 0.0, 0.0);
+                p1 = new Vector3D(0.0, 0.0, 0.0);
+                break;
+            } else {
+                outCodeOut = (outCode0 != 0) ? outCode0 : outCode1;
+                if( (outCodeOut & COHEN_SUTHERLAND_2D_TOP) == 8){
+                    x = p0.x + (p1.x - p0.x) * (max.y - p0.y) / (p1.y - p0.y);
+                    y = max.y;
+                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_BOTTOM) == 4){
+                    x = p0.x + (p1.x - p0.x) * (min.y - p0.y) / (p1.y - p0.y);
+                    y = min.y;
+                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_RIGHT) == 2){
+                    y = p0.y + (p1.y - p0.y) * (max.x - p0.x) / (p1.x - p0.x);
+                    x = max.x;
+                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_LEFT) == 1)
+                {
+                    y = p0.y + (p1.y - p0.y) * (min.x - p0.x) / (p1.x - p0.x);
+                    x = min.x;
+                }
+            }
+            if( outCodeOut == outCode0) {
+                p0.x = x;
+                p0.y = y;
+                outCode0 = computeCohenSutherland2DCode(p0, min, max);
+            } else {
+                p1.x = x;
+                p1.y = y;
+                outCode1 = computeCohenSutherland2DCode(p1, min, max);
+            }
+        }
+        return accept;
+    }
+
+    /**
+     * Compute a code of the position of a point relative to the clipping
+     * rectangle
+     * @param p point to be located
+     * @param min
+     * @param max
+     * @return the code in four bits representing the location of the point
+     */
+    private static int computeCohenSutherland2DCode(Vector3D p, Vector3D min, Vector3D max){
+        int outCode;
+        outCode = COHEN_SUTHERLAND_2D_INSIDE;
+
+        if(p.x < min.x)
+            outCode |= COHEN_SUTHERLAND_2D_LEFT;
+        if(p.x > max.x)
+            outCode |= COHEN_SUTHERLAND_2D_RIGHT;
+        if(p.y < min.y)
+            outCode |= COHEN_SUTHERLAND_2D_BOTTOM;
+        if(p.y > max.y)
+            outCode |= COHEN_SUTHERLAND_2D_TOP;
+        return outCode;
     }
 }
 
