@@ -76,6 +76,9 @@ cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd Techniques
+cd CohenSutherlandClippingTechnique2D
+./run.sh
+cd ..
 cd CohenSutherlandClippingTechnique3D
 ./run.sh
 cd ..

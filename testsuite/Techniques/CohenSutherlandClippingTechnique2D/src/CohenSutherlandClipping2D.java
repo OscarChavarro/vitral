@@ -1,3 +1,7 @@
+//===========================================================================
+
+import vsdk.toolkit.processing.ComputationalGeometry;
+
 // Java AWT/Swing classes
 import java.awt.BorderLayout;
 import java.awt.event.AdjustmentEvent;
@@ -18,7 +22,7 @@ import javax.media.opengl.GLEventListener;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
-@author Andrés Felipe Mejía (Paco el Caco)
+@author Andres Felipe Mejia (Paco el Caco)
  */
 public class CohenSutherlandClipping2D implements 
         GLEventListener, AdjustmentListener {
@@ -50,7 +54,7 @@ public class CohenSutherlandClipping2D implements
 
     public void createGUI()
     {
-        p0 = new Vector3D(-0.85, 0.5, 0.0);
+        p0 = new Vector3D(0.85, 0.5, 0.0);
         p1 = new Vector3D(-0.85, -0.5, 0.0);
         min = new Vector3D(-0.8, -0.8, 0.0);
         max = new Vector3D(0.8, 0.8, 0.0);
@@ -168,3 +172,7 @@ public class CohenSutherlandClipping2D implements
     }
     
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
