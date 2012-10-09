@@ -48,11 +48,7 @@ import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
-import application.gui.ButtonsPanel;
-import application.gui.ModifyPanel;
-import application.gui.SwingImageControlWindow;
-import application.gui.SwingSelectorDialog;
-import application.gui.MyChangeListener;
+import application.gui.*;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
 import application.render.jogl.JoglDrawingArea;
@@ -77,13 +73,15 @@ public class SceneEditorApplication {
     public JPanel statusBarPanel;
     public SwingImageControlWindow imageControlWindow;
     public SwingSelectorDialog selectorDialog;
+    GUIEventExecutor executor;
     public ButtonsPanel executorPanel;
-    private JFrame mainWindowWidget;
+    public JFrame mainWindowWidget;
     private String lookAndFeel;
     public String languageGuiFile;
     public ModifyPanel modifyPanel;
     public boolean modifyPanelSelected;
     public boolean fullScreenGuiMode;
+    private GUIEventExecutor guiEventExecutor;
 
     // Networking
     private VitralEditorServer networkServer;
@@ -182,7 +180,7 @@ public class SceneEditorApplication {
         container.getModel().addChangeListener(new MyChangeListener(this));
 
         //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 1);
+        panel = new ButtonsPanel(this, 1, executor);
         sp = new JScrollPane(panel);
         container.addTab(gui.getMessage("IDM_CREATION_TAB"), 
             null, sp, "Object creation operations");
@@ -194,19 +192,19 @@ public class SceneEditorApplication {
             null, sp, "Modify selected body");
 
         //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 2);
+        panel = new ButtonsPanel(this, 2, executor);
         sp = new JScrollPane(panel);
         container.addTab(gui.getMessage("IDM_GUI_TAB"), 
             null, sp, "GUI Control");
 
         //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 3);
+        panel = new ButtonsPanel(this, 3, executor);
         sp = new JScrollPane(panel);
         container.addTab(gui.getMessage("IDM_OTHERS_TAB"), 
             null, sp, "Control the scene components");
 
         //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 4);
+        panel = new ButtonsPanel(this, 4, executor);
         sp = new JScrollPane(panel);
         container.addTab(gui.getMessage("IDM_RENDER_TAB"), 
             null, sp, "Control the scene components");
@@ -281,7 +279,8 @@ public class SceneEditorApplication {
         //System.out.println(gui);
 
         //-----------------------------------------------------------------
-        executorPanel = new ButtonsPanel(this, 101);
+        executor = new GUIEventExecutor(this);
+        executorPanel = new ButtonsPanel(this, 101, executor);
 
         //-----------------------------------------------------------------
         JMenuBar menubar;
@@ -456,7 +455,7 @@ public class SceneEditorApplication {
 
     public void externalCommand(String label)
     {
-        executorPanel.executeCommand(label);
+        boolean b = guiEventExecutor.executeCommand(label);
     }
 
     public static void main(String[] args) {
