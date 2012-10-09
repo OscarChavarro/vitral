@@ -9,7 +9,7 @@
 package application;
 
 // Java basic classes
-import java.io.FileReader;
+import java.io.FileInputStream;
 
 // Java GUI classes
 import java.awt.BorderLayout;
@@ -30,6 +30,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK; 
@@ -55,7 +56,7 @@ import application.gui.MyChangeListener;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
 import application.render.jogl.JoglDrawingArea;
-import javax.swing.*;
+
 
 public class SceneEditorApplication {
     // Application model
@@ -226,7 +227,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         try {
             gui = GuiPersistence.importAquynzaGui(
-                                new FileReader(languageGuiFile)  );
+                                new FileInputStream(languageGuiFile)  );
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
@@ -271,7 +272,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         try {
             gui = GuiPersistence.importAquynzaGui(
-                                new FileReader(languageGuiFile)  );
+                                new FileInputStream(languageGuiFile)  );
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
