@@ -42,7 +42,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 
-public class CohenSutherlandClipping implements 
+public class CohenSutherlandClipping3D implements 
 GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, 
 KeyListener
 {
@@ -66,7 +66,7 @@ KeyListener
     public static final int LEFTVIEW = 3;
     public static final int PERSPECTIVEVIEW = 4;
 
-    public CohenSutherlandClipping() {
+    public CohenSutherlandClipping3D() {
         testVector = new Vector3D();
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
@@ -174,7 +174,7 @@ KeyListener
     }
     
     public static void main (String[] args) {
-        CohenSutherlandClipping instance = new CohenSutherlandClipping();
+        CohenSutherlandClipping3D instance = new CohenSutherlandClipping3D();
         instance.createGUI();
     }
 

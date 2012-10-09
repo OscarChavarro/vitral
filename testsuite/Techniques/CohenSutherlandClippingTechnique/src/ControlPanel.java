@@ -35,9 +35,9 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 
 public class ControlPanel extends JPanel implements AdjustmentListener, ActionListener
 {
-    private CohenSutherlandClipping parent;
+    private CohenSutherlandClipping3D parent;
 
-    public ControlPanel(CohenSutherlandClipping parent) {
+    public ControlPanel(CohenSutherlandClipping3D parent) {
         //-----------------------------------------------------------------
         JScrollBar sb;
         JLabel jl;
