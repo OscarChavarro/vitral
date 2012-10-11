@@ -8,6 +8,6 @@ package vsdk.toolkit.gui;
  *
  * @author TaakeSlottet
  */
-public abstract class GuiBasicElement {
+public abstract class GuiElement {
     
 }
