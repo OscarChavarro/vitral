@@ -4,7 +4,18 @@ package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import vsdk.toolkit.gui.variable.GuiVariable;
 
+/**
+In order to understand this class, the following concepts must be taken into
+account:
+  - GuiVariable
+  - GuiCommand
+  - Reflection (introspection) design pattern
+  - Menubars, buttons bars, and other are based upon GuiCommands
+  - Dialogs are based upon GuiVariables and GuiCommands
+  - Dialogs and menus are hierarchical
+*/
 public class Gui
 {
     private GuiMenu menubar;
@@ -12,14 +23,15 @@ public class Gui
     private ArrayList<GuiCommand> commandList;
     private ArrayList<GuiButtonGroup> buttonGroupList;
     private HashMap<String, String> messagesTable;
+    private ArrayList<GuiVariable> variableList;
 
-    public Gui()
-    {
+    public Gui() {
         menubar = null;
         popupMenuList = new ArrayList<GuiMenu>();
         commandList = new ArrayList<GuiCommand>();
         buttonGroupList = new ArrayList<GuiButtonGroup>();
         messagesTable = new HashMap<String, String>();
+        variableList = new ArrayList<GuiVariable>();
     }
 
     public void addMessage(String id, String message)
