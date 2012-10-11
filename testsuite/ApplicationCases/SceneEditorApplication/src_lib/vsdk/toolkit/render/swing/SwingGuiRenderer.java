@@ -34,7 +34,7 @@ import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.gui.GuiMenu;
 import vsdk.toolkit.gui.GuiMenuItem;
-import vsdk.toolkit.gui.GuiElement;
+import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiButtonGroup;
 import vsdk.toolkit.gui.GuiCommand;
 
@@ -105,11 +105,11 @@ public class SwingGuiRenderer
                 widgetPopup.add(new JMenuItem("Popup menu not found on GUI"));
           }
           else {
-            ArrayList<GuiElement> children;
+            ArrayList<GuiMenuElement> children;
             children = menu.getChildren();
 
             int i;
-            GuiElement element;
+            GuiMenuElement element;
             String className;
 
             for ( i = 0; i < children.size(); i++ ) {
@@ -265,11 +265,11 @@ public class SwingGuiRenderer
             widgetPopup.getPopupMenu().setLightWeightPopupEnabled(false);
           }
           else {
-            ArrayList<GuiElement> children;
+            ArrayList<GuiMenuElement> children;
             children = menubar.getChildren();
 
             int i;
-            GuiElement element;
+            GuiMenuElement element;
             GuiMenu menu;
             String className;
 

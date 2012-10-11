@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-public class GuiMenuItem extends GuiElement
+public class GuiMenuItem extends GuiMenuElement
 {
     private String name;
     private String commandName;

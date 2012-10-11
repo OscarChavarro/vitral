@@ -2,9 +2,9 @@ package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 
-public class GuiMenu extends GuiElement
+public class GuiMenu extends GuiMenuElement
 {
-    private ArrayList <GuiElement> children;
+    private ArrayList <GuiMenuElement> children;
     private String name;
     private char mnemonic;
     private String accelerator;
@@ -12,11 +12,11 @@ public class GuiMenu extends GuiElement
     public GuiMenu(Gui c)
     {
         context = c;
-        children = new ArrayList<GuiElement>();
+        children = new ArrayList<GuiMenuElement>();
         name = null;
     }
 
-    public ArrayList <GuiElement> getChildren()
+    public ArrayList <GuiMenuElement> getChildren()
     {
         return children;
     }
@@ -28,7 +28,7 @@ public class GuiMenu extends GuiElement
         accelerator = processAccelerator(n);
     }
 
-    public void addChild(GuiElement i)
+    public void addChild(GuiMenuElement i)
     {
         children.add(i);
     }

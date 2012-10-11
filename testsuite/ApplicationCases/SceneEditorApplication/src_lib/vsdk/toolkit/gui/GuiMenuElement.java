@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-public abstract class GuiElement
+public abstract class GuiMenuElement
 {
     protected Gui context;
 
