@@ -38,6 +38,9 @@ public class Gui {
         commandList = new ArrayList<GuiCommand>();
         buttonGroupList = new ArrayList<GuiButtonGroup>();
         messagesTable = new HashMap<String, String>();
+        /*
+         * TODO variableList should be hashMap
+         */
         variableList = new ArrayList<GuiVariable>();
         dialogList = new ArrayList<GuiDialog>();
     }
@@ -131,6 +134,16 @@ public class Gui {
 
     public void addVariable(GuiVariable variable) {
         variableList.add(variable);
+    }
+    
+    public GuiVariable getVariableByName(String name){
+        int i;
+        for(i = 0; i < variableList.size(); i++){
+            if(variableList.get(i).getName().equals(name)){
+                return variableList.get(i);
+            }
+        }
+        return null;
     }
 
     @Override

@@ -28,7 +28,6 @@ public abstract class GuiVariable extends GuiElement {
     /// under the "camera" scope. "scene.camera.position" could be a full
     /// hierarchy name for a variable inside the system.
 
-    protected String id;
     protected String name;
     protected String validRange;
     protected String initialvalue;
@@ -47,13 +46,6 @@ public abstract class GuiVariable extends GuiElement {
         this.name = name;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getInitialvalue() {
         return initialvalue;
@@ -66,8 +58,7 @@ public abstract class GuiVariable extends GuiElement {
     @Override
     public String toString() {
         String msg = "";
-        msg = msg + "VARIABLE: " + this.getId() + "\n"
-                + "     ID: " + this.getId() + "\n"
+        msg = msg + "VARIABLE:\n"
                 + "     TYPE: " + this.getType() + "\n"
                 + "     NAME: " + this.getName() + "\n"
                 + "     INITIAL_VALUE: " + this.getInitialvalue() + "\n"

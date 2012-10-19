@@ -748,31 +748,31 @@ public class GuiPersistence {
                         } else if (content == '}') {
                             if(typeName.equalsIgnoreCase("double")){
                                 variable = new GuiDoubleVariable();
-                                variable.setId(idString);
+                                variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if(typeName.equalsIgnoreCase("Vector3D")){
                                 variable = new GuiVector3DVariable();
-                                variable.setId(idString);
+                                variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if(typeName.equalsIgnoreCase("ColorRgb")){
                                 variable = new GuiColorRgbVariable();
-                                variable.setId(idString);
+                                variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if(typeName.equalsIgnoreCase("integer")){
                                 variable = new GuiDoubleVariable();
-                                variable.setId(idString);
+                                variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if(typeName.equalsIgnoreCase("boolean")){
                                 variable = new GuiDoubleVariable();
-                                variable.setId(idString);
+                                variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
