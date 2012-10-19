@@ -22,12 +22,20 @@ public class GuiColorRgbVariable extends GuiVariable {
     
     @Override
     public String getValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.validRange;
+    }
+
+    public String setValidRange() {
+        return validRange;
     }
 
     @Override
-    public String setValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setValidRange(String vr) {
+        this.validRange = vr;
     }
     
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

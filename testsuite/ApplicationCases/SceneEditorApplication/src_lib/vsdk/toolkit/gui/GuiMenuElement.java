@@ -1,8 +1,7 @@
 package vsdk.toolkit.gui;
 
-public abstract class GuiMenuElement
+public abstract class GuiMenuElement extends GuiElement
 {
-    protected Gui context;
 
     @Override
     public abstract String toString();
@@ -168,3 +167,7 @@ public abstract class GuiMenuElement
         return accelerator;
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

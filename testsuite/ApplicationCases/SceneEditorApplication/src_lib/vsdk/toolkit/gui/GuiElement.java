@@ -9,5 +9,9 @@ package vsdk.toolkit.gui;
  * @author TaakeSlottet
  */
 public abstract class GuiElement {
-    
+        protected Gui context;
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

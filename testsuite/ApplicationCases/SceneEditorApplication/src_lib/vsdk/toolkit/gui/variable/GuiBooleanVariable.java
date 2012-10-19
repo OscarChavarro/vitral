@@ -24,9 +24,17 @@ public class GuiBooleanVariable extends GuiVariable {
         return validRange;
     }
 
-    @Override
     public String setValidRange() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setValidRange(String vr) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

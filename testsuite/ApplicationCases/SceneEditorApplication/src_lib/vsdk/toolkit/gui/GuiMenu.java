@@ -2,8 +2,7 @@ package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 
-public class GuiMenu extends GuiMenuElement
-{
+public class GuiMenu extends GuiMenuElement{
     private ArrayList <GuiMenuElement> children;
     private String name;
     private char mnemonic;
@@ -69,3 +68,7 @@ public class GuiMenu extends GuiMenuElement
         return mnemonic;
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

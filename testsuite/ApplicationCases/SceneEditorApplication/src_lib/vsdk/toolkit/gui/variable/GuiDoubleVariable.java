@@ -21,11 +21,19 @@ public class GuiDoubleVariable extends GuiVariable {
 
     @Override
     public String getValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return validRange;
     }
 
-    @Override
+    public void setValidRange(String vr) {
+        validRange = vr;
+    }
+
+
     public String setValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Raro";
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

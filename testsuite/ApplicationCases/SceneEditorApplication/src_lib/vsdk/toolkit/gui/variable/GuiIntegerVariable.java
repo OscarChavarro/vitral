@@ -25,9 +25,17 @@ public class GuiIntegerVariable extends GuiVariable {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
     public String setValidRange() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void setValidRange(String vr) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

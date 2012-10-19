@@ -1,32 +1,44 @@
 package vsdk.toolkit.gui.variable;
 
+import java.util.ArrayList;
+import vsdk.toolkit.gui.GuiDialog;
+import vsdk.toolkit.gui.GuiElement;
+
 /**
-A GuiVariable is a value stored at computer memory which has a type, and is
-assigned to a name and that is inside a valid values range. For example, the
-radius of an sphere has a valid value range expressed as an interval: 
-"[0, INF]". A current value for that variable could be the number "5.0", and 
-its name could be "r". This variable is of type "GuiDoubleVariable".
-
-This class is the superclass of several other classes, each one representing
-an specific variable type.
-
-This class and its subclasses plays a client role in a reflection design pattern.
-1
+ * A GuiVariable is a value stored at computer memory which has a type, and is
+ * assigned to a name and that is inside a valid values range. For example, the
+ * radius of an sphere has a valid value range expressed as an interval: "[0,
+ * INF]". A current value for that variable could be the number "5.0", and its
+ * name could be "r". This variable is of type "GuiDoubleVariable".
+ *
+ * This class is the superclass of several other classes, each one representing
+ * an specific variable type.
+ *
+ * This class and its subclasses plays a client role in a reflection design
+ * pattern.
+ *
+ * This class plays a role of leaf on an n-ary tree in the composite design
+ * pattern.
+ *
  * @author TaakeSlottet
  */
-public abstract class GuiVariable {
+public abstract class GuiVariable extends GuiElement {
     /// Variable names follows a convention of scope operator. Example:
     /// "position" is a global name, "camera.position" is the same variable
     /// under the "camera" scope. "scene.camera.position" could be a full
     /// hierarchy name for a variable inside the system.
-    protected String name;    
-    protected String validRange;
 
-    public GuiVariable()
-    {
+    protected String id;
+    protected String name;
+    protected String validRange;
+    protected String initialvalue;
+
+    public GuiVariable() {
+        name = "";
         validRange = "";
+        initialvalue = "";
     }
-    
+
     public String getName() {
         return name;
     }
@@ -34,22 +46,53 @@ public abstract class GuiVariable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getInitialvalue() {
+        return initialvalue;
+    }
+
+    public void setInitialvalue(String initialvalue) {
+        this.initialvalue = initialvalue;
+    }
+
+    @Override
+    public String toString() {
+        String msg = "";
+        msg = msg + "VARIABLE: " + this.getId() + "\n"
+                + "     ID: " + this.getId() + "\n"
+                + "     TYPE: " + this.getType() + "\n"
+                + "     NAME: " + this.getName() + "\n"
+                + "     INITIAL_VALUE: " + this.getInitialvalue() + "\n"
+                + "     VALID_RANGE: " + this.getValidRange() + "\n";
+        return msg;
+    }
+
     /**
-    Each variable has a type. Examples: "Integer", "Double", "String",
-    "Vector3D".
-    */
+     * Each variable has a type. Examples: "Integer", "Double", "String",
+     * "Vector3D".
+     */
     public abstract String getType();
-    
+
     /**
-    Gets the current String specifying valid value range. The returned String
-    contains an specification expressed in Vitral GUI value ranges language.
-    */
+     * Gets the current String specifying valid value range. The returned String
+     * contains an specification expressed in Vitral GUI value ranges language.
+     */
     public abstract String getValidRange();
-    
+
     /**
-    Sets the current String specifying valid value range. The returned String
-    contains an specification expressed in Vitral GUI value ranges language.
-    */
-    public abstract String setValidRange();
+     * Sets the current String specifying valid value range. The returned String
+     * contains an specification expressed in Vitral GUI value ranges language.
+     */
+    public abstract void setValidRange(String vr);
 }
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.io.gui;
 
 // Java basic classes
@@ -7,20 +6,20 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
+import java.util.ArrayList;
 
 // Vitral classes
-import vsdk.toolkit.gui.GuiButtonGroup;
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiCommand;
-import vsdk.toolkit.gui.GuiMenu;
-import vsdk.toolkit.gui.GuiMenuItem;
-import vsdk.toolkit.gui.ExceptionGuiBadName;
-import vsdk.toolkit.gui.ExceptionGuiParseError;
+import vsdk.toolkit.gui.*;
+import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
+import vsdk.toolkit.gui.variable.GuiDoubleVariable;
+import vsdk.toolkit.gui.variable.GuiVariable;
+import vsdk.toolkit.gui.variable.GuiVector3DVariable;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 public class GuiPersistence {
+
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,
             Gui context) throws Exception {
@@ -32,48 +31,46 @@ public class GuiPersistence {
         do {
             try {
                 tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println("Salida 0");
                 throw e;
             }
 
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( level == 1 ) {
-                    lastId = parser.sval;
-                }
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    context.addMessage(lastId, parser.sval);
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                         level++;
-                         if ( level > 2 ) {
-                             throw new ExceptionGuiParseError();
-                         }
-                      }
-                      else if ( content == '}' ) {
-                         level--;
-                         if ( level <= 0 ) {
-                             return;
-                         }
-                      }
-                      else {
-                        //throw new ExceptionGuiParseError();
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (level == 1) {
+                        lastId = parser.sval;
                     }
-                }
-                break;
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        context.addMessage(lastId, parser.sval);
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            level++;
+                            if (level > 2) {
+                                throw new ExceptionGuiParseError();
+                            }
+                        } else if (content == '}') {
+                            level--;
+                            if (level <= 0) {
+                                return;
+                            }
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
+                    }
+                    break;
             }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while (tokenType != StreamTokenizer.TT_EOF);
     }
 
     private static GuiButtonGroup importAquynzaGuiButtonGroup(
@@ -92,101 +89,88 @@ public class GuiPersistence {
         do {
             try {
                 tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println("Salida 0");
                 throw e;
             }
 
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( level == 2 ) {
-                    item.addCommandByName(parser.sval);
-                }
-                if ( param == 0 && parser.sval.equals("direction") ) {
-                    param = 1;
-                }
-                else if ( param == 1 ) {
-                    if ( parser.sval.equals("horizontal") ) {
-                        item.setDirection(GuiButtonGroup.HORIZONTAL);
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (level == 2) {
+                        item.addCommandByName(parser.sval);
                     }
-                    else {
-                        item.setDirection(GuiButtonGroup.VERTICAL);
+                    if (param == 0 && parser.sval.equals("direction")) {
+                        param = 1;
+                    } else if (param == 1) {
+                        if (parser.sval.equals("horizontal")) {
+                            item.setDirection(GuiButtonGroup.HORIZONTAL);
+                        } else {
+                            item.setDirection(GuiButtonGroup.VERTICAL);
+                        }
+                        param = 0;
+                    } else if (param == 0 && parser.sval.equals("showIcons")) {
+                        param = 2;
+                    } else if (param == 2) {
+                        if (parser.sval.equals("on")) {
+                            item.setShowIcons(true);
+                        } else {
+                            item.setShowIcons(false);
+                        }
+                        param = 0;
+                    } else if (param == 0 && parser.sval.equals("showText")) {
+                        param = 3;
+                    } else if (param == 3) {
+                        if (parser.sval.equals("on")) {
+                            item.setShowText(true);
+                        } else {
+                            item.setShowText(false);
+                        }
+                        param = 0;
+                    } else if (param == 0 && parser.sval.equals("showTitle")) {
+                        param = 4;
+                    } else if (param == 4) {
+                        if (parser.sval.equals("on")) {
+                            //item.setShowTitle(true);
+                        } else {
+                            //item.setShowTitle(false);
+                        }
+                        param = 0;
                     }
-                    param = 0;
-                }
-                else if ( param == 0 && parser.sval.equals("showIcons") ) {
-                    param = 2;
-                }
-                else if ( param == 2 ) {
-                    if ( parser.sval.equals("on") ) {
-                        item.setShowIcons(true);
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        if (name == null) {
+                            name = parser.sval;
+                            item.setName(name);
+                        }
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            level++;
+                            if (level > 2) {
+                                throw new ExceptionGuiParseError();
+                            }
+                        } else if (content == '}') {
+                            level--;
+                            if (level <= 0) {
+                                return item;
+                            }
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
                     }
-                    else {
-                        item.setShowIcons(false);
-                    }
-                    param = 0;
-                }
-                else if ( param == 0 && parser.sval.equals("showText") ) {
-                    param = 3;
-                }
-                else if ( param == 3 ) {
-                    if ( parser.sval.equals("on") ) {
-                        item.setShowText(true);
-                    }
-                    else {
-                        item.setShowText(false);
-                    }
-                    param = 0;
-                }
-                else if ( param == 0 && parser.sval.equals("showTitle") ) {
-                    param = 4;
-                }
-                else if ( param == 4 ) {
-                    if ( parser.sval.equals("on") ) {
-                        //item.setShowTitle(true);
-                    }
-                    else {
-                        //item.setShowTitle(false);
-                    }
-                    param = 0;
-                }
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    if ( name == null ) {
-                        name = parser.sval;
-                        item.setName(name);
-                    }
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                         level++;
-                         if ( level > 2 ) {
-                             throw new ExceptionGuiParseError();
-                         }
-                      }
-                      else if ( content == '}' ) {
-                         level--;
-                         if ( level <= 0 ) {
-                             return item;
-                         }
-                      }
-                      else {
-                        //throw new ExceptionGuiParseError();
-                    }
-                }
-                break;
+                    break;
             }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while (tokenType != StreamTokenizer.TT_EOF);
 
-        if ( name == null ) {
+        if (name == null) {
             System.out.println("Salida 2");
             throw new ExceptionGuiBadName();
         }
@@ -212,98 +196,89 @@ public class GuiPersistence {
         do {
             try {
                 tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
+            } catch (Exception e) {
                 throw e;
             }
 
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( idString == null ) {
-                    idString = parser.sval;
-                    item.setId(parser.sval);
-                }
-                else if ( parser.sval.equals("name") ) {
-                    stringMode = 1;
-                }
-                else if ( parser.sval.equals("icon") ) {
-                    stringMode = 2;
-                }
-                else if ( parser.sval.equals("brief") ) {
-                    stringMode = 3;
-                }
-                else if ( parser.sval.equals("help") ) {
-                    stringMode = 4;
-                }
-                else if ( parser.sval.equals("iconTransparency") ) {
-                    stringMode = 5;
-                }
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    switch ( stringMode ) {
-                      case 1: // name
-                        item.setName(parser.sval);
-                        break;
-                      case 2: // icon
-                        try {
-                            img = 
-                            ImagePersistence.importRGBA(new File(parser.sval));
-                            item.setIcon(img);
-                        }
-                        catch ( Exception e ) {
-                            System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
-                            System.err.println(e);
-                        }
-                        break;
-                      case 3: // brief
-                        item.setBrief(parser.sval);
-                        break;
-                      case 4: // help
-                        item.appendToHelp(parser.sval);
-                        break;
-                      case 5: // icon transparency
-                        try {
-                            mask = 
-                            ImagePersistence.importRGB(new File(parser.sval));
-                            item.setIconTransparency(mask);
-                        }
-                        catch ( Exception e ) {
-                            System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
-                            System.err.println(e);
-                        }
-                        break;
-                      default:
-                        break;
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (idString == null) {
+                        idString = parser.sval;
+                        item.setId(parser.sval);
+                    } else if (parser.sval.equals("name")) {
+                        stringMode = 1;
+                    } else if (parser.sval.equals("icon")) {
+                        stringMode = 2;
+                    } else if (parser.sval.equals("brief")) {
+                        stringMode = 3;
+                    } else if (parser.sval.equals("help")) {
+                        stringMode = 4;
+                    } else if (parser.sval.equals("iconTransparency")) {
+                        stringMode = 5;
                     }
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                        if ( idString == null ) {
-                            throw new ExceptionGuiParseError();
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        switch (stringMode) {
+                            case 1: // name
+                                item.setName(parser.sval);
+                                break;
+                            case 2: // icon
+                                try {
+                                    img =
+                                            ImagePersistence.importRGBA(new File(parser.sval));
+                                    item.setIcon(img);
+                                } catch (Exception e) {
+                                    System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
+                                    System.err.println(e);
+                                }
+                                break;
+                            case 3: // brief
+                                item.setBrief(parser.sval);
+                                break;
+                            case 4: // help
+                                item.appendToHelp(parser.sval);
+                                break;
+                            case 5: // icon transparency
+                                try {
+                                    mask =
+                                            ImagePersistence.importRGB(new File(parser.sval));
+                                    item.setIconTransparency(mask);
+                                } catch (Exception e) {
+                                    System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
+                                    System.err.println(e);
+                                }
+                                break;
+                            default:
+                                break;
                         }
-                      }
-                      else if ( content == '}' ) {
-                          //parser.pushBack();
-                          //item.setName(name);
-                          item.applyTransparency();
-                          return item;
-                      }
-                      else {
-                        //throw new ExceptionGuiParseError();
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            if (idString == null) {
+                                throw new ExceptionGuiParseError();
+                            }
+                        } else if (content == '}') {
+                            //parser.pushBack();
+                            //item.setName(name);
+                            item.applyTransparency();
+                            return item;
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
                     }
-                }
-                break;
+                    break;
             }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while (tokenType != StreamTokenizer.TT_EOF);
 
-        if ( idString == null ) {
+        if (idString == null) {
             throw new ExceptionGuiBadName();
         }
 
@@ -326,49 +301,47 @@ public class GuiPersistence {
         do {
             try {
                 tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
+            } catch (Exception e) {
                 throw e;
             }
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER:
-                break;
-              case StreamTokenizer.TT_WORD:
-                if ( parser.sval.equals("MENUITEM") ||
-                     parser.sval.equals("POPUP") ) {
-                    parser.pushBack();
-                    item.setName(name);
-                    return item;
-                }
-                item.addModifier(parser.sval);
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    name = parser.sval;
-                    item.setName(name);
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                        throw new ExceptionGuiParseError();
-                      }
-                      else if ( content == '}' ) {
-                          parser.pushBack();
-                          item.setName(name);
-                          return item;
-                      }
-                      else {
-                        //throw new ExceptionGuiParseError();
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (parser.sval.equals("MENUITEM")
+                            || parser.sval.equals("POPUP")) {
+                        parser.pushBack();
+                        item.setName(name);
+                        return item;
                     }
-                }
-                break;
+                    item.addModifier(parser.sval);
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        name = parser.sval;
+                        item.setName(name);
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            throw new ExceptionGuiParseError();
+                        } else if (content == '}') {
+                            parser.pushBack();
+                            item.setName(name);
+                            return item;
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
+                    }
+                    break;
             }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
+        } while (tokenType != StreamTokenizer.TT_EOF);
 
-        if ( name == null ) {
+        if (name == null) {
             throw new ExceptionGuiBadName();
         }
         item.setName(name);
@@ -390,55 +363,52 @@ public class GuiPersistence {
         do {
             try {
                 tokenType = parser.nextToken();
-              }
-              catch (Exception e) {
+            } catch (Exception e) {
                 throw e;
             }
-            switch ( tokenType ) {
-              case StreamTokenizer.TT_EOL: break;
-              case StreamTokenizer.TT_EOF: break;
-              case StreamTokenizer.TT_NUMBER: break;
-              case StreamTokenizer.TT_WORD:
-                if ( parser.sval.equals("POPUP") ) {
-                    GuiMenu popup = importAquynzaGuiMenu(parser, context);
-                    context.addPopupMenu(popup);
-                    menu.addChild(popup);
-                }
-
-                else if ( parser.sval.equals("MENUITEM") ) {
-                    GuiMenuItem item;
-                    item = importAquynzaGuiMenuItem(parser, context);
-                    menu.addChild(item);
-                }
-
-                break;
-              default:
-                if ( parser.ttype == '\"' ) {
-                    name = parser.sval;
-                  }
-                  else {
-                    // Only supposed to contain '{' or '}'
-                    char content = parser.toString().charAt(7);
-                    if ( content == '{' ) {
-                        //System.out.println("{ MARK");
-                        level++;
-                      }
-                      else if ( content == '}' ) {
-                        //System.out.println("} MARK");
-                        level--;
-                        if ( level == 0 ) {
-                            tokenType = StreamTokenizer.TT_EOF;
-                        }
-                      }
-                      else {
-                        //throw new ExceptionGuiParseError();
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (parser.sval.equals("POPUP")) {
+                        GuiMenu popup = importAquynzaGuiMenu(parser, context);
+                        context.addPopupMenu(popup);
+                        menu.addChild(popup);
+                    } else if (parser.sval.equals("MENUITEM")) {
+                        GuiMenuItem item;
+                        item = importAquynzaGuiMenuItem(parser, context);
+                        menu.addChild(item);
                     }
-                }
-                break;
-            }
-        } while ( tokenType != StreamTokenizer.TT_EOF );
 
-        if ( name == null ) {
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        name = parser.sval;
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            //System.out.println("{ MARK");
+                            level++;
+                        } else if (content == '}') {
+                            //System.out.println("} MARK");
+                            level--;
+                            if (level == 0) {
+                                tokenType = StreamTokenizer.TT_EOF;
+                            }
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
+                    }
+                    break;
+            }
+        } while (tokenType != StreamTokenizer.TT_EOF);
+
+        if (name == null) {
             throw new ExceptionGuiBadName();
         }
         menu.setName(name);
@@ -448,10 +418,10 @@ public class GuiPersistence {
 
     /**
      * WARNING, pending to check character format
-     * 
+     *
      * @param source
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     public static Gui importAquynzaGui(InputStream source) throws Exception {
         Gui context;
@@ -475,6 +445,7 @@ public class GuiPersistence {
 
         int tokenType;
 
+        // First pass process
         do {
             try {
                 tokenType = parser.nextToken();
@@ -482,70 +453,345 @@ public class GuiPersistence {
                 break;
             }
             switch (tokenType) {
-            case StreamTokenizer.TT_EOL:
-                break;
-            case StreamTokenizer.TT_EOF:
-                break;
-            case StreamTokenizer.TT_NUMBER:
-                //System.out.println("NUMBER " + parser.sval);
-                break;
-            case StreamTokenizer.TT_WORD:
-                if ( parser.sval.equals("MENU") ) {
-                    GuiMenu menubar =
-                            importAquynzaGuiMenu(parser, context);
-                    context.setMenubar(menubar);
-                }
-                else if ( parser.sval.equals("POPUP") ) {
-                    GuiMenu popup =
-                            importAquynzaGuiMenu(parser, context);
-                    context.addPopupMenu(popup);
-                }
-                else if ( parser.sval.equals("COMMAND") ) {
-                    GuiCommand command = 
-                            importAquynzaGuiCommand(parser, context);
-                    context.addCommand(command);
-                }
-                else if ( parser.sval.equals("BUTTON_GROUP") ) {
-                    GuiButtonGroup bg = 
-                            importAquynzaGuiButtonGroup(parser, context);
-                    context.addButtonGroup(bg);
-                }
-                else if ( parser.sval.equals("MESSAGES") ) {
-                    importAquynzaGuiMessages(parser, context);
-                }
-                else {
-                    System.out.println("NotProcessedIdentifier " + parser.sval);
-                }
-                break;
-            default:
-                if (parser.ttype == '\"') {
-                    //System.out.println("STRING " + parser.sval);
-                    
-                } else {
-                    // Only supposed to contain '{' or '}'
-                    String report;
-                    report = parser.toString();
-                    if (report.length() >= 8) {
-                        char content = report.charAt(7);
-                        if (content == '{') {
-                            //System.out.println("{ MARK");
-                        } else if (content == '}') {
-                            //System.out.println("} MARK");
-                        } else {
-                            // Nothing is done, as this is and unknown token,
-                            // posibly corresponding to an empty token (i.e.
-                            // a comment line with no real information)
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    //System.out.println("NUMBER " + parser.sval);
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (parser.sval.equals("MENU")) {
+                        GuiMenu menubar =
+                                importAquynzaGuiMenu(parser, context);
+                        context.setMenubar(menubar);
+                    } else if (parser.sval.equals("POPUP")) {
+                        GuiMenu popup =
+                                importAquynzaGuiMenu(parser, context);
+                        context.addPopupMenu(popup);
+                    } else if (parser.sval.equals("COMMAND")) {
+                        GuiCommand command =
+                                importAquynzaGuiCommand(parser, context);
+                        context.addCommand(command);
+                    } else if (parser.sval.equals("DIALOG")) {
+                        GuiDialog dialog =
+                                importAquynzaGuiDialog(parser, context);
+                        context.addDialog(dialog);
+                    } else if (parser.sval.equals("VARIABLE")) {
+                        GuiVariable variable =
+                                importAquynzaGuiVariable(parser, context);
+                        context.addVariable(variable);
+                    } else if (parser.sval.equals("BUTTON_GROUP")) {
+                        GuiButtonGroup bg =
+                                importAquynzaGuiButtonGroup(parser, context);
+                        context.addButtonGroup(bg);
+                    } else if (parser.sval.equals("MESSAGES")) {
+                        importAquynzaGuiMessages(parser, context);
+                    } else {
+                        System.out.println("NotProcessedIdentifier " + parser.sval);
+                    }
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        //System.out.println("STRING " + parser.sval);
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        String report;
+                        report = parser.toString();
+                        if (report.length() >= 8) {
+                            char content = report.charAt(7);
+                            if (content == '{') {
+                                //System.out.println("{ MARK");
+                            } else if (content == '}') {
+                                //System.out.println("} MARK");
+                            } else {
+                                // Nothing is done, as this is and unknown token,
+                                // posibly corresponding to an empty token (i.e.
+                                // a comment line with no real information)
+                            }
                         }
                     }
-                }
-                break;
+                    break;
             }
         } while (tokenType != StreamTokenizer.TT_EOF);
 
+
+        // Second pass process
+        int i, j;
+        ArrayList<GuiDialog> dl;
+
+        dl = context.getDialogList();
+        for (i = 0; i < dl.size(); i++) {
+            ArrayList<String> pv = dl.get(i).getPendingVariableNames();
+            for (j = 0; j < pv.size(); j++) {
+                //dl.get(i).associateVariable(pv.get(j));
+            }
+
+            ArrayList<String> pc = dl.get(i).getPendingCommandNames();
+            for (j = 0; j < pc.size(); j++) {
+                //dl.get(i).associateCommand(pc.get(j));
+            }
+            ArrayList<String> pd = dl.get(i).getPendingDialogNames();
+            for (j = 0; j < pd.size(); j++) {
+                //dl.get(i).associateDialog(pd.get(j));
+            }
+        }
+
         return context;
     }
-}
 
+    private static GuiDialog importAquynzaGuiDialog(StreamTokenizer parser,
+            Gui context) throws ExceptionGuiBadName, ExceptionGuiParseError {
+        GuiDialog dialog;
+
+        dialog = new GuiDialog();
+        int tokenType = 0;
+        String idString = null;
+        int stringMode = 0;
+
+        do {
+            try {
+                tokenType = parser.nextToken();
+            } catch (Exception ex) {
+                try {
+                    throw ex;
+                } catch (Exception ex1) {
+                    ex1.getStackTrace();
+                }
+            }
+
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (idString == null) {
+                        idString = parser.sval;
+                        dialog.setId(parser.sval);
+                    } else if (parser.sval.equals("name")) {
+                        stringMode = 1;
+                    } else if (parser.sval.equals("variable")) {
+                        stringMode = 2;
+                    } else if (parser.sval.equals("command")) {
+                        stringMode = 3;
+                    } else if (parser.sval.equals("DIALOG")) {
+                        //stringMode = 4;
+                        //importAquynzaGuiDialog(parser, context);
+                        GuiDialog dialogS =
+                                importAquynzaGuiDialog(parser, context);
+                        context.addDialog(dialogS);
+                    } else if (parser.sval.equals("dialogref")) {
+                        stringMode = 5;
+                    } else if (parser.sval.equals("iconTransparency")) {
+                        stringMode = 6;
+                    } else {
+                        switch (stringMode) {
+                            case 1:
+                                dialog.getPendingDialogNames().add(parser.sval);
+                                break;
+                            case 2: // variables
+                                dialog.getPendingVariableNames().add(parser.sval);
+                                break;
+                            case 3: // command
+                                dialog.getPendingCommandNames().add(parser.sval);
+                                break;
+                            case 4: // dialog
+                                break;
+                            case 5:  // dialogref
+                                dialog.getPendingDialogRefNames().add(parser.sval);
+                                break;
+                            case 6:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        switch (stringMode) {
+                            case 1: // name
+                                dialog.setName(parser.sval);
+                                break;
+                            case 2: // variable
+                                dialog.getPendingVariableNames().add(parser.sval);
+                                break;
+                            case 3: // command
+                                dialog.getPendingCommandNames().add(parser.sval);
+                                break;
+                            case 4: // dialog
+                                dialog.getPendingDialogNames().add(parser.sval);
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            if (idString == null) {
+                                throw new ExceptionGuiParseError();
+                            }
+                        } else if (content == '}') {
+                            return dialog;
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
+                    }
+                    break;
+            }
+        } while (tokenType != StreamTokenizer.TT_EOF);
+
+        if (idString == null) {
+            throw new ExceptionGuiBadName();
+        }
+
+        return dialog;
+    }
+
+    private static GuiVariable importAquynzaGuiVariable(StreamTokenizer parser,
+            Gui context) throws ExceptionGuiBadName, ExceptionGuiParseError {
+        GuiVariable variable;
+        variable = null;
+        int tokenType = 0;
+        String idString = null;
+        int stringMode = 0;
+        
+        String typeName = null;
+        String rangeName = null;
+        String initialvalueName = null;
+
+        do {
+            try {
+                tokenType = parser.nextToken();
+            } catch (Exception ex) {
+                try {
+                    throw ex;
+                } catch (Exception ex1) {
+                    ex1.getStackTrace();
+                }
+            }
+
+            switch (tokenType) {
+                case StreamTokenizer.TT_EOL:
+                    break;
+                case StreamTokenizer.TT_EOF:
+                    break;
+                case StreamTokenizer.TT_NUMBER:
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    if (idString == null) {
+                        idString = parser.sval;
+                    } else if (parser.sval.equals("name")) {
+                        stringMode = 1;
+                    } else if (parser.sval.equals("VARIABLE")) {
+                        stringMode = 2;
+                    } else if (parser.sval.equals("type")) {
+                        stringMode = 3;
+                    } else if (parser.sval.equals("range")) {
+                        stringMode = 4;
+                    } else if (parser.sval.equals("initialValue")) {
+                        stringMode = 5;
+                    } else if (parser.sval.equals("iconTransparency")) {
+                        stringMode = 6;
+                    } else {
+                        switch (stringMode) {
+                            case 1: // name
+                                break;
+                            case 2: // VARIABLE
+                                break;
+                            case 3: // type
+                                typeName = parser.sval;
+                                break;
+                            case 4: // range
+                                rangeName = parser.sval;
+                                break;
+                            case 5:  // initialValue
+                                initialvalueName = parser.sval;
+                                break;
+                            case 6: // iconTransparency
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    if (parser.ttype == '\"') {
+                        switch (stringMode) {
+                            case 1: // name
+                                break;
+                            case 2: // variable
+                                break;
+                            case 3: // type
+                                typeName = parser.sval;
+                                break;
+                            case 4: // range
+                                rangeName = parser.sval;
+                                break;
+                            case 5: // InitialValues
+                                initialvalueName = parser.sval;
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        // Only supposed to contain '{' or '}'
+                        char content = parser.toString().charAt(7);
+                        if (content == '{') {
+                            if (idString == null) {
+                                throw new ExceptionGuiParseError();
+                            }
+                        } else if (content == '}') {
+                            if(typeName.equalsIgnoreCase("double")){
+                                variable = new GuiDoubleVariable();
+                                variable.setId(idString);
+                                variable.setValidRange(rangeName);
+                                variable.setInitialvalue(initialvalueName);
+                                return variable;
+                            } else if(typeName.equalsIgnoreCase("Vector3D")){
+                                variable = new GuiVector3DVariable();
+                                variable.setId(idString);
+                                variable.setValidRange(rangeName);
+                                variable.setInitialvalue(initialvalueName);
+                                return variable;
+                            } else if(typeName.equalsIgnoreCase("ColorRgb")){
+                                variable = new GuiColorRgbVariable();
+                                variable.setId(idString);
+                                variable.setValidRange(rangeName);
+                                variable.setInitialvalue(initialvalueName);
+                                return variable;
+                            } else if(typeName.equalsIgnoreCase("integer")){
+                                variable = new GuiDoubleVariable();
+                                variable.setId(idString);
+                                variable.setValidRange(rangeName);
+                                variable.setInitialvalue(initialvalueName);
+                                return variable;
+                            } else if(typeName.equalsIgnoreCase("boolean")){
+                                variable = new GuiDoubleVariable();
+                                variable.setId(idString);
+                                variable.setValidRange(rangeName);
+                                variable.setInitialvalue(initialvalueName);
+                                return variable;
+                            }
+                            
+                        } else {
+                            //throw new ExceptionGuiParseError();
+                        }
+                    }
+                    break;
+            }
+        } while (tokenType != StreamTokenizer.TT_EOF);
+
+        if (idString == null) {
+            throw new ExceptionGuiBadName();
+        }
+        return variable;
+    }
+}
 //===========================================================================
 //= EOF                                                                     =
 //===========================================================================

@@ -20,12 +20,20 @@ public class GuiVector3DVariable extends GuiVariable {
 
     @Override
     public String getValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.validRange;
+    }
+
+    public void setValidRange() {
+        
     }
 
     @Override
-    public String setValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setValidRange(String vr) {
+        this.validRange = vr;
     }
 
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

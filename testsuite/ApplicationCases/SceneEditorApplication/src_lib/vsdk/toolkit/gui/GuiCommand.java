@@ -9,8 +9,13 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAPixel;
 
-public class GuiCommand
-{
+
+/**
+ * This class plays a role of leaf on an n-ary tree in the composite design 
+ * pattern.
+ * @author TaakeSlottet
+ */
+public class GuiCommand extends GuiElement{
     private String id;
     private String name;
     private String briefDescription;
@@ -18,8 +23,7 @@ public class GuiCommand
     private RGBAImage icon;
     private RGBImage iconTransparency;
 
-    public GuiCommand()
-    {
+    public GuiCommand(){
         id = null;
         name = null;
         briefDescription = null;
@@ -28,38 +32,31 @@ public class GuiCommand
         iconTransparency = null;
     }
 
-    public String getId()
-    {
+    public String getId(){
         return id;
     }
 
-    public String getName()
-    {
+    public String getName(){
         return name;
     }
 
-    public String getBriefDescription()
-    {
+    public String getBriefDescription(){
         return briefDescription;
     }
 
-    public String getHelp()
-    {
+    public String getHelp(){
         return help;
     }
 
-    public RGBAImage getIcon()
-    {
+    public RGBAImage getIcon(){
         return icon;
     }
 
-    public RGBImage getIconTransparency()
-    {
+    public RGBImage getIconTransparency(){
         return iconTransparency;
     }
 
-    public void applyTransparency()
-    {
+    public void applyTransparency(){
         if ( icon == null || iconTransparency == null ) {
             return;
         }
@@ -87,28 +84,23 @@ public class GuiCommand
         }
     }
 
-    public void setId(String i)
-    {
+    public void setId(String i){
         id = i;
     }
 
-    public void setName(String n)
-    {
+    public void setName(String n){
         name = n;
     }
 
-    public void setBrief(String b)
-    {
+    public void setBrief(String b){
         briefDescription = b;
     }
 
-    public void setHelp(String h)
-    {
+    public void setHelp(String h){
         help = h;
     }
 
-    public void appendToHelp(String h)
-    {
+    public void appendToHelp(String h){
         if ( help != null ) {
             help = help + h;
         }
@@ -117,19 +109,16 @@ public class GuiCommand
         }
     }
 
-    public void setIcon(RGBAImage i)
-    {
+    public void setIcon(RGBAImage i){
         icon = i;
     }
 
-    public void setIconTransparency(RGBImage i)
-    {
+    public void setIconTransparency(RGBImage i){
         iconTransparency = i;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString(){
         String msg =  "  - Command [" + id + "]:\n";
         msg = msg + "    . Name: " + name + "\n";
         msg = msg + "    . Brief description: " + briefDescription + "\n";

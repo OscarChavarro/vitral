@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
@@ -7,23 +6,31 @@ import java.util.HashMap;
 import vsdk.toolkit.gui.variable.GuiVariable;
 
 /**
-In order to understand this class, the following concepts must be taken into
-account:
-  - GuiVariable
-  - GuiCommand
-  - Reflection (introspection) design pattern
-  - Menubars, buttons bars, and other are based upon GuiCommands
-  - Dialogs are based upon GuiVariables and GuiCommands
-  - Dialogs and menus are hierarchical
-*/
-public class Gui
-{
+ * In order to understand this class, the following concepts must be taken into
+ * account: - GuiVariable - GuiCommand - Reflection (introspection) design
+ * pattern - Menubars, buttons bars, and other are based upon GuiCommands -
+ * Dialogs are based upon GuiVariables and GuiCommands - Dialogs and menus are
+ * hierarchical
+ */
+public class Gui {
+    // Basic / fundamental / atomic elements
+
+    private ArrayList<GuiCommand> commandList;
+    private ArrayList<GuiVariable> variableList;
+    private HashMap<String, String> messagesTable;
+    // Composite elements
     private GuiMenu menubar;
     private ArrayList<GuiMenu> popupMenuList;
-    private ArrayList<GuiCommand> commandList;
     private ArrayList<GuiButtonGroup> buttonGroupList;
-    private HashMap<String, String> messagesTable;
-    private ArrayList<GuiVariable> variableList;
+    private ArrayList<GuiDialog> dialogList;
+
+    public ArrayList<GuiDialog> getDialogList() {
+        return dialogList;
+    }
+
+    public void setDialogList(ArrayList<GuiDialog> dialogList) {
+        this.dialogList = dialogList;
+    }
 
     public Gui() {
         menubar = null;
@@ -32,44 +39,40 @@ public class Gui
         buttonGroupList = new ArrayList<GuiButtonGroup>();
         messagesTable = new HashMap<String, String>();
         variableList = new ArrayList<GuiVariable>();
+        dialogList = new ArrayList<GuiDialog>();
     }
 
-    public void addMessage(String id, String message)
-    {
+    public void addMessage(String id, String message) {
         messagesTable.put(id, message);
     }
 
-    public String getMessage(String id)
-    {
+    public String getMessage(String id) {
         String msg;
 
         msg = messagesTable.get(id);
 
-        if ( msg == null ) {
+        if (msg == null) {
             return id;
         }
         return msg;
     }
 
-    public void setMenubar(GuiMenu m)
-    {
+    public void setMenubar(GuiMenu m) {
         menubar = m;
     }
 
-    public GuiMenu getMenubar()
-    {
+    public GuiMenu getMenubar() {
         return menubar;
     }
 
-    public GuiCommand getCommandByName(String name)
-    {
+    public GuiCommand getCommandByName(String name) {
         GuiCommand command = null;
         GuiCommand candidate;
         int i;
 
-        for ( i = 0; i < commandList.size(); i++ ) {
+        for (i = 0; i < commandList.size(); i++) {
             candidate = commandList.get(i);
-            if ( candidate.getId().equals(name) ) {
+            if (candidate.getId().equals(name)) {
                 command = candidate;
                 break;
             }
@@ -78,16 +81,16 @@ public class Gui
     }
 
     public GuiButtonGroup getButtonGroup(String name) {
-        if ( name == null ) {
+        if (name == null) {
             return null;
         }
 
         GuiButtonGroup group = null, candidate;
         int i;
 
-        for ( i = 0; i < buttonGroupList.size(); i++ ) {
+        for (i = 0; i < buttonGroupList.size(); i++) {
             candidate = buttonGroupList.get(i);
-            if ( candidate.getName().equals(name) ) {
+            if (candidate.getName().equals(name)) {
                 group = candidate;
                 break;
             }
@@ -95,16 +98,14 @@ public class Gui
         return group;
     }
 
-
-    public GuiMenu getPopup(String name)
-    {
+    public GuiMenu getPopup(String name) {
         GuiMenu menu = null;
         GuiMenu candidate;
 
         int i;
-        for ( i = 0; i < popupMenuList.size(); i++ ) {
+        for (i = 0; i < popupMenuList.size(); i++) {
             candidate = popupMenuList.get(i);
-            if ( candidate.getName().equals(name) ) {
+            if (candidate.getName().equals(name)) {
                 menu = candidate;
                 break;
             }
@@ -112,51 +113,71 @@ public class Gui
         return menu;
     }
 
-    public void addPopupMenu(GuiMenu p)
-    {
+    public void addPopupMenu(GuiMenu p) {
         popupMenuList.add(p);
     }
 
-    public void addCommand(GuiCommand c)
-    {
+    public void addCommand(GuiCommand c) {
         commandList.add(c);
     }
 
-    public void addButtonGroup(GuiButtonGroup b)
-    {
+    public void addButtonGroup(GuiButtonGroup b) {
         buttonGroupList.add(b);
     }
 
+    public void addDialog(GuiDialog dialog) {
+        dialogList.add(dialog);
+    }
+
+    public void addVariable(GuiVariable variable) {
+        variableList.add(variable);
+    }
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         String msg = "= Gui report =========================================================\n";
-        msg = msg + "Gui cache structure contains " + popupMenuList.size() +
-            " popup submenu structures registered\n";
-        msg = msg + "Gui cache structure contains " + commandList.size() +
-            " commands registered\n";
+        msg = msg + "Gui cache structure contains " + popupMenuList.size()
+                + " popup submenu structures registered\n";
+        msg = msg + "Gui cache structure contains " + commandList.size()
+                + " commands registered\n";
 
         int i;
         GuiCommand command;
-        for ( i = 0; i < commandList.size(); i++ ) {
+        for (i = 0; i < commandList.size(); i++) {
             command = commandList.get(i);
             msg = msg + command;
         }
 
-        if ( menubar == null ) {
+        if (menubar == null) {
             msg = msg + "There is NO menubar!";
-          }
-          else {
+        } else {
             msg = msg + "There is a menubar active, called \"" + menubar.getName() + "\"\n";
             msg = msg + "Dumping menubar tree structure...\n";
             msg = msg + menubar;
         }
+
+        /**
+         * TODO print lists of GUIDialosg and variables pending
+         */
+        
+        //-----------------------------------------------------------------------------------
+        GuiDialog dialog;
+        for (i = 0; i < dialogList.size(); i++) {
+            dialog = dialogList.get(i);
+            msg = msg + dialog.toString();
+        }
+
+        GuiVariable variable;
+        for (i = 0; i < variableList.size(); i++) {
+            variable = variableList.get(i);
+            msg = msg + variable.toString();
+        }
+        //-----------------------------------------------------------------------------------
         msg = msg + "===========================================================================\n";
+
         return msg;
     }
-
 }
-
 //===========================================================================
 //= EOF                                                                     =
 //===========================================================================
