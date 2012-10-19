@@ -5,10 +5,15 @@
 package application;
 
 // Internal classes
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.FileInputStream;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
@@ -37,6 +42,7 @@ public class GUIExample {
         languageGuiFile = "./etc/english.gui";
         
         mainWindowWidget = new JFrame("VITRAL GUI Example");
+        mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
         try {
             gui = GuiPersistence.importAquynzaGui(
@@ -52,6 +58,13 @@ public class GUIExample {
         
         Dimension d = new Dimension(800, 600);
 
+        JPanel p = new JPanel();
+        p.setBackground(Color.red);
+        mainWindowWidget.getContentPane().add(p,BorderLayout.CENTER);
+        
+        JPanel q = SwingGuiRenderer.buildVariable(gui.getVariableByName("color"));
+        p.add(q);
+        
         mainWindowWidget.setJMenuBar(menubar);
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
