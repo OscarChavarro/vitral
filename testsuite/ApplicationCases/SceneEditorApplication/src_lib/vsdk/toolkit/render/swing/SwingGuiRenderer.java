@@ -348,31 +348,52 @@ public class SwingGuiRenderer {
     public static JPanel buildBooleanVariable(GuiBooleanVariable v) {
         JPanel p = new JPanel();
         JCheckBox cb = new JCheckBox(v.getName());
+        p.add(cb);
+        return p;
+    }
+
+    private static JPanel buildNumberWidget(String subname) {
+        JPanel p;
+        JLabel l;
+        JTextField t;
+        p = new JPanel();
+        l = new JLabel(subname);
+        t = new JTextField("0.0");
+        p.add(l);
+        p.add(t);
         return p;
     }
     
     public static JPanel buildVector3DVariable(GuiVector3DVariable v) {
         JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
+        JLabel lv = new JLabel(v.getName());
+        JLabel ly = new JLabel("Y:");
+        p.add(lv);
+        p.add(buildNumberWidget("X:"));
+        p.add(buildNumberWidget("Y:"));
+        p.add(buildNumberWidget("Z:"));
         return p;
     }
     
     public static JPanel buildColorRgbVariable(GuiColorRgbVariable v) {
         JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
-        p.add(cb);
+        JLabel lv = new JLabel(v.getName());
+        p.add(lv);
+        p.add(buildNumberWidget("R:"));
+        p.add(buildNumberWidget("G:"));
+        p.add(buildNumberWidget("B:"));
         return p;
     }
     
     public static JPanel buildDoubleVariable(GuiDoubleVariable v) {
         JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
+        p.add(buildNumberWidget(v.getName()));
         return p;
     }
     
     public static JPanel buildIntegerVariable(GuiIntegerVariable v) {
         JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
+        p.add(buildNumberWidget(v.getName()));
         return p;
     }
     
@@ -392,47 +413,26 @@ public class SwingGuiRenderer {
 
         if (v instanceof vsdk.toolkit.gui.variable.GuiBooleanVariable) {
             q = buildBooleanVariable((GuiBooleanVariable) v);
-        } else {
-            JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
         }
-        
-        if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
+        else if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
             q = buildVector3DVariable((GuiVector3DVariable) v);
-        } else {
-            JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
         }
-        
-        if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
+        else if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
             q = buildColorRgbVariable((GuiColorRgbVariable) v);
-        } else {
-            JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
         }
-        
-        if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
+        else if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
             q = buildDoubleVariable((GuiDoubleVariable) v);
-        } else {
-            JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
         }
-        
-        if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
+        else if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
             q = buildIntegerVariable((GuiIntegerVariable) v);
-        } else {
-            JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
-        }
-        
-        if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
+        } 
+        else if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
             q = buildStringVariable((GuiStringVariable) v);
-        } else {
+        } 
+        else {
             JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
             q.add(l);
         }
-        //q.setBackground(Color.BLACK);
-        //q.setBorder(new TitledBorder("SATANIC KILLER"));
         return q;
     }
 }

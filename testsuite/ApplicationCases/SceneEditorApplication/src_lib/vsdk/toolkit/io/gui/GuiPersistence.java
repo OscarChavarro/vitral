@@ -10,10 +10,7 @@ import java.util.ArrayList;
 
 // Vitral classes
 import vsdk.toolkit.gui.*;
-import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
-import vsdk.toolkit.gui.variable.GuiDoubleVariable;
-import vsdk.toolkit.gui.variable.GuiVariable;
-import vsdk.toolkit.gui.variable.GuiVector3DVariable;
+import vsdk.toolkit.gui.variable.*;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -771,10 +768,10 @@ public class GuiPersistence {
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if(typeName.equalsIgnoreCase("boolean")){
-                                variable = new GuiDoubleVariable();
+                                variable = new GuiBooleanVariable();
                                 variable.setName(idString);
-                                variable.setValidRange(rangeName);
-                                variable.setInitialvalue(initialvalueName);
+                                //variable.setValidRange(rangeName);
+                                //variable.setInitialvalue(initialvalueName);
                                 return variable;
                             }
                             
