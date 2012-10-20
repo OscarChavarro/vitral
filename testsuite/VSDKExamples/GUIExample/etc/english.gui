@@ -1,12 +1,15 @@
 //===========================================================================
 //= english.gui                                                             =
 //=-------------------------------------------------------------------------=
-//= Oscar Chavarro                                                          =
+//= This file contains the GUI spec for the SceneEditor example application =
+//= (VSDK) in its english version.                                          =
+//=-------------------------------------------------------------------------=
+//= Oscar J. Chavarro G.  -JEDILINK-            ojchavarro@javeriana.edu.co =
 //= Grupo de investigacion de informatica grafica TAKINA/VITRAL             =
 //===========================================================================
 
 //===========================================================================
-//= APPLICATION MENUS                                                       =
+//= MENUS DE LA APLICACION                                                  =
 //===========================================================================
 
 MENU "GLOBAL" {
@@ -134,6 +137,9 @@ MENU "GLOBAL" {
 
 }
 
+
+
+
 POPUP "ESCENA" {
     //INCLUDE "VISUALIZADOR"
     MENUITEM SEPARATOR
@@ -197,6 +203,61 @@ POPUP "CALIDAD_VISUAL" {
 //= ESPECIFICACION DE COMANDOS                                              =
 //===========================================================================
 
+DIALOG IDD_MESH_SELECTION {
+    variable "renderingType",
+    variable "r",
+    command IDC_REDO
+    command IDC_COMMIT
+}
+
+DIALOG IDD_MODIFY_MESH {
+    dialogref IDD_MESH_SELECTION
+    dialogref IDD_MESH_SOFT_SELECTION
+    dialogref IDD_MESH_GEOMETRY
+    dialogref IDD_MEVector3DSH_PROPERTIES
+}
+
+
+DIALOG IDD_MODIFY_MESH2 {
+    DIALOG IDD_MESH_SELECTION2 {
+        variable "renderingType",
+        variable "boolIs",
+        command IDC_REDO
+        command IDC_COMMIT
+    }
+
+    dialogref IDD_MESH_SOFT_SELECTION
+    dialogref IDD_MESH_GEOMETRY
+    dialogref IDD_MESH_PROPERTIES
+}
+
+VARIABLE b {
+    type "boolean"
+}
+
+1VARIABLE r {
+    type "double"
+    range "[0, INF]",
+    initialValue "1.0"
+ //   app "textbox"
+ //   app "autodeskcombo"
+ //   units "m"
+//   app "iconset"
+//   icon 1 "points.jpg"
+//   icon 2 "triangles.jpg"
+//   icon 3 "face.jpg"
+}
+
+VARIABLE position {
+    type "Vector3D"
+    initialValue "<1, 0.5, 2>"
+}
+
+
+VARIABLE color {
+    type "ColorRgb"
+}
+
 /*---------------------------------------------------------------------------
 Un COMANDO es una accion en particular que puede tomar la aplicacion.
 Cada COMANDO tiene por lo menos un identificador y un nombre, y su
@@ -239,46 +300,46 @@ COMMAND IDC_FILE_SAVE {
 COMMAND IDC_VOICECOMMAND_CLIENT {
     name "Voice recognition", 
     brief "Activates the networked voice recognition client",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
 }
 
 COMMAND IDC_TOOLS_SELECT {
     name "Select", 
     brief "Select objects",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
 }
 
 COMMAND IDC_TOOLS_TRANSLATE {
     name "Select and translate",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
 }
 
 COMMAND IDC_TOOLS_ROTATE {
     name "Select and rotate",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
 }
 
 COMMAND IDC_TOOLS_SCALE {
     name "Select and scale",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1024.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1024Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1024.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1024Mask.png"
 }
 
 COMMAND IDC_TOOLS_CAMERA {
     name "Camera control",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
 }
 
 COMMAND IDC_TOOLS_RAY {
     name "Ray control", 
     brief "Activates or desactivates ray debug control",
-#    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1060.png",
-#    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
+    icon "./etc/icons/3dsmax7Icons/3dsmaxIcon1060.png",
+    iconTransparency "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
 }
 
 COMMAND IDC_CREATE_SPHERE {
@@ -428,7 +489,7 @@ altura de los grupos (en botones), y es opcional (por defecto tam es 2).
 BUTTON_GROUP "GLOBAL" {
     showTitle false, side 1
     title "Global bar",
-#    showIcons on,
+    showIcons on,
     showText off,
     direction horizontal
     BUTTONS  {
@@ -441,7 +502,7 @@ BUTTON_GROUP "GLOBAL" {
 BUTTON_GROUP "CREATION" {
     showTitle true, side 1
     title "Global bar",
-#    showIcons off,
+    showIcons off,
     showText on,
     direction vertical
     BUTTONS  {
@@ -470,7 +531,7 @@ BUTTON_GROUP "CREATION" {
 BUTTON_GROUP "GUI" {
     showTitle true, side 1
     title "Global bar",
-#    showIcons off,
+    showIcons off,
     showText on,
     direction vertical
     BUTTONS  {
@@ -484,7 +545,7 @@ BUTTON_GROUP "GUI" {
 BUTTON_GROUP "OTHER" {
     showTitle true, side 1
     title "Global bar",
-#    showIcons off,
+    showIcons off,
     showText on,
     direction vertical
     BUTTONS  {
@@ -498,7 +559,7 @@ BUTTON_GROUP "OTHER" {
 BUTTON_GROUP "RENDER" {
     showTitle true, side 1
     title "Global bar",
-#    showIcons off,
+    showIcons off,
     showText on,
     direction vertical
     BUTTONS  {
