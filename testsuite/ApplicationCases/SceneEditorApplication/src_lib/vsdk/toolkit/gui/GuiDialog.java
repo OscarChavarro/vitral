@@ -134,6 +134,9 @@ public class GuiDialog extends GuiElement {
         String msg = "";
 
         msg = msg + "DIALOG: " + this.getId() + "\n";
+        for (int j = 0; j < children.size(); j++) {
+            msg = msg + "    " + children.get(j).toString() + "\n";
+        }
         for (int j = 0; j < pendingCommandNames.size(); j++) {
             msg = msg + "    Commandname: " + pendingCommandNames.get(j) + "\n";
         }

@@ -16,7 +16,7 @@ public class GuiStringVariable extends GuiVariable {
 
     @Override
     public String getValidRange() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return  validRange;
     }
 
     public String setValidRange() {
@@ -25,7 +25,7 @@ public class GuiStringVariable extends GuiVariable {
 
     @Override
     public void setValidRange(String vr) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        validRange = vr;
     }
 
 }

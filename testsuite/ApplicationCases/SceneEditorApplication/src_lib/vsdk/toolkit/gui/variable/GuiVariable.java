@@ -1,7 +1,5 @@
 package vsdk.toolkit.gui.variable;
 
-import java.util.ArrayList;
-import vsdk.toolkit.gui.GuiDialog;
 import vsdk.toolkit.gui.GuiElement;
 
 /**

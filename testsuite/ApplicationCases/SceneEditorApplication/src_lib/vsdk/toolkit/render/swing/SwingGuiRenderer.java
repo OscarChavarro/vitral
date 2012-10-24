@@ -2,13 +2,10 @@
 package vsdk.toolkit.render.swing;
 
 // Basic JAVA JDK classes
+import java.awt.*;
 import java.util.ArrayList;
 
 // GUI JDK classes (Awt + Swing)
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -28,6 +25,7 @@ import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiButtonGroup;
 import vsdk.toolkit.gui.GuiCommand;
+import vsdk.toolkit.gui.GuiDialog;
 import vsdk.toolkit.gui.variable.*;
 
 public class SwingGuiRenderer {
@@ -347,8 +345,9 @@ public class SwingGuiRenderer {
 
     public static JPanel buildBooleanVariable(GuiBooleanVariable v) {
         JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
-        p.add(cb);
+        //JCheckBox cb = new JCheckBox(v.getName());
+        p.add(buildNumberWidget(v.getName()));
+        //p.add(cb);
         return p;
     }
 
@@ -363,18 +362,17 @@ public class SwingGuiRenderer {
         p.add(t);
         return p;
     }
-    
+
     public static JPanel buildVector3DVariable(GuiVector3DVariable v) {
         JPanel p = new JPanel();
         JLabel lv = new JLabel(v.getName());
-        JLabel ly = new JLabel("Y:");
         p.add(lv);
         p.add(buildNumberWidget("X:"));
         p.add(buildNumberWidget("Y:"));
         p.add(buildNumberWidget("Z:"));
         return p;
     }
-    
+
     public static JPanel buildColorRgbVariable(GuiColorRgbVariable v) {
         JPanel p = new JPanel();
         JLabel lv = new JLabel(v.getName());
@@ -384,56 +382,98 @@ public class SwingGuiRenderer {
         p.add(buildNumberWidget("B:"));
         return p;
     }
-    
+
     public static JPanel buildDoubleVariable(GuiDoubleVariable v) {
         JPanel p = new JPanel();
         p.add(buildNumberWidget(v.getName()));
         return p;
     }
-    
+
     public static JPanel buildIntegerVariable(GuiIntegerVariable v) {
         JPanel p = new JPanel();
+        //JScrollBar sb = new JScrollBar();
+        //JSlider js = new JSlider();
+        p.add(buildNumberWidget(v.getName()));
+        //p.add(sb);
+        //p.add(js);
+        return p;
+    }
+
+    public static JPanel buildStringVariable(GuiStringVariable v) {
+        JPanel p = new JPanel();
+        //JLabel l = new JLabel(v.getName());
+        //p.add(l);
         p.add(buildNumberWidget(v.getName()));
         return p;
     }
     
-    public static JPanel buildStringVariable(GuiStringVariable v) {
-        JPanel p = new JPanel();
-        JCheckBox cb = new JCheckBox(v.getName());
-        return p;
+    public static JButton buildCommandButton(GuiCommand c){
+        JButton b = new JButton(c.getName());
+        return b;
     }
 
     public static JPanel buildVariable(GuiVariable v) {
-        JPanel q = new JPanel();
+        JPanel containingPanelWidget = new JPanel();
         if (v == null) {
             JLabel l = new JLabel("NULL Variable ");
-            q.add(l);
-            return q;
+            containingPanelWidget.add(l);
+            return containingPanelWidget;
         }
 
         if (v instanceof vsdk.toolkit.gui.variable.GuiBooleanVariable) {
-            q = buildBooleanVariable((GuiBooleanVariable) v);
-        }
-        else if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
-            q = buildVector3DVariable((GuiVector3DVariable) v);
-        }
-        else if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
-            q = buildColorRgbVariable((GuiColorRgbVariable) v);
-        }
-        else if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
-            q = buildDoubleVariable((GuiDoubleVariable) v);
-        }
-        else if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
-            q = buildIntegerVariable((GuiIntegerVariable) v);
-        } 
-        else if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
-            q = buildStringVariable((GuiStringVariable) v);
-        } 
-        else {
+            containingPanelWidget = buildBooleanVariable((GuiBooleanVariable) v);
+        } else if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
+            containingPanelWidget = buildVector3DVariable((GuiVector3DVariable) v);
+        } else if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
+            containingPanelWidget = buildColorRgbVariable((GuiColorRgbVariable) v);
+        } else if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
+            containingPanelWidget = buildDoubleVariable((GuiDoubleVariable) v);
+        } else if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
+            containingPanelWidget = buildIntegerVariable((GuiIntegerVariable) v);
+        } else if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
+            containingPanelWidget = buildStringVariable((GuiStringVariable) v);
+        } else {
             JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
-            q.add(l);
+            containingPanelWidget.add(l);
         }
-        return q;
+        return containingPanelWidget;
+    }
+
+    public static JPanel buildDialog(GuiDialog d) {
+        JPanel panel = new JPanel();
+        TitledBorder tb;
+        String aux = d.getId();
+        if (d == null) {
+            JLabel l = new JLabel("NULL Dialog ");
+            panel.add(l);
+            return panel;
+        }
+        
+        //panel.setPreferredSize(new Dimension(aux.length(), 50));
+        tb = new TitledBorder(aux);
+        panel.setBorder(tb);
+  
+        for(int i = 0; i < d.getPendingVariableNames().size(); i++){
+            JPanel p = new JPanel();
+            GuiVariable v = null;
+            buildVariable(v);
+            panel.add(p);
+        }
+        
+        for(int i = 0; i < d.getPendingCommandNames().size(); i++){
+            GuiCommand c = new GuiCommand();
+            c.setName(d.getPendingCommandNames().get(i));
+            panel.add(buildCommandButton(c));
+        }
+        
+        for(int i = 0; i < d.getPendingDialogRefNames().size(); i++){
+            GuiDialog dial = new GuiDialog();
+            dial.setName(d.getPendingDialogRefNames().get(i));
+            panel.add(buildDialog(dial));
+        }
+        
+        
+        return panel;
     }
 }
 //===========================================================================

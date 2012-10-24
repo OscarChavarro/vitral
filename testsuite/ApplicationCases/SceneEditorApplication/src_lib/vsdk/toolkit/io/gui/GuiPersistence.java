@@ -579,7 +579,8 @@ public class GuiPersistence {
                         //importAquynzaGuiDialog(parser, context);
                         GuiDialog dialogS =
                                 importAquynzaGuiDialog(parser, context);
-                        context.addDialog(dialogS);
+                        //context.addDialog(dialogS);
+                        dialog.getChildren().add(dialogS);
                     } else if (parser.sval.equals("dialogref")) {
                         stringMode = 5;
                     } else if (parser.sval.equals("iconTransparency")) {
@@ -590,6 +591,9 @@ public class GuiPersistence {
                                 dialog.getPendingDialogNames().add(parser.sval);
                                 break;
                             case 2: // variables
+                                /*GuiVariable var =
+                                        importAquynzaGuiVariable(parser, context);
+                                context.addVariable(var);*/
                                 dialog.getPendingVariableNames().add(parser.sval);
                                 break;
                             case 3: // command
@@ -614,6 +618,9 @@ public class GuiPersistence {
                                 dialog.setName(parser.sval);
                                 break;
                             case 2: // variable
+                                /*GuiVariable var =
+                                        importAquynzaGuiVariable(parser, context);
+                                context.addVariable(var);*/
                                 dialog.getPendingVariableNames().add(parser.sval);
                                 break;
                             case 3: // command
@@ -656,7 +663,7 @@ public class GuiPersistence {
         int tokenType = 0;
         String idString = null;
         int stringMode = 0;
-        
+
         String typeName = null;
         String rangeName = null;
         String initialvalueName = null;
@@ -743,38 +750,44 @@ public class GuiPersistence {
                                 throw new ExceptionGuiParseError();
                             }
                         } else if (content == '}') {
-                            if(typeName.equalsIgnoreCase("double")){
+                            if (typeName.equalsIgnoreCase("double")) {
                                 variable = new GuiDoubleVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if(typeName.equalsIgnoreCase("Vector3D")){
+                            } else if (typeName.equalsIgnoreCase("Vector3D")) {
                                 variable = new GuiVector3DVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if(typeName.equalsIgnoreCase("ColorRgb")){
+                            } else if (typeName.equalsIgnoreCase("ColorRgb")) {
                                 variable = new GuiColorRgbVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if(typeName.equalsIgnoreCase("integer")){
-                                variable = new GuiDoubleVariable();
+                            } else if (typeName.equalsIgnoreCase("Integer")) {
+                                variable = new GuiIntegerVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if(typeName.equalsIgnoreCase("boolean")){
+                            } else if (typeName.equalsIgnoreCase("boolean")) {
                                 variable = new GuiBooleanVariable();
                                 variable.setName(idString);
                                 //variable.setValidRange(rangeName);
                                 //variable.setInitialvalue(initialvalueName);
                                 return variable;
+                            } else if (typeName.equalsIgnoreCase("String")) {
+                                variable = new GuiStringVariable();
+                                variable.setName(idString);
+                                //variable.setValidRange(rangeName);
+                                //variable.setInitialvalue(initialvalueName);
+                                return variable;
                             }
-                            
+
                         } else {
                             //throw new ExceptionGuiParseError();
                         }
