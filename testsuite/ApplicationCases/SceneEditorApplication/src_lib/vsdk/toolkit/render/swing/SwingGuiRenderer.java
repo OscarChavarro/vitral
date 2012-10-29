@@ -439,7 +439,7 @@ public class SwingGuiRenderer {
         return containingPanelWidget;
     }
 
-    public static JPanel buildDialog(GuiDialog d) {
+    public static JPanel buildDialog(GuiDialog d, Gui gui) {
         JPanel panel = new JPanel();
         TitledBorder tb;
         String aux = d.getId();
@@ -452,12 +452,10 @@ public class SwingGuiRenderer {
         //panel.setPreferredSize(new Dimension(aux.length(), 50));
         tb = new TitledBorder(aux);
         panel.setBorder(tb);
-  
-        for(int i = 0; i < d.getPendingVariableNames().size(); i++){
-            JPanel p = new JPanel();
-            GuiVariable v = null;
-            buildVariable(v);
-            panel.add(p);
+
+        for (int k = 0; k < d.getPendingVariableNames().size(); k++) {
+            JPanel q = SwingGuiRenderer.buildVariable(gui.getVariableByName(d.getPendingVariableNames().get(k)));
+            panel.add(q);
         }
         
         for(int i = 0; i < d.getPendingCommandNames().size(); i++){
@@ -469,7 +467,7 @@ public class SwingGuiRenderer {
         for(int i = 0; i < d.getPendingDialogRefNames().size(); i++){
             GuiDialog dial = new GuiDialog();
             dial.setName(d.getPendingDialogRefNames().get(i));
-            panel.add(buildDialog(dial));
+            panel.add(buildDialog(dial, gui));
         }
         
         

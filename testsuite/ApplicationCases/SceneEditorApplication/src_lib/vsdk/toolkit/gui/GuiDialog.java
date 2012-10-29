@@ -133,7 +133,7 @@ public class GuiDialog extends GuiElement {
         GuiDialog dialog;
         String msg = "";
 
-        msg = msg + "DIALOG: " + this.getId() + "\n";
+        msg = msg + "    DIALOG: " + this.getId() + "\n";
         for (int j = 0; j < children.size(); j++) {
             msg = msg + "    " + children.get(j).toString() + "\n";
         }
