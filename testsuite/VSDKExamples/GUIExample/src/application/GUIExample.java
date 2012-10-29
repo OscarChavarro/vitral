@@ -67,29 +67,12 @@ public class GUIExample {
 
 
         /*
-         * Dialog test
+         * Dialog english.gui file construction
          */
         for (int i = 0; i < gui.getDialogList().size(); i++) {
-            GuiDialog dial = gui.getDialogList().get(i);
-            JPanel panel = SwingGuiRenderer.buildDialog(gui.getDialogList().get(i));
-
-            for (int j = 0; j < dial.getChildren().size(); j++) {
-                GuiDialog dialChild = (GuiDialog) dial.getChildren().get(j);
-                JPanel panelChild = SwingGuiRenderer.buildDialog(dialChild);
-  
-                for (int k = 0; k < dialChild.getPendingVariableNames().size(); k++) {
-                    JPanel q = SwingGuiRenderer.buildVariable(gui.getVariableByName(dialChild.getPendingVariableNames().get(k)));
-                    panelChild.add(q);
-                }
-                panel.add(panelChild);
-            }
-            
-            for (int k = 0; k < dial.getPendingVariableNames().size(); k++) {
-                JPanel q = SwingGuiRenderer.buildVariable(gui.getVariableByName(dial.getPendingVariableNames().get(k)));
-                panel.add(q);
-            }
-            p.add(panel);
+            p.add(buildDialogGui(gui.getDialogList().get(i)));
         }
+
 
         TitledBorder tb = new TitledBorder("Test Sphere Modifier");
         p.setBorder(tb);
@@ -102,5 +85,25 @@ public class GUIExample {
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
         mainWindowWidget.setVisible(true);
+    }
+
+    public JPanel buildDialogGui(GuiDialog d) {
+        //Cuando ahce la recursion esta creando un nuevo panel papa
+        JPanel pan = SwingGuiRenderer.buildDialog(d,gui);
+        //pan.add(SwingGuiRenderer.buildDialog(d));
+        if (d.getChildren().isEmpty() || d.getChildren() == null) {
+            //pan.add(SwingGuiRenderer.buildDialog(d));
+            //p.add(pan);
+            return pan;
+        } else {
+            for (int j = 0; j < d.getChildren().size(); j++) {
+                JPanel panel = null;
+                GuiDialog dial = (GuiDialog) d.getChildren().get(j);
+                panel = buildDialogGui(dial);
+                pan.add(panel);
+            }
+        }
+
+        return pan;
     }
 }
