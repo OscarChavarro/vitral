@@ -33,6 +33,7 @@ public class GuiDialog extends GuiElement {
     private ArrayList<String> pendingCommandNames;
     private ArrayList<String> pendingDialogNames;
     private ArrayList<String> pendingDialogRefNames;
+    private boolean collapsable;
 
     public GuiDialog() {
         children = new ArrayList<GuiElement>();
@@ -40,8 +41,19 @@ public class GuiDialog extends GuiElement {
         pendingCommandNames = new ArrayList<String>();
         pendingDialogNames = new ArrayList<String>();
         pendingDialogRefNames = new ArrayList<String>();
+        orientation = ORIENTATION_VERTICAL;
+        collapsable = false;
     }
 
+    public boolean isCollapsable() {
+        return collapsable;
+    }
+
+    public void setCollapsable(boolean collapsable) {
+        this.collapsable = collapsable;
+    }
+
+    
     public ArrayList<String> getPendingCommandNames() {
         return pendingCommandNames;
     }

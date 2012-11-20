@@ -2,11 +2,10 @@
 package vsdk.toolkit.io.gui;
 
 // Java basic classes
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StreamTokenizer;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // Vitral classes
 import vsdk.toolkit.gui.*;
@@ -575,28 +574,27 @@ public class GuiPersistence {
                     } else if (parser.sval.equals("command")) {
                         stringMode = 3;
                     } else if (parser.sval.equals("DIALOG")) {
-                        //stringMode = 4;
-                        //importAquynzaGuiDialog(parser, context);
                         GuiDialog dialogS =
                                 importAquynzaGuiDialog(parser, context);
-                        //context.addDialog(dialogS);
                         dialog.getChildren().add(dialogS);
                     } else if (parser.sval.equals("dialogref")) {
                         stringMode = 5;
                     } else if (parser.sval.equals("iconTransparency")) {
                         stringMode = 6;
+                    } else if (parser.sval.equals("orientation")) {
+                        stringMode = 7;
+                    } else if (parser.sval.equals("collapsable")) {
+                        stringMode = 8;
                     } else {
                         switch (stringMode) {
                             case 1:
                                 dialog.getPendingDialogNames().add(parser.sval);
                                 break;
                             case 2: // variables
-                                /*GuiVariable var =
-                                        importAquynzaGuiVariable(parser, context);
-                                context.addVariable(var);*/
                                 dialog.getPendingVariableNames().add(parser.sval);
                                 break;
-                            case 3: // command
+                            case 3:
+
                                 dialog.getPendingCommandNames().add(parser.sval);
                                 break;
                             case 4: // dialog
@@ -605,6 +603,19 @@ public class GuiPersistence {
                                 dialog.getPendingDialogRefNames().add(parser.sval);
                                 break;
                             case 6:
+                                break;
+                            case 7: // orientation
+                                if (parser.sval.equals("vertical")) {
+                                    dialog.setOrientation(GuiDialog.ORIENTATION_VERTICAL);
+                                } else {
+                                    dialog.setOrientation(GuiDialog.ORIENTATION_HORIZONTAL);
+                                }
+
+                                break;
+                            case 8: // collapsable
+                                if (parser.sval.equals("true")) {
+                                    dialog.setCollapsable(true);
+                                }
                                 break;
                             default:
                                 break;
@@ -618,9 +629,6 @@ public class GuiPersistence {
                                 dialog.setName(parser.sval);
                                 break;
                             case 2: // variable
-                                /*GuiVariable var =
-                                        importAquynzaGuiVariable(parser, context);
-                                context.addVariable(var);*/
                                 dialog.getPendingVariableNames().add(parser.sval);
                                 break;
                             case 3: // command
@@ -628,6 +636,24 @@ public class GuiPersistence {
                                 break;
                             case 4: // dialog
                                 dialog.getPendingDialogNames().add(parser.sval);
+                                break;
+                            case 5:  // dialogref
+                                dialog.getPendingDialogRefNames().add(parser.sval);
+                                break;
+                            case 6:
+                                break;
+                            case 7: // orientation
+                                if (parser.sval.equals("vertical")) {
+                                    dialog.setOrientation(GuiDialog.ORIENTATION_VERTICAL);
+                                } else {
+                                    dialog.setOrientation(GuiDialog.ORIENTATION_HORIZONTAL);
+                                }
+
+                                break;
+                            case 8: // collapsable
+                                if (parser.sval.equals("true")) {
+                                    dialog.setCollapsable(true);
+                                }
                                 break;
                             default:
                                 break;

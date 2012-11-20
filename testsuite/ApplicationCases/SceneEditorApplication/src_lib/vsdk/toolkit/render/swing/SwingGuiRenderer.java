@@ -13,20 +13,20 @@ import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import vsdk.toolkit.gui.*;
 
 // VSDK classes
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 // Application specific classes
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiMenu;
-import vsdk.toolkit.gui.GuiMenuItem;
-import vsdk.toolkit.gui.GuiMenuElement;
-import vsdk.toolkit.gui.GuiButtonGroup;
-import vsdk.toolkit.gui.GuiCommand;
-import vsdk.toolkit.gui.GuiDialog;
-import vsdk.toolkit.gui.variable.*;
+import vsdk.toolkit.gui.variable.GuiBooleanVariable;
+import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
+import vsdk.toolkit.gui.variable.GuiDoubleVariable;
+import vsdk.toolkit.gui.variable.GuiIntegerVariable;
+import vsdk.toolkit.gui.variable.GuiStringVariable;
+import vsdk.toolkit.gui.variable.GuiVariable;
+import vsdk.toolkit.gui.variable.GuiVector3DVariable;
 
 public class SwingGuiRenderer {
 
@@ -343,76 +343,78 @@ public class SwingGuiRenderer {
         return widgetMenubar;
     }
 
-    public static JPanel buildBooleanVariable(GuiBooleanVariable v) {
+    public static JPanel buildBooleanVariable(GuiBooleanVariable v, ActionListener executor) {
         JPanel p = new JPanel();
-        //JCheckBox cb = new JCheckBox(v.getName());
-        p.add(buildNumberWidget(v.getName()));
-        //p.add(cb);
+        JCheckBox cb = new JCheckBox(v.getName());
+        //p.add(buildNumberWidget(v.getName()));
+        cb.addActionListener(executor);
+        p.add(cb);
         return p;
     }
 
-    private static JPanel buildNumberWidget(String subname) {
+    private static JPanel buildNumberWidget(String subname, ActionListener executor) {
         JPanel p;
         JLabel l;
         JTextField t;
         p = new JPanel();
         l = new JLabel(subname);
         t = new JTextField("0.0");
+        t.addActionListener(executor);
         p.add(l);
         p.add(t);
         return p;
     }
 
-    public static JPanel buildVector3DVariable(GuiVector3DVariable v) {
+    public static JPanel buildVector3DVariable(GuiVector3DVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         JLabel lv = new JLabel(v.getName());
         p.add(lv);
-        p.add(buildNumberWidget("X:"));
-        p.add(buildNumberWidget("Y:"));
-        p.add(buildNumberWidget("Z:"));
+        p.add(buildNumberWidget("X:", executor));
+        p.add(buildNumberWidget("Y:", executor));
+        p.add(buildNumberWidget("Z:", executor));
         return p;
     }
 
-    public static JPanel buildColorRgbVariable(GuiColorRgbVariable v) {
+    public static JPanel buildColorRgbVariable(GuiColorRgbVariable v, ActionListener executor) {
         JPanel p = new JPanel();
-        JLabel lv = new JLabel(v.getName());
-        p.add(lv);
-        p.add(buildNumberWidget("R:"));
-        p.add(buildNumberWidget("G:"));
-        p.add(buildNumberWidget("B:"));
+        p.add(buildNumberWidget("R:", executor));
+        p.add(buildNumberWidget("G:", executor));
+        p.add(buildNumberWidget("B:", executor));
         return p;
     }
 
-    public static JPanel buildDoubleVariable(GuiDoubleVariable v) {
+    public static JPanel buildDoubleVariable(GuiDoubleVariable v, ActionListener executor) {
         JPanel p = new JPanel();
-        p.add(buildNumberWidget(v.getName()));
+        p.add(buildNumberWidget(v.getName() + ":", executor));
         return p;
     }
 
-    public static JPanel buildIntegerVariable(GuiIntegerVariable v) {
+    public static JPanel buildIntegerVariable(GuiIntegerVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         //JScrollBar sb = new JScrollBar();
         //JSlider js = new JSlider();
-        p.add(buildNumberWidget(v.getName()));
+        p.add(buildNumberWidget(v.getName(), executor));
         //p.add(sb);
         //p.add(js);
         return p;
     }
 
-    public static JPanel buildStringVariable(GuiStringVariable v) {
+    public static JPanel buildStringVariable(GuiStringVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         //JLabel l = new JLabel(v.getName());
         //p.add(l);
-        p.add(buildNumberWidget(v.getName()));
+        p.add(buildNumberWidget(v.getName(), executor));
         return p;
     }
-    
-    public static JButton buildCommandButton(GuiCommand c){
+
+    public static JButton buildCommandButton(GuiCommand c, ActionListener executor) {
         JButton b = new JButton(c.getName());
+        b.setToolTipText("Test Message: " + c.getName());
+        b.addActionListener(executor);
         return b;
     }
 
-    public static JPanel buildVariable(GuiVariable v) {
+    public static JPanel buildVariable(GuiVariable v, ActionListener executor) {
         JPanel containingPanelWidget = new JPanel();
         if (v == null) {
             JLabel l = new JLabel("NULL Variable ");
@@ -421,17 +423,17 @@ public class SwingGuiRenderer {
         }
 
         if (v instanceof vsdk.toolkit.gui.variable.GuiBooleanVariable) {
-            containingPanelWidget = buildBooleanVariable((GuiBooleanVariable) v);
+            containingPanelWidget = buildBooleanVariable((GuiBooleanVariable) v, executor);
         } else if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
-            containingPanelWidget = buildVector3DVariable((GuiVector3DVariable) v);
+            containingPanelWidget = buildVector3DVariable((GuiVector3DVariable) v, executor);
         } else if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
-            containingPanelWidget = buildColorRgbVariable((GuiColorRgbVariable) v);
+            containingPanelWidget = buildColorRgbVariable((GuiColorRgbVariable) v, executor);
         } else if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
-            containingPanelWidget = buildDoubleVariable((GuiDoubleVariable) v);
+            containingPanelWidget = buildDoubleVariable((GuiDoubleVariable) v, executor);
         } else if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
-            containingPanelWidget = buildIntegerVariable((GuiIntegerVariable) v);
+            containingPanelWidget = buildIntegerVariable((GuiIntegerVariable) v, executor);
         } else if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
-            containingPanelWidget = buildStringVariable((GuiStringVariable) v);
+            containingPanelWidget = buildStringVariable((GuiStringVariable) v, executor);
         } else {
             JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
             containingPanelWidget.add(l);
@@ -439,38 +441,272 @@ public class SwingGuiRenderer {
         return containingPanelWidget;
     }
 
-    public static JPanel buildDialog(GuiDialog d, Gui gui) {
+    public static void buildGuiCommandConfiguration(JPanel panel, String aux, GridBagConstraints cons, GuiCommand c, ActionListener executor) {
+        if (aux.equals("Camera Rotations")) {
+            if (c.getName().equals("UP")) {
+                cons.gridx = 1;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                cons.anchor = GridBagConstraints.CENTER;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("DOWN")) {
+                cons.gridx = 1;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c,executor), cons);
+            } else if (c.getName().equals("LEFT")) {
+                cons.gridx = 0;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("RIGHT")) {
+                cons.gridx = 2;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            }
+        } else if (aux.equals("Camera Position Movements")) {
+            if (c.getName().equals("UP")) {
+                cons.gridx = 1;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                cons.anchor = GridBagConstraints.CENTER;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("DOWN")) {
+                cons.gridx = 1;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("LEFT")) {
+                cons.gridx = 0;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("RIGHT")) {
+                cons.gridx = 2;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("BACK")) {
+                cons.gridx = 0;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("FORWARD")) {
+                cons.gridx = 2;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            }
+        } else if (aux.equals("Terrain Position")) {
+            if (c.getName().equals("UP")) {
+                cons.gridx = 1;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                cons.anchor = GridBagConstraints.CENTER;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("DOWN")) {
+                cons.gridx = 1;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c,executor), cons);
+            } else if (c.getName().equals("LEFT")) {
+                cons.gridx = 0;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("RIGHT")) {
+                cons.gridx = 2;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("BACK")) {
+                cons.gridx = 0;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("FORWARD")) {
+                cons.gridx = 2;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            }
+        } else if (aux.equals("Terrain Visualization")) {
+            if (c.getName().equals("UP")) {
+                cons.gridx = 1;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                cons.anchor = GridBagConstraints.CENTER;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("DOWN")) {
+                cons.gridx = 1;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("LEFT")) {
+                cons.gridx = 0;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("RIGHT")) {
+                cons.gridx = 2;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("BACK")) {
+                cons.gridx = 0;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("FORWARD")) {
+                cons.gridx = 2;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            }
+        } else if (aux.equals("Lines Visualization")) {
+            if (c.getName().equals("LEFT")) {
+                cons.gridx = 0;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c, executor), cons);
+            } else if (c.getName().equals("RIGHT")) {
+                cons.gridx = 2;
+                cons.gridy = 1;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildCommandButton(c,executor), cons);
+            }
+        }
+    }
+
+    public static void buildGuiVariableConfiguration(JPanel panel, String aux, GridBagConstraints cons, Gui gui, ActionListener executor) {
+        if (aux.equals("MODE_1")) {
+            cons.gridx = 0;
+            cons.gridy = 0;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        } else if (aux.equals("MODE_2")) {
+            cons.gridx = 0;
+            cons.gridy = 1;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        } else if (aux.equals("MODE_3")) {
+            cons.gridx = 0;
+            cons.gridy = 2;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        } else if (aux.equals("color")) {
+            cons.gridx = 0;
+            cons.gridy = 2;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        } else if (aux.equals("TYPE_LINES")) {
+            cons.gridx = 0;
+            cons.gridy = 0;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        } else if (aux.equals("TOGGLE")) {
+            cons.gridx = 2;
+            cons.gridy = 0;
+            cons.gridwidth = 1;
+            cons.gridheight = 1;
+            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+        }
+    }
+
+    public static JPanel buildDialog(GuiDialog d, Gui gui, ActionListener executor) {
         JPanel panel = new JPanel();
-        TitledBorder tb;
-        String aux = d.getId();
+        panel.setLayout(new GridBagLayout());
+        LayoutManager cons;
+
+        //TitledBorder tb;
+        //String aux = d.getName();
+
         if (d == null) {
             JLabel l = new JLabel("NULL Dialog ");
             panel.add(l);
             return panel;
         }
-        
+
         //panel.setPreferredSize(new Dimension(aux.length(), 50));
-        tb = new TitledBorder(aux);
-        panel.setBorder(tb);
+        //tb = new TitledBorder(aux);
+        //panel.setBorder(tb);
+        panel.setToolTipText("Test dialog: " + d.getId());
+
+        //- Define geometry management for panel ---------------------------
+        int ncols;
+        int nrows;
+        if (d.getOrientation() == GuiDialog.ORIENTATION_HORIZONTAL) {
+            ncols = d.getPendingVariableNames().size()
+                    + d.getPendingCommandNames().size()
+                    + d.getPendingDialogRefNames().size();
+            nrows = 1;
+        } else {
+            ncols = 1;
+            nrows = d.getPendingVariableNames().size()
+                    + d.getPendingCommandNames().size()
+                    + d.getPendingDialogRefNames().size();
+        }
+
+
+        cons = new GridLayout(nrows, ncols);
+        panel.setLayout(cons);
+
+        //------------------------------------------------------------------
 
         for (int k = 0; k < d.getPendingVariableNames().size(); k++) {
-            JPanel q = SwingGuiRenderer.buildVariable(gui.getVariableByName(d.getPendingVariableNames().get(k)));
+            String vn = d.getPendingVariableNames().get(k);
+            //JPanel q = new JPanel();
+            JPanel q = buildVariable(gui.getVariableByName(vn), executor);
+            //buildGuiVariableConfiguration(q, vn, cons, gui);
             panel.add(q);
         }
-        
-        for(int i = 0; i < d.getPendingCommandNames().size(); i++){
+
+        for (int i = 0; i < d.getPendingCommandNames().size(); i++) {
             GuiCommand c = new GuiCommand();
             c.setName(d.getPendingCommandNames().get(i));
-            panel.add(buildCommandButton(c));
+            panel.add(buildCommandButton(c, executor));
+            //buildGuiCommandConfiguration(panel, aux, cons, c);
         }
-        
-        for(int i = 0; i < d.getPendingDialogRefNames().size(); i++){
+
+        for (int i = 0; i < d.getPendingDialogRefNames().size(); i++) {
             GuiDialog dial = new GuiDialog();
-            dial.setName(d.getPendingDialogRefNames().get(i));
-            panel.add(buildDialog(dial, gui));
+            dial.setId(d.getPendingDialogRefNames().get(i));
+            panel.add(buildDialog(dial, gui, executor));
         }
-        
-        
+        if(d.isCollapsable()){
+            CollapsablePanel pan = new CollapsablePanel(d.getName(), panel);
+            return pan;
+        }
         return panel;
     }
 }
