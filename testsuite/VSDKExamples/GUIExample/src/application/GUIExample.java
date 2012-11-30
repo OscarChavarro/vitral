@@ -6,19 +6,12 @@ package application;
 
 // Internal classes
 import com.sun.java.swing.plaf.gtk.GTKConstants;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.TextArea;
+import java.awt.*;
 import java.io.FileInputStream;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.gui.GuiDialog;
-import vsdk.toolkit.gui.variable.GuiVariable;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
@@ -46,12 +39,13 @@ public class GUIExample {
         languageGuiFile = "./etc/english.gui";
 
         mainWindowWidget = new JFrame("VITRAL GUI Example");
+        
         mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
             gui = GuiPersistence.importAquynzaGui(
                     new FileInputStream(languageGuiFile));
-            System.out.println(gui);
+            //System.out.println(gui);
         } catch (Exception e) {
             System.err.println("Fatal error: can not open GUI file");
             e.printStackTrace();
@@ -60,27 +54,33 @@ public class GUIExample {
         JMenuBar menubar;
         menubar = SwingGuiRenderer.buildMenubar(gui, null, executor);
 
-        Dimension d = new Dimension(1200, 600);
-
+        Dimension d = new Dimension(800, 800);
+        JPanel workspace = new JPanel();
+        //workspace.setPreferredSize(new Dimension(400, mainWindowWidget.getHeight()));
+        
+        
+        
         JPanel p = new JPanel();
-        p.setBackground(Color.WHITE);
+        p.setLayout(new GridLayout(gui.getDialogList().size(), 1));
+        //p.setPreferredSize(new Dimension(300, 800));
+        //p.setBackground(Color.WHITE);
 
-
+        TitledBorder tb = new TitledBorder("Applications");
+        TitledBorder tb2 = new TitledBorder("Workspace");
+        p.setBorder(tb);
+        //p.setBackground(Color.WHITE);
+        workspace.setBorder(tb2);
+        
         /*
          * Dialog english.gui file construction
          */
         for (int i = 0; i < gui.getDialogList().size(); i++) {
             p.add(buildDialogGui(gui.getDialogList().get(i)));
         }
-
-
-        TitledBorder tb = new TitledBorder("Test Sphere Modifier");
-        p.setBorder(tb);
-        p.setBackground(Color.DARK_GRAY);
-        mainWindowWidget.getContentPane().add(p);
-
-        //mainWindowWidget.add(panel,BorderLayout.SOUTH);
-
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.getViewport().add(p);
+        mainWindowWidget.add(workspace,BorderLayout.CENTER);
+        mainWindowWidget.add(scrollPane,BorderLayout.EAST);
         mainWindowWidget.setJMenuBar(menubar);
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
@@ -88,12 +88,8 @@ public class GUIExample {
     }
 
     public JPanel buildDialogGui(GuiDialog d) {
-        //Cuando ahce la recursion esta creando un nuevo panel papa
-        JPanel pan = SwingGuiRenderer.buildDialog(d,gui);
-        //pan.add(SwingGuiRenderer.buildDialog(d));
+        JPanel pan = SwingGuiRenderer.buildDialog(d, gui, executor);
         if (d.getChildren().isEmpty() || d.getChildren() == null) {
-            //pan.add(SwingGuiRenderer.buildDialog(d));
-            //p.add(pan);
             return pan;
         } else {
             for (int j = 0; j < d.getChildren().size(); j++) {
@@ -103,7 +99,6 @@ public class GUIExample {
                 pan.add(panel);
             }
         }
-
         return pan;
     }
 }
