@@ -203,49 +203,32 @@ POPUP "CALIDAD_VISUAL" {
 //= ESPECIFICACION DE COMANDOS                                              =
 //===========================================================================
 
-DIALOG IDD_MESH_SELECTION {
-    variable "renderingType",
-    variable "r",
-    command IDC_REDO
-    command IDC_COMMIT
-}
-
-DIALOG IDD_MODIFY_MESH {
-    dialogref IDD_MESH_SELECTION
-    dialogref IDD_MESH_SOFT_SELECTION
-    dialogref IDD_MESH_GEOMETRY
-    dialogref IDD_MEVector3DSH_PROPERTIES
-}
-
-
-DIALOG IDD_MODIFY_MESH2 {
-    DIALOG IDD_MESH_SELECTION2 {
-        variable "renderingType",
-        variable "boolIs",
-        command IDC_REDO
-        command IDC_COMMIT
-    }
-
-    dialogref IDD_MESH_SOFT_SELECTION
-    dialogref IDD_MESH_GEOMETRY
-    dialogref IDD_MESH_PROPERTIES
-}
-
-VARIABLE b {
+VARIABLE MODE_1 {
     type "boolean"
 }
 
-1VARIABLE r {
-    type "double"
-    range "[0, INF]",
-    initialValue "1.0"
- //   app "textbox"
- //   app "autodeskcombo"
- //   units "m"
-//   app "iconset"
-//   icon 1 "points.jpg"
-//   icon 2 "triangles.jpg"
-//   icon 3 "face.jpg"
+VARIABLE MODE_2 {
+    type "boolean"
+}
+
+VARIABLE MODE_3 {
+    type "boolean"
+}
+
+VARIABLE TOGGLE {
+    type "boolean"
+}
+
+VARIABLE TYPE_LINES {
+    type "String"
+}
+
+VARIABLE string {
+    type "String"
+}
+
+VARIABLE integer {
+    type "Integer"
 }
 
 VARIABLE position {
@@ -257,6 +240,70 @@ VARIABLE position {
 VARIABLE color {
     type "ColorRgb"
 }
+
+DIALOG IDD_MODIFY_CAMERA_ROTATION {
+	name "Camera Rotations"
+	variable "position"
+    command UP
+    command LEFT
+    command RIGHT
+    command DOWN
+    command PITCH
+    command ROLL
+    orientation "vertical"
+    collapsable "true"
+}
+
+DIALOG IDD_MODIFY_TERRAIN_POSITION {
+	name "Terrain Position"
+    command UP
+    command LEFT
+    command RIGHT
+    command DOWN
+    orientation "vertical"
+}
+
+DIALOG IDD_MODIFY_TERRAIN_VISUALIZATION {
+	name "Terrain Visualization"
+    command UP
+    command LEFT
+    command RIGHT
+    command DOWN
+    orientation "vertical"
+}
+
+DIALOG IDD_MODIFY_LINES_VISUALIZATION {
+	name "Lines Visualization"
+    command LEFT
+    command RIGHT
+    variable "TYPE_LINES"
+    variable "TOGGLE"
+    orientation "vertical"
+}
+
+DIALOG IDD_MODIFY_CAMERA_POSITION {
+	name "Camera Position Movements"
+	//SON DIALOGS
+    //dialogref IDD_MESH_SELECTION
+    //SON BUTTONS
+    command RIGHT
+    command LEFT
+    command UP
+    command DOWN
+    command FORWARD
+    command BACK
+    orientation "vertical"
+}
+
+DIALOG IDD_MODIFY_DISPLAY_MODE {
+	name "Visualization Mode"
+	variable "MODE_1"
+	variable "MODE_2"
+	variable "MODE_3"
+	orientation "vertical"
+}
+
+
 
 /*---------------------------------------------------------------------------
 Un COMANDO es una accion en particular que puede tomar la aplicacion.
