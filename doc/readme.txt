@@ -39,7 +39,11 @@ Latest version of the Vitral SDK project source code is available to the public
 on the internet and is hosted at SourceForge.net SVN service. To download
 vitral use the following command on linux or UNIX command line:
 
-svn co https://vitral.svn.sourceforge.net/svnroot/vitral/vitral/trunk vitral
+Before 2013:
+#svn co https://vitral.svn.sourceforge.net/svnroot/vitral/vitral/trunk vitral
+
+After:
+svn co https://svn.code.sf.net/p/vitral/code vitral
 
 On windows, using tortoise:
   - Create an empty folder named "vitral" and double click on it
