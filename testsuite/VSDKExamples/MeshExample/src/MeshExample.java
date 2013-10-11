@@ -57,13 +57,17 @@ public class MeshExample
     private CameraController cameraController;
     private RendererConfiguration qualitySelection;
     private RendererConfigurationController qualityController;
-    private GLCanvas canvas;
+    public GLCanvas canvas;
 
     private SimpleScene scene;
+
+    public double x;
 
     public MeshExample(String fileName) {
         super("VITRAL mesh test - JOGL");
         File file = null;
+
+        x = 0;
 
         scene = new SimpleScene();
 
@@ -147,6 +151,7 @@ public class MeshExample
     public static void main(String[] args) {
         JFrame f;
 
+
         if ( args.length == 1 ) {
             f = new MeshExample(args[0]);
         }
@@ -154,12 +159,19 @@ public class MeshExample
             f = new MeshExample(null);
         }
 
+        Animador h = new Animador((MeshExample)f);
+        Thread x = new Thread(h);
+        x.start();
+
+
         f.pack();
         f.setVisible(true);
     }
 
     private void drawObjectsGL(GL2 gl) {
         gl.glLoadIdentity();
+
+        gl.glTranslated(x, 0, 0);
 
         // Draw reference frame
         gl.glLineWidth((float)3.0);

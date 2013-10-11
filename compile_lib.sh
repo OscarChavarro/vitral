@@ -7,7 +7,7 @@ IO_CLASSES="./src/vsdk/toolkit/io/*.java ./src/vsdk/toolkit/io/metadata/*.java .
 
 AWT_CLASSES="./src/vsdk/toolkit/render/awt/*.java ./src/vsdk/toolkit/gui/CameraController.java ./src/vsdk/toolkit/gui/AwtSystem.java ./src/vsdk/toolkit/gui/CameraControllerAquynza.java ./src/vsdk/toolkit/gui/CameraControllerBlender.java ./src/vsdk/toolkit/gui/TranslateGizmo.java ./src/vsdk/toolkit/gui/RotateGizmo.java ./src/vsdk/toolkit/gui/ScaleGizmo.java ./src/vsdk/toolkit/gui/RendererConfigurationController.java ./src/vsdk/toolkit/io/image/ImagePersistence.java ./src/vsdk/toolkit/io/image/TargaImage.java ./src/vsdk/toolkit/io/geometry/ReaderObj.java"
 
-JOGL_CLASSES="./src/vsdk/toolkit/render/jogl/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java"
+JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java"
 
 VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java"
 
@@ -23,7 +23,11 @@ if [ ! -d ./lib ]; then
 fi
 
 clear
-javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_joglcg:$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+
+# Sometimes those are needed to specify its location...
+#$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar
+
+javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..

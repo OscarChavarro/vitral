@@ -927,3 +927,8 @@
   - 20min: organizing CohenSutherlandClippingTechnique example.
 
 ===========================================================================
+
+2013 october 11, Oscar Chavarro:
+  - 10min: Separating JOGL from base pure java code
+
+===========================================================================
