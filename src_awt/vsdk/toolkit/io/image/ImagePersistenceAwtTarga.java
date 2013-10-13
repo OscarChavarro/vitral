@@ -15,11 +15,11 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 
 /**
-The TargaImage class represents a targa image (the image files with .tga
+The ImagePersistenceAwtTarga class represents a targa image (the image files with .tga
 extension)
 */
 
-public class TargaImage extends PersistenceElement
+public class ImagePersistenceAwtTarga extends PersistenceElement
 {
     private static final int NO_TRANSPARENCY = 255;
     private static final int FULL_TRANSPARENCY = 0;
@@ -43,7 +43,7 @@ public class TargaImage extends PersistenceElement
     Constructs a TGAImage given the File image
     @param srcFile The tga image file
     */
-    public TargaImage(File srcFile) throws ImageNotRecognizedException {
+    public ImagePersistenceAwtTarga(File srcFile) throws ImageNotRecognizedException {
         try
         {
             open(srcFile);
@@ -88,7 +88,7 @@ public class TargaImage extends PersistenceElement
                 pixels = new byte[xSize * ySize*4];
             }
             else {
-                System.err.println("TargaImage - cannot read file!");       
+                System.err.println("ImagePersistenceAwtTarga - cannot read file!");       
             }
         }
         

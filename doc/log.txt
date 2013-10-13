@@ -936,5 +936,6 @@
   - 30min: migrating PBuffer JOGL code to current JOGL version
   - 30min: migrating PBuffer JOGL code to current JOGL version and
     separating awt code from main src folder to src_awt folder.
+  - 20min: separating awt code from main src folder to src_awt folder.
 
 ===========================================================================

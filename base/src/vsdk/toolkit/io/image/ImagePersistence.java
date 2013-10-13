@@ -33,9 +33,6 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
@@ -50,12 +47,17 @@ public class ImagePersistence extends PersistenceElement
 {
     public static boolean nativeWarningGiven = false;
     private static ImagePersistenceJogl joglHelper;
+    private static ImagePersistenceAwt awtHelper;
 
     static {
         joglHelper = null;
+        awtHelper = null;
 
         // Comment this line out if JOGL is not available
         joglHelper = new ImagePersistenceJogl();
+
+        // Comment this line out if Awt is not avaible
+        awtHelper = new ImagePersistenceAwt();
     }
 
     private static RGBAImage importDDSRGBA(File inImageFd)
@@ -66,14 +68,34 @@ public class ImagePersistence extends PersistenceElement
             data = joglHelper.importDDSRGBA(inImageFd);
         }
         else {
-            data = new RGBAImage();
-            data.init(256, 256);
-            data.createTestPattern();
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence.importDDSRGBA",
-                "ImagePersistenceJogl class not available, returning test image"
-            );
+            data = createNotAvailableImageRGBA();
         }
+        return data;
+    }
+
+    private static RGBAImage createNotAvailableImageRGBA()
+    {
+        RGBAImage data;
+        data = new RGBAImage();
+        data.init(256, 256);
+        data.createTestPattern();
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, returning test RGBA image"
+        );
+        return data;
+    }
+
+    private static RGBImage createNotAvailableImageRGB()
+    {
+        RGBImage data;
+        data = new RGBImage();
+        data.init(256, 256);
+        data.createTestPattern();
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, returning test RGB image"
+        );
         return data;
     }
 
@@ -85,13 +107,7 @@ public class ImagePersistence extends PersistenceElement
             data = joglHelper.importDDSRGB(inImageFd);
         }
         else {
-            data = new RGBImage();
-            data.init(256, 256);
-            data.createTestPattern();
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence.importDDSRGB",
-                "ImagePersistenceJogl class not available, returning test image"
-            );
+            data = createNotAvailableImageRGB();
         }
         return data;
     }
@@ -135,38 +151,13 @@ public class ImagePersistence extends PersistenceElement
 
         //-----------------------------------------------------------------
         if( type.equals("tga") ) {
-            TargaImage t = new TargaImage(inImageFd);
+            ImagePersistenceAwtTarga t = new ImagePersistenceAwtTarga(inImageFd);
             t.exportRGBA(retImage);
             return retImage;
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            BufferedImage bi = null;
-
-            // OLD SLOW METHOD, DO NOT USE!
-            //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
-            //java.awt.Image image;
-            //image = awtTools.getImage(inImageFd.getAbsolutePath());
-            //bi = toBufferedImage(image);
-
-            try {
-                BufferedInputStream bis;
-                FileInputStream fis;
-
-                fis = new FileInputStream(inImageFd);
-                bis = new BufferedInputStream(fis);
-                bi = ImageIO.read(bis);
-                bis.close();
-                fis.close();
-              }
-              catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
-                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-                return null;
-            }
-            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
-
-            return retImage;
+            return awtHelper.importRGBA(inImageFd);
         }
         else if( type.equals("dds") ) {
             //delete retImage;
@@ -232,46 +223,19 @@ public class ImagePersistence extends PersistenceElement
 
         //-----------------------------------------------------------------
         if( type.equals("tga") ) {
-            TargaImage t = new TargaImage(inImageFd);
+            ImagePersistenceAwtTarga t = new ImagePersistenceAwtTarga(inImageFd);
             t.exportRGB(retImage);
             return retImage;
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            BufferedImage bi = null;
-
-            // OLD SLOW METHOD, DO NOT USE!
-            //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();
-            //java.awt.Image image;
-            //image = awtTools.getImage(inImageFd.getAbsolutePath());
-            //bi = toBufferedImage(image);
-
-            try {
-                BufferedInputStream bis;
-                FileInputStream fis;
-
-                fis = new FileInputStream(inImageFd);
-                bis = new BufferedInputStream(fis);
-                bi = ImageIO.read(bis);
-                bis.close();
-                fis.close();
-              }
-              catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (A)",
-                                     "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
-                 throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
-            }
-            AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
-
-            return retImage;
+            return awtHelper.importRGB(inImageFd);
         }
         else if( type.equals("dds") ) {
             //delete retImage;
             return importDDSRGB(inImageFd);
         }
         else if( type.equals("ppm") )  {
-            BufferedImage bi = null;
-
             try {
                 BufferedInputStream bis;
                 FileInputStream fis;
@@ -372,48 +336,28 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static IndexedColorImage importIndexedColor(File imagen) throws ImageNotRecognizedException
+    public static IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
     {
-        String type = extractExtensionFromFile(imagen);
+        String type = extractExtensionFromFile(inImageFd);
         IndexedColorImage retImage;
         Image img;
 
         if( type.equals("bw") ) {
-            img = ImagePersistenceSGI.readImageSGI(imagen.getAbsolutePath());
+            img = ImagePersistenceSGI.readImageSGI(inImageFd.getAbsolutePath());
             if ( img instanceof IndexedColorImage ) {
                 retImage = (IndexedColorImage)img;
             }
             else {
                 throw new ImageNotRecognizedException("Convertion needed", 
-                imagen);
+                inImageFd);
             }
             return retImage;
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            BufferedImage bi = null;
-
-            try {
-                BufferedInputStream bis;
-                FileInputStream fis;
-
-                fis = new FileInputStream(imagen);
-                bis = new BufferedInputStream(fis);
-                bi = ImageIO.read(bis);
-                bis.close();
-                fis.close();
-              }
-              catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (C)",
-                                     "Cannot import image file \"" + imagen.getAbsolutePath() + "\"");
-                 throw new ImageNotRecognizedException("Error reading internal file:\n" + e, imagen);
-            }
-            retImage = new IndexedColorImage();
-            AwtIndexedColorImageRenderer.importFromAwtBufferedImage(bi, retImage);
-
-            return retImage;
+            return awtHelper.importIndexedColor(inImageFd);
         }
-        throw new ImageNotRecognizedException("Image not recognized", imagen);
+        throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
    
     private static void transferPixels(int[] ori, byte[] dest, int w, int h, int pixelDepth)
@@ -742,89 +686,6 @@ public class ImagePersistence extends PersistenceElement
         }
         return true;
     }
-
-    //=================================================================
-    // DESACTIVATED METHODS!!! DO NOT USE!!!
-    //=================================================================
-/*
-    private static boolean hasAlpha(java.awt.Image image) 
-    {
-        if (image instanceof BufferedImage) 
-        {
-            BufferedImage bimage = (BufferedImage)image;
-            return bimage.getColorModel().hasAlpha();
-        }
-    
-        java.awt.image.PixelGrabber pg;
-        pg = new java.awt.image.PixelGrabber(image, 0, 0, 1, 1, false);
-        try 
-        {
-            pg.grabPixels();
-        } 
-        catch (InterruptedException e) 
-        {
-        }
-    
-        java.awt.image.ColorModel cm = pg.getColorModel();
-        return cm.hasAlpha();
-    }
-
-    private static BufferedImage toBufferedImage(java.awt.Image image) 
-    {
-        if ( image instanceof BufferedImage ) {
-            return (BufferedImage)image;
-        }
-        //System.out.println(image.getClass().getName());
-    
-        // This code ensures that all the pixels in the image are loaded
-        image = new javax.swing.ImageIcon(image).getImage();
-    
-        // Determine if the image has transparent pixels; for this method's
-        // implementation, see e661 Determining If an Image Has Transparent Pixels
-        boolean hasAlpha = hasAlpha(image); 
-    
-        // Create a buffered image with a format that's compatible with the screen
-        BufferedImage bimage = null;
-        java.awt.GraphicsEnvironment ge;
-        ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-        try 
-        {
-            // Determine the type of transparency of the new buffered image
-            int transparency = java.awt.Transparency.OPAQUE;
-            if ( hasAlpha ) {
-                transparency = java.awt.Transparency.BITMASK;
-            }
-    
-            // Create the buffered image
-            java.awt.GraphicsDevice gs = ge.getDefaultScreenDevice();
-            java.awt.GraphicsConfiguration gc = gs.getDefaultConfiguration();
-            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-        } 
-        catch ( java.awt.HeadlessException e ) {
-            // The system does not have a screen
-        }
-    
-        if (bimage == null) 
-        {
-            // Create a buffered image using the default color model
-            int type = BufferedImage.TYPE_INT_RGB;
-            if (hasAlpha) 
-            {
-                type = BufferedImage.TYPE_INT_ARGB;
-            }
-            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-        }
-    
-        // Copy image to buffered image
-        java.awt.Graphics g = bimage.createGraphics();
-    
-        // Paint the image onto the buffered image
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-
-        return bimage;
-    }
-*/
     
 }
 
