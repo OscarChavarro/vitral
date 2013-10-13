@@ -65,7 +65,7 @@ public class CgAutomaticShaderExample
     private RendererConfigurationController qualityController;
 
     //- Animation & state control ------------------------------------------
-    private boolean firstTimer = true;
+    private int firstTimer = 0;
     private int needPaint = 3;
     private boolean withRotationAnimation = false;
     private boolean withLightAnimation = false;
@@ -191,6 +191,13 @@ public class CgAutomaticShaderExample
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
+        //- This block should be at the very beginning of this method -----
+        if ( firstTimer == 0 ) {
+            JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
+            needPaint = 2;
+        }
+
+        //-----------------------------------------------------------------
         if ( withRotationAnimation ) {
             zrotation += 0.5*2;
             needPaint = 1;
@@ -213,12 +220,6 @@ public class CgAutomaticShaderExample
         needPaint--;
 
         //-----------------------------------------------------------------
-        if ( firstTimer ) {
-            firstTimer = false;
-            JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
-        }
-
-        //-----------------------------------------------------------------
         gl.glEnable(gl.GL_DEPTH_TEST);
         gl.glClearColor(0, 0, 0, 1.0f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
@@ -237,6 +238,12 @@ public class CgAutomaticShaderExample
 
         gl.glLoadIdentity();
         JoglCgLightRenderer.draw(gl, light);
+
+        //- Manage startup problem of not applying color texture ----------
+        if ( firstTimer < 3 ) {
+            canvas.repaint();
+            firstTimer++;
+        }
     }
 
     public void
