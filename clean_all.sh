@@ -9,3 +9,6 @@ fi
 cd testsuite/_APITests/_JNIExample
 ./clean.sh
 cd ../../..
+cd testsuite/VSDKExamples/PolyhedralBoundedSolidExample
+rm -rf outputA* outputB* outputR*
+cd ../../..
