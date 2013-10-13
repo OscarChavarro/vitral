@@ -45,7 +45,7 @@ LIB_DIR = ../../lib
 CLASSES_DIR = ./classes
 TMP_DIR = ./tmp
 LIBTOOL = g++ -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
-JC = javac -classpath ../../../lib/vsdk.jar -d ../$(CLASSES_DIR)
+JC = javac -proc:none -classpath ../../../lib/vsdk.jar -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
 #===========================================================================

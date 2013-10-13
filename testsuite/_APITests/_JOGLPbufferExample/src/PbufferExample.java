@@ -9,7 +9,8 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+//import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLDrawableFactory;
 
 // VSDK classes
@@ -17,10 +18,18 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 
+/**
+This application example is used to test JOGL's / OpenGL's Pbuffer offline
+rendering capability. Note that on JOGL library history, several different
+ways of performing this have been used. As of october 2013, GLPbuffer class
+have been deprecated. Current code contains comments to compare previous
+implementation with current one (GLOffscreenAutoDrawable).
+*/
 public class PbufferExample implements GLEventListener {
     private static int imageWidth = 320;
     private static int imageHeight = 240;
-    private GLPbuffer  pbuffer;
+    //private GLPbuffer  pbuffer;
+    private GLOffscreenAutoDrawable pbuffer;
     private RGBImage  image;
 
     public PbufferExample() {
@@ -31,7 +40,10 @@ public class PbufferExample implements GLEventListener {
         GLCapabilities pbCaps = new GLCapabilities(profile);
         pbCaps.setDoubleBuffered(false);
         try {
-            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            //pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
+            pbuffer = creator.createOffscreenAutoDrawable(
+                null, pbCaps, null, imageWidth, imageHeight, null);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");

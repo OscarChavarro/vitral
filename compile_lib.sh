@@ -27,7 +27,9 @@ clear
 # Sometimes those are needed to specify its location...
 #$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar
 
-javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_jogl:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+# -proc:none option disables annotation processing which generates warnings
+# when using some gluegen/JOGL features.
+javac -proc:none -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_jogl:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 
 cd classes
 jar cf ../lib/vsdk.jar vsdk

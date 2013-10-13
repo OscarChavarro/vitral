@@ -15,14 +15,14 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 
 // Vitral classes
 import vsdk.framework.Component;
 
 public class JoglShapeMatchingOfflineRenderer extends Component implements GLEventListener {
-    private GLPbuffer  pbuffer;
+    private GLOffscreenAutoDrawable pbuffer;
     private boolean ready;
     private boolean pbufferSupported;
     private JoglShapeMatchingOfflineRenderable target;
@@ -41,13 +41,15 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         pbCaps.setDoubleBuffered(false);
         drawableFactory = GLDrawableFactory.getFactory(GLProfile.get(GLProfile.GL3));
 
-        if ( !drawableFactory.canCreateGLPbuffer(null) ) {
+        if ( !drawableFactory.canCreateGLPbuffer(null, profile) ) {
               pbufferSupported = false;
               return;
         }
 
         try {
-            pbuffer = drawableFactory.createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = drawableFactory.createOffscreenAutoDrawable(
+                null, pbCaps, null, imageWidth, imageHeight, null);
+
 
             pbufferSupported = true;
             pbuffer.addGLEventListener(this);

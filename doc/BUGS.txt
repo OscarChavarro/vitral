@@ -26,3 +26,9 @@ Following a list of detected BUGS.
       object when compiling the list, making object inalterable.
   - On testsuite/VSDKExamples/CgShaderExample CgAutomaticShaderExample.java
     test object fails to activate texture map on first frame.
+
+Previous working things that have detected errors:
+  - To check Stereo examples on several computers (was tested on Quadro)
+  - SceneEditorApplication example is failing when regenerating GUI on
+    a language or look and feel change.
+

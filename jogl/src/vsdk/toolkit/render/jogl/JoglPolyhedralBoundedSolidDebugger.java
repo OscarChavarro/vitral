@@ -10,7 +10,7 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 
 // VSDK classes
@@ -36,7 +36,7 @@ implements GLEventListener
 {
     private int imageWidth = 800;
     private int imageHeight = 600;
-    private GLPbuffer pbuffer;
+    private GLOffscreenAutoDrawable pbuffer;
     private RGBImage image;
     private String filename;
     private PolyhedralBoundedSolid solid;
@@ -55,7 +55,9 @@ implements GLEventListener
         GLCapabilities pbCaps = new GLCapabilities(profile);
         pbCaps.setDoubleBuffered(true);
         try {
-            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
+            pbuffer = creator.createOffscreenAutoDrawable(
+                null, pbCaps, null, imageWidth, imageHeight, null);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");

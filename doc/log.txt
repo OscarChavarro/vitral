@@ -933,5 +933,6 @@
 
 2013 october 13, Oscar Chavarro:
   - 42min: Separating JOGL from base pure java code
+  - 30min: migrating PBuffer JOGL code to current JOGL version
 
 ===========================================================================

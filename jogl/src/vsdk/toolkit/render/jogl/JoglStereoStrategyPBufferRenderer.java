@@ -10,15 +10,15 @@ import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLDrawableFactory;
 
 import vsdk.toolkit.media.RGBImage;
 
 public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRenderer
 {
-    private GLPbuffer leftPbuffer;
-    private GLPbuffer rightPbuffer;
+    private GLOffscreenAutoDrawable leftPbuffer;
+    private GLOffscreenAutoDrawable rightPbuffer;
     private RGBImage leftImage;
     private RGBImage rightImage;
 
@@ -34,8 +34,11 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
         pbCaps.setDoubleBuffered(false);
 
         try {
-            leftPbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
-            rightPbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
+            leftPbuffer = creator.createOffscreenAutoDrawable(
+                null, pbCaps, null, imageWidth, imageHeight, null);
+            rightPbuffer = creator.createOffscreenAutoDrawable(
+                null, pbCaps, null, imageWidth, imageHeight, null);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");

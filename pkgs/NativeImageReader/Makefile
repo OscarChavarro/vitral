@@ -8,7 +8,7 @@ SRC_DIR=./src
 TMP_DIR=./tmp
 CCO=g++ -fPIC -Wall -ansi -pedantic -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
 LIBTOOL=g++ -fPIC -Wall -ansi -pedantic
-JC = javac -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
+JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
 all: check ./bin/testImageReader $(LIB_DIR)/libNativeImageReader.so $(CLASSES_DIR)/testImageReader.class
