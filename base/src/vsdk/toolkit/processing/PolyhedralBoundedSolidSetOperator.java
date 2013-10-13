@@ -36,7 +36,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._Polyhedral
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
-import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
+import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
@@ -469,7 +469,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     /**
     Used for exporting internal state in graphical form.
     */
-    private static JoglPolyhedralBoundedSolidDebugger offlineRenderer = null;
+    private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
 
     /**
     Following variable `sonvv` from program [MANT1988].15.1.
@@ -2957,7 +2957,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             FileOutputStream fos = new FileOutputStream(fd);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
 
-            offlineRenderer.execute(solid, pattern + ".png");
+            if ( offlineRenderer != null ) {
+                offlineRenderer.execute(solid, pattern + ".png");
+	    }
+
             PersistenceElement.writeAsciiLine(bos, solid.toString());
             bos.close();
         }
@@ -2984,7 +2987,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
               | DEBUG_06_FINISH
               | DEBUG_99_SHOWOPERATIONS
               ;
-            offlineRenderer = new JoglPolyhedralBoundedSolidDebugger();
+            offlineRenderer = PolyhedralBoundedSolidDebugger.createOfflineRenderer();
         }
         else {
             debugFlags = 0;

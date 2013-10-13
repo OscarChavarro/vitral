@@ -24,12 +24,15 @@ import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
 
 /**
 Warning: check why this class implements a GLEventListener. Advanced debug
 features?
 */
-public class JoglPolyhedralBoundedSolidDebugger implements GLEventListener
+public class JoglPolyhedralBoundedSolidDebugger 
+extends PolyhedralBoundedSolidDebugger
+implements GLEventListener
 {
     private int imageWidth = 800;
     private int imageHeight = 600;

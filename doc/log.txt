@@ -931,4 +931,7 @@
 2013 october 11, Oscar Chavarro:
   - 10min: Separating JOGL from base pure java code
 
+2013 october 13, Oscar Chavarro:
+  - 42min: Separating JOGL from base pure java code
+
 ===========================================================================

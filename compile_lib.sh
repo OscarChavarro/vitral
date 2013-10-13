@@ -9,7 +9,7 @@ AWT_CLASSES="./src/vsdk/toolkit/render/awt/*.java ./src/vsdk/toolkit/gui/CameraC
 
 JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java ./src_jogl/vsdk/framework/shapeMatching/*.java"
 
-VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java"
+VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java ./src_jogl/vsdk/framework/shapeMatching/plugins/*.java"
 
 #---------------------------------------------------------------------------
 
@@ -27,7 +27,10 @@ clear
 # Sometimes those are needed to specify its location...
 #$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar
 
-javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_jogl:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+
+exit
+
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
