@@ -6,16 +6,16 @@
 
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent;
+//import java.awt.event.MouseEvent;
 
 import vsdk.toolkit.environment.Camera;
 
 public abstract class CameraController extends Controller {
     @Deprecated
-    public abstract boolean processMouseEventAwt(MouseEvent mouseEvent);
-    
+    public abstract boolean processMouseEventAwt(java.awt.event.MouseEvent mouseEvent);
+
     public abstract boolean processKeyPressedEvent(KeyEvent keyEvent);
     
     @Deprecated
@@ -25,19 +25,21 @@ public abstract class CameraController extends Controller {
     public abstract boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent);
     
     @Deprecated
-    public abstract boolean processMousePressedEventAwt(MouseEvent e);
+    public abstract boolean processMousePressedEventAwt(java.awt.event.MouseEvent e);
     
     @Deprecated
-    public abstract boolean processMouseReleasedEventAwt(MouseEvent e);
+    public abstract boolean processMouseReleasedEventAwt(java.awt.event.MouseEvent e);
     
     @Deprecated
-    public abstract boolean processMouseClickedEventAwt(MouseEvent e);
+    public abstract boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e);
     
     @Deprecated
-    public abstract boolean processMouseMovedEventAwt(MouseEvent e);
+    public abstract boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e);
     
     @Deprecated
-    public abstract boolean processMouseDraggedEventAwt(MouseEvent e);
+    public abstract boolean processMouseDraggedEventAwt(java.awt.event.MouseEvent e);
+
+    public abstract boolean processMouseDraggedEvent(MouseEvent e);
     
     @Deprecated
     public abstract boolean processMouseWheelEventAwt(MouseWheelEvent e);

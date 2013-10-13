@@ -2,9 +2,9 @@
 
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent; // Do not include, deprecated
+//import java.awt.event.MouseEvent; // Do not include, deprecated
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -37,7 +37,7 @@ public class CameraControllerAquynza extends CameraController {
 
     @Deprecated
     @Override
-    public boolean processMouseEventAwt(MouseEvent mouseEvent) {
+    public boolean processMouseEventAwt(java.awt.event.MouseEvent mouseEvent) {
       return true;
     }
 
@@ -278,7 +278,7 @@ public class CameraControllerAquynza extends CameraController {
 
     @Deprecated
     @Override
-    public boolean processMousePressedEventAwt(MouseEvent e)
+    public boolean processMousePressedEventAwt(java.awt.event.MouseEvent e)
     {
         oldMouseX = e.getX();
         oldMouseY = e.getX();
@@ -287,28 +287,34 @@ public class CameraControllerAquynza extends CameraController {
 
     @Deprecated
     @Override
-    public boolean processMouseReleasedEventAwt(MouseEvent e)
+    public boolean processMouseReleasedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
 
     @Deprecated
     @Override
-    public boolean processMouseClickedEventAwt(MouseEvent e)
+    public boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
 
     @Deprecated
     @Override
-    public boolean processMouseMovedEventAwt(MouseEvent e)
+    public boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
 
     @Deprecated
     @Override
-    public boolean processMouseDraggedEventAwt(MouseEvent e)
+    public boolean processMouseDraggedEventAwt(java.awt.event.MouseEvent e)
+    {
+        return processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e));
+    }
+
+    @Override
+    public boolean processMouseDraggedEvent(MouseEvent e)
     {
         //------------------------------------------------------------
         int deltaX;
@@ -338,7 +344,7 @@ public class CameraControllerAquynza extends CameraController {
         Vector3D u, v, w;
         int modifiers;
 
-        modifiers = e.getModifiersEx();
+        modifiers = e.getModifiers();
 
         R = camera.getRotation();
         u = new Vector3D(R.M[0][0], R.M[1][0], R.M[2][0]);

@@ -5,5 +5,5 @@ if [ ! -d ./classes ]; then
 fi
 
 cd src
-javac -Xlint:deprecation -Xlint:unchecked -d ../classes HelloWorldJOGL.java
+javac -proc:none -Xlint:deprecation -Xlint:unchecked -d ../classes HelloWorldJOGL.java
 cd ..

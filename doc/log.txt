@@ -937,5 +937,7 @@
   - 30min: migrating PBuffer JOGL code to current JOGL version and
     separating awt code from main src folder to src_awt folder.
   - 46min: separating awt code from main src folder to src_awt folder.
+  - 40min: migrating mouse event management from awt specific to vsdk, and
+    fixing JOGL/gluegen related compile time warnings.
 
 ===========================================================================

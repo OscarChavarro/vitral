@@ -8,7 +8,7 @@ SRC_DIR=./src
 TMP_DIR=./tmp
 #CCO=gcc -O4 -ansi -Wall -pedantic -I./src_lib
 CCO=gcc -std=c99 -m32 -fPIC -Wall -pedantic -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
-JC = javac -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
+JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
 all: check ./bin/compress ./bin/uncompress $(LIB_DIR)/libLZW.so $(CLASSES_DIR)/main.class

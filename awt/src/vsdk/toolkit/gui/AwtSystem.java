@@ -8,6 +8,7 @@ package vsdk.toolkit.gui;
 
 // Java GUI classes
 //import java.awt.event.KeyEvent; // Do not import!
+//import java.awt.event.MouseEvent; // Do not import!
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Font;
@@ -30,6 +31,19 @@ events.
 public class AwtSystem extends PresentationElement
 {
     private static Font font = null;
+
+    public static MouseEvent awt2vsdkEvent(java.awt.event.MouseEvent eawt)
+    {
+        MouseEvent evsdk;
+
+        evsdk = new MouseEvent();
+        evsdk.setX(eawt.getX());
+        evsdk.setY(eawt.getY());
+        evsdk.setButton(eawt.getButton());
+        evsdk.setModifiers(eawt.getModifiersEx());
+
+        return evsdk;
+    }
 
     public static KeyEvent awt2vsdkEvent(java.awt.event.KeyEvent eawt)
     {

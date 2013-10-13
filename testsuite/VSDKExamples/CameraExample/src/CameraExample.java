@@ -222,7 +222,8 @@ public class CameraExample extends Applet implements
     }
 
     public void mouseDragged(MouseEvent e) {
-        if ( cameraController.processMouseDraggedEventAwt(e) ) {
+        if ( cameraController.processMouseDraggedEvent(
+                 AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
