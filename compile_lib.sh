@@ -29,8 +29,6 @@ clear
 
 javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_jogl:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 
-exit
-
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
