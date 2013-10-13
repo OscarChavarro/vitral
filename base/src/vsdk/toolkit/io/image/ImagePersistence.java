@@ -99,6 +99,19 @@ public class ImagePersistence extends PersistenceElement
         return data;
     }
 
+    private static IndexedColorImage createNotAvailableImageIndexedColor()
+    {
+        IndexedColorImage data;
+        data = new IndexedColorImage();
+        data.init(256, 256);
+        data.createTestPattern();
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, returning test IndexedColor image"
+        );
+        return data;
+    }
+
     private static RGBImage importDDSRGB(File inImageFd)
     {
         RGBImage data = null;
@@ -157,7 +170,12 @@ public class ImagePersistence extends PersistenceElement
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            return awtHelper.importRGBA(inImageFd);
+            if ( awtHelper != null ) {
+                return awtHelper.importRGBA(inImageFd);
+	    }
+	    else {
+		return createNotAvailableImageRGBA();
+	    }
         }
         else if( type.equals("dds") ) {
             //delete retImage;
@@ -229,7 +247,13 @@ public class ImagePersistence extends PersistenceElement
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            return awtHelper.importRGB(inImageFd);
+            if ( awtHelper != null ) {
+                return awtHelper.importRGB(inImageFd);
+      	      }
+	      else {
+		return createNotAvailableImageRGB();
+	    }
+
         }
         else if( type.equals("dds") ) {
             //delete retImage;
@@ -355,7 +379,12 @@ public class ImagePersistence extends PersistenceElement
         }
         else if( type.equals("jpg") || type.equals("jpeg") ||
                  type.equals("gif") || type.equals("png") )  {
-            return awtHelper.importIndexedColor(inImageFd);
+            if ( awtHelper != null ) {
+                return awtHelper.importIndexedColor(inImageFd);
+	    }
+	    else {
+                return createNotAvailableImageIndexedColor();
+	    }
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
