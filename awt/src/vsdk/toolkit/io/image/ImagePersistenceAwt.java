@@ -4,8 +4,11 @@ package vsdk.toolkit.io.image;
 
 // Basic JDK classes
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 // Extended JDK classes
 import javax.imageio.ImageIO;
@@ -14,8 +17,10 @@ import java.awt.image.BufferedImage;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
@@ -114,7 +119,7 @@ public class ImagePersistenceAwt
     // DESACTIVATED METHODS!!! DO NOT USE!!!
     //=================================================================
 /*
-    private static boolean hasAlpha(java.awt.Image image) 
+    private boolean hasAlpha(java.awt.Image image) 
     {
         if (image instanceof BufferedImage) 
         {
@@ -136,7 +141,7 @@ public class ImagePersistenceAwt
         return cm.hasAlpha();
     }
 
-    private static BufferedImage toBufferedImage(java.awt.Image image) 
+    private BufferedImage toBufferedImage(java.awt.Image image) 
     {
         if ( image instanceof BufferedImage ) {
             return (BufferedImage)image;
@@ -192,6 +197,137 @@ public class ImagePersistenceAwt
         return bimage;
     }
 */
+
+    public void exportJPG(OutputStream os, Image img)
+        throws Exception
+    {
+        BufferedImage bimg;
+        int x, y, xSize, ySize;
+        RGBPixel p;
+
+        xSize = img.getXSize();
+        ySize = img.getYSize();
+        bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                p = img.getPixelRgb(x, y);
+                bimg.setRGB(x, y, 
+                  (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.b))
+                );
+            }
+        }
+
+        ImageIO.write(bimg, "jpg", os);
+
+        // OLD DEPRECATED API, DO NOT USE!
+        //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+        //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
+        //jpeg.encode(bimg);
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
+    binary PNG image format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */    
+    public boolean exportPNG(File fd, Image img)
+    {
+        try {
+            FileOutputStream fos = new FileOutputStream(fd);
+
+            exportPNG(fos, img);
+
+            fos.close();
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+        return true;
+    }
+
+    public void exportPNG_24bitRgb(OutputStream os, Image img)
+        throws Exception
+    {
+        BufferedImage bimg;
+        int x, y, xSize, ySize;
+        RGBPixel p;
+
+        xSize = img.getXSize();
+        ySize = img.getYSize();
+        bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+        for ( y = 0; y < ySize; y++ ) {
+            for ( x = 0; x < xSize; x++ ) {
+                p = img.getPixelRgb(x, y);
+                bimg.setRGB(x, y, 
+                  (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                  (VSDK.signedByte2unsignedInteger(p.b))
+                );
+            }
+        }
+
+        ImageIO.write(bimg, "png", os);
+    }
+
+    public void exportPNG(OutputStream os, Image img)
+        throws Exception
+    {
+/*
+        if ( img instanceof IndexedColorImage ) {
+//NOT WORKING
+            exportPNG_8bitGrayscale(os, (IndexedColorImage)img);
+        }
+        else {
+*/
+        exportPNG_24bitRgb(os, img);
+    }
+
+    /**
+    This method writes the contents of the specified image to a file in 
+    binary GIF image format. Returns true if everything
+    works fine, false if something fails, like a permission access denied
+    or if storage device runs out of space.
+    */    
+    public boolean exportGIF(File fd, Image img)
+    {
+        try {
+            BufferedImage bimg;
+            int x, y, xSize, ySize;
+            RGBPixel p;
+
+            xSize = img.getXSize();
+            ySize = img.getYSize();
+            bimg =  new BufferedImage(xSize, ySize, BufferedImage.TYPE_INT_RGB);
+            for ( y = 0; y < ySize; y++ ) {
+                for ( x = 0; x < xSize; x++ ) {
+                    p = img.getPixelRgb(x, y);
+                    bimg.setRGB(x, y, 
+                      (VSDK.signedByte2unsignedInteger(p.r)) * 256 * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.g)) * 256 +
+                      (VSDK.signedByte2unsignedInteger(p.b))
+                    );
+                }
+            }
+
+            FileOutputStream fos = new FileOutputStream(fd);
+
+            ImageIO.write(bimg, "gif", fos);
+
+            // OLD DEPRECATED API, DO NOT USE!
+            //com.sun.image.codec.jpeg.JPEGImageEncoder jpeg;
+            //jpeg = com.sun.image.codec.jpeg.JPEGCodec.createJPEGEncoder(fos);
+            //jpeg.encode(bimg);
+
+            fos.close();
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+        return true;
+    }
 
 }
 
