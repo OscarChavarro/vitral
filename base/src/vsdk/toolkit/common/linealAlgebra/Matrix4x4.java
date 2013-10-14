@@ -622,6 +622,30 @@ public class Matrix4x4 extends FundamentalEntity
         return array;
     }
 
+    public double[] exportToDoubleArrayColumnOrder()
+    {
+        double array[] = new double[16];
+        int i, j, k;
+        for ( j = 0, k = 0; j < 4; j++ ) {
+            for ( i = 0; i < 4; i++, k++ ) {
+                array[k] = M[i][j];
+            }
+        }
+        return array;
+    }
+
+    public float[] exportToFloatArrayColumnOrder()
+    {
+        float array[] = new float[16];
+        int i, j, k;
+        for ( j = 0, k = 0; j < 4; j++ ) {
+            for ( i = 0; i < 4; i++, k++ ) {
+                array[k] = (float)M[i][j];
+            }
+        }
+        return array;
+    }
+
     /**
      This method creates a Quaterion equivalent to current matrix. Note that
      the resulting Quaternion will be of unit lenght if current matrix is a

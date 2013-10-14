@@ -8,7 +8,7 @@ aids in traditional shader programming. For example, in OpenGL/JOGL, one
 can program a camera using standard functions like glFrustum or 
 gluPerspective, but VitralSDK offers a "Camera" class and a 
 "JoglCameraRenderer" class with methods that allows more convenient
-onject oriented programming. Note that any of such components use is
+object oriented programming. Note that any of such components use is
 optional, and the application programmer can choose to use basic functions
 or its VitralSDK counterparts at any time, even in a mixed way.
 
@@ -18,7 +18,7 @@ Renderman's shading language. The application programmer can choose to use
 the VitralSDK's basic supported predefined shaders, or to use directly its
 preferred shader API.
 
-This document describes a set of assumpsions with respect to shader
+This document describes a set of assumptions with respect to shader
 technology use, that VitralSDK follows to standarize its use, achieving
 maximum shader technology independence, portability and ease of use.
 Note that, however, specific shader effects could be difficult to be
@@ -82,7 +82,7 @@ coordinate context name.  For example, a vector perpendicular to a surface,
 commonly known as a "normal", as the concept "normal", and its name is
 "N".  If this normal is expressed in global world coordinates, its context
 is "Global", so a tipical variable name will be "NGlobal". If the same
-normal is transform in to view coordinates, its variable will be "NView", 
+normal is transformed in to view coordinates, its variable will be "NView", 
 and so on.
 
 The following are typical coordinates context names:

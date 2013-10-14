@@ -939,5 +939,15 @@
   - 46min: separating awt code from main src folder to src_awt folder.
   - 40min: migrating mouse event management from awt specific to vsdk, and
     fixing JOGL/gluegen related compile time warnings.
+  - 1h: first tests on android OpenGL ES 2.0 :) base vitral system
+    compiled almost ok (pending to resolve gui controlers and gizmos
+    to be more general/platform independent)
+
+2013 october 14, Oscar Chavarro:
+  - 36min: building basic src_androidGLES20 packages: AndroidGLESRenderer
+    basic support for shaders, shaders separated from java source in to its
+    respective external files.
+  - 4h: studying Android OpenGL-ES 2.0 example
+  - 1h: AndroidGLES20CameraRenderer
 
 ===========================================================================
