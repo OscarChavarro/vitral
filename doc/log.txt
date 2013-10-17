@@ -958,7 +958,8 @@
 2013 october 17, Oscar Chavarro:
   - 1h13min: AndroidGLES20SphereRenderer (most of the time testing and
     understanding arrays operations of OpenGL ES 2.0. Drawing sphere points
-  - 10min: Moving sphere functionality from joglcg to common src
-    (Sphere.spherePosition)
+  - 17min: Moving sphere functionality from joglcg to common src
+    (Sphere class methods spherePosition, sphereNormal, sphereTangent and
+    sphereBinormal)
 
 ===========================================================================

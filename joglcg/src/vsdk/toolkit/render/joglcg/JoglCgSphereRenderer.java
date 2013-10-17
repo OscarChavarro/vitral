@@ -21,39 +21,6 @@ import vsdk.toolkit.render.joglcg.JoglCgGeometryRenderer;
 public class JoglCgSphereRenderer extends JoglCgRenderer {
 
     /**
-    @todo check this method for efficiency improvement
-    */
-    private static void
-    sphereNormal(Vector3D n, double theta, double phi)
-    {
-        n.x = Math.cos(phi) * Math.cos(theta);
-        n.y = -Math.cos(phi) * Math.sin(theta);
-        n.z = Math.sin(phi);
-    }
-
-    /**
-    @todo check this method for efficiency improvement
-    */
-    private static void
-    sphereTangent(Vector3D t, double theta, double phi)
-    {
-        t.x = Math.sin(theta);
-        t.y = Math.cos(theta);
-        t.z = 0;
-    }
-
-    /**
-    @todo check this method for efficiency improvement
-    */
-    private static void
-    sphereBinormal(Vector3D b, double theta, double phi)
-    {
-        b.x = -Math.sin(phi)*Math.cos(theta);
-        b.y = Math.sin(phi)*Math.sin(theta);
-        b.z = Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + Math.cos(phi)*Math.sin(theta)*Math.sin(theta);
-    }
-
-    /**
     Warning: Change with configured color for vertex normals, tangents and
     binormals
     */
@@ -78,10 +45,10 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
 
-                sphereNormal(n, theta, phi1);
+                sphere.sphereNormal(n, theta, phi1);
                 sphere.spherePosition(p, theta, phi1);
-                sphereTangent(T, theta, phi1);
-                sphereBinormal(b, theta, phi1);
+                sphere.sphereTangent(T, theta, phi1);
+                sphere.sphereBinormal(b, theta, phi1);
 
                 gl.glColor3d(1, 1, 0);
                 gl.glVertex3d(p.x, p.y, p.z);
@@ -136,14 +103,14 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
             CGparameter binormalParam;
             double vectorarray[];
 
-            sphereTangent(T, theta, phi);
+            sphere.sphereTangent(T, theta, phi);
             tangentParam = accessNvidiaGpuVertexParameter("TObject");
             if ( tangentParam != null ) {
                 vectorarray = T.exportToDoubleArrayVect();
                 CgGL.cgGLSetParameter3dv(tangentParam, vectorarray, 0);
             }
 
-            sphereBinormal(B, theta, phi);
+            sphere.sphereBinormal(B, theta, phi);
             binormalParam = accessNvidiaGpuVertexParameter("BObject");
             if ( binormalParam != null ) {
                 B.x = 1;
@@ -155,7 +122,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
         }
 
         //- Pass standard vertex parameters to OpenGL ---------------------
-        sphereNormal(N, theta, phi);
+        sphere.sphereNormal(N, theta, phi);
         gl.glTexCoord2d(1.0-s, t);
         gl.glNormal3d(N.x, N.y, N.z);
 

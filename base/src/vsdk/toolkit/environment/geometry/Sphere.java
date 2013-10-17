@@ -320,6 +320,9 @@ public class Sphere extends Solid {
     }
 
     /**
+    Given a (thetha, phi) spherical coordinate in the surface of current
+    Sphere, this method writes on to `p` Vector3D the (x, y, z) coordinates
+    of the corresponding point on Sphere's surface.
     @todo check this method for efficiency improvement
     */
     public void
@@ -328,6 +331,52 @@ public class Sphere extends Solid {
         p.x = Math.cos(phi) * Math.cos(theta) * _radius;
         p.y = -Math.cos(phi) * Math.sin(theta) * _radius;
         p.z = Math.sin(phi) * _radius;
+    }
+
+    /**
+    Given a (thetha, phi) spherical coordinate in the surface of current
+    Sphere, this method writes on to `n` Vector3D the (nx, ny, nz) coordinates
+    of the surface normal at corresponding point on Sphere's surface.
+    @todo check this method for efficiency improvement
+    */
+    public void
+    sphereNormal(Vector3D n, double theta, double phi)
+    {
+        n.x = Math.cos(phi) * Math.cos(theta);
+        n.y = -Math.cos(phi) * Math.sin(theta);
+        n.z = Math.sin(phi);
+    }
+
+    /**
+    Given a (thetha, phi) spherical coordinate in the surface of current
+    Sphere, this method writes on to `n` Vector3D the (tx, ty, tz) coordinates
+    of the surface tangent at corresponding point on Sphere's surface. Tangents
+    are aligned with respect to Sphere's equator.
+    @todo check this method for efficiency improvement
+    @todo check this method for efficiency improvement
+    */
+    public void
+    sphereTangent(Vector3D t, double theta, double phi)
+    {
+        t.x = Math.sin(theta);
+        t.y = Math.cos(theta);
+        t.z = 0;
+    }
+
+    /**
+    Given a (thetha, phi) spherical coordinate in the surface of current
+    Sphere, this method writes on to `n` Vector3D the (bx, by, bz) coordinates
+    of the surface tangent binormal at corresponding point on Sphere's surface. 
+    Tangents binormals are perpendicular to both normal and tangent.
+    @todo check this method for efficiency improvement
+    */
+    public void
+    sphereBinormal(Vector3D b, double theta, double phi)
+    {
+        b.x = -Math.sin(phi)*Math.cos(theta);
+        b.y = Math.sin(phi)*Math.sin(theta);
+        b.z = Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + 
+              Math.cos(phi)*Math.sin(theta)*Math.sin(theta);
     }
 
 }
