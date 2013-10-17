@@ -15,6 +15,8 @@ import android.opengl.Matrix;
 import vitral.application.R;
 
 // VSDK classes
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class AndroidGLES20Renderer
@@ -22,10 +24,19 @@ public class AndroidGLES20Renderer
     private static String TAG = "GLES20TriangleRenderer";
 
     public static int AndroidGLES20GpuProgramConstant;
+    public static int AndroidGLES20GpuProgramConstantTexture;
 
     // OpenGL-ES2.0 state
+    public static float[] transientMatrix;
+    public static float[] modelViewMatrix;
+    public static float[] modelViewProjectionLocal;
     public static float[] projectionMatrix;
-    protected static float[] modelViewMatrix;
+    public static final int GL_MODELVIEW = 1;
+    public static final int GL_PROJECTION = 2;
+    public static final int GL_TEXTURE_2D = 2;
+    public static int currentMatrixMode = GL_MODELVIEW;
+    public static RendererConfiguration qualitySelection;
+    public static boolean errorsDetected = false;
 
     // OpenGL-ES SL parameters
     public static int modelViewProjectionLocalParam;
@@ -33,13 +44,29 @@ public class AndroidGLES20Renderer
     public static int uvVertexTextureCoordinateParam;
 
     public static void init(Context ctx) {
+        //- Set up geometric transforms -----------------------------------
         projectionMatrix = new float[16];
         modelViewMatrix = new float[16];
+        modelViewProjectionLocal = new float[16];
+        transientMatrix = new float[16];
 
         Matrix.setIdentityM(projectionMatrix, 0);
         Matrix.setIdentityM(modelViewMatrix, 0);
+        Matrix.setIdentityM(modelViewProjectionLocal, 0);
+        Matrix.setIdentityM(transientMatrix, 0);
 
-        createDefaultAutomaticAndroidGLES20Shaders(ctx);
+        //- Set up shaders ------------------------------------------------
+        ColorRgb white = new ColorRgb(1, 1, 1);
+        qualitySelection = new RendererConfiguration();
+        qualitySelection.setWireColor(white);
+        qualitySelection.setTexture(false);
+        qualitySelection.setSurfaces(true);
+        qualitySelection.setWires(false);
+        qualitySelection.setPoints(false);
+        qualitySelection.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        if ( !createDefaultAutomaticAndroidGLES20Shaders(ctx) == true ) {
+            errorsDetected = true;
+	}
     }
 
     public static void checkGlError(String op) {
@@ -131,11 +158,26 @@ public class AndroidGLES20Renderer
         return s;
     }
 
-    public static void createDefaultAutomaticAndroidGLES20Shaders(Context ctx)
+    public static boolean createDefaultAutomaticAndroidGLES20Shaders(Context ctx)
     {
         //- Create shader programs ----------------------------------------
         String vertexShaderSource;
         String pixelShaderSource;
+
+        vertexShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.constantvertexshader));
+        pixelShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.constantpixelshader));
+
+        AndroidGLES20GpuProgramConstant = 
+            createProgram(vertexShaderSource, pixelShaderSource);
+
+        if ( AndroidGLES20GpuProgramConstant == 0 ) {
+	    System.err.println("ERROR CREATING CONSTANT SHADER!");
+	    return false;
+	}
 
         vertexShaderSource = loadAsStringTrimmingComments(
             ctx.getResources().openRawResource(
@@ -144,35 +186,178 @@ public class AndroidGLES20Renderer
             ctx.getResources().openRawResource(
                 R.raw.constanttexturepixelshader));
 
-        AndroidGLES20GpuProgramConstant = 
+        AndroidGLES20GpuProgramConstantTexture = 
             createProgram(vertexShaderSource, pixelShaderSource);
 
-        //- Create parameters ---------------------------------------------
-        PObjectParam = GLES20.glGetAttribLocation(
-            AndroidGLES20GpuProgramConstant, "PObject");
-        checkGlError("glGetAttribLocation PObject");
-        if ( PObjectParam == -1 ) {
-            throw new RuntimeException(
-                "Could not get attrib location for PObject");
-        }
+        if ( AndroidGLES20GpuProgramConstantTexture == 0 ) {
+	    System.err.println("ERROR CREATING CONSTANT TEXTURE SHADER!");
+	    return false;
+	}
 
-        uvVertexTextureCoordinateParam = GLES20.glGetAttribLocation(
-            AndroidGLES20GpuProgramConstant, "uvVertexTextureCoordinate");
-        checkGlError("glGetAttribLocation uvVertexTextureCoordinate");
-        if ( uvVertexTextureCoordinateParam == -1 ) {
-            throw new RuntimeException(
+        //- Create parameters ---------------------------------------------
+        activateShaders();
+        return true;
+    }
+
+    private static void activateShaders()
+    {
+        //- Select current shaders programs from rendering configuration --
+        int shaderId = AndroidGLES20GpuProgramConstant;
+
+        if ( qualitySelection.isTextureSet() ) {
+            shaderId = AndroidGLES20GpuProgramConstantTexture;
+	}
+
+        //- Activate shader parameters ------------------------------------
+        if ( qualitySelection.isTextureSet() ) {
+            uvVertexTextureCoordinateParam = GLES20.glGetAttribLocation(
+                shaderId, "uvVertexTextureCoordinate");
+            checkGlError("glGetAttribLocation uvVertexTextureCoordinate");
+            if ( uvVertexTextureCoordinateParam == -1 ) {
+                throw new RuntimeException(
                 "Could not get attrib location for uvVertexTextureCoordinate");
-        }
+            }
+	}
 
         modelViewProjectionLocalParam = GLES20.glGetUniformLocation(
-            AndroidGLES20GpuProgramConstant, "modelViewProjectionLocal");
+            shaderId, "modelViewProjectionLocal");
         checkGlError("glGetUniformLocation modelViewProjectionLocal");
         if ( modelViewProjectionLocalParam == -1 ) {
             throw new RuntimeException(
             "Could not get attrib location for modelViewProjectionLocal");
         }
 
+        PObjectParam = GLES20.glGetAttribLocation(shaderId, "PObject");
+        checkGlError("glGetAttribLocation PObject");
+        if ( PObjectParam == -1 ) {
+            throw new RuntimeException(
+                "Could not get attrib location for PObject");
+        }
+
+        GLES20.glUseProgram(shaderId);
+        checkGlError("glUseProgram");
     }
+
+    public static void activateTransformationMatrices()
+    {
+        Matrix.multiplyMM(modelViewProjectionLocal, 0,
+            projectionMatrix, 0, modelViewMatrix, 0);
+        GLES20.glUniformMatrix4fv(modelViewProjectionLocalParam, 1, false, 
+            modelViewProjectionLocal, 0);
+    }
+
+    public static void glEnable(int k)
+    {
+        switch ( k ) {
+  	  case GL_TEXTURE_2D:
+	    qualitySelection.setTexture(true);
+            activateShaders();
+	    break;
+	}
+    }
+
+    public static void glDisable(int k)
+    {
+        switch ( k ) {
+  	  case GL_TEXTURE_2D:
+	    qualitySelection.setTexture(false);
+            activateShaders();
+	    break;
+	}
+    }
+
+    public static void glLoadIdentity()
+    {
+        switch ( currentMatrixMode ) {
+	  case GL_MODELVIEW:
+            Matrix.setIdentityM(modelViewMatrix, 0);
+	    break;
+	  case GL_PROJECTION:
+            Matrix.setIdentityM(projectionMatrix, 0);
+	    break;
+	}
+
+        activateTransformationMatrices();
+    }
+
+    public static void glPushMatrix()
+    {
+        activateTransformationMatrices();
+    }
+
+    public static void glPopMatrix()
+    {
+
+        activateTransformationMatrices();
+    }
+
+    public static void glScaled(double sx, double sy, double sz)
+    {
+        Matrix.setIdentityM(transientMatrix, 0);       
+        Matrix.scaleM(transientMatrix, 0, 
+            (float)sx, (float)sy, (float)sz);
+        switch ( currentMatrixMode ) {
+	  case GL_MODELVIEW:
+            Matrix.multiplyMM(modelViewMatrix, 0,
+                transientMatrix, 0, modelViewMatrix, 0);
+	    break;
+	  case GL_PROJECTION:
+            Matrix.multiplyMM(projectionMatrix, 0,
+                transientMatrix, 0, projectionMatrix, 0);
+	    break;
+	}
+        activateTransformationMatrices();
+    }
+
+    public static void glTranslated(double tx, double ty, double tz)
+    {
+        Matrix.setIdentityM(transientMatrix, 0);       
+        Matrix.translateM(transientMatrix, 0,
+            (float)tx, (float)ty, (float)tz);
+        switch ( currentMatrixMode ) {
+	  case GL_MODELVIEW:
+            Matrix.translateM(modelViewMatrix, 0,
+                (float)tx, (float)ty, (float)tz);
+            //Matrix.multiplyMM(modelViewMatrix, 0,
+            //    transientMatrix, 0, modelViewMatrix, 0);
+	    break;
+	  case GL_PROJECTION:
+            Matrix.multiplyMM(projectionMatrix, 0,
+                transientMatrix, 0, projectionMatrix, 0);
+	    break;
+	}
+        activateTransformationMatrices();
+    }
+
+    public static void glRotated(double angleDegrees, 
+        double ax, double ay, double az)
+    {
+        Matrix.setRotateM(transientMatrix, 0, 
+            (float)angleDegrees, (float)ax, (float)ay, (float)az);
+        switch ( currentMatrixMode ) {
+	  case GL_MODELVIEW:
+            Matrix.multiplyMM(modelViewMatrix, 0,
+                transientMatrix, 0, modelViewMatrix, 0);
+	    break;
+	  case GL_PROJECTION:
+            Matrix.multiplyMM(projectionMatrix, 0,
+                transientMatrix, 0, projectionMatrix, 0);
+	    break;
+	}
+        activateTransformationMatrices();
+    }
+
+    public static void glMatrixMode(int newMode)
+    {
+        switch ( newMode ) {
+	  case GL_MODELVIEW:
+	  case GL_PROJECTION:
+	    currentMatrixMode = newMode;
+	    break;
+	}
+
+    }
+
 }
 
 //===========================================================================

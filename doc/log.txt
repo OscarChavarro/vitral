@@ -949,5 +949,10 @@
     respective external files.
   - 4h: studying Android OpenGL-ES 2.0 example
   - 1h: AndroidGLES20CameraRenderer
+  - 3h: implementing basic geometric transform on AndroidGLES20Renderer
+
+2013 october 16, Oscar Chavarro:
+  - 2h: setting standard set of shaders: constant and constantTexture at
+    AndroidGLES20Renderer
 
 ===========================================================================
