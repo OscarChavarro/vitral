@@ -318,6 +318,18 @@ public class Sphere extends Solid {
         //-----------------------------------------------------------------
         return solid;
     }
+
+    /**
+    @todo check this method for efficiency improvement
+    */
+    public void
+    spherePosition(Vector3D p, double theta, double phi)
+    {
+        p.x = Math.cos(phi) * Math.cos(theta) * _radius;
+        p.y = -Math.cos(phi) * Math.sin(theta) * _radius;
+        p.z = Math.sin(phi) * _radius;
+    }
+
 }
 
 //===========================================================================

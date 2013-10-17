@@ -4,6 +4,7 @@ package vsdk.toolkit.render.androidgles20;
 
 // Basic Java classes
 import java.io.InputStream;
+import java.nio.FloatBuffer;
 
 // Android classes
 import android.util.Log;
@@ -25,6 +26,9 @@ public class AndroidGLES20Renderer
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramConstantTexture;
+
+    // Common values
+    protected static final int FLOAT_SIZE_IN_BYTES = 4;
 
     // OpenGL-ES2.0 state
     public static float[] transientMatrix;
@@ -356,6 +360,35 @@ public class AndroidGLES20Renderer
 	    break;
 	}
 
+    }
+
+    protected static void drawVertices3Position2Uv(FloatBuffer verticesBufferedArray,
+        int primitive, int numberOfElements, int vertexSizeInBytes)
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+            false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+
+        // glTexCoord2d
+        verticesBufferedArray.position(3);
+        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+            GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+            verticesBufferedArray);
+        checkGlError(
+            "glVertexAttribPointer uvVertexTextureCoordinateParam");
+        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
     }
 
 }

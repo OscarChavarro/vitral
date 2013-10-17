@@ -24,17 +24,6 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
     @todo check this method for efficiency improvement
     */
     private static void
-    spherePosition(Vector3D p, double theta, double phi, double r)
-    {
-        p.x = Math.cos(phi) * Math.cos(theta) * r;
-        p.y = -Math.cos(phi) * Math.sin(theta) * r;
-        p.z = Math.sin(phi) * r;
-    }
-
-    /**
-    @todo check this method for efficiency improvement
-    */
-    private static void
     sphereNormal(Vector3D n, double theta, double phi)
     {
         n.x = Math.cos(phi) * Math.cos(theta);
@@ -68,7 +57,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
     Warning: Change with configured color for vertex normals, tangents and
     binormals
     */
-    private static void drawVertexNormals(GL2 gl, double r, int slices, int stacks) {
+    private static void drawVertexNormals(GL2 gl, Sphere sphere, int slices, int stacks) {
         JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
@@ -90,7 +79,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
                 double theta = 2*Math.PI*s;
 
                 sphereNormal(n, theta, phi1);
-                spherePosition(p, theta, phi1, r);
+                sphere.spherePosition(p, theta, phi1);
                 sphereTangent(T, theta, phi1);
                 sphereBinormal(b, theta, phi1);
 
@@ -110,7 +99,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
         gl.glEnd();
     }
 
-    private static void drawPoints(GL2 gl, double r, int slices, int stacks) {
+    private static void drawPoints(GL2 gl, Sphere sphere, int slices, int stacks) {
         JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
@@ -127,7 +116,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
             for( int j = 0; j < slices; j++ ) {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
-                spherePosition(p, theta, phi1, r);
+                sphere.spherePosition(p, theta, phi1);
                 gl.glVertex3d(p.x, p.y, p.z);
             }
         }
@@ -139,7 +128,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
     */
     private static void
     drawVertex(GL2 gl, double theta, double phi, double s, double t,
-               Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
+               Vector3D P, Vector3D N, Vector3D T, Vector3D B, Sphere sphere)
     {
         //- If inside a Cg schema, pass non standard OpenGL parameters ----
         if ( renderingWithNvidiaGpu() ) {
@@ -171,12 +160,12 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
         gl.glNormal3d(N.x, N.y, N.z);
 
         //- Execute vertex -----------------------------------------------
-        spherePosition(P, theta, phi, r);
+        sphere.spherePosition(P, theta, phi);
         gl.glVertex3d(P.x, P.y, P.z);
     }
 
     private static void
-    drawSphereElements(GL2 gl, double r, int slices, int stacks)
+    drawSphereElements(GL2 gl, Sphere sphere, int slices, int stacks)
     {
         VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
         VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
@@ -207,8 +196,8 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
             for( j = 0; j < slices; j++ ) {
                 s = j/(slices-1.f);
                 theta = 2*Math.PI*s;
-                drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
-                drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
+                drawVertex(gl, theta, phi1, s, t1, P, N, T, B, sphere);
+                drawVertex(gl, theta, phi2, s, t2, P, N, T, B, sphere);
             }
             gl.glEnd();
         }
@@ -225,8 +214,8 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
         for( j = slices-1; j >= 0; j-- ) {
             s = j/(slices-1.f);
             theta = 2*Math.PI*s;
-            drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
-            drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
+            drawVertex(gl, theta, phi2, s, t2, P, N, T, B, sphere);
+            drawVertex(gl, theta, phi1, s, t1, P, N, T, B, sphere);
         }
         gl.glEnd();
 
@@ -250,7 +239,7 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(1.0f, 1.0f);
-            drawSphereElements(gl, s.getRadius(), slices, stacks);
+            drawSphereElements(gl, s, slices, stacks);
         }
         if ( q.isWiresSet() ) {
             JoglCgRenderer.disableNvidiaCgProfiles();
@@ -266,14 +255,14 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
             gl.glColor3d(1, 1, 1);
             gl.glDisable(GL.GL_TEXTURE_2D);
 
-            drawSphereElements(gl, s.getRadius(), slices, stacks);
+            drawSphereElements(gl, s, slices, stacks);
         }
 
         if ( q.isPointsSet() ) {
-            drawPoints(gl, s.getRadius(), slices, stacks);
+            drawPoints(gl, s, slices, stacks);
         }
         if ( q.isNormalsSet() ) {
-            drawVertexNormals(gl, s.getRadius(), slices, stacks);
+            drawVertexNormals(gl, s, slices, stacks);
         }
         if ( q.isBoundingVolumeSet() ) {
             JoglCgGeometryRenderer.drawMinMaxBox(gl, s, q);
