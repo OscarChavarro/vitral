@@ -224,7 +224,6 @@ public class JoglCgSphereRenderer extends JoglCgRenderer {
 
             drawSphereElements(gl, s, slices, stacks);
         }
-
         if ( q.isPointsSet() ) {
             drawPoints(gl, s, slices, stacks);
         }

@@ -961,5 +961,11 @@
   - 17min: Moving sphere functionality from joglcg to common src
     (Sphere class methods spherePosition, sphereNormal, sphereTangent and
     sphereBinormal)
+  - 3h: Studying OpenGL Shading Language and passing new attributes to it.
+
+2013 october 17, Oscar Chavarro:
+  - 30min: AndroidGLES20SphereRenderer.drawWires
+  - 45min: AndroidGLES20SphereRenderer.drawSphereElements
+  - 40min: testing geometry transforms and fixing bugs on matrix management
 
 ===========================================================================
