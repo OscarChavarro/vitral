@@ -963,9 +963,12 @@
     sphereBinormal)
   - 3h: Studying OpenGL Shading Language and passing new attributes to it.
 
-2013 october 17, Oscar Chavarro:
+2013 october 18, Oscar Chavarro:
   - 30min: AndroidGLES20SphereRenderer.drawWires
   - 45min: AndroidGLES20SphereRenderer.drawSphereElements
   - 40min: testing geometry transforms and fixing bugs on matrix management
+  - 34min: checking how to add touch events on android: first version of
+    CameraControllerAquynza working on android smartphone :)
+  - 53min: Checking how to use GPS on Android. Done simple gps events :)
 
 ===========================================================================
