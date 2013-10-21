@@ -42,6 +42,7 @@ import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.gui.CameraController;           // Control elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.gui.AwtSystem;
 
 // Application classes
 import util.filters.ObjectFilter;
@@ -250,38 +251,38 @@ public class MeshExample
     }
 
     public void mousePressed(MouseEvent e) {
-        if (cameraController.processMousePressedEventAwt(e)) {
+        if (cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (cameraController.processMouseReleasedEventAwt(e)) {
+        if (cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (cameraController.processMouseClickedEventAwt(e)) {
+        if (cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
-        if (cameraController.processMouseMovedEventAwt(e)) {
+        if (cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
-        if (cameraController.processMouseDraggedEventAwt(e)) {
+        if (cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
-        if (cameraController.processMouseWheelEventAwt(e)) {
+        if (cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
@@ -293,17 +294,17 @@ public class MeshExample
         if ( e.getKeyCode() == KeyEvent.VK_I ) {
             System.out.println(qualitySelection);
         }
-        if ( cameraController.processKeyPressedEventAwt(e) ) {
+        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
-        if ( qualityController.processKeyPressedEventAwt(e) ) {
+        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             System.out.println(qualitySelection);
             canvas.repaint();
         }
     }
 
     public void keyReleased(KeyEvent e) {
-        if (cameraController.processKeyReleasedEventAwt(e)) {
+        if (cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
         if (qualityController.processKeyReleasedEventAwt(e)) {

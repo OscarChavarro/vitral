@@ -45,6 +45,20 @@ public class AwtSystem extends PresentationElement
         return evsdk;
     }
 
+    public static MouseEvent awt2vsdkEvent(java.awt.event.MouseWheelEvent eawt)
+    {
+        MouseEvent evsdk;
+
+        evsdk = new MouseEvent();
+        evsdk.setX(eawt.getX());
+        evsdk.setY(eawt.getY());
+        evsdk.setButton(eawt.getButton());
+        evsdk.setModifiers(eawt.getModifiersEx());
+        evsdk.setClicks(eawt.getWheelRotation());
+
+        return evsdk;
+    }
+
     public static KeyEvent awt2vsdkEvent(java.awt.event.KeyEvent eawt)
     {
         KeyEvent evsdk;
@@ -119,7 +133,10 @@ public class AwtSystem extends PresentationElement
             return;
         }
 
+        evsdk.unicode_id = unicode_id;
+
         if ( unicode_id == java.awt.event.KeyEvent.CHAR_UNDEFINED ) {
+            evsdk.unicode_id = KeyEvent.KEY_NONE;
             switch ( keycode ) {
               case java.awt.event.KeyEvent.VK_F1:
                 evsdk.keycode = KeyEvent.KEY_F1;

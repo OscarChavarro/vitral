@@ -20,9 +20,10 @@ public class RendererConfigurationController extends Controller {
       qualitySelection = q;
   }
 
-  public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
-      return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
-  }
+    @Deprecated
+    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
+        return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
+    }
 
   public boolean processKeyPressedEvent(KeyEvent keyEvent) {
     boolean updated = false;

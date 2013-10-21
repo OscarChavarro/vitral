@@ -970,5 +970,11 @@
   - 34min: checking how to add touch events on android: first version of
     CameraControllerAquynza working on android smartphone :)
   - 53min: Checking how to use GPS on Android. Done simple gps events :)
+  - 20min: Updating event management on testuite examples for enabling
+    future removal of deprecated methods.
+
+2013 october 20, Oscar Chavarro:
+  - 2h12min: Updating event management on testuite examples for enabling
+    future removal of deprecated methods.
 
 ===========================================================================

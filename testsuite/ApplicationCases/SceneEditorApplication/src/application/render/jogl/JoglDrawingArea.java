@@ -61,6 +61,7 @@ import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
+import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
@@ -1060,7 +1061,7 @@ public class JoglDrawingArea implements
         }
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMousePressedEventAwt(e) ) {
+             cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ||
@@ -1139,7 +1140,7 @@ public class JoglDrawingArea implements
         }
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseReleasedEventAwt(e) ) {
+             cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1188,7 +1189,7 @@ public class JoglDrawingArea implements
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseClickedEventAwt(e) ) {
+             cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1235,7 +1236,7 @@ public class JoglDrawingArea implements
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseMovedEventAwt(e) ) {
+             cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1280,7 +1281,7 @@ public class JoglDrawingArea implements
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseDraggedEventAwt(e) ) {
+             cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1327,7 +1328,7 @@ public class JoglDrawingArea implements
     {
         System.out.println(".");
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseWheelEventAwt(e) ) {
+             cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
@@ -1345,7 +1346,7 @@ public class JoglDrawingArea implements
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processKeyPressedEventAwt(e) ) {
+             cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             ;
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
@@ -1388,7 +1389,7 @@ public class JoglDrawingArea implements
                 composed.M[2][3] = position.z;
 
                 translationGizmo.setTransformationMatrix(composed);
-                if ( translationGizmo.processKeyPressedEventAwt(e) ) {
+                if ( translationGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     composed = translationGizmo.getTransformationMatrix();
                     position.x = composed.M[0][3];
                     position.y = composed.M[1][3];
@@ -1409,7 +1410,7 @@ public class JoglDrawingArea implements
 
                 rotateGizmo.setTransformationMatrix(R);
 
-                if ( rotateGizmo.processKeyPressedEventAwt(e) ) {
+                if ( rotateGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     R = rotateGizmo.getTransformationMatrix();
                     gi.setRotation(R);
                     Matrix4x4 Ri = new Matrix4x4(R);
@@ -1431,7 +1432,7 @@ public class JoglDrawingArea implements
 
                 scaleGizmo.setTransformationMatrix(S);
 
-                if ( scaleGizmo.processKeyPressedEventAwt(e) ) {
+                if ( scaleGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     S = scaleGizmo.getTransformationMatrix();
                     s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
                     gi.setScale(s);
@@ -1461,7 +1462,7 @@ public class JoglDrawingArea implements
             break;
         }
 
-        if ( qualityController.processKeyPressedEventAwt(e) ) {
+        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             System.out.println(qualitySelection);
         }
 
@@ -1882,7 +1883,7 @@ public class JoglDrawingArea implements
     public void keyReleased(KeyEvent e) 
     {
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processKeyReleasedEventAwt(e) ) {
+             cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }

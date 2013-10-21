@@ -2,7 +2,7 @@
 
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseWheelEvent;
+//import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent; // Do not include, deprecated
 //import java.awt.event.MouseEvent; // Do not include, deprecated
 
@@ -276,9 +276,19 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    @Override
+    public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMousePressedEventAwt(java.awt.event.MouseEvent e)
+    {
+        return processMousePressedEvent(AwtSystem.awt2vsdkEvent(e));
+    }
+
+    public boolean processMousePressedEvent(MouseEvent e)
     {
         oldMouseX = e.getX();
         oldMouseY = e.getX();
@@ -292,6 +302,11 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    public boolean processMouseReleasedEvent(MouseEvent e)
+    {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e)
@@ -299,9 +314,21 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    @Override
+    public boolean processMouseClickedEvent(MouseEvent e)
+    {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean processMouseMovedEvent(MouseEvent e)
     {
         return false;
     }
@@ -397,7 +424,14 @@ public class CameraControllerAquynza extends CameraController {
 
     @Deprecated
     @Override
-    public boolean processMouseWheelEventAwt(MouseWheelEvent e)
+    public boolean processMouseWheelEventAwt(java.awt.event.MouseWheelEvent e)
+    {
+        return processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e));
+    }
+
+    @Deprecated
+    @Override
+    public boolean processMouseWheelEvent(MouseEvent e)
     {
         //------------------------------------------------------------
         double fov, angleInc;
@@ -414,31 +448,30 @@ public class CameraControllerAquynza extends CameraController {
         else if ( fov > 5 ) angleInc = Math.toRadians(1);
         else angleInc = Math.toRadians(0.1);
 
-        int clicks = e.getWheelRotation();
+        int clicks = e.getClicks();
 
         //------------------------------------------------------------
         if ( clicks > 0 ) {
             if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-                orthogonalZoom /= clicks;
+                orthogonalZoom /= 2*clicks;
               }
               else {
                 if ( fov < 0.1 - EPSILON ) fov += 0.1*clicks;
                 else if ( fov < 1 - EPSILON ) fov += clicks;
                 else if ( fov < 175 - EPSILON ) fov += 5*clicks;
             }
-            updated = true;
         }
         else if ( clicks < 0 ) {
             if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2*clicks;
               }
               else {
-                if ( fov > 5 + EPSILON ) fov -= 5*clicks;
-                else if ( fov > 1 + EPSILON  ) fov -= clicks;
-                else if ( fov > 0.1 + EPSILON  ) fov -= 0.1*clicks;
+                if ( fov > 5 + EPSILON ) fov += 5*clicks;
+                else if ( fov > 1 + EPSILON  ) fov += clicks;
+                else if ( fov > 0.1 + EPSILON  ) fov += 0.1*clicks;
             }
-            updated = true;
         }
+        updated = true;
 
         //------------------------------------------------------------
         camera.setFov(fov);

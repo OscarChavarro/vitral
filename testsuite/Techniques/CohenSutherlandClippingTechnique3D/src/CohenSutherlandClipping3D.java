@@ -38,6 +38,7 @@ import javax.media.opengl.GLEventListener;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
@@ -325,35 +326,35 @@ KeyListener
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if ( cameraController.processMousePressedEventAwt(e) ) {
+        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if ( cameraController.processMouseReleasedEventAwt(e) ) {
+        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if ( cameraController.processMouseClickedEventAwt(e) ) {
+        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if ( cameraController.processMouseMovedEventAwt(e) ) {
+        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if ( cameraController.processMouseDraggedEventAwt(e) ) {
+        if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
@@ -364,7 +365,7 @@ KeyListener
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
-        if ( cameraController.processMouseWheelEventAwt(e) ) {
+        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
@@ -375,14 +376,14 @@ KeyListener
             System.exit(0);
         }
 
-        if ( cameraController.processKeyPressedEventAwt(e) ) {
+        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if ( cameraController.processKeyReleasedEventAwt(e) ) {
+        if ( cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }

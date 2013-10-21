@@ -193,7 +193,7 @@ public class SwingCanvas extends JPanel implements
     }
 
     public void keyReleased(java.awt.event.KeyEvent e) {
-        if ( cameraController.processKeyReleasedEventAwt(e) ) {
+        if ( cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
@@ -216,31 +216,31 @@ public class SwingCanvas extends JPanel implements
     }
 
     public void mousePressed(MouseEvent e) {
-        if ( cameraController.processMousePressedEventAwt(e) ) {
+        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if ( cameraController.processMouseReleasedEventAwt(e) ) {
+        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
-        if ( cameraController.processMouseClickedEventAwt(e) ) {
+        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
-        if ( cameraController.processMouseMovedEventAwt(e) ) {
+        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
-        if ( cameraController.processMouseDraggedEventAwt(e) ) {
+        if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }
@@ -250,7 +250,7 @@ public class SwingCanvas extends JPanel implements
     */
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println(".");
-        if ( cameraController.processMouseWheelEventAwt(e) ) {
+        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             repaint();
         }
     }

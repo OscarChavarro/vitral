@@ -17,7 +17,7 @@ public class Animador implements Runnable
                 bicho.x = t;
                 bicho.canvas.repaint();
                 Thread.sleep(1000/24);
-                if ( t > 5.0zx ) {
+                if ( t > 5.0 ) {
                     break;
 		}
 	    }

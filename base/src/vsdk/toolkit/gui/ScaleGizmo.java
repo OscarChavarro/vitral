@@ -8,7 +8,7 @@ package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -32,19 +32,19 @@ public class ScaleGizmo extends Gizmo {
       return false;
   }
 
-  public boolean processKeyPressedEventAwt(KeyEvent keyEvent)
+  public boolean processKeyPressedEvent(KeyEvent keyEvent)
   {
       char unicode_id;
       int keycode;
       double deltaMov = 1.1;
       boolean updateNeeded = false;
 
-      unicode_id = keyEvent.getKeyChar();
-      keycode = keyEvent.getKeyCode();
+      unicode_id = keyEvent.unicode_id;
+      keycode = keyEvent.keycode;
 
       Vector3D s = new Vector3D(T.M[0][0], T.M[1][1], T.M[2][2]);
 
-      if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
+      if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
               // Position
               case 'x':
@@ -75,16 +75,16 @@ public class ScaleGizmo extends Gizmo {
         }
         else {
             switch ( keycode ) {
-              case KeyEvent.VK_UP:
-              case KeyEvent.VK_RIGHT:
+              case KeyEvent.KEY_UP:
+              case KeyEvent.KEY_RIGHT:
                 s.x *= deltaMov;
                 s.y *= deltaMov;
                 s.z *= deltaMov;
                 updateNeeded = true;
                 break;
 
-              case KeyEvent.VK_LEFT:
-              case KeyEvent.VK_DOWN:
+              case KeyEvent.KEY_LEFT:
+              case KeyEvent.KEY_DOWN:
                 s.x /= deltaMov;
                 s.y /= deltaMov;
                 s.z /= deltaMov;

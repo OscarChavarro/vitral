@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseWheelEvent;
+//import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent;
 //import java.awt.event.MouseEvent;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -374,9 +374,19 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
+    @Override
+    public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMousePressedEventAwt(java.awt.event.MouseEvent e)
+    {
+        return false;
+    }
+
+    public boolean processMousePressedEvent(MouseEvent e)
     {
         return false;
     }
@@ -388,6 +398,12 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
+    @Override
+    public boolean processMouseReleasedEvent(MouseEvent e)
+    {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e)
@@ -395,9 +411,21 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
+    @Override
+    public boolean processMouseClickedEvent(MouseEvent e)
+    {
+        return false;
+    }
+
     @Deprecated
     @Override
     public boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean processMouseMovedEvent(MouseEvent e)
     {
         return false;
     }
@@ -417,7 +445,13 @@ public class CameraControllerBlender extends CameraController {
 
     @Deprecated
     @Override
-    public boolean processMouseWheelEventAwt(MouseWheelEvent e)
+    public boolean processMouseWheelEventAwt(java.awt.event.MouseWheelEvent e)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean processMouseWheelEvent(MouseEvent e)
     {
         return false;
     }

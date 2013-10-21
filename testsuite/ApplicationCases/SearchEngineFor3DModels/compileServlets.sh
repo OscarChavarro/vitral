@@ -13,7 +13,7 @@ if [ ! -d ./tmp/WEB-INF/classes ]; then
 fi
 
 #= Compile sources and pack web archive ====================================
-javac -Xlint:deprecation -Xlint:unchecked -sourcepath ./src -d ./tmp/WEB-INF/classes -classpath .:../../../lib/vsdk.jar:$TOMCAT_DIR/lib/servlet-api.jar ./src/ServletConsole.java
+javac -proc:none -Xlint:deprecation -Xlint:unchecked -sourcepath ./src -d ./tmp/WEB-INF/classes -classpath .:../../../lib/vsdk.jar:$TOMCAT_DIR/lib/servlet-api.jar ./src/ServletConsole.java
 cp -r ../../../classes/vsdk tmp/WEB-INF/classes
 cp web/*.html tmp/
 cp web/web.xml tmp/WEB-INF

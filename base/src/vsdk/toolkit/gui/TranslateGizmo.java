@@ -12,7 +12,7 @@ import java.util.ArrayList;
 // Awt classes
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 //import java.awt.Robot;
 
 // VSDK classes
@@ -703,15 +703,15 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
-    public boolean processKeyPressedEventAwt(KeyEvent keyEvent)
+    public boolean processKeyPressedEvent(KeyEvent keyEvent)
     {
         char unicode_id;
         int keycode;
         double deltaMov = 0.1;
         boolean updateNeeded = false;
 
-        unicode_id = keyEvent.getKeyChar();
-        keycode = keyEvent.getKeyCode();
+        unicode_id = keyEvent.unicode_id;
+        keycode = keyEvent.keycode;
 
         Matrix4x4 R = new Matrix4x4(T);
         R.M[3][0] = 0.0;
@@ -727,7 +727,7 @@ public class TranslateGizmo extends Gizmo {
                                R, selectedResizing, aparentSizeInPixels, 
                                camera);
 
-        if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
+        if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
               // Position
               case 'x':
@@ -760,7 +760,7 @@ public class TranslateGizmo extends Gizmo {
         return updateNeeded;
     }
 
-    public boolean processKeyReleasedEventAwt(KeyEvent keyEvent)
+    public boolean processKeyReleasedEvent(KeyEvent keyEvent)
     {
         return false;
     }

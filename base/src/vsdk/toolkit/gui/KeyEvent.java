@@ -9,6 +9,7 @@ package vsdk.toolkit.gui;
 public class KeyEvent extends PresentationElement
 {
     public int keycode;
+    public char unicode_id;
     public int modifierMask;
 
     public static final int MASK_CTRL = 0x0001;
@@ -145,6 +146,7 @@ public class KeyEvent extends PresentationElement
     public  KeyEvent()
     {
         keycode = KEY_NONE;
+        unicode_id = KEY_NONE;
         modifierMask = 0;
     }
 }

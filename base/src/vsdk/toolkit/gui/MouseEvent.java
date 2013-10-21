@@ -27,6 +27,12 @@ public class MouseEvent extends PresentationElement
     private int y;
     private int button;
     private int modifiers;
+    private int clicks; // used for wheel mouse movements
+
+    public int getClicks()
+    {
+        return clicks;
+    }
 
     public int getX()
     {
@@ -46,6 +52,11 @@ public class MouseEvent extends PresentationElement
     public int getModifiers()
     {
         return modifiers;
+    }
+
+    public void setClicks(int clicks)
+    {
+        this.clicks = clicks;
     }
 
     public void setX(int x)

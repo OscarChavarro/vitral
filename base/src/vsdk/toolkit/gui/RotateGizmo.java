@@ -8,7 +8,7 @@ package vsdk.toolkit.gui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -32,15 +32,15 @@ public class RotateGizmo extends Gizmo {
       return false;
   }
 
-  public boolean processKeyPressedEventAwt(KeyEvent keyEvent)
+  public boolean processKeyPressedEvent(KeyEvent keyEvent)
   {
       char unicode_id;
       int keycode;
       double deltaMov = Math.toRadians(1.0);
       boolean updateNeeded = false;
 
-      unicode_id = keyEvent.getKeyChar();
-      keycode = keyEvent.getKeyCode();
+      unicode_id = keyEvent.unicode_id;
+      keycode = keyEvent.keycode;
 
       Matrix4x4 delta;
       Vector3D up, front, left;
@@ -58,7 +58,7 @@ public class RotateGizmo extends Gizmo {
       left = new Vector3D(1, 0, 0);
       left.normalize();
 
-      if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
+      if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
               // Position
               case 'x':

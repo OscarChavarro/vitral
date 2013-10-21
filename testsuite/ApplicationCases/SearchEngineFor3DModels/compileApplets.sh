@@ -8,7 +8,7 @@ fi
 
 #= Compile sources and pack web archive ====================================
 cd srcApplets
-javac -Xlint:deprecation -Xlint:unchecked -classpath . -d ../classes *.java
+javac -proc:none -Xlint:deprecation -Xlint:unchecked -classpath . -d ../classes *.java
 cp ../web/index.html ../classes
 cd ..
 cd classes
