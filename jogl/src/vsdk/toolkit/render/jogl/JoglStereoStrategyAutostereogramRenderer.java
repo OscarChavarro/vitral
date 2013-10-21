@@ -170,7 +170,6 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
     @Override
     public void activateStereoMode(GL2 gl)
     {
-        ;
     }
 
     @Override

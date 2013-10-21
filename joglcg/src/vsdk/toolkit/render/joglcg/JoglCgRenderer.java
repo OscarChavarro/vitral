@@ -120,7 +120,6 @@ public abstract class JoglCgRenderer extends JoglRenderer
                 "JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders",
                 "Cannot access Cg shaders (.cg files). Nvidia Cg shader deactivated.");
             nvidiaCgAutomaticMode = false;
-            return;
         }
     }
 
@@ -295,7 +294,7 @@ public abstract class JoglCgRenderer extends JoglRenderer
         if ( !getNvidiaCgAvailability() ) {
             return null;
         }
-        CGprogram shader = null;
+        CGprogram shader;
         try {
             shader = CgGL.cgCreateProgramFromStream(
                 nvidiaGpuContext, CgGL.CG_SOURCE, is,

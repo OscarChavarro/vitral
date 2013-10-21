@@ -524,7 +524,7 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        StringBuffer msg = new StringBuffer("");
+        StringBuilder msg = new StringBuilder("");
 
         do {
             readBytes(is, character);
@@ -593,7 +593,7 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        StringBuffer msg = new StringBuffer("");
+        StringBuilder msg = new StringBuilder("");
         byte a[] = new byte[2];
 
         do {
@@ -621,7 +621,7 @@ public abstract class PersistenceElement {
     {
         byte character[] = new byte[1];
         char letter;
-        StringBuffer stringBuffer = new StringBuffer("");
+        StringBuilder stringBuffer = new StringBuilder("");
 
         do {
             // Warning: this line makes this goes to slow!

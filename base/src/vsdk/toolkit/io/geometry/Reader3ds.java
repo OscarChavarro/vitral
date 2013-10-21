@@ -1377,7 +1377,6 @@ public class Reader3ds extends PersistenceElement
             if ( currentBuildingMaterial != null ) {
                 // Warning: don't know well how to handle this (percent over
                 // specular color?)
-                ;
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY ) {

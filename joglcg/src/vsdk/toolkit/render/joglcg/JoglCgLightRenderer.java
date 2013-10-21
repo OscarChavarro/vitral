@@ -15,7 +15,6 @@ import com.jogamp.opengl.cg.CGprogram;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
 public class JoglCgLightRenderer extends JoglCgRenderer {
 

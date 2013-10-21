@@ -26,7 +26,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
     {
         int i, p0, p1, p2, p3;
         double v[] = mesh.getVertexPositions();
-        double n[] = mesh.getVertexNormals();
+        //double n[] = mesh.getVertexNormals();
         double c[] = mesh.getVertexColors();
         int q[] = mesh.getQuadIndices();
 
@@ -56,7 +56,7 @@ public class JoglQuadMeshRenderer extends JoglRenderer
         FloatBuffer vertexColorsBuffer;
         IntBuffer quadIndicesBuffer;
         double v[] = mesh.getVertexPositions();
-        double n[] = mesh.getVertexNormals();
+        //double n[] = mesh.getVertexNormals();
         double c[] = mesh.getVertexColors();
         int q[] = mesh.getQuadIndices();
 

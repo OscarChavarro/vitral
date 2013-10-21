@@ -85,8 +85,7 @@ public class Rasterizer2D extends RenderingElement
                 }
                 xx += dxdy;
             }
-          }
-        ;
+        }
     }
 
     /**

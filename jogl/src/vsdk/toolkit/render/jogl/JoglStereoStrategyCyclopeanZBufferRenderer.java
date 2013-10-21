@@ -40,7 +40,6 @@ public class JoglStereoStrategyCyclopeanZBufferRenderer extends JoglStereoStrate
     @Override
     public void activateStereoMode(GL2 gl)
     {
-        ;
     }
 
     @Override

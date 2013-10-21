@@ -15,8 +15,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.render.joglcg.JoglCgRenderer;
-import vsdk.toolkit.render.joglcg.JoglCgGeometryRenderer;
 
 public class JoglCgSphereRenderer extends JoglCgRenderer {
 

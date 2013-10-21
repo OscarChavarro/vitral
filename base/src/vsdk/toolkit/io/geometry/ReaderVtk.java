@@ -76,7 +76,7 @@ public class ReaderVtk extends PersistenceElement
             //System.out.print("Reading triangle strips... ");
             auxStringTokenizer = new StringTokenizer(vtkDataFragment, " ");
             auxStringTokenizer.nextToken();
-            numElements = Integer.parseInt(auxStringTokenizer.nextToken());
+            /*numElements = */Integer.parseInt(auxStringTokenizer.nextToken());
             numIndexesInStripSet = Integer.parseInt(auxStringTokenizer.nextToken());
             stripData = new long[numIndexesInStripSet];
             for ( i = 0; i < numIndexesInStripSet; i++ ) {
@@ -182,7 +182,7 @@ public class ReaderVtk extends PersistenceElement
         String vtkHeader;
         String vtkBinaryMode;
 
-        header = readAsciiLine(bis);
+        /*header = */ readAsciiLine(bis);
         vtkBinaryMode = readAsciiLine(bis);
 
         if ( vtkBinaryMode == null ||

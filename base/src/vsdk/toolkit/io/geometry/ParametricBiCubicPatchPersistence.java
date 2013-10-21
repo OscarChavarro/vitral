@@ -24,10 +24,6 @@ public class ParametricBiCubicPatchPersistence extends PersistenceElement {
   public static String rootName = "ParametricBiCubicPatch";
   private static String patchAttributesNames[] = {
       "type", "approximationSteps"};
-  private final static String[] nodesNames = {
-      "ParametricCurve",
-      "Point"
-  };
 
   public static ParametricBiCubicPatch nodeToParametricBiCubicPatch(Node
       nodeRoot) throws

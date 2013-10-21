@@ -364,11 +364,14 @@ abstract class _ReaderPlyElementReader extends PersistenceElement
 class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
 {
     private static String separators;
+
     public _ReaderPlyElementReaderAscii(InputStream is)
     {
         super(is);
         separators = " \t\n\r";
     }
+
+    @Override
     public int readSignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
@@ -376,6 +379,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readUnsignedCharacterText() throws Exception
     {
         String token;
@@ -385,6 +389,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
+    @Override
     public int readSignedShortIntegerText() throws Exception
     {
         String token;
@@ -394,6 +399,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
+    @Override
     public int readUnsignedShortIntegerText() throws Exception
     {
         String token;
@@ -403,6 +409,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
+    @Override
     public int readSignedIntegerText() throws Exception
     {
         String token;
@@ -412,6 +419,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
+    @Override
     public int readUnsignedIntegerText() throws Exception
     {
         String token;
@@ -421,6 +429,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
         return Integer.parseInt(token);
     }
 
+    @Override
     public float readFloatText() throws Exception
     {
         String token;
@@ -445,6 +454,8 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     {
         super(is);
     }
+
+    @Override
     public int readSignedCharacterText() throws Exception
     {
         byte arr[] = new byte[1];
@@ -452,6 +463,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
         return (int)arr[0];
     }
 
+    @Override
     public int readUnsignedCharacterText() throws Exception
     {
         byte arr[] = new byte[1];
@@ -459,6 +471,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
         return VSDK.signedByte2unsignedInteger(arr[0]);
     }
 
+    @Override
     public int readSignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
@@ -466,6 +479,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readUnsignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
@@ -473,11 +487,13 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readSignedIntegerText() throws Exception
     {
         return (int)readLongBE(parentInputStream);
     }
 
+    @Override
     public int readUnsignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
@@ -485,11 +501,13 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public float readFloatText() throws Exception
     {
         return readFloatBE(parentInputStream);
     }
 
+    @Override
     public float readDoubleText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
@@ -504,6 +522,8 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     {
         super(is);
     }
+
+    @Override
     public int readSignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
@@ -511,6 +531,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readUnsignedCharacterText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedCharacter",
@@ -518,6 +539,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readSignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
@@ -525,6 +547,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readUnsignedShortIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
@@ -532,6 +555,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readSignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedInteger",
@@ -539,6 +563,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public int readUnsignedIntegerText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
@@ -546,11 +571,13 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
         return 0;
     }
 
+    @Override
     public float readFloatText() throws Exception
     {
         return readFloatLE(parentInputStream);
     }
 
+    @Override
     public float readDoubleText() throws Exception
     {
         VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
@@ -653,7 +680,6 @@ public class ReaderPly extends PersistenceElement
             }
             else if ( token.equals("comment") || token.equals("obj_info") ) {
                 // Skip line
-                ;
             }
             else if ( token.equals("end_header") ) {
                 headerDone = true;

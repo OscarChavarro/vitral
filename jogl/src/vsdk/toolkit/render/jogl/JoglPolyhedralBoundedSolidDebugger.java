@@ -48,6 +48,11 @@ implements GLEventListener
 
     public JoglPolyhedralBoundedSolidDebugger()
     {
+        init();
+    }
+
+    private void init()
+    {
         GLProfile profile;
 
         profile = GLProfile.get(GLProfile.GL2);
@@ -81,7 +86,6 @@ implements GLEventListener
         material = defaultMaterial();
         light1 = new Light(Light.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
         light2 = new Light(Light.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
-
     }
 
     private Material defaultMaterial()
@@ -96,6 +100,7 @@ implements GLEventListener
         return m;
     }
 
+    @Override
     public void execute(PolyhedralBoundedSolid solid, String filename)
     {
         this.filename = filename;
@@ -134,7 +139,7 @@ implements GLEventListener
     /** Not used method, but needed to instanciate GLEventListener */
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        ;
+
     }
 
     @Override

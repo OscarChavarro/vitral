@@ -58,7 +58,7 @@ public class ImagePersistence extends PersistenceElement
 
     private static RGBAImage importDDSRGBA(File inImageFd)
     {
-        RGBAImage data = null;
+        RGBAImage data;
 
         if ( joglHelper != null ) {
             data = joglHelper.importDDSRGBA(inImageFd);
@@ -110,7 +110,7 @@ public class ImagePersistence extends PersistenceElement
 
     private static RGBImage importDDSRGB(File inImageFd)
     {
-        RGBImage data = null;
+        RGBImage data;
 
         if ( joglHelper != null ) {
             data = joglHelper.importDDSRGB(inImageFd);
@@ -190,7 +190,11 @@ public class ImagePersistence extends PersistenceElement
         char arr[] = line.toCharArray();
         int i;
 
-        for ( i = 0; i < arr.length && (arr[i] != ' ' && arr[i] != '\t'); i++ );
+        for ( i = 0; 
+              i < arr.length && (arr[i] != ' ' && arr[i] != '\t'); 
+              i++ ) {
+            // Skip comment
+	}
 
         if ( i < arr.length && arr[i] == '#' ) {
             return true;
@@ -286,7 +290,6 @@ public class ImagePersistence extends PersistenceElement
                       case 2:
                         if ( line.startsWith("#") ) {
                             // Skip comment line
-                            ;
                           }
                           else {
                             StringTokenizer parser;

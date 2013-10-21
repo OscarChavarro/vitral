@@ -3,7 +3,6 @@
 package vsdk.toolkit.render.joglcg;
 
 // Java base classes
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -12,7 +11,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLProfile;
-import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.cg.CGparameter;
@@ -23,7 +21,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.render.jogl._JoglRGBAImageRendererImageAssociation;
-import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
 public class JoglCgRGBAImageRenderer extends JoglCgRenderer
 {

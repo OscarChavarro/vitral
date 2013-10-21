@@ -4,7 +4,6 @@ package vsdk.toolkit.io.image;
 
 // Basic JDK classes
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -87,7 +86,7 @@ public class ImagePersistenceAwt
     public RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         RGBAImage retImage = new RGBAImage();
-        BufferedImage bi = null;
+        BufferedImage bi;
 
         // OLD SLOW METHOD, DO NOT USE!
         //java.awt.Toolkit awtTools = java.awt.Toolkit.getDefaultToolkit();

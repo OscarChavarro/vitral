@@ -350,7 +350,7 @@ public class ShapeDescriptor3DGenerator extends Component
                 array[i-1] = distanceField;
             }
             else {
-                distanceField = null;
+                //distanceField = null;
             }
         }
         return array;

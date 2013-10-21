@@ -28,7 +28,11 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
     private JoglShapeMatchingOfflineRenderable target;
 
     public JoglShapeMatchingOfflineRenderer(int imageWidth, int imageHeight, JoglShapeMatchingOfflineRenderable target) {
+        init(imageWidth, imageHeight, target);
+    }
 
+    private void init(int imageWidth, int imageHeight, JoglShapeMatchingOfflineRenderable target)
+    {
         this.target = target;
         ready = false;
 
@@ -61,6 +65,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
         }
     }
 
+
     public boolean isPbufferSupported()
     {
         return pbufferSupported;
@@ -77,7 +82,6 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
                 Thread.sleep(100);
             }
             catch ( Exception e ) {
-                ;
             }
         }
     }
@@ -114,7 +118,6 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
     @Override
     public void dispose(GLAutoDrawable drawable)
     {
-        ;
     }
 }
 

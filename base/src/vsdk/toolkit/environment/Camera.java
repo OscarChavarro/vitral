@@ -377,11 +377,11 @@ public class Camera extends Entity
         R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
 
         // 3. Translate such that the center of projection is at the origin
-        ;
+
 
         // 4. Shear such that the center line of the view volume becomes the
         //    z axis
-        ;
+
 
         // 5. Scale such that the view volume becomes the canonical perspective
         //    view volume
@@ -589,8 +589,7 @@ public class Camera extends Entity
           }
           else {
             msg = msg + "  - UNKNOWN Camera projection mode!\n";
-          }
-        ;
+        }
 
         msg = msg + "  - eyePosition(x, y, z) = " + eyePosition + "\n";
         msg = msg + "  - focusedPointPosition(x, y, z) = " + eyePosition.add(front.multiply(focalDistance)) + "\n";

@@ -256,7 +256,6 @@ public class ReaderMitScene extends PersistenceElement
                         System.err.println("Error armando el cubemap!");
                         System.exit(0);
                     }
-
                 }
                 else if (st.sval.equals("light")) {
                   showDebugMessage("light");
@@ -291,9 +290,7 @@ public class ReaderMitScene extends PersistenceElement
                                          st.lineno()+" at "+st.sval);
                       throw new IOException(st.toString());
                     }
-                  ;
                 }
-
                 else if ( st.sval.equals("rotation") ) {
                   showDebugMessage("rotation");
                   yaw_actual = readNumber(st);

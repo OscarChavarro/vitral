@@ -22,7 +22,7 @@ Every geometric entity (prefer not to call it "Object", for not confusing
 it with the Object Oriented Programming concept or the base Java superclass)
 need to describe its form, its geometric transformation, material and other
 properties. The sub-classes of Geometry are responsible of representing
-the form only, supossing that this form is located in its own origin, 
+the form only, given that this form is located in its own origin, 
 without rotation or scaling.<P>
 
 This abstract class defines the required basic operations that must be

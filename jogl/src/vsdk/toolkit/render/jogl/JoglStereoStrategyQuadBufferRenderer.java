@@ -47,13 +47,11 @@ public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRend
     @Override
     public void activateStereoMode(GL2 gl)
     {
-        ;
     }
 
     @Override
     public void deactivateStereoMode(GL2 gl)
     {
-        ;
     }
 
 }

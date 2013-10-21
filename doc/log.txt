@@ -976,6 +976,8 @@
 2013 october 20, Oscar Chavarro:
   - 2h12min: Updating event management on testuite examples for enabling
     future removal of deprecated methods.
-  - 8:21-> removing warnings
+  - 4h: removing warnings on library. Pending to check general error
+    management and the use of java exceptions vs. the VSDK.reportMessage
+    mechanism.
 
 ===========================================================================

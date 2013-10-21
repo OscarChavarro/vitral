@@ -65,7 +65,6 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
     @Override
     public void activateStereoMode(GL2 gl)
     {
-        ;
     }
 
     private void drawTexturedQuad(GL2 gl, double minx, double miny, double maxx, double maxy)

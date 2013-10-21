@@ -331,7 +331,7 @@ public class ComputationalGeometry extends ProcessingElement
      * WARNING: This method would be more efficient if there were
      * an Vector2D class on VITRAL
      *
-     * @author Andres Felipe Mejia (Paco el Caco)
+     * @author Andres Felipe Mejia
      */
     public static boolean cohenSutherlandLineClipping2D(Vector3D p0, Vector3D p1,
             Vector3D min, Vector3D max){
@@ -354,8 +354,8 @@ public class ComputationalGeometry extends ProcessingElement
         double x = 0.0;
         double y = 0.0;
 
-        while(true){
-            if((outCode0 | outCode1) == 0){
+        while ( true ) {
+            if ( (outCode0 | outCode1) == 0 ) {
                 accept = true;
                 break;
             } else if ((outCode0 & outCode1) != 0){

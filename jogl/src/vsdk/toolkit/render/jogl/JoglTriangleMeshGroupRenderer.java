@@ -63,7 +63,6 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
                                          RendererConfiguration quality,
                                          int selectedMesh,
                                          ArrayList<int[]> selectedTriangles) {
-        ;
     }
 
 }

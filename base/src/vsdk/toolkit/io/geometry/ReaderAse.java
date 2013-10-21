@@ -890,7 +890,11 @@ public class ReaderAse extends PersistenceElement
                         // Unhandled color!
                     }
                     else if ( node.equals("*NODE_NAME") ) {
-                        try { parser.nextToken(); } catch ( Exception e ) { ; }
+                        try { 
+                            parser.nextToken(); 
+                        }
+                        catch ( Exception e ) { 
+                        }
                         thing.setName(parser.sval);
                     }
                     else {

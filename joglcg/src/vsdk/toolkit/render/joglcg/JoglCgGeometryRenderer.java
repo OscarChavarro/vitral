@@ -5,7 +5,6 @@ package vsdk.toolkit.render.joglcg;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGprogram;
 

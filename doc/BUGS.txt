@@ -32,3 +32,6 @@ Previous working things that have detected errors:
   - SceneEditorApplication example is failing when regenerating GUI on
     a language or look and feel change.
 
+There are some warnings that may reflect hidden bugs, to check:
+  - Implementation of ComputationalGeometry.cohenSutherlandLineClipping2D
+

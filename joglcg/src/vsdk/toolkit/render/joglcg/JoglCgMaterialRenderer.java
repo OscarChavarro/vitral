@@ -10,9 +10,7 @@ import com.jogamp.opengl.cg.CGprogram;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 
 public class JoglCgMaterialRenderer extends JoglCgRenderer {
     private static boolean errorReported = false;

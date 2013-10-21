@@ -5,7 +5,6 @@ package vsdk.toolkit.render.joglcg;
 // Java classes
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 // JOGL classes
 import javax.media.opengl.GL;

@@ -38,7 +38,6 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.io.image.ImageNotRecognizedException;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 
@@ -71,6 +70,7 @@ class _ReaderObjVertex extends PersistenceElement
         vertexNormalIndex = other.vertexNormalIndex;
     }
     
+    @Override
     public boolean equals(Object alien)
     {
         if ( !(alien instanceof _ReaderObjVertex) ) return false;
@@ -85,6 +85,7 @@ class _ReaderObjVertex extends PersistenceElement
         return true;
     }
 
+    @Override
     public String toString()
     {
         return "Vertex " + vertexPositionIndex + " / " + vertexNormalIndex
@@ -232,8 +233,8 @@ public class ReaderObj extends PersistenceElement
                     ArrayList<int[]> actRanges;
                     actRanges =
                         texture_span_triangleRange_table.get(textureIndex);
-                    int[] lastRange = actRanges.get(actRanges.size()-1);
-                    lastRange[1] = triangleDatasetsArray.size();
+                    //int[] lastRange = actRanges.get(actRanges.size()-1);
+                    //lastRange[1] = triangleDatasetsArray.size();
                 }
                 catch( NoSuchElementException nsee ) {
                 }
@@ -366,7 +367,7 @@ public class ReaderObj extends PersistenceElement
         newTriangleMesh = new TriangleMesh();
 
         //- If there are no specified materials, add a default one --------
-        if ( nextMaterialsArray.size() == 0 ) {
+        if ( nextMaterialsArray.isEmpty() ) {
             Material m;
             m = new Material();
             m.setName("default obj material");
@@ -599,8 +600,8 @@ public class ReaderObj extends PersistenceElement
         int numberOfTokens = st.countTokens();
         _ReaderObjVertex p0 = null;
         _ReaderObjVertex p1 = null;
-        _ReaderObjVertex p2 = null;
-        _ReaderObjVertex[] aux = null;
+        _ReaderObjVertex p2;
+        _ReaderObjVertex[] aux;
         int i;
 
         ret = new ArrayList<_ReaderObjVertex[]>();
@@ -707,8 +708,7 @@ public class ReaderObj extends PersistenceElement
             catch ( NumberFormatException nfe ) {
                 ret.vertexNormalIndex = -1;
             }
-          }
-        ;
+        }
         return ret;
     }
     
@@ -749,7 +749,7 @@ public class ReaderObj extends PersistenceElement
         
         try {
             BufferedReader in=new BufferedReader(new FileReader(nomArc));
-            String lineOfText="";
+            String lineOfText;
 
             Material activeMaterial=new Material();
             activeMaterial.setDoubleSided(false);
@@ -848,7 +848,7 @@ public class ReaderObj extends PersistenceElement
         ArrayList<Camera> camerasArray = inoutSimpleScene.getCameras();
 
         //-----------------------------------------------------------------
-        TriangleMeshGroup mg = null;
+        TriangleMeshGroup mg;
         mg = read(inSceneFileFd.getAbsolutePath());
         addThing(mg, simpleBodiesArray);
     }
