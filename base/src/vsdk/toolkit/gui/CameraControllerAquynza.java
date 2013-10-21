@@ -364,7 +364,6 @@ public class CameraControllerAquynza extends CameraController {
     {
         //------------------------------------------------------------
         double fov, angleInc;
-        boolean updated = false;
         double EPSILON = 0.0001;
         double orthogonalZoom;
 
@@ -400,13 +399,12 @@ public class CameraControllerAquynza extends CameraController {
                 else if ( fov > 0.1 + EPSILON  ) fov += 0.1*clicks;
             }
         }
-        updated = true;
 
         //------------------------------------------------------------
         camera.setFov(fov);
         camera.setOrthogonalZoom(orthogonalZoom);
 
-        return updated;
+        return true;
     }
 
     @Override

@@ -6,10 +6,6 @@
 
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseWheelEvent;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.MouseEvent;
-
 import vsdk.toolkit.environment.Camera;
 
 public abstract class CameraController extends Controller {

@@ -358,6 +358,7 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
+    @Override
     public boolean processMousePressedEvent(MouseEvent e)
     {
         return false;
@@ -408,6 +409,6 @@ public class CameraControllerBlender extends CameraController {
     @Override
     public void setDeltaMovement(double factor)
     {
-        ;
+
     }
 }
