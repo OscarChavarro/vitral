@@ -28,8 +28,8 @@ over gemetries.
 public class ComputationalGeometry extends ProcessingElement
 {
     private static InfinitePlane workPlane;
-	
-	// For 2D line clipping an 4 bit outcode is used
+        
+        // For 2D line clipping an 4 bit outcode is used
     private static final int COHEN_SUTHERLAND_2D_INSIDE = 0; // 0000
     private static final int COHEN_SUTHERLAND_2D_LEFT = 1;  // 0001
     private static final int COHEN_SUTHERLAND_2D_RIGHT = 2; // 0010

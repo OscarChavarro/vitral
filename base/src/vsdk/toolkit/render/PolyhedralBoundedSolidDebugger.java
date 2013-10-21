@@ -21,7 +21,7 @@ public abstract class PolyhedralBoundedSolidDebugger
     public static PolyhedralBoundedSolidDebugger createOfflineRenderer()
     {
         // Comment out this line if JOGL is not available at compile time
-	return new JoglPolyhedralBoundedSolidDebugger();
+        return new JoglPolyhedralBoundedSolidDebugger();
 
         // Return null if JOGL is not available at compile time
         //return null;

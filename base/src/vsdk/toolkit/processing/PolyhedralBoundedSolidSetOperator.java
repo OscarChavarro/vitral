@@ -2959,7 +2959,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
             if ( offlineRenderer != null ) {
                 offlineRenderer.execute(solid, pattern + ".png");
-	    }
+            }
 
             PersistenceElement.writeAsciiLine(bos, solid.toString());
             bos.close();

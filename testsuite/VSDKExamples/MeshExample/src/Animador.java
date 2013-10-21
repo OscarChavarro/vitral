@@ -5,7 +5,7 @@ public class Animador implements Runnable
 
     public Animador(MeshExample padre)
     {
-	bicho = padre;
+        bicho = padre;
     }
 
     public void run() {
@@ -19,10 +19,10 @@ public class Animador implements Runnable
                 Thread.sleep(1000/24);
                 if ( t > 5.0 ) {
                     break;
-		}
-	    }
-	}
-	catch ( Exception e ) {
-	}
+                }
+            }
+        }
+        catch ( Exception e ) {
+        }
     }
 }

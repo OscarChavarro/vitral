@@ -168,10 +168,10 @@ public class ImagePersistence extends PersistenceElement
                  type.equals("gif") || type.equals("png") )  {
             if ( awtHelper != null ) {
                 return awtHelper.importRGBA(inImageFd);
-	    }
-	    else {
-		return createNotAvailableImageRGBA();
-	    }
+            }
+            else {
+                return createNotAvailableImageRGBA();
+            }
         }
         else if( type.equals("dds") ) {
             //delete retImage;
@@ -245,10 +245,10 @@ public class ImagePersistence extends PersistenceElement
                  type.equals("gif") || type.equals("png") )  {
             if ( awtHelper != null ) {
                 return awtHelper.importRGB(inImageFd);
-      	      }
-	      else {
-		return createNotAvailableImageRGB();
-	    }
+              }
+              else {
+                return createNotAvailableImageRGB();
+            }
 
         }
         else if( type.equals("dds") ) {
@@ -377,10 +377,10 @@ public class ImagePersistence extends PersistenceElement
                  type.equals("gif") || type.equals("png") )  {
             if ( awtHelper != null ) {
                 return awtHelper.importIndexedColor(inImageFd);
-	    }
-	    else {
+            }
+            else {
                 return createNotAvailableImageIndexedColor();
-	    }
+            }
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
@@ -429,27 +429,27 @@ public class ImagePersistence extends PersistenceElement
     {
         if ( awtHelper != null ) {
             return awtHelper.exportGIF(fd, img);
-	}
-	else {
+        }
+        else {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "ImagePersistence",
                 "Helper class not available, not saving GIF image"
             );
             return false;
-	}
+        }
     }
 
     public static void exportJPG(OutputStream os, Image img) throws Exception
     {
         if ( awtHelper != null ) {
             awtHelper.exportJPG(os, img);
-	}
-	else {
+        }
+        else {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "ImagePersistence",
                 "Helper class not available, not saving JPG image"
             );
-	}
+        }
     }
 
     public static void exportPNG(OutputStream os, Image img)
@@ -457,47 +457,47 @@ public class ImagePersistence extends PersistenceElement
     {
         if ( awtHelper != null ) {
             awtHelper.exportPNG_24bitRgb(os, img);
-	}
-	else {
+        }
+        else {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "ImagePersistence",
                 "Helper class not available, not saving PNG image"
             );
-	}
+        }
     }
 
     public static void exportPNG(File fd, Image img)
     {
-	try {
+        try {
             if ( awtHelper != null ) {
                 awtHelper.exportPNG(fd, img);
-	    }
-	    else {
+            }
+            else {
                 VSDK.reportMessage(null, VSDK.WARNING, 
                     "ImagePersistence",
                     "Helper class not available, not saving PNG image"
                 );
-	    }
-	}
-	catch ( Exception e ) {
+            }
+        }
+        catch ( Exception e ) {
                 VSDK.reportMessage(null, VSDK.WARNING, 
                     "ImagePersistence",
                     "Error saving PNG image"
                 );
-	}
+        }
     }
 
     public static void exportPNG_24bitRgb(OutputStream os, Image img) throws Exception
     {
         if ( awtHelper != null ) {
             awtHelper.exportPNG_24bitRgb(os, img);
-	}
-	else {
+        }
+        else {
             VSDK.reportMessage(null, VSDK.WARNING, 
                 "ImagePersistence",
                 "Helper class not available, not saving PNG image"
             );
-	}
+        }
     }
 
     /**
