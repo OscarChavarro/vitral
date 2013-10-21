@@ -307,7 +307,7 @@ public class MeshExample
         if (cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
-        if (qualityController.processKeyReleasedEventAwt(e)) {
+        if (qualityController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
