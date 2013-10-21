@@ -2,10 +2,6 @@
 
 package vsdk.toolkit.gui;
 
-//import java.awt.event.MouseWheelEvent;
-//import java.awt.event.KeyEvent; // Do not include, deprecated
-//import java.awt.event.MouseEvent; // Do not include, deprecated
-
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
@@ -33,12 +29,6 @@ public class CameraControllerAquynza extends CameraController {
     public void setDeltaMovement(double val)
     {
         deltaMov = val;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseEventAwt(java.awt.event.MouseEvent mouseEvent) {
-      return true;
     }
 
     private double augmentLogarithmic(double val, double EPSILON)
@@ -256,36 +246,9 @@ public class CameraControllerAquynza extends CameraController {
         return updated;
     }
 
-    /**
-    @deprecated
-    Migrated to generalized version of this class, which is
-    independent of Awt.
-
-    This method has been deprecated in january 1st 2008. It should be
-    deleted by june 1st 2008.
-    */
-    @Deprecated
-    @Override
-    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
-        return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
-    }
-
-    @Deprecated
-    @Override
-    public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
-        return false;
-    }
-
     @Override
     public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
         return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMousePressedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return processMousePressedEvent(AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMousePressedEvent(MouseEvent e)
@@ -295,21 +258,7 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMouseReleasedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return false;
-    }
-
     public boolean processMouseReleasedEvent(MouseEvent e)
-    {
-        return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
@@ -320,24 +269,10 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return false;
-    }
-
     @Override
     public boolean processMouseMovedEvent(MouseEvent e)
     {
         return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseDraggedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e));
     }
 
     @Override
@@ -422,14 +357,6 @@ public class CameraControllerAquynza extends CameraController {
         return updated;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMouseWheelEventAwt(java.awt.event.MouseWheelEvent e)
-    {
-        return processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e));
-    }
-
-    @Deprecated
     @Override
     public boolean processMouseWheelEvent(MouseEvent e)
     {

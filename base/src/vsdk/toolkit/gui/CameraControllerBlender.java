@@ -1,8 +1,5 @@
 package vsdk.toolkit.gui;
 
-//import java.awt.event.MouseWheelEvent;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.MouseEvent;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
@@ -13,12 +10,6 @@ public class CameraControllerBlender extends CameraController {
 
     public CameraControllerBlender(Camera camera) {
         this.camera = camera;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseEventAwt(java.awt.event.MouseEvent mouseEvent) {
-      return true;
     }
 
     private double augmentLogarithmic(double val, double EPSILON)
@@ -57,15 +48,9 @@ public class CameraControllerBlender extends CameraController {
         return val;
     }
   
+
     @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
-        System.out.println("MY EVENT!");
-        return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
         Vector3D focusedPosition;
@@ -99,9 +84,9 @@ public class CameraControllerBlender extends CameraController {
         farPlaneDistance = camera.getFarPlaneDistance();
 
         // 2. Calculate variables used for interaction manipulation
-        unicode_id = keyEvent.getKeyChar();
-        keycode = keyEvent.getKeyCode();
-        mask = keyEvent.getModifiersEx();
+        unicode_id = keyEvent.unicode_id;
+        keycode = keyEvent.keycode;
+        mask = keyEvent.modifierMask;
 
         u = new Vector3D(R.M[0][0], R.M[1][0], R.M[2][0]);
         v = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
@@ -368,32 +353,12 @@ public class CameraControllerBlender extends CameraController {
         return updated;
     }
 
-    @Deprecated
-    @Override
-    public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
-        return false;
-    }
-
     @Override
     public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMousePressedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return false;
-    }
-
     public boolean processMousePressedEvent(MouseEvent e)
-    {
-        return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseReleasedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
@@ -404,22 +369,8 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMouseClickedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return false;
-    }
-
     @Override
     public boolean processMouseClickedEvent(MouseEvent e)
-    {
-        return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseMovedEventAwt(java.awt.event.MouseEvent e)
     {
         return false;
     }
@@ -430,22 +381,8 @@ public class CameraControllerBlender extends CameraController {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean processMouseDraggedEventAwt(java.awt.event.MouseEvent e)
-    {
-        return false;
-    }
-
     @Override
     public boolean processMouseDraggedEvent(MouseEvent e)
-    {
-        return false;
-    }
-
-    @Deprecated
-    @Override
-    public boolean processMouseWheelEventAwt(java.awt.event.MouseWheelEvent e)
     {
         return false;
     }
