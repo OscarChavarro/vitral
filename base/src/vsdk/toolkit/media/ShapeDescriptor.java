@@ -30,7 +30,7 @@ public abstract class ShapeDescriptor extends MediaEntity
     }
 
     public void setFeatureVector(double vector[]) {
-        ;
+
     }
 }
 

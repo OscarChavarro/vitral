@@ -156,7 +156,7 @@ public class PolyhedralBoundedSolid extends Solid {
             "Trying to associate a halfedge to a non-existing edge!");
         }
 
-        if ( where.parentEdge == null ) {
+        if ( where != null && where.parentEdge == null ) {
             he = where;
           }
           else {

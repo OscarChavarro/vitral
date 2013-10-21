@@ -57,7 +57,7 @@ public class InfinitePlane extends HalfSpace {
         this.d = -normal.dotProduct(p0);
     }
 
-    public void clone(InfinitePlane other)
+    public final void clone(InfinitePlane other)
     {
         this.a = other.a;
         this.b = other.b;

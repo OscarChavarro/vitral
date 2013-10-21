@@ -232,7 +232,6 @@ public class VSDK
     */
     public static String formatIntAsHex(int a)
     {
-        char guarismos[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
         String msg = "";
         byte b;
 
@@ -292,7 +291,13 @@ public class VSDK
                 throw new Exception("VSDK.reportMessage(FATAL_ERROR)");
             }
             catch ( Exception e ) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                StackTraceElement report[];
+                report = e.getStackTrace();
+                int i;
+                for ( i = 0; i < report.length; i++ ) {
+                    System.out.println(report[i]);
+                }
             }
             System.exit(1);
         }

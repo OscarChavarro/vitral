@@ -82,7 +82,7 @@ public class Matrix4x4 extends FundamentalEntity
 \right]
 \f]
     */
-    public void identity()
+    public final void identity()
     {
         M[0][0]=1.0;M[0][1]=0.0;M[0][2]=0.0;M[0][3]=0.0;
         M[1][0]=0.0;M[1][1]=1.0;M[1][2]=0.0;M[1][3]=0.0;
@@ -109,7 +109,7 @@ public class Matrix4x4 extends FundamentalEntity
         double downPlaneDistance, double upPlaneDistance,
         double nearPlaneDistance, double farPlaneDistance)
     {
-        double tx, ty, tz;;
+        double tx, ty, tz;
 
         tx = - ( (rightPlaneDistance + leftPlaneDistance) / 
                  (rightPlaneDistance - leftPlaneDistance) );

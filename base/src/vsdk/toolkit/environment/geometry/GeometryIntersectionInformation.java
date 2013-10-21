@@ -53,7 +53,7 @@ public class GeometryIntersectionInformation extends FundamentalEntity {
         clone(b);
     }
 
-    public void clone(GeometryIntersectionInformation other)
+    public final void clone(GeometryIntersectionInformation other)
     {
         this.p = new Vector3D(other.p);
         this.n = new Vector3D(other.n);

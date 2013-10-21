@@ -1274,7 +1274,6 @@ public class TriangleMesh extends Surface {
             c = oldTriangleIndices[3*i+2];
             if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ) {
                 // This triangle is not copied
-                ;
             }
             else {
                 j++;
@@ -1289,7 +1288,6 @@ public class TriangleMesh extends Surface {
             c = oldTriangleIndices[3*i+2];
             if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ) {
                 // This triangle is not copied
-                ;
             }
             else {
                 triangleIndices[3*j+0] = map[oldTriangleIndices[3*i+0]];
@@ -1413,6 +1411,12 @@ public class TriangleMesh extends Surface {
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
+        if ( extraVertices == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            "extraVertices is null!");
+            return;
+	}
+
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);
         extraVertices.add(ma.z);
@@ -1451,6 +1455,12 @@ public class TriangleMesh extends Surface {
         extraTriangles.add(i);
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
+
+        if ( extraVertices == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            "extraVertices is null!");
+            return;
+	}
 
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);
@@ -1494,6 +1504,12 @@ public class TriangleMesh extends Surface {
         extraTriangles.add(3*triangleIndices[3*i+0]+0);
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
+
+        if ( extraVertices == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            "extraVertices is null!");
+            return;
+	}
 
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);
@@ -1586,7 +1602,7 @@ public class TriangleMesh extends Surface {
                  (t1 == INSIDE && t2 == INSIDE && t3 == INSIDE)
                      )
             {
-                ;
+                // Untested?
             }
             else {
                 if ( t1 == INSIDE && t2 == OUTSIDE && t3 == OUTSIDE ) {

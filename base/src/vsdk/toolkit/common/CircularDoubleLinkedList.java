@@ -97,7 +97,9 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         int i;
         for ( i = 0, window = head;
               i < currentSize && i < index;
-              i++, window = window.next );
+              i++, window = window.next ) {
+            // Note this updates the window pointer
+	}
         lastAccessedIndex = i;
     }
 
@@ -182,7 +184,9 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         }
         int i;
         for ( i = 0, window = head;
-              i < currentSize && i < index; i++, window = window.next );
+              i < currentSize && i < index; i++, window = window.next ) {
+            // Note this updates the window pointer
+	}
         lastAccessedIndex = i;
         return window.data;
     }

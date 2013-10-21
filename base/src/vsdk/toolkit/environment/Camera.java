@@ -339,7 +339,7 @@ public class Camera extends Entity
     the projection transformation.
     */
     
-    public void updateVectors()
+    public final void updateVectors()
     {
         up.normalize();
         left.normalize();

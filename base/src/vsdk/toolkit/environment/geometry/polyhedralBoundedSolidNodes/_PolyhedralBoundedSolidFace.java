@@ -77,6 +77,11 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
     public _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid parent, int id)
     {
+        init(parent, id);
+    }
+
+    private void init(PolyhedralBoundedSolid parent, int id)
+    {
         this.id = id;
         parentSolid = parent;
         parentSolid.polygonsList.add(this);

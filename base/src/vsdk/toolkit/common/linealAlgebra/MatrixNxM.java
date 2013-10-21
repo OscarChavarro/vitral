@@ -61,7 +61,7 @@ public class MatrixNxM extends FundamentalEntity
     /**
     This methods changes current matrix to be the NxM identity matrix
     */
-    public void identity()
+    public final void identity()
     {
         int i, j;
         for ( i = 0; i < numRows; i++ ) {

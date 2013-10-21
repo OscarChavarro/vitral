@@ -36,6 +36,11 @@ public class FunctionalExplicitSurface extends Surface
 
     public FunctionalExplicitSurface(String fxy)
     {
+        init(fxy);
+    }
+
+    private void init(String fxy)
+    {
         functionExpression = fxy;
         xyFunction = new AlgebraicExpression();
         try {
@@ -149,9 +154,10 @@ public class FunctionalExplicitSurface extends Surface
 
         //-----------------------------------------------------------------
         internalGeometry.initVertexPositionsArray((nx+1)*(ny+1));
-        double v[] = internalGeometry.getVertexPositions();
+        double v[];
         double z;
 
+        v = internalGeometry.getVertexPositions();
         try {
             index = 0;
             for ( iy = 0, y = miny; iy <= ny; iy++, y += dy ) {
@@ -181,9 +187,10 @@ public class FunctionalExplicitSurface extends Surface
 
         //-----------------------------------------------------------------
         internalGeometry.initTriangleArrays(nx*ny*2);
-        int t[] = internalGeometry.getTriangleIndexes();
+        int t[];
 
         index = 0;
+        t = internalGeometry.getTriangleIndexes();
         for ( iy = 0; iy < ny; iy++ ) {
             for ( ix = 0; ix < nx; ix++ ) {
                 t[3*index] = coord(nx, ny, ix, iy);

@@ -157,8 +157,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
               }
               else {
                 msg = msg + "(INCONSISTENT!)";
-              }
-            ;
+            }
             msg = msg + ". ";
         }
         msg = msg + "Next halfedge: " + next().id + ".";

@@ -40,6 +40,12 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
     public _PolyhedralBoundedSolidVertex(PolyhedralBoundedSolid parentSolid,
                                          Vector3D position, int id)
     {
+        init(parentSolid, position, id);
+    }
+
+    private void
+    init(PolyhedralBoundedSolid parentSolid, Vector3D position, int id)
+    {
         this.id = id;
         emanatingHalfEdge = null;
         this.position = new Vector3D(position);

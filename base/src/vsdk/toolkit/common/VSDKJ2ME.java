@@ -181,17 +181,18 @@ public class VSDKJ2ME
 
     static public double log(double x)
      {
-         if(!(x>0.))
+         if( !(x>0.) ) {
              return Double.NaN;
+	 }
          //
-         if(x==1.0)
+         if( x == 1.0 ) {
              return 0.0;
+	 }
          // Argument of _log must be (0; 1]
-         if (x>1.)
-         {
-             x=1/x;
+         if ( x > 1.0 ) {
+             x = 1 / x;
              return -_log(x);
-         };
+         }
          //
          return _log(x);
      }

@@ -91,6 +91,6 @@ public class Polygon2D extends Surface
     doExtraInformation(Ray inRay, double intT, 
                        GeometryIntersectionInformation outData)
     {
-        ;
+
     }
 }

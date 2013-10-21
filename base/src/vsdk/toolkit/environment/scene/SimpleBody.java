@@ -95,7 +95,7 @@ public class SimpleBody extends Entity {
 
     public void setName(String n)
     {
-        name = new String(n);
+        name = n;
     }
 
     public Geometry getGeometry()

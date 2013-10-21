@@ -40,7 +40,7 @@ public class AlgebraicExpression extends FundamentalEntity
         root = null;
     }
 
-    public void
+    public final void
     defineValue(String name, double val)
     {
         values.put(name, new Double(val));
@@ -290,11 +290,8 @@ public class AlgebraicExpression extends FundamentalEntity
               default:
                 String content;
                 content = parser.toString();
-                if ( parser.ttype == '\"' ) {
-                    ;
-                  }
-                  else {
-                      tokens.add("" + content.charAt(7));
+                if ( parser.ttype != '\"' ) {
+                    tokens.add("" + content.charAt(7));
                 }
                 break;
             }

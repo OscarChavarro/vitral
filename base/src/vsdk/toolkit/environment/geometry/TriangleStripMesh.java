@@ -129,7 +129,7 @@ public class TriangleStripMesh extends Surface {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-        ;
+
     }
 }
 

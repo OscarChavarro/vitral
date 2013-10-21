@@ -43,6 +43,11 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     //=================================================================
     public _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace parent)
     {
+        init(parent);
+    }
+
+    private void init(_PolyhedralBoundedSolidFace parent)
+    {
         parentFace = parent;
         parentFace.boundariesList.add(this);
         halfEdgesList =

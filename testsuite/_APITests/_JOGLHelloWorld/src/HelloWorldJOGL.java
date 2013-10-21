@@ -12,13 +12,20 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 public class HelloWorldJOGL implements GLEventListener {
 
     public HelloWorldJOGL() {
+        createElements();
+    }
+
+    /**
+    A final method is one that cannot be overriden by subclasses
+    */
+    public final void createElements()
+    {
         //-----------------------------------------------------------------
         GLProfile glp = GLProfile.get(GLProfile.GL2); 
         GLCapabilities caps = new GLCapabilities(glp);
@@ -38,40 +45,44 @@ public class HelloWorldJOGL implements GLEventListener {
     }
 
     /** Called by drawable to initiate drawing */
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0.5, 0.5, 0);
         gl.glEnd();
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void init(GLAutoDrawable drawable) {
-        ;
+
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
-        ;
+
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
-        ;
+
     }
 
     /** Called to indicate the drawing surface has been moved and/or resized */
+    @Override
     public void reshape(GLAutoDrawable drawable,
                         int x,
                         int y,

@@ -13,7 +13,7 @@ public class AlgebraicExpressionException extends VSDKException
 
     public AlgebraicExpressionException()
     {
-        ;
+
     }
 
     public AlgebraicExpressionException(String message)

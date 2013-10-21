@@ -268,7 +268,7 @@ public class VoxelVolume extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-        ;
+
     }
 
     /**
