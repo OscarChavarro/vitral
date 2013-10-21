@@ -251,6 +251,7 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    @Override
     public boolean processMousePressedEvent(MouseEvent e)
     {
         oldMouseX = e.getX();
@@ -258,6 +259,7 @@ public class CameraControllerAquynza extends CameraController {
         return false;
     }
 
+    @Override
     public boolean processMouseReleasedEvent(MouseEvent e)
     {
         return false;

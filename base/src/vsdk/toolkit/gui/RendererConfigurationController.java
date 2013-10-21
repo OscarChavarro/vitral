@@ -1,6 +1,5 @@
 package vsdk.toolkit.gui;
 
-//import java.awt.event.KeyEvent;
 import vsdk.toolkit.common.RendererConfiguration;
 
 public class RendererConfigurationController extends Controller {
@@ -19,11 +18,6 @@ public class RendererConfigurationController extends Controller {
   {
       qualitySelection = q;
   }
-
-    @Deprecated
-    public boolean processKeyPressedEventAwt(java.awt.event.KeyEvent keyEvent) {
-        return processKeyPressedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
-    }
 
   public boolean processKeyPressedEvent(KeyEvent keyEvent) {
     boolean updated = false;
@@ -83,10 +77,6 @@ public class RendererConfigurationController extends Controller {
           break;
     }
     return updated;
-  }
-
-  public boolean processKeyReleasedEventAwt(java.awt.event.KeyEvent keyEvent) {
-      return processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(keyEvent));
   }
 
   public boolean processKeyReleasedEvent(KeyEvent keyEvent) {
