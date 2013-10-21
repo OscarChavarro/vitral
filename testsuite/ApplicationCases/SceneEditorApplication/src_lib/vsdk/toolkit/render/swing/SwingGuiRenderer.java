@@ -12,8 +12,6 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import vsdk.toolkit.gui.*;
 
 // VSDK classes
 import vsdk.toolkit.media.RGBAImage;
@@ -27,6 +25,13 @@ import vsdk.toolkit.gui.variable.GuiIntegerVariable;
 import vsdk.toolkit.gui.variable.GuiStringVariable;
 import vsdk.toolkit.gui.variable.GuiVariable;
 import vsdk.toolkit.gui.variable.GuiVector3DVariable;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.GuiButtonGroup;
+import vsdk.toolkit.gui.GuiCommand;
+import vsdk.toolkit.gui.GuiMenu;
+import vsdk.toolkit.gui.GuiMenuItem;
+import vsdk.toolkit.gui.GuiMenuElement;
+import vsdk.toolkit.gui.GuiDialog;
 
 public class SwingGuiRenderer {
 
@@ -162,8 +167,8 @@ public class SwingGuiRenderer {
         GuiMenu menu = context.getPopup(name);
 
         if (menu == null) {
-            widgetOption =
-                    widgetPopup.add(new JMenuItem("Popup menu not found on GUI"));
+            //widgetOption =
+            widgetPopup.add(new JMenuItem("Popup menu not found on GUI"));
         } else {
             ArrayList<GuiMenuElement> children;
             children = menu.getChildren();

@@ -53,6 +53,7 @@ public class GuiMenu extends GuiMenuElement{
         return msg;
     }
 
+    @Override
     public String toString()
     {
         return toString(0);

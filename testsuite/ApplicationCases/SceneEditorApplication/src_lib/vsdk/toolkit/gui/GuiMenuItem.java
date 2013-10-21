@@ -49,13 +49,10 @@ public class GuiMenuItem extends GuiMenuElement
     public void addModifier(String m)
     {
         if ( m.equals("CHECKED") ) {
-            ;
         }
         else if ( m.equals("GRAYED") ) {
-            ;
         }
         else if ( m.equals("UNCHEKED") ) {
-            ;
         }
         else if ( m.equals("SEPARATOR") ) {
             isSeparatorFlag = true;

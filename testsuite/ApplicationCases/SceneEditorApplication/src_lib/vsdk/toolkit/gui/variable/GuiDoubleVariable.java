@@ -24,6 +24,7 @@ public class GuiDoubleVariable extends GuiVariable {
         return validRange;
     }
 
+    @Override
     public void setValidRange(String vr) {
         validRange = vr;
     }
