@@ -980,4 +980,7 @@
     management and the use of java exceptions vs. the VSDK.reportMessage
     mechanism.
 
+2013 october 23, Leidy Alexandra Lozano:
+  - 24h: Torus model added	
+  
 ===========================================================================
