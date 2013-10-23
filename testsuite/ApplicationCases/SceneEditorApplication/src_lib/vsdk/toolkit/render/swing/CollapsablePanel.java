@@ -4,12 +4,20 @@
  */
 package vsdk.toolkit.render.swing;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseListener;
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 
 class _CollapsablePanelMouseListener implements MouseListener {
 

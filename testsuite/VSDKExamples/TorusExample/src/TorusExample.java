@@ -185,7 +185,7 @@ public class TorusExample extends Applet implements
         
         
         
-       String imageFilename = "C:\\Users\\ALEXANDRA\\Documents\\NetBeansProjects\\02_VSDKExamples_TorusExample\\src\\img/control.png";
+       String imageFilename = "./etc/control.png";
         try {
          
             img1 = ImagePersistence.importRGBA(new File(imageFilename));
@@ -268,11 +268,11 @@ static public JPanel menu()
     {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder()));
 
-        jButton1.setIcon(new javax.swing.ImageIcon("C:\\Users\\ALEXANDRA\\Documents\\NetBeansProjects\\02_VSDKExamples_TorusExample\\src\\img/mas.png")); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon("./etc/mas.png")); // NOI18N
         jButton1.setContentAreaFilled(true);
        
 
-        jButton2.setIcon(new javax.swing.ImageIcon("C:\\Users\\ALEXANDRA\\Documents\\NetBeansProjects\\02_VSDKExamples_TorusExample\\src\\img/menos.png")); // NOI18N
+        jButton2.setIcon(new javax.swing.ImageIcon("./etc/menos.png")); // NOI18N
         jButton2.setContentAreaFilled(true);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);

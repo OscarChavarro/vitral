@@ -88,9 +88,13 @@ public class ViewpointBinaryPersistence extends PersistenceElement {
         mesh.initVertexColorsArray();
         mesh.initQuadArrays((int)numQuads);
 
-        double v[] = mesh.getVertexPositions();
-        double n[] = mesh.getVertexNormals();
-        double c[] = mesh.getVertexColors();
+        double v[];
+        double n[];
+        double c[];
+
+        v = mesh.getVertexPositions();
+        n = mesh.getVertexNormals();
+        c = mesh.getVertexColors();
         int q[] = mesh.getQuadIndices();
 
         int i;

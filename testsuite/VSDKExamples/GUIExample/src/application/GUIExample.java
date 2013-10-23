@@ -4,12 +4,21 @@
  */
 package application;
 
-// Internal classes
-import com.sun.java.swing.plaf.gtk.GTKConstants;
-import java.awt.*;
+// Basic Java classes
 import java.io.FileInputStream;
-import javax.swing.*;
+
+// Awt/Swing classes
+import com.sun.java.swing.plaf.gtk.GTKConstants;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JMenuBar;
 import javax.swing.border.TitledBorder;
+
+// VSDK classes
 import vsdk.toolkit.gui.Gui;
 import vsdk.toolkit.gui.GuiDialog;
 import vsdk.toolkit.io.gui.GuiPersistence;

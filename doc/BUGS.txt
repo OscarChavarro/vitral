@@ -1,4 +1,9 @@
 Following a list of detected BUGS.
+  - SimpleBody.doIntersection is not taking into account current body
+    scale. Moreover, this method is apparently inducing errors on
+    raytracing (probably on the normal managment). Compare reference
+    raytracer implementation against original MIT sample or other raytracings.
+    Method needs formal verification / reconstruction.
   - PolyhedralBoundedSolid.computeQuantitativeInvisibility seems to be
     failing. To repeat this error, the PolyhedralBoundedSolidExample with
     Appel algorithm for hidden line visualization can be used.
