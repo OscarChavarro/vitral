@@ -28,6 +28,7 @@ public class AndroidGLES20Renderer
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramConstantTexture;
+    public static int AndroidGLES20GpuProgramGouraud;
 
     // Common values
     protected static final int FLOAT_SIZE_IN_BYTES = 4;
@@ -40,7 +41,8 @@ public class AndroidGLES20Renderer
     public static float[] projectionMatrix;
     public static final int GL_MODELVIEW = 1;
     public static final int GL_PROJECTION = 2;
-    public static final int GL_TEXTURE_2D = 2;
+    public static final int GL_TEXTURE_2D = 3;
+    public static final int GL_LIGHTING = 4;
     public static int currentMatrixMode = GL_MODELVIEW;
     public static RendererConfiguration qualitySelection;
     public static boolean errorsDetected = false;
@@ -50,6 +52,7 @@ public class AndroidGLES20Renderer
     public static int PObjectParam;
     public static int uvVertexTextureCoordinateParam;
     public static int emissionColorParam;
+    public static int normalParam;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -79,6 +82,12 @@ public class AndroidGLES20Renderer
         }
     }
 
+    public static void setShadingType(int t)
+    {
+        qualitySelection.setShadingType(t);
+        activateShaders();
+    }
+
     public static void checkGlError(String op) {
         int error;
         error = GLES20.glGetError();
@@ -86,26 +95,26 @@ public class AndroidGLES20Renderer
 
         while ( error != GLES20.GL_NO_ERROR) {
             switch ( error ) {
-              case GLES20.GL_INVALID_ENUM:
+            case GLES20.GL_INVALID_ENUM:
                 name = "GL_INVALID_ENUM​";
                 break;
-              case GLES20.GL_INVALID_VALUE:
+            case GLES20.GL_INVALID_VALUE:
                 name = "GL_INVALID_VALUE";
                 break;
-              case GLES20.GL_INVALID_OPERATION:
+            case GLES20.GL_INVALID_OPERATION:
                 name = "GL_INVALID_OPERATION​";
                 break;
-              case GLES20.GL_OUT_OF_MEMORY:
+            case GLES20.GL_OUT_OF_MEMORY:
                 name = "GL_OUT_OF_MEMORY​";
                 break;
-              case GLES20.GL_INVALID_FRAMEBUFFER_OPERATION:
+            case GLES20.GL_INVALID_FRAMEBUFFER_OPERATION:
                 name = "GL_INVALID_FRAMEBUFFER_OPERATION";
                 break;
-              //case GLES20.GL_TABLE_TOO_LARGE:
-              //  name = "GL_TABLE_TOO_LARGE​"; 
-              //  break;
-              //case GLES20.GL_STACK_OVERFLOW: name = "GL_STACK_OVERFLOW"; break;
-              //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
+            //case GLES20.GL_TABLE_TOO_LARGE:
+            //  name = "GL_TABLE_TOO_LARGE​"; 
+            //  break;
+            //case GLES20.GL_STACK_OVERFLOW: name = "GL_STACK_OVERFLOW"; break;
+            //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
             }
             Log.e(TAG, op + ": glError " + error + " : " + name);
             throw new RuntimeException(op + ": glError " + error);
@@ -225,6 +234,19 @@ public class AndroidGLES20Renderer
             return false;
         }
 
+        vertexShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.gouraudvertexshader));
+        pixelShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.gouraudpixelshader));
+        AndroidGLES20GpuProgramGouraud = 
+            createProgram(vertexShaderSource, pixelShaderSource);
+        if ( AndroidGLES20GpuProgramGouraud == 0 ) {
+            System.err.println("ERROR CREATING GOURAUD SHADER!");
+            return false;
+        }
+
         //- Create parameters ---------------------------------------------
         activateShaders();
         return true;
@@ -235,8 +257,20 @@ public class AndroidGLES20Renderer
         //- Select current shaders programs from rendering configuration --
         int shaderId = AndroidGLES20GpuProgramConstant;
 
+        //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... :");
+
         if ( qualitySelection.isTextureSet() ) {
             shaderId = AndroidGLES20GpuProgramConstantTexture;
+            //System.out.println("Constante con textura");
+        }
+        else if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+            shaderId = AndroidGLES20GpuProgramGouraud;
+            //System.out.println("Gouraud sin textura");
+        }
+        else {
+            shaderId = AndroidGLES20GpuProgramConstant;
+            //System.out.println("Constante sin textura");
         }
 
         //- Activate selected shader programs -----------------------------
@@ -249,7 +283,7 @@ public class AndroidGLES20Renderer
         checkGlError("glGetUniformLocation modelViewProjectionLocal");
         if ( modelViewProjectionLocalParam == -1 ) {
             throw new RuntimeException(
-            "Could not get attrib location for modelViewProjectionLocal");
+                "Could not get attrib location for modelViewProjectionLocal");
         }
 
         PObjectParam = GLES20.glGetAttribLocation(shaderId, "PObject");
@@ -265,17 +299,33 @@ public class AndroidGLES20Renderer
             checkGlError("glGetAttribLocation uvVertexTextureCoordinate");
             if ( uvVertexTextureCoordinateParam == -1 ) {
                 throw new RuntimeException(
-                "Could not get attrib location for uvVertexTextureCoordinate");
+                    "Could not get attrib location for uvVertexTextureCoordinate");
             }
         }
 
-        emissionColorParam = 
-            GLES20.glGetAttribLocation(shaderId, "emissionColor");
-        checkGlError("glGetAttribLocation emissionColor");
-        if ( emissionColorParam == -1 ) {
-            throw new RuntimeException(
-                "Could not get attrib location for emissionColor");
+        if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
+            emissionColorParam = 
+                GLES20.glGetAttribLocation(shaderId, "emissionColor");
+            checkGlError("glGetAttribLocation emissionColor");
+            if ( emissionColorParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get attrib location for emissionColor");
+            }
         }
+
+        if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+            normalParam = GLES20.glGetAttribLocation(shaderId, "normal");
+            checkGlError("glGetAttribLocation normal");
+            if ( normalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get attrib location for normal");
+            }
+        }
+	else {
+            normalParam = -1;
+	}
 
         activateTransformationMatrices();
     }
@@ -283,9 +333,9 @@ public class AndroidGLES20Renderer
     public static void activateTransformationMatrices()
     {
         Matrix.multiplyMM(modelViewProjectionLocal, 0,
-            projectionMatrix, 0, modelViewMatrix, 0);
+                          projectionMatrix, 0, modelViewMatrix, 0);
         GLES20.glUniformMatrix4fv(modelViewProjectionLocalParam, 1, false, 
-            modelViewProjectionLocal, 0);
+                                  modelViewProjectionLocal, 0);
     }
 
     public static void glEnable(int k)
@@ -301,7 +351,7 @@ public class AndroidGLES20Renderer
     public static void glDisable(int k)
     {
         switch ( k ) {
-          case GL_TEXTURE_2D:
+        case GL_TEXTURE_2D:
             qualitySelection.setTexture(false);
             activateShaders();
             break;
@@ -311,10 +361,10 @@ public class AndroidGLES20Renderer
     public static void glLoadIdentity()
     {
         switch ( currentMatrixMode ) {
-          case GL_MODELVIEW:
+        case GL_MODELVIEW:
             Matrix.setIdentityM(modelViewMatrix, 0);
             break;
-          case GL_PROJECTION:
+        case GL_PROJECTION:
             Matrix.setIdentityM(projectionMatrix, 0);
             break;
         }
@@ -338,16 +388,16 @@ public class AndroidGLES20Renderer
     {
         Matrix.setIdentityM(transientMatrix, 0);       
         Matrix.scaleM(transientMatrix, 0, 
-            (float)sx, (float)sy, (float)sz);
+                      (float)sx, (float)sy, (float)sz);
         copyMatrix(originalMatrix, modelViewMatrix);
         switch ( currentMatrixMode ) {
-          case GL_MODELVIEW:
+        case GL_MODELVIEW:
             Matrix.multiplyMM(modelViewMatrix, 0,
-                originalMatrix, 0, transientMatrix, 0);
+                              originalMatrix, 0, transientMatrix, 0);
             break;
-          case GL_PROJECTION:
+        case GL_PROJECTION:
             Matrix.multiplyMM(projectionMatrix, 0,
-                transientMatrix, 0, projectionMatrix, 0);
+                              transientMatrix, 0, projectionMatrix, 0);
             break;
         }
         activateTransformationMatrices();
@@ -366,38 +416,38 @@ public class AndroidGLES20Renderer
     {
         Matrix.setIdentityM(transientMatrix, 0);       
         Matrix.translateM(transientMatrix, 0,
-            (float)tx, (float)ty, (float)tz);
+                          (float)tx, (float)ty, (float)tz);
         copyMatrix(originalMatrix, modelViewMatrix);
         switch ( currentMatrixMode ) {
-          case GL_MODELVIEW:
+        case GL_MODELVIEW:
             //Matrix.multiplyMM(modelViewMatrix, 0,
             //    transientMatrix, 0, modelViewMatrix, 0);
             Matrix.multiplyMM(modelViewMatrix, 0,
-                originalMatrix, 0, transientMatrix, 0);
+                              originalMatrix, 0, transientMatrix, 0);
             break;
-          case GL_PROJECTION:
+        case GL_PROJECTION:
             Matrix.multiplyMM(projectionMatrix, 0,
-                transientMatrix, 0, projectionMatrix, 0);
+                              transientMatrix, 0, projectionMatrix, 0);
             break;
         }
         activateTransformationMatrices();
     }
 
     public static void glRotated(double angleDegrees, 
-        double ax, double ay, double az)
+                                 double ax, double ay, double az)
     {
         Matrix.setIdentityM(transientMatrix, 0);       
         Matrix.setRotateM(transientMatrix, 0, 
-            (float)angleDegrees, (float)ax, (float)ay, (float)az);
+                          (float)angleDegrees, (float)ax, (float)ay, (float)az);
         copyMatrix(originalMatrix, modelViewMatrix);
         switch ( currentMatrixMode ) {
-          case GL_MODELVIEW:
+        case GL_MODELVIEW:
             Matrix.multiplyMM(modelViewMatrix, 0,
-                originalMatrix, 0, transientMatrix, 0);
+                              originalMatrix, 0, transientMatrix, 0);
             break;
-          case GL_PROJECTION:
+        case GL_PROJECTION:
             Matrix.multiplyMM(projectionMatrix, 0,
-                transientMatrix, 0, projectionMatrix, 0);
+                              transientMatrix, 0, projectionMatrix, 0);
             break;
         }
         activateTransformationMatrices();
@@ -406,15 +456,15 @@ public class AndroidGLES20Renderer
     public static void glMatrixMode(int newMode)
     {
         switch ( newMode ) {
-          case GL_MODELVIEW:
-          case GL_PROJECTION:
+        case GL_MODELVIEW:
+        case GL_PROJECTION:
             currentMatrixMode = newMode;
             break;
         }
-
     }
 
-    protected static void drawVertices3Position2Uv(FloatBuffer verticesBufferedArray,
+    protected static void drawVertices3Position2Uv(
+        FloatBuffer verticesBufferedArray,
         int primitive, int numberOfElements, int vertexSizeInBytes)
     {
         //-----------------------------------------------------------------
@@ -422,7 +472,7 @@ public class AndroidGLES20Renderer
         // glVertex3d
         verticesBufferedArray.position(0);
         GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
-            false, vertexSizeInBytes, verticesBufferedArray);
+                             false, vertexSizeInBytes, verticesBufferedArray);
         checkGlError("glVertexAttribPointer PObject");
         GLES20.glEnableVertexAttribArray(PObjectParam);
         checkGlError("glEnableVertexAttribArray PObjectParam");
@@ -430,8 +480,8 @@ public class AndroidGLES20Renderer
         // glTexCoord2d
         verticesBufferedArray.position(3);
         GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-            GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-            verticesBufferedArray);
+                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                                     verticesBufferedArray);
         checkGlError(
             "glVertexAttribPointer uvVertexTextureCoordinateParam");
         GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
@@ -454,7 +504,7 @@ public class AndroidGLES20Renderer
         GLES20.glEnableVertexAttribArray(PObjectParam);
         checkGlError("glEnableVertexAttribArray PObjectParam");
         GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
-            false, vertexSizeInBytes, verticesBufferedArray);
+                             false, vertexSizeInBytes, verticesBufferedArray);
         checkGlError("glVertexAttribPointer PObject");
 
         // glColor3d
@@ -462,7 +512,7 @@ public class AndroidGLES20Renderer
         GLES20.glEnableVertexAttribArray(emissionColorParam);
         checkGlError("glEnableVertexAttribArray emissionColorParam");
         GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
-            false, vertexSizeInBytes, verticesBufferedArray);
+                             false, vertexSizeInBytes, verticesBufferedArray);
         checkGlError("glVertexAttribPointer emissionColorParam");
 
         // glTexCoord2d
@@ -470,8 +520,94 @@ public class AndroidGLES20Renderer
         GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
         checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
         GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-            GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-            verticesBufferedArray);
+                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                                     verticesBufferedArray);
+        checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
+
+    protected static void drawVertices3Position3Normal2Uv(
+        FloatBuffer verticesBufferedArray,
+        int primitive, int numberOfElements, int vertexSizeInBytes)
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+
+        // glNormal3d
+	if ( normalParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(normalParam);
+            checkGlError("glEnableVertexAttribArray normalParam");
+            GLES20.glVertexAttribPointer(normalParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer normalParam");
+	}
+
+        // glTexCoord2d
+        verticesBufferedArray.position(6);
+        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                                     verticesBufferedArray);
+        checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
+
+    protected static void drawVertices3Position3Color3Normal2Uv(
+        FloatBuffer verticesBufferedArray,
+        int primitive, int numberOfElements, int vertexSizeInBytes)
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+
+        // glColor3d
+        verticesBufferedArray.position(3);
+        GLES20.glEnableVertexAttribArray(emissionColorParam);
+        checkGlError("glEnableVertexAttribArray emissionColorParam");
+        GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer emissionColorParam");
+
+        // glNormal3d
+	if ( normalParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(normalParam);
+            checkGlError("glEnableVertexAttribArray normalParam");
+            GLES20.glVertexAttribPointer(normalParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer normalParam");
+	}
+
+        // glTexCoord2d
+        verticesBufferedArray.position(6);
+        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                                     verticesBufferedArray);
         checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
 
         //-----------------------------------------------------------------

@@ -990,4 +990,8 @@
   - 40min: integrating Torus related classes to SceneEditorApplication
   - 10min: checking all import senteces follows vitral standards
 
+2013 october 27, Oscar Chavarro
+  - 1h15min: preparing for the development of gouraud shaders. Shader selection
+    code. Normal parameter passing.
+
 ===========================================================================

@@ -173,9 +173,15 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         // glColor3d(c.r, c.g, c.b);
         ColorRgb c = q.getWireColor();
-        vertexDataArray[index] = (float)c.r;    index++;
-        vertexDataArray[index] = (float)c.g;    index++;
-        vertexDataArray[index] = (float)c.b;    index++;
+        //vertexDataArray[index] = (float)c.r;    index++;
+        //vertexDataArray[index] = (float)c.g;    index++;
+        //vertexDataArray[index] = (float)c.b;    index++;
+
+        //gl.glNormal3d(N.x, N.y, N.z);
+        sphere.sphereNormal(N, theta, phi);
+        vertexDataArray[index] = (float)N.x;    index++;
+        vertexDataArray[index] = (float)N.y;    index++;
+        vertexDataArray[index] = (float)N.z;    index++;
 
         // glTexCoord2d(1.0-s, t);
         vertexDataArray[index] = (float)(1.0-s);    index++; // U
@@ -202,10 +208,6 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         //    vectorarray = B.exportToDoubleArrayVect();
         //    CgGL.cgGLSetParameter3dv(binormalParam, vectorarray, 0);
         //}
-
-        //- Pass standard vertex parameters to OpenGL ---------------------
-        sphere.sphereNormal(N, theta, phi);
-        //gl.glNormal3d(N.x, N.y, N.z);
     }
 
     private static void
@@ -263,7 +265,9 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
                 ByteOrder.nativeOrder()).asFloatBuffer();
             verticesBufferedArray.put(vertexDataArray);
 
-            drawVertices3Position3Color2Uv(verticesBufferedArray, 
+            //drawVertices3Position3Color2Uv(verticesBufferedArray, 
+            //    GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
+            drawVertices3Position3Normal2Uv(verticesBufferedArray, 
                 GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
 
         }

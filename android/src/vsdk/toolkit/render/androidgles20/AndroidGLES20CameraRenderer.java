@@ -14,8 +14,8 @@ public class AndroidGLES20CameraRenderer extends AndroidGLES20Renderer
         float array[] = P.exportToFloatArrayColumnOrder();
         int i;
         for ( i = 0; i < 16; i++ ) {
-            projectionMatrix[i] = array[i];
-        }
+	    projectionMatrix[i] = array[i];
+	}
     }
 }
 
