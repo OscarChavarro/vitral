@@ -982,5 +982,8 @@
 
 2013 october 23, Leidy Alexandra Lozano:
   - 24h: Torus model added	
-  
+
+2013 october 24, Oscar Chavarro:
+  - 1h: checking Torus related classes, and adapting code to vitral standards
+
 ===========================================================================

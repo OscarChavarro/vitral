@@ -34,6 +34,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.environment.geometry.Torus;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements
@@ -44,12 +45,11 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
-
+import vsdk.toolkit.render.jogl.JoglTorusRenderer;
 
 /**
- *
- * @author Leidy Alexandra Lozano Jácome
- */
+@author Leidy Alexandra Lozano Jácome
+*/
 
 /**
 Note that this program is designed to work as a java application, or as a
@@ -73,10 +73,8 @@ public class TorusExample extends Applet implements
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;
     private RGBImage img;
-    private RGBAImage img1;
   
     private Torus torus;
-    private JoglTorusRender rTorus;
     
     private int N;
     private int n;
@@ -182,21 +180,6 @@ public class TorusExample extends Applet implements
 
           
         });
-        
-        
-        
-       String imageFilename = "./etc/control.png";
-        try {
-         
-            img1 = ImagePersistence.importRGBA(new File(imageFilename));
-            
-        }
-        catch (Exception e) {
-            System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
-            System.err.println("Check you have access to that file from current working directory.");
-            System.err.println(e);
-            System.exit(0);
-        }
     }
 
     /**
@@ -389,12 +372,8 @@ static public JPanel menu()
 
         gl.glLoadIdentity();
 
+        JoglTorusRenderer.draw(gl,torus,camera,qualitySelection,n,N);
         
-        rTorus=new JoglTorusRender();
-        rTorus.draw(gl,torus,camera,qualitySelection,n,N);
-        
-      
-
         gl.glLineWidth((float)3.0);
         gl.glBegin(gl.GL_LINES);
             gl.glColor3d(1, 0, 0);
@@ -410,15 +389,11 @@ static public JPanel menu()
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
         
-        
         // Draw image directly over screen
         gl.glMatrixMode(gl.GL_PROJECTION);
         gl.glLoadIdentity();
-         gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
-  
-      
-        JoglImageRenderer.draw(gl, img1);
     }
 
     /** Called by drawable to initiate drawing */
@@ -472,37 +447,37 @@ static public JPanel menu()
     }
 
     public void mousePressed(MouseEvent e) {
-        if ( cameraController.processMousePressedEventAwt(e) ) {
+        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if ( cameraController.processMouseReleasedEventAwt(e) ) {
+        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
-        if ( cameraController.processMouseClickedEventAwt(e) ) {
+        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
-        if ( cameraController.processMouseMovedEventAwt(e) ) {
+        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
-        if ( cameraController.processMouseDraggedEventAwt(e) ) {
+        if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
-        if ( cameraController.processMouseWheelEventAwt(e) ) {
+        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
@@ -514,20 +489,20 @@ static public JPanel menu()
         if ( e.getKeyCode() == KeyEvent.VK_I ) {
             System.out.println(qualitySelection);
         }
-        if ( cameraController.processKeyPressedEventAwt(e) ) {
+        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
-        if ( qualityController.processKeyPressedEventAwt(e) ) {
+        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             System.out.println(qualitySelection);
             canvas.repaint();
         }
     }
 
     public void keyReleased(KeyEvent e) {
-        if (cameraController.processKeyReleasedEventAwt(e)) {
+        if (cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
-        if (qualityController.processKeyReleasedEventAwt(e)) {
+        if (qualityController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }

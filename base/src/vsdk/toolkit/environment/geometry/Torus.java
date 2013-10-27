@@ -1,5 +1,11 @@
-package vsdk.toolkit.environment.geometry;
+//===========================================================================
+//=-------------------------------------------------------------------------=
+//= References:                                                             =
+//= [WAGN2004] Wagner, Max. "Ray/Torus Intersection". CS400 course homework =
+//= report for CS400 class                                                  =
+//===========================================================================
 
+package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -7,24 +13,17 @@ import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
 
 /**
- *
- * @author Leidy Alexandra Lozano Jácome
- */
-
-//This is an object type Torus
-
+Current implementation is based on [WAGN2004].
+@author Leidy Alexandra Lozano Jacome
+*/
 public class Torus extends Solid {
-    
-    
-    //rMajor = Radio of torus
-    //rMinor = Radio of torus
+    public static final long serialVersionUID = 20131024L;
     private double rMajor;
     private double rMinor;
     
-    
     private GeometryIntersectionInformation lastInfo;
     
-    public Torus(double rMaj,double rMin)
+    public Torus(double rMaj, double rMin)
     {
         rMajor=rMaj;
         rMinor=rMin;
@@ -84,88 +83,86 @@ public class Torus extends Solid {
         a1=2*beta*gama+8*(rMajor*rMajor)*p.z*d.z;
         a0=(gama*gama)+ 4*(rMajor*rMajor)*(p.z*p.z)-(4*(rMajor*rMajor)*(rMinor*rMinor));
         
-   //     System.out.println(inOut_ray);
+        //System.out.println(inOut_ray);
+        //System.out.println("rMinor: "+rMinor+" rMajor: "+rMajor);
+        //System.out.println("a4: "+a4+" a3: "+a3+" a2: "+a2+" a1: "+a1+" a0: "+a0);
         
-  //      System.out.println("rMinor: "+rMinor+" rMajor: "+rMajor);
-        
-  //      System.out.println("a4: "+a4+" a3: "+a3+" a2: "+a2+" a1: "+a1+" a0: "+a0);
-        
-        SolverPolynomialQuarticBairstow q=new SolverPolynomialQuarticBairstow(a4, a3, a2,  a1, a0);
-        double []root=q.getReal();
-        double []rootImg=q.getImg();
-        
-        double mRoot=0;
-        int count=0;
-        for(int i=0;i<4;i++)
-        {
-            if(rootImg[i]==0&&root[i]>0)
-            {
-                if(count==0)
-                {
-                    mRoot=root[i];
+        SolverPolynomialQuarticBairstow q;
+
+        q = new SolverPolynomialQuarticBairstow(a4, a3, a2,  a1, a0);
+
+        double root[] = q.getReal();
+        double rootImg[] = q.getImg();
+        double mRoot = 0;
+        int count = 0;
+
+        for ( int i = 0; i < 4; i++ ) {
+            if ( rootImg[i] == 0 && root[i] > 0 ) {
+                if ( count == 0 ) {
+                    mRoot = root[i];
                     count++;
                 }
-                else if(root[i]<mRoot)
+                else if ( root[i] < mRoot ) {
                     mRoot=root[i];
+		}
             }
         }
         
-        if(count==0)
+        if ( count == 0 ) {
             return false;
-        else
-        {
-            lastInfo.p.x=inOut_ray.origin.x + (mRoot * inOut_ray.direction.x);
-            lastInfo.p.y=inOut_ray.origin.y + (mRoot * inOut_ray.direction.y);
-            lastInfo.p.z=inOut_ray.origin.z + (mRoot * inOut_ray.direction.z); 
-        
-            inOut_ray.t=mRoot;
-            
-            return true;//calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
+	}
+        else {
+            lastInfo.p.x = inOut_ray.origin.x + (mRoot * inOut_ray.direction.x);
+            lastInfo.p.y = inOut_ray.origin.y + (mRoot * inOut_ray.direction.y);
+            lastInfo.p.z = inOut_ray.origin.z + (mRoot * inOut_ray.direction.z);
+            inOut_ray.t = mRoot;
+            return true; //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
     }
     
-    public boolean calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)
+    public boolean
+    calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)
     {
-        int [] iRoot=new int[4];
-        double [] Root=new double[4];
+        int iRoot[];
+        iRoot = new int[4];
+        double Root[];
+        Root = new double[4];
         
         //Root 1
-        //-------------------------------------------------------------------------
+        //--------------------------------------------------------------------
         
         double x=0,x1=0,x2=0,x3=0;
         
         //----------------------------------------------------
-       //1. Part 1 
+        //1. Part 1 
         double p1=-a3/(4*a4);
         System.out.println("Parte 1: "+p1);
        
         
         //--------------------------------------------------------- 
-       //2. Part 2
+        //2. Part 2
         
-    //   System.out.println("\nParte 2: p2_1 * Math.sqrt( p2_2  - p2_3 + p2_4 + p2_5)"); 
+        //System.out.println("\nParte 2: p2_1 * Math.sqrt( p2_2  - p2_3 + p2_4 + p2_5)"); 
         
         // 2.1
-        
         double p2_1=1/2d;
         System.out.println("p2_1: "+p2_1);
         
         // 2.2
-        
         double p2_2=Math.pow(a3, 2)/(4 *  Math.pow(a4, 2));
         System.out.println("p2_2: "+p2_2);
         
         // 2.3
-        
         double p2_3=(2 * a2)/(3 * a4);
         System.out.println("p2_3: "+p2_3);
        
         // 2.4
-   //     System.out.println("p2_4= p2_4_n/p2_4_d ");
+        System.out.println("p2_4= p2_4_n/p2_4_d ");
        
         // 2.4 nominador
-        double p2_4_n=Math.pow(2d, (1/3d))*(Math.pow(a2, 2) - 3 * a3  * a1 + 12 * a4 * a0);
-        System.out.println("p2_4_n: "+p2_4_n);
+        double p2_4_n;
+        p2_4_n = Math.pow(2d, (1/3d))*(Math.pow(a2, 2) - 3 * a3  * a1 + 12 * a4 * a0);
+        //System.out.println("p2_4_n: "+p2_4_n);
         
         
         // 2.4 denominador
@@ -1297,5 +1294,8 @@ public class Torus extends Solid {
     
     }
     
-    
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
