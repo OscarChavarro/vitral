@@ -75,6 +75,7 @@ MENU "GLOBAL" {
             MENUITEM "Cylinder", IDC_CREATE_CYLINDER
             MENUITEM "Cube", IDC_CREATE_CUBE
             MENUITEM "Box", IDC_CREATE_BOX
+            MENUITEM "Torus", IDC_CREATE_TORUS
             MENUITEM "Arrow", IDC_CREATE_ARROW
             MENUITEM "Volume", IDC_CREATE_VOXELSET
             MENUITEM "Spherical Harmonic Debug from voxel", IDC_CREATE_SPHERE_HARMONIC
@@ -288,6 +289,10 @@ COMMAND IDC_CREATE_SPHERE {
     name "Create Sphere"
 }
 
+COMMAND IDC_CREATE_TORUS {
+    name "Create Torus"
+}
+
 COMMAND IDC_CREATE_PLANE {
     name "Create Plane"
 }
@@ -453,6 +458,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_CYLINDER, 
         IDC_CREATE_CUBE, 
         IDC_CREATE_BOX, 
+        IDC_CREATE_TORUS, 
         IDC_CREATE_ARROW, 
         IDC_CREATE_VOLUME, 
         IDC_CREATE_BREP, 

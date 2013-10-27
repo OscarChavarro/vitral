@@ -65,6 +65,9 @@ public class GUIEventExecutor implements CommandListener{
         else if ( label.equals("IDC_CREATE_ARROW") ) {
             parent.theScene.addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
+        else if ( label.equals("IDC_CREATE_TORUS") ) {
+            parent.theScene.addThing(new Torus(2, 1));
+        }
         else if ( label.equals("IDC_CREATE_PLANE") ) {
             InfinitePlane plane;
             plane = new InfinitePlane(new Vector3D(-0.2, 0, 1), new Vector3D(0, 0, -1));

@@ -986,4 +986,8 @@
 2013 october 24, Oscar Chavarro:
   - 1h: checking Torus related classes, and adapting code to vitral standards
 
+2013 october 26, Oscar Chavarro
+  - 40min: integrating Torus related classes to SceneEditorApplication
+
+
 ===========================================================================

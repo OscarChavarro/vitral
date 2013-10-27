@@ -10,11 +10,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Torus;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 
 /**
 @author Leidy Alexandra Lozano Jácome
@@ -22,15 +18,6 @@ import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 
 public class JoglTorusRenderer {
     //= PROGRAM PART 1/2: ATTRIBUTES ==========================================
-    static Light l;
-    static Material m;
-   
-    static
-    {
-        l=new Light(Light.POINT,new Vector3D(1,1,2),new ColorRgb(1,1,1));
-        m=new Material();
-    }
-
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
@@ -77,9 +64,12 @@ public class JoglTorusRenderer {
         double v = 0.0f;
         double w;
 
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glColor3d(1, 0, 0);
+
         for ( w = 0.0; w < 2 * Math.PI + dw; w+=dw ) {
             v=0.0f;
-            gl.glBegin(GL.GL_POINTS);//_STRIP);
+            gl.glBegin(GL.GL_POINTS);
             for ( v = 0.0f; v < 2 * Math.PI + dv; v += dv ) {
                 gl.glColor3d(1, 0, 0);
                 gl.glVertex3d((R+r*Math.cos(v))*Math.cos(w),
@@ -137,11 +127,7 @@ public class JoglTorusRenderer {
         double w;
         
         Vector3D normal = new Vector3D();
-        //--------------------------------------------------------------------
-        JoglLightRenderer.activate(gl, l);
-        gl.glEnable(GL2.GL_LIGHTING);
-        JoglMaterialRenderer.activate(gl, m);
-        
+
         //--------------------------------------------------------------------
         for ( w = 0.0; w<2*Math.PI+dw; w+=dw ) {
             v=0.0f;
@@ -196,20 +182,18 @@ public class JoglTorusRenderer {
             }
             gl.glEnd();
             
-        } //outer loop
-        gl.glDisable(GL2.GL_LIGHTING);
+        }
     }
     
     private static void drawBox(GL2 gl,Torus t, int n,int N)
     {
-        double R=t.getrMajor();
+        double R=t.getrMajor() + t.getrMinor();
         double r=t.getrMinor();
         
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
         gl.glDisable(GL2.GL_LIGHTING);
         
-        // White side - BACK
         gl.glBegin(GL2.GL_LINE_STRIP);
         gl.glVertex3d(-R, -R, -r);
         gl.glVertex3d( R, -R, -r);
@@ -234,11 +218,9 @@ public class JoglTorusRenderer {
         gl.glVertex3d( R, -R, -r);
         gl.glVertex3d(-R, -R, -r);
         gl.glVertex3d(-R, -R,  r);
-
         gl.glEnd();
 
         gl.glBegin(GL2.GL_LINE_STRIP);
-        //gl.glColor3d(   1.0,  1.0, 1.0 );
         gl.glVertex3d( R, R,  r);
         gl.glVertex3d(-R, R,  r);
         gl.glVertex3d(-R, R, -r);
@@ -293,43 +275,6 @@ public class JoglTorusRenderer {
             }
             gl.glEnd();
         }
-    }
-    
-
-    private static void drawFloor(GL2 gl,double dx,double dy, int nx,int nj)
-    {
-        //--------------------------------------------------------------------
-        JoglLightRenderer.activate(gl, l);
-        gl.glEnable(GL2.GL_LIGHTING);
-        JoglMaterialRenderer.activate(gl, m);
-        
-        //--------------------------------------------------------------------
-        double x1,x2,y1,y2;
-        x1 = 0;
-        x2 = x1 + dx;
-        y1 = 0;
-        y2 = y1 + dy;
-
-        gl.glBegin(GL2.GL_QUADS);
-        double delta=0;
-        gl.glNormal3d(0, 0, 1);
-        
-        for ( int j = 0; j < nj; j++ ) {
-            for ( int i=0; i < nx; i++ ) {
-                gl.glVertex3d(x1, y1,0);
-                gl.glVertex3d(x2 - delta, y1, 0);
-                gl.glVertex3d(x2 - delta, y2 - delta, 0);
-                gl.glVertex3d(x1, y2 - delta, 0);
-                x1 = x2;
-                x2 = x1 + dx;
-            }
-            x1 = 0;
-            x2 = x1 + dx;
-            y1 = y2;
-            y2 = y1 + dy;
-        }
-        gl.glEnd();
-        gl.glDisable(GL2.GL_LIGHTING);
     }
 }    
 

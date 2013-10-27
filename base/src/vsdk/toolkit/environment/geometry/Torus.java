@@ -1283,11 +1283,11 @@ public class Torus extends Solid {
          // TODO!
         double [] minmax = new double[6];
         
-        minmax[0] = -rMajor;
-        minmax[1] = rMajor;
+        minmax[0] = -(rMajor + rMinor);
+        minmax[1] = -(rMajor+rMinor);
         minmax[2] = rMinor;
-        minmax[3] = rMajor;
-        minmax[4] = -rMajor;
+        minmax[3] = rMajor + rMinor;
+        minmax[4] = rMajor + rMinor;
         minmax[5] = -rMinor;
 
         return minmax;

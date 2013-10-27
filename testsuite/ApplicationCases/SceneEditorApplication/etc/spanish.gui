@@ -232,6 +232,10 @@ COMMAND IDC_CREATE_SPHERE {
     name "Crear Esfera"
 }
 
+COMMAND IDC_CREATE_TORUS {
+    name "Crear toroide"
+}
+
 COMMAND IDC_CREATE_PLANE {
     name "Crear Plano"
 }
@@ -398,6 +402,7 @@ BUTTON_GROUP "CREATION" {
         IDC_CREATE_CYLINDER, 
         IDC_CREATE_CUBE, 
         IDC_CREATE_BOX, 
+        IDC_CREATE_TORUS, 
         IDC_CREATE_ARROW, 
         IDC_CREATE_VOLUME, 
         IDC_CREATE_BREP, 

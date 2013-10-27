@@ -33,7 +33,11 @@ import javax.swing.event.ChangeListener;
 import vsdk.toolkit.common.RendererConfiguration;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.common.ColorRgb;              // Model elements
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Torus;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.JoglRenderer;
@@ -46,6 +50,8 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglTorusRenderer;
+import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
+import vsdk.toolkit.render.jogl.JoglLightRenderer;
 
 /**
 @author Leidy Alexandra Lozano Jácome
@@ -69,6 +75,8 @@ public class TorusExample extends Applet implements
     private boolean appletMode;
     private Camera camera;
     private CameraController cameraController;
+    private Light light;
+    private Material material;
     private RendererConfiguration qualitySelection;
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;
@@ -193,7 +201,13 @@ public class TorusExample extends Applet implements
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
         
-        torus=new Torus(1.8, 0.2);
+        light = new Light(Light.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+        material = new Material();
+        material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        material.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        material.setSpecular(new ColorRgb(1, 1, 1));
+
+        torus = new Torus(1.8, 0.2);
     }
 
     private void createGUI()
@@ -368,12 +382,20 @@ static public JPanel menu()
 
     private void drawObjectsGL(GL2 gl)
     {
+        //-----------------------------------------------------------------
         gl.glEnable(gl.GL_DEPTH_TEST);
 
         gl.glLoadIdentity();
 
-        JoglTorusRenderer.draw(gl,torus,camera,qualitySelection,n,N);
+        JoglLightRenderer.draw(gl, light);
+        gl.glEnable(gl.GL_LIGHTING);
+        JoglLightRenderer.activate(gl, light);
+        JoglMaterialRenderer.activate(gl, material);
+
+        JoglTorusRenderer.draw(gl, torus, camera, qualitySelection, n, N);
         
+        //-----------------------------------------------------------------
+        gl.glDisable(gl.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
         gl.glBegin(gl.GL_LINES);
             gl.glColor3d(1, 0, 0);
@@ -388,12 +410,6 @@ static public JPanel menu()
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
-        
-        // Draw image directly over screen
-        gl.glMatrixMode(gl.GL_PROJECTION);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-        gl.glLoadIdentity();
     }
 
     /** Called by drawable to initiate drawing */

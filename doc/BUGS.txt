@@ -31,11 +31,16 @@ Following a list of detected BUGS.
       object when compiling the list, making object inalterable.
   - On testsuite/VSDKExamples/CgShaderExample CgAutomaticShaderExample.java
     test object fails to activate texture map on first frame.
+  - Torus
 
 Previous working things that have detected errors:
   - To check Stereo examples on several computers (was tested on Quadro)
   - SceneEditorApplication example is failing when regenerating GUI on
     a language or look and feel change.
+  - Multiple viewport event selection of subwindow is failing: double click
+    needed to select a viewport
+  - SceneEditorApplication Swing windows failling to rebuild on GUI
+    configuration change
 
 There are some warnings that may reflect hidden bugs, to check:
   - Implementation of ComputationalGeometry.cohenSutherlandLineClipping2D

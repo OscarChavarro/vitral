@@ -48,10 +48,10 @@ public class SolverPolynomialQuarticBairstow {
         double a[] ={a0, a1, a2, a3, a4};
     
         int n = a.length;
-        double re[] = new double[n];
-        double im[] = new double[n];
+        real = new double[n];
+        img = new double[n];
 
-        Bairstow(a, -1, -1, re, im);
+        Bairstow(a, -1, -1, real, img);
     }
 
     /** This algorithm is failing. Use a raytracer to visually debug it */
@@ -111,18 +111,15 @@ public class SolverPolynomialQuarticBairstow {
                 raices(r, s, re, im, n);
 
             }
-            else
-            {
-
+            else {
                 re[n-1] = -a[0]/a[1];
                 im[n-1] = 0;
-
             }
     
             for ( i = 1; i < re.length; i++ ) {
-                getReal()[i-1]=re[i];
-                getImg()[i-1]=im[i];
                 //System.out.println( "X["+i+"]= " + re[i] + " j " + im[i]);
+                real[i-1]=re[i];
+                img[i-1]=im[i];
             }
 
         }
