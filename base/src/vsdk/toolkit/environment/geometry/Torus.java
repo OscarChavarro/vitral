@@ -119,7 +119,10 @@ public class Torus extends Solid {
             return true; //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
     }
-    
+
+    /**
+    Unused and not working yet method
+    */    
     public boolean
     calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)
     {
@@ -1202,64 +1205,55 @@ public class Torus extends Solid {
  //       System.out.println("p3_1: "+p3_1+"\np3_2: "+p3_2+" \np3_3: "+p3_3+" \np3_4: "+p3_4+" \np3_5: "+p3_5+" \np3_6: "+p3_6);
         
         x3 = p1 + p2 + p3;
- //       System.out.println("P1: "+p1+" P2: "+p2+" P3: "+p3+" \nX3:"+x3);
+        //System.out.println("P1: "+p1+" P2: "+p2+" P3: "+p3+" \nX3:"+x3);
         System.out.println("X3: "+x3);
         
-        if(Double.isNaN(x3))
-          {
+        if ( Double.isNaN(x3) ) {
               iRoot[3]=0;
               Root[3]=0;
           }
-          else
-          {
+          else {
               iRoot[3]=1;
               Root[3]=x3;
-          }
-        
+        }
         
         // Revisa de las raices encontradas cual está más cerca al punto del rayo
         
-        double root=0;
-        int cont=0;
+        double root = 0;
+        int cont = 0;
         
-        for(int i=0;i<4;i++)
-        {
-            if(iRoot[i]==0){}
-            else
-            {
-                if(cont==0)
-                {
-                    root=Root[i];
+        for ( int i = 0; i < 4; i++ ) {
+            if ( iRoot[i] == 0 ) {
+            }
+            else {
+                if ( cont == 0 ) {
+                    root = Root[i];
                     cont++;
                 }
-                else
-                {
-                    if(root<Root[i])
-                            {}
-                    else
-                        root=Root[i];
+                else {
+                    if ( root < Root[i] ) {
+                    }
+                    else {
+                        root = Root[i];
+		    }
                 }
                 
                 
             }
         }
-        if(cont==0) {
-            
+
+        if ( cont == 0 ) {
             return false;
-        } else {
-           
-                lastInfo.p.x=ray.origin.x + (root * ray.direction.x);
-                lastInfo.p.y=ray.origin.y + (root * ray.direction.y);
-                lastInfo.p.z=ray.origin.z + (root * ray.direction.z);
+        }
+        else {
+                lastInfo.p.x = ray.origin.x + (root * ray.direction.x);
+                lastInfo.p.y = ray.origin.y + (root * ray.direction.y);
+                lastInfo.p.z = ray.origin.z + (root * ray.direction.z);
                 
                 ray.t=root;
-                
          //       System.out.println("Raiz: "+root);
-             
                 return true;
         }
-        
-       
     }
 
     @Override

@@ -3,7 +3,8 @@
 package vsdk.toolkit.processing;
 
 /**
-@author Leidy Alexandra Lozano Jacome
+@author Leidy Alexandra Lozano Jacome, adapted from
+http://www.mygnet.com
 */
 public class SolverPolynomialQuarticBairstow {
     private double real[];
@@ -14,34 +15,6 @@ public class SolverPolynomialQuarticBairstow {
         img = new double[4];
     }
 
-    /**
-     * @return the res
-     */
-    public double[] getReal() {
-        return real;
-    }
-
-    /**
-     * @param aRes the res to set
-     */
-    public void setReal(double[] aRes) {
-        real = aRes;
-    }
-
-    /**
-     * @return the img
-     */
-    public double[] getImg() {
-        return img;
-    }
-
-    /**
-     * @param aImg the img to set
-     */
-    public void setImg(double[] aImg) {
-        img = aImg;
-    }
-    
     public SolverPolynomialQuarticBairstow(double a4,double a3, double a2, 
     double a1, double a0)
     {
@@ -54,15 +27,40 @@ public class SolverPolynomialQuarticBairstow {
         Bairstow(a, -1, -1, real, img);
     }
 
+    public double[] getReal() {
+        return real;
+    }
+
+    public void setReal(double[] aRes) {
+        real = aRes;
+    }
+
+    public double[] getImg() {
+        return img;
+    }
+
+    public void setImg(double[] aImg) {
+        img = aImg;
+    }
+    
     /** This algorithm is failing. Use a raytracer to visually debug it */
     public void
     Bairstow(double a[], double r0, double s0, double re[], double im[])
     {
-        int n = a.length, iter =0;
-        double b[] = new double[n], c[] = new double[n];
-        double ea1 = 1, ea2 = 1, T = 0.00001;
-        double r=r0, s=s0,det, ds, dr;
-        int MaxIter = 100, i;
+        int n = a.length;
+        int iter = 0;
+        double b[] = new double[n];
+        double c[] = new double[n];
+        double ea1 = 1;
+        double ea2 = 1;
+        double T = 0.0000001;
+        double r = r0;
+        double s = s0;
+        double det;
+        double ds;
+        double dr;
+        int MaxIter = 100;
+        int i;
 
         for ( iter = 0; iter < MaxIter && n > 3; iter++ ) {
             int turns = 0;
@@ -80,16 +78,15 @@ public class SolverPolynomialQuarticBairstow {
                     if(r!=0) ea1 = Math.abs(dr/r)*100.0;
                     if(s!=0) ea2 = Math.abs(ds/s)*100.0;
                 }
-                else
-                {
+                else {
                     r = 5*r+1;
                     s = s+1;
                     iter = 0;
                 }
                 turns++;
-            } while ( (ea1 > T) && (ea2 > T) && (turns < 1000) ); // Fail!
+            } while ( (ea1 > T) && (ea2 > T) && (turns < 100) ); // Fail!
 
-                raices(r, s, re, im, n);
+            roots(r, s, re, im, n);
                     /*    System.out.println("iter " +iter);
                           System.out.print("fn(x) = "); print(a, n);
                           System.out.print("fn-2(x) = "); print2(b, n);
@@ -108,7 +105,7 @@ public class SolverPolynomialQuarticBairstow {
                 r = -a[1]/a[2];
                 s = -a[0]/a[2];
                 //print(a, n);
-                raices(r, s, re, im, n);
+                roots(r, s, re, im, n);
 
             }
             else {
@@ -148,8 +145,12 @@ public class SolverPolynomialQuarticBairstow {
         int i;
 
         for (i = n - 1; i >= 0; i--) {
-                if(x[i] > 0) System.out.print("+ " +x[i] + "x"+i+" ");
-                else System.out.print("- " + -x[i] + "x"+i+" ");
+            if ( x[i] > 0 ) {
+                System.out.print("+ " +x[i] + "x"+i+" ");
+	    }
+            else {
+                System.out.print("- " + -x[i] + "x"+i+" ");
+	    }
         }
         System.out.println("");
     }
@@ -160,14 +161,18 @@ public class SolverPolynomialQuarticBairstow {
         int i;
 
         for (i = n - 1; i >= 2; i--) {
-            if(x[i] > 0) System.out.print("+ " +x[i] + "x"+(i-2)+" ");
-            else System.out.print("- " + -x[i] + "x"+(i-2)+" ");
+            if ( x[i] > 0 ) {
+                System.out.print("+ " +x[i] + "x"+(i-2)+" ");
+	    }
+            else {
+                System.out.print("- " + -x[i] + "x"+(i-2)+" ");
+	    }
         }
         System.out.println("Residuo = {"+ x[1]+ ", " + x[0] + "}");
     }
 
     public void
-    raices(double r, double s, double re[], double im[], int n)
+    roots(double r, double s, double re[], double im[], int n)
     {
         double d = r*r + 4*s;
 
