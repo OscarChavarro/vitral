@@ -43,12 +43,18 @@ import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
 import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.variable.GuiVariable;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
-import application.gui.*;
+import application.gui.ModifyPanel;
+import application.gui.ButtonsPanel;
+import application.gui.GUIEventExecutor;
+import application.gui.MyChangeListener;
+import application.gui.SwingSelectorDialog;
+import application.gui.SwingImageControlWindow;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
 import application.render.jogl.JoglDrawingArea;

@@ -988,6 +988,6 @@
 
 2013 october 26, Oscar Chavarro
   - 40min: integrating Torus related classes to SceneEditorApplication
-
+  - 10min: checking all import senteces follows vitral standards
 
 ===========================================================================

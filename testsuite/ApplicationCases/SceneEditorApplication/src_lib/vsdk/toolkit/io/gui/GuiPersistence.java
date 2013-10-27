@@ -9,8 +9,21 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 // Vitral classes
-import vsdk.toolkit.gui.*;
-import vsdk.toolkit.gui.variable.*;
+import vsdk.toolkit.gui.ExceptionGuiBadName;
+import vsdk.toolkit.gui.ExceptionGuiParseError;
+import vsdk.toolkit.gui.GuiDialog;
+import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.GuiMenu;
+import vsdk.toolkit.gui.GuiMenuItem;
+import vsdk.toolkit.gui.GuiButtonGroup;
+import vsdk.toolkit.gui.GuiCommand;
+import vsdk.toolkit.gui.variable.GuiVariable;
+import vsdk.toolkit.gui.variable.GuiDoubleVariable;
+import vsdk.toolkit.gui.variable.GuiIntegerVariable;
+import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
+import vsdk.toolkit.gui.variable.GuiVector3DVariable;
+import vsdk.toolkit.gui.variable.GuiStringVariable;
+import vsdk.toolkit.gui.variable.GuiBooleanVariable;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;

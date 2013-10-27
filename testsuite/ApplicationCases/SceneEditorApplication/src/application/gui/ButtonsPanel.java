@@ -22,7 +22,6 @@ import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
-import javax.swing.*;
 
 public class ButtonsPanel extends JPanel implements ActionListener
 {

@@ -2,15 +2,32 @@
 package vsdk.toolkit.render.swing;
 
 // Basic JAVA JDK classes
-import java.awt.*;
 import java.util.ArrayList;
 
 // GUI JDK classes (Awt + Swing)
+import java.awt.LayoutManager;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JCheckBox;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.border.Border;
 
 // VSDK classes
