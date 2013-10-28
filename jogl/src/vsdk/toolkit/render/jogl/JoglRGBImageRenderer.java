@@ -31,28 +31,13 @@ public class JoglRGBImageRenderer extends JoglRenderer
     private static ArrayList<_JoglRGBImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererImageAssociation>();
     //private static GLU glu = null;
 
-    /**
-    This method generates an OpenGL/JOGL MipMap structure, assoiates it with
-    the given image reference and activates.
-
-    The method keeps track of all images activated, and take that history into
-    account to pass the image data to the graphics hardware only once. Note that
-    this method creates and use an OpenGL/JOGL compilation list for each image,
-    to ensure optimal performance.
-    @return The OpenGL display list associated with this visualization
-    \todo
-    In applications with changing images, the memory list of compiled lists
-    and the list themselves should be cleared, or not used. This will lead to
-    the creation of new methods.
-    */
-    private static int activateBase(GL2 gl, RGBImage img)
+    private static int activateBaseOld(GL2 gl, RGBImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
         int y_tam = img.getYSize();
         int lists[] = new int[1];
 
-        /*
         if ( (x_tam % 4) == 0 ) {
             gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4);
           }
@@ -63,10 +48,9 @@ public class JoglRGBImageRenderer extends JoglRenderer
             gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
         }
 
-        if ( glu == null ) {
-            glu = new GLU();
-        }
-        */
+        //if ( glu == null ) {
+        //    glu = new GLU();
+        //}
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
@@ -90,10 +74,82 @@ public class JoglRGBImageRenderer extends JoglRenderer
             compiledImages.add(item);
 
             //----
-            //gl.glGenTextures(1, lists, 0);
-            //item.glList=lists[0];
-            //gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
+            gl.glGenTextures(1, lists, 0);
+            item.glList = lists[0];
+            gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
 
+            //glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 3, x_tam, y_tam, GL.GL_RGB, 
+            //                  GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
+            gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, GL.GL_RGB, 
+                            GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
+        }
+
+        //- 4. Use the image's glList -------------------------------------
+        if ( glListIsCompiled == false ) {
+            if ( item == null ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item");
+                return -1;
+            }
+            if ( item.renderer == null ) {
+                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
+                return -1;
+            }
+            item.renderer.bind(gl);
+            item.renderer.enable(gl);
+          }
+          else {
+            gl.glCallList(item.glList);
+        }
+
+        if ( item != null ) {
+            gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
+        }
+
+        return item.glList;
+    }
+
+    /**
+    This method generates an OpenGL/JOGL MipMap structure, assoiates it with
+    the given image reference and activates.
+
+    The method keeps track of all images activated, and take that history into
+    account to pass the image data to the graphics hardware only once. Note that
+    this method creates and use an OpenGL/JOGL compilation list for each image,
+    to ensure optimal performance.
+    @return The OpenGL display list associated with this visualization
+    \todo
+    In applications with changing images, the memory list of compiled lists
+    and the list themselves should be cleared, or not used. This will lead to
+    the creation of new methods.
+    */
+    private static int activateBase(GL2 gl, RGBImage img)
+    {
+        //- 1. Initialization of texture parameters -----------------------
+        int x_tam = img.getXSize();
+        int y_tam = img.getYSize();
+
+        //- 2. Seek if there is a precompiled glList for this image -------
+        boolean glListIsCompiled = false;
+        _JoglRGBImageRendererImageAssociation item = null;
+
+        int i;
+        for ( i = 0; i < compiledImages.size(); i++ ) {
+            item = compiledImages.get(i);
+            if ( item.image == img ) {
+                glListIsCompiled = true;
+                break;
+            }
+        }
+
+        //- 3. If there is no glList, create it ---------------------------
+        if ( glListIsCompiled == false ) {
+            //----
+            item = new _JoglRGBImageRendererImageAssociation();
+            item.image = img;
+            item.glList = 1;
+            compiledImages.add(item);
+
+            //----
             try {
                 GLProfile glprof;
                 TextureData textureData;
@@ -119,37 +175,23 @@ public class JoglRGBImageRenderer extends JoglRenderer
             catch ( Exception e ) {
                 VSDK.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
             }
-            /*
-            //glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 3, x_tam, y_tam, GL.GL_RGB, 
-            //                  GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
-            gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, 3, x_tam, y_tam, 0, GL.GL_RGB, 
-                            GL.GL_UNSIGNED_BYTE, img.getRawImageDirectBuffer());
-            */
         }
 
         //- 4. Use the image's glList -------------------------------------
-        //if ( glListIsCompiled == false ) {
-            if ( item == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item");
-                return -1;
-            }
-            if ( item.renderer == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
-                return -1;
-            }
-            item.renderer.bind(gl);
-            item.renderer.enable(gl);
-/*
-          }
-          else {
-            gl.glCallList(item.glList);
+        if ( item == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "JoglRGBImageRenderer.activate", "null item");
+            return -1;
         }
-*/
-        /*
-        if ( item != null ) {
-            gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
+        if ( item.renderer == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING,
+                "JoglRGBImageRenderer.activate", "null item renderer");
+            return -1;
         }
-        */
+        //gl.glBindTexture(GL.GL_TEXTURE_2D, item.glList);
+        item.renderer.bind(gl);
+        //item.renderer.enable(gl);
+
         return item.glList;
     }
 
