@@ -71,11 +71,11 @@ public class JoglCameraRenderer extends JoglRenderer
 
     public static void drawVolume(GL2 gl, Camera cam)
     {
-        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+        // This line causes problems on some drivers!
+        //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glShadeModel(GL2.GL_FLAT);
-
 
         //- Calcule los extremos del volumen de visualizacion ---------------
         double xn;
@@ -175,6 +175,7 @@ public class JoglCameraRenderer extends JoglRenderer
 
     public static void draw(GL2 gl, Camera cam)
     {
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
 
         Matrix4x4 R = cam.getRotation();

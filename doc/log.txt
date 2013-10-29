@@ -993,5 +993,11 @@
 2013 october 27, Oscar Chavarro
   - 1h15min: preparing for the development of gouraud shaders. Shader selection
     code. Normal parameter passing.
+  - 1h55min: studing gouraud shader structure. AndroidGLES20MaterialRenderer.
+    Passing parameters to gouraud shader.
+  - 45min: implementing ambient and diffusse terms on gouraud shader
+
+2013 october 29, Oscar Chavarro
+  - 1h: Fixing a bug that was impacting some applications.
 
 ===========================================================================
