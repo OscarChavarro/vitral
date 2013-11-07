@@ -10,12 +10,13 @@
 
 uniform mat4 modelViewProjectionLocal;    // input: PM * MVM
 attribute vec4 PObject;                   // input: glVertex3d
+attribute vec4 emissionColor;
 varying vec4 vertexColor;                 // output
 
 void main() {
     // Compute homogeneous position of vertex for rasterizer
     gl_Position = modelViewProjectionLocal * PObject;
-    vertexColor = vec4(1.0, 1.0, 1.0, 1.0);
+    vertexColor = emissionColor;
 }
 
 //===========================================================================

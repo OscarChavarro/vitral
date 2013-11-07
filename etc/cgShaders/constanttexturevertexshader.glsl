@@ -10,8 +10,10 @@
 
 uniform mat4 modelViewProjectionLocal;    // input: PM * MVM
 attribute vec4 PObject;                   // input: glVertex3d
+attribute vec4 emissionColor;
 attribute vec2 uvVertexTextureCoordinate; // input: glTexCoord2d
 varying vec2 uvTextureCoordinate;         // output
+varying vec4 vertexColor;                 // output
 
 void main() {
     // Compute homogeneous position of vertex for rasterizer
@@ -20,6 +22,7 @@ void main() {
     // Transform positions and normals from model-space to view-space
     uvTextureCoordinate.x = uvVertexTextureCoordinate.x;
     uvTextureCoordinate.y = 1.0 - uvVertexTextureCoordinate.y;
+    vertexColor = emissionColor;
 }
 
 //===========================================================================
