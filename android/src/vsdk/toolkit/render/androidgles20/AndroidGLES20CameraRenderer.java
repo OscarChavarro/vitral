@@ -10,8 +10,8 @@ public class AndroidGLES20CameraRenderer extends AndroidGLES20Renderer
 {
     public static void activate(Camera c)
     {
-        Matrix4x4 P = c.calculateProjectionMatrix();
-        float array[] = P.exportToFloatArrayColumnOrder();
+        Matrix4x4 MProjection = c.calculateProjectionMatrix();
+        float array[] = MProjection.exportToFloatArrayColumnOrder();
         int i;
         for ( i = 0; i < 16; i++ ) {
 	    projectionMatrix[i] = array[i];
