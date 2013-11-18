@@ -275,7 +275,9 @@ public class AndroidGLES20Renderer
         //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... :");
 
         if ( qualitySelection.getShadingType() == 
-            RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+            RendererConfiguration.SHADING_TYPE_GOURAUD ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_FLAT ) {
             shaderId = AndroidGLES20GpuProgramGouraud;
             //System.out.println("Gouraud");
         }
@@ -336,7 +338,9 @@ public class AndroidGLES20Renderer
         }
 
         if ( qualitySelection.getShadingType() == 
-            RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+            RendererConfiguration.SHADING_TYPE_GOURAUD ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_FLAT ) {
 
             // Activate normal parameter
             NObjectParam = GLES20.glGetAttribLocation(shaderId, "NObject");

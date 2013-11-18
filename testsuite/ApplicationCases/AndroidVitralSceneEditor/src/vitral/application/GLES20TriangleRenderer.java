@@ -96,7 +96,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         }
 
         // Draw background
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
@@ -132,24 +132,14 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         AndroidGLES20LightRenderer.activate(light2);
 
         //vgl.glTranslated(-2, 0, 0);
-        vgl.glRotated(200*x, 0, 0, 1);
-
-        //System.out.println("- OBJETO ESFERA WIRES ----------- ");
-/*
-        vgl.glDisable(vgl.GL_TEXTURE_2D);
-        vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        qualitySelection.setWires(true);
-        qualitySelection.setSurfaces(false);
-        sphere.setRadius(1.01);
-        AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection);
-*/
+        //vgl.glRotated(200*x, 0, 0, 1);
 
         //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
-        vgl.glDisable(vgl.GL_TEXTURE_2D);
-        vgl.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-        //vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        qualitySelection.setShadingType(
+            RendererConfiguration.SHADING_TYPE_FLAT);
         qualitySelection.setWires(false);
         qualitySelection.setSurfaces(true);
+        qualitySelection.setTexture(false);
         sphere.setRadius(1.0);
         AndroidGLES20MaterialRenderer.activate(material);
         AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection);
@@ -161,6 +151,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         vgl.glTranslated(x, 0, 0);
         vgl.glEnable(vgl.GL_TEXTURE_2D);
         drawUnitSquare();
+
     }
 
     private void drawUnitSquare()
