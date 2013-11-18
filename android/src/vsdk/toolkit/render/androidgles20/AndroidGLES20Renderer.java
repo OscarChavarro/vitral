@@ -274,18 +274,14 @@ public class AndroidGLES20Renderer
 
         //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... :");
 
-        if ( qualitySelection.isTextureSet() ) {
-            shaderId = AndroidGLES20GpuProgramConstant;
-            //System.out.println("Constante con textura");
-        }
-        else if ( qualitySelection.getShadingType() == 
+        if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_GOURAUD ) {
             shaderId = AndroidGLES20GpuProgramGouraud;
-            //System.out.println("Gouraud sin textura");
+            //System.out.println("Gouraud");
         }
         else {
             shaderId = AndroidGLES20GpuProgramConstant;
-            //System.out.println("Constante sin textura");
+            //System.out.println("Constante");
         }
 
         //- Activate selected shader programs -----------------------------
@@ -316,9 +312,7 @@ public class AndroidGLES20Renderer
                 throw new RuntimeException(
                     "Could not get attrib location for uvVertexTextureCoordinate");
             }
-        }
 
-        if ( shaderId == AndroidGLES20GpuProgramConstant ) {
             withTextureParam =
                 GLES20.glGetUniformLocation(shaderId, "withTexture");
             checkGlError("glGetUniformLocation withTexture");
@@ -326,12 +320,8 @@ public class AndroidGLES20Renderer
                 throw new RuntimeException(
                     "Could not get uniform location for withTexture");
             }
-            if ( qualitySelection.isTextureSet() ) {
-                GLES20.glUniform1i(withTextureParam, 1);
-            }
-            else {
-                GLES20.glUniform1i(withTextureParam, 0);
-            }
+            GLES20.glUniform1i(withTextureParam, 
+                qualitySelection.isTextureSet()?1:0);
         }
 
         if ( qualitySelection.getShadingType() == 

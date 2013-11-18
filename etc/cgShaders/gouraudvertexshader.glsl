@@ -19,13 +19,17 @@ uniform mat4 modelViewITLocal;         // input: MVM_IT
 uniform vec3 cameraPositionGlobal;
 uniform vec3 lightPositionsGlobal[8];  // input: maximum light supported: 8
 uniform int numberOfLights;
+uniform int withTexture;               // input: boolean 1 true 0 false
 attribute vec4 PObject;                // input: glVertex3d
 attribute vec3 NObject;                // input: glNormal3d
+attribute vec2 uvVertexTextureCoordinate; // input: glTexCoord2d
 uniform vec3 ambientColor;             // input: material parameters
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float phongExponent;
-varying vec3 vertexColor;              // output: color to pass to pixel shader
+varying vec4 vertexColor;              // output: color to pass to pixel shader
+varying float activateTexture;         // output
+varying vec2 uvTextureCoordinate;      // output
 
 void main() {
     vec4 PGlobal = modelViewLocal * PObject;
@@ -59,8 +63,16 @@ void main() {
     }
 
     // Output results to pixel shader
-    vertexColor = ambientTerm + diffuseTerm + specularTerm;
     gl_Position = modelViewProjectionLocal * PObject;
+    vertexColor = vec4(ambientTerm + diffuseTerm + specularTerm, 1.0);
+    if ( withTexture == 1 ) {
+        activateTexture = 1.0;
+        uvTextureCoordinate.x = uvVertexTextureCoordinate.x;
+        uvTextureCoordinate.y = 1.0 - uvVertexTextureCoordinate.y;
+      }
+      else {
+        activateTexture = 0.0;
+    }
 }
 
 //===========================================================================

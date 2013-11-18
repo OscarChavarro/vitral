@@ -76,7 +76,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        material.setDiffuse(new ColorRgb(1.0, 0.0, 0.0));
+        material.setDiffuse(new ColorRgb(1.0, 1.0, 1.0));
         material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
         material.setPhongExponent(40.0);
 
@@ -132,7 +132,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         AndroidGLES20LightRenderer.activate(light2);
 
         //vgl.glTranslated(-2, 0, 0);
-        //vgl.glRotated(200*x, 0, 0, 1);
+        vgl.glRotated(200*x, 0, 0, 1);
 
         //System.out.println("- OBJETO ESFERA WIRES ----------- ");
 /*
@@ -145,7 +145,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 */
 
         //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
-        vgl.glDisable(vgl.GL_TEXTURE_2D);
+        vgl.glEnable(vgl.GL_TEXTURE_2D);
         vgl.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
         //vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qualitySelection.setWires(false);

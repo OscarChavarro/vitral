@@ -1010,5 +1010,6 @@
 
 2013 noviembre 17, Oscar Chavarro
   - 42min: texture and non texture versions of constant shader unified
+  - 30min: texture support added to gouraud shader
 
 ===========================================================================

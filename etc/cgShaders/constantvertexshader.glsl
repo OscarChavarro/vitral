@@ -13,15 +13,16 @@ uniform int withTexture;                  // input: boolean 1 true 0 false
 attribute vec4 PObject;                   // input: glVertex3d
 attribute vec4 emissionColor;
 attribute vec2 uvVertexTextureCoordinate; // input: glTexCoord2d
-varying vec2 uvTextureCoordinate;         // output
 varying vec4 vertexColor;                 // output
 varying float activateTexture;            // output
+varying vec2 uvTextureCoordinate;         // output
 
 void main() {
     // Compute homogeneous position of vertex for rasterizer
     gl_Position = modelViewProjectionLocal * PObject;
 
     // Transform positions and normals from model-space to view-space
+    vertexColor = emissionColor;
     if ( withTexture == 1 ) {
         activateTexture = 1.0;
         uvTextureCoordinate.x = uvVertexTextureCoordinate.x;
@@ -30,7 +31,6 @@ void main() {
       else {
         activateTexture = 0.0;
     }
-    vertexColor = emissionColor;
 }
 
 //===========================================================================
