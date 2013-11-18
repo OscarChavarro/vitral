@@ -1000,4 +1000,15 @@
 2013 october 29, Oscar Chavarro
   - 1h: Fixing a bug that was impacting some applications.
 
+2013 noviembre 13, Oscar Chavarro
+  - 1h45min: AndroidGLES20LightRenderer
+  - 1h46min: checking gouraud vertex shader for light position value and
+    specular factor
+  - 27min: checking gouraud vertex shader for direction to the viewer
+  - 30min: checking gouraud vertex shader for multiple lights
+  - 1h: gouraud shader working with multiple lights :)
+
+2013 noviembre 17, Oscar Chavarro
+  - 42min: texture and non texture versions of constant shader unified
+
 ===========================================================================

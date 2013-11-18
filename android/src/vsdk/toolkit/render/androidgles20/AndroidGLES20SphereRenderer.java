@@ -173,9 +173,9 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         // glColor3d(c.r, c.g, c.b);
         ColorRgb c = q.getWireColor();
-        //vertexDataArray[index] = (float)c.r;    index++;
-        //vertexDataArray[index] = (float)c.g;    index++;
-        //vertexDataArray[index] = (float)c.b;    index++;
+        vertexDataArray[index] = (float)c.r;    index++;
+        vertexDataArray[index] = (float)c.g;    index++;
+        vertexDataArray[index] = (float)c.b;    index++;
 
         //gl.glNormal3d(N.x, N.y, N.z);
         sphere.sphereNormal(N, theta, phi);
@@ -211,7 +211,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     }
 
     private static void
-    drawSphereElements(Sphere sphere, int slices, int stacks, RendererConfiguration q)
+    drawSurfaces(Sphere sphere, int slices, int stacks, RendererConfiguration q)
     {
         VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
         VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
@@ -231,7 +231,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         double s;
         double theta;
         float vertexDataArray[];
-        int vertexFloatElements = 8;
+        int vertexFloatElements = 11;
         int index;
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
 
@@ -265,9 +265,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
                 ByteOrder.nativeOrder()).asFloatBuffer();
             verticesBufferedArray.put(vertexDataArray);
 
-            //drawVertices3Position3Color2Uv(verticesBufferedArray, 
-            //    GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
-            drawVertices3Position3Normal2Uv(verticesBufferedArray, 
+            drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, 
                 GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
 
         }
@@ -301,7 +299,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
             vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
             ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
-        drawVertices3Position3Color2Uv(verticesBufferedArray, 
+        drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, 
             GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
 
     }
@@ -316,7 +314,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
             drawWires(s, 20, 10, q);
         }
         if ( q.isSurfacesSet() ) {
-            drawSphereElements(s, 20, 10, q);
+            drawSurfaces(s, 80, 40, q);
         }
     }
 

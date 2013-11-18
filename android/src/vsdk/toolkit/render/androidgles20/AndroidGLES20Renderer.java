@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Stack;
 
 // Android classes
 import android.util.Log;
@@ -19,8 +21,11 @@ import vitral.application.R;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class AndroidGLES20Renderer
@@ -28,7 +33,6 @@ public class AndroidGLES20Renderer
     private static String TAG = "GLES20TriangleRenderer";
 
     public static int AndroidGLES20GpuProgramConstant;
-    public static int AndroidGLES20GpuProgramConstantTexture;
     public static int AndroidGLES20GpuProgramGouraud;
 
     // Common values
@@ -41,6 +45,7 @@ public class AndroidGLES20Renderer
     public static float[] modelViewITMatrix;
     public static float[] modelViewProjectionLocal;
     public static float[] projectionMatrix;
+    private static Stack<float[]> matrixStack;
     public static final int GL_MODELVIEW = 1;
     public static final int GL_PROJECTION = 2;
     public static final int GL_TEXTURE_2D = 3;
@@ -49,9 +54,12 @@ public class AndroidGLES20Renderer
     public static RendererConfiguration qualitySelection;
     protected static Material currentMaterial;
     public static boolean errorsDetected = false;
+    protected static ArrayList<Light> lights;
+    protected static Camera currentCamera;
 
     // OpenGL-ES SL parameters
     public static int modelViewProjectionLocalParam;
+    public static int modelViewLocalParam;
     public static int modelViewITLocalParam;
     public static int PObjectParam;
     public static int uvVertexTextureCoordinateParam;
@@ -60,7 +68,11 @@ public class AndroidGLES20Renderer
     private static int ambientColorParam;
     private static int diffuseColorParam;
     private static int specularColorParam;
-    private static int lightPositionGlobalParam;
+    private static int phongExponentParam;
+    private static int lightPositionsGlobalParam;
+    private static int numberOfLightsParam;
+    private static int withTextureParam;
+    private static int cameraPositionGlobalParam;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -77,6 +89,7 @@ public class AndroidGLES20Renderer
         Matrix.setIdentityM(modelViewProjectionLocal, 0);
         Matrix.setIdentityM(transientMatrix, 0);
         Matrix.setIdentityM(originalMatrix, 0);
+        matrixStack = new Stack<float[]>();
 
         //- Set up shaders ------------------------------------------------
         ColorRgb white = new ColorRgb(1, 1, 1);
@@ -88,10 +101,13 @@ public class AndroidGLES20Renderer
         qualitySelection.setPoints(false);
         qualitySelection.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         currentMaterial = new Material();
+        currentCamera = null;
 
         if ( !createDefaultAutomaticAndroidGLES20Shaders(ctx) == true ) {
             errorsDetected = true;
         }
+
+        lights = new ArrayList<Light>();
     }
 
     public static void setShadingType(int t)
@@ -235,19 +251,6 @@ public class AndroidGLES20Renderer
 
         vertexShaderSource = loadAsStringTrimmingComments(
             ctx.getResources().openRawResource(
-                R.raw.constanttexturevertexshader));
-        pixelShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.constanttexturepixelshader));
-        AndroidGLES20GpuProgramConstantTexture = 
-            createProgram(vertexShaderSource, pixelShaderSource);
-        if ( AndroidGLES20GpuProgramConstantTexture == 0 ) {
-            System.err.println("ERROR CREATING CONSTANT TEXTURE SHADER!");
-            return false;
-        }
-
-        vertexShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
                 R.raw.gouraudvertexshader));
         pixelShaderSource = loadAsStringTrimmingComments(
             ctx.getResources().openRawResource(
@@ -272,7 +275,7 @@ public class AndroidGLES20Renderer
         //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... :");
 
         if ( qualitySelection.isTextureSet() ) {
-            shaderId = AndroidGLES20GpuProgramConstantTexture;
+            shaderId = AndroidGLES20GpuProgramConstant;
             //System.out.println("Constante con textura");
         }
         else if ( qualitySelection.getShadingType() == 
@@ -315,6 +318,22 @@ public class AndroidGLES20Renderer
             }
         }
 
+        if ( shaderId == AndroidGLES20GpuProgramConstant ) {
+            withTextureParam =
+                GLES20.glGetUniformLocation(shaderId, "withTexture");
+            checkGlError("glGetUniformLocation withTexture");
+            if ( withTextureParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for withTexture");
+            }
+            if ( qualitySelection.isTextureSet() ) {
+                GLES20.glUniform1i(withTextureParam, 1);
+            }
+            else {
+                GLES20.glUniform1i(withTextureParam, 0);
+            }
+        }
+
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
             emissionColorParam = 
@@ -335,6 +354,14 @@ public class AndroidGLES20Renderer
             if ( NObjectParam == -1 ) {
                 throw new RuntimeException(
                     "Could not get attrib location for NObject");
+            }
+
+            modelViewLocalParam = GLES20.glGetUniformLocation(
+                shaderId, "modelViewLocal");
+            checkGlError("glGetUniformLocation modelViewLocal");
+            if ( modelViewLocalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get attrib location for modelViewLocalParam");
             }
 
             modelViewITLocalParam = GLES20.glGetUniformLocation(
@@ -380,15 +407,54 @@ public class AndroidGLES20Renderer
             GLES20.glUniform3f(specularColorParam,
                 (float)c.r, (float)c.g, (float)c.b);
 
-            lightPositionGlobalParam =
-                GLES20.glGetUniformLocation(shaderId, "lightPositionGlobal");
-            checkGlError("glGetUniformLocation lightPositionGlobal");
-            if ( lightPositionGlobalParam == -1 ) {
+            phongExponentParam =
+                GLES20.glGetUniformLocation(shaderId, "phongExponent");
+            checkGlError("glGetUniformLocation phongExponent");
+            if ( phongExponentParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for lightPositionGlobal");
+                    "Could not get uniform location for phongExponent");
             }
-            GLES20.glUniform4f(lightPositionGlobalParam,
-			       (float)-2, (float)0, (float)20, (float)1);
+            GLES20.glUniform1f(phongExponentParam,
+                (float)currentMaterial.getPhongExponent());
+
+            numberOfLightsParam =
+                GLES20.glGetUniformLocation(shaderId, "numberOfLights");
+            checkGlError("glGetUniformLocation numberOfLights");
+            if ( numberOfLightsParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for numberOfLights");
+            }
+            GLES20.glUniform1i(numberOfLightsParam, lights.size());
+
+            lightPositionsGlobalParam =
+                GLES20.glGetUniformLocation(shaderId, "lightPositionsGlobal");
+            checkGlError("glGetUniformLocation lightPositionsGlobal");
+            if ( lightPositionsGlobalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for lightPositionsGlobal");
+            }
+
+            float array[] = new float[3*lights.size()];
+            for ( int i = 0; i < lights.size(); i++ ) {
+                Vector3D p = lights.get(i).getPosition();
+                array[3*i + 0] = (float)p.x;
+                array[3*i + 1] = (float)p.y;
+                array[3*i + 2] = (float)p.z;
+            }
+            GLES20.glUniform3fv(lightPositionsGlobalParam, lights.size(), array, 0);
+
+            cameraPositionGlobalParam =
+                GLES20.glGetUniformLocation(shaderId, "cameraPositionGlobal");
+            checkGlError("glGetUniformLocation cameraPositionGlobal");
+            if ( cameraPositionGlobalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for cameraPositionGlobal");
+            }
+            if ( currentCamera != null ) {
+                Vector3D p = currentCamera.getPosition();
+                GLES20.glUniform3f(cameraPositionGlobalParam,
+                       (float)p.x, (float)p.y, (float)p.z);
+            }
         }
         else {
             NObjectParam = -1;
@@ -396,8 +462,13 @@ public class AndroidGLES20Renderer
             diffuseColorParam = -1;
 
             specularColorParam = -1;
+            modelViewLocalParam = -1;
             modelViewITLocalParam = -1;
-            lightPositionGlobalParam = -1;
+            lightPositionsGlobalParam = -1;
+            numberOfLightsParam = -1;
+            withTextureParam = -1;
+            cameraPositionGlobalParam = -1;
+            phongExponentParam = -1;
         }
 
         activateTransformationMatrices();
@@ -413,6 +484,12 @@ public class AndroidGLES20Renderer
 
         Matrix.invertM(transientMatrix, 0, modelViewMatrix, 0);
         Matrix.transposeM(modelViewITMatrix, 0, transientMatrix, 0);
+
+        if ( modelViewLocalParam != -1 ) {
+            GLES20.glUniformMatrix4fv(modelViewLocalParam, 
+                1, false, modelViewMatrix, 0);
+            checkGlError("modelViewLocalParam");
+        }
 
         if ( modelViewITLocalParam != -1 ) {
             GLES20.glUniformMatrix4fv(modelViewITLocalParam, 1, false, 
@@ -458,13 +535,26 @@ public class AndroidGLES20Renderer
 
     public static void glPushMatrix()
     {
-        System.out.println("glPushMatrix NOT IMPLEMENTED!");
-        activateTransformationMatrices();
+        switch ( currentMatrixMode ) {
+          case GL_MODELVIEW:
+            matrixStack.push(modelViewMatrix);
+            break;
+          case GL_PROJECTION:
+            matrixStack.push(projectionMatrix);
+            break;
+        }
     }
 
     public static void glPopMatrix()
     {
-        System.out.println("glPopMatrix NOT IMPLEMENTED!");
+        switch ( currentMatrixMode ) {
+          case GL_MODELVIEW:
+            modelViewMatrix = matrixStack.pop();
+            break;
+          case GL_PROJECTION:
+            projectionMatrix = matrixStack.pop();
+            break;
+        }
         activateTransformationMatrices();
     }
 
@@ -677,7 +767,7 @@ public class AndroidGLES20Renderer
 
         // glNormal3d
         if ( NObjectParam != -1 ) {
-            verticesBufferedArray.position(3);
+            verticesBufferedArray.position(6);
             GLES20.glEnableVertexAttribArray(NObjectParam);
             checkGlError("glEnableVertexAttribArray NObjectParam");
             GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
@@ -686,7 +776,7 @@ public class AndroidGLES20Renderer
         }
 
         // glTexCoord2d
-        verticesBufferedArray.position(6);
+        verticesBufferedArray.position(9);
         GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
         checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
         GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 

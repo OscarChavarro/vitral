@@ -68,10 +68,16 @@ readPngHeader(FILE *fd)
 */
 
     if ( bit_depth != 8 ) {
-        fprintf(stderr, "PngReader: ERROR -> only 8bpp depth images reading implemented!\n");
+        fprintf(stderr, "PngReader: Warning not 8bits depth not tested! (%d bit depth not supported)\n", bit_depth);
         fflush(stderr);
-        delete HeaderInfo;
-        return NULL;
+        //delete HeaderInfo;
+        //return NULL;
+        //printf("color_type: %d\n", color_type);
+        //printf("PNG_COLOR_TYPE_GRAY: %d\n", PNG_COLOR_TYPE_GRAY);
+        //printf("PNG_COLOR_TYPE_RGB: %d\n", PNG_COLOR_TYPE_RGB);
+        //printf("PNG_COLOR_TYPE_RGBA: %d\n", PNG_COLOR_TYPE_RGBA);
+        HeaderInfo->channels = -1;
+        return HeaderInfo;
     }
 
     HeaderInfo->channels = 3;
@@ -130,6 +136,12 @@ readPngHeader(FILE *fd)
 void
 readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BOOLEAN flip)
 {
+    if ( HeaderInfo->channels == -1 ) {
+        fprintf(stderr, "skipping image\n");
+        fflush(stderr);
+        return;
+    }
+
     //----------------------------------------------------------------------
     unsigned char **rowPointers;
     unsigned long int y;

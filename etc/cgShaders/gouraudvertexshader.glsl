@@ -14,38 +14,53 @@
 //===========================================================================
 
 uniform mat4 modelViewProjectionLocal; // input: PM * MVM
+uniform mat4 modelViewLocal;           // input: MVM
 uniform mat4 modelViewITLocal;         // input: MVM_IT
-uniform vec4 lightPositionGlobal;
+uniform vec3 cameraPositionGlobal;
+uniform vec3 lightPositionsGlobal[8];  // input: maximum light supported: 8
+uniform int numberOfLights;
 attribute vec4 PObject;                // input: glVertex3d
-attribute vec3 NObject;
+attribute vec3 NObject;                // input: glNormal3d
 uniform vec3 ambientColor;             // input: material parameters
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
-varying vec4 vertexColor;              // output: color to pass to pixel shader
+uniform float phongExponent;
+varying vec3 vertexColor;              // output: color to pass to pixel shader
 
 void main() {
-    vec4 PGlobal = modelViewProjectionLocal * PObject;
+    vec4 PGlobal = modelViewLocal * PObject;
 
     // Ambient term: implementing equation [FOLE1992].16.2
     vec3 ambientTerm;
-    ambientTerm = 0.0*ambientColor;
+    ambientTerm = ambientColor;
 
-    // Diffuse term: implementing equation [FOLE1992].16.4
-    vec3 diffuseTerm;
-    vec3 N;
-    vec3 L;
+    int i;
+    vec3 diffuseTerm = vec3(0, 0, 0);
+    vec3 specularTerm = vec3(0, 0, 0);
 
-    N = normalize(vec3(modelViewITLocal * vec4(NObject, 1.0)));
-    L = normalize(lightPositionGlobal.xyz - PGlobal.xyz);
-    diffuseTerm = diffuseColor * max(dot(N, L), 0.0);
+    for ( i = 0; i < numberOfLights; i++ ) {
+        // Diffuse term: implementing equation [FOLE1992].16.4
+        vec3 N; // Normal for current vertex on global coordinates
+        vec3 L; // Direction to the light source
 
-    // Specular term
-    vec3 specularTerm;
-    specularTerm = 0.0*specularColor;
+        N = normalize(vec3(modelViewITLocal * vec4(NObject, 1.0)));
+        L = normalize(lightPositionsGlobal[i] - PGlobal.xyz);
+        diffuseTerm += diffuseColor * max(dot(N, L), 0.0);
+
+        // Specular term: implementing the last term on equation
+        // [FOLE1992].16.14
+        vec3 V; // Direction to the viewpoint from current vertex
+        vec3 R; // Direction of specular reflection (maximum highlights)
+
+        V = normalize(cameraPositionGlobal - PGlobal.xyz);
+        //R = 2.0 * N * dot(N, L) - L; // Equation [FOLE1992].16.16
+        R = reflect(-L, N); // Using OpenGLSL implementation of the equation
+        specularTerm += specularColor * pow(max(dot(R, V), 0.0), phongExponent);
+    }
 
     // Output results to pixel shader
-    vertexColor = vec4(ambientTerm + diffuseTerm + specularTerm, 1);
-    gl_Position = PGlobal;
+    vertexColor = ambientTerm + diffuseTerm + specularTerm;
+    gl_Position = modelViewProjectionLocal * PObject;
 }
 
 //===========================================================================

@@ -27,8 +27,10 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
@@ -44,9 +46,14 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
     public Camera camera;
     private Sphere sphere;
     private Material material;
+    private Light light1;
+    private Light light2;
 
     // Display lists ids
     private int textureId;
+
+    // Other
+    long baserr = SystemClock.uptimeMillis();
 
     public GLES20TriangleRenderer(Context context) {
         androidApplicationContext = context;
@@ -68,9 +75,15 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         qualitySelection.setWireColor(new ColorRgb(1, 1, 1));
 
         material = new Material();
-        material.setAmbient(new ColorRgb(0.1, 0.1, 0.1));
+        material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(1.0, 0.0, 0.0));
         material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
+        material.setPhongExponent(40.0);
+
+        light1 = new Light(Light.POINT, 
+            new Vector3D(0, -10, 0), new ColorRgb(1, 1, 1));
+        light2 = new Light(Light.POINT, 
+            new Vector3D(1, -1, 1), new ColorRgb(1, 0, 0));
 
         sphere = new Sphere(1.0);
     }
@@ -83,7 +96,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         }
 
         // Draw background
-        GLES20.glClearColor(0.5f, 0.9f, 0.5f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
@@ -96,24 +109,45 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 
         // Tick updates transform
         long time = SystemClock.uptimeMillis() % 8000L;
+        long rr = (SystemClock.uptimeMillis() - baserr) / 8000L;
         float x = 0.0005f * ((int) time);
 
         vgl.glMatrixMode(vgl.GL_MODELVIEW);
         vgl.glLoadIdentity();
-        vgl.glTranslated(-2.0, 0, 0);
-        vgl.glRotated(200*x, 0, 0, 1);
+
+        // Move light around center...
+        double r = 1.2 + 0.2 * ((double)rr);
+        light1.setPosition(new Vector3D(r, 0, 0));
+        Matrix4x4 RL = new Matrix4x4();
+        RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
+        Vector3D P, PR;
+        P = light1.getPosition();
+        PR = RL.multiply(P);
+        light1.setPosition(PR);
+
+        AndroidGLES20LightRenderer.draw(light1);
+        AndroidGLES20LightRenderer.activate(light1);
+
+        AndroidGLES20LightRenderer.draw(light2);
+        AndroidGLES20LightRenderer.activate(light2);
+
+        //vgl.glTranslated(-2, 0, 0);
+        //vgl.glRotated(200*x, 0, 0, 1);
 
         //System.out.println("- OBJETO ESFERA WIRES ----------- ");
+/*
         vgl.glDisable(vgl.GL_TEXTURE_2D);
         vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qualitySelection.setWires(true);
         qualitySelection.setSurfaces(false);
         sphere.setRadius(1.01);
         AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection);
+*/
 
         //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
         vgl.glDisable(vgl.GL_TEXTURE_2D);
         vgl.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+        //vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qualitySelection.setWires(false);
         qualitySelection.setSurfaces(true);
         sphere.setRadius(1.0);
