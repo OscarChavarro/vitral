@@ -3,6 +3,7 @@
 precision mediump float;
 
 uniform sampler2D sTexture;
+//flat varying vec4 vertexColor;
 varying vec4 vertexColor;
 varying float activateTexture;     // input: boolean 1.0 true 0.0 false
 varying vec2 uvTextureCoordinate;

@@ -27,6 +27,7 @@ uniform vec3 ambientColor;             // input: material parameters
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float phongExponent;
+//flat varying vec4 vertexColor;              // output: color to pass to pixel shader
 varying vec4 vertexColor;              // output: color to pass to pixel shader
 varying float activateTexture;         // output
 varying vec2 uvTextureCoordinate;      // output

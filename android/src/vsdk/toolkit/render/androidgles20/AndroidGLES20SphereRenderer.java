@@ -178,7 +178,6 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         vertexDataArray[index] = (float)c.b;    index++;
 
         //gl.glNormal3d(N.x, N.y, N.z);
-        sphere.sphereNormal(N, theta, phi);
         vertexDataArray[index] = (float)N.x;    index++;
         vertexDataArray[index] = (float)N.y;    index++;
         vertexDataArray[index] = (float)N.z;    index++;
@@ -211,7 +210,8 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     }
 
     private static void
-    drawSurfaces(Sphere sphere, int slices, int stacks, RendererConfiguration q)
+    drawSurfacesSmooth(Sphere sphere, int slices, int stacks, 
+        RendererConfiguration q)
     {
         VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
         VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
@@ -249,9 +249,13 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
             for( j = 0; j < slices; j++ ) {
                 s = j/(slices-1.f);
                 theta = 2*Math.PI*s;
+
+                sphere.sphereNormal(N, theta, phi1);
                 drawVertex(theta, phi1, s, t1, P, N, T, B, 
                            sphere, vertexDataArray, index, q);
                 index += vertexFloatElements;
+
+                sphere.sphereNormal(N, theta, phi2);
                 drawVertex(theta, phi2, s, t2, P, N, T, B, 
                            sphere, vertexDataArray, index, q);
                 index += vertexFloatElements;
@@ -285,10 +289,146 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         for( j = slices-1; j >= 0; j-- ) {
             s = j/(slices-1.f);
             theta = 2*Math.PI*s;
+
+            sphere.sphereNormal(N, theta, phi2);
             drawVertex(theta, phi2, s, t2, P, N, T, B, 
                 sphere, vertexDataArray, index, q);
             index += vertexFloatElements;
+
+            sphere.sphereNormal(N, theta, phi1);
             drawVertex(theta, phi1, s, t1, P, N, T, B, 
+                sphere, vertexDataArray, index, q);
+            index += vertexFloatElements;
+        }
+
+        //-------------------------------------------------------------
+        FloatBuffer verticesBufferedArray;
+        verticesBufferedArray = ByteBuffer.allocateDirect(
+            vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
+            ByteOrder.nativeOrder()).asFloatBuffer();
+        verticesBufferedArray.put(vertexDataArray);
+        drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, 
+            GLES20.GL_TRIANGLE_STRIP, slices*2, vertexSizeInBytes);
+
+    }
+
+    /**
+    Current version has a little error in normal managament at the cap.
+    Rendering results are strange. Pending to check this.
+    */
+    private static void
+    drawSurfacesFlat(Sphere sphere, int slices, int stacks, RendererConfiguration q)
+    {
+        VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
+        VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
+
+        //-----------------------------------------------------------------
+        Vector3D P = new Vector3D(); // Vertex position
+        Vector3D N = new Vector3D(); // Vertex normal
+        Vector3D T = new Vector3D(); // Vertex tangent
+        Vector3D B = new Vector3D(); // Vertex binormal
+
+        int i;
+        int j;
+        double t1;
+        double t2;
+        double phi1;
+        double phi2;
+        double s1;
+        double s2;
+        double theta1;
+        double theta2;
+        float vertexDataArray[];
+        int vertexFloatElements = 11;
+        int index;
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
+
+        //- Draw main sphere body -----------------------------------------
+        for( i = 0; i < stacks - 2; i++ ) {
+            //-------------------------------------------------------------
+            t1 = i/(stacks-1.f);
+            t2 = (i+1)/(stacks-1.f);
+            phi1 = Math.PI*t1 - Math.PI/2;
+            phi2 = Math.PI*t2 - Math.PI/2;
+    
+            vertexDataArray = new float[slices*6*vertexFloatElements];
+            index = 0;
+
+            for( j = 0; j < slices; j++ ) {
+                s1 = j/(slices-1.f);
+                s2 = (j+1)/(slices-1.f);
+                theta1 = 2*Math.PI*s1;
+                theta2 = 2*Math.PI*s2;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta1, phi1, s1, t1, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta1, phi2, s1, t2, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta2, phi1, s2, t1, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta1, phi2, s1, t2, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta2, phi2, s2, t2, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+
+                sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+                drawVertex(theta2, phi1, s2, t1, P, N, T, B, 
+                           sphere, vertexDataArray, index, q);
+                index += vertexFloatElements;
+            }
+
+            //-------------------------------------------------------------
+            FloatBuffer verticesBufferedArray;
+
+            verticesBufferedArray = ByteBuffer.allocateDirect(
+                vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
+                ByteOrder.nativeOrder()).asFloatBuffer();
+            verticesBufferedArray.put(vertexDataArray);
+
+            drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, 
+                GLES20.GL_TRIANGLES, slices*6, vertexSizeInBytes);
+
+        }
+
+        //- Draw sphere upper cap -----------------------------------------
+        // Cap need to be painted in inverse order to allow for correct
+        // rendering in the case of flat shading in OpenGL/JOGL
+        t1 = i/(stacks-1.f);
+        t2 = (i+1)/(stacks-1.f);
+        phi1 = Math.PI*t1 - Math.PI/2;
+        phi2 = Math.PI*t2 - Math.PI/2;
+    
+        vertexDataArray = new float[slices*2*vertexFloatElements];
+        index = 0;
+
+        //-------------------------------------------------------------
+        for( j = slices-1; j >= 0; j-- ) {
+            s1 = j/(slices-1.f);
+            s2 = (j+1)/(slices-1.f);
+            theta1 = 2*Math.PI*s1;
+            theta2 = 2*Math.PI*s2;
+
+            sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+            drawVertex(theta1, phi2, s1, t2, P, N, T, B, 
+                sphere, vertexDataArray, index, q);
+            index += vertexFloatElements;
+
+            sphere.sphereNormal(N, (theta2+theta1)/2, (phi2+phi1)/2);
+            drawVertex(theta1, phi1, s1, t1, P, N, T, B, 
                 sphere, vertexDataArray, index, q);
             index += vertexFloatElements;
         }
@@ -314,7 +454,12 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
             drawWires(s, 20, 10, q);
         }
         if ( q.isSurfacesSet() ) {
-            drawSurfaces(s, 80, 40, q);
+            if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT ) {
+                drawSurfacesFlat(s, 20, 10, q);
+            }
+            else {
+                drawSurfacesSmooth(s, 20, 10, q);
+            }
         }
     }
 

@@ -145,7 +145,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 */
 
         //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
-        vgl.glEnable(vgl.GL_TEXTURE_2D);
+        vgl.glDisable(vgl.GL_TEXTURE_2D);
         vgl.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
         //vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qualitySelection.setWires(false);
