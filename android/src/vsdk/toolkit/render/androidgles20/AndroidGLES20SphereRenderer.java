@@ -472,11 +472,11 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
             if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD ) {
                 setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-                drawSurfacesSmooth(s, 20, 10, q);
+                drawSurfacesSmooth(s, slices, stacks, q);
             }
             else {
                 setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-                drawSurfacesFlat(s, 20, 10, q);
+                drawSurfacesFlat(s, slices, stacks, q);
             }
         }
     }

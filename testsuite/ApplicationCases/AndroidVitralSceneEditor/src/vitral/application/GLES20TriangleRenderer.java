@@ -3,15 +3,19 @@
 package vitral.application;
 
 // Java basic classes
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+
+
 // Android classes
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,12 +32,18 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.geometry.Box;
+import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
 public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 
@@ -45,6 +55,11 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
     private RendererConfiguration qualitySelection;
     public Camera camera;
     private Sphere sphere;
+    private Box box;
+    private Cone cone;
+    private TriangleMesh mesh;
+    private File meshFile;
+    
     private Material material;
     private Light light1;
     private Light light2;
@@ -86,6 +101,25 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
             new Vector3D(1, -1, 1), new ColorRgb(1, 0, 0));
 
         sphere = new Sphere(1.0);
+        
+        
+        box = new Box(1.0, 1.0, 1.0);
+        
+        cone = new Cone(1.0, 1.0, 2.0);
+        
+        System.out.println("-------------------------------------------CHARGING");
+        meshFile = new File("/sdcard/mug.ply");
+        ReaderPly reader;
+        reader = new ReaderPly();
+        SimpleScene scene = new SimpleScene();
+        try {
+			reader.importEnvironment(meshFile, scene);
+			mesh = (TriangleMesh)(scene.getSimpleBodies().get(0).getGeometry());
+			System.out.println(mesh.toString());
+		} catch (Exception e) {
+			System.out.println("==================================FATAL ERROR");
+			e.printStackTrace();
+		}
     }
 
     public void onDrawFrame(GL10 glUnused) {
@@ -135,15 +169,27 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         //vgl.glRotated(200*x, 0, 0, 1);
 
         //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
-        qualitySelection.setShadingType(
+        /**qualitySelection.setShadingType(
             RendererConfiguration.SHADING_TYPE_FLAT);
         qualitySelection.setWires(false);
         qualitySelection.setSurfaces(true);
-        qualitySelection.setTexture(false);
+        qualitySelection.setTexture(true);
         sphere.setRadius(1.0);
         AndroidGLES20MaterialRenderer.activate(material);
-        AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection);
+        AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection, 50, 25);**/
+        
 
+        vgl.glDisable(vgl.GL_TEXTURE_2D);
+        vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        qualitySelection.setWires(false);
+        qualitySelection.setSurfaces(true);
+        qualitySelection.setNormals(true);
+        vgl.glScaled(15,15,15);
+        vgl.glRotated(90, 1, 0, 0);
+        AndroidGLES20MaterialRenderer.activate(material);
+        AndroidGLES20TriangleMeshRenderer.draw(mesh, camera, qualitySelection);
+        
+        
         //System.out.println("- OBJETO PLANO ----------- ");
         vgl.glMatrixMode(vgl.GL_MODELVIEW);
         vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
