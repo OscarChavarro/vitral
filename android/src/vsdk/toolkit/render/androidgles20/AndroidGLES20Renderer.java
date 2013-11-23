@@ -113,6 +113,12 @@ public class AndroidGLES20Renderer
         lights = new ArrayList<Light>();
     }
 
+    public static void setRendererConfiguration(RendererConfiguration source)
+    {
+        qualitySelection.clone(source);
+        activateShaders();
+    }
+
     public static void setShadingType(int t)
     {
         qualitySelection.setShadingType(t);
@@ -317,17 +323,18 @@ public class AndroidGLES20Renderer
                 throw new RuntimeException(
                     "Could not get attrib location for uvVertexTextureCoordinate");
             }
+        }
 
-            withTextureParam =
-                GLES20.glGetUniformLocation(shaderId, "withTexture");
-            checkGlError("glGetUniformLocation withTexture");
-            if ( withTextureParam == -1 ) {
-                throw new RuntimeException(
-                    "Could not get uniform location for withTexture");
-            }
+        withTextureParam = GLES20.glGetUniformLocation(shaderId, "withTexture");
+        checkGlError("glGetUniformLocation withTexture");
+        if ( withTextureParam == -1 ) {
+            //throw new RuntimeException(
+            //    "Could not get uniform location for withTexture");
+        }
+	else {
             GLES20.glUniform1i(withTextureParam, 
                 qualitySelection.isTextureSet()?1:0);
-        }
+	}
 
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_NOLIGHT ) {

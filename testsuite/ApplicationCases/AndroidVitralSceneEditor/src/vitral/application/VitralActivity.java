@@ -9,6 +9,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
+// Android packages: GUI
+import android.view.View;
+import android.view.Menu;
+import android.view.SubMenu;
+import android.view.MenuItem;
+import android.widget.Toast;
+import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Gallery.LayoutParams;
+import android.view.Gravity;
+import android.widget.ImageView.ScaleType;
+import android.widget.Button;
+import android.view.View.OnClickListener;
+
 // Android packages: GPS API
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,12 +33,15 @@ import android.location.GpsStatus.Listener;
 import android.content.Context;
 
 // Vsdk classes
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
-public class VitralActivity extends Activity implements LocationListener, GpsStatus.Listener {
+public class VitralActivity extends Activity 
+implements LocationListener, 
+GpsStatus.Listener, OnClickListener {
     private BasicGLSurfaceView canvas;
 
     private CameraControllerAquynza cameraController;
@@ -32,14 +50,82 @@ public class VitralActivity extends Activity implements LocationListener, GpsSta
     private String provider;
     private int numberOfLocations;
 
-    //= Basic Activity methods ==================================================
+    //= Basic Activity methods =================================================
+    private void createGUI()
+    {
+/*
+        TextView label = new TextView(this);
+        label.setText("VITRAL Android Application Template");
+        label.setTextSize(10);
+        label.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        ImageView pic = new ImageView(this);
+        pic.setImageResource(R.raw.render);  
+        pic.setLayoutParams(new LayoutParams(
+                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));  
+        pic.setAdjustViewBounds(true);  
+        pic.setScaleType(ScaleType.FIT_XY);  
+        pic.setMaxHeight(250);  
+        pic.setMaxWidth(250);  
+*/
+
+        canvas = new BasicGLSurfaceView(getApplication());
+        //canvas.setLayoutParams(new LayoutParams(
+        //    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+
+/*
+        Button b1 = new Button(this);
+        b1.setId(1);
+        b1.setText("Click me");
+        b1.setLayoutParams(new LayoutParams(
+            LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        b1.setOnClickListener(this);
+
+        Button b2 = new Button(this);
+        b2.setId(2);
+        b2.setText("Tickle me");
+        b2.setLayoutParams(new LayoutParams(
+            LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        b2.setOnClickListener(this);
+
+        LinearLayout buttonsPanel = new LinearLayout(this);  
+        buttonsPanel.setOrientation(LinearLayout.HORIZONTAL);  
+        buttonsPanel.setLayoutParams(new LayoutParams(
+                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));  
+        //buttonsPanel.setGravity(Gravity.CENTER);  
+        buttonsPanel.addView(b1);
+        buttonsPanel.addView(b2);
+
+        // Organize elements
+        LinearLayout mainPanel = new LinearLayout(this);  
+        mainPanel.setOrientation(LinearLayout.VERTICAL);  
+        mainPanel.setLayoutParams(new LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));  
+        mainPanel.setGravity(Gravity.CENTER);  
+        mainPanel.addView(label);  
+        //mainPanel.addView(pic);
+        mainPanel.addView(buttonsPanel);
+        mainPanel.addView(canvas);  
+        setContentView(mainPanel);
+*/
+        setContentView(canvas);
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        System.out.println("Huy! " + v.getId());
+        Toast.makeText(this, "Huy!", Toast.LENGTH_SHORT).show();  
+    }
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        canvas = new BasicGLSurfaceView(getApplication());
-        setContentView(canvas);
 
-        cameraController = new CameraControllerAquynza(canvas.glExecutor.camera);
+        createGUI();
+
+        cameraController = 
+            new CameraControllerAquynza(canvas.glExecutor.getCamera());
 
         // GPS related
         numberOfLocations = 1;
@@ -98,7 +184,7 @@ public class VitralActivity extends Activity implements LocationListener, GpsSta
         return cameraController.processMouseDraggedEvent(evsdk); // 
     }
 
-    //= Extended methods for GPS ================================================
+    //= Extended methods for GPS ===============================================
     @Override
     public void onLocationChanged(Location location) {
         double lat = location.getLatitude();
@@ -153,6 +239,70 @@ public class VitralActivity extends Activity implements LocationListener, GpsSta
             break;
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        SubMenu q = menu.addSubMenu(0, 100, 0, "Rendering configuration");
+        q.add(0, 0, 0, "Constant shading");
+        q.add(0, 1, 0, "Flat shading");
+        q.add(0, 2, 0, "Gouraud shading");
+        q.add(0, 3, 0, "Phong shading");
+        q.add(0, 4, 0, "Toggle texture");
+
+        SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
+        o.add(0, 6, 0, "Sphere");
+        o.add(0, 7, 0, "Box");
+        o.add(0, 8, 0, "Cone");
+        o.add(0, 9, 0, "Mesh Mug");
+        o.add(0, 10, 0, "Toggle reference square");
+
+        SubMenu a = menu.addSubMenu(1, 101, 1, "Animation options");
+        a.add(0, 5, 0, "Toggle object rotation");
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        RendererConfiguration q;
+        q = canvas.glExecutor.getRendererConfiguration();
+        switch ( item.getItemId() ) {
+          case 0:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            break;
+          case 1:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+            break;
+          case 2:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+            break;
+          case 3:
+            break;
+          case 4:
+            q.changeTexture();
+            break;
+          case 5:
+            canvas.glExecutor.toggleObjectRotation();
+            break;
+          case 6:
+            canvas.glExecutor.selectObject(1);
+            break;
+          case 7:
+            canvas.glExecutor.selectObject(2);
+            break;
+          case 8:
+            canvas.glExecutor.selectObject(3);
+            break;
+          case 9:
+            canvas.glExecutor.selectObject(4);
+            break;
+          case 10:
+            canvas.glExecutor.toggleReferenceSquare();
+            break;
+        }
+        return true;
+    }
+
 }
 
 //===========================================================================

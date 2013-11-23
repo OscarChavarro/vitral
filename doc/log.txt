@@ -1014,24 +1014,37 @@
   - 1h: smooth and flat versions of AndroidGLES20SphereRenderer.drawSurface
 
 2013 noviembre 8, Juan Pablo Reyes
-  - 1h: Fixing the emulator on Eclipse to run OpenGL ES examples on a computer without unexpected crashes.
-  - 2h: Understanding of renderers code for 3D figures on android, from the sphere implementation. Observations over improvement opportunities.
+  - 1h: Fixing the emulator on Eclipse to run OpenGL ES examples on a
+    computer without unexpected crashes.
+  - 2h: Understanding of renderers code for 3D figures on android, from 
+    the sphere implementation. Observations over improvement opportunities.
 
 2013 noviembre 11, Juan Pablo Reyes
-  - 3h30min: Box and two-radius cylinder (cone, cylinder, etc..) implemented for android. Normals calculation must be verified thoroughly.
+  - 3h30min: Box and two-radius cylinder (cone, cylinder, etc..) 
+    implemented for android. Normals calculation must be verified 
+    thoroughly.
 
 2013 noviembre 13, Juan Pablo Reyes
-  - 20min: Implementing the draw normal methods over the two-radius cylinder class for android.
-  - 1h: Fixing android vitral application bug that painted figures with strange colors when using no illumination.
+  - 20min: Implementing the draw normal methods over the two-radius 
+    cylinder class for android.
+  - 1h: Fixing android vitral application bug that painted figures with 
+    strange colors when using no illumination.
   - 1h: Mathematical understanding of normals for a two-radius cylinder
-  - 2h: Implementing normal calculation for the two-radius cylinder minimizing the usage of trigonometrical functions. 
-  - 1h: Improving the codding of the CylinderRenderer class (less replication, using constants, integrating similar methods, etc)
+  - 2h: Implementing normal calculation for the two-radius cylinder 
+    minimizing the usage of trigonometrical functions. 
+  - 1h: Improving the codding of the CylinderRenderer class (less 
+    replication, using constants, integrating similar methods, etc)
 
 2013 noviembre 15, Juan Pablo Reyes
   - 3h: Understanding of the triangleMesh clases (the view and the model).
   - 1h30min: Implementing the class triangleMeshRenderer for Android
 
+2013 noviembre 19, Oscar Chavarro
+  - 56min: testing GUI creation elements on Android.
 
-  
+2013 noviembre 20, Oscar Chavarro
+  - 1h: researching android management of options menu
+  - 2h: integrating menus and several control options to android test
+    application
 
 ===========================================================================

@@ -10,19 +10,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-
-
-// Android classes
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
+// Android classes: misc
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.SystemClock;
+
+// Android classes: OpenGL ES 2.0
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
-import android.os.SystemClock;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -43,6 +42,8 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20BoxRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20ConeRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
 public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
@@ -52,27 +53,92 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
     private AndroidGLES20Renderer vgl;
 
     // Vitral scene
-    private RendererConfiguration qualitySelection;
-    public Camera camera;
+    private RendererConfiguration quality;
+    private Material material;
+    private Camera camera;
+    private Light light1;
+    private Light light2;
     private Sphere sphere;
     private Box box;
     private Cone cone;
+    private TriangleMesh meshMug;
     private TriangleMesh mesh;
-    private File meshFile;
     
-    private Material material;
-    private Light light1;
-    private Light light2;
-
     // Display lists ids
     private int textureId;
 
     // Other
-    long baserr = SystemClock.uptimeMillis();
+    private long baserr = SystemClock.uptimeMillis();
+    private boolean withObjectRotation = false;
+    private boolean withReferenceSquare = false;
+    
+    public RendererConfiguration getRendererConfiguration()
+    {
+        return quality;
+    }
 
-    public GLES20TriangleRenderer(Context context) {
-        androidApplicationContext = context;
+    public Camera getCamera()
+    {
+        return camera;
+    } 
 
+    public void toggleObjectRotation()
+    {
+        withObjectRotation = !withObjectRotation;
+    }
+
+    public void toggleReferenceSquare()
+    {
+        withReferenceSquare = !withReferenceSquare;
+    }
+
+    public void selectObject(int o)
+    {
+        sphere = null;
+        mesh = null;
+        box = null;
+        cone = null;
+        switch ( o ) {
+          case 1: default:
+            sphere = new Sphere(1.0);
+            break;
+          case 2:
+            box = new Box(1.0, 1.0, 1.0);
+            break;
+          case 3:
+            cone = new Cone(1.0, 1.0, 2.0);
+            break;
+          case 4:
+            mesh = meshMug;
+            break;
+        }
+    }
+
+    private TriangleMesh loadPlyMesh(String filename)
+    {
+        File meshFile;
+        ReaderPly reader;
+
+        System.out.println("Loading mesh " + filename);
+        meshFile = new File(filename);
+        reader = new ReaderPly();
+        SimpleScene scene = new SimpleScene();
+        TriangleMesh m = null;
+        try {
+            reader.importEnvironment(meshFile, scene);
+            m = (TriangleMesh)(scene.getSimpleBodies().get(0).getGeometry());
+            System.out.println(mesh.toString());
+          }
+          catch ( Exception e ) {
+            System.out.println("= ERROR LOADING MESH");
+            e.printStackTrace();
+        }
+
+        return m;
+    }
+
+    private void createModel()
+    {
         //-----------------------------------------------------------------
         Vector3D p = new Vector3D(0, -5, 5);
         Matrix4x4 R = new Matrix4x4();
@@ -83,11 +149,13 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         camera.setPosition(p);
         camera.setRotation(R);
 
-        qualitySelection = new RendererConfiguration();
-        qualitySelection.setPoints(false);
-        qualitySelection.setWires(false);
-        qualitySelection.setSurfaces(true);
-        qualitySelection.setWireColor(new ColorRgb(1, 1, 1));
+        quality = new RendererConfiguration();
+        quality.setPoints(false);
+        quality.setWires(false);
+        quality.setWireColor(new ColorRgb(1.0, 1.0, 1.0));
+        quality.setSurfaces(true);
+        quality.setTexture(true);
+        quality.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
 
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
@@ -99,27 +167,15 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
             new Vector3D(0, -10, 0), new ColorRgb(1, 1, 1));
         light2 = new Light(Light.POINT, 
             new Vector3D(1, -1, 1), new ColorRgb(1, 0, 0));
+        
+        meshMug = loadPlyMesh("sdcard/mug.ply");
+        selectObject(1);
+    }
 
-        sphere = new Sphere(1.0);
-        
-        
-        box = new Box(1.0, 1.0, 1.0);
-        
-        cone = new Cone(1.0, 1.0, 2.0);
-        
-        System.out.println("-------------------------------------------CHARGING");
-        meshFile = new File("/sdcard/mug.ply");
-        ReaderPly reader;
-        reader = new ReaderPly();
-        SimpleScene scene = new SimpleScene();
-        try {
-			reader.importEnvironment(meshFile, scene);
-			mesh = (TriangleMesh)(scene.getSimpleBodies().get(0).getGeometry());
-			System.out.println(mesh.toString());
-		} catch (Exception e) {
-			System.out.println("==================================FATAL ERROR");
-			e.printStackTrace();
-		}
+    public GLES20TriangleRenderer(Context context) {
+        androidApplicationContext = context;
+
+        createModel();
     }
 
     public void onDrawFrame(GL10 glUnused) {
@@ -130,13 +186,9 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         }
 
         // Draw background
-        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
-        // Activate texture image.activate()
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
         // camera.activate()
         AndroidGLES20CameraRenderer.activate(camera);
@@ -162,44 +214,58 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         AndroidGLES20LightRenderer.draw(light1);
         AndroidGLES20LightRenderer.activate(light1);
 
-        AndroidGLES20LightRenderer.draw(light2);
-        AndroidGLES20LightRenderer.activate(light2);
+        //AndroidGLES20LightRenderer.draw(light2);
+        //AndroidGLES20LightRenderer.activate(light2);
 
         //vgl.glTranslated(-2, 0, 0);
-        //vgl.glRotated(200*x, 0, 0, 1);
+        if ( withObjectRotation ) {
+            vgl.glRotated(200*x, 0, 0, 1);
+        }
 
-        //System.out.println("- OBJETO ESFERA SURFACES ----------- ");
-        /**qualitySelection.setShadingType(
-            RendererConfiguration.SHADING_TYPE_FLAT);
-        qualitySelection.setWires(false);
-        qualitySelection.setSurfaces(true);
-        qualitySelection.setTexture(true);
-        sphere.setRadius(1.0);
+        //-----------------------------------------------------------------
         AndroidGLES20MaterialRenderer.activate(material);
-        AndroidGLES20SphereRenderer.draw(sphere, camera, qualitySelection, 50, 25);**/
-        
+        AndroidGLES20Renderer.setRendererConfiguration(quality);
 
-        vgl.glDisable(vgl.GL_TEXTURE_2D);
-        vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        qualitySelection.setWires(false);
-        qualitySelection.setSurfaces(true);
-        qualitySelection.setNormals(true);
-        vgl.glScaled(15,15,15);
-        vgl.glRotated(90, 1, 0, 0);
-        AndroidGLES20MaterialRenderer.activate(material);
-        AndroidGLES20TriangleMeshRenderer.draw(mesh, camera, qualitySelection);
-        
-        
-        //System.out.println("- OBJETO PLANO ----------- ");
-        vgl.glMatrixMode(vgl.GL_MODELVIEW);
-        vgl.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        vgl.glLoadIdentity();
-        vgl.glTranslated(x, 0, 0);
-        vgl.glEnable(vgl.GL_TEXTURE_2D);
-        drawUnitSquare();
+        // Activate texture image.activate()
+        if ( quality.isTextureSet() ) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+            System.out.println("Texture: TRUE");
+        }
+        else {
+            System.out.println("Texture: FALSE");
+        }
 
+        if ( sphere != null ) {
+            sphere.setRadius(1.0);
+            AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 50, 25);
+        }
+
+        if ( box != null ) {
+            AndroidGLES20BoxRenderer.draw(box, camera, quality);
+        }
+
+        if ( cone != null ) {
+            AndroidGLES20ConeRenderer.draw(cone, camera, quality);
+        }
+        
+        if ( mesh != null ) {
+            vgl.glScaled(15, 15, 15);
+            vgl.glRotated(90, 1, 0, 0);
+            AndroidGLES20TriangleMeshRenderer.draw(mesh, camera, quality);
+        }
+        
+        //-----------------------------------------------------------------
+        if ( withReferenceSquare ) {
+            vgl.glMatrixMode(vgl.GL_MODELVIEW);
+            vgl.glLoadIdentity();
+            vgl.glTranslated(x, 0, 0);
+            vgl.glEnable(vgl.GL_TEXTURE_2D);
+            vgl.setRendererConfiguration(quality);
+            drawUnitSquare();
+        }
     }
-
+ 
     private void drawUnitSquare()
     {
         //-----------------------------------------------------------------
@@ -307,9 +373,7 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
         bitmap.recycle();
-
     }
-
 }
 
 //===========================================================================

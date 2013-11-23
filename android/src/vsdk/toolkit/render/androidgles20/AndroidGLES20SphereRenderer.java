@@ -81,7 +81,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         Vector3D p = new Vector3D();
         ColorRgb c = q.getWireColor();
 
-	System.out.println("COLOR: " + c);
+        System.out.println("COLOR: " + c);
 
         for( int i = 1; i < stacks - 1; i++ ) {
             //------------------------------------------------------------
@@ -465,22 +465,20 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         if ( q.isSurfacesSet() ) {
             if ( q.isTextureSet() ) {
                 glEnable(GL_TEXTURE_2D);
-	    }
-	    else {
-                glDisable(GL_TEXTURE_2D);
-	    }
-
-            if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD ) {
-                setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-                drawSurfacesSmooth(s, slices, stacks, q);
             }
             else {
-                setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+                glDisable(GL_TEXTURE_2D);
+            }
+
+            setShadingType(q.getShadingType());
+            if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT ) {
                 drawSurfacesFlat(s, slices, stacks, q);
+            }
+            else {
+                drawSurfacesSmooth(s, slices, stacks, q);
             }
         }
     }
-
 }
 
 //===========================================================================
