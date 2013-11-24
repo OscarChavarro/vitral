@@ -13,7 +13,7 @@ autostereographic images from random color tiles or SIRDS.
 The algorithm in this class is an adapted version of "OpenStereogram" system
 available at http://code.google.com/p/openstereogram.
 */
-public class AutoStereogramGenerator
+public class AutoStereogramGenerator extends RenderingElement
 {
     private static int getMinDepth(double separationFactor, int maxdepth, int observationDistance, int suppliedMinDepth) {
         int computedMinDepth = (int)( (separationFactor * maxdepth * observationDistance) /

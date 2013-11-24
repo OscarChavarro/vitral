@@ -200,7 +200,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     }
 
     /**
-    TO DO: Homogenize all of the draw method signatures. Perhaps this code can
+    \todo  Homogenize all of the draw method signatures. Perhaps this code can
     be generalized to search the corresponding rendering class to a given
     Geometry via reflection, so this search should not be done explicitly.
     */
@@ -261,7 +261,7 @@ public class JoglGeometryRenderer extends JoglRenderer
     }
 
     /**
-    TO DO: Homogenize all of the draw method signatures. Perhaps this code can
+    \todo  Homogenize all of the draw method signatures. Perhaps this code can
     be generalized to search the corresponding rendering class to a given
     Geometry via reflection, so this search should not be done explicitly.
     */

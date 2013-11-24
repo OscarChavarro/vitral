@@ -62,7 +62,7 @@ public abstract class PersistenceElement {
 
     /**
     Given a filename, this method extract its extension and return it.
-    TO DO:: This method will fail when directory path or filename contains
+    \todo : This method will fail when directory path or filename contains
     more than one dot.  Needs to be fixed.
     */
     protected static String extractExtensionFromFile(File fd)

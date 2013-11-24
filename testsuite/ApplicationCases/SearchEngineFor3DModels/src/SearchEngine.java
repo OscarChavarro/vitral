@@ -285,7 +285,7 @@ public class SearchEngine
 
     /**
     This method implements the matching step as described in [FUNK2003].3.2.
-    TO DO:: at a negative tolerance, this method should not use "tolerance" but
+    \todo : at a negative tolerance, this method should not use "tolerance" but
     return the -tolerance closest models. For example, for an equal behavior
     to the search engine described in [FUNK2003], this value should be -16.0.
     */
@@ -317,7 +317,7 @@ public class SearchEngine
 
     /**
     This method implements the matching step as described in [FUNK2003].3.2.
-    TO DO:: at a negative tolerance, this method should not use "tolerance" but
+    \todo : at a negative tolerance, this method should not use "tolerance" but
     return the -tolerance closest models. For example, for an equal behavior
     to the search engine described in [FUNK2003], this value should be -16.0.
     */

@@ -323,7 +323,7 @@ public class Sphere extends Solid {
     Given a (thetha, phi) spherical coordinate in the surface of current
     Sphere, this method writes on to `p` Vector3D the (x, y, z) coordinates
     of the corresponding point on Sphere's surface.
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     public void
     spherePosition(Vector3D p, double theta, double phi)
@@ -337,7 +337,7 @@ public class Sphere extends Solid {
     Given a (thetha, phi) spherical coordinate in the surface of current
     Sphere, this method writes on to `n` Vector3D the (nx, ny, nz) coordinates
     of the surface normal at corresponding point on Sphere's surface.
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     public void
     sphereNormal(Vector3D n, double theta, double phi)
@@ -352,8 +352,8 @@ public class Sphere extends Solid {
     Sphere, this method writes on to `n` Vector3D the (tx, ty, tz) coordinates
     of the surface tangent at corresponding point on Sphere's surface. Tangents
     are aligned with respect to Sphere's equator.
-    TO DO: check this method for efficiency improvement
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     public void
     sphereTangent(Vector3D t, double theta, double phi)
@@ -368,7 +368,7 @@ public class Sphere extends Solid {
     Sphere, this method writes on to `n` Vector3D the (bx, by, bz) coordinates
     of the surface tangent binormal at corresponding point on Sphere's surface. 
     Tangents binormals are perpendicular to both normal and tangent.
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     public void
     sphereBinormal(Vector3D b, double theta, double phi)

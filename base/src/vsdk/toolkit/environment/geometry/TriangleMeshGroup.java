@@ -222,7 +222,7 @@ public class TriangleMeshGroup extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
-    TO DO: Check efficiency for this implementation. Note that for the
+    \todo  Check efficiency for this implementation. Note that for the
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.

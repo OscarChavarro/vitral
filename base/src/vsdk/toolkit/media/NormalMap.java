@@ -323,7 +323,7 @@ public class NormalMap extends MediaEntity
         }
 
         //- 3. Copia de las derivadas para los bordes de la imagen ----------
-        // TO DO:: check why are two pixels down and left needed!
+        // \todo : check why are two pixels down and left needed!
         for( u = 0; u < xxSize; u++ ) {
             putNormal(u, 0, getNormal(u, 1));
             putNormal(u, yySize-2, getNormal(u, yySize-3));

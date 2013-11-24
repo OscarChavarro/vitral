@@ -1000,7 +1000,7 @@
 2013 october 29, Oscar Chavarro
   - 1h: Fixing a bug that was impacting some applications.
 
-2013 noviembre 13, Oscar Chavarro
+2013 november 13, Oscar Chavarro
   - 1h45min: AndroidGLES20LightRenderer
   - 1h46min: checking gouraud vertex shader for light position value and
     specular factor
@@ -1008,23 +1008,23 @@
   - 30min: checking gouraud vertex shader for multiple lights
   - 1h: gouraud shader working with multiple lights :)
 
-2013 noviembre 17, Oscar Chavarro
+2013 november 17, Oscar Chavarro
   - 42min: texture and non texture versions of constant shader unified
   - 30min: texture support added to gouraud shader
   - 1h: smooth and flat versions of AndroidGLES20SphereRenderer.drawSurface
 
-2013 noviembre 8, Juan Pablo Reyes
+2013 november 8, Juan Pablo Reyes
   - 1h: Fixing the emulator on Eclipse to run OpenGL ES examples on a
     computer without unexpected crashes.
   - 2h: Understanding of renderers code for 3D figures on android, from 
     the sphere implementation. Observations over improvement opportunities.
 
-2013 noviembre 11, Juan Pablo Reyes
+2013 november 11, Juan Pablo Reyes
   - 3h30min: Box and two-radius cylinder (cone, cylinder, etc..) 
     implemented for android. Normals calculation must be verified 
     thoroughly.
 
-2013 noviembre 13, Juan Pablo Reyes
+2013 november 13, Juan Pablo Reyes
   - 20min: Implementing the draw normal methods over the two-radius 
     cylinder class for android.
   - 1h: Fixing android vitral application bug that painted figures with 
@@ -1035,16 +1035,19 @@
   - 1h: Improving the codding of the CylinderRenderer class (less 
     replication, using constants, integrating similar methods, etc)
 
-2013 noviembre 15, Juan Pablo Reyes
+2013 november 15, Juan Pablo Reyes
   - 3h: Understanding of the triangleMesh clases (the view and the model).
   - 1h30min: Implementing the class triangleMeshRenderer for Android
 
-2013 noviembre 19, Oscar Chavarro
+2013 november 19, Oscar Chavarro
   - 56min: testing GUI creation elements on Android.
 
-2013 noviembre 20, Oscar Chavarro
+2013 november 20, Oscar Chavarro
   - 1h: researching android management of options menu
   - 2h: integrating menus and several control options to android test
     application
+
+2013 november 20, Oscar Chavarro
+  - 1h: revisiting documentation.
 
 ===========================================================================

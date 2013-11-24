@@ -27,8 +27,9 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.render.RenderingElement;
 
-public class AndroidGLES20Renderer
+public class AndroidGLES20Renderer extends RenderingElement
 {
     private static String TAG = "GLES20TriangleRenderer";
 

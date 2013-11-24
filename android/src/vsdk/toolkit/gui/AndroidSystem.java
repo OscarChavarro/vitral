@@ -5,7 +5,10 @@ package vsdk.toolkit.gui;
 // Android packages
 import android.view.MotionEvent;
 
-public class AndroidSystem
+// VSDK Classes
+import vsdk.toolkit.gui.PresentationElement;
+
+public class AndroidSystem extends PresentationElement
 {
     public static MouseEvent android2vsdkEvent(MotionEvent eandroid)
     {

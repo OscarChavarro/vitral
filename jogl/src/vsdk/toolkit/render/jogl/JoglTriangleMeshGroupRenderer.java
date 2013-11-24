@@ -57,7 +57,7 @@ public class JoglTriangleMeshGroupRenderer extends JoglRenderer {
     }
 
     /**
-    TO DO: program this!
+    \todo  program this!
     */
     public static void drawWithSelection(GL2 gl, TriangleMeshGroup meshGroup,
                                          RendererConfiguration quality,

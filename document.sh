@@ -1,9 +1,9 @@
 clear
 echo "Remember that you need doxygen and graphviz/dot for this to function!"
-echo "This could take a time of around 11 minutes, please wait..."
+echo "This could take a time of around 3 minutes, please wait..."
 rm -rf doc/html_doxygen
 rm -rf doc/html_javadoc
-#time doxygen doc/_doxygen/doxyfile.config
+time doxygen doc/_doxygen/doxyfile.config
 
 BASIC_CLASSES="./src/vsdk/toolkit/common/*.java ./src/vsdk/toolkit/common/linealAlgebra/*.java ./src/vsdk/toolkit/environment/*.java ./src/vsdk/toolkit/environment/geometry/*.java ./src/vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java ./src/vsdk/toolkit/environment/scene/*.java ./src/vsdk/toolkit/media/*.java ./src/vsdk/toolkit/render/*.java ./src/vsdk/toolkit/gui/*.java src/vsdk/toolkit/processing/*.java"
 

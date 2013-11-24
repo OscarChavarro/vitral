@@ -65,12 +65,12 @@ java.awt.geom.PathIterator class [.SUN2006], only that this one supports
 curves in 3D space, and not just in a 2D plane. The implementation follows the
 parametric curve development derived in Chapter 11 of [FOLE1992].
 
-TO DO: Document in detail the interpretation of point data for each curve type.
-TO DO: Pending to implement some other curve types, like Catmull-Rom.
-TO DO: Include some curve examples and its corresponding data structure in
+\todo  Document in detail the interpretation of point data for each curve type.
+\todo  Pending to implement some other curve types, like Catmull-Rom.
+\todo  Include some curve examples and its corresponding data structure in
       this documentation.
-TO DO: Fix the definition of UNRBSPLINE_MATRIX, to have it divided by 6.
-TO DO: Add evaluateFirstDerivative and evaluateSecondDerivative functions
+\todo  Fix the definition of UNRBSPLINE_MATRIX, to have it divided by 6.
+\todo  Add evaluateFirstDerivative and evaluateSecondDerivative functions
 */
 
 public class ParametricCurve extends Curve {
@@ -187,7 +187,7 @@ public class ParametricCurve extends Curve {
 
     The resulting curve created is the empty curve.
 
-    TO DO: Leave the UNRBSPLINE_MATRIX and CATMULL_ROM_MATRIX matrices 
+    \todo  Leave the UNRBSPLINE_MATRIX and CATMULL_ROM_MATRIX matrices 
     initialized to standard teoretical values, with their scalar constants 
     applied. This implies updating the evaluation methods.
     */
@@ -255,7 +255,7 @@ public class ParametricCurve extends Curve {
     }
 
     /**
-    TO DO: should check after removal of element 0 that if next command is a
+    \todo  should check after removal of element 0 that if next command is a
     BREAK, that command should be also be removed.
     */
     public void removePoint(int pos) {
@@ -342,7 +342,7 @@ public class ParametricCurve extends Curve {
     is to first express the second order quadric as a third order Bezier
     spline, and later evaluate the Bezier spline, as noted on [.FONT2006].
 
-    TO DO: Express this interpolation as a QUAD_MATRIX and similar scheme to
+    \todo  Express this interpolation as a QUAD_MATRIX and similar scheme to
     other points in this class.
     */
     private Vector3D evaluateQuadratic(int nseg, double t)
@@ -594,7 +594,7 @@ public class ParametricCurve extends Curve {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
-    TO DO: Check efficiency for this implementation. Note that for the
+    \todo  Check efficiency for this implementation. Note that for the
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.

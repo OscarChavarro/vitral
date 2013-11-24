@@ -259,7 +259,7 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
     /**
-    TO DO: verify that current contour curve have at least 4 control points
+    \todo  verify that current contour curve have at least 4 control points
     and that first 4 control points are of type HERMITE.
     */
     private void buildGeometryMatricesXYZ_Ferguson() {
@@ -475,7 +475,7 @@ public class ParametricBiCubicPatch extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
 
-    TO DO: implement the method
+    \todo  implement the method
     */
     @Override
     public boolean doIntersection(Ray r) {

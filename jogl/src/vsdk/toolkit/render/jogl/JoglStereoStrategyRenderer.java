@@ -5,7 +5,7 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLCapabilities;
 
-public abstract class JoglStereoStrategyRenderer
+public abstract class JoglStereoStrategyRenderer extends JoglRenderer
 {
     protected boolean swapChannels;
 

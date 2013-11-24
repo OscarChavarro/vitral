@@ -165,7 +165,7 @@ public class Matrix4x4 extends FundamentalEntity
     view volume, the line equations of x and y with respect to z have
     negative slopes.
 
-    TO DO: document better the derivation process for this matrix, including
+    \todo  document better the derivation process for this matrix, including
     drawings and algebra, step by step.
     */
     public void

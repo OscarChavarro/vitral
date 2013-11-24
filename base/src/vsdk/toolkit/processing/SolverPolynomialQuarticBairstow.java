@@ -6,7 +6,7 @@ package vsdk.toolkit.processing;
 @author Leidy Alexandra Lozano Jacome, adapted from
 http://www.mygnet.com
 */
-public class SolverPolynomialQuarticBairstow {
+public class SolverPolynomialQuarticBairstow extends ProcessingElement {
     private double real[];
     private double img[];
 

@@ -13,7 +13,7 @@ import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBPixel;
 
 /**
-TO DO: Current implementation is not well designed. This class' design should
+\todo  Current implementation is not well designed. This class' design should
 be checked to inforce:
   - Interoperability with existing image processing toolkits/frameworks like
     JAI, ITK, Khoros, OpenCV, Matlab+ImageToolbox, ImageMagick+JMagick, GIMP,
@@ -55,7 +55,7 @@ public abstract class ImageProcessing extends ProcessingElement {
     /**
     Given the `input` and `output` previously created images, fills in
     `output`'s space the `this` image using bilinear interpolation.
-    TO DO: worked well only in the growing case. Must add the shrinking
+    \todo  worked well only in the growing case. Must add the shrinking
     case for area averaging.
     */
     public static void resize(Image input, Image output)

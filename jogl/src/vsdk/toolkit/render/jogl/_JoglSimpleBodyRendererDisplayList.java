@@ -19,7 +19,8 @@ There is a trick in this class consisting on making two geometries
 geometries), so this class should be used as a key on a hasmap-like
 data structure. All geometries processed are numbered in succesive order.
 */
-public class _JoglSimpleBodyRendererDisplayList extends JoglRenderer implements Comparable<_JoglSimpleBodyRendererDisplayList>
+public class _JoglSimpleBodyRendererDisplayList extends JoglRenderer
+implements Comparable<_JoglSimpleBodyRendererDisplayList>
 {
     // Key
     private Geometry contentKey;

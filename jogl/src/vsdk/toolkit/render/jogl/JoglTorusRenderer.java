@@ -13,10 +13,10 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Torus;
 
 /**
-@author Leidy Alexandra Lozano Jácome
+@author Leidy Alexandra Lozano Jacome
 */
 
-public class JoglTorusRenderer {
+public class JoglTorusRenderer extends JoglRenderer {
     //= PROGRAM PART 1/2: ATTRIBUTES ==========================================
     /**
     Generate OpenGL/JOGL primitives needed for the rendering of recieved

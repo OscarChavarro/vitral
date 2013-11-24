@@ -9,9 +9,6 @@ package vsdk.toolkit.gui;
 // J2ME classes
 import javax.microedition.lcdui.Canvas;
 
-// VitralSDK classes
-import vsdk.toolkit.gui.KeyEvent;
-
 /**
 This class gives VitralSDK access to GUI operations in the J2meSystem, as
 translation of J2me specific events to VitralSDK generalized / portable

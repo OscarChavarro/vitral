@@ -73,7 +73,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     /**
     This is the answer to problem [MANT1988].14.2.
 
-    TO DO: Check for consistency of `emanatingHalfEdge` pointers for vertices.
+    \todo  Check for consistency of `emanatingHalfEdge` pointers for vertices.
     */
     protected static void cleanup(PolyhedralBoundedSolid s)
     {
@@ -146,7 +146,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
 
     This is the answer to problem [MANT1988].14.1.
 
-    TO DO:: check current assumptions!
+    \todo : check current assumptions!
 
     This protected method is here for exclusive use of subclasses
     `PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
@@ -241,7 +241,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     (larger than 180 degrees) angle. In the first case the method returns
     `false` and `true` for the second case.
     This is an answer to problem [MANT1988].13.6.
-    TO DO: Pending to verify functionality against method proposed by [MANT1988].
+    \todo  Pending to verify functionality against method proposed by [MANT1988].
     This should be a method of `PolyhedralBoundedSolid`, as it is of
     common utility to some other operations.
 

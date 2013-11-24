@@ -227,7 +227,7 @@ public class FunctionalExplicitSurface extends Surface
     Check the general interface contract in superclass method
     Geometry.doIntersection.
 
-    TO DO: Should not delegate work over tesselated geometry version. Should
+    \todo  Should not delegate work over tesselated geometry version. Should
     evaluate directly from algebraic function surface!
     */
     @Override

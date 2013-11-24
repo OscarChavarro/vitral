@@ -23,7 +23,7 @@ import vsdk.toolkit.environment.geometry.Sphere;
 public class JoglSphereRenderer extends JoglRenderer {
 
     /**
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     private static void
     spherePosition(Vector3D p, double theta, double phi, double r)
@@ -34,7 +34,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     /**
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     private static void
     sphereNormal(Vector3D n, double theta, double phi)
@@ -45,7 +45,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     /**
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     private static void
     sphereTangent(Vector3D t, double theta, double phi)
@@ -56,7 +56,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     }
 
     /**
-    TO DO: check this method for efficiency improvement
+    \todo  check this method for efficiency improvement
     */
     private static void
     sphereBinormal(Vector3D b, double theta, double phi)

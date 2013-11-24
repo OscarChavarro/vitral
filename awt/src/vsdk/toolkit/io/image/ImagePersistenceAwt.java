@@ -23,8 +23,9 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.io.PersistenceElement;
 
-public class ImagePersistenceAwt
+public class ImagePersistenceAwt extends PersistenceElement
 {
     public IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
     {

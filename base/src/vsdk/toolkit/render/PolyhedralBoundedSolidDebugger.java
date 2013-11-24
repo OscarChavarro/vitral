@@ -16,7 +16,7 @@ JOGL, it is possible this causes trouble on some platforms. In the event
 of a compiling error due to unavailable JOGL libraries, this class could
 be reprogrammed to return null.
 */
-public abstract class PolyhedralBoundedSolidDebugger
+public abstract class PolyhedralBoundedSolidDebugger extends RenderingElement
 {
     public static PolyhedralBoundedSolidDebugger createOfflineRenderer()
     {

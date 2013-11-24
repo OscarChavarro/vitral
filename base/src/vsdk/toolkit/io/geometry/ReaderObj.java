@@ -105,7 +105,7 @@ The original Wavefront format is not well standarized, so many variations
 could exist. This code currently manages only triangle faces, and interprets
 other polygons to triangle fans.
 
-TO DO: Perhaps "ReaderObj" is not the best name for this class, as in the
+\todo  Perhaps "ReaderObj" is not the best name for this class, as in the
 future should support exporting (writing) operations. It could be renamed
 to something as "PersistenceObj".
 */
@@ -124,7 +124,7 @@ public class ReaderObj extends PersistenceElement
     folder as the mesh file; the same statement can be given about the
     textures and other maps.
 
-    TO DO: should not recieve a filename, but a previously opened stream, to
+    \todo  should not recieve a filename, but a previously opened stream, to
     make it independent of filesystems, and generalize it to URLs or whatever
     other connection.
     */

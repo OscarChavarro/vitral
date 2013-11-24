@@ -119,7 +119,7 @@ public abstract class Image extends MediaEntity
     Given a double value inside the integer limits of this image, this
     method returns a rgb color corresponding to the nearest getPixelRgb.
 
-    TO DO:: implement this method.
+    \todo : implement this method.
     */
     public ColorRgb getColorRgbNearest(double x, double y)
     {

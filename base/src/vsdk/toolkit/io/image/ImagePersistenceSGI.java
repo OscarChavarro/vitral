@@ -27,7 +27,7 @@ This is a factory class intended to create Image entities from binary image
 files in SGI format. It is supposed to implement a persistence schema for
 the SGI image file format, as described in [wHAEB2006].
 
-TO DO: Not all subformats are supported, and no writting operations are
+\todo  Not all subformats are supported, and no writting operations are
       implemented yet.
 */
 public class ImagePersistenceSGI extends PersistenceElement

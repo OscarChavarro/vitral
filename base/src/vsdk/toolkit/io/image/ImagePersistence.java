@@ -35,7 +35,7 @@ import vsdk.toolkit.io.PersistenceElement;
 This class is a front end front which images of various formats can be
 exported and/or imported to/from files.
 
-TO DO: Does this implements a "Builder" design pattern??? A Factory design 
+\todo  Does this implements a "Builder" design pattern??? A Factory design 
       pattern... possibly some of that combined with a Facade design 
       pattern?
  */
@@ -126,7 +126,7 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    TO DO: Do not assume the file format only from the filename extension,
+    \todo  Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
     @param inImageFd - The file respesenting the image
@@ -207,7 +207,7 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    TO DO: Do not assume the file format only from the filename extension,
+    \todo  Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
     @param inImageFd - The file respesenting the image
@@ -349,7 +349,7 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    TO DO: Do not assume the file format only from the filename extension,
+    \todo  Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
     @param inImageFd - The file respesenting the image

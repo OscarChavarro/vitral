@@ -335,7 +335,7 @@ public class Camera extends Entity
     POST:
       - left queda normalizado
       - up queda normalizado
-    TO DO: Document the way in which vectors are calculated, acording to
+    \todo  Document the way in which vectors are calculated, acording to
     the projection transformation.
     */
     
@@ -850,7 +850,7 @@ public class Camera extends Entity
     plane passing through eye position of the camera and paralel to near 
     plane! In this case, W gets 0 value, and points are not correctly
     classified.
-    TO DO:: check this method... currently disabled due to non working cases!
+    \todo : check this method... currently disabled due to non working cases!
     */
     private int calculateOutcodeBits(Vector4D p)
     {

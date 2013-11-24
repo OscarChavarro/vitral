@@ -162,7 +162,7 @@ public abstract class Geometry extends Entity {
     public abstract double[] getMinMax();
 
     /**
-    TO DO: This method should be abstract, forcing all subclasses to define it.
+    \todo  This method should be abstract, forcing all subclasses to define it.
     The design of this method could change in future.
     */
     public TriangleMeshGroup exportToTriangleMeshGroup()
