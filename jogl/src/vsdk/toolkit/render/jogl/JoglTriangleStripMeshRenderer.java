@@ -64,7 +64,7 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
 
-    @todo Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
+    TO DO: Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
     */
     public static void
     draw(GL2 gl, TriangleStripMesh mesh, RendererConfiguration quality, boolean flip)

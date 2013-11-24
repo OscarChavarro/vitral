@@ -1598,7 +1598,7 @@ public class PolyhedralBoundedSolid extends Solid {
     This is not well understood for cases of intersection with face limits
     (vertices and edges). In some cases, computation of quantitative
     invisivility seems to be failing.
-    @todo check well all limiting cases.
+    TO DO: check well all limiting cases.
     */
     @Override
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
@@ -1692,7 +1692,7 @@ public class PolyhedralBoundedSolid extends Solid {
     it is required that faces of solids be "maximal", i.e. that all coplanar
     neighbor faces have been combined, and all "inessential" edges have been
     removed, as noted on section [MANT1988].15.5.
-    @todo current method does not fix faces that lies entirely over other
+    TO DO: current method does not fix faces that lies entirely over other
     faces.
     */
     public void maximizeFaces()

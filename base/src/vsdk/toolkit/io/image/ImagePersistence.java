@@ -35,7 +35,7 @@ import vsdk.toolkit.io.PersistenceElement;
 This class is a front end front which images of various formats can be
 exported and/or imported to/from files.
 
-@todo Does this implements a "Builder" design pattern??? A Factory design 
+TO DO: Does this implements a "Builder" design pattern??? A Factory design 
       pattern... possibly some of that combined with a Facade design 
       pattern?
  */
@@ -126,10 +126,10 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    @todo Do not assume the file format only from the filename extension,
+    TO DO: Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
-    @param imagen - The file respesenting the image
+    @param inImageFd - The file respesenting the image
     @return An RGBAImage entity that contains the image loaded in memory.
 
     Will change:
@@ -207,10 +207,10 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    @todo Do not assume the file format only from the filename extension,
+    TO DO: Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
-    @param imagen - The file respesenting the image
+    @param inImageFd - The file respesenting the image
     @return An RGBImage entity that contains the image loaded in memory.
 
     Will change:
@@ -349,10 +349,10 @@ public class ImagePersistence extends PersistenceElement
     method tries to recognize the file format and load the contents of it
     to the image.
 
-    @todo Do not assume the file format only from the filename extension,
+    TO DO: Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
-    @param imagen - The file respesenting the image
+    @param inImageFd - The file respesenting the image
     @return An IndexedColorImage entity that contains the image loaded in memory.
 
     Will change:

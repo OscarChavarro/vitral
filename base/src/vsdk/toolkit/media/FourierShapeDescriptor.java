@@ -17,7 +17,7 @@ import vsdk.toolkit.common.VSDK;
 /**
 Stores the feature vector for a set of 32 elements
 around a volume or image as described in [FUNK2003]
-@todo Generalize for variable number of elements and harmonics
+TO DO: Generalize for variable number of elements and harmonics
 */
 public class FourierShapeDescriptor extends ShapeDescriptor
 {

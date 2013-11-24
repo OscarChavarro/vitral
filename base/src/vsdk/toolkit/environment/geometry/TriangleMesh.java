@@ -53,12 +53,12 @@ making any change here will impact highly that code.
 This class does not ensure nor impose data integrity, and this will be the 
 sole responsability of the cooperating utilities and applications.
 
-@todo Document more this class (include samples and data structure diagrams)
-@todo Generalize the material usage model, to conform similarly to current
+TO DO: Document more this class (include samples and data structure diagrams)
+TO DO: Generalize the material usage model, to conform similarly to current
       texture usage (i.e. allow multiple materials per mesh)
-@todo Make sure this is always using good names with complete words on it
+TO DO: Make sure this is always using good names with complete words on it
       (rename methods and attributes)
-@todo Extend the model to allow dangling edges
+TO DO: Extend the model to allow dangling edges
 */
 public class TriangleMesh extends Surface {
 
@@ -200,7 +200,7 @@ public class TriangleMesh extends Surface {
     }
 
     /**
-    @todo copy full structure!
+    TO DO: copy full structure!
     */
     @Override
     public TriangleMesh clone()
@@ -1045,7 +1045,7 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
-    @todo Check efficiency for this implementation. Note that for the
+    TO DO: Check efficiency for this implementation. Note that for the
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.

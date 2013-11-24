@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.FixedBackground;
 public class JoglFixedBackgroundRenderer extends JoglRenderer 
 {
     /**
-    @todo in the case of equal size, polygon rendering should not be used,
+    TO DO: in the case of equal size, polygon rendering should not be used,
     direct texel to pixel copy should be used...
     */
     public static void draw(GL2 gl, FixedBackground background)

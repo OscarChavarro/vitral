@@ -50,7 +50,7 @@ as described in [BLIN1978b].
 This class is appropiate to play a role of "concrete strategy" in
 a "Strategy" design pattern.
 
-@todo Upgrade ArrayList management to Java 1.5 code style (typed templates)
+TO DO: Upgrade ArrayList management to Java 1.5 code style (typed templates)
 */
 public class Raytracer extends RenderingElement {
     private Vector3D static_tmp;
@@ -81,7 +81,7 @@ public class Raytracer extends RenderingElement {
     and its combination with geometric transformations. (This must be taken
     into account in the reflection and refraction calculations)
 
-    @todo Check the inconsistent use of tangent vector in bump mapping
+    TO DO: Check the inconsistent use of tangent vector in bump mapping
     calculation... it is non sense to always be <0, 1, 0>.
     */
     private void evaluateIlluminationModel(

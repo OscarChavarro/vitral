@@ -111,7 +111,7 @@ public class TriangleStripMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
 
-    @todo Method not implemented!
+    TO DO: Method not implemented!
     */
     @Override
     public boolean
@@ -123,7 +123,7 @@ public class TriangleStripMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
 
-    @todo Method not implemented!
+    TO DO: Method not implemented!
     */
     @Override
     public void

@@ -34,7 +34,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
 
-    @todo Do not turn off lighting here, that's a wrongly supposed used.
+    TO DO: Do not turn off lighting here, that's a wrongly supposed used.
     */
     static public void draw(GL2 gl, ParametricCurve curve, 
                             Camera c, RendererConfiguration q,

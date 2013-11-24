@@ -29,7 +29,7 @@ making any change here will impact highly that code.
 This class does not ensure nor impose data integrity, and this will be the 
 sole responsability of the cooperating utilities and applications.
 
-@todo Document more this class (include samples and data structure diagrams)
+TO DO: Document more this class (include samples and data structure diagrams)
 */
 public class QuadMesh extends Surface {
 

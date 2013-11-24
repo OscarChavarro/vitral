@@ -57,7 +57,7 @@ public class AutoStereogramGenerator
     The method builds a SIRD (autostereogram) over repetitions of the
     `tilePattern` image, wich must be repeatable.
 
-    @requires result and depthMap are of equal size
+    Requires result and depthMap to be of equal size
     */
     public static void generate(
         RGBImage result, RGBImage tilePattern, ZBuffer depthMap, 

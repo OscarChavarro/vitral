@@ -239,7 +239,6 @@ public class AlgebraicExpression extends FundamentalEntity
     }
 
     /**
-    @return true if expression was compiled successfully, false if not.
     */
     public void setExpression(String regexp) throws AlgebraicExpressionException
     {

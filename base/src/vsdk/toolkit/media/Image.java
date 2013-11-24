@@ -92,7 +92,7 @@ public abstract class Image extends MediaEntity
     width minus 1
     @param y - y cooordinate of desired pixel, must be between 0 and image
     height minus 1
-    @return the RGBPixel corresponding to requested pixel coordinate
+    Modifies the RGBPixel corresponding to requested pixel coordinate
     inside the image.
     */
     public abstract void getPixelRgb(int x, int y, RGBPixel p);
@@ -119,7 +119,7 @@ public abstract class Image extends MediaEntity
     Given a double value inside the integer limits of this image, this
     method returns a rgb color corresponding to the nearest getPixelRgb.
 
-    @todo: implement this method.
+    TO DO:: implement this method.
     */
     public ColorRgb getColorRgbNearest(double x, double y)
     {

@@ -445,7 +445,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     Current implementation only takes into account the containing plane.
     @return 1 if this face is visible from camera c, -1 if is not visible and
     0 if is tangent to it.
-    @todo: generalize to plane. This is returning "1" in cases where should
+    TO DO:: generalize to plane. This is returning "1" in cases where should
     return "-1".
     */
     public int isVisibleFrom(Camera c)

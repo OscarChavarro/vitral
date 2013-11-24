@@ -38,7 +38,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     private static IntBuffer triangleIndicesBuffer = null;
 
     /**
-    @todo program this!
+    TO DO: program this!
     */
     public static void drawWithSelection(GL2 gl, TriangleMesh mesh,
                                          RendererConfiguration quality, 
@@ -51,7 +51,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     Generate OpenGL/JOGL primitives needed for the rendering of recieved
     Geometry object.
 
-    @todo Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
+    TO DO: Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
     */
     public static void
     draw(GL2 gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {

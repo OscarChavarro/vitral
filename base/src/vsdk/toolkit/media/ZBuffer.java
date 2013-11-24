@@ -125,8 +125,6 @@ public class ZBuffer extends MediaEntity {
     /**
     This method converts this Z buffer into an RGBImage using the specified
     ColorPalette
-    @param p The color palete used to convert this z buffer into an RGBImage
-    @return An RGBAImage that represents this z buffer
     */
     public IndexedColorImage exportIndexedColorImage() {
         IndexedColorImage image = new IndexedColorImage();

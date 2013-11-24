@@ -725,7 +725,7 @@ format, and several files exists today persisted in this format.
 This is currently a Java/VitralSDK based implementation of the algorithms
 and data structures as described in [PITT1994], [FERC1996] and [VANV1997].
 
-@todo Perhaps "Reader3ds" is not the best name for this class, as in the
+TO DO: Perhaps "Reader3ds" is not the best name for this class, as in the
 future should support exporting (writing) operations. It could be renamed
 to something as "Persistence3ds". Some chunks are not being processed.
 */
@@ -1085,7 +1085,7 @@ public class Reader3ds extends PersistenceElement
     }
 
     /**
-    @todo Process missing chunks. (skipped)
+    TO DO: Process missing chunks. (skipped)
     */
     private static void processChunk(
         InputStream is, 

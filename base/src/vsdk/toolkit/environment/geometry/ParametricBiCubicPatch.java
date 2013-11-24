@@ -259,7 +259,7 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
     /**
-    @todo verify that current contour curve have at least 4 control points
+    TO DO: verify that current contour curve have at least 4 control points
     and that first 4 control points are of type HERMITE.
     */
     private void buildGeometryMatricesXYZ_Ferguson() {
@@ -475,7 +475,7 @@ public class ParametricBiCubicPatch extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
 
-    @todo implement the method
+    TO DO: implement the method
     */
     @Override
     public boolean doIntersection(Ray r) {
@@ -495,7 +495,7 @@ public class ParametricBiCubicPatch extends Surface {
     convertion to a Mesh could be managed by the user/programmer directly.
     WARNING: The numerical approach is really, really slow... 
 
-    @todo implement the method
+    TO DO implement the method
     */
     @Override
     public void
@@ -508,7 +508,7 @@ public class ParametricBiCubicPatch extends Surface {
     Returns an approximate bounding volume minmax for current patch, from
     the minmax of its contour curve.
 
-    @bug current contour curve asumption is not valid
+    BUG: current contour curve asumption is not valid
     */
     @Override
     public double[] getMinMax() {

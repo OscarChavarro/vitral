@@ -14,7 +14,7 @@ The RendererConfiguration class is used to indicate some attributes in which a
 geometry is to be displayed in screen. The RendererConfiguration class is not
 responsible of display any data, it is just an a suggestion on how to draw it.
 
-@todo: Rename to 'RenderConfiguration' or something similar...
+TO DO:: Rename to 'RenderConfiguration' or something similar...
 */
 public class RendererConfiguration extends FundamentalEntity /*implements Comparable <RendererConfiguration>*/ {
 

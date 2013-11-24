@@ -304,7 +304,7 @@ public class SwingGuiRenderer {
      * The builded menu is supposed to be used as a menubar inside a swing
      * JFrame.
      *
-     * @todo: permit the selection of a diferent name menu
+     * TO DO:: permit the selection of a diferent name menu
      */
     public static JMenuBar buildMenubar(Gui context, String name, ActionListener executor) {
         JMenu widgetPopup;
