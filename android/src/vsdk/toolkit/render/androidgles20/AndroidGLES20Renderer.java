@@ -36,8 +36,9 @@ public class AndroidGLES20Renderer extends RenderingElement
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
     
-    public static final int mode3Position3Normal3UV = 0;
+    public static final int mode3Position3Normal2UV = 0;
     public static final int mode3Position3Color = 1;
+    public static final int mode3Position3Color3Normal2UV = 2;
 
     // Common values
     protected static final int FLOAT_SIZE_IN_BYTES = 4;
@@ -332,10 +333,10 @@ public class AndroidGLES20Renderer extends RenderingElement
             //throw new RuntimeException(
             //    "Could not get uniform location for withTexture");
         }
-	else {
+        else {
             GLES20.glUniform1i(withTextureParam, 
                 qualitySelection.isTextureSet()?1:0);
-	}
+        }
 
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
@@ -748,36 +749,65 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glDrawArrays");
     }
 
+    protected static void drawVertices3Position3Normal(
+            FloatBuffer verticesBufferedArray,
+            int primitive, int numberOfElements, int vertexSizeInBytes)
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+
+        // glNormal3d
+        if ( NObjectParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(NObjectParam);
+            checkGlError("glEnableVertexAttribArray NObjectParam");
+            GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer NObjectParam");
+        }
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
+
     protected static void drawVertices3Position3Color(
             FloatBuffer verticesBufferedArray,
             int primitive, int numberOfElements, int vertexSizeInBytes)
-        {
-            //-----------------------------------------------------------------
-            // Send geometry to GPU
-            // glVertex3d
-            verticesBufferedArray.position(0);
-            GLES20.glEnableVertexAttribArray(PObjectParam);
-            checkGlError("glEnableVertexAttribArray PObjectParam");
-            GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
-                                 false, vertexSizeInBytes, verticesBufferedArray);
-            checkGlError("glVertexAttribPointer PObject");
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
 
-            // glNormal3d
-            if ( NObjectParam != -1 ) {
-                verticesBufferedArray.position(3);
-                GLES20.glEnableVertexAttribArray(NObjectParam);
-                checkGlError("glEnableVertexAttribArray NObjectParam");
-                GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
-                                 false, vertexSizeInBytes, verticesBufferedArray);
-                checkGlError("glVertexAttribPointer NObjectParam");
-            }
-
-
-            //-----------------------------------------------------------------
-            // Draw geometry
-            GLES20.glDrawArrays(primitive, 0, numberOfElements);
-            checkGlError("glDrawArrays");
+        // glColor3d
+        if ( emissionColorParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(emissionColorParam);
+            checkGlError("glEnableVertexAttribArray emissionColorParam");
+            GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer emissionColorParam");
         }
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
     
     protected static void drawVertices3Position3Color3Normal2Uv(
         FloatBuffer verticesBufferedArray,

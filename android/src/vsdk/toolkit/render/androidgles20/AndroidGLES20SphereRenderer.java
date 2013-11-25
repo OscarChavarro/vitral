@@ -81,7 +81,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         Vector3D p = new Vector3D();
         ColorRgb c = q.getWireColor();
 
-        System.out.println("COLOR: " + c);
+        //System.out.println("COLOR: " + c);
 
         for( int i = 1; i < stacks - 1; i++ ) {
             //------------------------------------------------------------
