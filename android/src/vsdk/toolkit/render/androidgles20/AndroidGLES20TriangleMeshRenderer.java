@@ -17,7 +17,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer{
 		int index ;
 		float vertexDataArray[];
 		//we'll use vertex with 8 points of information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 11;
 		
 		int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES*vertexFloatElements;
 				
@@ -31,7 +31,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer{
 			index+=3*vertexFloatElements;
 			
 		}
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (nMesh.getNumTriangles())*3, GLES20.GL_TRIANGLES, mode3Position3Normal3UV);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (nMesh.getNumTriangles())*3, GLES20.GL_TRIANGLES, mode3Position3Normal2UV);
 	}
 	
 	
@@ -44,6 +44,10 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer{
 			vertexDataArray[index] = (float) nMesh.getVertexPositions()[p*3]; 	index++;
 			vertexDataArray[index] = (float) nMesh.getVertexPositions()[(p*3)+1]; index++;
 			vertexDataArray[index] = (float) nMesh.getVertexPositions()[(p*3)+2]; index++;
+			
+			vertexDataArray[index] = (float) nMesh.getVertexNormals()[p*3]; 	index++;
+			vertexDataArray[index] = (float) nMesh.getVertexNormals()[(p*3)+1]; index++;
+			vertexDataArray[index] = (float) nMesh.getVertexNormals()[(p*3)+2]; index++;
 			
 			vertexDataArray[index] = (float) nMesh.getVertexNormals()[p*3]; 	index++;
 			vertexDataArray[index] = (float) nMesh.getVertexNormals()[(p*3)+1]; index++;
@@ -69,7 +73,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer{
 		//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
 		//method is using according to the way they should be drawn.
 		switch(drawingMode){
-		case mode3Position3Normal3UV:  drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+		case mode3Position3Normal2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
 			break;
 		case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
 			break;
@@ -81,13 +85,26 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer{
 
 	public static void draw(TriangleMesh nMesh, Camera nCamera, RendererConfiguration nRendererConfiguration){
 		
+		if(nRendererConfiguration.isTextureSet())
+			 glEnable(GL_TEXTURE_2D);
+		 else
+			 glDisable(GL_TEXTURE_2D);
+
+		
+		//Ilumination IFs
+		if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
+			setShadingType(nRendererConfiguration.SHADING_TYPE_NOLIGHT);
+		else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
+			setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+		else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)
+			setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+		
+		
 		if(nRendererConfiguration.isPointsSet());
 		//	drawPoints(nMesh, nRendererConfiguration);
 		if(nRendererConfiguration.isWiresSet());
 		//	drawWires(nMesh, nRendererConfiguration);
-		if(nRendererConfiguration.isSurfacesSet()){
-			 glEnable(GL_TEXTURE_2D);
-			setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+		if(nRendererConfiguration.isSurfacesSet()){ 
 			drawMesh(nMesh, nRendererConfiguration);
 		}
 		if(nRendererConfiguration.isNormalsSet());

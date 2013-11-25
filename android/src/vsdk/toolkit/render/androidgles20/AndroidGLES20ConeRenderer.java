@@ -34,7 +34,8 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 				//This array will contain the information of every vertex to draw them later
 				float vertexDataArray[];
 				//THe size of a vertex with all its information
-				int vertexFloatElements = 8;
+				int vertexFloatElements = 11;
+				
 				
 				
 				//Size of the vertex in byte
@@ -69,7 +70,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 				
 							
 				//Sending the data to the renderer
-				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (slices+1)*2, GLES20.GL_TRIANGLE_STRIP, mode3Position3Normal3UV);
+				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (slices+1)*2, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
 				
 				
 				//------------------------------------------------------------------------
@@ -84,6 +85,10 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = 0.0f; index++;
+
+				vertexDataArray[index] = 0.0f; index++;
+				vertexDataArray[index] = 0.0f; index++;
+				vertexDataArray[index] = -1.0f; index++;
 				
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = 0.0f; index++;
@@ -102,7 +107,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 										
 				}
 				
-				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices+2, GLES20.GL_TRIANGLE_FAN, mode3Position3Normal3UV);
+				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices+2, GLES20.GL_TRIANGLE_FAN, mode3Position3Color3Normal2UV);
 				
 				//Top Cap
 
@@ -112,6 +117,10 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = (float)(nCone.getHeight()); index++;
+
+				vertexDataArray[index] = 0.0f; index++;
+				vertexDataArray[index] = 0.0f; index++;
+				vertexDataArray[index] = 1.0f; index++;
 				
 				vertexDataArray[index] = 0.0f; index++;
 				vertexDataArray[index] = 0.0f; index++;
@@ -130,7 +139,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 										
 				}
 				
-				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices+2, GLES20.GL_TRIANGLE_FAN, mode3Position3Normal3UV);
+				sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices+2, GLES20.GL_TRIANGLE_FAN, mode3Position3Color3Normal2UV);
 	}
 	
 	
@@ -156,6 +165,11 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		else
 			normal = new Vector3D(0.0f, 0.0f, -1.0f);
 		
+		//Putting the colors
+		
+		vertexDataArray[index] = (float) normal.x; index++;
+		vertexDataArray[index] = (float) normal.y; index++;
+		vertexDataArray[index] = (float) normal.z; index++;
 		
 		//Putting the normals	
 		
@@ -167,6 +181,33 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		vertexDataArray[index] = (float) (theta/(2*Math.PI)); index++;
 		int val = (int) (height/nCone.getHeight());
 		vertexDataArray[index] = (float) val;
+
+	}
+	
+	private static void drawSimpleVertex(Cone nCone, Vector3D color, double radius, double height, double theta,float[] vertexDataArray, int index,	RendererConfiguration nRendererConfiguration, int element) {
+		
+		double cosTheta = Math.cos(theta);
+		double sinTheta = Math.sin(theta);
+		
+		//Putting the coordinates
+		vertexDataArray[index] = (float) (radius*cosTheta); index++;
+		vertexDataArray[index] = (float) (radius*sinTheta); index++;
+		vertexDataArray[index] = (float) (height); index++;
+		
+		Vector3D normal;
+		if(element == BODY)
+			normal = calculateVectorBodyNormal(nCone, cosTheta, sinTheta);
+		else if(element == TOP_CAP)
+			normal = new Vector3D(0.0f, 0.0f, 1.0f);
+		else
+			normal = new Vector3D(0.0f, 0.0f, -1.0f);
+		
+		//Putting the colors
+		
+		vertexDataArray[index] = (float) color.x; index++;
+		vertexDataArray[index] = (float) color.y; index++;
+		vertexDataArray[index] = (float) color.z; index++;
+			
 
 	}
 	
@@ -182,8 +223,9 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		//This array will contain the information of every vertex to draw them later
 		float vertexDataArray[];
 		//THe size of a vertex with all its information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 6;
 		
+		Vector3D color = new Vector3D(1, 0, 0);
 		
 		//Size of the vertex in byte
 		int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES*vertexFloatElements;
@@ -207,12 +249,12 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		{
 			//calculating the angle
 			theta = i*f;
-			drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+			drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
 			index+=vertexFloatElements;
 		}
 		
 		//Sending the data to the renderer
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Normal3UV);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Color);
 
 		//drawing the lines from the center to the edge
 		vertexDataArray = new float[slices*2*vertexFloatElements];
@@ -225,19 +267,16 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 			vertexDataArray[index] = 0; index++;
 			vertexDataArray[index] = 0; index++;
 			
-			vertexDataArray[index] = 0.0f; index++;
-			vertexDataArray[index] = 0.0f; index++;
-			vertexDataArray[index] = -1.0f; index++;
-			
-			vertexDataArray[index] = 1.0f; index++;
-			vertexDataArray[index] = 1.0f; index++;
-			
+			vertexDataArray[index] = (float)color.x; index++;
+			vertexDataArray[index] = (float)color.y; index++;
+			vertexDataArray[index] = (float)color.z; index++;
+						
 			theta = i*f;
-			drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+			drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
 			index+=vertexFloatElements;
 		}
 		
-			sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices*2, GLES20.GL_LINES, mode3Position3Normal3UV);
+			sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices*2, GLES20.GL_LINES, mode3Position3Color);
 		
 		//WIRING THE TOP CAP
 
@@ -248,13 +287,12 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		{
 			//calculating the angle
 			theta = i*f;
-			drawVertex(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);
+			drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);
 			index+=vertexFloatElements;
 		}
 							
 		//Sending the data to the renderer
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Normal3UV);
-		
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Color);		
 		
 		
 		//drawing the lines from the center to the edge
@@ -268,18 +306,16 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 			vertexDataArray[index] = 0.0f; index++;
 			vertexDataArray[index] = (float)nCone.getHeight(); index++;
 			
-			vertexDataArray[index] = 0.0f; index++;
-			vertexDataArray[index] = 0.0f; index++;
-			vertexDataArray[index] = 1.0f; index++;
+			vertexDataArray[index] = (float)color.x; index++;
+			vertexDataArray[index] = (float)color.y; index++;
+			vertexDataArray[index] = (float)color.z; index++;
 			
-			vertexDataArray[index] = 1.0f; index++;
-			vertexDataArray[index] = 1.0f; index++;
 			
 			theta = i*f;
-			drawVertex(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);			
+			drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);			
 			index+=vertexFloatElements;		
 		}
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2*slices, GLES20.GL_LINES, mode3Position3Normal3UV);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2*slices, GLES20.GL_LINES, mode3Position3Color);
 	
 		
 		//THIS IS THE BODY IN WIRE FRAME
@@ -293,13 +329,13 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		{
 			//calculating the angle
 			theta = i*f;
-			drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+			drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
 			index+=vertexFloatElements;
-			drawVertex(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
+			drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
 			index+=vertexFloatElements;
 		}
 		
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices*2, GLES20.GL_LINE_STRIP, mode3Position3Normal3UV);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices*2, GLES20.GL_LINE_STRIP, mode3Position3Color);
 			
 	}
 	
@@ -316,8 +352,9 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		//This array will contain the information of every vertex to draw them later
 		float vertexDataArray[];
 		//THe size of a vertex with all its information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 6;
 		
+		Vector3D color = new Vector3D(1, 0, 0);
 		
 		//Size of the vertex in byte
 		int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES*vertexFloatElements;
@@ -343,15 +380,15 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 		{
 			//calculating the angle
 			theta = i*f;
-			drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+			drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
 			index+=vertexFloatElements;
-			drawVertex(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
+			drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
 			index+=vertexFloatElements;
 		}
 		
 					
 		//Sending the data to the renderer
-		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_POINTS, mode3Position3Normal3UV);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices*2, GLES20.GL_POINTS, mode3Position3Color);
 
 	}
 	
@@ -581,7 +618,9 @@ private static void sendVertexesToDraw(float[] vertexDataArray, int vertexSizeIn
 	//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
 	//method is using according to the way they should be drawn.
 	switch(drawingMode){
-	case mode3Position3Normal3UV:  drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
+	case mode3Position3Color3Normal2UV: drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
+		break;
+	case mode3Position3Normal2UV:  drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
 		break;
 	case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
 		break;
@@ -599,19 +638,31 @@ public static void draw(Cone nCone, Camera nCamera, RendererConfiguration nRende
 }
 
 public static void draw(Cone nCone, Camera nCamera, RendererConfiguration nRendererConfiguration, int slices){
-	if(nRendererConfiguration.isPointsSet())
-		drawPoints(nCone, nRendererConfiguration, slices);
-	if(nRendererConfiguration.isWiresSet())
-		drawWires(nCone, nRendererConfiguration, slices);
-	if(nRendererConfiguration.isSurfacesSet())
-	{
+
+
+	
+	if(nRendererConfiguration.isTextureSet())
+		 glEnable(GL_TEXTURE_2D);
+	 else
 		 glDisable(GL_TEXTURE_2D);
+
+	
+	//Ilumination IFs
+	if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
+		setShadingType(nRendererConfiguration.SHADING_TYPE_NOLIGHT);
+	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
 		setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-		drawCone(nCone, nRendererConfiguration, slices);
-	}
-	if(nRendererConfiguration.isNormalsSet())
-		drawNormals(nCone, nRendererConfiguration, slices);
+	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)
+		setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+	
+	System.out.println("===========IS WIRES SEt? " + nRendererConfiguration.isWiresSet());
+	
+		if(nRendererConfiguration.isPointsSet())
+			drawPoints(nCone, nRendererConfiguration, slices);
+		if(nRendererConfiguration.isWiresSet())
+			drawWires(nCone, nRendererConfiguration, slices);
+		if(nRendererConfiguration.isSurfacesSet())
+			drawCone(nCone, nRendererConfiguration, slices);
+
 }
-
-
 }

@@ -29,7 +29,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		//This array will contain the information of every vertex to draw them later
 		float vertexDataArray[];
 		//THe size of a vertex with all its information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 11;
 		
 		
 		//Size of the vertex in byte
@@ -76,14 +76,8 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		
 		//Sending the data to the renderer
 		
-		FloatBuffer verticesBufferedArray;
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-			ByteOrder.nativeOrder()).asFloatBuffer();
-		
-		verticesBufferedArray.put(vertexDataArray);
-		
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_TRIANGLE_STRIP, 10, vertexSizeInBytes);
 		
 		//------------------------------------------------------------------------
 		//  BOX CAPS
@@ -103,12 +97,8 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		drawVertex(- 0.5,  0.5, - 0.5, (double)0, (double)1/2, color, vertexDataArray, index, nRendererConfiguration);
 		
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
 			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_TRIANGLE_STRIP, 4, vertexSizeInBytes);		
 		
 		//Lower Cap
 
@@ -124,13 +114,8 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		drawVertex(- 0.5,  - 0.5, - 0.5, (double)1, (double)1/2, color, vertexDataArray, index, nRendererConfiguration);
 		
 		
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
 			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_TRIANGLE_STRIP, 4, vertexSizeInBytes);
 	}
 
 	/**
@@ -143,15 +128,14 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		vertexDataArray[index] = (float)y; index++;
 		vertexDataArray[index] = (float)z; index++;
 		
-		/**
-		//VertexColor
-		vertexDataArray[index] = (float)color.x; index++;
-		vertexDataArray[index] = (float)color.y; index++;
-		vertexDataArray[index] = (float)color.z; index++;
-		**/
 		//Vertex normals		
 		Vector3D normal = new Vector3D(x, y, z);
 		normal.normalize();
+		
+		//VertexColor
+		vertexDataArray[index] = (float)normal.x; index++;
+		vertexDataArray[index] = (float)normal.y; index++;
+		vertexDataArray[index] = (float)normal.z; index++;
 		
 		vertexDataArray[index] = (float)normal.x; index++;
 		vertexDataArray[index] = (float)normal.y; index++;
@@ -161,6 +145,22 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		
 		vertexDataArray[index] = (float)u; index++;
 		vertexDataArray[index] = (float)v; index++;
+				
+	}
+	
+private static void drawSimpleVertex(double x, double y, double z, Vector3D color, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration) {
+		
+		//Vertex coordinates
+		vertexDataArray[index] = (float)x; index++;
+		vertexDataArray[index] = (float)y; index++;
+		vertexDataArray[index] = (float)z; index++;
+
+		
+		//VertexColor
+		vertexDataArray[index] = (float)color.x; index++;
+		vertexDataArray[index] = (float)color.y; index++;
+		vertexDataArray[index] = (float)color.z; index++;
+		
 				
 	}
 
@@ -179,7 +179,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		//This array will contain the information of every vertex to draw them later
 		float vertexDataArray[];
 		//THe size of a vertex with all its information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 6;
 		
 		
 		//Size of the vertex in byte
@@ -195,127 +195,86 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		vertexDataArray = new float[4*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  0.5,  0.5, (double)1/4, (double)0, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  0.5,  0.5, (double)1/2, (double)0, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  0.5, - 0.5, (double)1/2, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  0.5, - 0.5, (double)1/4, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5, - 0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		
 
-		FloatBuffer verticesBufferedArray;
-
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_LOOP, 4, vertexSizeInBytes);		
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, mode3Position3Color);
 		
 		//Lower Cap
 
 		vertexDataArray = new float[4*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  - 0.5,  0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5,  0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5, - 0.5, (double)1/2, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5, - 0.5, (double)1/4, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		
 		
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_LOOP, 4, vertexSizeInBytes);
-		
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, mode3Position3Color);		
 //line 1
 		
 		vertexDataArray = new float[2*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  0.5,  0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5,  0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 	
 		
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_STRIP, 2, vertexSizeInBytes);
-
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
 	//line 2
 
 		vertexDataArray = new float[2*vertexFloatElements];
 		index = 0;
 		
-		drawVertex(- 0.5,  0.5,  0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5,  0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 	
-		
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_STRIP, 2, vertexSizeInBytes);
-		
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);		
 //line 3
 		
 		vertexDataArray = new float[2*vertexFloatElements];
 		index = 0;
 		
-		drawVertex(- 0.5,  0.5, - 0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5, - 0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 	
 		
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_STRIP, 2, vertexSizeInBytes);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
 		
 //line 4
 		
 		vertexDataArray = new float[2*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  0.5, - 0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5, - 0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 	
 		
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_LINE_STRIP, 2, vertexSizeInBytes);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
 				
 	}
 
-	private static void drawPoints(Box nBox,
-			RendererConfiguration nRendererConfiguration) {
+	private static void drawPoints(Box nBox, RendererConfiguration nRendererConfiguration) {
 		//One Quad_Strip for the body
 		VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
 		//8 Quads covering the body of the box
@@ -326,9 +285,9 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		//This array will contain the information of every vertex to draw them later
 		float vertexDataArray[];
 		//THe size of a vertex with all its information
-		int vertexFloatElements = 8;
+		int vertexFloatElements = 6;
 		
-		Vector3D color = new Vector3D(1, 1, 1);
+		Vector3D color = new Vector3D(1, 0, 0);
 		
 		//Size of the vertex in byte
 		int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES*vertexFloatElements;
@@ -347,41 +306,34 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		//WARNING: UV Mapping coordinates are hard coded!!
 		
 		//Face 1
-		drawVertex( 0.5,  0.5,  0.5, (double)0, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5,  0.5, (double)0, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  0.5,  0.5, (double)3/4, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5,  0.5, (double)3/4, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 		//Face 2
-		drawVertex(- 0.5,  0.5, - 0.5, (double)1/2, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5, - 0.5, (double)1/2, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 		//Face 3
-		drawVertex( 0.5,  0.5, - 0.5, (double)1/4, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5, - 0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5, - 0.5, (double)1/4, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
 		//Face 4
-		drawVertex( 0.5,  0.5,  0.5, (double)0, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5,  0.5, (double)0, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 
 		
 		
 		//Sending the data to the renderer
 		
-		FloatBuffer verticesBufferedArray;
-		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-			ByteOrder.nativeOrder()).asFloatBuffer();
-		
-		verticesBufferedArray.put(vertexDataArray);
-		
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_TRIANGLE_STRIP, 10, vertexSizeInBytes);
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_POINTS, mode3Position3Color);
 		
 		//------------------------------------------------------------------------
 		//  BOX CAPS
@@ -392,89 +344,87 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
 		vertexDataArray = new float[4*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  0.5,  0.5, (double)1/2, (double)0, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  0.5,  0.5, (double)1/4, (double)0, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5,  0.5,  color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  0.5, - 0.5, (double)1/4, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  0.5, - 0.5, (double)1/2, (double)1/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_TRIANGLE_STRIP, 4, vertexSizeInBytes);		
-		
-		//Lower Cap
-
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, mode3Position3Color);
+				
 		vertexDataArray = new float[4*vertexFloatElements];
 		index = 0;
 		
-		drawVertex( 0.5,  - 0.5,  0.5, (double)1/2, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5,  0.5, (double)1/4, (double)1, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex( 0.5,  - 0.5, - 0.5, (double)1/4, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex( 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		index+=vertexFloatElements;
-		drawVertex(- 0.5,  - 0.5, - 0.5, (double)1/2, (double)2/3, color, vertexDataArray, index, nRendererConfiguration);
+		drawSimpleVertex(- 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
 		
 		
+		sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, mode3Position3Color);
 		
-		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-				ByteOrder.nativeOrder()).asFloatBuffer();
-			
-		verticesBufferedArray.put(vertexDataArray);
-			
-		drawVertices3Position3Normal2Uv(verticesBufferedArray, GLES20.GL_POINTS, 4, vertexSizeInBytes);
 		
 	}
 	
+	private static void sendVertexesToDraw(float[] vertexDataArray, int vertexSizeInBytes, int numberOfElements, int primitive, int drawingMode)
+	{
+		//The buffered array
+		FloatBuffer verticesBufferedArray;
+		//allocating the space
+		verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+		verticesBufferedArray.put(vertexDataArray);
+		//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
+		//method is using according to the way they should be drawn.
+		switch(drawingMode){
+		case mode3Position3Color3Normal2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+			break;
+		case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+			break;
+		case mode3Position3Normal2UV: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+			break;
+		default:
+			break;
+		}
+		
+	}
+
 
 
 public static void draw(Box nBox, Camera nCamera, RendererConfiguration nRendererConfiguration)
 {
+	
+	
+	if(nRendererConfiguration.isTextureSet())
+		 glEnable(GL_TEXTURE_2D);
+	 else
+		 glDisable(GL_TEXTURE_2D);
+
+	
+	//Ilumination IFs
+	if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
+		setShadingType(nRendererConfiguration.SHADING_TYPE_NOLIGHT);
+	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
+		setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)
+		setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+	
+	
 		if(nRendererConfiguration.isPointsSet())
-		{
-			glDisable(GL_TEXTURE_2D);
-			setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
 			drawPoints(nBox, nRendererConfiguration);
-		}
 		if(nRendererConfiguration.isWiresSet())
-		{
-			glDisable(GL_TEXTURE_2D);
-			setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
 			drawWires(nBox, nRendererConfiguration);
-		}
 		if(nRendererConfiguration.isSurfacesSet())
-		{
-			if(nRendererConfiguration.isTextureSet())
-				glEnable(GL_TEXTURE_2D);
-			else
-				glDisable(GL_TEXTURE_2D);
-			
-			switch(nRendererConfiguration.getShadingType()){
-				case (RendererConfiguration.SHADING_TYPE_NOLIGHT):
-					setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-					drawBox(nBox, nRendererConfiguration);
-					break;
-				case (RendererConfiguration.SHADING_TYPE_FLAT):
-					setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-					drawBox(nBox, nRendererConfiguration);
-					break;
-				case (RendererConfiguration.SHADING_TYPE_GOURAUD):
-					setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-					drawBox(nBox, nRendererConfiguration);
-					break;
-				default:
-					break;
-				
-			}
+			drawBox(nBox, nRendererConfiguration);
 		
-		}
-	}
+}
+
+
 }
 
 
