@@ -28,6 +28,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -37,6 +38,7 @@ import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.ReaderPly;
+import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
@@ -46,7 +48,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20BoxRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ConeRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
-public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
+public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
     // Android application elements
     private Context androidApplicationContext;
@@ -168,11 +170,11 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         light2 = new Light(Light.POINT, 
             new Vector3D(1, -1, 1), new ColorRgb(1, 0, 0));
         
-        meshMug = loadPlyMesh("sdcard/mug.ply");
+        meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
         selectObject(1);
     }
 
-    public GLES20TriangleRenderer(Context context) {
+    public AndroidGLES20DrawingArea(Context context) {
         androidApplicationContext = context;
 
         createModel();
@@ -230,10 +232,6 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
         if ( quality.isTextureSet() ) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-            System.out.println("Texture: TRUE");
-        }
-        else {
-            System.out.println("Texture: FALSE");
         }
 
         if ( sphere != null ) {
@@ -362,6 +360,13 @@ public class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
 
         is = androidApplicationContext.getResources().openRawResource(
             R.raw.render);
+
+        try {
+            RGBImage img = ImagePersistence.importRGB(is);
+	}
+	catch ( Exception e ) {
+	}
+
         Bitmap bitmap = null;
         try {
             bitmap = BitmapFactory.decodeStream(is);

@@ -18,9 +18,11 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -35,6 +37,8 @@ import vsdk.toolkit.io.PersistenceElement;
 This class is a front end front which images of various formats can be
 exported and/or imported to/from files.
 
+This class follows a Singleton design pattern.
+
 \todo  Does this implements a "Builder" design pattern??? A Factory design 
       pattern... possibly some of that combined with a Facade design 
       pattern?
@@ -42,31 +46,62 @@ exported and/or imported to/from files.
 public class ImagePersistence extends PersistenceElement
 {
     public static boolean nativeWarningGiven = false;
-    private static ImagePersistenceJogl joglHelper;
-    private static ImagePersistenceAwt awtHelper;
+    private static ArrayList<ImagePersistenceHelper> helpers = null;
 
     static {
-        joglHelper = null;
-        awtHelper = null;
+        initHelpers();
 
-        // Comment this line out if JOGL is not available
-        joglHelper = new ImagePersistenceJogl();
+        // Call order reflects prefered order
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAwt");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceTarga");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceJogl");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAndroid");
+    }
 
-        // Comment this line out if Awt is not avaible
-        awtHelper = new ImagePersistenceAwt();
+    private static void loadPluginHelper(String className)
+    {
+        ClassLoader cl = ImagePersistence.class.getClassLoader();
+        try {
+            Class<? extends Object> handle;
+            handle = cl.loadClass(className);
+            Object o;
+            o = handle.newInstance();
+            if ( o instanceof ImagePersistenceHelper ) {
+                helpers.add((ImagePersistenceHelper)o);
+            }
+        }
+        catch ( Exception e ) {
+            // Class is not available... (not a problem)
+        }
+    }
+
+    private static void initHelpers()
+    {
+        if ( helpers == null  ) {
+            helpers = new ArrayList<ImagePersistenceHelper>();
+        }
+    }
+
+    public static void registerHelper(ImagePersistenceHelper h)
+    {
+        initHelpers();
+        helpers.add(h);
     }
 
     private static RGBAImage importDDSRGBA(File inImageFd)
     {
-        RGBAImage data;
+        try {
+            int i;
+            for ( i = 0; i < helpers.size(); i++ ) {
+                if ( helpers.get(i).rgbaFormatSupported("dds") ) {
+                    return helpers.get(i).importRGBA(inImageFd);
+                }
+            }
+        }
+        catch ( Exception e ) {
 
-        if ( joglHelper != null ) {
-            data = joglHelper.importDDSRGBA(inImageFd);
         }
-        else {
-            data = createNotAvailableImageRGBA();
-        }
-        return data;
+        return createNotAvailableImageRGBA();
     }
 
     private static RGBAImage createNotAvailableImageRGBA()
@@ -110,15 +145,18 @@ public class ImagePersistence extends PersistenceElement
 
     private static RGBImage importDDSRGB(File inImageFd)
     {
-        RGBImage data;
+        try {
+            int i;
+            for ( i = 0; i < helpers.size(); i++ ) {
+                if ( helpers.get(i).rgbFormatSupported("dds") ) {
+                    return helpers.get(i).importRGB(inImageFd);
+                }
+            }
+        }
+        catch ( Exception e ) {
 
-        if ( joglHelper != null ) {
-            data = joglHelper.importDDSRGB(inImageFd);
         }
-        else {
-            data = createNotAvailableImageRGB();
-        }
-        return data;
+        return createNotAvailableImageRGB();
     }
 
     /**
@@ -159,21 +197,14 @@ public class ImagePersistence extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        if( type.equals("tga") ) {
-            ImagePersistenceAwtTarga t = new ImagePersistenceAwtTarga(inImageFd);
-            t.exportRGBA(retImage);
-            return retImage;
-        }
-        else if( type.equals("jpg") || type.equals("jpeg") ||
-                 type.equals("gif") || type.equals("png") )  {
-            if ( awtHelper != null ) {
-                return awtHelper.importRGBA(inImageFd);
-            }
-            else {
-                return createNotAvailableImageRGBA();
+        int i;
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).rgbaFormatSupported(type) ) {
+                return helpers.get(i).importRGBA(inImageFd);
             }
         }
-        else if( type.equals("dds") ) {
+
+        if( type.equals("dds") ) {
             //delete retImage;
             return importDDSRGBA(inImageFd);
         }
@@ -194,12 +225,18 @@ public class ImagePersistence extends PersistenceElement
               i < arr.length && (arr[i] != ' ' && arr[i] != '\t'); 
               i++ ) {
             // Skip comment
-	}
+        }
 
         if ( i < arr.length && arr[i] == '#' ) {
             return true;
         }
         return false;
+    }
+
+    public static RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
+    {
+        System.out.println("*** Trying to import an image!");
+        return null;
     }
 
     /**
@@ -240,22 +277,14 @@ public class ImagePersistence extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        if( type.equals("tga") ) {
-            ImagePersistenceAwtTarga t = new ImagePersistenceAwtTarga(inImageFd);
-            t.exportRGB(retImage);
-            return retImage;
-        }
-        else if( type.equals("jpg") || type.equals("jpeg") ||
-                 type.equals("gif") || type.equals("png") )  {
-            if ( awtHelper != null ) {
-                return awtHelper.importRGB(inImageFd);
-              }
-              else {
-                return createNotAvailableImageRGB();
+        int i;
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).rgbFormatSupported(type) ) {
+                return helpers.get(i).importRGB(inImageFd);
             }
-
         }
-        else if( type.equals("dds") ) {
+
+        if( type.equals("dds") ) {
             //delete retImage;
             return importDDSRGB(inImageFd);
         }
@@ -300,7 +329,6 @@ public class ImagePersistence extends PersistenceElement
                         }
                         break;
                     }
-
                 } while ( !exit );
 
                 retImage = new RGBImage();
@@ -310,7 +338,7 @@ public class ImagePersistence extends PersistenceElement
 
                 ByteBuffer bb = retImage.getRawImageDirectBuffer();
                 byte barr[] = new byte[xSize*3];
-                for ( int i = 0; i < ySize; i++ ) {
+                for ( i = 0; i < ySize; i++ ) {
                     readBytes(bis, barr);
                     bb.put(barr);
                 }
@@ -341,7 +369,7 @@ public class ImagePersistence extends PersistenceElement
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }
-        throw new ImageNotRecognizedException("Image not recognized", inImageFd);
+        return createNotAvailableImageRGB();
     }
 
     /**
@@ -359,11 +387,18 @@ public class ImagePersistence extends PersistenceElement
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     */
-    public static IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
+    public static IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         IndexedColorImage retImage;
         Image img;
+
+        int i;
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).indexedColorFormatSupported(type) ) {
+                return helpers.get(i).importIndexedColor(inImageFd);
+            }
+        }
 
         if( type.equals("bw") ) {
             img = ImagePersistenceSGI.readImageSGI(inImageFd.getAbsolutePath());
@@ -375,15 +410,6 @@ public class ImagePersistence extends PersistenceElement
                 inImageFd);
             }
             return retImage;
-        }
-        else if( type.equals("jpg") || type.equals("jpeg") ||
-                 type.equals("gif") || type.equals("png") )  {
-            if ( awtHelper != null ) {
-                return awtHelper.importIndexedColor(inImageFd);
-            }
-            else {
-                return createNotAvailableImageIndexedColor();
-            }
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
@@ -430,77 +456,77 @@ public class ImagePersistence extends PersistenceElement
 
     public static boolean exportGIF(File fd, Image img)
     {
-        if ( awtHelper != null ) {
-            return awtHelper.exportGIF(fd, img);
+        int i;
+
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).gifExportSupported() ) {
+                return helpers.get(i).exportGIF(fd, img);
+            }
         }
-        else {
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence",
-                "Helper class not available, not saving GIF image"
-            );
-            return false;
-        }
+            
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, not saving GIF image"
+        );
+        return false;
     }
 
     public static void exportJPG(OutputStream os, Image img) throws Exception
     {
-        if ( awtHelper != null ) {
-            awtHelper.exportJPG(os, img);
+        int i;
+
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).jpgExportSupported() ) {
+                helpers.get(i).exportJPG(os, img);
+            }
         }
-        else {
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence",
-                "Helper class not available, not saving JPG image"
-            );
-        }
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, not saving JPG image");
     }
 
     public static void exportPNG(OutputStream os, Image img)
         throws Exception
     {
-        if ( awtHelper != null ) {
-            awtHelper.exportPNG_24bitRgb(os, img);
+        int i;
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).pngExportSupported() ) {
+                helpers.get(i).exportPNG_24bitRgb(os, img);
+            }
         }
-        else {
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence",
-                "Helper class not available, not saving PNG image"
-            );
-        }
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, not saving PNG image");
     }
-
+ 
     public static void exportPNG(File fd, Image img)
     {
         try {
-            if ( awtHelper != null ) {
-                awtHelper.exportPNG(fd, img);
-            }
-            else {
-                VSDK.reportMessage(null, VSDK.WARNING, 
-                    "ImagePersistence",
-                    "Helper class not available, not saving PNG image"
-                );
+            int i;
+            for ( i = 0; i < helpers.size(); i++ ) {
+                if ( helpers.get(i).pngExportSupported() ) {
+                    helpers.get(i).exportPNG(fd, img);
+                }
             }
         }
         catch ( Exception e ) {
-                VSDK.reportMessage(null, VSDK.WARNING, 
-                    "ImagePersistence",
-                    "Error saving PNG image"
-                );
+            VSDK.reportMessage(null, VSDK.WARNING, 
+                "ImagePersistence",
+                "Error saving PNG image");
         }
     }
 
     public static void exportPNG_24bitRgb(OutputStream os, Image img) throws Exception
     {
-        if ( awtHelper != null ) {
-            awtHelper.exportPNG_24bitRgb(os, img);
+        int i;
+        for ( i = 0; i < helpers.size(); i++ ) {
+            if ( helpers.get(i).pngExportSupported() ) {
+                helpers.get(i).exportPNG_24bitRgb(os, img);
+            }
         }
-        else {
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "ImagePersistence",
-                "Helper class not available, not saving PNG image"
-            );
-        }
+        VSDK.reportMessage(null, VSDK.WARNING, 
+            "ImagePersistence",
+            "Helper class not available, not saving PNG image");
     }
 
     /**

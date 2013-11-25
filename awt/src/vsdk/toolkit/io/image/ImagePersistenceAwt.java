@@ -25,8 +25,50 @@ import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 import vsdk.toolkit.io.PersistenceElement;
 
-public class ImagePersistenceAwt extends PersistenceElement
+public class ImagePersistenceAwt extends ImagePersistenceHelper
 {
+    public boolean rgbFormatSupported(String fileExtension)
+    {
+        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png") ) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean rgbaFormatSupported(String fileExtension)
+    {
+        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png") ) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean indexedColorFormatSupported(String fileExtension)
+    {
+        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png") ) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean gifExportSupported()
+    {
+        return true;
+    }
+
+    public boolean jpgExportSupported()
+    {
+        return true;
+    }
+
+    public boolean pngExportSupported()
+    {
+        return true;
+    }
+
     public IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
     {
         IndexedColorImage retImage;

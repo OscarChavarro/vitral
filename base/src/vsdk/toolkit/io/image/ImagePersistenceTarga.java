@@ -7,19 +7,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import java.awt.Dimension;
-import java.awt.image.DirectColorModel;
-
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 
 /**
-The ImagePersistenceAwtTarga class represents a targa image (the image files with .tga
+The ImagePersistenceTarga class represents a targa image (the image files with .tga
 extension)
 */
 
-public class ImagePersistenceAwtTarga extends PersistenceElement
+public class ImagePersistenceTarga extends ImagePersistenceHelper
 {
     private static final int NO_TRANSPARENCY = 255;
     private static final int FULL_TRANSPARENCY = 0;
@@ -36,22 +33,27 @@ public class ImagePersistenceAwtTarga extends PersistenceElement
     private int ySize;
     private short pixelDepth;
     private short imageDescriptor;
-    private DirectColorModel cm;
+    //private DirectColorModel cm;
     public byte[] pixels;
 
-    /**
-    Constructs a TGAImage given the File image
-    @param srcFile The tga image file
-    */
-    public ImagePersistenceAwtTarga(File srcFile) throws ImageNotRecognizedException {
-        try
-        {
-            open(srcFile);
-        }
-        catch(IOException ioe)
-        {
-            throw new ImageNotRecognizedException("I/O Error while reading the image", srcFile);
-        }
+    public ImagePersistenceTarga()
+    {
+    }
+
+    public boolean rgbFormatSupported(String fileExtension)
+    {
+        if( fileExtension.equals("tga") ) {
+            return true;
+	}
+        return false;
+    }
+
+    public boolean rgbaFormatSupported(String fileExtension)
+    {
+        if( fileExtension.equals("tga") ) {
+            return true;
+	}
+        return false;
     }
     
     private void open(File srcFile) throws ImageNotRecognizedException, IOException {
@@ -79,16 +81,14 @@ public class ImagePersistenceAwtTarga extends PersistenceElement
         
         if (pixelDepth == 24) 
         {
-            cm = new DirectColorModel(24, 0xFF0000, 0xFF00, 0xFF);
             pixels = new byte[xSize * ySize*3];
         } 
         else { 
             if ( pixelDepth == 32 ) {
-                cm = new DirectColorModel(32, 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
                 pixels = new byte[xSize * ySize*4];
             }
             else {
-                System.err.println("ImagePersistenceAwtTarga - cannot read file!");       
+                System.err.println("ImagePersistenceTarga - cannot read file!");       
             }
         }
         
@@ -265,26 +265,29 @@ public class ImagePersistenceAwtTarga extends PersistenceElement
     public byte[] getTexture() {
         return this.pixels;     
     }
-        
-    /**
-    Returns the size of this tagra image in a Dimension object
-    @return The size of this targa image
-    */
-    public Dimension getSize() {
-        return new Dimension(xSize, ySize);
-    }
-       
+           
     private short flipEndian(short signedShort) {
         int input = signedShort & 0xFFFF;
         return (short) (input << 8 | (input & 0xFF00) >>> 8);
     }
 
-    public void exportRGB(RGBImage img)
+    public RGBImage importRGB(File inFileFd) throws ImageNotRecognizedException, Exception
     {
+        RGBImage img;
+        try
+        {
+            open(inFileFd);
+        }
+        catch(IOException ioe)
+        {
+            throw new ImageNotRecognizedException("I/O Error while reading the image", inFileFd);
+        }
+
         int x, y;
         byte r, g, b;
         int i = 0;
 
+        img = new RGBImage();
         img.init(xSize, ySize);
 
         for ( y = 0; y < ySize; y++ ) {
@@ -306,14 +309,26 @@ public class ImagePersistenceAwtTarga extends PersistenceElement
                 img.putPixel(x, ySize - 1 - y, r, g, b);
             }
         }
+	return img;
     }
 
-    public void exportRGBA(RGBAImage img)
+    public RGBAImage importRGBA(File inFileFd) throws ImageNotRecognizedException, Exception
     {
+        RGBAImage img;
         int x, y;
         byte r, g, b, a;
         int i = 0;
 
+        try
+        {
+            open(inFileFd);
+        }
+        catch(IOException ioe)
+        {
+            throw new ImageNotRecognizedException("I/O Error while reading the image", inFileFd);
+        }
+
+        img = new RGBAImage();
         img.init(xSize, ySize);
 
         for ( y = 0; y < ySize; y++ ) {
@@ -337,6 +352,7 @@ public class ImagePersistenceAwtTarga extends PersistenceElement
                 img.putPixel(x, ySize - 1 - y, r, g, b, a);
             }
         }
+        return img;
     }
 }
 

@@ -1047,7 +1047,10 @@
   - 2h: integrating menus and several control options to android test
     application
 
-2013 november 20, Oscar Chavarro
+2013 november 24, Oscar Chavarro
   - 1h: revisiting documentation.
+  - 2h10min: generating ImagePersistenceHelper generalization and
+    unification to image readers
+  - 27min: ImagePersistenceAndroid base helper mechanism activated
 
 ===========================================================================

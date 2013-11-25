@@ -76,7 +76,7 @@ readPngHeader(FILE *fd)
         //printf("PNG_COLOR_TYPE_GRAY: %d\n", PNG_COLOR_TYPE_GRAY);
         //printf("PNG_COLOR_TYPE_RGB: %d\n", PNG_COLOR_TYPE_RGB);
         //printf("PNG_COLOR_TYPE_RGBA: %d\n", PNG_COLOR_TYPE_RGBA);
-        HeaderInfo->channels = -1;
+        HeaderInfo->channels = 99;
         return HeaderInfo;
     }
 
@@ -136,7 +136,7 @@ readPngHeader(FILE *fd)
 void
 readPngDataRGB(_NativeImageReaderHeaderInfo *HeaderInfo, FILE *fd, BYTE *arr, BOOLEAN flip)
 {
-    if ( HeaderInfo->channels == -1 ) {
+    if ( HeaderInfo->channels == 99 ) {
         fprintf(stderr, "skipping image\n");
         fflush(stderr);
         return;

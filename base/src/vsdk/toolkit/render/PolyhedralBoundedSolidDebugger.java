@@ -4,9 +4,6 @@ package vsdk.toolkit.render;
 
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 
-// Comment out this line if JOGL is not available at compile time
-import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
-
 /**
 This class follows the Singleton design pattern. Its sole function is to
 create an offline renderer for debugging PolyhedralBoundedSolid objects.
@@ -20,11 +17,27 @@ public abstract class PolyhedralBoundedSolidDebugger extends RenderingElement
 {
     public static PolyhedralBoundedSolidDebugger createOfflineRenderer()
     {
-        // Comment out this line if JOGL is not available at compile time
-        return new JoglPolyhedralBoundedSolidDebugger();
+        return loadPluginHelper(
+            "vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger");
+    }
 
-        // Return null if JOGL is not available at compile time
-        //return null;
+    private static PolyhedralBoundedSolidDebugger 
+    loadPluginHelper(String className)
+    {
+        ClassLoader cl = PolyhedralBoundedSolidDebugger.class.getClassLoader();
+        try {
+            Class<? extends Object> handle;
+            handle = cl.loadClass(className);
+            Object o;
+            o = handle.newInstance();
+            if ( o instanceof PolyhedralBoundedSolidDebugger ) {
+                return (PolyhedralBoundedSolidDebugger)o;
+            }
+        }
+        catch ( Exception e ) {
+            // Class is not available... (not a problem)
+        }
+	return null;
     }
 
     public abstract void execute(PolyhedralBoundedSolid solid, String filename);
