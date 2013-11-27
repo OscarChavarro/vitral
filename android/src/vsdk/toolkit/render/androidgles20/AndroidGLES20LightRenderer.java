@@ -42,7 +42,7 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
 
         //-----------------------------------------------------------------
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 8;
-        int index = 0;
+        int index;
         ColorRgb c = l.getSpecular();
         float delta = 0.1f;
         int numVertex = 6;
@@ -51,6 +51,7 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
 
         Vector3D p = l.getPosition();
 
+        index = 0;
         vertexDataArray[index] = (float)p.x - delta;    index++;
         vertexDataArray[index] = (float)p.y;    index++;
         vertexDataArray[index] = (float)p.z;    index++;

@@ -856,6 +856,21 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glDrawArrays");
     }
 
+    protected static void
+    vertex3Position3Color2Uv(float arr[], int index,
+        double x, double y, double z,
+        double r, double g, double b,
+        double u, double v)
+    {
+        arr[index] = (float)x;    index++;
+        arr[index] = (float)y;    index++;
+        arr[index] = (float)z;    index++;
+        arr[index] = (float)r;    index++;
+        arr[index] = (float)g;    index++;
+        arr[index] = (float)b;    index++;
+        arr[index] = (float)u;    index++;
+        arr[index] = (float)v;    index++;
+    }
 }
 
 //===========================================================================

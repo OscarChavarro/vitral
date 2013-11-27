@@ -248,16 +248,24 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 2, 0, "Gouraud shading");
         q.add(0, 3, 0, "Phong shading");
         q.add(0, 4, 0, "Toggle texture");
+        q.add(0, 5, 0, "Toggle points");
+        q.add(0, 6, 0, "Toggle wires");
+        q.add(0, 7, 0, "Toggle surfaces");
+        q.add(0, 8, 0, "Toggle bounding boxes");
+        q.add(0, 9, 0, "Toggle selection corners");
+        q.add(0, 10, 0, "Toggle normals");
 
         SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
-        o.add(0, 6, 0, "Sphere");
-        o.add(0, 7, 0, "Box");
-        o.add(0, 8, 0, "Cone");
-        o.add(0, 9, 0, "Mesh Mug");
-        o.add(0, 10, 0, "Toggle reference square");
+        o.add(0, 11, 0, "Sphere (low res)");
+        o.add(0, 12, 0, "Sphere (high res)");
+        o.add(0, 13, 0, "Box");
+        o.add(0, 14, 0, "Cone");
+        o.add(0, 15, 0, "Mesh Mug");
+        o.add(0, 16, 0, "Toggle reference square");
 
         SubMenu a = menu.addSubMenu(1, 101, 1, "Animation options");
-        a.add(0, 5, 0, "Toggle object rotation");
+        a.add(0, 17, 0, "Toggle object rotation");
+        a.add(0, 18, 0, "Toggle first light rotation");
 
         return true;
     }
@@ -282,22 +290,46 @@ GpsStatus.Listener, OnClickListener {
             q.changeTexture();
             break;
           case 5:
-            canvas.glExecutor.toggleObjectRotation();
+            q.changePoints();
             break;
           case 6:
-            canvas.glExecutor.selectObject(1);
+            q.changeWires();
             break;
           case 7:
-            canvas.glExecutor.selectObject(2);
+            q.changeSurfaces();
             break;
           case 8:
-            canvas.glExecutor.selectObject(3);
+            q.changeBoundingVolume();
             break;
           case 9:
-            canvas.glExecutor.selectObject(4);
+            q.changeSelectionCorners();
             break;
           case 10:
+            q.changeNormals();
+            break;
+          case 11:
+            canvas.glExecutor.selectObject(1);
+            break;
+          case 12:
+            canvas.glExecutor.selectObject(2);
+            break;
+          case 13:
+            canvas.glExecutor.selectObject(3);
+            break;
+          case 14:
+            canvas.glExecutor.selectObject(4);
+            break;
+          case 15:
+            canvas.glExecutor.selectObject(5);
+            break;
+          case 16:
             canvas.glExecutor.toggleReferenceSquare();
+            break;
+          case 17:
+            canvas.glExecutor.toggleObjectRotation();
+            break;
+          case 18:
+            canvas.glExecutor.toggleLightRotation();
             break;
         }
         return true;

@@ -32,7 +32,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         //-----------------------------------------------------------------
         Vector3D p = new Vector3D();
-        ColorRgb c = q.getWireColor();
+        ColorRgb c = new ColorRgb(1.0, 0.0, 0.0); //q.getWireColor();
 
         int index = 0;
 
@@ -452,14 +452,17 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         if ( q.isPointsSet() ) {
             glDisable(GL_TEXTURE_2D);
             setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-            drawPoints(s, 20, 10, q);
+            double r = s.getRadius();
+            if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
+            drawPoints(s, slices, stacks, q);
+            s.setRadius(r);
         }
         if ( q.isWiresSet() ) {
             glDisable(GL_TEXTURE_2D);
             setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
-            drawWires(s, 20, 10, q);
+            drawWires(s, slices, stacks, q);
             s.setRadius(r);
         }
         if ( q.isSurfacesSet() ) {
@@ -477,6 +480,12 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
             else {
                 drawSurfacesSmooth(s, slices, stacks, q);
             }
+        }
+        if ( q.isBoundingVolumeSet() ) {
+            AndroidGLES20GeometryRenderer.drawMinMaxBox(s, q);
+        }
+        if ( q.isSelectionCornersSet() ) {
+            AndroidGLES20GeometryRenderer.drawSelectionCorners(s, q);
         }
     }
 }

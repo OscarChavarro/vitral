@@ -1056,4 +1056,8 @@
 2013 november 24, Oscar Chavarro
   - 10min: Integrating changes from Juan Pablo Reyes to AndroidGL20Renderer
 
+2013 november 26, Oscar Chavarro
+  - 1h20min: adding options to Android application template and testing
+    AndroidGLES20GeometryRenderer methods
+
 ===========================================================================

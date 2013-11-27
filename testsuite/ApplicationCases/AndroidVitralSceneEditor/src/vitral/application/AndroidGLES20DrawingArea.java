@@ -72,7 +72,9 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     // Other
     private long baserr = SystemClock.uptimeMillis();
     private boolean withObjectRotation = false;
+    private boolean withLightRotation = true;
     private boolean withReferenceSquare = false;
+    private boolean highResSphere = false;
     
     public RendererConfiguration getRendererConfiguration()
     {
@@ -89,6 +91,11 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         withObjectRotation = !withObjectRotation;
     }
 
+    public void toggleLightRotation()
+    {
+        withLightRotation = !withLightRotation;
+    }
+
     public void toggleReferenceSquare()
     {
         withReferenceSquare = !withReferenceSquare;
@@ -102,15 +109,20 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         cone = null;
         switch ( o ) {
           case 1: default:
+	    highResSphere = false;
             sphere = new Sphere(1.0);
             break;
           case 2:
-            box = new Box(1.0, 1.0, 1.0);
+	    highResSphere = true;
+            sphere = new Sphere(1.0);
             break;
           case 3:
-            cone = new Cone(1.0, 1.0, 2.0);
+            box = new Box(1.0, 1.0, 1.0);
             break;
           case 4:
+            cone = new Cone(1.0, 1.0, 2.0);
+            break;
+          case 5:
             mesh = meshMug;
             break;
         }
@@ -204,14 +216,16 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         vgl.glLoadIdentity();
 
         // Move light around center...
-        double r = 1.2 + 0.2 * ((double)rr);
-        light1.setPosition(new Vector3D(r, 0, 0));
-        Matrix4x4 RL = new Matrix4x4();
-        RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
-        Vector3D P, PR;
-        P = light1.getPosition();
-        PR = RL.multiply(P);
-        light1.setPosition(PR);
+        double r = 2.0;
+        if ( withLightRotation ) {
+            light1.setPosition(new Vector3D(r, 0, 0));
+            Matrix4x4 RL = new Matrix4x4();
+            RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
+            Vector3D P, PR;
+            P = light1.getPosition();
+            PR = RL.multiply(P);
+            light1.setPosition(PR);
+	}
 
         AndroidGLES20LightRenderer.draw(light1);
         AndroidGLES20LightRenderer.activate(light1);
@@ -236,7 +250,12 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         if ( sphere != null ) {
             sphere.setRadius(1.0);
-            AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 50, 25);
+            if ( highResSphere ) {
+                AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 50, 25);
+	    }
+	    else {
+                AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 20, 10);
+	    }
         }
 
         if ( box != null ) {
