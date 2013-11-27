@@ -12,3 +12,4 @@ cd ../../..
 cd testsuite/VSDKExamples/PolyhedralBoundedSolidExample
 rm -rf outputA* outputB* outputR*
 cd ../../..
+rm -rf testsuite/Tools/SpriteFontGenerator/output/*

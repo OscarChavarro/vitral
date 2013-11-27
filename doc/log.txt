@@ -1062,4 +1062,8 @@
   - 1h: adding options to Android application template and managing
     light colors. Gouraud shader updated.
 
+2013 november 27, Oscar Chavarro
+  - 10min: AndroidGLES20RGBImageRenderer
+  - 26min: SpriteFontGenerator utility
+
 ===========================================================================

@@ -478,6 +478,7 @@ public class ImagePersistence extends PersistenceElement
         for ( i = 0; i < helpers.size(); i++ ) {
             if ( helpers.get(i).jpgExportSupported() ) {
                 helpers.get(i).exportJPG(os, img);
+                return;
             }
         }
         VSDK.reportMessage(null, VSDK.WARNING, 
