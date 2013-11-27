@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 // Android classes: misc
 import android.content.Context;
@@ -58,8 +59,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private RendererConfiguration quality;
     private Material material;
     private Camera camera;
-    private Light light1;
-    private Light light2;
+    private ArrayList<Light> lights;
     private Sphere sphere;
     private Box box;
     private Cone cone;
@@ -151,6 +151,27 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         return m;
     }
 
+    public void prepareLights(int n)
+    {
+        Light l;
+        double p[] = {0, -10, 0, 0.8, 0.8, 0.8,
+                      1, -1, 1, 0, 1, 0,
+                      -0.6, -2, 2, 0, 0, 1};
+
+        lights = new ArrayList<Light>();
+
+        if ( n > 3 ) {
+            n = 3;
+	}
+
+        for ( int i = 0; i < n; i++ ) {
+            l = new Light(Light.POINT, 
+		new Vector3D(p[6*i+0], p[6*i+1], p[6*i+2]), 
+                new ColorRgb(p[6*i+3], p[6*i+4], p[6*i+5]));
+            lights.add(l);
+	}
+    }
+
     private void createModel()
     {
         //-----------------------------------------------------------------
@@ -177,10 +198,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
         material.setPhongExponent(40.0);
 
-        light1 = new Light(Light.POINT, 
-            new Vector3D(0, -10, 0), new ColorRgb(1, 1, 1));
-        light2 = new Light(Light.POINT, 
-            new Vector3D(1, -1, 1), new ColorRgb(1, 0, 0));
+        prepareLights(1);
         
         meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
         selectObject(1);
@@ -218,20 +236,19 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         // Move light around center...
         double r = 2.0;
         if ( withLightRotation ) {
-            light1.setPosition(new Vector3D(r, 0, 0));
+            lights.get(0).setPosition(new Vector3D(r, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
             RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
             Vector3D P, PR;
-            P = light1.getPosition();
+            P = lights.get(0).getPosition();
             PR = RL.multiply(P);
-            light1.setPosition(PR);
+            lights.get(0).setPosition(PR);
 	}
 
-        AndroidGLES20LightRenderer.draw(light1);
-        AndroidGLES20LightRenderer.activate(light1);
-
-        //AndroidGLES20LightRenderer.draw(light2);
-        //AndroidGLES20LightRenderer.activate(light2);
+        for ( int i = 0; i < lights.size(); i++ ) {
+            AndroidGLES20LightRenderer.draw(lights.get(i));
+            AndroidGLES20LightRenderer.activate(lights.get(i));
+	}
 
         //vgl.glTranslated(-2, 0, 0);
         if ( withObjectRotation ) {

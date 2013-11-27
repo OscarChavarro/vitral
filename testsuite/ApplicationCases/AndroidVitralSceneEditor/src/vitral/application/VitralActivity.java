@@ -49,6 +49,7 @@ GpsStatus.Listener, OnClickListener {
     private LocationManager locationManager;
     private String provider;
     private int numberOfLocations;
+    private int numberOfLights;
 
     //= Basic Activity methods =================================================
     private void createGUI()
@@ -126,6 +127,9 @@ GpsStatus.Listener, OnClickListener {
 
         cameraController = 
             new CameraControllerAquynza(canvas.glExecutor.getCamera());
+
+        // Scene related
+        numberOfLights = 1;
 
         // GPS related
         numberOfLocations = 1;
@@ -267,6 +271,9 @@ GpsStatus.Listener, OnClickListener {
         a.add(0, 17, 0, "Toggle object rotation");
         a.add(0, 18, 0, "Toggle first light rotation");
 
+        SubMenu x = menu.addSubMenu(1, 101, 1, "Other options");
+        x.add(0, 19, 0, "Add light");
+
         return true;
     }
 
@@ -330,6 +337,10 @@ GpsStatus.Listener, OnClickListener {
             break;
           case 18:
             canvas.glExecutor.toggleLightRotation();
+            break;
+          case 19:
+            numberOfLights++;
+            canvas.glExecutor.prepareLights(numberOfLights);
             break;
         }
         return true;

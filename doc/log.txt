@@ -1059,5 +1059,7 @@
 2013 november 26, Oscar Chavarro
   - 1h20min: adding options to Android application template and testing
     AndroidGLES20GeometryRenderer methods
+  - 1h: adding options to Android application template and managing
+    light colors. Gouraud shader updated.
 
 ===========================================================================

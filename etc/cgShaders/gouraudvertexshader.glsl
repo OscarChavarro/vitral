@@ -18,6 +18,7 @@ uniform mat4 modelViewLocal;           // input: MVM
 uniform mat4 modelViewITLocal;         // input: MVM_IT
 uniform vec3 cameraPositionGlobal;
 uniform vec3 lightPositionsGlobal[8];  // input: maximum light supported: 8
+uniform vec3 lightColorsGlobal[8];  // input: maximum light supported: 8
 uniform int numberOfLights;
 uniform int withTexture;               // input: boolean 1 true 0 false
 attribute vec4 PObject;                // input: glVertex3d
@@ -47,20 +48,24 @@ void main() {
         // Diffuse term: implementing equation [FOLE1992].16.4
         vec3 N; // Normal for current vertex on global coordinates
         vec3 L; // Direction to the light source
+        vec3 diffuseFactor;
 
         N = normalize(vec3(modelViewITLocal * vec4(NObject, 1.0)));
         L = normalize(lightPositionsGlobal[i] - PGlobal.xyz);
-        diffuseTerm += diffuseColor * max(dot(N, L), 0.0);
+        diffuseFactor = lightColorsGlobal[i] * diffuseColor;
+        diffuseTerm += diffuseFactor * max(dot(N, L), 0.0);
 
         // Specular term: implementing the last term on equation
         // [FOLE1992].16.14
         vec3 V; // Direction to the viewpoint from current vertex
         vec3 R; // Direction of specular reflection (maximum highlights)
+        vec3 specularFactor;
 
         V = normalize(cameraPositionGlobal - PGlobal.xyz);
         //R = 2.0 * N * dot(N, L) - L; // Equation [FOLE1992].16.16
         R = reflect(-L, N); // Using OpenGLSL implementation of the equation
-        specularTerm += specularColor * pow(max(dot(R, V), 0.0), phongExponent);
+        specularFactor = lightColorsGlobal[i] * specularColor;
+        specularTerm += specularFactor * pow(max(dot(R, V), 0.0), phongExponent);
     }
 
     // Output results to pixel shader

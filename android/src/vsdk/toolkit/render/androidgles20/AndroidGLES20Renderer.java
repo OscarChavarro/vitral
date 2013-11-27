@@ -75,6 +75,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static int specularColorParam;
     private static int phongExponentParam;
     private static int lightPositionsGlobalParam;
+    private static int lightColorsGlobalParam;
     private static int numberOfLightsParam;
     private static int withTextureParam;
     private static int cameraPositionGlobalParam;
@@ -440,6 +441,14 @@ public class AndroidGLES20Renderer extends RenderingElement
                     "Could not get uniform location for lightPositionsGlobal");
             }
 
+            lightColorsGlobalParam =
+                GLES20.glGetUniformLocation(shaderId, "lightColorsGlobal");
+            checkGlError("glGetUniformLocation lightColorsGlobal");
+            if ( lightColorsGlobalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for lightColorsGlobal");
+            }
+
             float array[] = new float[3*lights.size()];
             for ( int i = 0; i < lights.size(); i++ ) {
                 Vector3D p = lights.get(i).getPosition();
@@ -448,6 +457,15 @@ public class AndroidGLES20Renderer extends RenderingElement
                 array[3*i + 2] = (float)p.z;
             }
             GLES20.glUniform3fv(lightPositionsGlobalParam, lights.size(), array, 0);
+
+            array = new float[3*lights.size()];
+            for ( int i = 0; i < lights.size(); i++ ) {
+                c = lights.get(i).getSpecular();
+                array[3*i + 0] = (float)c.r;
+                array[3*i + 1] = (float)c.g;
+                array[3*i + 2] = (float)c.b;
+            }
+            GLES20.glUniform3fv(lightColorsGlobalParam, lights.size(), array, 0);
 
             cameraPositionGlobalParam =
                 GLES20.glGetUniformLocation(shaderId, "cameraPositionGlobal");
@@ -471,6 +489,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             modelViewLocalParam = -1;
             modelViewITLocalParam = -1;
             lightPositionsGlobalParam = -1;
+            lightColorsGlobalParam = -1;
             numberOfLightsParam = -1;
             withTextureParam = -1;
             cameraPositionGlobalParam = -1;
