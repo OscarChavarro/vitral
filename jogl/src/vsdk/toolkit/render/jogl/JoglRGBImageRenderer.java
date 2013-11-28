@@ -28,7 +28,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 
 public class JoglRGBImageRenderer extends JoglRenderer 
 {
-    private static ArrayList<_JoglRGBImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererImageAssociation>();
+    private static ArrayList<_JoglRGBImageRendererAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererAssociation>();
     //private static GLU glu = null;
 
     private static int activateBaseOld(GL2 gl, RGBImage img)
@@ -54,7 +54,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglRGBImageRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -68,7 +68,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         //- 3. If there is no glList, create it ---------------------------
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBImageRendererImageAssociation();
+            item = new _JoglRGBImageRendererAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -130,7 +130,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglRGBImageRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -144,7 +144,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         //- 3. If there is no glList, create it ---------------------------
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBImageRendererImageAssociation();
+            item = new _JoglRGBImageRendererAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -211,7 +211,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void deactivate(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item;
+        _JoglRGBImageRendererAssociation item;
 
         try { 
             int i;
@@ -231,7 +231,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
 
     public static void unload(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item;
+        _JoglRGBImageRendererAssociation item;
 
         try { 
             int i;

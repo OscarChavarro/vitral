@@ -8,7 +8,7 @@ import com.jogamp.opengl.util.texture.Texture;
 // VitralSDK classes
 import vsdk.toolkit.media.RGBImage;
 
-public class _JoglRGBImageRendererImageAssociation extends JoglRenderer
+public class _JoglRGBImageRendererAssociation extends JoglRenderer
 {
     public int glList;
     public Texture renderer;

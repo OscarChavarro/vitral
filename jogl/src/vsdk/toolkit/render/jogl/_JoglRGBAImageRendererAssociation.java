@@ -8,7 +8,7 @@ import com.jogamp.opengl.util.texture.Texture;
 // VitralSDK classes
 import vsdk.toolkit.media.RGBAImage;
 
-public class _JoglRGBAImageRendererImageAssociation extends JoglRenderer
+public class _JoglRGBAImageRendererAssociation extends JoglRenderer
 {
     public int glList;
     public Texture renderer;

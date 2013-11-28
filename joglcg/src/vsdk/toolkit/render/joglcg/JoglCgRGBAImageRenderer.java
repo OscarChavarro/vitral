@@ -20,11 +20,11 @@ import com.jogamp.opengl.cg.CgGL;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.render.jogl._JoglRGBAImageRendererImageAssociation;
+import vsdk.toolkit.render.jogl._JoglRGBAImageRendererAssociation;
 
 public class JoglCgRGBAImageRenderer extends JoglCgRenderer
 {
-    private static ArrayList<_JoglRGBAImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBAImageRendererImageAssociation>();
+    private static ArrayList<_JoglRGBAImageRendererAssociation> compiledImages = new ArrayList<_JoglRGBAImageRendererAssociation>();
     //private static GLU glu = null;
 
     /**
@@ -66,7 +66,7 @@ public class JoglCgRGBAImageRenderer extends JoglCgRenderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBAImageRendererImageAssociation item = null;
+        _JoglRGBAImageRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -82,7 +82,7 @@ public class JoglCgRGBAImageRenderer extends JoglCgRenderer
         gl.glEnable(GL.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBAImageRendererImageAssociation();
+            item = new _JoglRGBAImageRendererAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -184,7 +184,7 @@ public class JoglCgRGBAImageRenderer extends JoglCgRenderer
 
     public static void unload(GL2 gl, RGBAImage img)
     {
-        _JoglRGBAImageRendererImageAssociation item = null;
+        _JoglRGBAImageRendererAssociation item = null;
 
         try { 
             int i;

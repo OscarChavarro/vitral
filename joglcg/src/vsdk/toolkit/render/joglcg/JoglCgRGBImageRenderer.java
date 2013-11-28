@@ -20,11 +20,11 @@ import com.jogamp.opengl.cg.CgGL;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.render.jogl._JoglRGBImageRendererImageAssociation;
+import vsdk.toolkit.render.jogl._JoglRGBImageRendererAssociation;
 
 public class JoglCgRGBImageRenderer extends JoglCgRenderer 
 {
-    private static ArrayList<_JoglRGBImageRendererImageAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererImageAssociation>();
+    private static ArrayList<_JoglRGBImageRendererAssociation> compiledImages = new ArrayList<_JoglRGBImageRendererAssociation>();
     //private static GLU glu = null;
 
     /**
@@ -66,7 +66,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBImageRendererImageAssociation item = null;
+        _JoglRGBImageRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -80,7 +80,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
         //- 3. If there is no glList, create it ---------------------------
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBImageRendererImageAssociation();
+            item = new _JoglRGBImageRendererAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -182,7 +182,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
 
     public static void deactivate(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item;
+        _JoglRGBImageRendererAssociation item;
 
         try { 
             int i;
@@ -202,7 +202,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
 
     public static void unload(GL2 gl, RGBImage img)
     {
-        _JoglRGBImageRendererImageAssociation item;
+        _JoglRGBImageRendererAssociation item;
 
         try { 
             int i;
