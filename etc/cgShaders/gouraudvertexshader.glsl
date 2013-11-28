@@ -74,7 +74,7 @@ void main() {
     if ( withTexture == 1 ) {
         activateTexture = 1.0;
         uvTextureCoordinate.x = uvVertexTextureCoordinate.x;
-        uvTextureCoordinate.y = 1.0 - uvVertexTextureCoordinate.y;
+        uvTextureCoordinate.y = uvVertexTextureCoordinate.y;
       }
       else {
         activateTexture = 0.0;

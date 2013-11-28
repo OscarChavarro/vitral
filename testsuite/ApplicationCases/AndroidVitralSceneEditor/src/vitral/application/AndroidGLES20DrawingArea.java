@@ -4,7 +4,6 @@ package vitral.application;
 
 // Java basic classes
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 
 // Android classes: misc
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.SystemClock;
 
 // Android classes: OpenGL ES 2.0
@@ -390,33 +387,15 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         }
  
         //- Set up textures -----------------------------------------------
-        int[] lists = new int[1];
-
-        GLES20.glGenTextures(1, lists, 0);
-        textureId = lists[0];
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-
         InputStream is;
 
-        is = androidApplicationContext.getResources().openRawResource(
-            R.raw.render);
-
         try {
+            is = androidApplicationContext.getResources().openRawResource(
+                R.raw.render);
             texture = ImagePersistence.importRGBA(is);
 	}
 	catch ( Exception e ) {
 	}
-
-        Bitmap bitmap = null;
-        try {
-            bitmap = BitmapFactory.decodeStream(is);
-            is.close();
-          } 
-          catch(IOException e) {
-        }
-
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
     }
 }
 
