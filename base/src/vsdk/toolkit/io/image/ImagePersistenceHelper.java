@@ -23,6 +23,16 @@ this class implements a wrapper to legacy code.
 */
 public abstract class ImagePersistenceHelper extends  PersistenceElement
 {
+    public boolean rgbFormatFromInputStreamSupported(String fileExtension)
+    {
+        return false;
+    }
+
+    public boolean rgbaFormatFromInputStreamSupported(String fileExtension)
+    {
+        return false;
+    }
+
     public boolean rgbFormatSupported(String fileExtension)
     {
         return false;
@@ -59,6 +69,11 @@ public abstract class ImagePersistenceHelper extends  PersistenceElement
     }
 
     public RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
+    {
+        throw new ImageNotRecognizedException("Not implemented in helper", null);
+    }
+
+    public RGBAImage importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }

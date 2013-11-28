@@ -30,6 +30,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -40,13 +41,15 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20BoxRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ConeRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBImageRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBAImageRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
 public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
@@ -65,6 +68,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private Cone cone;
     private TriangleMesh meshMug;
     private TriangleMesh mesh;
+    private RGBAImage texture;
     
     // Display lists ids
     private int textureId;
@@ -261,8 +265,18 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         // Activate texture image.activate()
         if ( quality.isTextureSet() ) {
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
+                GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MAG_FILTER,
+                    GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                    GLES20.GL_REPEAT);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                    GLES20.GL_REPEAT);
+
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+            AndroidGLES20RGBAImageRenderer.activate(texture, textureId);
         }
 
         if ( sphere != null ) {
@@ -376,21 +390,11 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         }
  
         //- Set up textures -----------------------------------------------
-        int[] textures = new int[1];
+        int[] lists = new int[1];
 
-        GLES20.glGenTextures(1, textures, 0);
-        textureId = textures[0];
+        GLES20.glGenTextures(1, lists, 0);
+        textureId = lists[0];
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
-            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MAG_FILTER,
-                GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-                GLES20.GL_REPEAT);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-                GLES20.GL_REPEAT);
 
         InputStream is;
 
@@ -398,7 +402,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             R.raw.render);
 
         try {
-            RGBImage img = ImagePersistence.importRGB(is);
+            texture = ImagePersistence.importRGBA(is);
 	}
 	catch ( Exception e ) {
 	}
@@ -409,7 +413,6 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             is.close();
           } 
           catch(IOException e) {
-            ;
         }
 
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);

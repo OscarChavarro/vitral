@@ -31,7 +31,7 @@ import vsdk.toolkit.render.RenderingElement;
 
 public class AndroidGLES20Renderer extends RenderingElement
 {
-    private static String TAG = "GLES20TriangleRenderer";
+    private static String TAG = "AndroidGLES20Renderer";
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
@@ -133,7 +133,7 @@ public class AndroidGLES20Renderer extends RenderingElement
         error = GLES20.glGetError();
         String name = "UNKNOWN GL ERROR";
 
-        while ( error != GLES20.GL_NO_ERROR) {
+        while ( error != GLES20.GL_NO_ERROR ) {
             switch ( error ) {
             case GLES20.GL_INVALID_ENUM:
                 name = "GL_INVALID_ENUM​";
@@ -156,6 +156,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             //case GLES20.GL_STACK_OVERFLOW: name = "GL_STACK_OVERFLOW"; break;
             //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
             }
+            errorsDetected = true;
             Log.e(TAG, op + ": glError " + error + " : " + name);
             throw new RuntimeException(op + ": glError " + error);
         }

@@ -235,8 +235,34 @@ public class ImagePersistence extends PersistenceElement
 
     public static RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
     {
-        System.out.println("*** Trying to import an image!");
-        return null;
+        try {
+            int i;
+            for ( i = 0; i < helpers.size(); i++ ) {
+                if ( helpers.get(i).rgbFormatFromInputStreamSupported("*") ) {
+                    return helpers.get(i).importRGB(is);
+                }
+            }
+        }
+        catch ( Exception e ) {
+
+        }
+        return createNotAvailableImageRGB();
+    }
+
+    public static RGBAImage importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
+    {
+        try {
+            int i;
+            for ( i = 0; i < helpers.size(); i++ ) {
+                if ( helpers.get(i).rgbaFormatFromInputStreamSupported("*") ) {
+                    return helpers.get(i).importRGBA(is);
+                }
+            }
+        }
+        catch ( Exception e ) {
+
+        }
+        return createNotAvailableImageRGBA();
     }
 
     /**
@@ -493,6 +519,7 @@ public class ImagePersistence extends PersistenceElement
         for ( i = 0; i < helpers.size(); i++ ) {
             if ( helpers.get(i).pngExportSupported() ) {
                 helpers.get(i).exportPNG_24bitRgb(os, img);
+                return;
             }
         }
         VSDK.reportMessage(null, VSDK.WARNING, 
@@ -507,6 +534,7 @@ public class ImagePersistence extends PersistenceElement
             for ( i = 0; i < helpers.size(); i++ ) {
                 if ( helpers.get(i).pngExportSupported() ) {
                     helpers.get(i).exportPNG(fd, img);
+                    return;
                 }
             }
         }
@@ -523,6 +551,7 @@ public class ImagePersistence extends PersistenceElement
         for ( i = 0; i < helpers.size(); i++ ) {
             if ( helpers.get(i).pngExportSupported() ) {
                 helpers.get(i).exportPNG_24bitRgb(os, img);
+                return;
             }
         }
         VSDK.reportMessage(null, VSDK.WARNING, 

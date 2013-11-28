@@ -56,7 +56,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
         //glLineWidth(1.0f);
         float vertexDataArray[] = new float[numVertex*8];
         FloatBuffer verticesBufferedArray;
-        
+
         index = 0; vertex3Position3Color2Uv(vertexDataArray, index, 
             minmax[0], minmax[1], minmax[5], c.r, c.g, c.b, 0.0, 0.0); // 6
         index += 8; vertex3Position3Color2Uv(vertexDataArray, index, 
