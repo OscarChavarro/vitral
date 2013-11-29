@@ -2,6 +2,9 @@
 
 package vitral.application;
 
+// Java classes
+import java.util.Random;
+
 // Android packages
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -33,10 +36,16 @@ import android.location.GpsStatus.Listener;
 import android.content.Context;
 
 // Vsdk classes
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.geometry.Sphere;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
 public class VitralActivity extends Activity 
@@ -50,6 +59,10 @@ GpsStatus.Listener, OnClickListener {
     private String provider;
     private int numberOfLocations;
     private int numberOfLights;
+    private Random randomNumberGenerator;
+
+    private int interaction;
+    private int mouseMovementsFromLastDown;
 
     //= Basic Activity methods =================================================
     private void createGUI()
@@ -123,6 +136,10 @@ GpsStatus.Listener, OnClickListener {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        randomNumberGenerator = new Random(System.currentTimeMillis());
+        interaction = 1;
+        mouseMovementsFromLastDown = 0;
+
         createGUI();
 
         cameraController = 
@@ -164,28 +181,52 @@ GpsStatus.Listener, OnClickListener {
     //= Extended methods for user interface =====================================
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-/*
         switch ( e.getAction() ) {
           case MotionEvent.ACTION_DOWN:            // one touch: drag
-            System.out.println("one down");
+            //System.out.println("one down");
+	    mouseMovementsFromLastDown = 0;
             break;
           case MotionEvent.ACTION_POINTER_DOWN:    // two touches: zoom
-            System.out.println("two down");
+            //System.out.println("two down");
             break;
           case MotionEvent.ACTION_UP:              // no mode
-            System.out.println("up");
+	    mouseMovementsFromLastDown++;
+            //System.out.println("up");
             break;
           case MotionEvent.ACTION_POINTER_UP:      // no mode
-            System.out.println("upup");
+            //System.out.println("upup");
             break;
           case MotionEvent.ACTION_MOVE:            // rotation
-            System.out.println("move");
+            //System.out.println("move");
+	    mouseMovementsFromLastDown += 10;
             break;
         }
-*/
+
         MouseEvent evsdk = AndroidSystem.android2vsdkEvent(e);
 
-        return cameraController.processMouseDraggedEvent(evsdk); // 
+        switch ( interaction ) {
+          case 1:
+	    if ( mouseMovementsFromLastDown > 1 ) { // Drag
+                cameraController.processMouseDraggedEvent(evsdk);
+	    }
+	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
+	        canvas.glExecutor.selectObjectWithMouse(evsdk.getX(), evsdk.getY());
+	    }
+            break;
+
+          case 2:
+	    if ( mouseMovementsFromLastDown > 1 ) { // Drag
+                cameraController.processMouseDraggedEvent(evsdk);
+	    }
+	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
+	        canvas.glExecutor.insertSphereWithMouse(evsdk.getX(), evsdk.getY());
+	    }
+            break;
+
+          default:
+            return false;
+        }
+        return true;
     }
 
     //= Extended methods for GPS ===============================================
@@ -271,16 +312,58 @@ GpsStatus.Listener, OnClickListener {
         a.add(0, 17, 0, "Toggle object rotation");
         a.add(0, 18, 0, "Toggle first light rotation");
 
-        SubMenu x = menu.addSubMenu(1, 101, 1, "Other options");
+        SubMenu x = menu.addSubMenu(1, 102, 1, "Scene");
         x.add(0, 19, 0, "Add light");
+        x.add(0, 20, 0, "Add sphere");
+        x.add(0, 21, 0, "Add 10 spheres");
+
+        SubMenu i = menu.addSubMenu(1, 103, 1, "Interaction");
+        i.add(0, 22, 0, "Select objects");
+        i.add(0, 23, 0, "Insert spheres");
 
         return true;
+    }
+
+    private Vector3D randomPosition()
+    {
+        Vector3D p;
+
+        p = new Vector3D();
+/*
+        p.x = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
+        p.y = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
+        p.z = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
+*/
+        double phi;
+        double theta;
+        double r;
+
+        phi = (randomNumberGenerator.nextDouble()) * Math.PI;
+        theta = (randomNumberGenerator.nextDouble()*2.0) * Math.PI;
+        r = (randomNumberGenerator.nextDouble()*0.5) + 1.2;
+
+	p.setSphericalCoordinates(r, theta, phi);
+
+        return p;
+    }
+
+    private ColorRgb randomColor()
+    {
+        ColorRgb c;
+        c = new ColorRgb();
+        c.r = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
+        c.g = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
+        c.b = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
+        return c;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         RendererConfiguration q;
         q = canvas.glExecutor.getRendererConfiguration();
+        Scene s = canvas.glExecutor.getScene();
+        SimpleBody b;
+
         switch ( item.getItemId() ) {
           case 0:
             q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
@@ -341,6 +424,22 @@ GpsStatus.Listener, OnClickListener {
           case 19:
             numberOfLights++;
             canvas.glExecutor.prepareLights(numberOfLights);
+            break;
+          case 20:
+	    b = s.addThing(new Sphere(0.4), randomColor());
+            b.setPosition(randomPosition());
+            break;
+          case 21:
+	    for ( int i = 0; i < 10; i++ ) {
+   	        b = s.addThing(new Sphere(0.4), randomColor());
+                b.setPosition(randomPosition());
+	    }
+            break;
+          case 22:
+            interaction = 1;
+            break;
+          case 23:
+            interaction = 2;
             break;
         }
         return true;

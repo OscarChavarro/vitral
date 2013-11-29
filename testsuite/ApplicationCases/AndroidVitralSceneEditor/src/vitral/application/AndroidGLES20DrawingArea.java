@@ -23,6 +23,7 @@ import android.opengl.GLUtils;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -36,18 +37,17 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20BoxRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20ConeRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBAImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 
 public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
@@ -56,6 +56,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private AndroidGLES20Renderer vgl;
 
     // Vitral scene
+    private Scene scene;
     private RendererConfiguration quality;
     private Material material;
     private Camera camera;
@@ -82,10 +83,66 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         return quality;
     }
 
+    public Scene getScene()
+    {
+        return scene;
+    }
+
     public Camera getCamera()
     {
         return camera;
     } 
+
+    public void insertSphereWithMouse(int x, int y)
+    {
+        Ray r, ro;
+
+        System.out.println("Inserting sphere for (" + x + ", " + y + ")");
+
+        camera.updateVectors();
+        r = camera.generateRay(x, y);
+
+        System.out.println("  - Ray: " + r);
+        System.out.println("  - Camera at: " + camera.getPosition());
+
+        Vector3D p;
+
+        p = r.origin.add(r.direction.multiply(10.0));
+
+        System.out.println("  - Sphere at: " + p);
+
+
+        SimpleBody b;
+        Sphere s;
+
+        s = new Sphere(0.3);
+        b = scene.addThing(s, new ColorRgb(0.9, 0.5, 0.5) /*randomColor()*/);
+        b.setPosition(p);
+    }
+
+    public void selectObjectWithMouse(int x, int y)
+    {
+        Ray r, ro;
+        SimpleBody gi;
+
+        camera.updateVectors();
+        r = camera.generateRay(x, y);
+
+        double nearestDistance = Float.MAX_VALUE;
+
+        int i;
+
+        scene.selectedObjectIndex = -1;
+        ArrayList<SimpleBody> things = scene.scene.getSimpleBodies();
+
+        for ( i = 0; i < things.size(); i++ ) {
+            gi = things.get(i);
+            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
+                nearestDistance = r.t;
+                scene.selectedObjectIndex = i;
+            }
+        }
+    }
 
     public void toggleObjectRotation()
     {
@@ -110,11 +167,11 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         cone = null;
         switch ( o ) {
           case 1: default:
-	    highResSphere = false;
+            highResSphere = false;
             sphere = new Sphere(1.0);
             break;
           case 2:
-	    highResSphere = true;
+            highResSphere = true;
             sphere = new Sphere(1.0);
             break;
           case 3:
@@ -137,11 +194,11 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         System.out.println("Loading mesh " + filename);
         meshFile = new File(filename);
         reader = new ReaderPly();
-        SimpleScene scene = new SimpleScene();
+        SimpleScene tscene = new SimpleScene();
         TriangleMesh m = null;
         try {
-            reader.importEnvironment(meshFile, scene);
-            m = (TriangleMesh)(scene.getSimpleBodies().get(0).getGeometry());
+            reader.importEnvironment(meshFile, tscene);
+            m = (TriangleMesh)(tscene.getSimpleBodies().get(0).getGeometry());
             System.out.println(mesh.toString());
           }
           catch ( Exception e ) {
@@ -163,14 +220,14 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         if ( n > 3 ) {
             n = 3;
-	}
+        }
 
         for ( int i = 0; i < n; i++ ) {
             l = new Light(Light.POINT, 
-		new Vector3D(p[6*i+0], p[6*i+1], p[6*i+2]), 
+                new Vector3D(p[6*i+0], p[6*i+1], p[6*i+2]), 
                 new ColorRgb(p[6*i+3], p[6*i+4], p[6*i+5]));
             lights.add(l);
-	}
+        }
     }
 
     private void createModel()
@@ -181,9 +238,12 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         R.eulerAnglesRotation(Math.toRadians(90.0), Math.toRadians(-45.0), 0);
 
+        scene = new Scene();
+
         camera = new Camera();
         camera.setPosition(p);
         camera.setRotation(R);
+        camera.setFov(45.0);
 
         quality = new RendererConfiguration();
         quality.setPoints(false);
@@ -244,12 +304,12 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             P = lights.get(0).getPosition();
             PR = RL.multiply(P);
             lights.get(0).setPosition(PR);
-	}
+        }
 
         for ( int i = 0; i < lights.size(); i++ ) {
             AndroidGLES20LightRenderer.draw(lights.get(i));
             AndroidGLES20LightRenderer.activate(lights.get(i));
-	}
+        }
 
         //vgl.glTranslated(-2, 0, 0);
         if ( withObjectRotation ) {
@@ -280,26 +340,28 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             sphere.setRadius(1.0);
             if ( highResSphere ) {
                 AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 50, 25);
-	    }
-	    else {
+            }
+            else {
                 AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 20, 10);
-	    }
+            }
         }
 
         if ( box != null ) {
-            AndroidGLES20BoxRenderer.draw(box, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(box, camera, quality);
         }
 
         if ( cone != null ) {
-            AndroidGLES20ConeRenderer.draw(cone, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(cone, camera, quality);
         }
         
         if ( mesh != null ) {
             vgl.glScaled(15, 15, 15);
             vgl.glRotated(90, 1, 0, 0);
-            AndroidGLES20TriangleMeshRenderer.draw(mesh, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(mesh, camera, quality);
         }
-        
+
+        AndroidGLES20SceneRenderer.draw(scene, camera, quality);
+
         //-----------------------------------------------------------------
         if ( withReferenceSquare ) {
             vgl.glMatrixMode(vgl.GL_MODELVIEW);
@@ -393,9 +455,9 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             is = androidApplicationContext.getResources().openRawResource(
                 R.raw.render);
             texture = ImagePersistence.importRGBA(is);
-	}
-	catch ( Exception e ) {
-	}
+        }
+        catch ( Exception e ) {
+        }
     }
 }
 

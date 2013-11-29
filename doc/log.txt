@@ -1066,9 +1066,15 @@
   - 10min: AndroidGLES20RGBImageRenderer
   - 26min: SpriteFontGenerator utility
 
-2013 november 27, Oscar Chavarro
+2013 november 28, Oscar Chavarro
   - 1h35min: AndroidGLES20RGBImageRenderer
   - 18min: AndroidGLES20RGBAImageRenderer
   - 1h: ImagePersistenceAndroid :)
+  - 43min: AndroidGLES20SimpleBodyRenderer, AndroidGLES20GeometryRenderer
+    and basic scene management at android application template
+
+2013 november 29, Oscar Chavarro
+  - 50min: scene management at android application template
+  - 1h30: click interaction technique
 
 ===========================================================================

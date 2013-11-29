@@ -260,6 +260,67 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
         drawSelectionCorners(g.getMinMax(), q);
     }
 
+    /**
+    \todo  Homogenize all of the draw method signatures. Perhaps this code can
+    be generalized to search the corresponding rendering class to a given
+    Geometry via reflection, so this search should not be done explicitly.
+    */
+    public static void draw(Geometry g, Camera c, RendererConfiguration q)
+    {
+        if ( g == null ) {
+            VSDK.reportMessage(null, VSDK.WARNING,
+                               "AndroidGLES20GeometryRenderer.draw",
+                               "null Geometry reference recieved");
+            return;
+        }
+
+        if ( g instanceof Sphere ) {
+            AndroidGLES20SphereRenderer.draw((Sphere)g, c, q);
+        }
+        if ( g instanceof Torus ) {
+            //AndroidGLES20TorusRenderer.draw((Torus)g, c, q);
+        }
+        if ( g instanceof InfinitePlane ) {
+            //AndroidGLES20InfinitePlaneRenderer.draw((InfinitePlane)g, c, q);
+        }
+        else if ( g instanceof Box ) {
+            AndroidGLES20BoxRenderer.draw((Box)g, c, q);
+        }
+        else if ( g instanceof Cone ) {
+            AndroidGLES20ConeRenderer.draw((Cone)g, c, q);
+        }
+        else if ( g instanceof Arrow ) {
+            //AndroidGLES20ArrowRenderer.draw((Arrow)g, c, q);
+        }
+        else if ( g instanceof ParametricCurve ) {
+            //AndroidGLES20ParametricCurveRenderer.draw((ParametricCurve)g, c, q);
+        }
+        else if ( g instanceof ParametricBiCubicPatch ) {
+            //AndroidGLES20ParametricBiCubicPatchRenderer.draw((ParametricBiCubicPatch)g, c, q);
+        }
+        else if ( g instanceof PolyhedralBoundedSolid ) {
+            //AndroidGLES20PolyhedralBoundedSolidRenderer.draw((PolyhedralBoundedSolid)g, c, q);
+        }
+        else if ( g instanceof TriangleMesh ) {
+            AndroidGLES20TriangleMeshRenderer.draw((TriangleMesh)g, c, q);
+        }
+        else if ( g instanceof QuadMesh ) {
+            //AndroidGLES20QuadMeshRenderer.draw((QuadMesh)g, q, false);
+        }
+        else if ( g instanceof FunctionalExplicitSurface ) {
+            //AndroidGLES20FunctionalExplicitSurfaceRenderer.draw((FunctionalExplicitSurface)g, c, q);
+        }
+        else if ( g instanceof TriangleStripMesh ) {
+            //AndroidGLES20TriangleStripMeshRenderer.draw((TriangleStripMesh)g, q, false);
+        }
+        else if ( g instanceof TriangleMeshGroup ) {
+            //AndroidGLES20TriangleMeshGroupRenderer.draw((TriangleMeshGroup)g,q);
+        }
+        else if ( g instanceof VoxelVolume ) {
+            //AndroidGLES20VoxelVolumeRenderer.drawBinaryCubes((VoxelVolume)g, c, q);
+        }
+    }
+
 }
 
 //===========================================================================

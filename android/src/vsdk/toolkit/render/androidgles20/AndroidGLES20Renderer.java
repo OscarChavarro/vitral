@@ -538,7 +538,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     public static void glDisable(int k)
     {
         switch ( k ) {
-        case GL_TEXTURE_2D:
+          case GL_TEXTURE_2D:
             qualitySelection.setTexture(false);
             activateShaders();
             break;
