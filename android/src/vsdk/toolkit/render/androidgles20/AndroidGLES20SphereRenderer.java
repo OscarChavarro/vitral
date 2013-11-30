@@ -20,6 +20,9 @@ import vsdk.toolkit.environment.Camera;
 
 public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 {
+    private static int defaultSlices = 20;
+    private static int defaultStacks = 10;
+
     private static void drawPoints(Sphere sphere, int slices, int stacks,
         RendererConfiguration q)
     {
@@ -155,7 +158,13 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
     public static void draw(Sphere s, Camera c, RendererConfiguration q)
     {
-        draw(s, c, q, 20, 10);
+        draw(s, c, q, defaultSlices, defaultStacks);
+    }
+
+    public static void setDefaultSlicesStacks(int sl, int st)
+    {
+        defaultSlices = sl;
+        defaultStacks = st;
     }
 
     /**

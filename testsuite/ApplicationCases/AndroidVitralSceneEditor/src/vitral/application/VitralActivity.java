@@ -2,9 +2,6 @@
 
 package vitral.application;
 
-// Java classes
-import java.util.Random;
-
 // Android packages
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -59,7 +56,6 @@ GpsStatus.Listener, OnClickListener {
     private String provider;
     private int numberOfLocations;
     private int numberOfLights;
-    private Random randomNumberGenerator;
 
     private int interaction;
     private int mouseMovementsFromLastDown;
@@ -136,7 +132,6 @@ GpsStatus.Listener, OnClickListener {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        randomNumberGenerator = new Random(System.currentTimeMillis());
         interaction = 1;
         mouseMovementsFromLastDown = 0;
 
@@ -210,7 +205,7 @@ GpsStatus.Listener, OnClickListener {
                 cameraController.processMouseDraggedEvent(evsdk);
 	    }
 	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
-	        canvas.glExecutor.selectObjectWithMouse(evsdk.getX(), evsdk.getY());
+	        canvas.glExecutor.getScene().selectObjectWithMouse(evsdk.getX(), evsdk.getY());
 	    }
             break;
 
@@ -219,7 +214,7 @@ GpsStatus.Listener, OnClickListener {
                 cameraController.processMouseDraggedEvent(evsdk);
 	    }
 	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
-	        canvas.glExecutor.insertSphereWithMouse(evsdk.getX(), evsdk.getY());
+	        canvas.glExecutor.getScene().insertSphereWithMouse(evsdk.getX(), evsdk.getY());
 	    }
             break;
 
@@ -321,40 +316,10 @@ GpsStatus.Listener, OnClickListener {
         i.add(0, 22, 0, "Select objects");
         i.add(0, 23, 0, "Insert spheres");
 
+        SubMenu r = menu.addSubMenu(1, 104, 1, "Rendering");
+        r.add(0, 24, 0, "Raytrace");
+
         return true;
-    }
-
-    private Vector3D randomPosition()
-    {
-        Vector3D p;
-
-        p = new Vector3D();
-/*
-        p.x = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
-        p.y = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
-        p.z = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
-*/
-        double phi;
-        double theta;
-        double r;
-
-        phi = (randomNumberGenerator.nextDouble()) * Math.PI;
-        theta = (randomNumberGenerator.nextDouble()*2.0) * Math.PI;
-        r = (randomNumberGenerator.nextDouble()*0.5) + 1.2;
-
-	p.setSphericalCoordinates(r, theta, phi);
-
-        return p;
-    }
-
-    private ColorRgb randomColor()
-    {
-        ColorRgb c;
-        c = new ColorRgb();
-        c.r = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
-        c.g = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
-        c.b = (randomNumberGenerator.nextDouble() / 2.0) + 0.5;
-        return c;
     }
 
     @Override
@@ -426,13 +391,11 @@ GpsStatus.Listener, OnClickListener {
             canvas.glExecutor.prepareLights(numberOfLights);
             break;
           case 20:
-	    b = s.addThing(new Sphere(0.4), randomColor());
-            b.setPosition(randomPosition());
+            canvas.glExecutor.getScene().addRandomSphere();
             break;
           case 21:
 	    for ( int i = 0; i < 10; i++ ) {
-   	        b = s.addThing(new Sphere(0.4), randomColor());
-                b.setPosition(randomPosition());
+                canvas.glExecutor.getScene().addRandomSphere();
 	    }
             break;
           case 22:
@@ -440,6 +403,9 @@ GpsStatus.Listener, OnClickListener {
             break;
           case 23:
             interaction = 2;
+            break;
+          case 24:
+	    canvas.glExecutor.raytrace();
             break;
         }
         return true;

@@ -1076,5 +1076,6 @@
 2013 november 29, Oscar Chavarro
   - 50min: scene management at android application template
   - 1h30: click interaction technique
+  - 1h10min: standarized scene at android application template
 
 ===========================================================================

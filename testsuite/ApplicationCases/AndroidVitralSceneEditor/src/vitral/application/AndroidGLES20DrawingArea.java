@@ -59,8 +59,6 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private Scene scene;
     private RendererConfiguration quality;
     private Material material;
-    private Camera camera;
-    private ArrayList<Light> lights;
     private Sphere sphere;
     private Box box;
     private Cone cone;
@@ -69,7 +67,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private RGBAImage texture;
     
     // Display lists ids
-    private int textureId;
+    private RGBImage raytracingImage;
 
     // Other
     private long baserr = SystemClock.uptimeMillis();
@@ -90,59 +88,8 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
     public Camera getCamera()
     {
-        return camera;
+        return scene.camera;
     } 
-
-    public void insertSphereWithMouse(int x, int y)
-    {
-        Ray r, ro;
-
-        System.out.println("Inserting sphere for (" + x + ", " + y + ")");
-
-        camera.updateVectors();
-        r = camera.generateRay(x, y);
-
-        System.out.println("  - Ray: " + r);
-        System.out.println("  - Camera at: " + camera.getPosition());
-
-        Vector3D p;
-
-        p = r.origin.add(r.direction.multiply(10.0));
-
-        System.out.println("  - Sphere at: " + p);
-
-
-        SimpleBody b;
-        Sphere s;
-
-        s = new Sphere(0.3);
-        b = scene.addThing(s, new ColorRgb(0.9, 0.5, 0.5) /*randomColor()*/);
-        b.setPosition(p);
-    }
-
-    public void selectObjectWithMouse(int x, int y)
-    {
-        Ray r, ro;
-        SimpleBody gi;
-
-        camera.updateVectors();
-        r = camera.generateRay(x, y);
-
-        double nearestDistance = Float.MAX_VALUE;
-
-        int i;
-
-        scene.selectedObjectIndex = -1;
-        ArrayList<SimpleBody> things = scene.scene.getSimpleBodies();
-
-        for ( i = 0; i < things.size(); i++ ) {
-            gi = things.get(i);
-            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
-                nearestDistance = r.t;
-                scene.selectedObjectIndex = i;
-            }
-        }
-    }
 
     public void toggleObjectRotation()
     {
@@ -216,7 +163,10 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
                       1, -1, 1, 0, 1, 0,
                       -0.6, -2, 2, 0, 0, 1};
 
-        lights = new ArrayList<Light>();
+        ArrayList<Light> list = scene.scene.getLights();
+        while ( !list.isEmpty() ) {
+            list.remove(0);
+        }
 
         if ( n > 3 ) {
             n = 3;
@@ -226,25 +176,15 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             l = new Light(Light.POINT, 
                 new Vector3D(p[6*i+0], p[6*i+1], p[6*i+2]), 
                 new ColorRgb(p[6*i+3], p[6*i+4], p[6*i+5]));
-            lights.add(l);
+            list.add(l);
         }
     }
 
     private void createModel()
     {
         //-----------------------------------------------------------------
-        Vector3D p = new Vector3D(0, -5, 5);
-        Matrix4x4 R = new Matrix4x4();
-
-        R.eulerAnglesRotation(Math.toRadians(90.0), Math.toRadians(-45.0), 0);
-
         scene = new Scene();
-
-        camera = new Camera();
-        camera.setPosition(p);
-        camera.setRotation(R);
-        camera.setFov(45.0);
-
+        raytracingImage = null;
         quality = new RendererConfiguration();
         quality.setPoints(false);
         quality.setWires(false);
@@ -283,8 +223,6 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
-        // camera.activate()
-        AndroidGLES20CameraRenderer.activate(camera);
 
         // Tick updates transform
         long time = SystemClock.uptimeMillis() % 8000L;
@@ -296,7 +234,8 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         // Move light around center...
         double r = 2.0;
-        if ( withLightRotation ) {
+        ArrayList<Light> lights = scene.scene.getLights();
+        if ( withLightRotation && lights.size() > 0 ) {
             lights.get(0).setPosition(new Vector3D(r, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
             RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
@@ -306,11 +245,9 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             lights.get(0).setPosition(PR);
         }
 
-        for ( int i = 0; i < lights.size(); i++ ) {
-            AndroidGLES20LightRenderer.draw(lights.get(i));
-            AndroidGLES20LightRenderer.activate(lights.get(i));
-        }
+        AndroidGLES20SceneRenderer.draw(scene, quality);
 
+        vgl.glLoadIdentity();
         //vgl.glTranslated(-2, 0, 0);
         if ( withObjectRotation ) {
             vgl.glRotated(200*x, 0, 0, 1);
@@ -331,44 +268,44 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
                     GLES20.GL_REPEAT);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
                     GLES20.GL_REPEAT);
-
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            AndroidGLES20RGBAImageRenderer.activate(texture, textureId);
+            AndroidGLES20RGBAImageRenderer.activate(texture);
         }
 
         if ( sphere != null ) {
             sphere.setRadius(1.0);
             if ( highResSphere ) {
-                AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 50, 25);
+                AndroidGLES20SphereRenderer.setDefaultSlicesStacks(50, 25);
             }
             else {
-                AndroidGLES20SphereRenderer.draw(sphere, camera, quality, 20, 10);
+                AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
             }
+            AndroidGLES20GeometryRenderer.draw(sphere, scene.camera, quality);
         }
 
         if ( box != null ) {
-            AndroidGLES20GeometryRenderer.draw(box, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(box, scene.camera, quality);
         }
 
         if ( cone != null ) {
-            AndroidGLES20GeometryRenderer.draw(cone, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(cone, scene.camera, quality);
         }
         
         if ( mesh != null ) {
             vgl.glScaled(15, 15, 15);
             vgl.glRotated(90, 1, 0, 0);
-            AndroidGLES20GeometryRenderer.draw(mesh, camera, quality);
+            AndroidGLES20GeometryRenderer.draw(mesh, scene.camera, quality);
         }
-
-        AndroidGLES20SceneRenderer.draw(scene, camera, quality);
 
         //-----------------------------------------------------------------
         if ( withReferenceSquare ) {
+        //if ( raytracingImage != null ) {
             vgl.glMatrixMode(vgl.GL_MODELVIEW);
             vgl.glLoadIdentity();
             vgl.glTranslated(x, 0, 0);
             vgl.glEnable(vgl.GL_TEXTURE_2D);
             vgl.setRendererConfiguration(quality);
+            //AndroidGLES20RGBImageRenderer.activate(raytracingImage);
             drawUnitSquare();
         }
     }
@@ -436,7 +373,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
             return;
         }
 
-        camera.updateViewportResize(width, height);
+        scene.camera.updateViewportResize(width, height);
     }
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig configUnused) {
@@ -458,6 +395,13 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         }
         catch ( Exception e ) {
         }
+    }
+
+    public void raytrace()
+    {
+        raytracingImage = new RGBImage();
+        raytracingImage.init(128, 128);
+        scene.raytrace(raytracingImage, quality);
     }
 }
 

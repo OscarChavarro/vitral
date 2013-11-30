@@ -19,14 +19,14 @@ public class AndroidGLES20RGBAImageRenderer extends AndroidGLES20Renderer
         compiledImages = new ArrayList<_AndroidGLES20RGBAImageRendererAssociation>();
     }
 
-    public static int activate(RGBAImage img, int machete)
+    public static int activate(RGBAImage img)
     {
-        int list = activateBase(img, machete);
+        int list = activateBase(img);
 
         return list;
     }
 
-    private static int activateBase(RGBAImage img, int machete)
+    private static int activateBase(RGBAImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
