@@ -45,6 +45,12 @@ Before 2013:
 After:
 svn co https://svn.code.sf.net/p/vitral/code vitral
 
+To access read-write:
+  - Create an account at http://www.sf.net
+  - Request access via e-mail to jedilink@gmail.com
+  - Do:
+svn checkout --username=mysfaccount svn+ssh://mysfaccount@svn.code.sf.net/p/vitral/code/ vitral-code
+
 On windows, using tortoise:
   - Create an empty folder named "vitral" and double click on it
   - Right click on explorer context menu, and select "SVN Checkout"
