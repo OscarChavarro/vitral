@@ -167,7 +167,7 @@ public class ComputationalGeometry extends ProcessingElement
     }
 
     /**
-    Given a line that passes between points `p0` and `p2`, this method 
+    Given a line that passes between points `p0` and `p1`, this method 
     determines if point `p` falls under `distanceTolerance` in such line.
 
     This method is functionaly equivalent to procedures `contev` and
