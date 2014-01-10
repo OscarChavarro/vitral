@@ -1000,6 +1000,9 @@
 2013 october 29, Oscar Chavarro
   - 1h: Fixing a bug that was impacting some applications.
 
+2013 october 30, Leidy Lozano
+  - 48h: New interaction technique for controlling camera on GIS applications
+
 2013 november 13, Oscar Chavarro
   - 1h45min: AndroidGLES20LightRenderer
   - 1h46min: checking gouraud vertex shader for light position value and
