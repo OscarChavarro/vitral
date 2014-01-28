@@ -51,7 +51,9 @@ LINUX INSTALLATION INSTRUCTIONS
    point to the installation directory used by tomcat on step 2.
 4. Configure tomcat to include an administrator user, so you can deploy
    applications (needed on step 8).  On the tomcat installation folder
-   below, edit the file conf/tomcat-users.xml, and do something like:
+   below, edit the file conf/tomcat-users.xml, and do something like
+   the following in tomcat 6 version:
+
 
 <?xml version='1.0' encoding='utf-8'?>
 <tomcat-users>
@@ -59,6 +61,22 @@ LINUX INSTALLATION INSTRUCTIONS
   <role rolename="admin"/>
   <user username="mylogin" password="mypassword" roles="admin,manager"/>
 </tomcat-users>
+
+   On tomcat 7 use 
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <role rolename="manager-jmx"/>
+  <role rolename="manager-status"/>
+  <role rolename="admin-gui"/>
+  <role rolename="admin-script"/>
+  <user username="mylogin
+
+" password="mypassword" roles="manager-gui, manager-script, manage
+r-jmx, manager-status, admin-gui, admin-script"/>
+</tomcat-users>
+
 
 5. Start the tomcat webserver / application container by entering the
    bin directory under the main tomcat folder, and execute the
