@@ -505,33 +505,34 @@ public abstract class PersistenceElement {
     public static String
     readAsciiFixedSizeString(InputStream is, int size) throws Exception
     {
-        byte characters[] = new byte[size];
+        // Old implementation: check if it is more ineficient and-or
+        // equivalent
+	/*
+        byte bytesForString[] = new byte[size];
         char letter;
         String msg = "";
         int i;
 
-        readBytes(is, characters);
-        for ( i = 0; i < size && characters[0] != 0x00; i++ ) {
-            letter = (char)characters[i];
+        readBytes(is, bytesForString);
+        for ( i = 0; i < size && bytesForString[0] != 0x00; i++ ) {
+            letter = (char)bytesForString[i];
             if ( letter != 0x00 ) {
                 msg = msg + letter;
             }
         }
 
         return msg;
+	*/
 
         // Alternative implementation by Leidy Lozano:
-	/*
         if ( size <= 0 ) {
             return "";
 	}
-        byte[] bytesForString = new byte[20];
-        bytesForString = new byte[size]; 
+        byte[] bytesForString = new byte[size]; 
         readBytes(is, bytesForString);
 
-        String str = new String(bytesForString, "UTF-8");
-        return str;
-	*/
+        String msg = new String(bytesForString, "UTF-8");
+        return msg;
     }
 
     public static String readAsciiString(InputStream is) throws Exception
