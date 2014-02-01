@@ -42,18 +42,27 @@ public class CameraControllerGoogleEarth extends CameraController {
         Xold=e.getX();
         Yold=e.getY();
         
+     //  System.out.println("Presioné");
+        //Procedimiento para selección de lineas
+        camera.updateVectors();
+        Ray RayA=camera.generateRay(Xold, Yold);
+        
+        
+        
         return false;
     }
 
     @Override
     public boolean processMouseReleasedEvent(MouseEvent e)
     {
+        
         return false;
     }
 
     @Override
     public boolean processMouseClickedEvent(MouseEvent e)
     {
+        
         return false;
     }
 
@@ -343,7 +352,7 @@ public class CameraControllerGoogleEarth extends CameraController {
           case vsdk.toolkit.gui.KeyEvent.KEY_Z:
         
           //Limite superior
-          if((eyePosition.z+brinco)>=Math.pow(10, 24)){break;}//Para las fotos Math.pow(10, 25)
+          if((eyePosition.z+brinco)>=Math.pow(10, 3)){break;}//Para las fotos Math.pow(10, 25)
      
           //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
                brinco=Math.pow(10, Math.round(Math.log10(eyePosition.z))-1);
