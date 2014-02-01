@@ -116,7 +116,7 @@ public abstract class PersistenceElement {
             offset += numRead;
         } while( offset < length && numRead >= 0 ); 
     }
-
+    
     /**
     Given a previously initialized array of bytes, this method writes it
     with information readed from the given output stream.  If it is not
@@ -502,7 +502,8 @@ public abstract class PersistenceElement {
         writeBytes(os, bytesForLong);
     }
 
-    public static String readAsciiFixedSizeString(InputStream is, int size) throws Exception
+    public static String
+    readAsciiFixedSizeString(InputStream is, int size) throws Exception
     {
         byte characters[] = new byte[size];
         char letter;
@@ -518,6 +519,19 @@ public abstract class PersistenceElement {
         }
 
         return msg;
+
+        // Alternative implementation by Leidy Lozano:
+	/*
+        if ( size <= 0 ) {
+            return "";
+	}
+        byte[] bytesForString = new byte[20];
+        bytesForString = new byte[size]; 
+        readBytes(is, bytesForString);
+
+        String str = new String(bytesForString, "UTF-8");
+        return str;
+	*/
     }
 
     public static String readAsciiString(InputStream is) throws Exception
