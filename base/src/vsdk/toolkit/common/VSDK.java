@@ -265,6 +265,48 @@ public class VSDK
         return (byte)in;
     }
 
+    public static void reportMessageWithException(Object o, int level, String method, String message, Exception ee)
+    {
+        String msg;
+
+        msg = "===========================================================================\n";
+        msg = msg + "= VSDK Exception report                                                   =\n";
+        if ( o != null ) {
+            msg = msg + " - An exception has been thrown in the \"" + o.getClass().getName() + "\" class\n";
+        }
+        else {
+            msg = msg + " - An exception has been thrown from a static context\n";
+        }
+        msg = msg + " - Exception located at method " + method + "\n";
+        msg = msg + " - Exception message:\n" + message + "\n";
+        StackTraceElement report[];
+        report = ee.getStackTrace();
+        int i;
+        for ( i = 0; i < report.length; i++ ) {
+            msg = msg + report[i] + "\n";
+        }
+        msg = msg + "===========================================================================\n";
+        if ( level == FATAL_ERROR ) {
+            msg = msg + "Program excecution suspended!\n";
+        }
+
+        System.err.println(msg);
+
+        if ( level == FATAL_ERROR ) {
+            try {
+                throw new Exception("VSDK.reportMessage(FATAL_ERROR)");
+            }
+            catch ( Exception e ) {
+                //e.printStackTrace();
+                report = e.getStackTrace();
+                for ( i = 0; i < report.length; i++ ) {
+                    System.out.println(report[i]);
+                }
+            }
+            System.exit(1);
+        }
+    }
+    
     public static void reportMessage(Object o, int level, String method, String message)
     {
         String msg;
