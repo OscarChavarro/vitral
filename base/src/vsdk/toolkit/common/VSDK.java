@@ -300,7 +300,7 @@ public class VSDK
                 //e.printStackTrace();
                 report = e.getStackTrace();
                 for ( i = 0; i < report.length; i++ ) {
-                    System.out.println(report[i]);
+                    System.err.println(report[i]);
                 }
             }
             System.exit(1);
@@ -338,7 +338,7 @@ public class VSDK
                 report = e.getStackTrace();
                 int i;
                 for ( i = 0; i < report.length; i++ ) {
-                    System.out.println(report[i]);
+                    System.err.println(report[i]);
                 }
             }
             System.exit(1);
