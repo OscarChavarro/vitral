@@ -395,6 +395,11 @@ public class AwtSystem extends PresentationElement
 
     public static RGBAImage calculateLabelImage(String label, ColorRgb color)
     {
+        return calculateLabelImage(label, color, 14);
+    }
+    
+    public static RGBAImage calculateLabelImage(String label, ColorRgb color, int fontSize)
+    {
         //-----------------------------------------------------------------
         if ( font == null ) {
             font = new Font("Arial", Font.PLAIN, 14);
