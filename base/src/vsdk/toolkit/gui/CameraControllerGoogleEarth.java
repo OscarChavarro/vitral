@@ -352,7 +352,7 @@ public class CameraControllerGoogleEarth extends CameraController {
           case vsdk.toolkit.gui.KeyEvent.KEY_Z:
         
           //Limite superior
-          if((eyePosition.z+brinco)>=Math.pow(10, 3)){break;}//Para las fotos Math.pow(10, 25)
+          if((eyePosition.z+brinco)>=Math.pow(10, 4)){break;}//Para las fotos Math.pow(10, 25)
      
           //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
                brinco=Math.pow(10, Math.round(Math.log10(eyePosition.z))-1);
