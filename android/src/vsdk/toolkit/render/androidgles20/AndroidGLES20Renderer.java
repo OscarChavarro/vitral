@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
 // Basic Java classes
@@ -17,7 +16,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 // Sandbox
-import androidvitral.library.R;
+import vitral.application.R;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -27,10 +26,11 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.render.RenderingElement;
 
-public class AndroidGLES20Renderer
+public class AndroidGLES20Renderer extends RenderingElement
 {
-    private static String TAG = "GLES20TriangleRenderer";
+    private static String TAG = "AndroidGLES20Renderer";
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
@@ -38,7 +38,6 @@ public class AndroidGLES20Renderer
     public static final int mode3Position3Normal2UV = 0;
     public static final int mode3Position3Color = 1;
     public static final int mode3Position3Color3Normal2UV = 2;
-    
 
     // Common values
     protected static final int FLOAT_SIZE_IN_BYTES = 4;
@@ -75,6 +74,7 @@ public class AndroidGLES20Renderer
     private static int specularColorParam;
     private static int phongExponentParam;
     private static int lightPositionsGlobalParam;
+    private static int lightColorsGlobalParam;
     private static int numberOfLightsParam;
     private static int withTextureParam;
     private static int cameraPositionGlobalParam;
@@ -115,6 +115,12 @@ public class AndroidGLES20Renderer
         lights = new ArrayList<Light>();
     }
 
+    public static void setRendererConfiguration(RendererConfiguration source)
+    {
+        qualitySelection.clone(source);
+        activateShaders();
+    }
+
     public static void setShadingType(int t)
     {
         qualitySelection.setShadingType(t);
@@ -126,7 +132,7 @@ public class AndroidGLES20Renderer
         error = GLES20.glGetError();
         String name = "UNKNOWN GL ERROR";
 
-        while ( error != GLES20.GL_NO_ERROR) {
+        while ( error != GLES20.GL_NO_ERROR ) {
             switch ( error ) {
             case GLES20.GL_INVALID_ENUM:
                 name = "GL_INVALID_ENUM​";
@@ -149,6 +155,7 @@ public class AndroidGLES20Renderer
             //case GLES20.GL_STACK_OVERFLOW: name = "GL_STACK_OVERFLOW"; break;
             //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
             }
+            errorsDetected = true;
             Log.e(TAG, op + ": glError " + error + " : " + name);
             throw new RuntimeException(op + ": glError " + error);
         }
@@ -319,14 +326,15 @@ public class AndroidGLES20Renderer
                 throw new RuntimeException(
                     "Could not get attrib location for uvVertexTextureCoordinate");
             }
+        }
 
-            withTextureParam =
-                GLES20.glGetUniformLocation(shaderId, "withTexture");
-            checkGlError("glGetUniformLocation withTexture");
-            if ( withTextureParam == -1 ) {
-                throw new RuntimeException(
-                    "Could not get uniform location for withTexture");
-            }
+        withTextureParam = GLES20.glGetUniformLocation(shaderId, "withTexture");
+        checkGlError("glGetUniformLocation withTexture");
+        if ( withTextureParam == -1 ) {
+            //throw new RuntimeException(
+            //    "Could not get uniform location for withTexture");
+        }
+        else {
             GLES20.glUniform1i(withTextureParam, 
                 qualitySelection.isTextureSet()?1:0);
         }
@@ -433,6 +441,14 @@ public class AndroidGLES20Renderer
                     "Could not get uniform location for lightPositionsGlobal");
             }
 
+            lightColorsGlobalParam =
+                GLES20.glGetUniformLocation(shaderId, "lightColorsGlobal");
+            checkGlError("glGetUniformLocation lightColorsGlobal");
+            if ( lightColorsGlobalParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for lightColorsGlobal");
+            }
+
             float array[] = new float[3*lights.size()];
             for ( int i = 0; i < lights.size(); i++ ) {
                 Vector3D p = lights.get(i).getPosition();
@@ -441,6 +457,15 @@ public class AndroidGLES20Renderer
                 array[3*i + 2] = (float)p.z;
             }
             GLES20.glUniform3fv(lightPositionsGlobalParam, lights.size(), array, 0);
+
+            array = new float[3*lights.size()];
+            for ( int i = 0; i < lights.size(); i++ ) {
+                c = lights.get(i).getSpecular();
+                array[3*i + 0] = (float)c.r;
+                array[3*i + 1] = (float)c.g;
+                array[3*i + 2] = (float)c.b;
+            }
+            GLES20.glUniform3fv(lightColorsGlobalParam, lights.size(), array, 0);
 
             cameraPositionGlobalParam =
                 GLES20.glGetUniformLocation(shaderId, "cameraPositionGlobal");
@@ -464,6 +489,7 @@ public class AndroidGLES20Renderer
             modelViewLocalParam = -1;
             modelViewITLocalParam = -1;
             lightPositionsGlobalParam = -1;
+            lightColorsGlobalParam = -1;
             numberOfLightsParam = -1;
             withTextureParam = -1;
             cameraPositionGlobalParam = -1;
@@ -511,7 +537,7 @@ public class AndroidGLES20Renderer
     public static void glDisable(int k)
     {
         switch ( k ) {
-        case GL_TEXTURE_2D:
+          case GL_TEXTURE_2D:
             qualitySelection.setTexture(false);
             activateShaders();
             break;
@@ -742,33 +768,65 @@ public class AndroidGLES20Renderer
         checkGlError("glDrawArrays");
     }
 
+    protected static void drawVertices3Position3Normal(
+            FloatBuffer verticesBufferedArray,
+            int primitive, int numberOfElements, int vertexSizeInBytes)
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+
+        // glNormal3d
+        if ( NObjectParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(NObjectParam);
+            checkGlError("glEnableVertexAttribArray NObjectParam");
+            GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer NObjectParam");
+        }
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
+
     protected static void drawVertices3Position3Color(
             FloatBuffer verticesBufferedArray,
             int primitive, int numberOfElements, int vertexSizeInBytes)
-        {
-            //-----------------------------------------------------------------
-            // Send geometry to GPU
-            // glVertex3d
-            verticesBufferedArray.position(0);
-            GLES20.glEnableVertexAttribArray(PObjectParam);
-            checkGlError("glEnableVertexAttribArray PObjectParam");
-            GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
-                                 false, vertexSizeInBytes, verticesBufferedArray);
-            checkGlError("glVertexAttribPointer PObject");
+    {
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
 
+        // glColor3d
+        if ( emissionColorParam != -1 ) {
             verticesBufferedArray.position(3);
             GLES20.glEnableVertexAttribArray(emissionColorParam);
             checkGlError("glEnableVertexAttribArray emissionColorParam");
             GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
-                                 false, vertexSizeInBytes, verticesBufferedArray);
+                             false, vertexSizeInBytes, verticesBufferedArray);
             checkGlError("glVertexAttribPointer emissionColorParam");
-
-
-            //-----------------------------------------------------------------
-            // Draw geometry
-            GLES20.glDrawArrays(primitive, 0, numberOfElements);
-            checkGlError("glDrawArrays");
         }
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
     
     protected static void drawVertices3Position3Color3Normal2Uv(
         FloatBuffer verticesBufferedArray,
@@ -817,6 +875,21 @@ public class AndroidGLES20Renderer
         checkGlError("glDrawArrays");
     }
 
+    protected static void
+    vertex3Position3Color2Uv(float arr[], int index,
+        double x, double y, double z,
+        double r, double g, double b,
+        double u, double v)
+    {
+        arr[index] = (float)x;    index++;
+        arr[index] = (float)y;    index++;
+        arr[index] = (float)z;    index++;
+        arr[index] = (float)r;    index++;
+        arr[index] = (float)g;    index++;
+        arr[index] = (float)b;    index++;
+        arr[index] = (float)u;    index++;
+        arr[index] = (float)v;    index++;
+    }
 }
 
 //===========================================================================

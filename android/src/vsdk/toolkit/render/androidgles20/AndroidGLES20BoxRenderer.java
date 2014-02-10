@@ -1,3 +1,4 @@
+//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 import java.nio.ByteBuffer;
@@ -167,7 +168,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
 	private static void drawWires(Box nBox,
 			RendererConfiguration nRendererConfiguration) {
 		
-		Vector3D color = new Vector3D(0, 1, 1);
+		Vector3D color = new Vector3D(1, 0, 0);
 		//One Quad_Strip for the body
 		VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
 		//8 Quads covering the body of the box
@@ -427,7 +428,6 @@ public static void draw(Box nBox, Camera nCamera, RendererConfiguration nRendere
 
 }
 
-
-
-	
-
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================
