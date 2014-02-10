@@ -167,7 +167,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
 	private static void drawWires(Box nBox,
 			RendererConfiguration nRendererConfiguration) {
 		
-		Vector3D color = new Vector3D(1, 0, 0);
+		Vector3D color = new Vector3D(0, 1, 1);
 		//One Quad_Strip for the body
 		VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
 		//8 Quads covering the body of the box

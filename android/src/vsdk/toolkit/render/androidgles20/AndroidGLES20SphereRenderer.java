@@ -20,9 +20,6 @@ import vsdk.toolkit.environment.Camera;
 
 public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 {
-    private static int defaultSlices = 20;
-    private static int defaultStacks = 10;
-
     private static void drawPoints(Sphere sphere, int slices, int stacks,
         RendererConfiguration q)
     {
@@ -35,7 +32,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         //-----------------------------------------------------------------
         Vector3D p = new Vector3D();
-        ColorRgb c = new ColorRgb(1.0, 0.0, 0.0); //q.getWireColor();
+        ColorRgb c = q.getWireColor();
 
         int index = 0;
 
@@ -84,7 +81,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         Vector3D p = new Vector3D();
         ColorRgb c = q.getWireColor();
 
-        //System.out.println("COLOR: " + c);
+	System.out.println("COLOR: " + c);
 
         for( int i = 1; i < stacks - 1; i++ ) {
             //------------------------------------------------------------
@@ -158,13 +155,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
     public static void draw(Sphere s, Camera c, RendererConfiguration q)
     {
-        draw(s, c, q, defaultSlices, defaultStacks);
-    }
-
-    public static void setDefaultSlicesStacks(int sl, int st)
-    {
-        defaultSlices = sl;
-        defaultStacks = st;
+        draw(s, c, q, 20, 10);
     }
 
     /**
@@ -461,42 +452,39 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         if ( q.isPointsSet() ) {
             glDisable(GL_TEXTURE_2D);
             setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-            double r = s.getRadius();
-            if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
-            drawPoints(s, slices, stacks, q);
-            s.setRadius(r);
+            drawPoints(s, 20, 10, q);
         }
         if ( q.isWiresSet() ) {
             glDisable(GL_TEXTURE_2D);
             setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
-            drawWires(s, slices, stacks, q);
+            drawWires(s, 20, 10, q);
             s.setRadius(r);
         }
         if ( q.isSurfacesSet() ) {
             if ( q.isTextureSet() ) {
                 glEnable(GL_TEXTURE_2D);
-            }
-            else {
+	    }
+	    else {
                 glDisable(GL_TEXTURE_2D);
-            }
+	    }
 
-            setShadingType(q.getShadingType());
-            if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT ) {
-                drawSurfacesFlat(s, slices, stacks, q);
-            }
-            else {
+            if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD ) {
+                setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
                 drawSurfacesSmooth(s, slices, stacks, q);
             }
-        }
-        if ( q.isBoundingVolumeSet() ) {
-            AndroidGLES20GeometryRenderer.drawMinMaxBox(s, q);
-        }
-        if ( q.isSelectionCornersSet() ) {
-            AndroidGLES20GeometryRenderer.drawSelectionCorners(s, q);
+            else if(q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT){
+                setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+                drawSurfacesFlat(s, slices, stacks, q);
+            }
+            else if(q.getShadingType() == RendererConfiguration.SHADING_TYPE_NOLIGHT){
+                setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+                drawSurfacesFlat(s, slices, stacks, q);
+            }            
         }
     }
+
 }
 
 //===========================================================================
