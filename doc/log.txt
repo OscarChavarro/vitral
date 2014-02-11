@@ -1082,3 +1082,8 @@
   - 1h10min: standarized scene at android application template
 
 ===========================================================================
+
+2014 february 10, Oscar Chavarro
+  - 2h: fixing bug in texture management at AndroidGLES20 implementation
+
+===========================================================================

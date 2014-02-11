@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
 // Java classes
@@ -16,6 +15,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 
 public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
 {
@@ -49,24 +49,23 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
         if ( q.isTextureSet() ) {
             // Define texture parameters, including for further local
             // textures activated within JoglGeometryRenderers
-            /*
-            glTexParameteri(GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
-                GL_TRUE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                GL_CLAMP_TO_EDGE);
-            glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE,
-                GL2ES1.GL_MODULATE);
-	    */
             // Activate global texture
             if ( (texture != null) ) {
                 glEnable(GL_TEXTURE_2D);
-                //AndroidGLES20ImageRenderer.activate(gl, texture);
+                AndroidGLES20ImageRenderer.activate(texture);
+                //GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
+                //    GL2.GL_GENERATE_MIPMAP, GL_TRUE);
+                //GLES20.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE,
+                //    GL2ES1.GL_MODULATE);
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
+                    GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MAG_FILTER,
+                    GLES20.GL_LINEAR);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                    GLES20.GL_REPEAT);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                    GLES20.GL_REPEAT);
             }
         }
         else {

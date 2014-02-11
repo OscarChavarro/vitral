@@ -60,7 +60,7 @@ public class Scene
 
     public void selectObjectWithMouse(int x, int y)
     {
-        Ray r, ro;
+        Ray r;
         SimpleBody gi;
 
         camera.updateVectors();
@@ -84,7 +84,7 @@ public class Scene
 
     public void insertSphereWithMouse(int x, int y)
     {
-        Ray r, ro;
+        Ray r;
 
         camera.updateVectors();
         r = camera.generateRay(x, y);

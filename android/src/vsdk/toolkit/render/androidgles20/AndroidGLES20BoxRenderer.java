@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 import java.nio.ByteBuffer;
@@ -428,6 +427,7 @@ public static void draw(Box nBox, Camera nCamera, RendererConfiguration nRendere
 
 }
 
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================
+
+
+	
+

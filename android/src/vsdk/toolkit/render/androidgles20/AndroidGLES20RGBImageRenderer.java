@@ -61,19 +61,20 @@ public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
         GLES20.glEnable(GLES20.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
+            GLES20.glGenTextures(1, lists, 0);
             item = new _AndroidGLES20RGBImageRendererAssociation();
             item.image = img;
-            item.glList = 1;
+            item.glList = lists[0];
             compiledImages.add(item);
 
             //----
-            GLES20.glGenTextures(1, lists, 0);
-            item.glList = lists[0];
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, item.glList);
 
             GLES20.glTexImage2D(
-                GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, x_tam, y_tam, 0, GLES20.GL_RGB,
-                GLES20.GL_UNSIGNED_BYTE, item.image.getRawImageDirectBuffer());
+                GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, x_tam, y_tam, 0, 
+                GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, 
+                item.image.getRawImageDirectBuffer());
+
             checkGlError("glTexImage2D");
         }
 

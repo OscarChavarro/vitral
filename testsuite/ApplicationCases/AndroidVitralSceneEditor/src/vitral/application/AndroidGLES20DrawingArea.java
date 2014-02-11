@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vitral.application;
 
 // Java basic classes
@@ -13,17 +12,16 @@ import java.util.ArrayList;
 // Android classes: misc
 import android.content.Context;
 import android.os.SystemClock;
+import android.graphics.Typeface;
 
 // Android classes: OpenGL ES 2.0
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -37,23 +35,18 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20LightRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBImageRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20RGBAImageRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 
-public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
+public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements GLSurfaceView.Renderer {
 
     // Android application elements
     private Context androidApplicationContext;
-    private AndroidGLES20Renderer vgl;
 
     // Vitral scene
     private Scene scene;
@@ -64,13 +57,12 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private Cone cone;
     private TriangleMesh meshMug;
     private TriangleMesh mesh;
-    private RGBAImage texture;
-    
-    // Display lists ids
+    private RGBImage texture;
     private RGBImage raytracingImage;
+    private RGBAImage textImage;
 
     // Other
-    private long baserr = SystemClock.uptimeMillis();
+    //private long baserr = SystemClock.uptimeMillis();
     private boolean withObjectRotation = false;
     private boolean withLightRotation = true;
     private boolean withReferenceSquare = false;
@@ -136,15 +128,13 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
     private TriangleMesh loadPlyMesh(String filename)
     {
         File meshFile;
-        ReaderPly reader;
 
         System.out.println("Loading mesh " + filename);
         meshFile = new File(filename);
-        reader = new ReaderPly();
         SimpleScene tscene = new SimpleScene();
         TriangleMesh m = null;
         try {
-            reader.importEnvironment(meshFile, tscene);
+            ReaderPly.importEnvironment(meshFile, tscene);
             m = (TriangleMesh)(tscene.getSimpleBodies().get(0).getGeometry());
             System.out.println(mesh.toString());
           }
@@ -202,7 +192,14 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         prepareLights(1);
         
         meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
-        selectObject(1);
+        selectObject(2);
+
+        //-----------------------------------------------------------------
+        Typeface tf = Typeface.MONOSPACE;
+
+        textImage = new RGBAImage();
+        textImage.init(128, 128);
+        textImage.createTestPattern();
     }
 
     public AndroidGLES20DrawingArea(Context context) {
@@ -211,26 +208,43 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         createModel();
     }
 
+    /**
+    This method should be called after every call to a texture activation
+    (glBindTexture)
+    */
+    private void setTextureParameters()
+    {
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
+            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                GLES20.GL_REPEAT);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                GLES20.GL_REPEAT);
+    }
+
     public void onDrawFrame(GL10 glUnused) {
-        if ( vgl.errorsDetected ) {
+        if ( errorsDetected ) {
             GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             return;
         }
 
         // Draw background
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
         // Tick updates transform
         long time = SystemClock.uptimeMillis() % 8000L;
-        long rr = (SystemClock.uptimeMillis() - baserr) / 8000L;
+        //long rr = (SystemClock.uptimeMillis() - baserr) / 8000L;
         float x = 0.0005f * ((int) time);
 
-        vgl.glMatrixMode(vgl.GL_MODELVIEW);
-        vgl.glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
         // Move light around center...
         double r = 2.0;
@@ -247,10 +261,10 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         AndroidGLES20SceneRenderer.draw(scene, quality);
 
-        vgl.glLoadIdentity();
-        //vgl.glTranslated(-2, 0, 0);
+        glLoadIdentity();
+        //glTranslated(-2, 0, 0);
         if ( withObjectRotation ) {
-            vgl.glRotated(200*x, 0, 0, 1);
+            glRotated(200*x, 0, 0, 1);
         }
 
         //-----------------------------------------------------------------
@@ -259,17 +273,8 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
         // Activate texture image.activate()
         if ( quality.isTextureSet() ) {
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
-                GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                    GLES20.GL_TEXTURE_MAG_FILTER,
-                    GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-                    GLES20.GL_REPEAT);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-                    GLES20.GL_REPEAT);
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            AndroidGLES20RGBAImageRenderer.activate(texture);
+            AndroidGLES20ImageRenderer.activate(texture);
+            setTextureParameters();
         }
 
         if ( sphere != null ) {
@@ -292,22 +297,45 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         }
         
         if ( mesh != null ) {
-            vgl.glScaled(15, 15, 15);
-            vgl.glRotated(90, 1, 0, 0);
+            glScaled(15, 15, 15);
+            glRotated(90, 1, 0, 0);
             AndroidGLES20GeometryRenderer.draw(mesh, scene.camera, quality);
         }
 
         //-----------------------------------------------------------------
         if ( withReferenceSquare ) {
         //if ( raytracingImage != null ) {
-            vgl.glMatrixMode(vgl.GL_MODELVIEW);
-            vgl.glLoadIdentity();
-            vgl.glTranslated(x, 0, 0);
-            vgl.glEnable(vgl.GL_TEXTURE_2D);
-            vgl.setRendererConfiguration(quality);
-            //AndroidGLES20RGBImageRenderer.activate(raytracingImage);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glTranslated(x, 0, 0);
+            glEnable(GL_TEXTURE_2D);
+            setRendererConfiguration(quality);
+
+            AndroidGLES20ImageRenderer.activate(textImage);
+            setTextureParameters();
             drawUnitSquare();
         }
+
+        //- Draw HUD elements ---------------------------------------------
+	RendererConfiguration q;
+
+        q = new RendererConfiguration();
+        q.setSurfaces(true);
+        q.setTexture(true);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslated(0, 0, 0);
+        glScaled(0.5, 0.5, 0.5);
+        glEnable(GL_TEXTURE_2D);
+        setRendererConfiguration(q);
+        AndroidGLES20ImageRenderer.activate(textImage);
+        setTextureParameters();
+
+        drawUnitSquare();
     }
  
     private void drawUnitSquare()
@@ -331,45 +359,18 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         verticesBufferedArray.put(vertexDataArray);
 
         //-----------------------------------------------------------------
-        // Prepare geometry
-        // glVertex3d
-        verticesBufferedArray.position(0);
-        GLES20.glVertexAttribPointer(vgl.PObjectParam, 3, GLES20.GL_FLOAT, 
-            false, VERTEX_SIZE_IN_BYTES, verticesBufferedArray);
-        vgl.checkGlError("glVertexAttribPointer PObject");
-        GLES20.glEnableVertexAttribArray(vgl.PObjectParam);
-        vgl.checkGlError(
-            "glEnableVertexAttribArray PObjectParam");
-
-        // glColor3d
-        verticesBufferedArray.position(3);
-        GLES20.glEnableVertexAttribArray(vgl.emissionColorParam);
-        vgl.checkGlError("glEnableVertexAttribArray emissionColorParam");
-        GLES20.glVertexAttribPointer(vgl.emissionColorParam, 3, GLES20.GL_FLOAT,
-            false, VERTEX_SIZE_IN_BYTES, verticesBufferedArray);
-        vgl.checkGlError("glVertexAttribPointer emissionColorParam");
-
-        // glTexCoord2d
-        verticesBufferedArray.position(6);
-        GLES20.glVertexAttribPointer(vgl.uvVertexTextureCoordinateParam, 2, 
-            GLES20.GL_FLOAT, false, VERTEX_SIZE_IN_BYTES, 
-            verticesBufferedArray);
-        vgl.checkGlError(
-            "glVertexAttribPointer uvVertexTextureCoordinateParam");
-        GLES20.glEnableVertexAttribArray(vgl.uvVertexTextureCoordinateParam);
-        vgl.checkGlError(
-            "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
-
-        //-----------------------------------------------------------------
-        // Draw geometry
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-        vgl.checkGlError("glDrawArrays");
+	drawVertices3Position3Color2Uv(
+            verticesBufferedArray,
+            GLES20.GL_TRIANGLE_STRIP,
+            4,
+            VERTEX_SIZE_IN_BYTES
+        );
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
-        if ( vgl.errorsDetected ) {
+        if ( errorsDetected ) {
             return;
         }
 
@@ -378,10 +379,9 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig configUnused) {
         //- Setup shader parameters ---------------------------------------
-        vgl = new AndroidGLES20Renderer();
-        vgl.init(androidApplicationContext);
+        init(androidApplicationContext);
 
-        if ( vgl.errorsDetected ) {
+        if ( errorsDetected ) {
             return;
         }
  
@@ -391,7 +391,7 @@ public class AndroidGLES20DrawingArea implements GLSurfaceView.Renderer {
         try {
             is = androidApplicationContext.getResources().openRawResource(
                 R.raw.render);
-            texture = ImagePersistence.importRGBA(is);
+            texture = ImagePersistence.importRGB(is);
         }
         catch ( Exception e ) {
         }

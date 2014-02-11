@@ -179,13 +179,13 @@ GpsStatus.Listener, OnClickListener {
         switch ( e.getAction() ) {
           case MotionEvent.ACTION_DOWN:            // one touch: drag
             //System.out.println("one down");
-	    mouseMovementsFromLastDown = 0;
+            mouseMovementsFromLastDown = 0;
             break;
           case MotionEvent.ACTION_POINTER_DOWN:    // two touches: zoom
             //System.out.println("two down");
             break;
           case MotionEvent.ACTION_UP:              // no mode
-	    mouseMovementsFromLastDown++;
+            mouseMovementsFromLastDown++;
             //System.out.println("up");
             break;
           case MotionEvent.ACTION_POINTER_UP:      // no mode
@@ -193,7 +193,7 @@ GpsStatus.Listener, OnClickListener {
             break;
           case MotionEvent.ACTION_MOVE:            // rotation
             //System.out.println("move");
-	    mouseMovementsFromLastDown += 10;
+            mouseMovementsFromLastDown += 10;
             break;
         }
 
@@ -201,21 +201,21 @@ GpsStatus.Listener, OnClickListener {
 
         switch ( interaction ) {
           case 1:
-	    if ( mouseMovementsFromLastDown > 1 ) { // Drag
+            if ( mouseMovementsFromLastDown > 1 ) { // Drag
                 cameraController.processMouseDraggedEvent(evsdk);
-	    }
-	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
-	        canvas.glExecutor.getScene().selectObjectWithMouse(evsdk.getX(), evsdk.getY());
-	    }
+            }
+            else if ( mouseMovementsFromLastDown == 1 ) { // Click
+                canvas.glExecutor.getScene().selectObjectWithMouse(evsdk.getX(), evsdk.getY());
+            }
             break;
 
           case 2:
-	    if ( mouseMovementsFromLastDown > 1 ) { // Drag
+            if ( mouseMovementsFromLastDown > 1 ) { // Drag
                 cameraController.processMouseDraggedEvent(evsdk);
-	    }
-	    else if ( mouseMovementsFromLastDown == 1 ) { // Click
-	        canvas.glExecutor.getScene().insertSphereWithMouse(evsdk.getX(), evsdk.getY());
-	    }
+            }
+            else if ( mouseMovementsFromLastDown == 1 ) { // Click
+                canvas.glExecutor.getScene().insertSphereWithMouse(evsdk.getX(), evsdk.getY());
+            }
             break;
 
           default:
@@ -394,9 +394,9 @@ GpsStatus.Listener, OnClickListener {
             canvas.glExecutor.getScene().addRandomSphere();
             break;
           case 21:
-	    for ( int i = 0; i < 10; i++ ) {
+            for ( int i = 0; i < 10; i++ ) {
                 canvas.glExecutor.getScene().addRandomSphere();
-	    }
+            }
             break;
           case 22:
             interaction = 1;
@@ -405,7 +405,7 @@ GpsStatus.Listener, OnClickListener {
             interaction = 2;
             break;
           case 24:
-	    canvas.glExecutor.raytrace();
+            canvas.glExecutor.raytrace();
             break;
         }
         return true;
