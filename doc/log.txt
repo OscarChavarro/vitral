@@ -1086,4 +1086,8 @@
 2014 february 10, Oscar Chavarro
   - 2h: fixing bug in texture management at AndroidGLES20 implementation
 
+2014 february 11, Oscar Chavarro
+  - 1h: activating Android ImagePersistence functionality to read images
+    from files.
+
 ===========================================================================

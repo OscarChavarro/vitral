@@ -21,6 +21,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
