@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 // Android classes: misc
 import android.content.Context;
@@ -62,6 +63,12 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     private RGBImage texture;
     private RGBImage raytracingImage;
     private RGBAImage textImage;
+
+    // Animation control
+    private int frameCount;
+
+    // Hud
+    private HashMap<String, RGBAImage>characterSprites;
 
     // Other
     //private long baserr = SystemClock.uptimeMillis();
@@ -197,8 +204,46 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         selectObject(2);
 
         //-----------------------------------------------------------------
-        textImage = AndroidSystem.calculateLabelImage(
-            "Hola", new ColorRgb(1.0, 0.0, 0.0));
+        characterSprites = new HashMap<String, RGBAImage>();
+        char c;
+        String s;
+        RGBAImage img;
+
+        for ( c = 'a'; c <= 'z'; c++ ) {
+            s = "" + c;
+            img = AndroidSystem.calculateLabelImage(
+                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+            characterSprites.put(s, img);
+        }
+
+        for ( c = 'A'; c <= 'Z'; c++ ) {
+            s = "" + c;
+            img = AndroidSystem.calculateLabelImage(
+                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+            characterSprites.put(s, img);
+        }
+
+        for ( c = '0'; c <= '9'; c++ ) {
+            s = "" + c;
+            img = AndroidSystem.calculateLabelImage(
+                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+            characterSprites.put(s, img);
+        }
+
+        img = AndroidSystem.calculateLabelImage(
+            ".", new ColorRgb(1.0, 1.0, 1.0), 20);
+        characterSprites.put(".", img);
+
+        img = AndroidSystem.calculateLabelImage(
+            ",", new ColorRgb(1.0, 1.0, 1.0), 20);
+        characterSprites.put(",", img);
+
+        img = AndroidSystem.calculateLabelImage(
+            " ", new ColorRgb(1.0, 1.0, 1.0), 20);
+        characterSprites.put(" ", img);
+
+        //-----------------------------------------------------------------
+        frameCount = 0;
     }
 
     public AndroidGLES20DrawingArea(Context context) {
@@ -316,7 +361,26 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         }
 
         //- Draw HUD elements ---------------------------------------------
-        drawImage(textImage, getCamera(), 10, 10);
+        drawText("Frame: " + frameCount, getCamera(), 10, 10);
+        //AndroidGLES20ImageRenderer.unload(textImage);
+        frameCount++;
+    }
+
+    private void
+    drawText(String msg, Camera c, int x0, int y0)
+    {
+        int x = x0, y = y0;
+        int i;
+        String key = "_";
+
+        for ( i = 0; i < msg.length(); i++ ) {
+            key = "" + msg.charAt(i);
+            if ( characterSprites.containsKey(key) ) {
+                Image img = characterSprites.get(key);
+                drawImage(img, c, x, y);
+                x += img.getXSize()*2;
+            }
+        }
     }
  
     /**
@@ -325,7 +389,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     */
     private void drawImage(Image img, Camera c, int x, int y)
     {
-	RendererConfiguration q;
+        RendererConfiguration q;
         double fx, fy;
         double dx, dy;
 
@@ -379,7 +443,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         verticesBufferedArray.put(vertexDataArray);
 
         //-----------------------------------------------------------------
-	drawVertices3Position3Color2Uv(
+        drawVertices3Position3Color2Uv(
             verticesBufferedArray,
             GLES20.GL_TRIANGLE_STRIP,
             4,

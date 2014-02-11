@@ -1091,6 +1091,6 @@
     from files.
   - 30min: AndroidRGBAImageRenderer
   - 10min: AndroidRGBImageRenderer
-  - 20min: AndroidSystem.calculateLabelImage
+  - 1h: AndroidSystem.calculateLabelImage
 
 ===========================================================================
