@@ -3,18 +3,21 @@ package vsdk.toolkit.render.android;
 
 // Android classes: misc
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
 // VitralSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.RenderingElement;
 import vsdk.toolkit.media.RGBAPixel;
+import vsdk.toolkit.media.RGBAImage;
 
 public class AndroidRGBAImageRenderer extends AndroidRenderer {
     public static boolean
     importFromAndroidBitmap(Bitmap input, RGBAImage output)
     {
-        output.init(bitmap.getWidth(), bitmap.getHeight());
+        output.init(input.getWidth(), input.getHeight());
 
-        //bitmap.copyPixelsToBuffer(output.getRawImageDirectBuffer());
+        //input.copyPixelsToBuffer(output.getRawImageDirectBuffer());
         int x;
         int y;
         RGBAPixel p = new RGBAPixel();
@@ -30,6 +33,8 @@ public class AndroidRGBAImageRenderer extends AndroidRenderer {
                 output.putPixel(x, y, p);
             }
         }
+
+        return true;
     }
 }
 
