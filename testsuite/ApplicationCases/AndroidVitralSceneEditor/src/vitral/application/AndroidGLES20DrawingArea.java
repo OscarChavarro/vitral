@@ -322,16 +322,27 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         drawHUD(textImage, getCamera());
     }
  
-    private void drawHUD(Image img, Camera c)
+    /**
+    Draws an image at integer screen coordinates (x, y) in pixels from
+    upper left corner. Takes into account current configured camera (viewpoint)
+    */
+    private void drawHUD(Image img, Camera c, int x, int y)
     {
 	RendererConfiguration q;
         double fx, fy;
+        double dx, dy;
 
         fx = (((double)img.getXSize()) * 2.0) / 
              ((double)c.getViewportXSize());
 
         fy = (((double)img.getYSize()) * 2.0) / 
              ((double)c.getViewportYSize());
+
+        dx = ((double)img.getXSize() + x) / 
+            ((double)c.getViewportXSize());
+
+        dy = ((double)img.getYSize() + y) / 
+            ((double)c.getViewportYSize());
 
         q = new RendererConfiguration();
         q.setSurfaces(true);
@@ -341,7 +352,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glTranslated(-1.0, 0, 0);
+        glTranslated(-1.0 + dx, 1.0 - dy, 0);
         glScaled(fx, fy, 1.0);
         glEnable(GL_TEXTURE_2D);
         setRendererConfiguration(q);
