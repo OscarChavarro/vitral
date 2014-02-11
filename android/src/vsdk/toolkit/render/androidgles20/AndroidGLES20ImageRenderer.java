@@ -30,23 +30,6 @@ public class AndroidGLES20ImageRenderer extends AndroidGLES20Renderer
         return -1;
     }
 
-    /*
-    public static void draw(Image img)
-    {
-        if ( img instanceof RGBAImage ) {
-            AndroidGLES20RGBAImageRenderer.draw((RGBAImage)img);
-        }
-        else if ( img instanceof RGBImage ) {
-            AndroidGLES20RGBImageRenderer.draw((RGBImage)img);
-        }
-        else {
-            String c = img.getClass().getName();
-
-            VSDK.reportMessage(null, VSDK.WARNING, "AndroidGLES20ImageRenderer.draw",
-            "Image GL activation not implemented for subclass " + c);
-        }
-    }
-    */
 }
 
 //===========================================================================

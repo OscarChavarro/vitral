@@ -26,6 +26,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.Camera;
@@ -199,7 +200,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         Typeface tf = Typeface.MONOSPACE;
 
         textImage = new RGBAImage();
-        textImage.init(128, 128);
+        textImage.init(120, 30);
         textImage.createTestPattern();
     }
 
@@ -318,27 +319,37 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         }
 
         //- Draw HUD elements ---------------------------------------------
+        drawHUD(textImage, getCamera());
+    }
+ 
+    private void drawHUD(Image img, Camera c)
+    {
 	RendererConfiguration q;
+        double fx, fy;
+
+        fx = (((double)img.getXSize()) * 2.0) / 
+             ((double)c.getViewportXSize());
+
+        fy = (((double)img.getYSize()) * 2.0) / 
+             ((double)c.getViewportYSize());
 
         q = new RendererConfiguration();
         q.setSurfaces(true);
         q.setTexture(true);
         q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glTranslated(0, 0, 0);
-        glScaled(0.5, 0.5, 0.5);
+        glTranslated(-1.0, 0, 0);
+        glScaled(fx, fy, 1.0);
         glEnable(GL_TEXTURE_2D);
         setRendererConfiguration(q);
-        AndroidGLES20ImageRenderer.activate(textImage);
+        AndroidGLES20ImageRenderer.activate(img);
         setTextureParameters();
-
         drawUnitSquare();
     }
- 
+
     private void drawUnitSquare()
     {
         //-----------------------------------------------------------------

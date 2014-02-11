@@ -82,6 +82,7 @@ public class AndroidGLES20RGBAImageRenderer extends AndroidGLES20Renderer
 
         return item.glList;
     }
+
 }
 
 //===========================================================================
