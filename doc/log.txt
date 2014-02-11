@@ -1092,5 +1092,6 @@
   - 30min: AndroidRGBAImageRenderer
   - 10min: AndroidRGBImageRenderer
   - 1h: AndroidSystem.calculateLabelImage
+  - 30min: time reports on Android sample application
 
 ===========================================================================

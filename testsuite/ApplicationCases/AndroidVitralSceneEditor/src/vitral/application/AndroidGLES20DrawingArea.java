@@ -9,6 +9,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 // Android classes: misc
 import android.content.Context;
@@ -67,7 +68,8 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     // Animation control
     private int frameCount;
 
-    // Hud
+    // Hud & statistics
+    private HashMap<String, TimeReport>timers;
     private HashMap<String, RGBAImage>characterSprites;
 
     // Other
@@ -179,8 +181,22 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         }
     }
 
+    private HashMap<String, TimeReport> createTimers()
+    {
+        HashMap<String, TimeReport> timers;
+        timers = new HashMap<String, TimeReport>();
+        //timers.put("TOTAL_FRAME", new TimeReport("TOTAL_FRAME"));
+        timers.put("03_HUD", new TimeReport("03_HUD"));
+        timers.put("02_GEOMETRY", new TimeReport("02_GEOMETRY"));
+        timers.put("01_STARTUP", new TimeReport("01_STARTUP"));
+        return timers;
+    }
+
     private void createModel()
     {
+        //-----------------------------------------------------------------
+        timers = createTimers();
+        timers.get("01_STARTUP").start();
         //-----------------------------------------------------------------
         scene = new Scene();
         raytracingImage = null;
@@ -208,42 +224,56 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         char c;
         String s;
         RGBAImage img;
+        int fontSize = 16;
 
         for ( c = 'a'; c <= 'z'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         for ( c = 'A'; c <= 'Z'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         for ( c = '0'; c <= '9'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), 20);
+                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         img = AndroidSystem.calculateLabelImage(
-            ".", new ColorRgb(1.0, 1.0, 1.0), 20);
+            ".", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(".", img);
 
         img = AndroidSystem.calculateLabelImage(
-            ",", new ColorRgb(1.0, 1.0, 1.0), 20);
+            ",", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(",", img);
 
         img = AndroidSystem.calculateLabelImage(
-            " ", new ColorRgb(1.0, 1.0, 1.0), 20);
+            " ", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(" ", img);
+
+        img = AndroidSystem.calculateLabelImage(
+            "_", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+        characterSprites.put("_", img);
+
+        img = AndroidSystem.calculateLabelImage(
+            ":", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+        characterSprites.put(":", img);
+
+        img = AndroidSystem.calculateLabelImage(
+            "/", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+        characterSprites.put("/", img);
 
         //-----------------------------------------------------------------
         frameCount = 0;
+        timers.get("01_STARTUP").stop();
     }
 
     public AndroidGLES20DrawingArea(Context context) {
@@ -270,6 +300,8 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     }
 
     public void onDrawFrame(GL10 glUnused) {
+        timers.get("02_GEOMETRY").start();
+
         if ( errorsDetected ) {
             GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -359,11 +391,24 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             setTextureParameters();
             drawUnitSquare();
         }
+        timers.get("02_GEOMETRY").stop();
 
         //- Draw HUD elements ---------------------------------------------
-        drawText("Frame: " + frameCount, getCamera(), 10, 10);
+        timers.get("03_HUD").start();
+        int y = 10;
+        drawText("Frame: " + frameCount, getCamera(), 10, y);
+
+        TimeReport tr;
+        Set<String> s = timers.keySet();
+        for ( String e : s ) {
+            tr = timers.get(e);
+            y += 40;
+            drawText("" + tr, getCamera(), 10, y);
+        }
+
         //AndroidGLES20ImageRenderer.unload(textImage);
         frameCount++;
+        timers.get("03_HUD").stop();
     }
 
     private void
