@@ -1090,4 +1090,6 @@
   - 1h: activating Android ImagePersistence functionality to read images
     from files.
   - 30min: AndroidRGBAImageRenderer
+  - 10min: AndroidRGBImageRenderer
+
 ===========================================================================
