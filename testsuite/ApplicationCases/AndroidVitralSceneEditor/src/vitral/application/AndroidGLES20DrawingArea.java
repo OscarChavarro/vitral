@@ -12,7 +12,6 @@ import java.util.ArrayList;
 // Android classes: misc
 import android.content.Context;
 import android.os.SystemClock;
-import android.graphics.Typeface;
 
 // Android classes: OpenGL ES 2.0
 import javax.microedition.khronos.egl.EGLConfig;
@@ -37,6 +36,7 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
@@ -197,11 +197,8 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         selectObject(2);
 
         //-----------------------------------------------------------------
-        Typeface tf = Typeface.MONOSPACE;
-
-        textImage = new RGBAImage();
-        textImage.init(120, 30);
-        textImage.createTestPattern();
+        textImage = AndroidSystem.calculateLabelImage(
+            "Hola", new ColorRgb(1.0, 0.0, 0.0));
     }
 
     public AndroidGLES20DrawingArea(Context context) {
@@ -319,14 +316,14 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         }
 
         //- Draw HUD elements ---------------------------------------------
-        drawHUD(textImage, getCamera());
+        drawImage(textImage, getCamera(), 10, 10);
     }
  
     /**
     Draws an image at integer screen coordinates (x, y) in pixels from
     upper left corner. Takes into account current configured camera (viewpoint)
     */
-    private void drawHUD(Image img, Camera c, int x, int y)
+    private void drawImage(Image img, Camera c, int x, int y)
     {
 	RendererConfiguration q;
         double fx, fy;
