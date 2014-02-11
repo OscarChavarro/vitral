@@ -7,6 +7,8 @@ import android.view.MotionEvent;
 
 // VSDK Classes
 import vsdk.toolkit.gui.PresentationElement;
+import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImage;
 
 public class AndroidSystem extends PresentationElement
 {

@@ -1089,5 +1089,5 @@
 2014 february 11, Oscar Chavarro
   - 1h: activating Android ImagePersistence functionality to read images
     from files.
-
+  - 30min: AndroidRGBAImageRenderer
 ===========================================================================
