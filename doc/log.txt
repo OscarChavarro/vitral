@@ -1094,4 +1094,7 @@
   - 1h: AndroidSystem.calculateLabelImage
   - 30min: time reports on Android sample application
 
+2014 february 12, Oscar Chavarro
+  - 45min: OpenGL ESSL2.0 phong shaders
+
 ===========================================================================

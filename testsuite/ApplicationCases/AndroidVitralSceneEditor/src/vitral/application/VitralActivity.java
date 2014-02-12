@@ -340,6 +340,7 @@ GpsStatus.Listener, OnClickListener {
             q.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
             break;
           case 3:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
             break;
           case 4:
             q.changeTexture();

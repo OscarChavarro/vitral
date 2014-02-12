@@ -35,6 +35,7 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
+    public static int AndroidGLES20GpuProgramPhong;
     
     public static final int mode3Position3Normal2UV = 0;
     public static final int mode3Position3Color = 1;
@@ -243,7 +244,8 @@ public class AndroidGLES20Renderer extends RenderingElement
         return s;
     }
 
-    public static boolean createDefaultAutomaticAndroidGLES20Shaders(Context ctx)
+    public static boolean
+    createDefaultAutomaticAndroidGLES20Shaders(Context ctx)
     {
         String vertexShaderSource;
         String pixelShaderSource;
@@ -275,6 +277,19 @@ public class AndroidGLES20Renderer extends RenderingElement
             return false;
         }
 
+        vertexShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.phongvertexshader));
+        pixelShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.phongpixelshader));
+        AndroidGLES20GpuProgramPhong = 
+            createProgram(vertexShaderSource, pixelShaderSource);
+        if ( AndroidGLES20GpuProgramPhong == 0 ) {
+            System.err.println("ERROR CREATING PHONG SHADER!");
+            return false;
+        }
+
         //- Create parameters ---------------------------------------------
         activateShaders();
         return true;
@@ -294,6 +309,11 @@ public class AndroidGLES20Renderer extends RenderingElement
             shaderId = AndroidGLES20GpuProgramGouraud;
             //System.out.println("Gouraud");
         }
+	else if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_PHONG ) {
+            shaderId = AndroidGLES20GpuProgramPhong;
+            //System.out.println("Phong");
+	}
         else {
             shaderId = AndroidGLES20GpuProgramConstant;
             //System.out.println("Constante");
@@ -353,6 +373,8 @@ public class AndroidGLES20Renderer extends RenderingElement
 
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_GOURAUD ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_PHONG ||
              qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_FLAT ) {
 
