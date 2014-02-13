@@ -287,37 +287,38 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 1, 0, "Flat shading");
         q.add(0, 2, 0, "Gouraud shading");
         q.add(0, 3, 0, "Phong shading");
-        q.add(0, 4, 0, "Toggle texture");
-        q.add(0, 5, 0, "Toggle points");
-        q.add(0, 6, 0, "Toggle wires");
-        q.add(0, 7, 0, "Toggle surfaces");
-        q.add(0, 8, 0, "Toggle bounding boxes");
-        q.add(0, 9, 0, "Toggle selection corners");
-        q.add(0, 10, 0, "Toggle normals");
+        q.add(0, 4, 0, "Toggle texture mapping");
+        q.add(0, 5, 0, "Toggle bump mapping");
+        q.add(0, 6, 0, "Toggle points");
+        q.add(0, 7, 0, "Toggle wires");
+        q.add(0, 8, 0, "Toggle surfaces");
+        q.add(0, 9, 0, "Toggle bounding boxes");
+        q.add(0, 10, 0, "Toggle selection corners");
+        q.add(0, 11, 0, "Toggle normals");
 
         SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
-        o.add(0, 11, 0, "Sphere (low res)");
-        o.add(0, 12, 0, "Sphere (high res)");
-        o.add(0, 13, 0, "Box");
-        o.add(0, 14, 0, "Cone");
-        o.add(0, 15, 0, "Mesh Mug");
-        o.add(0, 16, 0, "Toggle reference square");
+        o.add(0, 12, 0, "Sphere (low res)");
+        o.add(0, 13, 0, "Sphere (high res)");
+        o.add(0, 14, 0, "Box");
+        o.add(0, 15, 0, "Cone");
+        o.add(0, 16, 0, "Mesh Mug");
+        o.add(0, 17, 0, "Toggle reference square");
 
         SubMenu a = menu.addSubMenu(1, 101, 1, "Animation options");
-        a.add(0, 17, 0, "Toggle object rotation");
-        a.add(0, 18, 0, "Toggle first light rotation");
+        a.add(0, 18, 0, "Toggle object rotation");
+        a.add(0, 19, 0, "Toggle first light rotation");
 
         SubMenu x = menu.addSubMenu(1, 102, 1, "Scene");
-        x.add(0, 19, 0, "Add light");
-        x.add(0, 20, 0, "Add sphere");
-        x.add(0, 21, 0, "Add 10 spheres");
+        x.add(0, 20, 0, "Add light");
+        x.add(0, 21, 0, "Add sphere");
+        x.add(0, 22, 0, "Add 10 spheres");
 
         SubMenu i = menu.addSubMenu(1, 103, 1, "Interaction");
-        i.add(0, 22, 0, "Select objects");
-        i.add(0, 23, 0, "Insert spheres");
+        i.add(0, 23, 0, "Select objects");
+        i.add(0, 24, 0, "Insert spheres");
 
         SubMenu r = menu.addSubMenu(1, 104, 1, "Rendering");
-        r.add(0, 24, 0, "Raytrace");
+        r.add(0, 25, 0, "Raytrace");
 
         return true;
     }
@@ -348,66 +349,69 @@ GpsStatus.Listener, OnClickListener {
             q.changeTexture();
             break;
           case 5:
-            q.changePoints();
+            q.changeBumpMap();
             break;
           case 6:
-            q.changeWires();
+            q.changePoints();
             break;
           case 7:
-            q.changeSurfaces();
+            q.changeWires();
             break;
           case 8:
-            q.changeBoundingVolume();
+            q.changeSurfaces();
             break;
           case 9:
-            q.changeSelectionCorners();
+            q.changeBoundingVolume();
             break;
           case 10:
-            q.changeNormals();
+            q.changeSelectionCorners();
             break;
           case 11:
-            canvas.glExecutor.selectObject(1);
+            q.changeNormals();
             break;
           case 12:
-            canvas.glExecutor.selectObject(2);
+            canvas.glExecutor.selectObject(1);
             break;
           case 13:
-            canvas.glExecutor.selectObject(3);
+            canvas.glExecutor.selectObject(2);
             break;
           case 14:
-            canvas.glExecutor.selectObject(4);
+            canvas.glExecutor.selectObject(3);
             break;
           case 15:
-            canvas.glExecutor.selectObject(5);
+            canvas.glExecutor.selectObject(4);
             break;
           case 16:
-            canvas.glExecutor.toggleReferenceSquare();
+            canvas.glExecutor.selectObject(5);
             break;
           case 17:
-            canvas.glExecutor.toggleObjectRotation();
+            canvas.glExecutor.toggleReferenceSquare();
             break;
           case 18:
-            canvas.glExecutor.toggleLightRotation();
+            canvas.glExecutor.toggleObjectRotation();
             break;
           case 19:
+            canvas.glExecutor.toggleLightRotation();
+            break;
+          case 20:
             numberOfLights++;
             canvas.glExecutor.prepareLights(numberOfLights);
             break;
-          case 20:
+          case 21:
             canvas.glExecutor.getScene().addRandomSphere();
             break;
-          case 21:
+          case 22:
             for ( int i = 0; i < 10; i++ ) {
                 canvas.glExecutor.getScene().addRandomSphere();
             }
             break;
-          case 22:
+          case 23:
             interaction = 1;
             break;
-          case 23:
+          case 24:
             interaction = 2;
             break;
-          case 24:
+          case 25:
             canvas.glExecutor.raytrace();
             break;
         }

@@ -1,4 +1,4 @@
-===========================================================================
+>===========================================================================
 = VitralSDK simplified Personal Software Process file                     =
 ===========================================================================
 = 
@@ -1100,5 +1100,8 @@
 2014 february 13, Oscar Chavarro
   - 2h30min: first complete OpenGL ESSL2.0 phong shader working and
     fully tested :)
+  - 40min: bump mapping shader for OpenGL ESSL2.0. Stage 1: shader created
+    from phong shader and multitexture passing tested
+  - 40min: importing bumpmap/normalmap and making tests
 
 ===========================================================================

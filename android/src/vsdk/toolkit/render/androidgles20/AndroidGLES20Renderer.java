@@ -36,6 +36,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
     public static int AndroidGLES20GpuProgramPhong;
+    public static int AndroidGLES20GpuProgramPhongBump;
     
     public static final int mode3Position3Normal2UV = 0;
     public static final int mode3Position3Color = 1;
@@ -80,6 +81,8 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static int numberOfLightsParam;
     private static int withTextureParam;
     private static int cameraPositionGlobalParam;
+    private static int sTextureParam;
+    private static int sBumpParam;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -103,6 +106,7 @@ public class AndroidGLES20Renderer extends RenderingElement
         qualitySelection = new RendererConfiguration();
         qualitySelection.setWireColor(white);
         qualitySelection.setTexture(false);
+        qualitySelection.setBumpMap(false);
         qualitySelection.setSurfaces(true);
         qualitySelection.setWires(false);
         qualitySelection.setPoints(false);
@@ -290,6 +294,19 @@ public class AndroidGLES20Renderer extends RenderingElement
             return false;
         }
 
+        vertexShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.phongbumpvertexshader));
+        pixelShaderSource = loadAsStringTrimmingComments(
+            ctx.getResources().openRawResource(
+                R.raw.phongbumppixelshader));
+        AndroidGLES20GpuProgramPhongBump = 
+            createProgram(vertexShaderSource, pixelShaderSource);
+        if ( AndroidGLES20GpuProgramPhong == 0 ) {
+            System.err.println("ERROR CREATING PHONG BUMP SHADER!");
+            return false;
+        }
+
         //- Create parameters ---------------------------------------------
         activateShaders();
         return true;
@@ -311,7 +328,12 @@ public class AndroidGLES20Renderer extends RenderingElement
         }
 	else if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_PHONG ) {
-            shaderId = AndroidGLES20GpuProgramPhong;
+            if ( qualitySelection.isBumpMapSet() ) {
+                shaderId = AndroidGLES20GpuProgramPhongBump;
+	    }
+	    else {
+                shaderId = AndroidGLES20GpuProgramPhong; 
+	    }
             //System.out.println("Phong");
 	}
         else {
@@ -370,6 +392,28 @@ public class AndroidGLES20Renderer extends RenderingElement
                     "Could not get attrib location for emissionColor");
             }
         }
+
+        if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_PHONG && 
+             qualitySelection.isBumpMapSet() ) {
+            sTextureParam = 
+                GLES20.glGetUniformLocation(shaderId, "sTexture");
+            checkGlError("glGetUniformLocation sTexture");
+            GLES20.glUniform1i(sTextureParam, 0);
+            if ( sTextureParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get attrib location for sTexture");
+            }
+
+            sBumpParam = 
+                GLES20.glGetUniformLocation(shaderId, "sBump");
+            checkGlError("glGetUniformLocation sBump");
+            GLES20.glUniform1i(sBumpParam, 1);
+            if ( sBumpParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get attrib location for sBump");
+            }
+	}
 
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_GOURAUD ||
