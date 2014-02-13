@@ -30,9 +30,9 @@ void main() {
     vec3 diffuseFactor;
     vec3 diffuseTerm = vec3(0.0, 0.0, 0.0);
     vec3 specularTerm = vec3(0.0, 0.0, 0.0);
+    vec3 L;
 
     for ( i = 0; i < numberOfLights; i++ ) {
-        vec3 L;
         L = normalize(lightPositionsGlobal[i] - PGlobal.xyz);
 
         // Diffuse term: implementing equation [FOLE1992].16.4
