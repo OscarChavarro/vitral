@@ -14,6 +14,11 @@ public class TimeReport
     TimeReport(String label)
     {
         this.label = new String(label);
+        reset();
+    }
+
+    public void reset()
+    {
         ocurrences = 0;
         elapsedTime = 0;
     }

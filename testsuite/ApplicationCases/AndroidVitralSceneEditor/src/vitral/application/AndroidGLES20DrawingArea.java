@@ -67,17 +67,16 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
     // Animation control
     private int frameCount;
+    private boolean withObjectRotation = false;
+    private boolean withLightRotation = false;
 
     // Hud & statistics
     private HashMap<String, TimeReport>timers;
     private HashMap<String, RGBAImage>characterSprites;
 
     // Other
-    //private long baserr = SystemClock.uptimeMillis();
-    private boolean withObjectRotation = false;
-    private boolean withLightRotation = true;
-    private boolean withReferenceSquare = false;
     private boolean highResSphere = false;
+    private boolean withReferenceSquare = false;
     
     public RendererConfiguration getRendererConfiguration()
     {
@@ -134,6 +133,8 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             mesh = meshMug;
             break;
         }
+
+        resetTimers();
     }
 
     private TriangleMesh loadPlyMesh(String filename)
@@ -206,13 +207,14 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         quality.setWireColor(new ColorRgb(1.0, 1.0, 1.0));
         quality.setSurfaces(true);
         quality.setTexture(true);
-        quality.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+        //quality.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+        quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(1.0, 1.0, 1.0));
         material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
-        material.setPhongExponent(40.0);
+        material.setPhongExponent(20.0);
 
         prepareLights(1);
         
@@ -299,6 +301,16 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
                 GLES20.GL_REPEAT);
     }
 
+    public void resetTimers()
+    {
+        TimeReport tr;
+        Set<String> s = timers.keySet();
+        for ( String e : s ) {
+            tr = timers.get(e);
+            tr.reset();
+        }
+    }
+
     public void onDrawFrame(GL10 glUnused) {
         timers.get("02_GEOMETRY").start();
 
@@ -316,7 +328,6 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
         // Tick updates transform
         long time = SystemClock.uptimeMillis() % 8000L;
-        //long rr = (SystemClock.uptimeMillis() - baserr) / 8000L;
         float x = 0.0005f * ((int) time);
 
         glMatrixMode(GL_MODELVIEW);

@@ -329,6 +329,8 @@ GpsStatus.Listener, OnClickListener {
         Scene s = canvas.glExecutor.getScene();
         SimpleBody b;
 
+        canvas.glExecutor.resetTimers();
+
         switch ( item.getItemId() ) {
           case 0:
             q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
