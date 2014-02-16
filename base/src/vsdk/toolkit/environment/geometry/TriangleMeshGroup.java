@@ -67,7 +67,8 @@ public class TriangleMeshGroup extends Surface {
 
     @Override
     public double[] getMinMax() {
-        calculateMinMaxPositions();
+        if(MinMax==null)
+            calculateMinMaxPositions();
         return this.MinMax;
     }
 

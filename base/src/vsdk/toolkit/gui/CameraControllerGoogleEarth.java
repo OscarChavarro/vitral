@@ -139,7 +139,7 @@ public class CameraControllerGoogleEarth extends CameraController {
     @Override
     public boolean processMouseWheelEvent(MouseEvent e)
     {
-        /* COMENTADO PORQUE NO ESTA EL EVENTO EN LA ClASE MOUSE EVENT DE VITRAL!!!!!!
+        // COMENTADO PORQUE NO ESTA EL EVENTO EN LA ClASE MOUSE EVENT DE VITRAL!!!!!!
         
         // Local copy of the Camera's internal parameters
         Vector3D eyePosition;
@@ -166,7 +166,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
         
         
-         int clicks = e.getWheelRotation();
+         int clicks = e.getClicks();//();
         boolean updated = false;
            double altura=eyePosition.z;  
         //------------------------------------------------------------
@@ -218,8 +218,8 @@ public class CameraControllerGoogleEarth extends CameraController {
         
         return updated;
         //------------------------------------------------------------
- */
-        return false;
+ 
+      //  return false;
     }
 
     @Override
