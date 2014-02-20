@@ -292,6 +292,14 @@ public class VSDK
 
         System.err.println(msg);
 
+        System.err.println("---------------------------------------------------------------------------");
+        System.err.println(ee.getMessage());
+        report = ee.getStackTrace();
+        for ( i = 0; i < report.length; i++ ) {
+            System.err.println(report[i]);
+        }
+        System.err.println("---------------------------------------------------------------------------");
+
         if ( level == FATAL_ERROR ) {
             try {
                 throw new Exception("VSDK.reportMessage(FATAL_ERROR)");
