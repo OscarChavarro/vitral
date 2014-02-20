@@ -298,11 +298,14 @@ public class VSDK
             }
             catch ( Exception e ) {
                 //e.printStackTrace();
+                System.err.println(e.getMessage());
                 report = e.getStackTrace();
                 for ( i = 0; i < report.length; i++ ) {
                     System.err.println(report[i]);
                 }
             }
+
+            // This line should not be used on servlet based systems
             System.exit(1);
         }
     }
