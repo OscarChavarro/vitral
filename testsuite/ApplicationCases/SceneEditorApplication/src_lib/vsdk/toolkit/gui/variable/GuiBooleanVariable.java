@@ -1,13 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//===========================================================================
 package vsdk.toolkit.gui.variable;
 
 /**
- *
- * @author TaakeSlottet
- */
+*/
 public class GuiBooleanVariable extends GuiVariable {
 
     public GuiBooleanVariable() {

@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.gui;
 
 public class ExceptionGuiBadName extends Exception {

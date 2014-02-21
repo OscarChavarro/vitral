@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//===========================================================================
 package vsdk.toolkit.gui.variable;
 
 /**
@@ -31,7 +28,6 @@ public class GuiVector3DVariable extends GuiVariable {
     public void setValidRange(String vr) {
         this.validRange = vr;
     }
-
 }
 
 //===========================================================================

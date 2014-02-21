@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//===========================================================================
 package vsdk.toolkit.render.swing;
 
 import java.awt.Font;
@@ -161,3 +158,7 @@ public class CollapsablePanel extends JPanel {
         headerPanel.repaint();
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

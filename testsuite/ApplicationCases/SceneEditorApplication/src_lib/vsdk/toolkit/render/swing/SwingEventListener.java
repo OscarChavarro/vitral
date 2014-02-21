@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.render.swing;
 
 // GUI JDK classes (Awt + Swing)

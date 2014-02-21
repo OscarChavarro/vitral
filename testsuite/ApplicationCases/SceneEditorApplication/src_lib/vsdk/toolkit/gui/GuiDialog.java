@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//===========================================================================
 package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
@@ -11,8 +8,6 @@ import vsdk.toolkit.common.VSDK;
 /**
  * This class plays a role of internal node on an n-ary tree in the composite
  * design pattern.
- *
- * @author TaakeSlottet
  */
 public class GuiDialog extends GuiElement {
 
@@ -163,3 +158,7 @@ public class GuiDialog extends GuiElement {
         return msg;
     }
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

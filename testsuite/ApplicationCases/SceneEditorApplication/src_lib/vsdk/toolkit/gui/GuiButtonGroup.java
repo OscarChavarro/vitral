@@ -1,6 +1,4 @@
 //===========================================================================
-//= Initial version: august 9 2007
-
 package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
