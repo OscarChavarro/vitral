@@ -7,12 +7,10 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAPixel;
 
-
 /**
- * This class plays a role of leaf on an n-ary tree in the composite design 
- * pattern.
- * @author TaakeSlottet
- */
+This class plays a role of leaf on an n-ary tree in the composite design 
+pattern.
+*/
 public class GuiCommand extends GuiElement{
     private String id;
     private String name;

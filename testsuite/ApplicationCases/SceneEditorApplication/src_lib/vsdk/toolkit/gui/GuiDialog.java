@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 
 /**
- * This class plays a role of internal node on an n-ary tree in the composite
- * design pattern.
- */
+This class plays a role of internal node on an n-ary tree in the composite
+design pattern.
+*/
 public class GuiDialog extends GuiElement {
 
     public static final int ORIENTATION_HORIZONTAL = 0x01;

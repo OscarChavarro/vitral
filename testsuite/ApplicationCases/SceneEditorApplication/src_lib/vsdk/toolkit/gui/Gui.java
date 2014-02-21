@@ -1,17 +1,20 @@
 //===========================================================================
 package vsdk.toolkit.gui;
 
+// Java classes
 import java.util.ArrayList;
 import java.util.HashMap;
+
+// VSDK classes
 import vsdk.toolkit.gui.variable.GuiVariable;
 
 /**
- * In order to understand this class, the following concepts must be taken into
- * account: - GuiVariable - GuiCommand - Reflection (introspection) design
- * pattern - Menubars, buttons bars, and other are based upon GuiCommands -
- * Dialogs are based upon GuiVariables and GuiCommands - Dialogs and menus are
- * hierarchical
- */
+In order to understand this class, the following concepts must be taken into
+account: - GuiVariable - GuiCommand - Reflection (introspection) design
+pattern - Menubars, buttons bars, and other are based upon GuiCommands -
+Dialogs are based upon GuiVariables and GuiCommands - Dialogs and menus are
+hierarchical
+*/
 public class Gui {
     // Basic / fundamental / atomic elements
 
