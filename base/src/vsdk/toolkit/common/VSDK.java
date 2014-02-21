@@ -318,7 +318,7 @@ public class VSDK
             // This line should not be used on servlet based systems
             if ( withSystemExit ) {
                 System.exit(1);
-	    }
+            }
         }
     }
     
@@ -349,7 +349,7 @@ public class VSDK
             }
             catch ( Exception e ) {
                 //e.printStackTrace();
-                System.err.println(ee.getMessage());
+                System.err.println(e.getMessage());
                 StackTraceElement report[];
                 report = e.getStackTrace();
                 int i;
@@ -360,7 +360,7 @@ public class VSDK
             // This line should not be used on servlet based systems
             if ( withSystemExit ) {
                 System.exit(1);
-	    }
+            }
         }
     }
 

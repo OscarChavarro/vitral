@@ -1106,5 +1106,6 @@
 
 2014 february 21, Oscar Chavarro
   - 10min: VSDK managing System.exit behavior.
+  - 31min: GUI sublibrary added to main trunk vsdk project. :)
 
 ===========================================================================
