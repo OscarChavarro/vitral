@@ -1104,4 +1104,7 @@
     from phong shader and multitexture passing tested
   - 40min: importing bumpmap/normalmap and making tests
 
+2014 february 21, Oscar Chavarro
+  - 10min: VSDK managing System.exit behavior.
+
 ===========================================================================

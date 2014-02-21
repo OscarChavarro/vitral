@@ -78,12 +78,13 @@ public class VSDK
     // Common mathematical constants
     public static final double EPSILON = 1e-6;
 
-    // Error reporting levels
+    // Error reporting levels and control
     public static final int WARNING = 1;
     public static final int ERROR = 2;
     public static final int FATAL_ERROR = 3;
     public static final int DEBUG = 4;
     public static final int VERBOSE = 5;
+    private static boolean withSystemExit;
 
     // Primitive types
     public static final int POINT = 0;
@@ -109,6 +110,7 @@ public class VSDK
     private static int intersectionCount[];
 
     static {
+        withSystemExit = true;
         primitiveCount = new int[PRIMITIVE_TYPE_COUNT];
         intersectionCount = new int[INTERSECTION_TYPE_COUNT];
         resetPrimitiveCounters();
@@ -314,7 +316,9 @@ public class VSDK
             }
 
             // This line should not be used on servlet based systems
-            System.exit(1);
+            if ( withSystemExit ) {
+                System.exit(1);
+	    }
         }
     }
     
@@ -345,6 +349,7 @@ public class VSDK
             }
             catch ( Exception e ) {
                 //e.printStackTrace();
+                System.err.println(ee.getMessage());
                 StackTraceElement report[];
                 report = e.getStackTrace();
                 int i;
@@ -352,8 +357,27 @@ public class VSDK
                     System.err.println(report[i]);
                 }
             }
-            System.exit(1);
+            // This line should not be used on servlet based systems
+            if ( withSystemExit ) {
+                System.exit(1);
+	    }
         }
+    }
+
+    /**
+    When reporting a fatal error on desktop and mobile based applications
+    this class calls a process termination procedure as such Java's
+    System.exit. This should not be done (and is considered by some as
+    a bad practice) on some environments as such servlet based web applications
+    as the use of such a procedure would terminate the application container
+    proceess abnormally, affecting global system behavior.
+
+    This method could be used to instruct VSDK to do not terminate
+    the calling process on a fatal error situation.
+    */
+    public static void setWithSystemExit(boolean flag)
+    {
+        withSystemExit = flag;
     }
 
 }
