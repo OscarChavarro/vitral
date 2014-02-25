@@ -10,23 +10,29 @@ public class StopWatch
 {
     private long t0;
     private long t1;
+    private boolean running;
 
     public StopWatch()
     {
         t0 = 0;
         t1 = 1;
+        running = false;
     }
 
     public void start()
     {
         //t0 = System.currentTimeMillis();
+        running = true;
         t0 = System.nanoTime();
     }
 
     public void stop()
     {
         //t1 = System.currentTimeMillis();
-        t1 = System.nanoTime();
+        if ( running ) {
+            t1 = System.nanoTime();
+        }
+        running = false;
     }
 
     public double getElapsedRealTime()
