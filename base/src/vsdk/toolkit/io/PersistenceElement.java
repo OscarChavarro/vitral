@@ -37,10 +37,11 @@ public abstract class PersistenceElement {
 
     private static final boolean bigEndianArchitecture = false;
 
-    private static byte[] byteBufferLone = new byte[1];
-    private static byte[] bytesForInt = new byte[2];
-    private static byte[] bytesForLong = new byte[4];
-    private static byte[] bytesForFloat = new byte[4];
+    private static final byte[] byteBufferLone = new byte[1];
+    private static final byte[] bytesForInt = new byte[2];
+    private static final byte[] bytesForLong = new byte[4];
+    private static final byte[] bytesForFloat = new byte[4];
+    private static final byte[] bytesForDouble = new byte[8];
 
     public static boolean
     checkDirectory(String dirName)
@@ -64,6 +65,8 @@ public abstract class PersistenceElement {
     Given a filename, this method extract its extension and return it.
     \todo : This method will fail when directory path or filename contains
     more than one dot.  Needs to be fixed.
+    @param fd
+    @return 
     */
     protected static String extractExtensionFromFile(File fd)
     {
@@ -103,6 +106,9 @@ public abstract class PersistenceElement {
     Given a previously initialized array of bytes, this method fills it
     with information readed from the given input stream.  If it is not
     enough information to read, this method generates an Exception.
+    @param is
+    @param bytesBuffer
+    @throws java.lang.Exception
     */
     public static void
     readBytes(InputStream is, byte[] bytesBuffer) throws Exception
@@ -121,6 +127,9 @@ public abstract class PersistenceElement {
     Given a previously initialized array of bytes, this method writes it
     with information readed from the given output stream.  If it is not
     enough information to read, this method generates an Exception.
+    @param os
+    @param bytesBuffer
+    @throws java.lang.Exception
     */
     public static void
     writeBytes(OutputStream os, byte[] bytesBuffer) throws Exception
@@ -290,6 +299,24 @@ public abstract class PersistenceElement {
         return Float.intBitsToFloat(accum);
     }
 
+    private static double byteArray2doubleDirect(byte[] arr, int start) {
+        int i;
+        int len = 8;
+        int cnt;
+        byte[] tmp = new byte[len];
+
+        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
+            tmp[cnt] = arr[i];
+        }
+        long accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 64; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return Double.longBitsToDouble(accum);
+    }
+
     private static float byteArray2floatInvert(byte[] arr, int start) {
         int i;
         int len = 4;
@@ -308,9 +335,30 @@ public abstract class PersistenceElement {
         return Float.intBitsToFloat(accum);
     }
 
+    private static double byteArray2doubleInvert(byte[] arr, int start) {
+        int i;
+        int len = 8;
+        int cnt = 3;
+        byte[] tmp = new byte[len];
+        for ( i = start; i < (start + len); i++ ) {
+            tmp[cnt] = arr[i];
+            cnt--;
+        }
+        long accum = 0;
+        i = 0;
+        for ( int shiftBy = 0; shiftBy < 64; shiftBy += 8 ) {
+            accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
+            i++;
+        }
+        return Double.longBitsToDouble(accum);
+    }
+
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static int byteArray2intBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -343,6 +391,9 @@ public abstract class PersistenceElement {
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static int byteArray2intLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -355,6 +406,9 @@ public abstract class PersistenceElement {
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static long byteArray2longBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -366,6 +420,9 @@ public abstract class PersistenceElement {
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static long byteArray2longLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -377,6 +434,9 @@ public abstract class PersistenceElement {
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static float byteArray2floatBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -404,12 +464,41 @@ public abstract class PersistenceElement {
     /**
     This method is responsible of taking into account the endianess of the 
     original data
+    @param arr
+    @param start
+    @return 
     */
     public static float byteArray2floatLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
             return byteArray2floatInvert(arr, start);
         }
         return byteArray2floatDirect(arr, start);
+    }
+
+    /**
+    This method is responsible of taking into account the endianess of the 
+    original data
+    @param arr
+    @param start
+    @return 
+    */
+    public static double byteArray2doubleLE(byte[] arr, int start) {
+        if ( bigEndianArchitecture ) {
+            return byteArray2doubleInvert(arr, start);
+        }
+        return byteArray2doubleDirect(arr, start);
+    }
+    
+    /**
+    @param arr    
+    @param start    
+    @return     
+    */
+    public static double byteArray2doubleBE(byte[] arr, int start) {
+        if ( bigEndianArchitecture ) {
+            return byteArray2doubleDirect(arr, start);
+        }
+        return byteArray2doubleInvert(arr, start);
     }
 
     public static int readIntLE(InputStream is) throws Exception
@@ -454,10 +543,23 @@ public abstract class PersistenceElement {
         readBytes(is, bytesForLong);
         return byteArray2longBE(bytesForLong, 0);
     }
+    
     public static float readFloatLE(InputStream is) throws Exception
     {
         readBytes(is, bytesForFloat);
         return byteArray2floatLE(bytesForFloat, 0);
+    }
+
+    public static double readDoubleLE(InputStream is) throws Exception
+    {
+        readBytes(is, bytesForDouble);
+        return byteArray2doubleLE(bytesForDouble, 0);
+    }
+
+    public static double readDoubleBE(InputStream is) throws Exception
+    {
+        readBytes(is, bytesForDouble);
+        return byteArray2doubleBE(bytesForDouble, 0);
     }
 
     public static float readFloatBE(InputStream is) throws Exception
@@ -742,6 +844,8 @@ public abstract class PersistenceElement {
     to be thrown.  Some libraries, as JOGL fails to return to the application
     the exception of a failed System.loadLibrary, so this method is useful
     in bettering the user feedback for this kind of circumstance.
+    @param libname
+    @return 
     */
     public static boolean verifyLibrary(String libname) {
         String nativeLibname = System.mapLibraryName(libname);
