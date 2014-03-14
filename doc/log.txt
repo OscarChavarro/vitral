@@ -1108,4 +1108,8 @@
   - 10min: VSDK managing System.exit behavior.
   - 31min: GUI sublibrary added to main trunk vsdk project. :)
 
+2014 march 14, Oscar Chavarro
+  - 10min: JOGL Pbuffer warnings removed, Vitral updated to JOGL2 version
+    from git at march 14 2014. Serializable classes with warnings fixed.
+
 ===========================================================================

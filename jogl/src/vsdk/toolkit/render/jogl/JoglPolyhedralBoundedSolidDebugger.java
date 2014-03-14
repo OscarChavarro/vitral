@@ -62,7 +62,7 @@ implements GLEventListener
         try {
             GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
             pbuffer = creator.createOffscreenAutoDrawable(
-                null, pbCaps, null, imageWidth, imageHeight, null);
+                null, pbCaps, null, imageWidth, imageHeight);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");

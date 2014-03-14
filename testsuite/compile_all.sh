@@ -101,7 +101,6 @@ cd ..
 #---------------------------------------------------------------------------
 cd ApplicationCases
 cd SceneEditorApplication
-./compile_lib.sh
 ./compile.sh
 cd ..
 cd SearchEngineFor3DModels

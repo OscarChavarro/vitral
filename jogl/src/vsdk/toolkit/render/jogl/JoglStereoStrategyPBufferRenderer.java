@@ -36,9 +36,9 @@ public class JoglStereoStrategyPBufferRenderer extends JoglStereoStrategyRendere
         try {
             GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
             leftPbuffer = creator.createOffscreenAutoDrawable(
-                null, pbCaps, null, imageWidth, imageHeight, null);
+                null, pbCaps, null, imageWidth, imageHeight);
             rightPbuffer = creator.createOffscreenAutoDrawable(
-                null, pbCaps, null, imageWidth, imageHeight, null);
+                null, pbCaps, null, imageWidth, imageHeight);
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");

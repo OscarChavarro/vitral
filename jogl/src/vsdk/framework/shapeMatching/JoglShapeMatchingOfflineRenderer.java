@@ -52,7 +52,7 @@ public class JoglShapeMatchingOfflineRenderer extends Component implements GLEve
 
         try {
             pbuffer = drawableFactory.createOffscreenAutoDrawable(
-                null, pbCaps, null, imageWidth, imageHeight, null);
+                null, pbCaps, null, imageWidth, imageHeight);
 
 
             pbufferSupported = true;
