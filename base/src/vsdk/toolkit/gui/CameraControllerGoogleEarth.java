@@ -42,7 +42,6 @@ public class CameraControllerGoogleEarth extends CameraController {
         Xold=e.getX();
         Yold=e.getY();
         
-     //  System.out.println("Presioné");
         //Procedimiento para selección de lineas
         camera.updateVectors();
         Ray RayA=camera.generateRay(Xold, Yold);
@@ -291,7 +290,6 @@ public class CameraControllerGoogleEarth extends CameraController {
           case vsdk.toolkit.gui.KeyEvent.KEY_UP:
             pitch -= angleInc;
             if ( pitch < Math.toRadians(-90) ) pitch = Math.toRadians(-90);
-            System.out.println(pitch);
             updated = true;
             break;
           case vsdk.toolkit.gui.KeyEvent.KEY_DOWN:
@@ -362,12 +360,6 @@ public class CameraControllerGoogleEarth extends CameraController {
               nearPlaneDistance = altura*0.1;
               farPlaneDistance = altura*110;
               
-    //          System.out.println("Altura: "+eyePosition.z);
-    //           System.out.println("near: "+nearPlaneDistance);
-    //           System.out.println("far: "+farPlaneDistance);
-              
-  
-               
             eyePosition.z += brinco; focusedPosition.z += brinco;
             updated = true;
             break; 
@@ -385,7 +377,6 @@ public class CameraControllerGoogleEarth extends CameraController {
   
           // View volume modification
           case vsdk.toolkit.gui.KeyEvent.KEY_A:
-              System.out.println(camera);
             if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom /= 2;
               }
@@ -397,7 +388,6 @@ public class CameraControllerGoogleEarth extends CameraController {
             updated = true;
             break;
           case vsdk.toolkit.gui.KeyEvent.KEY_a:
-               System.out.println(camera);
             if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
                 orthogonalZoom *= 2;
               }
@@ -410,23 +400,19 @@ public class CameraControllerGoogleEarth extends CameraController {
             break;
   
          case vsdk.toolkit.gui.KeyEvent.KEY_N:
-             System.out.println(camera);
             nearPlaneDistance = nearPlaneDistance+0.5;// augmentLogarithmic(nearPlaneDistance, EPSILON);
             updated = true;
             break;
           case vsdk.toolkit.gui.KeyEvent.KEY_n:
-              System.out.println(camera);
             nearPlaneDistance = nearPlaneDistance-0.5;//diminishLogarithmic(nearPlaneDistance, EPSILON);
             updated = true;
             break;
   
           case vsdk.toolkit.gui.KeyEvent.KEY_F:
-              System.out.println(camera);
             farPlaneDistance = farPlaneDistance+0.5;//augmentLogarithmic(farPlaneDistance, EPSILON);
             updated = true;
             break;
           case vsdk.toolkit.gui.KeyEvent.KEY_f:
-              System.out.println(camera);
             farPlaneDistance = farPlaneDistance-0.5;//diminishLogarithmic(farPlaneDistance, EPSILON);
             updated = true;
             break;
