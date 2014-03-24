@@ -513,6 +513,63 @@ public class CameraControllerGoogleEarth extends CameraController {
         this.yOld = yOld;
     }
 
+    /**
+    @param jumpValue
+    */
+    public void zoomOut(double jumpValue) {
+        Vector3D eyePosition;
+        Vector3D focusedPosition;
+
+        double nearPlaneDistance;
+        double farPlaneDistance;
+
+        eyePosition = camera.getPosition();
+        focusedPosition = camera.getFocusedPosition();
+
+        double altura = eyePosition.z;
+
+        nearPlaneDistance = altura * 0.1;
+        farPlaneDistance = altura * 110;
+
+        eyePosition.z += jumpValue;
+        focusedPosition.z += jumpValue;
+
+        camera.setPosition(eyePosition);
+        camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
+        camera.setNearPlaneDistance(nearPlaneDistance);
+        camera.setFarPlaneDistance(farPlaneDistance);
+
+    }
+
+    /**
+    @param jumpValue
+    */
+    public void zoomIn(double jumpValue) {
+
+        Vector3D eyePosition;
+        Vector3D focusedPosition;
+
+        double nearPlaneDistance;
+        double farPlaneDistance;
+
+        eyePosition = camera.getPosition();
+        focusedPosition = camera.getFocusedPosition();
+
+        double altura = eyePosition.z;
+        if ((eyePosition.z - jumpValue) >= 12) {
+            nearPlaneDistance = altura * 0.1;
+            farPlaneDistance = altura * 110;
+
+            eyePosition.z -= jumpValue;
+            focusedPosition.z -= jumpValue;
+
+            camera.setPosition(eyePosition);
+            camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
+            camera.setNearPlaneDistance(nearPlaneDistance);
+            camera.setFarPlaneDistance(farPlaneDistance);
+        }
+    }
+    
 }
 
 //===========================================================================
