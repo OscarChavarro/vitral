@@ -15,7 +15,6 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
@@ -93,16 +92,16 @@ public class JoglDrawingArea implements
     public GLCanvas canvas;
 
     private RendererConfiguration qualitySelection;
-    private RendererConfiguration qualitySelectionVisualDebug;
-    private CameraController cameraController;
-    private RendererConfigurationController qualityController;
-    private TranslateGizmo translationGizmo;
-    private RotateGizmo rotateGizmo;
-    private ScaleGizmo scaleGizmo;
-    private Material visualDebugMaterial;
+    private final RendererConfiguration qualitySelectionVisualDebug;
+    private final CameraController cameraController;
+    private final RendererConfigurationController qualityController;
+    private final TranslateGizmo translationGizmo;
+    private final RotateGizmo rotateGizmo;
+    private final ScaleGizmo scaleGizmo;
+    private final Material visualDebugMaterial;
 
-    private Scene theScene;
-    private JLabel statusMessage;
+    private final Scene theScene;
+    private final JLabel statusMessage;
 
     public int interactionMode;
     public int lastInteractionMode;
@@ -114,7 +113,7 @@ public class JoglDrawingArea implements
     public boolean wantToGetContourns;
     public boolean wantToDebugProjectedViews;
 
-    private JoglProjectedViewRenderer projectedViewRenderer;
+    private final JoglProjectedViewRenderer projectedViewRenderer;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -123,8 +122,8 @@ public class JoglDrawingArea implements
 
     SceneEditorApplication parent;
 
-    private boolean doDistanceField;
-    private int distanceFieldSide;
+    private final boolean doDistanceField;
+    private final int distanceFieldSide;
 
     //=================================================================
     public ViewportWindowSetManager viewOrganizer;
@@ -818,7 +817,8 @@ public class JoglDrawingArea implements
 
     }
 
-    /** Called by drawable to initiate drawing */
+    /** Called by drawable to initiate drawing
+     * @param drawable */
     @Override
     public void display(GLAutoDrawable drawable)
     {
@@ -966,26 +966,36 @@ public class JoglDrawingArea implements
     }
 
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+     * @param drawable */
     @Override
     public void init(GLAutoDrawable drawable)
     {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+     * @param drawable */
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+     * @param drawable
+     * @param a
+     * @param b */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b)
     {
-        ;
+        
     }
     
-    /** Called to indicate the drawing surface has been moved and/or resized */
+    /** Called to indicate the drawing surface has been moved and/or resized
+     * @param drawable
+     * @param x
+     * @param y
+     * @param width
+     * @param height */
     @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
@@ -1003,7 +1013,7 @@ public class JoglDrawingArea implements
     }   
 
     @Override
-    public void mouseEntered(MouseEvent e)
+    public void mouseEntered(java.awt.event.MouseEvent e)
     {
         canvas.requestFocusInWindow();
 
@@ -1020,18 +1030,18 @@ public class JoglDrawingArea implements
     }
 
     @Override
-    public void mouseExited(MouseEvent e) 
+    public void mouseExited(java.awt.event.MouseEvent e) 
     {
         //System.out.println("Mouse exited");
     }
 
-    private ViewportWindow getSelectedViewFromPointerPosition(MouseEvent e, boolean changeSelection)
+    private ViewportWindow getSelectedViewFromPointerPosition(java.awt.event.MouseEvent e, boolean changeSelection)
     {
         return viewOrganizer.getSelectedViewFromPointerPosition(e.getX(), e.getY(), changeSelection);
     }
 
     @Override
-    public void mousePressed(MouseEvent e)
+    public void mousePressed(java.awt.event.MouseEvent e)
     {
         JoglAwtViewportWindow view;
         //view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
@@ -1045,15 +1055,15 @@ public class JoglDrawingArea implements
         int m = e.getModifiersEx();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             (m & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
+             (m & java.awt.event.MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             canvas.setCursor(camrotateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
+                  (m & java.awt.event.MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             canvas.setCursor(camtranslateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
+                  (m & java.awt.event.MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             canvas.setCursor(camadvanceCursor);
         }
         else {
@@ -1062,7 +1072,7 @@ public class JoglDrawingArea implements
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
              cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-            ;
+            
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ||
                   interactionMode == TRANSLATE_INTERACTION_MODE || 
@@ -1070,7 +1080,7 @@ public class JoglDrawingArea implements
                   interactionMode == SCALE_INTERACTION_MODE 
                   ) {
             boolean composite = false;
-            if ( ((e.getModifiersEx()) & MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
+            if ( ((e.getModifiersEx()) & java.awt.event.MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();
@@ -1110,7 +1120,7 @@ public class JoglDrawingArea implements
 
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
-                translationGizmo.processMousePressedEventAwt(e);
+                translationGizmo.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e));
                 //------------------------------------------------------------
             }
 
@@ -1120,7 +1130,7 @@ public class JoglDrawingArea implements
     }
 
     @Override
-    public void mouseReleased(MouseEvent e)
+    public void mouseReleased(java.awt.event.MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex());
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
@@ -1165,7 +1175,7 @@ public class JoglDrawingArea implements
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseReleasedEventAwt(e) ) {
+            if ( translationGizmo.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position.x = composed.M[0][3];
                 position.y = composed.M[1][3];
@@ -1181,7 +1191,7 @@ public class JoglDrawingArea implements
     }
 
     @Override
-    public void mouseClicked(MouseEvent e)
+    public void mouseClicked(java.awt.event.MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
@@ -1211,7 +1221,7 @@ public class JoglDrawingArea implements
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseClickedEventAwt(e) ) {
+            if ( translationGizmo.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position.x = composed.M[0][3];
                 position.y = composed.M[1][3];
@@ -1226,7 +1236,7 @@ public class JoglDrawingArea implements
     }
 
     @Override
-    public void mouseMoved(MouseEvent e)
+    public void mouseMoved(java.awt.event.MouseEvent e)
     {
         //-----------------------------------------------------------------
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
@@ -1258,7 +1268,7 @@ public class JoglDrawingArea implements
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseMovedEventAwt(e) ) {
+            if ( translationGizmo.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position.x = composed.M[0][3];
                 position.y = composed.M[1][3];
@@ -1273,7 +1283,7 @@ public class JoglDrawingArea implements
     }
 
     @Override
-    public void mouseDragged(MouseEvent e)
+    public void mouseDragged(java.awt.event.MouseEvent e)
     {
         JoglAwtViewportWindow view = (JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()));
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
@@ -1306,7 +1316,7 @@ public class JoglDrawingArea implements
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseDraggedEventAwt(e) ) {
+            if ( translationGizmo.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position.x = composed.M[0][3];
                 position.y = composed.M[1][3];
@@ -1322,7 +1332,7 @@ public class JoglDrawingArea implements
 
     /**
     WARNING: It is not working... check pending
-    */
+     * @param e    */
     @Override
     public void mouseWheelMoved(MouseWheelEvent e)
     {
@@ -1347,7 +1357,7 @@ public class JoglDrawingArea implements
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
              cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-            ;
+            
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
             if ( unicode_id == KeyEvent.CHAR_UNDEFINED ) {
@@ -1513,12 +1523,7 @@ public class JoglDrawingArea implements
              ((e.getModifiersEx()) & KeyEvent.CTRL_DOWN_MASK) != 0x0 ) {
             switch ( keycode ) {
               case KeyEvent.VK_F:
-                if ( parent.fullScreenGuiMode ) {
-                    parent.fullScreenGuiMode = false;
-                }
-                else {
-                    parent.fullScreenGuiMode = true;
-                }
+                parent.fullScreenGuiMode = !parent.fullScreenGuiMode;
                 parent.destroyGUI();
                 parent.createGUI();
                 break;
@@ -1593,12 +1598,7 @@ public class JoglDrawingArea implements
                 }
                 break;
               case '5': // Numpad 5
-                if ( parent.withVisualDebugRay ) {
-                    parent.withVisualDebugRay = false;
-                }
-                else {
-                    parent.withVisualDebugRay = true;
-                }
+                parent.withVisualDebugRay = !parent.withVisualDebugRay;
                 break;
               case '*': // Numpad *
                 if ( parent.withVisualDebugRay ) {
@@ -1892,11 +1892,12 @@ public class JoglDrawingArea implements
     Do NOT call your controller from the `keyTyped` method, or the controller
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method
+     * @param e
     */
     @Override
     public void keyTyped(KeyEvent e)
     {
-        ;
+        
     }
 }
 

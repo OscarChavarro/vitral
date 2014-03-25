@@ -9,12 +9,6 @@ package vsdk.toolkit.gui;
 // Java basic classes
 import java.util.ArrayList;
 
-// Awt classes
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-//import java.awt.event.KeyEvent;
-//import java.awt.Robot;
-
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -39,10 +33,10 @@ public class TranslateGizmo extends Gizmo {
     private Camera camera;
 
     /// Geometric model based in primitive instancing: primitive concretions
-    private Arrow arrowModel;
-    private Cone cylinderModel;
-    private Box boxModel;
-    private Cone coneModel;
+    private final Arrow arrowModel;
+    private final Cone cylinderModel;
+    private final Box boxModel;
+    private final Cone coneModel;
 
     /// Geometric model based in primitive instancing: primitive instances
     /// This list is always of size 12, and its elements follow the order 
@@ -289,6 +283,11 @@ public class TranslateGizmo extends Gizmo {
     - modelType must be one of the following values: MODEL_FOR_GRAVITY or
       MODEL_FOR_DISPLAY. Depending on this value the size of current
       geometric elements could change.
+      @param translation
+      @param rotation
+      @param autosize
+      @param initialdu
+      @param camera
     */
     public void calculateGeometryState(Vector3D translation, Matrix4x4 rotation,
                                        boolean autosize, int initialdu,
@@ -696,7 +695,7 @@ public class TranslateGizmo extends Gizmo {
         return T;
     }
 
-    public boolean processMouseEventAwt(MouseEvent mouseEvent)
+    public boolean processMouseEvent(MouseEvent mouseEvent)
     {
         oldmousex = mouseEvent.getX();
         oldmousey = mouseEvent.getY();
@@ -765,7 +764,7 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
-    public boolean processMousePressedEventAwt(MouseEvent e)
+    public boolean processMousePressedEvent(MouseEvent e)
     {
         lastDeltaPosition = new Vector3D();
         //lastDeltaPosition = calculateDeltaPosition(mouseEvent);
@@ -899,7 +898,7 @@ public class TranslateGizmo extends Gizmo {
         return false;
     }
 
-    public boolean processMouseReleasedEventAwt(MouseEvent e)
+    public boolean processMouseReleasedEvent(MouseEvent e)
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
@@ -907,7 +906,7 @@ public class TranslateGizmo extends Gizmo {
         return true;
     }
 
-    public boolean processMouseClickedEventAwt(MouseEvent e)
+    public boolean processMouseClickedEvent(MouseEvent e)
     {
         selectedResizing = true;
         calculateGeometryState(getPosition(), T, selectedResizing, 
@@ -983,7 +982,7 @@ public class TranslateGizmo extends Gizmo {
         return active;
     }
 
-    public boolean processMouseMovedEventAwt(MouseEvent e)
+    public boolean processMouseMovedEvent(MouseEvent e)
     {
         oldmousex = e.getX();
         oldmousey = e.getY();
@@ -1012,7 +1011,7 @@ public class TranslateGizmo extends Gizmo {
         return null;
     }
 
-    public boolean processMouseDraggedEventAwt(MouseEvent e)
+    public boolean processMouseDraggedEvent(MouseEvent e)
     {
         //- If it is called as an automatic reposition, do nothing --------
 /*
@@ -1178,7 +1177,7 @@ public class TranslateGizmo extends Gizmo {
         return true;
     }
 
-    public boolean processMouseWheelEventAwt(MouseWheelEvent e)
+    public boolean processMouseWheelEvent(MouseEvent e)
     {
         return false;
     }

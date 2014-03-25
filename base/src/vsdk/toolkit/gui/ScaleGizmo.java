@@ -6,10 +6,6 @@
 
 package vsdk.toolkit.gui;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-//import java.awt.event.KeyEvent;
-
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
@@ -27,7 +23,7 @@ public class ScaleGizmo extends Gizmo {
       return T;
   }
 
-  public boolean processMouseEventAwt(MouseEvent mouseEvent)
+  public boolean processMouseEvent(MouseEvent mouseEvent)
   {
       return false;
   }
@@ -100,37 +96,37 @@ public class ScaleGizmo extends Gizmo {
       return updateNeeded;
   }
 
-  public boolean processKeyReleasedEventAwt(KeyEvent mouseEvent)
+  public boolean processKeyReleasedEvent(KeyEvent mouseEvent)
   {
       return false;
   }
 
-  public boolean processMousePressedEventAwt(MouseEvent e)
+  public boolean processMousePressedEvent(MouseEvent e)
   {
       return false;
   }
 
-  public boolean processMouseReleasedEventAwt(MouseEvent e)
+  public boolean processMouseReleasedEvent(MouseEvent e)
   {
       return false;
   }
 
-  public boolean processMouseClickedEventAwt(MouseEvent e)
+  public boolean processMouseClickedEvent(MouseEvent e)
   {
       return false;
   }
 
-  public boolean processMouseMovedEventAwt(MouseEvent e)
+  public boolean processMouseMovedEvent(MouseEvent e)
   {
       return false;
   }
 
-  public boolean processMouseDraggedEventAwt(MouseEvent e)
+  public boolean processMouseDraggedEvent(MouseEvent e)
   {
       return false;
   }
 
-  public boolean processMouseWheelEventAwt(MouseWheelEvent e)
+  public boolean processMouseWheelEvent(MouseEvent e)
   {
       return false;
   }
