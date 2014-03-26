@@ -180,9 +180,9 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         // glColor3d(c.r, c.g, c.b);
         ColorRgb c = q.getWireColor();
-        vertexDataArray[index] = (float)c.r;    index++;
-        vertexDataArray[index] = (float)c.g;    index++;
-        vertexDataArray[index] = (float)c.b;    index++;
+        vertexDataArray[index] = (float)1.0;    index++;
+        vertexDataArray[index] = (float)0.0;    index++;
+        vertexDataArray[index] = (float)1.0;    index++;
 
         //gl.glNormal3d(N.x, N.y, N.z);
         vertexDataArray[index] = (float)N.x;    index++;

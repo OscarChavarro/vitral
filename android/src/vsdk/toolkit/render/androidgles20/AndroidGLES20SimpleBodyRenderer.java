@@ -11,11 +11,8 @@ import android.opengl.GLES20;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 
 public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
 {
