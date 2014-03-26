@@ -7,12 +7,11 @@ import android.view.MotionEvent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
+//import android.graphics.Paint.FontMetrics;
 import android.graphics.Typeface;
 
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.gui.PresentationElement;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.android.AndroidRGBAImageRenderer;
 
@@ -38,6 +37,10 @@ public class AndroidSystem extends PresentationElement
 
     /**
     This method generates a texture from a text to be displayed.
+     * @param label
+     * @param color
+     * @param size
+     * @return 
     */
     public static RGBAImage calculateLabelImage(String label, ColorRgb color, int size)
     {
@@ -59,11 +62,10 @@ public class AndroidSystem extends PresentationElement
 
         Paint.FontMetrics fm = paint.getFontMetrics();
 
-        float fontHeight = (float)Math.ceil(Math.abs(fm.bottom) + 
-            Math.abs(fm.top));
+        //float fontHeight = (float)Math.ceil(Math.abs(fm.bottom) + 
+        //    Math.abs(fm.top));
         float fontAscent = (float)Math.ceil(Math.abs(fm.ascent));
         float fontDescent = (float)Math.ceil(Math.abs(fm.descent));
-
 
         //label = "H=" + fontHeight + ", A: " + fontAscent + ", D: " + fontDescent;
 
@@ -84,7 +86,6 @@ public class AndroidSystem extends PresentationElement
 	    w, 
             (int)(fontAscent+fontDescent),
             Bitmap.Config.ARGB_8888);
-
 
         bitmap.eraseColor(0x00FF0000);
         Canvas gc = new Canvas(bitmap);

@@ -79,7 +79,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
             ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
         drawVertices3Position3Color2Uv(verticesBufferedArray, 
-            GLES20.GL_LINE_LOOP, numVertex, vertexSizeInBytes);
+            GLES20.GL_LINE_LOOP, numVertex);
 
         index = 0; vertex3Position3Color2Uv(vertexDataArray, index, 
             minmax[3], minmax[1], minmax[2], c.r, c.g, c.b, 0.0, 0.0); // 4
@@ -103,7 +103,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
             ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
         drawVertices3Position3Color2Uv(verticesBufferedArray, 
-            GLES20.GL_LINE_LOOP, numVertex, vertexSizeInBytes);
+            GLES20.GL_LINE_LOOP, numVertex);
         //glPopAttrib();
     }
 
@@ -250,7 +250,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
             ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
         drawVertices3Position3Color2Uv(verticesBufferedArray, 
-            GLES20.GL_LINES, numVertex, vertexSizeInBytes);
+            GLES20.GL_LINES, numVertex);
 
         //glPopAttrib();
     }
@@ -264,6 +264,9 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
     \todo  Homogenize all of the draw method signatures. Perhaps this code can
     be generalized to search the corresponding rendering class to a given
     Geometry via reflection, so this search should not be done explicitly.
+    @param g
+    @param c
+    @param q
     */
     public static void draw(Geometry g, Camera c, RendererConfiguration q)
     {

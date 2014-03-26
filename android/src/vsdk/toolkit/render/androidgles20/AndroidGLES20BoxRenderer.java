@@ -382,11 +382,11 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
 		//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
 		//method is using according to the way they should be drawn.
 		switch(drawingMode){
-		case mode3Position3Color3Normal2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+		case mode3Position3Color3Normal2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements);
 			break;
-		case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+		case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
 			break;
-		case mode3Position3Normal2UV: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements, vertexSizeInBytes);
+		case mode3Position3Normal2UV: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
 			break;
 		default:
 			break;
@@ -408,7 +408,7 @@ public static void draw(Box nBox, Camera nCamera, RendererConfiguration nRendere
 	
 	//Ilumination IFs
 	if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
-		setShadingType(nRendererConfiguration.SHADING_TYPE_NOLIGHT);
+		setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
 	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
 		setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
 	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)

@@ -15,13 +15,13 @@ import android.view.Menu;
 import android.view.SubMenu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import android.widget.TextView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Gallery.LayoutParams;
-import android.view.Gravity;
-import android.widget.ImageView.ScaleType;
-import android.widget.Button;
+//import android.widget.TextView;
+//import android.widget.ImageView;
+//import android.widget.LinearLayout;
+//import android.widget.Gallery.LayoutParams;
+//import android.view.Gravity;
+//import android.widget.ImageView.ScaleType;
+//import android.widget.Button;
 import android.view.View.OnClickListener;
 
 // Android packages: GPS API
@@ -29,20 +29,18 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.GpsStatus;
-import android.location.GpsStatus.Listener;
+//import android.location.GpsStatus.Listener;
 import android.content.Context;
 
 // Vsdk classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Ray;
+//import vsdk.toolkit.common.linealAlgebra.Vector3D;
+//import vsdk.toolkit.common.ColorRgb;
+//import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.environment.geometry.Sphere;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
 public class VitralActivity extends Activity 
@@ -235,7 +233,7 @@ GpsStatus.Listener, OnClickListener {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        ;
+        
     }
 
     @Override
@@ -295,6 +293,7 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 9, 0, "Toggle bounding boxes");
         q.add(0, 10, 0, "Toggle selection corners");
         q.add(0, 11, 0, "Toggle normals");
+        q.add(0, 26, 0, "Toggle vertexColors");
 
         SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
         o.add(0, 12, 0, "Sphere (low res)");
@@ -413,6 +412,9 @@ GpsStatus.Listener, OnClickListener {
             break;
           case 25:
             canvas.glExecutor.raytrace();
+            break;
+          case 26:
+            q.setUseVertexColors(!q.getUseVertexColors());
             break;
         }
         return true;

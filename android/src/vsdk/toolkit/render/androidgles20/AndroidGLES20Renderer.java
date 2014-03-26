@@ -5,8 +5,6 @@ package vsdk.toolkit.render.androidgles20;
 // Basic Java classes
 import java.io.InputStream;
 import java.nio.FloatBuffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -31,7 +29,7 @@ import vsdk.toolkit.render.RenderingElement;
 
 public class AndroidGLES20Renderer extends RenderingElement
 {
-    private static String TAG = "AndroidGLES20Renderer";
+    private static final String TAG = "AndroidGLES20Renderer";
 
     public static int AndroidGLES20GpuProgramConstant;
     public static int AndroidGLES20GpuProgramGouraud;
@@ -80,6 +78,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static int lightColorsGlobalParam;
     private static int numberOfLightsParam;
     private static int withTextureParam;
+    private static int withVertexColorsParam;
     private static int cameraPositionGlobalParam;
     private static int sTextureParam;
     private static int sBumpParam;
@@ -315,30 +314,32 @@ public class AndroidGLES20Renderer extends RenderingElement
     protected static void activateShaders()
     {
         //- Select current shaders programs from rendering configuration --
-        int shaderId = AndroidGLES20GpuProgramConstant;
+        int shaderId; // = AndroidGLES20GpuProgramConstant;
+        String selectedShaderName; // = "<invalid>";
 
-        //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... :");
+        //System.out.print("Seleccionando shader " + qualitySelection.getShadingType() + " ... : ");
 
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_GOURAUD ||
              qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_FLAT ) {
             shaderId = AndroidGLES20GpuProgramGouraud;
-            //System.out.println("Gouraud");
+            selectedShaderName = "Gouraud";
         }
-	else if ( qualitySelection.getShadingType() == 
+        else if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_PHONG ) {
             if ( qualitySelection.isBumpMapSet() ) {
                 shaderId = AndroidGLES20GpuProgramPhongBump;
-	    }
-	    else {
+                selectedShaderName = "PhongBump";
+            }
+            else {
                 shaderId = AndroidGLES20GpuProgramPhong; 
-	    }
-            //System.out.println("Phong");
-	}
+                selectedShaderName = "Phong";
+            }
+        }
         else {
             shaderId = AndroidGLES20GpuProgramConstant;
-            //System.out.println("Constante");
+            selectedShaderName = "Constant";
         }
 
         //- Activate selected shader programs -----------------------------
@@ -346,19 +347,39 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glUseProgram");
 
         //- Activate shader parameters ------------------------------------
+        modelViewProjectionLocalParam = -1;
+        PObjectParam = -1;
+        sTextureParam = -1;
+        sBumpParam = -1;
+        NObjectParam = -1;
+        ambientColorParam = -1;
+        diffuseColorParam = -1;
+        specularColorParam = -1;
+        modelViewLocalParam = -1;
+        modelViewITLocalParam = -1;
+        lightPositionsGlobalParam = -1;
+        lightColorsGlobalParam = -1;
+        numberOfLightsParam = -1;
+        withTextureParam = -1;
+        withVertexColorsParam = -1;
+        cameraPositionGlobalParam = -1;
+        phongExponentParam = -1;
+        emissionColorParam = -1;
+        uvVertexTextureCoordinateParam = -1;
+
         modelViewProjectionLocalParam = GLES20.glGetUniformLocation(
             shaderId, "modelViewProjectionLocal");
         checkGlError("glGetUniformLocation modelViewProjectionLocal");
         if ( modelViewProjectionLocalParam == -1 ) {
             throw new RuntimeException(
-                "Could not get attrib location for modelViewProjectionLocal");
+                "Could not get attrib location for modelViewProjectionLocal for shader " + selectedShaderName);
         }
 
         PObjectParam = GLES20.glGetAttribLocation(shaderId, "PObject");
         checkGlError("glGetAttribLocation PObject");
         if ( PObjectParam == -1 ) {
             throw new RuntimeException(
-                "Could not get attrib location for PObject");
+                "Could not get attrib location for PObject for shader " + selectedShaderName);
         }
 
         if ( qualitySelection.isTextureSet() ) {
@@ -367,29 +388,33 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetAttribLocation uvVertexTextureCoordinate");
             if ( uvVertexTextureCoordinateParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for uvVertexTextureCoordinate");
+                    "Could not get attrib location for uvVertexTextureCoordinate for shader " + selectedShaderName);
             }
         }
 
         withTextureParam = GLES20.glGetUniformLocation(shaderId, "withTexture");
         checkGlError("glGetUniformLocation withTexture");
-        if ( withTextureParam == -1 ) {
-            //throw new RuntimeException(
-            //    "Could not get uniform location for withTexture");
-        }
-        else {
+        if ( withTextureParam != -1 ) {
             GLES20.glUniform1i(withTextureParam, 
                 qualitySelection.isTextureSet()?1:0);
         }
 
+        withVertexColorsParam = GLES20.glGetUniformLocation(shaderId, "withVertexColors");
+        checkGlError("glGetUniformLocation withVertexColors");
+        if ( withVertexColorsParam != -1 ) {
+            GLES20.glUniform1i(withVertexColorsParam, qualitySelection.getUseVertexColors()?1:0);
+        }
+
         if ( qualitySelection.getShadingType() == 
-            RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
+            RendererConfiguration.SHADING_TYPE_NOLIGHT ||
+            qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_PHONG ) {
             emissionColorParam = 
                 GLES20.glGetAttribLocation(shaderId, "emissionColor");
             checkGlError("glGetAttribLocation emissionColor");
             if ( emissionColorParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for emissionColor");
+                    "Could not get attrib location for emissionColor for shader " + selectedShaderName);
             }
         }
 
@@ -402,7 +427,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             GLES20.glUniform1i(sTextureParam, 0);
             if ( sTextureParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for sTexture");
+                    "Could not get attrib location for sTexture for shader " + selectedShaderName);
             }
 
             sBumpParam = 
@@ -411,10 +436,32 @@ public class AndroidGLES20Renderer extends RenderingElement
             GLES20.glUniform1i(sBumpParam, 1);
             if ( sBumpParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for sBump");
+                    "Could not get attrib location for sBump for shader " + selectedShaderName);
             }
-	}
+        }
+        
+        ColorRgb c;
 
+        if ( qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_GOURAUD ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_PHONG ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_FLAT ||
+             qualitySelection.getShadingType() == 
+            RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
+            diffuseColorParam =
+                GLES20.glGetUniformLocation(shaderId, "diffuseColor");
+            checkGlError("glGetUniformLocation diffuseColor");
+            if ( diffuseColorParam == -1 ) {
+                throw new RuntimeException(
+                    "Could not get uniform location for diffuseColor for shader " + selectedShaderName);
+            }
+            c = currentMaterial.getDiffuse();
+            GLES20.glUniform3f(diffuseColorParam,
+                (float)c.r, (float)c.g, (float)c.b);
+        }
+    
         if ( qualitySelection.getShadingType() == 
             RendererConfiguration.SHADING_TYPE_GOURAUD ||
              qualitySelection.getShadingType() == 
@@ -427,7 +474,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetAttribLocation NObject");
             if ( NObjectParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for NObject");
+                    "Could not get attrib location for NObject for shader " + selectedShaderName);
             }
 
             modelViewLocalParam = GLES20.glGetUniformLocation(
@@ -435,7 +482,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation modelViewLocal");
             if ( modelViewLocalParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for modelViewLocalParam");
+                    "Could not get attrib location for modelViewLocalParam for shader " + selectedShaderName);
             }
 
             modelViewITLocalParam = GLES20.glGetUniformLocation(
@@ -443,31 +490,19 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation modelViewITLocal");
             if ( modelViewITLocalParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get attrib location for modelViewITLocalParam");
+                    "Could not get attrib location for modelViewITLocalParam for shader " + selectedShaderName);
             }
 
             // Activate material parameters
-            ColorRgb c;
             ambientColorParam =
                 GLES20.glGetUniformLocation(shaderId, "ambientColor");
             checkGlError("glGetUniformLocation ambientColor");
             if ( ambientColorParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for ambientColor");
+                    "Could not get uniform location for ambientColor for shader " + selectedShaderName);
             }
             c = currentMaterial.getAmbient();
             GLES20.glUniform3f(ambientColorParam,
-                (float)c.r, (float)c.g, (float)c.b);
-
-            diffuseColorParam =
-                GLES20.glGetUniformLocation(shaderId, "diffuseColor");
-            checkGlError("glGetUniformLocation diffuseColor");
-            if ( diffuseColorParam == -1 ) {
-                throw new RuntimeException(
-                    "Could not get uniform location for diffuseColor");
-            }
-            c = currentMaterial.getDiffuse();
-            GLES20.glUniform3f(diffuseColorParam,
                 (float)c.r, (float)c.g, (float)c.b);
 
             specularColorParam =
@@ -475,7 +510,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation specularColor");
             if ( specularColorParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for specularColor");
+                    "Could not get uniform location for specularColor for shader " + selectedShaderName);
             }
             c = currentMaterial.getSpecular();
             GLES20.glUniform3f(specularColorParam,
@@ -486,7 +521,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation phongExponent");
             if ( phongExponentParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for phongExponent");
+                    "Could not get uniform location for phongExponent for shader " + selectedShaderName);
             }
             GLES20.glUniform1f(phongExponentParam,
                 (float)currentMaterial.getPhongExponent());
@@ -496,7 +531,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation numberOfLights");
             if ( numberOfLightsParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for numberOfLights");
+                    "Could not get uniform location for numberOfLights for shader " + selectedShaderName);
             }
             GLES20.glUniform1i(numberOfLightsParam, lights.size());
 
@@ -505,7 +540,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation lightPositionsGlobal");
             if ( lightPositionsGlobalParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for lightPositionsGlobal");
+                    "Could not get uniform location for lightPositionsGlobal for shader " + selectedShaderName);
             }
 
             lightColorsGlobalParam =
@@ -513,7 +548,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation lightColorsGlobal");
             if ( lightColorsGlobalParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for lightColorsGlobal");
+                    "Could not get uniform location for lightColorsGlobal for shader " + selectedShaderName);
             }
 
             float array[] = new float[3*lights.size()];
@@ -539,28 +574,13 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glGetUniformLocation cameraPositionGlobal");
             if ( cameraPositionGlobalParam == -1 ) {
                 throw new RuntimeException(
-                    "Could not get uniform location for cameraPositionGlobal");
+                    "Could not get uniform location for cameraPositionGlobal for shader " + selectedShaderName);
             }
             if ( currentCamera != null ) {
                 Vector3D p = currentCamera.getPosition();
                 GLES20.glUniform3f(cameraPositionGlobalParam,
                        (float)p.x, (float)p.y, (float)p.z);
             }
-        }
-        else {
-            NObjectParam = -1;
-            ambientColorParam = -1;
-            diffuseColorParam = -1;
-
-            specularColorParam = -1;
-            modelViewLocalParam = -1;
-            modelViewITLocalParam = -1;
-            lightPositionsGlobalParam = -1;
-            lightColorsGlobalParam = -1;
-            numberOfLightsParam = -1;
-            withTextureParam = -1;
-            cameraPositionGlobalParam = -1;
-            phongExponentParam = -1;
         }
 
         activateTransformationMatrices();
@@ -731,8 +751,10 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     protected static void drawVertices3Position2Uv(
         FloatBuffer verticesBufferedArray,
-        int primitive, int numberOfElements, int vertexSizeInBytes)
+        int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 5;
+        
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -744,14 +766,17 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glEnableVertexAttribArray PObjectParam");
 
         // glTexCoord2d
-        verticesBufferedArray.position(3);
-        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-                                     verticesBufferedArray);
-        checkGlError(
-            "glVertexAttribPointer uvVertexTextureCoordinateParam");
-        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
-        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+        if ( uvVertexTextureCoordinateParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                verticesBufferedArray);
+            checkGlError(
+                "glVertexAttribPointer uvVertexTextureCoordinateParam");
+            GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+            checkGlError(
+                "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+        }
 
         //-----------------------------------------------------------------
         // Draw geometry
@@ -761,8 +786,53 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     protected static void drawVertices3Position3Color2Uv(
         FloatBuffer verticesBufferedArray,
-        int primitive, int numberOfElements, int vertexSizeInBytes)
+        int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 8;
+        //-----------------------------------------------------------------
+        // Send geometry to GPU
+        // glVertex3d
+        verticesBufferedArray.position(0);
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam" + PObjectParam);
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, verticesBufferedArray);
+        checkGlError("glVertexAttribPointer PObject");
+
+        // glColor3d
+        if ( emissionColorParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(emissionColorParam);
+            checkGlError("glEnableVertexAttribArray emissionColorParam");
+            GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer emissionColorParam");
+        }
+
+        // glTexCoord2d
+        if ( uvVertexTextureCoordinateParam != -1 ) {
+            verticesBufferedArray.position(6);
+            GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+            checkGlError(
+                "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+            GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                verticesBufferedArray);
+            checkGlError(
+                "glVertexAttribPointer uvVertexTextureCoordinateParam");
+        }
+
+        //-----------------------------------------------------------------
+        // Draw geometry
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
+    }
+
+    protected static void drawVertices3Position3Color3Normal(
+        FloatBuffer verticesBufferedArray,
+        int primitive, int numberOfElements)
+    {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 9;
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -774,21 +844,24 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glVertexAttribPointer PObject");
 
         // glColor3d
-        verticesBufferedArray.position(3);
-        GLES20.glEnableVertexAttribArray(emissionColorParam);
-        checkGlError("glEnableVertexAttribArray emissionColorParam");
-        GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
-                             false, vertexSizeInBytes, verticesBufferedArray);
-        checkGlError("glVertexAttribPointer emissionColorParam");
+        if ( emissionColorParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(emissionColorParam);
+            checkGlError("glEnableVertexAttribArray emissionColorParam");
+            GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer emissionColorParam");
+        }
 
-        // glTexCoord2d
-        verticesBufferedArray.position(6);
-        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
-        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
-        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-                                     verticesBufferedArray);
-        checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
+        // glNormal3d
+        if ( NObjectParam != -1 ) {
+            verticesBufferedArray.position(6);
+            GLES20.glEnableVertexAttribArray(NObjectParam);
+            checkGlError("glEnableVertexAttribArray NObjectParam");
+            GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
+                             false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer NObjectParam");
+        }
 
         //-----------------------------------------------------------------
         // Draw geometry
@@ -798,8 +871,9 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     protected static void drawVertices3Position3Normal2Uv(
         FloatBuffer verticesBufferedArray,
-        int primitive, int numberOfElements, int vertexSizeInBytes)
+        int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 8;
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -821,13 +895,17 @@ public class AndroidGLES20Renderer extends RenderingElement
         }
 
         // glTexCoord2d
-        verticesBufferedArray.position(6);
-        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
-        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
-        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-                                     verticesBufferedArray);
-        checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
+        if ( uvVertexTextureCoordinateParam != -1 ) {
+            verticesBufferedArray.position(6);
+            GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+            checkGlError(
+                "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+            GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                verticesBufferedArray);
+            checkGlError(
+                "glVertexAttribPointer uvVertexTextureCoordinateParam");
+        }
 
         //-----------------------------------------------------------------
         // Draw geometry
@@ -837,8 +915,9 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     protected static void drawVertices3Position3Normal(
             FloatBuffer verticesBufferedArray,
-            int primitive, int numberOfElements, int vertexSizeInBytes)
+            int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 6;
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -867,8 +946,9 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     protected static void drawVertices3Position3Color(
             FloatBuffer verticesBufferedArray,
-            int primitive, int numberOfElements, int vertexSizeInBytes)
+            int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 6;
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -897,8 +977,9 @@ public class AndroidGLES20Renderer extends RenderingElement
     
     protected static void drawVertices3Position3Color3Normal2Uv(
         FloatBuffer verticesBufferedArray,
-        int primitive, int numberOfElements, int vertexSizeInBytes)
+        int primitive, int numberOfElements)
     {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 11;
         //-----------------------------------------------------------------
         // Send geometry to GPU
         // glVertex3d
@@ -910,12 +991,14 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glVertexAttribPointer PObject");
 
         // glColor3d
-        verticesBufferedArray.position(3);
-        GLES20.glEnableVertexAttribArray(emissionColorParam);
-        checkGlError("glEnableVertexAttribArray emissionColorParam");
-        GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
-                             false, vertexSizeInBytes, verticesBufferedArray);
-        checkGlError("glVertexAttribPointer emissionColorParam");
+        if ( emissionColorParam != -1 ) {
+            verticesBufferedArray.position(3);
+            GLES20.glEnableVertexAttribArray(emissionColorParam);
+            checkGlError("glEnableVertexAttribArray emissionColorParam");
+            GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                false, vertexSizeInBytes, verticesBufferedArray);
+            checkGlError("glVertexAttribPointer emissionColorParam");
+        }
 
         // glNormal3d
         if ( NObjectParam != -1 ) {
@@ -923,18 +1006,22 @@ public class AndroidGLES20Renderer extends RenderingElement
             GLES20.glEnableVertexAttribArray(NObjectParam);
             checkGlError("glEnableVertexAttribArray NObjectParam");
             GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
-                             false, vertexSizeInBytes, verticesBufferedArray);
+                false, vertexSizeInBytes, verticesBufferedArray);
             checkGlError("glVertexAttribPointer NObjectParam");
         }
 
         // glTexCoord2d
-        verticesBufferedArray.position(9);
-        GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
-        checkGlError("glEnableVertexAttribArray uvVertexTextureCoordinateParam");
-        GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
-                                     GLES20.GL_FLOAT, false, vertexSizeInBytes, 
-                                     verticesBufferedArray);
-        checkGlError("glVertexAttribPointer uvVertexTextureCoordinateParam");
+        if ( uvVertexTextureCoordinateParam != -1 ) {
+            verticesBufferedArray.position(9);
+            GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+            checkGlError(
+                "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+            GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2, 
+                GLES20.GL_FLOAT, false, vertexSizeInBytes, 
+                verticesBufferedArray);
+            checkGlError(
+                "glVertexAttribPointer uvVertexTextureCoordinateParam");
+        }
 
         //-----------------------------------------------------------------
         // Draw geometry

@@ -10,10 +10,13 @@
 
 uniform mat4 modelViewProjectionLocal;    // input: PM * MVM
 uniform int withTexture;                  // input: boolean 1 true 0 false
+uniform int withVertexColors;          // input: boolean 1 true 0 false
 attribute vec4 PObject;                   // input: glVertex3d
-attribute vec4 emissionColor;
+attribute vec3 emissionColor;
 attribute vec2 uvVertexTextureCoordinate; // input: glTexCoord2d
-varying vec4 vertexColor;                 // output
+uniform vec3 diffuseColor;
+
+varying vec3 vertexColor;                 // output
 varying float activateTexture;            // output
 varying vec2 uvTextureCoordinate;         // output
 
@@ -22,7 +25,12 @@ void main() {
     gl_Position = modelViewProjectionLocal * PObject;
 
     // Transform positions and normals from model-space to view-space
-    vertexColor = emissionColor;
+    if ( withVertexColors == 1 ) {
+        vertexColor = emissionColor;
+    }
+    else {
+        vertexColor = diffuseColor;
+    }
     if ( withTexture == 1 ) {
         activateTexture = 1.0;
         uvTextureCoordinate.x = uvVertexTextureCoordinate.x;

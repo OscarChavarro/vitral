@@ -14,6 +14,7 @@ uniform highp vec3 specularColor;        // input from CPU: material parameter
 uniform highp float phongExponent;       // input from CPU: material parameter
 
 varying vec4 PGlobal;              // input from vertex shader
+varying vec3 vertexColor;          // input from vertex shader
 varying vec3 N;                    // input from vertex shader
 varying vec3 V;                    // input from vertex shader
 varying vec2 uvTextureCoordinate;  // input from vertex shader
@@ -32,11 +33,15 @@ void main() {
     vec3 specularTerm = vec3(0.0, 0.0, 0.0);
     vec3 L;
 
+    vec3 diffuseFinalColor;
+
+    diffuseFinalColor = vertexColor;
+
     for ( i = 0; i < numberOfLights; i++ ) {
         L = normalize(lightPositionsGlobal[i] - PGlobal.xyz);
 
         // Diffuse term: implementing equation [FOLE1992].16.4
-        diffuseFactor = lightColorsGlobal[i] * diffuseColor;
+        diffuseFactor = lightColorsGlobal[i] * diffuseFinalColor;
         diffuseTerm += diffuseFactor * max(dot(N, L), 0.0);
 
         // Specular term: implementing the last term on equation
@@ -58,6 +63,7 @@ void main() {
     else {
         gl_FragColor = vec4(ambientTerm + diffuseTerm + specularTerm, 1.0);
     }
+
 }
 
 //===========================================================================

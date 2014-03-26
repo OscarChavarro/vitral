@@ -52,7 +52,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements GLSurfaceView.Renderer {
 
     // Android application elements
-    private Context androidApplicationContext;
+    private final Context androidApplicationContext;
 
     // Vitral scene
     private Scene scene;
@@ -147,18 +147,17 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
         System.out.println("Loading mesh " + filename);
         meshFile = new File(filename);
-        SimpleScene tscene = new SimpleScene();
+        SimpleScene localScene;
+        localScene = new SimpleScene();
         TriangleMesh m = null;
         try {
-            ReaderPly.importEnvironment(meshFile, tscene);
-            m = (TriangleMesh)(tscene.getSimpleBodies().get(0).getGeometry());
-            System.out.println(mesh.toString());
+            ReaderPly.importEnvironment(meshFile, localScene);
+            m = (TriangleMesh)(localScene.getSimpleBodies().get(0).getGeometry());
           }
           catch ( Exception e ) {
-            System.out.println("= ERROR LOADING MESH");
-            e.printStackTrace();
+            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                "loadPlyMesh", "Error loading mesh " + filename, e);
         }
-
         return m;
     }
 
@@ -188,7 +187,6 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
     private HashMap<String, TimeReport> createTimers()
     {
-        HashMap<String, TimeReport> timers;
         timers = new HashMap<String, TimeReport>();
         //timers.put("TOTAL_FRAME", new TimeReport("TOTAL_FRAME"));
         timers.put("03_HUD", new TimeReport("03_HUD"));
@@ -211,9 +209,9 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         quality.setWires(false);
         quality.setWireColor(new ColorRgb(1.0, 1.0, 1.0));
         quality.setSurfaces(true);
-        quality.setTexture(true);
+        quality.setTexture(false);
         quality.setBumpMap(false);
-        //quality.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+        quality.setUseVertexColors(true);
         quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         material = new Material();
@@ -363,15 +361,15 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
         // Move light around center...
         double r = 2.0;
-        ArrayList<Light> lights = scene.scene.getLights();
-        if ( withLightRotation && lights.size() > 0 ) {
-            lights.get(0).setPosition(new Vector3D(r, 0, 0));
+        ArrayList<Light> l = scene.scene.getLights();
+        if ( withLightRotation && l.size() > 0 ) {
+            l.get(0).setPosition(new Vector3D(r, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
             RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
             Vector3D P, PR;
-            P = lights.get(0).getPosition();
+            P = l.get(0).getPosition();
             PR = RL.multiply(P);
-            lights.get(0).setPosition(PR);
+            l.get(0).setPosition(PR);
         }
 
         AndroidGLES20SceneRenderer.draw(scene, quality);
@@ -430,12 +428,12 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslated(x, 0, 0);
-            glEnable(GL_TEXTURE_2D);
             setRendererConfiguration(quality);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             AndroidGLES20ImageRenderer.activate(testImage);
             setTextureParameters();
+            
             drawUnitSquare();
         }
         timers.get("02_GEOMETRY").stop();
@@ -463,7 +461,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     {
         int x = x0, y = y0;
         int i;
-        String key = "_";
+        String key;
 
         for ( i = 0; i < msg.length(); i++ ) {
             key = "" + msg.charAt(i);
@@ -500,15 +498,16 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         q = new RendererConfiguration();
         q.setSurfaces(true);
         q.setTexture(true);
+        q.setUseVertexColors(true);
         q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        setRendererConfiguration(q);
+
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glTranslated(-1.0 + dx, 1.0 - dy, 0);
         glScaled(fx, fy, 1.0);
-        glEnable(GL_TEXTURE_2D);
-        setRendererConfiguration(q);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         AndroidGLES20ImageRenderer.activate(img);
         setTextureParameters();
@@ -519,14 +518,12 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     {
         //-----------------------------------------------------------------
         // Geometry data
-        int FLOAT_SIZE_IN_BYTES = 4;
-        int VERTEX_SIZE_IN_BYTES = 8 * FLOAT_SIZE_IN_BYTES;
         float[] vertexDataArray = {
-            // X, Y, Z, R, G, B, U, V
-            -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-             0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-             0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+            // X, Y, Z, R, G, B, NX, NY, NZ, U, V
+            -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+             0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+             0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
         FloatBuffer verticesBufferedArray;
 
@@ -536,12 +533,9 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         verticesBufferedArray.put(vertexDataArray);
 
         //-----------------------------------------------------------------
-        drawVertices3Position3Color2Uv(
+        drawVertices3Position3Color3Normal2Uv(
             verticesBufferedArray,
-            GLES20.GL_TRIANGLE_STRIP,
-            4,
-            VERTEX_SIZE_IN_BYTES
-        );
+            GLES20.GL_TRIANGLE_STRIP, 4);
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {

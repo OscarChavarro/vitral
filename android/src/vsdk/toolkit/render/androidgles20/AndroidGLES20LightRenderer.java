@@ -114,7 +114,7 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
             ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
         drawVertices3Position3Color2Uv(verticesBufferedArray, 
-            GLES20.GL_LINES, numVertex, vertexSizeInBytes);
+            GLES20.GL_LINES, numVertex);
 
     }
 }

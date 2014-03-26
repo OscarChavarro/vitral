@@ -14,10 +14,9 @@ import vsdk.toolkit.environment.geometry.Cone;
 public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer{
 	
 	
-	private static int BODY = 0;
-	private static int TOP_CAP = 1;
-	private static int BOTTOM_CAP = 2; 
-	
+	private static final int BODY = 0;
+	private static final int TOP_CAP = 1;
+	private static final int BOTTOM_CAP = 2; 
 	
 	/**
 	 * This method draws the two-radius cylinder surfaces according to the number of slices desired
@@ -618,11 +617,11 @@ private static void sendVertexesToDraw(float[] vertexDataArray, int vertexSizeIn
 	//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
 	//method is using according to the way they should be drawn.
 	switch(drawingMode){
-	case mode3Position3Color3Normal2UV: drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
+	case mode3Position3Color3Normal2UV: drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, slices);
 		break;
-	case mode3Position3Normal2UV:  drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
+	case mode3Position3Normal2UV:  drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, slices);
 		break;
-	case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, slices, vertexSizeInBytes);
+	case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, slices);
 		break;
 	default:
 		break;
@@ -649,7 +648,7 @@ public static void draw(Cone nCone, Camera nCamera, RendererConfiguration nRende
 	
 	//Ilumination IFs
 	if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
-		setShadingType(nRendererConfiguration.SHADING_TYPE_NOLIGHT);
+		setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
 	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
 		setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
 	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)
