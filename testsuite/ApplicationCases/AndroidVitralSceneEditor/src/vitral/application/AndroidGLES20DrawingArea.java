@@ -49,7 +49,8 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 
-public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements GLSurfaceView.Renderer {
+public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer 
+implements GLSurfaceView.Renderer {
 
     // Android application elements
     private final Context androidApplicationContext;
@@ -68,6 +69,9 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     private RGBImage testImage;
     private IndexedColorImage bumpmap;
     private NormalMap normalMap;
+    private boolean highResSphere = false;
+    private boolean withReferenceSquare = false;
+    private boolean doRaytrace = false;
 
     // Animation control
     private int frameCount;
@@ -78,10 +82,12 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     private HashMap<String, TimeReport>timers;
     private HashMap<String, RGBAImage>characterSprites;
 
-    // Other
-    private boolean highResSphere = false;
-    private boolean withReferenceSquare = false;
-    
+    public AndroidGLES20DrawingArea(Context context) {
+        androidApplicationContext = context;
+
+        createModel();
+    }
+
     public RendererConfiguration getRendererConfiguration()
     {
         return quality;
@@ -134,6 +140,9 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             cone = new Cone(1.0, 1.0, 2.0);
             break;
           case 5:
+            if ( meshMug == null ) {
+                meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
+            }
             mesh = meshMug;
             break;
         }
@@ -211,7 +220,7 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         quality.setSurfaces(true);
         quality.setTexture(false);
         quality.setBumpMap(false);
-        quality.setUseVertexColors(true);
+        quality.setUseVertexColors(false);
         quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         material = new Material();
@@ -222,9 +231,24 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
 
         prepareLights(1);
         
-        meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
+        meshMug = null;
         selectObject(2);
+        createBitmapFontSprites();
 
+        bumpmap = null;
+        normalMap = null;
+        
+        //-----------------------------------------------------------------
+        //testImage = new RGBImage();
+        //testImage.init(128, 128);
+        //testImage.createTestPattern();
+
+        //-----------------------------------------------------------------
+        frameCount = 0;
+        timers.get("01_STARTUP").stop();
+    }
+
+    private void createBitmapFontSprites() {
         //-----------------------------------------------------------------
         characterSprites = new HashMap<String, RGBAImage>();
         char c;
@@ -235,85 +259,72 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         for ( c = 'a'; c <= 'z'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                    s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         for ( c = 'A'; c <= 'Z'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                    s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         for ( c = '0'; c <= '9'; c++ ) {
             s = "" + c;
             img = AndroidSystem.calculateLabelImage(
-                s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                    s, new ColorRgb(1.0, 1.0, 1.0), fontSize);
             characterSprites.put(s, img);
         }
 
         img = AndroidSystem.calculateLabelImage(
-            ".", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                ".", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(".", img);
 
         img = AndroidSystem.calculateLabelImage(
-            ",", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                ",", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(",", img);
 
         img = AndroidSystem.calculateLabelImage(
-            " ", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                " ", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(" ", img);
 
         img = AndroidSystem.calculateLabelImage(
-            "_", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                "_", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put("_", img);
 
         img = AndroidSystem.calculateLabelImage(
-            ":", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                ":", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put(":", img);
 
         img = AndroidSystem.calculateLabelImage(
-            "/", new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                "/", new ColorRgb(1.0, 1.0, 1.0), fontSize);
         characterSprites.put("/", img);
-
-        //-----------------------------------------------------------------
-        try {
-            bumpmap = 
-            ImagePersistence.importIndexedColor(
-                new File("/storage/extSdCard/earth.bw"));
-            normalMap = new NormalMap();
-            normalMap.importBumpMap(bumpmap, new Vector3D(1, 1, 0.2));
-        }
-        catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
-                "createModel", "Can not load bumpmap!", e);
-        }
-
-        System.out.println("XXX: Bumpmap of size " + 
-            bumpmap.getXSize() + " x " + bumpmap.getYSize());
-
-        //-----------------------------------------------------------------
-        //testImage = new RGBImage();
-        //testImage.init(128, 128);
-        //testImage.createTestPattern();
-
-        testImage = normalMap.exportToRgbImage();
-
-        //-----------------------------------------------------------------
-        frameCount = 0;
-        timers.get("01_STARTUP").stop();
     }
 
-    public AndroidGLES20DrawingArea(Context context) {
-        androidApplicationContext = context;
-
-        createModel();
+    private void loadBumpmap() {
+        //-----------------------------------------------------------------
+        try {
+            bumpmap =
+                    ImagePersistence.importIndexedColor(
+                            new File("/storage/extSdCard/earth.bw"));
+            normalMap = new NormalMap();
+            normalMap.importBumpMap(bumpmap, new Vector3D(1, 1, 0.2));
+            
+            testImage = normalMap.exportToRgbImage();
+        }
+        catch ( Exception e ) {
+            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR,
+                    "createModel", "Can not load bumpmap!", e);
+        }
+        
+        System.out.println("XXX: Bumpmap of size " +
+                bumpmap.getXSize() + " x " + bumpmap.getYSize());
     }
 
     /**
     This method should be called after every call to a texture activation
-    (glBindTexture)
+    (glBindTexture).
     */
     private void setTextureParameters()
     {
@@ -339,8 +350,19 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
     }
 
     public void onDrawFrame(GL10 glUnused) {
+        
+        if ( doRaytrace ) {
+            raytrace();
+            doRaytrace = false;
+        }
+        
         timers.get("02_GEOMETRY").start();
 
+        if ( quality.isBumpMapSet() &&
+             (bumpmap == null || normalMap == null) ) {
+            loadBumpmap();
+        }
+        
         if ( errorsDetected ) {
             GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -372,18 +394,21 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             l.get(0).setPosition(PR);
         }
 
+        //-----------------------------------------------------------------
+        AndroidGLES20Renderer.setRendererConfiguration(quality);
+
+        //-----------------------------------------------------------------
+        glLoadIdentity();
+        
         AndroidGLES20SceneRenderer.draw(scene, quality);
 
+        AndroidGLES20MaterialRenderer.activate(material);
         glLoadIdentity();
         //glTranslated(-2, 0, 0);
         if ( withObjectRotation ) {
             glRotated(200*x, 0, 0, 1);
         }
-
-        //-----------------------------------------------------------------
-        AndroidGLES20MaterialRenderer.activate(material);
-        AndroidGLES20Renderer.setRendererConfiguration(quality);
-
+        
         // Activate texture image.activate()
         if ( quality.isTextureSet() ) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -437,8 +462,14 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             drawUnitSquare();
         }
         timers.get("02_GEOMETRY").stop();
-
+        
         //- Draw HUD elements ---------------------------------------------
+        drawHudElements();
+        
+        frameCount++;
+    }
+
+    private void drawHudElements() {
         timers.get("03_HUD").start();
         int y = 10;
         drawText("Frame: " + frameCount, getCamera(), 10, y);
@@ -451,8 +482,12 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
             drawText("" + tr, getCamera(), 10, y);
         }
 
+        
+        if ( raytracingImage != null ) {
+            drawImage(raytracingImage, getCamera(), 10, y+50);
+        }
+        
         //AndroidGLES20ImageRenderer.unload(testImage);
-        frameCount++;
         timers.get("03_HUD").stop();
     }
 
@@ -570,11 +605,19 @@ public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer implements G
         }
     }
 
-    public void raytrace()
+    /**
+    Creates a rendering from current scene using raytracer. 
+    */
+    private void raytrace()
     {
         raytracingImage = new RGBImage();
-        raytracingImage.init(128, 128);
+        raytracingImage.init(256, 256);
         scene.raytrace(raytracingImage, quality);
+    }
+    
+    public void requestRaytracer()
+    {
+        doRaytrace = true;
     }
 }
 

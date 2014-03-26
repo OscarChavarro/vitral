@@ -411,7 +411,7 @@ GpsStatus.Listener, OnClickListener {
             interaction = 2;
             break;
           case 25:
-            canvas.glExecutor.raytrace();
+            canvas.glExecutor.requestRaytracer();
             break;
           case 26:
             q.setUseVertexColors(!q.getUseVertexColors());
