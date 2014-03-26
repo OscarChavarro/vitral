@@ -69,8 +69,8 @@ public class CameraControllerBlender extends CameraController {
         boolean updated = false;
         double EPSILON = 0.0001;
         int mask;
-        int SHIFT_MASK = java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
-        int CTRL_MASK = java.awt.event.KeyEvent.CTRL_DOWN_MASK;
+        int SHIFT_MASK = 1;//java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
+        int CTRL_MASK = 2;//java.awt.event.KeyEvent.CTRL_DOWN_MASK;
         Vector3D u, v, w;
         Matrix4x4 DR, T1, T2, COMPUESTA;
 
@@ -102,7 +102,7 @@ public class CameraControllerBlender extends CameraController {
 //        if ( unicode_id == keyEvent.CHAR_UNDEFINED ) {
 
             switch ( keycode ) {
-              case java.awt.event.KeyEvent.VK_X:
+              case KeyEvent.KEY_X:
                 if ( (mask & SHIFT_MASK) == 0 ) {
                     // Minuscula
                     eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
@@ -115,7 +115,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD5: // Rote el modo de proyeccion
+              case KeyEvent.KEY_NUM5: // Rote el modo de proyeccion
                 switch ( projectionMode ) {
                   case Camera.PROJECTION_MODE_PERSPECTIVE:
                     projectionMode = Camera.PROJECTION_MODE_ORTHOGONAL;
@@ -127,7 +127,7 @@ public class CameraControllerBlender extends CameraController {
                 updated = true;
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD4:
+              case KeyEvent.KEY_NUM4:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -151,7 +151,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD6:
+              case KeyEvent.KEY_NUM6:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -175,7 +175,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD2:
+              case KeyEvent.KEY_NUM2:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -199,7 +199,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD8:
+              case KeyEvent.KEY_NUM8:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
                     T1 = new Matrix4x4();
@@ -223,7 +223,7 @@ public class CameraControllerBlender extends CameraController {
                 }
                 break;
 
-              case java.awt.event.KeyEvent.VK_NUMPAD1:
+              case KeyEvent.KEY_NUM1:
                 updated = true;
                 R.axisRotation(0, 0, 0, 1);
                 break;
