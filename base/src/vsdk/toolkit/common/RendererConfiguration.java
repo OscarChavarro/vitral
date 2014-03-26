@@ -40,6 +40,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     private boolean points;
     private boolean normals;
     private boolean trianglesNormals;
+    private boolean useVertexColors;
     private ColorRgb wireColor;
 
     public int compareTo(RendererConfiguration other)
@@ -93,6 +94,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.normals = other.normals;
         this.trianglesNormals = other.trianglesNormals;
         this.wireColor.clone(other.wireColor);
+        this.useVertexColors = other.useVertexColors;
     }
 
     // To be used in future: depending of the rendering implementation for
@@ -127,6 +129,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         normals = false;
         trianglesNormals = false;
         wireColor = new ColorRgb(1, 1, 1);
+        useVertexColors = false;
     }
 
     public void setWireColor(ColorRgb c)
@@ -359,6 +362,20 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.trianglesNormals = trianglesNormals;
         copy.lodHint = lodHint;
         return copy;
+    }
+
+    /**
+    @return the useVertexColors
+    */
+    public boolean getUseVertexColors() {
+        return useVertexColors;
+    }
+
+    /**
+    @param useVertexColors the useVertexColors to set
+    */
+    public void setUseVertexColors(boolean useVertexColors) {
+        this.useVertexColors = useVertexColors;
     }
 }
 
