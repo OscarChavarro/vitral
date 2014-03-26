@@ -270,6 +270,8 @@ public class VSDK
     public static void reportMessageWithException(Object o, int level, String method, String message, Exception ee)
     {
         String msg;
+        int i;        
+        StackTraceElement report[];
 
         msg = "===========================================================================\n";
         msg = msg + "= VSDK Exception report                                                   =\n";
@@ -280,12 +282,19 @@ public class VSDK
             msg = msg + " - An exception has been thrown from a static context\n";
         }
         msg = msg + " - Exception located at method " + method + "\n";
-        msg = msg + " - Exception message:\n" + message + "\n";
-        StackTraceElement report[];
-        report = ee.getStackTrace();
-        int i;
-        for ( i = 0; i < report.length; i++ ) {
-            msg = msg + report[i] + "\n";
+        msg = msg + " - Vitral exception message:\n" + message + "\n";
+        
+        if ( ee != null ) {
+            msg = msg + " - Java exception class:\n" + ee.getClass().getName() + "\n";
+            msg = msg + " - Java exception message:\n" + ee.getMessage() + "\n";
+            report = ee.getStackTrace();
+
+            for ( i = 0; i < report.length; i++ ) {
+                msg = msg + report[i] + "\n";
+            }
+        }
+        else {
+            msg = msg + " - Java exception is null! No detailed information about error.\n";
         }
         msg = msg + "===========================================================================\n";
         if ( level == FATAL_ERROR ) {
