@@ -382,6 +382,9 @@ public class AwtSystem extends PresentationElement
               case '.':
                 evsdk.keycode = KeyEvent.KEY_PERIOD;
                 break;
+              case ' ':
+                evsdk.keycode = KeyEvent.KEY_SPACE;
+                break;
             }
         }
     }
