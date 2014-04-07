@@ -7,8 +7,13 @@ In order to build this project:
     "vitral.application" and a main class called "VitralActivity", do
     clean and build, and delete xml folder and VitralActivity class, to
     later add current project files.
+  - On netbeans, the new project creation copies some files. Delete 
+    VitralActivity.java and res/layout
   - Make the folder res/raw
   - Copy into res/raw render.png and *.glsl from etc/cgShaders folder on vitral
+  - Copy into res/raw miniearth.png etc/textures folder on vitral
+  - Copy AndroidManifest.xml from vitral/testsuite/ApplicationCases/
+    AndroidVitralSceneEditor/AndroidManifest.xml to project
   - Copy library code from src and src_android folders from vitral to project.
     When building a different application from current template, you should
     relocate the "R" class package from "vitral.application" to your desired
