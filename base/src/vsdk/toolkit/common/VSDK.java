@@ -106,8 +106,8 @@ public class VSDK
     public static final int sizeofReference = 4;
 
     // Primitive accounting data structures (not thread safe)
-    private static int primitiveCount[];
-    private static int intersectionCount[];
+    private static final int primitiveCount[];
+    private static final int intersectionCount[];
 
     static {
         withSystemExit = true;
@@ -157,10 +157,7 @@ public class VSDK
 
     public static boolean equals(double a, double b)
     {
-        if ( Math.abs(a - b) < EPSILON ) {
-            return true;
-        }
-        return false;
+        return Math.abs(a - b) < EPSILON;
     }
 
     public static double vectorDistance(Vector3D a, Vector3D b)
@@ -196,7 +193,9 @@ public class VSDK
     }
 
     /**
-    Given a double number, it formats it to print in a given precision
+    Given a double number, it formats it to print in a given precision.
+    @param a
+    @return
     */
     public static String formatDouble(double a)
     {
@@ -218,7 +217,9 @@ public class VSDK
     }
 
     /**
-    Given a byte, it formats it to print as two hexagesimal nibbles
+    Given a byte, it formats it to print as two hexagesimal nibbles.
+    @param a
+    @return
     */
     public static String formatByteAsHex(byte a)
     {
@@ -230,7 +231,9 @@ public class VSDK
     }
 
     /**
-    Given an integer, it formats it to print as two hexagesimal nibbles
+    Given an integer, it formats it to print as two hexagesimal nibbles.
+    @param a
+    @return
     */
     public static String formatIntAsHex(int a)
     {
@@ -250,7 +253,10 @@ public class VSDK
     }
 
     /** Converts integers in the domain [-128, 127] to integers in the range
-    [0, 256] */
+    [0, 256].
+    @param in
+    @return
+    */
     public static int signedByte2unsignedInteger(byte in) {
         int a;
 
@@ -304,11 +310,16 @@ public class VSDK
         System.err.println(msg);
 
         System.err.println("---------------------------------------------------------------------------");
-        System.err.println(ee.getMessage());
-        report = ee.getStackTrace();
-        for ( i = 0; i < report.length; i++ ) {
-            System.err.println(report[i]);
-        }
+        if ( ee != null ) {
+            System.err.println(ee.getMessage());
+            report = ee.getStackTrace();
+            for ( i = 0; i < report.length; i++ ) {
+                System.err.println(report[i]);
+            }
+	}
+	else {
+            System.err.println("Given exception is null! not reporting details!");
+	}
         System.err.println("---------------------------------------------------------------------------");
 
         if ( level == FATAL_ERROR ) {
@@ -383,6 +394,7 @@ public class VSDK
 
     This method could be used to instruct VSDK to do not terminate
     the calling process on a fatal error situation.
+    @param flag
     */
     public static void setWithSystemExit(boolean flag)
     {
