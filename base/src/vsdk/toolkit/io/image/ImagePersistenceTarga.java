@@ -1,12 +1,14 @@
 //===========================================================================
 package vsdk.toolkit.io.image;
 
+// Java basic classes
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+// VSDK classes
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
@@ -40,20 +42,16 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
     {
     }
 
+    @Override
     public boolean rgbFormatSupported(String fileExtension)
     {
-        if( fileExtension.equals("tga") ) {
-            return true;
-	}
-        return false;
+        return fileExtension.equals("tga");
     }
 
+    @Override
     public boolean rgbaFormatSupported(String fileExtension)
     {
-        if( fileExtension.equals("tga") ) {
-            return true;
-	}
-        return false;
+        return fileExtension.equals("tga");
     }
     
     private void open(File srcFile) throws ImageNotRecognizedException, IOException {
@@ -63,7 +61,8 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
         byte alpha = FULL_TRANSPARENCY;
         int srcLine;
         
-        FileInputStream fis = new FileInputStream(srcFile);
+        FileInputStream fis;
+        fis = new FileInputStream(srcFile);
         BufferedInputStream bis = new BufferedInputStream(fis, 8192);
         DataInputStream dis = new DataInputStream(bis);
         
@@ -271,6 +270,7 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
         return (short) (input << 8 | (input & 0xFF00) >>> 8);
     }
 
+    @Override
     public RGBImage importRGB(File inFileFd) throws ImageNotRecognizedException, Exception
     {
         RGBImage img;
@@ -312,6 +312,7 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
 	return img;
     }
 
+    @Override
     public RGBAImage importRGBA(File inFileFd) throws ImageNotRecognizedException, Exception
     {
         RGBAImage img;
