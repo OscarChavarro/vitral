@@ -36,12 +36,13 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
         glPushMatrix();
         glLoadIdentity();
 
-        glDisable(GL_TEXTURE_2D);
-        setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        activateShaders();
+        RendererConfiguration q = new RendererConfiguration();
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        q.setUseVertexColors(true);
+        q.setTexture(false);
+        setRendererConfiguration(q);
 
         //-----------------------------------------------------------------
-        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 8;
         int index;
         ColorRgb c = l.getSpecular();
         float delta = 0.1f;

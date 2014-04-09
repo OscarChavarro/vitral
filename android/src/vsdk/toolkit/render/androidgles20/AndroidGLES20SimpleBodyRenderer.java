@@ -48,7 +48,6 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
             // textures activated within JoglGeometryRenderers
             // Activate global texture
             if ( (texture != null) ) {
-                glEnable(GL_TEXTURE_2D);
                 AndroidGLES20ImageRenderer.activate(texture);
                 //GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
                 //    GL2.GL_GENERATE_MIPMAP, GL_TRUE);
@@ -64,9 +63,6 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
                 GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
                     GLES20.GL_REPEAT);
             }
-        }
-        else {
-            glDisable(GL_TEXTURE_2D);
         }
 
         //-----------------------------------------------------------------

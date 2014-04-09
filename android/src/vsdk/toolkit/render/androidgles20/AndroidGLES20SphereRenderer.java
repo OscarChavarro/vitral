@@ -450,12 +450,11 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         RendererConfiguration qcopy;
         
         if ( q.isPointsSet() ) {
-            glDisable(GL_TEXTURE_2D);
-            setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
             qcopy = q.clone();
             qcopy.setUseVertexColors(true);
+            qcopy.setTexture(false);
             qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             setRendererConfiguration(qcopy);
             drawPoints(s, slices, stacks, qcopy);
@@ -463,25 +462,18 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         }
         
         if ( q.isWiresSet() ) {
-            glDisable(GL_TEXTURE_2D);
             qcopy = q.clone();
             qcopy.setUseVertexColors(true);
             qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
+            qcopy.setTexture(false);
             setRendererConfiguration(qcopy);
             drawWires(s, slices, stacks, q);
             s.setRadius(r);
         }
         
         if ( q.isSurfacesSet() ) {
-            if ( q.isTextureSet() ) {
-                glEnable(GL_TEXTURE_2D);
-            }
-            else {
-                glDisable(GL_TEXTURE_2D);
-            }
-
             setRendererConfiguration(q);
             if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT ) {
                 drawSurfacesFlat(s, slices, stacks, q);

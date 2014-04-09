@@ -396,33 +396,21 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
 
 
 
-public static void draw(Box nBox, Camera nCamera, RendererConfiguration nRendererConfiguration)
-{
-	
-	
-	if(nRendererConfiguration.isTextureSet())
-		 glEnable(GL_TEXTURE_2D);
-	 else
-		 glDisable(GL_TEXTURE_2D);
-
-	
+public static void draw(Box nBox, Camera nCamera, RendererConfiguration q)
+    {
 	//Ilumination IFs
-	if(nRendererConfiguration.getShadingType()== RendererConfiguration.SHADING_TYPE_NOLIGHT)
-		setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT)
-		setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-	else if(nRendererConfiguration.getShadingType() == RendererConfiguration.SHADING_TYPE_GOURAUD)
-		setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-	
-	
-		if(nRendererConfiguration.isPointsSet())
-			drawPoints(nBox, nRendererConfiguration);
-		if(nRendererConfiguration.isWiresSet())
-			drawWires(nBox, nRendererConfiguration);
-		if(nRendererConfiguration.isSurfacesSet())
-			drawBox(nBox, nRendererConfiguration);
-		
-}
+
+        if (q.isPointsSet()) {
+            drawPoints(nBox, q);
+        }
+        if (q.isWiresSet()) {
+            drawWires(nBox, q);
+        }
+        if (q.isSurfacesSet()) {
+            drawBox(nBox, q);
+        }
+
+    }
 
 
 }

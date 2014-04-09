@@ -126,12 +126,6 @@ public class AndroidGLES20Renderer extends RenderingElement
         activateShaders();
     }
 
-    public static void setShadingType(int t)
-    {
-        qualitySelection.setShadingType(t);
-        activateShaders();
-    }
-
     public static void checkGlError(String op) {
         int error;
         error = GLES20.glGetError();
@@ -609,26 +603,6 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("modelViewITLocalParam");
         }
 
-    }
-
-    public static void glEnable(int k)
-    {
-        switch ( k ) {
-          case GL_TEXTURE_2D:
-            qualitySelection.setTexture(true);
-            activateShaders();
-            break;
-        }
-    }
-
-    public static void glDisable(int k)
-    {
-        switch ( k ) {
-          case GL_TEXTURE_2D:
-            qualitySelection.setTexture(false);
-            activateShaders();
-            break;
-        }
     }
 
     public static void glLoadIdentity()

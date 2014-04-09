@@ -40,9 +40,8 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
     public static void drawMinMaxBox(double minmax[], RendererConfiguration q)
     {
         //gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
-
-        glDisable(GL_TEXTURE_2D);
         RendererConfiguration qcopy = q.clone();
+        qcopy.setTexture(false);
         qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qcopy.setUseVertexColors(true);
         setRendererConfiguration(qcopy);
@@ -128,8 +127,8 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
         delta = delta.multiply(linePercent);
 
         //glPushAttrib(GL2.GL_LIGHTING_BIT);
-        glDisable(GL_TEXTURE_2D);
         RendererConfiguration qcopy = q.clone();
+        qcopy.setTexture(false);
         qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
         qcopy.setUseVertexColors(true);
         setRendererConfiguration(qcopy);
