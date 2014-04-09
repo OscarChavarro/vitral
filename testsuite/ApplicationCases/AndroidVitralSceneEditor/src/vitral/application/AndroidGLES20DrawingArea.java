@@ -216,7 +216,7 @@ implements GLSurfaceView.Renderer {
         quality = new RendererConfiguration();
         quality.setPoints(false);
         quality.setWires(false);
-        quality.setWireColor(new ColorRgb(1.0, 1.0, 1.0));
+        quality.setWireColor(new ColorRgb(1.0, 1.0, 0.0));
         quality.setSurfaces(true);
         quality.setTexture(false);
         quality.setBumpMap(false);

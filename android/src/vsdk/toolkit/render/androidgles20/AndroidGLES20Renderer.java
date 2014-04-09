@@ -56,7 +56,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     public static final int GL_TEXTURE_2D = 3;
     public static final int GL_LIGHTING = 4;
     public static int currentMatrixMode = GL_MODELVIEW;
-    public static RendererConfiguration qualitySelection;
+    private static RendererConfiguration qualitySelection;
     protected static Material currentMaterial;
     public static boolean errorsDetected = false;
     protected static ArrayList<Light> lights;

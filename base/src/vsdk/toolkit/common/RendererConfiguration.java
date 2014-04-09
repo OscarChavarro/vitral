@@ -346,8 +346,13 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         return msg;
     }
 
+    /**
+    @return
+    @throws CloneNotSupportedException
+    */
     @Override
-    public RendererConfiguration clone()
+    public RendererConfiguration clone() 
+            //throws CloneNotSupportedException
     {
         RendererConfiguration copy = new RendererConfiguration();
         copy.shadingType = shadingType;
@@ -361,6 +366,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.normals = normals;
         copy.trianglesNormals = trianglesNormals;
         copy.lodHint = lodHint;
+        copy.wireColor.clone(wireColor);
+        copy.useVertexColors = useVertexColors;
         return copy;
     }
 

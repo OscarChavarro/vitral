@@ -42,8 +42,10 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
         //gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
 
         glDisable(GL_TEXTURE_2D);
-        setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        activateShaders();
+        RendererConfiguration qcopy = q.clone();
+        qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        qcopy.setUseVertexColors(true);
+        setRendererConfiguration(qcopy);
 
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 8;
         int index;
@@ -127,8 +129,10 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
 
         //glPushAttrib(GL2.GL_LIGHTING_BIT);
         glDisable(GL_TEXTURE_2D);
-        setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        activateShaders();
+        RendererConfiguration qcopy = q.clone();
+        qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        qcopy.setUseVertexColors(true);
+        setRendererConfiguration(qcopy);
 
         // Warning: Change with configured color for selection corners
         ColorRgb c = new ColorRgb(1.0, 1.0, 1.0);

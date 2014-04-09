@@ -34,7 +34,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
 
         //-----------------------------------------------------------------
         Vector3D p = new Vector3D();
-        ColorRgb c = new ColorRgb(1.0, 0.0, 0.0); //q.getWireColor();
+        ColorRgb c = q.getWireColor();
 
         int index = 0;
 
@@ -79,8 +79,6 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         //-----------------------------------------------------------------
         Vector3D p = new Vector3D();
         ColorRgb c = q.getWireColor();
-
-        //System.out.println("COLOR: " + c);
 
         for( int i = 1; i < stacks - 1; i++ ) {
             //------------------------------------------------------------
@@ -179,9 +177,8 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         vertexDataArray[index] = (float)P.z;    index++;
 
         // glColor3d(c.r, c.g, c.b);
-        ColorRgb c = q.getWireColor();
         vertexDataArray[index] = (float)1.0;    index++;
-        vertexDataArray[index] = (float)0.0;    index++;
+        vertexDataArray[index] = (float)1.0;    index++;
         vertexDataArray[index] = (float)1.0;    index++;
 
         //gl.glNormal3d(N.x, N.y, N.z);
@@ -240,7 +237,6 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         float vertexDataArray[];
         int vertexFloatElements = 11;
         int index;
-        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
         FloatBuffer verticesBufferedArray;
 
         //- Draw main sphere body -----------------------------------------
@@ -346,7 +342,6 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         float vertexDataArray[];
         int vertexFloatElements = 11;
         int index;
-        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
 
         //- Draw main sphere body -----------------------------------------
         for( i = 0; i < stacks - 2; i++ ) {
@@ -452,22 +447,33 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     public static void draw(Sphere s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
+        RendererConfiguration qcopy;
+        
         if ( q.isPointsSet() ) {
             glDisable(GL_TEXTURE_2D);
             setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
-            drawPoints(s, slices, stacks, q);
+            qcopy = q.clone();
+            qcopy.setUseVertexColors(true);
+            qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            setRendererConfiguration(qcopy);
+            drawPoints(s, slices, stacks, qcopy);
             s.setRadius(r);
         }
+        
         if ( q.isWiresSet() ) {
             glDisable(GL_TEXTURE_2D);
-            setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            qcopy = q.clone();
+            qcopy.setUseVertexColors(true);
+            qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             double r = s.getRadius();
             if ( q.isSurfacesSet() ) s.setRadius(r * 1.01);
+            setRendererConfiguration(qcopy);
             drawWires(s, slices, stacks, q);
             s.setRadius(r);
         }
+        
         if ( q.isSurfacesSet() ) {
             if ( q.isTextureSet() ) {
                 glEnable(GL_TEXTURE_2D);
@@ -476,7 +482,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
                 glDisable(GL_TEXTURE_2D);
             }
 
-            setShadingType(q.getShadingType());
+            setRendererConfiguration(q);
             if ( q.getShadingType() == RendererConfiguration.SHADING_TYPE_FLAT ) {
                 drawSurfacesFlat(s, slices, stacks, q);
             }
@@ -484,10 +490,18 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
                 drawSurfacesSmooth(s, slices, stacks, q);
             }
         }
+        
         if ( q.isBoundingVolumeSet() ) {
+            qcopy = q.clone();
+            qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            setRendererConfiguration(qcopy);
             AndroidGLES20GeometryRenderer.drawMinMaxBox(s, q);
         }
+        
         if ( q.isSelectionCornersSet() ) {
+            qcopy = q.clone();
+            qcopy.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            setRendererConfiguration(qcopy);
             AndroidGLES20GeometryRenderer.drawSelectionCorners(s, q);
         }
     }
