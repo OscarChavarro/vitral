@@ -12,7 +12,6 @@
             >
         <activity android:name="VitralActivity"
                 android:theme="@style/Theme.Vitral"
-                
                 android:launchMode="singleTask"
                 android:configChanges="orientation|keyboardHidden">
             <intent-filter>

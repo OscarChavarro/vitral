@@ -2,6 +2,7 @@
 <resources>
 
     <style name="Theme.Vitral" parent="@style/Theme.AppCompat.Light">
+        <item name="android:windowFullscreen">true</item>
     </style>
 
 </resources>

@@ -4,7 +4,6 @@ package vitral.application;
 
 // Android packages
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Build;
 import android.os.Bundle;
@@ -286,7 +285,11 @@ GpsStatus.Listener, OnClickListener {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        SubMenu q = menu.addSubMenu(0, 100, 0, "Rendering configuration");
+        SubMenu popup = menu.addSubMenu(1001, 1002, 1003, "Popup");
+        popup.setIcon(R.drawable.abc_ic_menu_moreoverflow_normal_holo_light);
+        popup.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        
+        SubMenu q = popup.addSubMenu(0, 100, 0, "Rendering configuration");
         q.add(0, 0, 0, "Constant shading");
         q.add(0, 1, 0, "Flat shading");
         q.add(0, 2, 0, "Gouraud shading");
@@ -300,9 +303,8 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 10, 0, "Toggle selection corners");
         q.add(0, 11, 0, "Toggle normals");
         q.add(0, 26, 0, "Toggle vertexColors");
-        q.getItem().setShowAsAction(1);
 
-        SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
+        SubMenu o = popup.addSubMenu(1, 101, 1, "Object selection");
         o.add(0, 12, 0, "Sphere (low res)");
         o.add(0, 13, 0, "Sphere (high res)");
         o.add(0, 14, 0, "Box");
@@ -310,25 +312,27 @@ GpsStatus.Listener, OnClickListener {
         o.add(0, 16, 0, "Mesh Mug");
         o.add(0, 17, 0, "Toggle reference square");
 
-        SubMenu a = menu.addSubMenu(1, 101, 1, "Animation options");
+        SubMenu a = popup.addSubMenu(2, 102, 2, "Animation options");
         a.add(0, 18, 0, "Toggle object rotation");
         a.add(0, 19, 0, "Toggle first light rotation");
 
-        SubMenu x = menu.addSubMenu(1, 102, 1, "Scene");
+        SubMenu x = popup.addSubMenu(3, 103, 3, "Scene");
         x.add(0, 20, 0, "Add light");
         x.add(0, 21, 0, "Add sphere");
         x.add(0, 22, 0, "Add 10 spheres");
 
-        SubMenu i = menu.addSubMenu(1, 103, 1, "Interaction");
+        SubMenu i = popup.addSubMenu(4, 104, 4, "Interaction");
         i.add(0, 23, 0, "Select objects");
         i.add(0, 24, 0, "Insert spheres");
 
-        SubMenu r = menu.addSubMenu(1, 104, 1, "Rendering");
+        SubMenu r = popup.addSubMenu(5, 105, 5, "Rendering");
         r.add(0, 25, 0, "Raytrace");
 
-        menu.getItem(1).setEnabled(true);
+        //menu.getItem(1).setEnabled(true);
+        //menu.getItem(1).setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
         
-        return true;
+        
+        return true; //super.onCreateOptionsMenu(menu);
     }
 
     @Override
