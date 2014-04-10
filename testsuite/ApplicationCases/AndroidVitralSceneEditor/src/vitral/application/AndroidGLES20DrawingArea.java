@@ -39,8 +39,10 @@ import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.AndroidSystem;
+import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
@@ -48,6 +50,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshGroupRenderer;
 
 public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer 
 implements GLSurfaceView.Renderer {
@@ -62,8 +65,10 @@ implements GLSurfaceView.Renderer {
     private Sphere sphere;
     private Box box;
     private Cone cone;
-    private TriangleMesh meshMug;
-    private TriangleMesh mesh;
+    private TriangleMeshGroup currentLoadedMeshGroup;
+    private TriangleMesh currentLoadedMesh;
+    private TriangleMesh meshToRender;
+    private TriangleMeshGroup meshGroupToRender;
     private RGBImage texture;
     private RGBImage raytracingImage;
     private RGBImage testImage;
@@ -122,7 +127,8 @@ implements GLSurfaceView.Renderer {
     public void selectObject(int o)
     {
         sphere = null;
-        mesh = null;
+        meshToRender = null;
+        meshGroupToRender = null;
         box = null;
         cone = null;
         switch ( o ) {
@@ -141,10 +147,16 @@ implements GLSurfaceView.Renderer {
             cone = new Cone(1.0, 1.0, 2.0);
             break;
           case 5:
-            if ( meshMug == null ) {
-                meshMug = loadPlyMesh("/storage/extSdCard/mug.ply");
+            if ( currentLoadedMesh == null ) {
+                currentLoadedMesh = loadPlyMesh("/storage/extSdCard/mug.ply");
             }
-            mesh = meshMug;
+            meshToRender = currentLoadedMesh;
+            break;
+          case 6:
+            if ( currentLoadedMeshGroup == null ) {
+                currentLoadedMeshGroup = loadMeshGroup("/storage/extSdCard/cow.obj");
+            }
+            meshGroupToRender = currentLoadedMeshGroup;
             break;
         }
 
@@ -169,6 +181,29 @@ implements GLSurfaceView.Renderer {
                 "loadPlyMesh", "Error loading mesh " + filename, e);
         }
         return m;
+    }
+
+    private TriangleMeshGroup loadMeshGroup(String filename)
+    {
+        File meshFile;
+
+        System.out.println("XXXX: Loading mesh " + filename);
+        meshFile = new File(filename);
+        SimpleScene localScene;
+        localScene = new SimpleScene();
+        TriangleMeshGroup g = null;
+        try {
+            EnvironmentPersistence.importEnvironment(meshFile, localScene);
+            g = (TriangleMeshGroup)(localScene.getSimpleBodies().get(0).getGeometry());
+            System.out.println("XXXX: Found triangle meshes groups: " + localScene.getSimpleBodies().size());
+          }
+          catch ( Exception e ) {
+            System.out.println("XXXX: Failed to load mesh");
+            
+            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                "loadPlyMesh", "Error loading mesh " + filename, e);
+        }
+        return g;
     }
 
     public void prepareLights(int n)
@@ -232,7 +267,7 @@ implements GLSurfaceView.Renderer {
 
         prepareLights(1);
         
-        meshMug = null;
+        currentLoadedMesh = null;
         selectObject(2);
         createBitmapFontSprites();
 
@@ -441,11 +476,17 @@ implements GLSurfaceView.Renderer {
         if ( cone != null ) {
             AndroidGLES20GeometryRenderer.draw(cone, scene.camera, quality);
         }
-        
-        if ( mesh != null ) {
+
+        if ( meshToRender != null ) {
             glScaled(15, 15, 15);
             glRotated(90, 1, 0, 0);
-            AndroidGLES20GeometryRenderer.draw(mesh, scene.camera, quality);
+            AndroidGLES20GeometryRenderer.draw(meshToRender, scene.camera, quality);
+        }
+        
+        if ( meshGroupToRender != null ) {
+            glScaled(0.2, 0.2, 0.2);
+            AndroidGLES20TriangleMeshGroupRenderer.draw(meshGroupToRender, 
+                scene.camera, quality);
         }
 
         //-----------------------------------------------------------------

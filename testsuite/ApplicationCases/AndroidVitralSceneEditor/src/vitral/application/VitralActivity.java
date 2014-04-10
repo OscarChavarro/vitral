@@ -310,6 +310,7 @@ GpsStatus.Listener, OnClickListener {
         o.add(0, 14, 0, "Box");
         o.add(0, 15, 0, "Cone");
         o.add(0, 16, 0, "Mesh Mug");
+        o.add(0, 28, 0, "Mesh Cow");
         o.add(0, 17, 0, "Toggle reference square");
         
         SubMenu a = popup.addSubMenu(2, 102, 2, "Animation options");
@@ -396,6 +397,9 @@ GpsStatus.Listener, OnClickListener {
             break;
           case 16:
             canvas.glExecutor.selectObject(5);
+            break;
+          case 28:
+            canvas.glExecutor.selectObject(6);
             break;
           case 17:
             canvas.glExecutor.toggleReferenceSquare();

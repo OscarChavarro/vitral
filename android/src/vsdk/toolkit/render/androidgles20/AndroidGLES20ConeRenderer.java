@@ -36,14 +36,14 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
-				//Defining the size of the vertex array
+                                //Defining the size of the vertex array
 
         double theta;
 
-				//------------------------------------------------------------------------
+                                //------------------------------------------------------------------------
         //  CONE MAIN BODY
         //------------------------------------------------------------------------
-				//The main body is composed by an enveloping triangle strip
+                                //The main body is composed by an enveloping triangle strip
         //reserving the space on the vertexArray. 
         vertexDataArray = new float[(slices + 1) * 2 * vertexFloatElements];
         index = 0;
@@ -63,10 +63,10 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         //Sending the data to the renderer
         sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (slices + 1) * 2, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
 
-				//------------------------------------------------------------------------
+                                //------------------------------------------------------------------------
         //  CONE CAPS
         //------------------------------------------------------------------------
-				//Base Cap
+                                //Base Cap
         vertexDataArray = new float[(slices + 2) * vertexFloatElements];
         index = 0;
 
@@ -106,7 +106,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices + 2, GLES20.GL_TRIANGLE_FAN, mode3Position3Color3Normal2UV);
 
-				//Top Cap
+                                //Top Cap
         vertexDataArray = new float[(slices + 2) * vertexFloatElements];
         index = 0;
 
@@ -173,7 +173,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             normal = new Vector3D(0.0f, 0.0f, -1.0f);
         }
 
-		//Putting the colors
+                //Putting the colors
         vertexDataArray[index] = (float) normal.x;
         index++;
         vertexDataArray[index] = (float) normal.y;
@@ -181,7 +181,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         vertexDataArray[index] = (float) normal.z;
         index++;
 
-		//Putting the normals	
+                //Putting the normals   
         vertexDataArray[index] = (float) normal.x;
         index++;
         vertexDataArray[index] = (float) normal.y;
@@ -219,7 +219,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             normal = new Vector3D(0.0f, 0.0f, -1.0f);
         }
 
-		//Putting the colors
+                //Putting the colors
         vertexDataArray[index] = (float) color.x;
         index++;
         vertexDataArray[index] = (float) color.y;
@@ -230,7 +230,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
     }
 
     /**
-     * This	method draws the wire framed representation of the cone
+     * This     method draws the wire framed representation of the cone
      */
     private static void drawWires(Cone nCone, RendererConfiguration nRendererConfiguration, int slices) {
 
@@ -245,11 +245,11 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
-		//Defining the size of the vertex array
+                //Defining the size of the vertex array
 
         double theta;
 
-		//WIRING THE BASE CAP
+                //WIRING THE BASE CAP
         //reserving the space on the vertexArray. 
         vertexDataArray = new float[slices * vertexFloatElements];
         index = 0;
@@ -294,7 +294,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_LINES, mode3Position3Color);
 
-		//WIRING THE TOP CAP
+                //WIRING THE TOP CAP
         vertexDataArray = new float[slices * vertexFloatElements];
         index = 0;
 
@@ -334,11 +334,11 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
         sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2 * slices, GLES20.GL_LINES, mode3Position3Color);
 
-		//THIS IS THE BODY IN WIRE FRAME
+                //THIS IS THE BODY IN WIRE FRAME
         vertexDataArray = new float[(slices) * 2 * vertexFloatElements];
         index = 0;
 
-		//dividing the circle in the number indicated by slices
+                //dividing the circle in the number indicated by slices
         for (int i = 0; i < slices; i++) {
             //calculating the angle
             theta = i * f;
@@ -368,14 +368,14 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
-		//Defining the size of the vertex array
+                //Defining the size of the vertex array
 
         double theta;
 
-		//------------------------------------------------------------------------
+                //------------------------------------------------------------------------
         //  CONE MAIN BODY
         //------------------------------------------------------------------------
-		//The main body is composed by an enveloping triangle strip
+                //The main body is composed by an enveloping triangle strip
         //reserving the space on the vertexArray. 
         vertexDataArray = new float[(slices) * 2 * vertexFloatElements];
         index = 0;
@@ -411,11 +411,11 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
-	//Defining the size of the vertex array
+        //Defining the size of the vertex array
 
         double theta;
 
-	//------------------------------------------------------------------------
+        //------------------------------------------------------------------------
         //  CONE MAIN BODY
         //------------------------------------------------------------------------
         //dividing the circle in the number indicated by slices
@@ -438,7 +438,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
         sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 4, GLES20.GL_LINES, mode3Position3Color);
 
-	//Sending the top and bottom cap normals
+        //Sending the top and bottom cap normals
         vertexDataArray = new float[((slices * 4) + 4) * vertexFloatElements];
         index = 0;
 
@@ -643,7 +643,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         //allocating the space
         verticesBufferedArray = ByteBuffer.allocateDirect(vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         verticesBufferedArray.put(vertexDataArray);
-	//send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
+        //send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
         //method is using according to the way they should be drawn.
         switch (drawingMode) {
             case mode3Position3Color3Normal2UV:

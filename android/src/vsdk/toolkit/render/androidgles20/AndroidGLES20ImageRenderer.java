@@ -13,7 +13,7 @@ public class AndroidGLES20ImageRenderer extends AndroidGLES20Renderer
         if ( img == null ) {
             VSDK.reportMessage(null, VSDK.WARNING, "AndroidGLES20ImageRenderer.activate",
             "Trying to activate a NULL Image!");
-	}
+        }
 
         if ( img instanceof RGBAImage ) {
             return AndroidGLES20RGBAImageRenderer.activate((RGBAImage)img);

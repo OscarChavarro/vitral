@@ -36,9 +36,9 @@ public class AndroidGLES20Renderer extends RenderingElement
     public static int AndroidGLES20GpuProgramPhong;
     public static int AndroidGLES20GpuProgramPhongBump;
     
-    public static final int mode3Position3Normal2UV = 0;
-    public static final int mode3Position3Color = 1;
-    public static final int mode3Position3Color3Normal2UV = 2;
+    protected static final int mode3Position3Normal2UV = 0;
+    protected static final int mode3Position3Color = 1;
+    protected static final int mode3Position3Color3Normal2UV = 2;
 
     // Common values
     protected static final int FLOAT_SIZE_IN_BYTES = 4;

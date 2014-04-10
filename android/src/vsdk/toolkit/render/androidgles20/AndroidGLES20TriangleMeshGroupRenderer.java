@@ -1,22 +1,21 @@
 //===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
-// VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
-public class AndroidGLES20CameraRenderer extends AndroidGLES20Renderer
-{
-    public static void activate(Camera c)
+/**
+*/
+public class AndroidGLES20TriangleMeshGroupRenderer {
+    public static void draw(TriangleMeshGroup g, 
+        Camera c, RendererConfiguration q)
     {
-        Matrix4x4 MProjection = c.calculateProjectionMatrix();
-        float array[] = MProjection.exportToFloatArrayColumnOrder();
         int i;
-        for ( i = 0; i < 16; i++ ) {
-            projectionMatrix[i] = array[i];
+        
+        for ( i = 0; i < g.getMeshes().size(); i++ ) {
+            AndroidGLES20TriangleMeshRenderer.draw(g.getMeshAt(i), c, q);
         }
-        currentCamera = c;
     }
 }
 

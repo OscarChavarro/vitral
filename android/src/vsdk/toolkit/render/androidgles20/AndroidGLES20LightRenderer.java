@@ -22,11 +22,11 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
     {
         int i;
 
-	for ( i = 0; i < lights.size(); i++ ) {
-	    if ( lights.get(i) == l ) {
+        for ( i = 0; i < lights.size(); i++ ) {
+            if ( lights.get(i) == l ) {
                 return;
-	    }
-	}
+            }
+        }
         lights.add(l);
     }
 

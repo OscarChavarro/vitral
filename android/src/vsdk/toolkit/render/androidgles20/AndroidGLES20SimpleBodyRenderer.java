@@ -41,7 +41,7 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
 
         if ( texture == null ) {
             q.setTexture(false);
-	}
+        }
 
         if ( q.isTextureSet() ) {
             // Define texture parameters, including for further local
