@@ -25,3 +25,14 @@ In order to build this project:
   - Locate a folder on your device in order to copy "mug.ply" and textures.
     Transfer files there from etc vitral directory. Edit application code
     to reflect current device folder location.
+  - In order for this project to compile, android extensions for v7 appcompat
+    should be enabled and added. This usually implies:
+    . Android support repository extras for ADT must be installed
+    . sdk/extras/android/support/v7/appcompat project should be updated using
+      "android update" command for target android-19 or used version, this to
+      make a new build.xml ant can use
+    . Current project must depend on sdk/extras/android/support/v7/appcompat
+      by adding something like
+android.library.reference.1=../../../../usr/local/androidDeveloperTools/adt-bundle-linux-x86_64-20131030/sdk/extras/android/support/v7/a
+ppcompat
+      to project.properties

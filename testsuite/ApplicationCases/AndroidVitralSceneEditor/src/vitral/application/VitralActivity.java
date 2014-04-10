@@ -5,10 +5,11 @@ package vitral.application;
 // Android packages
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
-
+        
 // Android packages: GUI
 import android.view.View;
 import android.view.Menu;
@@ -31,6 +32,7 @@ import android.location.LocationManager;
 import android.location.GpsStatus;
 //import android.location.GpsStatus.Listener;
 import android.content.Context;
+import android.view.Window;
 
 // Vsdk classes
 //import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -43,7 +45,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
-public class VitralActivity extends Activity 
+public class VitralActivity extends ActionBarActivity 
 implements LocationListener, 
 GpsStatus.Listener, OnClickListener {
     private BasicGLSurfaceView canvas;
@@ -78,6 +80,7 @@ GpsStatus.Listener, OnClickListener {
 */
 
         canvas = new BasicGLSurfaceView(getApplication());
+        
         //canvas.setLayoutParams(new LayoutParams(
         //    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
@@ -117,6 +120,9 @@ GpsStatus.Listener, OnClickListener {
         setContentView(mainPanel);
 */
         setContentView(canvas);
+        //requestWindowFeature(Window.FEATURE_ACTION_BAR);
+        //getActionBar().show();
+        //getSupportActionBar().show();
     }
 
     @Override
@@ -294,6 +300,7 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 10, 0, "Toggle selection corners");
         q.add(0, 11, 0, "Toggle normals");
         q.add(0, 26, 0, "Toggle vertexColors");
+        q.getItem().setShowAsAction(1);
 
         SubMenu o = menu.addSubMenu(1, 101, 1, "Object selection");
         o.add(0, 12, 0, "Sphere (low res)");
@@ -319,6 +326,8 @@ GpsStatus.Listener, OnClickListener {
         SubMenu r = menu.addSubMenu(1, 104, 1, "Rendering");
         r.add(0, 25, 0, "Raytrace");
 
+        menu.getItem(1).setEnabled(true);
+        
         return true;
     }
 
