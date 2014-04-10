@@ -1112,4 +1112,7 @@
   - 10min: JOGL Pbuffer warnings removed, Vitral updated to JOGL2 version
     from git at march 14 2014. Serializable classes with warnings fixed.
 
+2014 april 10, Oscar Chavarro
+  - 4h: several aspects of OpenGL ES 2.0 for android renderers updated.
+
 ===========================================================================

@@ -72,7 +72,8 @@ implements GLSurfaceView.Renderer {
     private boolean highResSphere = false;
     private boolean withReferenceSquare = false;
     private boolean doRaytrace = false;
-
+    private boolean withHudReport = true;
+    
     // Animation control
     private int frameCount;
     private boolean withObjectRotation = false;
@@ -471,23 +472,26 @@ implements GLSurfaceView.Renderer {
 
     private void drawHudElements() {
         timers.get("03_HUD").start();
-        int y = 10;
-        drawText("Frame: " + frameCount, getCamera(), 10, y);
-
-        TimeReport tr;
-        Set<String> s = timers.keySet();
-        for ( String e : s ) {
-            tr = timers.get(e);
-            y += 40;
-            drawText("" + tr, getCamera(), 10, y);
-        }
-
         
-        if ( raytracingImage != null ) {
-            drawImage(raytracingImage, getCamera(), 10, y+50);
-        }
-        
+        if (withHudReport) {
+
+            int y = 10;
+            drawText("Frame: " + frameCount, getCamera(), 10, y);
+
+            TimeReport tr;
+            Set<String> s = timers.keySet();
+            for (String e : s) {
+                tr = timers.get(e);
+                y += 40;
+                drawText("" + tr, getCamera(), 10, y);
+            }
+
+            if (raytracingImage != null) {
+                drawImage(raytracingImage, getCamera(), 10, y + 50);
+            }
+
         //AndroidGLES20ImageRenderer.unload(testImage);
+        }
         timers.get("03_HUD").stop();
     }
 
@@ -618,6 +622,24 @@ implements GLSurfaceView.Renderer {
     public void requestRaytracer()
     {
         doRaytrace = true;
+    }
+
+    /**
+     * @return the withHudReport
+     */
+    public boolean isWithHudReport() {
+        return withHudReport;
+    }
+
+    /**
+     * @param withHudReport the withHudReport to set
+     */
+    public void setWithHudReport(boolean withHudReport) {
+        this.withHudReport = withHudReport;
+    }
+
+    public void toggleHudReport() {
+        withHudReport = !withHudReport;
     }
 }
 

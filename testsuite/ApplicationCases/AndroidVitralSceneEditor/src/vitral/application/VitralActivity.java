@@ -311,7 +311,7 @@ GpsStatus.Listener, OnClickListener {
         o.add(0, 15, 0, "Cone");
         o.add(0, 16, 0, "Mesh Mug");
         o.add(0, 17, 0, "Toggle reference square");
-
+        
         SubMenu a = popup.addSubMenu(2, 102, 2, "Animation options");
         a.add(0, 18, 0, "Toggle object rotation");
         a.add(0, 19, 0, "Toggle first light rotation");
@@ -327,6 +327,7 @@ GpsStatus.Listener, OnClickListener {
 
         SubMenu r = popup.addSubMenu(5, 105, 5, "Rendering");
         r.add(0, 25, 0, "Raytrace");
+        r.add(0, 27, 0, "Toggle performance report");
 
         //menu.getItem(1).setEnabled(true);
         //menu.getItem(1).setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
@@ -428,6 +429,9 @@ GpsStatus.Listener, OnClickListener {
             break;
           case 26:
             q.setUseVertexColors(!q.getUseVertexColors());
+            break;
+          case 27:
+            canvas.glExecutor.toggleHudReport();
             break;
         }
         return true;
