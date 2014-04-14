@@ -13,6 +13,7 @@ import android.util.Log;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import java.util.HashMap;
 
 // Sandbox
 import vitral.application.R;
@@ -82,6 +83,10 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static int cameraPositionGlobalParam;
     private static int sTextureParam;
     private static int sBumpParam;
+    
+    /// Reference to all known objects and their corresponding display list data
+    private static HashMap<Object, AndroidGLES20DisplayList>displayLists;
+
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -118,8 +123,50 @@ public class AndroidGLES20Renderer extends RenderingElement
         }
 
         lights = new ArrayList<Light>();
+        
+        displayLists = new HashMap<Object, AndroidGLES20DisplayList>();
     }
 
+    public static void executeCompiledDisplayList(Object o)
+    {
+        AndroidGLES20DisplayList displayList;
+        
+        displayList = displayLists.get(o);
+        
+        if ( displayList == null ) {
+            return;
+        }
+        
+        int i;
+        
+        for ( i = 0; i < displayList.getDirectVertexBufferObjects().size(); i++ ) {
+            AndroidGLES20MaterialRenderer.activate(displayList.getVboMaterials().get(i));
+            setRendererConfiguration(displayList.getCorrespondingQuality());
+            
+            
+            FloatBuffer fb;
+            
+            fb = displayList.getDirectVertexBufferObjects().get(i);
+            fb.position(0);
+            drawVertices3Position3Color3Normal2Uv(
+            fb, GLES20.GL_TRIANGLES, fb.capacity()/11);
+            
+        }
+
+    }
+
+    protected static boolean isObjectRegisteredWithADisplayList(Object o)
+    {
+        return displayLists.containsKey(o);
+    }
+    
+    protected static void registerObjectWithADisplayList(
+        Object key, AndroidGLES20DisplayList value)
+    {
+        displayLists.put(key, value);
+    }
+    
+    
     public static void setRendererConfiguration(RendererConfiguration source)
     {
         qualitySelection.clone(source);

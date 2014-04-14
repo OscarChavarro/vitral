@@ -485,7 +485,8 @@ implements GLSurfaceView.Renderer {
         
         if ( meshGroupToRender != null ) {
             glScaled(0.2, 0.2, 0.2);
-            AndroidGLES20TriangleMeshGroupRenderer.draw(meshGroupToRender, 
+            AndroidGLES20TriangleMeshGroupRenderer.drawWithDisplayList(
+                meshGroupToRender, 
                 scene.camera, quality);
         }
 

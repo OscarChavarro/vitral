@@ -24,40 +24,28 @@ Class for rendering TriangleMesh objects.
 public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
 
     /**
-    Render surface elements.
+    Render surface elements. If using display list compiling, all display list
+    fragments are added to given display list. 
     @param mesh
     @param q
+    @param displayList if it is not null, generates the compilation of
+    fragments inside the displayList.
     */
-    private static void drawMeshSurface(
+    private static void drawMeshSurfaceFragments(
         TriangleMesh mesh, 
-        RendererConfiguration q) {
-        
+        RendererConfiguration q,
+        AndroidGLES20DisplayList displayList) {
+
         RendererConfiguration qcopy = q.clone();
         qcopy.setUseVertexColors(false);
         setRendererConfiguration(qcopy);
        
-        int index;
-        float vertexDataArray[];
-        int vertexFloatElements = 11;
         int i;
-
-        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
-
-        index = 0;
-        vertexDataArray = 
-            new float[(mesh.getNumTriangles()) * 3 * vertexSizeInBytes];
 
         int materialRanges[][] = mesh.getMaterialRanges();
         Material materialsArray[] = mesh.getMaterials();
         boolean flipNormals = false;
-        
-        if ( materialRanges == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
-                "AndroidGLES20TriangleMeshRenderer.drawMeshSurface", 
-                "No material ranges found!");
-            return;
-        }
-        
+
         int nt;
         nt = mesh.getNumTriangles();
         if ( nt < 1 ) {
@@ -66,38 +54,40 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
                 "No triangles found!");
             return;
         }
-        
+
         int materialIndex;
         int start = 0;
         int end = 0;
-        for ( i = 0; i < materialRanges.length; i++ ) {
+        FloatBuffer vertexArray;
+        for ( i = 0; materialRanges != null && i < materialRanges.length; 
+              i++ ) {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
             if ( materialIndex >= 0 && materialIndex < materialsArray.length &&
                  start < end ) {
                 AndroidGLES20MaterialRenderer.activate(
                     materialsArray[materialIndex]);
-                drawRangeWithBufferedVertexArrays(mesh, start, end, flipNormals, false);
+                vertexArray = drawRangeWithBufferedVertexArrays(
+                    mesh, start, end, flipNormals, false);
+                if ( displayList != null && vertexArray != null ) {
+                    displayList.getDirectVertexBufferObjects().add(vertexArray);
+                    displayList.getVboMaterials().add(
+                        materialsArray[materialIndex]);
+                }
             }
             start = end;
         }
+
         if ( end <= nt ) {
             Material m = new Material();
             AndroidGLES20MaterialRenderer.activate(m);
-            drawRangeWithBufferedVertexArrays(mesh, start, nt, flipNormals, false);
+            vertexArray = drawRangeWithBufferedVertexArrays(
+                mesh, start, nt, flipNormals, false);
+            if ( displayList != null && vertexArray != null ) {
+                displayList.getDirectVertexBufferObjects().add(vertexArray);
+                displayList.getVboMaterials().add(m);
+            }
         }
-        
-        /*
-        for ( i = 0; i < mesh.getTriangleIndexes().length; i += 3 ) {
-            drawTriangle(mesh, index, i, vertexDataArray);
-            index += 3 * vertexFloatElements;
-        }
-        
-        sendVertexesToDraw(
-            vertexDataArray, 
-            (mesh.getNumTriangles()) * 3, 
-            GLES20.GL_TRIANGLES, mode3Position3Normal2UV);
-        */
     }
 
     /**
@@ -114,7 +104,9 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         FloatBuffer floatBufferedArray,
         int trianglesArray[]) {
         
-        Vertex v = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 0), 0, 0);
+        Vertex v;
+        
+        v = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 0), 0, 0);
         
         int p;
         int i;
@@ -156,20 +148,48 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         Camera camera, 
         RendererConfiguration q) {
         
-        if (q.isPointsSet()) {
+        if ( q.isPointsSet() ) {
             //drawPoints(mesh, q);
         }
-        if (q.isWiresSet()) {
+        if ( q.isWiresSet() ) {
             //drawWires(mesh, q);
         }
-        if (q.isSurfacesSet()) {
-            drawMeshSurface(mesh, q);
+        if ( q.isSurfacesSet() ) {
+            drawMeshSurfaceFragments(mesh, q, null);
         }
-        if (q.isNormalsSet()) {
+        if ( q.isNormalsSet() ) {
             //drawNormals(mesh, q);
         }
     }
 
+    /**
+    This method controls the generation of OpenGL ES2.0 primitives needed to
+    render given triangle mesh.
+    @param mesh
+    @param camera
+    @param q
+    @param displayList
+    */
+    public static void drawWithDisplayListCompiling(
+        TriangleMesh mesh, 
+        Camera camera, 
+        RendererConfiguration q,
+        AndroidGLES20DisplayList displayList) {
+        
+        if ( q.isPointsSet() ) {
+            //drawPoints(mesh, q);
+        }
+        if ( q.isWiresSet() ) {
+            //drawWires(mesh, q);
+        }
+        if ( q.isSurfacesSet() ) {
+            drawMeshSurfaceFragments(mesh, q, displayList);
+        }
+        if ( q.isNormalsSet() ) {
+            //drawNormals(mesh, q);
+        }
+    }
+    
     /**
     Given a range of triangle indices between start and end, this method draws
     that range of triangles.
@@ -178,8 +198,10 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
     @param end
     @param flipNormals
     @param withTexture
+    @return if null,there is no display list, so should not be added to
+    display lists set.
     */
-    private static void drawRangeWithBufferedVertexArrays(
+    private static FloatBuffer drawRangeWithBufferedVertexArrays(
         TriangleMesh mesh, 
         int start, 
         int end, 
@@ -187,7 +209,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         boolean withTexture) {
 
         if ( start >= end ) {
-            return;
+            return null;
         }
 
         int i;
@@ -201,20 +223,24 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         verticesBufferedArray = ByteBuffer.allocateDirect(
             (vertexFloatElements*3*(end - start)) * FLOAT_SIZE_IN_BYTES).order(
                 ByteOrder.nativeOrder()).asFloatBuffer();
+        
+        System.out.println("end - start: " + (end-start));
+        System.out.println("capacity: " + verticesBufferedArray.capacity());
+        
         verticesBufferedArray.position(0);
 
-        int index = 0;
         for ( i = start; i < end; i++ ) {
             if ( i >= t.length/3 ) {
                 break;
             }
             drawTriangle(mesh, i, verticesBufferedArray, t);
-            index += 3*vertexFloatElements;
         }
         
         // Send to GPU
         drawVertices3Position3Color3Normal2Uv(
             verticesBufferedArray, GLES20.GL_TRIANGLES, (end - start) * 3);
+
+        return verticesBufferedArray;
     }
 
 }
