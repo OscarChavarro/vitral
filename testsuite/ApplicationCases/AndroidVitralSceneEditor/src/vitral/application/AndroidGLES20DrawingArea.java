@@ -266,9 +266,9 @@ implements GLSurfaceView.Renderer {
         material.setPhongExponent(20.0);
 
         prepareLights(1);
-        
+
         currentLoadedMesh = null;
-        selectObject(2);
+        selectObject(6);
         createBitmapFontSprites();
 
         bumpmap = null;

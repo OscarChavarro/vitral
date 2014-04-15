@@ -1119,5 +1119,6 @@
   - 1h: AndroidGLES20DisplayList. First test for storing vertex buffered
     objects for CPU on a display list cache. Optimization bettered cow
     triangle mesh model from 2fps to 11fps on a Samsung Galaxy SIIImini. :)
+  - 2h: AndroidGLES20DisplayList working for VBOs loaded at GPU.
 
 ===========================================================================

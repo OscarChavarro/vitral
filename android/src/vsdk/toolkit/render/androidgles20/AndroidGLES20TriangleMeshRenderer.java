@@ -59,6 +59,8 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         int start = 0;
         int end = 0;
         FloatBuffer vertexArray;
+        int vbo[];
+        
         for ( i = 0; materialRanges != null && i < materialRanges.length; 
               i++ ) {
             end = materialRanges[i][0];
@@ -70,9 +72,8 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
                 vertexArray = drawRangeWithBufferedVertexArrays(
                     mesh, start, end, flipNormals, false);
                 if ( displayList != null && vertexArray != null ) {
-                    displayList.getDirectVertexBufferObjects().add(vertexArray);
-                    displayList.getVboMaterials().add(
-                        materialsArray[materialIndex]);
+                    compileDisplayListForTriangleRange(
+                       vertexArray, displayList, materialsArray[materialIndex]);
                 }
             }
             start = end;
@@ -84,10 +85,29 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
             vertexArray = drawRangeWithBufferedVertexArrays(
                 mesh, start, nt, flipNormals, false);
             if ( displayList != null && vertexArray != null ) {
-                displayList.getDirectVertexBufferObjects().add(vertexArray);
-                displayList.getVboMaterials().add(m);
+                compileDisplayListForTriangleRange(
+                    vertexArray, displayList, m);
             }
         }
+    }
+
+    private static void compileDisplayListForTriangleRange(
+        FloatBuffer vertexArray, AndroidGLES20DisplayList displayList, 
+        Material m) {
+        int[] vbo;
+        vbo = new int[1];
+        GLES20.glGenBuffers(1, vbo, 0);
+        vertexArray.position(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+        GLES20.glBufferData(
+            GLES20.GL_ARRAY_BUFFER,
+            vertexArray.capacity() * FLOAT_SIZE_IN_BYTES,
+            vertexArray, GLES20.GL_STATIC_DRAW);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        displayList.addVbo(
+            m,
+            vbo[0],
+            vertexArray.capacity()/11);
     }
 
     /**
@@ -223,9 +243,6 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         verticesBufferedArray = ByteBuffer.allocateDirect(
             (vertexFloatElements*3*(end - start)) * FLOAT_SIZE_IN_BYTES).order(
                 ByteOrder.nativeOrder()).asFloatBuffer();
-        
-        System.out.println("end - start: " + (end-start));
-        System.out.println("capacity: " + verticesBufferedArray.capacity());
         
         verticesBufferedArray.position(0);
 

@@ -138,21 +138,83 @@ public class AndroidGLES20Renderer extends RenderingElement
         }
         
         int i;
+
+        setRendererConfiguration(displayList.getCorrespondingQuality());
         
-        for ( i = 0; i < displayList.getDirectVertexBufferObjects().size(); i++ ) {
+        // Draw VBOs on display list
+        for ( i = 0; i < displayList.getVboIds().size(); i++ ) {
             AndroidGLES20MaterialRenderer.activate(displayList.getVboMaterials().get(i));
-            setRendererConfiguration(displayList.getCorrespondingQuality());
+
+            //-----------------------------------------------------------------
+            // Activate VBO
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, displayList.getVboIds().get(i));
+            checkGlError("glBindBuffer(" + displayList.getVboIds().get(i) + ")");
             
-            
-            FloatBuffer fb;
-            
-            fb = displayList.getDirectVertexBufferObjects().get(i);
-            fb.position(0);
-            drawVertices3Position3Color3Normal2Uv(
-            fb, GLES20.GL_TRIANGLES, fb.capacity()/11);
-            
+            // Display VBO 
+            drawVertices3Position3Color3Normal2Uv(GLES20.GL_TRIANGLES, displayList.getVboSizes().get(i));
+
+            // Disable current VBO
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+            checkGlError("glBindBuffer(0)");
         }
 
+        // Draw IndexedBufferedObjects on display list
+        // (Pending to program)
+    }
+
+    /**
+    Draws vertices from a VBO previously loaded at GPU, from vertex array
+    currently binded (activated with glBindBuffer).
+    @param primitive
+    @param numberOfElements
+    */
+    protected static void drawVertices3Position3Color3Normal2Uv(
+        int primitive, int numberOfElements) {
+        //-----------------------------------------------------------------
+        // Configure shaders parameters to process data on VBO
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 11;
+        
+        // glVertex3d
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT,
+                false, vertexSizeInBytes, 0);
+        checkGlError("glVertexAttribPointer PObject");
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+        
+        // glColor3d
+        if (emissionColorParam != -1) {
+            GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
+                    false, vertexSizeInBytes, 3 * FLOAT_SIZE_IN_BYTES);
+            checkGlError("glVertexAttribPointer emissionColorParam");
+            GLES20.glEnableVertexAttribArray(emissionColorParam);
+            checkGlError("glEnableVertexAttribArray emissionColorParam");
+        }
+        
+        // glNormal3d
+        if (NObjectParam != -1) {
+            GLES20.glVertexAttribPointer(NObjectParam, 3, GLES20.GL_FLOAT,
+                    false, vertexSizeInBytes, 6 * FLOAT_SIZE_IN_BYTES);
+            checkGlError("glVertexAttribPointer NObjectParam");
+            GLES20.glEnableVertexAttribArray(NObjectParam);
+            checkGlError("glEnableVertexAttribArray NObjectParam");
+        }
+        
+        // glTexCoord2d
+        if (uvVertexTextureCoordinateParam != -1) {
+            GLES20.glVertexAttribPointer(uvVertexTextureCoordinateParam, 2,
+                    GLES20.GL_FLOAT, false, vertexSizeInBytes,
+                    9 * FLOAT_SIZE_IN_BYTES);
+            checkGlError(
+                    "glVertexAttribPointer uvVertexTextureCoordinateParam");
+            GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
+            checkGlError(
+                    "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
+        }
+        
+        //-----------------------------------------------------------------
+        // Draw geometry from VBO preloaded at GPU
+        GLES20.glDrawArrays(primitive, 0, numberOfElements);
+        checkGlError("glDrawArrays");
     }
 
     protected static boolean isObjectRegisteredWithADisplayList(Object o)
@@ -996,6 +1058,13 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glDrawArrays");
     }
     
+    /**
+    Draws vertices from a VBO not loaded at GPU (from a native memory float
+    buffer).
+    @param verticesBufferedArray
+    @param primitive
+    @param numberOfElements
+    */
     protected static void drawVertices3Position3Color3Normal2Uv(
         FloatBuffer verticesBufferedArray,
         int primitive, int numberOfElements)

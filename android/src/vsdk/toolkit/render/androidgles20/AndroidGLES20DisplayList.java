@@ -3,6 +3,7 @@ package vsdk.toolkit.render.androidgles20;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.RendererConfiguration;
 
 import vsdk.toolkit.environment.Material;
@@ -14,34 +15,26 @@ to help the creation of a construction similar to display lists, based upon
 binded vertex buffer objects (VBOs) and indexed arrays.
 */
 public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
-    /// vboMaterials should be the same size as directVertexBufferObjects
+    /// vboMaterials should be the same size as vboIds
     /// and can contain null references. If first material is null, default
     /// material is assumed. If a middle positioned material is null, it is
     /// asumed as no change in material properties for next fragment.
     private ArrayList<Material> vboMaterials;
-    private ArrayList<FloatBuffer> directVertexBufferObjects;
+    
+    /// Open GL ES 2.0 vertex buffer object ids list.
+    private ArrayListOfInts vboIds; 
+    
+    /// Size in vertices
+    private ArrayListOfInts vboSizes;
     
     /// Gets invalidated if user changes rendering configuration.
     private RendererConfiguration correspondingQuality;
 
     AndroidGLES20DisplayList(RendererConfiguration q) {
         vboMaterials = new ArrayList<Material>();
-        directVertexBufferObjects = new ArrayList<FloatBuffer>();
+        vboIds = new ArrayListOfInts(10);
+        vboSizes = new ArrayListOfInts(10);
         correspondingQuality = q.clone();
-    }
-
-    /**
-    @return the directVertexBufferObjects
-    */
-    public ArrayList<FloatBuffer> getDirectVertexBufferObjects() {
-        return directVertexBufferObjects;
-    }
-
-    /**
-    @param directVertexBufferObjects the directVertexBufferObjects to set
-    */
-    public void setDirectVertexBufferObjects(ArrayList<FloatBuffer> directVertexBufferObjects) {
-        this.directVertexBufferObjects = directVertexBufferObjects;
     }
 
     /**
@@ -70,6 +63,26 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     */
     public void setCorrespondingQuality(RendererConfiguration correspondingQuality) {
         this.correspondingQuality = correspondingQuality;
+    }
+
+    /**
+     * @return the vboIds
+     */
+    public ArrayListOfInts getVboIds() {
+        return vboIds;
+    }
+
+    void addVbo(Material material, int id, int size) {
+        vboMaterials.add(material);
+        vboIds.add(id);
+        getVboSizes().add(size);
+    }
+
+    /**
+     * @return the vboSizes
+     */
+    public ArrayListOfInts getVboSizes() {
+        return vboSizes;
     }
     
 }
