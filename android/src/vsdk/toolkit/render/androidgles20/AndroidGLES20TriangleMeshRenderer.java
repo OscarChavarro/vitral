@@ -17,6 +17,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.isObjectRegisteredWithADisplayList;
 
 /**
 Class for rendering TriangleMesh objects.
@@ -258,6 +260,25 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
             verticesBufferedArray, GLES20.GL_TRIANGLES, (end - start) * 3);
 
         return verticesBufferedArray;
+    }
+
+    public static void drawWithDisplayList(TriangleMesh m, 
+        Camera c, RendererConfiguration q)
+    {
+        AndroidGLES20DisplayList displayList;
+
+        if ( isObjectRegisteredWithADisplayList(m) ) {
+            executeCompiledDisplayList(m);
+            return;
+        }
+
+        displayList = new AndroidGLES20DisplayList(q);
+        AndroidGLES20TriangleMeshRenderer.drawWithDisplayListCompiling(
+                m, c, q, displayList);
+
+        //if ( !displayList.isEmpty() ) {
+        registerObjectWithADisplayList(m, displayList);
+        //}
     }
 
 }

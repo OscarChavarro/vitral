@@ -5,9 +5,6 @@ package vitral.application;
 // Android classes
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-//import javax.microedition.khronos.egl.EGL11;
-//import javax.microedition.khronos.egl.EGLContext;
-//import javax.microedition.khronos.egl.EGLDisplay;
 
 public class BasicGLSurfaceView extends GLSurfaceView {
 
@@ -17,19 +14,11 @@ public class BasicGLSurfaceView extends GLSurfaceView {
         super(context);
 
         // Set OpenGL drawing canvas
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(2); // Using OpenGL ES 2.0
         glExecutor = new AndroidGLES20DrawingArea(context);
-        setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0); // RGBA depth stencil profile
+        setEGLContextFactory(new AndroidGLES20SharedContextFactory()); // Experimental!
         setRenderer(glExecutor);
-
-        // Trying to prepare multithread rendering for OpenGL 2.0 ES
-        //EGL11 driver = (EGL11)EGLContext.getEGL();
-        /*
-        EGLDisplay display;
-        display = driver.eglGetDisplay(EGL11.EGL_DEFAULT_DISPLAY);
-        System.out.println("XXXX: display: " + display);
-        */
-        //System.out.println("XXXX: Driver: " + driver);
     }
 }
 

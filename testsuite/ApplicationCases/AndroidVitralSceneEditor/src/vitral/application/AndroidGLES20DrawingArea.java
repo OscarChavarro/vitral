@@ -51,6 +51,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshGroupRenderer;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
 public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer 
 implements GLSurfaceView.Renderer {
@@ -83,6 +84,8 @@ implements GLSurfaceView.Renderer {
     private int frameCount;
     private boolean withObjectRotation = false;
     private boolean withLightRotation = false;
+    private boolean firstTimer = true;
+    private boolean displayListsCompiled = false;
 
     // Hud & statistics
     private HashMap<String, TimeReport>timers;
@@ -126,6 +129,8 @@ implements GLSurfaceView.Renderer {
 
     public void selectObject(int o)
     {
+        frameCount = 0;
+        
         sphere = null;
         meshToRender = null;
         meshGroupToRender = null;
@@ -386,25 +391,97 @@ implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 glUnused) {
-        
-        if ( doRaytrace ) {
-            raytrace();
-            doRaytrace = false;
-        }
-        
-        timers.get("02_GEOMETRY").start();
+        if ( firstTimer ) {
+            firstTimer = false;
 
-        if ( quality.isBumpMapSet() &&
-             (bumpmap == null || normalMap == null) ) {
-            loadBumpmap();
+            createSecondaryGLES20RenderingThread();
         }
-        
+
         if ( errorsDetected ) {
             GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             return;
         }
+        
+        if ( isDisplayListsCompiled() ) {
+            drawCurrent3DScene();
+        }
+        else {
+            drawStartupScreen();
+        }
+        
+        frameCount++;
+    }
 
+    private void drawStartupScreen() {
+        Camera c = getCamera();
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+        int y;
+        
+        //- Set up textures -----------------------------------------------
+        /*
+        if ( startupTexture == null ) {
+            InputStream is;
+
+            try {
+                is = androidApplicationContext.getResources().openRawResource(
+                    R.raw.startuph);
+                startupTexture = ImagePersistence.importRGB(is);
+            }
+            catch ( Exception e ) {
+                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                    "createModel", "Can not load texture!", e);
+            }
+        }
+        */
+        
+        //---------------------------------------------------------------------
+        RendererConfiguration q;
+        double fx, fy;
+        double dx, dy;
+
+        fx = 2.0;
+        fy = 2.0;
+        dx = 0.0;
+        dy = 0.0;
+        
+        q = new RendererConfiguration();
+        q.setSurfaces(true);
+        //q.setTexture(true);
+        q.setUseVertexColors(true);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslated(dx, dy, 0);
+        glScaled(fx, fy, 1.0);
+        setRendererConfiguration(q);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        //AndroidGLES20ImageRenderer.activate(startupTexture);
+        //setTextureParameters();
+        //drawUnitSquare();
+
+        //---------------------------------------------------------------------
+        y = 10;
+        drawText("Frame: " + frameCount, getCamera(), 10, y);
+    }
+
+    private void drawCurrent3DScene() {
+        if ( doRaytrace ) {
+            raytrace();
+            doRaytrace = false;
+        }
+        
+        if ( frameCount > 1 ) timers.get("02_GEOMETRY").start();
+
+        if ( quality.isBumpMapSet() &&
+                (bumpmap == null || normalMap == null) ) {
+            loadBumpmap();
+        }
+        
         // Draw background
         GLES20.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
@@ -448,7 +525,7 @@ implements GLSurfaceView.Renderer {
         // Activate texture image.activate()
         if ( quality.isTextureSet() ) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            AndroidGLES20ImageRenderer.activate(texture);
+            AndroidGLES20ImageRenderer.activate(getTexture());
             setTextureParameters();
         }
 
@@ -480,19 +557,19 @@ implements GLSurfaceView.Renderer {
         if ( meshToRender != null ) {
             glScaled(15, 15, 15);
             glRotated(90, 1, 0, 0);
-            AndroidGLES20GeometryRenderer.draw(meshToRender, scene.camera, quality);
+            AndroidGLES20TriangleMeshRenderer.drawWithDisplayList(
+                    meshToRender, scene.camera, quality);
         }
         
         if ( meshGroupToRender != null ) {
             glScaled(0.2, 0.2, 0.2);
             AndroidGLES20TriangleMeshGroupRenderer.drawWithDisplayList(
-                meshGroupToRender, 
-                scene.camera, quality);
+                    meshGroupToRender, scene.camera, quality);
         }
 
         //-----------------------------------------------------------------
         if ( withReferenceSquare ) {
-        //if ( raytracingImage != null ) {
+            //if ( raytracingImage != null ) {
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslated(x, 0, 0);
@@ -504,18 +581,25 @@ implements GLSurfaceView.Renderer {
             
             drawUnitSquare();
         }
-        timers.get("02_GEOMETRY").stop();
+        
+        if ( frameCount > 1 ) timers.get("02_GEOMETRY").stop();
         
         //- Draw HUD elements ---------------------------------------------
         drawHudElements();
-        
-        frameCount++;
+    }
+
+    private void createSecondaryGLES20RenderingThread() {
+        AndroidGLES20AssetLoader l;
+        l = new AndroidGLES20AssetLoader(this);
+        Thread t;
+        t = new Thread(l);
+        t.start();
     }
 
     private void drawHudElements() {
         timers.get("03_HUD").start();
         
-        if (withHudReport) {
+        if ( withHudReport ) {
 
             int y = 10;
             drawText("Frame: " + frameCount, getCamera(), 10, y);
@@ -528,6 +612,13 @@ implements GLSurfaceView.Renderer {
                 drawText("" + tr, getCamera(), 10, y);
             }
 
+            if ( meshToRender != null ) {
+                y += 40;
+                drawText("Mesh: v " + meshToRender.getNumVertices() + 
+                        " t " + meshToRender.getNumTriangles()
+                        , getCamera(), 10, y);
+            }
+            
             if (raytracingImage != null) {
                 drawImage(raytracingImage, getCamera(), 10, y + 50);
             }
@@ -558,7 +649,7 @@ implements GLSurfaceView.Renderer {
     Draws an image at integer screen coordinates (x, y) in pixels from
     upper left corner. Takes into account current configured camera (viewpoint)
     */
-    private void drawImage(Image img, Camera c, int x, int y)
+    public void drawImage(Image img, Camera c, int x, int y)
     {
         RendererConfiguration q;
         double fx, fy;
@@ -631,23 +722,10 @@ implements GLSurfaceView.Renderer {
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig configUnused) {
         //- Setup shader parameters ---------------------------------------
-        init(androidApplicationContext);
+        init(getAndroidApplicationContext());
 
         if ( errorsDetected ) {
             return;
-        }
-
-        //- Set up textures -----------------------------------------------
-        InputStream is;
-
-        try {
-            is = androidApplicationContext.getResources().openRawResource(
-                R.raw.miniearth);
-            texture = ImagePersistence.importRGB(is);
-        }
-        catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
-                "createModel", "Can not load texture!", e);
         }
     }
 
@@ -682,6 +760,41 @@ implements GLSurfaceView.Renderer {
 
     public void toggleHudReport() {
         withHudReport = !withHudReport;
+    }
+
+    /**
+     * @return the displayListsCompiled
+     */
+    public boolean isDisplayListsCompiled() {
+        return displayListsCompiled;
+    }
+
+    /**
+     * @param displayListsCompiled the displayListsCompiled to set
+     */
+    public void setDisplayListsCompiled(boolean displayListsCompiled) {
+        this.displayListsCompiled = displayListsCompiled;
+    }
+
+    /**
+     * @return the androidApplicationContext
+     */
+    public Context getAndroidApplicationContext() {
+        return androidApplicationContext;
+    }
+
+    /**
+     * @return the texture
+     */
+    public RGBImage getTexture() {
+        return texture;
+    }
+
+    /**
+     * @param texture the texture to set
+     */
+    public void setTexture(RGBImage texture) {
+        this.texture = texture;
     }
 }
 

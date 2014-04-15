@@ -1,12 +1,10 @@
 //===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
-import android.opengl.GLES20;
+// VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.drawVertices3Position3Color3Normal2Uv;
-import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.isObjectRegisteredWithADisplayList;
 
 /**
 */
