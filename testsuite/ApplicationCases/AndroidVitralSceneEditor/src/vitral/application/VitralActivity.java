@@ -7,14 +7,13 @@ import android.annotation.TargetApi;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.MotionEvent;
-        
+
 // Android packages: GUI
-import android.view.View;
+//import android.view.View;
 import android.view.Menu;
 import android.view.SubMenu;
 import android.view.MenuItem;
-import android.widget.Toast;
+//import android.widget.Toast;
 //import android.widget.TextView;
 //import android.widget.ImageView;
 //import android.widget.LinearLayout;
@@ -44,20 +43,15 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
-public class VitralActivity extends ActionBarActivity 
-implements LocationListener, 
-GpsStatus.Listener, OnClickListener {
+public class VitralActivity 
+extends ActionBarActivity 
+implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
     private BasicGLSurfaceView canvas;
-
-    private CameraControllerAquynza cameraController;
 
     private LocationManager locationManager;
     private String provider;
     private int numberOfLocations;
     private int numberOfLights;
-
-    private int interaction;
-    private int mouseMovementsFromLastDown;
 
     //= Basic Activity methods =================================================
     private void createGUI()
@@ -124,24 +118,20 @@ GpsStatus.Listener, OnClickListener {
         //getSupportActionBar().show();
     }
 
+/*
     @Override
     public void onClick(View v)
     {
         System.out.println("Huy! " + v.getId());
         Toast.makeText(this, "Huy!", Toast.LENGTH_SHORT).show();  
     }
-
+*/
+    
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        interaction = 1;
-        mouseMovementsFromLastDown = 0;
-
         createGUI();
-
-        cameraController = 
-            new CameraControllerAquynza(canvas.glExecutor.getCamera());
 
         // Scene related
         numberOfLights = 1;
@@ -174,57 +164,6 @@ GpsStatus.Listener, OnClickListener {
         super.onResume();
         canvas.onResume();
         locationManager.requestLocationUpdates(provider, 400, 1, this);
-    }
-
-    //= Extended methods for user interface =====================================
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        switch ( e.getAction() ) {
-          case MotionEvent.ACTION_DOWN:            // one touch: drag
-            //System.out.println("one down");
-            mouseMovementsFromLastDown = 0;
-            break;
-          case MotionEvent.ACTION_POINTER_DOWN:    // two touches: zoom
-            //System.out.println("two down");
-            break;
-          case MotionEvent.ACTION_UP:              // no mode
-            mouseMovementsFromLastDown++;
-            //System.out.println("up");
-            break;
-          case MotionEvent.ACTION_POINTER_UP:      // no mode
-            //System.out.println("upup");
-            break;
-          case MotionEvent.ACTION_MOVE:            // rotation
-            //System.out.println("move");
-            mouseMovementsFromLastDown += 10;
-            break;
-        }
-
-        MouseEvent evsdk = AndroidSystem.android2vsdkEvent(e);
-
-        switch ( interaction ) {
-          case 1:
-            if ( mouseMovementsFromLastDown > 1 ) { // Drag
-                cameraController.processMouseDraggedEvent(evsdk);
-            }
-            else if ( mouseMovementsFromLastDown == 1 ) { // Click
-                canvas.glExecutor.getScene().selectObjectWithMouse(evsdk.getX(), evsdk.getY());
-            }
-            break;
-
-          case 2:
-            if ( mouseMovementsFromLastDown > 1 ) { // Drag
-                cameraController.processMouseDraggedEvent(evsdk);
-            }
-            else if ( mouseMovementsFromLastDown == 1 ) { // Click
-                canvas.glExecutor.getScene().insertSphereWithMouse(evsdk.getX(), evsdk.getY());
-            }
-            break;
-
-          default:
-            return false;
-        }
-        return true;
     }
 
     //= Extended methods for GPS ===============================================
@@ -285,11 +224,27 @@ GpsStatus.Listener, OnClickListener {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        SubMenu popup = menu.addSubMenu(1001, 1002, 1003, "Popup");
+        // Activate menu for new devices without menu button, on Android
+        // versions 4.0 and up: put it on the action bar
+        SubMenu popup;
+        popup = menu.addSubMenu(1001, 1002, 1003, "Popup");
         popup.setIcon(R.drawable.abc_ic_menu_moreoverflow_normal_holo_light);
         popup.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        
-        SubMenu q = popup.addSubMenu(0, 100, 0, "Rendering configuration");
+        fillPopupWithItems(popup);
+
+        // Activate menu for old-fashioned devices with menu button, on Android
+        // versions previous to 4.0
+        fillPopupWithItems(menu);
+        menu.getItem(1).setEnabled(true);
+        menu.getItem(1).setShowAsAction(
+            MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
+        return true; 
+    }
+
+    private void fillPopupWithItems(Menu popupMenu) {
+        // Populate popup menu options
+        SubMenu q = popupMenu.addSubMenu(0, 100, 0, "Rendering configuration");
         q.add(0, 0, 0, "Constant shading");
         q.add(0, 1, 0, "Flat shading");
         q.add(0, 2, 0, "Gouraud shading");
@@ -304,7 +259,7 @@ GpsStatus.Listener, OnClickListener {
         q.add(0, 11, 0, "Toggle normals");
         q.add(0, 26, 0, "Toggle vertexColors");
 
-        SubMenu o = popup.addSubMenu(1, 101, 1, "Object selection");
+        SubMenu o = popupMenu.addSubMenu(1, 101, 1, "Object selection");
         o.add(0, 12, 0, "Sphere (low res)");
         o.add(0, 13, 0, "Sphere (high res)");
         o.add(0, 14, 0, "Box");
@@ -313,38 +268,32 @@ GpsStatus.Listener, OnClickListener {
         o.add(0, 28, 0, "Mesh Cow");
         o.add(0, 17, 0, "Toggle reference square");
         
-        SubMenu a = popup.addSubMenu(2, 102, 2, "Animation options");
+        SubMenu a = popupMenu.addSubMenu(2, 102, 2, "Animation options");
         a.add(0, 18, 0, "Toggle object rotation");
         a.add(0, 19, 0, "Toggle first light rotation");
 
-        SubMenu x = popup.addSubMenu(3, 103, 3, "Scene");
+        SubMenu x = popupMenu.addSubMenu(3, 103, 3, "Scene");
         x.add(0, 20, 0, "Add light");
         x.add(0, 21, 0, "Add sphere");
         x.add(0, 22, 0, "Add 10 spheres");
 
-        SubMenu i = popup.addSubMenu(4, 104, 4, "Interaction");
+        SubMenu i = popupMenu.addSubMenu(4, 104, 4, "Interaction");
         i.add(0, 23, 0, "Select objects");
         i.add(0, 24, 0, "Insert spheres");
 
-        SubMenu r = popup.addSubMenu(5, 105, 5, "Rendering");
+        SubMenu r = popupMenu.addSubMenu(5, 105, 5, "Rendering");
         r.add(0, 25, 0, "Raytrace");
         r.add(0, 27, 0, "Toggle performance report");
-
-        //menu.getItem(1).setEnabled(true);
-        //menu.getItem(1).setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-        
-        
-        return true; //super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         RendererConfiguration q;
-        q = canvas.glExecutor.getRendererConfiguration();
-        Scene s = canvas.glExecutor.getScene();
+        q = canvas.getGlExecutor().getRendererConfiguration();
+        Scene s = canvas.getGlExecutor().getScene();
         SimpleBody b;
 
-        canvas.glExecutor.resetTimers();
+        canvas.getGlExecutor().resetTimers();
 
         switch ( item.getItemId() ) {
           case 0:
@@ -384,58 +333,58 @@ GpsStatus.Listener, OnClickListener {
             q.changeNormals();
             break;
           case 12:
-            canvas.glExecutor.selectObject(1);
+            canvas.getGlExecutor().selectObject(1);
             break;
           case 13:
-            canvas.glExecutor.selectObject(2);
+            canvas.getGlExecutor().selectObject(2);
             break;
           case 14:
-            canvas.glExecutor.selectObject(3);
+            canvas.getGlExecutor().selectObject(3);
             break;
           case 15:
-            canvas.glExecutor.selectObject(4);
+            canvas.getGlExecutor().selectObject(4);
             break;
           case 16:
-            canvas.glExecutor.selectObject(5);
+            canvas.getGlExecutor().selectObject(5);
             break;
           case 28:
-            canvas.glExecutor.selectObject(6);
+            canvas.getGlExecutor().selectObject(6);
             break;
           case 17:
-            canvas.glExecutor.toggleReferenceSquare();
+            canvas.getGlExecutor().toggleReferenceSquare();
             break;
           case 18:
-            canvas.glExecutor.toggleObjectRotation();
+            canvas.getGlExecutor().toggleObjectRotation();
             break;
           case 19:
-            canvas.glExecutor.toggleLightRotation();
+            canvas.getGlExecutor().toggleLightRotation();
             break;
           case 20:
             numberOfLights++;
-            canvas.glExecutor.prepareLights(numberOfLights);
+            canvas.getGlExecutor().prepareLights(numberOfLights);
             break;
           case 21:
-            canvas.glExecutor.getScene().addRandomSphere();
+            canvas.getGlExecutor().getScene().addRandomSphere();
             break;
           case 22:
             for ( int i = 0; i < 10; i++ ) {
-                canvas.glExecutor.getScene().addRandomSphere();
+                canvas.getGlExecutor().getScene().addRandomSphere();
             }
             break;
           case 23:
-            interaction = 1;
+            canvas.getGlExecutor().setInteraction(1);
             break;
           case 24:
-            interaction = 2;
+            canvas.getGlExecutor().setInteraction(2);
             break;
           case 25:
-            canvas.glExecutor.requestRaytracer();
+            canvas.getGlExecutor().requestRaytracer();
             break;
           case 26:
             q.setUseVertexColors(!q.getUseVertexColors());
             break;
           case 27:
-            canvas.glExecutor.toggleHudReport();
+            canvas.getGlExecutor().toggleHudReport();
             break;
         }
         return true;

@@ -3,7 +3,6 @@ package vitral.application;
 
 // Java basic classes
 import java.io.File;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -20,6 +19,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.view.MotionEvent;
+import android.view.View;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -42,6 +43,8 @@ import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.AndroidSystem;
+import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -53,8 +56,19 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshGroupRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
+/**
+The Drawing Area is the main Vitral application element responsible for managing
+the view on the model-view-controller design pattern. Each rendering technology
+used to implement a drawing area must define a class, in this case, this class
+is used on Android devices, using OpenGL ES 2.0.
+
+This class is supposed to receive the main OpenGL ES 2.0 drawing events such as
+draw and resize-reshape, but should act only as a facade structural design 
+pattern, and delegate most of the application functionality to other application 
+classes, using the chain of responsibility behavioral design pattern.
+*/
 public class AndroidGLES20DrawingArea extends AndroidGLES20Renderer 
-implements GLSurfaceView.Renderer {
+implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     // Android application elements
     private final Context androidApplicationContext;
@@ -79,7 +93,7 @@ implements GLSurfaceView.Renderer {
     private boolean withReferenceSquare = false;
     private boolean doRaytrace = false;
     private boolean withHudReport = true;
-    
+
     // Animation control
     private int frameCount;
     private boolean withObjectRotation = false;
@@ -91,6 +105,11 @@ implements GLSurfaceView.Renderer {
     private HashMap<String, TimeReport>timers;
     private HashMap<String, RGBAImage>characterSprites;
 
+    // Interaction
+    private int interaction;
+    private int mouseMovementsFromLastDown;
+    private CameraControllerAquynza cameraController;
+    
     public AndroidGLES20DrawingArea(Context context) {
         androidApplicationContext = context;
 
@@ -102,14 +121,9 @@ implements GLSurfaceView.Renderer {
         return quality;
     }
 
-    public Scene getScene()
-    {
-        return scene;
-    }
-
     public Camera getCamera()
     {
-        return scene.camera;
+        return getScene().camera;
     } 
 
     public void toggleObjectRotation()
@@ -192,7 +206,6 @@ implements GLSurfaceView.Renderer {
     {
         File meshFile;
 
-        System.out.println("XXXX: Loading mesh " + filename);
         meshFile = new File(filename);
         SimpleScene localScene;
         localScene = new SimpleScene();
@@ -200,11 +213,8 @@ implements GLSurfaceView.Renderer {
         try {
             EnvironmentPersistence.importEnvironment(meshFile, localScene);
             g = (TriangleMeshGroup)(localScene.getSimpleBodies().get(0).getGeometry());
-            System.out.println("XXXX: Found triangle meshes groups: " + localScene.getSimpleBodies().size());
           }
           catch ( Exception e ) {
-            System.out.println("XXXX: Failed to load mesh");
-            
             VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
                 "loadPlyMesh", "Error loading mesh " + filename, e);
         }
@@ -214,11 +224,12 @@ implements GLSurfaceView.Renderer {
     public void prepareLights(int n)
     {
         Light l;
-        double p[] = {0, -10, 0, 0.8, 0.8, 0.8,
-                      1, -1, 1, 0, 1, 0,
-                      -0.6, -2, 2, 0, 0, 1};
+        double p[] = {
+            0, -10, 0, 0.8, 0.8, 0.8,
+            1, -1, 1, 0, 1, 0,
+            -0.6, -2, 2, 0, 0, 1};
 
-        ArrayList<Light> list = scene.scene.getLights();
+        ArrayList<Light> list = getScene().scene.getLights();
         while ( !list.isEmpty() ) {
             list.remove(0);
         }
@@ -227,10 +238,11 @@ implements GLSurfaceView.Renderer {
             n = 3;
         }
 
-        for ( int i = 0; i < n; i++ ) {
+        int i;
+        for ( i = 0; i < n; i++ ) {
             l = new Light(Light.POINT, 
-                new Vector3D(p[6*i+0], p[6*i+1], p[6*i+2]), 
-                new ColorRgb(p[6*i+3], p[6*i+4], p[6*i+5]));
+                new Vector3D(p[6*(i%3)+0], p[6*(i%3)+1], p[6*(i%3)+2]), 
+                new ColorRgb(p[6*(i%3)+3], p[6*(i%3)+4], p[6*(i%3)+5]));
             list.add(l);
         }
     }
@@ -283,6 +295,11 @@ implements GLSurfaceView.Renderer {
         //testImage = new RGBImage();
         //testImage.init(128, 128);
         //testImage.createTestPattern();
+
+        //-----------------------------------------------------------------
+        setInteraction(1);
+        mouseMovementsFromLastDown = 0;
+        cameraController = new CameraControllerAquynza(getCamera());
 
         //-----------------------------------------------------------------
         frameCount = 0;
@@ -390,6 +407,12 @@ implements GLSurfaceView.Renderer {
         }
     }
 
+    /**
+    Vitral framework for scene render control takes into account several cases:
+    error checking, startup screen and actual application screen. Note that
+    this method is supposed to be kept simple.
+    @param glUnused
+    */
     public void onDrawFrame(GL10 glUnused) {
         if ( firstTimer ) {
             firstTimer = false;
@@ -413,6 +436,15 @@ implements GLSurfaceView.Renderer {
         frameCount++;
     }
 
+    /**
+    This method is called each time a frame is needed and model is not loaded
+    from secondary storage to main memory or graphic assets are not yet
+    sent to GPU. This method should not depend on complex loading operations
+    as is supposed to be shown rapidly to the used, as soon as application is
+    loaded. This method is supposed to show an splash screen for application
+    startup, with some kind of "wait for application loading" message to
+    end user.
+    */
     private void drawStartupScreen() {
         Camera c = getCamera();
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -469,6 +501,12 @@ implements GLSurfaceView.Renderer {
         drawText("Frame: " + frameCount, getCamera(), 10, y);
     }
 
+    /**
+    This method controls the rendering of 3d scene on main application
+    functionality, as all model elements are loaded from secondary storage to
+    main RAM and all graphics assets such as display lists and textures are 
+    ready sent to GPU.
+    */
     private void drawCurrent3DScene() {
         if ( doRaytrace ) {
             raytrace();
@@ -496,7 +534,7 @@ implements GLSurfaceView.Renderer {
 
         // Move light around center...
         double r = 2.0;
-        ArrayList<Light> l = scene.scene.getLights();
+        ArrayList<Light> l = getScene().scene.getLights();
         if ( withLightRotation && l.size() > 0 ) {
             l.get(0).setPosition(new Vector3D(r, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
@@ -513,7 +551,7 @@ implements GLSurfaceView.Renderer {
         //-----------------------------------------------------------------
         glLoadIdentity();
         
-        AndroidGLES20SceneRenderer.draw(scene, quality);
+        AndroidGLES20SceneRenderer.draw(getScene(), quality);
 
         AndroidGLES20MaterialRenderer.activate(material);
         glLoadIdentity();
@@ -543,28 +581,28 @@ implements GLSurfaceView.Renderer {
             else {
                 AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
             }
-            AndroidGLES20GeometryRenderer.draw(sphere, scene.camera, quality);
+            AndroidGLES20GeometryRenderer.draw(sphere, getScene().camera, quality);
         }
 
         if ( box != null ) {
-            AndroidGLES20GeometryRenderer.draw(box, scene.camera, quality);
+            AndroidGLES20GeometryRenderer.draw(box, getScene().camera, quality);
         }
 
         if ( cone != null ) {
-            AndroidGLES20GeometryRenderer.draw(cone, scene.camera, quality);
+            AndroidGLES20GeometryRenderer.draw(cone, getScene().camera, quality);
         }
 
         if ( meshToRender != null ) {
             glScaled(15, 15, 15);
             glRotated(90, 1, 0, 0);
             AndroidGLES20TriangleMeshRenderer.drawWithDisplayList(
-                    meshToRender, scene.camera, quality);
+                    meshToRender, getScene().camera, quality);
         }
         
         if ( meshGroupToRender != null ) {
             glScaled(0.2, 0.2, 0.2);
             AndroidGLES20TriangleMeshGroupRenderer.drawWithDisplayList(
-                    meshGroupToRender, scene.camera, quality);
+                    meshGroupToRender, getScene().camera, quality);
         }
 
         //-----------------------------------------------------------------
@@ -588,19 +626,27 @@ implements GLSurfaceView.Renderer {
         drawHudElements();
     }
 
+    /**
+    Creates a secondary OpenGL ES 2.0 rendering thread, with a context shared
+    with current thread's OpenGL ES 2.0 context, in an offline surface
+    (pbuffer), supposed to fetch rendering assets from model main memory to
+    GPU memory. Current operation is non-blocking with respect to current
+    thread.
+    */
     private void createSecondaryGLES20RenderingThread() {
-        AndroidGLES20AssetLoader l;
-        l = new AndroidGLES20AssetLoader(this);
-        Thread t;
-        t = new Thread(l);
-        t.start();
+        AndroidGLES20AssetLoader assetLoaderRunnable;
+        Thread assetLoaderThread;
+        
+        assetLoaderRunnable = new AndroidGLES20AssetLoader(this);
+        assetLoaderThread = new Thread(assetLoaderRunnable);
+        assetLoaderThread.setName("OpenGLES20AssetLoader");
+        assetLoaderThread.start();
     }
 
     private void drawHudElements() {
         timers.get("03_HUD").start();
         
         if ( withHudReport ) {
-
             int y = 10;
             drawText("Frame: " + frameCount, getCamera(), 10, y);
 
@@ -622,8 +668,14 @@ implements GLSurfaceView.Renderer {
             if (raytracingImage != null) {
                 drawImage(raytracingImage, getCamera(), 10, y + 50);
             }
-
-        //AndroidGLES20ImageRenderer.unload(testImage);
+            
+            y += 40;
+            drawText("Viewport: (" + 
+                    getCamera().getViewportXSize() + ", " + 
+                    getCamera().getViewportYSize() + ")", 
+                    getCamera(), 10, y);
+            
+            //AndroidGLES20ImageRenderer.unload(testImage);
         }
         timers.get("03_HUD").stop();
     }
@@ -648,6 +700,10 @@ implements GLSurfaceView.Renderer {
     /**
     Draws an image at integer screen coordinates (x, y) in pixels from
     upper left corner. Takes into account current configured camera (viewpoint)
+    @param img
+    @param c
+    @param x
+    @param y
     */
     public void drawImage(Image img, Camera c, int x, int y)
     {
@@ -717,16 +773,12 @@ implements GLSurfaceView.Renderer {
             return;
         }
 
-        scene.camera.updateViewportResize(width, height);
+        getScene().camera.updateViewportResize(width, height);
     }
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig configUnused) {
         //- Setup shader parameters ---------------------------------------
         init(getAndroidApplicationContext());
-
-        if ( errorsDetected ) {
-            return;
-        }
     }
 
     /**
@@ -736,7 +788,7 @@ implements GLSurfaceView.Renderer {
     {
         raytracingImage = new RGBImage();
         raytracingImage.init(256, 256);
-        scene.raytrace(raytracingImage, quality);
+        getScene().raytrace(raytracingImage, quality);
     }
     
     public void requestRaytracer()
@@ -796,6 +848,73 @@ implements GLSurfaceView.Renderer {
     public void setTexture(RGBImage texture) {
         this.texture = texture;
     }
+
+    /**
+    @return the scene
+    */
+    public Scene getScene() {
+        return scene;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent e) {
+        
+        switch ( e.getAction() ) {
+          case MotionEvent.ACTION_DOWN:            // one touch: drag
+            //System.out.println("one down");
+            mouseMovementsFromLastDown = 0;
+            break;
+          case MotionEvent.ACTION_POINTER_DOWN:    // two touches: zoom
+            //System.out.println("two down");
+            break;
+          case MotionEvent.ACTION_UP:              // no mode
+            mouseMovementsFromLastDown++;
+            //System.out.println("up");
+            break;
+          case MotionEvent.ACTION_POINTER_UP:      // no mode
+            //System.out.println("upup");
+            break;
+          case MotionEvent.ACTION_MOVE:            // rotation
+            //System.out.println("move");
+            mouseMovementsFromLastDown += 10;
+            break;
+        }
+
+        MouseEvent evsdk = AndroidSystem.android2vsdkEvent(e);
+
+        switch ( interaction ) {
+          case 1:
+            if ( mouseMovementsFromLastDown > 1 ) { // Drag
+                cameraController.processMouseDraggedEvent(evsdk);
+            }
+            else if ( mouseMovementsFromLastDown == 1 ) { // Click
+                getScene().selectObjectWithMouse(evsdk.getX(), evsdk.getY());
+            }
+            break;
+
+          case 2:
+            if ( mouseMovementsFromLastDown > 1 ) { // Drag
+                cameraController.processMouseDraggedEvent(evsdk);
+            }
+            else if ( mouseMovementsFromLastDown == 1 ) { // Click
+                getScene().insertSphereWithMouse(evsdk.getX(), evsdk.getY());
+            }
+            break;
+
+          default:
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param interaction the interaction to set
+     */
+    public void setInteraction(int interaction) {
+        this.interaction = interaction;
+    }
+
 }
 
 //===========================================================================

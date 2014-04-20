@@ -8,7 +8,7 @@ import android.opengl.GLSurfaceView;
 
 public class BasicGLSurfaceView extends GLSurfaceView {
 
-    public AndroidGLES20DrawingArea glExecutor;
+    private final AndroidGLES20DrawingArea glExecutor;
 
     public BasicGLSurfaceView(Context context) {
         super(context);
@@ -19,7 +19,17 @@ public class BasicGLSurfaceView extends GLSurfaceView {
         setEGLConfigChooser(8, 8, 8, 8, 16, 0); // RGBA depth stencil profile
         setEGLContextFactory(new AndroidGLES20SharedContextFactory()); // Experimental!
         setRenderer(glExecutor);
+        
+        setOnTouchListener(glExecutor);
     }
+
+    /**
+    @return the glExecutor
+    */
+    public AndroidGLES20DrawingArea getGlExecutor() {
+        return glExecutor;
+    }
+    
 }
 
 //===========================================================================
