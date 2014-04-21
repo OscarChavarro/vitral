@@ -3,9 +3,6 @@ package vitral.application;
 
 // Java basic classes
 import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -40,8 +37,6 @@ import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.AndroidSystem;
@@ -49,13 +44,10 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshGroupRenderer;
-import vsdk.toolkit.render.androidgles20.AndroidGLES20TriangleMeshRenderer;
 
 /**
 The Drawing Area is the main Vitral application element responsible for managing
@@ -74,15 +66,12 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     // Android application elements
     private final Context androidApplicationContext;
 
-    // Vitral scene
+    // Vitral model
     private Scene scene;
     private RendererConfiguration quality;
     private Material material;
-    private Box box;
-    private Cone cone;
     private SimpleScene preloadedCow;
     private SimpleScene preloadedMug;
-
     private RGBImage texture;
     private RGBImage raytracingImage;
     private RGBImage testImage;
@@ -110,6 +99,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private int interaction;
     private int mouseMovementsFromLastDown;
     private CameraControllerAquynza cameraController;
+    
+    // Graphic design
+    private int fontSize = 16;
     
     public AndroidGLES20DrawingArea(Context context) {
         androidApplicationContext = context;
@@ -175,9 +167,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
               i++ ) {
             scene.scene.getSimpleBodies().remove(0);
         }
-        
-        box = null;
-        cone = null;
+       
+        Box box;
+        Cone cone;
         Sphere sphere;
         numberOfAffectedObjectsOnScene = 1;
         Matrix4x4 R;
@@ -195,9 +187,11 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             break;
           case 3:
             box = new Box(1.0, 1.0, 1.0);
+            addThing(box, new Vector3D(1, 1, 1));
             break;
           case 4:
             cone = new Cone(1.0, 1.0, 2.0);
+            addThing(cone, new Vector3D(1, 1, 1));
             break;
           case 5:
             if ( preloadedMug == null ) {
@@ -317,8 +311,10 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         prepareLights(1);
 
-        selectObject(5);
-        createBitmapFontSprites();
+        selectObject(1);
+        
+        characterSprites = new HashMap<String, RGBAImage>();
+        //fillBitmapFontSprites();
 
         bumpmap = null;
         normalMap = null;
@@ -341,13 +337,17 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         timers.get("01_STARTUP").stop();
     }
 
-    private void createBitmapFontSprites() {
+    /**
+    This method is used to create font sprites for common used characters.
+    Note that application can waste unneeded time loading glyphs that will never
+    be used or will seldom used. It is recommended not to use this method and
+    instead load each glyph when first needed.
+    */
+    private void fillBitmapFontSprites() {
         //-----------------------------------------------------------------
-        characterSprites = new HashMap<String, RGBAImage>();
         char c;
         String s;
         RGBAImage img;
-        int fontSize = 16;
 
         for ( c = 'a'; c <= 'z'; c++ ) {
             s = "" + c;
@@ -533,11 +533,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         
         if ( frameCount > 1 ) timers.get("02_GEOMETRY").start();
 
-        if ( quality.isBumpMapSet() &&
-                (bumpmap == null || normalMap == null) ) {
-            loadBumpmap();
-        }
-        
         // Draw background
         GLES20.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
@@ -563,11 +558,13 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         }
 
         //-----------------------------------------------------------------
-        AndroidGLES20Renderer.setRendererConfiguration(quality);
+        if ( highResSphere ) {
+            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(50, 25);
+        }
+        else {
+            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
+        }
 
-        //-----------------------------------------------------------------
-        glLoadIdentity();
-        
         if ( withObjectRotation ) {
             int i;
             
@@ -580,63 +577,69 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                 b.setRotation(delta.multiply(original));
             }
         }
-        AndroidGLES20SceneRenderer.draw(getScene(), quality);
 
-        //-----------------------------------------------------------------
-        AndroidGLES20MaterialRenderer.activate(material);
         glLoadIdentity();
-        //glTranslated(-2, 0, 0);
-        if ( withObjectRotation ) {
-            glRotated(200*x, 0, 0, 1);
-        }
-        
-        // Activate texture image.activate()
-        if ( quality.isTextureSet() ) {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            AndroidGLES20ImageRenderer.activate(getTexture());
-            activateDefaultTextureParameters();
-        }
-
-        if ( quality.isBumpMapSet() ) {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-            AndroidGLES20ImageRenderer.activate(testImage);
-            activateDefaultTextureParameters();
-        }
-
-        if ( highResSphere ) {
-            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(50, 25);
-        }
-        else {
-            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
-        }
-
-        if ( box != null ) {
-            AndroidGLES20GeometryRenderer.draw(box, getScene().camera, quality);
-        }
-
-        if ( cone != null ) {
-            AndroidGLES20GeometryRenderer.draw(cone, getScene().camera, quality);
-        }
-
-        //-----------------------------------------------------------------
-        if ( withReferenceSquare ) {
-            //if ( raytracingImage != null ) {
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glTranslated(x, 0, 0);
-            setRendererConfiguration(quality);
-
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            AndroidGLES20ImageRenderer.activate(testImage);
-            activateDefaultTextureParameters();
-            
-            drawUnitSquare();
-        }
+        AndroidGLES20SceneRenderer.draw(getScene(), quality);
+        drawNonStandardSceneElements(x);
         
         if ( frameCount > 1 ) timers.get("02_GEOMETRY").stop();
         
         //- Draw HUD elements ---------------------------------------------
         drawHudElements();
+    }
+
+    /**
+    Draws test elements not relying on standard Vitral Scene rendering
+    framework. Current version of method drawCurrent3DScene uses a standard
+    Vitral SimpleScene to render test objects. This method is here to render
+    additional test elements on a more low level direct OpenGL ES 2.0
+    interaction. Currently, only reference square is used. On an actual
+    application this kind of rendering control should not be used, in favor of 
+    standard Vitral scene construction and rendering.
+    */
+    private void drawNonStandardSceneElements(float x) {
+        //- Prepare rendering environment ---------------------------------
+        if ( withReferenceSquare ) {
+            setRendererConfiguration(quality);
+            AndroidGLES20MaterialRenderer.activate(material);
+
+            // Activate texture image.activate()
+            if ( quality.isTextureSet() ) {
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                AndroidGLES20ImageRenderer.activate(texture);
+                activateDefaultTextureParameters();
+            }
+
+            if ( quality.isBumpMapSet()
+                    && (bumpmap == null || normalMap == null) ) {
+                loadBumpmap();
+            }
+            
+            if ( quality.isBumpMapSet() ) {
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+                AndroidGLES20ImageRenderer.activate(testImage);
+                activateDefaultTextureParameters();
+            }
+        }
+        
+        //- Render test geometry ------------------------------------------
+        if ( withReferenceSquare ) {
+            // Set transformation
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            //glTranslated(-2, 0, 0);
+            //if ( withObjectRotation ) {
+            //    glRotated(200 * x, 0, 0, 1);
+            //}
+            glTranslated(x, 0, 0);
+
+            // Draw current geometry
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            AndroidGLES20ImageRenderer.activate(texture);
+            activateDefaultTextureParameters();
+            
+            drawUnitSquare();
+        }
     }
 
     /**
@@ -660,6 +663,14 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         timers.get("03_HUD").start();
         
         if ( withHudReport ) {
+            RendererConfiguration q;
+            q = new RendererConfiguration();
+            q.setSurfaces(true);
+            q.setTexture(true);
+            q.setUseVertexColors(true);
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            setRendererConfiguration(q);
+
             int y = 10;
             drawText("Frame: " + frameCount, getCamera(), 10, y);
 
@@ -692,11 +703,18 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         int x = x0, y = y0;
         int i;
         String key;
+        RGBAImage img;
 
         for ( i = 0; i < msg.length(); i++ ) {
             key = "" + msg.charAt(i);
+            if ( !characterSprites.containsKey(key) ) {
+                img = AndroidSystem.calculateLabelImage(
+                    key, new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                characterSprites.put(key, img);
+            }
+            
             if ( characterSprites.containsKey(key) ) {
-                Image img = characterSprites.get(key);
+                img = characterSprites.get(key);
                 drawImage(img, c, x, y);
                 x += img.getXSize()*2;
             }
@@ -713,7 +731,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     */
     public void drawImage(Image img, Camera c, int x, int y)
     {
-        RendererConfiguration q;
         double fx, fy;
         double dx, dy;
 
@@ -729,13 +746,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         dy = ((double)img.getYSize() + y) / 
             ((double)c.getViewportYSize());
 
-        q = new RendererConfiguration();
-        q.setSurfaces(true);
-        q.setTexture(true);
-        q.setUseVertexColors(true);
-        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-        setRendererConfiguration(q);
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
@@ -746,30 +756,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         AndroidGLES20ImageRenderer.activate(img);
         activateDefaultTextureParameters();
         drawUnitSquare();
-    }
-
-    private void drawUnitSquare()
-    {
-        //-----------------------------------------------------------------
-        // Geometry data
-        float[] vertexDataArray = {
-            // X, Y, Z, R, G, B, NX, NY, NZ, U, V
-            -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-             0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-             0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
-
-        FloatBuffer verticesBufferedArray;
-
-        verticesBufferedArray = ByteBuffer.allocateDirect(
-            vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
-            ByteOrder.nativeOrder()).asFloatBuffer();
-        verticesBufferedArray.put(vertexDataArray);
-
-        //-----------------------------------------------------------------
-        drawVertices3Position3Color3Normal2Uv(
-            verticesBufferedArray,
-            GLES20.GL_TRIANGLE_STRIP, 4);
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
@@ -803,15 +789,15 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     }
 
     /**
-     * @return the withHudReport
-     */
+    @return the withHudReport
+    */
     public boolean isWithHudReport() {
         return withHudReport;
     }
 
     /**
-     * @param withHudReport the withHudReport to set
-     */
+    @param withHudReport the withHudReport to set
+    */
     public void setWithHudReport(boolean withHudReport) {
         this.withHudReport = withHudReport;
     }
@@ -821,36 +807,36 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     }
 
     /**
-     * @return the displayListsCompiled
-     */
+    @return the displayListsCompiled
+    */
     public boolean isDisplayListsCompiled() {
         return displayListsCompiled;
     }
 
     /**
-     * @param displayListsCompiled the displayListsCompiled to set
-     */
+    @param displayListsCompiled the displayListsCompiled to set
+    */
     public void setDisplayListsCompiled(boolean displayListsCompiled) {
         this.displayListsCompiled = displayListsCompiled;
     }
 
     /**
-     * @return the androidApplicationContext
-     */
+    @return the androidApplicationContext
+    */
     public Context getAndroidApplicationContext() {
         return androidApplicationContext;
     }
 
     /**
-     * @return the texture
-     */
+    @return the texture
+    */
     public RGBImage getTexture() {
         return texture;
     }
 
     /**
-     * @param texture the texture to set
-     */
+    @param texture the texture to set
+    */
     public void setTexture(RGBImage texture) {
         this.texture = texture;
     }

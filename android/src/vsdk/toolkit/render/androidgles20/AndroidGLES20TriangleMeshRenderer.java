@@ -109,6 +109,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         displayList.addVbo(
             m,
             vbo[0],
+            GLES20.GL_TRIANGLES,
             vertexArray.capacity()/11);
     }
 

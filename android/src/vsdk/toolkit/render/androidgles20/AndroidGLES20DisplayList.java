@@ -27,6 +27,9 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     /// Size in vertices
     private ArrayListOfInts vboSizes;
     
+    /// Primitive to be used on vertex buffered objects
+    private ArrayListOfInts vboPrimitives;
+    
     /// Gets invalidated if user changes rendering configuration.
     private RendererConfiguration correspondingQuality;
 
@@ -34,7 +37,13 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
         vboMaterials = new ArrayList<Material>();
         vboIds = new ArrayListOfInts(10);
         vboSizes = new ArrayListOfInts(10);
-        correspondingQuality = q.clone();
+        vboPrimitives = new ArrayListOfInts(10);
+        if ( q!= null ) {
+            correspondingQuality = q.clone();
+        }
+        else {
+            correspondingQuality = null;
+        }
     }
 
     /**
@@ -66,23 +75,31 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     }
 
     /**
-     * @return the vboIds
-     */
+    @return the vboIds
+    */
     public ArrayListOfInts getVboIds() {
         return vboIds;
     }
 
-    void addVbo(Material material, int id, int size) {
+    void addVbo(Material material, int id, int primitive, int size) {
         vboMaterials.add(material);
         vboIds.add(id);
+        vboPrimitives.add(primitive);
         getVboSizes().add(size);
     }
 
     /**
-     * @return the vboSizes
-     */
+    @return the vboSizes
+    */
     public ArrayListOfInts getVboSizes() {
         return vboSizes;
+    }
+
+    /**
+    @return the vboPrimitives
+    */
+    public ArrayListOfInts getVboPrimitives() {
+        return vboPrimitives;
     }
     
 }

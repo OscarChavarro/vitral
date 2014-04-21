@@ -7,11 +7,14 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.StopWatch;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
+import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.setRendererConfiguration;
 
 /**
 Creates an off-screen area to render OpenGL ES 2.0 commands on an asset 
@@ -27,6 +30,9 @@ public class AndroidGLES20AssetLoader implements Runnable {
     }
     
     private void sendLoadedModelAssetsToGPU() {
+        StopWatch clock = new StopWatch();
+        clock.start();
+        System.out.println("Loading texture... ");
         //- Set up textures -----------------------------------------------
         InputStream is;
 
@@ -43,7 +49,19 @@ public class AndroidGLES20AssetLoader implements Runnable {
         // Note that generated OpenGL operations on current thread will be
         // drawn over pbuffer surface, but generated display lists will be
         // shared between contexts...
+        RendererConfiguration q;
+        q = new RendererConfiguration();
+        q.setSurfaces(true);
+        q.setTexture(true);
+        q.setUseVertexColors(true);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        setRendererConfiguration(q);
+
         parent.drawImage(parent.getTexture(), new Camera(), 0, 0);
+        
+        clock.stop();
+        System.out.println("Ok (" + 
+            VSDK.formatDouble(clock.getElapsedRealTime()) + ")");
     }
 
     /**

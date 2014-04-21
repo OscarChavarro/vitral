@@ -13,6 +13,8 @@ import android.util.Log;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 
 // Sandbox
@@ -43,6 +45,8 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     // Common values
     protected static final int FLOAT_SIZE_IN_BYTES = 4;
+    
+    private static Object unitSquare = null;
 
     // OpenGL-ES2.0 state
     public static float[] transientMatrix;
@@ -143,7 +147,11 @@ public class AndroidGLES20Renderer extends RenderingElement
         
         // Draw VBOs on display list
         for ( i = 0; i < displayList.getVboIds().size(); i++ ) {
-            AndroidGLES20MaterialRenderer.activate(displayList.getVboMaterials().get(i));
+            Material m = displayList.getVboMaterials().get(i);
+            
+            if ( m != null ) {
+                AndroidGLES20MaterialRenderer.activate(m);
+            }
 
             //-----------------------------------------------------------------
             // Activate VBO
@@ -151,7 +159,9 @@ public class AndroidGLES20Renderer extends RenderingElement
             checkGlError("glBindBuffer(" + displayList.getVboIds().get(i) + ")");
             
             // Display VBO 
-            drawVertices3Position3Color3Normal2Uv(GLES20.GL_TRIANGLES, displayList.getVboSizes().get(i));
+            drawVertices3Position3Color3Normal2Uv(
+                displayList.getVboPrimitives().get(i), 
+                displayList.getVboSizes().get(i));
 
             // Disable current VBO
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -248,8 +258,10 @@ public class AndroidGLES20Renderer extends RenderingElement
     
     public static void setRendererConfiguration(RendererConfiguration source)
     {
-        qualitySelection.clone(source);
-        activateShaders();
+        if ( source != null ) {
+            qualitySelection.clone(source);
+            activateShaders();
+        }
     }
 
     public static void checkGlError(String op) {
@@ -1150,6 +1162,65 @@ public class AndroidGLES20Renderer extends RenderingElement
         arr[index] = (float)u;    index++;
         arr[index] = (float)v;    index++;
     }
+    
+    /**
+    Generates OpenGL ES 2.0 primitives needed to render a 2D square of unit
+    size (sides of 1.0) placed around the origin.
+    */
+    public synchronized static void drawUnitSquare()
+    {
+        if ( unitSquare != null && 
+             isObjectRegisteredWithADisplayList(unitSquare) ) {
+            executeCompiledDisplayList(unitSquare);
+            return;
+        }
+        
+        //-----------------------------------------------------------------
+        unitSquare = new Object();
+        
+        AndroidGLES20DisplayList displayList;
+        
+        displayList = new AndroidGLES20DisplayList(null);
+                
+        //-----------------------------------------------------------------
+        // Geometry data
+        float[] vertexDataArray = {
+            // X, Y, Z, R, G, B, NX, NY, NZ, U, V
+            -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+             0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+             0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+
+        FloatBuffer vertexArray;
+
+        vertexArray = ByteBuffer.allocateDirect(
+            vertexDataArray.length * FLOAT_SIZE_IN_BYTES).order(
+            ByteOrder.nativeOrder()).asFloatBuffer();
+        vertexArray.put(vertexDataArray);
+
+        //-----------------------------------------------------------------
+        int[] vbo;
+        vbo = new int[1];
+        GLES20.glGenBuffers(1, vbo, 0);
+        vertexArray.position(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+        GLES20.glBufferData(
+            GLES20.GL_ARRAY_BUFFER,
+            vertexArray.capacity() * FLOAT_SIZE_IN_BYTES,
+            vertexArray, GLES20.GL_STATIC_DRAW);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        displayList.addVbo(null, vbo[0], GLES20.GL_TRIANGLE_STRIP, 4);
+
+        registerObjectWithADisplayList(unitSquare, displayList);
+        
+        //-----------------------------------------------------------------
+        //drawVertices3Position3Color3Normal2Uv(
+        //    vertexArray,
+        //    GLES20.GL_TRIANGLE_STRIP, 
+        //    4);
+        executeCompiledDisplayList(unitSquare);
+    }
+
 }
 
 //===========================================================================
