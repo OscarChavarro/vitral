@@ -26,7 +26,6 @@ public class AndroidGLES20SceneRenderer extends AndroidGLES20Renderer
         SimpleBody gi;
         RendererConfiguration r2 = r.clone();
 
-        
         for ( i = 0; i < bodies.size(); i++ ) {
             gi = bodies.get(i);
             

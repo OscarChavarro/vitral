@@ -385,8 +385,7 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
             canvas.getGlExecutor().toggleHudReport();
             break;
           case 29:
-            canvas.getGlExecutor().clearSceneFromObjectsAndLights();
-            canvas.getGlExecutor().prepareLights(1);
+            canvas.getGlExecutor().clearSceneFromObjects();
             break;
         }
         return true;

@@ -48,7 +48,6 @@ import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
-import vsdk.toolkit.io.geometry.ReaderPly;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20GeometryRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
@@ -81,10 +80,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private Material material;
     private Box box;
     private Cone cone;
-    private TriangleMeshGroup currentLoadedMeshGroup;
-    private TriangleMesh currentLoadedMesh;
-    private TriangleMesh meshToRender;
-    private TriangleMeshGroup meshGroupToRender;
+    private SimpleScene preloadedCow;
+    private SimpleScene preloadedMug;
+
     private RGBImage texture;
     private RGBImage raytracingImage;
     private RGBImage testImage;
@@ -95,6 +93,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private boolean doRaytrace = false;
     private boolean withHudReport = true;
     private double firstLightRadius = 2.0;
+    private int numberOfAffectedObjectsOnScene = 1;
 
     // Animation control
     private int frameCount;
@@ -168,15 +167,20 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     {
         frameCount = 0;
         
-        if ( scene.scene.getSimpleBodies().size() > 1 ) {
+        int i;
+
+        for ( i = 0; 
+              i < numberOfAffectedObjectsOnScene &&
+              scene.scene.getSimpleBodies().size() > 0;
+              i++ ) {
             scene.scene.getSimpleBodies().remove(0);
         }
         
-        meshToRender = null;
-        meshGroupToRender = null;
         box = null;
         cone = null;
         Sphere sphere;
+        numberOfAffectedObjectsOnScene = 1;
+        Matrix4x4 R;
 
         switch ( o ) {
           case 1: default:
@@ -196,59 +200,58 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             cone = new Cone(1.0, 1.0, 2.0);
             break;
           case 5:
-            if ( currentLoadedMesh == null ) {
-                currentLoadedMesh = loadPlyMesh("/storage/extSdCard/mug.ply");
+            if ( preloadedMug == null ) {
+                preloadedMug = 
+                        loadExternalSceneFile("/storage/extSdCard/mug.ply");
             }
-            meshToRender = currentLoadedMesh;
+            R = new Matrix4x4();
+            R.axisRotation(Math.toRadians(90), 1, 0, 0);
+            activateSubScene(preloadedMug, R, new Vector3D(20, 20, 20));
             break;
           case 6:
-            if ( currentLoadedMeshGroup == null ) {
-                currentLoadedMeshGroup = loadMeshGroup("/storage/extSdCard/cow.obj");
+            if ( preloadedCow == null ) {
+                preloadedCow = 
+                        loadExternalSceneFile("/storage/extSdCard/cow.obj");
             }
-            meshGroupToRender = currentLoadedMeshGroup;
+            R = new Matrix4x4();
+            activateSubScene(preloadedCow, R, new Vector3D(0.3, 0.3, 0.3));
             break;
         }
 
         resetTimers();
     }
 
-    private TriangleMesh loadPlyMesh(String filename)
-    {
-        File meshFile;
-
-        System.out.println("Loading mesh " + filename);
-        meshFile = new File(filename);
-        SimpleScene localScene;
-        localScene = new SimpleScene();
-        TriangleMesh m = null;
-        try {
-            ReaderPly.importEnvironment(meshFile, localScene);
-            m = (TriangleMesh)(localScene.getSimpleBodies().get(0).getGeometry());
-          }
-          catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
-                "loadPlyMesh", "Error loading mesh " + filename, e);
+    private void activateSubScene(SimpleScene source, Matrix4x4 R, Vector3D scale) {
+        int i;
+        for ( i = 0; i < source.getSimpleBodies().size();
+                i++ ) {
+            SimpleBody b = source.getSimpleBodies().get(i);
+            b.setScale(scale);
+            //Matrix4x4 orig = b.getRotation();
+            //Matrix4x4 modified = orig.multiply(R);
+            b.setRotation(R);
+            scene.scene.getSimpleBodies().add(b);
         }
-        return m;
+        numberOfAffectedObjectsOnScene =
+                source.getSimpleBodies().size();
     }
 
-    private TriangleMeshGroup loadMeshGroup(String filename)
+    private SimpleScene loadExternalSceneFile(String filename)
     {
         File meshFile;
 
         meshFile = new File(filename);
         SimpleScene localScene;
         localScene = new SimpleScene();
-        TriangleMeshGroup g = null;
+        
         try {
             EnvironmentPersistence.importEnvironment(meshFile, localScene);
-            g = (TriangleMeshGroup)(localScene.getSimpleBodies().get(0).getGeometry());
           }
           catch ( Exception e ) {
             VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
-                "loadPlyMesh", "Error loading mesh " + filename, e);
+                "loadExternalSceneFile", "Error loading file " + filename, e);
         }
-        return g;
+        return localScene;
     }
 
     public void prepareLights(int n)
@@ -314,12 +317,14 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         prepareLights(1);
 
-        currentLoadedMesh = null;
-        selectObject(6);
+        selectObject(5);
         createBitmapFontSprites();
 
         bumpmap = null;
         normalMap = null;
+
+        preloadedCow = null;
+        preloadedMug = null;
         
         //-----------------------------------------------------------------
         //testImage = new RGBImage();
@@ -564,11 +569,15 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         glLoadIdentity();
         
         if ( withObjectRotation ) {
-            if ( scene.scene.getSimpleBodies().size() >= 1 ) {
-                SimpleBody b = scene.scene.getSimpleBodies().get(0);
-                Matrix4x4 R = new Matrix4x4();
-                R.axisRotation(Math.toRadians(200*x), new Vector3D(0, 0, 1));
-                b.setRotation(R);
+            int i;
+            
+            for ( i = 0; scene.scene.getSimpleBodies().size() >= 1 &&
+                    i < numberOfAffectedObjectsOnScene; i++ ) {
+                SimpleBody b = scene.scene.getSimpleBodies().get(i);
+                Matrix4x4 original = b.getRotation();
+                Matrix4x4 delta = new Matrix4x4();
+                delta.axisRotation(Math.toRadians(1.0), new Vector3D(0, 0, 1));
+                b.setRotation(delta.multiply(original));
             }
         }
         AndroidGLES20SceneRenderer.draw(getScene(), quality);
@@ -607,19 +616,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         if ( cone != null ) {
             AndroidGLES20GeometryRenderer.draw(cone, getScene().camera, quality);
-        }
-
-        if ( meshToRender != null ) {
-            glScaled(15, 15, 15);
-            glRotated(90, 1, 0, 0);
-            AndroidGLES20TriangleMeshRenderer.drawWithDisplayList(
-                    meshToRender, getScene().camera, quality);
-        }
-        
-        if ( meshGroupToRender != null ) {
-            glScaled(0.2, 0.2, 0.2);
-            AndroidGLES20TriangleMeshGroupRenderer.drawWithDisplayList(
-                    meshGroupToRender, getScene().camera, quality);
         }
 
         //-----------------------------------------------------------------
@@ -675,13 +671,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                 drawText("" + tr, getCamera(), 10, y);
             }
 
-            if ( meshToRender != null ) {
-                y += 40;
-                drawText("Mesh: v " + meshToRender.getNumVertices() + 
-                        " t " + meshToRender.getNumTriangles()
-                        , getCamera(), 10, y);
-            }
-            
             if (raytracingImage != null) {
                 drawImage(raytracingImage, getCamera(), 10, y + 50);
             }
@@ -873,10 +862,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         return scene;
     }
     
-    public void clearSceneFromObjectsAndLights()
+    public void clearSceneFromObjects()
     {
         scene.scene.getSimpleBodies().clear();
-        scene.scene.getLights().clear();
     }
 
     @Override

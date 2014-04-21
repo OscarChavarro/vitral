@@ -1127,5 +1127,6 @@
     rendering is managing simple bodies individual transformation matrix
     and texture. Sample program is modified to manage test sphere as
     first object in standard scene.
+  - 1h: Android example is managing subscenes for sample objects.
 
 ===========================================================================

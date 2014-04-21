@@ -308,7 +308,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
             //AndroidGLES20PolyhedralBoundedSolidRenderer.draw((PolyhedralBoundedSolid)g, c, q);
         }
         else if ( g instanceof TriangleMesh ) {
-            AndroidGLES20TriangleMeshRenderer.draw((TriangleMesh)g, c, q);
+            AndroidGLES20TriangleMeshRenderer.drawWithDisplayList((TriangleMesh)g, c, q);
         }
         else if ( g instanceof QuadMesh ) {
             //AndroidGLES20QuadMeshRenderer.draw((QuadMesh)g, q, false);
@@ -320,7 +320,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
             //AndroidGLES20TriangleStripMeshRenderer.draw((TriangleStripMesh)g, q, false);
         }
         else if ( g instanceof TriangleMeshGroup ) {
-            //AndroidGLES20TriangleMeshGroupRenderer.draw((TriangleMeshGroup)g,q);
+            AndroidGLES20TriangleMeshGroupRenderer.drawWithDisplayList((TriangleMeshGroup)g, c, q);
         }
         else if ( g instanceof VoxelVolume ) {
             //AndroidGLES20VoxelVolumeRenderer.drawBinaryCubes((VoxelVolume)g, c, q);
