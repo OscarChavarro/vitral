@@ -7,20 +7,21 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
-import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.StopWatch;
 
 // VSDK classes
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
-import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.setRendererConfiguration;
+import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 
 /**
 Creates an off-screen area to render OpenGL ES 2.0 commands on an asset 
 pre loading thread.
 */
-public class AndroidGLES20AssetLoader implements Runnable {
+public class AndroidGLES20AssetLoader extends AndroidGLES20Renderer 
+implements Runnable {
 
     private final AndroidGLES20DrawingArea parent;
     

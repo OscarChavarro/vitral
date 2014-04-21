@@ -30,6 +30,7 @@ import android.location.LocationManager;
 import android.location.GpsStatus;
 //import android.location.GpsStatus.Listener;
 import android.content.Context;
+import android.os.Debug;
 import android.view.Window;
 
 // Vsdk classes
@@ -128,6 +129,9 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        // Profiler: create .trace file to be used with traceview ADT tool.
+        //Debug.startMethodTracing("VITRAL");
+        
         createGUI();
 
         // Scene related
@@ -147,6 +151,13 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
           else {
             System.out.println("Location not available");
         }
+    }
+    
+    @Override
+    protected void onDestroy()
+    {
+        //Debug.stopMethodTracing();
+        super.onDestroy();
     }
 
     @Override
