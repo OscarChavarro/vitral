@@ -37,9 +37,6 @@ import android.view.Window;
 //import vsdk.toolkit.common.ColorRgb;
 //import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.gui.AndroidSystem;
-import vsdk.toolkit.gui.MouseEvent;
-import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE) 
@@ -276,6 +273,7 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
         x.add(0, 20, 0, "Add light");
         x.add(0, 21, 0, "Add sphere");
         x.add(0, 22, 0, "Add 10 spheres");
+        x.add(0, 29, 0, "Clear scene");
 
         SubMenu i = popupMenu.addSubMenu(4, 104, 4, "Interaction");
         i.add(0, 23, 0, "Select objects");
@@ -385,6 +383,10 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
             break;
           case 27:
             canvas.getGlExecutor().toggleHudReport();
+            break;
+          case 29:
+            canvas.getGlExecutor().clearSceneFromObjectsAndLights();
+            canvas.getGlExecutor().prepareLights(1);
             break;
         }
         return true;

@@ -38,9 +38,11 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -77,7 +79,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private Scene scene;
     private RendererConfiguration quality;
     private Material material;
-    private Sphere sphere;
     private Box box;
     private Cone cone;
     private TriangleMeshGroup currentLoadedMeshGroup;
@@ -93,6 +94,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private boolean withReferenceSquare = false;
     private boolean doRaytrace = false;
     private boolean withHudReport = true;
+    private double firstLightRadius = 2.0;
 
     // Animation control
     private int frameCount;
@@ -141,23 +143,51 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         withReferenceSquare = !withReferenceSquare;
     }
 
+    /**
+    Add a thing in the current Vitral scene with given geometry and scale factor
+    with identity rotation and position at the origin.
+    @param g
+    @param scale
+    */
+    public void addThing(Geometry g, Vector3D scale)
+    {
+        SimpleBody b;
+        
+        b = new SimpleBody();
+        b.setPosition(new Vector3D(0, 0, 0));
+        b.setRotation(new Matrix4x4());
+        b.setMaterial(material);
+        b.setScale(scale);
+        b.setGeometry(g);
+        b.setTexture(texture);
+        
+        scene.scene.getSimpleBodies().add(0, b);
+    }
+    
     public void selectObject(int o)
     {
         frameCount = 0;
         
-        sphere = null;
+        if ( scene.scene.getSimpleBodies().size() > 1 ) {
+            scene.scene.getSimpleBodies().remove(0);
+        }
+        
         meshToRender = null;
         meshGroupToRender = null;
         box = null;
         cone = null;
+        Sphere sphere;
+
         switch ( o ) {
           case 1: default:
             highResSphere = false;
             sphere = new Sphere(1.0);
+            addThing(sphere, new Vector3D(1, 1, 1));
             break;
           case 2:
             highResSphere = true;
             sphere = new Sphere(1.0);
+            addThing(sphere, new Vector3D(1, 1, 1));
             break;
           case 3:
             box = new Box(1.0, 1.0, 1.0);
@@ -225,7 +255,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     {
         Light l;
         double p[] = {
-            0, -10, 0, 0.8, 0.8, 0.8,
+            0, -firstLightRadius, 0, 0.8, 0.8, 0.8,
             1, -1, 1, 0, 1, 0,
             -0.6, -2, 2, 0, 0, 1};
 
@@ -380,23 +410,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                 bumpmap.getXSize() + " x " + bumpmap.getYSize());
     }
 
-    /**
-    This method should be called after every call to a texture activation
-    (glBindTexture).
-    */
-    private void setTextureParameters()
-    {
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
-            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MAG_FILTER,
-                GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-                GLES20.GL_REPEAT);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-                GLES20.GL_REPEAT);
-    }
-
     public void resetTimers()
     {
         TimeReport tr;
@@ -533,10 +546,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         glLoadIdentity();
 
         // Move light around center...
-        double r = 2.0;
         ArrayList<Light> l = getScene().scene.getLights();
         if ( withLightRotation && l.size() > 0 ) {
-            l.get(0).setPosition(new Vector3D(r, 0, 0));
+            l.get(0).setPosition(new Vector3D(firstLightRadius, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
             RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
             Vector3D P, PR;
@@ -551,8 +563,17 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         //-----------------------------------------------------------------
         glLoadIdentity();
         
+        if ( withObjectRotation ) {
+            if ( scene.scene.getSimpleBodies().size() >= 1 ) {
+                SimpleBody b = scene.scene.getSimpleBodies().get(0);
+                Matrix4x4 R = new Matrix4x4();
+                R.axisRotation(Math.toRadians(200*x), new Vector3D(0, 0, 1));
+                b.setRotation(R);
+            }
+        }
         AndroidGLES20SceneRenderer.draw(getScene(), quality);
 
+        //-----------------------------------------------------------------
         AndroidGLES20MaterialRenderer.activate(material);
         glLoadIdentity();
         //glTranslated(-2, 0, 0);
@@ -564,24 +585,20 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         if ( quality.isTextureSet() ) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             AndroidGLES20ImageRenderer.activate(getTexture());
-            setTextureParameters();
+            activateDefaultTextureParameters();
         }
 
         if ( quality.isBumpMapSet() ) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             AndroidGLES20ImageRenderer.activate(testImage);
-            setTextureParameters();
+            activateDefaultTextureParameters();
         }
 
-        if ( sphere != null ) {
-            sphere.setRadius(1.0);
-            if ( highResSphere ) {
-                AndroidGLES20SphereRenderer.setDefaultSlicesStacks(50, 25);
-            }
-            else {
-                AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
-            }
-            AndroidGLES20GeometryRenderer.draw(sphere, getScene().camera, quality);
+        if ( highResSphere ) {
+            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(50, 25);
+        }
+        else {
+            AndroidGLES20SphereRenderer.setDefaultSlicesStacks(20, 10);
         }
 
         if ( box != null ) {
@@ -615,7 +632,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             AndroidGLES20ImageRenderer.activate(testImage);
-            setTextureParameters();
+            activateDefaultTextureParameters();
             
             drawUnitSquare();
         }
@@ -738,7 +755,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         glScaled(fx, fy, 1.0);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         AndroidGLES20ImageRenderer.activate(img);
-        setTextureParameters();
+        activateDefaultTextureParameters();
         drawUnitSquare();
     }
 
@@ -855,6 +872,12 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     public Scene getScene() {
         return scene;
     }
+    
+    public void clearSceneFromObjectsAndLights()
+    {
+        scene.scene.getSimpleBodies().clear();
+        scene.scene.getLights().clear();
+    }
 
     @Override
     public boolean onTouch(View v, MotionEvent e) {
@@ -909,8 +932,8 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     }
 
     /**
-     * @param interaction the interaction to set
-     */
+    @param interaction the interaction to set
+    */
     public void setInteraction(int interaction) {
         this.interaction = interaction;
     }

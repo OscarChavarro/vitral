@@ -9,6 +9,7 @@ import android.opengl.GLES20;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -20,16 +21,20 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
-        Vector3D scale;
-        Vector3D p;
+        // Activate current body transformation matrix
+        Matrix4x4 R = b.getRotation();
+        Matrix4x4 S = new Matrix4x4();
+        Matrix4x4 T = new Matrix4x4();
+        Vector3D p = b.getPosition();
+        Vector3D s = b.getScale();
 
-        p = b.getPosition();
-        scale = b.getScale();
+        S.scale(s);
+        T.translation(p);
+        Matrix4x4 M;
 
+        M = T.multiply(R.multiply(S));
         glLoadIdentity();
-        glTranslated(p.x, p.y, p.z);
-        //AndroidGLES20MatrixRenderer.activate(b.getRotation());
-        glScaled(scale.x, scale.y, scale.z);
+        AndroidGLES20MatrixRenderer.activate(M);
 
         //glColor3d(1, 1, 1);
         AndroidGLES20MaterialRenderer.activate(b.getMaterial());
@@ -49,19 +54,10 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
             // Activate global texture
             if ( (texture != null) ) {
                 AndroidGLES20ImageRenderer.activate(texture);
-                //GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-                //    GL2.GL_GENERATE_MIPMAP, GL_TRUE);
-                //GLES20.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE,
-                //    GL2ES1.GL_MODULATE);
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
-                    GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                    GLES20.GL_TEXTURE_MAG_FILTER,
-                    GLES20.GL_LINEAR);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-                    GLES20.GL_REPEAT);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-                    GLES20.GL_REPEAT);
+                
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                AndroidGLES20ImageRenderer.activate(texture);
+                activateDefaultTextureParameters();
             }
         }
 

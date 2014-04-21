@@ -163,6 +163,23 @@ public class AndroidGLES20Renderer extends RenderingElement
     }
 
     /**
+    This method should be called after every call to a texture activation
+    (glBindTexture).
+    */
+    public static void activateDefaultTextureParameters()
+    {
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, 
+            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                GLES20.GL_REPEAT);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                GLES20.GL_REPEAT);
+    }
+    
+    /**
     Draws vertices from a VBO previously loaded at GPU, from vertex array
     currently binded (activated with glBindBuffer).
     @param primitive
@@ -786,17 +803,16 @@ public class AndroidGLES20Renderer extends RenderingElement
         Matrix.setIdentityM(transientMatrix, 0);       
         Matrix.translateM(transientMatrix, 0,
                           (float)tx, (float)ty, (float)tz);
-        copyMatrix(originalMatrix, modelViewMatrix);
         switch ( currentMatrixMode ) {
-        case GL_MODELVIEW:
-            //Matrix.multiplyMM(modelViewMatrix, 0,
-            //    transientMatrix, 0, modelViewMatrix, 0);
+          case GL_MODELVIEW:
+            copyMatrix(originalMatrix, modelViewMatrix);
             Matrix.multiplyMM(modelViewMatrix, 0,
                               originalMatrix, 0, transientMatrix, 0);
             break;
-        case GL_PROJECTION:
+          case GL_PROJECTION:
+            copyMatrix(originalMatrix, projectionMatrix);
             Matrix.multiplyMM(projectionMatrix, 0,
-                              transientMatrix, 0, projectionMatrix, 0);
+                              originalMatrix, 0, transientMatrix, 0);
             break;
         }
         activateTransformationMatrices();

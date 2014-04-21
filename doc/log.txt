@@ -1122,4 +1122,10 @@
   - 2h: AndroidGLES20DisplayList working for VBOs loaded at GPU.
   - 4h: Android optimization for multithreaded OpenGL ES 2.0 rendering :)
 
+2014 april 20, Oscar Chavarro
+  - 1h: Android implementation adds MatrixRenderer, and simple scene
+    rendering is managing simple bodies individual transformation matrix
+    and texture. Sample program is modified to manage test sphere as
+    first object in standard scene.
+
 ===========================================================================
