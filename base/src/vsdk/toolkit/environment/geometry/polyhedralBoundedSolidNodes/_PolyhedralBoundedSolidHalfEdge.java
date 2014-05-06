@@ -65,7 +65,8 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     }
 
     /**
-    Locates the previous halfedge in current list
+    Locates the previous half edge in current list
+    @return 
     */
     public _PolyhedralBoundedSolidHalfEdge previous()
     {
@@ -75,7 +76,8 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     }
 
     /**
-    Locates the next halfedge in current list
+    Locates the next half edge in current list
+    @return 
     */
     public _PolyhedralBoundedSolidHalfEdge next()
     {
@@ -104,6 +106,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     with respect to parent edge. Note that this code corresponds to macro
     `mate(he)`, defined in program [MANT1988] 10.2, and annotated in
     sections [MANT1988].10.3. and [MANT1988].10.4.2.
+    @return 
     */
     public _PolyhedralBoundedSolidHalfEdge
     mirrorHalfEdge()
@@ -121,17 +124,17 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     position are nearly equal (with respect to a the given `tolerance`).
     This method follows the suggested funcionality of procedure "match" from
     program [MANT1988].12.9. and presented in section [MANT1988].12.4.2.
+    @param other
+    @param tolerance
+    @return 
     */
     public boolean
     vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge other, double tolerance)
     {
-        if ( VSDK.vectorDistance(
-                 this.startingVertex.position,
-                 other.startingVertex.position
-             ) <= tolerance ) {
-            return true;
-        }
-        return false;
+        return VSDK.vectorDistance(
+            this.startingVertex.position,
+            other.startingVertex.position
+        ) <= tolerance;
     }
 
     @Override

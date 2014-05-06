@@ -20,6 +20,8 @@ public abstract class Curve extends Geometry {
     1-dimensional objects are infinitively thin, a doIntersection operation
     will always fail as the operation is regularized for constructive
     solid modelling compatible interpretation.
+    @param r
+    @return 
     */
     @Override
     public boolean doIntersection(Ray r)
@@ -30,6 +32,9 @@ public abstract class Curve extends Geometry {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inRay
+    @param intT
+    @param outData
     */
     @Override
     public void

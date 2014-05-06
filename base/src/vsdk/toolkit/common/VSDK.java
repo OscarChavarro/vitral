@@ -22,13 +22,16 @@ Vitral SDK implementation.  VITRAL is a trademark of the TAKINA research
 group, and identifies the computer graphics laboratory in the Pontificia
 Universidad Javeriana of Bogot&aacute; Colombia.
 
-\section intro Introduction: the Vitral SDK Architecture and design specification
+\section intro Introduction: the Vitral SDK Architecture and design 
+specification
 
-This is an automatically generated page from the Vitral SDK source code. It is not
-editable.  You can browse the literate programming style documentation, but
-remember to take a look first at the document describing the Vitral SDK toolkit:<P>
+This is an automatically generated page from the Vitral SDK source code. It is
+not editable.  You can browse the literate programming style documentation, but
+remember to take a look first at the document describing the Vitral SDK toolkit:
+<P>
 
-<A HREF="../ArchitectureAndDesignSpecification.html">Architecture and design specification of the Vitral SDK toolkit</A>.
+<A HREF="../ArchitectureAndDesignSpecification.html">
+Architecture and design specification of the Vitral SDK toolkit</A>.
 
 \section model The Vitral SDK toolkit data model
 
@@ -38,8 +41,8 @@ the moment such a detailed description is not available.
 
 \section next What to do next?
 
-The recomended steps are: 1. Install the Vitral SDK toolkit. 2. Take a look at the
-samples in the testsuite directory. 3. Have this API documentation available
+The recomended steps are: 1. Install the Vitral SDK toolkit. 2. Take a look at 
+the samples in the testsuite directory. 3. Have this API documentation available
 and look at specific method description for help. 4. Have in hand a good
 computer graphics textbook.
 
@@ -51,8 +54,8 @@ version 1.5 or newer):
 
 \section VSDK The vsdk.toolkit.common.VSDK utility class
 
-All classes in the Vitral SDK toolkit have access to an static class called VSDK,
-which is governed by the SINGLETON design pattern behavior. That is, it is
+All classes in the Vitral SDK toolkit have access to an static class called 
+VSDK, which is governed by the SINGLETON design pattern behavior. That is, it is
 an static class that lives only once per virtual machine.  Some operations
 in this class are not thread safe, so thread partitioning of Vitral SDK toolkit
 based applications is not recommended. Instead, heavy process partition is

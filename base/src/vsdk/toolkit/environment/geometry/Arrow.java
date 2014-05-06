@@ -82,8 +82,10 @@ public class Arrow extends Solid {
     }
 
     /**
-     Check the general interface contract in superclass method
-     Geometry.doIntersection.
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
+    @param inOutRay
+    @return 
     */
     @Override
     public boolean
@@ -122,6 +124,9 @@ public class Arrow extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inRay
+    @param inT
+    @param outData
     */
     @Override
     public void

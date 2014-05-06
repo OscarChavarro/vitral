@@ -7,6 +7,7 @@
 package vsdk.toolkit.common;
 
 // Java basic classes
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.StreamTokenizer;
@@ -16,11 +17,11 @@ import java.io.StringReader;
 
 /**
 A `AlgebraicExpression` is an algebraic expression composed of algebraic
-variables, unary and binary operators (including basic logaritmic, exponential,
+variables, unary and binary operators (including basic logarithmic, exponential,
 and trigonometric functions) with a set of values for algebraic variables
 that can be evaluated, giving as a result a `double` value.
 
-This class stablishes a Facade (Facade design pattern for all regular
+This class establishes a Facade (Facade design pattern for all regular
 expression operations) and plays a user role in a composite design pattern
 with _AlgebraicExpression*Node classes.
 */
@@ -239,6 +240,8 @@ public class AlgebraicExpression extends FundamentalEntity
     }
 
     /**
+    @param regexp
+    @throws vsdk.toolkit.common.AlgebraicExpressionException
     */
     public void setExpression(String regexp) throws AlgebraicExpressionException
     {
@@ -272,7 +275,7 @@ public class AlgebraicExpression extends FundamentalEntity
             try {
                 tokenType = parser.nextToken();
             }
-            catch ( Exception e ) {
+            catch ( IOException e ) {
                 break;
             }
             switch (tokenType) {

@@ -82,6 +82,7 @@ public class Vector3D extends FundamentalEntity
 
     /**
     Make this vector internal values equal to the other's.
+    @param other
     */
     public final void clone(Vector3D other)
     {
@@ -124,6 +125,8 @@ public class Vector3D extends FundamentalEntity
 
     /**
     Stores in `this` Vector3D the result of adding the operands `a` and `b`
+    @param a
+    @param b
     */
     public final void add(Vector3D a, Vector3D b)
     {
@@ -139,6 +142,8 @@ public class Vector3D extends FundamentalEntity
 
     /**
     Stores in `this` Vector3D the result of substracting the operands `a` and `b`
+    @param a
+    @param b
     */
     public final void substract(Vector3D a, Vector3D b)
     {
@@ -163,6 +168,7 @@ public class Vector3D extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
+    @return 
     */
     @Override
     public String toString()
@@ -182,6 +188,7 @@ public class Vector3D extends FundamentalEntity
     Note that theta goes from 0 to 2*PI, and correspond to an axis of
     rotation <0, 0, 1>.
     POST: 0 <= theta <= 2*PI
+    @return 
     */
     public double obtainSphericalThetaAngle()
     {
@@ -206,6 +213,7 @@ public class Vector3D extends FundamentalEntity
     calculates the phi angle (in radians) of the tip, corresponding
     to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
     Note phi goes from 0 to PI.
+    @return 
     */
     public double obtainSphericalPhiAngle()
     {
@@ -220,6 +228,9 @@ public class Vector3D extends FundamentalEntity
     Given a point <r, theta, phi> in spherical coordinates, this method sets
     current vector to corresponding cartesian coordinates <x, y, z>. Angles
     are in radians.
+    @param r
+    @param theta
+    @param phi
     */
     public void setSphericalCoordinates(double r, double theta, double phi)
     {

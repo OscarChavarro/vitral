@@ -175,7 +175,8 @@ public class Camera extends Entity
     changing any other vector. This method does NOT change the value of `up`
     of `left` vectors and can be used in advanced applications to directly
     access basic camera parameters.
-     */
+    @param focusedPosition
+    */
     public void setFocusedPositionDirect(Vector3D focusedPosition)
     {
         Vector3D partial;
@@ -202,7 +203,8 @@ public class Camera extends Entity
     \todo
     This method FAILS if the initial value of `up` is parallel to the
     `front` direction. Validation and exception handling are needed.
-     */
+    @param focusedPosition
+    */
     public void setFocusedPositionMaintainingOrthogonality(Vector3D focusedPosition)
     {
         front.substract(focusedPosition, eyePosition);
@@ -248,6 +250,7 @@ public class Camera extends Entity
 
     For non-advanced programmers, it is desireable to invoke the 
     `setUpMaintainingOrthogonality` method instead of this one.
+    @param up
     */
     public void setUpDirect(Vector3D up)
     {
@@ -261,6 +264,7 @@ public class Camera extends Entity
 
     For non-advanced programmers, it is desireable to invoke the 
     `setLeftMaintainingOrthogonality` method instead of this one.
+    @param left
     */
     public void setLeftDirect(Vector3D left)
     {
@@ -268,8 +272,9 @@ public class Camera extends Entity
     }
 
     /**
-     * En este metodo no se tiene en cuenta si up y front quedan mirando 
-       para el mismo lado
+    En este metodo no se tiene en cuenta si up y front quedan mirando 
+    para el mismo lado.
+    @param up
      */
     public void setUpMaintainingOrthogonality(Vector3D up)
     {
@@ -426,6 +431,9 @@ public class Camera extends Entity
         method must be called again to reflect the changes in this calculation.
 
     /todo this method should be named "generateProjectorRay"
+    @param x
+    @param y
+    @return 
     */
     public final Ray generateRay(int x, int y)
     {
@@ -504,6 +512,7 @@ public class Camera extends Entity
     
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    @return 
     */
     public Matrix4x4 calculateViewVolumeMatrix()
     {
@@ -533,7 +542,8 @@ public class Camera extends Entity
     }
 
     /**
-    Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    Note that projectionMatrix = transformationMatrix*viewVolumeMatrix.
+    @return 
     */
     public Matrix4x4 calculateTransformationMatrix()
     {
@@ -559,6 +569,7 @@ public class Camera extends Entity
 
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
+    @return 
     */
     public Matrix4x4 calculateProjectionMatrix()
     {
@@ -571,6 +582,7 @@ public class Camera extends Entity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
+    @return 
     */
     @Override
     public String toString()
@@ -664,6 +676,9 @@ public class Camera extends Entity
     ray origin and by the proyection plane (u, v) point, where (u, v) is
     the proyection of pixel (x, y). The plane is perpendicular to the v
     direction.
+    @param x
+    @param y
+    @return 
     */
     public InfinitePlane calculateUPlaneAtPixel(int x, int y)
     {
@@ -682,6 +697,8 @@ public class Camera extends Entity
 
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
+    @param u
+    @return 
     */
     public InfinitePlane calculateUPlane(double u)
     {
@@ -730,9 +747,12 @@ public class Camera extends Entity
     /**
     Given `this` camera and the pixel (x, y) in its viewport, this method
     calculates an infinite plane that pass by the corresponding proyector
-    ray origin and by the proyection plane (u, v) point, where (u, v) is
-    the proyection of pixel (x, y). The plane is perpendicular to the v
+    ray origin and by the projection plane (u, v) point, where (u, v) is
+    the projection of pixel (x, y). The plane is perpendicular to the v
     direction.
+    @param x
+    @param y
+    @return 
     */
     public InfinitePlane calculateVPlaneAtPixel(int x, int y)
     {
@@ -745,6 +765,8 @@ public class Camera extends Entity
     /**
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
+    @param v
+    @return 
     */
     public InfinitePlane calculateVPlane(double v)
     {
@@ -797,6 +819,7 @@ public class Camera extends Entity
 
     WARNING: This is currently considering only the perspective case!
     TODO: The paralel projection case!
+    @return 
     */
     public InfinitePlane calculateNearPlane()
     {
@@ -819,6 +842,7 @@ public class Camera extends Entity
 
     WARNING: This is currently considering only the perspective case!
     TODO: The paralel projection case!
+    @return 
     */
     public InfinitePlane calculateFarPlane()
     {
@@ -955,6 +979,11 @@ public class Camera extends Entity
 
     This algorithm structure follows the one proposed in [FOLE1992].3.12.3,
     generalizing it to the 3D case, as noted in [FOLE1992].6.5.3.
+    @param point0
+    @param point1
+    @param clippedPoint0
+    @param clippedPoint1
+    @return 
     */
     public boolean clipLineCohenSutherlandPlanes(
                              Vector3D point0, Vector3D point1,
@@ -1102,6 +1131,11 @@ public class Camera extends Entity
     The resulting clipped points are in the canonical volume reference, ready
     for projection.  If 3D clipped points are needed, they must be premultiplied
     by the inverse of the normalizingTransformation.
+    @param point0
+    @param point1
+    @param clippedPoint0
+    @param clippedPoint1
+    @return 
     */
     public boolean clipLineCohenSutherlandCanonicVolume(
                              Vector3D point0, Vector3D point1,
@@ -1303,6 +1337,9 @@ public class Camera extends Entity
     TODO: Current implementation is suspicious. It should use a simple
     multiplication of point with projection matrix... but this idea is not
     working.
+    @param inPoint
+    @param outProjected
+    @return 
     */
     public boolean projectPoint(Vector3D inPoint, Vector3D outProjected)
     {
@@ -1378,6 +1415,7 @@ public class Camera extends Entity
     Return 6 outward pointing planes bounding the view volume / frustum
     for current camera.
     PRE: updateVectors method should be called before calling this method.
+    @return 
     */
     public InfinitePlane[] getBoundingPlanes()
     {
@@ -1400,6 +1438,8 @@ public class Camera extends Entity
     this method determines if that paralelogram is visible.
     In other words, this method determines if the paralelogram and the
     view volume intersects.
+    @param cornerCoordinates
+    @return 
     */
     public boolean
     boundingConvexPolyhedraIsVisible(Vector3D[] cornerCoordinates)

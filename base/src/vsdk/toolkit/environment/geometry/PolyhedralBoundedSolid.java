@@ -101,6 +101,8 @@ public class PolyhedralBoundedSolid extends Solid {
     Find the face identified with `id`. Returns null if face not found,
     or current founded face otherwise.
     Build based over function `fface` in program [MANT1988].11.9.
+    @param id
+    @return 
     */
     public _PolyhedralBoundedSolidFace
     findFace(int id)
@@ -199,6 +201,9 @@ public class PolyhedralBoundedSolid extends Solid {
     satisfy the intuitive notion of a solid object. Nevertheless, it is
     useful as the initial state of creating a boundary model with a sequence
     of Euler operations.
+    @param p
+    @param vertexId
+    @param faceId
     */
     public void mvfs(Vector3D p, int vertexId, int faceId)
     {
@@ -268,6 +273,10 @@ public class PolyhedralBoundedSolid extends Solid {
     [MANT1988].11.5.1; and following the structure of sample program
     [MANT1988].11.6, this method has the effect of adding one new vertex
     and one new edge to the solid model.
+    @param he1
+    @param he2
+    @param vertexID
+    @param p
     */
     public void lmev(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2,
@@ -355,6 +364,8 @@ public class PolyhedralBoundedSolid extends Solid {
 
     Current implementation is not explained on [MANT1988], but leaved as
     problem [MANT1988].11.3.
+    @param he1
+    @param he2
     */
     public void lkev(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2)
@@ -416,6 +427,8 @@ public class PolyhedralBoundedSolid extends Solid {
     distinct faces. That is, it is assumed that:
       - `he1.parentEdge` == `he2.parentEdge`
       - `he1.parentLoop.parentFace` != `he2.parentLoop.parentFace`
+    @param he1
+    @param he2
     */
     public void lkef(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2)
@@ -486,6 +499,10 @@ public class PolyhedralBoundedSolid extends Solid {
     [MANT1988].11.5.1; and following the structure of sample program
     [MANT1988].11.7, this method is the dual to lmev. Note that creates
     the halfedges as usual, and then swaps them.
+    @param he1
+    @param he2
+    @param newFaceId
+    @return 
     */
     public _PolyhedralBoundedSolidFace lmef(
         _PolyhedralBoundedSolidHalfEdge he1,
@@ -560,6 +577,8 @@ public class PolyhedralBoundedSolid extends Solid {
     cases that one or both of the resulting loops are empty are also
     included. Note that current code follows section [MANT1988].11.3.4
     and the structure of sample program [MANT1988].11.8.
+    @param he1
+    @param he2
     */
     public void lkemr(
         _PolyhedralBoundedSolidHalfEdge he1,
@@ -634,6 +653,8 @@ public class PolyhedralBoundedSolid extends Solid {
     and follows the functional definition of section [MANT1988].11.5.1.
     This method should be shecket to see if it is managing only the
     "same shell" case, or if it is done.
+    @param face1
+    @param face2
     */
     public void lkfmrh(
         _PolyhedralBoundedSolidFace face1,
@@ -671,6 +692,9 @@ public class PolyhedralBoundedSolid extends Solid {
     inner loop of its parent face.
     Note that this method is a partial solution to problem [MANT1988].11.5, 
     and follows the functional definition of section [MANT1988].11.5.1.
+    @param l
+    @param newFaceId
+    @return 
     */
     public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceId)
     {
@@ -694,6 +718,10 @@ public class PolyhedralBoundedSolid extends Solid {
     effect except for assigning the inner vs. outer information. Note that
     `lringmv` is an addendum to `lmef`, and not an Euler operator.
     This method follows the functional definition of section [MANT1988].11.5.1.
+    @param l
+    @param tofac
+    @param setAsOuterLoop
+    @return 
     */
     public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
     {
@@ -721,6 +749,8 @@ public class PolyhedralBoundedSolid extends Solid {
     Current implementation was programmed as an answer to exercise
     [MANT1988].11.4, and follows the signature from section
     [MANT1988].11.5.1.
+     * @param he1
+     * @param he2
     */
     public void lmekr(
         _PolyhedralBoundedSolidHalfEdge he1,
@@ -800,6 +830,7 @@ public class PolyhedralBoundedSolid extends Solid {
            will be taken as starting vertex for new edge
     @param v4 vertex id (counted from 1) for new vertex
     @param p coordinates for new vertex
+    @return 
     */
     public boolean smev(int f1, int v1, int v4, Vector3D p)
     {
@@ -837,7 +868,14 @@ public class PolyhedralBoundedSolid extends Solid {
     a "convenience" procedure `smev` that performs this operation.  The
     procedure assumes that `v1` appears just once in `f1`; hence, the
     argument `v2` can be left out.
-    @return true if operation succeded, false otherway
+    @param f1
+    @param f2
+    @param v1
+    @param v2
+    @param v3
+    @param v4
+    @param p
+    @return true on operation success, false other way.
     */
     public boolean mev(int f1, int f2,
                    int v1, int v2, int v3, int v4, Vector3D p)
@@ -876,6 +914,11 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     smef: simplified version of mef operator.
     See mef method for a complete description.
+    @param f1
+    @param v1
+    @param v3
+    @param newfaceid
+    @return 
     */
     public boolean smef(int f1, int v1, int v3, int newfaceid)
     {
@@ -913,6 +956,14 @@ public class PolyhedralBoundedSolid extends Solid {
     are known to occur just once in the face.
     Executes a `lmef` in halfedges v1-v2, v3-v4 in respective faces `f1`
     and `f2`, and assigns to the new face the `newfaceid`.
+    @param f1
+    @param f2
+    @param v1
+    @param v2
+    @param v3
+    @param v4
+    @param newfaceid
+    @return 
     */
     public boolean mef(int f1, int f2,
                        int v1, int v2, int v3, int v4, int newfaceid)
@@ -952,6 +1003,13 @@ public class PolyhedralBoundedSolid extends Solid {
     kemr: (High level version) KillEdgeMakeRing (loop splitting operation).
     Executes a `lkemr` in halfedges v1-v2, v3-v4 in respective faces `f1`
     and `f2`.
+    @param f1
+    @param f2
+    @param v1
+    @param v2
+    @param v3
+    @param v4
+    @return 
     */
     public boolean kemr(int f1, int f2,
                        int v1, int v2, int v3, int v4)
@@ -999,6 +1057,9 @@ public class PolyhedralBoundedSolid extends Solid {
     solid as the only shell.
     This method should be shecket to see if it is managing only the
     "same shell" case, or if it is done.
+    @param f1
+    @param f2
+    @return 
     */
     public boolean kfmrh(int f1, int f2)
     {
@@ -1027,6 +1088,7 @@ public class PolyhedralBoundedSolid extends Solid {
     model. This method is useful for higher level modeling operations, as
     noted in section [MANT1988].12.2. Current method (and method getMaxFaceId)
     is build after the function `getmaxnames` of program [MANT1988].12.1.
+    @return 
     */
     public int getMaxVertexId()
     {
@@ -1039,6 +1101,7 @@ public class PolyhedralBoundedSolid extends Solid {
     noted in section [MANT1988].12.2. Current method (and method
     getMaxVertexId) is build after the function `getmaxnames` of program
     [MANT1988].12.1.
+    @return 
     */
     public int getMaxFaceId()
     {
@@ -1060,6 +1123,8 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doIntersection.
+    @param inOutRay
+    @return 
     */
     @Override
     public boolean doIntersection(Ray inOutRay) {
@@ -1143,6 +1208,7 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {
@@ -1242,6 +1308,7 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Returns true if the model was validated (using `validateModel` method)
     and validation succeed after any geometrical or topological operation.
+    @return 
     */
     public boolean isValid()
     {
@@ -1288,19 +1355,18 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Given a face inside current solid, this method returns true if face is
     planar, false otherwise.
+    @param face
+    @return 
     */
     public boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face)
     {
         ArrayList<Vector3D> points = extractPointsFromFace(face);
-
-        if ( (points != null) && validateFacePointsAreCoplanar(points) ) {
-            return true;
-        }
-        return false;
+        return (points != null) && validateFacePointsAreCoplanar(points);
     }
 
     /**
     After section [MANT1988].12.4.2 and program [MANT1988].12.9.
+    @param faceid
     */
     public void loopGlue(int faceid)
     {
@@ -1336,6 +1402,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Given `this` and `other` solids, this method erases the `other` solid
     while appending its parts to current one as a new shell. This method
     follows section [MANT1988].12.4.1 and program [MANT1988].12.8.
+    @param other
     */
     public void merge(PolyhedralBoundedSolid other)
     {
@@ -1531,6 +1598,7 @@ public class PolyhedralBoundedSolid extends Solid {
         (no holes, no missing faces and no non-manifold solids like
         Klain bottles)
       - Geometric integrity: there are no intersecting faces
+    @return 
     */
     public boolean validateModel()
     {
@@ -1597,8 +1665,9 @@ public class PolyhedralBoundedSolid extends Solid {
 
     This is not well understood for cases of intersection with face limits
     (vertices and edges). In some cases, computation of quantitative
-    invisivility seems to be failing.
+    invisibility seems to be failing.
     \todo  check well all limiting cases.
+    @return 
     */
     @Override
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
@@ -1652,6 +1721,10 @@ public class PolyhedralBoundedSolid extends Solid {
     Utility routine used to compare floating values inside the boundary
     representation winged edge data structure, following procedure `comp`
     from program [MANT1988].13.2.
+    @param a
+    @param b
+    @param tolerance
+    @return 
     */
     public static int compareValue(double a, double b, double tolerance)
     {

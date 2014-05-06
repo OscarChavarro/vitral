@@ -140,14 +140,12 @@ public class TriangleMeshGroup extends Surface {
     }
 
     /**
-     Check the general interface contract in superclass method
-     Geometry.doIntersection.
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
 
-       Dado un Ray `inout_rayo`, esta operaci&oacute;n determina si el rayo se
-       intersecta con alguna de las mallas de triangulos. Si el rayo no intersecta
-       al objeto se retorna 0, y de lo contrario se retorna la distancia desde
-       el origen del rayo hasta el punto de interseccion mas cercano de todas las mallas.
-     */
+    @param inOut_Ray
+    @return 
+    */
     @Override
     public boolean doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating meshes
@@ -207,11 +205,16 @@ public class TriangleMeshGroup extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inRay
+    @param inT
+    @param outData
     */
     @Override
     public void
-    doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outData) {
+    doExtraInformation(
+        Ray inRay, 
+        double inT,
+        GeometryIntersectionInformation outData) {
         outData.clone(lastInfo);
     }
 
@@ -227,6 +230,7 @@ public class TriangleMeshGroup extends Surface {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -250,6 +254,7 @@ public class TriangleMeshGroup extends Surface {
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
+    @return 
     */
     @Override
     public String toString() {

@@ -122,6 +122,13 @@ public class Torus extends Solid {
 
     /**
     Unused and not working yet method
+    @param a4
+    @param a3
+    @param a2
+    @param a1
+    @param a0
+    @param ray
+    @return 
     */    
     public boolean
     calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)
@@ -133,8 +140,10 @@ public class Torus extends Solid {
         
         //Root 1
         //--------------------------------------------------------------------
-        
-        double x=0,x1=0,x2=0,x3=0;
+        double x;
+        double x1;
+        double x2;
+        double x3;
         
         //----------------------------------------------------
         //1. Part 1 

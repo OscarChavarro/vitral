@@ -35,17 +35,10 @@ public class Sphere extends Solid {
     }
 
     /**
-     Check the general interface contract in superclass method
-     Geometry.doIntersection.
-
-    Dado un Ray `inout_rayo`, esta operaci&oacute;n determina si el rayo se
-    intersecta con la superficie de este objeto o no. Si el rayo no intersecta
-    al objeto se retorna 0, y de lo contrario se retorna la distancia desde
-    el origen del rayo hasta el punto de interseccion.
-
-    En caso de intersecci&oacute;n, se modifica `inout_rayo.t` para que 
-    contenga la distancia entre el punto de intersecci&oacute;n y el origen
-    del `inout_rayo`.
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
+    @param inout_rayo
+    @return 
     */
     @Override
     public boolean
@@ -100,6 +93,7 @@ public class Sphere extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inT
     */
     @Override
     public void
@@ -147,6 +141,7 @@ public class Sphere extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -324,6 +319,9 @@ public class Sphere extends Solid {
     Sphere, this method writes on to `p` Vector3D the (x, y, z) coordinates
     of the corresponding point on Sphere's surface.
     \todo  check this method for efficiency improvement
+    @param p
+    @param theta
+    @param phi
     */
     public void
     spherePosition(Vector3D p, double theta, double phi)
@@ -338,6 +336,9 @@ public class Sphere extends Solid {
     Sphere, this method writes on to `n` Vector3D the (nx, ny, nz) coordinates
     of the surface normal at corresponding point on Sphere's surface.
     \todo  check this method for efficiency improvement
+    @param n
+    @param theta
+    @param phi
     */
     public void
     sphereNormal(Vector3D n, double theta, double phi)
@@ -354,6 +355,9 @@ public class Sphere extends Solid {
     are aligned with respect to Sphere's equator.
     \todo  check this method for efficiency improvement
     \todo  check this method for efficiency improvement
+    @param t
+    @param theta
+    @param phi
     */
     public void
     sphereTangent(Vector3D t, double theta, double phi)
@@ -369,6 +373,9 @@ public class Sphere extends Solid {
     of the surface tangent binormal at corresponding point on Sphere's surface. 
     Tangents binormals are perpendicular to both normal and tangent.
     \todo  check this method for efficiency improvement
+    @param b
+    @param theta
+    @param phi
     */
     public void
     sphereBinormal(Vector3D b, double theta, double phi)

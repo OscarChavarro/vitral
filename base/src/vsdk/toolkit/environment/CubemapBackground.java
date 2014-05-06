@@ -44,6 +44,8 @@ public class CubemapBackground extends Background {
     }
 
     /**
+    @param d
+    @return 
     */
     @Override
     public ColorRgb colorInDireccion(Vector3D d)

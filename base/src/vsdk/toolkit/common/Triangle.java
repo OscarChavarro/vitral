@@ -18,17 +18,20 @@ public class Triangle extends FundamentalEntity
     public int p2;
 
     /**
-     */
+    */
     public Vector3D normal;
 
     /**
-     */
+    */
     public Triangle() {
         normal = new Vector3D(0, 0, 0);
     }
 
     /**
-     */
+    @param p0
+    @param p1
+    @param p2
+    */
     public Triangle(int p0, int p1, int p2) {
         this.p0 = p0;
         this.p1 = p1;
@@ -37,37 +40,43 @@ public class Triangle extends FundamentalEntity
     }
 
     /**
-     */
+    @return 
+    */
     public int getPoint0() {
         return this.p0;
     }
 
     /**
-     */
+    @return 
+    */
     public int getPoint1() {
         return this.p1;
     }
 
     /**
-     */
+    @return 
+    */
     public int getPoint2() {
         return this.p2;
     }
 
     /**
-     */
+    @param p0
+    */
     public void setPoint0(int p0) {
         this.p0 = p0;
     }
 
     /**
-     */
+    @param p1
+    */
     public void setPoint1(int p1) {
         this.p1 = p1;
     }
 
     /**
-     */
+    @param p2
+    */
     public void setPoint2(int p2) {
         this.p2 = p2;
     }
@@ -76,6 +85,7 @@ public class Triangle extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use this method for serialization
     or persistence purposes.
+    @return 
     */
     @Override
     public String toString() {

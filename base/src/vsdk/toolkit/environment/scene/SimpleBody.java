@@ -69,6 +69,9 @@ public class SimpleBody extends Entity {
         _static_vector3d = new Vector3D();
     }
 
+    /**
+    
+    */
     @Override
     public void finalize()
     {
@@ -219,7 +222,9 @@ public class SimpleBody extends Entity {
     `_static_ray` are used by this method to avoid several calls to
     `new` methods, and to avoid extra garbage collector memory de-allocation.
     This two variables would be temporary local variables in this method
-    if C/C++ style "static" functionallity exist in Java.
+    if C/C++ style "static" functionality exist in Java.
+    @param inOutRay
+    @return 
     */
     public final boolean doIntersection(Ray inOutRay)
     {
@@ -257,6 +262,9 @@ public class SimpleBody extends Entity {
 
     /**
     WARNING: Check if this method works ok for modified geometric operations!
+    @param inRay
+    @param inT
+    @param outInfo
     */
     public void doExtraInformation(Ray inRay, double inT, GeometryIntersectionInformation outInfo)
     {

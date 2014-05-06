@@ -148,6 +148,7 @@ public class QuadMesh extends Surface {
     This method provides a clear structured form of defining the mesh vertexes,
     but it is inefficient. Its use is discouraged for applications manipulating
     big meshes.
+    @param vertexes
     */
     public void setVertexes(Vertex[] vertexes) {
         int n, i;
@@ -188,6 +189,8 @@ public class QuadMesh extends Surface {
     Given a vertex structure and an `i` position, this method copies
     the information from the structure in to the i-th vertex arrays position.
     PRE: 0 <= i < vertexPositions.length/3
+    @param i
+    @param vertex
     */
     public void setVertexAt(int i, Vertex vertex) {
         vertexPositions[3*i] = vertex.position.x;
@@ -212,6 +215,11 @@ public class QuadMesh extends Surface {
     Given a triangle structure and an `i` position, this method copies
     the information from the structure in to the i-th triangle arrays position.
     PRE: 0 <= i < vertexPositions.length/3
+    @param i
+    @param p0
+    @param p1
+    @param p2
+    @param p3
     */
     public void setQuadAt(int i, int p0, int p1, int p2, int p3) {
         quadIndices[4*i] = p0;
@@ -314,6 +322,7 @@ public class QuadMesh extends Surface {
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
+    @return 
     */
     @Override
     public String toString() {
@@ -338,6 +347,8 @@ public class QuadMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doIntersection.
+    @param inOut_Ray
+    @return 
     */
     @Override
     public boolean
@@ -349,6 +360,7 @@ public class QuadMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inT
     */
     @Override
     public void
@@ -358,6 +370,7 @@ public class QuadMesh extends Surface {
     }
 
     /**
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -369,6 +382,7 @@ public class QuadMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {

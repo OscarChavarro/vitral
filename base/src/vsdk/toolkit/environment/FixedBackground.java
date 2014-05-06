@@ -36,6 +36,8 @@ public class FixedBackground extends Background {
 
     /**
     BUG: not working math!
+    @param d
+    @return 
     */
     @Override
     public ColorRgb colorInDireccion(Vector3D d)

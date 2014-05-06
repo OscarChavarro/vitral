@@ -50,6 +50,7 @@ public class ColorRgb extends FundamentalEntity
 
     /**
     This constructor builds a ColorRgb from another one.
+    @param c
     */
     public ColorRgb(ColorRgb c)
     {
@@ -60,6 +61,9 @@ public class ColorRgb extends FundamentalEntity
 
     /**
     This constructor builds a ColorRgb from individual component values.
+    @param r
+    @param g
+    @param b
     */
     public ColorRgb(double r, double g, double b)
     {
@@ -70,6 +74,7 @@ public class ColorRgb extends FundamentalEntity
 
     /**
     Given other color, this color gets combined with the another one.
+    @param other
     */
     public void modulate(ColorRgb other)
     {
@@ -84,66 +89,78 @@ public class ColorRgb extends FundamentalEntity
     }
 
     /** This method returns a copy of the value r. Note that this method does
-    NOT constitues an encapsulation of the value, as the original attribute
+    NOT constitutes an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods. */
+    to the attribute and this intermediated use of get/set methods.
+    @return
+    */
     public double getR()
     {
         return r;
     }
 
     /** This method returns a copy of the value g. Note that this method does
-    NOT constitues an encapsulation of the value, as the original attribute
+    NOT constitutes an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods. */
+    to the attribute and this intermediated use of get/set methods. 
+    @return 
+    */
     public double getG()
     {
         return g;
     }
 
     /** This method returns a copy of the value b. Note that this method does
-    NOT constitues an encapsulation of the value, as the original attribute
+    NOT constitutes an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods. */
+    to the attribute and this intermediated use of get/set methods. 
+    @return 
+    */
     public double getB()
     {
         return b;
     }
 
     /** This method sets the value r, as a copy of the parameter. Note that 
-    this method does NOT constitues an encapsulation of the value, as the 
+    this method does NOT constitutes an encapsulation of the value, as the 
     original attribute is public. This method is supplied for puritans that
     like to see a lot of long get/set code, and for testing the performance of
     different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods. */
+    access to the attribute and this intermediated use of get/set methods.
+    @param r 
+    */
     public void setR(double r)
     {
         this.r = r;
     }
 
     /** This method sets the value g, as a copy of the parameter. Note that 
-    this method does NOT constitues an encapsulation of the value, as the 
+    this method does NOT constitutes an encapsulation of the value, as the 
     original attribute is public. This method is supplied for puritans that
     like to see a lot of long get/set code, and for testing the performance of
     different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods. */
+    access to the attribute and this intermediated use of get/set methods. 
+    @param g
+    */
     public void setG(double g)
     {
         this.g = g;
     }
 
     /** This method sets the value b, as a copy of the parameter. Note that 
-    this method does NOT constitues an encapsulation of the value, as the 
+    this method does NOT constitutes an encapsulation of the value, as the 
     original attribute is public. This method is supplied for puritans that
     like to see a lot of long get/set code, and for testing the performance of
     different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods. */
+    access to the attribute and this intermediated use of get/set methods. 
+    @param b
+    */
     public void setB(double b)
     {
         this.b = b;
@@ -153,6 +170,7 @@ public class ColorRgb extends FundamentalEntity
     This method exports the color components to an static array of float
     values. It is supposed to help operations in APIs like OpenGL/JOGL where
     this representation form is commonly used.
+    @return 
     */
     public float[] exportToFloatArrayVect()
     {
@@ -170,6 +188,7 @@ public class ColorRgb extends FundamentalEntity
     This method return a String representation of current color. In its
     current implementation it is biased for human readability, not for
     precision, so the use of an approximation formating.
+    @return 
     */
     @Override
     public String toString()
@@ -181,7 +200,9 @@ public class ColorRgb extends FundamentalEntity
 
     /**
     Given current color space (RGB coordinates), this method returns the
-    euclidean distance between two points in such space: `this` and `other`.
+    Euclidean distance between two points in such space: `this` and `other`.
+    @param other
+    @return 
     */
     public double distance(ColorRgb other) {
         return Math.sqrt((this.r - other.r)*(this.r - other.r) +
@@ -198,6 +219,9 @@ public class ColorRgb extends FundamentalEntity
     /**
     Given a 8 bit signed RGB integer triplet, this method computes the
     corresponding [0.0, 1.0] clamped interval values for color.
+    @param r
+    @param g
+    @param b
     */
     public void importFromSigned8bitPixel(byte r, byte g, byte b)
     {

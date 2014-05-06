@@ -221,6 +221,7 @@ public class ParametricCurve extends Curve {
 
     /**
     Calculates and return the number of pieces in current curve.
+    @return 
     */
     public int getNumPieces()
     {
@@ -257,6 +258,7 @@ public class ParametricCurve extends Curve {
     /**
     \todo  should check after removal of element 0 that if next command is a
     BREAK, that command should be also be removed.
+    @param pos
     */
     public void removePoint(int pos) {
         points.remove(pos);
@@ -277,6 +279,9 @@ public class ParametricCurve extends Curve {
 
     Returns null if current endingSegment is not a segment but a BREAK
     command.
+    @param endingSegment
+    @param t
+    @return 
     */
     public Vector3D evaluate(int endingSegment,  double t) {
         if ( types.get(endingSegment).intValue() == CORNER ) {
@@ -516,6 +521,9 @@ public class ParametricCurve extends Curve {
     However, in cases as simple drawing, this leads to unnecessary line
     primitives. Due to that situation, the user can specify if breaking
     rects or not.
+    @param endingPointForSegment
+    @param withBrokenRects
+    @return 
     */
     public ArrayList<Vector3D> calculatePoints(int endingPointForSegment,
                                                boolean withBrokenRects) {
@@ -564,6 +572,7 @@ public class ParametricCurve extends Curve {
     /**
     This method returns an aproximate minmax of current curve, based on a
     sampling (evaluation) of points.
+    @return 
     */
     @Override
     public double[] getMinMax()
@@ -598,6 +607,7 @@ public class ParametricCurve extends Curve {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

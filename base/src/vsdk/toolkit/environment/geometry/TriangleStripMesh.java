@@ -75,6 +75,7 @@ public class TriangleStripMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {
@@ -112,6 +113,8 @@ public class TriangleStripMesh extends Surface {
     Geometry.doIntersection.
 
     \todo  Method not implemented!
+    @param inOut_Ray
+    @return 
     */
     @Override
     public boolean
@@ -124,6 +127,7 @@ public class TriangleStripMesh extends Surface {
     Geometry.doExtraInformation.
 
     \todo  Method not implemented!
+    @param inT
     */
     @Override
     public void

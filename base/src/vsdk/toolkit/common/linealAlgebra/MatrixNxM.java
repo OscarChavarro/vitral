@@ -27,6 +27,9 @@ public class MatrixNxM extends FundamentalEntity
 
     /**
     This constructor builds the NxM identity matrix
+    @param n
+    @param m
+    @throws java.lang.Exception
     */
     public MatrixNxM(int n, int m) throws Exception
     {
@@ -110,8 +113,9 @@ public class MatrixNxM extends FundamentalEntity
     }
 
     /**
-     Converts current matrix into it's invert matrix.
-     */
+    Converts current matrix into it's invert matrix.
+    @throws java.lang.Exception
+    */
     public void invert() throws Exception
     {
         double d = determinant();
@@ -178,12 +182,13 @@ public class MatrixNxM extends FundamentalEntity
     }
 
     /**
-     Multiply this matrix by a scalar, note that this method doesn't modify 
-     this matrix. 
-     @param a The scalar by whom this matrix will be multiplied
-     @return A new Matrix3D that contains the value of current matrix 
-      multiplied by the input parameter.
-     */
+    Multiply this matrix by a scalar, note that this method doesn't modify 
+    this matrix. 
+    @param a The scalar by whom this matrix will be multiplied
+    @return A new Matrix3D that contains the value of current matrix 
+    multiplied by the input parameter.
+    @throws java.lang.Exception
+    */
     public final MatrixNxM multiply(double a) throws Exception
     {
         MatrixNxM R = new MatrixNxM(numRows, numColumns);
@@ -198,11 +203,12 @@ public class MatrixNxM extends FundamentalEntity
     }
 
     /**
-     This method multiplies an input matrix by this matrix, the result is a 
-     new matrix and current matrix is not modified.
-     @param other The matrix by whom this matrix will be multiplied
-     @return The matrix result of the multiplication.
-     */
+    This method multiplies an input matrix by this matrix, the result is a 
+    new matrix and current matrix is not modified.
+    @param other The matrix by whom this matrix will be multiplied
+    @return The matrix result of the multiplication.
+    @throws java.lang.Exception
+    */
     public MatrixNxM multiply(MatrixNxM other) throws Exception
     {
         if ( this.numColumns != other.numRows ) {
@@ -271,9 +277,10 @@ public class MatrixNxM extends FundamentalEntity
     }
 
     /**
-     This method computes the determinant of this matrix.
-     @return this matrix determinant
-     */
+    This method computes the determinant of this matrix.
+    @return this matrix determinant
+    @throws java.lang.Exception
+    */
     public double determinant() throws Exception
     {
         if ( numColumns != numRows ) {

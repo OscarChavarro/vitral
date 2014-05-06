@@ -74,6 +74,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     Note that a Ferguson patch is an Hermite patch with zero valued
     twist vectors.
+    @param curve
     */
     public void buildFergusonPatch(ParametricCurve curve) {
         this.contourCurve = curve;
@@ -354,6 +355,9 @@ public class ParametricBiCubicPatch extends Surface {
     </UL>
 
     PRE: calculateMAtrices() should be called before calling this method.
+    @param p
+    @param s
+    @param t
     */
     public void evaluate(Vector3D p, double s, double t)
     {
@@ -456,6 +460,9 @@ public class ParametricBiCubicPatch extends Surface {
     </UL>
 
     PRE: calculateMAtrices() should be called before calling this method.
+    @param n
+    @param s
+    @param t
     */
     public void evaluateNormal(Vector3D n, double s, double t)
     {
@@ -476,6 +483,8 @@ public class ParametricBiCubicPatch extends Surface {
     Geometry.doIntersection.
 
     \todo  implement the method
+    @param r
+    @return 
     */
     @Override
     public boolean doIntersection(Ray r) {
@@ -509,6 +518,7 @@ public class ParametricBiCubicPatch extends Surface {
     the minmax of its contour curve.
 
     BUG: current contour curve asumption is not valid
+    @return 
     */
     @Override
     public double[] getMinMax() {

@@ -20,7 +20,7 @@ As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidEdge` makes a
 face-to-face relationship representing the identification of the line
 segments between faces.
 
-Note that in the sake of simplify and eficiency current programming 
+Note that in the sake of simplify and efficiency current programming 
 implementation this class exhibit public access attributes. It is important
 to note that those attributes will only be accessed directly from related 
 classes in the same package

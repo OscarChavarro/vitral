@@ -8,6 +8,7 @@ package vsdk.toolkit.environment.geometry;
 
 // VitralSDK classes
 import vsdk.toolkit.common.AlgebraicExpression;
+import vsdk.toolkit.common.AlgebraicExpressionException;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
@@ -46,14 +47,14 @@ public class FunctionalExplicitSurface extends Surface
         try {
             xyFunction.setExpression(fxy);
         }
-        catch ( Exception e ) {
+        catch ( AlgebraicExpressionException e ) {
             VSDK.reportMessage(this, VSDK.WARNING, 
                 "constructor",
                 "Cannot create algebraic expression for \"" + fxy + "\":\n" + e);
             try {
                 xyFunction.setExpression("0");
             }
-            catch ( Exception e2 ) {
+            catch ( AlgebraicExpressionException e2 ) {
                 VSDK.reportMessage(this, VSDK.FATAL_ERROR, 
                     "constructor",
                     "So bad. Something is wrong with algebraic expressions!:\n" + e2);
@@ -178,7 +179,7 @@ public class FunctionalExplicitSurface extends Surface
                 }
             }
         }
-        catch ( Exception e ) {
+        catch ( AlgebraicExpressionException e ) {
             VSDK.reportMessage(this, VSDK.WARNING, 
                 "constructor",
                 "Cannot evaluate algebraic expression!" + e);
@@ -217,6 +218,7 @@ public class FunctionalExplicitSurface extends Surface
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {
@@ -229,6 +231,8 @@ public class FunctionalExplicitSurface extends Surface
 
     \todo  Should not delegate work over tesselated geometry version. Should
     evaluate directly from algebraic function surface!
+    @param inOut_Ray
+    @return 
     */
     @Override
     public boolean
@@ -239,6 +243,9 @@ public class FunctionalExplicitSurface extends Surface
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inRay
+    @param inT
+    @param outData
     */
     @Override
     public void
@@ -250,6 +257,9 @@ public class FunctionalExplicitSurface extends Surface
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
+    @param p
+    @param distanceTolerance
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -260,6 +270,9 @@ public class FunctionalExplicitSurface extends Surface
     /**
     Check the general interface contract in superclass method
     Geometry.doVoxelization.
+    @param vv
+    @param M
+    @param reporter
     */
     @Override
     public void

@@ -19,6 +19,8 @@ package vsdk.toolkit.environment.geometry;
 
 // Java basic classes
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ArrayListOfInts;
@@ -201,10 +203,17 @@ public class TriangleMesh extends Surface {
 
     /**
     \todo  copy full structure!
+    @return 
     */
     @Override
     public TriangleMesh clone()
     {
+        try {
+            super.clone();
+        }
+        catch ( CloneNotSupportedException ex ) {
+            
+        }
         TriangleMesh other = new TriangleMesh();
 
         other.name = this.name;
@@ -366,6 +375,11 @@ public class TriangleMesh extends Surface {
     This method provides a clear structured form of defining the mesh vertexes,
     but it is inefficient. Its use is discouraged for applications manipulating
     big meshes.
+    @param vertexes
+    @param withNormals
+    @param withBinormals
+    @param withTangents
+    @param withUvs
     */
     public void setVertexes(Vertex[] vertexes,
                             boolean withNormals, boolean withBinormals,
@@ -426,6 +440,7 @@ public class TriangleMesh extends Surface {
     This method provides a clear structured form of defining the mesh triangles,
     but it is inefficient. Its use is discouraged for applications manipulating
     big meshes.
+    @param triangles
     */
     public void setTriangles(Triangle[] triangles) {
         int n, i;
@@ -460,6 +475,8 @@ public class TriangleMesh extends Surface {
     Given a vertex structure and an `i` position, this method copies
     the information from the structure in to the i-th vertex arrays position.
     PRE: 0 <= i < vertexPositions.length/3
+    @param i
+    @param vertex
     */
     public void setVertexAt(int i, Vertex vertex) {
         vertexPositions[3*i] = vertex.position.x;
@@ -484,6 +501,8 @@ public class TriangleMesh extends Surface {
     Given a triangle structure and an `i` position, this method copies
     the information from the structure in to the i-th triangle arrays position.
     PRE: 0 <= i < vertexPositions.length/3
+    @param i
+    @param triangle
     */
     public void setTriangleAt(int i, Triangle triangle) {
         triangleIndices[3*i] = triangle.p0;
@@ -578,6 +597,8 @@ public class TriangleMesh extends Surface {
     Note this always returns an array with two (2) integers: the first one
     is an index to `triangles` array, the second one is an index to the
     `textures` array.
+    @param spanRange
+    @return 
     */
     public int[] getTextureRangeAt(int spanRange) {
         return textureRanges[spanRange];
@@ -597,6 +618,8 @@ public class TriangleMesh extends Surface {
     Note this always returns an array with two (2) integers: the first one
     is an index to `triangles` array, the second one is an index to the
     `materials` array.
+    @param spanRange
+    @return 
     */
     public int[] getMaterialRangeAt(int spanRange) {
         return materialRanges[spanRange];
@@ -793,6 +816,7 @@ public class TriangleMesh extends Surface {
     This method is supposed to be a friend of TriangleMesh related objects.
     The method is used to query the last intersected triangle, after a
     positive called to the doIntersection method.
+    @return 
     */
     public int doIntersectionInformation() {
         return selectedTriangle;
@@ -802,6 +826,7 @@ public class TriangleMesh extends Surface {
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
+    @return 
     */
     @Override
     public String toString() {
@@ -860,6 +885,8 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doIntersection.
+    @param inOut_Ray
+    @return 
     */
     @Override
     public boolean
@@ -932,6 +959,7 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inT
     */
     @Override
     public void
@@ -1049,6 +1077,7 @@ public class TriangleMesh extends Surface {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -1084,6 +1113,7 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {
@@ -1535,6 +1565,7 @@ public class TriangleMesh extends Surface {
     Given current mesh and a plane p, this method modifies the current mesh,
     leaving on it only the triangles which lies on the INSIDE part of the
     plane `p`. For triangles cutting the plane, new triangles are generated.
+    @param p
     */
     public void
     slice(InfinitePlane p)

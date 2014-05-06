@@ -94,6 +94,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     Find the halfedge from vertex `vn1` to vertex `vn2`. 
     Returns null if halfedge not found, or current founded halfedge otherwise.
     Build based over function `fhe` in program [MANT1988].11.9.
+    @param vn1
+    @param vn2
+    @return 
     */
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1, int vn2)
     {
@@ -114,6 +117,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /**
     Find the first halfedge originating from vertex `vn1`.
     Returns null if halfedge not found, or current founded halfedge otherwise.
+    @param vn1
+    @return 
     */
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1)
     {
@@ -251,6 +256,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
     /**
     Given a point p in the containing plane of this face, the method returns:
+    @param p
+    @param tolerance
     @return Geometry.OUTSIDE if point is outside polygon, Geometry.LIMIT if
     its in the polygon border, Geometry.INSIDE if point is inside border.
     PRE:
@@ -443,6 +450,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
     /**
     Current implementation only takes into account the containing plane.
+    @param c
     @return 1 if this face is visible from camera c, -1 if is not visible and
     0 if is tangent to it.
     \todo : generalize to plane. This is returning "1" in cases where should

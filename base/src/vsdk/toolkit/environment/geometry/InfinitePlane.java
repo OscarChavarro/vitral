@@ -103,6 +103,8 @@ public class InfinitePlane extends HalfSpace {
     Por a given point `p`, calculates if it lies inside, outside or 
     on surface with respect to current plane, taking the plane as an
     infinite halfspace, not as a surface.
+    @param p
+    @param distanceTolerance
     @return 0 if point is on the plane surface, 1 if point is outside or
     -1 if point is inside the plane.
     Note that current interpretation of the plane is done as a semispace,
@@ -125,6 +127,7 @@ public class InfinitePlane extends HalfSpace {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
+    @return 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -144,6 +147,7 @@ public class InfinitePlane extends HalfSpace {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inT
     */
     @Override
     public void
@@ -157,7 +161,8 @@ public class InfinitePlane extends HalfSpace {
     }
 
     /**
-    TODO: Current returned values are not always true!
+    TODO: Current returned values are not always valid!
+    @return 
     */
     @Override
     public double[] getMinMax()
@@ -200,6 +205,8 @@ public class InfinitePlane extends HalfSpace {
     /**
     Given a plane normal and a point in the plane, this method updates
     current plane to fit that spec.
+    @param p
+    @param n
     */
     public void setFromPointNormal(Vector3D p, Vector3D n)
     {
@@ -210,6 +217,8 @@ public class InfinitePlane extends HalfSpace {
     /**
     Given point `p`, current method returns the minimum (signed) distance
     between such a point and this plane.
+    @param p
+    @return 
     */
     public double pointDistance(Vector3D p)
     {
@@ -221,6 +230,8 @@ public class InfinitePlane extends HalfSpace {
     its distance is the minimum to `p`. Note this correspond to "the point's
     projection to the plane" such as the projector is at 90 deg. angle with
     respect to the plane.
+    @param p
+    @return 
     */
     public Vector3D projectPoint(Vector3D p)
     {
@@ -235,6 +246,8 @@ public class InfinitePlane extends HalfSpace {
     Given point `p`, current method returns the mirrored point of `p` with
     respect to this plane. Note that the intersection between this plane and
     the line from `p` to its mirror is the projection of p over the plane.
+    @param p
+    @return 
     */
     public Vector3D mirrorPoint(Vector3D p)
     {
@@ -249,6 +262,9 @@ public class InfinitePlane extends HalfSpace {
     Returns `true` if `this` plane is overlaping with `other` plane.
     Note that two planes are overlaping if they are both coplanar and
     at the same distance from the origin.
+    @param other
+    @param tolerance
+    @return 
     */
     public boolean overlapsWith(InfinitePlane other, double tolerance)
     {
@@ -278,14 +294,10 @@ public class InfinitePlane extends HalfSpace {
         b2 /= l2;
         c2 /= l2;
         d2 /= l2;
-
-        if ( Math.abs(a2 - a1) <= tolerance &&
-             Math.abs(b2 - b1) <= tolerance &&
-             Math.abs(c2 - c1) <= tolerance &&
-             Math.abs(d2 - d1) <= tolerance ) {
-            return true;
-        }
-        return false;
+        return Math.abs(a2 - a1) <= tolerance &&
+            Math.abs(b2 - b1) <= tolerance &&
+            Math.abs(c2 - c1) <= tolerance &&
+            Math.abs(d2 - d1) <= tolerance;
     }
 
     @Override

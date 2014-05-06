@@ -67,7 +67,10 @@ public class ArrayListOfInts extends FundamentalEntity {
     }
 
     /**
-    Quicksort
+    Implements the quick sort algorithm.
+    @param array
+    @param left0
+    @param right0
     */
     public static void quicksort(int[] array, int left0, int right0)
     {

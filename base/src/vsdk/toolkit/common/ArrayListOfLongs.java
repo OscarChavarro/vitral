@@ -63,7 +63,10 @@ public class ArrayListOfLongs extends FundamentalEntity {
     }
 
     /**
-    Quicksort
+    Implements the quick sort algorithm.
+    @param array
+    @param left0
+    @param right0
     */
     public static void quicksort(long[] array, int left0, int right0)
     {

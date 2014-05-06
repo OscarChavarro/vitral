@@ -104,9 +104,13 @@ public class VoxelVolume extends Solid {
     }
 
     /**
-    Given current voxelset geometric space (cube from <-1, -1, -1> to
-    <1, 1, 1>), current voxelset size, and cell position to a voxel; this
+    Given current voxel set geometric space (cube from <-1, -1, -1> to
+    <1, 1, 1>), current voxel set size, and cell position to a voxel; this
     methods gives the position of the voxel center in world coordinates.
+    @param x
+    @param y
+    @param z
+    @return 
     */
     public Vector3D getVoxelPosition(int x, int y, int z)
     {
@@ -120,6 +124,8 @@ public class VoxelVolume extends Solid {
     /**
     Partial coordinate convertion (X axis) for `x` voxel coordinate to
     corresponding voxel index.
+    @param x
+    @return 
     */
     public int getNearestIFromX(double x)
     {
@@ -129,6 +135,8 @@ public class VoxelVolume extends Solid {
     /**
     Partial coordinate convertion (Y axis) for `y` voxel coordinate to
     corresponding voxel index.
+    @param y
+    @return 
     */
     public int getNearestJFromY(double y)
     {
@@ -138,6 +146,8 @@ public class VoxelVolume extends Solid {
     /**
     Partial coordinate convertion (Z axis) for `z` voxel coordinate to
     corresponding voxel index.
+    @param z
+    @return 
     */
     public int getNearestKFromZ(double z)
     {
@@ -149,6 +159,10 @@ public class VoxelVolume extends Solid {
     <1, 1, 1>), current voxelset size, and cell position to a voxel; this
     methods gives the voxel value with a position corresponding to coordinate
     <x, y, z> (inside voxel space cube).
+    @param x
+    @param y
+    @param z
+    @return 
     */
     public int getVoxelAtPosition(double x, double y, double z)
     {
@@ -167,6 +181,8 @@ public class VoxelVolume extends Solid {
     <1, 1, 1>), current voxelset size, and cell position to a voxel; this
     methods gives the voxel value with a position corresponding to coordinate
     <x, y, z> (inside voxel space cube).
+    @param p
+    @return 
     */
     public int getVoxelAtPosition(Vector3D p)
     {
@@ -185,6 +201,10 @@ public class VoxelVolume extends Solid {
     <1, 1, 1>), current voxelset size, and cell position to a voxel; this
     methods puts the voxel value with a position corresponding to coordinate
     <x, y, z> (inside voxel space cube).
+    @param x
+    @param y
+    @param z
+    @param val
     */
     public void putVoxelAtPosition(double x, double y, double z, byte val)
     {
@@ -203,6 +223,8 @@ public class VoxelVolume extends Solid {
     <1, 1, 1>), current voxelset size, and cell position to a voxel; this
     methods puts the voxel value with a position corresponding to coordinate
     <x, y, z> (inside voxel space cube).
+    @param p
+    @param val
     */
     public void putVoxelAtPosition(Vector3D p, byte val)
     {
@@ -231,6 +253,7 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
+    @return 
     */
     @Override
     public double[] getMinMax() {
@@ -247,14 +270,12 @@ public class VoxelVolume extends Solid {
     }
 
     /**
-     Check the general interface contract in superclass method
-     Geometry.doIntersection.
+    Check the general interface contract in superclass method
+    Geometry.doIntersection.
 
-       Dado un Ray `inout_rayo`, esta operaci&oacute;n determina si el rayo se
-       intersecta con alguna de las mallas de triangulos. Si el rayo no intersecta
-       al objeto se retorna 0, y de lo contrario se retorna la distancia desde
-       el origen del rayo hasta el punto de interseccion mas cercano de todas las mallas.
-     */
+    @param inOut_Ray
+    @return 
+    */
     @Override
     public boolean doIntersection(Ray inOut_Ray) {
         return false;
@@ -263,11 +284,15 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
+    @param inRay
+    @param inT
+    @param outData
     */
     @Override
     public void
-    doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outData) {
+    doExtraInformation(Ray inRay, 
+        double inT,
+        GeometryIntersectionInformation outData) {
 
     }
 
@@ -275,6 +300,8 @@ public class VoxelVolume extends Solid {
     Current method creates a transformation matrix that represent the
     coordinate change from voxel volume cube <-1, -1, -1>-<1, 1, 1> to
     the bounding box recieved in `minmax`.
+    @param minmax
+    @return 
     */
     public static Matrix4x4
     getTransformFromVoxelFrameToMinMax(double minmax[])
@@ -311,6 +338,7 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Solid.doCenterOfMass
+    @return 
     */
     @Override
     public Vector3D doCenterOfMass() {

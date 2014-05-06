@@ -29,6 +29,8 @@ public class Complex extends FundamentalEntity {
 
     /**
     Create a new object with the given real and imaginary parts
+    @param real
+    @param imag
     */
     public Complex(double real, double imag) {
         r = real;
@@ -37,6 +39,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return abs/modulus/magnitude
+    @return 
     */
     public double abs() {
         return Math.hypot(r, i); // Math.sqrt(r*r + i*i)
@@ -44,6 +47,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return angle/phase/argument
+    @return 
     */
     public double phase() {
         // between -pi and pi
@@ -52,6 +56,8 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is (this + b)
+    @param b
+    @return 
     */
     public Complex plus(Complex b) {
         double real = this.r + b.r;
@@ -61,6 +67,8 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is (this - b)
+    @param b
+    @return 
     */
     public Complex minus(Complex b) {
         Complex a = this;
@@ -71,6 +79,8 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is (this * b)
+    @param b
+    @return 
     */
     public Complex times(Complex b) {
         Complex a = this;
@@ -82,6 +92,8 @@ public class Complex extends FundamentalEntity {
     /**
     Scalar multiplication
     Return a new object whose value is (this * alpha)
+    @param alpha
+    @return 
     */
     public Complex times(double alpha) {
         return new Complex(alpha * r, alpha * i);
@@ -89,6 +101,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the conjugate of this
+    @return 
     */
     public Complex conjugate() {
       return new Complex(r, -i);
@@ -96,6 +109,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the reciprocal of this
+    @return 
     */
     public Complex reciprocal() {
         double scale = r*r + i*i;
@@ -104,6 +118,8 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a / b
+    @param b
+    @return 
     */
     public Complex divides(Complex b) {
         Complex a = this;
@@ -112,6 +128,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex exponential of this
+    @return 
     */
     public Complex exp() {
         return new Complex(Math.exp(r) * Math.cos(i), Math.exp(r) * Math.sin(i));
@@ -119,6 +136,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex sine of this
+    @return 
     */
     public Complex sin() {
         return new Complex(Math.sin(r) * Math.cosh(i), Math.cos(r) * Math.sinh(i));
@@ -126,6 +144,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex cosine of this
+    @return 
     */
     public Complex cos() {
         return new Complex(Math.cos(r) * Math.cosh(i), -Math.sin(r) * Math.sinh(i));
@@ -133,6 +152,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex tangent of this
+    @return 
     */
     public Complex tan() {
         return sin().divides(cos());
@@ -140,6 +160,9 @@ public class Complex extends FundamentalEntity {
 
     /**
     A static version of plus
+    @param a
+    @param b
+    @return 
     */
     public static Complex plus(Complex a, Complex b) {
         double real = a.r + b.r;
@@ -150,6 +173,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a string representation of the invoking Complex object
+    @return 
     */
     @Override
     public String toString() {

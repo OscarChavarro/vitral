@@ -9,6 +9,9 @@
 
 package vsdk.toolkit.common;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
 The RendererConfiguration class is used to indicate some attributes in which a 
 geometry is to be displayed in screen. The RendererConfiguration class is not
@@ -348,12 +351,17 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
 
     /**
     @return
-    @throws CloneNotSupportedException
     */
     @Override
     public RendererConfiguration clone() 
-            //throws CloneNotSupportedException
+        //throws CloneNotSupportedException 
     {
+        try {
+            super.clone();
+        }
+        catch ( CloneNotSupportedException ex ) {
+        
+        }
         RendererConfiguration copy = new RendererConfiguration();
         copy.shadingType = shadingType;
         copy.surfaces = surfaces;

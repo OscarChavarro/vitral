@@ -64,21 +64,24 @@ public abstract class GuiVariable extends GuiElement {
     }
 
     /**
-     * Each variable has a type. Examples: "Integer", "Double", "String",
-     * "Vector3D".
-     */
+    Each variable has a type. Examples: "Integer", "Double", "String",
+    "Vector3D".
+    @return 
+    */
     public abstract String getType();
 
     /**
-     * Gets the current String specifying valid value range. The returned String
-     * contains an specification expressed in Vitral GUI value ranges language.
-     */
+    Gets the current String specifying valid value range. The returned String
+    contains an specification expressed in Vitral GUI value ranges language.
+     * @return 
+    */
     public abstract String getValidRange();
 
     /**
-     * Sets the current String specifying valid value range. The returned String
-     * contains an specification expressed in Vitral GUI value ranges language.
-     */
+    Sets the current String specifying valid value range. The returned String
+    contains an specification expressed in Vitral GUI value ranges language.
+     * @param vr
+    */
     public abstract void setValidRange(String vr);
 }
 

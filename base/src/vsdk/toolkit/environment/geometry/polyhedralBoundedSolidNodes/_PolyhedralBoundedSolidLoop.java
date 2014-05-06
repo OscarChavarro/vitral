@@ -68,7 +68,11 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     }
 
     /** Locates a half edge that goes from vertex with id `a` to vertex with
-    id `b`.  Returns null if no such half edge exists in this loop. */
+    id `b`.  Returns null if no such half edge exists in this loop.
+    @param a
+    @param b
+    @return  
+    */
     public _PolyhedralBoundedSolidHalfEdge halfEdgeVertices(int a, int b)
     {
         _PolyhedralBoundedSolidHalfEdge he, oldhe;

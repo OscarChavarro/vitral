@@ -139,6 +139,9 @@ public abstract class Geometry extends Entity {
 
     Prerequisite: this method should be called only after a call to
     doIntersection method in the same object that returned a true value.
+    @param inRay
+    @param intT
+    @param outData
     */
     public abstract void
     doExtraInformation(Ray inRay, double intT, 
@@ -164,6 +167,7 @@ public abstract class Geometry extends Entity {
     /**
     \todo  This method should be abstract, forcing all subclasses to define it.
     The design of this method could change in future.
+    @return 
     */
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
@@ -172,6 +176,7 @@ public abstract class Geometry extends Entity {
 
     /**
     The design of this method could change in future.
+    @return 
     */
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
@@ -185,6 +190,9 @@ public abstract class Geometry extends Entity {
 
     Note that the `INSIDE` and `OUTSIDE` cases are only feasible in `Solid`s,
     while `LIMIT` cases can be defined in 0D, 1D and 2D geometries.
+    @param p
+    @param distanceTolerance
+    @return 
     */
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
@@ -198,6 +206,9 @@ public abstract class Geometry extends Entity {
     for that cases voxelization should be explicit, and overload this method.
     Current method is usually well behaved for basic solid models.
     Note that `reporter` can be null.
+    @param vv
+    @param M
+    @param reporter
     */
     public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
     {

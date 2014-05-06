@@ -30,11 +30,12 @@ public class Entity implements Serializable
     /**
     Each Entity object in the VSDK model should be responsible for calculating
     the size in bytes that occupies in RAM, including its own attributes and
-    the agregated objects (note that the associated objects only must count
+    the aggregated objects (note that the associated objects only must count
     the size of the references).  If the class doen't overload this method,
     a 0 size is assumed.
 
     This is important for applications implementing memory chaching schema.
+    @return 
     */
     public int getSizeInBytes()
     {

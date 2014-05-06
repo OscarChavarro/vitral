@@ -1129,4 +1129,8 @@
     first object in standard scene.
   - 1h: Android example is managing subscenes for sample objects.
 
+2014 may 5, Oscar Chavarro
+  - 1h6min: revisiting comments. Less warnings appearing on IDEs as such
+    Netbeans.
+
 ===========================================================================
