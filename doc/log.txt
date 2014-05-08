@@ -1133,4 +1133,7 @@
   - 1h6min: revisiting comments. Less warnings appearing on IDEs as such
     Netbeans.
 
+2014 may 8, Oscar Chavarro
+  - 20min: Android data resources moved from res to assets.
+
 ===========================================================================

@@ -11,19 +11,23 @@ import java.util.Stack;
 // Android classes
 import android.util.Log;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 
 // Sandbox
-import vitral.application.R;
+//import vitral.application.R;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -386,58 +390,61 @@ public class AndroidGLES20Renderer extends RenderingElement
         String pixelShaderSource;
 
         //- Create shader programs ----------------------------------------
-        vertexShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.constantvertexshader));
-        pixelShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.constantpixelshader));
-        AndroidGLES20GpuProgramConstant = 
-            createProgram(vertexShaderSource, pixelShaderSource);
-        if ( AndroidGLES20GpuProgramConstant == 0 ) {
-            System.err.println("ERROR CREATING CONSTANT SHADER!");
-            return false;
-        }
+        AssetManager loader;
+        
+        loader = ctx.getResources().getAssets();
+        
+        try {
+            vertexShaderSource = loadAsStringTrimmingComments(
+                loader.open("constantvertexshader.glsl"));
+            pixelShaderSource = loadAsStringTrimmingComments(
+                loader.open("constantpixelshader.glsl"));
+            AndroidGLES20GpuProgramConstant
+                = createProgram(vertexShaderSource, pixelShaderSource);
+            if ( AndroidGLES20GpuProgramConstant == 0 ) {
+                System.err.println("ERROR CREATING CONSTANT SHADER!");
+                return false;
+            }
 
-        vertexShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.gouraudvertexshader));
-        pixelShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.gouraudpixelshader));
-        AndroidGLES20GpuProgramGouraud = 
-            createProgram(vertexShaderSource, pixelShaderSource);
-        if ( AndroidGLES20GpuProgramGouraud == 0 ) {
-            System.err.println("ERROR CREATING GOURAUD SHADER!");
-            return false;
-        }
+            vertexShaderSource = loadAsStringTrimmingComments(
+                loader.open("gouraudvertexshader.glsl"));
+            pixelShaderSource = loadAsStringTrimmingComments(
+                loader.open("gouraudpixelshader.glsl"));
+            AndroidGLES20GpuProgramGouraud
+                = createProgram(vertexShaderSource, pixelShaderSource);
+            if ( AndroidGLES20GpuProgramGouraud == 0 ) {
+                System.err.println("ERROR CREATING GOURAUD SHADER!");
+                return false;
+            }
 
-        vertexShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.phongvertexshader));
-        pixelShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.phongpixelshader));
-        AndroidGLES20GpuProgramPhong = 
-            createProgram(vertexShaderSource, pixelShaderSource);
-        if ( AndroidGLES20GpuProgramPhong == 0 ) {
-            System.err.println("ERROR CREATING PHONG SHADER!");
-            return false;
-        }
+            vertexShaderSource = loadAsStringTrimmingComments(
+                loader.open("phongvertexshader.glsl"));
+            pixelShaderSource = loadAsStringTrimmingComments(
+                loader.open("phongpixelshader.glsl"));
+            AndroidGLES20GpuProgramPhong
+                = createProgram(vertexShaderSource, pixelShaderSource);
+            if ( AndroidGLES20GpuProgramPhong == 0 ) {
+                System.err.println("ERROR CREATING PHONG SHADER!");
+                return false;
+            }
 
-        vertexShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.phongbumpvertexshader));
-        pixelShaderSource = loadAsStringTrimmingComments(
-            ctx.getResources().openRawResource(
-                R.raw.phongbumppixelshader));
-        AndroidGLES20GpuProgramPhongBump = 
-            createProgram(vertexShaderSource, pixelShaderSource);
-        if ( AndroidGLES20GpuProgramPhong == 0 ) {
-            System.err.println("ERROR CREATING PHONG BUMP SHADER!");
-            return false;
+            vertexShaderSource = loadAsStringTrimmingComments(
+                loader.open("phongbumpvertexshader.glsl"));
+            pixelShaderSource = loadAsStringTrimmingComments(
+                loader.open("phongbumppixelshader.glsl"));
+            AndroidGLES20GpuProgramPhongBump
+                = createProgram(vertexShaderSource, pixelShaderSource);
+            if ( AndroidGLES20GpuProgramPhong == 0 ) {
+                System.err.println("ERROR CREATING PHONG BUMP SHADER!");
+                return false;
+            }
         }
-
+        catch ( Resources.NotFoundException e ) {
+            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
+        }
+        catch ( IOException e ) {
+            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
+        }
         //- Create parameters ---------------------------------------------
         activateShaders();
         return true;

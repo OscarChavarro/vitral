@@ -10,6 +10,8 @@ In order to build this project:
   - On netbeans, the new project creation copies some files. Delete 
     VitralActivity.java and res/layout
   - Make the folder res/raw
+  - Make the folder assets (on project main folder, at the same level that
+    "src" and "res")
   - Copy into res/raw render.png and *.glsl from etc/cgShaders folder on vitral
   - Copy into res/raw miniearth.png etc/textures folder on vitral
   - Copy AndroidManifest.xml from vitral/testsuite/ApplicationCases/
