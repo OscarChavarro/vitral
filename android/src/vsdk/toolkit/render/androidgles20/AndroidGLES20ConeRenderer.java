@@ -61,7 +61,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
 
         //Sending the data to the renderer
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (slices + 1) * 2, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, (slices + 1) * 2, GLES20.GL_TRIANGLE_STRIP, MODE_3POSITION_3COLOR_3NORMAL_2UV);
 
                                 //------------------------------------------------------------------------
         //  CONE CAPS
@@ -104,7 +104,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         }
 
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices + 2, GLES20.GL_TRIANGLE_FAN, mode3Position3Color3Normal2UV);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices + 2, GLES20.GL_TRIANGLE_FAN, MODE_3POSITION_3COLOR_3NORMAL_2UV);
 
                                 //Top Cap
         vertexDataArray = new float[(slices + 2) * vertexFloatElements];
@@ -144,7 +144,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         }
 
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices + 2, GLES20.GL_TRIANGLE_FAN, mode3Position3Color3Normal2UV);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices + 2, GLES20.GL_TRIANGLE_FAN, MODE_3POSITION_3COLOR_3NORMAL_2UV);
     }
 
     /**
@@ -265,7 +265,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
 
         //Sending the data to the renderer
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, MODE_3POSITION_3COLOR);
 
         //drawing the lines from the center to the edge
         vertexDataArray = new float[slices * 2 * vertexFloatElements];
@@ -292,7 +292,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             index += vertexFloatElements;
         }
 
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_LINES, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_LINES, MODE_3POSITION_3COLOR);
 
                 //WIRING THE TOP CAP
         vertexDataArray = new float[slices * vertexFloatElements];
@@ -306,7 +306,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
 
         //Sending the data to the renderer
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices, GLES20.GL_LINE_LOOP, MODE_3POSITION_3COLOR);
 
         //drawing the lines from the center to the edge
         vertexDataArray = new float[2 * slices * vertexFloatElements];
@@ -332,7 +332,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);
             index += vertexFloatElements;
         }
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2 * slices, GLES20.GL_LINES, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2 * slices, GLES20.GL_LINES, MODE_3POSITION_3COLOR);
 
                 //THIS IS THE BODY IN WIRE FRAME
         vertexDataArray = new float[(slices) * 2 * vertexFloatElements];
@@ -348,7 +348,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             index += vertexFloatElements;
         }
 
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_LINE_STRIP, MODE_3POSITION_3COLOR);
 
     }
 
@@ -393,7 +393,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         }
 
         //Sending the data to the renderer
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_POINTS, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 2, GLES20.GL_POINTS, MODE_3POSITION_3COLOR);
 
     }
 
@@ -436,7 +436,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             drawNormal(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += 2 * vertexFloatElements;
         }
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 4, GLES20.GL_LINES, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, slices * 4, GLES20.GL_LINES, MODE_3POSITION_3COLOR);
 
         //Sending the top and bottom cap normals
         vertexDataArray = new float[((slices * 4) + 4) * vertexFloatElements];
@@ -457,7 +457,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             index += 2 * vertexFloatElements;
 
         }
-        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, ((slices * 4) + 4), GLES20.GL_LINES, mode3Position3Color);
+        sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, ((slices * 4) + 4), GLES20.GL_LINES, MODE_3POSITION_3COLOR);
 
     }
 
@@ -646,13 +646,13 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         //send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
         //method is using according to the way they should be drawn.
         switch (drawingMode) {
-            case mode3Position3Color3Normal2UV:
+            case MODE_3POSITION_3COLOR_3NORMAL_2UV:
                 drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, slices);
                 break;
-            case mode3Position3Normal2UV:
+            case MODE_3POSITION_3NORMAL_2UV:
                 drawVertices3Position3Normal2Uv(verticesBufferedArray, primitive, slices);
                 break;
-            case mode3Position3Color:
+            case MODE_3POSITION_3COLOR:
                 drawVertices3Position3Color(verticesBufferedArray, primitive, slices);
                 break;
             default:

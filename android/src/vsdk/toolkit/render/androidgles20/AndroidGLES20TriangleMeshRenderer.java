@@ -61,7 +61,6 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         int start = 0;
         int end = 0;
         FloatBuffer vertexArray;
-        int vbo[];
         
         for ( i = 0; materialRanges != null && i < materialRanges.length; 
               i++ ) {

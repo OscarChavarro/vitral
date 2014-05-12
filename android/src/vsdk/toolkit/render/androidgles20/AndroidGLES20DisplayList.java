@@ -32,12 +32,16 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     
     /// Gets invalidated if user changes rendering configuration.
     private RendererConfiguration correspondingQuality;
-
-    AndroidGLES20DisplayList(RendererConfiguration q) {
+    
+    /// One of the several encaptulation for vertex data
+    private int vertexMode;
+    
+    public AndroidGLES20DisplayList(RendererConfiguration q) {
         vboMaterials = new ArrayList<Material>();
         vboIds = new ArrayListOfInts(10);
         vboSizes = new ArrayListOfInts(10);
         vboPrimitives = new ArrayListOfInts(10);
+        vertexMode = MODE_3POSITION_3COLOR_3NORMAL_2UV;
         if ( q!= null ) {
             correspondingQuality = q.clone();
         }
@@ -81,7 +85,7 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
         return vboIds;
     }
 
-    void addVbo(Material material, int id, int primitive, int size) {
+    public void addVbo(Material material, int id, int primitive, int size) {
         vboMaterials.add(material);
         vboIds.add(id);
         vboPrimitives.add(primitive);
@@ -100,6 +104,20 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     */
     public ArrayListOfInts getVboPrimitives() {
         return vboPrimitives;
+    }
+
+    /**
+    @return the vertexMode
+    */
+    public int getVertexMode() {
+        return vertexMode;
+    }
+
+    /**
+    @param vertexMode the vertexMode to set
+    */
+    public void setVertexMode(int vertexMode) {
+        this.vertexMode = vertexMode;
     }
     
 }

@@ -76,7 +76,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                 
                 //Sending the data to the renderer
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_TRIANGLE_STRIP, MODE_3POSITION_3COLOR_3NORMAL_2UV);
                 
                 
                 //------------------------------------------------------------------------
@@ -97,7 +97,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                 drawVertex(- 0.5,  0.5, - 0.5, (double)0, (double)1/2, color, vertexDataArray, index, nRendererConfiguration);
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, MODE_3POSITION_3COLOR_3NORMAL_2UV);
                         
                 
                 //Lower Cap
@@ -114,7 +114,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                 drawVertex(- 0.5,  - 0.5, - 0.5, (double)1, (double)1/2, color, vertexDataArray, index, nRendererConfiguration);
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, mode3Position3Color3Normal2UV);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_TRIANGLE_STRIP, MODE_3POSITION_3COLOR_3NORMAL_2UV);
                         
         }
 
@@ -204,7 +204,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 drawSimpleVertex( 0.5,  0.5, - 0.5,  color, vertexDataArray, index, nRendererConfiguration);
                 
 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, MODE_3POSITION_3COLOR);
                 
                 //Lower Cap
 
@@ -221,7 +221,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, mode3Position3Color);            
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_LINE_LOOP, MODE_3POSITION_3COLOR);            
 //line 1
                 
                 vertexDataArray = new float[2*vertexFloatElements];
@@ -234,7 +234,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
         
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, MODE_3POSITION_3COLOR);
         //line 2
 
                 vertexDataArray = new float[2*vertexFloatElements];
@@ -245,7 +245,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 drawSimpleVertex(- 0.5,  - 0.5,  0.5, color, vertexDataArray, index, nRendererConfiguration);
                 index+=vertexFloatElements;
         
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);           
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, MODE_3POSITION_3COLOR);           
 //line 3
                 
                 vertexDataArray = new float[2*vertexFloatElements];
@@ -257,7 +257,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 index+=vertexFloatElements;
         
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, MODE_3POSITION_3COLOR);
                 
 //line 4
                 
@@ -270,7 +270,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 index+=vertexFloatElements;
         
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 2, GLES20.GL_LINE_STRIP, MODE_3POSITION_3COLOR);
                                 
         }
 
@@ -333,7 +333,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 
                 //Sending the data to the renderer
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_POINTS, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 10, GLES20.GL_POINTS, MODE_3POSITION_3COLOR);
                 
                 //------------------------------------------------------------------------
                 //  BOX CAPS
@@ -353,7 +353,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 drawSimpleVertex(- 0.5,  0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, MODE_3POSITION_3COLOR);
                                 
                 vertexDataArray = new float[4*vertexFloatElements];
                 index = 0;
@@ -367,7 +367,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 drawSimpleVertex(- 0.5,  - 0.5, - 0.5, color, vertexDataArray, index, nRendererConfiguration);
                 
                 
-                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, mode3Position3Color);
+                sendVertexesToDraw(vertexDataArray, vertexSizeInBytes, 4, GLES20.GL_POINTS, MODE_3POSITION_3COLOR);
                 
                 
         }
@@ -382,11 +382,11 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 //send the vertices to draw with arrays of 3 points for position, 3 for normals and 2 for UV (for UV mapping)
                 //method is using according to the way they should be drawn.
                 switch(drawingMode){
-                case mode3Position3Color3Normal2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements);
+                case MODE_3POSITION_3COLOR_3NORMAL_2UV:  drawVertices3Position3Color3Normal2Uv(verticesBufferedArray, primitive, numberOfElements);
                         break;
-                case mode3Position3Color: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
+                case MODE_3POSITION_3COLOR: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
                         break;
-                case mode3Position3Normal2UV: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
+                case MODE_3POSITION_3NORMAL_2UV: drawVertices3Position3Color(verticesBufferedArray, primitive, numberOfElements);
                         break;
                 default:
                         break;
