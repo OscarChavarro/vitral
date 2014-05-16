@@ -1617,6 +1617,10 @@ public class PolyhedralBoundedSolid extends Solid {
 
             if ( validateFaceIsPlanar(face) ) {
                 face.calculatePlane();
+                if ( face.containingPlane == null ) {
+                    msg += "  - Face [" + face.id + "] was not able to compute containing plane\n";
+                    test = false;
+                }
             }
             else {
                 msg += "  - Face [" + face.id + "] is not coplanar\n";
@@ -1637,7 +1641,7 @@ public class PolyhedralBoundedSolid extends Solid {
         }
         else {
             VSDK.reportMessage(this, VSDK.WARNING, "validateModel",
-                "Validation test failed!:\n" + msg);
+                "Solid validation test failed!:\n" + msg);
         }
 
         return test;

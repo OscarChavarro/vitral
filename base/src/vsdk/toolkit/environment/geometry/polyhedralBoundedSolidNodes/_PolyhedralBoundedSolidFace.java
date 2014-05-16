@@ -10,7 +10,6 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 //===========================================================================
-
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import java.util.ArrayList;
@@ -140,92 +139,150 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     PRE: current face points must be all co-planar. Previous solid validation
     should be made!
     POST: current face contains a plane containing the face.
-
-    Current implementation takes in to account only the first loop.
+    @return 
     */
-    public void
+    public boolean
     calculatePlane()
     {
-        if ( boundariesList.size() < 1 ) {
-            return;
-        }
+        return calculatePlaneByVertexSequenceNormalCrossProduct();
+    }
 
+    /**
+    Current implementation takes in to account only the first loop. This method
+    has proved to be inefficient.
+    */
+    private boolean calculatePlaneByVertexSequenceNormalCrossProduct() {
+        if ( boundariesList.size() < 1 ) {
+            return true;
+        }
         _PolyhedralBoundedSolidLoop loop;
         _PolyhedralBoundedSolidHalfEdge he, heStart;
-
         loop = boundariesList.get(0);
-
         he = loop.boundaryStartHalfEdge;
         if ( he == null ) {
             // Loop without starting halfedge
-            return;
+            return true;
         }
         heStart = he;
-
         boolean colinearPoints = true;
-
         do {
             // This is only considering the first three vertices, and not taking
             // in to account the possible case of too close vertices. Should be
             // replaced to consider the full vertices set.
-
             //- Do normal estimation on a three set of points -----------------
             Vector3D p0;
             Vector3D p1;
             Vector3D p2;
             Vector3D a, b;
             Vector3D n;
-
             p0 = he.startingVertex.position;
             p1 = he.next().startingVertex.position;
             p2 = he.next().next().startingVertex.position;
-
-            a = p1.substract(p0);    a.normalize();
-            b = p2.substract(p0);    b.normalize();
+            a = p1.substract(p0);
+            a.normalize();
+            b = p2.substract(p0);
+            b.normalize();
             n = a.crossProduct(b);
+            // Iterate if the given three vertices are colinear
+            double angleInDegrees;
+            angleInDegrees = Math.toDegrees(Math.acos(a.dotProduct(b)));
+            
+            /*
+            System.out.println("  - Face plane determination angle: " +
+            VSDK.formatDouble(angleInDegrees));
+            if ( angleInDegrees < 1.0 ) {
+            System.out.println("  * Need to fix face");
+            }
+             */
+            boolean firstTimer = true;
+            // In a given polygon, pass 1 for angle correction seeks big
+            // angles, leading to less error on normal plane calculation
+            /*
+            while ( angleInDegrees < 30.0 && he.next().next() != heStart &&
+                he.next() != heStart ) {
+                he = he.next();
+                p0 = he.startingVertex.position;
+                p1 = he.next().startingVertex.position;
+                p2 = he.next().next().startingVertex.position;
 
+                a = p1.substract(p0);
+                a.normalize();
+                b = p2.substract(p0);
+                b.normalize();
+                n = a.crossProduct(b);
+                angleInDegrees = Math.acos(a.dotProduct(b));
+                //System.out.println("  . Big iteration angle: " + angleInDegrees);
+                firstTimer = false;
+            }
+            */
+            
+            // This code will fail for polygons with all angles under 1 degre,
+            // for example a polygon representing a circle with more than 
+            // 360 segments
+            while ( angleInDegrees < 1.0 && he.next().next() != heStart &&
+                he.next() != heStart ) {
+                he = he.next();
+                p0 = he.startingVertex.position;
+                p1 = he.next().startingVertex.position;
+                p2 = he.next().next().startingVertex.position;
+
+                a = p1.substract(p0);
+                a.normalize();
+                b = p2.substract(p0);
+                b.normalize();
+                n = a.crossProduct(b);
+                angleInDegrees = Math.acos(a.dotProduct(b));
+                //System.out.println("  . Iteration angle: " + angleInDegrees);
+                firstTimer = false;
+            }
+            
+            //if ( !firstTimer ) {
+            //    System.out.println("  * fixed");
+            //}
+            
+            if ( angleInDegrees < 1.0 ) {
+                //VSDK.reportMessage(this, VSDK.WARNING, "calculatePlane", 
+                //    "Face is colinear degenerate case!");
+                containingPlane = null;
+                return false;
+            }
+            // Do plane
             if ( n.length() < VSDK.EPSILON ||
-                 a.length() < VSDK.EPSILON ||
-                 b.length() < VSDK.EPSILON ) {
+                a.length() < VSDK.EPSILON ||
+                b.length() < VSDK.EPSILON ) {
                 he = he.next();
                 continue;
             }
             else {
                 colinearPoints = false;
             }
-
             n.normalize();
             containingPlane = new InfinitePlane(n, p0);
-
             //- Determine if p1 region is convex or concave -------------------
             Vector3D middle = a.add(b);
             Vector3D testPoint;
             middle.normalize();
             middle = middle.multiply(10.0*VSDK.EPSILON);
-
             testPoint = p0.add(middle);
-
             //- If concave, swap normal direction -----------------------------
             if ( testPointInside(testPoint, VSDK.EPSILON) == Geometry.OUTSIDE ) {
                 n = n.multiply(-1.0);
             }
             containingPlane = new InfinitePlane(n, p0);
-
             he = he.next();
-
-        } while ( he != heStart && colinearPoints );
-
+        }
+        while ( he != heStart && colinearPoints );
         /*
         do {
-            he = he.next();
-            if ( he == null ) {
-                // Loop is not closed!
-                break;
-            }
-            // ?
+        he = he.next();
+        if ( he == null ) {
+        // Loop is not closed!
+        break;
+        }
+        // ?
         } while( he != heStart );
-        */
-
+         */
+        return false;
     }
 
     /**

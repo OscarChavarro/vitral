@@ -31,6 +31,11 @@ public class Polygon2D extends Surface
         currentLoop.addVertex(x, y);
     }
 
+    public void pushVertex(double x, double y)
+    {
+        currentLoop.pushVertex(x, y);
+    }
+
     public final void nextLoop()
     {
         currentLoop = new _Polygon2DContour();

@@ -28,6 +28,11 @@ public class _Polygon2DContour extends FundamentalEntity
     {
         vertices.add(new Vertex2D(x, y));
     }
+    
+    public void pushVertex(double x, double y)
+    {
+        vertices.add(0, new Vertex2D(x, y));
+    }
 }
 
 //===========================================================================

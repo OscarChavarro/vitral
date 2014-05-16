@@ -1136,4 +1136,9 @@
 2014 may 8, Oscar Chavarro
   - 20min: Android data resources moved from res to assets.
 
+2014 may 16, Oscar Chavarro
+  - 2h: fixing a bug that makes polyhedral bounded solid face algorithm
+    plane calculation to fail for some polygons with near-colinear sequences
+    of vertices.
+
 ===========================================================================

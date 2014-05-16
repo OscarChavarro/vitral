@@ -299,6 +299,7 @@ public class Box extends Solid {
         solid.smev(1, 3, 2,
             new Vector3D(size.x/2, -size.y/2, -size.z/2));
         solid.mef(1, 1, 1, 4, 2, 3, 2);
+        
         solid.smev(1, 1, 5,
             new Vector3D(-size.x/2, -size.y/2, size.z/2));
         solid.smev(1, 2, 6,
