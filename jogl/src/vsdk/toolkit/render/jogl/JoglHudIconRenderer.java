@@ -16,12 +16,6 @@ import vsdk.toolkit.media.RGBImage;
 /**
 */
 public class JoglHudIconRenderer {
-    private static final Image xxx;
-    static {
-        xxx = new RGBImage();
-        xxx.init(8, 8);
-        xxx.createTestPattern();
-    }
     
     public static void activateDefaultTextureParameters(GL2 gl)
     {
@@ -51,17 +45,17 @@ public class JoglHudIconRenderer {
         fy = (((double)img.getYSize()) * 2.0) / 
              ((double)c.getViewportYSize());
 
-        dx = ((double)img.getXSize() + x) / 
+        dx = ((double)(x) * 2.0 + ((double)img.getXSize())) / 
             ((double)c.getViewportXSize());
 
-        dy = ((double)img.getYSize() + y) / 
+        dy = ((double)(y) * 2.0 + ((double)img.getYSize())) / 
             ((double)c.getViewportYSize());
 
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
-        gl.glTranslated(-1.0 + dx, 1.0 - dy, 0);
+        gl.glTranslated(dx-1, 1.0 - dy, 0);
         gl.glScaled(fx, fy, 1.0);
         gl.glActiveTexture(GL2.GL_TEXTURE0);
         JoglImageRenderer.activate(gl, img);
