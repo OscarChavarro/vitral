@@ -143,11 +143,136 @@ public class KeyEvent extends PresentationElement
     public static final int KEY_PERIOD = 0x0074;
     public static final int KEY_NUMPERIOD = 0x0075;
 
-    public  KeyEvent()
+    public KeyEvent()
     {
         keycode = KEY_NONE;
         unicode_id = KEY_NONE;
         modifierMask = 0;
+    }
+
+    public static String getKeyName(int key)
+    {
+        String msg = "KEY_NONE";
+        switch ( key ) {
+  	  case KEY_A: msg = "KEY_A"; break;
+  	  case KEY_B: msg = "KEY_B"; break;
+  	  case KEY_C: msg = "KEY_C"; break;
+  	  case KEY_D: msg = "KEY_D"; break;
+  	  case KEY_E: msg = "KEY_E"; break;
+  	  case KEY_F: msg = "KEY_F"; break;
+  	  case KEY_G: msg = "KEY_G"; break;
+  	  case KEY_H: msg = "KEY_H"; break;
+  	  case KEY_I: msg = "KEY_I"; break;
+  	  case KEY_J: msg = "KEY_J"; break;
+  	  case KEY_K: msg = "KEY_K"; break;
+  	  case KEY_L: msg = "KEY_L"; break;
+  	  case KEY_M: msg = "KEY_M"; break;
+  	  case KEY_N: msg = "KEY_N"; break;
+  	  case KEY_O: msg = "KEY_O"; break;
+  	  case KEY_P: msg = "KEY_P"; break;
+  	  case KEY_Q: msg = "KEY_Q"; break;
+  	  case KEY_R: msg = "KEY_R"; break;
+  	  case KEY_S: msg = "KEY_S"; break;
+  	  case KEY_T: msg = "KEY_T"; break;
+  	  case KEY_U: msg = "KEY_U"; break;
+  	  case KEY_V: msg = "KEY_V"; break;
+  	  case KEY_W: msg = "KEY_W"; break;
+  	  case KEY_X: msg = "KEY_X"; break;
+  	  case KEY_Y: msg = "KEY_Y"; break;
+  	  case KEY_Z: msg = "KEY_Z"; break;
+  	  case KEY_a: msg = "KEY_a"; break;
+  	  case KEY_b: msg = "KEY_b"; break;
+  	  case KEY_c: msg = "KEY_c"; break;
+  	  case KEY_d: msg = "KEY_d"; break;
+  	  case KEY_e: msg = "KEY_e"; break;
+  	  case KEY_f: msg = "KEY_f"; break;
+  	  case KEY_g: msg = "KEY_g"; break;
+  	  case KEY_h: msg = "KEY_h"; break;
+  	  case KEY_i: msg = "KEY_i"; break;
+  	  case KEY_j: msg = "KEY_j"; break;
+  	  case KEY_k: msg = "KEY_k"; break;
+  	  case KEY_l: msg = "KEY_l"; break;
+  	  case KEY_m: msg = "KEY_m"; break;
+  	  case KEY_n: msg = "KEY_n"; break;
+  	  case KEY_o: msg = "KEY_o"; break;
+  	  case KEY_p: msg = "KEY_p"; break;
+  	  case KEY_q: msg = "KEY_q"; break;
+  	  case KEY_r: msg = "KEY_r"; break;
+  	  case KEY_s: msg = "KEY_s"; break;
+  	  case KEY_t: msg = "KEY_t"; break;
+  	  case KEY_u: msg = "KEY_u"; break;
+  	  case KEY_v: msg = "KEY_v"; break;
+  	  case KEY_w: msg = "KEY_w"; break;
+  	  case KEY_x: msg = "KEY_x"; break;
+  	  case KEY_y: msg = "KEY_y"; break;
+  	  case KEY_z: msg = "KEY_z"; break;
+  	  case KEY_0: msg = "KEY_0"; break;
+  	  case KEY_1: msg = "KEY_1"; break;
+  	  case KEY_2: msg = "KEY_2"; break;
+  	  case KEY_3: msg = "KEY_3"; break;
+  	  case KEY_4: msg = "KEY_4"; break;
+  	  case KEY_5: msg = "KEY_5"; break;
+  	  case KEY_6: msg = "KEY_6"; break;
+  	  case KEY_7: msg = "KEY_7"; break;
+  	  case KEY_8: msg = "KEY_8"; break;
+  	  case KEY_9: msg = "KEY_9"; break;
+  	  case KEY_NUM0: msg = "KEY_NUM0"; break;
+  	  case KEY_NUM1: msg = "KEY_NUM1"; break;
+  	  case KEY_NUM2: msg = "KEY_NUM2"; break;
+  	  case KEY_NUM3: msg = "KEY_NUM3"; break;
+  	  case KEY_NUM4: msg = "KEY_NUM4"; break;
+  	  case KEY_NUM5: msg = "KEY_NUM5"; break;
+  	  case KEY_NUM6: msg = "KEY_NUM6"; break;
+  	  case KEY_NUM7: msg = "KEY_NUM7"; break;
+  	  case KEY_NUM8: msg = "KEY_NUM8"; break;
+  	  case KEY_NUM9: msg = "KEY_NUM9"; break;
+  	  case KEY_F1: msg = "KEY_F1"; break;
+  	  case KEY_F2: msg = "KEY_F2"; break;
+  	  case KEY_F3: msg = "KEY_F3"; break;
+  	  case KEY_F4: msg = "KEY_F4"; break;
+  	  case KEY_F5: msg = "KEY_F5"; break;
+  	  case KEY_F6: msg = "KEY_F6"; break;
+  	  case KEY_F7: msg = "KEY_F7"; break;
+  	  case KEY_F8: msg = "KEY_F8"; break;
+  	  case KEY_F9: msg = "KEY_F9"; break;
+  	  case KEY_F10: msg = "KEY_F10"; break;
+  	  case KEY_F11: msg = "KEY_F11"; break;
+  	  case KEY_F12: msg = "KEY_F12"; break;
+  	  case KEY_ESC: msg = "KEY_ESC"; break;
+  	  case KEY_PRINTSCREEN: msg = "KEY_PRINTSCREEN"; break;
+  	  case KEY_BACKSPACE: msg = "KEY_BACKSPACE"; break;
+  	  case KEY_INSERT: msg = "KEY_INSERT"; break;
+  	  case KEY_DELETE: msg = "KEY_DELETE"; break;
+  	  case KEY_PAGEUP: msg = "KEY_PAGEUP"; break;
+  	  case KEY_PAGEDOWN: msg = "KEY_PAGEDOWN"; break;
+  	  case KEY_HOME: msg = "KEY_HOME"; break;
+  	  case KEY_END: msg = "KEY_END"; break;
+  	  case KEY_SPACE: msg = "KEY_SPACE"; break;
+  	  case KEY_LSHIFT: msg = "KEY_LSHIFT"; break;
+  	  case KEY_RSHIFT: msg = "KEY_RSHIFT"; break;
+  	  case KEY_LALT: msg = "KEY_LALT"; break;
+  	  case KEY_RALT: msg = "KEY_RALT"; break;
+  	  case KEY_ALTGR: msg = "KEY_ALTGR"; break;
+  	  case KEY_LCTRL: msg = "KEY_LCTRL"; break;
+  	  case KEY_RCTRL: msg = "KEY_RCTRL"; break;
+  	  case KEY_UP: msg = "KEY_UP"; break;
+  	  case KEY_DOWN: msg = "KEY_DOWN"; break;
+  	  case KEY_LEFT: msg = "KEY_LEFT"; break;
+  	  case KEY_RIGHT: msg = "KEY_RIGHT"; break;
+  	  case KEY_NUMSLASH: msg = "KEY_NUMSLASH"; break;
+  	  case KEY_NUMASTERISK: msg = "KEY_NUMASTERISK"; break;
+  	  case KEY_NUMMINUS: msg = "KEY_NUMMINUS"; break;
+  	  case KEY_NUMPLUS: msg = "KEY_NUMPLUS"; break;
+  	  case KEY_NUMLOCK: msg = "KEY_NUMLOCK"; break;
+  	  case KEY_NUMENTER: msg = "KEY_NUMENTER"; break;
+  	  case KEY_ENTER: msg = "KEY_ENTER"; break;
+  	  case KEY_CAPSLOCK: msg = "KEY_CAPSLOCK"; break;
+  	  case KEY_TAB: msg = "KEY_TAB"; break;
+  	  case KEY_COMMA: msg = "KEY_COMMA"; break;
+  	  case KEY_PERIOD: msg = "KEY_PERIOD"; break;
+  	  case KEY_NUMPERIOD: msg = "KEY_NUMPERIOD"; break;
+        }
+        return msg;
     }
 }
 
