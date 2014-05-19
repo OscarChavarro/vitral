@@ -1141,4 +1141,7 @@
     plane calculation to fail for some polygons with near-colinear sequences
     of vertices.
 
+2014 may 19, Oscar Chavarro
+  - 44min: JoglHudIconRenderer
+
 ===========================================================================

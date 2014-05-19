@@ -3,7 +3,6 @@ package vsdk.toolkit.gui;
 
 import java.io.File;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAImage;
@@ -44,10 +43,10 @@ public class HudIcon extends GuiElement {
     public String getMapTag(String baseUrl)
     {
         return "    <AREA SHAPE=\"rect\" COORDS=\"" + 
-                x + ", " + 
-                y + ", " +
-                (x + xSize) + ", " + 
-                (y + ySize) + "\" HREF=\"" + 
+                getX() + ", " + 
+                getY() + ", " +
+                (getX() + xSize) + ", " + 
+                (getY() + ySize) + "\" HREF=\"" + 
                 baseUrl + KeyEvent.getKeyName(keyEvent) + "\" " +
                 "style=\"cursor: default;\"" + 
                 "/>";
@@ -78,7 +77,7 @@ public class HudIcon extends GuiElement {
                 target.g = origin.g;
                 target.b = origin.b;
                 if ( VSDK.signedByte2unsignedInteger(origin.a) > 250 ) {
-                    output.putPixelRgb(xi + x, yi + y, target);
+                    output.putPixelRgb(xi + getX(), yi + getY(), target);
                 }
             }
         }
@@ -86,8 +85,8 @@ public class HudIcon extends GuiElement {
     }
     
     private void init(int x, int y, int xSize, int ySize, int keyEvent, String imageFilename) {
-        this.x = x;
-        this.y = y;
+        this.setX(x);
+        this.setY(y);
         this.xSize = xSize;
         this.ySize = ySize;
         this.keyEvent = keyEvent;
@@ -131,17 +130,45 @@ public class HudIcon extends GuiElement {
         String msg;
         
         if ( image != null ) { 
-            msg = "ICON -> x:" + x + " y: " + y + " xSize: " + 
+            msg = "ICON -> x:" + getX() + " y: " + getY() + " xSize: " + 
                     xSize + " ySize: " + ySize +
                 " img: LOADED keyEvent: " + KeyEvent.getKeyName(keyEvent) + "\n";
         }
         else {
-            msg = "ICON -> x:" + x + " y: " + y + " xSize: " + 
+            msg = "ICON -> x:" + getX() + " y: " + getY() + " xSize: " + 
                     xSize + " ySize: " + ySize +
                 " img: null keyEvent: " + KeyEvent.getKeyName(keyEvent) + "\n";
         }
         
         return msg;
+    }
+
+    /**
+    @return the x
+    */
+    public int getX() {
+        return x;
+    }
+
+    /**
+    @param x the x to set
+    */
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    /**
+    @return the y
+    */
+    public int getY() {
+        return y;
+    }
+
+    /**
+    @param y the y to set
+    */
+    public void setY(int y) {
+        this.y = y;
     }
 }
 
