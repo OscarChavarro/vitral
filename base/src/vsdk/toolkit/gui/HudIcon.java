@@ -35,6 +35,30 @@ public class HudIcon extends GuiElement {
     }
 
     /**
+    Given a (x, y) coordinate in screen reference system (with 0, 0 coordinate
+    on top left corner of screen), this method determines if that coordinate
+    falls between current hud icon.
+    @param inX
+    @param inY
+    @return 
+    */
+    public boolean doIntersection(int inX, int inY)
+    {
+        int currentXSize = xSize;
+        int currentYSize = ySize;
+        
+        if ( currentXSize <= 0 ) {
+            currentXSize = image.getXSize();
+        } 
+
+        if ( currentYSize <= 0 ) {
+            currentYSize = image.getYSize();
+        } 
+        return inX >= x && inX <= x + currentXSize &&
+            inY >= y && inY <= y + currentYSize;
+    }
+    
+    /**
     Generates a segment of HTML1 code to encode current icon over a map for
     simple image interaction.
     @param baseUrl
@@ -47,7 +71,7 @@ public class HudIcon extends GuiElement {
                 getY() + ", " +
                 (getX() + xSize) + ", " + 
                 (getY() + ySize) + "\" HREF=\"" + 
-                baseUrl + KeyEvent.getKeyName(keyEvent) + "\" " +
+                baseUrl + KeyEvent.getKeyName(getKeyEvent()) + "\" " +
                 "style=\"cursor: default;\"" + 
                 "/>";
     }
@@ -132,12 +156,12 @@ public class HudIcon extends GuiElement {
         if ( image != null ) { 
             msg = "ICON -> x:" + getX() + " y: " + getY() + " xSize: " + 
                     xSize + " ySize: " + ySize +
-                " img: LOADED keyEvent: " + KeyEvent.getKeyName(keyEvent) + "\n";
+                " img: LOADED keyEvent: " + KeyEvent.getKeyName(getKeyEvent()) + "\n";
         }
         else {
             msg = "ICON -> x:" + getX() + " y: " + getY() + " xSize: " + 
                     xSize + " ySize: " + ySize +
-                " img: null keyEvent: " + KeyEvent.getKeyName(keyEvent) + "\n";
+                " img: null keyEvent: " + KeyEvent.getKeyName(getKeyEvent()) + "\n";
         }
         
         return msg;
@@ -169,6 +193,13 @@ public class HudIcon extends GuiElement {
     */
     public void setY(int y) {
         this.y = y;
+    }
+
+    /**
+     * @return the keyEvent
+     */
+    public int getKeyEvent() {
+        return keyEvent;
     }
 }
 
