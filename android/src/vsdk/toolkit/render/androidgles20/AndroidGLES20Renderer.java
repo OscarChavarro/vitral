@@ -32,6 +32,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.RenderingElement;
 
 public class AndroidGLES20Renderer extends RenderingElement
@@ -92,10 +93,9 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static int cameraPositionGlobalParam;
     private static int sTextureParam;
     private static int sBumpParam;
-    
-    /// Reference to all known objects and their corresponding display list data
-    private static HashMap<Object, AndroidGLES20DisplayList>displayLists;
 
+    /// Reference to all known objects and their corresponding display list data
+    private static HashMap<Object, AndroidGLES20DisplayList> displayLists;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -1227,7 +1227,58 @@ public class AndroidGLES20Renderer extends RenderingElement
         arr[index] = (float)u;    index++;
         arr[index] = (float)v;    index++;
     }
+
     
+    /**
+    Draws an image at integer screen coordinates (x, y) in pixels from
+    upper left corner. Takes into account current configured camera (viewpoint).
+    
+    This method could fail if caller does not set previously texture
+    parameters for OpenGLES.
+    @param img
+    @param c
+    @param x
+    @param y
+    */
+    protected static void drawImage(Image img, Camera c, int x, int y)
+    {
+        RendererConfiguration q;
+        double fx, fy;
+        double dx, dy;
+
+        if ( img == null ) {
+            return;
+        }
+        
+        fx = (((double)img.getXSize()) * 2.0) / 
+             ((double)c.getViewportXSize());
+
+        fy = (((double)img.getYSize()) * 2.0) / 
+             ((double)c.getViewportYSize());
+
+        dx = ((double)img.getXSize() + x) / 
+            ((double)c.getViewportXSize());
+
+        dy = ((double)img.getYSize() + y) / 
+            ((double)c.getViewportYSize());
+
+        q = new RendererConfiguration();
+        q.setSurfaces(true);
+        q.setTexture(true);
+        q.setUseVertexColors(true);
+        q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslated(-1.0 + dx, 1.0 - dy, 0);
+        glScaled(fx, fy, 1.0);
+        setRendererConfiguration(q);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        AndroidGLES20ImageRenderer.activate(img);
+        drawUnitSquare();
+    }
+
     /**
     Generates OpenGL ES 2.0 primitives needed to render a 2D square of unit
     size (sides of 1.0) placed around the origin.
