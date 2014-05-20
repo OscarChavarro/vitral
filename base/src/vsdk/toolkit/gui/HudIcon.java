@@ -59,6 +59,35 @@ public class HudIcon extends GuiElement {
     }
     
     /**
+    Given a (x, y) coordinate in screen reference system (with 0, 0 coordinate
+    on top left corner of screen), this method determines if that coordinate
+    falls between current hud icon. This version takes into account a gravity
+    range around base rectangles.
+    @param inX
+    @param inY
+    @param gravity
+    @return 
+    */
+    public boolean doIntersectionWithGravity(int inX, int inY, int gravity)
+    {
+        if ( doIntersection(inX, inY) ) {
+            return true;
+        }
+        int currentXSize = xSize;
+        int currentYSize = ySize;
+        
+        if ( currentXSize <= 0 ) {
+            currentXSize = image.getXSize();
+        } 
+
+        if ( currentYSize <= 0 ) {
+            currentYSize = image.getYSize();
+        } 
+        return inX >= (x-gravity) && inX <= (x+gravity) + currentXSize &&
+            inY >= (y-gravity) && inY <= (y+gravity) + currentYSize;
+    }
+    
+    /**
     Generates a segment of HTML1 code to encode current icon over a map for
     simple image interaction.
     @param baseUrl
