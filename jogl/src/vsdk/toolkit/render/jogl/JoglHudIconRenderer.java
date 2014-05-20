@@ -11,7 +11,6 @@ import javax.media.opengl.GL2;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.HudIcon;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
 
 /**
 */
@@ -35,6 +34,15 @@ public class JoglHudIconRenderer {
         double fx, fy;
         double dx, dy;
 
+        if ( x < 0 ) {
+            x = -x;
+            x = (int)c.getViewportXSize() - img.getXSize() - x;
+        }
+        if ( y < 0 ) {
+            y = -y;
+            y = (int)c.getViewportYSize() - img.getYSize() - y;
+        }
+        
         if ( img == null ) {
             return;
         }

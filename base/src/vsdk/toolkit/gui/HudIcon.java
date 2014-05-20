@@ -3,6 +3,7 @@ package vsdk.toolkit.gui;
 
 import java.io.File;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAImage;
@@ -42,7 +43,7 @@ public class HudIcon extends GuiElement {
     @param inY
     @return 
     */
-    public boolean doIntersection(int inX, int inY)
+    public boolean doIntersection(int inX, int inY, Camera c)
     {
         int currentXSize = xSize;
         int currentYSize = ySize;
@@ -54,8 +55,21 @@ public class HudIcon extends GuiElement {
         if ( currentYSize <= 0 ) {
             currentYSize = image.getYSize();
         } 
-        return inX >= x && inX <= x + currentXSize &&
-            inY >= y && inY <= y + currentYSize;
+        
+        int xx = x;
+        int yy = y;
+        
+        if ( xx < 0 ) {
+            xx = -xx;
+            xx = (int)c.getViewportXSize() - image.getXSize() - xx;
+        }
+        if ( yy < 0 ) {
+            yy = -yy;
+            yy = (int)c.getViewportYSize() - image.getYSize() - yy;
+        }
+        
+        return inX >= xx && inX <= xx + currentXSize &&
+            inY >= yy && inY <= yy + currentYSize;
     }
     
     /**
@@ -66,11 +80,13 @@ public class HudIcon extends GuiElement {
     @param inX
     @param inY
     @param gravity
+    @param c
     @return 
     */
-    public boolean doIntersectionWithGravity(int inX, int inY, int gravity)
+    public boolean doIntersectionWithGravity(int inX, int inY, int gravity, 
+        Camera c)
     {
-        if ( doIntersection(inX, inY) ) {
+        if ( doIntersection(inX, inY, c) ) {
             return true;
         }
         int currentXSize = xSize;
@@ -83,8 +99,21 @@ public class HudIcon extends GuiElement {
         if ( currentYSize <= 0 ) {
             currentYSize = image.getYSize();
         } 
-        return inX >= (x-gravity) && inX <= (x+gravity) + currentXSize &&
-            inY >= (y-gravity) && inY <= (y+gravity) + currentYSize;
+        
+        int xx = x;
+        int yy = y;
+        
+        if ( xx < 0 ) {
+            xx = -xx;
+            xx = (int)c.getViewportXSize() - image.getXSize() - xx;
+        }
+        if ( yy < 0 ) {
+            yy = -yy;
+            yy = (int)c.getViewportYSize() - image.getYSize() - yy;
+        }
+
+        return inX >= (xx-gravity) && inX <= (xx+gravity) + currentXSize &&
+            inY >= (yy-gravity) && inY <= (yy+gravity) + currentYSize;
     }
     
     /**
