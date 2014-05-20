@@ -1256,10 +1256,10 @@ public class AndroidGLES20Renderer extends RenderingElement
         fy = (((double)img.getYSize()) * 2.0) / 
              ((double)c.getViewportYSize());
 
-        dx = ((double)img.getXSize() + x) / 
+	dx = ((double)(x) * 2.0 + ((double)img.getXSize())) / 
             ((double)c.getViewportXSize());
 
-        dy = ((double)img.getYSize() + y) / 
+        dy = ((double)(y) * 2.0 + ((double)img.getYSize())) / 
             ((double)c.getViewportYSize());
 
         q = new RendererConfiguration();
@@ -1275,6 +1275,7 @@ public class AndroidGLES20Renderer extends RenderingElement
         glScaled(fx, fy, 1.0);
         setRendererConfiguration(q);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        activateDefaultTextureParameters();
         AndroidGLES20ImageRenderer.activate(img);
         drawUnitSquare();
     }
