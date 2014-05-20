@@ -1249,6 +1249,15 @@ public class AndroidGLES20Renderer extends RenderingElement
         if ( img == null ) {
             return;
         }
+
+        if ( x < 0 ) {
+            x = -x;
+            x = (int)c.getViewportXSize() - img.getXSize() - x;
+        }
+        if ( y < 0 ) {
+            y = -y;
+            y = (int)c.getViewportYSize() - img.getYSize() - y;
+        }
         
         fx = (((double)img.getXSize()) * 2.0) / 
              ((double)c.getViewportXSize());
