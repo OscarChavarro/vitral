@@ -721,43 +721,6 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         }
     }
  
-    /**
-    Draws an image at integer screen coordinates (x, y) in pixels from
-    upper left corner. Takes into account current configured camera (viewpoint)
-    @param img
-    @param c
-    @param x
-    @param y
-    */
-    public void drawImage(Image img, Camera c, int x, int y)
-    {
-        double fx, fy;
-        double dx, dy;
-
-        fx = (((double)img.getXSize()) * 2.0) / 
-             ((double)c.getViewportXSize());
-
-        fy = (((double)img.getYSize()) * 2.0) / 
-             ((double)c.getViewportYSize());
-
-        dx = ((double)img.getXSize() + x) / 
-            ((double)c.getViewportXSize());
-
-        dy = ((double)img.getYSize() + y) / 
-            ((double)c.getViewportYSize());
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glTranslated(-1.0 + dx, 1.0 - dy, 0);
-        glScaled(fx, fy, 1.0);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        AndroidGLES20ImageRenderer.activate(img);
-        activateDefaultTextureParameters();
-        drawUnitSquare();
-    }
-
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
