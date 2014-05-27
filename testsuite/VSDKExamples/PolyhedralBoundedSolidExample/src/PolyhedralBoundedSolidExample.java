@@ -14,6 +14,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import javax.swing.JFrame;
 
 // JOGL classes
@@ -29,6 +33,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -62,7 +67,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private int solidType = 19;
+    private int solidType = 23;
     private int csgOperation = 0;
     private int csgSample = 5;
     private boolean debugEdges = false;
@@ -102,35 +107,35 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
     private PolyhedralBoundedSolid buildSolid(int type)
     {
-        PolyhedralBoundedSolid solid = null;
+        PolyhedralBoundedSolid mySolid;
         Matrix4x4 T, R, S, M;
 
-        switch ( type % 23 ) {
+        switch ( type % 24 ) {
           case 0:
-            solid = new PolyhedralBoundedSolid();
-            solid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
-            solid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
-            solid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
+            mySolid = new PolyhedralBoundedSolid();
+            mySolid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
+            mySolid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
+            mySolid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
             break;
           case 1:
-            solid = PolyhedralBoundedSolidModelingTools.createBox(new Vector3D(0.9, 0.9, 0.9));
+            mySolid = PolyhedralBoundedSolidModelingTools.createBox(new Vector3D(0.9, 0.9, 0.9));
             break;
           case 3:
-            solid = new PolyhedralBoundedSolid();
-            solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            mySolid = new PolyhedralBoundedSolid();
+            mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             GeometricModeler.addArc(
-                solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
+                mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
           case 4:
-            solid = GeometricModeler.createCircularLamina(
+            mySolid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
             break;
           case 5:
-            solid = new PolyhedralBoundedSolid();
-            solid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            mySolid = new PolyhedralBoundedSolid();
+            mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             GeometricModeler.addArc(
-                solid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
+                mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
             T = new Matrix4x4();
             T.translation(0.0, 0.0, 0.5);
@@ -141,11 +146,11 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             M = T.multiply(R.multiply(S));
 
             GeometricModeler.translationalSweepExtrudeFacePlanar(
-                solid, solid.findFace(1), M);
+                mySolid, mySolid.findFace(1), M);
 
             break;
           case 6:
-            solid = GeometricModeler.createCircularLamina(
+            mySolid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 24
             );
 
@@ -157,7 +162,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
             GeometricModeler.translationalSweepExtrudeFacePlanar(
-                solid, solid.findFace(1), M);
+                mySolid, mySolid.findFace(1), M);
 
 /*
             T = new Matrix4x4();
@@ -175,69 +180,72 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             break;
 
           case 7:
-            solid = PolyhedralBoundedSolidModelingTools.createSphere(0.5);
+            mySolid = PolyhedralBoundedSolidModelingTools.createSphere(0.5);
             break;
           case 8:
-            solid = PolyhedralBoundedSolidModelingTools.createCone(0.5, 0.0, 1.0);
+            mySolid = PolyhedralBoundedSolidModelingTools.createCone(0.5, 0.0, 1.0);
             break;
           case 9:
-            solid = PolyhedralBoundedSolidModelingTools.createArrow(0.7, 0.3, 0.05, 0.1);
+            mySolid = PolyhedralBoundedSolidModelingTools.createArrow(0.7, 0.3, 0.05, 0.1);
             break;
           case 10:
-            solid = PolyhedralBoundedSolidModelingTools.createLaminaWithTwoShells();
+            mySolid = PolyhedralBoundedSolidModelingTools.createLaminaWithTwoShells();
             break;
           case 11:
-            solid = PolyhedralBoundedSolidModelingTools.createLaminaWithHole();
+            mySolid = PolyhedralBoundedSolidModelingTools.createLaminaWithHole();
             break;
           case 12:
-            solid = PolyhedralBoundedSolidModelingTools.createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
+            mySolid = PolyhedralBoundedSolidModelingTools.createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
             T = new Matrix4x4();
             T.translation(0.0, 0.0, 0.1);
 
             GeometricModeler.translationalSweepExtrudeFacePlanar(
-                solid, solid.findFace(1), T);
+                mySolid, mySolid.findFace(1), T);
 
             break;
           case 13:
-            solid = PolyhedralBoundedSolidModelingTools.createGluedCilinders();
+            mySolid = PolyhedralBoundedSolidModelingTools.createGluedCilinders();
             break;
           case 14:
-            solid = PolyhedralBoundedSolidModelingTools.eulerOperatorsTest();
+            mySolid = PolyhedralBoundedSolidModelingTools.eulerOperatorsTest();
             break;
           case 15:
-            solid = PolyhedralBoundedSolidModelingTools.rotationalSweepTest();
+            mySolid = PolyhedralBoundedSolidModelingTools.rotationalSweepTest();
             break;
           case 16:
-            solid = PolyhedralBoundedSolidModelingTools.splitTest(1);
+            mySolid = PolyhedralBoundedSolidModelingTools.splitTest(1);
             break;
           case 17:
-            solid = PolyhedralBoundedSolidModelingTools.splitTest(2);
+            mySolid = PolyhedralBoundedSolidModelingTools.splitTest(2);
             break;
           case 18:
-            solid = PolyhedralBoundedSolidModelingTools.splitTest(3);
+            mySolid = PolyhedralBoundedSolidModelingTools.splitTest(3);
             break;
           case 19:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(1, csgOperation, csgSample, debugCsg);
+            mySolid = PolyhedralBoundedSolidModelingTools.csgTest(1, csgOperation, csgSample, debugCsg);
             debugCsg = false;
             break;
           case 20:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample, debugCsg);
+            mySolid = PolyhedralBoundedSolidModelingTools.csgTest(2, csgOperation, csgSample, debugCsg);
             debugCsg = false;
             break;
           case 21:
-            solid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample, debugCsg);
+            mySolid = PolyhedralBoundedSolidModelingTools.csgTest(3, csgOperation, csgSample, debugCsg);
             debugCsg = false;
             break;
           case 22:
-            solid = PolyhedralBoundedSolidModelingTools.featuredObject();
+            mySolid = PolyhedralBoundedSolidModelingTools.featuredObject();
+            break;
+          case 23:
+            mySolid = importFromFile("/tmp/solid.bin");
             break;
           case 2: default:
-            solid = PolyhedralBoundedSolidModelingTools.createHoledBox();
+            mySolid = PolyhedralBoundedSolidModelingTools.createHoledBox();
             break;
         }
 
-        return solid;
+        return mySolid;
     }
 
     private GLCanvas createGUI()
@@ -269,6 +277,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         canvas.requestFocusInWindow();
     }
 
+    @Override
     public void init()
     {
         setLayout(new BorderLayout());
@@ -283,13 +292,13 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         int i;
         Vector3D p;
 
-        gl.glPushAttrib(gl.GL_DEPTH_TEST);
-        gl.glDisable(gl.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
+        gl.glDisable(GL2.GL_DEPTH_TEST);
 
         //-----------------------------------------------------------------
         gl.glLineWidth(4.0f);
         gl.glColor3d(0, 0, 0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
         for ( i = 0; i < contourLines.size(); i++ ) {
             p = contourLines.get(i);
             gl.glVertex3d(p.x, p.y, p.z);
@@ -298,7 +307,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
 
         gl.glLineWidth(4.0f);
         gl.glColor3d(0, 0, 0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
         for ( i = 0; i < visibleLines.size(); i++ ) {
             p = visibleLines.get(i);
             gl.glVertex3d(p.x, p.y, p.z);
@@ -339,11 +348,11 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glLoadIdentity();
 
         //-----------------------------------------------------------------
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
 
         if ( edgeIndex > -3 && showCoordinateSystem ) {
-            gl.glBegin(gl.GL_LINES);
+            gl.glBegin(GL2.GL_LINES);
                 gl.glColor3d(1, 0, 0);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(1, 0, 0);
@@ -364,7 +373,7 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         JoglLightRenderer.draw(gl, light1);
         JoglLightRenderer.activate(gl, light2);
         JoglLightRenderer.draw(gl, light2);
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHTING);
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, solid, faceIndex);
         JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, solid, faceIndex);
@@ -399,43 +408,65 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
         }
 
+        /*
         contourLines = null;
         visibleLines = null;
         hiddenLines = null;
         bodyArray = null;
         body = null;
+        */
     }
 
-    /** Called by drawable to initiate drawing */
+    /** Called by drawable to initiate drawing
+    @param drawable 
+    */
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
 
         JoglCameraRenderer.activate(gl, camera);
 
         drawObjectsGL(gl);
     }
    
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+    @param drawable 
+    */
+    @Override
     public void init(GLAutoDrawable drawable) {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+    @param drawable 
+    */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** Not used method, but needed to instanciate GLEventListener
+    @param drawable
+    @param a 
+    @param b 
+    */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
-        ;
+        
     }
     
-    /** Called to indicate the drawing surface has been moved and/or resized */
+    /** Called to indicate the drawing surface has been moved and/or resized
+    @param drawable
+    @param x
+    @param y
+    @param width
+    @param height
+    */
+    @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
@@ -445,91 +476,98 @@ public class PolyhedralBoundedSolidExample extends Applet implements
         gl.glViewport(0, 0, width, height); 
 
         camera.updateViewportResize(width, height);
-    }   
+    } 
 
-  public void mouseEntered(MouseEvent e) {
-      canvas.requestFocusInWindow();
-  }
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        canvas.requestFocusInWindow();
+    }
 
-  public void mouseExited(MouseEvent e) {
-    //System.out.println("Mouse exited");
-  }
+    @Override
+    public void mouseExited(MouseEvent e) {
+        //System.out.println("Mouse exited");
+    }
 
-  public void mousePressed(MouseEvent e) {
-      if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseReleased(MouseEvent e) {
-      if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseClicked(MouseEvent e) {
-      if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseMoved(MouseEvent e) {
-      if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void mouseDragged(MouseEvent e) {
-      if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  /**
-  WARNING: It is not working... check pending
-  */
-  public void mouseWheelMoved(MouseWheelEvent e) {
-      System.out.println(".");
-      if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    /**
+    @param e
+    */
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        System.out.println(".");
+        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  public void keyPressed(KeyEvent e) {
-      if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-          System.exit(0);
-      }
-      if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-      if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          System.out.println(quality);
-          canvas.repaint();
-      }
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+            System.exit(0);
+        }
+        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            System.out.println(quality);
+            canvas.repaint();
+        }
 
-      int unicode_id = e.getKeyChar();
-      if ( unicode_id != e.CHAR_UNDEFINED ) {
-          switch ( unicode_id ) {
+        int unicode_id = e.getKeyChar();
+        if ( unicode_id != KeyEvent.CHAR_UNDEFINED ) {
+            switch ( unicode_id ) {
             case '0':
-                if ( debugEdges ) {
-                    debugEdges = false;
-                }
-                else {
-                    debugEdges = true;
-                }
+                debugEdges = !debugEdges;
                 break;
             case ' ':
-                if ( showCoordinateSystem ) {
-                    showCoordinateSystem = false;
-                }
-                else {
-                    showCoordinateSystem = true;
-                }
+                showCoordinateSystem = !showCoordinateSystem;
                 break;
-            case '1': faceIndex --; break;
-            case '2': faceIndex ++; break;
-            case '8': edgeIndex --; break;
-            case '9': edgeIndex ++; break;
+            case '1':
+                faceIndex--;
+                break;
+            case '2':
+                faceIndex++;
+                break;
+            case '8':
+                edgeIndex--;
+                break;
+            case '9':
+                edgeIndex++;
+                break;
             case 'I':
                 System.out.println(solid);
                 if ( solid.validateModel() ) {
@@ -541,58 +579,95 @@ public class PolyhedralBoundedSolidExample extends Applet implements
                 break;
 
             case '3':
-              solidType--;
-              if ( solidType < 0 ) solidType = 0;
-              solid = buildSolid(solidType);
-              break;
+                solidType--;
+                if ( solidType < 0 ) {
+                    solidType = 0;
+                }
+                solid = buildSolid(solidType);
+                break;
 
             case '4':
-              solidType++;
-              solid = buildSolid(solidType);
-              break;
+                solidType++;
+                solid = buildSolid(solidType);
+                break;
 
             case '5':
-              csgOperation++;
-              if ( csgOperation > 3 ) csgOperation = 0;
-              solid = buildSolid(solidType);
-              break;
+                csgOperation++;
+                if ( csgOperation > 3 ) {
+                    csgOperation = 0;
+                }
+                solid = buildSolid(solidType);
+                break;
 
             case '6':
-              csgSample++;
-              if ( csgSample > 7 ) csgSample = 0;
-              solid = buildSolid(solidType);
-              break;
+                csgSample++;
+                if ( csgSample > 7 ) {
+                    csgSample = 0;
+                }
+                solid = buildSolid(solidType);
+                break;
 
             case 'v':
-              debugVertices = !debugVertices;
-              break;
+                debugVertices = !debugVertices;
+                break;
 
             case 'd':
-              debugCsg = !debugCsg;
-              solid = buildSolid(solidType);
-              break;
+                debugCsg = !debugCsg;
+                solid = buildSolid(solidType);
+                break;
 
-          }
-          if ( faceIndex < -2 ) faceIndex = -2;
-          if ( edgeIndex < -3 ) edgeIndex = -3;
-          canvas.repaint();
-      }
-  }
+            }
+            if ( faceIndex < -2 ) {
+                faceIndex = -2;
+            }
+            if ( edgeIndex < -3 ) {
+                edgeIndex = -3;
+            }
+            canvas.repaint();
+        }
+    }
 
-  public void keyReleased(KeyEvent e) {
-      if ( cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-          canvas.repaint();
-      }
-  }
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if ( cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            canvas.repaint();
+        }
+    }
 
-  /**
-  Do NOT call your controller from the `keyTyped` method, or the controller
-  will be invoked twice for each key. Call it only from the `keyPressed` and
-  `keyReleased` method
-  */
-  public void keyTyped(KeyEvent e) {
-      ;
-  }
+    /**
+    Do NOT call your controller from the `keyTyped` method, or the controller
+    will be invoked twice for
+    @param e each key. Call it only from the `keyPressed` and
+    `keyReleased` method
+    */
+    @Override
+    public void keyTyped(KeyEvent e) {
+        
+    }
+
+    private PolyhedralBoundedSolid importFromFile(String filename) {
+        PolyhedralBoundedSolid mysolid = null;
+        
+        try {
+            File fd = new File(filename);
+            FileInputStream fis;
+            fis = new FileInputStream(fd);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            mysolid = (PolyhedralBoundedSolid)ois.readObject();
+            
+            fis.close();
+        }
+        catch ( IOException e ) {
+            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+              "importFromFile", "Error reading solid from file " + filename, e);
+        }
+        catch ( ClassNotFoundException e ) {
+            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR,
+              "importFromFile", "Error reading solid from file " + filename, e);
+        }
+        
+        return mysolid;
+    }
 
 }
 
