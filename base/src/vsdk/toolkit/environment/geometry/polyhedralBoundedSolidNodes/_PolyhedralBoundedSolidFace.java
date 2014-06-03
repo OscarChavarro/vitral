@@ -144,7 +144,151 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     public boolean
     calculatePlane()
     {
-        return calculatePlaneByVertexSequenceNormalCrossProduct();
+        //return calculatePlaneByVertexSequenceNormalCrossProduct();
+        return calculatePlaneByCorner(0.1);//If we assume meters, 0.01 is 1cm.
+    }
+
+    /**
+     * Current implementation takes in to account only the first loop.
+     */
+    private boolean calculatePlaneByCorner (double tolerance) {
+        _PolyhedralBoundedSolidLoop loop;
+        _PolyhedralBoundedSolidHalfEdge he, heStart, heInferior;
+        Vector3D p0 = new Vector3D ();
+        Vector3D p1;
+        Vector3D a = new Vector3D ();
+        Vector3D b = new Vector3D ();
+        Vector3D n1;
+        Vector3D temp = new Vector3D ();
+        //Vector3D pInferior;
+        int numberOfPoints;
+        boolean readyVecA, readyVecB;
+        double dotP;
+        //domPlane: 1=xy, 2=xz, 3=yz
+        byte domPlane;
+        Vector3D vPrev = new Vector3D ();
+        Vector3D vNext = new Vector3D ();
+
+        if ( boundariesList.size () < 1 ) {
+            return true;
+        }
+        loop = boundariesList.get (0);
+        he = loop.boundaryStartHalfEdge;
+        if ( he == null ) {
+            // Loop without starting halfedge
+            return true;
+        }
+        heStart = he;
+
+        // Calculate temporal normal (the sense may not be the correct), to find
+        // the dominant plane.
+        // The superior point is calculated too.
+        numberOfPoints = 0;
+        readyVecA = false;
+        readyVecB = false;
+
+        do {
+            //Obtain any two non collinear vectors
+            numberOfPoints++;
+            p0 = he.startingVertex.position;
+            p1 = he.next ().startingVertex.position;
+            temp.substract (p1, p0);
+            if ( !readyVecA ) {
+                if ( temp.length () > tolerance ) {
+                    a.clone (temp);
+                    a.normalize ();
+                    readyVecA = true;
+                }
+            } else if ( !readyVecB ) {
+                if ( temp.length () > tolerance ) {
+                    temp.normalize ();
+                    dotP = Math.abs (temp.dotProduct (a));
+                    if ( dotP < 1 - VSDK.EPSILON * 1000 ) {
+                        b.clone (temp);
+                        readyVecB = true;
+                    }
+                }
+            }
+            he = he.next ();
+        } while ( he != heStart && !readyVecB );
+        if ( (a.length () == 0) || (b.length () == 0) ) {
+            // Any vector is zero.
+            return true;
+        }
+        n1 = a.crossProduct (b); //Temporal normal.
+        // Special case: triangle
+        if ( numberOfPoints == 3 ) {
+            containingPlane = new InfinitePlane (n1, p0);
+            return false;
+        }
+        //Test for dominant plane.
+        //domPlane: 1=xy, 2=xz, 3=yz
+        if ( n1.z > n1.x ) {
+            if ( n1.z > n1.y ) {
+                domPlane = 1;
+            } else {
+                domPlane = 2;
+            }
+        } else if ( n1.x > n1.y ) {
+            domPlane = 3;
+        } else {
+            domPlane = 2;
+        }
+        //Find inferior point of face, given the dominant plane.
+        he = loop.boundaryStartHalfEdge;
+        heInferior = he;
+        he = he.next ();
+        while ( he != heStart ) {
+            p0 = he.startingVertex.position;
+            switch ( domPlane ) {
+                case 1: //xy plane
+                    if ( p0.y < heInferior.startingVertex.position.y ) {
+                        heInferior = he;
+                    }
+                    break;
+                case 2: //xz plane
+                    if ( p0.z < heInferior.startingVertex.position.z ) {
+                        heInferior = he;
+                    }
+                    break;
+                case 3: //yz plane
+                    if ( p0.z < heInferior.startingVertex.position.z ) {
+                        heInferior = he;
+                    }
+                    break;
+            }
+            he = he.next ();
+        }
+        // Find next and previous vectors from inferior point(previously found) 
+        // to calculate the plane.
+        he = heInferior;
+        p0 = heInferior.startingVertex.position;
+        do {
+            he = he.next ();
+            p1 = he.startingVertex.position;
+            vNext.substract (p1, p0);
+            if ( vNext.length () > tolerance ) {
+                vNext.normalize ();
+                break;
+            }
+        } while ( he != heInferior );
+        he = heInferior;
+        do {
+            // The previous vector should not be collinear with the first one found.
+            he = he.previous ();
+            p1 = he.startingVertex.position;
+            vPrev.substract (p1, p0);
+            if ( vPrev.length () > tolerance ) {
+                vPrev.normalize ();
+                dotP = Math.abs (vPrev.dotProduct (vNext));
+                if ( dotP < 1 - VSDK.EPSILON * 1000 ) {
+                    break;
+                }
+            }
+        } while ( he != heInferior );
+        n1 = vNext.crossProduct (vPrev);
+        containingPlane = new InfinitePlane (n1, p0);
+        return false;
     }
 
     /**
