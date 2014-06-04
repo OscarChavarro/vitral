@@ -160,8 +160,6 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D b = new Vector3D ();
         Vector3D n1;
         Vector3D temp = new Vector3D ();
-        //Vector3D pInferior;
-        int numberOfPoints;
         boolean readyVecA, readyVecB;
         double dotP;
         //domPlane: 1=xy, 2=xz, 3=yz
@@ -183,13 +181,11 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         // Calculate temporal normal (the sense may not be the correct), to find
         // the dominant plane.
         // The superior point is calculated too.
-        numberOfPoints = 0;
         readyVecA = false;
         readyVecB = false;
 
         do {
             //Obtain any two non collinear vectors
-            numberOfPoints++;
             p0 = he.startingVertex.position;
             p1 = he.next ().startingVertex.position;
             temp.substract (p1, p0);
@@ -217,19 +213,20 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
         n1 = a.crossProduct (b); //Temporal normal.
         // Special case: triangle
-        if ( numberOfPoints == 3 ) {
+        if ( loop.halfEdgesList.size () == 3 ) {
+            n1.normalize ();
             containingPlane = new InfinitePlane (n1, p0);
             return false;
         }
         //Test for dominant plane.
         //domPlane: 1=xy, 2=xz, 3=yz
-        if ( n1.z > n1.x ) {
-            if ( n1.z > n1.y ) {
+        if ( Math.abs(n1.z) > Math.abs(n1.x) ) {
+            if ( Math.abs(n1.z) > Math.abs(n1.y) ) {
                 domPlane = 1;
             } else {
                 domPlane = 2;
             }
-        } else if ( n1.x > n1.y ) {
+        } else if ( Math.abs(n1.x) > Math.abs(n1.y) ) {
             domPlane = 3;
         } else {
             domPlane = 2;
