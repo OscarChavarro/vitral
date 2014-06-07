@@ -1,7 +1,9 @@
 //===========================================================================
 package vsdk.toolkit.io.xml;
 
-public class XmlNodeParam
+import vsdk.toolkit.io.PersistenceElement;
+
+public class XmlNodeParam extends PersistenceElement
 {
     public String param;
     public String value;

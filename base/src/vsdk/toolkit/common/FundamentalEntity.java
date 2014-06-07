@@ -19,7 +19,7 @@ derived from this abstract class belong two one of the following groups:
     of not common/portable counterparts like Java3D. It is common to find
     these are NOT "classes", but "structs", and as such, they do not use
     encapsulation (i.e. they have public attributes), as they are not
-    suppose to evolve nor change, and as they impact greatly in application
+    supposed to evolve nor change, and as they impact greatly in application
     performance.
   - Extended collections: similiar to other, but not found in basic
     java implementations. For example, CircularDoubleLinkedList implementation
@@ -39,7 +39,6 @@ data structuring classes. This serves two purposes:
 */
 public abstract class FundamentalEntity extends Entity {
     // Yes, it is currently empty!
-    ;
 }
 
 //===========================================================================

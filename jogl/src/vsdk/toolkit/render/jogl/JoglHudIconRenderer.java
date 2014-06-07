@@ -14,7 +14,7 @@ import vsdk.toolkit.media.Image;
 
 /**
 */
-public class JoglHudIconRenderer {
+public class JoglHudIconRenderer extends JoglRenderer {
     
     public static void activateDefaultTextureParameters(GL2 gl)
     {

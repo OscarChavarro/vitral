@@ -3,7 +3,9 @@ package vsdk.toolkit.io.xml;
 
 import java.util.ArrayList;
 
-public class XmlNode
+import vsdk.toolkit.io.PersistenceElement;
+
+public class XmlNode extends PersistenceElement
 {
     private String name;
     private ArrayList<XmlNodeParam> params;

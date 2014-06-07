@@ -2,12 +2,13 @@
 package vsdk.toolkit.io.xml;
 
 import java.util.ArrayList;
+
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
 This class provides a basic processing capability for a one line of XML code.
 */
-public class XmlImporter
+public class XmlImporter extends PersistenceElement
 {
     public ArrayList<XmlNode> importFromLine(String line)
     {
@@ -68,8 +69,7 @@ public class XmlImporter
                     utf8parts[utf8charindex] = arr[i];
                     if ( utf8charindex >= 1 ) {
                         utf8charindex = -1;
-                        currentString.append(
-                            PersistenceElement.buildUtf8Char(utf8parts));
+                        currentString.append(buildUtf8Char(utf8parts));
                     }
                 }
                 else {
