@@ -141,7 +141,7 @@ public class Sphere extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

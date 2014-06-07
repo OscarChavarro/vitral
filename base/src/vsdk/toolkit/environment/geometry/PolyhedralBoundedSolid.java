@@ -102,7 +102,7 @@ public class PolyhedralBoundedSolid extends Solid {
     or current founded face otherwise.
     Build based over function `fface` in program [MANT1988].11.9.
     @param id
-    @return 
+    @return the id face
     */
     public _PolyhedralBoundedSolidFace
     findFace(int id)
@@ -502,7 +502,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param he1
     @param he2
     @param newFaceId
-    @return 
+    @return the newly generated face
     */
     public _PolyhedralBoundedSolidFace lmef(
         _PolyhedralBoundedSolidHalfEdge he1,
@@ -694,7 +694,7 @@ public class PolyhedralBoundedSolid extends Solid {
     and follows the functional definition of section [MANT1988].11.5.1.
     @param l
     @param newFaceId
-    @return 
+    @return the newly generated face
     */
     public _PolyhedralBoundedSolidFace lmfkrh(_PolyhedralBoundedSolidLoop l, int newFaceId)
     {
@@ -721,7 +721,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param l
     @param tofac
     @param setAsOuterLoop
-    @return 
+    @return PENDING TO DEFINE! Note that this impacts boolean set operators!
     */
     public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
     {
@@ -830,7 +830,7 @@ public class PolyhedralBoundedSolid extends Solid {
            will be taken as starting vertex for new edge
     @param v4 vertex id (counted from 1) for new vertex
     @param p coordinates for new vertex
-    @return 
+    @return true on operation success, false other way.
     */
     public boolean smev(int f1, int v1, int v4, Vector3D p)
     {
@@ -918,7 +918,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param v1
     @param v3
     @param newfaceid
-    @return 
+    @return true on operation success, false other way.
     */
     public boolean smef(int f1, int v1, int v3, int newfaceid)
     {
@@ -963,7 +963,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param v3
     @param v4
     @param newfaceid
-    @return 
+    @return true on operation success, false other way.
     */
     public boolean mef(int f1, int f2,
                        int v1, int v2, int v3, int v4, int newfaceid)
@@ -1009,7 +1009,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param v2
     @param v3
     @param v4
-    @return 
+    @return true on operation success, false other way.
     */
     public boolean kemr(int f1, int f2,
                        int v1, int v2, int v3, int v4)
@@ -1059,7 +1059,7 @@ public class PolyhedralBoundedSolid extends Solid {
     "same shell" case, or if it is done.
     @param f1
     @param f2
-    @return 
+    @return true on operation success, false other way.
     */
     public boolean kfmrh(int f1, int f2)
     {
@@ -1088,7 +1088,7 @@ public class PolyhedralBoundedSolid extends Solid {
     model. This method is useful for higher level modeling operations, as
     noted in section [MANT1988].12.2. Current method (and method getMaxFaceId)
     is build after the function `getmaxnames` of program [MANT1988].12.1.
-    @return 
+    @return the maximum id used in vertices set
     */
     public int getMaxVertexId()
     {
@@ -1101,7 +1101,7 @@ public class PolyhedralBoundedSolid extends Solid {
     noted in section [MANT1988].12.2. Current method (and method
     getMaxVertexId) is build after the function `getmaxnames` of program
     [MANT1988].12.1.
-    @return 
+    @return the maximum id used on faces set
     */
     public int getMaxFaceId()
     {
@@ -1309,7 +1309,7 @@ public class PolyhedralBoundedSolid extends Solid {
     /**
     Returns true if the model was validated (using `validateModel` method)
     and validation succeed after any geometrical or topological operation.
-    @return 
+    @return true if solid model is valid, false if not
     */
     public boolean isValid()
     {
@@ -1357,7 +1357,7 @@ public class PolyhedralBoundedSolid extends Solid {
     Given a face inside current solid, this method returns true if face is
     planar, false otherwise.
     @param face
-    @return 
+    @return true if all points over given face are coplanar
     */
     public boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face)
     {
@@ -1599,7 +1599,7 @@ public class PolyhedralBoundedSolid extends Solid {
         (no holes, no missing faces and no non-manifold solids like
         Klain bottles)
       - Geometric integrity: there are no intersecting faces
-    @return 
+    @return true if current solid is valid (well formed), false otherwise
     */
     public boolean validateModel()
     {
@@ -1672,7 +1672,8 @@ public class PolyhedralBoundedSolid extends Solid {
     (vertices and edges). In some cases, computation of quantitative
     invisibility seems to be failing.
     \todo  check well all limiting cases.
-    @return 
+    @return  the number of front facing surface elements (with
+    respect to `origin`) between the `origin` point and the `p` point
     */
     @Override
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
@@ -1729,7 +1730,7 @@ public class PolyhedralBoundedSolid extends Solid {
     @param a
     @param b
     @param tolerance
-    @return 
+    @return 0 if two numbers are nearly equal, 1 if a > b, -1 if a < b
     */
     public static int compareValue(double a, double b, double tolerance)
     {

@@ -11,7 +11,6 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
-
 /**
 Current implementation is based on [WAGN2004].
 @author Leidy Alexandra Lozano Jacome
@@ -128,7 +127,7 @@ public class Torus extends Solid {
     @param a1
     @param a0
     @param ray
-    @return 
+    @return true if current quartic equation has at least one real root
     */    
     public boolean
     calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)

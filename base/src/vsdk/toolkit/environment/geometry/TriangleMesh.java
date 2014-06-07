@@ -203,7 +203,7 @@ public class TriangleMesh extends Surface {
 
     /**
     \todo  copy full structure!
-    @return 
+    @return a new TriangleMesh containing an exact copy of the original
     */
     @Override
     public TriangleMesh clone()
@@ -598,7 +598,7 @@ public class TriangleMesh extends Surface {
     is an index to `triangles` array, the second one is an index to the
     `textures` array.
     @param spanRange
-    @return 
+    @return an integer array for textures ranges indexes
     */
     public int[] getTextureRangeAt(int spanRange) {
         return textureRanges[spanRange];
@@ -619,7 +619,7 @@ public class TriangleMesh extends Surface {
     is an index to `triangles` array, the second one is an index to the
     `materials` array.
     @param spanRange
-    @return 
+    @return a integer array with material ranges indexes
     */
     public int[] getMaterialRangeAt(int spanRange) {
         return materialRanges[spanRange];
@@ -816,7 +816,7 @@ public class TriangleMesh extends Surface {
     This method is supposed to be a friend of TriangleMesh related objects.
     The method is used to query the last intersected triangle, after a
     positive called to the doIntersection method.
-    @return 
+    @return selected triangle
     */
     public int doIntersectionInformation() {
         return selectedTriangle;
@@ -886,7 +886,7 @@ public class TriangleMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current TriangleMesh
     */
     @Override
     public boolean
@@ -1077,7 +1077,7 @@ public class TriangleMesh extends Surface {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

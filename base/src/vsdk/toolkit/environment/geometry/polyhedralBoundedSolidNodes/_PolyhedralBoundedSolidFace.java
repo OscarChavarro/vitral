@@ -95,7 +95,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     Build based over function `fhe` in program [MANT1988].11.9.
     @param vn1
     @param vn2
-    @return 
+    @return requested half edge
     */
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1, int vn2)
     {
@@ -117,7 +117,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     Find the first halfedge originating from vertex `vn1`.
     Returns null if halfedge not found, or current founded halfedge otherwise.
     @param vn1
-    @return 
+    @return requested halfedge
     */
     public _PolyhedralBoundedSolidHalfEdge findHalfEdge(int vn1)
     {
@@ -139,7 +139,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     PRE: current face points must be all co-planar. Previous solid validation
     should be made!
     POST: current face contains a plane containing the face.
-    @return 
+    @return true if current face is in a situation where containing plane
+    could be calculated.
     */
     public boolean
     calculatePlane()
@@ -149,8 +150,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     }
 
     /**
-     * Current implementation takes in to account only the first loop.
-     */
+    Current implementation takes in to account only the first loop.
+    @return true if current face is in a situation where containing plane
+    could be calculated.
+    */
     private boolean calculatePlaneByCorner (double tolerance) {
         _PolyhedralBoundedSolidLoop loop;
         _PolyhedralBoundedSolidHalfEdge he, heStart, heInferior;
@@ -291,6 +294,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /**
     Current implementation takes in to account only the first loop. This method
     has proved to be inefficient.
+    @return true if current face is in a situation where containing plane
+    could be calculated.
     */
     private boolean calculatePlaneByVertexSequenceNormalCrossProduct() {
         if ( boundariesList.size() < 1 ) {

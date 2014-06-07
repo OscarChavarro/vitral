@@ -348,7 +348,7 @@ public class QuadMesh extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current QuadMesh
     */
     @Override
     public boolean
@@ -370,7 +370,7 @@ public class QuadMesh extends Surface {
     }
 
     /**
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

@@ -106,7 +106,7 @@ public class InfinitePlane extends HalfSpace {
     @param p
     @param distanceTolerance
     @return 0 if point is on the plane surface, 1 if point is outside or
-    -1 if point is inside the plane.
+    -1 if point is inside the plane - INSIDE, OUTSIDE or LIMIT constant value.
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.
     */
@@ -127,7 +127,7 @@ public class InfinitePlane extends HalfSpace {
     /**
     Check the general interface contract in superclass method
     Geometry.doContainmentTest.
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -219,7 +219,7 @@ public class InfinitePlane extends HalfSpace {
     Given point `p`, current method returns the minimum (signed) distance
     between such a point and this plane.
     @param p
-    @return 
+    @return a number indicating minimum signed distances to current plane
     */
     public double pointDistance(Vector3D p)
     {
@@ -232,7 +232,7 @@ public class InfinitePlane extends HalfSpace {
     projection to the plane" such as the projector is at 90 deg. angle with
     respect to the plane.
     @param p
-    @return 
+    @return a new Vector3D containing point projection over current plane
     */
     public Vector3D projectPoint(Vector3D p)
     {
@@ -248,7 +248,8 @@ public class InfinitePlane extends HalfSpace {
     respect to this plane. Note that the intersection between this plane and
     the line from `p` to its mirror is the projection of p over the plane.
     @param p
-    @return 
+    @return a new Vector3D with a point mirrored with respect to input point
+    around current plane
     */
     public Vector3D mirrorPoint(Vector3D p)
     {
@@ -265,7 +266,7 @@ public class InfinitePlane extends HalfSpace {
     at the same distance from the origin.
     @param other
     @param tolerance
-    @return 
+    @return true if plane overlaps other plane, false otherwise
     */
     public boolean overlapsWith(InfinitePlane other, double tolerance)
     {

@@ -110,7 +110,8 @@ public class VoxelVolume extends Solid {
     @param x
     @param y
     @param z
-    @return 
+    @return a new Vector3D with point position corresponding to given indexes
+    inside the matrix of voxels
     */
     public Vector3D getVoxelPosition(int x, int y, int z)
     {
@@ -125,7 +126,7 @@ public class VoxelVolume extends Solid {
     Partial coordinate convertion (X axis) for `x` voxel coordinate to
     corresponding voxel index.
     @param x
-    @return 
+    @return a matrix index for the given coordinate
     */
     public int getNearestIFromX(double x)
     {
@@ -136,7 +137,7 @@ public class VoxelVolume extends Solid {
     Partial coordinate convertion (Y axis) for `y` voxel coordinate to
     corresponding voxel index.
     @param y
-    @return 
+    @return a matrix index for the given coordinate
     */
     public int getNearestJFromY(double y)
     {
@@ -147,7 +148,7 @@ public class VoxelVolume extends Solid {
     Partial coordinate convertion (Z axis) for `z` voxel coordinate to
     corresponding voxel index.
     @param z
-    @return 
+    @return a matrix index for the given coordinate
     */
     public int getNearestKFromZ(double z)
     {
@@ -162,7 +163,7 @@ public class VoxelVolume extends Solid {
     @param x
     @param y
     @param z
-    @return 
+    @return value of voxel at specified indexed position
     */
     public int getVoxelAtPosition(double x, double y, double z)
     {
@@ -182,7 +183,7 @@ public class VoxelVolume extends Solid {
     methods gives the voxel value with a position corresponding to coordinate
     <x, y, z> (inside voxel space cube).
     @param p
-    @return 
+    @return voxel value for given point in space
     */
     public int getVoxelAtPosition(Vector3D p)
     {
@@ -304,7 +305,8 @@ public class VoxelVolume extends Solid {
     coordinate change from voxel volume cube <-1, -1, -1>-<1, 1, 1> to
     the bounding box recieved in `minmax`.
     @param minmax
-    @return 
+    @return a new Matrix4x4 for coordinate mapping between volume and
+    world coordinates
     */
     public static Matrix4x4
     getTransformFromVoxelFrameToMinMax(double minmax[])
@@ -341,7 +343,7 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Solid.doCenterOfMass
-    @return 
+    @return new Vector3D containing volume center of mass
     */
     @Override
     public Vector3D doCenterOfMass() {

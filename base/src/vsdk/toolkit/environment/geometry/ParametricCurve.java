@@ -221,7 +221,7 @@ public class ParametricCurve extends Curve {
 
     /**
     Calculates and return the number of pieces in current curve.
-    @return 
+    @return number of pieces in current curve.
     */
     public int getNumPieces()
     {
@@ -281,7 +281,8 @@ public class ParametricCurve extends Curve {
     command.
     @param endingSegment
     @param t
-    @return 
+    @return a new Vector3D containing a point over the curve or null if not
+    possible to compute
     */
     public Vector3D evaluate(int endingSegment,  double t) {
         if ( types.get(endingSegment).intValue() == CORNER ) {
@@ -523,7 +524,7 @@ public class ParametricCurve extends Curve {
     rects or not.
     @param endingPointForSegment
     @param withBrokenRects
-    @return 
+    @return a set of points with a sampling over current curve
     */
     public ArrayList<Vector3D> calculatePoints(int endingPointForSegment,
                                                boolean withBrokenRects) {
@@ -608,7 +609,7 @@ public class ParametricCurve extends Curve {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

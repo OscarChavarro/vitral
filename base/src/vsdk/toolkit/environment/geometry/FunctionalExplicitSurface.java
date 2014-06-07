@@ -260,7 +260,7 @@ public class FunctionalExplicitSurface extends Surface
     Geometry.doContainmentTest.
     @param p
     @param distanceTolerance
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value 
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)

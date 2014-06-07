@@ -234,7 +234,7 @@ public class TriangleMeshGroup extends Surface {
     special application of volume rendering generation, it is better
     to provide another method, to add voxels after a path following
     over the line.
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
@@ -258,7 +258,7 @@ public class TriangleMeshGroup extends Surface {
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable report from current mesh group
     */
     @Override
     public String toString() {

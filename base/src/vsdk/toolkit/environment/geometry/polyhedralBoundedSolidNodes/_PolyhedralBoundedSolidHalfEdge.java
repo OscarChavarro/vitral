@@ -66,7 +66,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
 
     /**
     Locates the previous half edge in current list
-    @return 
+    @return requested half edge
     */
     public _PolyhedralBoundedSolidHalfEdge previous()
     {
@@ -77,7 +77,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
 
     /**
     Locates the next half edge in current list
-    @return 
+    @return requested halfedge
     */
     public _PolyhedralBoundedSolidHalfEdge next()
     {
@@ -106,7 +106,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     with respect to parent edge. Note that this code corresponds to macro
     `mate(he)`, defined in program [MANT1988] 10.2, and annotated in
     sections [MANT1988].10.3. and [MANT1988].10.4.2.
-    @return 
+    @return complementary halfedge
     */
     public _PolyhedralBoundedSolidHalfEdge
     mirrorHalfEdge()
@@ -126,7 +126,8 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     program [MANT1988].12.9. and presented in section [MANT1988].12.4.2.
     @param other
     @param tolerance
-    @return 
+    @return true if given halfedges are very close (under tolerance), false
+    if they are far away
     */
     public boolean
     vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge other, double tolerance)
