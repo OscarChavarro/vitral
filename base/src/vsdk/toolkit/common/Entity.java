@@ -9,13 +9,14 @@ package vsdk.toolkit.common;
 import java.io.Serializable;
 
 /**
-This class is a base superclass for all classes in the VSDK model. Note that
-this class supports two functionalities:
+This class is a base superclass for all classes in the VSDK model (as of
+Vitral applications are based upon Model-View-Controller or MVC design
+pattern). Note that this class supports two functionalities:
   - As implementing the Serializable interface, this permits to serialize 
     all of the 
 */
 
-public class Entity implements Serializable
+public class Entity extends ModelElement implements Serializable
 {
     /**
     This is a value used for the standard java serialization mechanism to

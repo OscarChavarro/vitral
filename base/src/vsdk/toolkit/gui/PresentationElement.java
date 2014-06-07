@@ -7,7 +7,7 @@
 package vsdk.toolkit.gui;
 
 /**
-DEFINITION: A `PresentationElement` in VitralSDK is a software element with
+A `PresentationElement` in VitralSDK is a software element with
 algorithms and data structures (i.e. a class) with the specific functionality
 of managing (create, delete, query and modify) a data Entity from human
 user interaction. Usually, a `PresentationElement` provides specific

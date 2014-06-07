@@ -7,7 +7,7 @@
 package vsdk.toolkit.processing;
 
 /**
-DEFINITION: A `ProcessingElement` in VitralSDK is a software element with
+A `ProcessingElement` in VitralSDK is a software element with
 algorithms and data structures (i.e. a class) with the specific functionality
 for manipulating and extract metadata from a data Entity (usually a geometric
 low-level entity). Usually, a `ProcessingElement` provides stand-alone,

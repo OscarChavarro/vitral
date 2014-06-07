@@ -7,7 +7,7 @@
 package vsdk.toolkit.common;
 
 /**
-DEFINITION: A `FundamentalEntity` in VitralSDK is a basic software construction
+A `FundamentalEntity` in VitralSDK is a basic software construction
 brick, use in the support and definition of common datastructures. Classes
 derived from this abstract class belong two one of the following groups:
   - Extended common data structures: similar to other, but not found in basic

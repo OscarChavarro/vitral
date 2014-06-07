@@ -76,6 +76,11 @@ The VSDK class provides the following services:
     for benchmarking purposes
 */
 
+
+/**
+VSDK class is a fundamental class that contains common utility elements for
+all software inside Vitral Software Development Kit.
+*/
 public class VSDK
 {
     // Common mathematical constants

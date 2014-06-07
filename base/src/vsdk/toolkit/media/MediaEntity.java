@@ -9,7 +9,7 @@ package vsdk.toolkit.media;
 import vsdk.toolkit.common.Entity;
 
 /**
-DEFINITION: A `MediaEntity` in VitralSDK is a software element with data
+A `MediaEntity` in VitralSDK is a software element with data
 structures associated with multimedia information, and some minor basic
 algorithms for suporting them.
 

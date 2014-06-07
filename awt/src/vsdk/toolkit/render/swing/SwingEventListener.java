@@ -5,7 +5,10 @@ package vsdk.toolkit.render.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SwingEventListener implements ActionListener
+// VSDK classes
+import vsdk.toolkit.gui.PresentationElement;
+
+public class SwingEventListener extends PresentationElement implements ActionListener
 {
     private String commandName;
     private ActionListener executor;

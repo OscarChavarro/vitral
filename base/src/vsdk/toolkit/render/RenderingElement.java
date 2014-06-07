@@ -7,7 +7,7 @@
 package vsdk.toolkit.render;
 
 /**
-DEFINITION: A `RenderingElement` in VitralSDK is a software element with
+A `RenderingElement` in VitralSDK is a software element with
 algorithms and data structures (i.e. a class) with the specific functionality
 of generating simple visual 2D primitives from a data Entity (i.e. aiding
 as part of a visualization pipeline). Usually, a `RenderingElement` provides

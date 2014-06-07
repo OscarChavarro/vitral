@@ -7,7 +7,7 @@
 package vsdk.framework;
 
 /**
-DEFINITION: A `Component` in VitralSDK is a software container for a
+A `Component` in VitralSDK is a software container for VSDK FRAMEWORK as a
 "component" in the sence of object oriented programming (programming structured
 over software components). Subclasses of class `Component` usually correspond
 to interfaces and concrete classes, and to design patterns structures showed

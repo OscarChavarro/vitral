@@ -18,6 +18,13 @@
 
 package vsdk.toolkit.common;
 
+/**
+VSDKJ2ME class is a fundamental class that contains common utility elements for
+all software inside Vitral Software Development Kit on Java MicroEdition
+implementations. It is not supposed to be included on other platform 
+configurations as such java desktop, java servlet or java for Android, but
+if include at compile time is not harmful.
+*/
 public class VSDKJ2ME
 {
     public static final double PI = 3.14159265358979323846;

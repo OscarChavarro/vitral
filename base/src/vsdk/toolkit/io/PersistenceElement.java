@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 import vsdk.toolkit.common.VSDK;
 
 /**
-DEFINITION: A `PersistenceElement` in VitralSDK is a software element with
+A `PersistenceElement` in VitralSDK is a software element with
 algorithms and data structures (i.e. a class) with the specific functionality
 of providing persistence operations for a data Entity.
 
