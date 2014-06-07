@@ -3,7 +3,7 @@ package vsdk.toolkit.gui;
 
 import java.util.ArrayList;
 
-public class GuiButtonGroup
+public class GuiButtonGroup extends GuiElement
 {
     private ArrayList<GuiCommand> commandReferenceList;
     private Gui context;

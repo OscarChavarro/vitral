@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 
 import javax.media.opengl.GL2;
 
-import vsdk.toolkit.common.StopWatch;
+import vsdk.toolkit.processing.StopWatch;
 
 public class JoglStereoStrategyWiggleRenderer extends JoglStereoStrategyRenderer
 {

@@ -14,7 +14,7 @@ import vsdk.toolkit.media.RGBPixel;
 Class used to manage HUD based interactions based on button like images with
 interaction area.
 */
-public class HudIcon extends GuiElement {
+public class HudIcon extends PresentationElement {
     /// Image to show, can be null
     private RGBAImage image;   
     

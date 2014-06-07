@@ -11,7 +11,7 @@ import vsdk.toolkit.media.RGBAPixel;
 This class plays a role of leaf on an n-ary tree in the composite design 
 pattern.
 */
-public class GuiCommand extends GuiElement{
+public class GuiCommand extends GuiElement {
     private String id;
     private String name;
     private String briefDescription;

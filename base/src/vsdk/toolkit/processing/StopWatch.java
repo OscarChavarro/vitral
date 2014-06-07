@@ -4,9 +4,9 @@
 //= - April 30 2008 - Oscar Chavarro: Original base version                 =
 //===========================================================================
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.processing;
 
-public class StopWatch
+public class StopWatch extends ProcessingElement
 {
     private long t0;
     private long t1;

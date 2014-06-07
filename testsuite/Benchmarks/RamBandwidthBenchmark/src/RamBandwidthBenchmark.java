@@ -1,7 +1,7 @@
 //===========================================================================
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.StopWatch;
+import vsdk.toolkit.processing.StopWatch;
 
 /**
 This class implements a simple brute-force benchmark for testing the available

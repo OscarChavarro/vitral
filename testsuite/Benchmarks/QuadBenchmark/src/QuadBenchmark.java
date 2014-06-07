@@ -43,7 +43,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.common.StopWatch;
+import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.io.geometry.ViewpointBinaryPersistence; // Persistence elements
 
 /**

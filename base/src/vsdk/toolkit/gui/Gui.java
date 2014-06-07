@@ -15,7 +15,7 @@ pattern - Menubars, buttons bars, and other are based upon GuiCommands -
 Dialogs are based upon GuiVariables and GuiCommands - Dialogs and menus are
 hierarchical
 */
-public class Gui {
+public class Gui extends PresentationElement {
     // Basic / fundamental / atomic elements
 
     private ArrayList<GuiCommand> commandList;

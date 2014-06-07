@@ -27,8 +27,9 @@ import vsdk.toolkit.gui.variable.GuiBooleanVariable;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.io.PersistenceElement;
 
-public class GuiPersistence {
+public class GuiPersistence extends PersistenceElement {
 
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,

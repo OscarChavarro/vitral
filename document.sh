@@ -1,6 +1,6 @@
 clear
 echo "Remember that you need doxygen and graphviz/dot for this to function!"
-echo "This could take a time of around 3 minutes, please wait..."
+echo "This could take a time of around 4 minutes on an eight core system, please wait..."
 rm -rf doc/html_doxygen
 rm -rf doc/html_javadoc
 time doxygen doc/_doxygen/doxyfile.config

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.StopWatch;
+import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.scene.SimpleScene;

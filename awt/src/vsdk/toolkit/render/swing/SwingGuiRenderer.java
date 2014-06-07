@@ -35,6 +35,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
 
 // Application specific classes
+import vsdk.toolkit.gui.PresentationElement;
 import vsdk.toolkit.gui.variable.GuiBooleanVariable;
 import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
 import vsdk.toolkit.gui.variable.GuiDoubleVariable;
@@ -50,7 +51,7 @@ import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiDialog;
 
-public class SwingGuiRenderer {
+public class SwingGuiRenderer extends PresentationElement {
 
     private static int convertMnemonic2Swing(char in) {
         char uc = Character.toUpperCase(in);
