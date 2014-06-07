@@ -38,7 +38,7 @@ public class Sphere extends Solid {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     @param inout_rayo
-    @return 
+    @return true if given ray intersects current Sphere
     */
     @Override
     public boolean
@@ -156,6 +156,10 @@ public class Sphere extends Solid {
         return LIMIT;
     }
 
+    /**
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
     @Override
     public double[] getMinMax()
     {

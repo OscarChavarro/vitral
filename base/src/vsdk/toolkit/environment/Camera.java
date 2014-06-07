@@ -433,7 +433,8 @@ public class Camera extends Entity
     /todo this method should be named "generateProjectorRay"
     @param x
     @param y
-    @return 
+    @return a new ray fired from current camera eye location and passing thru
+    projection surface at a point equivalent to (x, y) integer projected pixel      coordinate
     */
     public final Ray generateRay(int x, int y)
     {
@@ -512,7 +513,7 @@ public class Camera extends Entity
     
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
-    @return 
+    @return projection matrix representing view volume component
     */
     public Matrix4x4 calculateViewVolumeMatrix()
     {
@@ -543,7 +544,7 @@ public class Camera extends Entity
 
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix.
-    @return 
+    @return transformation component for projection matrix for current camera
     */
     public Matrix4x4 calculateTransformationMatrix()
     {
@@ -569,7 +570,8 @@ public class Camera extends Entity
 
     /**
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
-    @return 
+    @return projection matrix for current camera, including transformation
+    and view volume components
     */
     public Matrix4x4 calculateProjectionMatrix()
     {
@@ -582,7 +584,7 @@ public class Camera extends Entity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable representation of current camera's information
     */
     @Override
     public String toString()
@@ -678,7 +680,8 @@ public class Camera extends Entity
     direction.
     @param x
     @param y
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateUPlaneAtPixel(int x, int y)
     {
@@ -698,7 +701,8 @@ public class Camera extends Entity
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
     @param u
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateUPlane(double u)
     {
@@ -752,7 +756,8 @@ public class Camera extends Entity
     direction.
     @param x
     @param y
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateVPlaneAtPixel(int x, int y)
     {
@@ -766,7 +771,8 @@ public class Camera extends Entity
     PRE: updateVectors() must be called before this method if camera model
     is new or recently changed.
     @param v
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateVPlane(double v)
     {
@@ -819,7 +825,8 @@ public class Camera extends Entity
 
     WARNING: This is currently considering only the perspective case!
     TODO: The paralel projection case!
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateNearPlane()
     {
@@ -842,7 +849,8 @@ public class Camera extends Entity
 
     WARNING: This is currently considering only the perspective case!
     TODO: The paralel projection case!
-    @return 
+    @return a new plane as part of the 6 planes representing current camera's
+    viewing volume
     */
     public InfinitePlane calculateFarPlane()
     {
@@ -983,7 +991,8 @@ public class Camera extends Entity
     @param point1
     @param clippedPoint0
     @param clippedPoint1
-    @return 
+    @return true if given 3D line has at least a segment inside current camera
+    view volume, false if line is to be totally removed on an clipping operation
     */
     public boolean clipLineCohenSutherlandPlanes(
                              Vector3D point0, Vector3D point1,
@@ -1135,7 +1144,8 @@ public class Camera extends Entity
     @param point1
     @param clippedPoint0
     @param clippedPoint1
-    @return 
+    @return true if at least a segment of the given 3D line is visible from
+    current camera
     */
     public boolean clipLineCohenSutherlandCanonicVolume(
                              Vector3D point0, Vector3D point1,
@@ -1314,7 +1324,6 @@ public class Camera extends Entity
     /**
     Given a point `inPoint` in world coordinates, this method calculates a
     pixel's  coordinate in viewport space (in the form <u, v, 0>).
-    Returns true if the pixel lies inside the viewport, false otherwise.
 
     Note that the integer part of the returned `outProjected` point (in
     its x and y coordinates) can be used as an input to a putPixel type
@@ -1339,7 +1348,7 @@ public class Camera extends Entity
     working.
     @param inPoint
     @param outProjected
-    @return 
+    @return true if the pixel lies inside the viewport, false otherwise.
     */
     public boolean projectPoint(Vector3D inPoint, Vector3D outProjected)
     {
@@ -1415,7 +1424,8 @@ public class Camera extends Entity
     Return 6 outward pointing planes bounding the view volume / frustum
     for current camera.
     PRE: updateVectors method should be called before calling this method.
-    @return 
+    @return return a set of 6 planes, representing the current cameras view
+    volume
     */
     public InfinitePlane[] getBoundingPlanes()
     {
@@ -1439,7 +1449,8 @@ public class Camera extends Entity
     In other words, this method determines if the paralelogram and the
     view volume intersects.
     @param cornerCoordinates
-    @return 
+    @return if a convex polyhedra for given point set can be visible from
+    current camera
     */
     public boolean
     boundingConvexPolyhedraIsVisible(Vector3D[] cornerCoordinates)

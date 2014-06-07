@@ -66,7 +66,7 @@ public abstract class PersistenceElement {
     \todo : This method will fail when directory path or filename contains
     more than one dot.  Needs to be fixed.
     @param fd
-    @return 
+    @return file extension
     */
     protected static String extractExtensionFromFile(File fd)
     {
@@ -358,7 +358,7 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return integer representation for given bit stream on big endian order
     */
     public static int byteArray2intBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -393,7 +393,7 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return integer representation for given bit stream on little endian order
     */
     public static int byteArray2intLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -408,7 +408,7 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return long integer representation for given bit stream on big endian order
     */
     public static long byteArray2longBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -422,7 +422,8 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return long integer representation for given bit stream on little
+    endian order
     */
     public static long byteArray2longLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -436,7 +437,8 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return single precission float number representation for given bit stream
+    on big endian order
     */
     public static float byteArray2floatBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -466,7 +468,8 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return single precission float representation for given bit stream on 
+    little endian order
     */
     public static float byteArray2floatLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -480,7 +483,8 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return 
+    @return double precission float representation for given bit stream on 
+    little endian order
     */
     public static double byteArray2doubleLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -492,7 +496,8 @@ public abstract class PersistenceElement {
     /**
     @param arr    
     @param start    
-    @return     
+    @return double precission float representation for given bit stream on 
+    bit endian order
     */
     public static double byteArray2doubleBE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
@@ -845,7 +850,7 @@ public abstract class PersistenceElement {
     the exception of a failed System.loadLibrary, so this method is useful
     in bettering the user feedback for this kind of circumstance.
     @param libname
-    @return 
+    @return true if library is available
     */
     public static boolean verifyLibrary(String libname) {
         String nativeLibname = System.mapLibraryName(libname);

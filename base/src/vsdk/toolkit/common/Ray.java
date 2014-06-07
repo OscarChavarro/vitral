@@ -47,7 +47,7 @@ public class Ray  extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable representation of current Ray
     */
     @Override
     public String toString()

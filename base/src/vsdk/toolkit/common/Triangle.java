@@ -40,21 +40,21 @@ public class Triangle extends FundamentalEntity
     }
 
     /**
-    @return 
+    @return point p0
     */
     public int getPoint0() {
         return this.p0;
     }
 
     /**
-    @return 
+    @return point p1
     */
     public int getPoint1() {
         return this.p1;
     }
 
     /**
-    @return 
+    @return point p2
     */
     public int getPoint2() {
         return this.p2;
@@ -85,7 +85,7 @@ public class Triangle extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use this method for serialization
     or persistence purposes.
-    @return 
+    @return human readable representation of current triangle
     */
     @Override
     public String toString() {

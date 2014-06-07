@@ -1,4 +1,4 @@
->===========================================================================
+===========================================================================
 = VitralSDK simplified Personal Software Process file                     =
 ===========================================================================
 = 
@@ -1143,5 +1143,9 @@
 
 2014 may 19, Oscar Chavarro
   - 44min: JoglHudIconRenderer
+
+2014 june 07, Oscar Chavarro
+  - 1h30min: Adding @return comments to javadoc. They where missing and 
+    leading to warnings on javadoc documentation generation process.
 
 ===========================================================================

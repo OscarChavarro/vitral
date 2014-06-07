@@ -19,5 +19,7 @@ J2ME_CLASSES="src_jme/vsdk/toolkit/render/j2me/*.java src_jme/vsdk/toolkit/gui/*
 
 ANDROID_CLASSES="src_android/vsdk/toolkit/gui/*.java src_android/vsdk/toolkit/render/androidgles20/*.java"
 
-javadoc -d ./doc/html_javadoc $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES $J2ME_CLASSES $ANDROID_CLASSES
+ANDROID_LIBRARY="/usr/local/androidDeveloperTools/adt-bundle-linux-x86_64-20131030/sdk/platforms/android-19/android.jar"
+
+javadoc -classpath ./src:./src_android:$ANDROID_LIBRARY -d ./doc/html_javadoc $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES $J2ME_CLASSES $ANDROID_CLASSES
 

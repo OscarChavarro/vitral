@@ -32,8 +32,8 @@ public class Torus extends Solid {
     }
 
     /**
-     * @return the rMajor
-     */
+    @return the rMajor
+    */
     public double getrMajor() {
         return rMajor;
     }
@@ -46,15 +46,15 @@ public class Torus extends Solid {
     }
 
     /**
-     * @return the rMinor
-     */
+    @return the rMinor
+    */
     public double getrMinor() {
         return rMinor;
     }
 
     /**
-     * @param rMinor the rMinor to set
-     */
+    @param rMinor the rMinor to set
+    */
     public void setrMinor(double rMinor) {
         this.rMinor = rMinor;
     }
@@ -1281,6 +1281,10 @@ public class Torus extends Solid {
         outData.n.normalize();
     }
 
+    /**
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
     @Override
     public double[] getMinMax() {
          // TODO!

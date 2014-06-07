@@ -65,6 +65,10 @@ public class TriangleMeshGroup extends Surface {
         return this.meshes.get(index);
     }
 
+    /**
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
     @Override
     public double[] getMinMax() {
         if(MinMax==null)
@@ -144,7 +148,7 @@ public class TriangleMeshGroup extends Surface {
     Geometry.doIntersection.
 
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current TriangleMeshGroup
     */
     @Override
     public boolean doIntersection(Ray inOut_Ray) {

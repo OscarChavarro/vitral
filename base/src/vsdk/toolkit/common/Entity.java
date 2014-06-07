@@ -35,7 +35,7 @@ public class Entity implements Serializable
     a 0 size is assumed.
 
     This is important for applications implementing memory chaching schema.
-    @return 
+    @return the number of bytes current object ocupies in RAM when loaded
     */
     public int getSizeInBytes()
     {

@@ -181,7 +181,7 @@ public class Vertex extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable representation of current vertex
     */
     @Override
     public String toString() {

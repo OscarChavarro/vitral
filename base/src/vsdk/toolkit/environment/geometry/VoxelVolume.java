@@ -253,7 +253,8 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {
@@ -273,8 +274,10 @@ public class VoxelVolume extends Solid {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
 
+    NOT IMPLEMENTED YET!
+
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current VoxelVolume
     */
     @Override
     public boolean doIntersection(Ray inOut_Ray) {

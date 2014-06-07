@@ -93,7 +93,7 @@ public class Vector3D extends FundamentalEntity
 
     /**
     @param B Vector3D
-    @return double
+    @return dot product between two vectors
     */
     public final double dotProduct(Vector3D B) {
         return (x*B.x + y*B.y + z*B.z);
@@ -112,7 +112,7 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-    @return double
+    @return current vector length
     */
     public final double length() {
         return Math.sqrt(x*x + y*y + z*z);
@@ -168,7 +168,7 @@ public class Vector3D extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable representation of current vector
     */
     @Override
     public String toString()
@@ -188,7 +188,8 @@ public class Vector3D extends FundamentalEntity
     Note that theta goes from 0 to 2*PI, and correspond to an axis of
     rotation <0, 0, 1>.
     POST: 0 <= theta <= 2*PI
-    @return 
+    @return an angle with theta angle spherical coordinate for the point at
+    the tip of current vector, when vector tail is anchored at the origin
     */
     public double obtainSphericalThetaAngle()
     {
@@ -213,7 +214,8 @@ public class Vector3D extends FundamentalEntity
     calculates the phi angle (in radians) of the tip, corresponding
     to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
     Note phi goes from 0 to PI.
-    @return 
+    @return an angle with phi angle spherical coordinate for the point at
+    the tip of current vector, when vector tail is anchored at the origin
     */
     public double obtainSphericalPhiAngle()
     {

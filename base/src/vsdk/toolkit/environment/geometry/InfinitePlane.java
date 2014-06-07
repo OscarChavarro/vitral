@@ -162,7 +162,8 @@ public class InfinitePlane extends HalfSpace {
 
     /**
     TODO: Current returned values are not always valid!
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax()

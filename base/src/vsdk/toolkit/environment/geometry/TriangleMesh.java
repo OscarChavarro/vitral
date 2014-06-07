@@ -826,7 +826,7 @@ public class TriangleMesh extends Surface {
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return 
+    @return human readable representation of current TriangleMesh information
     */
     @Override
     public String toString() {
@@ -1113,7 +1113,8 @@ public class TriangleMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {

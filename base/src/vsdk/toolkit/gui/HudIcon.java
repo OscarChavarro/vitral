@@ -41,7 +41,8 @@ public class HudIcon extends GuiElement {
     falls between current hud icon.
     @param inX
     @param inY
-    @return 
+    @return true if current coordinate lies inside HudIcon with respect to
+    camera's viewport configuration, false otherwise
     */
     public boolean doIntersection(int inX, int inY, Camera c)
     {
@@ -81,7 +82,8 @@ public class HudIcon extends GuiElement {
     @param inY
     @param gravity
     @param c
-    @return 
+    @return true if current coordinate lies inside HudIcon with respect to
+    camera's viewport configuration, false otherwise
     */
     public boolean doIntersectionWithGravity(int inX, int inY, int gravity, 
         Camera c)

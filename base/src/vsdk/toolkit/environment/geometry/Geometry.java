@@ -167,7 +167,8 @@ public abstract class Geometry extends Entity {
     /**
     \todo  This method should be abstract, forcing all subclasses to define it.
     The design of this method could change in future.
-    @return 
+    @return a new TriangleMeshGroup representing the surface of current Geometry
+    when possible, null if not possible
     */
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
@@ -176,7 +177,8 @@ public abstract class Geometry extends Entity {
 
     /**
     The design of this method could change in future.
-    @return 
+    @return a new PolyhedralBoundedSolid representing the surface of current 
+    Geometry when possible, null if not possible
     */
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
@@ -192,7 +194,7 @@ public abstract class Geometry extends Entity {
     while `LIMIT` cases can be defined in 0D, 1D and 2D geometries.
     @param p
     @param distanceTolerance
-    @return 
+    @return INSIDE, OUTSIDE or LIMIT constant value
     */
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {

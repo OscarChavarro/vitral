@@ -39,7 +39,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return abs/modulus/magnitude
-    @return 
+    @return complex number magnitude
     */
     public double abs() {
         return Math.hypot(r, i); // Math.sqrt(r*r + i*i)
@@ -47,7 +47,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return angle/phase/argument
-    @return 
+    @return complex number phase
     */
     public double phase() {
         // between -pi and pi
@@ -57,7 +57,7 @@ public class Complex extends FundamentalEntity {
     /**
     Return a new Complex object whose value is (this + b)
     @param b
-    @return 
+    @return complex number with the result of adding two other complex numbers
     */
     public Complex plus(Complex b) {
         double real = this.r + b.r;
@@ -68,7 +68,7 @@ public class Complex extends FundamentalEntity {
     /**
     Return a new Complex object whose value is (this - b)
     @param b
-    @return 
+    @return negated complex number
     */
     public Complex minus(Complex b) {
         Complex a = this;
@@ -80,7 +80,8 @@ public class Complex extends FundamentalEntity {
     /**
     Return a new Complex object whose value is (this * b)
     @param b
-    @return 
+    @return a new complex number with the result of the multiplication of other
+    two complex numbers
     */
     public Complex times(Complex b) {
         Complex a = this;
@@ -93,7 +94,7 @@ public class Complex extends FundamentalEntity {
     Scalar multiplication
     Return a new object whose value is (this * alpha)
     @param alpha
-    @return 
+    @return scalar multiplied complex number
     */
     public Complex times(double alpha) {
         return new Complex(alpha * r, alpha * i);
@@ -101,7 +102,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the conjugate of this
-    @return 
+    @return conjugate complex number
     */
     public Complex conjugate() {
       return new Complex(r, -i);
@@ -109,7 +110,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the reciprocal of this
-    @return 
+    @return reciprocal complex number
     */
     public Complex reciprocal() {
         double scale = r*r + i*i;
@@ -119,7 +120,8 @@ public class Complex extends FundamentalEntity {
     /**
     Return a / b
     @param b
-    @return 
+    @return a new complex number with the division result of other two
+    complex numbers
     */
     public Complex divides(Complex b) {
         Complex a = this;
@@ -128,7 +130,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex exponential of this
-    @return 
+    @return exponent of current complex number 
     */
     public Complex exp() {
         return new Complex(Math.exp(r) * Math.cos(i), Math.exp(r) * Math.sin(i));
@@ -136,7 +138,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex sine of this
-    @return 
+    @return complex sine
     */
     public Complex sin() {
         return new Complex(Math.sin(r) * Math.cosh(i), Math.cos(r) * Math.sinh(i));
@@ -144,7 +146,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex cosine of this
-    @return 
+    @return complex cosine
     */
     public Complex cos() {
         return new Complex(Math.cos(r) * Math.cosh(i), -Math.sin(r) * Math.sinh(i));
@@ -152,7 +154,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a new Complex object whose value is the complex tangent of this
-    @return 
+    @return complex tangent
     */
     public Complex tan() {
         return sin().divides(cos());
@@ -162,7 +164,8 @@ public class Complex extends FundamentalEntity {
     A static version of plus
     @param a
     @param b
-    @return 
+    @return a new complex number with the addition result of other two complex
+    numbers
     */
     public static Complex plus(Complex a, Complex b) {
         double real = a.r + b.r;
@@ -173,7 +176,7 @@ public class Complex extends FundamentalEntity {
 
     /**
     Return a string representation of the invoking Complex object
-    @return 
+    @return human readable representation of current complex number
     */
     @Override
     public String toString() {

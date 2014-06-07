@@ -94,7 +94,7 @@ public class ColorRgb extends FundamentalEntity
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
     to the attribute and this intermediated use of get/set methods.
-    @return
+    @return red color component
     */
     public double getR()
     {
@@ -107,7 +107,7 @@ public class ColorRgb extends FundamentalEntity
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
     to the attribute and this intermediated use of get/set methods. 
-    @return 
+    @return green color component
     */
     public double getG()
     {
@@ -120,7 +120,7 @@ public class ColorRgb extends FundamentalEntity
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
     to the attribute and this intermediated use of get/set methods. 
-    @return 
+    @return blue color component
     */
     public double getB()
     {
@@ -170,7 +170,8 @@ public class ColorRgb extends FundamentalEntity
     This method exports the color components to an static array of float
     values. It is supposed to help operations in APIs like OpenGL/JOGL where
     this representation form is commonly used.
-    @return 
+    @return a three element sized single precission float array containing 
+    r, g and b data
     */
     public float[] exportToFloatArrayVect()
     {
@@ -178,6 +179,10 @@ public class ColorRgb extends FundamentalEntity
         return ret;
     }
 
+    /**
+    @return a three element sized double precission float array containing 
+    r, g and b data
+    */
     public double[] exportToDoubleArrayVect()
     {
         double[] ret={r, g, b, 1};
@@ -188,7 +193,7 @@ public class ColorRgb extends FundamentalEntity
     This method return a String representation of current color. In its
     current implementation it is biased for human readability, not for
     precision, so the use of an approximation formating.
-    @return 
+    @return human readable String representation of current color
     */
     @Override
     public String toString()
@@ -202,7 +207,7 @@ public class ColorRgb extends FundamentalEntity
     Given current color space (RGB coordinates), this method returns the
     Euclidean distance between two points in such space: `this` and `other`.
     @param other
-    @return 
+    @return color distance in RGB color coordinate space
     */
     public double distance(ColorRgb other) {
         return Math.sqrt((this.r - other.r)*(this.r - other.r) +
@@ -210,6 +215,9 @@ public class ColorRgb extends FundamentalEntity
                          (this.b - other.b)*(this.b - other.b));
     }
 
+    /**
+    @param other
+    */
     public void clone(ColorRgb other) {
         this.r = other.r;
         this.g = other.g;

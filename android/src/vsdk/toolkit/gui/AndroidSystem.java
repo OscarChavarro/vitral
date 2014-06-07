@@ -37,10 +37,11 @@ public class AndroidSystem extends PresentationElement
 
     /**
     This method generates a texture from a text to be displayed.
-     * @param label
-     * @param color
-     * @param size
-     * @return 
+    @param label
+    @param color
+    @param size
+    @return a new image containing a transparent representation of given text
+    color, using a monospaced default font
     */
     public static RGBAImage calculateLabelImage(String label, ColorRgb color, int size)
     {

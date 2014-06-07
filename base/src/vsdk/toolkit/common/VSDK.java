@@ -198,7 +198,8 @@ public class VSDK
     /**
     Given a double number, it formats it to print in a given precision.
     @param a
-    @return
+    @return a string representation of given double presiccion float number with
+    two decimal digits after the floating comma
     */
     public static String formatDouble(double a)
     {
@@ -207,6 +208,12 @@ public class VSDK
         return f.format(a, new StringBuffer(""), new FieldPosition(0)).toString();
     }
 
+    /**
+    Given a double number, it formats it to print in a given precision.
+    @param a
+    @return a string representation of given double presiccion float number with
+    given decimal digits after the floating comma
+    */
     public static String formatDouble(double a, int digits)
     {
         int i;
@@ -222,7 +229,8 @@ public class VSDK
     /**
     Given a byte, it formats it to print as two hexagesimal nibbles.
     @param a
-    @return
+    @return a string containing hexagesimal representation in two nibbles from
+    the given 8 bit byte
     */
     public static String formatByteAsHex(byte a)
     {
@@ -236,7 +244,8 @@ public class VSDK
     /**
     Given an integer, it formats it to print as two hexagesimal nibbles.
     @param a
-    @return
+    @return a string containing hexagesimal representation in four nibbles from
+    the given 32 bit integer
     */
     public static String formatIntAsHex(int a)
     {
@@ -256,9 +265,9 @@ public class VSDK
     }
 
     /** Converts integers in the domain [-128, 127] to integers in the range
-    [0, 256].
+    [0, 256).
     @param in
-    @return
+    @return a number between 0 to 255
     */
     public static int signedByte2unsignedInteger(byte in) {
         int a;

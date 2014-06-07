@@ -25,7 +25,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param mouseEvent
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     public boolean processMouseEvent(MouseEvent mouseEvent) {
 
@@ -34,7 +34,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMousePressedEvent(MouseEvent e) {
@@ -50,7 +50,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMouseReleasedEvent(MouseEvent e) {
@@ -60,7 +60,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMouseClickedEvent(MouseEvent e) {
@@ -70,7 +70,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMouseMovedEvent(MouseEvent e) {
@@ -80,7 +80,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMouseDraggedEvent(MouseEvent e) {
@@ -132,7 +132,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param e
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processMouseWheelEvent(MouseEvent e) {
@@ -212,7 +212,7 @@ public class CameraControllerGoogleEarth extends CameraController {
     }
 
     /**
-    @return 
+    @return current camera being under control
     */
     @Override
     public Camera getCamera() {
@@ -229,7 +229,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param keyEvent
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processKeyPressedEvent(vsdk.toolkit.gui.KeyEvent keyEvent) {
@@ -470,7 +470,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
     /**
     @param keyEvent
-    @return 
+    @return true if current event leads to a model update, false if not.
     */
     @Override
     public boolean processKeyReleasedEvent(KeyEvent keyEvent) {

@@ -218,7 +218,8 @@ public class FunctionalExplicitSurface extends Surface
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {
@@ -232,7 +233,7 @@ public class FunctionalExplicitSurface extends Surface
     \todo  Should not delegate work over tesselated geometry version. Should
     evaluate directly from algebraic function surface!
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current FunctionalExplicitSurface
     */
     @Override
     public boolean

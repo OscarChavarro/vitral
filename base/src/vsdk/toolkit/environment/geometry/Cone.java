@@ -220,7 +220,7 @@ public class Cone extends Solid {
     Check the general interface contract in superclass method
     Geometry.doIntersection.
     @param inOutRay
-    @return 
+    @return true if given ray intersects current Cone
     */
     @Override
     public boolean
@@ -328,6 +328,10 @@ public class Cone extends Solid {
         outData.n.normalize();
     }
 
+    /**
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
     @Override
     public double[] getMinMax()
     {

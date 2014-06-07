@@ -158,7 +158,8 @@ public class SimpleBodyGroup extends Entity {
     not included in the geometries representations, making the internal
     code of `doIntersection` methods much easier to develop and maintain.
     @param inOutRay
-    @return 
+    @return true if given line intersects with any body inside current body
+    group
     */
     public boolean doIntersection(Ray inOutRay)
     {

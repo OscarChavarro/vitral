@@ -21,7 +21,7 @@ public abstract class Curve extends Geometry {
     will always fail as the operation is regularized for constructive
     solid modelling compatible interpretation.
     @param r
-    @return 
+    @return always if false
     */
     @Override
     public boolean doIntersection(Ray r)

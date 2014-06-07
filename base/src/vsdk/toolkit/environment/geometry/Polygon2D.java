@@ -42,6 +42,10 @@ public class Polygon2D extends Surface
         loops.add(currentLoop);
     }
 
+    /**
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
     @Override
     public double[] getMinMax()
     {

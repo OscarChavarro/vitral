@@ -484,7 +484,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     \todo  implement the method
     @param r
-    @return 
+    @return true if given ray intersects current ParametricBicubicPatch
     */
     @Override
     public boolean doIntersection(Ray r) {
@@ -518,7 +518,8 @@ public class ParametricBiCubicPatch extends Surface {
     the minmax of its contour curve.
 
     BUG: current contour curve asumption is not valid
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {

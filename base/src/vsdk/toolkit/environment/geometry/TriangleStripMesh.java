@@ -75,7 +75,8 @@ public class TriangleStripMesh extends Surface {
     /**
     Check the general interface contract in superclass method
     Geometry.getMinMax.
-    @return 
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {
@@ -114,7 +115,7 @@ public class TriangleStripMesh extends Surface {
 
     \todo  Method not implemented!
     @param inOut_Ray
-    @return 
+    @return true if given ray intersects current TriangleStripMesh
     */
     @Override
     public boolean

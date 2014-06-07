@@ -350,7 +350,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     }
 
     /**
-    @return
+    @return a new object containing an exact copy of current 
+    RendererConfiguration
     */
     @Override
     public RendererConfiguration clone() 

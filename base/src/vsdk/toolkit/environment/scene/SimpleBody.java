@@ -224,7 +224,7 @@ public class SimpleBody extends Entity {
     This two variables would be temporary local variables in this method
     if C/C++ style "static" functionality exist in Java.
     @param inOutRay
-    @return 
+    @return true if given ray intersects with current body
     */
     public final boolean doIntersection(Ray inOutRay)
     {
