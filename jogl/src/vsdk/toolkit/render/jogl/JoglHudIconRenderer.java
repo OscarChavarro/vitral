@@ -47,17 +47,12 @@ public class JoglHudIconRenderer {
             return;
         }
         
-        fx = (((double)img.getXSize()) * 2.0) / 
-             ((double)c.getViewportXSize());
-
-        fy = (((double)img.getYSize()) * 2.0) / 
-             ((double)c.getViewportYSize());
-
-        dx = ((double)(x) * 2.0 + ((double)img.getXSize())) / 
-            ((double)c.getViewportXSize());
-
-        dy = ((double)(y) * 2.0 + ((double)img.getYSize())) / 
-            ((double)c.getViewportYSize());
+        fx = (((double)img.getXSize()) * 2.0) / c.getViewportXSize();
+        fy = (((double)img.getYSize()) * 2.0) / c.getViewportYSize();
+        dx = 
+         ((double)(x) * 2.0 + ((double)img.getXSize())) / c.getViewportXSize();
+        dy =
+         ((double)(y) * 2.0 + ((double)img.getYSize())) / c.getViewportYSize();
 
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
