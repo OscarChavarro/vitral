@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import vsdk.toolkit.gui.CommandListener;
 
-public class GUIEventExecutor implements ActionListener, CommandListener{
+public class GUIEventExecutor extends CommandListener implements ActionListener {
 
     @Override
     public boolean executeCommand(String label) {
