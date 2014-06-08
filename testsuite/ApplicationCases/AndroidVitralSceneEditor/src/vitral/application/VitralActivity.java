@@ -1,129 +1,24 @@
 //===========================================================================
-
 package vitral.application;
 
 // Android packages
-import android.annotation.TargetApi;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Build;
 import android.os.Bundle;
 
 // Android packages: GUI
-//import android.view.View;
 import android.view.Menu;
 import android.view.SubMenu;
 import android.view.MenuItem;
-//import android.widget.Toast;
-//import android.widget.TextView;
-//import android.widget.ImageView;
-//import android.widget.LinearLayout;
-//import android.widget.Gallery.LayoutParams;
-//import android.view.Gravity;
-//import android.widget.ImageView.ScaleType;
-//import android.widget.Button;
-import android.view.View.OnClickListener;
 
-// Android packages: GPS API
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.GpsStatus;
-//import android.location.GpsStatus.Listener;
-import android.content.Context;
-import android.os.Debug;
-import android.view.Window;
-
-// Vsdk classes
-//import vsdk.toolkit.common.linealAlgebra.Vector3D;
-//import vsdk.toolkit.common.ColorRgb;
-//import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.scene.SimpleBody;
-
-@TargetApi(Build.VERSION_CODES.CUPCAKE) 
-public class VitralActivity 
-extends ActionBarActivity 
-implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
+//@TargetApi(Build.VERSION_CODES.CUPCAKE) 
+public class VitralActivity extends ActionBarActivity {
     private BasicGLSurfaceView canvas;
 
-    private LocationManager locationManager;
-    private String provider;
-    private int numberOfLocations;
-    private int numberOfLights;
-
-    //= Basic Activity methods =================================================
     private void createGUI()
     {
-/*
-        TextView label = new TextView(this);
-        label.setText("VITRAL Android Application Template");
-        label.setTextSize(10);
-        label.setGravity(Gravity.CENTER_HORIZONTAL);
-
-        ImageView pic = new ImageView(this);
-        pic.setImageResource(R.raw.render);  
-        pic.setLayoutParams(new LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));  
-        pic.setAdjustViewBounds(true);  
-        pic.setScaleType(ScaleType.FIT_XY);  
-        pic.setMaxHeight(250);  
-        pic.setMaxWidth(250);  
-*/
-
         canvas = new BasicGLSurfaceView(getApplication());
-        
-        //canvas.setLayoutParams(new LayoutParams(
-        //    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-
-/*
-        Button b1 = new Button(this);
-        b1.setId(1);
-        b1.setText("Click me");
-        b1.setLayoutParams(new LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        b1.setOnClickListener(this);
-
-        Button b2 = new Button(this);
-        b2.setId(2);
-        b2.setText("Tickle me");
-        b2.setLayoutParams(new LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        b2.setOnClickListener(this);
-
-        LinearLayout buttonsPanel = new LinearLayout(this);  
-        buttonsPanel.setOrientation(LinearLayout.HORIZONTAL);  
-        buttonsPanel.setLayoutParams(new LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));  
-        //buttonsPanel.setGravity(Gravity.CENTER);  
-        buttonsPanel.addView(b1);
-        buttonsPanel.addView(b2);
-
-        // Organize elements
-        LinearLayout mainPanel = new LinearLayout(this);  
-        mainPanel.setOrientation(LinearLayout.VERTICAL);  
-        mainPanel.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));  
-        mainPanel.setGravity(Gravity.CENTER);  
-        mainPanel.addView(label);  
-        //mainPanel.addView(pic);
-        mainPanel.addView(buttonsPanel);
-        mainPanel.addView(canvas);  
-        setContentView(mainPanel);
-*/
         setContentView(canvas);
-        //requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        //getActionBar().show();
-        //getSupportActionBar().show();
     }
-
-/*
-    @Override
-    public void onClick(View v)
-    {
-        System.out.println("Huy! " + v.getId());
-        Toast.makeText(this, "Huy!", Toast.LENGTH_SHORT).show();  
-    }
-*/
     
     @Override
     protected void onCreate(Bundle icicle) {
@@ -133,29 +28,12 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
         //Debug.startMethodTracing("VITRAL");
         
         createGUI();
-
-        // Scene related
-        numberOfLights = 1;
-
-        // GPS related
-        numberOfLocations = 1;
-        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        provider = locationManager.getProvider(LocationManager.GPS_PROVIDER).getName();
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        // Initialize the location fields
-        if ( location != null ) {
-            System.out.println("OnCreate: provider " + provider + " has been selected.");
-            onLocationChanged(location);
-          }
-          else {
-            System.out.println("Location not available");
-        }
     }
     
     @Override
     protected void onDestroy()
     {
+        // Profiler: close .trace file to be used with traceview ADT tool.
         //Debug.stopMethodTracing();
         super.onDestroy();
     }
@@ -164,72 +42,21 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
     protected void onPause() {
         super.onPause();
         canvas.onPause();
-        locationManager.removeUpdates(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         canvas.onResume();
-        locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
-    //= Extended methods for GPS ===============================================
-    @Override
-    public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
-        System.out.println("[" + numberOfLocations + "] LAT: " + lat + " LON: " + lon);
-        numberOfLocations++;
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        System.out.println("Enabled new location provider: " + provider);
-        locationManager.requestLocationUpdates(provider, 400, 1, this);
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        // Initialize the location fields
-        if ( location != null ) {
-            System.out.println("Provider " + provider + " has been selected.");
-            onLocationChanged(location);
-          }
-          else {
-            System.out.println("(Again) Location not available");
-        }
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        System.out.println("Enabled new location provider: " + provider);
-    }
-
-    @Override
-    public void onGpsStatusChanged(int event) {
-        switch ( event ) {
-          case GpsStatus.GPS_EVENT_STARTED:
-            System.out.println("GPS_EVENT_STARTED");
-            break;
-          case GpsStatus.GPS_EVENT_STOPPED:
-            System.out.println("GPS_EVENT_STOPPED");
-            break;
-          case GpsStatus.GPS_EVENT_FIRST_FIX:
-            System.out.println("GPS_EVENT_FIRST_FIX");
-            break;
-          case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-            System.out.println("GPS_EVENT_SATELLITE_STATUS");
-            break;
-          default:
-            System.out.println("Unknown GPS event");
-            break;
-        }
-    }
-
+    /**
+    Creates an options menu.
+    
+    Pending to check when device has old-style hardware menu buttons and enable
+    that part of code only on that cases.
+    @return android specific.
+    */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Activate menu for new devices without menu button, on Android
@@ -241,7 +68,8 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
         fillPopupWithItems(popup);
 
         // Activate menu for old-fashioned devices with menu button, on Android
-        // versions previous to 4.0
+        // versions previous to 4.0 (this code should not be executed on newer
+        // devices, as it appears repeated).
         fillPopupWithItems(menu);
         menu.getItem(1).setEnabled(true);
         menu.getItem(1).setShowAsAction(
@@ -297,109 +125,7 @@ implements LocationListener, GpsStatus.Listener /*, OnClickListener*/ {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        RendererConfiguration q;
-        q = canvas.getGlExecutor().getRendererConfiguration();
-        Scene s = canvas.getGlExecutor().getScene();
-        SimpleBody b;
-
-        canvas.getGlExecutor().resetTimers();
-
-        switch ( item.getItemId() ) {
-          case 0:
-            q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-            break;
-          case 1:
-            q.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-            break;
-          case 2:
-            q.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
-            break;
-          case 3:
-            q.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
-            break;
-          case 4:
-            q.changeTexture();
-            break;
-          case 5:
-            q.changeBumpMap();
-            break;
-          case 6:
-            q.changePoints();
-            break;
-          case 7:
-            q.changeWires();
-            break;
-          case 8:
-            q.changeSurfaces();
-            break;
-          case 9:
-            q.changeBoundingVolume();
-            break;
-          case 10:
-            q.changeSelectionCorners();
-            break;
-          case 11:
-            q.changeNormals();
-            break;
-          case 12:
-            canvas.getGlExecutor().selectObject(1);
-            break;
-          case 13:
-            canvas.getGlExecutor().selectObject(2);
-            break;
-          case 14:
-            canvas.getGlExecutor().selectObject(3);
-            break;
-          case 15:
-            canvas.getGlExecutor().selectObject(4);
-            break;
-          case 16:
-            canvas.getGlExecutor().selectObject(5);
-            break;
-          case 28:
-            canvas.getGlExecutor().selectObject(6);
-            break;
-          case 17:
-            canvas.getGlExecutor().toggleReferenceSquare();
-            break;
-          case 18:
-            canvas.getGlExecutor().toggleObjectRotation();
-            break;
-          case 19:
-            canvas.getGlExecutor().toggleLightRotation();
-            break;
-          case 20:
-            numberOfLights++;
-            canvas.getGlExecutor().prepareLights(numberOfLights);
-            break;
-          case 21:
-            canvas.getGlExecutor().getScene().addRandomSphere();
-            break;
-          case 22:
-            for ( int i = 0; i < 10; i++ ) {
-                canvas.getGlExecutor().getScene().addRandomSphere();
-            }
-            break;
-          case 23:
-            canvas.getGlExecutor().setInteraction(1);
-            break;
-          case 24:
-            canvas.getGlExecutor().setInteraction(2);
-            break;
-          case 25:
-            canvas.getGlExecutor().requestRaytracer();
-            break;
-          case 26:
-            q.setUseVertexColors(!q.getUseVertexColors());
-            break;
-          case 27:
-            canvas.getGlExecutor().toggleHudReport();
-            break;
-          case 29:
-            canvas.getGlExecutor().clearSceneFromObjects();
-            break;
-        }
-        return true;
+        return canvas.getGlExecutor().executeMenuCommand(item.getItemId());
     }
 
 }

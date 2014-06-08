@@ -678,7 +678,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             Set<String> s = timers.keySet();
             for (String e : s) {
                 tr = timers.get(e);
-                y += 40;
+                y += 20;
                 drawText("" + tr, getCamera(), 10, y);
             }
 
@@ -873,6 +873,112 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     */
     public void setInteraction(int interaction) {
         this.interaction = interaction;
+    }
+
+    public boolean executeMenuCommand(int id) {
+        RendererConfiguration q;
+        q = getRendererConfiguration();
+        Scene s = getScene();
+        SimpleBody b;
+
+        resetTimers();
+
+        switch ( id ) {
+          case 0:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            break;
+          case 1:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
+            break;
+          case 2:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_GOURAUD);
+            break;
+          case 3:
+            q.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+            break;
+          case 4:
+            q.changeTexture();
+            break;
+          case 5:
+            q.changeBumpMap();
+            break;
+          case 6:
+            q.changePoints();
+            break;
+          case 7:
+            q.changeWires();
+            break;
+          case 8:
+            q.changeSurfaces();
+            break;
+          case 9:
+            q.changeBoundingVolume();
+            break;
+          case 10:
+            q.changeSelectionCorners();
+            break;
+          case 11:
+            q.changeNormals();
+            break;
+          case 12:
+            selectObject(1);
+            break;
+          case 13:
+            selectObject(2);
+            break;
+          case 14:
+            selectObject(3);
+            break;
+          case 15:
+            selectObject(4);
+            break;
+          case 16:
+            selectObject(5);
+            break;
+          case 28:
+            selectObject(6);
+            break;
+          case 17:
+            toggleReferenceSquare();
+            break;
+          case 18:
+            toggleObjectRotation();
+            break;
+          case 19:
+            toggleLightRotation();
+            break;
+          case 20:
+            prepareLights(scene.scene.getLights().size()+1);
+            break;
+          case 21:
+            getScene().addRandomSphere();
+            break;
+          case 22:
+            for ( int i = 0; i < 10; i++ ) {
+                getScene().addRandomSphere();
+            }
+            break;
+          case 23:
+            setInteraction(1);
+            break;
+          case 24:
+            setInteraction(2);
+            break;
+          case 25:
+            requestRaytracer();
+            break;
+          case 26:
+            q.setUseVertexColors(!q.getUseVertexColors());
+            break;
+          case 27:
+            toggleHudReport();
+            break;
+          case 29:
+            clearSceneFromObjects();
+            break;
+        }
+        return true;
+
     }
 
 }
