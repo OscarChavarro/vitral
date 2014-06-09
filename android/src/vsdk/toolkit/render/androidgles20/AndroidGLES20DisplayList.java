@@ -24,9 +24,15 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     /// Open GL ES 2.0 vertex buffer object ids list.
     private ArrayListOfInts vboIds; 
     
+    /// Open GL ES 2.0 index buffer object ids list.
+    private ArrayListOfInts iboIds; 
+    
     /// Size in vertices
     private ArrayListOfInts vboSizes;
-    
+
+    /// Size in primitives
+    private ArrayListOfInts iboSizes;
+
     /// Primitive to be used on vertex buffered objects
     private ArrayListOfInts vboPrimitives;
     
@@ -41,6 +47,8 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
         vboIds = new ArrayListOfInts(10);
         vboSizes = new ArrayListOfInts(10);
         vboPrimitives = new ArrayListOfInts(10);
+        iboIds = new ArrayListOfInts(10);
+        iboSizes = new ArrayListOfInts(10);
         vertexMode = MODE_3POSITION_3COLOR_3NORMAL_2UV;
         if ( q!= null ) {
             correspondingQuality = q.clone();
@@ -91,7 +99,13 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
         vboPrimitives.add(primitive);
         getVboSizes().add(size);
     }
+    
+    public void addIbos(int ibo, int size) {
+        iboIds.add(ibo);
+        getIboSizes().add(size);
+    }
 
+    
     /**
     @return the vboSizes
     */
@@ -119,7 +133,18 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     public void setVertexMode(int vertexMode) {
         this.vertexMode = vertexMode;
     }
-    
+
+    /**
+    @return the iboIds
+    */
+    public ArrayListOfInts getIndexIds() {
+        return iboIds;
+    }
+
+    public ArrayListOfInts getIboSizes() {
+        return iboSizes;
+    }
+
 }
 
 //===========================================================================

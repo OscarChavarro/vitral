@@ -39,11 +39,6 @@ public class AndroidGLES20Renderer extends RenderingElement
 {
     private static final String TAG = "AndroidGLES20Renderer";
 
-    public static int AndroidGLES20GpuProgramConstant;
-    public static int AndroidGLES20GpuProgramGouraud;
-    public static int AndroidGLES20GpuProgramPhong;
-    public static int AndroidGLES20GpuProgramPhongBump;
-    
     protected static final int MODE_3POSITION = 1;
     protected static final int MODE_3POSITION_3NORMAL_2UV = 2;
     protected static final int MODE_3POSITION_3COLOR = 3;
@@ -55,6 +50,10 @@ public class AndroidGLES20Renderer extends RenderingElement
     private static Object unitSquare = null;
 
     // OpenGL-ES2.0 state
+    public static int AndroidGLES20GpuProgramConstant;
+    public static int AndroidGLES20GpuProgramGouraud;
+    public static int AndroidGLES20GpuProgramPhong;
+    public static int AndroidGLES20GpuProgramPhongBump;
     public static float[] transientMatrix;
     public static float[] originalMatrix;
     public static float[] modelViewMatrix;
@@ -150,7 +149,7 @@ public class AndroidGLES20Renderer extends RenderingElement
 
         setRendererConfiguration(displayList.getCorrespondingQuality());
         
-        // Draw VBOs on display list
+        // Draw elements on display list
         for ( i = 0; i < displayList.getVboIds().size(); i++ ) {
             Material m = displayList.getVboMaterials().get(i);
             
@@ -160,30 +159,61 @@ public class AndroidGLES20Renderer extends RenderingElement
 
             //-----------------------------------------------------------------
             // Activate VBO
-            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, displayList.getVboIds().get(i));
+            GLES20.glBindBuffer(
+                GLES20.GL_ARRAY_BUFFER, displayList.getVboIds().get(i));
             checkGlError("glBindBuffer(" + displayList.getVboIds().get(i) + ")");
             
-            // Display VBO 
-            switch ( displayList.getVertexMode() ) {
-              case MODE_3POSITION:
-                drawVertices3Position(
+            if ( displayList.getIndexIds().size() == 0 ) {
+                // Display VBO
+                switch ( displayList.getVertexMode() ) {
+                  case MODE_3POSITION:
+                    drawVertices3Position(
+                        displayList.getVboPrimitives().get(i),
+                        displayList.getVboSizes().get(i));
+                    break;
+                  case MODE_3POSITION_3COLOR_3NORMAL_2UV:
+                  default:
+                    drawVertices3Position3Color3Normal2Uv(
+                        displayList.getVboPrimitives().get(i),
+                        displayList.getVboSizes().get(i));
+                    break;
+                }
+            }
+
+            // Display indexed primitives
+            if ( displayList.getIndexIds().size() != 0 ) {
+                // Bind Attributes
+                switch ( displayList.getVertexMode() ) {
+                  case MODE_3POSITION:
+                    activateVertices3Position();
+                    break;
+                  case MODE_3POSITION_3COLOR_3NORMAL_2UV:
+                  default:
+                    activateVertices3Position3Color3Normal2Uv();
+                    break;
+                }
+
+                // Draw
+                int ibo = displayList.getIndexIds().get(i);
+                GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo);
+                GLES20.glDrawElements(
                     displayList.getVboPrimitives().get(i), 
-                    displayList.getVboSizes().get(i));
-                break;
-              case MODE_3POSITION_3COLOR_3NORMAL_2UV: default:
-                drawVertices3Position3Color3Normal2Uv(
-                    displayList.getVboPrimitives().get(i), 
-                    displayList.getVboSizes().get(i));
-                break;
+                    displayList.getIboSizes().get(i), 
+                    GLES20.GL_UNSIGNED_SHORT, 0);
+                checkGlError("glDrawElements()");
             }
 
             // Disable current VBO
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-            checkGlError("glBindBuffer(0)");
-        }
+            checkGlError("glBindBuffer(0) for vertices");
+ 
+            // Disable current IBO
+            if ( displayList.getIndexIds().size() != 0 ) {
+                GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+                checkGlError("glBindBuffer(0) for indices");
+            }
 
-        // Draw IndexedBufferedObjects on display list
-        // (Pending to program)
+        }
     }
 
     /**
@@ -203,16 +233,8 @@ public class AndroidGLES20Renderer extends RenderingElement
                 GLES20.GL_REPEAT);
     }
     
-    /**
-    Draws vertices from a VBO previously loaded at GPU, from vertex array
-    currently binded (activated with glBindBuffer).
-    @param primitive
-    @param numberOfElements
-    */
-    protected static void drawVertices3Position3Color3Normal2Uv(
-        int primitive, int numberOfElements) {
-        //-----------------------------------------------------------------
-        // Configure shaders parameters to process data on VBO
+    protected static void activateVertices3Position3Color3Normal2Uv()
+    {
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 11;
         
         // glVertex3d
@@ -250,7 +272,20 @@ public class AndroidGLES20Renderer extends RenderingElement
             GLES20.glEnableVertexAttribArray(uvVertexTextureCoordinateParam);
             checkGlError(
                     "glEnableVertexAttribArray uvVertexTextureCoordinateParam");
-        }
+        }        
+    }
+    
+    /**
+    Draws vertices from a VBO previously loaded at GPU, from vertex array
+    currently binded (activated with glBindBuffer).
+    @param primitive
+    @param numberOfElements
+    */
+    protected static void drawVertices3Position3Color3Normal2Uv(
+        int primitive, int numberOfElements) {
+        //-----------------------------------------------------------------
+        // Configure shaders parameters to process data on VBO
+        activateVertices3Position3Color3Normal2Uv();
         
         //-----------------------------------------------------------------
         // Draw geometry from VBO preloaded at GPU
@@ -307,7 +342,7 @@ public class AndroidGLES20Renderer extends RenderingElement
             //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
             }
             errorsDetected = true;
-            Log.e(TAG, op + ": glError " + error + " : " + name);
+            Log.e(TAG, op + ": glError " + error + " : " + name + " Thread: " + Thread.currentThread().getName());
             throw new RuntimeException(op + ": glError " + error);
         }
     }
@@ -877,6 +912,18 @@ public class AndroidGLES20Renderer extends RenderingElement
         }
     }
 
+    protected static void activateVertices3Position()
+    {
+        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 3;
+
+        // glVertex3d
+        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
+                             false, vertexSizeInBytes, 0);
+        checkGlError("glVertexAttribPointer PObject");
+        GLES20.glEnableVertexAttribArray(PObjectParam);
+        checkGlError("glEnableVertexAttribArray PObjectParam");
+    }
+    
     /**
     Draws vertices from a VBO previously loaded at GPU, from vertex array
     currently binded (activated with glBindBuffer).
@@ -886,17 +933,10 @@ public class AndroidGLES20Renderer extends RenderingElement
     protected static void drawVertices3Position(
         int primitive, int numberOfElements)
     {
-        int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * 3;
-        
         //-----------------------------------------------------------------
         // Send geometry to GPU
-        // glVertex3d
-        GLES20.glVertexAttribPointer(PObjectParam, 3, GLES20.GL_FLOAT, 
-                             false, vertexSizeInBytes, 0);
-        checkGlError("glVertexAttribPointer PObject");
-        GLES20.glEnableVertexAttribArray(PObjectParam);
-        checkGlError("glEnableVertexAttribArray PObjectParam");
-
+        activateVertices3Position();
+        
         //-----------------------------------------------------------------
         // Draw geometry from VBO preloaded at GPU
         GLES20.glDrawArrays(primitive, 0, numberOfElements);
