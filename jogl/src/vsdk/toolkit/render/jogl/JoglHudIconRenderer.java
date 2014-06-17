@@ -96,54 +96,6 @@ public class JoglHudIconRenderer extends JoglRenderer {
 
     }
 
-    public static void draw(GL2 gl, HudIcon icon, Camera camera, int index) {
-        try {
-            switch (index) {
-                case 1:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero02.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 2:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero03.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 3:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero04.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 4:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero05.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 5:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero06.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 6:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero07.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 7:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero08.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 8:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero09.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 9:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 10:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 11:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero11.png")), camera, icon.getX(), icon.getY());
-                    break;
-                case 12:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero13.png")), camera, icon.getX(), icon.getY());
-                    break;
-                default:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("C:/Users/Negro/Desktop/etc/billboards/Numero01.png")), camera, icon.getX(), icon.getY());
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 }
 
 //===========================================================================
