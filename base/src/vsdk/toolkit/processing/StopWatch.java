@@ -37,6 +37,9 @@ public class StopWatch extends ProcessingElement
 
     public double getElapsedRealTime()
     {
+        if ( running ) {
+            t1 = System.nanoTime();
+        }
         double a, b;
         a = (double)t0;
         b = (double)t1;
