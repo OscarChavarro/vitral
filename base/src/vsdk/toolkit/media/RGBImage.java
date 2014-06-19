@@ -436,8 +436,8 @@ public class RGBImage extends Image
         try {
             int x, y;
 
-            PersistenceElement.writeIntBE(out, xSize);
-            PersistenceElement.writeIntBE(out, ySize);
+            PersistenceElement.writeSignedShortBE(out, xSize);
+            PersistenceElement.writeSignedShortBE(out, ySize);
             byte arr[] = new byte[3];
 
             data.rewind();
@@ -459,8 +459,8 @@ public class RGBImage extends Image
     {
         int x, y;
 
-        xSize = PersistenceElement.readIntBE(in);
-        ySize = PersistenceElement.readIntBE(in);
+        xSize = PersistenceElement.readSignedShortBE(in);
+        ySize = PersistenceElement.readSignedShortBE(in);
 
         initNoFill(xSize, ySize);
         data.rewind();

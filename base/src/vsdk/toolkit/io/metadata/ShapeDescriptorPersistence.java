@@ -66,7 +66,7 @@ public class ShapeDescriptorPersistence extends PersistenceElement
                     break;
                   case TYPE_FOURIER_DESCRIPTOR:
                     label = readAsciiString(reader);
-                    bytesToSkip = readIntBE(reader);
+                    bytesToSkip = readSignedShortBE(reader);
                     vector = new double[bytesToSkip/4];
                     for ( i = 0; i < vector.length; i++ ) {
                         vector[i] = readFloatBE(reader);
@@ -78,7 +78,7 @@ public class ShapeDescriptorPersistence extends PersistenceElement
                     break;
                   case TYPE_PRIMITIVECOUNT_DESCRIPTOR:
                     label = readAsciiString(reader);
-                    bytesToSkip = readIntBE(reader);
+                    bytesToSkip = readSignedShortBE(reader);
                     vector = new double[bytesToSkip/4];
                     for ( i = 0; i < vector.length; i++ ) {
                         vector[i] = readFloatBE(reader);
@@ -89,7 +89,7 @@ public class ShapeDescriptorPersistence extends PersistenceElement
                     reader.skip(bytesToSkip - vector.length*4);
                     break;
                   default:
-                    bytesToSkip = readIntBE(reader);
+                    bytesToSkip = readSignedShortBE(reader);
                     System.out.println("Skipping bytes: " + bytesToSkip);
                     reader.skip(bytesToSkip);
                     break;
@@ -157,7 +157,7 @@ public class ShapeDescriptorPersistence extends PersistenceElement
 
             //-----------------------------------------------------------------
             featureVector = s.getFeatureVector();
-            writeIntBE(writer, featureVector.length*4); // Bytes to skip
+            writeSignedShortBE(writer, featureVector.length*4); // Bytes to skip
             for ( j = 0; j < featureVector.length; j++ ) {
                 writeFloatBE(writer, (float)featureVector[j]);
             }

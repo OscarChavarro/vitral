@@ -107,7 +107,7 @@ public class ImagePersistenceSGI extends PersistenceElement
             is = new FileInputStream(fd.getFD());
 
             //- Process SGI file header ----------------------------------
-            irisImageFileMagicNumber = readIntBE(is);
+            irisImageFileMagicNumber = readSignedShortBE(is);
             if ( irisImageFileMagicNumber != 474 ) {
                 throw new Exception("Not an SGI image, " +
                     "wrong magic number: " + irisImageFileMagicNumber);
@@ -116,10 +116,10 @@ public class ImagePersistenceSGI extends PersistenceElement
             storageFormat = VSDK.signedByte2unsignedInteger(character[0]);
             readBytes(is, character);
             bytesPerPixelChannel = VSDK.signedByte2unsignedInteger(character[0]);
-            numberOfDimensions = readIntBE(is);
-            xSize = readIntBE(is);
-            ySize = readIntBE(is);
-            numberOfChannels = readIntBE(is);
+            numberOfDimensions = readSignedShortBE(is);
+            xSize = readSignedShortBE(is);
+            ySize = readSignedShortBE(is);
+            numberOfChannels = readSignedShortBE(is);
             minimumPixelValue = readLongBE(is);
             maximumPixelValue = readLongBE(is);
             dummy1 = readLongBE(is);

@@ -638,8 +638,8 @@ public class ImagePersistence extends PersistenceElement
             writeLongLE(writer, 40);
             writeLongLE(writer, img.getXSize());
             writeLongLE(writer, img.getYSize());
-            writeIntLE(writer, 1);
-            writeIntLE(writer, 24);
+            writeSignedShortLE(writer, 1);
+            writeSignedShortLE(writer, 24);
             writeLongLE(writer, 0);
             writeLongLE(writer, 16);
             writeLongLE(writer, 2835);

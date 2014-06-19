@@ -363,7 +363,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         for ( i = 0; i < ntextures; i++ ) {
             for ( j = 0; j < 15; j++ ) {
                 if ( j== 0 && i == 0 ) {
-                    a = byteArray2intLE(arr4, 0);
+                    a = byteArray2signedShortLE(arr4, 0);
                 }
                 else {
                     a = readLongLE(is);
@@ -386,19 +386,19 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         t = mesh.getTriangleIndexes();
 
         readChunkStart(is, arr4);
-        t[0] = byteArray2intLE(arr4, 0);
-        t[1] = byteArray2intLE(arr4, 2);
+        t[0] = byteArray2signedShortLE(arr4, 0);
+        t[1] = byteArray2signedShortLE(arr4, 2);
 
         for ( i = 0; i < nt; i++ ) {
             if ( i != 0 ) {
-                t[3*i+0] = readIntLE(is);
-                t[3*i+1] = readIntLE(is);
+                t[3*i+0] = readSignedShortLE(is);
+                t[3*i+1] = readSignedShortLE(is);
             }
-            t[3*i+2] = readIntLE(is);
+            t[3*i+2] = readSignedShortLE(is);
         }
 
         if ( (nt % 2) != 0 ) {
-            readIntLE(is);
+            readSignedShortLE(is);
         }
 
         //-----------------------------------------------------------------

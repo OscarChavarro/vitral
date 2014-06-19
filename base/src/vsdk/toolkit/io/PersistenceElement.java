@@ -1,16 +1,13 @@
 //===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 8 2006 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.io;
 
+// Java basic classes
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.StringTokenizer;
 
+// VSDK Classes
 import vsdk.toolkit.common.VSDK;
 
 /**
@@ -22,71 +19,42 @@ The PersistenceElement abstract class provides an interface for *Persistence
 style classes. This serves three purposes:
   - To help in design level organization of persistence classes (this eases the
     study of the class hierarchy)
-  - To provide a place to locate possible future operations, common to
-    all persistence classes and persistence private utility/supporting
-    classes.  In particular, this class contains basic low level
-    persistence operations for converting bit streams from and to basic
-    numeric data types. Note that this code is NOT portable, as it needs
-    explicit programmer configuration for little-endian or big-endian
-    hardware platform.
+  - To provide a place to locate operations common to all persistence classes 
+    and persistence private utility/supporting classes.  In particular, this 
+    class contains basic low level persistence operations for converting bit 
+    streams from and to basic numeric data types. Note that this code is NOT 
+    portable, as it needs explicit programmer configuration for little-endian 
+    or big-endian hardware platform (programmer should take care about how
+    to configure attribute bigEndianArchitecture).
   - To provide means of accessing some operating system's native library
     files and other basic file system management.
-*/
 
+Note that there are several methods used to handle byte arrays and change 
+between little endian and bit endian orders. When the copies are done on
+the same order (from little endian to little endian or from big endian to
+big endian) the "Direct" versions are used. When copies are done on the
+reverse order (from little endian to big endian or from big endian to
+little endian) the "Invert" versions are used.
+*/
 public abstract class PersistenceElement {
 
     private static final boolean bigEndianArchitecture = false;
 
-    private static final byte[] byteBufferLone = new byte[1];
-    private static final byte[] bytesForInt = new byte[2];
+    private static final byte[] byteBuffer1byte = new byte[1];
+    private static final byte[] byteBuffer2byte = new byte[2];
+    private static final byte[] byteBuffer4byte = new byte[4];
+    private static final byte[] byteBuffer8byte = new byte[8];
+    
+    // Long int should use an 8-sized array, not a 4-sized. Check.
     private static final byte[] bytesForLong = new byte[4];
-    private static final byte[] bytesForFloat = new byte[4];
-    private static final byte[] bytesForDouble = new byte[8];
-
-    public static boolean
-    checkDirectory(String dirName)
-    {
-        File dirFd = new File(dirName);
-
-        if ( dirFd.exists() && (!dirFd.isDirectory() ) ) {
-            System.err.println("Directory " + dirName + " can not be created, because a file with that name already exists (not overwriten).");
-            return false;
-        }
-
-        if ( !dirFd.exists() && !dirFd.mkdir() ) {
-            System.err.println("Directory " + dirName + " can not be created, check permisions and available free disk space.");
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-    Given a filename, this method extract its extension and return it.
-    \todo : This method will fail when directory path or filename contains
-    more than one dot.  Needs to be fixed.
-    @param fd
-    @return file extension
-    */
-    protected static String extractExtensionFromFile(File fd)
-    {
-        String filename = fd.getName();
-        StringTokenizer st = new StringTokenizer(filename, ".");
-        int numTokens = st.countTokens();
-        for( int i = 0; i < numTokens - 1; i++ ) {
-            st.nextToken();
-        }
-        String ext = st.nextToken();
-        return ext;
-    }
 
     public static int
     readByteInt(InputStream is) throws Exception
     {
         int a;
 
-        is.read(byteBufferLone, 0, 1);
-        a = (int)byteBufferLone[0];
+        is.read(byteBuffer1byte, 0, 1);
+        a = (int)byteBuffer1byte[0];
 
         return a;
     }
@@ -96,8 +64,8 @@ public abstract class PersistenceElement {
     {
         int a;
 
-        is.read(byteBufferLone, 0, 1);
-        a = VSDK.signedByte2unsignedInteger(byteBufferLone[0]);
+        is.read(byteBuffer1byte, 0, 1);
+        a = VSDK.signedByte2unsignedInteger(byteBuffer1byte[0]);
 
         return a;
     }
@@ -137,76 +105,82 @@ public abstract class PersistenceElement {
         os.write(bytesBuffer, 0, bytesBuffer.length);
     }
 
-    private static void int2byteArrayDirect(byte[] arr, int start, int num)
+    /**
+    Receives an signed 16 bits integer (C++ short) and exports its data to a 
+    signed 8 bit byte array in direct endianess order.
+    @param outArrayToBeExported     byte array to be exported
+    @param inStartIndexInsideArray  index inside byte array to export data from
+    @param inNumberToConvert        signed 16 bits integer
+    
+    Pending to check: verify if inNumberToConvert parameter could be used
+    of short type.
+    */
+    private static void signedShort2byteArrayDirect(
+        byte outArrayToBeExported[], 
+        final int inStartIndexInsideArray, 
+        final int inNumberToConvert)
     {
         int i;
-        int len = 2;
-        byte[] tmp = new byte[len];
+        int length = 2;
 
         // Convert number to array
-        for ( i = 0; i < len; i++ ) {
-            tmp[i] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+        for ( i = 0; i < length; i++ ) {
+            byteBuffer2byte[i] = 
+                (byte)((inNumberToConvert & (0xFF << 8*i)) >> 8*i);
         }
 
         // Export subarray to end array
         int cnt;
-        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
-            arr[i] = tmp[cnt];
+        for ( i = inStartIndexInsideArray, cnt = 0; 
+              i < (inStartIndexInsideArray + length); 
+              i++, cnt++ ) {
+            outArrayToBeExported[i] = byteBuffer2byte[cnt];
         }
     }
 
-    private static void int2byteArrayInvert(byte[] arr, int start, int num)
+    /**
+    Receives an signed 16 bits integer (C++ short) and exports its data to a 
+    signed 8 bit byte array in reverse endianess order.
+    @param outArrayToBeExported     byte array to be exported
+    @param inStartIndexInsideArray  index inside byte array to export data from
+    @param inNumberToConvert        signed 16 bits integer
+    
+    Pending to check: verify if inNumberToConvert parameter could be used
+    of short type.
+    */
+    private static void signedShort2byteArrayInvert(
+        byte outArrayToBeExported[], 
+        int inStartIndexInsideArray, 
+        int inNumberToConvert)
     {
         int i;
-        int len = 2;
-        byte[] tmp = new byte[len];
+        int lenght = 2;
 
         // Convert number to array
-        for ( i = 0; i < len; i++ ) {
-            tmp[len-i-1] = (byte)((num & (0xFF << 8*i)) >> 8*i);
+        for ( i = 0; i < lenght; i++ ) {
+            byteBuffer2byte[lenght-i-1] = 
+                (byte)((inNumberToConvert & (0xFF << 8*i)) >> 8*i);
         }
 
         // Export subarray to end array
         int cnt;
-        for ( i = start, cnt = 0; i < (start + len); i++, cnt++ ) {
-            arr[i] = tmp[cnt];
+        for ( i = inStartIndexInsideArray, cnt = 0; 
+            i < (inStartIndexInsideArray + lenght); 
+            i++, cnt++ ) {
+            outArrayToBeExported[i] = byteBuffer2byte[cnt];
         }
     }
 
-    private static int byteArray2intDirect(byte[] arr, int start) {
+    private static int byteArray2signedShortDirect(byte[] arr, int start) {
         int low = arr[start] & 0xff;
         int high = arr[start+1] & 0xff;
         return ( high << 8 | low );
     }
 
-    private static int byteArray2intInvert(byte[] arr, int start) {
+    private static int byteArray2signedShortInvert(byte[] arr, int start) {
         int low = arr[start] & 0xff;
         int high = arr[start+1] & 0xff;
         return ( low << 8 | high );
-    }
-
-    private static int byteArray2signedIntDirect(byte[] arr, int start) {
-        int low = arr[start] & 0xff;
-        int high = arr[start+1] & 0xff;
-        System.out.println("NOT IMPLEMENTED YET!");
-        System.exit(1);
-        return ( high << 8 | low );
-    }
-
-    private static int byteArray2signedIntInvert(byte[] arr, int start) {
-        int hw = VSDK.signedByte2unsignedInteger(arr[start]);
-        int lw = VSDK.signedByte2unsignedInteger(arr[start+1]);
-        int result;
-
-        if ( ((hw >> 7) & 0x01) == 0 ) {
-           result = ( hw << 8 | lw );
-        }
-        else {
-           // signed 16 bit 2-complement representation
-           hw &= (hw & 0x7F);
-           result = -(32768 - ( (hw << 8) + lw ));
-        }
-        return result;
     }
 
     private static long byteArray2longDirect(byte[] arr, int start) {
@@ -227,8 +201,11 @@ public abstract class PersistenceElement {
         return accum;
     }
 
-    private static void long2byteArrayDirect(
-        byte[] arr, int start, long num) {
+    private static void signedInt2byteArrayDirect(
+        byte arr[],
+        int start, 
+        long num) {
+        
         int i;
         int len = 4;
         byte[] tmp = new byte[len];
@@ -245,7 +222,7 @@ public abstract class PersistenceElement {
         }
     }
 
-    private static void long2byteArrayInvert(
+    private static void signedInt2byteArrayInvert(
         byte[] arr, int start, long num) {
         int i;
         int len = 4;
@@ -360,32 +337,25 @@ public abstract class PersistenceElement {
     @param start
     @return integer representation for given bit stream on big endian order
     */
-    public static int byteArray2intBE(byte[] arr, int start) {
+    public static int byteArray2signedShortBE(byte arr[], int start) {
         if ( bigEndianArchitecture ) {
-            return byteArray2intDirect(arr, start);
+            return byteArray2signedShortDirect(arr, start);
         }
-        return byteArray2intInvert(arr, start);
+        return byteArray2signedShortInvert(arr, start);
     }
 
-    public static int byteArray2signedIntBE(byte[] arr, int start) {
+    public static void signedShort2byteArrayBE(byte[] arr, int start, int num) {
         if ( bigEndianArchitecture ) {
-            return byteArray2signedIntDirect(arr, start);
+            signedShort2byteArrayDirect(arr, start, num);
         }
-        return byteArray2signedIntInvert(arr, start);
+        signedShort2byteArrayInvert(arr, start, num);
     }
 
-    public static void int2byteArrayBE(byte[] arr, int start, int num) {
+    public static void signedShort2byteArrayLE(byte[] arr, int start, int num) {
         if ( bigEndianArchitecture ) {
-            int2byteArrayDirect(arr, start, num);
+            signedShort2byteArrayInvert(arr, start, num);
         }
-        int2byteArrayInvert(arr, start, num);
-    }
-
-    public static void int2byteArrayLE(byte[] arr, int start, int num) {
-        if ( bigEndianArchitecture ) {
-            int2byteArrayInvert(arr, start, num);
-        }
-        int2byteArrayDirect(arr, start, num);
+        signedShort2byteArrayDirect(arr, start, num);
     }
 
     /**
@@ -395,11 +365,11 @@ public abstract class PersistenceElement {
     @param start
     @return integer representation for given bit stream on little endian order
     */
-    public static int byteArray2intLE(byte[] arr, int start) {
+    public static int byteArray2signedShortLE(byte[] arr, int start) {
         if ( bigEndianArchitecture ) {
-            return byteArray2intInvert(arr, start);
+            return byteArray2signedShortInvert(arr, start);
         }
-        return byteArray2intDirect(arr, start);
+        return byteArray2signedShortDirect(arr, start);
     }
 
 
@@ -437,7 +407,7 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return single precission float number representation for given bit stream
+    @return single precision float number representation for given bit stream
     on big endian order
     */
     public static float byteArray2floatBE(byte[] arr, int start) {
@@ -450,17 +420,17 @@ public abstract class PersistenceElement {
     public static void float2byteArrayBE(byte[] arr, int start, float num) {
         long a = Float.floatToIntBits(num);
         if ( bigEndianArchitecture ) {
-            long2byteArrayDirect(arr, start, a);
+            signedInt2byteArrayDirect(arr, start, a);
         }
-        long2byteArrayInvert(arr, start, a);
+        signedInt2byteArrayInvert(arr, start, a);
     }
 
     public static void float2byteArrayLE(byte[] arr, int start, float num) {
         long a = Float.floatToIntBits(num);
         if ( bigEndianArchitecture ) {
-            long2byteArrayInvert(arr, start, a);
+            signedInt2byteArrayInvert(arr, start, a);
         }
-        long2byteArrayDirect(arr, start, a);
+        signedInt2byteArrayDirect(arr, start, a);
     }
 
     /**
@@ -468,7 +438,7 @@ public abstract class PersistenceElement {
     original data
     @param arr
     @param start
-    @return single precission float representation for given bit stream on 
+    @return single precision float representation for given bit stream on 
     little endian order
     */
     public static float byteArray2floatLE(byte[] arr, int start) {
@@ -499,50 +469,55 @@ public abstract class PersistenceElement {
     @return double precission float representation for given bit stream on 
     bit endian order
     */
-    public static double byteArray2doubleBE(byte[] arr, int start) {
+    public static double byteArray2doubleBE(byte arr[], int start) {
         if ( bigEndianArchitecture ) {
             return byteArray2doubleDirect(arr, start);
         }
         return byteArray2doubleInvert(arr, start);
     }
 
-    public static int readIntLE(InputStream is) throws Exception
+    public static int readSignedShortLE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForInt);
-        return byteArray2intLE(bytesForInt, 0);
+        readBytes(is, byteBuffer2byte);
+        return byteArray2signedShortLE(byteBuffer2byte, 0);
     }
 
-    public static int readIntBE(InputStream is) throws Exception
+    public static int readSignedShortBE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForInt);
-        return byteArray2intBE(bytesForInt, 0);
+        readBytes(is, byteBuffer2byte);
+        return byteArray2signedShortBE(byteBuffer2byte, 0);
     }
 
-
-    public static int readSignedIntBE(InputStream is) throws Exception
+    public static void writeSignedShortBE(OutputStream os, int num) throws Exception
     {
-        readBytes(is, bytesForInt);
-        return byteArray2signedIntBE(bytesForInt, 0);
+        signedShort2byteArrayBE(byteBuffer2byte, 0, num);
+        writeBytes(os, byteBuffer2byte);
     }
 
-    public static void writeIntBE(OutputStream os, int num) throws Exception
+    public static void writeSignedShortLE(OutputStream os, int num) throws Exception
     {
-        int2byteArrayBE(bytesForInt, 0, num);
-        writeBytes(os, bytesForInt);
+        signedShort2byteArrayLE(byteBuffer2byte, 0, num);
+        writeBytes(os, byteBuffer2byte);
     }
 
-    public static void writeIntLE(OutputStream os, int num) throws Exception
-    {
-        int2byteArrayLE(bytesForInt, 0, num);
-        writeBytes(os, bytesForInt);
-    }
-
+    /**
+    Pending to check. Is this really managing 64 bit long integers?
+    @param is
+    @return 
+    @throws java.lang.Exception
+    */
     public static long readLongLE(InputStream is) throws Exception
     {
         readBytes(is, bytesForLong);
         return byteArray2longLE(bytesForLong, 0);
     }
 
+    /**
+    Pending to check. Is this really managing 64 bit long integers?
+    @param is
+    @return 
+    @throws java.lang.Exception
+    */
     public static long readLongBE(InputStream is) throws Exception
     {
         readBytes(is, bytesForLong);
@@ -551,26 +526,26 @@ public abstract class PersistenceElement {
     
     public static float readFloatLE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForFloat);
-        return byteArray2floatLE(bytesForFloat, 0);
+        readBytes(is, byteBuffer4byte);
+        return byteArray2floatLE(byteBuffer4byte, 0);
     }
 
     public static double readDoubleLE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForDouble);
-        return byteArray2doubleLE(bytesForDouble, 0);
+        readBytes(is, byteBuffer8byte);
+        return byteArray2doubleLE(byteBuffer8byte, 0);
     }
 
     public static double readDoubleBE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForDouble);
-        return byteArray2doubleBE(bytesForDouble, 0);
+        readBytes(is, byteBuffer8byte);
+        return byteArray2doubleBE(byteBuffer8byte, 0);
     }
 
     public static float readFloatBE(InputStream is) throws Exception
     {
-        readBytes(is, bytesForFloat);
-        long i = byteArray2longBE(bytesForFloat, 0);
+        readBytes(is, byteBuffer4byte);
+        long i = byteArray2longBE(byteBuffer4byte, 0);
         int j = (int)i;
         return Float.intBitsToFloat(j);
     }
@@ -578,24 +553,24 @@ public abstract class PersistenceElement {
     public static void writeFloatBE(OutputStream os, float num)
         throws Exception
     {
-        float2byteArrayBE(bytesForFloat, 0, num);
-        writeBytes(os, bytesForFloat);
+        float2byteArrayBE(byteBuffer4byte, 0, num);
+        writeBytes(os, byteBuffer4byte);
     }
 
     public static void writeFloatLE(OutputStream os, float num)
         throws Exception
     {
-        float2byteArrayLE(bytesForFloat, 0, num);
-        writeBytes(os, bytesForFloat);
+        float2byteArrayLE(byteBuffer4byte, 0, num);
+        writeBytes(os, byteBuffer4byte);
     }
 
     public static void writeLongBE(OutputStream os, long num)
         throws Exception
     {
         if ( bigEndianArchitecture ) {
-            long2byteArrayDirect(bytesForLong, 0, num);
+            signedInt2byteArrayDirect(bytesForLong, 0, num);
         }
-        long2byteArrayInvert(bytesForLong, 0, num);
+        signedInt2byteArrayInvert(bytesForLong, 0, num);
         writeBytes(os, bytesForLong);
     }
 
@@ -603,9 +578,9 @@ public abstract class PersistenceElement {
         throws Exception
     {
         if ( bigEndianArchitecture ) {
-            long2byteArrayInvert(bytesForLong, 0, num);
+            signedInt2byteArrayInvert(bytesForLong, 0, num);
         }
-        long2byteArrayDirect(bytesForLong, 0, num);
+        signedInt2byteArrayDirect(bytesForLong, 0, num);
         writeBytes(os, bytesForLong);
     }
 
@@ -840,9 +815,9 @@ public abstract class PersistenceElement {
 
     /**
     Given the name of a native library, this method tries to determine
-    wheter it is available or not.  Takes into account the cross-platform
+    whether it is available or not.  Takes into account the cross-platform
     differences, and it is supposed to check if a System.loadLibrary
-    call for givel library will succeed or not.
+    call for given library will succeed or not.
 
     Use this method to anticipate any problem before it fails, so a better
     user feedback instruction can be given instead of waiting for an exception
@@ -890,6 +865,44 @@ public abstract class PersistenceElement {
         }
         return false;
     }
+
+    public static boolean
+    checkDirectory(String dirName)
+    {
+        File dirFd = new File(dirName);
+
+        if ( dirFd.exists() && (!dirFd.isDirectory() ) ) {
+            System.err.println("Directory " + dirName + " can not be created, because a file with that name already exists (not overwriten).");
+            return false;
+        }
+
+        if ( !dirFd.exists() && !dirFd.mkdir() ) {
+            System.err.println("Directory " + dirName + " can not be created, check permisions and available free disk space.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+    Given a filename, this method extract its extension and return it.
+    \todo : This method will fail when directory path or filename contains
+    more than one dot.  Needs to be fixed.
+    @param fd
+    @return file extension
+    */
+    protected static String extractExtensionFromFile(File fd)
+    {
+        String filename = fd.getName();
+        StringTokenizer st = new StringTokenizer(filename, ".");
+        int numTokens = st.countTokens();
+        for( int i = 0; i < numTokens - 1; i++ ) {
+            st.nextToken();
+        }
+        String ext = st.nextToken();
+        return ext;
+    }
+
 }
 
 //===========================================================================

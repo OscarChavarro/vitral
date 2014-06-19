@@ -708,7 +708,7 @@ class _Reader3dsChunk extends PersistenceElement
 
     public void readHeader(InputStream is) throws Exception
     {
-        id = readIntLE(is);
+        id = readSignedShortLE(is);
         length = readLongLE(is);
     }
 }
@@ -1257,7 +1257,7 @@ public class Reader3ds extends PersistenceElement
         else if ( currentChunk.id == _Reader3dsChunk.ID_VERTEX_LIST ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
-            int numVertexes = readIntLE(is);
+            int numVertexes = readSignedShortLE(is);
             //System.out.println(indent(level+1) + "  . Reading " + numVertexes +
             //                 " vertexes");
 
@@ -1279,7 +1279,7 @@ public class Reader3ds extends PersistenceElement
             //System.out.println(indent(level) + currentChunk);
 
             //----
-            int numTriangles = readIntLE(is);
+            int numTriangles = readSignedShortLE(is);
             //System.out.println(indent(level+1) + "  . Reading " + numTriangles +
             //                 " triangles");
 
@@ -1287,10 +1287,10 @@ public class Reader3ds extends PersistenceElement
 
             currentTrianglesList = new Triangle[numTriangles];
             for ( i = 0; i < numTriangles; i++ ) {
-                a = readIntLE(is);
-                b = readIntLE(is);
-                c = readIntLE(is);
-                flags = readIntLE(is) & 0x07;
+                a = readSignedShortLE(is);
+                b = readSignedShortLE(is);
+                c = readSignedShortLE(is);
+                flags = readSignedShortLE(is) & 0x07;
                 /* Warning: dont know how to process this! */
                 if ( (flags & 0x07) == 0x00 ||
                      (flags & 0x07) == 0x01 ||
@@ -1356,7 +1356,7 @@ public class Reader3ds extends PersistenceElement
         else if ( currentChunk.id == _Reader3dsChunk.ID_AMOUNT ) {
             //-------------------------------------------------------------
             //System.out.println(indent(level) + currentChunk);
-            currentAmount = readIntLE(is);
+            currentAmount = readSignedShortLE(is);
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPFILENAME ) {
             //-------------------------------------------------------------
@@ -1512,19 +1512,19 @@ public class Reader3ds extends PersistenceElement
             //System.out.println(indent(level) + currentChunk);
             _Reader3dsMaterialMapping range = new _Reader3dsMaterialMapping();
             range.materialName = readAsciiString(is);
-            int numMappings = readIntLE(is);
+            int numMappings = readSignedShortLE(is);
             range.associatedTriangles = new int[numMappings];
             //System.out.println(indent(level+1) + "  . Reading " +
             //             numMappings + " material mappings for material \"" +
             //             range.materialName + "\"");
             for ( i = 0; i < numMappings; i++ ) {
-                range.associatedTriangles[i] = readIntLE(is);
+                range.associatedTriangles[i] = readSignedShortLE(is);
             }
             currentMaterialMappingArray.add(range);
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MAP_LIST ) {
             //-------------------------------------------------------------
-            int numVerticesUVMaps = readIntLE(is);
+            int numVerticesUVMaps = readSignedShortLE(is);
             currentUTextureMapping = new double[numVerticesUVMaps];
             currentVTextureMapping = new double[numVerticesUVMaps];
             for ( i = 0; i < currentVTextureMapping.length; i++ ) {
@@ -1581,7 +1581,7 @@ public class Reader3ds extends PersistenceElement
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPOPTIONS ) {
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
-            int dummyOptions = readIntLE(is);
+            int dummyOptions = readSignedShortLE(is);
             //System.out.println("Options: " + dummyOptions);
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPFILTERBLUR ) {
