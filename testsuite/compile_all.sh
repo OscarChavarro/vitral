@@ -53,6 +53,9 @@ cd ..
 cd MeshExample
 ./compile.sh
 cd ..
+cd MD2Example
+./compile.sh
+cd ..
 cd PolyhedralBoundedSolidExample
 ./compile.sh
 cd ..

@@ -113,11 +113,10 @@ public class Md2MeshExample
         md2Mesh = new Md2Mesh();
 
         //-----------------------------------------------------------------
-        //fileName = "C:\\Politecnica\\ModelosEdificios\\Biblioteca I. E. Municipio de San Agustín\\Biblioteca Laureano Gomez-San Agustín\\lorenzoGomesFinal_sinPiso.obj";
-//        fileName = "C:\\Politecnica\\etc\\geometry\\Blade.md2";
-//        texture = "C:\\Politecnica\\etc\\geometry\\Texture\\Blade.jpg";
-        fileName = "C:\\Politecnica\\etc\\geometry\\Samourai.md2";
-        texture = "C:\\Politecnica\\etc\\geometry\\Texture\\Samourai.jpg";
+//        fileName = "C:\\Politecnica\\etc\\geometry\\samourai.md2";
+//        texture = "C:\\Politecnica\\etc\\geometry\\Texture\\samourai.jpg";
+        fileName = "../../../etc/md2/samourai.md2";
+        texture = "../../../etc/md2/samourai.jpg";
         try {
             md2Pers = new Md2Persistence();
             md2Pers.read(fileName,texture,md2Mesh);
@@ -129,61 +128,7 @@ public class Md2MeshExample
         }
         
         
-//        if ( fileName == null ) {
-//            JFileChooser jfc = null;
-//
-//            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../etc/geometry");
-//
-//            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-//            jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
-//            jfc.addChoosableFileFilter(new ObjectFilter("3ds", "3ds Files"));
-//            jfc.addChoosableFileFilter(new ObjectFilter("ply", "Ply Files"));
-//            jfc.addChoosableFileFilter(new ObjectFilter("ase", "3ds Files (Ascii Scene Export)"));
-//            jfc.addChoosableFileFilter(new ObjectFilter("vtk", "kitware's VTK legacy binary file"));
-//            int opc = jfc.showOpenDialog(new JPanel());
-//
-//            if ( opc == JFileChooser.APPROVE_OPTION ) {
-//                file = jfc.getSelectedFile();
-//            }
-//        }
-//        else {
-//            file = new File(fileName);
-//        }
-//
-//        //-----------------------------------------------------------------
-//        if ( file != null ) {
-//            try {
-//                EnvironmentPersistence.importEnvironment(file, scene);
-//
-//// Trivial mesh creation (need to change TriangleMeshGroup by TriangleMesh):
-///*
-//        Vertex v[] = new Vertex[3];
-//        v[0] = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 1));
-//        v[1] = new Vertex(new Vector3D(1, 0, 0), new Vector3D(0, 0, 1));
-//        v[2] = new Vertex(new Vector3D(1, 1, 0), new Vector3D(0, 0, 1));
-//
-//        Triangle t[] = new Triangle[1];
-//        t[0] = new Triangle(0, 1, 2);
-//
-//        mesh = new TriangleMesh();
-//        mesh.setVertexes(v);
-//        mesh.setTriangles(t);
-//        mesh.calculateNormals();
-//*/
-//            }
-//            catch ( Exception ex ) {
-//                System.err.println("Failed to read file.");
-//                ex.printStackTrace();
-//                System.exit(0);
-//            }
-//        }
-//        else {
-//            System.err.println("File not specified");
-//            System.exit(0);
-//        }
-
         //-----------------------------------------------------------------
-        //canvas = new GLCanvas();
         canvas = new GLJPanel(glCaps);
 
         canvas.addGLEventListener(this);

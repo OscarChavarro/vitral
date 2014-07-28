@@ -17,7 +17,6 @@ public class AnimationEvent {
     public void setT(double t) {
         this.t = t;
     }
-    
 }
 
 //===========================================================================
