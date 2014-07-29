@@ -237,6 +237,38 @@ public class ColorRgb extends FundamentalEntity
         this.g = ((double)VSDK.signedByte2unsignedInteger(g)) / 255.0;
         this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + (int) (Double.doubleToLongBits(this.r) ^ (Double.doubleToLongBits(this.r) >>> 32));
+        hash = 59 * hash + (int) (Double.doubleToLongBits(this.g) ^ (Double.doubleToLongBits(this.g) >>> 32));
+        hash = 59 * hash + (int) (Double.doubleToLongBits(this.b) ^ (Double.doubleToLongBits(this.b) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ColorRgb other = (ColorRgb) obj;
+        if (Double.doubleToLongBits(this.r) != Double.doubleToLongBits(other.r)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.g) != Double.doubleToLongBits(other.g)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.b) != Double.doubleToLongBits(other.b)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }
 
 //===========================================================================
