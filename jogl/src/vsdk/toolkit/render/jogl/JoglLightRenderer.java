@@ -20,7 +20,8 @@ import vsdk.toolkit.environment.Light;
 public class JoglLightRenderer extends JoglRenderer {
 
     public static int supportedLightsInOpenGL = 8;
-
+    private static double scale = 1.0;
+    
     public static void deactivate(GL2 gl, Light l)
     {
         int lightNumber = l.getId();
@@ -77,17 +78,19 @@ public class JoglLightRenderer extends JoglRenderer {
         double delta = 0.1;
 
         gl.glPushMatrix();
+        gl.glTranslated(p.x, p.y, p.z);
+        gl.glScaled(scale, scale, scale);
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glLineWidth(2.0f);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(c.r, c.g, c.b);
-            gl.glVertex3d(p.x - delta, p.y, p.z);
-            gl.glVertex3d(p.x + delta, p.y, p.z);
-            gl.glVertex3d(p.x, p.y - delta, p.z);
-            gl.glVertex3d(p.x, p.y + delta, p.z);
-            gl.glVertex3d(p.x, p.y, p.z - delta);
-            gl.glVertex3d(p.x, p.y, p.z + delta);
+            gl.glVertex3d(0 - delta, 0, 0);
+            gl.glVertex3d(0 + delta, 0, 0);
+            gl.glVertex3d(0, 0 - delta, 0);
+            gl.glVertex3d(0, 0 + delta, 0);
+            gl.glVertex3d(0, 0, 0 - delta);
+            gl.glVertex3d(0, 0, 0 + delta);
         gl.glEnd();
         gl.glPopMatrix();
     }
@@ -99,6 +102,20 @@ public class JoglLightRenderer extends JoglRenderer {
         for ( i = 0; i < supportedLightsInOpenGL; i++ ) {
             gl.glDisable(GL2.GL_LIGHT0 + i);
         }
+    }
+
+    /**
+    @return the scale
+    */
+    public static double getScale() {
+        return scale;
+    }
+
+    /**
+    @param newScale the scale to set
+    */
+    public static void setScale(double newScale) {
+        scale = newScale;
     }
     
 }
