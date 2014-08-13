@@ -238,6 +238,9 @@ public class ColorRgb extends FundamentalEntity
         this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
     }
 
+    /**
+    Allows this color to be used inside a HashMap.
+    */
     @Override
     public int hashCode() {
         int hash = 5;
