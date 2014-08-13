@@ -29,6 +29,7 @@ import vsdk.toolkit.common.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.Md2Mesh;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
@@ -43,7 +44,7 @@ import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.io.geometry.Md2Persistence;
 import vsdk.toolkit.animation.AnimationEventGenerator;
 import vsdk.toolkit.animation.Md2AnimationListener;
-import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
 
 /**
  */
@@ -107,6 +108,7 @@ public class Md2MeshExample
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         camera = new Camera();
+        camera.setPosition(new Vector3D(0, -60, 0));
         cameraController = new CameraControllerAquynza(camera);
 
         qualitySelection = new RendererConfiguration();
@@ -230,14 +232,11 @@ public class Md2MeshExample
        Thread t  = new Thread(animator);
        t.start();
 
-       // This is causing to repeat the canvas repaint!
-
-       //streetSelectorListener = new StreetSelectorAnimationListener(c, m);
-       //animator.addAnimationListener(streetSelectorListener);
-
-       Md2AnimationListener testListener = 
-           new Md2AnimationListener(gljp, md2Mesh);
+       Md2AnimationListener testListener =  new Md2AnimationListener(md2Mesh);
        animator.addAnimationListener(testListener);
+       
+       JoglRepainterAnimationListener animatorRepainter;
+       animatorRepainter = new JoglRepainterAnimationListener(gljp);
     }
     
     /** 

@@ -1,23 +1,16 @@
-
+//===========================================================================
 package vsdk.toolkit.animation;
-
-// Java basic classes
-import javax.media.opengl.awt.GLJPanel;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.Md2Mesh;
 
 /**
- *
- * @author
- */
+*/
 public class Md2AnimationListener  extends AnimationListener {
-    private final GLJPanel canvas;
     private final Md2Mesh md2Mesh;
 
-    public Md2AnimationListener(GLJPanel canvas, Md2Mesh md2Mesh)
+    public Md2AnimationListener(Md2Mesh md2Mesh)
     {
-        this.canvas = canvas;
         this.md2Mesh = md2Mesh;
     }
 
@@ -29,9 +22,9 @@ public class Md2AnimationListener  extends AnimationListener {
             //model.setAnimationTestCursorPosition(p);
             md2Mesh.setElapsedTimeSeg((float)e.getT());
         }
-        if ( canvas != null ) {
-            canvas.repaint();
-        }
-
     }    
 }
+
+//===========================================================================
+//= EOF                                                                     =
+//===========================================================================

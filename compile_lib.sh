@@ -7,7 +7,7 @@ IO_CLASSES="./src/vsdk/toolkit/io/*.java ./src/vsdk/toolkit/io/metadata/*.java .
 
 AWT_CLASSES="./src_awt/vsdk/toolkit/render/awt/*.java ./src_awt/vsdk/toolkit/render/swing/*.java ./src/vsdk/toolkit/gui/CameraController.java ./src_awt/vsdk/toolkit/gui/AwtSystem.java ./src/vsdk/toolkit/gui/CameraControllerAquynza.java ./src/vsdk/toolkit/gui/CameraControllerBlender.java ./src/vsdk/toolkit/gui/TranslateGizmo.java ./src/vsdk/toolkit/gui/RotateGizmo.java ./src/vsdk/toolkit/gui/ScaleGizmo.java ./src/vsdk/toolkit/gui/RendererConfigurationController.java ./src/vsdk/toolkit/io/image/ImagePersistence.java ./src_awt/vsdk/toolkit/io/image/*.java ./src/vsdk/toolkit/io/geometry/ReaderObj.java"
 
-JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java ./src_jogl/vsdk/framework/shapeMatching/*.java ./src_jogl/vsdk/toolkit/io/image/*.java"
+JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_jogl/vsdk/toolkit/render/jogl/animation/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java ./src_jogl/vsdk/framework/shapeMatching/*.java ./src_jogl/vsdk/toolkit/io/image/*.java"
 
 VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java ./src_jogl/vsdk/framework/shapeMatching/plugins/*.java"
 
