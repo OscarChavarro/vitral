@@ -95,6 +95,8 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     /// Reference to all known objects and their corresponding display list data
     private static HashMap<Object, AndroidGLES20DisplayList> displayLists;
+    
+    protected static String errorMessage;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -133,6 +135,7 @@ public class AndroidGLES20Renderer extends RenderingElement
         lights = new ArrayList<Light>();
         
         displayLists = new HashMap<Object, AndroidGLES20DisplayList>();
+        errorMessage = "No error detected";
     }
 
     public static void executeCompiledDisplayList(Object o)
@@ -343,7 +346,8 @@ public class AndroidGLES20Renderer extends RenderingElement
             }
             errorsDetected = true;
             Log.e(TAG, op + ": glError " + error + " : " + name + " Thread: " + Thread.currentThread().getName());
-            throw new RuntimeException(op + ": glError " + error);
+            errorMessage = "" + op + ": glError " + error + " : " + name;
+            //throw new RuntimeException(op + ": glError " + error);
         }
     }
 
