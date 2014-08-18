@@ -772,11 +772,13 @@ public class AndroidGLES20Renderer extends RenderingElement
 
     public static void activateTransformationMatrices()
     {
-        Matrix.multiplyMM(modelViewProjectionLocal, 0,
-            projectionMatrix, 0, modelViewMatrix, 0);
-        GLES20.glUniformMatrix4fv(modelViewProjectionLocalParam, 1, false, 
-            modelViewProjectionLocal, 0);
-        checkGlError("modelViewProjectionLocalParam");
+        if ( modelViewProjectionLocalParam != -1 ) {
+            Matrix.multiplyMM(modelViewProjectionLocal, 0,
+                projectionMatrix, 0, modelViewMatrix, 0);
+            GLES20.glUniformMatrix4fv(modelViewProjectionLocalParam, 1, false,
+                modelViewProjectionLocal, 0);
+            checkGlError("modelViewProjectionLocalParam");
+        }
 
         Matrix.invertM(transientMatrix, 0, modelViewMatrix, 0);
         Matrix.transposeM(modelViewITMatrix, 0, transientMatrix, 0);
