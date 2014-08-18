@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.HashMap;
 
 // Android classes
 import android.util.Log;
@@ -15,10 +19,6 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.HashMap;
 
 // Sandbox
 //import vitral.application.R;
