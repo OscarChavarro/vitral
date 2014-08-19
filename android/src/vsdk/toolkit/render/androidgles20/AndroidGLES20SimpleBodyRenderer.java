@@ -36,10 +36,10 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
         glLoadIdentity();
         AndroidGLES20MatrixRenderer.activate(M);
 
-        //glColor3d(1, 1, 1);
+        //-----------------------------------------------------------------
+        // Activate current body material
         AndroidGLES20MaterialRenderer.activate(b.getMaterial());
 
-        //-----------------------------------------------------------------
         Image texture;
 
         texture = b.getTexture();

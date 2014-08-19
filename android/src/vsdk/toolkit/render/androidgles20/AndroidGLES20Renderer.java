@@ -344,10 +344,23 @@ public class AndroidGLES20Renderer extends RenderingElement
             //case GLES20.GL_STACK_OVERFLOW: name = "GL_STACK_OVERFLOW"; break;
             //case GLES20.GL_STACK_UNDERFLOW: name = "GL_STACK_UNDERFLOW"; break;
             }
+
+            if ( !errorsDetected ) {
+                Log.e(TAG, op + ": glError " + error + " : " + name
+                    + " Thread: " + Thread.currentThread().getName());
+                try {
+                    throw new RuntimeException(op + ": glError " + error);
+                }
+                catch ( RuntimeException e ) {
+                    VSDK.reportMessageWithException(
+                        null, VSDK.WARNING, "checkGLError",
+                        "OpenGL ES 2.0 error", e);
+                }
+            }
+            
             errorsDetected = true;
-            Log.e(TAG, op + ": glError " + error + " : " + name + " Thread: " + Thread.currentThread().getName());
             errorMessage = "" + op + ": glError " + error + " : " + name;
-            //throw new RuntimeException(op + ": glError " + error);
+            
         }
     }
 
