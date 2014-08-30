@@ -186,6 +186,9 @@ public class AwtSystem extends PresentationElement
               case java.awt.event.KeyEvent.VK_RIGHT:
                 evsdk.keycode = KeyEvent.KEY_RIGHT;
                 break;
+              case java.awt.event.KeyEvent.VK_ENTER:
+                evsdk.keycode = KeyEvent.KEY_ENTER;
+                break;
             }
         }
         else {
