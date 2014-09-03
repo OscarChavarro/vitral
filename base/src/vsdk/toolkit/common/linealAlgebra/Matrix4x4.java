@@ -161,7 +161,7 @@ public class Matrix4x4 extends FundamentalEntity
 
     The derivation of this matrix follows the approach suggested at
     [FOLE1992].6.4. except that relations are not derived from similar
-    triangles, but writting down line equations and noting that for current
+    triangles, but writing down line equations and noting that for current
     view volume, the line equations of x and y with respect to z have
     negative slopes.
 

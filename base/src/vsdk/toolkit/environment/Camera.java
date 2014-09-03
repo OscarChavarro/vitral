@@ -343,7 +343,6 @@ public class Camera extends Entity
     \todo  Document the way in which vectors are calculated, acording to
     the projection transformation.
     */
-    
     public final void updateVectors()
     {
         up.normalize();
@@ -369,20 +368,28 @@ public class Camera extends Entity
 
         // Warning: near plane clipping
         VRP = eyePosition.add(front.multiply(nearPlaneDistance));
-        //VRP = eyePosition.add(front.multiply(1));
         T1.translation(VRP.multiply(-1));
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
         //    become the -z axis
         Matrix4x4 R1;
-        Matrix4x4 R2 = new Matrix4x4();
-
         R1 = getRotation();
         R1.invert();
+        
+        Matrix4x4 R2 = new Matrix4x4();
         R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        Matrix4x4 RTOTAL = R2.multiply(R1);
 
+        //System.out.println("----------------------");
+        //System.out.println("R1: " + R1);
+        //Vector3D myVPN = front.multiply(-1);
+        //System.out.println("MyVPN: " + myVPN);
+        //Vector3D normalizedVPN = RTOTAL.multiply(myVPN);
+        //System.out.println("NormalizedVPN: " + normalizedVPN);
+        
         // 3. Translate such that the center of projection is at the origin
-
+        Matrix4x4 T2 = new Matrix4x4();
+        T2.translation(0, 0, -nearPlaneDistance);
 
         // 4. Shear such that the center line of the view volume becomes the
         //    z axis
@@ -400,15 +407,21 @@ public class Camera extends Entity
         ddy = upWithScale.length();
         S1.scale(ddx, ddy, 1);
         S1.invert();
-
+        
         // 5.2. Proportional scaling to adjust near / far clipping planes
         // maintaining the piramid form
-        ddz = nearPlaneDistance;
-        S2.scale(ddz, ddz, ddz);
-        S2.invert();
+        //ddz = 2.0/(farPlaneDistance - nearPlaneDistance);
+        //S2.scale(1, 1, ddz);
+        //S2.invert();
 
-        //
-        normalizingTransformation = S2.multiply(S1.multiply(R2.multiply(R1.multiply(T1))));
+        // Compose final transformation
+        Matrix4x4 T3 = new Matrix4x4();
+        //T3.translation(0, 0, nearPlaneDistance);
+        
+        normalizingTransformation = 
+            T3.multiply(S2.multiply(S1.multiply(T2.multiply(RTOTAL.multiply(T1)))));
+        
+        System.out.println("normalizingTransformation: " + normalizingTransformation);
     }
 
     /**
