@@ -421,7 +421,7 @@ public class Camera extends Entity
         normalizingTransformation = 
             T3.multiply(S2.multiply(S1.multiply(T2.multiply(RTOTAL.multiply(T1)))));
         
-        System.out.println("normalizingTransformation: " + normalizingTransformation);
+        //System.out.println("normalizingTransformation: " + normalizingTransformation);
     }
 
     /**
