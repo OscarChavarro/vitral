@@ -134,7 +134,6 @@ public class AwtSystem extends PresentationElement
         }
 
         evsdk.unicode_id = unicode_id;
-
         if ( unicode_id == java.awt.event.KeyEvent.CHAR_UNDEFINED ) {
             evsdk.unicode_id = KeyEvent.KEY_NONE;
             switch ( keycode ) {
@@ -187,7 +186,12 @@ public class AwtSystem extends PresentationElement
                 evsdk.keycode = KeyEvent.KEY_RIGHT;
                 break;
               case java.awt.event.KeyEvent.VK_ENTER:
+                  System.out.println("ENTER");
                 evsdk.keycode = KeyEvent.KEY_ENTER;
+                break;
+              case java.awt.event.KeyEvent.VK_BACK_SPACE:
+                  System.out.println("BACK_SPACE");
+                evsdk.keycode = KeyEvent.KEY_BACKSPACE;
                 break;
             }
         }
@@ -388,6 +392,12 @@ public class AwtSystem extends PresentationElement
               case ' ':
                 evsdk.keycode = KeyEvent.KEY_SPACE;
                 break;
+              case '\n':
+                evsdk.keycode = KeyEvent.KEY_ENTER;
+                break;
+              case '\b':
+                evsdk.keycode = KeyEvent.KEY_BACKSPACE;
+                break;
             }
         }
     }
@@ -406,11 +416,60 @@ public class AwtSystem extends PresentationElement
     
     public static RGBAImage calculateLabelImage(String label, ColorRgb color, int fontSize)
     {
+        font = null;
         //-----------------------------------------------------------------
         if ( font == null ) {
-            font = new Font("Arial", Font.PLAIN, 14);
+            font = new Font("Arial", Font.PLAIN, fontSize);
         }
 
+        //-----------------------------------------------------------------
+        RGBAImage labelImage;
+
+        //- Obtain an offline Java2D graphics context ---------------------
+        labelImage = new RGBAImage();
+        labelImage.init(1, 1);
+
+        BufferedImage bi;
+        Graphics offlineContext;
+
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
+        offlineContext = bi.getGraphics();
+        offlineContext.setFont(font);
+        FontMetrics fm = offlineContext.getFontMetrics();
+
+        //- Calculate the required image area for current label & font ----
+        Rectangle2D r = fm.getStringBounds(label, offlineContext);
+        Rectangle ri = r.getBounds();
+
+        LineMetrics metrics;
+        int up;
+
+        metrics = fm.getLineMetrics(label, offlineContext);
+
+        up = (int)(Math.ceil(metrics.getAscent()));
+        
+        //BAD FIX!!!!!
+        if(ri.width <= 0)
+            ri.width = 2;
+        labelImage.init(ri.width, ri.height);
+
+        //- Calculate label image -----------------------------------------
+        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
+        offlineContext = bi.getGraphics();
+        offlineContext.setFont(font);
+        offlineContext.setColor(
+            new Color((float)color.r, (float)color.g, (float)color.b));
+        offlineContext.drawString(label, 0, up);
+
+        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
+
+        return labelImage;
+    }
+    
+    public static RGBAImage calculateLabelImage(String label, ColorRgb color, int fontSize, Font newFont)
+    {
+        
+        font = newFont;
         //-----------------------------------------------------------------
         RGBAImage labelImage;
 
