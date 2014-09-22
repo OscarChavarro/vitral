@@ -333,8 +333,8 @@ public class TranslateGizmo extends Gizmo {
             Vector3D right = camera.getLeft().multiply(-1);
 
             right.normalize();
-            camera.projectPoint(p, a);
-            camera.projectPoint(p.add(right), b);
+            camera.projectPointUsingRayMethod(p, a);
+            camera.projectPointUsingRayMethod(p.add(right), b);
             double factor = VSDK.vectorDistance(a, b);
             currentScale = ((double)initialdu)/factor;
         }
@@ -1163,7 +1163,7 @@ public class TranslateGizmo extends Gizmo {
             Vector3D pp = new Vector3D();
             Vector3D base = p.add(deltapos);
 
-            camera.projectPoint(base, pp);
+            camera.projectPointUsingRayMethod(base, pp);
 
             Point global = e.getComponent().getLocationOnScreen();
             //awtRobot.mouseMove((int)pp.x+global.x, (int)pp.y+global.y);

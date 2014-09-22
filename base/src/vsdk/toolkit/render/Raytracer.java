@@ -39,7 +39,6 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.scene.SimpleBody;
-
 import vsdk.toolkit.gui.ProgressMonitor;
 
 /**

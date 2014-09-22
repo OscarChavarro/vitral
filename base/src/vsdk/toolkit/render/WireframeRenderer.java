@@ -39,7 +39,7 @@ public class WireframeRenderer extends RenderingElement
     `lineSet`.
     */
     private static void addLine(Calligraphic2DBuffer lineSet,
-                                Vector3D cp0, Vector3D cp1, Matrix4x4 CPP,
+                                Vector3D cp0, Vector3D cp1, Matrix4x4 Proj,
                                 Camera c) {
         //-----------------------------------------------------------------
         Vector4D hp0, hp1; // Clipped points in homogeneous space
@@ -50,9 +50,9 @@ public class WireframeRenderer extends RenderingElement
 
         hp0 = new Vector4D(cp0);
         hp1 = new Vector4D(cp1);
-        pp0 = CPP.multiply(hp0);
+        pp0 = Proj.multiply(hp0);
         pp0.divideByW();
-        pp1 = CPP.multiply(hp1);
+        pp1 = Proj.multiply(hp1);
         pp1.divideByW();
         lineSet.add2DLine(pp0.x*f, pp0.y*f, pp1.x*f, pp1.y*f);
     }
@@ -97,7 +97,7 @@ public class WireframeRenderer extends RenderingElement
         }
     }
 
-    private static void processMesh(SimpleBody body, Matrix4x4 CPP,
+    private static void processMesh(SimpleBody body, Matrix4x4 P,
                         Calligraphic2DBuffer outLineSet,
                         Camera inCamera)
     {
@@ -143,7 +143,7 @@ public class WireframeRenderer extends RenderingElement
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
-                    addLine(outLineSet, cp0, cp1, CPP, inCamera);
+                    addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
                 mp0.x = v[3*p1];
@@ -155,7 +155,7 @@ public class WireframeRenderer extends RenderingElement
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
-                    addLine(outLineSet, cp0, cp1, CPP, inCamera);
+                    addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
                 mp0.x = v[3*p2];
@@ -167,7 +167,7 @@ public class WireframeRenderer extends RenderingElement
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
-                    addLine(outLineSet, cp0, cp1, CPP, inCamera);
+                    addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
             }
         }
@@ -179,19 +179,19 @@ public class WireframeRenderer extends RenderingElement
     {
         //- Calligraphic rendering of lines in to 2D line buffer ----------
         int i;                     // Index inside objects list
-        Matrix4x4 CPP;               // Projection matrix
+        Matrix4x4 P;               // Projection matrix
         Geometry g;
 
-        CPP = new Matrix4x4();
-        CPP.canonicalPerspectiveProjection();
+        P = new Matrix4x4();
+        P.canonicalPerspectiveProjection();
 
         for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {
             g = inSimpleBodyArray.get(i).getGeometry();
             if ( g instanceof Surface ) {
-                processMesh(inSimpleBodyArray.get(i), CPP, outLineSet, inCamera);
+                processMesh(inSimpleBodyArray.get(i), P, outLineSet, inCamera);
             }
             else if ( g instanceof Solid ) {
-                processBrep(inSimpleBodyArray.get(i), CPP, outLineSet, inCamera);
+                processBrep(inSimpleBodyArray.get(i), P, outLineSet, inCamera);
             }
         }
     }

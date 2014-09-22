@@ -1335,6 +1335,28 @@ public class Camera extends Entity
     }
 
     /**
+    @param worldPosition
+    @param projectedPosition
+    @return 
+    */
+    public boolean projectPoint(Vector3D worldPosition, Vector3D projectedPosition) {
+        Matrix4x4 NT = getNormalizingTransformation();
+        Vector3D p = NT.multiply(worldPosition);
+        p.x /= -p.z;
+        p.y /= -p.z;
+        p.z /= p.z;
+
+        if ( p.x < -1.0 || p.x > 1.0 || p.y < -1.0 || p.y > 1.0 ) {
+            return false;
+        }
+        
+        projectedPosition.x = ((p.x + 1.0)/2.0 * getViewportXSize());
+        projectedPosition.y = (getViewportYSize() - (p.y + 1.0)/2.0 * getViewportYSize());
+
+        return true;
+    }
+
+    /**
     Given a point `inPoint` in world coordinates, this method calculates a
     pixel's  coordinate in viewport space (in the form <u, v, 0>).
 
@@ -1363,7 +1385,7 @@ public class Camera extends Entity
     @param outProjected
     @return true if the pixel lies inside the viewport, false otherwise.
     */
-    public boolean projectPoint(Vector3D inPoint, Vector3D outProjected)
+    public boolean projectPointUsingRayMethod(Vector3D inPoint, Vector3D outProjected)
     {
         // 1. Calculate vectors
         Vector3D upCopy = null;

@@ -112,7 +112,6 @@ public class KeyEvent extends PresentationElement
     public static final int KEY_ESC = 0x0055;
     public static final int KEY_PRINTSCREEN = 0x0056;
     public static final int KEY_BACKSPACE = 0x0057;
-    //public static final int KEY_BACKSPACE = 0x0008;
     public static final int KEY_INSERT = 0x0058;
     public static final int KEY_DELETE = 0x0059;
     public static final int KEY_PAGEUP = 0x005A;
