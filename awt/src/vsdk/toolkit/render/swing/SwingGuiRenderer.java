@@ -16,6 +16,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.BoxLayout;
@@ -29,6 +30,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
+
 
 // VSDK classes
 import vsdk.toolkit.media.RGBAImage;
@@ -50,6 +52,7 @@ import vsdk.toolkit.gui.GuiMenu;
 import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiDialog;
+import vsdk.toolkit.io.image.ImagePersistence;
 
 public class SwingGuiRenderer extends PresentationElement {
 
@@ -365,16 +368,65 @@ public class SwingGuiRenderer extends PresentationElement {
         }
         return widgetMenubar;
     }
+///codeOscar
+    
 
+    
+
+    
+    // Code Oz
     public static JPanel buildBooleanVariable(GuiBooleanVariable v, ActionListener executor) {
         JPanel p = new JPanel();
+        /*
+        v.getImageForFalseState();
+        v.getImageForTrueState();
+        */
+   
+        JButton optionA= new JButton();
+        JButton optionB= new JButton();
+    
+        if(optionA!=null || optionB!=null )
+        {
+
+            optionA= new JButton("./etc/1.jpg");
+                p.add(optionA);
+
+        }
+        
+           
         JCheckBox cb = new JCheckBox(v.getName());
-        //p.add(buildNumberWidget(v.getName()));
+      //  p.add(buildNumberWidget(v.getName()));
+        
         cb.addActionListener(executor);
         p.add(cb);
+        p.add(optionA);
+        
+
+        
+        //JCheckBox cb = new JCheckBox(v.getName());
+        //p.add(buildNumberWidget(v.getName()));
+        //cb.addActionListener(executor);
+        //p.add(cb);
+        
+      /*
+        JCheckBox b = new JCheckBox("NUll);
+        p.add(b);
+        b = new JCheckBox("False");
+        p.add(b);*/
+        
+       // RGBAImage image = ImagePersistence.importRGBA(new File());
+    
+        /*
+        getImageForTrueState
+        */
+        
+        
         return p;
     }
 
+    
+    
+    
     private static JPanel buildNumberWidget(String subname, ActionListener executor) {
         JPanel p;
         JLabel l;
@@ -623,22 +675,24 @@ public class SwingGuiRenderer extends PresentationElement {
                 cons.gridheight = 1;
                 panel.add(buildCommandButton(c,executor), cons);
             }
-        }
+          
     }
-
-    public static void buildGuiVariableConfiguration(JPanel panel, String aux, GridBagConstraints cons, Gui gui, ActionListener executor) {
-        if (aux.equals("MODE_1")) {
-            cons.gridx = 0;
-            cons.gridy = 0;
-            cons.gridwidth = 1;
-            cons.gridheight = 1;
-            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
-        } else if (aux.equals("MODE_2")) {
-            cons.gridx = 0;
-            cons.gridy = 1;
-            cons.gridwidth = 1;
-            cons.gridheight = 1;
-            panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+    }
+    
+    
+        public static void buildGuiVariableConfiguration(JPanel panel, String aux, GridBagConstraints cons, Gui gui, ActionListener executor) {
+            if (aux.equals("MODE_1")) {
+                cons.gridx = 0;
+                cons.gridy = 0;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
+            } else if (aux.equals("MODE_2")) {
+                cons.gridx = 10;
+                cons.gridy = 11;
+                cons.gridwidth = 1;
+                cons.gridheight = 1;
+                panel.add(buildVariable(gui.getVariableByName(aux), executor), cons);
         } else if (aux.equals("MODE_3")) {
             cons.gridx = 0;
             cons.gridy = 2;
@@ -731,6 +785,18 @@ public class SwingGuiRenderer extends PresentationElement {
             return pan;
         }
         return panel;
+    }
+
+    private static void setPreferredSize(Dimension size) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private static void setMinimumSize(Dimension size) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private static void setMaximumSize(Dimension size) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
 
