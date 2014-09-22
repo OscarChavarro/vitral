@@ -20,8 +20,6 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.gui.AndroidSystem;
-
-// Transition classes
 import vsdk.toolkit.gui.dialog.InformationDialog;
 
 /**
@@ -132,7 +130,8 @@ public class AndroidGLES20InformationDialogRenderer
 
             if ( !characterSprites.containsKey(key) ) {
                 img = AndroidSystem.calculateLabelImage(
-                    key, new ColorRgb(1.0, 1.0, 1.0), fontSize);
+                    key, new ColorRgb(1.0, 1.0, 1.0), 
+                    new ColorRgb(0.0, 0.0, 0.0), fontSize);
                 characterSprites.put(key, img);
             }
             if ( characterSprites.containsKey(key) ) {

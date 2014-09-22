@@ -5,7 +5,6 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.RendererConfiguration;
-
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 

@@ -17,7 +17,7 @@ public class AndroidGLES20HudIconRenderer extends AndroidGLES20Renderer {
         
         for ( i = 0; i < hudIcons.size(); i++ ) {
             HudIcon icon = hudIcons.get(i);
-            drawImage(icon.getImage(), camera, icon.getX(), icon.getY());
+            drawImage(icon.getImage(), camera, icon.getX(), icon.getY(), true);
         }
 
     }

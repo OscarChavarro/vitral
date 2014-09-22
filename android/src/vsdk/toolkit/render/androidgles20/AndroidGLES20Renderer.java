@@ -31,8 +31,11 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.gui.AndroidSystem;
+import vsdk.toolkit.gui.TextVisualConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.RenderingElement;
 
 public class AndroidGLES20Renderer extends RenderingElement
@@ -1298,8 +1301,10 @@ public class AndroidGLES20Renderer extends RenderingElement
     @param c
     @param x
     @param y
+    @param useWhiteColor
     */
-    protected static void drawImage(Image img, Camera c, int x, int y)
+    protected static void drawImage(Image img, Camera c, int x, int y, 
+        boolean useWhiteColor)
     {
         RendererConfiguration q;
         double fx, fy;
@@ -1333,8 +1338,9 @@ public class AndroidGLES20Renderer extends RenderingElement
         q = new RendererConfiguration();
         q.setSurfaces(true);
         q.setTexture(true);
-        q.setUseVertexColors(true);
+        q.setUseVertexColors(useWhiteColor);
         q.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+        
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
@@ -1362,11 +1368,11 @@ public class AndroidGLES20Renderer extends RenderingElement
         
         //-----------------------------------------------------------------
         unitSquare = new Object();
-        
+
         AndroidGLES20DisplayList displayList;
-        
+
         displayList = new AndroidGLES20DisplayList(null);
-                
+
         //-----------------------------------------------------------------
         // Geometry data
         float[] vertexDataArray = {
@@ -1395,15 +1401,54 @@ public class AndroidGLES20Renderer extends RenderingElement
             vertexArray, GLES20.GL_STATIC_DRAW);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         displayList.addVbo(null, vbo[0], GLES20.GL_TRIANGLE_STRIP, 4);
-
         registerObjectWithADisplayList(unitSquare, displayList);
-        
+
         //-----------------------------------------------------------------
         //drawVertices3Position3Color3Normal2Uv(
         //    vertexArray,
         //    GLES20.GL_TRIANGLE_STRIP, 
         //    4);
         executeCompiledDisplayList(unitSquare);
+    }
+    
+    /**
+    @param characterStyle
+    @param msg
+    @param c
+    @param x0
+    @param y0
+    @param useWhiteColor
+    */
+    protected static void
+    drawText(
+        TextVisualConfiguration characterStyle,
+        String msg, Camera c, int x0, int y0, 
+        boolean useWhiteColor)
+    {
+        int x = x0, y = y0;
+        int i;
+        String key;
+        RGBAImage img;
+
+        HashMap<String, RGBAImage> characterSpriteCaches;
+        characterSpriteCaches = characterStyle.getCharacterSprites();
+        
+        for ( i = 0; i < msg.length(); i++ ) {
+            key = "" + msg.charAt(i);
+            if ( !characterSpriteCaches.containsKey(key) ) {
+                img = AndroidSystem.calculateLabelImage(
+                    key, 
+                    characterStyle.getForegroundColor(), 
+                    characterStyle.getBackgroundColor(), 
+                    characterStyle.getFontSize());
+                characterSpriteCaches.put(key, img);
+            }
+            if ( characterSpriteCaches.containsKey(key) ) {
+                img = characterSpriteCaches.get(key);
+                drawImage(img, c, x, y, useWhiteColor);
+                x += img.getXSize();
+            }
+        }
     }
 
 }

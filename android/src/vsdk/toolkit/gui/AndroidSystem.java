@@ -30,38 +30,44 @@ public class AndroidSystem extends PresentationElement
         return evsdk;
     }
 
-    public static RGBAImage calculateLabelImage(String label, ColorRgb color)
+    public static RGBAImage calculateLabelImage(String label, 
+        ColorRgb foregroundColor, ColorRgb backgroundColor)
     {
-        return calculateLabelImage(label, color, 14);
+        return calculateLabelImage(label, foregroundColor, backgroundColor, 14);
     }
 
     /**
     This method generates a texture from a text to be displayed.
     @param label
-    @param color
+    @param foreColor
     @param size
     @return a new image containing a transparent representation of given text
-    color, using a monospaced default font
+    color, using a mono-spaced default font
     */
-    public static RGBAImage calculateLabelImage(String label, ColorRgb color, int size)
+    public static RGBAImage calculateLabelImage(
+        String label, 
+        ColorRgb foreColor, 
+        ColorRgb backColor,
+        int size)
     {
         //---------------------------------------------------------------------
-        int c;
+        int foregroundColor;
+        int backgroundColor = 0;
         int r, g, b;
 
-        r = (int)(color.r * 255.0);
-        g = (int)(color.g * 255.0);
-        b = (int)(color.b * 255.0);
-        c = (0xFF << 24) + (r << 16) + (g << 8) + b; 
+        r = (int)(foreColor.r * 255.0);
+        g = (int)(foreColor.g * 255.0);
+        b = (int)(foreColor.b * 255.0);
+        foregroundColor = (0xFF << 24) + (r << 16) + (g << 8) + b; 
 
         Typeface tf = Typeface.MONOSPACE;
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setTextSize(size);
-        paint.setColor(c);
-        paint.setTypeface(tf);
+        Paint foregroundPaintConfig = new Paint();
+        foregroundPaintConfig.setAntiAlias(true);
+        foregroundPaintConfig.setTextSize(size);
+        foregroundPaintConfig.setColor(foregroundColor);
+        foregroundPaintConfig.setTypeface(tf);
 
-        Paint.FontMetrics fm = paint.getFontMetrics();
+        Paint.FontMetrics fm = foregroundPaintConfig.getFontMetrics();
 
         //float fontHeight = (float)Math.ceil(Math.abs(fm.bottom) + 
         //    Math.abs(fm.top));
@@ -72,7 +78,7 @@ public class AndroidSystem extends PresentationElement
 
         //---------------------------------------------------------------------
         float widths[] = new float[label.length()];
-        int n = paint.getTextWidths(label, 0, label.length(), widths);
+        int n = foregroundPaintConfig.getTextWidths(label, 0, label.length(), widths);
         float l = 0;
         for ( int i = 0; i < n; i++ ) {
             l += widths[i];
@@ -91,7 +97,27 @@ public class AndroidSystem extends PresentationElement
         bitmap.eraseColor(0x00FF0000);
         Canvas gc = new Canvas(bitmap);
 
-        gc.drawText(label, 0, fontAscent, paint);
+        if ( backColor != null ) {
+            r = (int) (backColor.r * 255.0);
+            g = (int) (backColor.g * 255.0);
+            b = (int) (backColor.b * 255.0);
+            backgroundColor = (0xFF << 24) + (r << 16) + (g << 8) + b;
+            Paint backgroundPaintConfig = new Paint();
+            backgroundPaintConfig.setAntiAlias(true);
+            backgroundPaintConfig.setTextSize(size);
+            backgroundPaintConfig.setColor(backgroundColor);
+            backgroundPaintConfig.setTypeface(tf);
+            gc.drawText(label, 0 + 1, fontAscent, backgroundPaintConfig);
+            gc.drawText(label, 0, fontAscent + 1, backgroundPaintConfig);
+            gc.drawText(label, 0 - 1, fontAscent, backgroundPaintConfig);
+            gc.drawText(label, 0, fontAscent - 1, backgroundPaintConfig);
+            gc.drawText(label, 0 + 1, fontAscent+1, backgroundPaintConfig);
+            gc.drawText(label, 0 + 1, fontAscent-1, backgroundPaintConfig);
+            gc.drawText(label, 0 - 1, fontAscent+1, backgroundPaintConfig);
+            gc.drawText(label, 0 - 1, fontAscent-1, backgroundPaintConfig);
+        }
+
+        gc.drawText(label, 0, fontAscent, foregroundPaintConfig);
 
         //gc.drawLine(0, 0, w, 0, paint);
         //gc.drawLine(0, fontAscent-1, w, fontAscent-1, paint);
