@@ -3,6 +3,7 @@ package vsdk.toolkit.io.gui;
 
 // Java basic classes
 import java.io.File;
+import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,7 +31,9 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class GuiPersistence extends PersistenceElement {
-
+    /**
+    
+    */
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,
             Gui context) throws Exception {
@@ -42,8 +45,8 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
-                System.out.println("Salida 0");
+            } catch (IOException e) {
+                System.out.println("Exit case 0");
                 throw e;
             }
 
@@ -95,12 +98,12 @@ public class GuiPersistence extends PersistenceElement {
 
         String name = null;
 
-        int param = 0;
+        int parameter = 0;
 
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Salida 0");
                 throw e;
             }
@@ -116,42 +119,42 @@ public class GuiPersistence extends PersistenceElement {
                     if (level == 2) {
                         item.addCommandByName(parser.sval);
                     }
-                    if (param == 0 && parser.sval.equals("direction")) {
-                        param = 1;
-                    } else if (param == 1) {
+                    if (parameter == 0 && parser.sval.equals("direction")) {
+                        parameter = 1;
+                    } else if (parameter == 1) {
                         if (parser.sval.equals("horizontal")) {
                             item.setDirection(GuiButtonGroup.HORIZONTAL);
                         } else {
                             item.setDirection(GuiButtonGroup.VERTICAL);
                         }
-                        param = 0;
-                    } else if (param == 0 && parser.sval.equals("showIcons")) {
-                        param = 2;
-                    } else if (param == 2) {
+                        parameter = 0;
+                    } else if (parameter == 0 && parser.sval.equals("showIcons")) {
+                        parameter = 2;
+                    } else if (parameter == 2) {
                         if (parser.sval.equals("on")) {
                             item.setShowIcons(true);
                         } else {
                             item.setShowIcons(false);
                         }
-                        param = 0;
-                    } else if (param == 0 && parser.sval.equals("showText")) {
-                        param = 3;
-                    } else if (param == 3) {
+                        parameter = 0;
+                    } else if (parameter == 0 && parser.sval.equals("showText")) {
+                        parameter = 3;
+                    } else if (parameter == 3) {
                         if (parser.sval.equals("on")) {
                             item.setShowText(true);
                         } else {
                             item.setShowText(false);
                         }
-                        param = 0;
-                    } else if (param == 0 && parser.sval.equals("showTitle")) {
-                        param = 4;
-                    } else if (param == 4) {
+                        parameter = 0;
+                    } else if (parameter == 0 && parser.sval.equals("showTitle")) {
+                        parameter = 4;
+                    } else if (parameter == 4) {
                         if (parser.sval.equals("on")) {
                             //item.setShowTitle(true);
                         } else {
                             //item.setShowTitle(false);
                         }
-                        param = 0;
+                        parameter = 0;
                     }
                     break;
                 default:
@@ -207,7 +210,7 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw e;
             }
 
@@ -312,7 +315,7 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw e;
             }
             switch (tokenType) {
@@ -374,7 +377,7 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw e;
             }
             switch (tokenType) {
@@ -460,7 +463,7 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 break;
             }
             switch (tokenType) {
@@ -498,7 +501,12 @@ public class GuiPersistence extends PersistenceElement {
                         context.addButtonGroup(bg);
                     } else if (parser.sval.equals("MESSAGES")) {
                         importAquynzaGuiMessages(parser, context);
-                    } else {
+                    } 
+                    else if(parser.sval.equals("IMAGE"))
+                    {
+                    
+                    }
+                    else {
                         System.out.println("NotProcessedIdentifier " + parser.sval);
                     }
                     break;
@@ -563,10 +571,10 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 try {
                     throw ex;
-                } catch (Exception ex1) {
+                } catch (IOException ex1) {
                     ex1.getStackTrace();
                 }
             }
@@ -712,10 +720,10 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 try {
                     throw ex;
-                } catch (Exception ex1) {
+                } catch (IOException ex1) {
                     ex1.getStackTrace();
                 }
             }
@@ -791,37 +799,37 @@ public class GuiPersistence extends PersistenceElement {
                                 throw new ExceptionGuiParseError();
                             }
                         } else if (content == '}') {
-                            if (typeName.equalsIgnoreCase("double")) {
+                            if (typeName != null && typeName.equalsIgnoreCase("double")) {
                                 variable = new GuiDoubleVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName.equalsIgnoreCase("Vector3D")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("Vector3D")) {
                                 variable = new GuiVector3DVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName.equalsIgnoreCase("ColorRgb")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("ColorRgb")) {
                                 variable = new GuiColorRgbVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName.equalsIgnoreCase("Integer")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("Integer")) {
                                 variable = new GuiIntegerVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName.equalsIgnoreCase("boolean")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("boolean")) {
                                 variable = new GuiBooleanVariable();
                                 variable.setName(idString);
                                 //variable.setValidRange(rangeName);
                                 //variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName.equalsIgnoreCase("String")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("String")) {
                                 variable = new GuiStringVariable();
                                 variable.setName(idString);
                                 //variable.setValidRange(rangeName);
