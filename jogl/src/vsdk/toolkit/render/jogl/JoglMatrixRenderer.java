@@ -41,8 +41,10 @@ public class JoglMatrixRenderer extends JoglRenderer {
     }
 
     /**
-    This method acumulates the matrix represented in `A` in the currently
+    This method accumulates the matrix represented in `A` in the currently
     selected matrix stack inside the JOGL state machine.
+    @param gl
+    @param A
     */
     public static void activate(GL2 gl, Matrix4x4 A)
     {

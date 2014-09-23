@@ -99,7 +99,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     /// Reference to all known objects and their corresponding display list data
     private static HashMap<Object, AndroidGLES20DisplayList> displayLists;
     
-    protected static String errorMessage;
+    private static String errorMessage;
 
     public static void init(Context ctx) {
         //- Set up geometric transforms -----------------------------------
@@ -1419,7 +1419,7 @@ public class AndroidGLES20Renderer extends RenderingElement
     @param y0
     @param useWhiteColor
     */
-    protected static void
+    public static void
     drawText(
         TextVisualConfiguration characterStyle,
         String msg, Camera c, int x0, int y0, 
@@ -1449,6 +1449,20 @@ public class AndroidGLES20Renderer extends RenderingElement
                 x += img.getXSize();
             }
         }
+    }
+
+    /**
+    @return the errorMessage
+    */
+    public static String getErrorMessage() {
+        return errorMessage;
+    }
+
+    /**
+    @param aErrorMessage the errorMessage to set
+    */
+    public static void setErrorMessage(String aErrorMessage) {
+        errorMessage = aErrorMessage;
     }
 
 }

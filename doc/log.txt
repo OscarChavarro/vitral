@@ -1148,4 +1148,7 @@
   - 2h: Adding @return comments to javadoc. They where missing and 
     leading to warnings on javadoc documentation generation process.
 
+2014 september 23, Oscar Chavarro
+  - 1h: Adding support for Android GL-ES 1.0
+
 ===========================================================================
