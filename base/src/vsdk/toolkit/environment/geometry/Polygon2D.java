@@ -3,6 +3,7 @@
 package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
@@ -42,6 +43,13 @@ public class Polygon2D extends Surface
         loops.add(currentLoop);
     }
 
+    public void invert()
+    {
+        for(_Polygon2DContour p2DContour : loops) {
+            Collections.reverse(p2DContour.vertices);
+        }
+    }
+    
     /**
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
