@@ -1,9 +1,7 @@
 //===========================================================================
-
 // VITRAL recomendation: Use explicit class imports (not .*) in hello world 
 // type programs so the user/programmer can be exposed to all the complexity 
 // involved. This will help him to know better the involved libraries.
-
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
@@ -22,7 +20,7 @@ public class HelloWorldJOGL implements GLEventListener {
     }
 
     /**
-    A final method is one that cannot be overriden by subclasses
+    A final method is one that does not accept to have override in subclasses
     */
     public final void createElements()
     {
@@ -44,7 +42,10 @@ public class HelloWorldJOGL implements GLEventListener {
         frame.setVisible(true);
     }
 
-    /** Called by drawable to initiate drawing */
+    /** 
+    Called by drawable to initiate drawing.
+    @param drawable 
+    */
     @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
@@ -64,24 +65,42 @@ public class HelloWorldJOGL implements GLEventListener {
         gl.glEnd();
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /**
+    Not used method, but need to instance GLEventListener.
+    @param drawable
+    */
     @Override
     public void init(GLAutoDrawable drawable) {
 
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** 
+    Not used method, but need to instance GLEventListener 
+    @param drawable
+    @param a
+    @param b
+    */
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
 
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** 
+    Not used method, but need to instance GLEventListener.
+    @param drawable
+    */
     @Override
     public void dispose(GLAutoDrawable drawable) {
 
     }
 
-    /** Called to indicate the drawing surface has been moved and/or resized */
+    /**
+    Called to indicate the drawing surface has been moved and/or resized
+    @param drawable
+    @param x
+    @param y
+    @param width
+    @param height
+    */
     @Override
     public void reshape(GLAutoDrawable drawable,
                         int x,
@@ -92,6 +111,10 @@ public class HelloWorldJOGL implements GLEventListener {
         gl.glViewport(0, 0, width, height);
     }
 
+    /**
+    Program entry point for applications.
+    @param args 
+    */
     public static void main(String[] args) {
         HelloWorldJOGL instance = new HelloWorldJOGL();
     }
