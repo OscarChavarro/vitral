@@ -23,52 +23,49 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
-import vsdk.toolkit.io.PersistenceElement;
 
 public class ImagePersistenceAwt extends ImagePersistenceHelper
 {
+    @Override
     public boolean rgbFormatSupported(String fileExtension)
     {
-        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
-            fileExtension.equals("gif") || fileExtension.equals("png") ) {
-            return true;
-        }
-        return false;
+        return fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png");
     }
 
+    @Override
     public boolean rgbaFormatSupported(String fileExtension)
     {
-        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
-            fileExtension.equals("gif") || fileExtension.equals("png") ) {
-            return true;
-        }
-        return false;
+        return fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png");
     }
 
+    @Override
     public boolean indexedColorFormatSupported(String fileExtension)
     {
-        if( fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
-            fileExtension.equals("gif") || fileExtension.equals("png") ) {
-            return true;
-        }
-        return false;
+        return fileExtension.equals("jpg") || fileExtension.equals("jpeg") ||
+            fileExtension.equals("gif") || fileExtension.equals("png");
     }
 
+    @Override
     public boolean gifExportSupported()
     {
         return true;
     }
 
+    @Override
     public boolean jpgExportSupported()
     {
         return true;
     }
 
+    @Override
     public boolean pngExportSupported()
     {
         return true;
     }
 
+    @Override
     public IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
     {
         IndexedColorImage retImage;
@@ -95,6 +92,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         return retImage;
     }
 
+    @Override
     public RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         RGBImage retImage = new RGBImage();
@@ -126,6 +124,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         return retImage;
     }
 
+    @Override
     public RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         RGBAImage retImage = new RGBAImage();
@@ -144,15 +143,17 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             fis = new FileInputStream(inImageFd);
             bis = new BufferedInputStream(fis);
             bi = ImageIO.read(bis);
+            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
             bis.close();
             fis.close();
+            
           }
           catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
-                                 "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
+            VSDK.reportMessageWithException(null, VSDK.ERROR, "ImagePersistenAwt.importRGBA",
+                "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"",
+                e);
             return null;
         }
-        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
 
         return retImage;
     }
@@ -240,6 +241,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
     }
 */
 
+    @Override
     public void exportJPG(OutputStream os, Image img)
         throws Exception
     {
@@ -274,11 +276,16 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
     binary PNG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */    
+    @Override
     public boolean exportPNG(File fd, Image img)
     {
         try {
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
 
             exportPNG(fos, img);
 
@@ -290,6 +297,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         return true;
     }
 
+    @Override
     public void exportPNG_24bitRgb(OutputStream os, Image img)
         throws Exception
     {
@@ -314,6 +322,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         ImageIO.write(bimg, "png", os);
     }
 
+    @Override
     public void exportPNG(OutputStream os, Image img)
         throws Exception
     {
@@ -332,7 +341,11 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
     binary GIF image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */    
+    @Override
     public boolean exportGIF(File fd, Image img)
     {
         try {
@@ -354,7 +367,8 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
                 }
             }
 
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
 
             ImageIO.write(bimg, "gif", fos);
 

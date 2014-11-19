@@ -58,7 +58,7 @@ public class PolygonProcessor {
         _Polygon2DContour p2DContourSimp = new _Polygon2DContour();
         Vertex2D point;
         /** In missingNodes we put two vertex at a time */
-        Stack<Integer> indsStkMissingNodes = new Stack();
+        Stack<Integer> indsStkMissingNodes = new Stack<Integer>();
         int ind0,ind1,indFar;
         //float epsilon = 0.01f;///
         float[] dist = new float[1];

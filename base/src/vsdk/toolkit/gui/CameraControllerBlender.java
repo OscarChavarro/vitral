@@ -7,6 +7,7 @@ import vsdk.toolkit.environment.Camera;
 public class CameraControllerBlender extends CameraController {
 
     private Camera camera;
+    
 
     public CameraControllerBlender(Camera camera) {
         this.camera = camera;
@@ -64,7 +65,7 @@ public class CameraControllerBlender extends CameraController {
         // Internal variables to control the interaction
         char unicode_id;
         int keycode;
-        double deltaMov = 0.1;
+        double deltaMov = 100.0;
         double angleInc;
         boolean updated = false;
         double EPSILON = 0.0001;

@@ -208,6 +208,7 @@ public class ImagePersistence extends PersistenceElement
             //delete retImage;
             return importDDSRGBA(inImageFd);
         }
+        
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
 
@@ -260,7 +261,7 @@ public class ImagePersistence extends PersistenceElement
             }
         }
         catch ( Exception e ) {
-
+            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "ImagePersistence.importRGBA", "INPUT ERROR: ", e);
         }
         return createNotAvailableImageRGBA();
     }

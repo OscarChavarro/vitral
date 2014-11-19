@@ -104,7 +104,7 @@ public class WeilerAthertonPolygonClipper {
 //        for ( DoubleLinkedListNode<VertexNode2D> dllnNodeS : intersecVertListOut ) {
         for ( i=0; i < intersecVertListOut.size(); ++i ) {
             _DoubleLinkedListNode<_VertexNode2D> dllnNodeS = intersecVertListOut.get(i);
-            if ( (dllnNodeS.data.flags & 0b01) == 0 ) {
+            if ( (dllnNodeS.data.flags & 0x01) == 0 ) {
                 if ( emptyInnerPolyOut ) {
                     emptyInnerPolyOut = false;
                 } else {
@@ -112,10 +112,10 @@ public class WeilerAthertonPolygonClipper {
                 }
                 iterator = dllnNodeS;
                 do {
-                    iterator.data.flags = (byte) (iterator.data.flags | 0b01); //Now this node may not be used in an interior polygon.
+                    iterator.data.flags = (byte) (iterator.data.flags | 0x01); //Now this node may not be used in an interior polygon.
                     innerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r, iterator.data.color.g, iterator.data.color.b);
                     iterator = iterator.next;
-                    iterator.data.flags = (byte) (iterator.data.flags | 0b01); //Now this node may not be used in an interior polygon.
+                    iterator.data.flags = (byte) (iterator.data.flags | 0x01); //Now this node may not be used in an interior polygon.
                     if ( iterator.data.pairNode != null ) {
                         iterator = iterator.data.pairNode;
                     }
@@ -127,7 +127,7 @@ public class WeilerAthertonPolygonClipper {
 //        for ( DoubleLinkedListNode<VertexNode2D> dllnNodeS : intersecVertListIn ) {
         for ( i=0; i < intersecVertListIn.size(); ++i ) {
             _DoubleLinkedListNode<_VertexNode2D> dllnNodeS = intersecVertListIn.get(i);
-            if ( (dllnNodeS.data.flags & 0b10) == 0 ) {
+            if ( (dllnNodeS.data.flags & 0x02) == 0 ) {
                 boolean isSubject;
 
                 if ( emptyOuterPolyOut ) {
@@ -138,14 +138,14 @@ public class WeilerAthertonPolygonClipper {
                 iterator = dllnNodeS;
                 isSubject = true;
                 do {
-                    iterator.data.flags = (byte) (iterator.data.flags | 0b10); //Now this node may not be used in an outer polygon.
+                    iterator.data.flags = (byte) (iterator.data.flags | 0x02); //Now this node may not be used in an outer polygon.
                     outerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r, iterator.data.color.g, iterator.data.color.b);
                     if ( isSubject ) {
                         iterator = iterator.next;
                     } else {
                         iterator = iterator.previous;
                     }
-                    iterator.data.flags = (byte) (iterator.data.flags | 0b10); //Now this node may not be used in an outer polygon.
+                    iterator.data.flags = (byte) (iterator.data.flags | 0x02); //Now this node may not be used in an outer polygon.
                     if ( iterator.data.pairNode != null ) {
                         iterator = iterator.data.pairNode;
                         isSubject = !isSubject;
