@@ -1,5 +1,4 @@
 //===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
 // Java classes

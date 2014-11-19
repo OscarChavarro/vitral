@@ -1,5 +1,5 @@
 //===========================================================================
-package vsdk.toolkit.render.androidgles20;
+package vsdk.toolkit.render.androidgles10;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ As OpenGL ES 2.0 does not support directly display lists, this class is aimed
 to help the creation of a construction similar to display lists, based upon
 binded vertex buffer objects (VBOs) and indexed arrays.
 */
-public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
+public class AndroidGLES10DisplayList extends AndroidGLES10Renderer {
     /// vboMaterials should be the same size as vboIds
     /// and can contain null references. If first material is null, default
     /// material is assumed. If a middle positioned material is null, it is
@@ -42,7 +42,7 @@ public class AndroidGLES20DisplayList extends AndroidGLES20Renderer {
     /// One of the several encaptulation for vertex data
     private int vertexMode;
     
-    public AndroidGLES20DisplayList(RendererConfiguration q) {
+    public AndroidGLES10DisplayList(RendererConfiguration q) {
         vboMaterials = new ArrayList<Material>();
         vboIds = new ArrayListOfInts(10);
         vboSizes = new ArrayListOfInts(10);

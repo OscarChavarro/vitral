@@ -1,31 +1,31 @@
 //===========================================================================
-package vsdk.toolkit.render.androidgles20;
+package vsdk.toolkit.render.androidgles10;
 
 // Java classes
 import java.util.ArrayList;
 
 // Android classes: OpenGL ES 2.0
-import android.opengl.GLES20;
+import android.opengl.GLES10;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImage;
 
-public class AndroidGLES20RGBAImageRenderer extends AndroidGLES20Renderer
+public class AndroidGLES10RGBImageRenderer extends AndroidGLES10Renderer
 {
-    private static ArrayList<_AndroidGLES20RGBAImageRendererAssociation> compiledImages;
+    private static ArrayList<_AndroidGLES10RGBImageRendererAssociation> compiledImages;
 
     static {
-        compiledImages = new ArrayList<_AndroidGLES20RGBAImageRendererAssociation>();
+        compiledImages = new ArrayList<_AndroidGLES10RGBImageRendererAssociation>();
     }
 
-    public static int activate(RGBAImage img)
+    public static int activate(RGBImage img)
     {
         int list = activateBase(img);
 
         return list;
     }
 
-    private static int activateBase(RGBAImage img)
+    private static int activateBase(RGBImage img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -33,18 +33,18 @@ public class AndroidGLES20RGBAImageRenderer extends AndroidGLES20Renderer
         int lists[] = new int[1];
 
         if ( (x_tam % 4) == 0 ) {
-            GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 4);
+            GLES10.glPixelStorei(GLES10.GL_UNPACK_ALIGNMENT, 4);
           }
           else if ( (x_tam % 2) == 0 ) {
-            GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 2);
+            GLES10.glPixelStorei(GLES10.GL_UNPACK_ALIGNMENT, 2);
           }
           else {
-            GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+            GLES10.glPixelStorei(GLES10.GL_UNPACK_ALIGNMENT, 1);
         }
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _AndroidGLES20RGBAImageRendererAssociation item = null;
+        _AndroidGLES10RGBImageRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -56,32 +56,32 @@ public class AndroidGLES20RGBAImageRenderer extends AndroidGLES20Renderer
         }
 
         //- 3. If there is no glList, create it ---------------------------
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES10.glBlendFunc(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE_MINUS_SRC_ALPHA);
+        GLES10.glEnable(GLES10.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
-            item = new _AndroidGLES20RGBAImageRendererAssociation();
+            GLES10.glGenTextures(1, lists, 0);
+            item = new _AndroidGLES10RGBImageRendererAssociation();
             item.image = img;
-            item.glList = 1;
+            item.glList = lists[0];
             compiledImages.add(item);
 
             //----
-            GLES20.glGenTextures(1, lists, 0);
-            item.glList = lists[0];
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, item.glList);
+            GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, item.glList);
 
-            GLES20.glTexImage2D(
-                GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, x_tam, y_tam, 0, GLES20.GL_RGBA,
-                GLES20.GL_UNSIGNED_BYTE, item.image.getRawImageDirectBuffer());
+            GLES10.glTexImage2D(
+                GLES10.GL_TEXTURE_2D, 0, GLES10.GL_RGB, x_tam, y_tam, 0, 
+                GLES10.GL_RGB, GLES10.GL_UNSIGNED_BYTE, 
+                item.image.getRawImageDirectBuffer());
+
             checkGlError("glTexImage2D");
         }
 
         //- 4. Use the image's glList -------------------------------------
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, item.glList);
+        GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, item.glList);
 
         return item.glList;
     }
-
 }
 
 //===========================================================================

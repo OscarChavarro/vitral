@@ -2,7 +2,7 @@
 package vsdk.toolkit.render.androidgles10;
 
 // Android GLES 1.0 classes
-import javax.microedition.khronos.opengles.GL10;
+import android.opengl.GLES10;
 
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -17,7 +17,7 @@ public class AndroidGLES10MatrixRenderer extends AndroidGLES10Renderer {
      * @param gl
      * @param A
     */
-    public static void activate(GL10 gl, Matrix4x4 A)
+    public static void activate(Matrix4x4 A)
     {
         float Mgl[] = new float[16];
         int row, column, pos;
@@ -28,7 +28,7 @@ public class AndroidGLES10MatrixRenderer extends AndroidGLES10Renderer {
             }
         }
 
-        gl.glMultMatrixf(Mgl, 0);
+        GLES10.glMultMatrixf(Mgl, 0);
     }
 
 }

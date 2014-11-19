@@ -19,22 +19,21 @@ import vsdk.toolkit.gui.PresentationElement;
 /**
 */
 public class AndroidGuiRenderer extends PresentationElement {
-
     public static int currentMenuId = -1;
     public static int currentCommandId = 1;
-    
+
     public static boolean
     executeCommandById(Gui inOutContext, int id, GuiCommandExecutor executor)
     {
         String command = executor.getCommandFromId(id);
         return executor.executeMenuCommand(command);
     }
-    
+
     public static void emptyMenubar(Menu inOutParentMenu)
     {
         inOutParentMenu.clear();
     }
-    
+
     /**
     @param inOutContext
     @param inOutParentMenu
@@ -42,15 +41,17 @@ public class AndroidGuiRenderer extends PresentationElement {
     @return
     */
     public static SubMenu buildMenubar(
-        Gui inOutContext, 
+        Gui inOutContext,
         Menu inOutParentMenu,
         GuiCommandExecutor executor)
     {
         // Activate menu for new devices without menu button, on Android
         // versions 4.0 and up: put it on the action bar
         SubMenu popup;
+        inOutParentMenu.add(1001, 1666, 1004, "Buscar");
         popup = inOutParentMenu.addSubMenu(1001, 1002, 1003, "Popup");
         buildMenubar(inOutContext, popup, executor);
+
 
         return popup;
     }

@@ -251,7 +251,7 @@ public class AndroidGLES20Renderer extends RenderingElement
         checkGlError("glEnableVertexAttribArray PObjectParam");
         
         // glColor3d
-        if (emissionColorParam != -1) {
+        if ( emissionColorParam != -1 ) {
             GLES20.glVertexAttribPointer(emissionColorParam, 3, GLES20.GL_FLOAT,
                     false, vertexSizeInBytes, 3 * FLOAT_SIZE_IN_BYTES);
             checkGlError("glVertexAttribPointer emissionColorParam");
