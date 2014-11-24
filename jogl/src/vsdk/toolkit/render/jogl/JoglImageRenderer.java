@@ -20,7 +20,7 @@ import vsdk.toolkit.media.RGBAImage;
 public class JoglImageRenderer extends JoglRenderer
 {
     /**
-    This method generates an OpenGL/JOGL MipMap structure, assoiates it with
+    This method generates an OpenGL/JOGL MipMap structure, associates it with
     the given image reference and activates.
 
     The method keeps track of all images activated, and take that history into
@@ -35,6 +35,9 @@ public class JoglImageRenderer extends JoglRenderer
     */
     public static int activate(GL2 gl, Image img)
     {
+        if ( img == null ) {
+            return -1;
+        }
         if ( img instanceof RGBAImage ) {
             return JoglRGBAImageRenderer.activate(gl, (RGBAImage)img);
         }
