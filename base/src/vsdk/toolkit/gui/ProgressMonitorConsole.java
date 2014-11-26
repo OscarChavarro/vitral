@@ -6,6 +6,8 @@
 
 package vsdk.toolkit.gui;
 
+import vsdk.toolkit.common.VSDK;
+
 public class ProgressMonitorConsole extends ProgressMonitor {
 
     private double currentPercent;
@@ -50,6 +52,9 @@ public class ProgressMonitorConsole extends ProgressMonitor {
     public void
     update(double minValue, double maxValue, double currentValue)
     {
+        if ( (maxValue - minValue) < VSDK.EPSILON ) {
+            return;
+        }
         double v = 100 * (currentValue - minValue) / (maxValue - minValue);
 
         while ( currentPercent + jumpPercent < v ) {
@@ -62,6 +67,15 @@ public class ProgressMonitorConsole extends ProgressMonitor {
             }
         }
     }
+    
+    /**
+    @return the currentPercent
+    */
+    @Override
+    public double getCurrentPercent() {
+        return currentPercent;
+    }
+
 }
 
 //===========================================================================
