@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package vsdk.toolkit.render.jogl;
 
 // Java basic classes
@@ -31,7 +25,7 @@ public class JoglMd2MeshRenderer extends JoglRenderer {
     
     public static void draw(GL2 gl, Md2Mesh md2Mesh){
         int numFrame;
-        int i, n, numFrameNext;
+        int i,j, numFrameNext;
         float[] frameVerts,frameVertsNext;
         float[] glCmdTexCoords;
         short[] frameNormalInds,frameNormalIndsNext;
@@ -75,40 +69,64 @@ public class JoglMd2MeshRenderer extends JoglRenderer {
         frameNormalIndsNext = md2Mesh.frameNormalIndices.get(numFrameNext);
         JoglImageRenderer.activate(gl, md2Mesh.skins[0]);
         gl.glEnable(GL2.GL_TEXTURE_2D);
-        n = 0;
-        for(int[] vertIndexStrip : md2Mesh.glCmdVertIndexStrip) {
-            glCmdTexCoords = md2Mesh.glCmdTexCoordsStrip.get(n++);
-            gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-                for(i=0;i<vertIndexStrip.length;++i) {
-                    normal = normals[frameNormalInds[vertIndexStrip[i]]];
-                    normalN = normals[frameNormalIndsNext[vertIndexStrip[i]]];
-                    gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
-                                 ,normal[1] + t*(normalN[1]-normal[1])
-                                 ,normal[2] + t*(normalN[2]-normal[2]));
-                    //Apparently the image has the origin in the top left, not on the bottom left as in OpenGL.
-                    gl.glTexCoord2d(glCmdTexCoords[i*2], 1-glCmdTexCoords[i*2+1]);
-                    vertInd = vertIndexStrip[i]*3;
-                    gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
-                                 ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
-                                 ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
-                }
-            gl.glEnd();
-        }
-        n = 0;
-        for(int[] vertIndexFan : md2Mesh.glCmdVertIndexFan) {
-            glCmdTexCoords = md2Mesh.glCmdTexCoordsFan.get(n++);
-            gl.glBegin(GL2.GL_TRIANGLE_FAN);
-                for(i=0;i<vertIndexFan.length;++i) {
-                    normal = normals[frameNormalInds[vertIndexFan[i]]];
-                    normalN = normals[frameNormalIndsNext[vertIndexFan[i]]];
-                    gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
-                                 ,normal[1] + t*(normalN[1]-normal[1])
-                                 ,normal[2] + t*(normalN[2]-normal[2]));
-                    gl.glTexCoord2d(glCmdTexCoords[i*2], 1-glCmdTexCoords[i*2+1]);
-                    vertInd = vertIndexFan[i]*3;
-                    gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
-                                 ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
-                                 ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+        if(!md2Mesh.glCmdVertIndexStrip.isEmpty() || !md2Mesh.glCmdVertIndexFan.isEmpty()) {
+//        if(false) {
+    //        for(int[] vertIndexStrip : md2Mesh.glCmdVertIndexStrip) {
+            for(i=0; i < md2Mesh.glCmdVertIndexStrip.size(); ++i) {
+                int[] vertIndexStrip = md2Mesh.glCmdVertIndexStrip.get(i);
+                glCmdTexCoords = md2Mesh.glCmdTexCoordsStrip.get(i);
+                gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+                    for(j=0;j<vertIndexStrip.length;++j) {
+                        normal = normals[frameNormalInds[vertIndexStrip[j]]];
+                        normalN = normals[frameNormalIndsNext[vertIndexStrip[j]]];
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
+                                     ,normal[1] + t*(normalN[1]-normal[1])
+                                     ,normal[2] + t*(normalN[2]-normal[2]));
+                        //Apparently the image has the origin in the top left, not on the bottom left as in OpenGL.
+                        gl.glTexCoord2d(glCmdTexCoords[j*2], 1-glCmdTexCoords[j*2+1]);
+                        vertInd = vertIndexStrip[j]*3;//In frameVerts, a one-dimensional array, are the 3 vertex coords.
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
+                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
+                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                    }
+                gl.glEnd();
+            }
+    //        for(int[] vertIndexFan : md2Mesh.glCmdVertIndexFan) {
+            for(i=0; i < md2Mesh.glCmdVertIndexFan.size(); ++i) {
+                int[] vertIndexFan = md2Mesh.glCmdVertIndexFan.get(i);
+                glCmdTexCoords = md2Mesh.glCmdTexCoordsFan.get(i);
+                gl.glBegin(GL2.GL_TRIANGLE_FAN);
+                    for(j=0;j<vertIndexFan.length;++j) {
+                        normal = normals[frameNormalInds[vertIndexFan[j]]];
+                        normalN = normals[frameNormalIndsNext[vertIndexFan[j]]];
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
+                                     ,normal[1] + t*(normalN[1]-normal[1])
+                                     ,normal[2] + t*(normalN[2]-normal[2]));
+                        gl.glTexCoord2d(glCmdTexCoords[j*2], 1-glCmdTexCoords[j*2+1]);
+                        vertInd = vertIndexFan[j]*3;
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
+                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
+                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                    }
+                gl.glEnd();
+            }
+        } else {
+            // Each triangle has three vertex indices and three tex. coord. indices.
+            gl.glBegin(GL2.GL_TRIANGLES);
+                for(i=0;i<md2Mesh.numTriangles;++i){
+                    for(j=0;j<3;++j){
+                        normal = normals[frameNormalInds[md2Mesh.triangles[i*2][j]]];
+                        normalN = normals[frameNormalIndsNext[md2Mesh.triangles[i*2][j]]];
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
+                                     ,normal[1] + t*(normalN[1]-normal[1])
+                                     ,normal[2] + t*(normalN[2]-normal[2]));
+                        gl.glTexCoord2d(md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2]
+                                      , 1 - md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2 + 1]);
+                        vertInd = md2Mesh.triangles[i*2][j]*3;//In frameVerts, a one-dimensional array, are the 3 vertex coords.
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
+                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
+                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                    }
                 }
             gl.glEnd();
         }
