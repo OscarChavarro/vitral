@@ -48,8 +48,8 @@ public class AndroidGuiRenderer extends PresentationElement {
         // Activate menu for new devices without menu button, on Android
         // versions 4.0 and up: put it on the action bar
         SubMenu popup;
-        inOutParentMenu.add(1001, 1666, 1004, "Buscar");
-        popup = inOutParentMenu.addSubMenu(1001, 1002, 1003, "Popup");
+        //inOutParentMenu.add(1001, 1666, 1004, "Buscar");
+        popup = inOutParentMenu.addSubMenu(1001, 1002, 1003, "MENU");
         buildMenubar(inOutContext, popup, executor);
 
 

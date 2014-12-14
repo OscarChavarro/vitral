@@ -82,6 +82,28 @@ public class AndroidGLES10RGBImageRenderer extends AndroidGLES10Renderer
 
         return item.glList;
     }
+    
+    public static void disable(RGBImage img)
+    {
+        //- 1. Seek if there is a precompiled glList for this image -------
+        boolean glListIsCompiled = false;
+        _AndroidGLES10RGBImageRendererAssociation item = null;
+
+        int i;
+        for ( i = 0; i < compiledImages.size(); i++ ) {
+            item = compiledImages.get(i);
+            if ( item.image == img ) {
+                glListIsCompiled = true;
+                break;
+            }
+        }
+
+        //- 2. If there is a glList, delete it ----------------------------
+        if ( glListIsCompiled != false && item != null ) {
+            int arr[] = {item.glList};
+            GLES10.glDeleteTextures(1, arr, 0);
+        }
+    }
 }
 
 //===========================================================================

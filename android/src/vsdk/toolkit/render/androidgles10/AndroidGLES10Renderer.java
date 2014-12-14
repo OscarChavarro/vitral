@@ -12,11 +12,13 @@ import android.opengl.GLES10;
 import android.opengl.GLES11;
 import android.opengl.GLES20;
 import android.util.Log;
+import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 
 // VSDK classes
 import vsdk.toolkit.render.RenderingElement;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.gui.AndroidSystem;
@@ -39,7 +41,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
     protected static final int FLOAT_SIZE_IN_BYTES = 4;
     private static Object unitSquare = null;
     public static boolean errorsDetected = false;
-    private static String errorMessage;
+    protected static String errorMessage;
     
     /// Reference to all known objects and their corresponding display list data
     private static HashMap<Object, AndroidGLES10DisplayList> displayLists;
@@ -135,7 +137,8 @@ public class AndroidGLES10Renderer extends RenderingElement {
             // Activate VBO
             GLES11.glBindBuffer(
                 GLES11.GL_ARRAY_BUFFER, displayList.getVboIds().get(i));
-            checkGlError("glBindBuffer(" + displayList.getVboIds().get(i) + ")");
+            checkGlError(
+                "glBindBuffer(" + displayList.getVboIds().get(i) + ")");
 
             if ( displayList.getIndexIds().size() == 0 ) {
                 // Display VBO
@@ -346,6 +349,13 @@ public class AndroidGLES10Renderer extends RenderingElement {
         GLES10.glDisableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
     }    
 
+    
+    protected static void drawImage(Image img, Camera c, int x, int y, 
+        boolean useWhiteColor)
+    {
+        drawImageWithScale(img, c, x, y, useWhiteColor, 1, 1);
+    }
+    
     /**
     Draws an image at integer screen coordinates (x, y) in pixels from
     upper left corner. Takes into account current configured camera (viewpoint).
@@ -357,37 +367,44 @@ public class AndroidGLES10Renderer extends RenderingElement {
     @param x
     @param y
     @param useWhiteColor
+    @param sx
+    @param sy
     */
-    protected static void drawImage(Image img, Camera c, int x, int y, 
-        boolean useWhiteColor)
+    protected static void drawImageWithScale(Image img, Camera c, int x, int y, 
+        boolean useWhiteColor, float sx, float sy)
     {
         RendererConfiguration q;
         float fx, fy;
         float dx, dy;
+        float ix;
+        float iy;
 
         if ( img == null ) {
             return;
         }
 
+        ix = img.getXSize() * sx;
+        iy = img.getYSize() * sy;
+
         if ( x < 0 ) {
             x = -x;
-            x = (int)c.getViewportXSize() - img.getXSize() - x;
+            x = (int)c.getViewportXSize() - (int)ix - x;
         }
         if ( y < 0 ) {
             y = -y;
-            y = (int)c.getViewportYSize() - img.getYSize() - y;
+            y = (int)c.getViewportYSize() - (int)iy - y;
         }
         
-        fx = (((float)img.getXSize()) * 2.0f) / 
+        fx = (ix * 2.0f) / 
              ((float)c.getViewportXSize());
 
-        fy = (((float)img.getYSize()) * 2.0f) / 
+        fy = (iy * 2.0f) / 
              ((float)c.getViewportYSize());
 
-	dx = ((float)(x) * 2.0f + ((float)img.getXSize())) / 
+        dx = ((float)(x) * 2.0f + ix) / 
             ((float)c.getViewportXSize());
 
-        dy = ((float)(y) * 2.0f + ((float)img.getYSize())) / 
+        dy = ((float)(y) * 2.0f + iy) / 
             ((float)c.getViewportYSize());
 
         q = new RendererConfiguration();
@@ -402,6 +419,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
         GLES10.glLoadIdentity();
         GLES10.glTranslatef(-1.0f + dx, 1.0f - dy, 0);
         GLES10.glScalef(fx, fy, 1.0f);
+        
         setRendererConfiguration(q);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         activateDefaultTextureParameters();
@@ -409,6 +427,72 @@ public class AndroidGLES10Renderer extends RenderingElement {
         drawUnitSquare();
     }
     
+    public static void buildFontMaps(TextVisualConfiguration characterStyle) {
+        final int currentPos[] = new int[2];
+        RGBAImage glyphMap = null;
+
+        Matrix4x4 glyphTextureTransform = new Matrix4x4();
+        ColorRgb fg = characterStyle.getForegroundColor();
+        ColorRgb bg = characterStyle.getBackgroundColor();
+        int fontSize = characterStyle.getFontSize();
+        int i;
+        char symbols[] = {'-', '+', '*', '/', '!', '|', '\"', '\'', '@',
+            '#', '$', '%', '&', '(', ')', '=', '?', '<', '>', ',', '.',
+            ';', ':', '_', '{', '}', '[', ']', 'á', 'é', 'í', 'ó', 'ú', 'ñ',
+            'ü', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', ' '};
+        HashMap<String, RGBAImage> characterSpriteCaches;
+        HashMap<String, Matrix4x4> characterTransformCaches;
+        Matrix4x4 M;
+
+        characterSpriteCaches = characterStyle.getCharacterSprites();
+        characterTransformCaches = characterStyle.getCharacterTransforms();
+
+        if ( glyphMap == null ) {
+            char c;
+            for ( c = 'A'; c <= 'Z'; c++ ) {
+                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap, currentPos, glyphTextureTransform,
+                    "" + c, fg, bg, fontSize);
+                if ( !characterSpriteCaches.containsKey("" + c) ) {
+                    M = new Matrix4x4(glyphTextureTransform);
+                    characterSpriteCaches.put("" + c, glyphMap);
+                    characterTransformCaches.put("" + c, M);
+                }
+            }
+            for ( c = 'a'; c <= 'z'; c++ ) {
+                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap, currentPos, glyphTextureTransform,
+                    "" + c, fg, bg, fontSize);
+                if ( !characterSpriteCaches.containsKey("" + c) ) {
+                    M = new Matrix4x4(glyphTextureTransform);
+                    characterSpriteCaches.put("" + c, glyphMap);
+                    characterTransformCaches.put("" + c, M);
+                }
+            }
+            for ( c = '0'; c <= '9'; c++ ) {
+                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap, currentPos, glyphTextureTransform,
+                    "" + c, fg, bg, fontSize);
+                if ( !characterSpriteCaches.containsKey("" + c) ) {
+                    M = new Matrix4x4(glyphTextureTransform);
+                    characterSpriteCaches.put("" + c, glyphMap);
+                    characterTransformCaches.put("" + c, M);
+                }
+            }
+            for ( i = 0; i < symbols.length; i++ ) {
+                c = symbols[i];
+                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap, currentPos, glyphTextureTransform,
+                    "" + c, fg, bg, fontSize);
+                if ( !characterSpriteCaches.containsKey("" + c) ) {
+                    M = new Matrix4x4(glyphTextureTransform);
+                    characterSpriteCaches.put("" + c, glyphMap);
+                    characterTransformCaches.put("" + c, M);
+                }
+            }
+        }
+    }
+
     /**
     @param characterStyle
     @param msg
@@ -430,21 +514,38 @@ public class AndroidGLES10Renderer extends RenderingElement {
 
         HashMap<String, RGBAImage> characterSpriteCaches;
         characterSpriteCaches = characterStyle.getCharacterSprites();
+        HashMap<String, Matrix4x4> characterTransformCaches;
+        characterTransformCaches = characterStyle.getCharacterTransforms();
         
         for ( i = 0; i < msg.length(); i++ ) {
             key = "" + msg.charAt(i);
             if ( !characterSpriteCaches.containsKey(key) ) {
-                img = AndroidSystem.calculateLabelImage(
-                    key, 
-                    characterStyle.getForegroundColor(), 
-                    characterStyle.getBackgroundColor(), 
-                    characterStyle.getFontSize());
-                characterSpriteCaches.put(key, img);
+                key = "*";
             }
-            if ( characterSpriteCaches.containsKey(key) ) {
+
+            if ( characterSpriteCaches.containsKey(key) &&
+                 characterTransformCaches.containsKey(key) ) {
+                float sx;
+                float sy;
+                Matrix4x4 M;
+                M = characterTransformCaches.get(key);
                 img = characterSpriteCaches.get(key);
-                drawImage(img, c, x, y, useWhiteColor);
-                x += img.getXSize();
+                sx = (float)M.M[0][0];
+                sy = (float)M.M[1][1];
+
+                GLES10.glMatrixMode(GLES10.GL_TEXTURE);
+                GLES10.glPushMatrix();
+                GLES10.glLoadIdentity();
+                GLES10.glMultMatrixf(M.exportToFloatArrayColumnOrder(), 0);
+                GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
+
+                drawImageWithScale(
+                    img, c, x, y, useWhiteColor, sx, sy);
+                x += img.getXSize() * sx;
+
+                GLES10.glMatrixMode(GLES10.GL_TEXTURE);
+                GLES10.glPopMatrix();
+                GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
             }
         }
     }

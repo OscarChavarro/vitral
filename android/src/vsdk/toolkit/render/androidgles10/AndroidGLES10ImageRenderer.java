@@ -29,6 +29,26 @@ public class AndroidGLES10ImageRenderer extends AndroidGLES10Renderer
         }
         return -1;
     }
+    
+    public static void disable(Image img)
+    {
+        if ( img == null ) {
+            return;
+        }
+
+        if ( img instanceof RGBAImage ) {
+            AndroidGLES10RGBAImageRenderer.disable((RGBAImage)img);
+        }
+        else if ( img instanceof RGBImage ) {
+            AndroidGLES10RGBImageRenderer.disable((RGBImage)img);
+        }
+        else {
+            String c = img.getClass().getName();
+
+            VSDK.reportMessage(null, VSDK.WARNING, "AndroidGLES20ImageRenderer.disable",
+            "Image GL activation not implemented for subclass " + c);
+        }        
+    }
 
 }
 

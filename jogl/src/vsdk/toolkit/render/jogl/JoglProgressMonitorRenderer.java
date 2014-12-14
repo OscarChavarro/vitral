@@ -31,9 +31,15 @@ public class JoglProgressMonitorRenderer extends JoglRenderer {
         gl.glPushAttrib(GL2.GL_DEPTH_BITS);
         gl.glDisable(GL2.GL_DEPTH_TEST);
         gl.glPushMatrix();
-        gl.glColor3d(0, 0, 0);
+        gl.glColor3d(
+            0, 
+            ((float)(0x51)/((float)0xFF)), 
+            ((float)(0x5B)/((float)0xFF)));
         drawFrame(gl, x0, y0, xSize, ySize, 0.0, 0.0);
-        gl.glColor3d(0.6, 0.6, 0.6);
+        gl.glColor3d(
+            ((float)(0xFD)/((float)0xFF)), 
+            ((float)(0x98)/((float)0xFF)), 
+            ((float)(0xA1)/((float)0xFF)));
         drawFrame(gl, x0, y0, xSize, ySize, 0.05, 0.05);
 
         gl.glColor3d(0.0, 1.0, 0.0);
