@@ -24,7 +24,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.visualAnalytics.PercentageWheelWidget;
 import vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
+//import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 /**
 This class generates OpenGL / JOGL primitives needed to show a 
@@ -43,9 +43,9 @@ three ways:
     never used textures.
 */
 public class JoglPercentageWheelWidgetRenderer {
-    private static HashMap<String, RGBAImage>characterSpritesSmall;
-    private static TextRenderer joglTextRendererSmall;
-    private static TextRenderer joglTextRendererBig;
+    private static final HashMap<String, RGBAImage>characterSpritesSmall;
+    private static final TextRenderer joglTextRendererSmall;
+    private static final TextRenderer joglTextRendererBig;
     private static final int fontSize = 20;
 
     static {
@@ -55,13 +55,13 @@ public class JoglPercentageWheelWidgetRenderer {
     }
     
     private static void
-    drawCharJOGL(GL2 gl, String key, TextRenderer r, ColorRgb c)
+    drawCharJOGL(GL2 gl, String key, TextRenderer r, ColorRgb c, Vector3D pos, double scale)
     {
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
-
+        
         r.begin3DRendering();
         r.setColor((float)c.r, (float)c.g, (float)c.b, 1.0f); // Recuerda RGB son los tres primeros
         r.draw3D(key, 0.0f, 0.0f, 0.0f, 0.05f); // La cadena y la posicion
@@ -72,7 +72,6 @@ public class JoglPercentageWheelWidgetRenderer {
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPopMatrix();
         gl.glMatrixMode(GL2.GL_MODELVIEW);
-
     }
     
     private static double
@@ -95,6 +94,7 @@ public class JoglPercentageWheelWidgetRenderer {
         return dx;
     }
     
+    /*
     private static double
     drawChar(GL2 gl, String key)
     {
@@ -133,6 +133,7 @@ public class JoglPercentageWheelWidgetRenderer {
         }
         return dx;
     }
+    */
 
     /**
     Draws widget on current OpenGL context.
@@ -142,30 +143,43 @@ public class JoglPercentageWheelWidgetRenderer {
     public static void draw(GL2 gl, PercentageWheelWidget widget)
     {
         // OpenGL state setup
+        gl.glPushMatrix();
+
         Vector3D pos = widget.getPosition();
         double s = widget.getScale();
-        gl.glPushMatrix();
+        
+        gl.glPushAttrib(GL2.GL_DEPTH_BITS | GL2.GL_TEXTURE_2D );
+        gl.glLoadIdentity();
         gl.glTranslated(pos.x, pos.y, pos.z);
         gl.glScaled(s, s, 1);
+        
+        drawInternal(gl, widget);
+        
+        // End
         gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glPushAttrib(GL2.GL_DEPTH_BITS | GL2.GL_TEXTURE_2D );
+        gl.glPopAttrib();
+        
+        gl.glPopMatrix();
+    }
+
+    private static void drawInternal(GL2 gl, PercentageWheelWidget widget) {
+        Vector3D pos = widget.getPosition();
+        double s = widget.getScale();
+                
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+
         gl.glLineWidth((float)1.0);
         //gl.glDisable(GL2.GL_DEPTH_TEST);
         //gl.glDepthFunc(GL2.GL_LEQUAL);
-
         //
-        double alpha = 1.0;
         int i;
         double angle;
         double da;
-        double deltaZ = 0.001;
         double delta;
         ArrayList<VisualDoubleVariable> dataset;
-
         delta = 360.0 / (widget.getAproximationSteps());
         dataset = widget.getDataset().getDoubles();
         da = 360.0 / ((double)dataset.size());
-
         // Layer 1: Draw border
         for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
             ColorRgb c = widget.getBorderBackgroundColor();
@@ -176,18 +190,19 @@ public class JoglPercentageWheelWidgetRenderer {
                 c = widget.getBorderHighlightedColor();
             }
             drawSector(gl, angle, angle + da,
-                widget.getOuterRadius(), 
-                widget.getOuterRadius() + widget.getBorderWidth(), 
-                1.0, delta, c);    
+                    widget.getOuterRadius(),
+                    widget.getOuterRadius() + widget.getBorderWidth(),
+                    1.0, delta, c);    
         }
-
+        
+        double deltaZ = 0.001;
+        
         // Layer 1: Draw background
         for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
-            drawSector(gl, angle, angle + da, 0.0, 
-                widget.getOuterRadius(), 1.0, delta,
-                widget.getWheelBackgroundColor());    
+            drawSector(gl, angle, angle + da, 0.0,
+                    widget.getOuterRadius(), 1.0, delta,
+                    widget.getWheelBackgroundColor());    
         }
-
         // Layer 2: Draw data
         gl.glTranslated(0, 0, deltaZ);
         for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
@@ -198,43 +213,36 @@ public class JoglPercentageWheelWidgetRenderer {
             else if ( i == widget.getHighligtedSector() ) {
                 c = widget.getHighlightedSectorColor();
             }
-            drawSector(gl, angle, angle + da, 
-                widget.getInnerRadius(), 
-                widget.getOuterRadius(), 
-                dataset.get(i).getCurrentValue(), delta, c);    
+            drawSector(gl, angle, angle + da,
+                    widget.getInnerRadius(),
+                    widget.getOuterRadius(),
+                    dataset.get(i).getCurrentValue(), delta, c);    
         }
-
         // Layer 3: Draw scale lines
         gl.glTranslated(0, 0, deltaZ);
         double p;
         double r;
-        
         for ( p = 0; p < 1.0 - VSDK.EPSILON; p += 0.1 ) {
-            r = widget.getInnerRadius() + 
-                p * (widget.getOuterRadius()-widget.getInnerRadius());
+            r = widget.getInnerRadius() +
+                    p * (widget.getOuterRadius()-widget.getInnerRadius());
             drawCircle(gl, delta, r, widget.getTrackLineColor());             
         }
-        
         // Layer 4: Draw external border
         gl.glTranslated(0, 0, deltaZ);
-        drawTrack(gl, 
-            delta, 
-            widget.getOuterRadius(), 
-            widget.getOuterRadius() + widget.getBorderWidth() / 5.0, 
-            widget.getSectorLineColor()); 
-
-        // Layer 4: Draw data sector lines
+        drawTrack(gl,
+                delta,
+                widget.getOuterRadius(),
+                widget.getOuterRadius() + widget.getBorderWidth() / 5.0,
+                widget.getSectorLineColor());
         double x, y, r1, r2;
         r1 = widget.getInnerRadius();
         r2 = widget.getOuterRadius() + widget.getBorderWidth();
         ColorRgb c = widget.getSectorLineColor();
-
         gl.glColor3d(c.r, c.g, c.b);
         gl.glBegin(GL2.GL_LINES);
-        
-        for ( i = 0, angle = 0.0; 
-            i < dataset.size(); 
-            i++, angle += da ) {
+        for ( i = 0, angle = 0.0;
+                i < dataset.size();
+                i++, angle += da ) {
             x = r1*Math.cos(Math.toRadians(angle));
             y = r1*Math.sin(Math.toRadians(angle));
             gl.glVertex3d(x, y, 0.0);
@@ -244,32 +252,42 @@ public class JoglPercentageWheelWidgetRenderer {
             gl.glVertex3d(x, y, 0.0);
         }
         gl.glEnd();
-        
         // Layer 4: Draw texts
-        for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
-            drawSectorText(
-                gl, 
-                dataset.get(i).getName(), 
-                angle, 
-                angle + da,
-                widget.getOuterRadius(),
-                widget.getBorderWidth(),
-                deltaZ);
-        }
 
+        for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
+            gl.glLoadIdentity();
+            gl.glTranslated(pos.x, pos.y, pos.z);
+            gl.glScaled(s, s, s);
+
+            drawSectorText(
+                    gl,
+                    dataset.get(i).getName(),
+                    angle,
+                    angle + da,
+                    widget.getOuterRadius(),
+                    widget.getBorderWidth(),
+                    deltaZ,
+                    pos, s);
+        }
         // Draw title in center
+        
         double scale = 0.1 * widget.getInnerRadius();
         double xx;
         double yy;
         gl.glPushMatrix();
+        
+        gl.glLoadIdentity();
+        gl.glTranslated(pos.x, pos.y, pos.z);
+        gl.glScaled(s, s, s);
 
+        
         if ( widget.getSelectedSector() == -1 ) {
             xx = -widget.getInnerRadius() + 0.05;
             yy = -0.025;
             gl.glTranslated(xx, yy, 4 * deltaZ);
             gl.glScaled(scale, scale, 1);
             drawCharJOGL(gl, widget.getDefaultTitle(), joglTextRendererBig,
-                new ColorRgb(1, 1, 1));
+                    new ColorRgb(1, 1, 1), pos, s);
         }
         else {
             double val;
@@ -282,7 +300,7 @@ public class JoglPercentageWheelWidgetRenderer {
             
             gl.glTranslated(xx, yy, 4 * deltaZ);
             gl.glScaled(scale, scale, 1);
-            drawCharJOGL(gl, msg, joglTextRendererBig, new ColorRgb(1, 1, 1));
+            drawCharJOGL(gl, msg, joglTextRendererBig, new ColorRgb(1, 1, 1), pos, s);
             
             xx = -widget.getInnerRadius() + 0.05;
             yy = 0.02;
@@ -297,18 +315,11 @@ public class JoglPercentageWheelWidgetRenderer {
                 gl.glTranslated(xx, yy, 4 * deltaZ);
                 gl.glScaled(scale, scale, 1);
                 drawCharJOGL(gl, token, joglTextRendererSmall,
-                    new ColorRgb(1, 1, 1));
+                        new ColorRgb(1, 1, 1), pos, s);
                 gl.glPopMatrix();
                 yy -= 0.05;
-            }
-            
+            }  
         }
-
-        gl.glPopMatrix();
-        
-        // End
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glPopAttrib();
         gl.glPopMatrix();
     }
 
@@ -390,7 +401,9 @@ public class JoglPercentageWheelWidgetRenderer {
         double endAngle,
         double outerRadius,
         double borderWidth,
-        double deltaZ) {
+        double deltaZ,
+        Vector3D pos,
+        double ss) {
         
         String key;
         int i;
@@ -431,7 +444,7 @@ public class JoglPercentageWheelWidgetRenderer {
 
             key = "" + msg.charAt(i);
             //drawChar(gl, key);
-            drawCharJOGL(gl, key, joglTextRendererSmall, new ColorRgb(0, 0, 0));
+            drawCharJOGL(gl, key, joglTextRendererSmall, new ColorRgb(0, 0, 0), pos, ss);
 
             gl.glPopMatrix();
             angle -= da*widthProportions[i];
