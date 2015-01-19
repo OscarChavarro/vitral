@@ -50,12 +50,6 @@ public class ImagePersistence extends PersistenceElement
 
     static {
         initHelpers();
-
-        // Call order reflects prefered order
-        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAwt");
-        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceTarga");
-        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceJogl");
-        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAndroid");
     }
 
     private static void loadPluginHelper(String className)
@@ -75,11 +69,17 @@ public class ImagePersistence extends PersistenceElement
         }
     }
 
-    private static void initHelpers()
+    public static void initHelpers()
     {
         if ( helpers == null  ) {
             helpers = new ArrayList<ImagePersistenceHelper>();
         }
+        
+        // Call order reflects prefered order
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAwt");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceTarga");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceJogl");
+        loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAndroid");
     }
 
     public static void registerHelper(ImagePersistenceHelper h)
