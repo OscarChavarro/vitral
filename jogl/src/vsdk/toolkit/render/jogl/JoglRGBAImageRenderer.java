@@ -196,9 +196,10 @@ public class JoglRGBAImageRenderer extends JoglRenderer
     {
         gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
         gl.glRasterPos2f(-1, -1);
-        gl.glDrawPixels(img.getXSize(), img.getYSize(), 
-                        GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, 
-                        img.getRawImageDirectBuffer());
+        gl.glDrawPixels(
+            img.getXSize(), img.getYSize(), 
+            GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, 
+            img.getRawImageDirectBuffer());
     }
 
     public static ByteBuffer importJOGLimage(GL2 gl) {

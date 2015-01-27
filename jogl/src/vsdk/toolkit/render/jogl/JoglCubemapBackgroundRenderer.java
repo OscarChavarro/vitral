@@ -49,7 +49,7 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
         gl.glShadeModel(GL2.GL_FLAT);
         gl.glDisable(GL.GL_BLEND);
         gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL.GL_DEPTH_TEST);
+        gl.glDisable(GL.GL_DEPTH_TEST   );
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glFrontFace(GL.GL_CCW);
         gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
