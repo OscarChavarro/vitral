@@ -696,7 +696,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         //- Draw solid faces one by one -----------------------------------
         gl.glCullFace(GL.GL_BACK);
         gl.glEnable(GL.GL_CULL_FACE);
-        gl.glPolygonOffset(-1.0f, 1.0f);
+        //gl.glPolygonOffset(-1.0f, 1.0f);
 
         //-----------------------------------------------------------------
         Vector3D p0, n;
@@ -809,7 +809,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonOffset(1.0f, 1.0f);
             drawSurfaces(gl, solid);
         }
         if ( quality.isWiresSet() ) {

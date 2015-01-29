@@ -280,7 +280,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            // gl.glPolygonOffset(1.0f, 1.0f);
 
             if ( q.isTextureSet() ) {
                 gl.glEnable(GL.GL_TEXTURE_2D);
@@ -340,7 +340,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonOffset(1.0f, 1.0f);
             drawSurfaceGrid(gl, p, textureUSizeFactor, tilling_y,
                             textureURelaviteStart, textureVRelativeStart, q);
         }

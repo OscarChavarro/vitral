@@ -39,6 +39,11 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
     /**
     \todo  program this!
+     * @param gl
+     * @param mesh
+     * @param quality
+     * @param flip
+     * @param selectedTriangles
     */
     public static void drawWithSelection(GL2 gl, TriangleMesh mesh,
                                          RendererConfiguration quality, 
@@ -52,6 +57,10 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     Geometry object.
 
     \todo  Handle PHONG and BUMPMAPPING cases, via vertex/program shaders
+     * @param gl
+     * @param mesh
+     * @param quality
+     * @param flip
     */
     public static void
     draw(GL2 gl, TriangleMesh mesh, RendererConfiguration quality, boolean flip) {
@@ -65,7 +74,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
             // Prepare bump mapping and shaders...
-            ;
+            
         }
 
         if ( quality.isSurfacesSet() ) {
@@ -76,9 +85,9 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             //
 
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
-            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            //gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
+            //gl.glPolygonOffset(1.0f, 1.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
                 drawSurfacesWithTexture(gl, mesh, flip);
@@ -93,7 +102,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             gl.glShadeModel(GL2.GL_FLAT);
 
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
-            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
+            //gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
@@ -183,7 +192,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         //-----------------------------------------------------------------
         if ( quality.isBumpMapSet() ) {
             // Prepare bump mapping and shaders...
-            ;
+            
         }
 
         if ( quality.isSurfacesSet() ) {
@@ -196,7 +205,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonOffset(1.0f, 1.0f);
             if ( quality.isTextureSet() && withTextures ) {
                 // drawSurfacesWithTexture can enable GL_TEXTURE_2D
                 drawSurfacesWithTexture(gl, mesh, flip);
@@ -356,7 +365,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         int end = 0;
         int materialIndex;
         Material materialsArray[] = mesh.getMaterials();
-        for ( int i = 0; i < materialRanges.length; i++ ) {
+        int i;
+        for ( i = 0; i < materialRanges.length; i++ ) {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
             if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
@@ -400,7 +410,8 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         int end = 0;
         int materialIndex;
         Material materialsArray[] = mesh.getMaterials();
-        for ( int i = 0; i < materialRanges.length; i++ ) {
+        int i;
+        for ( i = 0; i < materialRanges.length; i++ ) {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
             if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
@@ -668,7 +679,7 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
         block = info[0] / 3;
 
         //-----------------------------------------------------------------
-        int t[] = mesh.getTriangleIndexes();
+        //int t[] = mesh.getTriangleIndexes();
         int i;
         for ( i = start; i+block < end; i += block ) {
             triangleIndicesBuffer.position(3*i);

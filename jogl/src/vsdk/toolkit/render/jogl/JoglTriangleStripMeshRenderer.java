@@ -76,7 +76,7 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonOffset(1.0f, 1.0f);
 
             drawSurfacesWithoutTexture(gl, mesh, flip);
         }

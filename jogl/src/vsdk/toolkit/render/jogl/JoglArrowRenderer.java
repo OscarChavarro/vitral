@@ -62,7 +62,7 @@ public class JoglArrowRenderer extends JoglRenderer {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            gl.glPolygonOffset(1.0f, 1.0f);
+            //gl.glPolygonOffset(1.0f, 1.0f);
             drawParts(gl, arrow);
         }
 
@@ -91,7 +91,7 @@ public class JoglArrowRenderer extends JoglRenderer {
 
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_POINTS);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(-0.5f, 0.0f);
+            //gl.glPolygonOffset(-0.5f, 0.0f);
             gl.glLineWidth(1.0f);
 
             // Warning: Change with configured color for borders
