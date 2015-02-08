@@ -1,21 +1,34 @@
 //===========================================================================
-// VITRAL recomendation: Use explicit class imports (not .*) in hello world 
-// type programs so the user/programmer can be exposed to all the complexity 
-// involved. This will help him to know better the involved libraries.
+// VITRAL recommendation: Use explicit class imports (not .*) so the user
+// or programmer can be exposed to all the complexity involved. This will 
+// help him also to better know the libraries involved.
+
+// Java Awt/Swing classes
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
 // JOGL classes
+import javax.media.opengl.awt.GLJPanel;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GL2;
-import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
-public class HelloWorldJOGL implements GLEventListener {
+/**
+Simple example program to show how to program OpenGL programs in Java using
+JOGL2 library. Current program does not make use of interaction events, and
+does not respond to mouse neither keyboard events.
+*/
+public class HelloWorldJOGL implements GLEventListener 
+{
+    private JFrame mainWindowWidget;
 
-    public HelloWorldJOGL() {
+    /**
+    Default constructor.
+    */
+    public HelloWorldJOGL() 
+    {
         createElements();
     }
 
@@ -27,19 +40,24 @@ public class HelloWorldJOGL implements GLEventListener {
         //-----------------------------------------------------------------
         GLProfile glp = GLProfile.get(GLProfile.GL2); 
         GLCapabilities caps = new GLCapabilities(glp);
-        GLCanvas canvas = new GLCanvas(caps);
+        GLJPanel canvas = new GLJPanel(caps);
         canvas.addGLEventListener(this);
 
         //-----------------------------------------------------------------
-        JFrame frame;
+        mainWindowWidget = new JFrame("VITRAL concept test - JOGL Hello World");
+        mainWindowWidget.add(canvas, BorderLayout.CENTER);
+        mainWindowWidget.pack();
+        mainWindowWidget.setSize(640, 480);
+        mainWindowWidget.setLocationRelativeTo(null);
+        mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
 
-        frame = new JFrame("VITRAL concept test - JOGL Hello World");
-        frame.add(canvas, BorderLayout.CENTER);
-        frame.pack();
-        frame.setSize(640, 480);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+    /**
+    Start Swing thread and show application on screen.
+    */
+    public final void runApp()
+    {
+        mainWindowWidget.setVisible(true);
     }
 
     /** 
@@ -75,16 +93,6 @@ public class HelloWorldJOGL implements GLEventListener {
     }
 
     /** 
-    Not used method, but need to instance GLEventListener 
-    @param drawable
-    @param a
-    @param b
-    */
-    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
-
-    }
-
-    /** 
     Not used method, but need to instance GLEventListener.
     @param drawable
     */
@@ -102,11 +110,13 @@ public class HelloWorldJOGL implements GLEventListener {
     @param height
     */
     @Override
-    public void reshape(GLAutoDrawable drawable,
-                        int x,
-                        int y,
-                        int width,
-                        int height) {
+    public void reshape(
+        GLAutoDrawable drawable,
+        int x,
+        int y,
+        int width,
+        int height) 
+    {
         GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height);
     }
@@ -117,6 +127,7 @@ public class HelloWorldJOGL implements GLEventListener {
     */
     public static void main(String[] args) {
         HelloWorldJOGL instance = new HelloWorldJOGL();
+        instance.runApp();
     }
 
 }
