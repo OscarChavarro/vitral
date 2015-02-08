@@ -7,109 +7,115 @@
 
 package vsdk.toolkit.environment.geometry;
 
+// VSDK classes
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
 /**
 Current implementation is based on [WAGN2004].
-@author Leidy Alexandra Lozano Jacome
 */
-public class Torus extends Solid {
+public class Torus extends Solid 
+{
     public static final long serialVersionUID = 20131024L;
-    private double rMajor;
-    private double rMinor;
     
-    private GeometryIntersectionInformation lastInfo;
+    private double majorRadius;
+    private double minorRadius;
     
-    public Torus(double rMaj, double rMin)
+    private final GeometryIntersectionInformation lastInfo;
+
+    /**
+    @param inMajorRadius
+    @param inMinorRadius 
+    */
+    public Torus(final double inMajorRadius, final double inMinorRadius)
     {
-        rMajor=rMaj;
-        rMinor=rMin;
+        majorRadius = inMajorRadius;
+        minorRadius = inMinorRadius;
         
         lastInfo = new GeometryIntersectionInformation();
     }
 
     /**
-    @return the rMajor
+    @return the majorRadius
     */
-    public double getrMajor() {
-        return rMajor;
+    public double getMajorRadius() 
+    {
+        return majorRadius;
     }
 
     /**
-     * @param rMajor the rMajor to set
+     * @param rMajor the majorRadius to set
      */
-    public void setrMajor(double rMajor) {
-        this.rMajor = rMajor;
+    public void setMajorRadius(double rMajor) 
+    {
+        this.majorRadius = rMajor;
     }
 
     /**
-    @return the rMinor
+    @return the minorRadius
     */
-    public double getrMinor() {
-        return rMinor;
+    public double getMinorRadius() 
+    {
+        return minorRadius;
     }
 
     /**
-    @param rMinor the rMinor to set
+    @param rMinor the minorRadius to set
     */
-    public void setrMinor(double rMinor) {
-        this.rMinor = rMinor;
+    public void setMinorRadius(double rMinor) 
+    {
+        this.minorRadius = rMinor;
     }
 
     @Override
-    public boolean doIntersection(Ray inOut_ray) {
-        
-        Vector3D p=inOut_ray.origin;
-        
+    public boolean doIntersection(Ray inOut_ray) 
+    {
+        Vector3D p = inOut_ray.origin;
+
         inOut_ray.direction.normalize();
-        Vector3D d=inOut_ray.direction;
-       
-        double alpha,beta,gama;
-       
-        
-        
-        alpha=d.dotProduct(d);
-        beta=2*p.dotProduct(d);
-        gama=p.dotProduct(p)-(rMinor*rMinor)-(rMajor*rMajor);
-        
-        double a4,a3,a2,a1,a0;
-        
-        a4=alpha*alpha;
-        a3=2*alpha*beta;
-        a2=(beta*beta)+2*alpha*gama+4*(rMajor*rMajor)*(d.z*d.z);
-        a1=2*beta*gama+8*(rMajor*rMajor)*p.z*d.z;
-        a0=(gama*gama)+ 4*(rMajor*rMajor)*(p.z*p.z)-(4*(rMajor*rMajor)*(rMinor*rMinor));
-        
+        Vector3D d = inOut_ray.direction;
+
+        double alpha, beta, gama;
+
+        alpha = d.dotProduct(d);
+        beta = 2 * p.dotProduct(d);
+        gama = p.dotProduct(p) - (minorRadius * minorRadius) - (majorRadius * majorRadius);
+
+        double a4, a3, a2, a1, a0;
+
+        a4 = alpha * alpha;
+        a3 = 2 * alpha * beta;
+        a2 = (beta * beta) + 2 * alpha * gama + 4 * (majorRadius * majorRadius) * (d.z * d.z);
+        a1 = 2 * beta * gama + 8 * (majorRadius * majorRadius) * p.z * d.z;
+        a0 = (gama * gama) + 4 * (majorRadius * majorRadius) * (p.z * p.z) - (4 * (majorRadius * majorRadius) * (minorRadius * minorRadius));
+
         //System.out.println(inOut_ray);
-        //System.out.println("rMinor: "+rMinor+" rMajor: "+rMajor);
+        //System.out.println("minorRadius: "+minorRadius+" majorRadius: "+majorRadius);
         //System.out.println("a4: "+a4+" a3: "+a3+" a2: "+a2+" a1: "+a1+" a0: "+a0);
-        
         SolverPolynomialQuarticBairstow q;
 
-        q = new SolverPolynomialQuarticBairstow(a4, a3, a2,  a1, a0);
+        q = new SolverPolynomialQuarticBairstow(a4, a3, a2, a1, a0);
 
         double root[] = q.getReal();
         double rootImg[] = q.getImg();
         double mRoot = 0;
         int count = 0;
 
-        for ( int i = 0; i < 4; i++ ) {
-            if ( rootImg[i] == 0 && root[i] > 0 ) {
-                if ( count == 0 ) {
+        for (int i = 0; i < 4; i++) {
+            if (rootImg[i] == 0 && root[i] > 0) {
+                if (count == 0) {
                     mRoot = root[i];
                     count++;
+                } else if (root[i] < mRoot) {
+                    mRoot = root[i];
                 }
-                else if ( root[i] < mRoot ) {
-                    mRoot=root[i];
-		}
             }
         }
-        
-        if ( count == 0 ) {
+
+        if (count == 0) {
             return false;
-	}
+        } 
         else {
             lastInfo.p.x = inOut_ray.origin.x + (mRoot * inOut_ray.direction.x);
             lastInfo.p.y = inOut_ray.origin.y + (mRoot * inOut_ray.direction.y);
@@ -119,8 +125,9 @@ public class Torus extends Solid {
         }
     }
 
-    /**
-    Unused and not working yet method
+    /*
+    Unused and not working yet method. An old try to find roots from analytical
+    cubic equation solution.
     @param a4
     @param a3
     @param a2
@@ -129,7 +136,8 @@ public class Torus extends Solid {
     @param ray
     @return true if current quartic equation has at least one real root
     */    
-    public boolean
+    /*
+    private boolean
     calculateRoot(double a4, double a3,double a2, double a1, double a0, Ray ray)
     {
         int iRoot[];
@@ -177,7 +185,7 @@ public class Torus extends Solid {
         
         
         // 2.4 denominador
-   //     System.out.println("p2_4_d=3 * a * Math.pow((  p2_4_d_1 - p2_4_d_2 + p2_4_d_3 + p2_4_d_4 - p2_4_d_5  + Math.sqrt(p2_4_d_6)),(1/3d)); ");
+        //System.out.println("p2_4_d=3 * a * Math.pow((  p2_4_d_1 - p2_4_d_2 + p2_4_d_3 + p2_4_d_4 - p2_4_d_5  + Math.sqrt(p2_4_d_6)),(1/3d)); ");
         
         // 2.4.1
         double p2_4_d_1= 2 * Math.pow(a2, 3);
@@ -202,7 +210,7 @@ public class Torus extends Solid {
                                         - 3 * a3 * a1 
                                         + 12 * a4 * a0),3
                                        );
-         double p2_4_d_6_2=Math.pow(
+        double p2_4_d_6_2=Math.pow(
                                       (2 * Math.pow(a2, 3) 
                                        - 9 * a3 * a2 * a1 
                                        + 27 * a4 * Math.pow(a1, 2) 
@@ -414,68 +422,64 @@ public class Torus extends Solid {
         
         //Root 2
         //------------------------------------------------------------------------
-         //----------------------------------------------------
         //----------------------------------------------------
-       //1. Part 1 
+        //----------------------------------------------------
+        //1. Part 1 
         p1=-a3/(4*a4);
-//        System.out.println("Parte 1: "+p1);
-       
-        
+        //System.out.println("Parte 1: "+p1);
+
         //--------------------------------------------------------- 
-       //2. Part 2
+        //2. Part 2        
+        //System.out.println("\nParte 2: p2_1 * Math.sqrt( p2_2  - p2_3 + p2_4 + p2_5)"); 
         
-//       System.out.println("\nParte 2: p2_1 * Math.sqrt( p2_2  - p2_3 + p2_4 + p2_5)"); 
-        
-        // 2.1
-        
+        // 2.1        
         p2_1=1/2d;
- //       System.out.println("p2_1: "+p2_1);
+        //System.out.println("p2_1: "+p2_1);
         
         // 2.2
         
         p2_2=Math.pow(a3, 2)/(4 *  Math.pow(a4, 2));
- //       System.out.println("p2_2: "+p2_2);
+        //System.out.println("p2_2: "+p2_2);
         
         // 2.3
         
         p2_3=(2 * a2)/(3 * a4);
- //       System.out.println("p2_3: "+p2_3);
+        //System.out.println("p2_3: "+p2_3);
        
         // 2.4
- //       System.out.println("p2_4= p2_4_n/p2_4_d ");
+        //System.out.println("p2_4= p2_4_n/p2_4_d ");
        
         // 2.4 nominador
         p2_4_n=Math.pow(2d, (1/3d))*(Math.pow(a2, 2) - 3 * a3  * a1 + 12 * a4 * a0);
-//        System.out.println("p2_4_n: "+p2_4_n);
-        
+        //System.out.println("p2_4_n: "+p2_4_n);
         
         // 2.4 denominador
- //       System.out.println("p2_4_d=3 * a * Math.pow((  p2_4_d_1 - p2_4_d_2 + p2_4_d_3 + p2_4_d_4 - p2_4_d_5  + Math.sqrt(p2_4_d_6)),(1/3d)); ");
+        //System.out.println("p2_4_d=3 * a * Math.pow((  p2_4_d_1 - p2_4_d_2 + p2_4_d_3 + p2_4_d_4 - p2_4_d_5  + Math.sqrt(p2_4_d_6)),(1/3d)); ");
         
         // 2.4.1
         p2_4_d_1= 2 * Math.pow(a2, 3);
- //       System.out.println("p2_4_d_1: "+p2_4_d_1);
+        //System.out.println("p2_4_d_1: "+p2_4_d_1);
         // 2.4.2
         p2_4_d_2= 9 * a3 * a2 * a1;
- //       System.out.println("p2_4_d_2: "+p2_4_d_2);
+        //System.out.println("p2_4_d_2: "+p2_4_d_2);
         // 2.4.3
         p2_4_d_3= 27 * a4 * Math.pow(a1, 2) ;
-//        System.out.println("p2_4_d_3: "+p2_4_d_3);
+        //System.out.println("p2_4_d_3: "+p2_4_d_3);
         // 2.4.4
         p2_4_d_4= 27 * Math.pow(a3, 2) * a0;
-//        System.out.println("p2_4_d_4: "+p2_4_d_4);
+        //System.out.println("p2_4_d_4: "+p2_4_d_4);
         // 2.4.5
         p2_4_d_5= 72 * a4 * a2 * a0;
-//        System.out.println("p2_4_d_5: "+p2_4_d_5);
+        //System.out.println("p2_4_d_5: "+p2_4_d_5);
         // 2.4.6        
- //       System.out.println("p2_4_d_6=p2_4_d_6_1 + p2_4_d_6_2");
+        //System.out.println("p2_4_d_6=p2_4_d_6_1 + p2_4_d_6_2");
         
         p2_4_d_6_1=4 * Math.pow(
                                         (Math.pow(a2, 2) 
                                         - 3 * a3 * a1 
                                         + 12 * a4 * a0),3
                                        );
-         p2_4_d_6_2=Math.pow(
+        p2_4_d_6_2=Math.pow(
                                       (2 * Math.pow(a2, 3) 
                                        - 9 * a3 * a2 * a1 
                                        + 27 * a4 * Math.pow(a1, 2) 
@@ -485,7 +489,7 @@ public class Torus extends Solid {
         
         p2_4_d_6 = - p2_4_d_6_1 + p2_4_d_6_2;
         
-  //      System.out.println("p2_4_d_6: "+p2_4_d_6);
+        //System.out.println("p2_4_d_6: "+p2_4_d_6);
         
         p2_4_d=3 * a4 * Math.pow(
                                         (  p2_4_d_1 
@@ -497,7 +501,7 @@ public class Torus extends Solid {
                                         )
                                        ,(1/3d));
         
- //       System.out.println(p2_4_d);
+        //System.out.println(p2_4_d);
         
         p2_4= p2_4_n/p2_4_d;
         
@@ -667,30 +671,28 @@ public class Torus extends Solid {
         
         p3= p3_1 * Math.sqrt(p3_2 - p3_3 - p3_4 - p3_5 - p3_6);
         
-  //      System.out.println("p3_1: "+p3_1+"\np3_2: "+p3_2+" \np3_3: "+p3_3+" \np3_4: "+p3_4+" \np3_5: "+p3_5+" \np3_6: "+p3_6);
+        //System.out.println("p3_1: "+p3_1+"\np3_2: "+p3_2+" \np3_3: "+p3_3+" \np3_4: "+p3_4+" \np3_5: "+p3_5+" \np3_6: "+p3_6);
         
         x1=p1+p2-p3;
-      //  System.out.println("P1: "+p1+" P2: "+p2+" P3: "+p3+" \nX1:"+x1);
+        //System.out.println("P1: "+p1+" P2: "+p2+" P3: "+p3+" \nX1:"+x1);
         
-       System.out.println("X1: "+x1);
+        //System.out.println("X1: "+x1);
        
-       if(Double.isNaN(x1))
-          {
-              iRoot[1]=0;
-              Root[1]=0;
-          }
-          else
-          {
-              iRoot[1]=1;
-              Root[1]=x1;
-          }
+        if( Double.isNaN(x1) ) {
+            iRoot[1] = 0;
+            Root[1] = 0;
+        } 
+        else {
+            iRoot[1] = 1;
+            Root[1] = x1;
+        }
         
         // Root 3
         //----------------------------------------------------------------------
         
-       //1. Part 1 
+        //1. Part 1 
         p1=-a3/(4*a4);
-//        System.out.println("Parte 1: "+p1);
+        //        System.out.println("Parte 1: "+p1);
        
         
         //--------------------------------------------------------- 
@@ -1263,15 +1265,15 @@ public class Torus extends Solid {
                 return true;
         }
     }
-
+    */
+    
     @Override
-    public void doExtraInformation(Ray inRay, double intT, GeometryIntersectionInformation outData) {
-        
-     
-        
+    public void doExtraInformation(
+        Ray inRay, double intT, GeometryIntersectionInformation outData) 
+    {
         outData.p = lastInfo.p;
-        double r2=rMinor*rMinor;
-        double R2=rMajor*rMajor;
+        double r2=minorRadius*minorRadius;
+        double R2=majorRadius*majorRadius;
      
         outData.n.x = (4*lastInfo.p.x*(Math.pow(lastInfo.p.x, 2) + Math.pow(lastInfo.p.y, 2) + Math.pow(lastInfo.p.z, 2) - r2 - R2) );
         outData.n.y = (4*lastInfo.p.y*(Math.pow(lastInfo.p.x, 2) + Math.pow(lastInfo.p.y, 2) + Math.pow(lastInfo.p.z, 2) - r2 - R2) );
@@ -1286,20 +1288,17 @@ public class Torus extends Solid {
     */
     @Override
     public double[] getMinMax() {
-         // TODO!
         double [] minmax = new double[6];
         
-        minmax[0] = -(rMajor + rMinor);
-        minmax[1] = -(rMajor+rMinor);
-        minmax[2] = rMinor;
-        minmax[3] = rMajor + rMinor;
-        minmax[4] = rMajor + rMinor;
-        minmax[5] = -rMinor;
+        minmax[0] = -(majorRadius + minorRadius);
+        minmax[1] = -(majorRadius+minorRadius);
+        minmax[2] = minorRadius;
+        minmax[3] = majorRadius + minorRadius;
+        minmax[4] = majorRadius + minorRadius;
+        minmax[5] = -minorRadius;
 
         return minmax;
-    
-    }
-    
+    }    
 }
 
 //===========================================================================

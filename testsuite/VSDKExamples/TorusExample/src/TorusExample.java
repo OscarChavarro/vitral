@@ -1,9 +1,8 @@
 //===========================================================================
 
-// Basic Java classes
+// Java basic classes
 
-// Awt / swing classes
-import java.applet.Applet;
+// Java Awt/Swing classes
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
@@ -16,24 +15,28 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.File;
 import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.LayoutStyle;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 // JOGL classes
 import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import vsdk.toolkit.common.RendererConfiguration;
 
-// VitralSDK classes
+// VSDK classes
 import vsdk.toolkit.common.ColorRgb;              // Model elements
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
@@ -45,63 +48,47 @@ import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
 import vsdk.toolkit.render.jogl.JoglTorusRenderer;
 import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 
 /**
-@author Leidy Alexandra Lozano Jácome
-*/
-
-/**
-Note that this program is designed to work as a java application, or as a
-java applet.  If current class does not extends from Applet, and `init` method
-is deleted, this will continue working as a simple java application.
-
 This is a simple program recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
-public class TorusExample extends Applet implements 
+public class TorusExample implements 
     GLEventListener,                                                    // JOGL
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener // GUI
 {
 
 //= PROGRAM PART 1/5: ATTRIBUTES ============================================
 
-    private boolean appletMode;
     private Camera camera;
     private CameraController cameraController;
     private Light light;
     private Material material;
     private RendererConfiguration qualitySelection;
     private RendererConfigurationController qualityController;
-    private GLCanvas canvas;
-    private RGBImage img;
-  
+    private GLCanvas canvas;  
     private Torus torus;
-    
     private int N;
     private int n;
 
     
     // Attributes of Menu Bar
-    static JButton jButton1 = new javax.swing.JButton();;
-    static JButton jButton2 = new javax.swing.JButton();
-    static JPanel jPanel1 = new javax.swing.JPanel();
-    static JPanel jPanel2 = new javax.swing.JPanel();
-    static JPanel jPanel3= new javax.swing.JPanel();
-    static JLabel jLabel1 = new javax.swing.JLabel();
-    static JLabel jLabel2 = new javax.swing.JLabel();
-    static JLabel jLabel3 = new javax.swing.JLabel();
-    static JLabel jLabel4 = new javax.swing.JLabel();
-    static JSpinner jSpinner1 = new javax.swing.JSpinner();
-    static JSpinner jSpinner2 = new javax.swing.JSpinner();
-    static JSpinner jSpinner3 = new javax.swing.JSpinner();
-    static JSpinner jSpinner4 = new javax.swing.JSpinner();
+    static JButton jButton1 = new JButton();;
+    static JButton jButton2 = new JButton();
+    static JPanel jPanel1 = new JPanel();
+    static JPanel jPanel2 = new JPanel();
+    static JPanel jPanel3= new JPanel();
+    static JLabel jLabel1 = new JLabel();
+    static JLabel jLabel2 = new JLabel();
+    static JLabel jLabel3 = new JLabel();
+    static JLabel jLabel4 = new JLabel();
+    static JSpinner jSpinner1 = new JSpinner();
+    static JSpinner jSpinner2 = new JSpinner();
+    static JSpinner jSpinner3 = new JSpinner();
+    static JSpinner jSpinner4 = new JSpinner();
 
 //= PROGRAM PART 2/5: CONSTRUCTORS ==========================================
 
@@ -147,7 +134,7 @@ public class TorusExample extends Applet implements
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                torus.setrMajor((double)jSpinner1.getValue());
+                torus.setMajorRadius((double)jSpinner1.getValue());
                 canvas.repaint();
                 
             }
@@ -159,7 +146,7 @@ public class TorusExample extends Applet implements
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                torus.setrMinor((double)jSpinner2.getValue());
+                torus.setMinorRadius((double)jSpinner2.getValue());
                 canvas.repaint();
             }
 
@@ -199,9 +186,12 @@ public class TorusExample extends Applet implements
         cameraController = new CameraControllerAquynza(camera);
         
         qualitySelection = new RendererConfiguration();
-        qualityController = new RendererConfigurationController(qualitySelection);
+        qualityController = 
+            new RendererConfigurationController(qualitySelection);
         
-        light = new Light(Light.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+        light = 
+            new Light(
+                Light.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
@@ -226,7 +216,6 @@ public class TorusExample extends Applet implements
           // Common VitralSDK initialization
         JoglRenderer.verifyOpenGLAvailability();
         TorusExample instance = new TorusExample();
-        instance.appletMode = false;
         instance.createModel();
 
            // Create application based GUI
@@ -244,131 +233,158 @@ public class TorusExample extends Applet implements
       
              
   //      instance.canvas.requestFocusInWindow();
-        frame.getContentPane().add(menu(), java.awt.BorderLayout.AFTER_LINE_ENDS);
+        frame.getContentPane().add(
+            menu(), BorderLayout.AFTER_LINE_ENDS);
         
-        frame.getContentPane().add(instance.canvas, java.awt.BorderLayout.CENTER);
+        frame.getContentPane().add(
+            instance.canvas, BorderLayout.CENTER);
         
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    public void init()
-    {
-       appletMode = true;
-        createModel();
-        setLayout(new BorderLayout());
-        createGUI();
-        add("Center", canvas);
-    }
     
-static public JPanel menu()
+    static public JPanel menu()
     {
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder()));
+        jPanel2.setBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder()));
 
-        jButton1.setIcon(new javax.swing.ImageIcon("./etc/mas.png")); // NOI18N
+        jButton1.setIcon(new ImageIcon("./etc/mas.png")); // NOI18N
         jButton1.setContentAreaFilled(true);
        
 
-        jButton2.setIcon(new javax.swing.ImageIcon("./etc/menos.png")); // NOI18N
+        jButton2.setIcon(new ImageIcon("./etc/menos.png")); // NOI18N
         jButton2.setContentAreaFilled(true);
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        GroupLayout jPanel2Layout = new GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            jPanel2Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 44, 
+                    GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 
+                    GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 44, 
+                    GroupLayout.PREFERRED_SIZE)
                 .addGap(23, 23, 23))
         );
         jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            jPanel2Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(jPanel2Layout.createParallelGroup(
+                    GroupLayout.Alignment.TRAILING)
                     .addComponent(jButton2)
                     .addComponent(jButton1))
                 .addGap(0, 9, Short.MAX_VALUE))
         );
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder()));
+        jPanel3.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder()));
 
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(Double.valueOf(1.8d), Double.valueOf(0.0d), null, Double.valueOf(0.1d)));
+        jSpinner1.setModel(
+            new SpinnerNumberModel(1.8d, 0.0d, null, 0.1d));
 
         jLabel1.setText("R");
 
         jLabel2.setText("r");
 
-        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(Double.valueOf(0.2d), Double.valueOf(0.0d), null, Double.valueOf(0.1d)));
+        jSpinner2.setModel(
+            new SpinnerNumberModel(0.2d, 0.0d, null, 0.1d));
 
         jLabel3.setText("N");
 
-        jSpinner3.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(0), null, Integer.valueOf(1)));
+        jSpinner3.setModel(new SpinnerNumberModel(10, 0, null, 1));
 
         jLabel4.setText("n");
 
-        jSpinner4.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(0), null, Integer.valueOf(1)));
+        jSpinner4.setModel(new SpinnerNumberModel(10, 0, null, 1));
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        GroupLayout jPanel3Layout = 
+            new GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            jPanel3Layout.createParallelGroup(
+                GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
                     .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 28, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, 
+                    28, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.LEADING, false)
                     .addComponent(jSpinner1)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
+                    .addComponent(jSpinner2, 
+                        GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
                     .addComponent(jSpinner3)
                     .addComponent(jSpinner4))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            jPanel3Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSpinner1, 
+                        GroupLayout.PREFERRED_SIZE, 
+                        GroupLayout.DEFAULT_SIZE, 
+                        GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSpinner2, 
+                        GroupLayout.PREFERRED_SIZE, 
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSpinner3, GroupLayout.PREFERRED_SIZE, 
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 
+                    GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(
+                    GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSpinner4, GroupLayout.PREFERRED_SIZE, 
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(
+                    GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jPanel2, GroupLayout.PREFERRED_SIZE, 0, 
+                        Short.MAX_VALUE)
+                    .addComponent(jPanel3, GroupLayout.DEFAULT_SIZE, 
+                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(GroupLayout.Alignment.TRAILING, 
+                jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, GroupLayout.PREFERRED_SIZE, 
+                    GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel2, GroupLayout.PREFERRED_SIZE, 
+                    GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(245, Short.MAX_VALUE))
         );
        
@@ -383,21 +399,21 @@ static public JPanel menu()
     private void drawObjectsGL(GL2 gl)
     {
         //-----------------------------------------------------------------
-        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
 
         gl.glLoadIdentity();
 
         JoglLightRenderer.draw(gl, light);
-        gl.glEnable(gl.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHTING);
         JoglLightRenderer.activate(gl, light);
         JoglMaterialRenderer.activate(gl, material);
 
         JoglTorusRenderer.draw(gl, torus, camera, qualitySelection, n, N);
         
         //-----------------------------------------------------------------
-        gl.glDisable(gl.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
-        gl.glBegin(gl.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glColor3d(1, 0, 0);
             gl.glVertex3d(0, 0, 0);
             gl.glVertex3d(1, 0, 0);
@@ -412,12 +428,16 @@ static public JPanel menu()
         gl.glEnd();
     }
 
-    /** Called by drawable to initiate drawing */
+    /** 
+    Called by drawable to initiate drawing
+    @param drawable 
+    */
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
         JoglCameraRenderer.activate(gl, camera);
@@ -425,22 +445,33 @@ static public JPanel menu()
         drawObjectsGL(gl);
     }
    
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** 
+    Not used method, but needed to instance GLEventListener
+    @param drawable 
+    */
+    @Override
     public void init(GLAutoDrawable drawable) {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
+    /** 
+    Not used method, but needed to instance GLEventListener
+    @param drawable 
+    */
+    @Override
     public void dispose(GLAutoDrawable drawable) {
-        ;
+        
     }
 
-    /** Not used method, but needed to instanciate GLEventListener */
-    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
-        ;
-    }
-    
-    /** Called to indicate the drawing surface has been moved and/or resized */
+    /** 
+    Called to indicate the drawing surface has been moved and/or resized
+    @param drawable
+    @param x
+    @param y
+    @param width
+    @param height 
+    */
+    @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
@@ -454,50 +485,65 @@ static public JPanel menu()
 
 //= PART 5/5: GUI PROCEDURES ================================================
 
+    @Override
     public void mouseEntered(MouseEvent e) {
         canvas.requestFocusInWindow();
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
       //System.out.println("Mouse exited");
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
-        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMousePressedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
-        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseReleasedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
-        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseClickedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
-        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseMovedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
-        if ( cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseDraggedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseWheelEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
             System.exit(0);
@@ -505,20 +551,25 @@ static public JPanel menu()
         if ( e.getKeyCode() == KeyEvent.VK_I ) {
             System.out.println(qualitySelection);
         }
-        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processKeyPressedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
-        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( qualityController.processKeyPressedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             System.out.println(qualitySelection);
             canvas.repaint();
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
-        if (cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (cameraController.processKeyReleasedEvent(
+            AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
-        if (qualityController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (qualityController.processKeyReleasedEvent(
+            AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
@@ -527,9 +578,11 @@ static public JPanel menu()
     Do NOT call your controller from the `keyTyped` method, or the controller
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method
+    @param e
     */
+    @Override
     public void keyTyped(KeyEvent e) {
-        ;
+        
     }
 
 }

@@ -1,8 +1,6 @@
 //===========================================================================
 
-// Basic Java classes
-
-// Awt / swing classes
+// Java Awt/Swing classes
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -58,7 +56,8 @@ public class CameraExample extends Applet implements
     that real initialization be done in another `createModel` method, and
     that such method be called explicity from entry point function.
     */
-    public CameraExample() {
+    public CameraExample() 
+    {
         // Empty! call `createModel` explicity from entry point function!
         
     }
@@ -76,7 +75,10 @@ public class CameraExample extends Applet implements
         corridor = new SimpleCorridor();
     }
 
-    private void createGUI()
+    /**
+    Use to create Swing elements
+    */
+    private void fillGUIWithCanvas()
     {
         canvas = new GLCanvas();
         canvas.addGLEventListener(this);
@@ -88,7 +90,12 @@ public class CameraExample extends Applet implements
 
 //= PROGRAM PART 3/5: ENTRY POINTS ==========================================
 
-    public static void main (String[] args) {
+    /**
+    Entrance point function for desktop standalone application running mode. 
+    @param args 
+    */
+    public static void main (String[] args) 
+    {
         // Common VitralSDK initialization
         JoglRenderer.verifyOpenGLAvailability();
         CameraExample instance = new CameraExample();
@@ -99,7 +106,7 @@ public class CameraExample extends Applet implements
         JFrame frame;
         Dimension size;
 
-        instance.createGUI();
+        instance.fillGUIWithCanvas();
         frame = new JFrame("VITRAL concept test - Camera control example");
         frame.add(instance.canvas, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -110,18 +117,24 @@ public class CameraExample extends Applet implements
         instance.canvas.requestFocusInWindow();
     }
 
+    /**
+    Entrance point function for applet running mode. 
+    */
     @Override
     public void init()
     {
         appletMode = true;
         createModel();
         setLayout(new BorderLayout());
-        createGUI();
+        fillGUIWithCanvas();
         add("Center", canvas);
     }
     
 //= PROGRAM PART 4/5: JOGL-OPENGL PROCEDURES ================================
 
+    /**
+    @param gl 
+    */
     private void drawObjectsGL(GL2 gl)
     {
         gl.glEnable(GL2.GL_DEPTH_TEST);
@@ -228,34 +241,53 @@ public class CameraExample extends Applet implements
       //System.out.println("Mouse exited");
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mousePressed(MouseEvent e) {
-        if ( cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMousePressedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mouseReleased(MouseEvent e) {
-        if ( cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseReleasedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mouseClicked(MouseEvent e) {
-        if ( cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseClickedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mouseMoved(MouseEvent e) {
-        if ( cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseMovedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mouseDragged(MouseEvent e) {
         if ( cameraController.processMouseDraggedEvent(
@@ -264,13 +296,20 @@ public class CameraExample extends Applet implements
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        if ( cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processMouseWheelEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /**
+    @param e 
+    */
     @Override
     public void keyPressed(KeyEvent e) {
         if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
@@ -279,14 +318,19 @@ public class CameraExample extends Applet implements
             }
         }
 
-        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processKeyPressedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
+    /** 
+    @param e 
+    */
     @Override
     public void keyReleased(KeyEvent e) {
-        if ( cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( cameraController.processKeyReleasedEvent(
+            AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }

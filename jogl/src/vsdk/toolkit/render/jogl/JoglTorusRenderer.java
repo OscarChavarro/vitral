@@ -57,8 +57,8 @@ public class JoglTorusRenderer extends JoglRenderer {
     //= PROGRAM PART 2/2: PROCEDURES ==========================================
     private static void drawPoint(GL2 gl,Torus t, int n,int N)
     {
-        double R = t.getrMajor();
-        double r = t.getrMinor();
+        double R = t.getMajorRadius();
+        double r = t.getMinorRadius();
         double dv = 2*Math.PI/n;
         double dw = 2*Math.PI/N;
         double v = 0.0f;
@@ -82,8 +82,8 @@ public class JoglTorusRenderer extends JoglRenderer {
     
     private static void drawLines (GL2 gl,Torus t, int n,int N)
     {
-        double R = t.getrMajor();
-        double r = t.getrMinor();
+        double R = t.getMajorRadius();
+        double r = t.getMinorRadius();
         
         gl.glColor3d(1, 1, 1);
         gl.glLineWidth(1.0f);
@@ -116,8 +116,8 @@ public class JoglTorusRenderer extends JoglRenderer {
     
     private static void drawQuads(GL2 gl,Torus t, int n,int N)
     {
-        double R=t.getrMajor();
-        double r=t.getrMinor();
+        double R=t.getMajorRadius();
+        double r=t.getMinorRadius();
 
         double rr=1.5f*r;
 
@@ -187,8 +187,8 @@ public class JoglTorusRenderer extends JoglRenderer {
     
     private static void drawBox(GL2 gl,Torus t, int n,int N)
     {
-        double R=t.getrMajor() + t.getrMinor();
-        double r=t.getrMinor();
+        double R=t.getMajorRadius() + t.getMinorRadius();
+        double r=t.getMinorRadius();
         
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
@@ -233,8 +233,8 @@ public class JoglTorusRenderer extends JoglRenderer {
     <IMG ="torusNormals.jpg"></IMG>
     */
     private static void drawVertexNormals(GL2 gl,Torus t, int n,int N) {        
-        double R=t.getrMajor();
-        double r=t.getrMinor();
+        double R=t.getMajorRadius();
+        double r=t.getMinorRadius();
         
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
