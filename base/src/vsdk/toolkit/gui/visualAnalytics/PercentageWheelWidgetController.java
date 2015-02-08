@@ -80,7 +80,7 @@ public class PercentageWheelWidgetController extends Controller {
         r = inPlane.length();
         angle = Math.toDegrees(inPlane.obtainSphericalThetaAngle());
 
-        r = r*controlledWidget.getScale();
+        r = r/controlledWidget.getScale();
         
         if ( r < controlledWidget.getInnerRadius() ) {
             // User has click inside label center, nothing happens
@@ -97,6 +97,13 @@ public class PercentageWheelWidgetController extends Controller {
 
         i = (int)Math.floor(angle * (((double)N) / 360.0));
         return i;
+    }
+
+    /**
+     * @return the controlledWidget
+     */
+    public PercentageWheelWidget getControlledWidget() {
+        return controlledWidget;
     }
    
 }
