@@ -101,7 +101,7 @@ public class RGBAImage extends Image
     {
         // Warning: it is not taking into account the internal occupancy of the
         // ByteBuffer
-        return xSize*ySize*4 + 2*VSDK.sizeofInt + VSDK.sizeofReference;
+        return xSize*ySize*4 + 2*INT_SIZE_IN_BYTES + POINTER_SIZE_IN_BYTES;
     }
 
     /**
@@ -111,6 +111,7 @@ public class RGBAImage extends Image
     to hold such image uncompressed.
 
     Returns true if memory allocation succeed, false if not.
+    @return 
     */
     @Override
     public boolean init(int width, int height)

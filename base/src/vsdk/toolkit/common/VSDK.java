@@ -109,10 +109,6 @@ public class VSDK
     public static final int CONE = 2;
     public static final int INTERSECTION_TYPE_COUNT = 3;
 
-    // Sizeof sizes
-    public static final int sizeofInt = 4;
-    public static final int sizeofReference = 4;
-
     // Primitive accounting data structures (not thread safe)
     private static final int primitiveCount[];
     private static final int intersectionCount[];
@@ -420,6 +416,99 @@ public class VSDK
     public static void setWithSystemExit(boolean flag)
     {
         withSystemExit = flag;
+    }
+
+    /**
+    Given a distance unit in meters, current method formats an international
+    system proper name.
+    @param x
+    @param digits
+    @return 
+    */
+    public static String formatSILengthUnit(double x, int digits) {
+        
+        String postfixes[] = {
+            "y", // 10e-24
+            "_", // 10e-23
+            "_", // 10e-22
+            "z", // 10e-21
+            "_", // 10e-20
+            "_", // 10e-19
+            "a", // 10e-18
+            "_", // 10e-17
+            "_", // 10e-16
+            "f", // 10e-15
+            "_", // 10e-14
+            "_", // 10e-13
+            "p", // 10e-12
+            "_", // 10e-11
+            "_", // 10e-10
+            "n", // 10e-9
+            "_", // 10e-8
+            "_", // 10e-7
+            "micro", // 10e-6
+            "_", // 10e-5
+            "_", // 10e-4
+            "m", // 10e-3
+            "c", // 10e-2
+            "d", // 10e-1
+            "", // 10e0
+            "_", // 10e1v  // da? confussing for end users
+            "_", // 10e2  // h?
+            "k", // 10e3
+            "_", // 10e4
+            "_", // 10e5
+            "M", // 10e6
+            "_", // 10e7
+            "_", // 10e8
+            "G", // 10e9
+            "_", // 10e10
+            "_", // 10e11
+            "T", // 10e12
+            "_", // 10e13
+            "_", // 10e14
+            "P", // 10e15
+            "_", // 10e16
+            "_", // 10e17
+            "E", // 10e18
+            "_", // 10e19
+            "_", // 10e20
+            "Z", // 10e21
+            "_", // 10e22
+            "_", // 10e23
+            "Y" // 10e24
+        };
+
+        double corrected = x;
+        
+        double base = Math.floor(Math.log10(corrected));
+        
+        
+        double multiplier = 1.0;
+        
+        while ( base < -24 ) {
+            multiplier /= 10.0;
+            corrected *= 10.0;
+            base = Math.floor(Math.log10(corrected));
+        }
+        while ( base > 24 ) {
+            multiplier *= 10.0;
+            corrected /= 10.0;
+            base = Math.floor(Math.log10(corrected));
+        }
+
+        int ibase = ((int)Math.floor(base));
+        
+        while ( postfixes[ibase+24].equals("_") ) {
+            ibase--;
+            multiplier *= 10.0;
+        }
+
+        double normalized;
+        base = Math.floor(Math.log10(corrected));
+        normalized = corrected / Math.pow(10.0, base);
+        return formatDouble(multiplier*normalized, digits) + " " +
+            postfixes[ibase+24] + "m";
     }
 
 }

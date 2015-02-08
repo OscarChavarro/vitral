@@ -8,6 +8,8 @@ package vsdk.toolkit.render.jogl;
 
 // Java classes
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // JOGL classes
 import javax.media.opengl.GL2;
@@ -31,32 +33,36 @@ public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
         SimpleBody gi;
         RendererConfiguration internalQuality;
 
-        internalQuality = q.clone();
-        internalQuality.setSelectionCorners(false);
-        internalQuality.setBoundingVolume(false);
+        try {
+            internalQuality = q.clone();
+            internalQuality.setSelectionCorners(false);
+            internalQuality.setBoundingVolume(false);
 
-        ArrayList <SimpleBody> sublist;
-        sublist = b.getBodies();
+            ArrayList<SimpleBody> sublist;
+            sublist = b.getBodies();
 
-        gl.glPushMatrix();
-        p = b.getPosition();
-        gl.glTranslated(p.x, p.y, p.z);
-        JoglMatrixRenderer.activate(gl, b.getRotation());
-        scale = b.getScale();
-        gl.glScaled(scale.x, scale.y, scale.z);
+            gl.glPushMatrix();
+            p = b.getPosition();
+            gl.glTranslated(p.x, p.y, p.z);
+            JoglMatrixRenderer.activate(gl, b.getRotation());
+            scale = b.getScale();
+            gl.glScaled(scale.x, scale.y, scale.z);
 
-        for ( i = 0; i < sublist.size(); i++ ) {
-            gi = sublist.get(i);
-            JoglSimpleBodyRenderer.draw(gl, gi, c, internalQuality);
+            for (i = 0; i < sublist.size(); i++) {
+                gi = sublist.get(i);
+                JoglSimpleBodyRenderer.draw(gl, gi, c, internalQuality);
+            }
+
+            if (q.isSelectionCornersSet()) {
+                JoglGeometryRenderer.drawSelectionCorners(gl, b.getMinMax(), q);
+            }
+            if (q.isBoundingVolumeSet()) {
+                JoglGeometryRenderer.drawMinMaxBox(gl, b.getMinMax(), q);
+            }
+            gl.glPopMatrix();
+        } catch (CloneNotSupportedException ex) {
+
         }
-
-        if ( q.isSelectionCornersSet() ) {
-            JoglGeometryRenderer.drawSelectionCorners(gl, b.getMinMax(), q);
-        }
-        if ( q.isBoundingVolumeSet() ) {
-            JoglGeometryRenderer.drawMinMaxBox(gl, b.getMinMax(), q);
-        }
-        gl.glPopMatrix();
 
     }
 }

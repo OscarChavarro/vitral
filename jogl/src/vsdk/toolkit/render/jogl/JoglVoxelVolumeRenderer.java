@@ -36,49 +36,52 @@ public class JoglVoxelVolumeRenderer extends JoglRenderer
     {
         int xSize, ySize, zSize, x, y, z;
         double dx, dy, dz;
-        RendererConfiguration qsub = q.clone();
 
-        qsub.setBoundingVolume(false);
-        qsub.setSelectionCorners(false);
+        try {
+            RendererConfiguration qsub = q.clone();
 
-        xSize = v.getXSize();
-        ySize = v.getYSize();
-        zSize = v.getZSize();
-        dx = 2 / ((double)xSize);
-        dy = 2 / ((double)ySize);
-        dz = 2 / ((double)zSize);
+            qsub.setBoundingVolume(false);
+            qsub.setSelectionCorners(false);
 
-        if ( geometryInstance == null ) {
-            geometryInstance = new Box(dx, dy, dz);
-        }
+            xSize = v.getXSize();
+            ySize = v.getYSize();
+            zSize = v.getZSize();
+            dx = 2 / ((double) xSize);
+            dy = 2 / ((double) ySize);
+            dz = 2 / ((double) zSize);
 
-        //-----------------------------------------------------------------
-        gl.glPushMatrix();
-        int voxelValue;
-        for ( z = 0; z < zSize; z++ ) {
-            for ( y = 0; y < ySize; y++ ) {
-                for ( x = 0; x < xSize; x++ ) {
-                    voxelValue = v.getVoxel(x, y, z);
-                    if ( voxelValue >= threshold ) {
-                        gl.glPushMatrix();
-                        gl.glTranslated(dx/2+x*dx-1, dy/2+y*dy-1, dz/2+z*dz-1);
-                        JoglGeometryRenderer.draw(gl, geometryInstance, c, qsub);
-                        gl.glPopMatrix();
+            if (geometryInstance == null) {
+                geometryInstance = new Box(dx, dy, dz);
+            }
+
+            //-----------------------------------------------------------------
+            gl.glPushMatrix();
+            int voxelValue;
+            for (z = 0; z < zSize; z++) {
+                for (y = 0; y < ySize; y++) {
+                    for (x = 0; x < xSize; x++) {
+                        voxelValue = v.getVoxel(x, y, z);
+                        if (voxelValue >= threshold) {
+                            gl.glPushMatrix();
+                            gl.glTranslated(dx / 2 + x * dx - 1, dy / 2 + y * dy - 1, dz / 2 + z * dz - 1);
+                            JoglGeometryRenderer.draw(gl, geometryInstance, c, qsub);
+                            gl.glPopMatrix();
+                        }
                     }
                 }
             }
-        }
-        gl.glPopMatrix();
+            gl.glPopMatrix();
 
         //-----------------------------------------------------------------
+            if (q.isBoundingVolumeSet()) {
+                JoglGeometryRenderer.drawMinMaxBox(gl, v, q);
+            }
+            if (q.isSelectionCornersSet()) {
+                JoglGeometryRenderer.drawSelectionCorners(gl, v, q);
+            }
+        } catch (Exception e) {
 
-        if ( q.isBoundingVolumeSet() ) {
-            JoglGeometryRenderer.drawMinMaxBox(gl, v, q);
         }
-        if ( q.isSelectionCornersSet() ) {
-            JoglGeometryRenderer.drawSelectionCorners(gl, v, q);
-        }
-
     }
 }
 

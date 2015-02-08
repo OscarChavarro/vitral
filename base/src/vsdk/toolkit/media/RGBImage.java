@@ -101,16 +101,17 @@ public class RGBImage extends Image
     {
         // Warning: it is not taking into account the internal occupancy of the
         // ByteBuffer
-        return xSize*ySize*3 + 2*VSDK.sizeofInt + VSDK.sizeofReference;
+        return xSize*ySize*3 + 2*INT_SIZE_IN_BYTES + POINTER_SIZE_IN_BYTES;
     }
 
     /**
     Image initialize with black background fill.
 
-    Given the desired width and height, this method asigns the needed memory
+    Given the desired width and height, this method assigns the needed memory
     to hold such image uncompressed.
 
     Returns true if memory allocation succeed, false if not.
+    @return 
     */
     @Override
     public boolean init(int width, int height)
@@ -150,6 +151,7 @@ public class RGBImage extends Image
     to hold such image uncompressed.
 
     Returns true if memory allocation succeed, false if not.
+    @return 
     */
     @Override
     public boolean initNoFill(int width, int height)
@@ -185,6 +187,11 @@ public class RGBImage extends Image
     /**
     This method changes the pixel information for pixel (x, y) on the
     represented image matrix, to contain the values <r, g, b>.
+    @param x
+    @param y
+    @param r
+    @param g
+    @param b
     */
     public void putPixel(int x, int y, byte r, byte g, byte b)
     {
@@ -227,6 +234,7 @@ public class RGBImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.putPixelRgb.
+    @param p
     */
     @Override
     public void putPixelRgb(int x, int y, RGBPixel p)
@@ -251,6 +259,9 @@ public class RGBImage extends Image
     /**
     This method returns the color component <r, g, b> contained on the pixel
     <x, y> of current image.
+    @param x
+    @param y
+    @return 
     */
     public RGBPixel getPixel(int x, int y)
     {
@@ -276,6 +287,7 @@ public class RGBImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getPixelRgb.
+    @return 
     */
     @Override
     public RGBPixel getPixelRgb(int x, int y)
@@ -302,6 +314,7 @@ public class RGBImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getPixelRgb.
+    @param p
     */
     @Override
     public void getPixelRgb(int x, int y, RGBPixel p)
@@ -326,6 +339,7 @@ public class RGBImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getXSize.
+    @return 
     */
     @Override
     public int getXSize()
@@ -336,6 +350,7 @@ public class RGBImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getYSize.
+    @return 
     */
     @Override
     public int getYSize()
@@ -387,10 +402,13 @@ public class RGBImage extends Image
 
     }
 
-    /** Returns a copy of current image in its own memory */
+    /** Returns a copy of current image in its own memory
+     * @return 
+     * @throws java.lang.CloneNotSupportedException */
     @Override
-    public RGBImage clone()
+    public RGBImage clone() throws CloneNotSupportedException
     {
+        //Image parentCopy = (Image)super.clone();
         RGBImage copy;
         int xxSize = getXSize();
         int yySize = getYSize();
@@ -406,7 +424,10 @@ public class RGBImage extends Image
         return copy;
     }
 
-    /** Returns a copy of current image in its own memory */
+    /** 
+    Returns a copy of current image in its own memory 
+    @return 
+    */
     public RGBAImage cloneToRgba()
     {
         RGBAImage copy;

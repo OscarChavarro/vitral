@@ -474,25 +474,27 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
                 previousMaterialIndex = currentMaterialIndex;
             }
             if ( currentTextureIndex != previousTextureIndex ) {
+                
                 if ( currentTextureIndex >= 0 ) {
                     gl.glEnable(GL.GL_TEXTURE_2D);
                     JoglImageRenderer.activate(gl,
                         texturesArray[currentTextureIndex]);
                     // Warning: Shoult this be here? or not ...
-                    //gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                    //    GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-                    //gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                    //    GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-                    //gl.glTexParameterf(GL.GL_TEXTURE_2D,
-                    //    GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
-                    //gl.glTexParameterf(GL.GL_TEXTURE_2D,
-                    //    GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT);
-                    //gl.glTexEnvf(GL2.GL_TEXTURE_ENV,
-                    //    GL2.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+                    gl.glTexParameteri(GL2.GL_TEXTURE_2D,
+                        GL.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+                    gl.glTexParameteri(GL2.GL_TEXTURE_2D,
+                        GL.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+                    gl.glTexParameterf(GL2.GL_TEXTURE_2D,
+                        GL.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                    gl.glTexParameterf(GL2.GL_TEXTURE_2D,
+                        GL.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+                    gl.glTexEnvf(GL2.GL_TEXTURE_ENV,
+                        GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
                 }
                 else {
                     gl.glDisable(GL.GL_TEXTURE_2D);
                 }
+                
                 previousTextureIndex = currentTextureIndex;
             }
 

@@ -9,9 +9,6 @@
 
 package vsdk.toolkit.common;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
 The RendererConfiguration class is used to indicate some attributes in which a 
 geometry is to be displayed in screen. The RendererConfiguration class is not
@@ -45,6 +42,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     private boolean trianglesNormals;
     private boolean useVertexColors;
     private ColorRgb wireColor;
+    private ColorRgb boundingVolumeColor;
 
     public int compareTo(RendererConfiguration other)
     {
@@ -97,6 +95,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.normals = other.normals;
         this.trianglesNormals = other.trianglesNormals;
         this.wireColor.clone(other.wireColor);
+        this.boundingVolumeColor.clone(other.boundingVolumeColor);
         this.useVertexColors = other.useVertexColors;
     }
 
@@ -132,6 +131,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         normals = false;
         trianglesNormals = false;
         wireColor = new ColorRgb(1, 1, 1);
+        boundingVolumeColor = new ColorRgb(1, 1, 0);
         useVertexColors = false;
     }
 
@@ -352,10 +352,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     /**
     @return a new object containing an exact copy of current 
     RendererConfiguration
+    @throws java.lang.CloneNotSupportedException
     */
     @Override
-    public RendererConfiguration clone() 
-        //throws CloneNotSupportedException 
+    public RendererConfiguration clone()
+        throws CloneNotSupportedException 
     {
         try {
             super.clone();
@@ -376,6 +377,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.trianglesNormals = trianglesNormals;
         copy.lodHint = lodHint;
         copy.wireColor.clone(wireColor);
+        copy.boundingVolumeColor.clone(boundingVolumeColor);
         copy.useVertexColors = useVertexColors;
         return copy;
     }
@@ -392,6 +394,20 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     */
     public void setUseVertexColors(boolean useVertexColors) {
         this.useVertexColors = useVertexColors;
+    }
+
+    /**
+    @return the boundingVolumeColor
+    */
+    public ColorRgb getBoundingVolumeColor() {
+        return boundingVolumeColor;
+    }
+
+    /**
+    @param boundingVolumeColor the boundingVolumeColor to set
+    */
+    public void setBoundingVolumeColor(ColorRgb boundingVolumeColor) {
+        this.boundingVolumeColor = boundingVolumeColor;
     }
 }
 

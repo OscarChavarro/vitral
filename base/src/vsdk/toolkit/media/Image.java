@@ -22,7 +22,7 @@ bi-linear interpolation evaluation on Rgb space.
 public abstract class Image extends MediaEntity
 {
     /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061220L;
+    //public static final long serialVersionUID = 20061220L;
 
     private static RGBPixel rgb = new RGBPixel();
 

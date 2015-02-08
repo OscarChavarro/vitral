@@ -34,22 +34,6 @@ public class Camera extends Entity
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20060502L;
 
-    // Basic Camera Model
-    private Vector3D up;
-    private Vector3D front;
-    private Vector3D left;
-    private Vector3D eyePosition;
-    private double focalDistance;
-    private int projectionMode;
-    private double fov;
-    private double orthogonalZoom;
-    private double nearPlaneDistance;
-    private double farPlaneDistance;
-
-    /// This string should be used for specific application defined
-    /// functionality. Can be null.
-    private String name;
-
     // Global constants
     public static final int OPCODE_FAR = (0x01 << 1);
     public static final int OPCODE_NEAR = (0x01 << 2);
@@ -60,6 +44,24 @@ public class Camera extends Entity
 
     public static final int PROJECTION_MODE_ORTHOGONAL = 4;
     public static final int PROJECTION_MODE_PERSPECTIVE = 5;
+
+    // Basic Camera Model
+    private Vector3D up;
+    private Vector3D front;
+    private Vector3D left;
+    private Vector3D eyePosition;
+    private double focalDistance;
+    private int projectionMode;
+    
+    /// This is vertical field of vision
+    private double fov;
+    private double orthogonalZoom;
+    private double nearPlaneDistance;
+    private double farPlaneDistance;
+
+    /// This string should be used for specific application defined
+    /// functionality. Can be null.
+    private String name;
 
     /**
     Una `Camera` debe saber de qu&eacute; tama&ntilde;o es el viewport para
@@ -1479,7 +1481,7 @@ public class Camera extends Entity
     }
 
     /**
-    Given a pointdescription of a paralelogram or other convex polyhedra 
+    Given a point description of a paralelogram or other convex polyhedra 
     this method determines if that paralelogram is visible.
     In other words, this method determines if the paralelogram and the
     view volume intersects.
@@ -1509,6 +1511,28 @@ public class Camera extends Entity
         }
 
         return true;
+    }
+
+    public void clone(Camera other) {
+        this.focalDistance = other.focalDistance;
+        this.projectionMode = other.projectionMode;
+        this.fov = other.fov;
+        this.orthogonalZoom = other.orthogonalZoom;
+        this.nearPlaneDistance = other.nearPlaneDistance;
+        this.farPlaneDistance = other.farPlaneDistance;
+        this.viewportXSize = other.viewportXSize;
+        this.viewportYSize = other.viewportYSize;
+        this.up = other.up;
+        this.front = other.front;
+        this.left = other.left;
+        this.eyePosition = other.eyePosition;
+        this.name = other.name;
+        this.dx = other.dx;
+        this.dy = other.dy;
+        this._dir = other._dir;
+        this.upWithScale = other.upWithScale;
+        this.rightWithScale = other.rightWithScale;
+        this.normalizingTransformation = other.normalizingTransformation;
     }
 
 }

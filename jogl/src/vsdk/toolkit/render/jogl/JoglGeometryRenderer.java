@@ -9,6 +9,7 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import vsdk.toolkit.common.ColorRgb;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -76,11 +77,12 @@ public class JoglGeometryRenderer extends JoglRenderer
 
     public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)
     {
+        ColorRgb c = q.getBoundingVolumeColor();
         gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
-        gl.glColor3d(1, 1, 0);
+        gl.glColor3d(c.r, c.g, c.b);
         gl.glLineWidth(1.0f);
         gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(minmax[0], minmax[1], minmax[5]); // 6

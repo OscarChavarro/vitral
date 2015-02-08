@@ -23,7 +23,7 @@ classes NOT related with 3D geometry. This serves two purposes:
 */
 public abstract class MediaEntity extends Entity {
     // Yes, it is currently empty!
-    ;
+    
 }
 
 //===========================================================================

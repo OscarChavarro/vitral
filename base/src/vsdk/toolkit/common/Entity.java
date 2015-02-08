@@ -18,6 +18,16 @@ pattern). Note that this class supports two functionalities:
 
 public class Entity extends ModelElement implements Serializable
 {
+    /// Constants used for operations of type getSizeInBytes
+    public static final int BYTE_SIZE_IN_BYTES = 1;
+    public static final int INT_SIZE_IN_BYTES = 4;
+    public static final int LONG_SIZE_IN_BYTES = 8;
+    public static final int FLOAT_SIZE_IN_BYTES = 4;
+    public static final int DOUBLE_SIZE_IN_BYTES = 8;
+    public static final int VECTOR3D_SIZE_IN_BYTES = 24;
+    public static final int COLORRGB_SIZE_IN_BYTES = 24;
+    public static final int POINTER_SIZE_IN_BYTES = 8;
+    
     /**
     This is a value used for the standard java serialization mechanism to
     keep track of software versions.  To avoid warning at compilation time
@@ -26,7 +36,7 @@ public class Entity extends ModelElement implements Serializable
     define this value.  The proposed number to asign is the concatenation of
     8 digits YYYYMMDD, for year, month and day respectively.
     */
-    public static final long serialVersionUID = 20060502L;
+    //public static final long serialVersionUID = 20060502L;
 
     /**
     Each Entity object in the VSDK model should be responsible for calculating

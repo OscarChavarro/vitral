@@ -12,7 +12,6 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
 
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -36,14 +35,10 @@ public class JoglCameraRenderer extends JoglRenderer
     {
         Matrix4x4 R;
         Camera camera2 = new Camera(cam);
-        Vector3D eye, center, neweye, newcenter;
+        Vector3D neweye;
 
-        eye = camera2.getPosition();
-        center = camera2.getFocusedPosition();
         neweye = new Vector3D(0, 0, 0);
-        newcenter = center.substract(eye);
         camera2.setPosition(neweye);
-        camera2.setFocusedPositionDirect(newcenter);
         camera2.setNearPlaneDistance(0.1);
         camera2.setFarPlaneDistance(10.0);
         gl.glMatrixMode(GL2.GL_PROJECTION);
