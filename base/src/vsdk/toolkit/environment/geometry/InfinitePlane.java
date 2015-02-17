@@ -313,6 +313,48 @@ public class InfinitePlane extends HalfSpace {
         return msg;
     }
 
+    /**
+     * @return the a
+     */
+    public double getA() {
+        return a;
+    }
+
+    /**
+     * @param a the a to set
+     */
+    public void setA(double a) {
+        this.a = a;
+    }
+
+    /**
+     * @return the b
+     */
+    public double getB() {
+        return b;
+    }
+
+    /**
+     * @param b the b to set
+     */
+    public void setB(double b) {
+        this.b = b;
+    }
+
+    /**
+     * @return the c
+     */
+    public double getC() {
+        return c;
+    }
+
+    /**
+     * @param c the c to set
+     */
+    public void setC(double c) {
+        this.c = c;
+    }
+
 }
 
 //===========================================================================

@@ -74,7 +74,11 @@ public class CameraControllerBlender extends CameraController {
         int CTRL_MASK = 2;//java.awt.event.KeyEvent.CTRL_DOWN_MASK;
         Vector3D u, v, w;
         Matrix4x4 DR, T1, T2, COMPUESTA;
+        //LRR16ene2015.
+        Matrix4x4 tranMat = new Matrix4x4();
+        double angRot;
 
+        angRot = Math.toRadians(5);
         // 1. Obtain a copy of the camera's internal parameters
         eyePosition = camera.getPosition();
         focusedPosition = camera.getFocusedPosition();
@@ -104,16 +108,16 @@ public class CameraControllerBlender extends CameraController {
 
             switch ( keycode ) {
               case KeyEvent.KEY_X:
-                if ( (mask & SHIFT_MASK) == 0 ) {
-                    // Minuscula
-                    eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
-                    updated = true;
-                }
-                else if ( (mask & SHIFT_MASK) != 0 ) {
-                    // Mayuscula
-                    eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
-                    updated = true;
-                }
+//                if ( (mask & SHIFT_MASK) == 0 ) {
+//                    // Minuscula
+//                    eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
+//                    updated = true;
+//                }
+//                else if ( (mask & SHIFT_MASK) != 0 ) {
+//                    // Mayuscula
+//                    eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
+//                    updated = true;
+//                }
                 break;
 
               case KeyEvent.KEY_NUM5: // Rote el modo de proyeccion
@@ -131,15 +135,19 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM4:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-                    T1 = new Matrix4x4();
-                    DR = new Matrix4x4();
-                    T2 = new Matrix4x4();
-                    T1.translation(focusedPosition.multiply(-1));
-                    DR.axisRotation(-Math.toRadians(15), 0, 0, 1);
-                    T2.translation(focusedPosition);
-                    COMPUESTA = T2.multiply(DR.multiply(T1));
-                    eyePosition = COMPUESTA.multiply(eyePosition);
-                    R = COMPUESTA.multiply(R);
+//                    T1 = new Matrix4x4();
+//                    DR = new Matrix4x4();
+//                    T2 = new Matrix4x4();
+//                    T1.translation(focusedPosition.multiply(-1));
+//                    DR.axisRotation(-Math.toRadians(15), 0, 0, 1);
+//                    T2.translation(focusedPosition);
+//                    COMPUESTA = T2.multiply(DR.multiply(T1));
+//                    eyePosition = COMPUESTA.multiply(eyePosition);
+//                    R = COMPUESTA.multiply(R);
+                    //tranMat.axisRotation(ang, w);
+                    tranMat.axisRotation(-angRot, 0, 0, 1);
+                    R = tranMat.multiply(R);
+                    eyePosition = tranMat.multiply(eyePosition);
                     updated = true;
                 }
                 else if ( (mask & CTRL_MASK) != 0 ) {
@@ -155,15 +163,19 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM6:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-                    T1 = new Matrix4x4();
-                    DR = new Matrix4x4();
-                    T2 = new Matrix4x4();
-                    T1.translation(focusedPosition.multiply(-1));
-                    DR.axisRotation(Math.toRadians(15), 0, 0, 1);
-                    T2.translation(focusedPosition);
-                    COMPUESTA = T2.multiply(DR.multiply(T1));
-                    eyePosition = COMPUESTA.multiply(eyePosition);
-                    R = COMPUESTA.multiply(R);
+//                    T1 = new Matrix4x4();
+//                    DR = new Matrix4x4();
+//                    T2 = new Matrix4x4();
+//                    T1.translation(focusedPosition.multiply(-1));
+//                    DR.axisRotation(Math.toRadians(15), 0, 0, 1);
+//                    T2.translation(focusedPosition);
+//                    COMPUESTA = T2.multiply(DR.multiply(T1));
+//                    eyePosition = COMPUESTA.multiply(eyePosition);
+//                    R = COMPUESTA.multiply(R);
+                    //tranMat.axisRotation(ang, w);
+                    tranMat.axisRotation(angRot, 0, 0, 1);
+                    R = tranMat.multiply(R);
+                    eyePosition = tranMat.multiply(eyePosition);
                     updated = true;
                 }
                 else if ( (mask & CTRL_MASK) != 0 ) {
@@ -179,15 +191,18 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM2:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-                    T1 = new Matrix4x4();
-                    DR = new Matrix4x4();
-                    T2 = new Matrix4x4();
-                    T1.translation(focusedPosition.multiply(-1));
-                    DR.axisRotation(-Math.toRadians(15), v.x, v.y, v.z);
-                    T2.translation(focusedPosition);
-                    COMPUESTA = T2.multiply(DR.multiply(T1));
-                    eyePosition = COMPUESTA.multiply(eyePosition);
-                    R = COMPUESTA.multiply(R);
+//                    T1 = new Matrix4x4();
+//                    DR = new Matrix4x4();
+//                    T2 = new Matrix4x4();
+//                    T1.translation(focusedPosition.multiply(-1));
+//                    DR.axisRotation(-Math.toRadians(15), v.x, v.y, v.z);
+//                    T2.translation(focusedPosition);
+//                    COMPUESTA = T2.multiply(DR.multiply(T1));
+//                    eyePosition = COMPUESTA.multiply(eyePosition);
+//                    R = COMPUESTA.multiply(R);
+                    tranMat.axisRotation(-angRot, v);
+                    R = tranMat.multiply(R);
+                    eyePosition = tranMat.multiply(eyePosition);                    
                     updated = true;
                 }
                 else if ( (mask & CTRL_MASK) != 0 ) {
@@ -203,15 +218,18 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM8:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-                    T1 = new Matrix4x4();
-                    DR = new Matrix4x4();
-                    T2 = new Matrix4x4();
-                    T1.translation(focusedPosition.multiply(-1));
-                    DR.axisRotation(Math.toRadians(15), v.x, v.y, v.z);
-                    T2.translation(focusedPosition);
-                    COMPUESTA = T2.multiply(DR.multiply(T1));
-                    eyePosition = COMPUESTA.multiply(eyePosition);
-                    R = COMPUESTA.multiply(R);
+//                    T1 = new Matrix4x4();
+//                    DR = new Matrix4x4();
+//                    T2 = new Matrix4x4();
+//                    T1.translation(focusedPosition.multiply(-1));
+//                    DR.axisRotation(Math.toRadians(15), v.x, v.y, v.z);
+//                    T2.translation(focusedPosition);
+//                    COMPUESTA = T2.multiply(DR.multiply(T1));
+//                    eyePosition = COMPUESTA.multiply(eyePosition);
+//                    R = COMPUESTA.multiply(R);
+                    tranMat.axisRotation(angRot, v);
+                    R = tranMat.multiply(R);
+                    eyePosition = tranMat.multiply(eyePosition);                    
                     updated = true;
                 }
                 else if ( (mask & CTRL_MASK) != 0 ) {

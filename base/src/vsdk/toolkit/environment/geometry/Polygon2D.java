@@ -43,6 +43,17 @@ public class Polygon2D extends Surface
         loops.add(currentLoop);
     }
 
+    public final void eraseLastLoop()
+    {
+        int size;
+        
+        size = loops.size();
+        if(size > 1) {
+            loops.remove(size-1);
+            currentLoop = loops.get(size-2);
+        }
+    }
+    
     public void invert()
     {
         for(_Polygon2DContour p2DContour : loops) {
