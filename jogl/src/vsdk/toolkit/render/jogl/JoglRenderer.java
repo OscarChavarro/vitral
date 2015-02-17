@@ -15,9 +15,12 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.media.Image;
 
 // VitralSDK classes
 import vsdk.toolkit.render.RenderingElement;
+import static vsdk.toolkit.render.jogl.JoglHudIconRenderer.activateDefaultTextureParameters;
 
 /**
 The JoglRenderer abstract class provides an interface for Jogl*Renderer
@@ -46,6 +49,9 @@ public abstract class JoglRenderer extends RenderingElement {
     }
 */
 
+    /**
+    @return 
+    */
     public static boolean verifyOpenGLAvailability()
     {
 /*
@@ -128,6 +134,75 @@ public abstract class JoglRenderer extends RenderingElement {
 
         return buffer;
     }
+    
+    public static void drawUnitSquare(GL2 gl) {
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glColor3d(1, 1, 1);
+        gl.glBegin(GL2.GL_QUADS);
+        gl.glTexCoord2d(0, 0);
+        gl.glVertex2d(-0.5, -0.5);
+
+        gl.glTexCoord2d(1, 0);
+        gl.glVertex2d(0.5, -0.5);
+
+        gl.glTexCoord2d(1, 1);
+        gl.glVertex2d(0.5, 0.5);
+
+        gl.glTexCoord2d(0, 1);
+        gl.glVertex2d(-0.5, 0.5);
+        gl.glEnd();
+
+    }
+
+    public static void drawImageOn2DWindow(GL2 gl, Image img, Camera c, int x, int y) {
+        double fx, fy;
+        double dx, dy;
+
+        if (x < 0) {
+            x = -x;
+            x = (int) c.getViewportXSize() - img.getXSize() - x;
+        }
+        if (y < 0) {
+            y = -y;
+            y = (int) c.getViewportYSize() - img.getYSize() - y;
+        }
+
+        if (img == null) {
+            return;
+        }
+
+        fx = (((double) img.getXSize()) * 2.0) / c.getViewportXSize();
+        fy = (((double) img.getYSize()) * 2.0) / c.getViewportYSize();
+        dx
+                = ((double) (x) * 2.0 + ((double) img.getXSize())) / c.getViewportXSize();
+        dy
+                = ((double) (y) * 2.0 + ((double) img.getYSize())) / c.getViewportYSize();
+
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glLoadIdentity();
+        gl.glTranslated(dx - 1, 1.0 - dy, 0);
+        gl.glScaled(fx, fy, 1.0);
+        gl.glActiveTexture(GL2.GL_TEXTURE0);
+        JoglImageRenderer.activate(gl, img);
+        activateDefaultTextureParameters(gl);
+        drawUnitSquare(gl);
+    }
+
+    public static void activateDefaultTextureParameters(GL2 gl) {
+        gl.glTexParameteri(
+            GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+        gl.glTexParameteri(
+            GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+        gl.glTexParameterf(
+            GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_MIRRORED_REPEAT);
+        gl.glTexParameterf(
+            GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_MIRRORED_REPEAT);
+        //gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL);
+    }
+
 
 }
 

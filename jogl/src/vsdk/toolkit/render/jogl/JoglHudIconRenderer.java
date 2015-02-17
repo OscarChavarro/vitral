@@ -12,8 +12,6 @@ import javax.media.opengl.GL2;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.HudIcon;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBAImage;
 
 /**
  */
@@ -31,112 +29,56 @@ public class JoglHudIconRenderer extends JoglRenderer {
                 GL2.GL_REPEAT);
     }
 
-    public static void drawImage(GL2 gl, Image img, Camera c, int x, int y) {
-        double fx, fy;
-        double dx, dy;
-
-        if (x < 0) {
-            x = -x;
-            x = (int) c.getViewportXSize() - img.getXSize() - x;
-        }
-        if (y < 0) {
-            y = -y;
-            y = (int) c.getViewportYSize() - img.getYSize() - y;
-        }
-
-        if (img == null) {
-            return;
-        }
-
-        fx = (((double) img.getXSize()) * 2.0) / c.getViewportXSize();
-        fy = (((double) img.getYSize()) * 2.0) / c.getViewportYSize();
-        dx
-                = ((double) (x) * 2.0 + ((double) img.getXSize())) / c.getViewportXSize();
-        dy
-                = ((double) (y) * 2.0 + ((double) img.getYSize())) / c.getViewportYSize();
-
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glLoadIdentity();
-        gl.glTranslated(dx - 1, 1.0 - dy, 0);
-        gl.glScaled(fx, fy, 1.0);
-        gl.glActiveTexture(GL2.GL_TEXTURE0);
-        JoglImageRenderer.activate(gl, img);
-        activateDefaultTextureParameters(gl);
-        drawUnitSquare(gl);
-    }
-
     public static void draw(GL2 gl, ArrayList<HudIcon> hudIcons, Camera camera) {
         int i;
 
         for (i = 0; i < hudIcons.size(); i++) {
             HudIcon icon = hudIcons.get(i);
-            drawImage(gl, icon.getImage(), camera, icon.getX(), icon.getY());
+            drawImageOn2DWindow(gl, icon.getImage(), camera, icon.getX(), icon.getY());
         }
-    }
-
-    private static void drawUnitSquare(GL2 gl) {
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glEnable(GL2.GL_TEXTURE_2D);
-        gl.glColor3d(1, 1, 1);
-        gl.glBegin(GL2.GL_QUADS);
-        gl.glTexCoord2d(0, 0);
-        gl.glVertex2d(-0.5, -0.5);
-
-        gl.glTexCoord2d(1, 0);
-        gl.glVertex2d(0.5, -0.5);
-
-        gl.glTexCoord2d(1, 1);
-        gl.glVertex2d(0.5, 0.5);
-
-        gl.glTexCoord2d(0, 1);
-        gl.glVertex2d(-0.5, 0.5);
-        gl.glEnd();
-
     }
 
     public static void draw(GL2 gl, HudIcon icon, Camera camera, int index) {
         try {
             switch (index) {
                 case 1:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero02.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero02.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 2:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero03.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero03.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 3:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero04.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero04.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 4:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero05.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero05.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 5:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero06.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero06.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 6:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero07.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero07.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 7:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero08.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero08.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 8:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero09.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero09.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 9:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 10:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero10.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 11:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero11.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero11.png")), camera, icon.getX(), icon.getY());
                     break;
                 case 12:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero13.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero13.png")), camera, icon.getX(), icon.getY());
                     break;
                 default:
-                    drawImage(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero01.png")), camera, icon.getX(), icon.getY());
+                    drawImageOn2DWindow(gl, ImagePersistence.importRGBA(new File("/usr/local/mosquioids/etc/billboards/Numero01.png")), camera, icon.getX(), icon.getY());
                     break;
             }
         } catch (Exception e) {
