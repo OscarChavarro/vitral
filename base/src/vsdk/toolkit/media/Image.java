@@ -22,9 +22,10 @@ bi-linear interpolation evaluation on Rgb space.
 public abstract class Image extends MediaEntity
 {
     /// Check the general attribute description in superclass Entity.
-    //public static final long serialVersionUID = 20061220L;
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
 
-    private static RGBPixel rgb = new RGBPixel();
+    private static final RGBPixel rgb = new RGBPixel();
 
     /**
     Given the width and height of the desired new size for this image, this
@@ -70,6 +71,7 @@ public abstract class Image extends MediaEntity
     width minus 1
     @param y - y cooordinate of desired pixel, must be between 0 and image
     height minus 1
+    @param p
     */
     public abstract void putPixelRgb(int x, int y, RGBPixel p);
 
@@ -94,6 +96,7 @@ public abstract class Image extends MediaEntity
     height minus 1
     Modifies the RGBPixel corresponding to requested pixel coordinate
     inside the image.
+    @param p
     */
     public abstract void getPixelRgb(int x, int y, RGBPixel p);
 
@@ -120,6 +123,9 @@ public abstract class Image extends MediaEntity
     method returns a rgb color corresponding to the nearest getPixelRgb.
 
     \todo : implement this method.
+    @param x
+    @param y
+    @return 
     */
     public ColorRgb getColorRgbNearest(double x, double y)
     {
@@ -144,6 +150,9 @@ public abstract class Image extends MediaEntity
 
     Current implementation is based on bilinear interpolation algorithm
     proposed for the bumpmap equivalent in [BLIN1978b].
+    @param x
+    @param y
+    @return 
     */
     public ColorRgb getColorRgbBiLinear(double x, double y)
     {

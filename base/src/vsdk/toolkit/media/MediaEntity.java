@@ -11,7 +11,7 @@ import vsdk.toolkit.common.Entity;
 /**
 A `MediaEntity` in VitralSDK is a software element with data
 structures associated with multimedia information, and some minor basic
-algorithms for suporting them.
+algorithms for supporting them.
 
 The MediaEntity abstract class provides an interface for multimedia related
 classes NOT related with 3D geometry. This serves two purposes:
@@ -22,8 +22,8 @@ classes NOT related with 3D geometry. This serves two purposes:
     detected.
 */
 public abstract class MediaEntity extends Entity {
-    // Yes, it is currently empty!
-    
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
 }
 
 //===========================================================================

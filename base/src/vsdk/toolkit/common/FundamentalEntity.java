@@ -38,7 +38,8 @@ data structuring classes. This serves two purposes:
     detected.
 */
 public abstract class FundamentalEntity extends Entity {
-    // Yes, it is currently empty!
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
 }
 
 //===========================================================================

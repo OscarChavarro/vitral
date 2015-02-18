@@ -70,19 +70,28 @@ class _ReaderObjVertex extends PersistenceElement
         vertexNormalIndex = other.vertexNormalIndex;
     }
     
+    /**
+    Pending to check why Java ask for overloading of current method. Not clear
+    how should be made.
+    */
+    @Override
+    public int hashCode()
+    {
+        return vertexNormalIndex + 
+            10*vertexPositionIndex + 
+            100*vertexTextureCoordinateIndex;
+    }
+    
     @Override
     public boolean equals(Object alien)
     {
         if ( !(alien instanceof _ReaderObjVertex) ) return false;
         _ReaderObjVertex other = (_ReaderObjVertex)alien;
 
-        if ( other.vertexPositionIndex != this.vertexPositionIndex ||
-             other.vertexNormalIndex != this.vertexNormalIndex ||
-             other.vertexTextureCoordinateIndex != 
-             this.vertexTextureCoordinateIndex ) {
-            return false;
-        }
-        return true;
+        return !(other.vertexPositionIndex != this.vertexPositionIndex ||
+            other.vertexNormalIndex != this.vertexNormalIndex ||
+            other.vertexTextureCoordinateIndex !=
+            this.vertexTextureCoordinateIndex);
     }
 
     @Override

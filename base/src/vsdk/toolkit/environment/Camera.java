@@ -32,6 +32,7 @@ import vsdk.toolkit.environment.geometry.InfinitePlane;
 public class Camera extends Entity
 {
     /// Check the general attribute description in superclass Entity.
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20060502L;
 
     // Global constants
@@ -1535,6 +1536,27 @@ public class Camera extends Entity
         this.normalizingTransformation = other.normalizingTransformation;
     }
 
+    /**
+    Given a point in screen coordinates (x, y, 0), for example from a user
+    generated mouse click, this method calculates the corresponding 3D point
+    such as when located in the unit square (from <-0.5, -0.5, 0> to 
+    <0.5, 0.5, 0>) the projected point is localized visually on the given
+    input viewport coordinate if camera is at OpenGL compatible neutral
+    configuration (at position 0, 0, 2, looking down to position 0, 0, 0 with
+    up vector 0, 1, 0).
+    @param inViewportPoint
+    @param inOutUnitSquarePoint 
+    */
+    public void convertViewportPointToUnitSquare(
+        final Vector3D inViewportPoint,
+        Vector3D inOutUnitSquarePoint)
+    {
+        inOutUnitSquarePoint.x = inViewportPoint.x / (viewportXSize) - 0.5;
+        inOutUnitSquarePoint.y =
+            -1.0 * (inViewportPoint.y / (viewportYSize) - 0.5);
+        inOutUnitSquarePoint.z = 0;
+    }
+    
 }
 
 //===========================================================================

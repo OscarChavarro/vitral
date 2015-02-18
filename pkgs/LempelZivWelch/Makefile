@@ -1,7 +1,7 @@
 #===========================================================================
 
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
-PLATFORM=linux
+PLATFORM=darwin
 LIB_DIR=../../lib
 CLASSES_DIR = ./classes
 SRC_DIR=./src
@@ -11,7 +11,7 @@ CCO=gcc -std=c99 -m32 -fPIC -Wall -pedantic -I./src_lib -I$(JDKHOME)/include -I$
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
-all: check ./bin/compress ./bin/uncompress $(LIB_DIR)/libLZW.so $(CLASSES_DIR)/main.class
+all: check ./bin/compress ./bin/uncompress $(LIB_DIR)/libLZW.dylib $(CLASSES_DIR)/main.class
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
@@ -44,8 +44,14 @@ check: ./classes ./bin ./tmp
 $(CLASSES_DIR)/main.class: $(SRC_DIR)/main.java
 	cd $(SRC_DIR);$(JC) main.java
 
+# The Linux Way
 $(LIB_DIR)/libLZW.so: ./tmp/compress.o ./tmp/LzwWrapper.o
 	$(CCO) -shared -Wl,-soname,libLZW.so.1 -o $(LIB_DIR)/libLZW.so.1 ./tmp/compress.o ./tmp/LzwWrapper.o
+	@cd $(LIB_DIR);rm -f ./libLZW.so;ln -s ./libLZW.so.1 ./libLZW.so
+
+# The MacOSX/Darwin Way
+$(LIB_DIR)/libLZW.dylib: ./tmp/compress.o ./tmp/LzwWrapper.o
+	$(CCO) -dynamiclib -o $(LIB_DIR)/libLZW.dylib ./tmp/compress.o ./tmp/LzwWrapper.o
 	@cd $(LIB_DIR);rm -f ./libLZW.so;ln -s ./libLZW.so.1 ./libLZW.so
 
 ./bin/compress: ./tmp/compress.o ./tmp/test.o

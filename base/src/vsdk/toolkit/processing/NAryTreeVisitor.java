@@ -24,7 +24,6 @@ public class NAryTreeVisitor<T> extends ProcessingElement {
     @param inTraverser
     @param level 
     */
-    @SuppressWarnings("unchecked")
     private void preOrderTraverse(
         _NAryTreeNode<T> inNode, 
         final NAryTreeTraverser inTraverser, 
@@ -36,7 +35,8 @@ public class NAryTreeVisitor<T> extends ProcessingElement {
             return;
         }
         if ( inNode instanceof _NAryTreeIntermediateNode ) {
-            _NAryTreeIntermediateNode node = (_NAryTreeIntermediateNode)inNode;
+            _NAryTreeIntermediateNode<T> node;
+            node = (_NAryTreeIntermediateNode<T>)inNode;
             ArrayList<_NAryTreeNode<T>> l = node.getChildren();
             int i;
             inTraverser.visit(node.getData(), level);
@@ -45,7 +45,8 @@ public class NAryTreeVisitor<T> extends ProcessingElement {
             }
         }
         else if ( inNode instanceof _NAryTreeLeafNode ) {
-            _NAryTreeLeafNode leaf = (_NAryTreeLeafNode)inNode;
+            _NAryTreeLeafNode<T> leaf;
+            leaf = (_NAryTreeLeafNode<T>)inNode;
             inTraverser.visit(leaf.getData(), level);
         }
         else {

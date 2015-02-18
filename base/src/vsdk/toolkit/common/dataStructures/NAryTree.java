@@ -14,6 +14,9 @@ was followed:
 @param <T>
 */
 public class NAryTree<T> extends Entity {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     private _NAryTreeNode<T> root;
 
     /**
@@ -28,7 +31,6 @@ public class NAryTree<T> extends Entity {
     Creates a one level tree containing given data element in its root.
     @param inRootContent 
     */
-    @SuppressWarnings("unchecked")
     public NAryTree(T inRootContent)
     {
         root = (_NAryTreeNode<T>)new _NAryTreeLeafNode<T>(inRootContent);    
@@ -53,8 +55,7 @@ public class NAryTree<T> extends Entity {
     @param inKey
     @return 
     */
-    @SuppressWarnings("unchecked")
-    private _NAryTreeNode searchNodeByContent(
+    private _NAryTreeNode<T> searchNodeByContent(
         final _NAryTreeNode<T> inNode, final T inKey)
     {
         if ( inNode == null ) {
@@ -63,9 +64,11 @@ public class NAryTree<T> extends Entity {
             return null;
         }
         if ( inNode instanceof _NAryTreeIntermediateNode ) {
-            _NAryTreeIntermediateNode node = (_NAryTreeIntermediateNode)inNode;
-            _NAryTreeNode candidate;
-            ArrayList<_NAryTreeNode<T>> l = node.getChildren();
+            _NAryTreeIntermediateNode<T> node;
+            node = (_NAryTreeIntermediateNode<T>)inNode;
+            _NAryTreeNode<T> candidate;
+            ArrayList<_NAryTreeNode<T>> l;
+            l = node.getChildren();
             int i;
             
             if ( node.getData().equals(inKey) ) {
@@ -95,7 +98,7 @@ public class NAryTree<T> extends Entity {
     @param inKey
     @return containing node or null if element is not inside tree
     */
-    public _NAryTreeNode searchNodeByContent(final T inKey)
+    public _NAryTreeNode<T> searchNodeByContent(final T inKey)
     {
         if (  getRoot() == null ) {
             return null;
@@ -114,21 +117,20 @@ public class NAryTree<T> extends Entity {
     @param inNewData
     @return 
     */
-    @SuppressWarnings("unchecked")
     public boolean addChild(
         final T inExistingNodeData, 
         final T inNewData) 
     {
-        _NAryTreeNode parent;
+        _NAryTreeNode<T> parent;
         parent = searchNodeByContent(inExistingNodeData);
         if ( parent == null ) {
             return false;
         }
         
         //---------------------------------------------------------------------
-        _NAryTreeIntermediateNode node;
+        _NAryTreeIntermediateNode<T> node;
         if ( parent instanceof _NAryTreeIntermediateNode ) {
-            node = (_NAryTreeIntermediateNode)parent;
+            node = (_NAryTreeIntermediateNode<T>)parent;
             node.getChildren().add(new _NAryTreeLeafNode<T>(inNewData));
             return true;
         }
@@ -149,7 +151,7 @@ public class NAryTree<T> extends Entity {
                     return false;
                 }
                 if ( grandpa instanceof _NAryTreeIntermediateNode ) {
-                    node = (_NAryTreeIntermediateNode)grandpa;
+                    node = (_NAryTreeIntermediateNode<T>)grandpa;
                     
                     node.replaceChild(
                         parent, new _NAryTreeLeafNode<T>(inNewData));
@@ -169,7 +171,6 @@ public class NAryTree<T> extends Entity {
     @param inKey
     @return 
     */
-    @SuppressWarnings("unchecked")
     private _NAryTreeNode<T> searchParent(
         _NAryTreeNode<T> inNode,
         _NAryTreeNode<T> inKey)
@@ -180,7 +181,8 @@ public class NAryTree<T> extends Entity {
             return null;
         }
         if ( inNode instanceof _NAryTreeIntermediateNode ) {
-            _NAryTreeIntermediateNode node = (_NAryTreeIntermediateNode)inNode;
+            _NAryTreeIntermediateNode<T> node;
+            node = (_NAryTreeIntermediateNode<T>)inNode;
             
             ArrayList<_NAryTreeNode<T>> l = node.getChildren();
             int i;
@@ -190,7 +192,7 @@ public class NAryTree<T> extends Entity {
                 }
             }
             
-            _NAryTreeNode candidate;
+            _NAryTreeNode<T> candidate;
             for ( i = 0; i < l.size(); i++ ) {
                 candidate = searchParent(l.get(i), inKey);
                 if ( candidate != null ) {

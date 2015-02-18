@@ -7,10 +7,12 @@ import java.util.ArrayList;
 NAry tree nodes organized from composite structural design pattern.
 @param <T>
 */
-public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode {
+public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode<T> {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     private final ArrayList<_NAryTreeNode<T>> children;
 
-    @SuppressWarnings("unchecked")
     public _NAryTreeIntermediateNode(T inInfo)
     {
         super(inInfo);
@@ -24,14 +26,15 @@ public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode {
         return children;
     }
     
-    @SuppressWarnings("unchecked")
     public boolean
-    replaceChild(final _NAryTreeNode inOldNode, final _NAryTreeNode inNewNode)
+    replaceChild(
+        final _NAryTreeNode<T> inOldNode, 
+        final _NAryTreeNode<T> inNewNode)
     {
         int i;
-      
+
         _NAryTreeIntermediateNode<T> subtree;
-        subtree = new _NAryTreeIntermediateNode<T>((T)inOldNode.getData());
+        subtree = new _NAryTreeIntermediateNode<T>(inOldNode.getData());
         subtree.getChildren().add(inNewNode);
 
         for ( i = 0; i < children.size(); i++ ) {

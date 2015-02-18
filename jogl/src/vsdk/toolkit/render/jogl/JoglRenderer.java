@@ -174,14 +174,17 @@ public abstract class JoglRenderer extends RenderingElement {
 
         fx = (((double) img.getXSize()) * 2.0) / c.getViewportXSize();
         fy = (((double) img.getYSize()) * 2.0) / c.getViewportYSize();
-        dx
-                = ((double) (x) * 2.0 + ((double) img.getXSize())) / c.getViewportXSize();
-        dy
-                = ((double) (y) * 2.0 + ((double) img.getYSize())) / c.getViewportYSize();
+        dx = ((double) (x) * 2.0 + 
+            ((double) img.getXSize())) / c.getViewportXSize();
+        dy = ((double) (y) * 2.0 + 
+            ((double) img.getYSize())) / c.getViewportYSize();
 
+        gl.glEnable(GL2.GL_TEXTURE_2D);
         gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glTranslated(dx - 1, 1.0 - dy, 0);
         gl.glScaled(fx, fy, 1.0);
@@ -189,6 +192,11 @@ public abstract class JoglRenderer extends RenderingElement {
         JoglImageRenderer.activate(gl, img);
         activateDefaultTextureParameters(gl);
         drawUnitSquare(gl);
+        
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
     public static void activateDefaultTextureParameters(GL2 gl) {

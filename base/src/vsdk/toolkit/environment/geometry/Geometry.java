@@ -30,7 +30,8 @@ supplied by all geometries in order to be managed uniformly by every
 geometric algorithm, including but not limited to rendering operations.<P>
 */
 public abstract class Geometry extends Entity {
-
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
     public static final int INSIDE = 1;
     public static final int LIMIT = 0;
     public static final int OUTSIDE = -1;

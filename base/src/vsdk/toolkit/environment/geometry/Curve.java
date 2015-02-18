@@ -9,6 +9,9 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.Ray;
 
 public abstract class Curve extends Geometry {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     /**
     This method is provided to ease the integration with generic operation
     Geometry.doIntersection.  A default behavior of not responding the test

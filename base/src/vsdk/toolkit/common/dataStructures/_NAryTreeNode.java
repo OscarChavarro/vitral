@@ -8,6 +8,8 @@ NAry tree nodes organized from composite structural design pattern.
 @param <T>
 */
 public abstract class _NAryTreeNode<T> extends Entity {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
     private T data;
 
     /**

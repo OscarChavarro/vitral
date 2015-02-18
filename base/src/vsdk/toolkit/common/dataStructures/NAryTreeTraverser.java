@@ -6,6 +6,9 @@ import vsdk.toolkit.common.Entity;
 /**
 */
 public abstract class NAryTreeTraverser extends Entity {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     public abstract void start();
     public abstract void end();
     public abstract void visit(Object inElement, final int inLevel);

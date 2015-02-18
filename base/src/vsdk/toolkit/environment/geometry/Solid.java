@@ -9,6 +9,9 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public abstract class Solid extends Geometry {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     /**
     Given current solid, the method `doCenterOfMass` returns a vector
     containing the center of mass for current solid, assuming that all the

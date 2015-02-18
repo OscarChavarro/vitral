@@ -7,6 +7,9 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public abstract class Background extends Entity
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+    
     public Background() {
 
     }

@@ -16,20 +16,21 @@ style classes inside the Vitral SDK. This serves two purposes:
 */
 
 public abstract class VSDKException extends Exception {
-   public VSDKException() {
-   }
+    public static final long serialVersionUID = 20150218L;
+    public VSDKException() {
+    }
 
-   public VSDKException(String message) {
+    public VSDKException(String message) {
        super(message);
-   }
+    }
 
-   public VSDKException(String message, Throwable cause) {
+    public VSDKException(String message, Throwable cause) {
        super(message, cause);
-   }
+    }
 
-   public VSDKException(Throwable cause) {
+    public VSDKException(Throwable cause) {
        super(cause);
-   }
+    }
 }
 
 //===========================================================================

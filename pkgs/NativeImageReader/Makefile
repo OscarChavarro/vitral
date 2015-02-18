@@ -1,17 +1,18 @@
 #===========================================================================
 
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
-PLATFORM=linux
+PLATFORM=darwin
 LIB_DIR=../../lib
 CLASSES_DIR = ./classes
 SRC_DIR=./src
 TMP_DIR=./tmp
-CCO=g++ -fPIC -Wall -ansi -pedantic -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
-LIBTOOL=g++ -fPIC -Wall -ansi -pedantic
+# -ansi
+CCO=g++ -fPIC -Wall -pedantic -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM) -I/opt/local/include
+LIBTOOL=g++ -fPIC -Wall -pedantic -L/opt/local/lib
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
-all: check ./bin/testImageReader $(LIB_DIR)/libNativeImageReader.so $(CLASSES_DIR)/testImageReader.class
+all: check ./bin/testImageReader $(LIB_DIR)/libNativeImageReader.dylib $(CLASSES_DIR)/testImageReader.class
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
@@ -44,8 +45,14 @@ check: ./classes ./bin ./tmp
 $(CLASSES_DIR)/testImageReader.class: $(SRC_DIR)/testImageReader.java
 	cd $(SRC_DIR);$(JC) testImageReader.java
 
+# The Linux way
 $(LIB_DIR)/libNativeImageReader.so: ./tmp/PngReader.o ./tmp/NativeImageReaderWrapper.o
 	$(CCO) -shared -Wl,-soname,libNativeImageReader.so.1 -o $(LIB_DIR)/libNativeImageReader.so.1 ./tmp/PngReader.o ./tmp/NativeImageReaderWrapper.o -lpng
+	@cd $(LIB_DIR);rm -f ./libNativeImageReader.so;ln -s ./libNativeImageReader.so.1 ./libNativeImageReader.so
+
+# The MacOSX/Darwin way
+$(LIB_DIR)/libNativeImageReader.dylib: ./tmp/PngReader.o ./tmp/NativeImageReaderWrapper.o
+	$(CCO) -dynamiclib -o $(LIB_DIR)/libNativeImageReader.dylib ./tmp/PngReader.o ./tmp/NativeImageReaderWrapper.o -L/opt/local/lib -lpng
 	@cd $(LIB_DIR);rm -f ./libNativeImageReader.so;ln -s ./libNativeImageReader.so.1 ./libNativeImageReader.so
 
 ./tmp/PngReader.o: ./src_lib/PngReader.C ./src_lib/NativeImageReader.h

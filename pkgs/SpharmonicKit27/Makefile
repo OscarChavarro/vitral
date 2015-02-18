@@ -39,7 +39,8 @@
 #===========================================================================
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
 
-PLATFORM=linux
+#PLATFORM=linux
+PLATFORM=darwin
 SRC_DIR = ./src
 LIB_DIR = ../../lib
 CLASSES_DIR = ./classes
@@ -112,7 +113,7 @@ FSTHYBRIDXOBJ = $(FLTHYBRIDOBJ) \
 
 # first some shortcuts
 
-all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.so bin/generateSphericalHarmonics bin/convertFileToBynaryArray
+all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.dylib bin/generateSphericalHarmonics bin/convertFileToBynaryArray
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
@@ -143,7 +144,7 @@ check: ./classes ./bin ./tmp
 	@mkdir tmp
 
 clean: 
-	@rm -rf $(LIB_DIR)/*.so ./classes ./bin ./tmp
+	@rm -rf $(LIB_DIR)/*.so $(LIB_DIR)/*.dylib ./classes ./bin ./tmp
 	@rm -rf $(CLASSES_DIR)/*
 	@rm -rf $(TMP_DIR)/*
 	@rm -f bin/generateSphericalHarmonics bin/convertFileToBynaryArray `find . -name "*~"`
@@ -155,8 +156,13 @@ $(TMP_DIR)/SpharmonicKitWrapper.o: $(SRC_DIR)/SpharmonicKitWrapper.C
 	cd $(CLASSES_DIR);$(JH) vsdk.toolkit.processing.SpharmonicKitWrapper
 	$(CCP) $(CFLAGS) -I$(TMP_DIR) -o $(TMP_DIR)/SpharmonicKitWrapper.o -c $(SRC_DIR)/SpharmonicKitWrapper.C
 
+# The Linux way
 $(LIB_DIR)/libspharmonickit.so: $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
 	$(LIBTOOL) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libspharmonickit.so -o $(LIB_DIR)/libspharmonickit.so $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
+
+# The MacOSX/Darwin way
+$(LIB_DIR)/libspharmonickit.dylib: $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
+	$(LIBTOOL) $(CFLAGS) $(LDFLAGS) -dynamiclib -o $(LIB_DIR)/libspharmonickit.dylib $(TMP_DIR)/SpharmonicKitWrapper.o $(FSTSEMIOBJ) tmp/FST_semi_disk.o
 
 $(CLASSES_DIR)/main.class: $(SRC_DIR)/main.java
 	cd $(SRC_DIR);$(JC) -classpath ../../../lib/vsdk.jar main.java

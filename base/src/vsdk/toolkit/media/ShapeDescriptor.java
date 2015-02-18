@@ -8,6 +8,8 @@ package vsdk.toolkit.media;
 
 public abstract class ShapeDescriptor extends MediaEntity
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
     protected String label;
 
     public ShapeDescriptor(String label)
