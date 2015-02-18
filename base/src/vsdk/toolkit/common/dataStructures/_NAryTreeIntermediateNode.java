@@ -8,13 +8,14 @@ NAry tree nodes organized from composite structural design pattern.
 @param <T>
 */
 public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode {
-   private final ArrayList<_NAryTreeNode<T>> children;
+    private final ArrayList<_NAryTreeNode<T>> children;
 
-   public _NAryTreeIntermediateNode(T inInfo)
-   {
-       super(inInfo);
-       children = new ArrayList<_NAryTreeNode<T>>();
-   }
+    @SuppressWarnings("unchecked")
+    public _NAryTreeIntermediateNode(T inInfo)
+    {
+        super(inInfo);
+        children = new ArrayList<_NAryTreeNode<T>>();
+    }
 
     /**
     @return the children
@@ -23,6 +24,7 @@ public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode {
         return children;
     }
     
+    @SuppressWarnings("unchecked")
     public boolean
     replaceChild(final _NAryTreeNode inOldNode, final _NAryTreeNode inNewNode)
     {

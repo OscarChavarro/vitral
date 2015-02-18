@@ -24,6 +24,7 @@ public class NAryTreeVisitor<T> extends ProcessingElement {
     @param inTraverser
     @param level 
     */
+    @SuppressWarnings("unchecked")
     private void preOrderTraverse(
         _NAryTreeNode<T> inNode, 
         final NAryTreeTraverser inTraverser, 

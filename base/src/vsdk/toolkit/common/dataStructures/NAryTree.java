@@ -28,9 +28,10 @@ public class NAryTree<T> extends Entity {
     Creates a one level tree containing given data element in its root.
     @param inRootContent 
     */
+    @SuppressWarnings("unchecked")
     public NAryTree(T inRootContent)
     {
-        root = new _NAryTreeLeafNode<T>(inRootContent);    
+        root = (_NAryTreeNode<T>)new _NAryTreeLeafNode<T>(inRootContent);    
     }
 
     /**
@@ -52,6 +53,7 @@ public class NAryTree<T> extends Entity {
     @param inKey
     @return 
     */
+    @SuppressWarnings("unchecked")
     private _NAryTreeNode searchNodeByContent(
         final _NAryTreeNode<T> inNode, final T inKey)
     {
@@ -112,6 +114,7 @@ public class NAryTree<T> extends Entity {
     @param inNewData
     @return 
     */
+    @SuppressWarnings("unchecked")
     public boolean addChild(
         final T inExistingNodeData, 
         final T inNewData) 
@@ -166,6 +169,7 @@ public class NAryTree<T> extends Entity {
     @param inKey
     @return 
     */
+    @SuppressWarnings("unchecked")
     private _NAryTreeNode<T> searchParent(
         _NAryTreeNode<T> inNode,
         _NAryTreeNode<T> inKey)
