@@ -69,7 +69,12 @@ public class JoglSceneRenderer
         //JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(true);
 
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
-            quality = s.qualityTemplate.clone();
+            try {
+                quality = s.qualityTemplate.clone();
+	    }
+	    catch ( CloneNotSupportedException e ) {
+                break;
+	    }
 
             if ( s.selectedThings.isSelected(i) ) {
                 quality.setSelectionCorners(true);
@@ -105,7 +110,13 @@ public class JoglSceneRenderer
 
         //- Draw visual debug entities (usually transparent) --------------
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
-            quality = s.qualityTemplate.clone();
+            try {
+                quality = s.qualityTemplate.clone();
+	    }
+	    catch ( CloneNotSupportedException e ) {
+                break;
+	    }
+
             quality.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
             if ( s.selectedDebugThingGroups.isSelected(i) ) {
                 quality.setSelectionCorners(true);
