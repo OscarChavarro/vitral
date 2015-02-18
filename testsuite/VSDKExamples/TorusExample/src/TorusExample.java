@@ -106,12 +106,11 @@ public class TorusExample implements
         jButton1.addActionListener(new ActionListener () {
  
             @Override
-            @SuppressWarnings("empty-statement")
             public void actionPerformed(ActionEvent  e)
             {
                 //Execute when button is pressed
-                 Button a = new Button("click");
-                KeyEvent ev = new KeyEvent(a, 1, 20, 1, 10, 'a');;
+                Button a = new Button("click");
+                KeyEvent ev = new KeyEvent(a, 1, 20, 1, 10, 'a');
                 keyPressed( ev);
             }
         }); 
@@ -119,12 +118,11 @@ public class TorusExample implements
         jButton2.addActionListener(new ActionListener () {
  
             @Override
-            @SuppressWarnings("empty-statement")
             public void actionPerformed(ActionEvent  e)
             {
                 //Execute when button is pressed
-                 Button a = new Button("click");
-                KeyEvent ev = new KeyEvent(a, 1, 20, 1, 10, 'A');;
+                Button a = new Button("click");
+                KeyEvent ev = new KeyEvent(a, 1, 20, 1, 10, 'A');
                 keyPressed( ev);
             }
         }); 

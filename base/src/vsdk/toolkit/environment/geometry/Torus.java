@@ -17,6 +17,7 @@ Current implementation is based on [WAGN2004].
 */
 public class Torus extends Solid 
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20131024L;
     
     private double majorRadius;
