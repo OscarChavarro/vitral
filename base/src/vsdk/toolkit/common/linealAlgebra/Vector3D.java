@@ -15,14 +15,14 @@ import vsdk.toolkit.common.FundamentalEntity;
 Class Vector3D represents a one dimensional array of three values, usually
 to be interpreted as:
   - A column vector of 1x3 positions, useful in linear algebra computations.
-  - A point in the R3 euclidean space
+  - A point in the R3 Euclidean space
 As current class is supposed to be used in the context of computer graphics,
-array elements are not indiced, to say from 0 to 2, but are instead named
+array elements are not indexed, to say from 0 to 2, but are instead named
 with the usual 3D axis labels `x`, `y` and `z`.
 This is one of the most fundamental classes in VitralSDK toolkit, and its
 attributes are usually accessed in the inner loops of computational intensive
 calculations. As such, the attributes are promoted to be public, yes, 
-breaking encaptulation and converting current class to a mere non-evolvable
+breaking encapsulation and converting current class to a mere non-evolvable
 structure.
 Lack of get/set method enforces a direct attribute access programming style
 which will lend to shorter code.
@@ -30,6 +30,7 @@ which will lend to shorter code.
 public class Vector3D extends FundamentalEntity
 {
     /// Check the general attribute description in superclass Entity.
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20060502L;
 
     /// Yes, they are public due to efficiency issues
@@ -100,8 +101,7 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-     *
-     */
+    */
     public final void normalize() {
         double t = x*x + y*y + z*z;
         if ( Math.abs(t) < VSDK.EPSILON ) return;
@@ -141,7 +141,7 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-    Stores in `this` Vector3D the result of substracting the operands `a` and `b`
+    Stores in `this` Vector3D the result of subtracting the operands `a` and `b`
     @param a
     @param b
     */
@@ -165,7 +165,7 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-    Provides an object to text report convertion, optimized for human
+    Provides an object to text report a convert, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
     @return human readable representation of current vector
@@ -228,7 +228,7 @@ public class Vector3D extends FundamentalEntity
 
     /**
     Given a point <r, theta, phi> in spherical coordinates, this method sets
-    current vector to corresponding cartesian coordinates <x, y, z>. Angles
+    current vector to corresponding Cartesian coordinates <x, y, z>. Angles
     are in radians.
     @param r
     @param theta

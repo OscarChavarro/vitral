@@ -1544,6 +1544,9 @@ public class Camera extends Entity
     input viewport coordinate if camera is at OpenGL compatible neutral
     configuration (at position 0, 0, 2, looking down to position 0, 0, 0 with
     up vector 0, 1, 0).
+    
+    When configuring graphics library to draw on viewport coordinates is
+    recommended to not use this method, but viewport2UnitSquareTransform.
     @param inViewportPoint
     @param inOutUnitSquarePoint 
     */
@@ -1551,12 +1554,39 @@ public class Camera extends Entity
         final Vector3D inViewportPoint,
         Vector3D inOutUnitSquarePoint)
     {
-        inOutUnitSquarePoint.x = inViewportPoint.x / (viewportXSize) - 0.5;
-        inOutUnitSquarePoint.y =
-            -1.0 * (inViewportPoint.y / (viewportYSize) - 0.5);
+        double a = 1.0 / (viewportXSize);
+        double f = -1.0 / (viewportYSize);
+        double d = -0.5;
+        double h = 0.5;
+        inOutUnitSquarePoint.x = a * inViewportPoint.x + d;
+        inOutUnitSquarePoint.y = f * inViewportPoint.y + h;
         inOutUnitSquarePoint.z = 0;
     }
-    
+
+    /**
+    Creates a transformation matrix to convert points in the unit square
+    (from <-0.5, -0.5, 0> to <0.5, 0.5, 0>) viewport coordinates.
+    @return 
+    */
+    public Matrix4x4
+    viewport2UnitSquareTransform()
+    {
+        Matrix4x4 T;
+        T = new Matrix4x4();
+        
+        double a = 1.0 / (viewportXSize);
+        double f = -1.0 / (viewportYSize);
+        double d = -0.5;
+        double h = 0.5;
+
+        T.M[0][0] = a;
+        T.M[1][1] = f;
+        T.M[0][3] = d;
+        T.M[1][3] = h;
+
+        return T;
+    }
+
 }
 
 //===========================================================================

@@ -20,6 +20,10 @@ import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
+
+import sun.misc.Cleaner;
+
 import vsdk.toolkit.io.PersistenceElement;
 //#endif
 
@@ -497,6 +501,33 @@ public class RGBImage extends Image
         }
     }
 //#endif
+
+    public void dispose() {
+        if ( data != null ) {
+            try {
+                Field cleanerField;
+                cleanerField = data.getClass().getDeclaredField("cleaner");
+                cleanerField.setAccessible(true);
+                Cleaner cleaner;
+                cleaner = (Cleaner) cleanerField.get(data);
+                cleaner.clean();
+            }
+            catch (NoSuchFieldException ex) {
+                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                    "dispose", "No such field cleaner", ex);
+            } 
+            catch (SecurityException ex) {
+                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                    "dispose", "Security fail", ex);                
+            } catch (IllegalArgumentException ex) {
+                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                    "dispose", "Illegal argument", ex);                
+            } catch (IllegalAccessException ex) {
+                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                    "dispose", "Illegal access", ex);                
+            }
+        }
+    }
 
 }
 

@@ -136,9 +136,13 @@ public abstract class JoglRenderer extends RenderingElement {
     }
     
     public static void drawUnitSquare(GL2 gl) {
+        drawUnitSquare(gl, 1.0);
+    }
+    
+    public static void drawUnitSquare(GL2 gl, double alpha) {
+        gl.glColor4d(1, 1, 1, alpha);
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_TEXTURE_2D);
-        gl.glColor3d(1, 1, 1);
         gl.glBegin(GL2.GL_QUADS);
         gl.glTexCoord2d(0, 0);
         gl.glVertex2d(-0.5, -0.5);
@@ -156,19 +160,23 @@ public abstract class JoglRenderer extends RenderingElement {
     }
 
     public static void drawImageOn2DWindow(GL2 gl, Image img, Camera c, int x, int y) {
+        drawImageOn2DWindow(gl, img, c, x, y, 1.0);
+    }
+    
+    public static void drawImageOn2DWindow(GL2 gl, Image img, Camera c, int x, int y, double alpha) {
         double fx, fy;
         double dx, dy;
 
-        if (x < 0) {
+        if ( x < 0 ) {
             x = -x;
             x = (int) c.getViewportXSize() - img.getXSize() - x;
         }
-        if (y < 0) {
+        if ( y < 0 ) {
             y = -y;
             y = (int) c.getViewportYSize() - img.getYSize() - y;
         }
 
-        if (img == null) {
+        if ( img == null ) {
             return;
         }
 
@@ -191,7 +199,7 @@ public abstract class JoglRenderer extends RenderingElement {
         gl.glActiveTexture(GL2.GL_TEXTURE0);
         JoglImageRenderer.activate(gl, img);
         activateDefaultTextureParameters(gl);
-        drawUnitSquare(gl);
+        drawUnitSquare(gl, alpha);
         
         gl.glPopMatrix();
         gl.glMatrixMode(GL2.GL_PROJECTION);

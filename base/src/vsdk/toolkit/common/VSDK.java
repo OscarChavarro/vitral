@@ -9,7 +9,7 @@ package vsdk.toolkit.common;
 
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
-
+import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
@@ -175,6 +175,12 @@ public class VSDK
                          (a.z-b.z)*(a.z-b.z));
     }
 
+    public static double vectorDistance(Vector2D a, Vector2D b)
+    {
+        return Math.sqrt((a.x-b.x)*(a.x-b.x) + 
+                         (a.y-b.y)*(a.y-b.y));
+    }
+
     public static double colorDistance(ColorRgb a, ColorRgb b)
     {
         return Math.sqrt((a.r-b.r)*(a.r-b.r) + 
@@ -203,7 +209,7 @@ public class VSDK
     /**
     Given a double number, it formats it to print in a given precision.
     @param a
-    @return a string representation of given double presiccion float number with
+    @return a string representation of given double precision float number with
     two decimal digits after the floating comma
     */
     public static String formatDouble(double a)
@@ -216,13 +222,19 @@ public class VSDK
     /**
     Given a double number, it formats it to print in a given precision.
     @param a
-    @return a string representation of given double presiccion float number with
+    @param digits
+    @return a string representation of given double precision float number with
     given decimal digits after the floating comma
     */
     public static String formatDouble(double a, int digits)
     {
         int i;
         String ff = "0.";
+        
+        if ( digits == 0 ) {
+            ff = "0";
+        }
+        
         for ( i = 0; i < digits; i++ ) {
             ff = ff + "0";
         }
@@ -455,7 +467,7 @@ public class VSDK
             "", // 10e0
             "_", // 10e1v  // da? confussing for end users
             "_", // 10e2  // h?
-            "k", // 10e3
+            "K", // 10e3
             "_", // 10e4
             "_", // 10e5
             "M", // 10e6
