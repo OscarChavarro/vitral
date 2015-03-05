@@ -40,10 +40,12 @@ public abstract class PersistenceElement {
 
     private static final boolean bigEndianArchitecture = false;
 
-    private static final byte[] byteBuffer1byte = new byte[1];
-    private static final byte[] byteBuffer2byte = new byte[2];
-    private static final byte[] byteBuffer4byte = new byte[4];
-    private static final byte[] byteBuffer8byte = new byte[8];
+    // Those are not thread safe / re-entrant... each different thread should
+    // use its own arrays
+    private static final byte byteBuffer1byte[] = new byte[1];
+    private static final byte byteBuffer2byte[] = new byte[2];
+    private static final byte byteBuffer4byte[] = new byte[4];
+    private static final byte byteBuffer8byte[] = new byte[8];
     
     // Long int should use an 8-sized array, not a 4-sized. Check.
     private static final byte[] bytesForLong = new byte[4];
@@ -484,8 +486,9 @@ public abstract class PersistenceElement {
 
     public static int readSignedShortBE(InputStream is) throws Exception
     {
-        readBytes(is, byteBuffer2byte);
-        return byteArray2signedShortBE(byteBuffer2byte, 0);
+        byte arr[] = new byte[2];
+        readBytes(is, arr);
+        return byteArray2signedShortBE(arr, 0);
     }
 
     public static void writeSignedShortBE(OutputStream os, int num) throws Exception

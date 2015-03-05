@@ -12,6 +12,34 @@ import vsdk.toolkit.common.dataStructures._NAryTreeNode;
 import vsdk.toolkit.common.dataStructures._NAryTreeLeafNode;
 import vsdk.toolkit.common.dataStructures._NAryTreeIntermediateNode;
 
+class _NAryTreeCounterTraverser extends NAryTreeTraverser
+{
+    private long count;
+    
+    @Override
+    public void start() {
+        count = 0;
+    }
+
+    @Override
+    public void end() {
+ 
+    }
+
+    @Override
+    public void visit(Object inElement, int inLevel) {
+        count++;
+    }
+
+    /**
+     * @return the count
+     */
+    public long getCount() {
+        return count;
+    }
+    
+}
+
 /**
 This class contains several common operations for NAryTree. This class plays
 the role of algorithm holder class in a visitor design pattern.
@@ -71,6 +99,16 @@ public class NAryTreeVisitor<T> extends ProcessingElement {
         inTraverser.end();
     }
 
+    public long countNumberOfNodes(NAryTree<T> inTree)
+    {
+        if (  inTree.getRoot() == null ) {
+            return 0;
+        }
+        _NAryTreeCounterTraverser c;
+        c = new _NAryTreeCounterTraverser();
+        preOrderTraverse(inTree, c);
+        return c.getCount();
+    }
 }
 
 //===========================================================================

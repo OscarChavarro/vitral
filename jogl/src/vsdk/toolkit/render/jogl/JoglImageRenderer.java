@@ -32,6 +32,9 @@ public class JoglImageRenderer extends JoglRenderer
     In applications with changing images, the memory list of compiled lists
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
+    @param gl
+    @param img
+    @return 
     */
     public static int activate(GL2 gl, Image img)
     {

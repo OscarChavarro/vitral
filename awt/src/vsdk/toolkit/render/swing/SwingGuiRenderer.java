@@ -228,7 +228,8 @@ public class SwingGuiRenderer extends PresentationElement {
         return widgetPopup;
     }
 
-    public static JPanel buildButtonGroup(Gui context, String name, ActionListener executor) {
+    public static JPanel buildButtonGroup(
+        Gui context, String name, ActionListener executor) {
         JPanel frame;
         JLabel l;
         JButton b;

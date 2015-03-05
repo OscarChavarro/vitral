@@ -86,7 +86,8 @@ public class Gui extends PresentationElement {
         return command;
     }
 
-    public GuiButtonGroup getButtonGroup(String name) {
+    public GuiButtonGroup getButtonGroup(String name) 
+    {
         if (name == null) {
             return null;
         }
@@ -96,7 +97,7 @@ public class Gui extends PresentationElement {
 
         for (i = 0; i < buttonGroupList.size(); i++) {
             candidate = buttonGroupList.get(i);
-            if (candidate.getName().equals(name)) {
+            if ( candidate.getName().equals(name) ) {
                 group = candidate;
                 break;
             }

@@ -194,7 +194,8 @@ public class GuiPersistence extends PersistenceElement {
 
     private static GuiCommand importAquynzaGuiCommand(
             StreamTokenizer parser,
-            Gui context) throws Exception {
+            Gui context,
+            String globalDataPath) throws Exception {
         GuiCommand item;
         RGBAImage img;
         RGBImage mask;
@@ -246,7 +247,8 @@ public class GuiPersistence extends PersistenceElement {
                             case 2: // icon
                                 try {
                                     img =
-                                            ImagePersistence.importRGBA(new File(parser.sval));
+                                            ImagePersistence.importRGBA(
+                                                new File(globalDataPath + "/" + parser.sval));
                                     item.setIcon(img);
                                 } catch (Exception e) {
                                     System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
@@ -261,8 +263,11 @@ public class GuiPersistence extends PersistenceElement {
                                 break;
                             case 5: // icon transparency
                                 try {
-                                    mask =
-                                            ImagePersistence.importRGB(new File(parser.sval));
+                                    String filename;
+                                    filename = globalDataPath + "/" + 
+                                            parser.sval;
+                                    mask = ImagePersistence.importRGB(
+                                        new File(filename));
                                     item.setIconTransparency(mask);
                                 } catch (Exception e) {
                                     System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
@@ -437,7 +442,8 @@ public class GuiPersistence extends PersistenceElement {
      * @return
      * @throws Exception
      */
-    public static Gui importAquynzaGui(InputStream source) throws Exception {
+    public static Gui importAquynzaGui(InputStream source,
+        String globalDataPath) throws Exception {
         Gui context;
 
         context = new Gui();
@@ -485,7 +491,8 @@ public class GuiPersistence extends PersistenceElement {
                         context.addPopupMenu(popup);
                     } else if (parser.sval.equals("COMMAND")) {
                         GuiCommand command =
-                                importAquynzaGuiCommand(parser, context);
+                                importAquynzaGuiCommand(parser, context, 
+                                    globalDataPath);
                         context.addCommand(command);
                     } else if (parser.sval.equals("DIALOG")) {
                         GuiDialog dialog =
