@@ -115,7 +115,7 @@ public class JoglSphereRenderer extends JoglRenderer {
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glColor3d(1, 0, 0);
-        gl.glPointSize(2.0f);
+        gl.glPointSize(6.0f);
 
         Vector3D p = new Vector3D();
 
@@ -222,7 +222,7 @@ public class JoglSphereRenderer extends JoglRenderer {
     {
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             //gl.glPolygonOffset(1.0f, 1.0f);
             drawSphereElements(gl, s.getRadius(), slices, stacks);
@@ -232,7 +232,7 @@ public class JoglSphereRenderer extends JoglRenderer {
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);
 
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
             gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glLineWidth(1.0f);
 
