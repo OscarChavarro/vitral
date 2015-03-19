@@ -135,7 +135,7 @@ public class JoglRGBImageRenderer extends JoglRenderer
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
             item = compiledImages.get(i);
-            if ( item.image == img ) {
+            if ( item != null && item.image == img ) {
                 glListIsCompiled = true;
                 break;
             }

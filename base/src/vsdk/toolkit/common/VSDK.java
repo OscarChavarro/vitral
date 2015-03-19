@@ -113,10 +113,6 @@ public class VSDK
     private static final int primitiveCount[];
     private static final int intersectionCount[];
 
-    // Stores the mode of execution of the program. In jnlp mode, the program load
-    // its data from resources instead of from the file system.
-    public static boolean inJnlpMode = false; //LRR 28oct2014
-
     static {
         withSystemExit = true;
         primitiveCount = new int[PRIMITIVE_TYPE_COUNT];
