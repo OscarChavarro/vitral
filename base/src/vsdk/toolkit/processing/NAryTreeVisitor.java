@@ -14,6 +14,9 @@ import vsdk.toolkit.common.dataStructures._NAryTreeIntermediateNode;
 
 class _NAryTreeCounterTraverser extends NAryTreeTraverser
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150218L;
+
     private long count;
     
     @Override

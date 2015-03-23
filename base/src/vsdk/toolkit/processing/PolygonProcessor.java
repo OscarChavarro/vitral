@@ -25,7 +25,7 @@ import vsdk.toolkit.environment.geometry._Polygon2DContour;
  * This class implements the Ramer–Douglas–Peucker algorithm in a non recursive
  * way, to simplify polygons.
  */
-public class PolygonProcessor {
+public class PolygonProcessor extends ProcessingElement {
     /**
      * Given a Polygon2D object, return a simplified version of that set of polygons
      * using the Ramer–Douglas–Peucker algorithm.
