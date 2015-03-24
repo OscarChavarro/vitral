@@ -28,6 +28,10 @@ public abstract class CameraController extends Controller {
     public abstract Camera getCamera();
     public abstract void setCamera(Camera camera);
     public abstract void setDeltaMovement(double factor);
+    
+    public void tick(double inCurrentTime)
+    {        
+    }
 }
 
 //===========================================================================
