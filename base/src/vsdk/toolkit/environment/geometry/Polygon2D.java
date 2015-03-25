@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 
 public class Polygon2D extends Surface
 {
@@ -15,7 +16,10 @@ public class Polygon2D extends Surface
 
     public ArrayList<_Polygon2DContour> loops;
     private _Polygon2DContour currentLoop;
-
+    // headNode is the head node of the n-ary tree codified in a binary tree
+    // in left child-right sibling way.
+    private BinaryTreeNode<_Polygon2DContour> headNode;
+    
     public Polygon2D()
     {
         loops = new ArrayList<_Polygon2DContour>();
@@ -45,12 +49,22 @@ public class Polygon2D extends Surface
 
     public final void eraseLastLoop()
     {
-        int size;
+        int i;
+        _Polygon2DContour loop;
         
-        size = loops.size();
-        if(size > 1) {
-            loops.remove(size-1);
-            currentLoop = loops.get(size-2);
+        if(loops.size() > 1) {
+            // Remove also the holes of that loop. LRR.
+            for(i=0; i<loops.size(); ++i) {
+                loop = loops.get(i);
+                if(loop.getExteriorContour() == loops.get(loops.size()-1)) {
+                    loops.remove(i);
+                    --i;
+                }
+            }
+            if(loops.size() > 1) {
+                loops.remove(loops.size()-1);
+                currentLoop = loops.get(loops.size()-1);
+            }
         }
     }
     
@@ -120,5 +134,19 @@ public class Polygon2D extends Surface
                        GeometryIntersectionInformation outData)
     {
 
+    }
+    
+    /**
+     * @return the headNode
+     */
+    public BinaryTreeNode<_Polygon2DContour> getHeadNode() {
+        return headNode;
+    }
+
+    /**
+     * @param headNode the headNode to set
+     */
+    public void setHeadNode(BinaryTreeNode<_Polygon2DContour> headNode) {
+        this.headNode = headNode;
     }
 }
