@@ -8,6 +8,7 @@ import java.util.Collections;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
+import vsdk.toolkit.processing.PolygonProcessor;
 
 public class Polygon2D extends Surface
 {
@@ -65,6 +66,8 @@ public class Polygon2D extends Surface
                 loops.remove(loops.size()-1);
                 currentLoop = loops.get(loops.size()-1);
             }
+            // Rebuild the n-ary tree codified in a binary tree.
+            PolygonProcessor.classifyContourHoles(this);
         }
     }
     
