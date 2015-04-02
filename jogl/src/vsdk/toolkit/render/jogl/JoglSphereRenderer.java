@@ -223,7 +223,7 @@ public class JoglSphereRenderer extends JoglRenderer {
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
-            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
+            //gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
             //gl.glPolygonOffset(1.0f, 1.0f);
             drawSphereElements(gl, s.getRadius(), slices, stacks);
         }
