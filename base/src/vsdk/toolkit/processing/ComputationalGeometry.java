@@ -159,6 +159,8 @@ public class ComputationalGeometry extends ProcessingElement
     /**
     Given a line from p0 to p1 and a point p, this method gives the minimum
     distance between line and point.
+    
+    Following implementation from http://geomalgorithms.com/a02-_lines.html
     @param p0
     @param p1
     @param p
@@ -169,8 +171,7 @@ public class ComputationalGeometry extends ProcessingElement
         Vector3D p1,
         Vector3D p)
     {
-        double d;
-        Vector3D a, b;
+        //----------------------------------------------------------------------
         Vector3D lineVector = p1.substract(p0);
 
         double denominator = lineVector.length();
@@ -178,12 +179,31 @@ public class ComputationalGeometry extends ProcessingElement
             return Double.NaN;
         }
 
-        a = p1.substract(p0);
-        b = p0.substract(p);
-        double numerator = a.crossProduct(b).length();
-        d = (numerator / denominator);
+        //----------------------------------------------------------------------
+        Vector3D v, w;
 
-        return d;    
+        v = p1.substract(p0);
+        w = p.substract(p0);
+        
+        double c1;
+        double c2;
+
+        c1 = w.dotProduct(v);
+        if ( c1 <= 0.0 ) {
+            return VSDK.vectorDistance(p, p0);
+        }
+        
+        c2 = v.dotProduct(v);
+        if ( c2 <= c1 ) {
+            return VSDK.vectorDistance(p, p1);
+        }
+        
+        double b;
+        b = c1 / c2;
+        Vector3D pb;
+        pb = p0.add(v.multiply(b));
+           
+        return VSDK.vectorDistance(p, pb);    
     }
     
     /**
