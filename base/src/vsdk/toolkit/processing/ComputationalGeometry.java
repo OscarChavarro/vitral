@@ -27,7 +27,7 @@ over gemetries.
 */
 public class ComputationalGeometry extends ProcessingElement
 {
-    private static InfinitePlane workPlane;
+    private static final InfinitePlane workPlane;
         
         // For 2D line clipping an 4 bit outcode is used
     private static final int COHEN_SUTHERLAND_2D_INSIDE = 0; // 0000
@@ -93,11 +93,23 @@ public class ComputationalGeometry extends ProcessingElement
     (more than 90 degrees of vector angle) then the normal is inverted to manage
      meshes with reversed triangles.
     </UL>
+    @param inOut_Ray
+    @param v0
+    @param v1
+    @param v2
+    @param outPoint
+    @param outNormal
+    @return 
     */
     public static boolean
-    doIntersectionWithTriangle(Ray inOut_Ray,
-                               Vector3D v0, Vector3D v1, Vector3D v2,
-                               Vector3D outPoint, Vector3D outNormal) {
+    doIntersectionWithTriangle(
+        Ray inOut_Ray,
+        Vector3D v0, 
+        Vector3D v1, 
+        Vector3D v2,
+        Vector3D outPoint, 
+        Vector3D outNormal) 
+    {
         Vector3D p;           // Point of intersection between ray and plane
         Vector3D u, v, n;     // Edge vectors and normal
         double t, a, b, d;    // Coefficients for solving equation (2)
@@ -145,24 +157,57 @@ public class ComputationalGeometry extends ProcessingElement
     }
 
     /**
-    Given a line that passes between points `p0` and `p1`, this method 
-    determines if point `p` falls under `distanceTolerance` in such line.
+    Given a line from p0 to p1 and a point p, this method gives the minimum
+    distance between line and point.
+    @param p0
+    @param p1
+    @param p
+    @return 
     */
-    public static int lineContainmentTest(Vector3D p0, Vector3D p1,
-                                   Vector3D p, double distanceTolerance) {
+    public static double lineToPointDistance(
+        Vector3D p0, 
+        Vector3D p1,
+        Vector3D p)
+    {
         double d;
         Vector3D a, b;
         Vector3D lineVector = p1.substract(p0);
 
         double denominator = lineVector.length();
-        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
+        if ( denominator < VSDK.EPSILON ) {
+            return Double.NaN;
+        }
 
         a = p1.substract(p0);
         b = p0.substract(p);
         double numerator = a.crossProduct(b).length();
         d = (numerator / denominator);
 
-        if ( d <= distanceTolerance ) return Geometry.LIMIT;
+        return d;    
+    }
+    
+    /**
+    Given a line that passes between points `p0` and `p1`, this method 
+    determines if point `p` falls under `distanceTolerance` in such line.
+    @param p0
+    @param p1
+    @param p
+    @param distanceTolerance
+    @return 
+    */
+    public static int lineContainmentTest(
+        Vector3D p0, 
+        Vector3D p1,
+        Vector3D p, 
+        double distanceTolerance) 
+    {
+        double d;
+
+        d = lineToPointDistance(p0, p1, p);
+        
+        if ( d <= distanceTolerance ) {
+            return Geometry.LIMIT;
+        }
         return Geometry.OUTSIDE;
     }
 
@@ -172,9 +217,18 @@ public class ComputationalGeometry extends ProcessingElement
 
     This method is functionaly equivalent to procedures `contev` and
     `intrev` from program [MANT1988].13.3. and section [MANT1988].13.2.2.
+    @param p0
+    @param p1
+    @param p
+    @param distanceTolerance
+    @return 
     */
-    public static int lineSegmentContainmentTest(Vector3D p0, Vector3D p1,
-                                   Vector3D p, double distanceTolerance) {
+    public static int lineSegmentContainmentTest(
+        Vector3D p0, 
+        Vector3D p1,
+        Vector3D p, 
+        double distanceTolerance) 
+    {
         double d;
         Vector3D a, b;
 
@@ -208,9 +262,18 @@ public class ComputationalGeometry extends ProcessingElement
        - R5: outside triangle, near vertex 1
        - R6: outside triangle, near vertex 2
        - R7: outside triangle, near vertex 3
+    @param p0
+    @param p1
+    @param p2
+    @param p
+    @param distanceTolerance
+    @return 
     */
     public static int triangleContainmentTest(
-        Vector3D p0, Vector3D p1, Vector3D p2, Vector3D p,
+        Vector3D p0, 
+        Vector3D p1, 
+        Vector3D p2, 
+        Vector3D p,
         double distanceTolerance)
     {
         Vector3D n, a, b;
@@ -349,7 +412,7 @@ public class ComputationalGeometry extends ProcessingElement
 
         int outCode0 = computeCohenSutherland2DCode(p0, min, max);
         int outCode1 = computeCohenSutherland2DCode(p1, min, max);
-        int outCodeOut = 0;
+        int outCodeOut;
         boolean accept = false;
         double x = 0.0;
         double y = 0.0;
@@ -358,9 +421,8 @@ public class ComputationalGeometry extends ProcessingElement
             if ( (outCode0 | outCode1) == 0 ) {
                 accept = true;
                 break;
-            } else if ((outCode0 & outCode1) != 0){
-                p0 = new Vector3D(0.0, 0.0, 0.0);
-                p1 = new Vector3D(0.0, 0.0, 0.0);
+            } 
+            else if ((outCode0 & outCode1) != 0){
                 break;
             } else {
                 outCodeOut = (outCode0 != 0) ? outCode0 : outCode1;
