@@ -18,41 +18,83 @@ public class GuiCommand extends GuiElement {
     private String help; // Could contain HTML tags
     private RGBAImage icon;
     private RGBImage iconTransparency;
+    private RGBAImage secondaryIcon;
+    private RGBImage secondaryIconTransparency;
 
-    public GuiCommand(){
+    /**
+    
+    */
+    public GuiCommand()
+    {
         id = null;
         name = null;
         briefDescription = null;
         help = null;
         icon = null;
         iconTransparency = null;
+        secondaryIcon = null;
+        secondaryIconTransparency = null;
     }
 
-    public String getId(){
+    /**
+    
+    @return 
+    */
+    public String getId()
+    {
         return id;
     }
 
-    public String getName(){
+    /**
+    
+    @return 
+    */
+    public String getName()
+    {
         return name;
     }
 
-    public String getBriefDescription(){
+    /**
+    
+    @return 
+    */
+    public String getBriefDescription()
+    {
         return briefDescription;
     }
 
-    public String getHelp(){
+    /**
+    
+    @return 
+    */
+    public String getHelp()
+    {
         return help;
     }
 
-    public RGBAImage getIcon(){
+    /**
+    
+    @return 
+    */
+    public RGBAImage getIcon()
+    {
         return icon;
     }
 
-    public RGBImage getIconTransparency(){
+    /**
+    
+    @return 
+    */
+    public RGBImage getIconTransparency()
+    {
         return iconTransparency;
     }
 
-    public void applyTransparency(){
+    /**
+    
+    */
+    public void applyTransparency()
+    {
         if ( icon == null || iconTransparency == null ) {
             return;
         }
@@ -80,23 +122,80 @@ public class GuiCommand extends GuiElement {
         }
     }
 
-    public void setId(String i){
+    /**
+    
+    */
+    public void applySecondTransparency()
+    {
+        if ( secondaryIcon == null || secondaryIconTransparency == null ) {
+            return;
+        }
+
+        int xlimit, ylimit, x, y;
+
+        xlimit = Math.min(secondaryIcon.getXSize(), secondaryIconTransparency.getXSize());
+        ylimit = Math.min(secondaryIcon.getYSize(), secondaryIconTransparency.getYSize());
+
+        RGBPixel in;
+        RGBAPixel out;
+        int r, g, b, a;
+
+        for ( y = 0; y < ylimit; y++ ) {
+            for ( x = 0; x < xlimit; x++ ) {
+                in = secondaryIconTransparency.getPixel(x, y);
+                r = VSDK.signedByte2unsignedInteger(in.r);
+                g = VSDK.signedByte2unsignedInteger(in.g);
+                b = VSDK.signedByte2unsignedInteger(in.b);
+                a = (r + g + b) / 3;
+                out = secondaryIcon.getPixel(x, y);
+                out.a = VSDK.unsigned8BitInteger2signedByte(a);
+                secondaryIcon.putPixel(x, y, out);
+            }
+        }
+    }
+
+    /**
+    
+    @param i 
+    */
+    public void setId(String i)
+    {
         id = i;
     }
 
-    public void setName(String n){
+    /**
+    
+    @param n 
+    */
+    public void setName(String n)
+    {
         name = n;
     }
 
-    public void setBrief(String b){
+    /**
+    
+    @param b 
+    */
+    public void setBrief(String b)
+    {
         briefDescription = b;
     }
 
-    public void setHelp(String h){
+    /**
+    
+    @param h 
+    */
+    public void setHelp(String h)
+    {
         help = h;
     }
 
-    public void appendToHelp(String h){
+    /**
+    
+    @param h 
+    */
+    public void appendToHelp(String h)
+    {
         if ( help != null ) {
             help = help + h;
         }
@@ -105,16 +204,31 @@ public class GuiCommand extends GuiElement {
         }
     }
 
-    public void setIcon(RGBAImage i){
+    /**
+    
+    @param i 
+    */
+    public void setIcon(RGBAImage i)
+    {
         icon = i;
     }
 
-    public void setIconTransparency(RGBImage i){
+    /**
+    
+    @param i 
+    */
+    public void setIconTransparency(RGBImage i)
+    {
         iconTransparency = i;
     }
 
+    /**
+    
+    @return 
+    */
     @Override
-    public String toString(){
+    public String toString()
+    {
         String msg =  "  - Command [" + id + "]:\n";
         msg = msg + "    . Name: " + name + "\n";
         msg = msg + "    . Brief description: " + briefDescription + "\n";
@@ -126,6 +240,38 @@ public class GuiCommand extends GuiElement {
                   ", " + icon.getYSize() + ")\n";
         }
         return msg;
+    }
+
+    /**
+    @return the secondaryIcon
+    */
+    public RGBAImage getSecondaryIcon()
+    {
+        return secondaryIcon;
+    }
+
+    /**
+    @param secondaryIcon the secondaryIcon to set
+    */
+    public void setSecondaryIcon(RGBAImage secondaryIcon)
+    {
+        this.secondaryIcon = secondaryIcon;
+    }
+
+    /**
+    @return the secondaryIconTransparency
+    */
+    public RGBImage getSecondaryIconTransparency()
+    {
+        return secondaryIconTransparency;
+    }
+
+    /**
+    @param secondaryIconTransparency the secondaryIconTransparency to set
+    */
+    public void setSecondaryIconTransparency(RGBImage secondaryIconTransparency)
+    {
+        this.secondaryIconTransparency = secondaryIconTransparency;
     }
 
 }

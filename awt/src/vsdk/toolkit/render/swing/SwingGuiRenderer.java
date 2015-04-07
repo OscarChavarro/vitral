@@ -16,7 +16,6 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.BoxLayout;
@@ -35,8 +34,6 @@ import javax.swing.border.Border;
 // VSDK classes
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
-
-// Application specific classes
 import vsdk.toolkit.gui.PresentationElement;
 import vsdk.toolkit.gui.variable.GuiBooleanVariable;
 import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
@@ -52,7 +49,6 @@ import vsdk.toolkit.gui.GuiMenu;
 import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiDialog;
-import vsdk.toolkit.io.image.ImagePersistence;
 
 public class SwingGuiRenderer extends PresentationElement {
 
@@ -240,6 +236,8 @@ public class SwingGuiRenderer extends PresentationElement {
 
         if (group == null) {
             frame.setBackground(new Color(1.0f, 0.0f, 0.0f));
+            l = new JLabel("No ButtonGroup \"" + name + "\" found in GUI");
+            frame.add(l);
             return frame;
         }
 
@@ -252,33 +250,55 @@ public class SwingGuiRenderer extends PresentationElement {
             frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
         }
 
-        if (group == null) {
-            l = new JLabel("No ButtonGroup \"" + name + "\" found in GUI");
-            frame.add(l);
-            return frame;
-        }
-
         ArrayList<GuiCommand> list = group.getCommands();
         int i;
         GuiCommand element;
         RGBAImage img;
 
-        for (i = 0; i < list.size(); i++) {
+        for ( i = 0; i < list.size(); i++ ) {
             element = list.get(i);
 
             // Button goes with images ... if any inside command
             img = element.getIcon();
 
-            if (img == null || !group.isShowIconsSet()) {
+            
+            if ( img == null || !group.isShowIconsSet() ) {
                 b = new JButton(element.getName());
-            } else {
-                b = new JButton(new ImageIcon(
-                        AwtRGBAImageRenderer.exportToAwtBufferedImage(img)));
+            } 
+            else {
+                final ImageIcon primaryIcon;
+                primaryIcon = new ImageIcon(
+                        AwtRGBAImageRenderer.exportToAwtBufferedImage(img));
+                b = new JButton(primaryIcon);
                 b.setMargin(new Insets(0, 0, 0, 0));
+                final JButton bb = b;
+                img = element.getSecondaryIcon();
+                if ( img != null ) {
+                    final ImageIcon secondaryIcon;
+                    secondaryIcon = new ImageIcon(
+                            AwtRGBAImageRenderer.exportToAwtBufferedImage(img));
+                    b.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e)
+                        {
+                            ImageIcon i = (ImageIcon)bb.getIcon();
+                            if ( i == primaryIcon ) {
+                                bb.setIcon(secondaryIcon);
+                            }
+                            else {
+                                bb.setIcon(primaryIcon);
+                            }
+                        }
+                    });
+
+                    //b.setPressedIcon(new ImageIcon(
+                    //    AwtRGBAImageRenderer.exportToAwtBufferedImage(img)));
+                }
             }
+            
             b.setName(element.getId());
 
-            if (group.isShowTextSet()) {
+            if ( group.isShowTextSet() ) {
                 b.setText(element.getName());
             }
 
@@ -301,17 +321,23 @@ public class SwingGuiRenderer extends PresentationElement {
     }
 
     /**
-     * This method construct the swing menu structure for the menu contained in
-     * data context which has the specified name. If null is given as name, the
-     * context's menubar is used. In this way, different frame windows could
-     * have different menubars.
-     *
-     * The builded menu is supposed to be used as a menubar inside a swing
-     * JFrame.
-     *
-     * \todo : permit the selection of a diferent name menu
-     */
-    public static JMenuBar buildMenubar(Gui context, String name, ActionListener executor) {
+    This method construct the swing menu structure for the menu contained in
+    data context which has the specified name. If null is given as name, the
+    context's menubar is used. In this way, different frame windows could
+    have different menubars.
+    
+    The builded menu is supposed to be used as a menubar inside a swing
+    JFrame.
+    
+    \todo : permit the selection of a different name menu
+    @param context
+    @param name
+    @param executor
+    @return 
+    */
+    public static JMenuBar buildMenubar(
+        Gui context, String name, ActionListener executor) 
+    {
         JMenu widgetPopup;
         JMenuItem widgetOption;
         JMenuBar widgetMenubar;
@@ -319,18 +345,19 @@ public class SwingGuiRenderer extends PresentationElement {
         String errorMenu = null;
         int mnemonic;
 
-        if (context != null) {
+        if ( context != null ) {
             menubar = context.getMenubar();
-            if (menubar == null) {
-                errorMenu = "No menubar in GUI!";
-            }
-        } else {
+        } 
+        else {
             errorMenu = "No Gui specified!";
+        }
+        if ( menubar == null ) {
+            errorMenu = "No menubar in GUI!";
         }
 
         widgetMenubar = new JMenuBar();
 
-        if (errorMenu != null) {
+        if ( menubar == null || errorMenu != null) {
             widgetPopup = new JMenu(errorMenu);
             widgetMenubar.add(widgetPopup);
             widgetOption = widgetPopup.add(new JMenuItem("Exit"));
@@ -370,11 +397,6 @@ public class SwingGuiRenderer extends PresentationElement {
         return widgetMenubar;
     }
 ///codeOscar
-    
-
-    
-
-    
     // Code Oz
     public static JPanel buildBooleanVariable(GuiBooleanVariable v, ActionListener executor) {
         JPanel p = new JPanel();
@@ -383,16 +405,11 @@ public class SwingGuiRenderer extends PresentationElement {
         v.getImageForTrueState();
         */
    
-        JButton optionA= new JButton();
-        JButton optionB= new JButton();
+        JButton optionA;
+        JButton optionB = new JButton();
     
-        if(optionA!=null || optionB!=null )
-        {
-
             optionA= new JButton("./etc/1.jpg");
                 p.add(optionA);
-
-        }
         
            
         JCheckBox cb = new JCheckBox(v.getName());

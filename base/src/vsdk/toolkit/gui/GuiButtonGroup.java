@@ -5,15 +5,13 @@ import java.util.ArrayList;
 
 public class GuiButtonGroup extends GuiElement
 {
-    private ArrayList<GuiCommand> commandReferenceList;
-    private Gui context;
+    private final ArrayList<GuiCommand> commandReferenceList;
     private String name;
 
     private boolean showText;
     private boolean showIcons;
     private boolean showTitle;
     private int direction;
-    //private int side;
 
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;

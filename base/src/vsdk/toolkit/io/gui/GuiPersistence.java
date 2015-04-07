@@ -193,9 +193,8 @@ public class GuiPersistence extends PersistenceElement {
     }
 
     private static GuiCommand importAquynzaGuiCommand(
-            StreamTokenizer parser,
-            Gui context,
-            String globalDataPath) throws Exception {
+        StreamTokenizer parser, String globalDataPath) throws Exception 
+    {
         GuiCommand item;
         RGBAImage img;
         RGBImage mask;
@@ -207,11 +206,13 @@ public class GuiPersistence extends PersistenceElement {
         String idString = null;
 
         int stringMode = 0;
+        int iconId = 1;
 
         do {
             try {
                 tokenType = parser.nextToken();
-            } catch (IOException e) {
+            } 
+            catch (IOException e) {
                 throw e;
             }
 
@@ -226,16 +227,31 @@ public class GuiPersistence extends PersistenceElement {
                     if (idString == null) {
                         idString = parser.sval;
                         item.setId(parser.sval);
-                    } else if (parser.sval.equals("name")) {
+                    } 
+                    else if (parser.sval.equals("name")) {
                         stringMode = 1;
-                    } else if (parser.sval.equals("icon")) {
+                    } 
+                    else if (parser.sval.equals("icon")) {
                         stringMode = 2;
-                    } else if (parser.sval.equals("brief")) {
+                        iconId = 1;
+                    }
+                    else if (parser.sval.equals("secondaryIcon")) {
+                        stringMode = 2;
+                        iconId = 2;
+                    }
+                    else if (parser.sval.equals("brief")) {
                         stringMode = 3;
-                    } else if (parser.sval.equals("help")) {
+                    } 
+                    else if (parser.sval.equals("help")) {
                         stringMode = 4;
-                    } else if (parser.sval.equals("iconTransparency")) {
+                    } 
+                    else if (parser.sval.equals("iconTransparency")) {
                         stringMode = 5;
+                        iconId = 1;
+                    }
+                    else if (parser.sval.equals("secondaryIconTransparency")) {
+                        stringMode = 5;
+                        iconId = 2;
                     }
                     break;
                 default:
@@ -246,10 +262,15 @@ public class GuiPersistence extends PersistenceElement {
                                 break;
                             case 2: // icon
                                 try {
-                                    img =
-                                            ImagePersistence.importRGBA(
-                                                new File(globalDataPath + "/" + parser.sval));
-                                    item.setIcon(img);
+                                    img = ImagePersistence.importRGBA(
+                                        new File(
+                                            globalDataPath + "/" + parser.sval));
+                                    if ( iconId == 1 ) {
+                                        item.setIcon(img);
+                                    }
+                                    else {
+                                        item.setSecondaryIcon(img);
+                                    }
                                 } catch (Exception e) {
                                     System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
                                     System.err.println(e);
@@ -268,7 +289,12 @@ public class GuiPersistence extends PersistenceElement {
                                             parser.sval;
                                     mask = ImagePersistence.importRGB(
                                         new File(filename));
-                                    item.setIconTransparency(mask);
+                                    if ( iconId == 1 ) {
+                                        item.setIconTransparency(mask);
+                                    }
+                                    else {
+                                        item.setSecondaryIconTransparency(mask);
+                                    }
                                 } catch (Exception e) {
                                     System.err.println("Warning: could not read the image file \"" + parser.sval + "\".");
                                     System.err.println(e);
@@ -285,9 +311,8 @@ public class GuiPersistence extends PersistenceElement {
                                 throw new ExceptionGuiParseError();
                             }
                         } else if (content == '}') {
-                            //parser.pushBack();
-                            //item.setName(name);
                             item.applyTransparency();
+                            item.applySecondTransparency();
                             return item;
                         } else {
                             //throw new ExceptionGuiParseError();
@@ -302,6 +327,7 @@ public class GuiPersistence extends PersistenceElement {
         }
 
         item.applyTransparency();
+        item.applySecondTransparency();
 
         return item;
     }
@@ -436,12 +462,13 @@ public class GuiPersistence extends PersistenceElement {
     }
 
     /**
-     * WARNING, pending to check character format
-     *
-     * @param source
-     * @return
-     * @throws Exception
-     */
+    WARNING, pending to check character format
+     
+    @param source
+    @param globalDataPath
+    @return
+    @throws Exception
+    */
     public static Gui importAquynzaGui(InputStream source,
         String globalDataPath) throws Exception {
         Gui context;
@@ -491,7 +518,7 @@ public class GuiPersistence extends PersistenceElement {
                         context.addPopupMenu(popup);
                     } else if (parser.sval.equals("COMMAND")) {
                         GuiCommand command =
-                                importAquynzaGuiCommand(parser, context, 
+                                importAquynzaGuiCommand(parser, 
                                     globalDataPath);
                         context.addCommand(command);
                     } else if (parser.sval.equals("DIALOG")) {
