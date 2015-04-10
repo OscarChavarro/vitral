@@ -24,6 +24,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.visualAnalytics.PercentageWheelWidget;
 import vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable;
+import vsdk.toolkit.render.jogl.JoglRenderer;
 //import vsdk.toolkit.render.jogl.JoglImageRenderer;
 
 /**
@@ -42,7 +43,7 @@ three ways:
   - Text proportion calculation is inefficient since creates a set of
     never used textures.
 */
-public class JoglPercentageWheelWidgetRenderer {
+public class JoglPercentageWheelWidgetRenderer extends JoglRenderer {
     private static final HashMap<String, RGBAImage>characterSpritesSmall;
     private static final TextRenderer joglTextRendererSmall;
     private static final TextRenderer joglTextRendererBig;
@@ -149,6 +150,8 @@ public class JoglPercentageWheelWidgetRenderer {
         double s = widget.getScale();
         
         gl.glPushAttrib(GL2.GL_DEPTH_BITS | GL2.GL_TEXTURE_2D );
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        gl.glDisable(GL2.GL_DEPTH_TEST);
         gl.glLoadIdentity();
         gl.glTranslated(pos.x, pos.y, pos.z);
         gl.glScaled(s, s, 1);
@@ -156,7 +159,6 @@ public class JoglPercentageWheelWidgetRenderer {
         drawInternal(gl, widget);
         
         // End
-        gl.glDisable(GL2.GL_TEXTURE_2D);
         gl.glPopAttrib();
         
         gl.glPopMatrix();

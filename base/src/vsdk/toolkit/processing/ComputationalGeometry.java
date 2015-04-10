@@ -16,6 +16,7 @@ package vsdk.toolkit.processing;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
@@ -399,101 +400,129 @@ public class ComputationalGeometry extends ProcessingElement
     }
 
     /**
-     * Implementation of the Cohen-Sutherland line clipping algorithm on two
-     * Dimensions
-     * @param p0 first point of the line to be clipped
-     * @param p1 second point of the line to be clipped
-     * @param min coordinate with the minimum (x,y) values of the clipping
-     * rectangle
-     * @param max coordinate with the maximum (x,y) values of the clipping
-     * rectangle
-     * @return <code> true </code> when there is at least a portion of the line
-     * inside the clipping rectangle and <code> false </code> when the line is
-     * outside the clipping rectangle.
-     *
-     * WARNING: This method would be more efficient if there were
-     * an Vector2D class on VITRAL
-     *
-     * @author Andres Felipe Mejia
-     */
-    public static boolean cohenSutherlandLineClipping2D(Vector3D p0, Vector3D p1,
-            Vector3D min, Vector3D max){
-
-        if(min.x > max.x){
-            double aux = min.x;
+    Implementation of the Cohen-Sutherland line clipping algorithm on two
+    Dimensions
+    @param p0 first point of the line to be clipped
+    @param p1 second point of the line to be clipped
+    @param min coordinate with the minimum (x,y) values of the clipping
+    rectangle
+    @param max coordinate with the maximum (x,y) values of the clipping
+    rectangle
+    @param tolerance could be 0, or an small value. Positive makes area smaller,
+    negative makes area bigger.
+    @return <code> true </code> when there is at least a portion of the line
+    inside the clipping rectangle and <code> false </code> when the line is
+    outside the clipping rectangle.
+    */
+    public static boolean cohenSutherlandLineClipping2D(
+        Vector2D p0, 
+        Vector2D p1,
+        Vector2D min, 
+        Vector2D max,
+        double tolerance)
+    {
+        double aux;
+        if ( min.x > max.x ) {
+            aux = min.x;
             min.x = max.x;
             max.x = aux;
         }
-        if(min.y > max.y){
-            double aux = min.y;
+        if ( min.y > max.y ) {
+            aux = min.y;
             min.y = max.y;
             max.y = aux;
         }
+        
+        if ( max.x - min.x < VSDK.EPSILON ||
+             max.y - min.y < VSDK.EPSILON ) {
+            //System.out.println("Error: to small area");
+            return false;
+        }
 
-        int outCode0 = computeCohenSutherland2DCode(p0, min, max);
-        int outCode1 = computeCohenSutherland2DCode(p1, min, max);
+        int outCode0 = computeCohenSutherland2DCode(p0, min, max, tolerance);
+        int outCode1 = computeCohenSutherland2DCode(p1, min, max, tolerance);
         int outCodeOut;
         boolean accept = false;
         double x = 0.0;
         double y = 0.0;
-
-        while ( true ) {
+        
+        while ( !accept ) {
             if ( (outCode0 | outCode1) == 0 ) {
+                // Both endpoints are inside clip rectangle
                 accept = true;
                 break;
-            } 
-            else if ((outCode0 & outCode1) != 0){
+            }
+            else if ( (outCode0 & outCode1) != 0 ) {
+                // Both endpoints are outside one of the 4 limit lines
+                accept = false;
                 break;
-            } else {
+            } 
+            else {
+                // Line should be trimmed
+                double e = 2*tolerance; //2*VSDK.EPSILON;
                 outCodeOut = (outCode0 != 0) ? outCode0 : outCode1;
-                if( (outCodeOut & COHEN_SUTHERLAND_2D_TOP) == 8){
-                    x = p0.x + (p1.x - p0.x) * (max.y - p0.y) / (p1.y - p0.y);
-                    y = max.y;
-                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_BOTTOM) == 4){
-                    x = p0.x + (p1.x - p0.x) * (min.y - p0.y) / (p1.y - p0.y);
-                    y = min.y;
-                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_RIGHT) == 2){
-                    y = p0.y + (p1.y - p0.y) * (max.x - p0.x) / (p1.x - p0.x);
-                    x = max.x;
-                }else if ( (outCodeOut & COHEN_SUTHERLAND_2D_LEFT) == 1)
-                {
-                    y = p0.y + (p1.y - p0.y) * (min.x - p0.x) / (p1.x - p0.x);
-                    x = min.x;
+                if ( (outCodeOut & COHEN_SUTHERLAND_2D_TOP) == 
+                     COHEN_SUTHERLAND_2D_TOP) {
+                    x = p0.x + 
+                        (p1.x - p0.x) * ((max.y-e) - p0.y) / (p1.y - p0.y);
+                    y = max.y - e;
+                }
+                else if ( (outCodeOut & COHEN_SUTHERLAND_2D_BOTTOM) == 
+                    COHEN_SUTHERLAND_2D_BOTTOM) {
+                    x = p0.x + (p1.x - p0.x) * (min.y+e - p0.y) / (p1.y - p0.y);
+                    y = min.y+e;
+                }
+                else if ( (outCodeOut & COHEN_SUTHERLAND_2D_RIGHT) == 
+                    COHEN_SUTHERLAND_2D_RIGHT) {
+                    y = p0.y + (p1.y - p0.y) * (max.x-e - p0.x) / (p1.x - p0.x);
+                    x = max.x-e;
+                }
+                else if ( (outCodeOut & COHEN_SUTHERLAND_2D_LEFT) == 
+                    COHEN_SUTHERLAND_2D_LEFT ) {
+                    y = p0.y + (p1.y - p0.y) * (min.x+e - p0.x) / (p1.x - p0.x);
+                    x = min.x+e;
                 }
             }
-            if( outCodeOut == outCode0) {
+            if ( outCodeOut == outCode0 ) {
                 p0.x = x;
                 p0.y = y;
-                outCode0 = computeCohenSutherland2DCode(p0, min, max);
-            } else {
+                outCode0 = computeCohenSutherland2DCode(p0, min, max, tolerance);
+            }
+            else {
                 p1.x = x;
                 p1.y = y;
-                outCode1 = computeCohenSutherland2DCode(p1, min, max);
-            }
+                outCode1 = computeCohenSutherland2DCode(p1, min, max, tolerance);
+            }            
         }
         return accept;
     }
 
     /**
-     * Compute a code of the position of a point relative to the clipping
-     * rectangle
-     * @param p point to be located
-     * @param min
-     * @param max
-     * @return the code in four bits representing the location of the point
-     */
-    private static int computeCohenSutherland2DCode(Vector3D p, Vector3D min, Vector3D max){
+    Compute a code of the position of a point relative to the clipping
+    rectangle
+    @param p point to be located
+    @param min
+    @param max
+    @return the code in four bits representing the location of the point
+    */
+    private static int computeCohenSutherland2DCode(
+        Vector2D p, Vector2D min, Vector2D max, double tolerance){
         int outCode;
         outCode = COHEN_SUTHERLAND_2D_INSIDE;
+        double e = tolerance;
 
-        if(p.x < min.x)
+        if ( p.x < min.x + e ) {
             outCode |= COHEN_SUTHERLAND_2D_LEFT;
-        if(p.x > max.x)
+        }
+        if ( p.x > max.x - e ) {
             outCode |= COHEN_SUTHERLAND_2D_RIGHT;
-        if(p.y < min.y)
+        }
+        if ( p.y < min.y + e ) {
             outCode |= COHEN_SUTHERLAND_2D_BOTTOM;
-        if(p.y > max.y)
+        }
+        if ( p.y > max.y - e ) {
             outCode |= COHEN_SUTHERLAND_2D_TOP;
+        }
         return outCode;
     }
 }
