@@ -25,14 +25,11 @@ import java.io.BufferedOutputStream;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
@@ -43,7 +40,9 @@ import vsdk.toolkit.io.PersistenceElement;
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
 design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
-class _PolyhedralBoundedSolidSetOperatorNullEdge extends PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSetOperatorNullEdge>
+class _PolyhedralBoundedSolidSetOperatorNullEdge 
+    extends PolyhedralBoundedSolidOperator 
+    implements Comparable <_PolyhedralBoundedSolidSetOperatorNullEdge>
 {
     public _PolyhedralBoundedSolidEdge e;
 
@@ -82,6 +81,7 @@ class _PolyhedralBoundedSolidSetOperatorNullEdge extends PolyhedralBoundedSolidO
         }
     }
 
+    @Override
     public String toString()
     {
         return e.toString() + " (sorted with respect to position " + this.e.rightHalf.startingVertex.position + ")";
@@ -2118,16 +2118,16 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         if ( from == null || to == null ) {
-            System.out.println("Unexpected case (separateEdgeSequence): null halfedges!");
-            System.exit(0);
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+                "Unexpected case: null halfedges!");
         }
 
         PolyhedralBoundedSolid s;
         s = from.parentLoop.parentFace.parentSolid;
 
         if ( s != to.parentLoop.parentFace.parentSolid ) {
-            System.out.println("Unexpected case (separateEdgeSequence): halfedges on different solids!");
-            System.exit(0);
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+                "Unexpected case: halfedges on different solids!");
         }
 
         //-----------------------------------------------------------------
@@ -3047,7 +3047,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             debugSolid(inSolidB, "outputB_stage03");
         }
 
-        if ( sonea.size() == 0 && sonvv.size() == 0 ) {
+        if ( sonea.isEmpty() && sonvv.isEmpty() ) {
             // No intersections found
             if ( op == INTERSECTION ) {
                 return res;

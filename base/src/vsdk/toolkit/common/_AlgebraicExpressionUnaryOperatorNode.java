@@ -55,7 +55,8 @@ public class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionN
             val = Math.abs(operandValue);
         }
         else if ( operatorName.equals("cbrt") ) {
-            val = Math.cbrt(operandValue);
+            //val = Math.cbrt(operandValue);
+            val = Math.pow(operandValue, 1.0/3.0);
         }
         else if ( operatorName.equals("ceil") ) {
             val = Math.ceil(operandValue);
