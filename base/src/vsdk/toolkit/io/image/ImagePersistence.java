@@ -64,8 +64,12 @@ public class ImagePersistence extends PersistenceElement
                 helpers.add((ImagePersistenceHelper)o);
             }
         }
-        catch ( Exception e ) {
+        catch ( ClassNotFoundException e ) {
             // Class is not available... (not a problem)
+        }
+        catch ( InstantiationException e ) {
+        }
+        catch ( IllegalAccessException e ) {
         }
     }
 
@@ -167,17 +171,20 @@ public class ImagePersistence extends PersistenceElement
     \todo  Do not assume the file format only from the filename extension,
     but trying to detect file headers.
 
-    @param inImageFd - The file respesenting the image
+    @param inImageFd - The file containing the image
     @return An RGBAImage entity that contains the image loaded in memory.
 
     Will change:
       - Choose a better name for this method
-      - Do not recieve a File, but a Stream of bytes
+      - Do not receive a File, but a Stream of bytes
+     * @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
+    public static RGBAImage importRGBA(File inImageFd) 
+        throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
-        RGBAImage retImage = new RGBAImage();
+        RGBAImage retImage;
+        retImage = new RGBAImage();
 
         //- Try optimized reading, if native library is available ---------
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
@@ -228,10 +235,7 @@ public class ImagePersistence extends PersistenceElement
             // Skip comment
         }
 
-        if ( i < arr.length && arr[i] == '#' ) {
-            return true;
-        }
-        return false;
+        return i < arr.length && arr[i] == '#';
     }
 
     public static RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
@@ -280,8 +284,10 @@ public class ImagePersistence extends PersistenceElement
     Will change:
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
+    @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
+    public static RGBImage importRGB(File inImageFd) 
+        throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         RGBImage retImage = new RGBImage();
@@ -413,8 +419,10 @@ public class ImagePersistence extends PersistenceElement
     Will change:
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
+    @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException, Exception
+    public static IndexedColorImage importIndexedColor(File inImageFd) 
+        throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         IndexedColorImage retImage;
@@ -465,11 +473,15 @@ public class ImagePersistence extends PersistenceElement
     binary JPEG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */
     public static boolean exportJPG(File fd, Image img)
     {
         try {
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
 
             exportJPG(fos, img);
 
@@ -565,12 +577,16 @@ public class ImagePersistence extends PersistenceElement
     binary RGB PPM format (i.e. P6 PPM sub-format). Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */
     public static boolean exportPPM(File fd, Image img)
     {
         try {
             BufferedOutputStream writer;
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
             writer = new BufferedOutputStream(fos);
 
             String line1 = "P6\n";
@@ -615,12 +631,16 @@ public class ImagePersistence extends PersistenceElement
     binary RGB uncompressed BMP format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */
     public static boolean exportBMP(File fd, Image img)
     {
         try {
             BufferedOutputStream writer;
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
             writer = new BufferedOutputStream(fos);
 
             int y, x;
@@ -675,12 +695,16 @@ public class ImagePersistence extends PersistenceElement
     binary GrayScale PPM format (i.e. P5 PPM sub-format). Returns true if
     everything works fine, false if something fails, like a permission access
     denied or if storage device runs out of space.
+    @param fd
+    @param img
+    @return 
     */
     public static boolean exportPNM(File fd, Image img)
     {
         try {
             BufferedOutputStream writer;
-            FileOutputStream fos = new FileOutputStream(fd);
+            FileOutputStream fos;
+            fos = new FileOutputStream(fd);
             writer = new BufferedOutputStream(fos);
 
             String line1 = "P5\n";

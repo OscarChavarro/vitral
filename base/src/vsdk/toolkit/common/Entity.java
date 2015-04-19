@@ -6,7 +6,10 @@
 
 package vsdk.toolkit.common;
 
+// Java basic classes
+import java.lang.reflect.Method;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
 This class is a base superclass for all classes in the VSDK model (as of
@@ -54,6 +57,129 @@ public class Entity extends ModelElement implements Serializable
     {
         return 0;
     }
+    
+    /**
+    Calculate a set of variable specs in "type:name" format, from method set and
+    detecting pair of get / set methods.
+    @return 
+    */
+    public ArrayList<String> getEncapsulatedVariables()
+    {
+        int i;
+        int j;
+        Class c;
+        Method methods[];
+        Method m;
+        Class t[];
+        Class r;
+        
+        c = this.getClass();
+        methods = c.getMethods();
+        
+        // Stage 1: get a list of getters with no argument and a single return
+        ArrayList<Method> getters = new ArrayList<Method>();
+        for ( i = 0; i < methods.length; i++ ) {
+            m = methods[i];
+            if ( m.getName().startsWith("get") ) {
+                t = m.getParameterTypes();
+                r = m.getReturnType();
+
+                if ( t.length == 0 && typeIsSupported(r) ) {
+                    getters.add(m);
+                }
+            }
+        }
+ 
+        // Stage 2: get a list of setters with a single argument and with no 
+        // return
+        ArrayList<Method> setters = new ArrayList<Method>();
+        for ( i = 0; i < methods.length; i++ ) {
+            m = methods[i];
+            if ( m.getName().startsWith("set") ) {
+                t = m.getParameterTypes();
+                r = m.getReturnType();
+                if ( t.length == 1 && r.getName().equals("void")) {
+                    setters.add(m);
+                }
+                
+            }
+        }
+
+        // Stage 3: report get/set pairs with the same name and parameter type
+        ArrayList<String> variableSpecs;
+        variableSpecs = new ArrayList<String>();
+        for ( i = 0; i < getters.size(); i++ ) {
+            String gname;
+            m = getters.get(i);
+            gname = m.getName().substring(3, m.getName().length());
+            r = m.getReturnType();
+            for ( j = 0; j < setters.size(); j++ ) {
+                String sname = setters.get(j).getName().substring(
+                    3, setters.get(j).getName().length());
+                t = setters.get(j).getParameterTypes();
+                if ( t.length == 1 && gname.equals(sname) && 
+                     t[0].getName().equals(r.getName()) ) {
+                    String s = gname.toLowerCase();
+                    String variableName = s.substring(0, 1) +
+                        gname.substring(1);
+                    variableSpecs.add(r.getName() + ":" + variableName);
+                    break;
+                }
+            } 
+        }
+        
+        return variableSpecs;
+    }
+    
+    private boolean typeIsSupported(Class r)
+    {
+        String n = r.getName();
+                        
+        if ( n.equals("long") ) {
+            return true;
+        }
+        else if ( n.equals("int") ) {
+            return true;
+        }
+        else if ( n.equals("float") ) {
+            return true;
+        }
+        else if ( n.equals("double") ) {
+            return true;
+        }
+        else if ( n.equals("byte") ) {
+            return true;
+        }
+        else if ( n.equals("boolean") ) {
+            return true;
+        }
+        else if ( n.equals("char") ) {
+            return true;
+        }
+        else if ( n.equals("short") ) {
+            return true;
+        }
+        else if ( n.equals("java.lang.String") ) {
+            return true;
+        }
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector2D") ) {
+            return true;
+        }
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector3D") ) {
+            return true;
+        }
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector4D") ) {
+            return true;
+        }
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.ColorRgb") ) {
+            return true;
+        }
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Matrix4x4") ) {
+            return true;
+        }
+        return false;
+    }
+    
 }
 
 //===========================================================================

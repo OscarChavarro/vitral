@@ -1,13 +1,3 @@
-package vsdk.toolkit.processing;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Stack;
-import vsdk.toolkit.common.Vertex2D;
-import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
-
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
@@ -22,6 +12,18 @@ import vsdk.toolkit.environment.geometry._Polygon2DContour;
 //= line or its caricature", The Canadian Cartographer 10(2), 112–122 (1973)=
 //===========================================================================
 
+package vsdk.toolkit.processing;
+
+// Java basic classes
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Stack;
+
+// VSDK classes
+import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
+import vsdk.toolkit.environment.geometry.Polygon2D;
+import vsdk.toolkit.environment.geometry._Polygon2DContour;
 
 
 /**
@@ -251,8 +253,11 @@ public class PolygonProcessor extends ProcessingElement {
                 child = child.getSibling();
             }
             child = new BinaryTreeNode<_Polygon2DContour>(list.get(0));
-            lastChild.setSibling(child);
-            lastChild = child;
+            
+            if ( lastChild != null ) {
+                lastChild.setSibling(child);
+                lastChild = child;
+            }
         }
         // Indicates that the contour is in the binary tree.
         list.get(0).fleetingFlag = true;
@@ -260,11 +265,13 @@ public class PolygonProcessor extends ProcessingElement {
         for(i=1; i<list.size(); ++i) {
             ++levelOfNode;
             p2DContour = list.get(i);
-            if((levelOfNode%2) == 0) { // Is a hole.
+            if( (levelOfNode%2) == 0 && lastChild != null ) { // Is a hole.
                 p2DContour.setExteriorContour(lastChild.getData());
             }
             child = new BinaryTreeNode<_Polygon2DContour>(p2DContour);
-            lastChild.setChild(child);
+            if ( lastChild != null ) {
+                lastChild.setChild(child);
+            }
             child.getData().fleetingFlag = true;
             lastChild = child;            
         }

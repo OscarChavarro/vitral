@@ -22,8 +22,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 
-import sun.misc.Cleaner;
-
 import vsdk.toolkit.io.PersistenceElement;
 //#endif
 
@@ -50,6 +48,7 @@ to keep this class conceptually consistent with non-java VSDK realizations
 public class RGBImage extends Image
 {
     /// Check the general attribute description in superclass Entity.
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20060502L;
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
@@ -197,7 +196,7 @@ public class RGBImage extends Image
     @param g
     @param b
     */
-    public void putPixel(int x, int y, byte r, byte g, byte b)
+    public synchronized void putPixel(int x, int y, byte r, byte g, byte b)
     {
         int index = (xSize*(ySize-1-y) + x)*3;
 
@@ -216,7 +215,7 @@ public class RGBImage extends Image
 
     }
 
-    public void putPixel(int x, int y, RGBPixel p)
+    public synchronized void putPixel(int x, int y, RGBPixel p)
     {
         int index = (xSize*(ySize-1-y) + x)*3;
 
@@ -241,7 +240,7 @@ public class RGBImage extends Image
     @param p
     */
     @Override
-    public void putPixelRgb(int x, int y, RGBPixel p)
+    public synchronized void putPixelRgb(int x, int y, RGBPixel p)
     {
         int index = (xSize*(ySize-1-y) + x)*3;
 
@@ -401,7 +400,8 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
+            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", 
+                "NOT IMPLEMENTED! CHECK VSDK CODE!");
 //#endif
 
     }
@@ -412,6 +412,7 @@ public class RGBImage extends Image
     @Override
     public RGBImage clone() throws CloneNotSupportedException
     {
+        super.clone();
         //Image parentCopy = (Image)super.clone();
         RGBImage copy;
         int xxSize = getXSize();
@@ -508,8 +509,8 @@ public class RGBImage extends Image
                 Field cleanerField;
                 cleanerField = data.getClass().getDeclaredField("cleaner");
                 cleanerField.setAccessible(true);
-                Cleaner cleaner;
-                cleaner = (Cleaner) cleanerField.get(data);
+                sun.misc.Cleaner cleaner;
+                cleaner = (sun.misc.Cleaner)cleanerField.get(data);
                 cleaner.clean();
             }
             catch (NoSuchFieldException ex) {

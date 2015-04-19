@@ -267,7 +267,7 @@ public class Box extends Solid {
     }
 
     public void setSize(double dx, double dy, double dz) {
-        size = new Vector3D(dx, dy, dz);
+        setSize(new Vector3D(dx, dy, dz));
     }
 
     public void setSize(Vector3D s) {

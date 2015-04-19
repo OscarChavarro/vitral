@@ -12,6 +12,7 @@ import vsdk.toolkit.processing.PolygonProcessor;
 
 public class Polygon2D extends Surface
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20090816L;
 
