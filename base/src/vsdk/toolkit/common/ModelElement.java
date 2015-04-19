@@ -32,7 +32,18 @@ of such high level should be included here, but to this class subclasses
 */
 
 public abstract class ModelElement {
-    
+    /**
+    Just to do not the inheritance chain.
+    @return
+    @throws CloneNotSupportedException 
+    */
+    @Override
+    public Object clone() throws CloneNotSupportedException
+    {
+        super.clone();
+        return null;
+    }
+
 }
 
 //===========================================================================

@@ -24,6 +24,19 @@ classes NOT related with 3D geometry. This serves two purposes:
 public abstract class MediaEntity extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20150218L;
+    
+    /**
+    Just to do not the inheritance chain.
+    @return
+    @throws CloneNotSupportedException 
+    */
+    @Override
+    public Object clone() throws CloneNotSupportedException
+    {
+        super.clone();
+        return null;
+    }
+
 }
 
 //===========================================================================

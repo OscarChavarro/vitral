@@ -19,8 +19,6 @@ package vsdk.toolkit.environment.geometry;
 
 // Java basic classes
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ArrayListOfInts;
@@ -67,6 +65,8 @@ public class TriangleMesh extends Surface {
 //= Class attributes ========================================================
 
     /// Check the general attribute description in superclass Entity.
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+
     public static final long serialVersionUID = 20080512L;
 
     // Basic mesh data model
@@ -204,16 +204,12 @@ public class TriangleMesh extends Surface {
     /**
     \todo  copy full structure!
     @return a new TriangleMesh containing an exact copy of the original
+    @throws java.lang.CloneNotSupportedException
     */
     @Override
-    public TriangleMesh clone()
+    public TriangleMesh clone() throws CloneNotSupportedException
     {
-        try {
-            super.clone();
-        }
-        catch ( CloneNotSupportedException ex ) {
-            
-        }
+        super.clone();
         TriangleMesh other = new TriangleMesh();
 
         other.name = this.name;
@@ -678,9 +674,9 @@ public class TriangleMesh extends Surface {
         }
 
         for ( i = 0; i < getNumTriangles(); i++ ) {
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+0]).add(new Integer(i));
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+1]).add(new Integer(i));
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+2]).add(new Integer(i));
+            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+0]).add(i);
+            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+1]).add(i);
+            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+2]).add(i);
         }
 
         Vector3D n = new Vector3D();
@@ -691,7 +687,7 @@ public class TriangleMesh extends Surface {
             n.x = n.y = n.z = 0.0;
             for ( j = 0; j < incidentTrianglesPerVertexArray.get(i).size(); j++ ) {
                 int ii;
-                ii = incidentTrianglesPerVertexArray.get(i).get(j).intValue();
+                ii = incidentTrianglesPerVertexArray.get(i).get(j);
                 n.x += triangleNormals[3*ii+0];
                 n.y += triangleNormals[3*ii+1];
                 n.z += triangleNormals[3*ii+2];
@@ -1442,11 +1438,11 @@ public class TriangleMesh extends Surface {
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        if ( extraVertices == null ) {
+        if ( ma == null || mb == null /*|| extraVertices == null*/ ) {
             VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
-	}
+	    }
 
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);
@@ -1487,11 +1483,11 @@ public class TriangleMesh extends Surface {
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        if ( extraVertices == null ) {
+        if ( ma == null /*|| extraVertices == null*/ ) {
             VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
-	}
+    	}
 
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);
@@ -1536,11 +1532,11 @@ public class TriangleMesh extends Surface {
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
-        if ( extraVertices == null ) {
+        if ( ma == null || mb == null /*|| extraVertices == null*/ ) {
             VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
-	}
+   	    }
 
         extraVertices.add(ma.x);
         extraVertices.add(ma.y);

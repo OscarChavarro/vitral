@@ -19,6 +19,7 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.VSDK;
 
 public class ParametricBiCubicPatch extends Surface {
     /// Check the general attribute description in superclass Entity.
@@ -223,40 +224,74 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    private void printGeometryMatrices()
+    /**
+    */
+    public void printGeometryMatrices()
     {
         double[][] mx = Gx_MATRIX.M;
         double[][] my = Gy_MATRIX.M;
         double[][] mz = Gz_MATRIX.M;
 
-        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
-                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
-                          mx[0][0], my[0][0], mz[0][0],
-                          mx[0][1], my[0][1], mz[0][1],
-                          mx[0][2], my[0][2], mz[0][2],
-                          mx[0][3], my[0][3], mz[0][3]
-        );
-        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
-                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
-                          mx[1][0], my[1][0], mz[1][0],
-                          mx[1][1], my[1][1], mz[1][1],
-                          mx[1][2], my[1][2], mz[1][2],
-                          mx[1][3], my[1][3], mz[1][3]
-        );
-        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
-                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
-                          mx[2][0], my[2][0], mz[2][0],
-                          mx[2][1], my[2][1], mz[2][1],
-                          mx[2][2], my[2][2], mz[2][2],
-                          mx[2][3], my[2][3], mz[2][3]
-        );
-        System.out.printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | " +
-                          "<%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
-                          mx[3][0], my[3][0], mz[3][0],
-                          mx[3][1], my[3][1], mz[3][1],
-                          mx[3][2], my[3][2], mz[3][2],
-                          mx[3][3], my[3][3], mz[3][3]
-        );
+        System.out.println(
+            "[ <"   + VSDK.formatDouble(mx[0][0]) + 
+            ", "    + VSDK.formatDouble(my[0][0]) +
+            ", "    + VSDK.formatDouble(mz[0][0]) +
+            "> | <" + VSDK.formatDouble(mx[0][1]) +
+            ", "    + VSDK.formatDouble(my[0][1]) +
+            ", "    + VSDK.formatDouble(mz[0][1]) +
+            "> | <" + VSDK.formatDouble(mx[0][2]) +
+            ", "    + VSDK.formatDouble(my[0][2]) + 
+            ", "    + VSDK.formatDouble(mz[0][2]) +
+            "> | <" + VSDK.formatDouble(mx[0][3]) + 
+            ", "    + VSDK.formatDouble(my[0][3]) + 
+            ", "    + VSDK.formatDouble(mz[0][3]) +
+            "> ]");
+
+        System.out.println(
+            "[ <"   + VSDK.formatDouble(mx[1][0]) + 
+            ", "    + VSDK.formatDouble(my[1][0]) +
+            ", "    + VSDK.formatDouble(mz[1][0]) +
+            "> | <" + VSDK.formatDouble(mx[1][1]) +
+            ", "    + VSDK.formatDouble(my[1][1]) +
+            ", "    + VSDK.formatDouble(mz[1][1]) +
+            "> | <" + VSDK.formatDouble(mx[1][2]) +
+            ", "    + VSDK.formatDouble(my[1][2]) + 
+            ", "    + VSDK.formatDouble(mz[1][2]) +
+            "> | <" + VSDK.formatDouble(mx[1][3]) + 
+            ", "    + VSDK.formatDouble(my[1][3]) + 
+            ", "    + VSDK.formatDouble(mz[1][3]) +
+            "> ]");
+        
+        System.out.println(
+            "[ <"   + VSDK.formatDouble(mx[2][0]) + 
+            ", "    + VSDK.formatDouble(my[2][0]) +
+            ", "    + VSDK.formatDouble(mz[2][0]) +
+            "> | <" + VSDK.formatDouble(mx[2][1]) +
+            ", "    + VSDK.formatDouble(my[2][1]) +
+            ", "    + VSDK.formatDouble(mz[2][1]) +
+            "> | <" + VSDK.formatDouble(mx[2][2]) +
+            ", "    + VSDK.formatDouble(my[2][2]) + 
+            ", "    + VSDK.formatDouble(mz[2][2]) +
+            "> | <" + VSDK.formatDouble(mx[2][3]) + 
+            ", "    + VSDK.formatDouble(my[2][3]) + 
+            ", "    + VSDK.formatDouble(mz[2][3]) +
+            "> ]");
+
+        System.out.println(
+            "[ <"   + VSDK.formatDouble(mx[3][0]) + 
+            ", "    + VSDK.formatDouble(my[3][0]) +
+            ", "    + VSDK.formatDouble(mz[3][0]) +
+            "> | <" + VSDK.formatDouble(mx[3][1]) +
+            ", "    + VSDK.formatDouble(my[3][1]) +
+            ", "    + VSDK.formatDouble(mz[3][1]) +
+            "> | <" + VSDK.formatDouble(mx[3][2]) +
+            ", "    + VSDK.formatDouble(my[3][2]) + 
+            ", "    + VSDK.formatDouble(mz[3][2]) +
+            "> | <" + VSDK.formatDouble(mx[3][3]) + 
+            ", "    + VSDK.formatDouble(my[3][3]) + 
+            ", "    + VSDK.formatDouble(mz[3][3]) +
+            "> ]");
+
     }
 
     /**

@@ -45,6 +45,7 @@ to keep this class conceptually consistent with non-java VSDK realizations
 public class RGBAImage extends Image
 {
     /// Check the general attribute description in superclass Entity.
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20060502L;
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
@@ -152,6 +153,7 @@ public class RGBAImage extends Image
     to hold such image uncompressed.
 
     Returns true if memory allocation succeed, false if not.
+    @return 
     */
     @Override
     public boolean initNoFill(int width, int height)
@@ -188,6 +190,11 @@ public class RGBAImage extends Image
     This method changes the pixel information for pixel (x, y) on the
     represented image matrix, to contain the values <r, g, b, -1>
     (fully opaque pixel).
+    @param x
+    @param y
+    @param r
+    @param g
+    @param b
     */
     public void putPixel(int x, int y, byte r, byte g, byte b)
     {
@@ -281,6 +288,9 @@ public class RGBAImage extends Image
     /**
     This method returns the color component <r, g, b, a> contained on the pixel
     <x, y> of current image.
+    @param x
+    @param y
+    @return 
     */
     public RGBAPixel getPixel(int x, int y)
     {
@@ -308,6 +318,7 @@ public class RGBAImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getPixelRgb.
+    @return 
     */
     @Override
     public RGBPixel getPixelRgb(int x, int y)
@@ -379,6 +390,7 @@ public class RGBAImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getXSize.
+    @return 
     */
     @Override
     public int getXSize()
@@ -389,6 +401,7 @@ public class RGBAImage extends Image
     /**
     Check the general signature contract in superclass method
     Image.getYSize.
+    @return 
     */
     @Override
     public int getYSize()
@@ -441,10 +454,15 @@ public class RGBAImage extends Image
 
     }
     
-    /** Returns a copy of current image in its own memory */
+    /** 
+    Returns a copy of current image in its own memory 
+     * @return 
+     * @throws java.lang.CloneNotSupportedException
+    */
     @Override
-    public RGBAImage clone()
+    public RGBAImage clone() throws CloneNotSupportedException
     {
+        super.clone();
         RGBAImage copy;
         int xxSize = getXSize();
         int yySize = getYSize();
@@ -460,7 +478,10 @@ public class RGBAImage extends Image
         return copy;
     }
 
-    /** Returns a copy of current image in its own memory */
+    /** 
+    Returns a copy of current image in its own memory 
+     * @return 
+    */
     public RGBImage exportToRgbImage()
     {
         RGBImage copy;

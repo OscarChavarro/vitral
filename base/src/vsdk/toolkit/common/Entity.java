@@ -179,7 +179,19 @@ public class Entity extends ModelElement implements Serializable
         }
         return false;
     }
-    
+
+    /**
+    Just to do not the inheritance chain.
+    @return
+    @throws CloneNotSupportedException 
+    */
+    @Override
+    public Object clone() throws CloneNotSupportedException
+    {
+        super.clone();
+        return null;
+    }
+
 }
 
 //===========================================================================
