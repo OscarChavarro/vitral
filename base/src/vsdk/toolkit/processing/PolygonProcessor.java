@@ -32,34 +32,40 @@ import vsdk.toolkit.environment.geometry._Polygon2DContour;
  */
 public class PolygonProcessor extends ProcessingElement {
     /**
-     * Given a Polygon2D object, return a simplified version of that set of polygons
-     * using the Ramer–Douglas–Peucker algorithm.
-     * @param pol2DIn array of polygons.
-     * @param epsilon Umbral distance, used to leave or discard points.
-     * @param copy the points of the contours are copied or referenced?
-     * @return array of simplified polygons.
-     */
-    public static Polygon2D polygon2DSimplify(Polygon2D pol2DIn, float epsilon, boolean copy){
-        Polygon2D pol2DSimp = new Polygon2D();
+    Given a Polygon2D object, return a simplified version of that set of polygons
+    using the Ramer-Douglas-Peucker algorithm.
+    @param pol2DIn array of polygons.
+    @param epsilon Umbral distance, used to leave or discard points.
+    @param copy the points of the contours are copied or referenced?
+    @return array of simplified polygons.
+    */
+    public static Polygon2D polygon2DSimplify(
+        Polygon2D pol2DIn, 
+        double epsilon, 
+        boolean copy)
+    {
+        Polygon2D simplifiedPolygon = new Polygon2D();
         int i;
         
-        pol2DSimp.loops.clear();
-//        for(_Polygon2DContour p2DContour : pol2DIn.loops) {
-        for(i=0; i < pol2DIn.loops.size(); ++i) {
+        simplifiedPolygon.loops.clear();
+        for ( i = 0; i < pol2DIn.loops.size(); i++ ) {
             _Polygon2DContour p2DContour = pol2DIn.loops.get(i);
-            pol2DSimp.loops.add(polygon2DContourSimplify(p2DContour,epsilon,true));
+            simplifiedPolygon.loops.add(
+                polygon2DContourSimplify(p2DContour, epsilon, true));
         }
-        return pol2DSimp;
+        return simplifiedPolygon;
     }
     
     /**
-     * Given a polygon2DContour object, return a simplified version of that polygon
-     * using the Ramer–Douglas–Peucker algorithm in non recursive fashion.
-     * @param p2DContour   Single polygon.
-     * @param epsilon Umbral distance, used to leave or discard points.
-     * @param copy the points of the contour are copied or referenced?
-     */
-    private static _Polygon2DContour  polygon2DContourSimplify(_Polygon2DContour p2DContour, float epsilon, boolean copy){
+    Given a polygon2DContour object, return a simplified version of that polygon
+    using the Ramer-Douglas-Peucker algorithm in non recursive fashion.
+    @param p2DContour   Single polygon.
+    @param epsilon Umbral distance, used to leave or discard points.
+    @param copy the points of the contour are copied or referenced?
+    */
+    private static _Polygon2DContour polygon2DContourSimplify(
+        _Polygon2DContour p2DContour, double epsilon, boolean copy)
+    {
         _Polygon2DContour p2DContourSimp = new _Polygon2DContour();
         Vertex2D point;
         /** In missingNodes we put two vertex at a time */
