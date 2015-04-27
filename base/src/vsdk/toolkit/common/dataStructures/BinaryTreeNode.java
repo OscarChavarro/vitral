@@ -1,10 +1,12 @@
 //===========================================================================
 package vsdk.toolkit.common.dataStructures;
 
+import vsdk.toolkit.common.FundamentalEntity;
+
 /**
 @param <T>
 */
-public class BinaryTreeNode<T>
+public class BinaryTreeNode<T> extends FundamentalEntity
 {
     private T data;
     private BinaryTreeNode<T> sibling = null;

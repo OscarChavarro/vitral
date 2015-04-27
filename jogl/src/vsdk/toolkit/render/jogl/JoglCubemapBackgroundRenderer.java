@@ -10,6 +10,7 @@ package vsdk.toolkit.render.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
+import vsdk.toolkit.environment.Camera;
 
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -33,7 +34,7 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
     }
 
     public static void draw(GL2 gl, CubemapBackground background)
-    {
+    {        
         //-----------------------------------------------------------------
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
@@ -57,8 +58,13 @@ public class JoglCubemapBackgroundRenderer extends JoglRenderer
         //- Put image background ------------------------------------------
         RGBAImage images[] = background.getImages();
 
-        JoglCameraRenderer.activateCenter(gl, background.getCamera());
-        
+        if ( background.getCamera() != null ) {
+           JoglCameraRenderer.activateCenter(gl, background.getCamera());
+        }
+        else {
+           JoglCameraRenderer.activateCenter(gl, new Camera());
+        }
+
         gl.glColor3d(1, 1, 1);
 
         gl.glEnable(GL.GL_TEXTURE_2D);

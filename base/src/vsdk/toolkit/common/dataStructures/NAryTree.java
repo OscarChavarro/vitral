@@ -2,7 +2,7 @@
 package vsdk.toolkit.common.dataStructures;
 
 import java.util.ArrayList;
-import vsdk.toolkit.common.Entity;
+import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;
 
 /**
@@ -13,7 +13,7 @@ was followed:
     this is not followed.
 @param <T>
 */
-public class NAryTree<T> extends Entity {
+public class NAryTree<T> extends FundamentalEntity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20150218L;
     
