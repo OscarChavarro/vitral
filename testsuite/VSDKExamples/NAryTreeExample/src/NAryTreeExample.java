@@ -7,6 +7,10 @@ import vsdk.toolkit.processing.NAryTreeVisitor;
 /**
 */
 public class NAryTreeExample {
+
+    /**
+    @param args
+    */
     public static void main(String args[])
     {
         // Visitor facade... for next operations
@@ -33,9 +37,9 @@ public class NAryTreeExample {
 
         // Search tests
         Integer x = 666;
-        System.out.println("Searching for someone who is here: " + 
+        System.out.println("Searching for someone who is here: " +
             tree.searchNodeByContent(n111));
-        System.out.println("Searching for someone who is not here: " + 
+        System.out.println("Searching for someone who is not here: " +
             tree.searchNodeByContent(x));
     }
 }

@@ -227,7 +227,7 @@ public class Vector3D extends FundamentalEntity
     }
 
     /**
-    Given a point <r, theta, phi> in spherical coordinates, this method sets
+    Given a point [r, theta, phi] in spherical coordinates, this method sets
     current vector to corresponding Cartesian coordinates <x, y, z>. Angles
     are in radians.
     @param r

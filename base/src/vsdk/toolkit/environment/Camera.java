@@ -198,7 +198,7 @@ public class Camera extends Entity
       - current `up` vector (taken as a hint)
     This method CAN change the value of `up` and `left` vectors, to
     allow the user specify a left-handed orthogonal reference frame formed by
-    the vectors <up, front, left>. The initial up vector is taken as a hint
+    the vectors [up, front, left]. The initial up vector is taken as a hint
     to specify a new up vector, similar to the original but forming a 90
     degree angle with the front direction. The left vector is always changed
     to form a third orthogonal vectors to former ones. Note that the three

@@ -15,12 +15,12 @@ import java.util.ArrayList;
 This class is a base superclass for all classes in the VSDK model (as of
 Vitral applications are based upon Model-View-Controller or MVC design
 pattern). Note that this class supports two functionalities:
-  - As implementing the Serializable interface, this permits to serialize 
-    all of the 
+  - As implementing the Serializable interface, this permits to serialize
+    all of the
 */
 
 public class Entity extends ModelElement implements Serializable
-{    
+{
     public static final long serialVersionUID = 20150218L;
 
     /// Constants used for operations of type getSizeInBytes
@@ -32,7 +32,7 @@ public class Entity extends ModelElement implements Serializable
     public static final int VECTOR3D_SIZE_IN_BYTES = 24;
     public static final int COLORRGB_SIZE_IN_BYTES = 24;
     public static final int POINTER_SIZE_IN_BYTES = 8;
-    
+
     /**
     This is a value used for the standard java serialization mechanism to
     keep track of software versions.  To avoid warning at compilation time
@@ -57,11 +57,11 @@ public class Entity extends ModelElement implements Serializable
     {
         return 0;
     }
-    
+
     /**
     Calculate a set of variable specs in "type:name" format, from method set and
     detecting pair of get / set methods.
-    @return 
+    @return
     */
     public ArrayList<String> getEncapsulatedVariables()
     {
@@ -72,10 +72,10 @@ public class Entity extends ModelElement implements Serializable
         Method m;
         Class t[];
         Class r;
-        
+
         c = this.getClass();
         methods = c.getMethods();
-        
+
         // Stage 1: get a list of getters with no argument and a single return
         ArrayList<Method> getters = new ArrayList<Method>();
         for ( i = 0; i < methods.length; i++ ) {
@@ -89,8 +89,8 @@ public class Entity extends ModelElement implements Serializable
                 }
             }
         }
- 
-        // Stage 2: get a list of setters with a single argument and with no 
+
+        // Stage 2: get a list of setters with a single argument and with no
         // return
         ArrayList<Method> setters = new ArrayList<Method>();
         for ( i = 0; i < methods.length; i++ ) {
@@ -101,7 +101,7 @@ public class Entity extends ModelElement implements Serializable
                 if ( t.length == 1 && r.getName().equals("void")) {
                     setters.add(m);
                 }
-                
+
             }
         }
 
@@ -117,7 +117,7 @@ public class Entity extends ModelElement implements Serializable
                 String sname = setters.get(j).getName().substring(
                     3, setters.get(j).getName().length());
                 t = setters.get(j).getParameterTypes();
-                if ( t.length == 1 && gname.equals(sname) && 
+                if ( t.length == 1 && gname.equals(sname) &&
                      t[0].getName().equals(r.getName()) ) {
                     String s = gname.toLowerCase();
                     String variableName = s.substring(0, 1) +
@@ -125,16 +125,16 @@ public class Entity extends ModelElement implements Serializable
                     variableSpecs.add(r.getName() + ":" + variableName);
                     break;
                 }
-            } 
+            }
         }
-        
+
         return variableSpecs;
     }
-    
+
     private boolean typeIsSupported(Class r)
     {
         String n = r.getName();
-                        
+
         if ( n.equals("long") ) {
             return true;
         }
@@ -183,7 +183,7 @@ public class Entity extends ModelElement implements Serializable
     /**
     Just to do not the inheritance chain.
     @return
-    @throws CloneNotSupportedException 
+    @throws CloneNotSupportedException
     */
     @Override
     public Object clone() throws CloneNotSupportedException

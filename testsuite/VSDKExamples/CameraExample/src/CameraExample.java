@@ -35,7 +35,7 @@ is deleted, this will continue working as a simple java application.
 This is a simple program recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
-public class CameraExample extends Applet implements 
+public class CameraExample extends Applet implements
     GLEventListener,                                                    // JOGL
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener // GUI
 {
@@ -56,10 +56,10 @@ public class CameraExample extends Applet implements
     that real initialization be done in another `createModel` method, and
     that such method be called explicity from entry point function.
     */
-    public CameraExample() 
+    public CameraExample()
     {
         // Empty! call `createModel` explicity from entry point function!
-        
+
     }
 
     /**
@@ -91,10 +91,10 @@ public class CameraExample extends Applet implements
 //= PROGRAM PART 3/5: ENTRY POINTS ==========================================
 
     /**
-    Entrance point function for desktop standalone application running mode. 
-    @param args 
+    Entrance point function for desktop standalone application running mode.
+    @param args
     */
-    public static void main (String[] args) 
+    public static void main (String[] args)
     {
         // Common VitralSDK initialization
         JoglRenderer.verifyOpenGLAvailability();
@@ -118,7 +118,7 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    Entrance point function for applet running mode. 
+    Entrance point function for applet running mode.
     */
     @Override
     public void init()
@@ -129,11 +129,11 @@ public class CameraExample extends Applet implements
         fillGUIWithCanvas();
         add("Center", canvas);
     }
-    
+
 //= PROGRAM PART 4/5: JOGL-OPENGL PROCEDURES ================================
 
     /**
-    @param gl 
+    @param gl
     */
     private void drawObjectsGL(GL2 gl)
     {
@@ -159,12 +159,13 @@ public class CameraExample extends Applet implements
         gl.glEnd();
     }
 
-    /** 
-    Called by drawable to initiate drawing 
+    /**
+    Called by drawable to initiate drawing
     @param drawable
     */
     @Override
-    public void display(GLAutoDrawable drawable) {
+    public void display(GLAutoDrawable drawable)
+    {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
@@ -175,41 +176,44 @@ public class CameraExample extends Applet implements
 
         drawObjectsGL(gl);
     }
-   
+
     /**
-    Not used method, but needed to instanciate GLEventListener 
+    Not used method, but needed to instanciate GLEventListener
     @param drawable
     */
     @Override
-    public void init(GLAutoDrawable drawable) {
-        
+    public void init(GLAutoDrawable drawable)
+    {
+
     }
 
-    /** 
-    Not used method, but needed to instanciate GLEventListener 
+    /**
+    Not used method, but needed to instanciate GLEventListener
     @param drawable
     */
     @Override
-    public void dispose(GLAutoDrawable drawable) {
-        
+    public void dispose(GLAutoDrawable drawable)
+    {
+
     }
 
-    /** 
-    Not used method, but needed to instanciate GLEventListener 
+    /**
+    Not used method, but needed to instanciate GLEventListener
     @param drawable
     @param a
     @param b
     */
-    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
-        
+    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b)
+    {
+
     }
-    
+
     /** Called to indicate the drawing surface has been moved and/or resized
-    @param drawable 
-    @param x 
-    @param y 
-    @param width 
-    @param height 
+    @param drawable
+    @param x
+    @param y
+    @param width
+    @param height
     */
     @Override
     public void reshape (GLAutoDrawable drawable,
@@ -218,10 +222,10 @@ public class CameraExample extends Applet implements
                          int width,
                          int height) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glViewport(0, 0, width, height); 
+        gl.glViewport(0, 0, width, height);
 
         camera.updateViewportResize(width, height);
-    }   
+    }
 
 //= PART 5/5: GUI PROCEDURES ================================================
 
@@ -229,7 +233,8 @@ public class CameraExample extends Applet implements
     @param e
     */
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent e)
+    {
         canvas.requestFocusInWindow();
     }
 
@@ -237,15 +242,17 @@ public class CameraExample extends Applet implements
     @param e
     */
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent e)
+    {
       //System.out.println("Mouse exited");
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent e)
+    {
         if ( cameraController.processMousePressedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -253,10 +260,11 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent e)
+    {
         if ( cameraController.processMouseReleasedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -264,10 +272,11 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent e)
+    {
         if ( cameraController.processMouseClickedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -275,10 +284,11 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mouseMoved(MouseEvent e) {
+    public void mouseMoved(MouseEvent e)
+    {
         if ( cameraController.processMouseMovedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -286,10 +296,11 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void mouseDragged(MouseEvent e)
+    {
         if ( cameraController.processMouseDraggedEvent(
                  AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -297,10 +308,11 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
+    public void mouseWheelMoved(MouseWheelEvent e)
+    {
         if ( cameraController.processMouseWheelEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -308,11 +320,12 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e 
+    @param e
     */
     @Override
     public void keyPressed(KeyEvent e) {
-        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE )
+        {
             if ( !appletMode ) {
                 System.exit(0);
             }
@@ -324,8 +337,8 @@ public class CameraExample extends Applet implements
         }
     }
 
-    /** 
-    @param e 
+    /**
+    @param e
     */
     @Override
     public void keyReleased(KeyEvent e) {
@@ -342,8 +355,9 @@ public class CameraExample extends Applet implements
     @param e
     */
     @Override
-    public void keyTyped(KeyEvent e) {
-        
+    public void keyTyped(KeyEvent e)
+    {
+
     }
 
 }

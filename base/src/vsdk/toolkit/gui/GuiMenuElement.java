@@ -38,7 +38,7 @@ public abstract class GuiMenuElement extends GuiElement
     generates the simplified name, separating from it its mnemonic and
     accelerator if any.
 
-    For example, if codedName has the value "&Open\tCtrl+O", the
+    For example, if codedName has the value <code>&Open\tCtrl+O</code>, the
     simplified name will be "Open", the mnemonic will be 'O' and the
     accelerator will be "Ctrl+O". This method return its simplified name.
     */
@@ -108,7 +108,7 @@ public abstract class GuiMenuElement extends GuiElement
     generates the simplified name, separating from it its mnemonic and
     accelerator if any.
 
-    For example, if codedName has the value "&Open\tCtrl+O", the
+    For example, if codedName has the value <code>&Open\tCtrl+O</code>, the
     simplified name will be "Open", the mnemonic will be 'O' and the
     accelerator will be "Ctrl+O". This method return its mnemonic.
     */
@@ -139,7 +139,7 @@ public abstract class GuiMenuElement extends GuiElement
     generates the simplified name, separating from it its mnemonic and
     accelerator if any.
 
-    For example, if codedName has the value "&Open\tCtrl+O", the
+    For example, if codedName has the value <code>Open\tCtrl+O</code>, the
     simplified name will be "Open", the mnemonic will be 'O' and the
     accelerator will be "Ctrl+O". This method return its accelerator,
     or null if it is no accelerator.
