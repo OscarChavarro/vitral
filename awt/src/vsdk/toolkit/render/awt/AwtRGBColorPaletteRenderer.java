@@ -21,7 +21,13 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
         return (float)in;
     }
 
-    public static void drawFlatVertical(Graphics dc, RGBColorPalette palette, int x0, int y0, int dx, int dy)
+    public static void drawFlatVertical(
+        Graphics dc,
+        RGBColorPalette palette,
+        int x0,
+        int y0,
+        int dx,
+        int dy)
     {
         int x, y;
         ColorRgb c;
@@ -43,7 +49,13 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
         }
     }
 
-    public static void drawShadedVertical(Graphics dc, RGBColorPalette palette, int x0, int y0, int dx, int dy)
+    public static void drawShadedVertical(
+        Graphics dc,
+        RGBColorPalette palette,
+        int x0,
+        int y0,
+        int dx,
+        int dy)
     {
         int x, y;
         ColorRgb c;
@@ -59,6 +71,34 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
                 System.out.println("Warning: initializing color " + c);
             }
             for ( x = 0; x < dx; x++ ) {
+                dc.setColor(cawt);
+                dc.drawLine(x+x0, y+y0, x+x0, y+y0);
+            }
+        }
+    }
+
+    public static void drawShadedHorizontal(
+        Graphics dc,
+        RGBColorPalette palette,
+        int x0,
+        int y0,
+        int dx,
+        int dy)
+    {
+        int x, y;
+        ColorRgb c;
+        Color cawt = null;
+        double delta = 1.0 / ((double)(dx-1));
+
+        for ( x = 0; x < dx; x++ ) {
+            c = palette.evalLinear(delta*((double)x));
+            try {
+                cawt = new Color(convert(c.r), convert(c.g), convert(c.b));
+            }
+            catch( Exception e ){
+                System.out.println("Warning: initializing color " + c);
+            }
+            for ( y = 0; y < dy; y++ ) {
                 dc.setColor(cawt);
                 dc.drawLine(x+x0, y+y0, x+x0, y+y0);
             }
