@@ -1,3 +1,13 @@
+package vsdk.toolkit.processing;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Stack;
+import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
+import vsdk.toolkit.environment.geometry.Polygon2D;
+import vsdk.toolkit.environment.geometry._Polygon2DContour;
+
 //===========================================================================
 //=-------------------------------------------------------------------------=
 //= Module history:                                                         =
@@ -12,18 +22,6 @@
 //= line or its caricature", The Canadian Cartographer 10(2), 112–122 (1973)=
 //===========================================================================
 
-package vsdk.toolkit.processing;
-
-// Java basic classes
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Stack;
-
-// VSDK classes
-import vsdk.toolkit.common.Vertex2D;
-import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
 
 
 /**
@@ -31,40 +29,44 @@ import vsdk.toolkit.environment.geometry._Polygon2DContour;
  * way, to simplify polygons.
  */
 public class PolygonProcessor extends ProcessingElement {
+
+    private static final double EPSILON = 1E-18;
+
     /**
-    Given a Polygon2D object, return a simplified version of that set of polygons
-    using the Ramer-Douglas-Peucker algorithm.
-    @param pol2DIn array of polygons.
-    @param epsilon Umbral distance, used to leave or discard points.
-    @param copy the points of the contours are copied or referenced?
-    @return array of simplified polygons.
-    */
+     * Given a Polygon2D object, return a simplified version of that set of polygons
+     * using the Ramer–Douglas–Peucker algorithm.
+     * @param pol2DIn array of polygons.
+     * @param epsilon Umbral distance, used to leave or discard points.
+     * @param copy the points of the contours are copied or referenced?
+     * @return array of simplified polygons.
+     */
     public static Polygon2D polygon2DSimplify(
-        Polygon2D pol2DIn, 
-        double epsilon, 
-        boolean copy)
-    {
-        Polygon2D simplifiedPolygon = new Polygon2D();
+        Polygon2D pol2DIn,
+        double epsilon,
+        boolean copy ) {
+        Polygon2D pol2DSimp = new Polygon2D();
         int i;
-        
-        simplifiedPolygon.loops.clear();
-        for ( i = 0; i < pol2DIn.loops.size(); i++ ) {
+
+        pol2DSimp.loops.clear();
+//        for(_Polygon2DContour p2DContour : pol2DIn.loops) {
+        for(i=0; i < pol2DIn.loops.size(); ++i) {
             _Polygon2DContour p2DContour = pol2DIn.loops.get(i);
-            simplifiedPolygon.loops.add(
-                polygon2DContourSimplify(p2DContour, epsilon, true));
+            pol2DSimp.loops.add(polygon2DContourSimplify(p2DContour,epsilon,true));
         }
-        return simplifiedPolygon;
+        return pol2DSimp;
     }
-    
+
     /**
-    Given a polygon2DContour object, return a simplified version of that polygon
-    using the Ramer-Douglas-Peucker algorithm in non recursive fashion.
-    @param p2DContour   Single polygon.
-    @param epsilon Umbral distance, used to leave or discard points.
-    @param copy the points of the contour are copied or referenced?
-    */
-    private static _Polygon2DContour polygon2DContourSimplify(
-        _Polygon2DContour p2DContour, double epsilon, boolean copy)
+     * Given a polygon2DContour object, return a simplified version of that polygon
+     * using the Ramer–Douglas–Peucker algorithm in non recursive fashion.
+     * @param p2DContour   Single polygon.
+     * @param epsilon Umbral distance, used to leave or discard points.
+     * @param copy the points of the contour are copied or referenced?
+     */
+    private static _Polygon2DContour  polygon2DContourSimplify(
+        _Polygon2DContour p2DContour,
+        double epsilon,
+        boolean copy)
     {
         _Polygon2DContour p2DContourSimp = new _Polygon2DContour();
         Vertex2D point;
@@ -78,8 +80,8 @@ public class PolygonProcessor extends ProcessingElement {
           * (filled with zeros)*/
         int[] ContourSimpFlags;
         int numVertex,i;
-        
-        
+
+
         numVertex = p2DContour.vertices.size();
         if(numVertex < 3) { //One line or one point.
             if(copy)
@@ -144,7 +146,7 @@ public class PolygonProcessor extends ProcessingElement {
         float[] v = new float[2];
         float dist, maxDist;
         int indFar;
-        
+
         //Find the unitary normal vector to the line.
         xInd0 = (float)p2DContour.vertices.get(ind0).x;
         yInd0 = (float)p2DContour.vertices.get(ind0).y;
@@ -177,15 +179,15 @@ public class PolygonProcessor extends ProcessingElement {
         outDist[0]=maxDist;
         return indFar;
     }
-    
-    
+
+
     public static void classifyContourHoles(Polygon2D polygon)
     {
         int i,j;
         //Node of the Great Hole that contains everything.
         ArrayList<_Polygon2DContour> tempList;
         _Polygon2DContour p2DContour,p2DContourTest;
-        
+
         // Actualize minMaxArea in all contours of the polygon, and clear the flag.
         for(i=0; i<polygon.loops.size(); ++i) {
             p2DContour = polygon.loops.get(i);
@@ -216,7 +218,7 @@ public class PolygonProcessor extends ProcessingElement {
             insertListInBinaryTree(tempList,polygon.getHeadNode());
         }
     }
-    
+
     private static void insertListInBinaryTree(
              ArrayList<_Polygon2DContour> list
             ,BinaryTreeNode<_Polygon2DContour> headNode) // Head node is in the 0 level.
@@ -224,7 +226,7 @@ public class PolygonProcessor extends ProcessingElement {
         _Polygon2DContour p2DContour;
         BinaryTreeNode<_Polygon2DContour> containingContourNode;
         int levelOfContainingContourNode[] = new int[1];
-        
+
         if(list.isEmpty())
             return;
         p2DContour = list.get(0);
@@ -234,7 +236,7 @@ public class PolygonProcessor extends ProcessingElement {
                 ,levelOfContainingContourNode);
         insertListInBinaryTreeNode(list,containingContourNode,levelOfContainingContourNode[0]);
     }
-    
+
     private static void insertListInBinaryTreeNode(
              ArrayList<_Polygon2DContour> list
             ,BinaryTreeNode<_Polygon2DContour> containingListNode
@@ -244,7 +246,7 @@ public class PolygonProcessor extends ProcessingElement {
         BinaryTreeNode<_Polygon2DContour> child,lastChild=null;
         _Polygon2DContour p2DContour;
         int levelOfNode;
-        
+
         levelOfNode = levelOfContainingContourNode + 1;
         if((levelOfNode%2) == 0)
             list.get(0).setExteriorContour(containingListNode.getData());
@@ -259,11 +261,10 @@ public class PolygonProcessor extends ProcessingElement {
                 child = child.getSibling();
             }
             child = new BinaryTreeNode<_Polygon2DContour>(list.get(0));
-            
             if ( lastChild != null ) {
                 lastChild.setSibling(child);
-                lastChild = child;
             }
+            lastChild = child;
         }
         // Indicates that the contour is in the binary tree.
         list.get(0).fleetingFlag = true;
@@ -271,25 +272,23 @@ public class PolygonProcessor extends ProcessingElement {
         for(i=1; i<list.size(); ++i) {
             ++levelOfNode;
             p2DContour = list.get(i);
-            if( (levelOfNode%2) == 0 && lastChild != null ) { // Is a hole.
+            if((levelOfNode%2) == 0) { // Is a hole.
                 p2DContour.setExteriorContour(lastChild.getData());
             }
             child = new BinaryTreeNode<_Polygon2DContour>(p2DContour);
-            if ( lastChild != null ) {
-                lastChild.setChild(child);
-            }
+            lastChild.setChild(child);
             child.getData().fleetingFlag = true;
-            lastChild = child;            
+            lastChild = child;
         }
     }
-    
+
     /**
      * Finds the contour node that contains the p2DContour in the binary tree
      * represented by headNode.
      * @param p2DContour
      * @param headNode
      * @param levelOfContainingContourNode is zero based. This array contains one element.
-     * @return 
+     * @return
      */
     private static BinaryTreeNode<_Polygon2DContour> findContainingContourNode(
              _Polygon2DContour p2DContour
@@ -298,7 +297,7 @@ public class PolygonProcessor extends ProcessingElement {
     {
         boolean isTheContainingContourNode;
         BinaryTreeNode<_Polygon2DContour> child;
-        
+
         levelOfContainingContourNode[0] = 0;
         while(headNode != null) {
             child = headNode.getChild();
@@ -319,7 +318,7 @@ public class PolygonProcessor extends ProcessingElement {
         // Reaches here only if headNode == null.
         return headNode;
     }
-    
+
     private static boolean binaryTreeContainContour(
              BinaryTreeNode<_Polygon2DContour> headNode
             ,_Polygon2DContour p2DContour)
@@ -332,13 +331,13 @@ public class PolygonProcessor extends ProcessingElement {
             return true;
         return binaryTreeContainContour(headNode.getChild(),p2DContour);
     }
-    
+
     /**
      * Test if the contour is inside the polygon. This function assumes that
      * the contour is fully inside or fully outside.
      * @param contour
      * @param mainPolygon
-     * @return 
+     * @return
      */
     public static boolean contourInsidePolygon(
              ArrayList<Vertex2D> contour
@@ -347,10 +346,10 @@ public class PolygonProcessor extends ProcessingElement {
         int i;
         Vertex2D point;
         byte result;
-        
+
         for (i = 0; i < contour.size(); ++i) {
             point = contour.get(i);
-            
+
             result = isPointInsidePolygon2D(point, mainPolygon);
             if(result == 1)
                 return true;
@@ -363,14 +362,14 @@ public class PolygonProcessor extends ProcessingElement {
         // case the contour can be anywhere(inside, outside, intersecting).
         return false;
     }
-    
+
 
     /* Function isPointInPolygon2D is based on the function developed by W. Randolph
      Franklin:
      http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
      visited on sep 08 2014.
      The part that tests if the point is in de boundary is new.
-    
+
      License to Use
 
      Copyright (c) 1970-2003, Wm. Randolph Franklin
@@ -425,8 +424,8 @@ public class PolygonProcessor extends ProcessingElement {
             else
                 polPointNext = polygon.get(i+1);
             temp = polPoint.y - polPointNext.y;
-            if ( Math.abs(temp) < 0.0001 ) { //Horizontal line.
-                if ( Math.abs(point.y - (polPointNext.y + temp / 2)) < 0.0001 ) {
+            if ( Math.abs(temp) < EPSILON ) { //Horizontal line.
+                if ( Math.abs(point.y - (polPointNext.y + temp / 2)) < EPSILON ) {
                     if ( (polPointNext.x - point.x) * (point.x - polPoint.x) >= 0 ) {
                         return 0;
                     }
@@ -435,7 +434,7 @@ public class PolygonProcessor extends ProcessingElement {
             if ( point.y < polPoint.y != point.y < polPointNext.y ) {
                 temp = ((polPointNext.x - polPoint.x) * (point.y - polPoint.y)
                         / (polPointNext.y - polPoint.y) + polPoint.x);
-                if ( Math.abs(point.x - temp) < 0.0001 ) {
+                if ( Math.abs(point.x - temp) < EPSILON ) {
                     return 0;
                 }
                 if ( point.x < temp ) {
