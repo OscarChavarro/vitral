@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 
 // JOGL/CG classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.cg.CgGL;
 import com.jogamp.opengl.cg.CGcontext;
 import com.jogamp.opengl.cg.CGprogram;

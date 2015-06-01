@@ -67,7 +67,7 @@ public class Entity extends ModelElement implements Serializable
     {
         int i;
         int j;
-        Class c;
+        Class<?> c;
         Method methods[];
         Method m;
         Class t[];

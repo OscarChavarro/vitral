@@ -2,7 +2,7 @@
 
 package vsdk.toolkit.render.joglcg;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
