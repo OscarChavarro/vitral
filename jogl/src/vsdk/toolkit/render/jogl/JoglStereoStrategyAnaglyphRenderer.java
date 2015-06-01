@@ -3,9 +3,9 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
 
 /**
 JoglStereoStrategyAnaglyphRenderer supports two methods for color blending

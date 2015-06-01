@@ -11,9 +11,9 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.SimpleBackground;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 
 public class JoglSimpleBackgroundRenderer extends JoglRenderer 
 {

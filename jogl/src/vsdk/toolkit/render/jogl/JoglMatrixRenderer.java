@@ -8,8 +8,8 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 

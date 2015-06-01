@@ -2,8 +2,8 @@
 
 package vsdk.toolkit.render.jogl;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLCapabilities;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLCapabilities;
 
 public abstract class JoglStereoStrategyRenderer extends JoglRenderer
 {

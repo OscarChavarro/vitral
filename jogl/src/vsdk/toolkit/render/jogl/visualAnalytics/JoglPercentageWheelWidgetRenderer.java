@@ -14,7 +14,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;

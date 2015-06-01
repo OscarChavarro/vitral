@@ -3,9 +3,9 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
-import javax.media.opengl.GLCapabilities;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GLCapabilities;
 
 public class JoglStereoStrategyQuadBufferRenderer extends JoglStereoStrategyRenderer
 {

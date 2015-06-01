@@ -16,7 +16,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 
 // JOGL classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;

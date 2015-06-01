@@ -1,4 +1,4 @@
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;

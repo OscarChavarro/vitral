@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.TriangleMesh;

@@ -5,7 +5,7 @@ package application.render.jogl;
 // Java basic classes
 
 // JOGL classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;

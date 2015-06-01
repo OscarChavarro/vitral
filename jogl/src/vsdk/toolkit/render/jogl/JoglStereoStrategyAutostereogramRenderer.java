@@ -5,8 +5,8 @@ package vsdk.toolkit.render.jogl;
 import java.util.Random;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.media.RGBImage;

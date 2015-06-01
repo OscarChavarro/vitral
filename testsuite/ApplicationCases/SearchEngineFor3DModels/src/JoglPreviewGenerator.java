@@ -16,8 +16,8 @@
 import java.io.File;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;

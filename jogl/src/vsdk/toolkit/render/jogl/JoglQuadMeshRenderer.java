@@ -11,8 +11,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;

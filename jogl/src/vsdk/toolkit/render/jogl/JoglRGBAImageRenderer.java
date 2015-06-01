@@ -14,10 +14,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 

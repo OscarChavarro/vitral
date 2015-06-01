@@ -10,10 +10,10 @@ package vsdk.toolkit.render.jogl;
 import java.nio.FloatBuffer;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2GL3;
 
 import vsdk.toolkit.media.ZBuffer;
 

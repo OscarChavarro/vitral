@@ -7,7 +7,7 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.VoxelVolume;

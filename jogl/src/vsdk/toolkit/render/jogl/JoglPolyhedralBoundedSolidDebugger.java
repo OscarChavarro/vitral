@@ -5,13 +5,13 @@ package vsdk.toolkit.render.jogl;
 import java.io.File;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLOffscreenAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLDrawableFactory;
 
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;

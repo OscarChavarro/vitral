@@ -5,7 +5,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
-import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 
 import vsdk.toolkit.gui.AwtSystem; // Controller elements

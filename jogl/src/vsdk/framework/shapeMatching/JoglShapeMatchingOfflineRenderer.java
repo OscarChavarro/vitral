@@ -10,13 +10,13 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLOffscreenAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLDrawableFactory;
 
 // Vitral classes
 import vsdk.framework.Component;

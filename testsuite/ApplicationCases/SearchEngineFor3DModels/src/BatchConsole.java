@@ -20,10 +20,10 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLAutoDrawable;
 
 // VSDK Classes
 import vsdk.toolkit.media.GeometryMetadata;

@@ -2,7 +2,7 @@
 package vsdk.toolkit.render.jogl.animation;
 
 // JOGL classes
-import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLJPanel;
 
 // VSDK classes
 import vsdk.toolkit.animation.AnimationEvent;

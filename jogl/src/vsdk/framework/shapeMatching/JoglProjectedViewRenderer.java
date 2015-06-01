@@ -10,8 +10,8 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 // VSDK Classes
 import vsdk.toolkit.common.RendererConfiguration;

@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 // JOGL classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.environment.Camera;

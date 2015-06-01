@@ -21,12 +21,12 @@ import java.io.ObjectInputStream;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GLEventListener;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
@@ -238,7 +238,13 @@ public class PolyhedralBoundedSolidExample extends Applet implements
             mySolid = PolyhedralBoundedSolidModelingTools.featuredObject();
             break;
           case 23:
-            mySolid = importFromFile("/tmp/solid.bin");
+	    File fd = new File("/tmp/solid.bin");
+	    if ( fd.exists() ) {
+	        mySolid = importFromFile("/tmp/solid.bin");
+	    }
+	    else {
+                mySolid = PolyhedralBoundedSolidModelingTools.featuredObject();
+	    }
             break;
           case 2: default:
             mySolid = PolyhedralBoundedSolidModelingTools.createHoledBox();

@@ -22,11 +22,11 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
 // JOGL classes
-import javax.media.opengl.GL2;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

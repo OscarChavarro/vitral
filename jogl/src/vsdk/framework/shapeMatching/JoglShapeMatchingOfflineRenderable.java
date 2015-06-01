@@ -10,7 +10,7 @@
 package vsdk.framework.shapeMatching;
 
 // JOGL classes
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 // Vitral classes
 import vsdk.framework.Component;
