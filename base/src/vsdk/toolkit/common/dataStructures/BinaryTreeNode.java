@@ -8,6 +8,9 @@ import vsdk.toolkit.common.FundamentalEntity;
 */
 public class BinaryTreeNode<T> extends FundamentalEntity
 {
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final long serialVersionUID = 20150601L;
+
     private T data;
     private BinaryTreeNode<T> sibling = null;
     private BinaryTreeNode<T> child = null;

@@ -7,7 +7,7 @@ import vsdk.toolkit.common.Vertex2D;
 
 import java.util.ArrayList;
 
-public class _Polygon2DContour extends FundamentalEntity implements Comparable
+public class _Polygon2DContour extends FundamentalEntity implements Comparable<_Polygon2DContour>
 {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20090816L;
@@ -147,13 +147,13 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable
      * @return 
      */
     @Override
-    public int compareTo(Object obj)
+    public int compareTo(_Polygon2DContour obj)
     {
-        if ( ! (obj instanceof _Polygon2DContour) ) {
-            return -1;
-        }
+        //if ( ! (obj instanceof _Polygon2DContour) ) {
+        //    return -1;
+        //}
         _Polygon2DContour other;
-        other = (_Polygon2DContour)obj;
+        other = /*(_Polygon2DContour)*/ obj;
 
         if(!minMaxAreaCalculated)
             calcMinMaxArea(false); // The variable minMaxAreaCalculated must be

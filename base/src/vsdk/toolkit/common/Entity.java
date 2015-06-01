@@ -70,8 +70,8 @@ public class Entity extends ModelElement implements Serializable
         Class<?> c;
         Method methods[];
         Method m;
-        Class t[];
-        Class r;
+        Class<?> t[];
+        Class<?> r;
 
         c = this.getClass();
         methods = c.getMethods();
@@ -131,7 +131,7 @@ public class Entity extends ModelElement implements Serializable
         return variableSpecs;
     }
 
-    private boolean typeIsSupported(Class r)
+    private boolean typeIsSupported(Class<?> r)
     {
         String n = r.getName();
 
