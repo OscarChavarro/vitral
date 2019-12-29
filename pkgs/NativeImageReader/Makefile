@@ -1,7 +1,8 @@
 #===========================================================================
 
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
-PLATFORM=darwin
+# Values for PLATFORM: "linux" or "darwin"
+PLATFORM=`uname -a | awk '{print $1}' | tr '[:upper:]' '[:lower:]'`
 LIB_DIR=../../lib
 CLASSES_DIR = ./classes
 SRC_DIR=./src
@@ -12,7 +13,12 @@ LIBTOOL=g++ -fPIC -Wall -pedantic -L/opt/local/lib
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
-all: check ./bin/testImageReader $(LIB_DIR)/libNativeImageReader.dylib $(CLASSES_DIR)/testImageReader.class
+DLL_EXTENSION="so"
+ifeq ($(PLATFORM), "darwin") 
+    DLL_EXTENSION="dylib"
+endif
+
+all: check ./bin/testImageReader $(LIB_DIR)/libNativeImageReader.$(DLL_EXTENSION) $(CLASSES_DIR)/testImageReader.class
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \

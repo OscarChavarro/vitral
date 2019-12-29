@@ -36,13 +36,18 @@ IMPLEMENTATION ON OPENGL/JOGL
 VERSION CONTROL
 
 Latest version of the Vitral SDK project source code is available to the public
-on the internet and is hosted at SourceForge.net SVN service. To download
-vitral use the following command on linux or UNIX command line:
+on the internet and is hosted at GITHUB. Older versions are available at SourceForge.net SVN service.
+
+To download latest vitral verision, use the following command line:
+
+After 2019:
+
+To download older vitral versions use the following command on linux or UNIX command line:
 
 Before 2013:
 #svn co https://vitral.svn.sourceforge.net/svnroot/vitral/vitral/trunk vitral
 
-After:
+Between 2013 and 2019:
 svn co https://svn.code.sf.net/p/vitral/code vitral
 
 To access read-write:
@@ -55,3 +60,6 @@ On windows, using tortoise:
   - Create an empty folder named "vitral" and double click on it
   - Right click on explorer context menu, and select "SVN Checkout"
   - On URL of repository use
+
+From 2020, vitral version control is being managed on git. To move or rename a file, use:
+git filter-branch -f --tree-filter 'if [ -f SRCFILE ]; then mkdir -p DSTFOLDER && mv SRCFILE DSTFILE; fi' HEAD

@@ -38,9 +38,8 @@
 
 #===========================================================================
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
-
-#PLATFORM=linux
-PLATFORM=darwin
+# Values for PLATFORM: "linux" or "darwin"
+PLATFORM=`uname -a | awk '{print $1}' | tr '[:upper:]' '[:lower:]'`
 SRC_DIR = ./src
 LIB_DIR = ../../lib
 CLASSES_DIR = ./classes
@@ -48,6 +47,11 @@ TMP_DIR = ./tmp
 LIBTOOL = g++ -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
+
+DLL_EXTENSION="so"
+ifeq ($(PLATFORM), "darwin") 
+    DLL_EXTENSION="dylib"
+endif
 
 #===========================================================================
 
@@ -113,7 +117,7 @@ FSTHYBRIDXOBJ = $(FLTHYBRIDOBJ) \
 
 # first some shortcuts
 
-all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.dylib bin/generateSphericalHarmonics bin/convertFileToBynaryArray
+all: check $(CLASSES_DIR)/main.class $(LIB_DIR)/libspharmonickit.$(DLL_EXTENSION) bin/generateSphericalHarmonics bin/convertFileToBynaryArray
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \

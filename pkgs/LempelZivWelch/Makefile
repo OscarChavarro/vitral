@@ -1,7 +1,8 @@
 #===========================================================================
 
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
-PLATFORM=darwin
+# Values for PLATFORM: "linux" or "darwin"
+PLATFORM=`uname -a | awk '{print $1}' | tr '[:upper:]' '[:lower:]'`
 LIB_DIR=../../lib
 CLASSES_DIR = ./classes
 SRC_DIR=./src
@@ -11,7 +12,12 @@ CCO=gcc -std=c99 -m32 -fPIC -Wall -pedantic -I./src_lib -I$(JDKHOME)/include -I$
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar:../$(CLASSES_DIR) -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
-all: check ./bin/compress ./bin/uncompress $(LIB_DIR)/libLZW.dylib $(CLASSES_DIR)/main.class
+DLL_EXTENSION="so"
+ifeq ($(PLATFORM), "darwin") 
+    DLL_EXTENSION="dylib"
+endif
+
+all: check ./bin/compress ./bin/uncompress $(LIB_DIR)/libLZW.$(DLL_EXTENSION) $(CLASSES_DIR)/main.class
 
 check: ./classes ./bin ./tmp
 	@if [ ! -x $(JDKHOME)/bin/java ]; then                             \
