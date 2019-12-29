@@ -504,6 +504,8 @@ public class RGBImage extends Image
 //#endif
 
     public void dispose() {
+        // TODO: Check if garbabe collection is not a problem!
+        /*
         if ( data != null ) {
             try {
                 Field cleanerField;
@@ -528,6 +530,7 @@ public class RGBImage extends Image
                     "dispose", "Illegal access", ex);                
             }
         }
+        */
     }
 
 }
