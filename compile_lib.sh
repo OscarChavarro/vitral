@@ -9,7 +9,7 @@ AWT_CLASSES="./awt/src/vsdk/toolkit/render/awt/*.java ./awt/src/vsdk/toolkit/ren
 
 JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
 
-#JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/srccg/vsdk/toolkit/render/joglcg/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
+#JOGLCG_CLASSES="./joglcg/src/vsdk/toolkit/render/joglcg/*.java"
 
 VITRALARCHITECTURE_CLASSES="./base/src/vsdk/framework/*.java ./base/src/vsdk/framework/shapeMatching/*.java ./base/src/vsdk/framework/shapeMatching/plugins/*.java ./jogl/src/vsdk/framework/shapeMatching/plugins/*.java"
 
@@ -26,19 +26,23 @@ fi
 
 clear
 
-# Sometimes those are needed to specify its location...
-JOGL_CP=$JAVA_HOME/jre/lib/ext/gluegen-rt-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/gluegen-rt-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/jogl-all-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2.jar
+# Check this all are well installed. Good idea is to install them to ~/.m2 using
+# maven, and copy them to Java's extension folder. 
+#JOGL_CP=$JAVA_HOME/jre/lib/ext/gluegen-rt-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/gluegen-rt-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/jogl-all-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2.jar
 
+# Compile main java library
 # -proc:none option disables annotation processing which generates warnings
 # when using some gluegen/JOGL features.
-javac -proc:none -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
-cd pkgs/SpharmonicKit27;make;cd ../..
-cd pkgs/LempelZivWelch;make;cd ../..
-cd pkgs/NativeImageReader;make;cd ../..
+
+# Compile native code packages
+cd pkgs/SpharmonicKit27;make -j 24;cd ../..
+cd pkgs/LempelZivWelch;make -j 24;cd ../..
+cd pkgs/NativeImageReader;make -j 24;cd ../..
 
 # Set proper permisions
 chmod 755 `find . -type d`
