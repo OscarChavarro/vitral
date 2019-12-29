@@ -90,8 +90,8 @@ double csecond( )
 #endif
 {
 #ifdef UNIX_ENABLED
-	struct tms buf;
-    static struct tms buf0;			/* times structure */
+    struct tms buf;
+    static struct tms buf0; /* times structure */
     static int firstcall=1;
 #ifdef WALLCLOCK
     clock_t  rv;
@@ -107,16 +107,17 @@ double csecond( )
 
 #ifdef WALLCLOCK
     rv=times(&buf);
-    /*    if ( rv < 0 ) {fprintf( stderr, "csecond failed  %d \n",rv ); } */
+    /* if ( rv < 0 ) {fprintf( stderr, "csecond failed  %d \n",rv ); } */
     return( (double) (rv-rv0) / (double)DIVIDER );
 #else
+    // TODO: This code is returning an answer from non-initialized data! Review.
     return( (double)( (buf.tms_utime + buf.tms_stime + buf.tms_cutime + buf.tms_cstime) -
                       (buf0.tms_utime + buf0.tms_stime + buf0.tms_cutime + buf0.tms_cstime)
                      ) / (double)DIVIDER );
 #endif
 #endif /* UNIX_ENABLED */
-	#ifndef UNIX_ENABLED
-	return 0;
+    #ifndef UNIX_ENABLED
+    return 0;
 #endif
 }
 

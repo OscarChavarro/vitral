@@ -63,7 +63,7 @@ CCP = g++ -DUNIX_ENABLED
 # define optimization flags suitable for your platform
 
 # CFLAGS = -O3 -fp_reorder -DWALLCLOCK
-CFLAGS = -O2 -ansi -Wall -fPIC -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
+CFLAGS = -O2 -ansi -Wall -fPIC -I./src_lib -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM) -DWALLCLOCK
 LDFLAGS = -lm
 
 # for naive
