@@ -56,8 +56,7 @@ public class CameraExample extends Applet implements
     that real initialization be done in another `createModel` method, and
     that such method be called explicity from entry point function.
     */
-    public CameraExample()
-    {
+    public CameraExample() {
         // Empty! call `createModel` explicity from entry point function!
 
     }
@@ -65,8 +64,7 @@ public class CameraExample extends Applet implements
     /**
     Real constructor
     */
-    private void createModel()
-    {
+    private void createModel() {
         camera = new Camera();
 
         //cameraController = new CameraControllerBlender(camera);
@@ -78,8 +76,7 @@ public class CameraExample extends Applet implements
     /**
     Use to create Swing elements
     */
-    private void fillGUIWithCanvas()
-    {
+    private void fillGUIWithCanvas() {
         canvas = new GLCanvas();
         canvas.addGLEventListener(this);
         canvas.addMouseListener(this);
@@ -92,12 +89,14 @@ public class CameraExample extends Applet implements
 
     /**
     Entrance point function for desktop standalone application running mode.
-    @param args
+    @param args not used
     */
-    public static void main (String[] args)
-    {
+    public static void main (String[] args) {
         // Common VitralSDK initialization
-        JoglRenderer.verifyOpenGLAvailability();
+        if ( !JoglRenderer.verifyOpenGLAvailability() ) {
+            System.out.println("Can not start OpenGL/JOGL. Review X11 session connection status.");
+            return;
+        }
         CameraExample instance = new CameraExample();
         instance.appletMode = false;
         instance.createModel();
@@ -133,10 +132,9 @@ public class CameraExample extends Applet implements
 //= PROGRAM PART 4/5: JOGL-OPENGL PROCEDURES ================================
 
     /**
-    @param gl
+    @param gl JOGL graphics context
     */
-    private void drawObjectsGL(GL2 gl)
-    {
+    private void drawObjectsGL(GL2 gl) {
         gl.glEnable(GL2.GL_DEPTH_TEST);
 
         gl.glLoadIdentity();
@@ -161,11 +159,10 @@ public class CameraExample extends Applet implements
 
     /**
     Called by drawable to initiate drawing
-    @param drawable
+    @param drawable JOGL graphics context
     */
     @Override
-    public void display(GLAutoDrawable drawable)
-    {
+    public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0, 0, 0, 1);
@@ -179,80 +176,75 @@ public class CameraExample extends Applet implements
 
     /**
     Not used method, but needed to instanciate GLEventListener
-    @param drawable
+    @param drawable JOGL graphics context
     */
     @Override
-    public void init(GLAutoDrawable drawable)
-    {
+    public void init(GLAutoDrawable drawable) {
 
     }
 
     /**
     Not used method, but needed to instanciate GLEventListener
-    @param drawable
+    @param drawable JOGL graphics context
     */
     @Override
-    public void dispose(GLAutoDrawable drawable)
-    {
+    public void dispose(GLAutoDrawable drawable) {
 
     }
 
     /**
     Not used method, but needed to instanciate GLEventListener
-    @param drawable
-    @param a
-    @param b
+    @param drawable JOGL graphics context
+    @param a not used
+    @param b not used
     */
-    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b)
-    {
+    @SuppressWarnings("unused")
+    public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {
 
     }
 
     /** Called to indicate the drawing surface has been moved and/or resized
-    @param drawable
-    @param x
-    @param y
-    @param width
-    @param height
+    @param drawable JOGL graphics context
+    @param x not used
+    @param y not used
+    @param xSize window xSize
+    @param ySize window height
     */
     @Override
     public void reshape (GLAutoDrawable drawable,
                          int x,
                          int y,
-                         int width,
-                         int height) {
+                         int xSize,
+                         int ySize) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glViewport(0, 0, width, height);
+        gl.glViewport(0, 0, xSize, ySize);
 
-        camera.updateViewportResize(width, height);
+        camera.updateViewportResize(xSize, ySize);
     }
 
 //= PART 5/5: GUI PROCEDURES ================================================
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseEntered(MouseEvent e)
-    {
+    public void mouseEntered(MouseEvent e) {
         canvas.requestFocusInWindow();
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseExited(MouseEvent e)
-    {
-      //System.out.println("Mouse exited");
+    public void mouseExited(MouseEvent e) {
     }
 
     /**
-    @param e
+    @param e not used
     */
+    @SuppressWarnings("unused")
     @Override
-    public void mousePressed(MouseEvent e)
-    {
+    public void mousePressed(MouseEvent e) {
         if ( cameraController.processMousePressedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -260,11 +252,10 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseReleased(MouseEvent e)
-    {
+    public void mouseReleased(MouseEvent e) {
         if ( cameraController.processMouseReleasedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -272,11 +263,10 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseClicked(MouseEvent e)
-    {
+    public void mouseClicked(MouseEvent e) {
         if ( cameraController.processMouseClickedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -284,11 +274,10 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseMoved(MouseEvent e)
-    {
+    public void mouseMoved(MouseEvent e) {
         if ( cameraController.processMouseMovedEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -296,11 +285,10 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseDragged(MouseEvent e)
-    {
+    public void mouseDragged(MouseEvent e) {
         if ( cameraController.processMouseDraggedEvent(
                  AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -308,11 +296,10 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e)
-    {
+    public void mouseWheelMoved(MouseWheelEvent e) {
         if ( cameraController.processMouseWheelEvent(
             AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
@@ -320,7 +307,7 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
     public void keyPressed(KeyEvent e) {
@@ -338,7 +325,7 @@ public class CameraExample extends Applet implements
     }
 
     /**
-    @param e
+    @param e not used
     */
     @Override
     public void keyReleased(KeyEvent e) {
@@ -352,14 +339,12 @@ public class CameraExample extends Applet implements
     Do NOT call your controller from the `keyTyped` method, or the controller
     will be invoked twice for each key. Call it only from the `keyPressed` and
     `keyReleased` method
-    @param e
+    @param e not used
     */
     @Override
-    public void keyTyped(KeyEvent e)
-    {
+    public void keyTyped(KeyEvent e) {
 
     }
-
 }
 
 //===========================================================================
