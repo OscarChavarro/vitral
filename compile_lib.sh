@@ -1,17 +1,17 @@
 #!/bin/sh
 #===========================================================================
 
-BASIC_CLASSES="./src/vsdk/toolkit/common/*.java ./src/vsdk/toolkit/common/linealAlgebra/*.java ./src/vsdk/toolkit/environment/*.java ./src/vsdk/toolkit/environment/geometry/*.java ./src/vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java ./src/vsdk/toolkit/environment/scene/*.java ./src/vsdk/toolkit/media/*.java ./src/vsdk/toolkit/render/*.java ./src/vsdk/toolkit/gui/*.java src/vsdk/toolkit/processing/*.java ./src/vsdk/toolkit/animation/*.java"
+BASE_CLASSES="./base/src/vsdk/toolkit/common/*.java ./base/src/vsdk/toolkit/common/linealAlgebra/*.java ./base/src/vsdk/toolkit/environment/*.java ./base/src/vsdk/toolkit/environment/geometry/*.java ./base/src/vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java ./base/src/vsdk/toolkit/environment/scene/*.java ./base/src/vsdk/toolkit/media/*.java ./base/src/vsdk/toolkit/render/*.java ./base/src/vsdk/toolkit/gui/*.java ./base/src/vsdk/toolkit/processing/*.java ./base/src/vsdk/toolkit/animation/*.java ./base/src/vsdk/toolkit/gui/*.java"
 
-IO_CLASSES="./src/vsdk/toolkit/io/*.java ./src/vsdk/toolkit/io/xml/*.java ./src/vsdk/toolkit/io/metadata/*.java ./src/vsdk/toolkit/io/image/ImageNotRecognizedException.java ./src/vsdk/toolkit/io/image/ImagePersistenceSGI.java ./src/vsdk/toolkit/io/image/RGBColorPalettePersistence.java ./src/vsdk/toolkit/io/image/NativeImageReaderWrapper.java ./src/vsdk/toolkit/io/image/_NativeImageReaderWrapperHeaderInfo.java ./src/vsdk/toolkit/io/geometry/EnvironmentPersistence.java ./src/vsdk/toolkit/io/geometry/ViewpointBinaryPersistence.java ./src/vsdk/toolkit/io/geometry/FontReader.java ./src/vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.java ./src/vsdk/toolkit/io/geometry/ParametricCurvePersistence.java ./src/vsdk/toolkit/io/geometry/Reader3ds.java ./src/vsdk/toolkit/io/geometry/ReaderAse.java ./src/vsdk/toolkit/io/geometry/ReaderMitScene.java ./src/vsdk/toolkit/io/geometry/Md2Persistence.java ./src/vsdk/toolkit/io/gui/*.java"
+IO_CLASSES="./base/src/vsdk/toolkit/io/*.java ./base/src/vsdk/toolkit/io/xml/*.java ./base/src/vsdk/toolkit/io/metadata/*.java ./base/src/vsdk/toolkit/io/image/ImageNotRecognizedException.java ./base/src/vsdk/toolkit/io/image/ImagePersistenceSGI.java ./base/src/vsdk/toolkit/io/image/RGBColorPalettePersistence.java ./base/src/vsdk/toolkit/io/image/NativeImageReaderWrapper.java ./base/src/vsdk/toolkit/io/image/_NativeImageReaderWrapperHeaderInfo.java ./base/src/vsdk/toolkit/io/geometry/EnvironmentPersistence.java ./base/src/vsdk/toolkit/io/geometry/ViewpointBinaryPersistence.java ./base/src/vsdk/toolkit/io/geometry/FontReader.java ./base/src/vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.java ./base/src/vsdk/toolkit/io/geometry/ParametricCurvePersistence.java ./base/src/vsdk/toolkit/io/geometry/Reader3ds.java ./base/src/vsdk/toolkit/io/geometry/ReaderAse.java ./base/src/vsdk/toolkit/io/geometry/ReaderMitScene.java ./base/src/vsdk/toolkit/io/geometry/Md2Persistence.java ./base/src/vsdk/toolkit/io/gui/*.java ./base/src/vsdk/toolkit/io/image/ImagePersistence.java ./base/src/vsdk/toolkit/io/geometry/ReaderObj.java"
 
-AWT_CLASSES="./src_awt/vsdk/toolkit/render/awt/*.java ./src_awt/vsdk/toolkit/render/swing/*.java ./src/vsdk/toolkit/gui/CameraController.java ./src_awt/vsdk/toolkit/gui/AwtSystem.java ./src/vsdk/toolkit/gui/CameraControllerAquynza.java ./src/vsdk/toolkit/gui/CameraControllerBlender.java ./src/vsdk/toolkit/gui/TranslateGizmo.java ./src/vsdk/toolkit/gui/RotateGizmo.java ./src/vsdk/toolkit/gui/ScaleGizmo.java ./src/vsdk/toolkit/gui/RendererConfigurationController.java ./src/vsdk/toolkit/io/image/ImagePersistence.java ./src_awt/vsdk/toolkit/io/image/*.java ./src/vsdk/toolkit/io/geometry/ReaderObj.java"
+AWT_CLASSES="./awt/src/vsdk/toolkit/render/awt/*.java ./awt/src/vsdk/toolkit/render/swing/*.java ./awt/src/vsdk/toolkit/gui/AwtSystem.java ./awt/src/vsdk/toolkit/io/image/*.java"
 
-JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_jogl/vsdk/toolkit/render/jogl/animation/*.java ./src_jogl/vsdk/framework/shapeMatching/*.java ./src_jogl/vsdk/toolkit/io/image/*.java"
+JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
 
-#JOGL_CLASSES="./src_jogl/vsdk/toolkit/render/jogl/*.java ./src_jogl/vsdk/toolkit/render/jogl/animation/*.java ./src_joglcg/vsdk/toolkit/render/joglcg/*.java ./src_jogl/vsdk/framework/shapeMatching/*.java ./src_jogl/vsdk/toolkit/io/image/*.java"
+#JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/srccg/vsdk/toolkit/render/joglcg/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
 
-VITRALARCHITECTURE_CLASSES="./src/vsdk/framework/*.java ./src/vsdk/framework/shapeMatching/*.java ./src/vsdk/framework/shapeMatching/plugins/*.java ./src_jogl/vsdk/framework/shapeMatching/plugins/*.java"
+VITRALARCHITECTURE_CLASSES="./base/src/vsdk/framework/*.java ./base/src/vsdk/framework/shapeMatching/*.java ./base/src/vsdk/framework/shapeMatching/plugins/*.java ./jogl/src/vsdk/framework/shapeMatching/plugins/*.java"
 
 #---------------------------------------------------------------------------
 
@@ -27,11 +27,11 @@ fi
 clear
 
 # Sometimes those are needed to specify its location...
-#$JAVA_HOME/jre/lib/ext/jogl.all.jar:$JAVA_HOME/jre/lib/ext/gluegen.jar:$JAVA_HOME/jre/lib/ext/jogl.cg.jar
+JOGL_CP=$JAVA_HOME/jre/lib/ext/gluegen-rt-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/gluegen-rt-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2-natives-linux-amd64.jar:$JAVA_HOME/jre/lib/ext/jogl-all-main-2.3.2.jar:$JAVA_HOME/jre/lib/ext/jogl-all-2.3.2.jar
 
 # -proc:none option disables annotation processing which generates warnings
 # when using some gluegen/JOGL features.
-javac -proc:none -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./src:./src_jogl:./src_joglcg -d ./classes $BASIC_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+javac -proc:none -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
 
 cd classes
 jar cf ../lib/vsdk.jar vsdk
@@ -44,10 +44,14 @@ cd pkgs/NativeImageReader;make;cd ../..
 chmod 755 `find ./classes -type d`
 chmod 755 `find ./doc -type d`
 chmod 755 `find ./etc -type d`
-chmod 755 `find ./_ide -type d`
 chmod 755 `find ./lib -type d`
 chmod 755 `find ./pkgs -type d`
-chmod 755 `find ./src -type d`
+chmod 755 `find ./base/src -type d`
+chmod 755 `find ./awt/src -type d`
+chmod 755 `find ./jogl/src -type d`
+chmod 755 `find ./joglcg/src -type d`
+chmod 755 `find ./android/src -type d`
+chmod 755 `find ./jme/src -type d`
 chmod 755 `find ./testsuite -type d`
 chmod 644 `find . -name "*.java"`
 chmod 644 `find . -name "*.bat"`

@@ -22,7 +22,7 @@
         <defaultGoal>install</defaultGoal>
         <directory>target</directory>
         <finalName>vitral-1.0</finalName>
-        <sourceDirectory>${project.basedir}/VSDKExamples/CameraExample/src</sourceDirectory>
+        <sourceDirectory>${project.basedir}/VSDKExamples/CameraSwingExample/src</sourceDirectory>
         <outputDirectory>target/classes</outputDirectory>
         <plugins>
             <plugin>
@@ -38,6 +38,12 @@
         <resources>
             <resource>
                 <directory>${project.basedir}/OfflineExamples/RaytracingOfflineExample/src</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/VSDKExamples/CameraExample/src</directory>
                 <includes>
                     <include>**/*.java</include>
                 </includes>

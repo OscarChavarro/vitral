@@ -39,7 +39,7 @@
 #===========================================================================
 JDKHOME:=`sh ./scripts/locate_jdk.sh`/..
 # Values for PLATFORM: "linux" or "darwin"
-PLATFORM=`uname -a | awk '{print $1}' | tr '[:upper:]' '[:lower:]'`
+PLATFORM = `sh ./scripts/get_platform.sh`
 SRC_DIR = ./src
 LIB_DIR = ../../lib
 CLASSES_DIR = ./classes
@@ -48,9 +48,9 @@ LIBTOOL = g++ -I$(JDKHOME)/include -I$(JDKHOME)/include/$(PLATFORM)
 JC = javac -proc:none -classpath ../../../lib/vsdk.jar -d ../$(CLASSES_DIR)
 JH = javah -classpath ../../../lib/vsdk.jar -d ../$(TMP_DIR)
 
-DLL_EXTENSION="so"
+DLL_EXTENSION=so
 ifeq ($(PLATFORM), "darwin") 
-    DLL_EXTENSION="dylib"
+    DLL_EXTENSION=dylib
 endif
 
 #===========================================================================
