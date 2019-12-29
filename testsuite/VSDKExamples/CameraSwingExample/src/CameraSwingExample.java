@@ -26,14 +26,12 @@ import javax.swing.JPanel;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglRenderer;
@@ -57,7 +55,7 @@ public class CameraSwingExample extends Applet implements
     private Camera camera;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private SimpleCorridor corridor;
+    private SimpleCorridor2 corridor;
     private ButtonsPanel controls;
     private JMenuBar menubar;
 
@@ -84,7 +82,7 @@ public class CameraSwingExample extends Applet implements
         //cameraController = new CameraControllerBlender(camera);
         cameraController = new CameraControllerAquynza(camera);
 
-        corridor = new SimpleCorridor();
+        corridor = new SimpleCorridor2();
     }
 
     private void createGUI()

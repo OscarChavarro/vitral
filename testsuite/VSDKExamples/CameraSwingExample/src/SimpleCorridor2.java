@@ -1,6 +1,6 @@
 import com.jogamp.opengl.GL2;
 
-public class SimpleCorridor
+public class SimpleCorridor2
 {
     private double a;
     private int na;
@@ -10,7 +10,7 @@ public class SimpleCorridor
     private int nc;
     private double interSpace;
 
-    public SimpleCorridor()
+    public SimpleCorridor2()
     {
         a = 6;
         na = 6;
