@@ -7,11 +7,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>co.cubestudio</groupId>
-    <artifactId>vitral-base</artifactId>
+    <artifactId>vitral-awt</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
 
-    <name>vitral-base</name>
+    <name>vitral-awt</name>
     <url>https://sourceforge.net/projects/vitral</url>
 
     <properties>
@@ -35,4 +35,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>co.cubestudio</groupId>
+            <artifactId>vitral-base</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
 </project>

@@ -7,11 +7,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>co.cubestudio</groupId>
-    <artifactId>vitral-base</artifactId>
+    <artifactId>vitral-jogl</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
 
-    <name>vitral-base</name>
+    <name>vitral-jogl</name>
     <url>https://sourceforge.net/projects/vitral</url>
 
     <properties>
@@ -35,4 +35,25 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-main</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>co.cubestudio</groupId>
+            <artifactId>vitral-base</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>co.cubestudio</groupId>
+            <artifactId>vitral-awt</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
 </project>

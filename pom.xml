@@ -16,6 +16,9 @@
 
     <modules>
         <module>base</module>
+        <module>awt</module>
+        <module>jogl</module>
+        <module>testsuite</module>
     </modules>
 
     <dependencies>
