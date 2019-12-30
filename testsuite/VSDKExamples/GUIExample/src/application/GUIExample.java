@@ -53,7 +53,7 @@ public class GUIExample {
 
         try {
             gui = GuiPersistence.importAquynzaGui(
-                    new FileInputStream(languageGuiFile));
+                new FileInputStream(languageGuiFile), ".");
             //System.out.println(gui);
         } catch (Exception e) {
             System.err.println("Fatal error: can not open GUI file");

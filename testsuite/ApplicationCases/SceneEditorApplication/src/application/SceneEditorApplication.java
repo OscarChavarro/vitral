@@ -231,7 +231,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         try {
             gui = GuiPersistence.importAquynzaGui(
-                                new FileInputStream(languageGuiFile)  );
+		new FileInputStream(languageGuiFile), ".");
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
@@ -276,7 +276,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         try {
             gui = GuiPersistence.importAquynzaGui(
-                                new FileInputStream(languageGuiFile)  );
+                new FileInputStream(languageGuiFile), ".");
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");

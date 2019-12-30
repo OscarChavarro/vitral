@@ -3,7 +3,7 @@
 
 BASE_CLASSES="./base/src/vsdk/toolkit/common/*.java ./base/src/vsdk/toolkit/common/linealAlgebra/*.java ./base/src/vsdk/toolkit/environment/*.java ./base/src/vsdk/toolkit/environment/geometry/*.java ./base/src/vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/*.java ./base/src/vsdk/toolkit/environment/scene/*.java ./base/src/vsdk/toolkit/media/*.java ./base/src/vsdk/toolkit/render/*.java ./base/src/vsdk/toolkit/gui/*.java ./base/src/vsdk/toolkit/processing/*.java ./base/src/vsdk/toolkit/animation/*.java ./base/src/vsdk/toolkit/gui/*.java"
 
-IO_CLASSES="./base/src/vsdk/toolkit/io/*.java ./base/src/vsdk/toolkit/io/xml/*.java ./base/src/vsdk/toolkit/io/metadata/*.java ./base/src/vsdk/toolkit/io/image/*.java ./base/src/vsdk/toolkit/io/geometry/*.java"
+IO_CLASSES="./base/src/vsdk/toolkit/io/*.java ./base/src/vsdk/toolkit/io/xml/*.java ./base/src/vsdk/toolkit/io/metadata/*.java ./base/src/vsdk/toolkit/io/image/*.java ./base/src/vsdk/toolkit/io/geometry/*.java ./base/src/vsdk/toolkit/io/gui/*.java"
 
 AWT_CLASSES="./awt/src/vsdk/toolkit/render/awt/*.java ./awt/src/vsdk/toolkit/render/swing/*.java ./awt/src/vsdk/toolkit/gui/*.java ./awt/src/vsdk/toolkit/io/image/*.java"
 

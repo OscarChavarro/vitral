@@ -19,7 +19,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2D;
 
 /**
 @author Andres Felipe Mejia (Paco el Caco)
@@ -27,12 +27,13 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 public class CohenSutherlandClipping2D implements 
         GLEventListener, AdjustmentListener {
 
-    private static Vector3D min;
-    private static Vector3D max;
-    private Vector3D clipped0;
-    private Vector3D clipped1;
-    private static Vector3D p0;
-    private static Vector3D p1;
+    private static final double DELTA = 0.0001;
+    private static Vector2D min;
+    private static Vector2D max;
+    private Vector2D clipped0;
+    private Vector2D clipped1;
+    private static Vector2D p0;
+    private static Vector2D p1;
 
     private JFrame frame;
     private JPanel panel;
@@ -54,13 +55,13 @@ public class CohenSutherlandClipping2D implements
 
     public void createGUI()
     {
-        p0 = new Vector3D(0.85, 0.5, 0.0);
-        p1 = new Vector3D(-0.85, -0.5, 0.0);
-        min = new Vector3D(-0.8, -0.8, 0.0);
-        max = new Vector3D(0.8, 0.8, 0.0);
-        clipped0 = new Vector3D(p0);
-        clipped1 = new Vector3D(p1);
-        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max);
+        p0 = new Vector2D(0.85, 0.5);
+        p1 = new Vector2D(-0.85, -0.5);
+        min = new Vector2D(-0.8, -0.8);
+        max = new Vector2D(0.8, 0.8);
+        clipped0 = new Vector2D(p0);
+        clipped1 = new Vector2D(p1);
+        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max, DELTA);
 
         frame = new JFrame("VITRAL concept test - Cohen Sutherland 2D line clipping");
         frame.setSize(800, 600);
@@ -165,9 +166,9 @@ public class CohenSutherlandClipping2D implements
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("y1") ) {
             p1.y = value;
         }
-        clipped0 = new Vector3D(p0);
-        clipped1 = new Vector3D(p1);
-        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max);
+        clipped0 = new Vector2D(p0);
+        clipped1 = new Vector2D(p1);
+        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max, DELTA);
         canvas.repaint();
     }
     
