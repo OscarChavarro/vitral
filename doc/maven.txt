@@ -1,0 +1,2 @@
+Use:
+mvn install:install-file -Dfile=./lib/vsdk.jar -DgroupId=com.cubestudio.vsdk -DartifactId=vsdk -Dversion=1.0 -Dpackaging=jar
