@@ -7,11 +7,11 @@ IO_CLASSES="./base/src/vsdk/toolkit/io/*.java ./base/src/vsdk/toolkit/io/xml/*.j
 
 AWT_CLASSES="./awt/src/vsdk/toolkit/render/awt/*.java ./awt/src/vsdk/toolkit/render/swing/*.java ./awt/src/vsdk/toolkit/gui/*.java ./awt/src/vsdk/toolkit/io/image/*.java"
 
-JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
+#JOGL_CLASSES="./jogl/src/vsdk/toolkit/render/jogl/*.java ./jogl/src/vsdk/toolkit/render/jogl/animation/*.java ./jogl/src/vsdk/framework/shapeMatching/*.java ./jogl/src/vsdk/toolkit/io/image/*.java"
 
 #JOGLCG_CLASSES="./joglcg/src/vsdk/toolkit/render/joglcg/*.java"
 
-VITRALARCHITECTURE_CLASSES="./base/src/vsdk/framework/*.java ./base/src/vsdk/framework/shapeMatching/*.java ./base/src/vsdk/framework/shapeMatching/plugins/*.java ./jogl/src/vsdk/framework/shapeMatching/plugins/*.java"
+#VITRALARCHITECTURE_CLASSES="./base/src/vsdk/framework/*.java ./base/src/vsdk/framework/shapeMatching/*.java ./base/src/vsdk/framework/shapeMatching/plugins/*.java ./jogl/src/vsdk/framework/shapeMatching/plugins/*.java"
 
 #---------------------------------------------------------------------------
 
@@ -33,16 +33,17 @@ clear
 # Compile main java library
 # -proc:none option disables annotation processing which generates warnings
 # when using some gluegen/JOGL features.
-javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+#javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $JOGL_CLASSES $VITRALARCHITECTURE_CLASSES
+javac -Xmaxerrs 10000 -Xlint:deprecation -Xlint:unchecked -Xlint -classpath ./base/src:./awt/src:./jogl/src:$JOGL_CP -d ./classes $BASE_CLASSES $IO_CLASSES $AWT_CLASSES $VITRALARCHITECTURE_CLASSES
 
 cd classes
 jar cf ../lib/vsdk.jar vsdk
 cd ..
 
 # Compile native code packages
-cd pkgs/SpharmonicKit27;make -j 24;cd ../..
-cd pkgs/LempelZivWelch;make -j 24;cd ../..
-cd pkgs/NativeImageReader;make -j 24;cd ../..
+cd pkgs/SpharmonicKit27;make -j 72;cd ../..
+cd pkgs/LempelZivWelch;make -j 72;cd ../..
+cd pkgs/NativeImageReader;make -j 72;cd ../..
 
 # Set proper permisions
 chmod 755 `find . -type d`

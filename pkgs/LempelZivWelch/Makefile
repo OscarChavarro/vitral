@@ -73,7 +73,7 @@ $(LIB_DIR)/libLZW.dylib: ./tmp/compress.o ./tmp/LzwWrapper.o
 	$(CCO) -DUNIX_ENABLED -o ./tmp/test.o -c $(SRC_DIR)/test.c
 
 ./tmp/LzwWrapper.o: $(SRC_DIR)/LzwWrapper.c ./src_lib/compress.h ./src_lib/compress.c
-	@cd $(SRC_DIR);$(JH) -d ../tmp -jni vsdk.toolkit.processing.LzwWrapper
+	#@cd $(SRC_DIR);$(JH) -d ../tmp -jni vsdk.toolkit.processing.LzwWrapper
 	$(CCO) -o ./tmp/LzwWrapper.o -c $(SRC_DIR)/LzwWrapper.c
 
 clean:

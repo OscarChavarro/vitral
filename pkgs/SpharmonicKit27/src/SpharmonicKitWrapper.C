@@ -12,7 +12,7 @@
 #include "cospmls.h"
 
 #include <jni.h>
-#include "vsdk_toolkit_processing_SpharmonicKitWrapper.h"
+//#include "vsdk_toolkit_processing_SpharmonicKitWrapper.h"
 
 /*=========================================================================*/
 

@@ -156,8 +156,8 @@ clean:
 #===========================================================================
 
 $(TMP_DIR)/SpharmonicKitWrapper.o: $(SRC_DIR)/SpharmonicKitWrapper.C
-	cd $(CLASSES_DIR);$(JH) -jni vsdk.toolkit.processing.SpharmonicKitWrapper
-	cd $(CLASSES_DIR);$(JH) vsdk.toolkit.processing.SpharmonicKitWrapper
+	#cd $(CLASSES_DIR);$(JH) -jni vsdk.toolkit.processing.SpharmonicKitWrapper
+	#cd $(CLASSES_DIR);$(JH) vsdk.toolkit.processing.SpharmonicKitWrapper
 	$(CCP) $(CFLAGS) -I$(TMP_DIR) -o $(TMP_DIR)/SpharmonicKitWrapper.o -c $(SRC_DIR)/SpharmonicKitWrapper.C
 
 # The Linux way

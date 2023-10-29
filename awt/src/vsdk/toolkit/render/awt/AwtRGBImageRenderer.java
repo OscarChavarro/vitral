@@ -95,7 +95,7 @@ public class AwtRGBImageRenderer extends AwtRenderer
             }
         }
         else {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
+            VSDK.reportMessage(null, VSDK.WARNING, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
         }
         return true;
     }

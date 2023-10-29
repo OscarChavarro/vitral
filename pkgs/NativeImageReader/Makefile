@@ -71,7 +71,7 @@ bin/testImageReader: ./tmp/PngReader.o ./tmp/testImageReader.o
 	$(LIBTOOL) -o bin/testImageReader ./tmp/PngReader.o ./tmp/testImageReader.o -lpng
 
 ./tmp/NativeImageReaderWrapper.o: $(SRC_DIR)/NativeImageReaderWrapper.C ./src_lib/NativeImageReader.h
-	@cd $(SRC_DIR);$(JH) -d ../tmp -jni vsdk.toolkit.io.image.NativeImageReaderWrapper
+	#@cd $(SRC_DIR);$(JH) -d ../tmp -jni vsdk.toolkit.io.image.NativeImageReaderWrapper
 	$(CCO) -o ./tmp/NativeImageReaderWrapper.o -c $(SRC_DIR)/NativeImageReaderWrapper.C
 
 clean:
