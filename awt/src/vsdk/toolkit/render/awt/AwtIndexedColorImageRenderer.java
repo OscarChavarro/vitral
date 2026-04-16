@@ -45,6 +45,13 @@ public class AwtIndexedColorImageRenderer extends AwtRenderer
         BufferedImage input, IndexedColorImage output
     )
     {
+	return importFromAwtBufferedImage(input, output, null);
+    }
+    
+    public static boolean importFromAwtBufferedImage(
+        BufferedImage input, IndexedColorImage output, String filename
+    )
+    {
         int w = input.getWidth();
         int h = input.getHeight();
         int w2 = output.getXSize();
@@ -90,7 +97,7 @@ public class AwtIndexedColorImageRenderer extends AwtRenderer
             }
         }
         else {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported (file [" + filename + "])!");
         }
         return true;
     }

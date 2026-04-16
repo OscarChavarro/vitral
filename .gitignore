@@ -1,4 +1,16 @@
 .idea
 master.iml
 
-
+classes/*
+lib/*
+bin/*
+tmp/*
+pkgs/LempelZivWelch/bin/
+pkgs/LempelZivWelch/classes/
+pkgs/LempelZivWelch/tmp/
+pkgs/NativeImageReader/bin/
+pkgs/NativeImageReader/classes/
+pkgs/NativeImageReader/tmp/
+pkgs/SpharmonicKit27/bin/
+pkgs/SpharmonicKit27/classes/
+pkgs/SpharmonicKit27/tmp/

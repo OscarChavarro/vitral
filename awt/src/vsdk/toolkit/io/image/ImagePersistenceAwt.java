@@ -87,7 +87,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
         retImage = new IndexedColorImage();
-        AwtIndexedColorImageRenderer.importFromAwtBufferedImage(bi, retImage);
+        AwtIndexedColorImageRenderer.importFromAwtBufferedImage(bi, retImage, inImageFd.getPath());
 
         return retImage;
     }
@@ -119,7 +119,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
-        AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage);
+        AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage, inImageFd.getPath());
 
         return retImage;
     }
@@ -143,7 +143,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             fis = new FileInputStream(inImageFd);
             bis = new BufferedInputStream(fis);
             bi = ImageIO.read(bis);
-            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage);
+            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage, inImageFd.getPath());
             bis.close();
             fis.close();
             
