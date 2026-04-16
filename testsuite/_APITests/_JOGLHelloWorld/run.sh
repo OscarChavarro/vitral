@@ -1,1 +1,1 @@
-java -classpath ./classes HelloWorldJOGL
+mvn exec:java -Dexec.mainClass=HelloWorldJOGL
