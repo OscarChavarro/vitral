@@ -3,7 +3,6 @@
 // Basic Java classes
 
 // Awt / swing classes
-import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -44,7 +43,7 @@ is deleted, this will continue working as a simple java application.
 This is a simple programme recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
-public class CameraSwingExample extends Applet implements
+public class CameraSwingExample extends JFrame implements
     GLEventListener,
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener
 {

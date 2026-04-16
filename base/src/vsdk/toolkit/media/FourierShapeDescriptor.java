@@ -64,7 +64,7 @@ public class FourierShapeDescriptor extends ShapeDescriptor
     }
 
     @Override
-    public void setFeatureVector(double vector[]) {
+    public void setFeatureVector(double[] vector) {
         if ( vector.length != numberOfElements*numberOfHarmonics ) {
             VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
                 "Trying to set featurevector from incorrectly sized data!");
@@ -74,17 +74,6 @@ public class FourierShapeDescriptor extends ShapeDescriptor
         int i;
         for ( i = 0; i < featureVector.length; i++ ) {
             featureVector[i] = vector[i];
-        }
-    }
-
-    @Override
-    public void finalize()
-    {
-        label = null;
-        featureVector = null;
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
         }
     }
 }
