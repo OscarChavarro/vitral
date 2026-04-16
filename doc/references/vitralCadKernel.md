@@ -87,12 +87,7 @@ Primary theory baseline reviewed from OCR PDFs:
 - MANT1988 Chapter 10 explicitly distinguishes `EPS` and `BIGEPS`; current code does not expose a robust tolerance context.
 - Impact: scale sensitivity, unstable classification, false coplanarity/containment decisions.
 
-### D) Validation contract is incomplete relative to claimed solid validity
-- `validateModel` acknowledges missing checks (face-face intersections, loop intersections, fuller Euler/closure checks).
-- Intermediate special faces are allowed by design, but there is no explicit dual-mode validator (`strict final` vs `intermediate permissive`).
-- Impact: hard to separate acceptable transient states from final invalid outputs.
-
-### E) Recursive mutation style increases fragility
+### D) Recursive mutation style increases fragility
 - `maximizeFaces` recursively restarts after each mutation.
 - `processEdge` recurses after splitting during edge-face processing.
 - Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
@@ -121,14 +116,13 @@ Primary theory baseline reviewed from OCR PDFs:
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 2. Validation Contract | Separate transient from final validity | Introduce `validateModelIntermediate()` and `validateModelStrict()`; add strict checks for loop self-intersection, loop-loop intersection, and face-face improper intersections | New validation API + diagnostics report schema | All final outputs from split/set-op pass strict validation on baseline corpus |
 | 3. Numerical Robustness | Make predicates scale-aware and reproducible | Introduce tolerance context (`eps`, `bigEps`, relative scale); centralize predicate calls; replace ad hoc multipliers with policy-driven thresholds | Numeric policy module + predicate audit | Cross-scale test corpus yields stable classification outcomes |
 | 4. Boolean Completeness | Close known algorithmic gaps | Implement containment handling for no-intersection cases (Ch15 Problem 15.1); complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap handling | Boolean completion patch + scenario tests | Correct results for containment, disjoint, coplanar-overlap, and touching-only suites |
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
 
 ## 8) Priority Recommendations
-- Implement containment handling and strict-vs-intermediate validation (Phases 2 and 4 core subset).
+- Implement containment handling (Phase 4 core subset).
 - Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
 - Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
 

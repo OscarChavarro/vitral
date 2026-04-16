@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
@@ -1583,82 +1584,449 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
 
-    /**
-    This method runs a set of validity tests to check the integrity of the
-    data structure. If all of the tests goes well, this method returns true.
-    If any of the test fails, this method return false.
+    private int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
+    {
+        Vector3D n = face.containingPlane.getNormal();
+        if ( Math.abs(n.x) >= Math.abs(n.y) && Math.abs(n.x) >= Math.abs(n.z) ) {
+            return 1;
+        }
+        if ( Math.abs(n.y) >= Math.abs(n.x) && Math.abs(n.y) >= Math.abs(n.z) ) {
+            return 2;
+        }
+        return 3;
+    }
 
-    As noted on section [MANT1988].6.3. a  boundary model is "valid" if:
-    1. The set of faces of the boundary model "closes", i.e., forms the
-       complete skin of the solid with no missing parts.
-    2. Faces of the model do not intersect each other except at common
-       vertices or edges (altough some relaxed criteria from [MANT1988].15.
-       allows faces to intersect with edges or vertices from other faces,
-       as long as the edges or vertex be the only parts of a face touching
-       the interior of other face).
-    3. The boundaries of faces are simple polygons that do not intersect
-       themselves (i.e. an "8" does not describe a correct face boundary).
+    private Vector2D projectPointTo2D(Vector3D in, int dominantCoordinate)
+    {
+        Vector2D out = new Vector2D();
+        if ( dominantCoordinate == 1 ) {
+            out.x = in.y;
+            out.y = in.z;
+        }
+        else if ( dominantCoordinate == 2 ) {
+            out.x = in.x;
+            out.y = in.z;
+        }
+        else {
+            out.x = in.x;
+            out.y = in.y;
+        }
+        return out;
+    }
 
-    Current methods (already implemented):
-      - All loops have an starting halfedge
-      - All loops are closed
-      - All faces contains its corresponding containing plane equation
+    private double orientation2D(Vector2D a, Vector2D b, Vector2D c)
+    {
+        return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+    }
 
-    Current methods (not implemented yet):
-      - All faces are co-planar
-      - For faces with more than one loop, the loops are not intersecting
-        nor self-intersecting
-      - Topology test: euler formula gives a closed representation
-        (no holes, no missing faces and no non-manifold solids like
-        Klain bottles)
-      - Geometric integrity: there are no intersecting faces
-    @return true if current solid is valid (well formed), false otherwise
-    */
-    public boolean validateModel()
+    private boolean pointOnSegment2D(Vector2D p, Vector2D a, Vector2D b, double tolerance)
+    {
+        if ( Math.abs(orientation2D(a, b, p)) > tolerance ) {
+            return false;
+        }
+        double minX = Math.min(a.x, b.x) - tolerance;
+        double maxX = Math.max(a.x, b.x) + tolerance;
+        double minY = Math.min(a.y, b.y) - tolerance;
+        double maxY = Math.max(a.y, b.y) + tolerance;
+        return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
+    }
+
+    private boolean segmentsIntersect2D(Vector2D a1, Vector2D a2,
+                                        Vector2D b1, Vector2D b2,
+                                        double tolerance)
+    {
+        double o1 = orientation2D(a1, a2, b1);
+        double o2 = orientation2D(a1, a2, b2);
+        double o3 = orientation2D(b1, b2, a1);
+        double o4 = orientation2D(b1, b2, a2);
+
+        boolean proper = (o1 > tolerance && o2 < -tolerance ||
+                          o1 < -tolerance && o2 > tolerance) &&
+                         (o3 > tolerance && o4 < -tolerance ||
+                          o3 < -tolerance && o4 > tolerance);
+        if ( proper ) {
+            return true;
+        }
+
+        return pointOnSegment2D(b1, a1, a2, tolerance) ||
+               pointOnSegment2D(b2, a1, a2, tolerance) ||
+               pointOnSegment2D(a1, b1, b2, tolerance) ||
+               pointOnSegment2D(a2, b1, b2, tolerance);
+    }
+
+    private boolean loopHasSelfIntersection(_PolyhedralBoundedSolidFace face,
+                                            _PolyhedralBoundedSolidLoop loop,
+                                            StringBuilder msg)
+    {
+        int n = loop.halfEdgesList.size();
+        if ( n < 3 ) {
+            msg.append("  - Face [").append(face.id)
+               .append("] has a loop with fewer than 3 edges.\n");
+            return true;
+        }
+
+        int dominantCoordinate = dominantCoordinateForFace(face);
+        int i, j;
+        for ( i = 0; i < n; i++ ) {
+            _PolyhedralBoundedSolidHalfEdge heA = loop.halfEdgesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge heANext = heA.next();
+            if ( heANext == null ) {
+                msg.append("  - Face [").append(face.id)
+                   .append("] has a non-closed loop during strict validation.\n");
+                return true;
+            }
+            Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+            Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+
+            for ( j = i+1; j < n; j++ ) {
+                if ( j == i ) continue;
+                if ( j == (i+1)%n || i == (j+1)%n ) {
+                    continue;
+                }
+
+                _PolyhedralBoundedSolidHalfEdge heB = loop.halfEdgesList.get(j);
+                _PolyhedralBoundedSolidHalfEdge heBNext = heB.next();
+                if ( heBNext == null ) {
+                    msg.append("  - Face [").append(face.id)
+                       .append("] has a non-closed loop during strict validation.\n");
+                    return true;
+                }
+                Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+
+                if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) ) {
+                    msg.append("  - Face [").append(face.id)
+                       .append("] has a self-intersecting loop.\n");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean loopsIntersect(_PolyhedralBoundedSolidFace face,
+                                   _PolyhedralBoundedSolidLoop loopA,
+                                   _PolyhedralBoundedSolidLoop loopB,
+                                   StringBuilder msg)
+    {
+        int dominantCoordinate = dominantCoordinateForFace(face);
+        int i, j;
+        for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge heANext = heA.next();
+            if ( heANext == null ) {
+                msg.append("  - Face [").append(face.id)
+                   .append("] has a non-closed loop during strict validation.\n");
+                return true;
+            }
+            Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+            Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+
+            for ( j = 0; j < loopB.halfEdgesList.size(); j++ ) {
+                _PolyhedralBoundedSolidHalfEdge heB = loopB.halfEdgesList.get(j);
+                _PolyhedralBoundedSolidHalfEdge heBNext = heB.next();
+                if ( heBNext == null ) {
+                    msg.append("  - Face [").append(face.id)
+                       .append("] has a non-closed loop during strict validation.\n");
+                    return true;
+                }
+                Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+                if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) ) {
+                    msg.append("  - Face [").append(face.id)
+                       .append("] has intersecting loops.\n");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean validateLoopsStrict(StringBuilder msg)
+    {
+        int i, j, k;
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            if ( face.containingPlane == null ) {
+                msg.append("  - Face [").append(face.id)
+                   .append("] has no containing plane for strict checks.\n");
+                return false;
+            }
+
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
+                if ( loopHasSelfIntersection(face, loop, msg) ) {
+                    return false;
+                }
+            }
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                for ( k = j+1; k < face.boundariesList.size(); k++ ) {
+                    if ( loopsIntersect(face, face.boundariesList.get(j),
+                                        face.boundariesList.get(k), msg) ) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean facesAreCoplanar(_PolyhedralBoundedSolidFace faceA,
+                                     _PolyhedralBoundedSolidFace faceB)
+    {
+        if ( faceA.containingPlane == null || faceB.containingPlane == null ) {
+            return false;
+        }
+
+        Vector3D nA = faceA.containingPlane.getNormal().multiply(1.0);
+        Vector3D nB = faceB.containingPlane.getNormal().multiply(1.0);
+        nA.normalize();
+        nB.normalize();
+        if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) > 100*VSDK.EPSILON ) {
+            return false;
+        }
+
+        for ( int i = 0; i < faceA.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
+            if ( loop.halfEdgesList.size() > 0 ) {
+                Vector3D p = loop.halfEdgesList.get(0).startingVertex.position;
+                return Math.abs(faceB.containingPlane.pointDistance(p)) <= 10*VSDK.EPSILON;
+            }
+        }
+        return false;
+    }
+
+    private boolean segmentSharesEndpoint(_PolyhedralBoundedSolidHalfEdge a,
+                                          _PolyhedralBoundedSolidHalfEdge b)
+    {
+        _PolyhedralBoundedSolidHalfEdge an = a.next();
+        _PolyhedralBoundedSolidHalfEdge bn = b.next();
+        if ( an == null || bn == null ) {
+            return false;
+        }
+        _PolyhedralBoundedSolidVertex a0 = a.startingVertex;
+        _PolyhedralBoundedSolidVertex a1 = an.startingVertex;
+        _PolyhedralBoundedSolidVertex b0 = b.startingVertex;
+        _PolyhedralBoundedSolidVertex b1 = bn.startingVertex;
+        return a0 == b0 || a0 == b1 || a1 == b0 || a1 == b1;
+    }
+
+    private boolean vertexStrictlyInsideFace(_PolyhedralBoundedSolidVertex v,
+                                             _PolyhedralBoundedSolidFace face)
+    {
+        if ( face.containingPlane.doContainmentTest(v.position, 10*VSDK.EPSILON) != LIMIT ) {
+            return false;
+        }
+        return face.testPointInside(v.position, 10*VSDK.EPSILON) == Geometry.INSIDE;
+    }
+
+    private boolean edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge he,
+                                            _PolyhedralBoundedSolidFace face)
+    {
+        _PolyhedralBoundedSolidHalfEdge next = he.next();
+        if ( next == null || face.containingPlane == null ) {
+            return false;
+        }
+
+        Vector3D p0 = he.startingVertex.position;
+        Vector3D p1 = next.startingVertex.position;
+        double d0 = face.containingPlane.pointDistance(p0);
+        double d1 = face.containingPlane.pointDistance(p1);
+
+        if ( Math.abs(d0) <= 10*VSDK.EPSILON && Math.abs(d1) <= 10*VSDK.EPSILON ) {
+            return false;
+        }
+        if ( d0*d1 > 0 ) {
+            return false;
+        }
+
+        double denom = d0 - d1;
+        if ( Math.abs(denom) <= VSDK.EPSILON ) {
+            return false;
+        }
+        double t = d0 / denom;
+        if ( t <= 10*VSDK.EPSILON || t >= 1.0 - 10*VSDK.EPSILON ) {
+            return false;
+        }
+
+        Vector3D p = p0.add(p1.substract(p0).multiply(t));
+        return face.testPointInside(p, 10*VSDK.EPSILON) == Geometry.INSIDE;
+    }
+
+    private boolean facesHaveImproperIntersection(_PolyhedralBoundedSolidFace faceA,
+                                                  _PolyhedralBoundedSolidFace faceB,
+                                                  StringBuilder msg)
+    {
+        int i, j, k;
+        _PolyhedralBoundedSolidHalfEdge he;
+
+        for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
+            for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
+                he = loop.halfEdgesList.get(j);
+                if ( vertexStrictlyInsideFace(he.startingVertex, faceB) ) {
+                    msg.append("  - Faces [").append(faceA.id).append("] and [")
+                       .append(faceB.id).append("] intersect improperly.\n");
+                    return true;
+                }
+                if ( edgePiercesFaceInterior(he, faceB) ) {
+                    msg.append("  - Faces [").append(faceA.id).append("] and [")
+                       .append(faceB.id).append("] intersect improperly.\n");
+                    return true;
+                }
+            }
+        }
+
+        for ( i = 0; i < faceB.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = faceB.boundariesList.get(i);
+            for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
+                he = loop.halfEdgesList.get(j);
+                if ( vertexStrictlyInsideFace(he.startingVertex, faceA) ) {
+                    msg.append("  - Faces [").append(faceA.id).append("] and [")
+                       .append(faceB.id).append("] intersect improperly.\n");
+                    return true;
+                }
+                if ( edgePiercesFaceInterior(he, faceA) ) {
+                    msg.append("  - Faces [").append(faceA.id).append("] and [")
+                       .append(faceB.id).append("] intersect improperly.\n");
+                    return true;
+                }
+            }
+        }
+
+        if ( facesAreCoplanar(faceA, faceB) ) {
+            int dominantCoordinate = dominantCoordinateForFace(faceA);
+            for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
+                _PolyhedralBoundedSolidLoop loopA = faceA.boundariesList.get(i);
+                for ( j = 0; j < loopA.halfEdgesList.size(); j++ ) {
+                    _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(j);
+                    _PolyhedralBoundedSolidHalfEdge heANext = heA.next();
+                    if ( heANext == null ) {
+                        continue;
+                    }
+                    Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+                    Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+
+                    for ( k = 0; k < faceB.boundariesList.size(); k++ ) {
+                        _PolyhedralBoundedSolidLoop loopB = faceB.boundariesList.get(k);
+                        for ( int m = 0; m < loopB.halfEdgesList.size(); m++ ) {
+                            _PolyhedralBoundedSolidHalfEdge heB = loopB.halfEdgesList.get(m);
+                            _PolyhedralBoundedSolidHalfEdge heBNext = heB.next();
+                            if ( heBNext == null ) {
+                                continue;
+                            }
+                            if ( heA.parentEdge == heB.parentEdge ) {
+                                continue;
+                            }
+                            Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                            Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+                            if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) &&
+                                 !segmentSharesEndpoint(heA, heB) ) {
+                                msg.append("  - Faces [").append(faceA.id).append("] and [")
+                                   .append(faceB.id).append("] intersect improperly.\n");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean validateFaceIntersectionsStrict(StringBuilder msg)
+    {
+        int i, j;
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = polygonsList.get(i);
+            for ( j = i+1; j < polygonsList.size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = polygonsList.get(j);
+                if ( facesHaveImproperIntersection(faceA, faceB, msg) ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean validateModelInternal(boolean strict, String methodName)
     {
         int i;
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         boolean test = true;
 
         modelIsValid = false;
-
-
         remakeEmanatingHalfedgesReferences();
 
-        //-----------------------------------------------------------------
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-
             if ( validateFaceIsPlanar(face) ) {
                 face.calculatePlane();
                 if ( face.containingPlane == null ) {
-                    msg += "  - Face [" + face.id + "] was not able to compute containing plane\n";
+                    msg.append("  - Face [").append(face.id)
+                       .append("] was not able to compute containing plane\n");
                     test = false;
                 }
             }
             else {
-                msg += "  - Face [" + face.id + "] is not coplanar\n";
+                msg.append("  - Face [").append(face.id).append("] is not coplanar\n");
                 test = false;
             }
         }
 
-        //-----------------------------------------------------------------
-
         if ( !validateTopologicalIntegrity() ) {
-            msg += "  - Topological integrity test failed.\n";
+            msg.append("  - Topological integrity test failed.\n");
             test = false;
         }
 
-        //-----------------------------------------------------------------
+        if ( strict && test ) {
+            if ( !validateLoopsStrict(msg) ) {
+                test = false;
+            }
+            if ( test && !validateFaceIntersectionsStrict(msg) ) {
+                test = false;
+            }
+        }
+
         if ( test ) {
             modelIsValid = true;
         }
         else {
-            VSDK.reportMessage(this, VSDK.WARNING, "validateModel",
-                "Solid validation test failed!:\n" + msg);
+            VSDK.reportMessage(this, VSDK.WARNING, methodName,
+                "Solid validation test failed!:\n" + msg.toString());
         }
-
         return test;
+    }
+
+    /**
+    Compatibility validation entry point.
+    Equivalent to validateModelIntermediate.
+    @return true if current solid is valid under intermediate checks
+    */
+    public boolean validateModel()
+    {
+        return validateModelInternal(false, "validateModel");
+    }
+
+    /**
+    Intermediate validation mode intended for transient states.
+    Checks planarity/plane construction and topological integrity.
+    @return true if current solid passes intermediate checks
+    */
+    public boolean validateModelIntermediate()
+    {
+        return validateModelInternal(false, "validateModelIntermediate");
+    }
+
+    /**
+    Strict validation mode for final solid outputs.
+    Adds strict loop and face intersection checks over intermediate checks.
+    @return true if current solid passes strict checks
+    */
+    public boolean validateModelStrict()
+    {
+        return validateModelInternal(true, "validateModelStrict");
     }
 
     //= TEXTUAL QUERY OPERATIONS ======================================
