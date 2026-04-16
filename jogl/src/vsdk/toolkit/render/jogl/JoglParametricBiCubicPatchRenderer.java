@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 20 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
-//= - May 23 2006 - Gina Chiquillo: added generation of texture coords.     =
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
@@ -359,7 +351,3 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

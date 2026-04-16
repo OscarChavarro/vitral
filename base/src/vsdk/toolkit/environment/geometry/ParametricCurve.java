@@ -1,17 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 //= [.SUN2006] Java 1.5.0 API, available at http://java.sun.com             =
 //= [.FONT2006] The FontForge project home page, available at               =
 //=            http://fontforge.sourceforge.net/bezier.html                 =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 20 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
-//= - July 25 2006 - Oscar Chavarro: quality check, documentation added     =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -639,7 +631,3 @@ public class ParametricCurve extends Curve {
         return OUTSIDE;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

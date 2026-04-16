@@ -1,3 +1,11 @@
+//= References:                                                             =
+//= [RAMER1972] Urs Ramer, "An iterative procedure for the polygonal        =
+//= approximation of plane curves", Computer Graphics and Image Processing, =
+//= 1(3), 244–256 (1972).                                                   =
+//= [DOPEU1973] David Douglas & Thomas Peucker, "Algorithms for the         =
+//= reduction of the number of points required to represent a digitized     =
+//= line or its caricature", The Canadian Cartographer 10(2), 112–122 (1973)=
+
 package vsdk.toolkit.processing;
 
 import java.util.ArrayList;
@@ -7,21 +15,6 @@ import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
-
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - July 14 2014 - Leonardo Rebolledo: Original base version              =
-//=-------------------------------------------------------------------------=
-//= References:                                                             =
-//= [RAMER1972] Urs Ramer, "An iterative procedure for the polygonal        =
-//= approximation of plane curves", Computer Graphics and Image Processing, =
-//= 1(3), 244–256 (1972).                                                   =
-//= [DOPEU1973] David Douglas & Thomas Peucker, "Algorithms for the         =
-//= reduction of the number of points required to represent a digitized     =
-//= line or its caricature", The Canadian Cartographer 10(2), 112–122 (1973)=
-//===========================================================================
-
 
 
 /**

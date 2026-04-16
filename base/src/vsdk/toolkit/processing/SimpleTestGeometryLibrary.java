@@ -1,8 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - Apr 20 2008 - Oscar Chavarro: Original base version                   =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
 //=          the machine rendering of solids". Proceedings, ACM National    =
@@ -12,7 +7,6 @@
 //=     Vol. 5, No. 1, January 1986, pp. 1-29.                              =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
-//===========================================================================
 
 package vsdk.toolkit.processing;
 
@@ -545,7 +539,3 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

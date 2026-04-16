@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.environment;
 
 import vsdk.toolkit.common.Entity;
@@ -15,7 +14,3 @@ public abstract class Background extends Entity
     }
     public abstract ColorRgb colorInDireccion(Vector3D d);
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

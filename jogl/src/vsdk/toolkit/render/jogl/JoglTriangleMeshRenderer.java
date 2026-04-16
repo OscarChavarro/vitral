@@ -1,11 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - David Diaz, Lina Rojas, Gabriel Sarmiento: Original   =
 //=                                                            base version =
-//= - August 7 2006 - Oscar Chavarro: re-structured and tested              =
-//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
-//===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
@@ -704,7 +697,3 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

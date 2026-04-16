@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui.visualAnalytics;
 
 // VSDK classes
@@ -340,7 +339,3 @@ public class PercentageWheelWidget extends PresentationElement {
         this.defaultTitle = defaultTitle;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

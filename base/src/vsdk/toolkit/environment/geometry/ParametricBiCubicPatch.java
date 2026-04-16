@@ -1,5 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [WAYN1990] Knapp Wayne. "Ray with Bicubic Patch Intersection Problem",  =
 //=            Ray Tracing News, volume 3, number 3, july 13 1990.          =
@@ -7,11 +5,6 @@
 //=         http://jedi.ks.uiuc.edu/~johns/raytracer/rtn/rtnv3n3.html#art19 =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 27 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2006 - Gina Chiquillo / Oscar Chavarro: quality check        =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -595,7 +588,3 @@ public class ParametricBiCubicPatch extends Surface {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

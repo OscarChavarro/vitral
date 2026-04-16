@@ -1,4 +1,3 @@
-//===========================================================================
            /***************************************************
             *   An instructional Ray-Tracing Renderer written
             *   for MIT 6.837  Fall '98 by Leonard McMillan.
@@ -351,7 +350,3 @@ public class ReaderMitScene extends PersistenceElement
         theScene.setActiveBackgroundIndex(0);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

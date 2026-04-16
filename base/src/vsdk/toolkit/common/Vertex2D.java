@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public class Vertex2D extends FundamentalEntity
@@ -33,7 +31,3 @@ public class Vertex2D extends FundamentalEntity
         return msg;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

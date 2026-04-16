@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 public class ExceptionGuiParseError extends Exception {
@@ -10,7 +9,3 @@ public class ExceptionGuiParseError extends Exception {
         return "Parse error reading GUI data";
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

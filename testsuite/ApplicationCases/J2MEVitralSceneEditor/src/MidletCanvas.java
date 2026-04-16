@@ -1,5 +1,3 @@
-//===========================================================================
-
 // J2ME classes
 import javax.microedition.lcdui.Canvas;         // Platform specific elements
 import javax.microedition.lcdui.Font;
@@ -315,7 +313,3 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

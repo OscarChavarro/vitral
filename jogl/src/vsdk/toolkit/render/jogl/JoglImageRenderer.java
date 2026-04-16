@@ -1,11 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 25 2005 - Oscar Chavarro: Original base version              =
-//= - December 7 2005 - Fabio Aroca / Eduardo Mendoza: importJOGLimage and  =
 //=   getImageJOGL methods added                                            =
-//= - March 14 2006 - Oscar Chavarro: quality check                         =
-//===========================================================================
 
 package vsdk.toolkit.render.jogl;
 
@@ -113,7 +106,3 @@ public class JoglImageRenderer extends JoglRenderer
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

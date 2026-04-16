@@ -1,5 +1,3 @@
-//===========================================================================
-
 // Java AWT/Swing classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -185,7 +183,3 @@ public class ControlPanel extends JPanel implements AdjustmentListener, ActionLi
         parent.canvas.repaint();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

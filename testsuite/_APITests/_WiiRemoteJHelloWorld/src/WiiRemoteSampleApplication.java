@@ -1,9 +1,7 @@
-//===========================================================================
 //= Example based on WiiRemoteJ.jar example "WRLImpl.java", by              =
 //= Michael Diamond (version 1/05/07) posted on june 26/2007 at             =
 //= http://www.wiili.org/forum/wiiremotej-v10-released-t2357.html           =
 //= Modified by Oscar Xavier Chavarro - October 9 / 2007.                   =
-//===========================================================================
 
 // Java basic classes
 import java.io.DataOutputStream;
@@ -699,7 +697,3 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
     
     
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

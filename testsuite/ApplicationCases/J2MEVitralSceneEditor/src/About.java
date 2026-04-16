@@ -1,5 +1,3 @@
-//===========================================================================
-
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
@@ -45,7 +43,3 @@ public class About {
         display.setCurrent(alert);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

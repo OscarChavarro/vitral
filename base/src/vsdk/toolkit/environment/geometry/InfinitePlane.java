@@ -1,10 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 8 2006 - Oscar Chavarro: Original base version                  =
-//= - November 1 2006 - Alfonso Barbosa, Diana Reyes: added classifyPoint   =
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -356,7 +349,3 @@ public class InfinitePlane extends HalfSpace {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

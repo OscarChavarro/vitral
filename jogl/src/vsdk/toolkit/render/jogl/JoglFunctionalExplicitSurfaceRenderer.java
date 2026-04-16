@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 15 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 // Basic Java classes
@@ -30,7 +24,3 @@ public class JoglFunctionalExplicitSurfaceRenderer extends JoglRenderer {
         JoglTriangleMeshRenderer.draw(gl, mesh, quality, false);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,9 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - June 22 2008 - Oscar Chavarro: Original base version (promoted from   =
 //=   previous "ViewportOrganizer" class at SceneEditorApplication example).=
-//===========================================================================
 
 package vsdk.toolkit.gui;
 
@@ -393,7 +388,3 @@ public class ViewportWindowSetManager extends PresentationElement
         return n;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui.variable;
 
 import vsdk.toolkit.gui.GuiElement;
@@ -84,7 +83,3 @@ public abstract class GuiVariable extends GuiElement {
     */
     public abstract void setValidRange(String vr);
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

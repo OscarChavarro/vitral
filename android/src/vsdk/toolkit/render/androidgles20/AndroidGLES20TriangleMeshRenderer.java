@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 // Java basic classes
@@ -282,7 +281,3 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

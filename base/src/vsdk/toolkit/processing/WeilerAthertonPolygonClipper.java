@@ -1,15 +1,9 @@
-package vsdk.toolkit.processing;
-
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 4 2014 - Leonardo Rebolledo: Original base version          =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [WEATH1977] Kevin Weiler and Peter Atherton. "HIDDEN SURFACE REMOVAL    =
 //= USING POLYGON AREA SORTING",                                            =
 //= Program of Computer Graphics, Cornell University. Ithaca, New York, 1977=
-//===========================================================================
+package vsdk.toolkit.processing;
+
 import java.util.ArrayList;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 

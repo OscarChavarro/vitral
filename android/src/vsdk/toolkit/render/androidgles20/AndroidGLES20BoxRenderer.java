@@ -414,8 +414,3 @@ public static void draw(Box nBox, Camera nCamera, RendererConfiguration q)
 
 
 }
-
-
-
-        
-

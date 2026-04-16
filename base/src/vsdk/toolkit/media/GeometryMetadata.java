@@ -1,8 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - May 23 2007 - Oscar Chavarro: Original base version                   =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [BUST2005] Bustos, Benjamin. Keim, Daniel A. Saupe, Dietmar. Schreck,   =
 //=     Tobias. Vranic, Dejan V. "Feature-Based Similarity Search in 3D     =
@@ -12,7 +7,6 @@
 //=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
 //=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
 //=     January 2003. Pp. 83-105                                            =
-//===========================================================================
 
 package vsdk.toolkit.media;
 
@@ -177,7 +171,3 @@ public class GeometryMetadata extends MediaEntity
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

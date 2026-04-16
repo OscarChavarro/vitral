@@ -1,10 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
-//= - November 19 2006 - Oscar Chavarro: re-structured and tested           =
-//===========================================================================
-
 package vsdk.toolkit.common;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
@@ -94,7 +87,3 @@ public class Triangle extends FundamentalEntity
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

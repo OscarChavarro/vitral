@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.swing;
 
 // Basic JAVA JDK classes
@@ -817,7 +816,3 @@ public class SwingGuiRenderer extends PresentationElement {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

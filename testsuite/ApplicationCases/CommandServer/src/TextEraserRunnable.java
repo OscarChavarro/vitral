@@ -1,5 +1,3 @@
-//===========================================================================
-
 public class TextEraserRunnable implements Runnable
 {
     private CommandServer parent;
@@ -31,7 +29,3 @@ public class TextEraserRunnable implements Runnable
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

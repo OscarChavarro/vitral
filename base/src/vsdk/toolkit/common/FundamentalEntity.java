@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 22 2007 - Oscar Chavarro: Original base version                 =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 /**
@@ -41,7 +35,3 @@ public abstract class FundamentalEntity extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20150218L;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

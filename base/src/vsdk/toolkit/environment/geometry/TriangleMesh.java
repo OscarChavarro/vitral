@@ -1,19 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
-//= - May 2 2006 - Oscar Chavarro: quality check, doIntersection doc/test   =
-//= - May 3 2006 - Oscar Chavarro: fixed doIntersection error when testing  =
 //=       back facing triangles                                             =
-//= - November 6 2006 - Oscar Chavarro: introduced bounding box and normal  =
 //=       interpolation                                                     =
-//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [DACH2006] Dachille, Frank IX. Kaufman, Arie. "Incremental Triangle     =
 //=     Voxelization", Center for Visual Computing and Department of        =
 //=     Computer Science, State University of New York at Stony Brook, 2000 =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -1692,7 +1682,3 @@ public class TriangleMesh extends Surface {
         calculateNormals();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

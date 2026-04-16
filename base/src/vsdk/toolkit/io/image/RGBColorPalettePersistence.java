@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - February 24 2006 - Gina Chiquillo: Original base version              =
-//= - April 6 2006 - Oscar Chavarro: Quality check - integration            =
-//= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
-//===========================================================================
-
 package vsdk.toolkit.io.image;
 
 import java.io.Reader;
@@ -120,7 +112,3 @@ public class RGBColorPalettePersistence extends PersistenceElement {
         return p;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

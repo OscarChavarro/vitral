@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
@@ -66,7 +64,3 @@ public class JoglStereoStrategyCyclopeanZBufferRenderer extends JoglStereoStrate
         JoglImageRenderer.draw(gl, image);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.joglcg;
 
 // Java classes
@@ -235,7 +233,3 @@ public class JoglCgSimpleBodyRenderer extends JoglCgRenderer {
         deactivateNvidiaGpuParameters(gl, q);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

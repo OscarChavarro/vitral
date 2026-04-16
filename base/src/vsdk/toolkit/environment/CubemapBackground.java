@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 27 2005 - Oscar Chavarro: Original base version              =
-//= - February 15 2006 - Oscar Chavarro: Implemented true colorInDirection  =
-//= - May 3 2007 - Oscar Chavarro: colorInDirection corrected for cubemap   =
-//===========================================================================
-
 package vsdk.toolkit.environment;
 
 import vsdk.toolkit.common.ColorRgb;
@@ -110,7 +102,3 @@ public class CubemapBackground extends Background {
         this.camera = camera;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.io.xml;
 
 import vsdk.toolkit.io.PersistenceElement;
@@ -14,7 +13,3 @@ public class XmlNodeParam extends PersistenceElement
         value = null;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

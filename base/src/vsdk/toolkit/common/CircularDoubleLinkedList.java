@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - January 3 2007 - Oscar Chavarro: Original base version                =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
@@ -259,7 +253,3 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

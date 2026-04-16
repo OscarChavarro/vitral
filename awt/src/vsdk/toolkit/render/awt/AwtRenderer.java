@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 8 2006 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.render.awt;
 
 import vsdk.toolkit.render.RenderingElement;
@@ -21,7 +15,3 @@ style classes. This serves two purposes:
 public abstract class AwtRenderer extends RenderingElement {
     ;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

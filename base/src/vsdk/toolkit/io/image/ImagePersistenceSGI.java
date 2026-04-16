@@ -1,13 +1,7 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 19 2006 - Oscar Chavarro: Original base version              =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [wHAEB2006] Haeberli, Paul. "The SGI Image File Format", version 1.00,  =
 //=     available at http://local.wasp.uwa.edu.au/~pbourke/dataformats/     =
 //=     sgirgb/sgiversion.html, accessed december 19 2006.                  =
-//===========================================================================
 
 package vsdk.toolkit.io.image;
 
@@ -191,7 +185,3 @@ public class ImagePersistenceSGI extends PersistenceElement
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

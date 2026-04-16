@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 import vsdk.toolkit.common.VSDK;
@@ -40,7 +39,3 @@ public class ProgressMonitorInRam extends ProgressMonitor {
         return currentPercent;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

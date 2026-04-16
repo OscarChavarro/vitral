@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.jogl.animation;
 
 // JOGL classes
@@ -54,7 +53,3 @@ public class JoglRepainterAnimationListener extends AnimationListener {
         this.paused = paused;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

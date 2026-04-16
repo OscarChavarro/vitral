@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui.visualAnalytics;
 
 import vsdk.toolkit.gui.PresentationElement;
@@ -61,7 +60,3 @@ public class VisualDoubleVariable extends PresentationElement {
         this.currentValue = currentValue;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

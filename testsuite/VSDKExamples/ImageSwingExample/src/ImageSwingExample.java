@@ -1,23 +1,12 @@
-//===========================================================================
 //= This example serves as a testbed for basic RGB image manipulation,      =
 //= dependent of Java's Swing, but not dependent on JOGL/OpenGL.            =
-//=-------------------------------------------------------------------------=
 //= Proposed exercises based on this program:                               =
-//=   - Change default RGBImage management to generate an equivalent code   =
 //=     that manages other types of Image, such as RGBAImage or             =
 //=     IndexedColorImage                                                   =
-//=   - Study basic image persistence/loading, producing an equivalent code =
 //=     that does not use any vsdk.toolkit.io.image.* persistence class.    =
-//=   - Use the provided `performImageOperation1` method to study basic     =
 //=     image processing operations like thresholding, color inversion      =
 //=     (negative image generation), 90 degrees rotations and others.       =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - August 2 2006 - Oscar Chavarro: comments added                        =
-//= - December 18 2006 - Oscar Chavarro: minor changes to ease Image format =
 //=   changes.                                                              =
-//===========================================================================
 
 // Basic JDK classes
 import java.io.File;
@@ -254,7 +243,3 @@ class MyCanvasPanel extends JPanel
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

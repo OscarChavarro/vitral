@@ -1,10 +1,4 @@
-//===========================================================================
 //= This example serves as a testbed for basic RGB image manipulation       =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - August 2 2006 - Oscar Chavarro: comments added                        =
-//===========================================================================
 
 // Basic JDK classes
 import java.io.File;
@@ -54,7 +48,3 @@ public class ImageOfflineExample
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

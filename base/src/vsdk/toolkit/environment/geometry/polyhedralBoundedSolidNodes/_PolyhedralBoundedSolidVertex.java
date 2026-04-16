@@ -1,13 +1,6 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 18 2006 - Oscar Chavarro: Original base version              =
-//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
@@ -67,7 +60,3 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         return msg;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

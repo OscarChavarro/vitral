@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.gui;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -419,7 +417,3 @@ public class CameraControllerAquynza extends CameraController {
         this.camera = camera;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

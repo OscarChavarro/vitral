@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render;
 
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
@@ -42,7 +40,3 @@ public abstract class PolyhedralBoundedSolidDebugger extends RenderingElement
 
     public abstract void execute(PolyhedralBoundedSolid solid, String filename);
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

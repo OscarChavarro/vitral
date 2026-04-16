@@ -1,10 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - May 4 2006 - Gina Chiquillo: Original base version                    =
-//= - May 5 2006 - Oscar Chavarro: quality check                            =
-//===========================================================================
-
 package vsdk.toolkit.io.geometry;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -118,6 +111,3 @@ public class ParametricCurvePersistence extends PersistenceElement {
         return nodeCurve;
     }
 }
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

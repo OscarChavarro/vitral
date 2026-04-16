@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.android;
 
 import vsdk.toolkit.render.RenderingElement;
@@ -16,7 +15,3 @@ style classes. This serves two purposes:
 public abstract class AndroidRenderer extends RenderingElement {
     ;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

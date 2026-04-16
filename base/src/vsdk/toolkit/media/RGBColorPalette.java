@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - February 24 2006 - Gina Chiquillo: Original base version              =
-//= - April 4 2006 - Oscar Chavarro: Quality check - comments added         =
-//= - May 26 2006 - David Diaz/Oscar Chavarro: documentation added          =
-//===========================================================================
-
 package vsdk.toolkit.media;
 
 import java.util.ArrayList;
@@ -182,7 +174,3 @@ public class RGBColorPalette extends MediaEntity {
         return index;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,14 +1,10 @@
-//===========================================================================
 //= A 3D Search Engine based on Vitral SDK toolkit platform                 =
-//=-------------------------------------------------------------------------=
 //= Oscar Chavarro, May 23 2007                                             =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
 //=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
 //=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
 //=     January 2003. Pp. 83-105                                            =
-//===========================================================================
 
 // Java basic classes
 import java.util.ArrayList;
@@ -172,7 +168,3 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,15 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - May 10 2007 - Oscar Chavarro: Original base version                   =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [BAER2002] Baeentzen, Jakob Andreas. Aanaes, Henrik. "Generating Signed =
 //=     Distance Fields From Triangle Meshes",  Technical report            =
 //=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
-//===========================================================================
 
 package vsdk.toolkit.processing;
 
@@ -526,7 +520,3 @@ public class ComputationalGeometry extends ProcessingElement
         return outCode;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

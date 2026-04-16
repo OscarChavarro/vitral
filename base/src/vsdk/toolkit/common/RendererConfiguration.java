@@ -1,11 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 11 2005 - Gabriel Sarmiento & Lina Rojas: Original base       =
 //=                     version                                             =
-//= - November 1 2005 - Oscar Chavarro: Quality check - comments added      =
-//= - August 6 2006 - Oscar Chavarro: toString method added                 =
-//===========================================================================
 
 package vsdk.toolkit.common;
 
@@ -410,7 +403,3 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.boundingVolumeColor = boundingVolumeColor;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

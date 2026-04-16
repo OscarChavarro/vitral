@@ -1,5 +1,3 @@
-//===========================================================================
-
 // Java GUI classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -116,7 +114,3 @@ public class ButtonsPanel extends JPanel implements ActionListener, DocumentList
         updateModel(e);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

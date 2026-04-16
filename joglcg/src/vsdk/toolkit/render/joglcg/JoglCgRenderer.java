@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.joglcg;
 
 // Java base classes
@@ -452,7 +450,3 @@ public abstract class JoglCgRenderer extends JoglRenderer
         JoglCgRenderer.disableNvidiaCgProfiles();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,13 +1,7 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - February 22 2007 - Oscar Chavarro: Original base version              =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [KAUF1987] Kaufman, Arie. "Efficient Algorithms for 3D Scan-Conversion  =
 //=     of Parametric Curves, Surfaces, and Volumes", ACM SIGGRAPH Computer =
 //=     Graphics, volume 21, number 4, July 1987.                           =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -375,7 +369,3 @@ public class VoxelVolume extends Solid {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

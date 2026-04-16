@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
@@ -14,7 +12,3 @@ public class _JoglRGBAImageRendererAssociation extends JoglRenderer
     public Texture renderer;
     public RGBAImage image;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

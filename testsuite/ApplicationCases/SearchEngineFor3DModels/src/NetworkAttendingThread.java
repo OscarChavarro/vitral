@@ -1,5 +1,3 @@
-//===========================================================================
-
 // Java basic classes
 import java.net.Socket;
 import java.io.BufferedReader;
@@ -77,7 +75,3 @@ public class NetworkAttendingThread implements Runnable
         System.out.println("Closing communications thread!");
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

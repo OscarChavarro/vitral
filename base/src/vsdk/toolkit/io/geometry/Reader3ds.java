@@ -1,8 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 9 2006 - Oscar Chavarro: Original base version               =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FERC1996] Fercoq, Robin. "3D Studio Material Library File Format",     =
 //=     internet document posted at alt.3d and alt.3d-studio                =
@@ -13,7 +8,6 @@
 //=     "3D Studio File Format (rewritten)", internet document posted at    =
 //=     alt.3d and alt.3d-studio (usenet lists), revision 0.93, january     =
 //=     1997.                                                               =
-//===========================================================================
 
 package vsdk.toolkit.io.geometry;
 
@@ -1664,7 +1658,3 @@ public class Reader3ds extends PersistenceElement
         workingDirectory = null;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

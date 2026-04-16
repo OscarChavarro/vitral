@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 public abstract class GuiMenuElement extends GuiElement
@@ -168,7 +167,3 @@ public abstract class GuiMenuElement extends GuiElement
         return accelerator;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

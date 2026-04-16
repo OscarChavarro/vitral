@@ -1,5 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =
 //=          principles and practice" - second edition, Addison Wesley,     =
@@ -7,10 +5,6 @@
 //= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
 //=          the machine rendering of solids". Proceedings, ACM National    =
 //=          meeting 1967.                                                  =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 5 2007 - Oscar Chavarro: Original base version              =
-//===========================================================================
 
 package vsdk.toolkit.render;
 
@@ -419,7 +413,3 @@ public class HiddenLineRenderer extends RenderingElement
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public class ArrayListOfLongs extends FundamentalEntity {
@@ -101,7 +99,3 @@ public class ArrayListOfLongs extends FundamentalEntity {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

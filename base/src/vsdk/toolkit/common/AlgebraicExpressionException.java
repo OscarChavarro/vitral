@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 14 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public class AlgebraicExpressionException extends VSDKException
@@ -31,7 +25,3 @@ public class AlgebraicExpressionException extends VSDKException
         super(cause);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

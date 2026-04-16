@@ -1,4 +1,3 @@
-//===========================================================================
 // VITRAL recommendation: Use explicit class imports (not .*) so the user
 // or programmer can be exposed to all the complexity involved. This will 
 // help him also to better know the libraries involved.
@@ -131,7 +130,3 @@ public class HelloWorldJOGL implements GLEventListener
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

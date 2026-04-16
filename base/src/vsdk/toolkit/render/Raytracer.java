@@ -1,5 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [BLIN1978b] Blinn, James F. "Simulation of wrinkled surfaces", SIGGRAPH =
 //=          proceedings, 1978.                                             =
@@ -8,19 +6,10 @@
 //=          1992.                                                          =
 //= [WHIT1980] Whitted, Turner. "An Improved Illumination Model for Shaded  =
 //=            Display", 1980.                                              =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - February 13 2006 - Oscar Chavarro: updated raytracing code to manage  =
 //=   rayable objects, with geometries implementing intersection operation  =
 //=   in an object-coordinate basis.                                        =
-//= - May 16 2006 - Alfonso Barbosa: modify to manage ZBuffers              =
-//= - November 1 2006 - Alfonso Barbosa / Diana Reyes: execute generalized  =
 //=   for inclusion of sub-viewport spec.                                   =
-//= - November 19 2006 - Oscar Chavarro: material handling supporting       =
 //=   submaterials inside geometry.                                         =
-//= - December 20 2006 - Oscar Chavarro: bump mapping added                 =
-//===========================================================================
 
 package vsdk.toolkit.render;
 
@@ -526,7 +515,3 @@ public class Raytracer extends RenderingElement {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

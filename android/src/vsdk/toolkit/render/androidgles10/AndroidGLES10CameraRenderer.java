@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles10;
 
 // Android GLES 1.0 classes
@@ -43,7 +42,3 @@ public class AndroidGLES10CameraRenderer extends AndroidGLES10Renderer {
         GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

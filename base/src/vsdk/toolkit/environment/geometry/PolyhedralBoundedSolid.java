@@ -1,17 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 18 2006 - Oscar Chavarro: Original base version              =
-//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
-//= - April 21 2007 - Oscar Chavarro: First working version with basics     =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 //= [.wMANT2008] Mantyla Martti. "Personal Home Page", <<shar>> archive     =
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -2165,7 +2157,3 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles10;
 
 import vsdk.toolkit.common.VSDK;
@@ -51,7 +50,3 @@ public class AndroidGLES10ImageRenderer extends AndroidGLES10Renderer
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,12 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 22 2005 - David Diaz: Original base version                    =
-//= - November 15 2005 - Oscar Chavarro: Migrated to JOGL Beta Version      =
-//= - November 28 2005 - Oscar Chavarro: Added activateCenter method        =
-//= - February 27 2006 - Oscar Chavarro: Added drawGL method                =
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
@@ -188,7 +179,3 @@ public class JoglCameraRenderer extends JoglRenderer
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.common.dataStructures;
 
 import vsdk.toolkit.common.Entity;
@@ -34,7 +33,3 @@ public abstract class _NAryTreeNode<T> extends Entity {
         this.data = data;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

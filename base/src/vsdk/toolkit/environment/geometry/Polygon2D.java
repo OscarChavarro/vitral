@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;

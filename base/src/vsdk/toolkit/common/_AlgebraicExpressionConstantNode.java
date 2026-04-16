@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 14 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
@@ -32,7 +26,3 @@ public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
         return msg;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

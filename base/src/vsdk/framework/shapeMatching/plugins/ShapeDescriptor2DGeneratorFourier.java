@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.framework.shapeMatching.plugins;
 
 // Java classes
@@ -57,7 +55,3 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
         return null;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

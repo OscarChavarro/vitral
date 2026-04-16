@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 // Java classes
@@ -83,7 +82,3 @@ public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
         return item.glList;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

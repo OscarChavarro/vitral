@@ -1,15 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - November 18 2006 - Oscar Chavarro: Original base version              =
-//= - January 3 2007 - Oscar Chavarro: First phase implementation           =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [GLAS1989] Glassner, Andrew. "An introduction to ray tracing",          =
 //=     Academic Press, 1989.                                               =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
-//===========================================================================
+
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
 
 import java.util.ArrayList;
@@ -737,7 +731,3 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         return msg;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

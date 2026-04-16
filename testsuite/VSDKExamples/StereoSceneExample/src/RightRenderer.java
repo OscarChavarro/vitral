@@ -1,5 +1,3 @@
-//===========================================================================
-
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -51,7 +49,3 @@ public class RightRenderer implements GLEventListener {
         ;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 import java.util.HashMap;
@@ -102,7 +101,3 @@ public class TextVisualConfiguration extends PresentationElement {
         this.borderSize = borderSize;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

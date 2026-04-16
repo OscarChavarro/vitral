@@ -1,9 +1,8 @@
-//===========================================================================
 //= References:                                                             =
 //= [.wGOOD2014] "Good Infographics", example available at                  =
 //= http://awesome.good.is/transparency/web/1010/political-climate-chart/   =
 //=     interactive.html                                                    =
-//===========================================================================
+
 package vsdk.toolkit.render.jogl.visualAnalytics;
 
 // Java Swing/Awt classes
@@ -453,7 +452,3 @@ public class JoglPercentageWheelWidgetRenderer extends JoglRenderer {
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

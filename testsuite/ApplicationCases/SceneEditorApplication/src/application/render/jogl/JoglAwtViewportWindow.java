@@ -1,9 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - June 22 2008 - Oscar Chavarro: Original base version (promoted from   =
 //=   previous "JoglView" class at SceneEditorApplication example).         =
-//===========================================================================
 
 package application.render.jogl;
 
@@ -744,7 +739,3 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

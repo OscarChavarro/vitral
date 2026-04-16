@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 // Java classes
@@ -80,7 +79,3 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
         glPopMatrix();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

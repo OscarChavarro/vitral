@@ -1,11 +1,8 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [BRES1965] Bresenham, J.E. "Algorithm for computer control of a digital =
 //=            plotter" IBM Syst. J. 4, 1 (1965), 25-30.                    =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
-//===========================================================================
 
 package vsdk.toolkit.render;
 
@@ -451,7 +448,3 @@ public class Rasterizer2D extends RenderingElement
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

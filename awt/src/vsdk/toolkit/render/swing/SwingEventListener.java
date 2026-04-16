@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.swing;
 
 // GUI JDK classes (Awt + Swing)
@@ -28,7 +27,3 @@ public class SwingEventListener extends PresentationElement implements ActionLis
         executor.actionPerformed(e2);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,5 +1,3 @@
-//===========================================================================
-
 // Awt / swing classes
 import java.awt.Graphics;                       // Platform specific elements
 import java.awt.Rectangle;
@@ -255,7 +253,3 @@ public class SwingCanvas extends JPanel implements
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

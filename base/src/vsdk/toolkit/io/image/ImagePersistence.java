@@ -1,15 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 2 2005 - David Diaz: Original base version                  =
-//= - November 24 2005 - Oscar Chavarro: check pending:                     =
-//= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
-//= - August 6 2006                                                         =
-//=   - Oscar Chavarro: managed RGB and RGBA cases independently            =
-//=   - Oscar Chavarro: Awt BufferedImage convertion moved to render.awt    =
-//= - May 1 2007 - Oscar Chavarro: updated to ImageIO API                   =
-//===========================================================================
-
 package vsdk.toolkit.io.image;
 
 // Basic JDK classes
@@ -741,7 +729,3 @@ public class ImagePersistence extends PersistenceElement
     }
     
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

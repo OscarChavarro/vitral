@@ -1,6 +1,6 @@
-//===========================================================================
 // SOME METHODS BASED ON ORIGINAL "henson.midp.Float11" CLASS FROM 
 // Nikolay Klimchuk. Original information:
+
 /**
  * <p>Title: Class for float-point calculations in J2ME applications CLDC 1.1</p>
  * <p>Description: Useful methods for float-point calculations which absent in native Math class</p>
@@ -316,7 +316,3 @@ public class VSDKJ2ME
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

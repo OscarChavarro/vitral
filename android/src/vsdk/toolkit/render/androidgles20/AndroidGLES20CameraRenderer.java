@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
 // VSDK classes
@@ -19,7 +17,3 @@ public class AndroidGLES20CameraRenderer extends AndroidGLES20Renderer
         currentCamera = c;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

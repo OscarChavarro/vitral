@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.framework.shapeMatching.plugins;
 
 // Java classes
@@ -11,7 +9,3 @@ public class ShapeDescriptor3DGeneratorSphericalHarmonics extends ShapeDescripto
 {
     ;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

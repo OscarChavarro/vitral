@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL2;
@@ -76,7 +74,3 @@ public class JoglStereoStrategyWiggleRenderer extends JoglStereoStrategyRenderer
         inFrame = false;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

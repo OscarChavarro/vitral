@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.io.image;
 
 // Basic java classes
@@ -115,7 +113,3 @@ public abstract class ImagePersistenceHelper extends  PersistenceElement
         throw new Exception("No helper supported");
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

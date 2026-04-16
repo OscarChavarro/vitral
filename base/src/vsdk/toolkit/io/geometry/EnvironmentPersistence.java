@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 8 2006 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.io.geometry;
 
 // Java basic classes
@@ -74,7 +68,3 @@ public class EnvironmentPersistence extends PersistenceElement {
         WriterVtk.exportEnvironment(inOutputStream, inScene);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

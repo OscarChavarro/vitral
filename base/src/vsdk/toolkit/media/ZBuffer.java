@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 14 2006 - Fabio Aroca & Eduardo Mendoza: Original base version  =
-//= - March 14 2006 - Oscar Chavarro: quality check                         =
-//= - May 25 2006 - David Diaz & Oscar Chavarro: documentation added        =
-//===========================================================================
-
 package vsdk.toolkit.media;
 
 import vsdk.toolkit.common.VSDK;
@@ -200,7 +192,3 @@ public class ZBuffer extends MediaEntity {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

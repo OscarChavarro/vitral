@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.common.dataStructures;
 
 import java.util.ArrayList;
@@ -47,7 +46,3 @@ public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode<T> {
         return false;        
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

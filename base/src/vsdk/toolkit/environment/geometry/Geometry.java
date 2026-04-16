@@ -1,13 +1,7 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
 //=          the machine rendering of solids". Proceedings, ACM National    =
 //=          meeting 1967.                                                  =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//===========================================================================
 
 package vsdk.toolkit.environment.geometry;
 
@@ -267,7 +261,3 @@ public abstract class Geometry extends Entity {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

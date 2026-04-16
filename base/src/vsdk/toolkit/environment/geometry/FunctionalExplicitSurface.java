@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 15 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 // VitralSDK classes
@@ -282,7 +276,3 @@ public class FunctionalExplicitSurface extends Surface
         internalGeometry.doVoxelization(vv, M, reporter);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -55,7 +53,3 @@ public class Ray  extends FundamentalEntity
         return "Ray Origin: " + origin + "; Direction: " + direction + " T: " + VSDK.formatDouble(t);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

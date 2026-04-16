@@ -1,22 +1,8 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - August 24 2005 - David Diaz / Cesar Bustacara: Design changes to      =
 //=   decouple JOGL from the Camera data model, extra utilitary methods     =
 //=   added                                                                 =
-//= - August 25 2005 - Oscar Chavarro: English translation of comments      =
-//= - September 12 2005 - Oscar Chavarro: generateRay updated               =
-//= - November 15 2005 - Oscar Chavarro: generateRay updated (Bug?)         =
-//= - November 23 2005 - Oscar Chavarro: updated methods for direct access  =
 //=   of coordinate base system and access maintaining ortoghonality.       =
-//= - November 24 2005 - Oscar Chavarro: new generateRay algorithm, now     =
 //=   consistent with JOGL/OpenGL transformation interpretation.            =
-//= - April 7 2006 - Oscar Chavarro: calculateUPlaneAtPixel, proyectPoint   =
-//= - November 5 2006 - Oscar Chavarro: plane calculation methods updated   =
-//= - November 5 2006 - Oscar Chavarro: added Cohen-Sutherland line         =
 //=   clipping functionality                                                =
-//===========================================================================
 
 package vsdk.toolkit.environment;
 
@@ -1588,7 +1574,3 @@ public class Camera extends Entity
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - December 31 2007 - Oscar Chavarro: Original base version              =
-//===========================================================================
-
 package vsdk.toolkit.render.j2me;
 
 import vsdk.toolkit.render.RenderingElement;
@@ -21,7 +15,3 @@ style classes. This serves two purposes:
 public abstract class J2meRenderer extends RenderingElement {
     ;
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

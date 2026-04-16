@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 25 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.io.geometry;
 
 // Java basic classes
@@ -165,7 +159,3 @@ public class ReaderGts extends PersistenceElement
         addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

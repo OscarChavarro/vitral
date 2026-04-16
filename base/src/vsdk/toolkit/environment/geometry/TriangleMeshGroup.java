@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Gabriel Sarmiento / Lina Rojas: Original base version =
-//= - April 28 2006 - Oscar Chavarro: quality group                         =
-//= - November 6 2006 - Oscar Chavarro: introduced bounding box             =
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
@@ -287,7 +279,3 @@ public class TriangleMeshGroup extends Surface {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

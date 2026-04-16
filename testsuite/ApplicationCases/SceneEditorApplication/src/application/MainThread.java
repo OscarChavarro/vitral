@@ -1,5 +1,3 @@
-//===========================================================================
-
 package application;
 
 public class MainThread implements Runnable
@@ -17,7 +15,3 @@ public class MainThread implements Runnable
         app = new SceneEditorApplication(args);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

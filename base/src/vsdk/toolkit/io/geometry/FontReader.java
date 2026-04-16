@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 15 2006 - Oscar Chavarro: Original base version                =
-//===========================================================================
-
 package vsdk.toolkit.io.geometry;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.io.PersistenceElement;
@@ -21,7 +15,3 @@ public abstract class FontReader extends PersistenceElement
     public abstract ParametricCurve extractGlyph(
         String fontFile, String characterAndItsContext);
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

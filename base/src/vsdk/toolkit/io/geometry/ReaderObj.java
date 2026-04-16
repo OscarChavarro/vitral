@@ -1,14 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - David Diaz: Original base version                     =
-//= - May 18 2006 - David Diaz: bug fixes                                   =
-//= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
-//= - November 13 2006 - Oscar Chavarro: re-structured and tested           =
-//= - November 19 2006 - Oscar Chavarro: re-structured and tested - using   =
 //=       private class _ReaderObjVertex and simplified TriangleMesh design =
-//= - May 4 2007 - Oscar Chavarro: added support for not well formed objs   =
-//===========================================================================
 
 package vsdk.toolkit.io.geometry;
 
@@ -862,7 +852,3 @@ public class ReaderObj extends PersistenceElement
         addThing(mg, simpleBodiesArray);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

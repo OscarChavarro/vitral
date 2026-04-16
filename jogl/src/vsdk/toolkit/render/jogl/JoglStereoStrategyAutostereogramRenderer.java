@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 import java.util.Random;
@@ -218,7 +216,3 @@ public class JoglStereoStrategyAutostereogramRenderer extends JoglStereoStrategy
         JoglImageRenderer.draw(gl, stereogramResult);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

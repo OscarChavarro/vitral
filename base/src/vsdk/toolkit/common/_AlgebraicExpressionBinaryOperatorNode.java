@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 14 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpressionNode
@@ -60,7 +54,3 @@ public class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpression
         return msg;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,10 +1,7 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =
 //=          principles and practice" - second edition, Addison Wesley,     =
 //=          1992.                                                          =
-//===========================================================================
 
 // Basic JDK classes
 import java.io.File;
@@ -62,7 +59,3 @@ public class SmoothPolygonTest
         System.out.println("Resulting image has been written to \"output.bmp\"");    }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

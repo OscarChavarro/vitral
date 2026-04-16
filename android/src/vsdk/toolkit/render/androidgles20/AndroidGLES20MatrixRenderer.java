@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.render.androidgles20;
 
 // VSDK classes
@@ -49,7 +48,3 @@ public class AndroidGLES20MatrixRenderer extends AndroidGLES20Renderer {
         activateTransformationMatrices();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

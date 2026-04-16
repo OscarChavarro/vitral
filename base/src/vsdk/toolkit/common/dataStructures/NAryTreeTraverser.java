@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.common.dataStructures;
 
 import vsdk.toolkit.common.Entity;
@@ -35,7 +34,3 @@ public abstract class NAryTreeTraverser extends Entity {
         return head;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

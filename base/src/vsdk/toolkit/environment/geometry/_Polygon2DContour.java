@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.FundamentalEntity;
@@ -170,7 +168,3 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
             return 1;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

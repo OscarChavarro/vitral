@@ -1,11 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - November 24 2005 - Oscar Chavarro: Revision and integration with      =
 //=   recursive raytracing ilumination model                                =
-//= - March 18 2006 - Oscar Chavarro: minor checks                          =
-//===========================================================================
 
 package vsdk.toolkit.environment;
 
@@ -175,7 +168,3 @@ public class Material extends Entity
                "\n";
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

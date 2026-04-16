@@ -1,10 +1,5 @@
-//===========================================================================
 //= This is the main class for a simple 3D editor application, and serves   =
 //= as the main testbed integration for functionalities in the VSDK toolkit =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - Since august 2005 - Oscar Chavarro                                    =
-//===========================================================================
 
 package application;
 
@@ -471,7 +466,3 @@ public class SceneEditorApplication {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

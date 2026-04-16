@@ -1,9 +1,4 @@
-//===========================================================================
 //= This example serves as a testbed for AlgebraicExpression class.           =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 14 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
 
 // VSDK classes
 import vsdk.toolkit.common.AlgebraicExpression;
@@ -38,7 +33,3 @@ public class AlgebraicExpressionExample
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,8 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 1 2008 - Oscar Chavarro: Original base version                  =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1986] Mantyla Martti. "Boolean Operations of 2-Manifolds through   =
 //=     Vertex Neighborhood Classification". ACM Transactions on Graphics,  =
@@ -12,7 +7,6 @@
 //= [.wMANT2008] Mantyla Martti. "Personal Home Page", <<shar>> archive     =
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
-//===========================================================================
 
 package vsdk.toolkit.processing;
 
@@ -3100,7 +3094,3 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         return res;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

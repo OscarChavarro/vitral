@@ -1,7 +1,4 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
 //= Oscar Chavarro, June 16 2007.                                           =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FUNK2003], Funkhouser, Thomas.  Min, Patrick. Kazhdan, Michael. Chen,  =
 //=     Joyce. Halderman, Alex. Dobkin, David. Jacobs, David. "A Search     =
@@ -10,7 +7,6 @@
 //= [MIN2003] Min, Patrick. Halderman, John A. Kazhdan, Michael.            =
 //=     Funkhouser, Thoimas A. "Early Experiences with a 3D Model Search    =
 //=     Engine".                                                            =
-//===========================================================================
 
 // Java basic classes
 import java.io.File;
@@ -240,7 +236,3 @@ public class JoglPreviewGenerator
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

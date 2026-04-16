@@ -1,9 +1,4 @@
-//===========================================================================
 //= Scientific Editor Application based on VSDK.                            =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 20 2006 - Oscar Chavarro: Original base version                =
-//===========================================================================
 
 // Java basic classes
 import java.io.File;
@@ -431,7 +426,3 @@ class ButtonsPanel extends JPanel implements ActionListener, ChangeListener
         //parent.drawingArea.repaint();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

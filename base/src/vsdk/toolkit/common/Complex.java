@@ -1,14 +1,8 @@
-//===========================================================================
 //= References:                                                             =
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - June 8 2005 - Oscar Chavarro: Original base version                   =
-//=-------------------------------------------------------------------------=
 //= [.wPRIN2007] Princeton University, "Introduction to programming in      =
 //=     Java", course notes available at                                    =
 //=     http://www.cs.princeton.edu/introcs/97data/                         =
 //=     last accessed, june 8 2007.                                         =
-//===========================================================================
 
 package vsdk.toolkit.common;
 
@@ -187,7 +181,3 @@ public class Complex extends FundamentalEntity {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

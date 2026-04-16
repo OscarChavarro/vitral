@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - November 15 2005 - Oscar Chavarro: quality check                      =
-//= - March 17 2006 - Oscar Chavarro: added exportToFloatArrayVect method   =
-//===========================================================================
-
 package vsdk.toolkit.common.linealAlgebra;
 
 import vsdk.toolkit.common.VSDK;
@@ -241,7 +233,3 @@ public class Vector3D extends FundamentalEntity
         z = r * Math.cos(phi);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

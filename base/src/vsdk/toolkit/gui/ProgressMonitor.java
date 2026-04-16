@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 19 2006 - Oscar Chavarro: Original base version                 =
-//===========================================================================
-
 package vsdk.toolkit.gui;
 
 /**
@@ -24,7 +18,3 @@ public abstract class ProgressMonitor extends PresentationElement {
         double minValue, double maxValue, double currentValue);
     public abstract double getCurrentPercent();
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

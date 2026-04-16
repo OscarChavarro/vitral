@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 import java.util.HashMap;
@@ -27,7 +26,3 @@ public abstract class GuiCommandExecutor extends PresentationElement {
     
     public abstract boolean executeMenuCommand(String inIdCommand);
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

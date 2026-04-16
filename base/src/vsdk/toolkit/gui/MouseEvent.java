@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.gui;
 
 public class MouseEvent extends PresentationElement
@@ -80,7 +78,3 @@ public class MouseEvent extends PresentationElement
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

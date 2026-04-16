@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.common.dataStructures;
 
 import vsdk.toolkit.common.FundamentalEntity;
@@ -71,7 +70,3 @@ public class BinaryTreeNode<T> extends FundamentalEntity
         this.data = data;
     }    
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

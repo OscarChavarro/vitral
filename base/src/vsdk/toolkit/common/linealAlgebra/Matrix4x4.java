@@ -1,19 +1,9 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - August 24 2005 - David Diaz / Cesar Bustacara: Design changes to      =
 //=   decouple JOGL from the Matrix data model                              =
-//= - May 2 2006 - David Diaz / Oscar Chavarro: documentation added         =
-//= - November 3 2006 - Oscar Chavarro: New versions of determinant and     =
 //=   invert that takes into account 4x4 matrices, not just the 3x3 case    =
-//= - May 2007 - Liliana Baquero: Revitions to matrix math code             =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics,           =
 //=          principles and practice" - second edition, Addison Wesley,     =
 //=          1992.                                                          =
-//===========================================================================
 
 package vsdk.toolkit.common.linealAlgebra;
 
@@ -832,7 +822,3 @@ public class Matrix4x4 extends FundamentalEntity
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,10 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - April 20 2006 - Gina Chiquillo / David Camello: Original base version =
-//= - April 28 2005 - Gina Chiquillo / Oscar Chavarro: quality check        =
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
@@ -350,7 +343,3 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,13 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 15 2005 - Oscar Chavarro: Original base version             =
-//= - November 28 2005 - Oscar Chavarro: Quality check - comments added     =
-//= - November 28 2005 - Oscar Chavarro: set/get methods added              =
-//= - February 13 2005 - Oscar Chavarro: quality check                      =
-//= - May 25 2006 - David Diaz / Oscar Chavarro: Documentation added        =
-//===========================================================================
-
 package vsdk.toolkit.media;
 
 import vsdk.toolkit.common.VSDK;
@@ -138,7 +128,3 @@ public class RGBPixel extends MediaEntity {
             VSDK.signedByte2unsignedInteger(b) + ">";
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

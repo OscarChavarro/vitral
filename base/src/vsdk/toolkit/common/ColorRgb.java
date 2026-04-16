@@ -1,12 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 15 2005 - David Diaz: Original base version                 =
-//= - November 1 2005 - Oscar Chavarro: Quality check - comments added      =
-//= - November 15 2005 - Oscar Chavarro: set/get methods added              =
-//= - March 17 2006 - Oscar Chavarro: added toFloatVect method              =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 /**
@@ -273,7 +264,3 @@ public class ColorRgb extends FundamentalEntity
     
     
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

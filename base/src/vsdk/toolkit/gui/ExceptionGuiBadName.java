@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.gui;
 
 public class ExceptionGuiBadName extends Exception {
@@ -10,7 +9,3 @@ public class ExceptionGuiBadName extends Exception {
         return "Bad name";
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

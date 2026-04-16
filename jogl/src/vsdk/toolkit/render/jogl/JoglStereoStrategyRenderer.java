@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL2;
@@ -51,7 +49,3 @@ public abstract class JoglStereoStrategyRenderer extends JoglRenderer
         return configureDefaultLeftChannel(gl);
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

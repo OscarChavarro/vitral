@@ -1,12 +1,6 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - March 26 2008 - Oscar Chavarro: Original base version                 =
-//=-------------------------------------------------------------------------=
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
-//===========================================================================
 
 package vsdk.toolkit.processing;
 
@@ -777,7 +771,3 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         sonf = null;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

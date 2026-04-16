@@ -1,5 +1,3 @@
-//===========================================================================
-
 package vsdk.toolkit.render.androidgles20;
 
 // VSDK classes
@@ -13,7 +11,3 @@ public class AndroidGLES20MaterialRenderer extends AndroidGLES20Renderer
         activateShaders();
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,11 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - August 8 2005 - Oscar Chavarro: Original base version                 =
-//= - November 28 2005 - Oscar Chavarro: Quality check                      =
-//= - March 19 2006 - Oscar Chavarro: VSDK integration                      =
-//===========================================================================
-
 package vsdk.toolkit.media;
 
 // Note that on (old or incomplete) Java implementations as such those found
@@ -534,7 +526,3 @@ public class RGBImage extends Image
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

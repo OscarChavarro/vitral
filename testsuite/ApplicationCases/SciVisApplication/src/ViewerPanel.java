@@ -1,5 +1,3 @@
-//===========================================================================
-
 // Java GUI classes
 import java.awt.Color;
 import java.awt.event.MouseListener;
@@ -87,7 +85,3 @@ public class ViewerPanel extends JPanel implements MouseListener
         }
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

@@ -1,7 +1,5 @@
-//===========================================================================
 //= This example shows the use of texturing in JOGL based VSDK applications =
 //= applying JoglImageRenderer class methods.                               =
-//===========================================================================
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -278,7 +276,3 @@ public class ImageExample extends JFrame implements
   }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

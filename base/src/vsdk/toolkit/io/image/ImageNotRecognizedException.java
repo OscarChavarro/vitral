@@ -1,10 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - September 2 2005 - David Diaz: Original base version                  =
-//= - May 22 2006 - David Diaz/Oscar Chavarro: documentation added          =
-//===========================================================================
-
 package vsdk.toolkit.io.image;
 import java.io.File;
 
@@ -44,7 +37,3 @@ public class ImageNotRecognizedException extends VSDKException
        return image;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

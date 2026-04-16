@@ -1,4 +1,3 @@
-//===========================================================================
 package vsdk.toolkit.common.linealAlgebra;
 
 import vsdk.toolkit.common.FundamentalEntity;
@@ -142,7 +141,3 @@ public class Vector2D extends FundamentalEntity {
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

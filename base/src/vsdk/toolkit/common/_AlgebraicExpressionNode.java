@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - October 14 2007 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.common;
 
 public abstract class _AlgebraicExpressionNode extends FundamentalEntity
@@ -16,7 +10,3 @@ public abstract class _AlgebraicExpressionNode extends FundamentalEntity
     @Override
     public abstract String toString();
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

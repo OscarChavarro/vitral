@@ -1,4 +1,3 @@
-//===========================================================================
 // This example is based on the original SPECViewperf benckmark. Currently
 // supports just a very limited subset of SPECViewperf: quad data.
 
@@ -373,7 +372,3 @@ public class QuadBenchmark extends Applet implements
     }
 
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================

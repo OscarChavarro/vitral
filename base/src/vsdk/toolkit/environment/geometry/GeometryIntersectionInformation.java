@@ -1,9 +1,3 @@
-//===========================================================================
-//=-------------------------------------------------------------------------=
-//= Module history:                                                         =
-//= - February 9 2006 - Oscar Chavarro: Original base version               =
-//===========================================================================
-
 package vsdk.toolkit.environment.geometry;
 
 import vsdk.toolkit.common.FundamentalEntity;
@@ -64,7 +58,3 @@ public class GeometryIntersectionInformation extends FundamentalEntity {
         this.normalMap = other.normalMap;
     }
 }
-
-//===========================================================================
-//= EOF                                                                     =
-//===========================================================================
