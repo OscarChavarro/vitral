@@ -32,6 +32,15 @@ class VitralVisualizationServerProtocol implements Runnable
     private int x1;
     private int y1;
 
+    private int readInt32BE(InputStream is) throws Exception
+    {
+        long value = PersistenceElement.readLongBE(is);
+        if ( value < Integer.MIN_VALUE || value > Integer.MAX_VALUE ) {
+            throw new IOException("Value out of 32-bit range: " + value);
+        }
+        return (int)value;
+    }
+
     public VitralVisualizationServerProtocol(Socket socket)
     {
         this.socket = socket;
@@ -83,28 +92,28 @@ class VitralVisualizationServerProtocol implements Runnable
             out[0] = 1;
         }
         else if ( in.equals("id") ) {
-            id = PersistenceElement.readIntBE(is);
+            id = readInt32BE(is);
             System.out.println("Server set to id " + id);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("x0") ) {
-            x0 = PersistenceElement.readIntBE(is);
+            x0 = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("y0") ) {
-            y0 = PersistenceElement.readIntBE(is);
+            y0 = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("x1") ) {
-            x1 = PersistenceElement.readIntBE(is);
+            x1 = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("y1") ) {
-            y1 = PersistenceElement.readIntBE(is);
+            y1 = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }

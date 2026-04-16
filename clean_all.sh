@@ -1,3 +1,4 @@
+gradle clean
 cd pkgs/SpharmonicKit27;make clean;cd ../..
 cd pkgs/LempelZivWelch;make clean;cd ../..
 cd pkgs/NativeImageReader;make clean;cd ../..
@@ -13,3 +14,5 @@ cd testsuite/VSDKExamples/PolyhedralBoundedSolidExample
 rm -rf outputA* outputB* outputR*
 cd ../../..
 rm -rf testsuite/Tools/SpriteFontGenerator/output/*
+
+rm -rf .gradle-home/

@@ -54,7 +54,7 @@ public class CommandServer
         // entries listed at the end
 
 
-        commandSet.addSpeech("IDC_FILE_QUIT", "salir de la aplicaciÛn");
+        commandSet.addSpeech("IDC_FILE_QUIT", "salir de la aplicaci√≥n");
         commandSet.addSpeech("IDC_CREATE_SPHERE", "crear esfera");
         commandSet.addSpeech("IDC_CREATE_SPHERE", "crear ese era");
         commandSet.addSpeech("IDC_CREATE_SPHERE", "crear este era");
@@ -64,8 +64,8 @@ public class CommandServer
         commandSet.addSpeech("IDC_CREATE_CUBE", "crear cubo");
         commandSet.addSpeech("IDC_CREATE_BOX", "crear caja");
         commandSet.addSpeech("IDC_CREATE_ARROW", "crear flecha");
-        commandSet.addSpeech("IDC_CREATE_BREP", "crear sÛlido");
-        commandSet.addSpeech("IDC_CREATE_BREP", "crear sÛlidos");
+        commandSet.addSpeech("IDC_CREATE_BREP", "crear s√≥lido");
+        commandSet.addSpeech("IDC_CREATE_BREP", "crear s√≥lidos");
         commandSet.addSpeech("IDC_CREATE_PARAMETRICCUBICCURVE", "crear curva");
         commandSet.addSpeech("IDC_CREATE_PARAMETRICBICUBICPATCH", "crear parche");
         commandSet.addSpeech("IDC_IMPORT_OBJECTS_FROM_FILE", "leer archivo");
@@ -75,35 +75,35 @@ public class CommandServer
         commandSet.addSpeech("IDC_CREATE_OMNILIGHT", "crearluz");
 
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_MOTIF", "apariencia unix");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LAF_MOTIF", "apariencia cl·sica");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LAF_MOTIF", "apariencia cl√°sica");
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_MOTIF", "apariencia antigua");
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_JAVA", "apariencia java");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LAF_JAVA", "apariencia habr·");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LAF_JAVA", "apariencia habr√°");
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_JAVA", "apariencia hava");
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_JAVA", "apariencia haba");
         commandSet.addSpeech("IDC_CUSTOMIZE_LAF_WINDOWS", "apariencia windows");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "interfaz en inglÈs");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "interfase en inglÈs");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "idioma inglÈs");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "interfaz en espaÒol");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "interfase en espaÒol");
-        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "idioma espaÒol");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "interfaz en ingl√©s");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "interfase en ingl√©s");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_ENGLISH", "idioma ingl√©s");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "interfaz en espa√±ol");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "interfase en espa√±ol");
+        commandSet.addSpeech("IDC_CUSTOMIZE_LANGUAGE_SPANISH", "idioma espa√±ol");
         commandSet.addSpeech("IDC_OTHERS_CYCLE_BACKGROUND", "cambiar fondo");
         commandSet.addSpeech("IDC_OTHERS_CYCLE_BACKGROUND", "rotar fondo");
         commandSet.addSpeech("IDC_OTHERS_TOGGLE_GRID", "grilla");
-        commandSet.addSpeech("IDC_TOOLS_CAMERA", "modo c·mara");
-        commandSet.addSpeech("IDC_TOOLS_CAMERA", "mondo c·mara");
-        commandSet.addSpeech("IDC_TOOLS_CAMERA", "c·mara");
+        commandSet.addSpeech("IDC_TOOLS_CAMERA", "modo c√°mara");
+        commandSet.addSpeech("IDC_TOOLS_CAMERA", "mondo c√°mara");
+        commandSet.addSpeech("IDC_TOOLS_CAMERA", "c√°mara");
         commandSet.addSpeech("IDC_TOOLS_SELECT", "seleccionar");
-        commandSet.addSpeech("IDC_TOOLS_SELECT", "modo selecciÛn");
-        commandSet.addSpeech("IDC_TOOLS_SELECT", "modo de selecciÛn");
-        commandSet.addSpeech("IDC_TOOLS_TRANSLATE", "modo translaciÛn");
+        commandSet.addSpeech("IDC_TOOLS_SELECT", "modo selecci√≥n");
+        commandSet.addSpeech("IDC_TOOLS_SELECT", "modo de selecci√≥n");
+        commandSet.addSpeech("IDC_TOOLS_TRANSLATE", "modo translaci√≥n");
         commandSet.addSpeech("IDC_TOOLS_TRANSLATE", "transladar");
-        commandSet.addSpeech("IDC_TOOLS_TRANSLATE", "modo de translaciÛn");
+        commandSet.addSpeech("IDC_TOOLS_TRANSLATE", "modo de translaci√≥n");
         commandSet.addSpeech("IDC_TOOLS_ROTATE", "rotar");
         commandSet.addSpeech("IDC_TOOLS_ROTATE", "brotar");
-        commandSet.addSpeech("IDC_TOOLS_ROTATE", "modo rotaciÛn");
-        commandSet.addSpeech("IDC_TOOLS_ROTATE", "modo de rotaciÛn");
+        commandSet.addSpeech("IDC_TOOLS_ROTATE", "modo rotaci√≥n");
+        commandSet.addSpeech("IDC_TOOLS_ROTATE", "modo de rotaci√≥n");
         commandSet.addSpeech("IDC_TOOLS_SCALE", "escalar");
         commandSet.addSpeech("IDC_TOOLS_SCALE", "modo de escalamiento");
         commandSet.addSpeech("IDC_TOOLS_RAY", "rayo");

@@ -8,7 +8,6 @@ package application;
 import java.io.FileInputStream;
 
 // Awt/Swing classes
-import com.sun.java.swing.plaf.gtk.GTKConstants;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;

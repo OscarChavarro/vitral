@@ -1,0 +1,179 @@
+allprojects {
+    group = 'co.cubestudio'
+    version = '1.0'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url = uri('https://jogamp.org/deployment/maven')
+        }
+    }
+}
+
+tasks.register('verifyJavaUtf8') {
+    group = 'verification'
+    description = 'Validates that all Java sources (except android) are UTF-8 encoded.'
+
+    doLast {
+        def invalid = []
+        def decoder = java.nio.charset.StandardCharsets.UTF_8
+            .newDecoder()
+            .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+            .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+
+        fileTree(rootDir) {
+            include '**/*.java'
+            exclude 'android/**'
+            exclude '**/build/**'
+            exclude '.gradle/**'
+            exclude '.gradle-home/**'
+        }.files.each { sourceFile ->
+            try {
+                decoder.reset()
+                decoder.decode(java.nio.ByteBuffer.wrap(sourceFile.bytes))
+            }
+            catch (java.nio.charset.CharacterCodingException ignored) {
+                invalid << sourceFile
+            }
+        }
+
+        if (!invalid.isEmpty()) {
+            def files = invalid.collect { it.path }.join('\n - ')
+            throw new GradleException("Non UTF-8 Java sources detected:\n - ${files}")
+        }
+    }
+}
+
+subprojects { subproject ->
+    if (subproject.path == ':testsuite' || !subproject.buildFile.exists()) {
+        return
+    }
+
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 17
+    }
+
+    tasks.named('check') {
+        dependsOn rootProject.tasks.named('verifyJavaUtf8')
+    }
+
+    def legacyExternalProjects = [
+        ':testsuite:ApplicationCases:SciVisApplication',
+        ':testsuite:ApplicationCases:jaitest',
+        ':testsuite:_APITests:_JAIHelloWorld',
+        ':testsuite:_APITests:_WiiRemoteJHelloWorld'
+    ]
+    def skipLegacy = legacyExternalProjects.contains(subproject.path) && !rootProject.hasProperty('enableLegacyApis')
+
+    def srcDir = file('src').exists() ? 'src' : '.'
+    if (skipLegacy) {
+        srcDir = null
+        logger.lifecycle("Skipping legacy external API project ${subproject.path}. Use -PenableLegacyApis to enable it.")
+    }
+
+    sourceSets {
+        main {
+            java {
+                setSrcDirs(srcDir == null ? [] : [srcDir])
+                exclude 'build/**'
+                exclude 'target/**'
+                exclude '.gradle/**'
+                exclude 'classes/**'
+                exclude 'doc/**'
+            }
+            resources.setSrcDirs([])
+        }
+        test {
+            java.setSrcDirs([])
+            resources.setSrcDirs([])
+        }
+    }
+
+    tasks.register('runMain', JavaExec) {
+        group = 'application'
+        description = 'Runs a module main class. Use -PrunMainClass=<fqcn> and optional -PrunJvmArgs=<a|b>.'
+        dependsOn tasks.named('classes')
+        classpath = sourceSets.main.runtimeClasspath
+        standardInput = System.in
+        mainClass.set(providers.gradleProperty('runMainClass').orElse(''))
+
+        def rawJvmArgs = project.findProperty('runJvmArgs')?.toString()
+        if (rawJvmArgs) {
+            def parsedJvmArgs = rawJvmArgs.split('\\|').findAll { !it.isBlank() }
+            if (!parsedJvmArgs.isEmpty()) {
+                jvmArgs(parsedJvmArgs)
+            }
+        }
+
+        doFirst {
+            if (mainClass.get().isBlank()) {
+                throw new GradleException("Missing -PrunMainClass for ${project.path}:runMain")
+            }
+        }
+    }
+}
+
+project(':awt') {
+    dependencies {
+        api project(':base')
+    }
+}
+
+project(':jogl') {
+    dependencies {
+        api project(':base')
+        api project(':awt')
+
+        api 'org.jogamp.jogl:jogl-all:2.5.0'
+        api 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
+project(':testsuite:ApplicationCases:CommandServer') {
+    dependencies {
+        implementation project(':base')
+    }
+}
+
+project(':testsuite:ApplicationCases:SearchEngineFor3DModels') {
+    dependencies {
+        compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    }
+}
+
+project(':testsuite:_APITests:_JOGLHelloWorld') {
+    dependencies {
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
+configure(subprojects.findAll {
+    it.path.startsWith(':testsuite:') &&
+    it.buildFile.exists() &&
+    it.path != ':testsuite:ApplicationCases:CommandServer' &&
+    it.path != ':testsuite:_APITests:_JOGLHelloWorld'
+}) {
+    dependencies {
+        implementation project(':base')
+        implementation project(':awt')
+        implementation project(':jogl')
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}

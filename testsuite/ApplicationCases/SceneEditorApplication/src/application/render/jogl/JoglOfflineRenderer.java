@@ -8,14 +8,14 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLPbuffer;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLDrawableFactory;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 
 public class JoglOfflineRenderer implements GLEventListener {
-    private GLPbuffer  pbuffer;
+    private GLOffscreenAutoDrawable pbuffer;
     private boolean ready;
     private JoglProjectedViewRenderer renderer;
     private boolean pbufferSupported;
@@ -40,7 +40,8 @@ public class JoglOfflineRenderer implements GLEventListener {
         pbufferSupported = false;
 
         try {
-            pbuffer = GLDrawableFactory.getFactory(profile).createGLPbuffer(null, pbCaps, null, imageWidth, imageHeight, null);
+            pbuffer = GLDrawableFactory.getFactory(profile)
+                .createOffscreenAutoDrawable(null, pbCaps, null, imageWidth, imageHeight);
             pbufferSupported = true;
             pbuffer.addGLEventListener(this);
           }

@@ -1,5 +1,9 @@
 .idea
 master.iml
+.gradle/
+.gradle-home/
+build/
+**/build/
 
 classes/*
 lib/*
@@ -14,3 +18,4 @@ pkgs/NativeImageReader/tmp/
 pkgs/SpharmonicKit27/bin/
 pkgs/SpharmonicKit27/classes/
 pkgs/SpharmonicKit27/tmp/
+gradle/wrapper/gradle-wrapper.jar

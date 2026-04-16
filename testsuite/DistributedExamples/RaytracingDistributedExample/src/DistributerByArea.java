@@ -63,6 +63,11 @@ class RaytracerDistributedClient implements Runnable
     private int x1;
     private int y1;
 
+    private void writeInt32BE(OutputStream os, int value) throws Exception
+    {
+        PersistenceElement.writeLongBE(os, value);
+    }
+
     public RaytracerDistributedClient(
         String ip, int port,
         SimpleScene theScene,
@@ -116,7 +121,7 @@ class RaytracerDistributedClient implements Runnable
             PersistenceElement.readBytes(is, responseType);
 
             PersistenceElement.writeAsciiString(os, "id");
-            PersistenceElement.writeIntBE(os, id);
+            writeInt32BE(os, id);
             PersistenceElement.readBytes(is, responseType);
 
             //-----------------------------------------------------------------
@@ -129,19 +134,19 @@ class RaytracerDistributedClient implements Runnable
                     pendingends.put(task);
                     System.out.println("Sending task " + task);
                     PersistenceElement.writeAsciiString(os, "x0");
-                    PersistenceElement.writeIntBE(os, task.x0);
+                    writeInt32BE(os, task.x0);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "y0");
-                    PersistenceElement.writeIntBE(os, task.y0);
+                    writeInt32BE(os, task.y0);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "x1");
-                    PersistenceElement.writeIntBE(os, task.x1);
+                    writeInt32BE(os, task.x1);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "y1");
-                    PersistenceElement.writeIntBE(os, task.y1);
+                    writeInt32BE(os, task.y1);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "render");
