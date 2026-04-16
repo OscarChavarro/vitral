@@ -1,0 +1,87 @@
+// Java Awt classes
+import java.awt.Font;
+
+// JOGL classes
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.awt.TextRenderer;
+
+public class JoglDebuggerHudRenderer
+{
+    private static final int LINE_HEIGHT = 34;
+
+    private final DebuggerModel model;
+    private TextRenderer hudTextRenderer;
+    private int viewportWidth;
+    private int viewportHeight;
+
+    public JoglDebuggerHudRenderer(DebuggerModel model)
+    {
+        this.model = model;
+        this.hudTextRenderer = null;
+        this.viewportWidth = 0;
+        this.viewportHeight = 0;
+    }
+
+    public void init(GLAutoDrawable drawable)
+    {
+        hudTextRenderer = new TextRenderer(
+            new Font("SansSerif", Font.BOLD, 18), true, true);
+        updateViewportSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+    }
+
+    public void updateViewportSize(int width, int height)
+    {
+        viewportWidth = width;
+        viewportHeight = height;
+    }
+
+    public void draw(GLAutoDrawable drawable)
+    {
+        if ( hudTextRenderer == null ) {
+            return;
+        }
+
+        int width = viewportWidth > 0 ? viewportWidth : drawable.getSurfaceWidth();
+        int height = viewportHeight > 0 ? viewportHeight : drawable.getSurfaceHeight();
+        String showingFaceLoopMessage = "Showing face loop [1, 2]: " + formatFaceLoopLabel();
+        String selectedModelMessage = "Selected model [3, 4]: " + model.solidModelName.name();
+        String referenceFrameMessage = "Reference frame: " +
+            (model.showCoordinateSystem ? "ON" : "OFF");
+
+        hudTextRenderer.beginRendering(width, height);
+        hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
+        hudTextRenderer.draw(showingFaceLoopMessage, 16, height - 28);
+        hudTextRenderer.draw(selectedModelMessage, 16, height - (28 + LINE_HEIGHT));
+        hudTextRenderer.draw(referenceFrameMessage, 16, height - (28 + 2*LINE_HEIGHT));
+        if ( model.errorState ) {
+            hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
+            hudTextRenderer.draw(model.errorMessage, 16, 16);
+        }
+        hudTextRenderer.endRendering();
+    }
+
+    private String formatFaceLoopLabel()
+    {
+        if ( model.faceIndex == -2 ) {
+            return "NONE";
+        }
+        if ( model.faceIndex == -1 ) {
+            return "ALL";
+        }
+
+        int currentFace = model.faceIndex + 1;
+        int totalFaces = 0;
+        if ( model.solid != null && model.solid.polygonsList != null ) {
+            totalFaces = model.solid.polygonsList.size();
+        }
+        return "[" + currentFace + "/" + totalFaces + "]";
+    }
+
+    public void dispose(GLAutoDrawable drawable)
+    {
+        if ( hudTextRenderer != null ) {
+            hudTextRenderer.dispose();
+            hudTextRenderer = null;
+        }
+    }
+}

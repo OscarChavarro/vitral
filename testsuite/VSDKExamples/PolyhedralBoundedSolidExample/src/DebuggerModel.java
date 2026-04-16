@@ -30,12 +30,14 @@ public class DebuggerModel
     public RendererConfigurationController qualityController;
     public CameraController cameraController;
     public GLCanvas canvas;
-    public int solidType = 23;
+    public SolidModelNames solidModelName = SolidModelNames.IMPORT_OR_FEATURED_OBJECT;
     public int csgOperation = 0;
     public int csgSample = 5;
     public boolean debugEdges = false;
     public boolean showCoordinateSystem = true;
     public boolean debugCsg = false;
+    public boolean errorState = false;
+    public String errorMessage = "";
 
     public JFrame mainFrame;
     public Rectangle windowedBounds;
@@ -68,5 +70,18 @@ public class DebuggerModel
         m.setDoubleSided(false);
         m.setPhongExponent(100);
         return m;
+    }
+
+    public void clearErrorState()
+    {
+        errorState = false;
+        errorMessage = "";
+    }
+
+    public void setErrorState(String message)
+    {
+        errorState = true;
+        errorMessage = message;
+        System.err.println("[PolyhedralBoundedSolidExample] " + errorMessage);
     }
 }

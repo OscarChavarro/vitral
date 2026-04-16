@@ -139,6 +139,22 @@ Primary theory baseline reviewed from OCR PDFs:
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
 
+### 7.1) Error Handling Implementation Checkpoint (2026-04-17)
+
+- **Kernel fatal-path behavior remains process-terminating by default**:
+  - `VSDK.reportMessage(..., FATAL_ERROR, ...)` and `reportMessageWithException(..., FATAL_ERROR, ...)` still call `System.exit(1)` when `withSystemExit` is true.
+  - There is still no production/test wiring that sets `VSDK.setWithSystemExit(false)` before risky modeling/set-op flows.
+- **Harness-level recovery exists but is only partial**:
+  - `PolyhedralBoundedSolidExample` wraps solid rebuild paths in `try/catch (Throwable)` and stores an error state (`model.setErrorState(...)`) instead of crashing on regular thrown exceptions.
+  - This recovery does **not** intercept kernel fatal exits if `withSystemExit` remains enabled.
+- **Phase 1 bug-fix items related to resilience are still pending in core code**:
+  - Null-check copy/paste defects in high-level operators remain present (`mev/smef/mef/kemr` validate `he1` where `he2` should be validated).
+  - `PolyhedralBoundedSolid.calculateMinMaxPositions` still initializes maxima with `Double.MIN_VALUE`.
+  - Debug mask duplication is still present in set-op (`DEBUG_06_FINISH` and `DEBUG_99_SHOWOPERATIONS` both `0x20`).
+  - `loopGlue` still lacks defensive precondition checks before boundary access/use.
+
+**Net status:** Phase 0 and the error-handling subset of Phase 1 are still mostly **pending** in kernel code; current improvements are primarily at the visual debugger/harness layer.
+
 ## 8) Priority Recommendations
 - Implement Phase 1 fixes immediately (low cost, high impact).
 - Implement containment handling and strict-vs-intermediate validation (Phases 2 and 4 core subset).

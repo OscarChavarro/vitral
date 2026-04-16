@@ -64,16 +64,13 @@ public class DebuggerKeyboardInteractionTechniques
             break;
 
           case KeyEvent.KEY_3:
-            model.solidType--;
-            if ( model.solidType < 0 ) {
-                model.solidType = 0;
-            }
+            model.solidModelName = model.solidModelName.previousClamped();
             actions.rebuildSolid();
             handled = true;
             break;
 
           case KeyEvent.KEY_4:
-            model.solidType++;
+            model.solidModelName = model.solidModelName.nextCircular();
             actions.rebuildSolid();
             handled = true;
             break;

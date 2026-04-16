@@ -37,28 +37,28 @@ public class BoundedSolidTestSelector
         PolyhedralBoundedSolid mySolid;
         Matrix4x4 T, R, S, M;
 
-        switch ( model.solidType % 24 ) {
-          case 0:
+        switch ( model.solidModelName ) {
+          case MVFS_SMEV_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
             mySolid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
             mySolid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
             break;
-          case 1:
+          case CREATE_BOX:
             mySolid = createBox(new Vector3D(0.9, 0.9, 0.9));
             break;
-          case 3:
+          case ADD_ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             GeometricModeler.addArc(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
-          case 4:
+          case CREATE_CIRCULAR_LAMINA:
             mySolid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
             break;
-          case 5:
+          case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             GeometricModeler.addArc(
@@ -76,7 +76,7 @@ public class BoundedSolidTestSelector
                 mySolid, mySolid.findFace(1), M);
 
             break;
-          case 6:
+          case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR:
             mySolid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 24
             );
@@ -104,22 +104,22 @@ public class BoundedSolidTestSelector
 */
             break;
 
-          case 7:
+          case CREATE_SPHERE:
             mySolid = createSphere(0.5);
             break;
-          case 8:
+          case CREATE_CONE:
             mySolid = createCone(0.5, 0.0, 1.0);
             break;
-          case 9:
+          case CREATE_ARROW:
             mySolid = createArrow(0.7, 0.3, 0.05, 0.1);
             break;
-          case 10:
+          case CREATE_LAMINA_WITH_TWO_SHELLS:
             mySolid = createLaminaWithTwoShells();
             break;
-          case 11:
+          case CREATE_LAMINA_WITH_HOLE:
             mySolid = createLaminaWithHole();
             break;
-          case 12:
+          case CREATE_FONT_BLOCK:
             mySolid = createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
             T = new Matrix4x4();
@@ -129,40 +129,40 @@ public class BoundedSolidTestSelector
                 mySolid, mySolid.findFace(1), T);
 
             break;
-          case 13:
+          case CREATE_GLUED_CILINDERS:
             mySolid = createGluedCilinders();
             break;
-          case 14:
+          case EULER_OPERATORS_TEST:
             mySolid = eulerOperatorsTest();
             break;
-          case 15:
+          case ROTATIONAL_SWEEP_TEST:
             mySolid = rotationalSweepTest();
             break;
-          case 16:
+          case SPLIT_TEST_PART_1:
             mySolid = splitTest(1);
             break;
-          case 17:
+          case SPLIT_TEST_PART_2:
             mySolid = splitTest(2);
             break;
-          case 18:
+          case SPLIT_TEST_PART_3:
             mySolid = splitTest(3);
             break;
-          case 19:
+          case CSG_TEST_PART_1:
             mySolid = csgTest(1, model.csgOperation, model.csgSample, model.debugCsg);
             model.debugCsg = false;
             break;
-          case 20:
+          case CSG_TEST_PART_2:
             mySolid = csgTest(2, model.csgOperation, model.csgSample, model.debugCsg);
             model.debugCsg = false;
             break;
-          case 21:
+          case CSG_TEST_PART_3:
             mySolid = csgTest(3, model.csgOperation, model.csgSample, model.debugCsg);
             model.debugCsg = false;
             break;
-          case 22:
+          case FEATURED_OBJECT:
             mySolid = featuredObject();
             break;
-          case 23:
+          case IMPORT_OR_FEATURED_OBJECT:
             File fd = new File("/tmp/solid.bin");
             if ( fd.exists() ) {
                 mySolid = importFromFile("/tmp/solid.bin");
@@ -171,7 +171,8 @@ public class BoundedSolidTestSelector
                 mySolid = featuredObject();
             }
             break;
-          case 2: default:
+          case CREATE_HOLED_BOX:
+          default:
             mySolid = createHoledBox();
             break;
         }
@@ -194,14 +195,14 @@ public class BoundedSolidTestSelector
         catch ( IOException e ) {
             VSDK.reportMessageWithException(
                 BoundedSolidTestSelector.class,
-                VSDK.FATAL_ERROR,
+                VSDK.WARNING,
                 "importFromFile",
                 "Error reading solid from file " + filename, e);
         }
         catch ( ClassNotFoundException e ) {
             VSDK.reportMessageWithException(
                 BoundedSolidTestSelector.class,
-                VSDK.FATAL_ERROR,
+                VSDK.WARNING,
                 "importFromFile",
                 "Error reading solid from file " + filename, e);
         }

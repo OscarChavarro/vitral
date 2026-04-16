@@ -20,10 +20,12 @@ import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
 public class JoglDebuggerRenderer implements GLEventListener
 {
     private final DebuggerModel model;
+    private final JoglDebuggerHudRenderer hudRenderer;
 
     public JoglDebuggerRenderer(DebuggerModel model)
     {
         this.model = model;
+        this.hudRenderer = new JoglDebuggerHudRenderer(model);
     }
 
     public void refreshCanvasAfterWindowModeChange()
@@ -139,6 +141,10 @@ public class JoglDebuggerRenderer implements GLEventListener
             gl.glEnd();
         }
 
+        if ( model.solid == null ) {
+            return;
+        }
+
         //-----------------------------------------------------------------
         JoglMaterialRenderer.activate(gl, model.material);
         JoglLightRenderer.activate(gl, model.light1);
@@ -204,6 +210,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         JoglCameraRenderer.activate(gl, model.camera);
 
         drawObjectsGL(gl);
+        hudRenderer.draw(drawable);
     }
    
     /** Not used method, but needed to instanciate GLEventListener
@@ -211,7 +218,7 @@ public class JoglDebuggerRenderer implements GLEventListener
     */
     @Override
     public void init(GLAutoDrawable drawable) {
-        
+        hudRenderer.init(drawable);
     }
 
     /** Not used method, but needed to instanciate GLEventListener
@@ -219,7 +226,7 @@ public class JoglDebuggerRenderer implements GLEventListener
     */
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        
+        hudRenderer.dispose(drawable);
     }
     
     /** Called to indicate the drawing surface has been moved and/or resized
@@ -239,5 +246,6 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glViewport(0, 0, width, height); 
 
         model.camera.updateViewportResize(width, height);
+        hudRenderer.updateViewportSize(width, height);
     }
 }

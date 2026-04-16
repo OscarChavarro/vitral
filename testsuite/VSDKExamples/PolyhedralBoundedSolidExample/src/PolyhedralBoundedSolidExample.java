@@ -42,7 +42,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         joglDebuggerRenderer = new JoglDebuggerRenderer(model);
 
         // Initial solid
-        model.solid = PolyhedralBoundedSolidModelingTools.buildSolid(model);
+        buildSolidWithRecovery();
     }
 
     private GLCanvas createGUI()
@@ -69,7 +69,35 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private void rebuildSolid()
     {
-        model.solid = PolyhedralBoundedSolidModelingTools.buildSolid(model);
+        buildSolidWithRecovery();
+    }
+
+    private void buildSolidWithRecovery()
+    {
+        try {
+            model.clearErrorState();
+            model.solid = PolyhedralBoundedSolidModelingTools.buildSolid(model);
+            if ( model.solid == null ) {
+                throw new IllegalStateException("Solid builder returned null");
+            }
+        }
+        catch ( Throwable e ) {
+            model.setErrorState(formatBuildErrorMessage(e));
+        }
+    }
+
+    private String formatBuildErrorMessage(Throwable e)
+    {
+        StringBuilder msg = new StringBuilder();
+        msg.append("Build error");
+        if ( model.solidModelName != null ) {
+            msg.append(" [").append(model.solidModelName.name()).append("]");
+        }
+        msg.append(": ").append(e.getClass().getSimpleName());
+        if ( e.getMessage() != null && !e.getMessage().isEmpty() ) {
+            msg.append(" - ").append(e.getMessage());
+        }
+        return msg.toString();
     }
 
     private void repaintCanvas()
