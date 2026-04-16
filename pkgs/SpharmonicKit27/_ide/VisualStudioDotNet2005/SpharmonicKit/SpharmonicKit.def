@@ -1,6 +1,0 @@
-; SpharmonicKit.def: declara los parámetros de módulo del archivo DLL.
-
-LIBRARY      "SpharmonicKit"
-
-EXPORTS
-    ; Colocar aquí las exportaciones explícitas
