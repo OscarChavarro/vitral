@@ -18,7 +18,9 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.awt.GLCanvas;
 
 // VitralSDK classes
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 
@@ -43,6 +45,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
         // Initial solid
         buildSolidWithRecovery();
+        recenterOrbiterAfterModelChange(null, new Vector3D(0, 0, 0));
     }
 
     private GLCanvas createGUI()
@@ -105,6 +108,49 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         if ( model.canvas != null ) {
             model.canvas.repaint();
         }
+    }
+
+    private Vector3D calculateSolidCenter()
+    {
+        if ( model.solid == null ) {
+            return new Vector3D(0, 0, 0);
+        }
+
+        double[] minMax = model.solid.getMinMax();
+        if ( minMax == null || minMax.length < 6 ) {
+            return new Vector3D(0, 0, 0);
+        }
+
+        return new Vector3D(
+            (minMax[0] + minMax[3]) / 2.0,
+            (minMax[1] + minMax[4]) / 2.0,
+            (minMax[2] + minMax[5]) / 2.0);
+    }
+
+    private void recenterOrbiterAfterModelChange(SolidModelNames previousModelName,
+                                                 Vector3D previousPointOfInterest)
+    {
+        if ( previousModelName == model.solidModelName ) {
+            return;
+        }
+        if ( model.solid == null ) {
+            return;
+        }
+        if ( !(model.cameraController instanceof CameraControllerOrbiter) ) {
+            return;
+        }
+
+        CameraControllerOrbiter orbiterController =
+            (CameraControllerOrbiter)model.cameraController;
+
+        Vector3D previousEye = model.camera.getPosition();
+        Vector3D relativeVector = previousEye.substract(previousPointOfInterest);
+        Vector3D newPointOfInterest = calculateSolidCenter();
+        Vector3D newEye = newPointOfInterest.add(relativeVector);
+
+        orbiterController.setPointOfInterest(newPointOfInterest);
+        model.camera.setPosition(newEye);
+        model.camera.setFocusedPositionMaintainingOrthogonality(newPointOfInterest);
     }
 
     private void toggleFullscreenMode()
@@ -334,6 +380,13 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     @Override
     public void keyPressed(java.awt.event.KeyEvent e) {
         KeyEvent event = AwtSystem.awt2vsdkEvent(e);
+        SolidModelNames previousModelName = model.solidModelName;
+        Vector3D previousPointOfInterest = new Vector3D(0, 0, 0);
+        if ( model.cameraController instanceof CameraControllerOrbiter ) {
+            CameraControllerOrbiter orbiterController =
+                (CameraControllerOrbiter)model.cameraController;
+            previousPointOfInterest = orbiterController.getPointOfInterest();
+        }
 
         if ( keyboardInteractionTechniques.processPressed(
                  model, event, new DebuggerKeyboardInteractionTechniques.Actions() {
@@ -352,6 +405,8 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
                          PolyhedralBoundedSolidExample.this.toggleFullscreenMode();
                      }
                  }) ) {
+            recenterOrbiterAfterModelChange(
+                previousModelName, previousPointOfInterest);
             repaintCanvas();
         }
     }

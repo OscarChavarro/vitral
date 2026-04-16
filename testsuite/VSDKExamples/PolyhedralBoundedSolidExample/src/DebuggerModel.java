@@ -12,7 +12,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
 import vsdk.toolkit.gui.CameraController;
-import vsdk.toolkit.gui.CameraControllerAquynza;
+import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 
 public class DebuggerModel
@@ -52,8 +52,9 @@ public class DebuggerModel
         camera.setRotation(R);
 
         quality = new RendererConfiguration();
+        quality.changeWires();
         qualityController = new RendererConfigurationController(quality);
-        cameraController = new CameraControllerAquynza(camera);
+        cameraController = new CameraControllerOrbiter(camera);
 
         material = defaultMaterial();
         light1 = new Light(Light.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
