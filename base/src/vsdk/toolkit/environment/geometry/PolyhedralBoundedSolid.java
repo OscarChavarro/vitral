@@ -894,7 +894,7 @@ public class PolyhedralBoundedSolid extends Solid {
             return false;
         }
         he2 = oldface2.findHalfEdge(v1, v3);
-        if ( he1 == null ) {
+        if ( he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Edge " + v1 + " - " + v3 + " not found in face " + f2 + ".");
             return false;
@@ -930,7 +930,7 @@ public class PolyhedralBoundedSolid extends Solid {
             return false;
         }
         he2 = oldface1.findHalfEdge(v3);
-        if ( he1 == null ) {
+        if ( he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Edge " + v3 + " - * not found in face " + f1 + ".");
             return false;
@@ -982,9 +982,9 @@ public class PolyhedralBoundedSolid extends Solid {
             return false;
         }
         he2 = oldface2.findHalfEdge(v3, v4);
-        if ( he1 == null ) {
+        if ( he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "mef",
-            "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
+            "Edge " + v3 + " - " + v4 + " not found in face " + f2 + ".");
             return false;
         }
         lmef(he1, he2, newfaceid);
@@ -1028,9 +1028,9 @@ public class PolyhedralBoundedSolid extends Solid {
             return false;
         }
         he2 = oldface2.findHalfEdge(v3, v4);
-        if ( he1 == null ) {
+        if ( he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "kemr",
-            "Edge " + v3 + " - " + v3 + " not found in face " + f2 + ".");
+            "Edge " + v3 + " - " + v4 + " not found in face " + f2 + ".");
             return false;
         }
         lkemr(he1, he2);
@@ -1169,9 +1169,9 @@ public class PolyhedralBoundedSolid extends Solid {
             double minX = Double.MAX_VALUE;
             double minY = Double.MAX_VALUE;
             double minZ = Double.MAX_VALUE;
-            double maxX = Double.MIN_VALUE;
-            double maxY = Double.MIN_VALUE;
-            double maxZ = Double.MIN_VALUE;
+            double maxX = -Double.MAX_VALUE;
+            double maxY = -Double.MAX_VALUE;
+            double maxZ = -Double.MAX_VALUE;
             int i;
 
             for ( i = 0; i < verticesList.size(); i++ ) {
@@ -1367,15 +1367,36 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidFace face;
 
         face = findFace(faceid);
+        if ( face == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                "Face " + faceid + " not found.");
+            return;
+        }
+        if ( face.boundariesList.size() < 2 ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                "Face " + faceid + " does not contain at least two loops.");
+            return;
+        }
 
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge h1, h2, h1next;
 
         h1 = face.boundariesList.get(0).boundaryStartHalfEdge;
         h2 = face.boundariesList.get(1).boundaryStartHalfEdge;
+        if ( h1 == null || h2 == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                "Missing loop boundary start halfedge.");
+            return;
+        }
 
+        _PolyhedralBoundedSolidHalfEdge h2start = h2;
         while ( !h1.vertexPositionMatch(h2, 10*VSDK.EPSILON) ) {
             h2 = h2.next();
+            if ( h2 == h2start ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                    "No matching starting vertex found between candidate loops.");
+                return;
+            }
         }
 
         lmekr(h1, h2);

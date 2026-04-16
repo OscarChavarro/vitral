@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.awt.GLCanvas;
 
 // VitralSDK classes
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
@@ -42,6 +43,10 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         keyboardInteractionTechniques = new DebuggerKeyboardInteractionTechniques();
         mouseInteractionTechniques = new DebuggerMouseInteractionTechniques();
         joglDebuggerRenderer = new JoglDebuggerRenderer(model);
+
+        // Keep the debugger process alive and surface fatal kernel issues as exceptions.
+        VSDK.setWithSystemExit(false);
+        VSDK.setWithFatalExceptions(true);
 
         // Initial solid
         buildSolidWithRecovery();

@@ -55,7 +55,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static final int DEBUG_04_VERTEXVERTEXCLASIFFIER = 0x08;
     private static final int DEBUG_05_CONNECT = 0x10;
     private static final int DEBUG_06_FINISH = 0x20;
-    private static final int DEBUG_99_SHOWOPERATIONS = 0x20;
+    private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
 
     /**
     The integer `debugFlags` is a bitwise combination of debugging flags

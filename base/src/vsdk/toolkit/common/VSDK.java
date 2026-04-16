@@ -86,6 +86,7 @@ public class VSDK
     public static final int DEBUG = 4;
     public static final int VERBOSE = 5;
     private static boolean withSystemExit;
+    private static boolean withFatalExceptions;
 
     // Primitive types
     public static final int POINT = 0;
@@ -108,10 +109,39 @@ public class VSDK
 
     static {
         withSystemExit = true;
+        withFatalExceptions = true;
         primitiveCount = new int[PRIMITIVE_TYPE_COUNT];
         intersectionCount = new int[INTERSECTION_TYPE_COUNT];
         resetPrimitiveCounters();
         resetIntersectionCounters();
+    }
+
+    private static void processFatalError(String method, String message, Exception cause)
+    {
+        if ( withSystemExit ) {
+            System.exit(1);
+            return;
+        }
+
+        if ( !withFatalExceptions ) {
+            return;
+        }
+
+        String m;
+        if ( method == null || method.length() == 0 ) {
+            m = "VSDK fatal error";
+        }
+        else {
+            m = "VSDK fatal error at " + method;
+        }
+        if ( message != null && message.length() > 0 ) {
+            m = m + ": " + message;
+        }
+
+        if ( cause != null ) {
+            throw new VSDKFatalException(m, cause);
+        }
+        throw new VSDKFatalException(m);
     }
 
     public static void resetPrimitiveCounters()
@@ -353,10 +383,7 @@ public class VSDK
                 }
             }
 
-            // This line should not be used on servlet based systems
-            if ( withSystemExit ) {
-                System.exit(1);
-            }
+            processFatalError(method, message, ee);
         }
     }
     
@@ -395,10 +422,7 @@ public class VSDK
                     System.err.println(report[i]);
                 }
             }
-            // This line should not be used on servlet based systems
-            if ( withSystemExit ) {
-                System.exit(1);
-            }
+            processFatalError(method, message, null);
         }
     }
 
@@ -417,6 +441,16 @@ public class VSDK
     public static void setWithSystemExit(boolean flag)
     {
         withSystemExit = flag;
+    }
+
+    /**
+    Controls whether FATAL_ERROR reports should raise an unchecked exception
+    when process termination is disabled with setWithSystemExit(false).
+    @param flag
+    */
+    public static void setWithFatalExceptions(boolean flag)
+    {
+        withFatalExceptions = flag;
     }
 
     /**

@@ -92,17 +92,7 @@ Primary theory baseline reviewed from OCR PDFs:
 - Intermediate special faces are allowed by design, but there is no explicit dual-mode validator (`strict final` vs `intermediate permissive`).
 - Impact: hard to separate acceptable transient states from final invalid outputs.
 
-### E) Catastrophic failure mode in core error path
-- `VSDK.reportMessage(..., FATAL_ERROR, ...)` calls `System.exit(1)` by default.
-- Many geometric/topological anomalies can terminate the whole process.
-- Impact: debugger/test harness can die instead of reporting recoverable diagnostic failures.
-
-### F) Concrete code defects that directly hurt resilience
-- High-level operators include repeated null-check copy-paste errors (checking `he1` where `he2` should be checked), enabling downstream null dereference paths.
-- `calculateMinMaxPositions` initializes maxima with `Double.MIN_VALUE`, which is wrong for negative-coordinate solids.
-- Debug bitmask duplication (`DEBUG_06_FINISH` and `DEBUG_99_SHOWOPERATIONS` both `0x20`) weakens debug control semantics.
-
-### G) Recursive mutation style increases fragility
+### E) Recursive mutation style increases fragility
 - `maximizeFaces` recursively restarts after each mutation.
 - `processEdge` recurses after splitting during edge-face processing.
 - Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
@@ -131,37 +121,18 @@ Primary theory baseline reviewed from OCR PDFs:
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 0. Safety Baseline | Stop catastrophic failures during diagnosis | Add non-fatal mode for kernel errors in test/debug runs; convert hard exits into typed exceptions in harness context | Stable crash-reporting harness | No unexpected process exits in regression suite |
-| 1. Correctness Bugs First | Remove obvious deterministic faults | Fix null-check copy-paste bugs in high-level operators; fix min/max initialization bug; fix duplicated debug flag mask; add guard in `loopGlue` matching loop | Patch set + unit tests for each bug | All new bug tests pass, no regressions in existing samples |
 | 2. Validation Contract | Separate transient from final validity | Introduce `validateModelIntermediate()` and `validateModelStrict()`; add strict checks for loop self-intersection, loop-loop intersection, and face-face improper intersections | New validation API + diagnostics report schema | All final outputs from split/set-op pass strict validation on baseline corpus |
 | 3. Numerical Robustness | Make predicates scale-aware and reproducible | Introduce tolerance context (`eps`, `bigEps`, relative scale); centralize predicate calls; replace ad hoc multipliers with policy-driven thresholds | Numeric policy module + predicate audit | Cross-scale test corpus yields stable classification outcomes |
 | 4. Boolean Completeness | Close known algorithmic gaps | Implement containment handling for no-intersection cases (Ch15 Problem 15.1); complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap handling | Boolean completion patch + scenario tests | Correct results for containment, disjoint, coplanar-overlap, and touching-only suites |
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
 
-### 7.1) Error Handling Implementation Checkpoint (2026-04-17)
-
-- **Kernel fatal-path behavior remains process-terminating by default**:
-  - `VSDK.reportMessage(..., FATAL_ERROR, ...)` and `reportMessageWithException(..., FATAL_ERROR, ...)` still call `System.exit(1)` when `withSystemExit` is true.
-  - There is still no production/test wiring that sets `VSDK.setWithSystemExit(false)` before risky modeling/set-op flows.
-- **Harness-level recovery exists but is only partial**:
-  - `PolyhedralBoundedSolidExample` wraps solid rebuild paths in `try/catch (Throwable)` and stores an error state (`model.setErrorState(...)`) instead of crashing on regular thrown exceptions.
-  - This recovery does **not** intercept kernel fatal exits if `withSystemExit` remains enabled.
-- **Phase 1 bug-fix items related to resilience are still pending in core code**:
-  - Null-check copy/paste defects in high-level operators remain present (`mev/smef/mef/kemr` validate `he1` where `he2` should be validated).
-  - `PolyhedralBoundedSolid.calculateMinMaxPositions` still initializes maxima with `Double.MIN_VALUE`.
-  - Debug mask duplication is still present in set-op (`DEBUG_06_FINISH` and `DEBUG_99_SHOWOPERATIONS` both `0x20`).
-  - `loopGlue` still lacks defensive precondition checks before boundary access/use.
-
-**Net status:** Phase 0 and the error-handling subset of Phase 1 are still mostly **pending** in kernel code; current improvements are primarily at the visual debugger/harness layer.
-
 ## 8) Priority Recommendations
-- Implement Phase 1 fixes immediately (low cost, high impact).
 - Implement containment handling and strict-vs-intermediate validation (Phases 2 and 4 core subset).
 - Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
 - Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
 
 ## 9) Final Assessment
-The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. However, it is not yet production-robust due to incomplete edge-case coverage, tolerance strategy limitations, and failure semantics that are too catastrophic for resilient CAD workflows.
+The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. However, it is not yet production-robust due to incomplete edge-case coverage and tolerance strategy limitations.
 
 With the phased plan above, the project can realistically evolve from "algorithmically faithful and educational" to "robust and resilient CAD kernel" while preserving its current architectural strengths.
