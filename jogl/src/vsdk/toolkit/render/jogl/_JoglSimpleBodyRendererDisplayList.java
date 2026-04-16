@@ -44,7 +44,7 @@ implements Comparable<_JoglSimpleBodyRendererDisplayList>
         gval = geometryIds.get(g);
 
         if ( gval == null ) {
-            geometryIds.put(g, new Integer(nextId));
+            geometryIds.put(g, Integer.valueOf(nextId));
             nextId++;
         }
 

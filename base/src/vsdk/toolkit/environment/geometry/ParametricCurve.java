@@ -216,7 +216,7 @@ public class ParametricCurve extends Curve {
             return;
         }
         points.add(point);
-        types.add(new Integer(type));
+        types.add(Integer.valueOf(type));
     }
 
     /**
@@ -244,7 +244,7 @@ public class ParametricCurve extends Curve {
             return;
         }
         points.add(position, point);
-        types.add(position, new Integer(type));
+        types.add(position, Integer.valueOf(type));
     }
 
     public Vector3D[] getPoint(int pos) {

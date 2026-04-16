@@ -6,9 +6,6 @@ cd ..
 cd _JOGLPbufferExample
 ./run.sh
 cd ..
-cd _JAIHelloWorld
-./run.sh
-cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd OfflineExamples

@@ -6,9 +6,6 @@ cd ..
 cd _JOGLPbufferExample
 ./compile.sh
 cd ..
-cd _JAIHelloWorld
-#./compile.sh
-cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd OfflineExamples
@@ -19,9 +16,11 @@ cd ImageOfflineExample
 ./compile.sh
 cd ..
 cd Rasterizer2DExample
-./compile1.sh
-./compile2.sh
-./compile3.sh
+if [ -f ../../gradle/wrapper/gradle-wrapper.jar ]; then
+  ../../gradlew :testsuite:OfflineExamples:Rasterizer2DExample:build
+else
+  gradle -p ../.. :testsuite:OfflineExamples:Rasterizer2DExample:build
+fi
 cd ..
 cd WireframeOfflineExample
 ./compile.sh

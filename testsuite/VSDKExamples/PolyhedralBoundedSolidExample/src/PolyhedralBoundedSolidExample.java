@@ -51,6 +51,7 @@ import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.processing.GeometricModeler;
 
+@SuppressWarnings("removal")
 public class PolyhedralBoundedSolidExample extends Applet implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 

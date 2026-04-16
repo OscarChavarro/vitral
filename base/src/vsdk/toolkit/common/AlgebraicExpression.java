@@ -44,7 +44,7 @@ public class AlgebraicExpression extends FundamentalEntity
     public final void
     defineValue(String name, double val)
     {
-        values.put(name, new Double(val));
+        values.put(name, Double.valueOf(val));
     }
 
     @Override
@@ -157,7 +157,7 @@ public class AlgebraicExpression extends FundamentalEntity
                 continue;
             }
             if ( level == 0 && isOperator(tokens.get(i)) ) {
-                topLevelConnectorIndexes.add(new Integer(i));
+                topLevelConnectorIndexes.add(Integer.valueOf(i));
             }
         }
 

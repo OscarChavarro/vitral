@@ -326,7 +326,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
             //if ( a != b || a != c || b != c ) {
                 int index;
-                Long l = new Long(val);
+                Long l = Long.valueOf(val);
                 index = java.util.Collections.binarySearch(vals, l);
                 if ( index < 0 ) {
                     vals.add((-index)-1, l);

@@ -1,0 +1,73 @@
+// Rasterizer2DExample module descriptor.
+// When this file is the root project (running from this folder), it bootstraps
+// a standalone multi-project build including only base.
+if (project == rootProject) {
+    apply plugin: 'application'
+
+    allprojects {
+        group = 'co.cubestudio'
+        version = '1.0'
+
+        repositories {
+            mavenCentral()
+        }
+    }
+
+    configure(subprojects + [project]) {
+        apply plugin: 'java-library'
+
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(17)
+            }
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = 'UTF-8'
+            options.release = 17
+        }
+
+        def srcDir = file('src').exists() ? 'src' : '.'
+        sourceSets {
+            main {
+                java {
+                    setSrcDirs([srcDir])
+                    exclude 'build/**'
+                    exclude 'target/**'
+                    exclude '.gradle/**'
+                    exclude 'classes/**'
+                    exclude 'doc/**'
+                }
+                resources.setSrcDirs([])
+            }
+            test {
+                java.setSrcDirs([])
+                resources.setSrcDirs([])
+            }
+        }
+    }
+
+    dependencies {
+        implementation project(':base')
+    }
+
+    application {
+        mainClass = providers.gradleProperty('runMainClass').orElse('')
+    }
+
+    tasks.named('run', JavaExec) {
+        standardInput = System.in
+        def rawJvmArgs = project.findProperty('runJvmArgs')?.toString()
+        if (rawJvmArgs) {
+            def parsedJvmArgs = rawJvmArgs.split('\\|').findAll { !it.isBlank() }
+            if (!parsedJvmArgs.isEmpty()) {
+                jvmArgs(parsedJvmArgs)
+            }
+        }
+        doFirst {
+            if (application.mainClass.get().isBlank()) {
+                throw new GradleException("Missing -PrunMainClass for :run")
+            }
+        }
+    }
+}

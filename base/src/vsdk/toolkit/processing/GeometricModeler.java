@@ -199,12 +199,12 @@ public class GeometricModeler extends ProcessingElement
                     solid.getMaxVertexId()+1, newPos);
                 newfaceid = solid.getMaxFaceId()+1;
                 solid.lmef(scan.previous(), scan.next().next(), newfaceid);
-                newfaces.add(new Integer(newfaceid));
+                newfaces.add(Integer.valueOf(newfaceid));
                 scan = (scan.next().mirrorHalfEdge()).next();
             }
             newfaceid = solid.getMaxFaceId()+1;
             solid.lmef(scan.previous(), scan.next().next(), newfaceid);
-            newfaces.add(new Integer(newfaceid));
+            newfaces.add(Integer.valueOf(newfaceid));
         }
 
         _PolyhedralBoundedSolidFace newface;

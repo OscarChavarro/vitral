@@ -35,6 +35,7 @@ is deleted, this will continue working as a simple java application.
 This is a simple program recommended for use as a template in the development
 of VitralSDK programs by incremental modification.
 */
+@SuppressWarnings("removal")
 public class CameraExample extends Applet implements
     GLEventListener,                                                    // JOGL
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener // GUI

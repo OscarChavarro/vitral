@@ -1,2 +1,3 @@
-java -classpath ./classes:../../../lib/vsdk.jar PolygonTest
+#!/usr/bin/env bash
+gradle run -PrunMainClass=PolygonTest
 display output.bmp

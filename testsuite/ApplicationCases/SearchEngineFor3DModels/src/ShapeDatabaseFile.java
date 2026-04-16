@@ -35,18 +35,6 @@ public class ShapeDatabaseFile implements ShapeDatabase
         descriptorsArray = new ArrayList<GeometryMetadata>();
     }
 
-    public void finalize()
-    {
-        int i;
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.set(i, null);
-        }
-        for ( i = 0; i < descriptorsArray.size(); i++ ) {
-            descriptorsArray.remove(0);
-        }
-        descriptorsArray = null;
-    }
-
     public boolean connect()
     {
         System.out.print("Reading database ... ");

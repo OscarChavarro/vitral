@@ -808,10 +808,10 @@ public class ReaderAse extends PersistenceElement
             smoothGroupId = triangleData.get(5*i+3);
 
             materialId = triangleData.get(5*i+4);
-            group = smoothGroups.get(new Integer(smoothGroupId));
+            group = smoothGroups.get(Integer.valueOf(smoothGroupId));
             if ( group == null ) {
                 group = new _ReaderAseMeshCache();
-                smoothGroups.put(new Integer(smoothGroupId), group);
+                smoothGroups.put(Integer.valueOf(smoothGroupId), group);
             }
             group.addTriangle(p0, p1, p2, materialId);
         }

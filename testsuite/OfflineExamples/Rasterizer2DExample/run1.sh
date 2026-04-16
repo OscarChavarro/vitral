@@ -1,2 +1,3 @@
-java -classpath ./classes:../../../lib/vsdk.jar LineTest
+#!/usr/bin/env bash
+gradle run -PrunMainClass=LineTest
 display output.bmp
