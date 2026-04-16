@@ -7,9 +7,6 @@ rm -rf `find . -type d -name "lib"` `find . -type d -name "classes"` testsuite/A
 if [ -f ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin ]; then
     rm -i ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin
 fi
-cd testsuite/_APITests/_JNIExample
-./clean.sh
-cd ../../..
 cd testsuite/VSDKExamples/PolyhedralBoundedSolidExample
 rm -rf outputA* outputB* outputR*
 cd ../../..

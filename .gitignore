@@ -19,3 +19,9 @@ pkgs/SpharmonicKit27/bin/
 pkgs/SpharmonicKit27/classes/
 pkgs/SpharmonicKit27/tmp/
 gradle/wrapper/gradle-wrapper.jar
+
+# testsuite generated assets
+testsuite/**/output/
+testsuite/**/*.ppm
+testsuite/**/*.jpg
+testsuite/**/*.bmp

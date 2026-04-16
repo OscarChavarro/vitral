@@ -68,7 +68,6 @@ subprojects { subproject ->
 
     def legacyExternalProjects = [
         ':testsuite:ApplicationCases:SciVisApplication',
-        ':testsuite:ApplicationCases:jaitest',
         ':testsuite:_APITests:_WiiRemoteJHelloWorld'
     ]
     def skipLegacy = legacyExternalProjects.contains(subproject.path) && !rootProject.hasProperty('enableLegacyApis')
