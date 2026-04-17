@@ -67,22 +67,17 @@ Primary theory baseline reviewed from OCR PDFs:
 ## 5.1 Completeness status
 - **Euler core**: substantial but partial in global operators and ring movement semantics.
 - **Split**: mostly implemented with extra heuristics, but not fully formalized for all corner cases.
-- **Boolean set operations**: implemented end-to-end but with explicit unsupported/untested branches and known theoretical gaps.
+- **Boolean set operations**: implemented end-to-end with known theoretical gaps around coplanar and touching-only contact handling.
 - **Validation layer**: intermediate and strict flows are in place (planarity, topology, loop strictness, face-face improper intersections), now backed by scale-aware numeric policy.
 
 ## 5.2 Critical robustness risks
 
-### A) Unsupported branches in vertex-vertex classifier/connectivity path
-- `separateEdgeSequence` prints explicit `"NOT SUPPORTED CASE A..E"`.
-- There are comments marking untested paths and fallback reversals in sector reclassification.
-- Impact: fragile behavior in complex coplanar/coincident neighborhoods.
-
-### B) Recursive mutation style increases fragility
+### A) Recursive mutation style increases fragility
 - `maximizeFaces` recursively restarts after each mutation.
 - `processEdge` recurses after splitting during edge-face processing.
 - Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
 
-### C) Numerical Robustness Re-evaluation (Phase 3)
+### B) Numerical Robustness Re-evaluation (Phase 3)
 - `PolyhedralBoundedSolidNumericPolicy` now defines `BREP_EPSILON`, `BREP_BIG_EPSILON`, and scale-aware `ToleranceContext`.
 - Validation execution now uses one numeric context per run (`validateIntermediate` and `validateStrict`), passed through validation strategies.
 - Geometric strict checks (loop self-intersection, loop-loop intersection, face-face improper intersections) now consume centralized policy predicates.
@@ -112,16 +107,18 @@ Primary theory baseline reviewed from OCR PDFs:
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 4. Boolean Completeness | Close remaining algorithmic gaps | Complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap and touching-only handling | Boolean completion patch + scenario tests | Correct results for disjoint, coplanar-overlap, touching-only, and unsupported A-E suites |
+| 4.1 Coplanar Overlap | Formalize coplanar overlap behavior | Define and implement deterministic rules for coplanar-overlap classification/reclassification | Coplanar-overlap patch + scenario tests | Correct and stable results for coplanar overlap suites |
+| 4.2 Touching-Only | Formalize touching-only behavior | Define and implement deterministic rules for touching-only (point/edge/line contact without volumetric overlap) | Touching-only patch + scenario tests | Correct and stable results for touching-only suites |
+| 4.3 Regression Tests | Lock correctness for 4.1-4.2 | Add deterministic regression tests for coplanar-overlap and touching-only scenarios | Regression bundle + fixtures/seeds | Regressions pass consistently and prevent reintroduction of those failures |
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
 
 ## 8) Priority Recommendations
 - Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
 - Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
-- Add deterministic regressions for disjoint, coplanar-overlap, touching-only, and unsupported A-E classifier/connectivity scenarios.
+- Add deterministic regressions for disjoint, coplanar-overlap, and touching-only scenarios.
 
 ## 9) Final Assessment
 The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. Numerical robustness improved materially with a centralized scale-aware tolerance policy and stricter validation contracts.
 
-The main remaining robustness debt is concentrated in unsupported A-E classifier/connectivity branches, coplanar/touching edge cases, and systematic regression coverage.
+The main remaining robustness debt is concentrated in coplanar/touching edge cases and systematic regression coverage.

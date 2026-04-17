@@ -48,9 +48,36 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         VSDK.setWithSystemExit(false);
         VSDK.setWithFatalExceptions(true);
 
+        configureInitialModelFromSystemProperty();
+
         // Initial solid
         buildSolidWithRecovery();
         recenterOrbiterAfterModelChange(null, new Vector3D(0, 0, 0));
+    }
+
+    private void configureInitialModelFromSystemProperty()
+    {
+        String modelProperty = System.getProperty("polySolidModel");
+        if ( modelProperty == null || modelProperty.isBlank() ) {
+            return;
+        }
+
+        try {
+            int modelId = Integer.parseInt(modelProperty);
+            model.solidModelName = SolidModelNames.fromId(modelId);
+            return;
+        }
+        catch ( NumberFormatException e ) {
+            // Not a numeric id; continue with enum-name parsing.
+        }
+
+        try {
+            model.solidModelName = SolidModelNames.valueOf(modelProperty);
+        }
+        catch ( IllegalArgumentException e ) {
+            System.err.println("[PolyhedralBoundedSolidExample] Ignoring unknown "
+                + "polySolidModel='" + modelProperty + "'");
+        }
     }
 
     private GLCanvas createGUI()

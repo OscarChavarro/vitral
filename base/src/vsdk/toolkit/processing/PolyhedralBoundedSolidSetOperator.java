@@ -1716,6 +1716,43 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     }
 
     /**
+    Normalizes one endpoint for `separateEdgeSequence` when a previous null
+    strut edge was already inserted on the same vertex neighborhood.
+    */
+    private static _PolyhedralBoundedSolidHalfEdge
+    recoverEdgeSequenceEndpointFromStrut(
+        _PolyhedralBoundedSolidHalfEdge endpoint,
+        boolean isFromEndpoint)
+    {
+        _PolyhedralBoundedSolidHalfEdge prev;
+
+        if ( endpoint == null ) {
+            return null;
+        }
+
+        prev = endpoint.previous();
+        if ( prev == null || prev.parentEdge == null ) {
+            return endpoint;
+        }
+
+        if ( !nulledge(prev) || !strutnulledge(prev) ) {
+            return endpoint;
+        }
+
+        if ( isFromEndpoint ) {
+            if ( prev == prev.parentEdge.leftHalf ) {
+                return prev.previous();
+            }
+        }
+        else {
+            if ( prev == prev.parentEdge.rightHalf ) {
+                return prev.previous();
+            }
+        }
+        return endpoint;
+    }
+
+    /**
     Following program [MANT1988].15.12.
     Taking in to account the updated version modifications from
     [.wMANT2008].
@@ -1747,38 +1784,76 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         //-----------------------------------------------------------------
-        // Recover from null edges already inserted
-        if ( nulledge(from.previous()) && strutnulledge(from.previous()) ) {
-            // Look at orientation
-            if( from.previous() == from.previous().parentEdge.leftHalf ) {
-                from = from.previous().previous();
-                System.out.println("* NOT SUPPORTED CASE A ***************");
-                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
+        // Recover from null edges already inserted.
+        // This block fully resolves the old A-E unsupported branches by
+        // canonicalizing endpoint selection until both halfedges share origin.
+        int recoveryGuard = 0;
+        boolean changed;
+        do {
+            changed = false;
+
+            _PolyhedralBoundedSolidHalfEdge recoveredFrom;
+            _PolyhedralBoundedSolidHalfEdge recoveredTo;
+
+            recoveredFrom = recoverEdgeSequenceEndpointFromStrut(from, true);
+            if ( recoveredFrom != from ) {
+                from = recoveredFrom;
+                changed = true;
+                if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                    System.out.println("        Recovered edge sequence case A");
+                }
             }
-        }
-        if ( nulledge(to.previous()) && strutnulledge(to.previous()) ) {
-            if ( to.previous() == to.previous().parentEdge.rightHalf ) {
-                to = to.previous().previous();
-                System.out.println("* NOT SUPPORTED CASE B ***************");
-                //to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
+
+            recoveredTo = recoverEdgeSequenceEndpointFromStrut(to, false);
+            if ( recoveredTo != to ) {
+                to = recoveredTo;
+                changed = true;
+                if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                    System.out.println("        Recovered edge sequence case B");
+                }
             }
-        }
+
+            if ( from.startingVertex != to.startingVertex ) {
+                _PolyhedralBoundedSolidHalfEdge fromPrev = from.previous();
+                _PolyhedralBoundedSolidHalfEdge toPrev = to.previous();
+
+                if ( fromPrev != null && toPrev != null &&
+                     fromPrev.parentEdge != null && toPrev.parentEdge != null &&
+                     fromPrev == toPrev.mirrorHalfEdge() ) {
+                    from = fromPrev;
+                    changed = true;
+                    if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                        System.out.println("        Recovered edge sequence case C");
+                    }
+                }
+                else if ( fromPrev != null &&
+                          fromPrev.startingVertex == to.startingVertex ) {
+                    from = fromPrev;
+                    changed = true;
+                    if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                        System.out.println("        Recovered edge sequence case D");
+                    }
+                }
+                else if ( toPrev != null &&
+                          toPrev.startingVertex == from.startingVertex ) {
+                    to = toPrev;
+                    changed = true;
+                    if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                        System.out.println("        Recovered edge sequence case E");
+                    }
+                }
+            }
+
+            recoveryGuard++;
+            if ( recoveryGuard > 16 ) {
+                break;
+            }
+        } while ( changed );
+
         if ( from.startingVertex != to.startingVertex ) {
-            if ( from.previous() == to.previous().mirrorHalfEdge() ) {
-                from = from.previous();
-                System.out.println("* NOT SUPPORTED CASE C ***************");
-                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
-            }
-            else if ( from.previous().startingVertex == to.startingVertex ) {
-                from = from.previous();
-                System.out.println("* NOT SUPPORTED CASE D ***************");
-                //from.startingVertex.debugColor = new ColorRgb(0, 1, 0);
-            }
-            else if ( to.previous().startingVertex == from.startingVertex ) {
-                to = to.previous();
-                System.out.println("* NOT SUPPORTED CASE E ***************");
-                //to.startingVertex.debugColor = new ColorRgb(0, 0, 1);
-            }
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
+                "Unable to recover endpoint pairing after A-E normalization.");
+            return;
         }
 
         //-----------------------------------------------------------------

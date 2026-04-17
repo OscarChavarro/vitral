@@ -160,6 +160,26 @@ public class BoundedSolidTestSelector
             mySolid = csgTest(3, model.csgOperation, model.csgSample, model.debugCsg);
             model.debugCsg = false;
             break;
+          case CSG_MANT1988_15_2_HOLED_INTERSECTION:
+            mySolid = csgMant1988_15_2Case(
+                -1, GeometricModeler.INTERSECTION, model.debugCsg);
+            model.debugCsg = false;
+            break;
+          case CSG_MANT1988_15_2_LIMIT_INTERSECTION:
+            mySolid = csgMant1988_15_2Case(
+                0, GeometricModeler.INTERSECTION, model.debugCsg);
+            model.debugCsg = false;
+            break;
+          case CSG_MANT1988_15_2_LIMIT_DIFFERENCE:
+            mySolid = csgMant1988_15_2Case(
+                0, GeometricModeler.DIFFERENCE, model.debugCsg);
+            model.debugCsg = false;
+            break;
+          case CSG_MANT1988_15_2_OPEN_DIFFERENCE:
+            mySolid = csgMant1988_15_2Case(
+                1, GeometricModeler.DIFFERENCE, model.debugCsg);
+            model.debugCsg = false;
+            break;
           case FEATURED_OBJECT:
             mySolid = featuredObject();
             break;
@@ -1077,6 +1097,16 @@ public class BoundedSolidTestSelector
             return operands[1];
         }
         return res;
+    }
+
+    private static PolyhedralBoundedSolid csgMant1988_15_2Case(
+        int situation, int op, boolean withDebug)
+    {
+        PolyhedralBoundedSolid[] operands;
+
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(
+            situation);
+        return GeometricModeler.setOp(operands[0], operands[1], op, withDebug);
     }
 
     public static PolyhedralBoundedSolid featuredObject()
