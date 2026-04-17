@@ -96,19 +96,124 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
     }
 
-    private static boolean hasCoplanarOverlap(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr)
-    {
-        int i;
+    private static final int COPLANAR_OP_UNION = 0;
+    private static final int COPLANAR_OP_INTERSECTION = 1;
+    private static final int COPLANAR_OP_DIFFERENCE = 2;
 
-        for ( i = 0; i < nbr.size(); i++ ) {
-            if ( nbr.get(i).coplanarRelation ==
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                    .COPLANAR_OVERLAP ) {
-                return true;
+    private static final int COPLANAR_SIDE_A_VS_B = 0;
+    private static final int COPLANAR_SIDE_B_VS_A = 1;
+
+    private static final int COPLANAR_ORIENTATION_SAME = 0;
+    private static final int COPLANAR_ORIENTATION_OPPOSITE = 1;
+
+    /*
+    Coplanar overlap decision table for vertex/face classifier.
+
+    Dimensions: [op][side][orientation]
+      - op: UNION / INTERSECTION / DIFFERENCE
+      - side: A_vs_B or B_vs_A
+      - orientation: same or opposite normals
+    */
+    private static final int[][][] COPLANAR_VERTEX_FACE_CLASS_TABLE = {
+        // UNION
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN
+            }
+        },
+        // INTERSECTION
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            }
+        },
+        // DIFFERENCE
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
             }
         }
-        return false;
+    };
+
+    /*
+    Coplanar overlap decision table for vertex/vertex classifier.
+
+    Dimensions: [op][orientation][solidSide]
+      - op: UNION / INTERSECTION / DIFFERENCE
+      - orientation: same or opposite normals
+      - solidSide: A-side or B-side sector class
+    */
+    private static final int[][][] COPLANAR_VERTEX_VERTEX_CLASS_TABLE = {
+        // UNION
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN
+            }
+        },
+        // INTERSECTION
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            }
+        },
+        // DIFFERENCE
+        {
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            },
+            {
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT
+            }
+        }
+    };
+
+    private static int coplanarOpIndex(int op)
+    {
+        if ( op == UNION ) {
+            return COPLANAR_OP_UNION;
+        }
+        if ( op == DIFFERENCE ) {
+            return COPLANAR_OP_DIFFERENCE;
+        }
+        return COPLANAR_OP_INTERSECTION;
+    }
+
+    private static int coplanarSideIndex(int BvsA)
+    {
+        return (BvsA == 0) ? COPLANAR_SIDE_A_VS_B : COPLANAR_SIDE_B_VS_A;
+    }
+
+    private static int coplanarOrientationIndex(boolean sameOrientation)
+    {
+        return sameOrientation ? COPLANAR_ORIENTATION_SAME :
+            COPLANAR_ORIENTATION_OPPOSITE;
     }
 
     private static int classifyCoplanarSectorRelation(
@@ -180,20 +285,86 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static int resolveCoplanarSectorClass(int op, int BvsA,
                                                   boolean sameOrientation)
     {
-        if ( BvsA != 0 ) {
-            return (op == UNION) ?
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-        }
+        return COPLANAR_VERTEX_FACE_CLASS_TABLE[coplanarOpIndex(op)]
+            [coplanarSideIndex(BvsA)]
+            [coplanarOrientationIndex(sameOrientation)];
+    }
 
-        if ( sameOrientation ) {
-            return (op == UNION) ?
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+    private static int resolveCoplanarVertexVertexClass(int op,
+        boolean sameOrientation, boolean sideA)
+    {
+        int sideIndex = sideA ? 0 : 1;
+        return COPLANAR_VERTEX_VERTEX_CLASS_TABLE[coplanarOpIndex(op)]
+            [coplanarOrientationIndex(sameOrientation)]
+            [sideIndex];
+    }
+
+    private static void applyCoplanarRulesToVertexFaceNeighborhood(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
+        _PolyhedralBoundedSolidFace referenceFace,
+        InfinitePlane referencePlane,
+        int BvsA, int op,
+        boolean useMirrorFace)
+    {
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace current;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidFace localFace;
+        Vector3D c;
+        double d;
+        int i;
+        int nnbr = nbr.size();
+        int relation;
+        int resolvedClass;
+        boolean sameOrientation;
+
+        for ( i = 0; i < nnbr; i++ ) {
+            current = nbr.get(i);
+            he = current.sector;
+            if ( he == null || he.parentLoop == null ||
+                 he.parentLoop.parentFace == null ) {
+                continue;
+            }
+
+            if ( useMirrorFace ) {
+                _PolyhedralBoundedSolidHalfEdge mirror = he.mirrorHalfEdge();
+                if ( mirror == null || mirror.parentLoop == null ||
+                     mirror.parentLoop.parentFace == null ) {
+                    continue;
+                }
+                localFace = mirror.parentLoop.parentFace;
+            }
+            else {
+                localFace = he.parentLoop.parentFace;
+            }
+            if ( localFace == null || localFace.containingPlane == null ||
+                 referencePlane == null ) {
+                continue;
+            }
+
+            // Test coplanarity for local sector face against reference face.
+            c = localFace.containingPlane.getNormal().crossProduct(
+                referencePlane.getNormal());
+            d = c.dotProduct(c);
+            if ( compareToZero(d) != 0 ) {
+                continue;
+            }
+
+            relation = classifyCoplanarSectorRelation(current, referenceFace);
+            registerCoplanarRelation(nbr, i, relation);
+            registerCoplanarRelation(nbr, (i+1)%nnbr, relation);
+
+            if ( relation ==
+                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                     .COPLANAR_OVERLAP ) {
+                d = localFace.containingPlane.getNormal().dotProduct(
+                    referencePlane.getNormal());
+                sameOrientation = (compareToZero(d) == 1);
+                resolvedClass = resolveCoplanarSectorClass(op, BvsA,
+                    sameOrientation);
+                nbr.get(i).cl = resolvedClass;
+                nbr.get((i+1)%nnbr).cl = resolvedClass;
+            }
         }
-        return (op == UNION) ?
-            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
-            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
     }
 
     /**
@@ -607,73 +778,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidFace referenceFace,
         InfinitePlane referencePlane, int BvsA, int op)
     {
-        _PolyhedralBoundedSolidFace localFace;
-        Vector3D c;
-        double d;
-        int i;
-        int nnbr = nbr.size();
-        int relation;
-        int resolvedClass;
-        boolean sameOrientation;
-
-        //-----------------------------------------------------------------
-        // Backup neighborhood to prevent empty case
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> backup;
-
-        backup = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>();
-        for ( i = 0; i < nnbr; i++ ) {
-            backup.add(new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace(nbr.get(i)));
-        }
-
-        //-----------------------------------------------------------------
-        // Only will be activated if non empty case result (force to intersect)
-        for ( i = 0; i < nnbr; i++ ) {
-            // Test coplanarity
-            localFace = nbr.get(i).sector.parentLoop.parentFace;
-            c = localFace.containingPlane.getNormal().crossProduct(
-                referencePlane.getNormal());
-            d = c.dotProduct(c);
-            if ( compareToZero(d) == 0 ) {
-                relation = classifyCoplanarSectorRelation(nbr.get(i),
-                    referenceFace);
-                registerCoplanarRelation(nbr, i, relation);
-                registerCoplanarRelation(nbr, (i+1)%nnbr, relation);
-
-                if ( relation ==
-                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                         .COPLANAR_OVERLAP ) {
-                    d = localFace.containingPlane.getNormal().dotProduct(
-                        referencePlane.getNormal());
-                    sameOrientation = (compareToZero(d) == 1);
-                    resolvedClass = resolveCoplanarSectorClass(op, BvsA,
-                        sameOrientation);
-                    nbr.get(i).cl = resolvedClass;
-                    nbr.get((i+1)%nnbr).cl = resolvedClass;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------
-        // Restore original neighborhood if result is empty case
-        int ins = 0;
-        int outs = 0;
-
-        for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
-                outs++;
-            }
-            else {
-                ins++;
-            }
-        }
-        if ( (outs == nnbr || ins == nnbr) &&
-             !hasCoplanarOverlap(nbr) ) {
-            //System.out.println("**** WRONG ON SECTOR RECLASSIFICATION! REVERSED!");
-            for ( i = 0; i < nnbr; i++ ) {
-                nbr.get(i).cl = backup.get(i).cl;
-                //nbr.get(i).reverse = true;
-            }
-        }
+        applyCoplanarRulesToVertexFaceNeighborhood(
+            nbr, referenceFace, referencePlane, BvsA, op, false);
     }
 
     /**
@@ -694,73 +800,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidFace referenceFace,
         InfinitePlane referencePlane, int BvsA, int op)
     {
-        _PolyhedralBoundedSolidFace localFace;
-        Vector3D c;
-        double d;
-        int i;
-        int nnbr = nbr.size();
-        int relation;
-        int resolvedClass;
-        boolean sameOrientation;
-
-        //-----------------------------------------------------------------
-        // Backup neighborhood to prevent empty case
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> backup;
-
-        backup = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>();
-        for ( i = 0; i < nnbr; i++ ) {
-            backup.add(new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace(nbr.get(i)));
-        }
-
-        //-----------------------------------------------------------------
-        // Only will be activated if non empty case result (force to intersect)
-        for ( i = 0; i < nnbr; i++ ) {
-            // Test coplanarity
-            localFace = nbr.get(i).sector.mirrorHalfEdge().parentLoop.parentFace;
-            c = localFace.containingPlane.getNormal().crossProduct(
-                referencePlane.getNormal());
-            d = c.dotProduct(c);
-            if ( compareToZero(d) == 0 ) {
-                relation = classifyCoplanarSectorRelation(nbr.get(i),
-                    referenceFace);
-                registerCoplanarRelation(nbr, i, relation);
-                registerCoplanarRelation(nbr, (i+1)%nnbr, relation);
-
-                if ( relation ==
-                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                         .COPLANAR_OVERLAP ) {
-                    d = localFace.containingPlane.getNormal().dotProduct(
-                        referencePlane.getNormal());
-                    sameOrientation = (compareToZero(d) == 1);
-                    resolvedClass = resolveCoplanarSectorClass(op, BvsA,
-                        sameOrientation);
-                    nbr.get(i).cl = resolvedClass;
-                    nbr.get((i+1)%nnbr).cl = resolvedClass;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------
-        // Restore original neighborhood if result is empty case
-        int ins = 0;
-        int outs = 0;
-
-        for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
-                outs++;
-            }
-            else {
-                ins++;
-            }
-        }
-        if ( (outs == nnbr || ins == nnbr) &&
-             !hasCoplanarOverlap(nbr) ) {
-            System.out.println("**** WRONG ON SECTOR RECLASSIFICATION! REVERSED!");
-            for ( i = 0; i < nnbr; i++ ) {
-                nbr.get(i).cl = backup.get(i).cl;
-                //nbr.get(i).reverse = true;
-            }
-        }
+        applyCoplanarRulesToVertexFaceNeighborhood(
+            nbr, referenceFace, referencePlane, BvsA, op, true);
     }
 
     private static void printNbr(ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> neighborSectorsInfo)
@@ -1559,7 +1600,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     {
         _PolyhedralBoundedSolidHalfEdge ha, hb;
         int i, j, newsa, newsb;
-        boolean nonopposite;
+        boolean sameOrientation;
         int secta, prevsecta, nextsecta;
         int sectb, prevsectb, nextsectb;
         double d;
@@ -1585,15 +1626,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
                 n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
                 d = VSDK.vectorDistance(n1, n2);
-                nonopposite = ( d < numericContext.unitVectorTolerance() );
-                if ( nonopposite ) {
-                    newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                    newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                }
-                else {
-                    newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                    newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                }
+                sameOrientation = ( d < numericContext.unitVectorTolerance() );
+                newsa = resolveCoplanarVertexVertexClass(op, sameOrientation,
+                    true);
+                newsb = resolveCoplanarVertexVertexClass(op, sameOrientation,
+                    false);
                 si = sectors.get(i);
 
                 // Propagate to neigbor sectors

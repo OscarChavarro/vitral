@@ -95,23 +95,23 @@ Primary theory baseline reviewed from OCR PDFs:
 
 | Topic | MANT1988 intent | Current Java status | Assessment |
 |---|---|---|---|
-| Euler operator foundation | Full constructive basis with syntax discipline | Implemented broadly, with some partial/global limitations | Medium-High |
-| Geometric validity beyond topology | Must be enforced separately | Intermediate/strict validators available; coverage corpus still pending | Medium |
-| Split closure/generality/robustness | Explicit requirement (Ch14) | Structurally aligned, heuristic-heavy, now using centralized numeric policy | Medium |
-| Boolean reduction/classify/connect/finish | Explicit phase architecture (Ch15) | Implemented with strong structural match | High |
-| Maximal face precondition | Required before robust set-op reduction | Implemented via `maximizeFaces`, but method has known open cases | Medium |
-| Curved/nonmanifold generality | Book states algorithm does not directly cover | Not covered; no formal guardrail policy | Medium-Low |
-| Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Scale-aware policy integrated (`BREP_EPSILON`/`BREP_BIG_EPSILON`, centralized predicates) | Medium-High |
+| Euler operator foundation | Full constructive basis with syntax discipline | Implemented broadly (low/high-level operators), but with unresolved TODOs and shallow automated coverage in the example harness | Medium-High |
+| Geometric validity beyond topology | Must be enforced separately | Intermediate and strict validators are available (planarity, topology, strict loop and face-intersection checks), but strict mode is not consistently exercised in sample flows | Medium-High |
+| Split closure/generality/robustness | Explicit requirement (Ch14) | Split pipeline is structurally aligned and numeric-policy aware, but still depends on heuristics (ordering fixes/in-plane cases) and limited regression corpus | Medium |
+| Boolean reduction/classify/connect/finish | Explicit phase architecture (Ch15) | Implemented with strong phase match; vertex/face classification now includes explicit coplanar relation handling (`DISJOINT/TOUCHING/OVERLAP`) and no-intersection classification fallback | High |
+| Maximal face precondition | Required before robust set-op reduction | Enforced via `maximizeFaces`, but method still restarts recursively and documents open cases (`faces inside faces`, `"Case 2: Not tested!"`) | Medium |
+| Curved/nonmanifold generality | Book states algorithm does not directly cover | Not covered; behavior remains centered on polyhedral 2-manifold workflows, without explicit guardrail policy | Medium-Low |
+| Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Scale-aware policy is centralized and propagated through split/set-op/validators (`BREP_EPSILON`, `BREP_BIG_EPSILON`, context predicates); calibration suite still pending | Medium-High |
 
 ## 7) Hardening Strategy (Roadmap Table)
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 4.1 Coplanar Overlap | Formalize coplanar overlap behavior | Define and implement deterministic rules for coplanar-overlap classification/reclassification | Coplanar-overlap patch + scenario tests | Correct and stable results for coplanar overlap suites |
-| 4.2 Touching-Only | Formalize touching-only behavior | Define and implement deterministic rules for touching-only (point/edge/line contact without volumetric overlap) | Touching-only patch + scenario tests | Correct and stable results for touching-only suites |
-| 4.3 Regression Tests | Lock correctness for 4.1-4.2 | Add deterministic regression tests for coplanar-overlap and touching-only scenarios | Regression bundle + fixtures/seeds | Regressions pass consistently and prevent reintroduction of those failures |
-| 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
-| 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
+| 4.1 Coplanar Overlap | Stabilize and verify codified coplanar-overlap behavior | Keep table-driven reclassification rules (orientation/op dependent) as source of truth and validate against MANT1988 15.2-style scenarios | Implemented coplanar decision tables (vertex/face + vertex/vertex) + pending deterministic coplanar regression set | MANT1988 15.2-style cases produce stable, repeatable results with no classifier reversals |
+| 4.2 Touching-Only | Consolidate existing touching-only behavior | Formalize policy for point/edge/line contact (non-volumetric), including LIMIT/no-intersection handling in set-op | Touching-only decision table + deterministic touching regression set | Union/intersection/difference outcomes match documented policy for touching-only cases |
+| 4.3 Regression Tests | Lock correctness for 4.1-4.2 | Promote existing visual CSG samples to automated tests; re-enable deeper CSG chains under controlled known-failure gating | Automated regression bundle + fixtures/seeds + known-failure list | Regression suite runs deterministically and blocks reintroduction of 4.1/4.2 failures |
+| 5. Regression Corpus | Prevent future regressions | Expand corpus from MANT1986/MANT1988 figures and sample generators; add property checks (idempotence, commutativity where applicable, orientation consistency) | Reproducible corpus + seed catalog + invariant checks | CI gates on invariants and known hard scenarios |
+| 6. Performance + Observability | Make hard cases debuggable and practical | Standardize current stage-debug dumps into structured metrics (generate/classify/connect/finish), with timing and candidate-pair counters | Structured telemetry per case + comparable performance baselines | Diagnosis and runtime on large cases improve without correctness regressions |
 
 ## 8) Priority Recommendations
 - Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
