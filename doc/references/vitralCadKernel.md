@@ -29,7 +29,6 @@ Primary theory baseline reviewed from OCR PDFs:
 
 ## 2.3 Important known limitations in the book itself
 - Chapter 15 final remarks: algorithm does not directly extend to curved-face and nonmanifold general cases.
-- Chapter 15 Problem 15.1 explicitly calls out incomplete handling of "one solid fully inside the other" when no surface intersections exist.
 
 ## 2.4 Euler operators are not enough by themselves
 - Chapter 9: soundness is topological/syntactic; it does not guarantee geometric validity.
@@ -73,22 +72,17 @@ Primary theory baseline reviewed from OCR PDFs:
 
 ## 5.2 Critical robustness risks
 
-### A) Known incomplete algorithm branch (book Problem 15.1 still open)
-- In `setOp`, if no intersections are detected, branch behavior is simplistic and does not solve containment correctly for all ops.
-- This matches the exact open issue documented by MANT1988 Problem 15.1.
-- Impact: wrong result for full-containment no-crossing scenarios.
-
-### B) Unsupported branches in vertex-vertex classifier/connectivity path
+### A) Unsupported branches in vertex-vertex classifier/connectivity path
 - `separateEdgeSequence` prints explicit `"NOT SUPPORTED CASE A..E"`.
 - There are comments marking untested paths and fallback reversals in sector reclassification.
 - Impact: fragile behavior in complex coplanar/coincident neighborhoods.
 
-### C) Recursive mutation style increases fragility
+### B) Recursive mutation style increases fragility
 - `maximizeFaces` recursively restarts after each mutation.
 - `processEdge` recurses after splitting during edge-face processing.
 - Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
 
-### 5.2.1 Numerical Robustness Re-evaluation (Phase 3)
+### C) Numerical Robustness Re-evaluation (Phase 3)
 - `PolyhedralBoundedSolidNumericPolicy` now defines `BREP_EPSILON`, `BREP_BIG_EPSILON`, and scale-aware `ToleranceContext`.
 - Validation execution now uses one numeric context per run (`validateIntermediate` and `validateStrict`), passed through validation strategies.
 - Geometric strict checks (loop self-intersection, loop-loop intersection, face-face improper intersections) now consume centralized policy predicates.
@@ -110,7 +104,6 @@ Primary theory baseline reviewed from OCR PDFs:
 | Geometric validity beyond topology | Must be enforced separately | Intermediate/strict validators available; coverage corpus still pending | Medium |
 | Split closure/generality/robustness | Explicit requirement (Ch14) | Structurally aligned, heuristic-heavy, now using centralized numeric policy | Medium |
 | Boolean reduction/classify/connect/finish | Explicit phase architecture (Ch15) | Implemented with strong structural match | High |
-| Containment no-intersection case | Must be handled (Problem 15.1) | Not fully solved | Low |
 | Maximal face precondition | Required before robust set-op reduction | Implemented via `maximizeFaces`, but method has known open cases | Medium |
 | Curved/nonmanifold generality | Book states algorithm does not directly cover | Not covered; no formal guardrail policy | Medium-Low |
 | Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Scale-aware policy integrated (`BREP_EPSILON`/`BREP_BIG_EPSILON`, centralized predicates) | Medium-High |
@@ -119,16 +112,16 @@ Primary theory baseline reviewed from OCR PDFs:
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 4. Boolean Completeness | Close known algorithmic gaps | Implement containment handling for no-intersection cases (Ch15 Problem 15.1); complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap handling | Boolean completion patch + scenario tests | Correct results for containment, disjoint, coplanar-overlap, and touching-only suites |
+| 4. Boolean Completeness | Close remaining algorithmic gaps | Complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap and touching-only handling | Boolean completion patch + scenario tests | Correct results for disjoint, coplanar-overlap, touching-only, and unsupported A-E suites |
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
 
 ## 8) Priority Recommendations
-- Implement containment handling (Phase 4 core subset).
 - Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
 - Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
+- Add deterministic regressions for disjoint, coplanar-overlap, touching-only, and unsupported A-E classifier/connectivity scenarios.
 
 ## 9) Final Assessment
 The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. Numerical robustness improved materially with a centralized scale-aware tolerance policy and stricter validation contracts.
 
-The main remaining robustness debt is algorithmic completeness in difficult boolean edge cases (containment with no intersections, unsupported A-E branches), plus systematic regression coverage.
+The main remaining robustness debt is concentrated in unsupported A-E classifier/connectivity branches, coplanar/touching edge cases, and systematic regression coverage.

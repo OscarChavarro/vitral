@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
@@ -2556,6 +2557,168 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         outRes.compactIds();
     }
 
+    /**
+    Classifies a point against a solid using ray-parity. Returns INSIDE,
+    OUTSIDE or LIMIT for ambiguous cases.
+    */
+    private static int classifyPointAgainstSolid(
+        PolyhedralBoundedSolid solid,
+        Vector3D point)
+    {
+        int i, j;
+        _PolyhedralBoundedSolidFace face;
+        double eps = numericContext.bigEpsilon();
+
+        if ( solid == null || solid.polygonsList.size() < 1 ) {
+            return Geometry.OUTSIDE;
+        }
+
+        // Boundary quick check.
+        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+            face = solid.polygonsList.get(i);
+            if ( Math.abs(face.containingPlane.pointDistance(point)) <= eps ) {
+                if ( face.testPointInside(point, eps) != Geometry.OUTSIDE ) {
+                    return Geometry.LIMIT;
+                }
+            }
+        }
+
+        // Retry with a few skewed directions to avoid degenerate rays.
+        Vector3D[] dirs = {
+            new Vector3D(1.0, 0.371, 0.137),
+            new Vector3D(0.193, 1.0, 0.417),
+            new Vector3D(0.217, 0.173, 1.0)
+        };
+
+        for ( j = 0; j < dirs.length; j++ ) {
+            int hits = 0;
+            boolean ambiguous = false;
+            ArrayList<Double> distances = new ArrayList<Double>();
+            Ray ray = new Ray(point, dirs[j]);
+
+            for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+                face = solid.polygonsList.get(i);
+                Ray rayHit = new Ray(ray);
+                if ( !face.containingPlane.doIntersection(rayHit) ) {
+                    continue;
+                }
+                if ( rayHit.t <= eps ) {
+                    continue;
+                }
+
+                Vector3D pi = rayHit.origin.add(
+                    rayHit.direction.multiply(rayHit.t));
+                int status = face.testPointInside(pi, eps);
+                if ( status == Geometry.LIMIT ) {
+                    ambiguous = true;
+                    break;
+                }
+                if ( status == Geometry.INSIDE ) {
+                    boolean duplicated = false;
+                    int k;
+                    for ( k = 0; k < distances.size(); k++ ) {
+                        if ( Math.abs(distances.get(k).doubleValue() - rayHit.t)
+                             <= eps ) {
+                            duplicated = true;
+                            break;
+                        }
+                    }
+                    if ( !duplicated ) {
+                        distances.add(Double.valueOf(rayHit.t));
+                        hits++;
+                    }
+                }
+            }
+
+            if ( !ambiguous ) {
+                return ((hits % 2) == 1) ? Geometry.INSIDE : Geometry.OUTSIDE;
+            }
+        }
+
+        return Geometry.LIMIT;
+    }
+
+    /**
+    Classifies if at least one non-boundary vertex of `solidA` lies inside
+    `solidB`.
+    */
+    private static int classifySolidAgainstSolid(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        int i;
+        int sawLimit = 0;
+
+        if ( solidA == null || solidA.verticesList.size() < 1 ) {
+            return Geometry.OUTSIDE;
+        }
+
+        for ( i = 0; i < solidA.verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v = solidA.verticesList.get(i);
+            int status = classifyPointAgainstSolid(solidB, v.position);
+            if ( status == Geometry.INSIDE ) {
+                return Geometry.INSIDE;
+            }
+            if ( status == Geometry.OUTSIDE ) {
+                return Geometry.OUTSIDE;
+            }
+            sawLimit = 1;
+        }
+
+        return (sawLimit != 0) ? Geometry.LIMIT : Geometry.OUTSIDE;
+    }
+
+    /**
+    Handles no-intersection cases (book problem [MANT1988].15.1).
+    */
+    private static PolyhedralBoundedSolid setOpNoIntersectionCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op)
+    {
+        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
+        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+
+        if ( op == INTERSECTION ) {
+            if ( aInB == Geometry.INSIDE ) {
+                outRes.merge(inSolidA);
+            }
+            else if ( bInA == Geometry.INSIDE ) {
+                outRes.merge(inSolidB);
+            }
+            return outRes;
+        }
+
+        if ( op == UNION ) {
+            if ( aInB == Geometry.INSIDE ) {
+                outRes.merge(inSolidB);
+            }
+            else if ( bInA == Geometry.INSIDE ) {
+                outRes.merge(inSolidA);
+            }
+            else {
+                outRes.merge(inSolidA);
+                outRes.merge(inSolidB);
+            }
+            return outRes;
+        }
+
+        // DIFFERENCE
+        if ( aInB == Geometry.INSIDE ) {
+            return outRes;
+        }
+        if ( bInA == Geometry.INSIDE ) {
+            outRes.merge(inSolidA);
+            inSolidB.revert();
+            outRes.merge(inSolidB);
+            outRes.compactIds();
+            return outRes;
+        }
+        outRes.merge(inSolidA);
+        return outRes;
+    }
+
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,
@@ -2676,18 +2839,15 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         if ( sonea.isEmpty() && sonvv.isEmpty() ) {
             // No intersections found
-            if ( op == INTERSECTION ) {
-                return res;
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            if ( res.polygonsList.size() > 0 ) {
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+                res.compactIds();
+                res.maximizeFaces();
+                res.compactIds();
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
             }
-            else if ( op == DIFFERENCE ) {
-                res.merge(inSolidA);
-                return res;
-            }
-            else if ( op == UNION ) {
-                res.merge(inSolidA);
-                res.merge(inSolidB);
-                return res;
-            }
+            return res;
         }
 
         if ( withDebug ) {

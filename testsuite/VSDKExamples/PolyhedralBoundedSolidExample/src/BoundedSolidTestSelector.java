@@ -45,16 +45,16 @@ public class BoundedSolidTestSelector
             mySolid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
             mySolid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
             break;
-          case CREATE_BOX:
+          case BOX:
             mySolid = createBox(new Vector3D(0.9, 0.9, 0.9));
             break;
-          case ADD_ARC_SAMPLE:
+          case ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
             GeometricModeler.addArc(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
-          case CREATE_CIRCULAR_LAMINA:
+          case CIRCULAR_LAMINA:
             mySolid = GeometricModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
@@ -105,22 +105,22 @@ public class BoundedSolidTestSelector
 */
             break;
 
-          case CREATE_SPHERE:
+          case SPHERE:
             mySolid = createSphere(0.5);
             break;
-          case CREATE_CONE:
+          case CONE:
             mySolid = createCone(0.5, 0.0, 1.0);
             break;
-          case CREATE_ARROW:
+          case ARROW:
             mySolid = createArrow(0.7, 0.3, 0.05, 0.1);
             break;
-          case CREATE_LAMINA_WITH_TWO_SHELLS:
+          case LAMINA_WITH_TWO_SHELLS:
             mySolid = createLaminaWithTwoShells();
             break;
-          case CREATE_LAMINA_WITH_HOLE:
+          case LAMINA_WITH_HOLE:
             mySolid = createLaminaWithHole();
             break;
-          case CREATE_FONT_BLOCK:
+          case FONT_BLOCK:
             mySolid = createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
             T = new Matrix4x4();
@@ -130,13 +130,13 @@ public class BoundedSolidTestSelector
                 mySolid, mySolid.findFace(1), T);
 
             break;
-          case CREATE_GLUED_CILINDERS:
+          case GLUED_CILINDERS:
             mySolid = createGluedCilinders();
             break;
           case EULER_OPERATORS_TEST:
             mySolid = eulerOperatorsTest();
             break;
-          case ROTATIONAL_SWEEP_TEST:
+          case ROTATIONAL_SWEEP:
             mySolid = rotationalSweepTest();
             break;
           case SPLIT_TEST_PART_1:
@@ -172,7 +172,10 @@ public class BoundedSolidTestSelector
                 mySolid = featuredObject();
             }
             break;
-          case CREATE_HOLED_BOX:
+          case HOLLOW_BOX:
+            mySolid = createHollowBox();
+            break;
+          case HOLED_BOX:
           default:
             mySolid = createHoledBox();
             break;
@@ -308,8 +311,7 @@ public class BoundedSolidTestSelector
     {
         PolyhedralBoundedSolid solid;
 
-        solid = BoundedSolidTestSelector.createBox(
-                new Vector3D(0.9, 0.9, 0.9));
+        solid = BoundedSolidTestSelector.createBox(new Vector3D(0.9, 0.9, 0.9));
         BoundedSolidTestSelector.extrudeBox(solid);
         solid.kfmrh(2, 11);
         //R.translation(-0.55, -0.55, -0.55);
@@ -317,6 +319,28 @@ public class BoundedSolidTestSelector
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
+    }
+
+    /**
+    This method is a test for the solution to problem [MANT1988].15.1 on case of one solid
+    fully inside another.
+    */
+    public static PolyhedralBoundedSolid createHollowBox()
+    {
+        PolyhedralBoundedSolid solidA;
+        PolyhedralBoundedSolid solidB;
+        PolyhedralBoundedSolid result;
+
+        // Outer box.
+        solidA = BoundedSolidTestSelector.createBox(new Vector3D(0.9, 0.9, 0.9));
+
+        // Inner box at 80% size, centered at the same position as solidA.
+        solidB = BoundedSolidTestSelector.createBox(new Vector3D(0.72, 0.72, 0.72));
+
+        // Hollow box = outer box minus inner box.
+        result = GeometricModeler.setOp(solidA, solidB, GeometricModeler.DIFFERENCE);
+
+        return result;
     }
 
     public static PolyhedralBoundedSolid createLaminaWithTwoShells()

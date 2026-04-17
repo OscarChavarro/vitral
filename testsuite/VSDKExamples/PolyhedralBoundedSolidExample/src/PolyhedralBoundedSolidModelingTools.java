@@ -43,6 +43,11 @@ public class PolyhedralBoundedSolidModelingTools
         return BoundedSolidTestSelector.createHoledBox();
     }
 
+    public static PolyhedralBoundedSolid createHollowBox()
+    {
+        return BoundedSolidTestSelector.createHollowBox();
+    }
+
     public static PolyhedralBoundedSolid createLaminaWithTwoShells()
     {
         return BoundedSolidTestSelector.createLaminaWithTwoShells();
