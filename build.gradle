@@ -127,6 +127,8 @@ project(':awt') {
 }
 
 project(':base') {
+    apply plugin: 'jacoco'
+
     sourceSets {
         main {
             java.setSrcDirs(['src/main'])
@@ -139,12 +141,28 @@ project(':base') {
     }
 
     dependencies {
-        testImplementation platform('org.junit:junit-bom:5.10.3')
+        testImplementation platform('org.junit:junit-bom:5.11.4')
         testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'org.assertj:assertj-core:3.26.3'
+    }
+
+    jacoco {
+        toolVersion = '0.8.12'
     }
 
     tasks.named('test') {
         useJUnitPlatform()
+        finalizedBy(tasks.named('jacocoTestReport'))
+    }
+
+    tasks.named('jacocoTestReport') {
+        dependsOn(tasks.named('test'))
+        reports {
+            html.required = true
+            xml.required = true
+            csv.required = false
+        }
     }
 }
 
