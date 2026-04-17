@@ -2,7 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 // Java classes
 import java.util.ArrayList;

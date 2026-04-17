@@ -8,7 +8,9 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
 
 // Java classes
 import java.util.ArrayList;

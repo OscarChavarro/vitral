@@ -1,4 +1,6 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
 
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 

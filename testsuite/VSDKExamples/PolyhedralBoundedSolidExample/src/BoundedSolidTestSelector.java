@@ -28,7 +28,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.processing.GeometricModeler;
-import vsdk.toolkit.processing.PolyhedralBoundedSolidSetOperator;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidSetOperator;
 import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
 public class BoundedSolidTestSelector

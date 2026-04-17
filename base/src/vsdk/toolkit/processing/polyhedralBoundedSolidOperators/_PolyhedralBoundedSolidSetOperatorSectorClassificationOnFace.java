@@ -1,4 +1,6 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
