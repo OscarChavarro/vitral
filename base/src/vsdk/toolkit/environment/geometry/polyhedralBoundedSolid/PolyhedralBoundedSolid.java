@@ -708,27 +708,111 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    Method `lringmv` moves the loop `l` from its parent face to face `tofac`.
-    If `setAsOuterLoop` is false, `l` becomes an "inner" loop, and otherwise
-    the outer loop of `tofac`. If `l.parentFace` == `tofac`, `lringmv` has no
-    effect except for assigning the inner vs. outer information. Note that
-    `lringmv` is an addendum to `lmef`, and not an Euler operator.
+    Method `lringmv` moves the loop `l` from its parent face to face `toFace`.
+    If `setAsOuterLoop` is false, `l` becomes an "inner" loop of `toFace`.
+    Otherwise, `l` is positioned as the outer loop (first boundary) of
+    `toFace`.
+
+    If `l.parentFace` == `toFace`, no topological move is performed; only loop
+    ordering is adjusted to satisfy the requested inner/outer role.
+
+    Current implementation validates non-null arguments, same-solid movement,
+    source face non-emptiness after move, and that an inner loop is not added
+    to a face without an outer loop.
+
+    Note that `lringmv` is an addendum to `lmef`, and not an Euler operator.
     This method follows the functional definition of section [MANT1988].11.5.1.
-    @param l
-    @param tofac
-    @param setAsOuterLoop
-    @return PENDING TO DEFINE! Note that this impacts boolean set operators!
+    @param l loop to move or reorder
+    @param toFace destination face
+    @param setAsOuterLoop true to set `l` as outer loop, false to set it as inner loop
+    @return true if move/reorder succeeds (or was already satisfied), false otherwise
     */
-    public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace tofac, boolean setAsOuterLoop)
+    public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace toFace, boolean setAsOuterLoop)
     {
-        if ( setAsOuterLoop ) {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lringmv",
-                "Outer loop case not implemented!");
+        _PolyhedralBoundedSolidFace fromfac;
+        boolean sameFace;
+        int nloops;
+
+        if ( l == null || toFace == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Null input loop or destination face.");
+            return false;
         }
-        tofac.boundariesList.add(l);
-        l.parentFace.boundariesList.locateWindowAtElem(l);
-        l.parentFace.boundariesList.removeElemAtWindow();
-        l.parentFace = tofac;
+
+        fromfac = l.parentFace;
+        if ( fromfac == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Given loop does not have a parent face.");
+            return false;
+        }
+        if ( fromfac.parentSolid != toFace.parentSolid ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Loop move across different solids is not supported.");
+            return false;
+        }
+
+        sameFace = (fromfac == toFace);
+        nloops = toFace.boundariesList.size();
+
+        //-----------------------------------------------------------------
+        // Same-face case: only reorder to satisfy outer/inner intent.
+        if ( sameFace ) {
+            if ( !toFace.boundariesList.locateWindowAtElem(l) ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                    "Given loop was not found in its parent face boundaries.");
+                return false;
+            }
+
+            if ( setAsOuterLoop ) {
+                if ( nloops <= 0 || toFace.boundariesList.get(0) == l ) {
+                    return true;
+                }
+                toFace.boundariesList.removeElemAtWindow();
+                toFace.boundariesList.push(l);
+                return true;
+            }
+
+            // setAsOuterLoop == false
+            if ( nloops <= 1 ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                    "Cannot mark the only boundary loop as inner.");
+                return false;
+            }
+            if ( toFace.boundariesList.get(0) != l ) {
+                return true;
+            }
+            toFace.boundariesList.removeElemAtWindow();
+            toFace.boundariesList.add(l);
+            return true;
+        }
+
+        //-----------------------------------------------------------------
+        // Cross-face case: move loop and place it as outer/inner.
+        if ( fromfac.boundariesList.size() <= 1 ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Cannot move the only boundary loop of a face.");
+            return false;
+        }
+        if ( !setAsOuterLoop && toFace.boundariesList.size() <= 0 ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Cannot insert an inner loop into a face without outer loop.");
+            return false;
+        }
+        if ( !fromfac.boundariesList.locateWindowAtElem(l) ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
+                "Given loop was not found in source face boundaries.");
+            return false;
+        }
+
+        fromfac.boundariesList.removeElemAtWindow();
+        l.parentFace = toFace;
+
+        if ( setAsOuterLoop ) {
+            toFace.boundariesList.push(l);
+        }
+        else {
+            toFace.boundariesList.add(l);
+        }
         return true;
     }
 
@@ -1218,8 +1302,10 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
-    Returns true if the model was validated (using `validateModel` method)
-    and validation succeed after any geometrical or topological operation.
+    Returns true if the model was validated using
+    `PolyhedralBoundedSolidValidationEngine.validateIntermediate` or
+    `PolyhedralBoundedSolidValidationEngine.validateStrict`, and validation
+    succeeded after the latest geometrical or topological operation.
     @return true if solid model is valid, false if not
     */
     public boolean isValid()

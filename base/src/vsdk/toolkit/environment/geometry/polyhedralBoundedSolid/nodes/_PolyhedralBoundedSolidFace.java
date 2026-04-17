@@ -15,6 +15,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.processing.ComputationalGeometry;
@@ -149,6 +150,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     could be calculated.
     */
     private boolean calculatePlaneByCorner (double tolerance) {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forFace(this);
+        double nonColinearDotTolerance = numericContext.coplanarDotTolerance();
         _PolyhedralBoundedSolidLoop loop;
         _PolyhedralBoundedSolidHalfEdge he, heStart, heInferior;
         Vector3D p0 = new Vector3D ();
@@ -196,7 +200,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 if ( temp.length () > tolerance ) {
                     temp.normalize ();
                     dotP = Math.abs (temp.dotProduct (a));
-                    if ( dotP < 1 - VSDK.EPSILON * 1000 ) {
+                    if ( dotP < 1 - nonColinearDotTolerance ) {
                         b.clone (temp);
                         readyVecB = true;
                     }
@@ -275,7 +279,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             if ( vPrev.length () > tolerance ) {
                 vPrev.normalize ();
                 dotP = Math.abs (vPrev.dotProduct (vNext));
-                if ( dotP < 1 - VSDK.EPSILON * 1000 ) {
+                if ( dotP < 1 - nonColinearDotTolerance ) {
                     break;
                 }
             }
@@ -292,6 +296,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     could be calculated.
     */
     private boolean calculatePlaneByVertexSequenceNormalCrossProduct() {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forFace(this);
         if ( boundariesList.size() < 1 ) {
             return true;
         }
@@ -387,9 +393,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 return false;
             }
             // Do plane
-            if ( n.length() < VSDK.EPSILON ||
-                a.length() < VSDK.EPSILON ||
-                b.length() < VSDK.EPSILON ) {
+            if ( n.length() < numericContext.epsilon() ||
+                a.length() < numericContext.epsilon() ||
+                b.length() < numericContext.epsilon() ) {
                 he = he.next();
                 continue;
             }
@@ -402,10 +408,11 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             Vector3D middle = a.add(b);
             Vector3D testPoint;
             middle.normalize();
-            middle = middle.multiply(10.0*VSDK.EPSILON);
+            middle = middle.multiply(numericContext.bigEpsilon());
             testPoint = p0.add(middle);
             //- If concave, swap normal direction -----------------------------
-            if ( testPointInside(testPoint, VSDK.EPSILON) == Geometry.OUTSIDE ) {
+            if ( testPointInside(testPoint, numericContext.epsilon()) ==
+                Geometry.OUTSIDE ) {
                 n = n.multiply(-1.0);
             }
             containingPlane = new InfinitePlane(n, p0);

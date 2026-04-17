@@ -2,7 +2,6 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -35,6 +34,11 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     public static final int CROSSING_EDGE = 30;
     public static final int UNDEFINED = 40;
 
+    public static final int COPLANAR_UNKNOWN = 0;
+    public static final int COPLANAR_DISJOINT = 1;
+    public static final int COPLANAR_TOUCHING = 2;
+    public static final int COPLANAR_OVERLAP = 3;
+
     public _PolyhedralBoundedSolidHalfEdge sector;
     public InfinitePlane referencePlane;
     public int cl;
@@ -45,6 +49,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     public Vector3D position;
     public int situation = UNDEFINED;
     public boolean reverse = false;
+    public int coplanarRelation = COPLANAR_UNKNOWN;
 
     public _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace()
     {
@@ -61,6 +66,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
         this.position = other.position;
         this.situation = other.situation;
         this.reverse = other.reverse;
+        this.coplanarRelation = other.coplanarRelation;
     }
 
     /**
@@ -106,7 +112,11 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
               case ABOVE: cl = AoutB; break;
               case BELOW: cl = AinB; break;
               case ON:
-                if ( a.overlapsWith(b, VSDK.EPSILON) ) {
+                if ( coplanarRelation != COPLANAR_UNKNOWN &&
+                     coplanarRelation != COPLANAR_OVERLAP ) {
+                    cl = AoutB;
+                }
+                else if ( a.overlapsWith(b, numericContext.bigEpsilon()) ) {
                     cl = AonBplus;
                 }
                 else {
@@ -120,7 +130,11 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
               case ABOVE: cl = BoutA; break;
               case BELOW: cl = BinA; break;
               case ON:
-                if ( a.overlapsWith(b, VSDK.EPSILON) ) {
+                if ( coplanarRelation != COPLANAR_UNKNOWN &&
+                     coplanarRelation != COPLANAR_OVERLAP ) {
+                    cl = BoutA;
+                }
+                else if ( a.overlapsWith(b, numericContext.bigEpsilon()) ) {
                     cl = BonAplus;
                 }
                 else {
