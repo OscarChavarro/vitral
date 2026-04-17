@@ -1,124 +1,125 @@
-# Vitral CAD Kernel Audit (MANT1988 Alignment)
+# CAD Kernel Audit
 
-## 1) Scope and Method
-This audit compares the current Java CAD kernel implementation against the theory and algorithmic intent in MANT1988, with focus on:
+## 1) Scope and method
+This audit evaluates the current B-Rep CAD kernel quality against [MANT1988], focused on:
 
-- `PolyhedralBoundedSolid` core B-Rep and Euler operators.
-- Set operations and split flow (`PolyhedralBoundedSolidSetOperator`, splitter helpers, and `GeometricModeler` wrappers).
-- Real execution/test flows in `PolyhedralBoundedSolidModelingTools` and the visual debugger app `PolyhedralBoundedSolidExample`.
+- `base/src/main/vsdk/toolkit/environment/geometry/polyhedralBoundedSolid`
+- `base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators`
+- `testsuite/VSDKExamples/PolyhedralBoundedSolidExample`
 
-Primary theory baseline reviewed from OCR PDFs:
+And contrasts the result with the previous content of this same document.
 
-- Chapter 9: Euler operators.
-- Chapter 10: Half-edge data structure and tolerance model.
-- Chapter 12: Sweeping and loop gluing.
-- Chapter 14: Splitting algorithm requirements (closure, generality, robustness).
-- Chapter 15: Boolean set operations (boundary classification, limitations, and open problems).
+Important scope decision for this audit:
+- Lack of curved-surface support is intentionally excluded from the gap analysis.
 
-## 2) Theory Baseline (What the Book Explicitly Requires)
+## 2) MANT1988 baseline used for comparison
+From the reference chapters:
 
-## 2.1 Core constraints
-- Chapter 14 states splitting must be closed, general, and robust under small numerical inaccuracies.
-- Chapter 15 states Boolean B-Rep is hard because of broad intersection case coverage and numerical sensitivity in overlap/coplanarity/intersection tests.
-- Chapter 15 states 2-manifolds are not closed under Boolean operations; pseudomanifold-compatible behavior is necessary.
+- Ch. 9 and Ch. 10: Euler operators and half-edge structure provide topological construction power, but geometric correctness is a separate concern.
+- Ch. 14: splitting should be closed, general, and robust under numerical inaccuracies.
+- Ch. 15: boolean set-op workflow is reduction -> classify -> connect -> finish; handling of coplanar and touching cases is central; 2-manifolds are not closed under set operations, so pseudomanifold-compatible handling is needed.
 
-## 2.2 Boolean workflow structure
-- Chapter 15 decomposes into: reduction, classification, connect, finish.
-- Boundary classification is central, including handling of "on" cases through reclassification rules.
-- Chapter 15 assumes maximal faces before reduction.
+## 3) Current implementation assessment
 
-## 2.3 Important known limitations in the book itself
-- Chapter 15 final remarks: algorithm does not directly extend to curved-face and nonmanifold general cases.
+## 3.1 B-Rep core (`PolyhedralBoundedSolid`)
+Strengths:
+- Strong conceptual alignment with MANT1988 operator vocabulary (`mvfs/kvfs`, `lmev/lkev`, `lmef/lkef`, `lkemr/lmekr`, `kfmrh/lmfkrh`, etc.).
+- Data model reflects half-edge hierarchy from the book.
 
-## 2.4 Euler operators are not enough by themselves
-- Chapter 9: soundness is topological/syntactic; it does not guarantee geometric validity.
-- Practical implication: separate geometric validation and robust predicates are mandatory in real kernels.
+Observed weaknesses:
+- `maximizeFaces()` uses recursive restart after local mutation; this is fragile under complex models and hard to reason about for worst-case behavior.
+- `maximizeFaces()` still contains an explicit open status (`Case 2: Not tested!`) and an old TODO-level limitation about fully nested coplanar faces.
+- Some operations are permissive and rely on warnings/fatal reports rather than transactional failure semantics.
 
-## 3) Current Java Flow Analysis
+Assessment: architecturally solid, operationally still brittle in hard topology normalization paths.
 
-## 3.1 Visual debugger execution path
-- `PolyhedralBoundedSolidExample` routes `solidType` to builders in `PolyhedralBoundedSolidModelingTools`.
-- Interactive keys switch among Euler, sweep, split, CSG, and stress cases.
-- CSG debug can dump intermediate stages via `withDebug`.
+## 3.2 Splitter (`PolyhedralBoundedSolidSplitter`)
+Strengths:
+- High structural fidelity with Ch. 14 decomposition (`splitGenerate`, `splitClassify`, `splitConnect`, `splitFinish`).
+- Numeric policy integration is present.
 
-## 3.2 Modeling tools role
-- `PolyhedralBoundedSolidModelingTools` mirrors textbook-style examples (Euler, sweep, gluing, split, CSG).
-- It is both demo harness and de facto integration testbed.
-- Several stress paths are currently commented out, which indicates unstable or unfinished paths are known but not systematically isolated.
+Observed weaknesses:
+- The code explicitly documents local orientation adjustments and extra heuristics not formalized in the original algorithm.
+- There are still comments indicating uncertainty in behavior assumptions (e.g., branch when no intersections are found: "Plane should be tested here before assuming this order!").
+- Internal style remains mutation-heavy with complex control flow and list-side effects.
 
-## 3.3 Boolean engine flow
-- `setOp` pipeline in `PolyhedralBoundedSolidSetOperator` follows textbook phase structure:
-  1. Normalize/prepare (`compactIds`, `validateIntermediate`, `maximizeFaces`, `updmaxnames`).
-  2. `setOpGenerate` (vertex-face and vertex-vertex candidates).
-  3. `setOpClassify` (vertex-face and vertex-vertex classifiers).
-  4. `setOpConnect` (null-edge pairing/joining).
-  5. `setOpFinish` (face movement, gluing, compaction, cleanup).
-- This is a strong architectural match to MANT1988 Chapter 15.
+Assessment: functionally rich and close to textbook flow, but not yet hardened for all degenerate/edge distributions expected in industrial geometry pipelines.
 
-## 4) Strengths
-- Strong conceptual alignment with MANT1988 chapter structure and nomenclature.
-- Explicit support for low-level and high-level Euler operators.
-- Split and set-op are built over reusable operator primitives (`PolyhedralBoundedSolidOperator`), which is structurally sound.
-- Numeric tolerance handling now uses a dedicated policy (`PolyhedralBoundedSolidNumericPolicy`) with `BREP_EPSILON`, `BREP_BIG_EPSILON`, relative scale, and centralized predicate helpers.
-- Existing debug infrastructure (stage outputs, optional offline renderer, visual app) is a valuable foundation for hardening.
+## 3.3 Set operations (`PolyhedralBoundedSolidSetOperator`)
+Strengths:
+- Macro-pipeline strongly aligned with Ch. 15 (`setOpGenerate`, `setOpClassify`, `setOpConnect`, `setOpFinish`).
+- Explicit no-intersection policy exists (disjoint/touching/containment).
+- Coplanar rules are now table-driven for vertex-face and vertex-vertex classification, which is a positive hardening step.
+- Uses numeric context (`PolyhedralBoundedSolidNumericPolicy`) instead of scattered tolerances.
 
-## 5) Audit Findings (State, Completeness, Quality)
+Observed weaknesses:
+- Implementation keeps extensive static mutable state (`son*` sets, debug flags, numeric context wiring), which is not thread-safe and complicates reentrancy.
+- Inputs are mutated in-place during set-op flow (`compactIds`, `maximizeFaces`, id remapping, etc.), making API behavior side-effectful and risky for product use unless clearly isolated by cloning.
+- Robustness still depends on heuristic geometric predicates in difficult coplanar/touching neighborhoods.
 
-## 5.1 Completeness status
-- **Euler core**: substantial but partial in global operators and ring movement semantics.
-- **Split**: mostly implemented with extra heuristics, but not fully formalized for all corner cases.
-- **Boolean set operations**: implemented end-to-end with known theoretical gaps around coplanar and touching-only contact handling.
-- **Validation layer**: intermediate and strict flows are in place (planarity, topology, loop strictness, face-face improper intersections), now backed by scale-aware numeric policy.
+Assessment: very good research-grade realization of MANT1988 architecture, but not yet production-grade in determinism, side-effect isolation, and adversarial robustness.
 
-## 5.2 Critical robustness risks
+## 3.4 Validation subsystem
+Strengths:
+- Validation is modularized (`validateIntermediate`, `validateStrict`) with strategy composition.
+- Strict validators include loop self-intersection and face-face improper intersection checks.
+- Numeric policy is centralized and propagated through validators.
 
-### A) Recursive mutation style increases fragility
-- `maximizeFaces` recursively restarts after each mutation.
-- `processEdge` recurses after splitting during edge-face processing.
-- Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
+Observed weaknesses:
+- Core operator flows commonly gate on `validateIntermediate`; strict validation is not consistently part of post-op contracts.
+- Topological repair helper behavior can modify model content (`remakeEmanatingHalfedgesReferences` removes vertices with null emanating halfedge), mixing validation and mutation concerns.
 
-### B) Numerical Robustness Re-evaluation (Phase 3)
-- `PolyhedralBoundedSolidNumericPolicy` now defines `BREP_EPSILON`, `BREP_BIG_EPSILON`, and scale-aware `ToleranceContext`.
-- Validation execution now uses one numeric context per run (`validateIntermediate` and `validateStrict`), passed through validation strategies.
-- Geometric strict checks (loop self-intersection, loop-loop intersection, face-face improper intersections) now consume centralized policy predicates.
-- Splitter and set-operator classification predicates were migrated from direct `VSDK.EPSILON` usage to policy-driven thresholds.
-- The previous ad hoc multipliers in B-Rep validation/operator paths were replaced by policy methods and named tolerances.
+Assessment: good direction, but contract separation (validate vs repair) and strict-by-default safety profile are still incomplete.
 
-## 5.3 Evidence from real flows (`ModelingTools` + visual app)
-- `buildCsgTest4` already documents a known topological issue for `maximizeFaces` under union.
-- `buildCsgTest5` has a larger CSG composition chain commented out and replaced with a reduced scenario, indicating unresolved instability in deep CSG compositions.
-- `csgTest` has post-operation validation lines commented out.
-- `eulerOperatorsTest` leaves stronger tests commented and returns a minimal partially built structure path; this can produce invalid states in visual workflows.
-- The debugger app exposes many scenarios through one key-path, but there is no deterministic pass/fail harness tied to these scenarios.
+## 3.5 Test and example reality
+Strengths:
+- Test suite now includes parameterized set-op scenarios (disjoint, touching, containment, MANT1988 fixtures).
+- Validation and numeric policy have dedicated tests.
 
-## 6) Gap Matrix: Java Implementation vs MANT1988 Intent
+Observed weaknesses:
+- `PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest` currently encodes known algebraic drift by asserting that idempotence/absorption equivalences do not hold in selected corpus cases.
+- Example/harness code still contains commented-out stress paths and commented-out validation lines in CSG flows.
+- Visual example remains useful for debugging, but it is not a deterministic quality gate.
 
-| Topic | MANT1988 intent | Current Java status | Assessment |
-|---|---|---|---|
-| Euler operator foundation | Full constructive basis with syntax discipline | Implemented broadly (low/high-level operators), but with unresolved TODOs and shallow automated coverage in the example harness | Medium-High |
-| Geometric validity beyond topology | Must be enforced separately | Intermediate and strict validators are available (planarity, topology, strict loop and face-intersection checks), but strict mode is not consistently exercised in sample flows | Medium-High |
-| Split closure/generality/robustness | Explicit requirement (Ch14) | Split pipeline is structurally aligned and numeric-policy aware, but still depends on heuristics (ordering fixes/in-plane cases) and limited regression corpus | Medium |
-| Boolean reduction/classify/connect/finish | Explicit phase architecture (Ch15) | Implemented with strong phase match; vertex/face classification now includes explicit coplanar relation handling (`DISJOINT/TOUCHING/OVERLAP`) and no-intersection classification fallback | High |
-| Maximal face precondition | Required before robust set-op reduction | Enforced via `maximizeFaces`, but method still restarts recursively and documents open cases (`faces inside faces`, `"Case 2: Not tested!"`) | Medium |
-| Curved/nonmanifold generality | Book states algorithm does not directly cover | Not covered; behavior remains centered on polyhedral 2-manifold workflows, without explicit guardrail policy | Medium-Low |
-| Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Scale-aware policy is centralized and propagated through split/set-op/validators (`BREP_EPSILON`, `BREP_BIG_EPSILON`, context predicates); calibration suite still pending | Medium-High |
+Assessment: coverage is improving and now honestly captures known failure classes, but correctness envelope is still below industrial confidence levels.
 
-## 7) Hardening Strategy (Roadmap Table)
+## 4) Comparison vs previous version of this document
+Relative to the previous `vitralCadKernel.md`, this update keeps the same high-level verdict (strong conceptual alignment, robustness debt concentrated in hard boundary cases) but clarifies and tightens several points:
 
-| Phase | Goal | Main Actions | Deliverables | Exit Criteria |
-|---|---|---|---|---|
-| 1. Coplanar Overlap | Stabilize and verify codified coplanar-overlap behavior | Keep table-driven reclassification rules (orientation/op dependent) as source of truth and validate against MANT1988 15.2-style scenarios | Implemented coplanar decision tables (vertex/face + vertex/vertex) + pending deterministic coplanar regression set | MANT1988 15.2-style cases produce stable, repeatable results with no classifier reversals |
-| 2. Touching-Only | Stabilize and verify touching-only behavior | Keep explicit touching-only policy for point/edge/line contact (non-volumetric), including deterministic LIMIT/no-intersection handling in set-op | Implemented touching-only no-intersection policy table + pending deterministic touching regression set | Union/intersection/difference outcomes are stable for touching-only scenarios and match documented policy |
-| 3. Regression Tests | Lock correctness for 4.1-4.2 | Promote existing visual CSG samples to automated tests; re-enable deeper CSG chains under controlled known-failure gating | Automated regression bundle + fixtures/seeds + known-failure list | Regression suite runs deterministically and blocks reintroduction of 4.1/4.2 failures |
-| 4. Regression Corpus | Prevent future regressions | Expand corpus from MANT1986/MANT1988 figures and sample generators; add property checks (idempotence, commutativity where applicable, orientation consistency) | Reproducible corpus + seed catalog + invariant checks | CI gates on invariants and known hard scenarios |
-| 5. Performance + Observability | Make hard cases debuggable and practical | Standardize current stage-debug dumps into structured metrics (generate/classify/connect/finish), with timing and candidate-pair counters | Structured telemetry per case + comparable performance baselines | Diagnosis and runtime on large cases improve without correctness regressions |
+- Confirms that coplanar/touching handling moved from ad-hoc logic toward explicit decision tables.
+- Adds explicit emphasis on non-thread-safe static mutable state in operators.
+- Adds explicit emphasis on side-effectful API behavior (input solids mutated by set-op pipeline).
+- Updates test interpretation: there is now deliberate codification of known algebraic drift in automated tests, not only commented visual scenarios.
+- Separates validation maturity from production contract maturity: validators exist, but strict-mode enforcement is not yet systemic.
 
-## 8) Priority Recommendations
-- Re-enable currently commented CSG stress paths behind a `known_failures` gate and track each failure class.
-- Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
-- Add deterministic regressions for disjoint, coplanar-overlap, and touching-only scenarios.
+## 5) Production readiness evaluation (curved surfaces excluded)
+Current maturity level:
+- Advanced research prototype / early pre-production kernel.
 
-## 9) Final Assessment
-The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. Numerical robustness improved materially with a centralized scale-aware tolerance policy and stricter validation contracts.
+Why not production yet:
+- Determinism and robustness under adversarial coplanar/touching configurations are not fully guaranteed.
+- Algebraic properties expected by industrial CAD boolean engines are known to drift in selected corpora.
+- Thread safety and side-effect isolation are insufficient for concurrent, service-style, or transactional CAD backends.
+- Quality gates still rely partly on manual/visual workflows and known-failure expectations.
 
-The main remaining robustness debt is concentrated in coplanar/touching edge cases and systematic regression coverage.
+## 6) What is missing for industrial CAD readiness
+Priority P0 (must-have):
+- Enforce non-mutating public boolean API contract (clone/isolate operands or provide explicit destructive variants).
+- Remove or encapsulate static mutable operator state for thread-safe execution.
+- Turn known algebraic drift corpus into pass criteria (not expected-failure criteria) for the target support domain.
+- Define and enforce strict validation checkpoints after split/set-op in production path.
+
+Priority P1 (high):
+- Replace recursive restart patterns in topology normalization with bounded iterative passes and explicit convergence controls.
+- Expand deterministic regression corpus around MANT1988 Ch. 14/15 corner cases (coplanar overlap, touching-only, containment, nested rings).
+- Strengthen predicate robustness strategy (tolerance calibration suite + repeatability checks across scale ranges).
+
+Priority P2 (important):
+- Separate validation from repair semantics in API and internals.
+- Add structured operation telemetry (candidate counts, phase timing, branch decisions) for reproducible diagnostics.
+- Add large-model stress benchmarks and memory/time budgets as CI gates.
+
+## 7) Final verdict
+The kernel is one of the strongest MANT1988-faithful implementations in the project, with clear architectural correspondence to Euler/split/set-op theory and meaningful recent hardening on numeric policy and coplanar classification.
+
+However, excluding curved surfaces as requested, it still does not qualify as production-grade industrial CAD kernel yet. The main blockers are robustness closure in hard boolean neighborhoods, deterministic algebraic behavior, thread-safe/state-safe execution model, and stricter automated quality contracts.

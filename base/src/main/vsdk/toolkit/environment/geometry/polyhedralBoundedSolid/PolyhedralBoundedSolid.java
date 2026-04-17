@@ -1560,214 +1560,211 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he;
         InfinitePlane a, b;
         Vector3D p0, p1, p2;
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-
-        remakeEmanatingHalfedgesReferences();
-
-        //- Eliminate null edges ------------------------------------------
-        for ( i = 0; i < edgesList.size(); i++ ) {
-            e = edgesList.get(i);
-            p1 = e.rightHalf.startingVertex.position;
-            p2 = e.leftHalf.startingVertex.position;
-            if ( PolyhedralBoundedSolidNumericPolicy
-                .pointsCoincident(p1, p2, numericContext) ) {
-                lkev(e.rightHalf, e.leftHalf);
-                // As this breaks the edge sequence, start again!
-                maximizeFaces();
-                return;
-            }
-        }
-
-        //- Join coplanar faces -------------------------------------------
         _PolyhedralBoundedSolidHalfEdge heStart;
+        boolean restart;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
 
-        for ( i = 0; i < edgesList.size(); i++ ) {
-            e = edgesList.get(i);
-            a = e.rightHalf.parentLoop.parentFace.containingPlane;
-            b = e.leftHalf.parentLoop.parentFace.containingPlane;
-            if ( e.rightHalf.parentLoop.parentFace ==
-                 e.leftHalf.parentLoop.parentFace &&
-                 e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
-                // Case 1: need to remove an edge separating to
-                // different coplanar faces (join faces). Order doesn't
-                // matter.
-                lkemr(e.rightHalf, e.leftHalf);
+        restart = true;
+        while ( restart ) {
+            restart = false;
+            numericContext = PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+            remakeEmanatingHalfedgesReferences();
 
-                // As this breaks the face set, start again!
-                maximizeFaces();
-                return;
-            }
-            else if ( a.overlapsWith(b, numericContext.epsilon()) &&
-                e.rightHalf.parentLoop != e.leftHalf.parentLoop
-                ) {
-                // Case 2: Not tested!
-                lkef(e.rightHalf, e.leftHalf);
-
-                // As this breaks the face set, start again!
-                maximizeFaces();
-                return;
-            }
-            else if ( e.rightHalf.parentLoop.parentFace ==
-                 e.leftHalf.parentLoop.parentFace &&
-                 e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
-                 (e.leftHalf == e.rightHalf.next() ||
-                  e.rightHalf == e.leftHalf.next())
-                 ) {
-                // Case 3:. Need to remove a dangling edge, with two
-                // halfedges lying over the same face. Do not remove any
-                // face, rather, remove the dangling edge and its dangling
-                // vertex. To test, use object from figure [MANT1988].15.1.
-                // or code from SimpleTestGeometryLibrary method
-                // createTestObjectPairMANT1988_15_1
-                if ( e.leftHalf == e.rightHalf.next() ) {
-                    heStart = e.leftHalf;
+            //- Eliminate null edges --------------------------------------
+            for ( i = 0; i < edgesList.size(); i++ ) {
+                e = edgesList.get(i);
+                p1 = e.rightHalf.startingVertex.position;
+                p2 = e.leftHalf.startingVertex.position;
+                if ( PolyhedralBoundedSolidNumericPolicy
+                    .pointsCoincident(p1, p2, numericContext) ) {
+                    lkev(e.rightHalf, e.leftHalf);
+                    restart = true;
+                    break;
                 }
-                else {
-                    heStart = e.rightHalf;
-                }
-                lkev(heStart, heStart.mirrorHalfEdge());
-
-                // As this breaks the face set, start again!
-                maximizeFaces();
-                return;
             }
-            else if ( e.rightHalf.parentLoop.parentFace ==
-                 e.leftHalf.parentLoop.parentFace &&
-                 e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
-                 (e.leftHalf != e.rightHalf.next() &&
-                  e.rightHalf != e.leftHalf.next())
-                 ) {
-                // Case 4. Need to remove an edge on a self-intersecting
-                // loop, causing that loop to break on two rings. To test
-                // use "buildCsgTest4" pair on 
-                // PolyhedralBoundedSolidModelingTools testsuite program
-                // (union of two L-shaped boxes to form a hollowed brick).
-                // It is important to break the loops in such a way that
-                // bigger loop be the first loop, and smaller loop is the
-                // inner ring.
-
-                // Estimate the size of semiloop starting at e.leftHalf
-                double minmax[] = getMinMax();
-                Vector3D min = new Vector3D(minmax[3], minmax[4], minmax[5]);
-                Vector3D max = new Vector3D(minmax[0], minmax[1], minmax[2]);
-                Vector3D p;
-                heStart = e.leftHalf;
-                he = heStart;
-                do {
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        break;
-                    }
-                    p = he.startingVertex.position;
-                    if ( p.x > max.x ) max.x = p.x;
-                    if ( p.y > max.y ) max.y = p.y;
-                    if ( p.z > max.z ) max.z = p.z;
-                    if ( p.x < min.x ) min.x = p.x;
-                    if ( p.y < min.y ) min.y = p.y;
-                    if ( p.z < min.z ) min.z = p.z;
-                } while( he != heStart && he != e.rightHalf);
-                double leftDistance = VSDK.vectorDistance(min, max);
-
-                // Estimate the size of semiloop starting at e.rightHalf
-                min = new Vector3D(minmax[3], minmax[4], minmax[5]);
-                max = new Vector3D(minmax[0], minmax[1], minmax[2]);
-                heStart = e.rightHalf;
-                he = heStart;
-                do {
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        break;
-                    }
-                    p = he.startingVertex.position;
-                    if ( p.x > max.x ) max.x = p.x;
-                    if ( p.y > max.y ) max.y = p.y;
-                    if ( p.z > max.z ) max.z = p.z;
-                    if ( p.x < min.x ) min.x = p.x;
-                    if ( p.y < min.y ) min.y = p.y;
-                    if ( p.z < min.z ) min.z = p.z;
-                } while( he != heStart && he != e.leftHalf);
-                double rightDistance = VSDK.vectorDistance(min, max);
-
-                // Determine outer loop acording to major extent
-                _PolyhedralBoundedSolidHalfEdge heOuter;
-                _PolyhedralBoundedSolidHalfEdge heInner;
-
-                if ( leftDistance > rightDistance ) {
-                    heOuter = e.leftHalf;
-                    heInner = e.rightHalf;
-                }
-                else {
-                    heOuter = e.rightHalf;
-                    heInner = e.leftHalf;
-                }
-                lkemr(heInner, heOuter);
-
-                // As this breaks the face set, start again!
-                maximizeFaces();
-                return;
-            }
-        }
-
-        //- Eliminate vertices between colinear edges ---------------------
-        _PolyhedralBoundedSolidHalfEdge heMirror;
-        _PolyhedralBoundedSolidVertex v;
-        int nedges;
-
-        for ( i = 0; i < verticesList.size(); i++ ) {
-            v = verticesList.get(i);
-            heStart = v.emanatingHalfEdge;
-            if ( heStart == null ) {
+            if ( restart ) {
                 continue;
             }
-            he = heStart;
-            nedges = 0;
-            j = 0;
-            do {
-                nedges++;
-                if ( nedges > 2 ) break;
 
-                if ( he == null ) {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
-                        "Inconsistent model! Null HalfEdge. Check.");
+            //- Join coplanar faces ---------------------------------------
+            for ( i = 0; i < edgesList.size(); i++ ) {
+                e = edgesList.get(i);
+                a = e.rightHalf.parentLoop.parentFace.containingPlane;
+                b = e.leftHalf.parentLoop.parentFace.containingPlane;
+                if ( e.rightHalf.parentLoop.parentFace ==
+                     e.leftHalf.parentLoop.parentFace &&
+                     e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
+                    // Case 1: need to remove an edge separating to
+                    // different coplanar faces (join faces). Order doesn't
+                    // matter.
+                    lkemr(e.rightHalf, e.leftHalf);
+                    restart = true;
+                    break;
                 }
+                else if ( a.overlapsWith(b, numericContext.epsilon()) &&
+                          e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
+                    // Case 2: Not tested!
+                    lkef(e.rightHalf, e.leftHalf);
+                    restart = true;
+                    break;
+                }
+                else if ( e.rightHalf.parentLoop.parentFace ==
+                          e.leftHalf.parentLoop.parentFace &&
+                          e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
+                          (e.leftHalf == e.rightHalf.next() ||
+                           e.rightHalf == e.leftHalf.next()) ) {
+                    // Case 3:. Need to remove a dangling edge, with two
+                    // halfedges lying over the same face. Do not remove any
+                    // face, rather, remove the dangling edge and its dangling
+                    // vertex. To test, use object from figure [MANT1988].15.1.
+                    // or code from SimpleTestGeometryLibrary method
+                    // createTestObjectPairMANT1988_15_1
+                    if ( e.leftHalf == e.rightHalf.next() ) {
+                        heStart = e.leftHalf;
+                    }
+                    else {
+                        heStart = e.rightHalf;
+                    }
+                    lkev(heStart, heStart.mirrorHalfEdge());
+                    restart = true;
+                    break;
+                }
+                else if ( e.rightHalf.parentLoop.parentFace ==
+                          e.leftHalf.parentLoop.parentFace &&
+                          e.rightHalf.parentLoop == e.leftHalf.parentLoop &&
+                          (e.leftHalf != e.rightHalf.next() &&
+                           e.rightHalf != e.leftHalf.next()) ) {
+                    // Case 4. Need to remove an edge on a self-intersecting
+                    // loop, causing that loop to break on two rings. To test
+                    // use "buildCsgTest4" pair on
+                    // PolyhedralBoundedSolidModelingTools testsuite program
+                    // (union of two L-shaped boxes to form a hollowed brick).
+                    // It is important to break the loops in such a way that
+                    // bigger loop be the first loop, and smaller loop is the
+                    // inner ring.
 
-                heMirror = he.mirrorHalfEdge();
-                if ( heMirror == null ) {
-                    /*
-                    VSDK.reportMessage(this, VSDK.WARNING, "maximizeFaces",
-                        "Inconsistent model! halfedge " + he.id +
-                        " of face " + he.parentLoop.parentFace.id +
-                        " at position " + j + " emanating from \nvertex " +
-                        v.id + 
-                        " without mirror halfedge. Check."
-                    );
-                    */
-                    nedges = 0;
+                    // Estimate the size of semiloop starting at e.leftHalf
+                    double minmax[] = getMinMax();
+                    Vector3D min = new Vector3D(minmax[3], minmax[4], minmax[5]);
+                    Vector3D max = new Vector3D(minmax[0], minmax[1], minmax[2]);
+                    Vector3D p;
+                    heStart = e.leftHalf;
+                    he = heStart;
+                    do {
+                        he = he.next();
+                        if ( he == null ) {
+                            // Loop is not closed!
+                            break;
+                        }
+                        p = he.startingVertex.position;
+                        if ( p.x > max.x ) max.x = p.x;
+                        if ( p.y > max.y ) max.y = p.y;
+                        if ( p.z > max.z ) max.z = p.z;
+                        if ( p.x < min.x ) min.x = p.x;
+                        if ( p.y < min.y ) min.y = p.y;
+                        if ( p.z < min.z ) min.z = p.z;
+                    } while( he != heStart && he != e.rightHalf);
+                    double leftDistance = VSDK.vectorDistance(min, max);
+
+                    // Estimate the size of semiloop starting at e.rightHalf
+                    min = new Vector3D(minmax[3], minmax[4], minmax[5]);
+                    max = new Vector3D(minmax[0], minmax[1], minmax[2]);
+                    heStart = e.rightHalf;
+                    he = heStart;
+                    do {
+                        he = he.next();
+                        if ( he == null ) {
+                            // Loop is not closed!
+                            break;
+                        }
+                        p = he.startingVertex.position;
+                        if ( p.x > max.x ) max.x = p.x;
+                        if ( p.y > max.y ) max.y = p.y;
+                        if ( p.z > max.z ) max.z = p.z;
+                        if ( p.x < min.x ) min.x = p.x;
+                        if ( p.y < min.y ) min.y = p.y;
+                        if ( p.z < min.z ) min.z = p.z;
+                    } while( he != heStart && he != e.leftHalf);
+                    double rightDistance = VSDK.vectorDistance(min, max);
+
+                    // Determine outer loop acording to major extent
+                    _PolyhedralBoundedSolidHalfEdge heOuter;
+                    _PolyhedralBoundedSolidHalfEdge heInner;
+
+                    if ( leftDistance > rightDistance ) {
+                        heOuter = e.leftHalf;
+                        heInner = e.rightHalf;
+                    }
+                    else {
+                        heOuter = e.rightHalf;
+                        heInner = e.leftHalf;
+                    }
+                    lkemr(heInner, heOuter);
+                    restart = true;
+                    break;
+                }
+            }
+            if ( restart ) {
+                continue;
+            }
+
+            //- Eliminate vertices between colinear edges -----------------
+            _PolyhedralBoundedSolidHalfEdge heMirror;
+            _PolyhedralBoundedSolidVertex v;
+            int nedges;
+
+            for ( i = 0; i < verticesList.size(); i++ ) {
+                v = verticesList.get(i);
+                heStart = v.emanatingHalfEdge;
+                if ( heStart == null ) {
                     continue;
                 }
+                he = heStart;
+                nedges = 0;
+                j = 0;
+                do {
+                    nedges++;
+                    if ( nedges > 2 ) break;
 
-                he = heMirror.next();
-                if ( he == null ) {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
-                        "Inconsistent model! HalfEdge without next. Check.");
-                }
-                j++;
-            } while ( he != heStart );
+                    if ( he == null ) {
+                        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
+                            "Inconsistent model! Null HalfEdge. Check.");
+                    }
 
-            if ( nedges == 2 ) {
-                p0 = heStart.startingVertex.position;
-                p1 = heStart.next().startingVertex.position.substract(p0);
-                p2 = heStart.previous().startingVertex.position.substract(p0);
-                if ( PolyhedralBoundedSolidNumericPolicy
-                    .vectorsColinear(p1, p2, numericContext) ) {
-                    if ( p1.dotProduct(p2) < 0 ) {
-                        lkev(heStart, heStart.mirrorHalfEdge());
-                        // As this breaks the edge sequence, start again!
-                        maximizeFaces();
-                        return;
+                    heMirror = he.mirrorHalfEdge();
+                    if ( heMirror == null ) {
+                        /*
+                        VSDK.reportMessage(this, VSDK.WARNING, "maximizeFaces",
+                            "Inconsistent model! halfedge " + he.id +
+                            " of face " + he.parentLoop.parentFace.id +
+                            " at position " + j + " emanating from \nvertex " +
+                            v.id +
+                            " without mirror halfedge. Check."
+                        );
+                        */
+                        nedges = 0;
+                        continue;
+                    }
+
+                    he = heMirror.next();
+                    if ( he == null ) {
+                        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "maximizeFaces",
+                            "Inconsistent model! HalfEdge without next. Check.");
+                    }
+                    j++;
+                } while ( he != heStart );
+
+                if ( nedges == 2 ) {
+                    p0 = heStart.startingVertex.position;
+                    p1 = heStart.next().startingVertex.position.substract(p0);
+                    p2 = heStart.previous().startingVertex.position.substract(p0);
+                    if ( PolyhedralBoundedSolidNumericPolicy
+                        .vectorsColinear(p1, p2, numericContext) ) {
+                        if ( p1.dotProduct(p2) < 0 ) {
+                            lkev(heStart, heStart.mirrorHalfEdge());
+                            restart = true;
+                            break;
+                        }
                     }
                 }
             }

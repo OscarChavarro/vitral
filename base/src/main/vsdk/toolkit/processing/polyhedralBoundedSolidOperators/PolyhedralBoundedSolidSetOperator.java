@@ -14,6 +14,7 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 // Java classes
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -578,7 +579,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     /**
     Following program [MANT1988].15.3.
     */
-    private static void doSetOpGenerate(
+    private static _PolyhedralBoundedSolidEdge doSetOpGenerate(
         _PolyhedralBoundedSolidEdge e,
         _PolyhedralBoundedSolidFace f,
         int BvsA,
@@ -638,7 +639,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                         addsovv(e.rightHalf.startingVertex, f.lastIntersectedVertex, BvsA);
 
                     }
-                    processEdge(e.rightHalf.previous().parentEdge, current, BvsA, other);
+                    return e.rightHalf.previous().parentEdge;
                 }
 
             }
@@ -652,6 +653,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             }
         }
 
+        return null;
     }
 
     /**
@@ -663,11 +665,23 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                                     PolyhedralBoundedSolid other)
     {
         _PolyhedralBoundedSolidFace f;
+        _PolyhedralBoundedSolidEdge generatedEdge;
         int i;
+        ArrayDeque<_PolyhedralBoundedSolidEdge> pendingEdges;
 
-        for ( i = 0; i < s.polygonsList.size(); i++ ) {
-            f = s.polygonsList.get(i);
-            doSetOpGenerate(e, f, BvsA, s, other);
+        pendingEdges = new ArrayDeque<_PolyhedralBoundedSolidEdge>();
+        pendingEdges.addFirst(e);
+
+        while ( !pendingEdges.isEmpty() ) {
+            e = pendingEdges.removeFirst();
+            for ( i = 0; i < s.polygonsList.size(); i++ ) {
+                f = s.polygonsList.get(i);
+                generatedEdge = doSetOpGenerate(e, f, BvsA, s, other);
+                if ( generatedEdge != null ) {
+                    // Depth-first processing order, equivalent to recursive style.
+                    pendingEdges.addFirst(generatedEdge);
+                }
+            }
         }
     }
 
