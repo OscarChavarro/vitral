@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 // VSDK Classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
@@ -95,7 +96,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         addArc(solid, 1, 1, cx, cy, rad, h, 0, 
             ((double)(n-1))*360.0/((double)n), n-1);
         solid.smef(1, n, 1, 2);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -118,7 +119,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
             prev = nextVertexId;
         }
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
     @Override

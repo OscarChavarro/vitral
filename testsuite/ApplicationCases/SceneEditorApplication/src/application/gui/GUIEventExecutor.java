@@ -24,6 +24,7 @@ import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.Sphere;
@@ -222,12 +223,12 @@ public class GUIEventExecutor extends CommandListener{
 
             R.translation(-0.55, -0.55, -0.55);
             brep.applyTransformation(R);
-            brep.validateModel();
+            PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
 
             //brep = createCircle(0.5, 0.5, 0.5, 0.1, 12);
 
             //
-            brep.validateModel();
+            PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
             parent.theScene.addThing(brep);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {

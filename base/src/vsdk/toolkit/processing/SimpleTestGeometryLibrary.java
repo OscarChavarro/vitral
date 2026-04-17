@@ -15,6 +15,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 
 /**
 This is a utility class containing a lot of geometry examples (mostly
@@ -92,7 +93,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -100,7 +101,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 0.2, 1.0));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -108,7 +109,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
-        c.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -116,7 +117,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 1.0, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
-        d.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
         ab = GeometricModeler.setOp(a, b, GeometricModeler.UNION);
@@ -156,7 +157,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -164,7 +165,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -172,7 +173,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
-        c.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -180,7 +181,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
-        d.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
         ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
@@ -193,7 +194,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
         e.applyTransformation(T);
-        e.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -201,7 +202,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
         f.applyTransformation(T);
-        f.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -209,7 +210,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
         g.applyTransformation(T);
-        g.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -217,7 +218,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
         h.applyTransformation(T);
-        h.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------
         eg = GeometricModeler.setOp(e, g, GeometricModeler.UNION);
@@ -287,7 +288,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         Box box = new Box(new Vector3D(1, 0.5, 0.6));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(R);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         R = new Matrix4x4();
@@ -296,7 +297,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(1, 0.5, 0.6));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         operands[0] = a;
@@ -332,7 +333,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         a.smev(1, 4, 5, new Vector3D(0.70+0.05, 0.42+0.05, 0.18+0.05));
         a.smev(1, 5, 6, new Vector3D(0.00+0.05, 0.42+0.05, 0.18+0.05));
         a.mef(1, 1, 6, 5, 1, 2, 2);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, -0.42, 0);
@@ -348,7 +349,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         operands[0] = a;
@@ -492,7 +493,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         box = new Box(new Vector3D(0.5, 1, 0.6));
         block = box.exportToPolyhedralBoundedSolid();
         block.applyTransformation(T);
-        block.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(block);
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid wedge;

@@ -1,4 +1,5 @@
 import vsdk.toolkit.gui.KeyEvent;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 
 public class DebuggerKeyboardInteractionTechniques
 {
@@ -54,7 +55,7 @@ public class DebuggerKeyboardInteractionTechniques
             break;
           case KeyEvent.KEY_I:
             System.out.println(model.solid);
-            if ( model.solid.validateModel() ) {
+            if ( PolyhedralBoundedSolidValidationEngine.validateIntermediate(model.solid) ) {
                 System.out.println("SOLID MODEL IS VALID!");
             }
             else {

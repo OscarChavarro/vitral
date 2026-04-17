@@ -10,6 +10,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
@@ -94,7 +96,7 @@ public class GeometricModeler extends ProcessingElement
             solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
             prev = nextVertexId;
         }
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
     /**
@@ -111,7 +113,7 @@ public class GeometricModeler extends ProcessingElement
         addArc(solid, 1, 1, cx, cy, rad, h, 0, 
             ((double)(n-1))*360.0/((double)n), n-1);
         solid.smef(1, n, 1, 2);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -156,7 +158,7 @@ public class GeometricModeler extends ProcessingElement
             solid.lmef(scan.previous(), scan.next().next(),
                 solid.getMaxFaceId()+1);
         }
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
     /**
@@ -205,7 +207,7 @@ public class GeometricModeler extends ProcessingElement
         for ( i = 0; i < newfaces.size(); i++ ) {
             newfaceid = newfaces.get(i).intValue();
             newface = solid.findFace(newfaceid);
-            if ( !solid.validateFaceIsPlanar(newface) ) {
+            if ( !PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(newface) ) {
                 scan = newface.boundariesList.get(0).boundaryStartHalfEdge;
                 newfaceid = solid.getMaxFaceId()+1;
                 solid.lmef(scan.next(), scan.previous(), newfaceid);
@@ -216,7 +218,7 @@ public class GeometricModeler extends ProcessingElement
             newfaces.remove(0);
         }
 
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
     public static PolyhedralBoundedSolid createBrepFromParametricCurve(ParametricCurve curve)
@@ -328,7 +330,7 @@ public class GeometricModeler extends ProcessingElement
             solid.kfmrh(2, nextFaceId-1);
         }
 
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 

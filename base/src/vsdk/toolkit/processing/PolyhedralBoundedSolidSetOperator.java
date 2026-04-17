@@ -23,6 +23,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
@@ -2615,12 +2616,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
         inSolidA.compactIds();
         inSolidB.compactIds();
-        inSolidA.validateModel();
-        inSolidB.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
         inSolidA.maximizeFaces();
         inSolidB.maximizeFaces();
-        inSolidA.validateModel();
-        inSolidB.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
         inSolidA.compactIds();
         inSolidB.compactIds();
         updmaxnames(inSolidB, inSolidA);
@@ -2680,11 +2681,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             debugSolid(res, "outputR_stage06");
         }
 
-        res.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
         res.compactIds();
         res.maximizeFaces();
         res.compactIds();
-        res.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
 
         if ( withDebug ) {
             debugSolid(res, "outputR_stage07");

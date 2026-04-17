@@ -19,6 +19,7 @@ import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
@@ -220,7 +221,7 @@ public class BoundedSolidTestSelector
         Box b = new Box(boxSize);
         solid = b.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -236,7 +237,7 @@ public class BoundedSolidTestSelector
         Sphere s = new Sphere(r);
         solid = s.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -252,7 +253,7 @@ public class BoundedSolidTestSelector
         Cone c = new Cone(r1, r2, h);
         solid = c.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -268,7 +269,7 @@ public class BoundedSolidTestSelector
         Arrow a = new Arrow(p1, p2, p3, p4);
         solid = a.exportToPolyhedralBoundedSolid();
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -296,7 +297,7 @@ public class BoundedSolidTestSelector
         solid.smev(7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
         solid.mef(7, 7, 15, 11, 16, 12, 10);
         solid.mef(7, 7, 13, 14, 16, 12, 11);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
     /**
@@ -313,7 +314,7 @@ public class BoundedSolidTestSelector
         solid.kfmrh(2, 11);
         //R.translation(-0.55, -0.55, -0.55);
         //solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
     }
@@ -349,7 +350,7 @@ public class BoundedSolidTestSelector
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
 
     }
@@ -385,7 +386,7 @@ public class BoundedSolidTestSelector
 
         //-----------------------------------------------------------------
         solid.applyTransformation(R);
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 
@@ -442,7 +443,7 @@ public class BoundedSolidTestSelector
         );
         GeometricModeler.translationalSweepExtrudeFacePlanar(
             solid1, solid1.findFace(1), T);
-        solid1.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
 
         //-----------------------------------------------------------------
         double ang = (2*Math.PI) / 6;
@@ -462,7 +463,7 @@ public class BoundedSolidTestSelector
         );
         GeometricModeler.translationalSweepExtrudeFacePlanar(
             solid2, solid2.findFace(1), T);
-        solid2.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid2);
 
         //-----------------------------------------------------------------
         R.translation(c.x, -c.y, c.z);
@@ -472,9 +473,9 @@ public class BoundedSolidTestSelector
         glue(solid1, solid2, 8, 13);
 
         //-----------------------------------------------------------------
-        solid1.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
         solid1.maximizeFaces();
-        solid1.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
 
         return solid1;
     }
@@ -529,7 +530,7 @@ public class BoundedSolidTestSelector
         solid.smev(1, 2, 3, new Vector3D(1.0, 1.0, 0.0));
 
         //-----------------------------------------------------------------
-        //solid.validateModel();
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         System.out.println(solid);
         return solid;
     }
@@ -707,7 +708,7 @@ public class BoundedSolidTestSelector
 */
         solid = createTestTorus(4, 16);
         //-----------------------------------------------------------------
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
     }
@@ -751,7 +752,7 @@ public class BoundedSolidTestSelector
 //                               new Vector3D(0, 0, 0.5) /*p*/);
 
         //-----------------------------------------------------------------
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         if ( part == 1 ) {
             return solid;
@@ -768,7 +769,7 @@ public class BoundedSolidTestSelector
         }
 
         solid.maximizeFaces();
-        solid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
     }
@@ -797,7 +798,7 @@ public class BoundedSolidTestSelector
         Box box = new Box(new Vector3D(1, 0.5, 0.3));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(R);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         R = new Matrix4x4();
@@ -806,7 +807,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.5, 1, 0.3));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(R);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         operands[0] = a;
@@ -840,7 +841,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -848,7 +849,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -856,7 +857,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
-        c.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -864,7 +865,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
-        d.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
         x = GeometricModeler.setOp(b, c, GeometricModeler.UNION);
@@ -904,7 +905,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
-        a.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -912,7 +913,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
-        b.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -920,7 +921,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
-        c.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -928,7 +929,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
-        d.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -936,7 +937,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
         e.applyTransformation(T);
-        e.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -944,7 +945,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
         f.applyTransformation(T);
-        f.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -952,7 +953,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
         g.applyTransformation(T);
-        g.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -960,7 +961,7 @@ public class BoundedSolidTestSelector
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
         h.applyTransformation(T);
-        h.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------
 /*
@@ -1041,9 +1042,9 @@ public class BoundedSolidTestSelector
         }
 
         //-----------------------------------------------------------------
-        //operands[0].validateModel();
-        //operands[1].validateModel();
-        //res.validateModel();
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[0]);
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[1]);
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
 
         if ( part == 2 ) {
             return operands[0];

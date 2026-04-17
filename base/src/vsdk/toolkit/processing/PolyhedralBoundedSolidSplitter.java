@@ -15,6 +15,7 @@ import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
@@ -725,9 +726,9 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         fixNullFaces(facesToFixAbove);
         fixNullFaces(facesToFixBelow);
         cleanup(newAbove);
-        newAbove.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(newAbove);
         cleanup(newBelow);
-        newBelow.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(newBelow);
         outSolidsAbove.add(newAbove);
         outSolidsBelow.add(newBelow);
         destroy(inSolid);
@@ -751,7 +752,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
                       ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
     {
         //-----------------------------------------------------------------
-        inSolid.validateModel();
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolid);
         splitGenerate(inSolid, inSplittingPlane);
         splitClassify(inSolid, inSplittingPlane);
 
