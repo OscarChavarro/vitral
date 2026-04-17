@@ -126,6 +126,28 @@ project(':awt') {
     }
 }
 
+project(':base') {
+    sourceSets {
+        main {
+            java.setSrcDirs(['src/main'])
+            resources.setSrcDirs([])
+        }
+        test {
+            java.setSrcDirs(['src/test'])
+            resources.setSrcDirs([])
+        }
+    }
+
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.10.3')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
 project(':jogl') {
     dependencies {
         api project(':base')
