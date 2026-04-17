@@ -17,9 +17,9 @@ import vsdk.toolkit.environment.geometry.Surface;
 import vsdk.toolkit.environment.geometry.Solid;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 

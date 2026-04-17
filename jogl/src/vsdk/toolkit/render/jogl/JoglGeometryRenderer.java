@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.Torus;
 import vsdk.toolkit.environment.geometry.InfinitePlane;

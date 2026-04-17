@@ -9,13 +9,13 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidGeometricValidator;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 /**
 This is a utility class containing a lot of geometry operations (mostly

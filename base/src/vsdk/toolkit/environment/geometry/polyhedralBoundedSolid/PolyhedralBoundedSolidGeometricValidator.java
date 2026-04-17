@@ -1,13 +1,15 @@
-package vsdk.toolkit.environment.geometry;
+package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 public class PolyhedralBoundedSolidGeometricValidator
 {

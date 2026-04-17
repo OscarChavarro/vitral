@@ -14,8 +14,8 @@ package vsdk.toolkit.processing;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 /**
 This is a utility class containing a lot of geometry examples (mostly

@@ -1,7 +1,7 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 /**
 This class is used to store vertex / halfedge neigborhood information for the

@@ -2,12 +2,12 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-package vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes;
+package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**
 As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidVertex` contains

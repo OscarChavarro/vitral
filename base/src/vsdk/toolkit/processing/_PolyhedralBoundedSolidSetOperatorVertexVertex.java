@@ -1,6 +1,6 @@
 package vsdk.toolkit.processing;
 
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 public class _PolyhedralBoundedSolidSetOperatorVertexVertex
     extends PolyhedralBoundedSolidOperator

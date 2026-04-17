@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry;
+package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 public interface PolyhedralBoundedSolidValidationStrategy
 {

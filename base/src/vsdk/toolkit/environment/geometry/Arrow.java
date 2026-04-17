@@ -3,6 +3,7 @@ package vsdk.toolkit.environment.geometry;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.GeometricModeler;
 
 public class Arrow extends Solid {

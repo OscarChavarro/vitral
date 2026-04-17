@@ -5,7 +5,7 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-package vsdk.toolkit.environment.geometry;
+package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
@@ -14,11 +14,15 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.InfinitePlane;
+import vsdk.toolkit.environment.geometry.Solid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 /**
 This class encapsulates a polyhedral boundary representation for 2-manifold

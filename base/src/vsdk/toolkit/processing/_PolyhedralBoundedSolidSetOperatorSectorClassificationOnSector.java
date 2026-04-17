@@ -1,6 +1,6 @@
 package vsdk.toolkit.processing;
 
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 /**
 This class is used to store sector / sector neigborhood information for the

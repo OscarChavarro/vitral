@@ -1,8 +1,8 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidNumericPolicy;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 
 /**
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
