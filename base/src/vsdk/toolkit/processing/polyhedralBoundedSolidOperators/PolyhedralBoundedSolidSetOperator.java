@@ -100,6 +100,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static final int COPLANAR_OP_INTERSECTION = 1;
     private static final int COPLANAR_OP_DIFFERENCE = 2;
 
+    private static final int NO_INT_RELATION_DISJOINT = 0;
+    private static final int NO_INT_RELATION_TOUCHING = 1;
+    private static final int NO_INT_RELATION_A_IN_B = 2;
+    private static final int NO_INT_RELATION_B_IN_A = 3;
+
     private static final int COPLANAR_SIDE_A_VS_B = 0;
     private static final int COPLANAR_SIDE_B_VS_A = 1;
 
@@ -2854,7 +2859,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid solidB)
     {
         int i;
-        int sawLimit = 0;
+        boolean sawLimit = false;
+        boolean sawOutside = false;
 
         if ( solidA == null || solidA.verticesList.size() < 1 ) {
             return Geometry.OUTSIDE;
@@ -2866,13 +2872,41 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             if ( status == Geometry.INSIDE ) {
                 return Geometry.INSIDE;
             }
-            if ( status == Geometry.OUTSIDE ) {
-                return Geometry.OUTSIDE;
+            if ( status == Geometry.LIMIT ) {
+                sawLimit = true;
             }
-            sawLimit = 1;
+            else {
+                sawOutside = true;
+            }
         }
 
-        return (sawLimit != 0) ? Geometry.LIMIT : Geometry.OUTSIDE;
+        if ( sawLimit ) {
+            return Geometry.LIMIT;
+        }
+        if ( sawOutside ) {
+            return Geometry.OUTSIDE;
+        }
+        return Geometry.OUTSIDE;
+    }
+
+    /*
+    No-intersection classifier policy:
+      - INSIDE means one solid is volumetrically contained in the other.
+      - LIMIT means touching-only (point/edge/line contact, non-volumetric).
+      - OUTSIDE means disjoint.
+    */
+    private static int classifyNoIntersectionRelation(int aInB, int bInA)
+    {
+        if ( aInB == Geometry.INSIDE ) {
+            return NO_INT_RELATION_A_IN_B;
+        }
+        if ( bInA == Geometry.INSIDE ) {
+            return NO_INT_RELATION_B_IN_A;
+        }
+        if ( aInB == Geometry.LIMIT || bInA == Geometry.LIMIT ) {
+            return NO_INT_RELATION_TOUCHING;
+        }
+        return NO_INT_RELATION_DISJOINT;
     }
 
     /**
@@ -2886,25 +2920,28 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     {
         int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
         int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+        int relation = classifyNoIntersectionRelation(aInB, bInA);
 
         if ( op == INTERSECTION ) {
-            if ( aInB == Geometry.INSIDE ) {
+            if ( relation == NO_INT_RELATION_A_IN_B ) {
                 outRes.merge(inSolidA);
             }
-            else if ( bInA == Geometry.INSIDE ) {
+            else if ( relation == NO_INT_RELATION_B_IN_A ) {
                 outRes.merge(inSolidB);
             }
+            // Touching-only and disjoint return empty intersection.
             return outRes;
         }
 
         if ( op == UNION ) {
-            if ( aInB == Geometry.INSIDE ) {
+            if ( relation == NO_INT_RELATION_A_IN_B ) {
                 outRes.merge(inSolidB);
             }
-            else if ( bInA == Geometry.INSIDE ) {
+            else if ( relation == NO_INT_RELATION_B_IN_A ) {
                 outRes.merge(inSolidA);
             }
             else {
+                // Touching-only and disjoint both merge the two solids.
                 outRes.merge(inSolidA);
                 outRes.merge(inSolidB);
             }
@@ -2912,16 +2949,17 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         // DIFFERENCE
-        if ( aInB == Geometry.INSIDE ) {
+        if ( relation == NO_INT_RELATION_A_IN_B ) {
             return outRes;
         }
-        if ( bInA == Geometry.INSIDE ) {
+        if ( relation == NO_INT_RELATION_B_IN_A ) {
             outRes.merge(inSolidA);
             inSolidB.revert();
             outRes.merge(inSolidB);
             outRes.compactIds();
             return outRes;
         }
+        // Touching-only and disjoint keep minuend unchanged.
         outRes.merge(inSolidA);
         return outRes;
     }
