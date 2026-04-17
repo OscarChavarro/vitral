@@ -23,6 +23,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
@@ -68,6 +69,17 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     Used for exporting internal state in graphical form.
     */
     private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
+
+    private static int compareToZero(double value)
+    {
+        return PolyhedralBoundedSolidNumericPolicy.compareToZero(value,
+            numericContext);
+    }
+
+    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
+    {
+        return face.testPointInside(point, numericContext.bigEpsilon());
+    }
 
     /**
     Following variable `sonvv` from program [MANT1988].15.1.
@@ -252,8 +264,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         double d;
 
         d = f.containingPlane.pointDistance(v.position);
-        if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 0 ) {
-            cont = cont = f.testPointInside(v.position, VSDK.EPSILON);
+        if ( compareToZero(d) == 0 ) {
+            cont = pointInFace(f, v.position);
             if ( cont == Geometry.INSIDE ) {
                 addsovf(v.emanatingHalfEdge, f, BvsA);
             }
@@ -291,8 +303,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         v2 = e.leftHalf.startingVertex;
         d1 = f.containingPlane.pointDistance(v1.position);
         d2 = f.containingPlane.pointDistance(v2.position);
-        s1 = PolyhedralBoundedSolid.compareValue(d1, 0.0, VSDK.EPSILON);
-        s2 = PolyhedralBoundedSolid.compareValue(d2, 0.0, VSDK.EPSILON);
+        s1 = compareToZero(d1);
+        s2 = compareToZero(d2);
 
         if ( (s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1) ) {
             t = d1 / (d1 - d2);
@@ -301,8 +313,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                          v1.position)).multiply(t));
 
             d3 = f.containingPlane.pointDistance(p);
-            if ( PolyhedralBoundedSolid.compareValue(d3, 0.0, VSDK.EPSILON) == 0 ) {
-                cont = f.testPointInside(p, VSDK.EPSILON);
+            if ( compareToZero(d3) == 0 ) {
+                cont = pointInFace(f, p);
 
                 if ( cont != Geometry.OUTSIDE ) {
                     current.lmev(e.rightHalf, e.leftHalf.next(),
@@ -428,7 +440,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
             c.sector = he;
             d = referencePlane.pointDistance((he.next()).startingVertex.position);
-            c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
+            c.cl = compareToZero(d);
             c.isWide = false;
             c.position = new Vector3D((he.next()).startingVertex.position);
             c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
@@ -441,7 +453,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
                 c.sector = he;
                 d = referencePlane.pointDistance(bisect);
-                c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
+                c.cl = compareToZero(d);
                 c.isWide = true;
                 c.position = new Vector3D(bisect);
                 c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
@@ -504,11 +516,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             f = nbr.get(i).sector.parentLoop.parentFace;
             c = f.containingPlane.getNormal().crossProduct(referencePlane.getNormal());
             d = c.dotProduct(c);
-            if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 0 ) {
+            if ( compareToZero(d) == 0 ) {
                 // Entering this means "faces are coplanar"
                 //System.out.println("**** UNTESTED CASE!");
                 d = f.containingPlane.getNormal().dotProduct(referencePlane.getNormal());
-                if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
+                if ( compareToZero(d) == 1 ) {
                     // Identical
                     if ( BvsA != 0 ) {
                         nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
@@ -601,11 +613,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             f = nbr.get(i).sector.mirrorHalfEdge().parentLoop.parentFace;
             c = f.containingPlane.getNormal().crossProduct(referencePlane.getNormal());
             d = c.dotProduct(c);
-            if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 0 ) {
+            if ( compareToZero(d) == 0 ) {
                 // Entering this means "faces are coplanar"
                 d = f.containingPlane.getNormal().dotProduct(referencePlane.getNormal());
                 // Test orientation
-                if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
+                if ( compareToZero(d) == 1 ) {
                     // Identical
                     if ( BvsA != 0 ) {
                         nbr.get(i).cl = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
@@ -1092,10 +1104,12 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 he.startingVertex.position);
             n.ref12 = n.ref1.crossProduct(n.ref2);
 
-            if ( (n.ref12.length() < VSDK.EPSILON) ||
+            if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                     n.ref1, n.ref2, numericContext) ||
                  (n.ref12.dotProduct(he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0 ) ) {
                 // Inside this conditional means: current vertex is a wide one
-                if ( (n.ref12.length() < VSDK.EPSILON) ) {
+                if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                         n.ref1, n.ref2, numericContext) ) {
                     bisec = inside(he);
                 }
                 else {
@@ -1226,7 +1240,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
 
         //- Calculate interval intersection -------------------------------
-        if ( a2 + VSDK.EPSILON > b1 - VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy.angleIntervalsOverlap(
+                a2, b1, numericContext) ) {
 
             if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0 ) {
                 System.out.print(" <TRUE>");
@@ -1265,15 +1280,17 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int t1, t2;
 
         c1 = dir.crossProduct(ref1);
-        if ( c1.length() < VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+            dir, ref1, numericContext) ) {
             return (ref1.dotProduct(dir) > 0.0);
         }
         c2 = ref2.crossProduct(dir);
-        if ( c2.length() < VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+            ref2, dir, numericContext) ) {
             return (ref2.dotProduct(dir) > 0.0);
         }
-        t1 = PolyhedralBoundedSolid.compareValue(c1.dotProduct(ref12), 0.0, VSDK.EPSILON);
-        t2 = PolyhedralBoundedSolid.compareValue(c2.dotProduct(ref12), 0.0, VSDK.EPSILON);
+        t1 = compareToZero(c1.dotProduct(ref12));
+        t2 = compareToZero(c2.dotProduct(ref12));
         return ( t1 < 0.0 && t2 < 0.0 );
     }
 
@@ -1315,7 +1332,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         intrs = n1.crossProduct(n2);
 
         //-----------------------------------------------------------------
-        if ( intrs.length() < VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy.unitVectorsParallel(
+            n1, n2, numericContext) ) {
             if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0 ) {
                 System.out.print(" <coplanar>");
             }
@@ -1417,10 +1435,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                     d2 = nb.dotProduct(xa.ref2);
                     d3 = na.dotProduct(xb.ref1);
                     d4 = na.dotProduct(xb.ref2);
-                    s.s1a = PolyhedralBoundedSolid.compareValue(d1, 0.0, VSDK.EPSILON);
-                    s.s2a = PolyhedralBoundedSolid.compareValue(d2, 0.0, VSDK.EPSILON);
-                    s.s1b = PolyhedralBoundedSolid.compareValue(d3, 0.0, VSDK.EPSILON);
-                    s.s2b = PolyhedralBoundedSolid.compareValue(d4, 0.0, VSDK.EPSILON);
+                    s.s1a = compareToZero(d1);
+                    s.s2a = compareToZero(d2);
+                    s.s1b = compareToZero(d3);
+                    s.s2b = compareToZero(d4);
                     s.intersect = true;
                     sectors.add(s);
                 }
@@ -1471,7 +1489,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
                 n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
                 d = VSDK.vectorDistance(n1, n2);
-                nonopposite = ( d < VSDK.EPSILON );
+                nonopposite = ( d < numericContext.unitVectorTolerance() );
                 if ( nonopposite ) {
                     newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
                     newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
@@ -1525,15 +1543,14 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
     private static boolean colinearVectors(Vector3D a, Vector3D b)
     {
-        if ( a.crossProduct(b).length() < VSDK.EPSILON ) {
-            return true;
-        }
-        return false;
+        return PolyhedralBoundedSolidNumericPolicy
+            .vectorsColinear(a, b, numericContext);
     }
 
     public static boolean colinearVectorsWithDirection(Vector3D a, Vector3D b)
     {
-        if ( a.crossProduct(b).length() < VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy
+            .vectorsColinear(a, b, numericContext) ) {
             if ( a.dotProduct(b) >= 0 ) return true;
         }
         return false;
@@ -1859,7 +1876,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     */
     private static boolean nulledge(_PolyhedralBoundedSolidHalfEdge he)
     {
-        return ( VSDK.vectorDistance(he.startingVertex.position, he.next().startingVertex.position) < VSDK.EPSILON);
+        return PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+            he.startingVertex.position, he.next().startingVertex.position,
+            numericContext);
     }
 
     /**
@@ -1888,7 +1907,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
         dir = h2.startingVertex.position.substract(he.startingVertex.position);
         cr = he.parentLoop.parentFace.containingPlane.getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.containingPlane.getNormal());
-        if ( cr.length() < VSDK.EPSILON ) {
+        if ( cr.length() < numericContext.unitVectorTolerance() ) {
             return true;
         }
         return (dir.dotProduct(cr) < 0.0);
@@ -1904,7 +1923,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         ref1 = he.previous().startingVertex.position.substract(he.startingVertex.position);
         ref2 = he.next().startingVertex.position.substract(he.startingVertex.position);
         ref12 = ref1.crossProduct(ref2);
-        if ( ref12.length() < VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy
+            .vectorsColinear(ref1, ref2, numericContext) ) {
             return true;
         }
         return ((ref12.dotProduct(he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0) ? false : true );
@@ -2575,6 +2595,11 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid inSolidB,
         int op, boolean withDebug)
     {
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
+        _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
+            numericContext);
+
         if ( withDebug ) {
             debugFlags = 0
               | DEBUG_01_STRUCTURE
@@ -2625,6 +2650,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         inSolidA.compactIds();
         inSolidB.compactIds();
         updmaxnames(inSolidB, inSolidA);
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
+        _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
+            numericContext);
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage01");

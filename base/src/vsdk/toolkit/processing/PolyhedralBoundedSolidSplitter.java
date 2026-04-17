@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 // VitralSDK classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
@@ -80,11 +80,25 @@ design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
 class _PolyhedralBoundedSolidSplitterNullEdge extends PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
 {
+    private static PolyhedralBoundedSolidNumericPolicy.ToleranceContext
+        numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+
     public _PolyhedralBoundedSolidEdge e;
 
     public _PolyhedralBoundedSolidSplitterNullEdge(_PolyhedralBoundedSolidEdge e)
     {
         this.e = e;
+    }
+
+    public static void setNumericContext(
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        if ( context == null ) {
+            numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+        }
+        else {
+            numericContext = context;
+        }
     }
 
     @Override
@@ -96,14 +110,16 @@ class _PolyhedralBoundedSolidSplitterNullEdge extends PolyhedralBoundedSolidOper
         a = this.e.rightHalf.startingVertex.position;
         b = other.e.rightHalf.startingVertex.position;
 
-        if ( PolyhedralBoundedSolid.compareValue(a.x, b.x, 10*VSDK.EPSILON) != 0 ) {
+        if ( PolyhedralBoundedSolidNumericPolicy
+            .compare(a.x, b.x, numericContext.bigEpsilon()) != 0 ) {
             if ( a.x < b.x ) {
                 return -1;
             }
             return 1;
         }
         else {
-            if ( PolyhedralBoundedSolid.compareValue(a.y, b.y, 10*VSDK.EPSILON) != 0 ) {
+            if ( PolyhedralBoundedSolidNumericPolicy
+                .compare(a.y, b.y, numericContext.bigEpsilon()) != 0 ) {
                 if ( a.y < b.y ) {
                     return -1;
                 }
@@ -130,6 +146,12 @@ from GeometricModeler class.
 */
 public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperator
 {
+    private static int compareToZero(double value)
+    {
+        return PolyhedralBoundedSolidNumericPolicy.compareToZero(value,
+            numericContext);
+    }
+
     /**
     Following variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
     */
@@ -199,8 +221,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             v2 = e.leftHalf.startingVertex;
             d1 = inSplittingPlane.pointDistance(v1.position);
             d2 = inSplittingPlane.pointDistance(v2.position);
-            s1 = PolyhedralBoundedSolid.compareValue(d1, 0.0, VSDK.EPSILON);
-            s2 = PolyhedralBoundedSolid.compareValue(d2, 0.0, VSDK.EPSILON);
+            s1 = compareToZero(d1);
+            s2 = compareToZero(d2);
             if ( (s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1) ) {
                 t = d1 / (d1 - d2);
                 p = v1.position.add((v2.position.substract(v1.position)).multiply(t));
@@ -254,7 +276,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             c = new _PolyhedralBoundedSolidSplitterSectorClassification();
             c.sector = he;
             d = inSplittingPlane.pointDistance((he.next()).startingVertex.position);
-            c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
+            c.cl = compareToZero(d);
             c.isWide = false;
             c.position = new Vector3D((he.next()).startingVertex.position);
             c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED;
@@ -266,7 +288,7 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
                 c = new _PolyhedralBoundedSolidSplitterSectorClassification();
                 c.sector = he;
                 d = inSplittingPlane.pointDistance(bisect);
-                c.cl = PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON);
+                c.cl = compareToZero(d);
                 c.isWide = true;
                 c.position = new Vector3D(bisect);
                 c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
@@ -323,10 +345,10 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             f = l.sector.parentLoop.parentFace;
             c = f.containingPlane.getNormal().crossProduct(inSplittingPlane.getNormal());
             d = c.dotProduct(c);
-            if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 0 ) {
+            if ( compareToZero(d) == 0 ) {
                 // Entering this means "faces are coplanar"
                 d = f.containingPlane.getNormal().dotProduct(inSplittingPlane.getNormal());
-                if ( PolyhedralBoundedSolid.compareValue(d, 0.0, VSDK.EPSILON) == 1 ) {
+                if ( compareToZero(d) == 1 ) {
                     l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                     l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
                     nbr.get((i+1)%nbr.size()).cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
@@ -420,7 +442,9 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
 
             //- Insert null edge -----------------------------------------
             int d1;
-            d1 = inSplittingPlane.doContainmentTestHalfSpace(head.next().startingVertex.position, VSDK.EPSILON);
+            d1 = inSplittingPlane.doContainmentTestHalfSpace(
+                head.next().startingVertex.position,
+                numericContext.epsilon());
 
             //System.out.println("LMEV:");
             if ( d1 != Geometry.OUTSIDE ) {
@@ -669,7 +693,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
             heStart = b.boundariesList.get(i).boundaryStartHalfEdge;
             he = heStart;
             do {
-                if ( a.testPointInside(he.startingVertex.position, VSDK.EPSILON) == Geometry.OUTSIDE ) {
+                if ( a.testPointInside(he.startingVertex.position,
+                        numericContext.bigEpsilon()) == Geometry.OUTSIDE ) {
                     return false;
                 }
                 he = he.next();
@@ -752,6 +777,9 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
                       ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
     {
         //-----------------------------------------------------------------
+        setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolid(inSolid));
+        _PolyhedralBoundedSolidSplitterNullEdge.setNumericContext(numericContext);
+
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolid);
         splitGenerate(inSolid, inSplittingPlane);
         splitClassify(inSolid, inSplittingPlane);

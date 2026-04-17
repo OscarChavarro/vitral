@@ -1,8 +1,7 @@
 package vsdk.toolkit.processing;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
 
 /**
@@ -13,12 +12,26 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
     extends PolyhedralBoundedSolidOperator
     implements Comparable<_PolyhedralBoundedSolidSetOperatorNullEdge>
 {
+    private static PolyhedralBoundedSolidNumericPolicy.ToleranceContext
+        numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+
     public _PolyhedralBoundedSolidEdge e;
 
     public _PolyhedralBoundedSolidSetOperatorNullEdge(
         _PolyhedralBoundedSolidEdge e)
     {
         this.e = e;
+    }
+
+    public static void setNumericContext(
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        if ( context == null ) {
+            numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+        }
+        else {
+            numericContext = context;
+        }
     }
 
     public int compareTo(_PolyhedralBoundedSolidSetOperatorNullEdge other)
@@ -29,14 +42,16 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         a = this.e.rightHalf.startingVertex.position;
         b = other.e.rightHalf.startingVertex.position;
 
-        if ( PolyhedralBoundedSolid.compareValue(a.x, b.x, 10*VSDK.EPSILON) != 0 ) {
+        if ( PolyhedralBoundedSolidNumericPolicy
+            .compare(a.x, b.x, numericContext.bigEpsilon()) != 0 ) {
             if ( a.x < b.x ) {
                 return -1;
             }
             return 1;
         }
         else {
-            if ( PolyhedralBoundedSolid.compareValue(a.y, b.y, 10*VSDK.EPSILON) != 0 ) {
+            if ( PolyhedralBoundedSolidNumericPolicy
+                .compare(a.y, b.y, numericContext.bigEpsilon()) != 0 ) {
                 if ( a.y < b.y ) {
                     return -1;
                 }

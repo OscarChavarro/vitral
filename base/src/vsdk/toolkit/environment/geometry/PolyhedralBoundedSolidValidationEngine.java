@@ -14,6 +14,8 @@ public class PolyhedralBoundedSolidValidationEngine
     {
         StringBuilder msg = new StringBuilder();
         boolean ok = true;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
 
         ArrayList<PolyhedralBoundedSolidValidationStrategy> strategies =
             new ArrayList<PolyhedralBoundedSolidValidationStrategy>();
@@ -22,7 +24,7 @@ public class PolyhedralBoundedSolidValidationEngine
 
         int i;
         for ( i = 0; i < strategies.size(); i++ ) {
-            if ( !strategies.get(i).validate(solid, msg) ) {
+            if ( !strategies.get(i).validate(solid, numericContext, msg) ) {
                 ok = false;
                 break;
             }
@@ -40,6 +42,8 @@ public class PolyhedralBoundedSolidValidationEngine
     {
         StringBuilder msg = new StringBuilder();
         boolean ok = true;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
 
         ArrayList<PolyhedralBoundedSolidValidationStrategy> strategies =
             new ArrayList<PolyhedralBoundedSolidValidationStrategy>();
@@ -50,7 +54,7 @@ public class PolyhedralBoundedSolidValidationEngine
 
         int i;
         for ( i = 0; i < strategies.size(); i++ ) {
-            if ( !strategies.get(i).validate(solid, msg) ) {
+            if ( !strategies.get(i).validate(solid, numericContext, msg) ) {
                 ok = false;
                 break;
             }
@@ -68,10 +72,12 @@ public class PolyhedralBoundedSolidValidationEngine
         implements PolyhedralBoundedSolidValidationStrategy
     {
         @Override
-        public boolean validate(PolyhedralBoundedSolid solid, StringBuilder msg)
+        public boolean validate(PolyhedralBoundedSolid solid,
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+            StringBuilder msg)
         {
             return PolyhedralBoundedSolidGeometricValidator
-                .validateAllFacesPlanarityAndPlanes(solid, msg);
+                .validateAllFacesPlanarityAndPlanes(solid, numericContext, msg);
         }
     }
 
@@ -79,7 +85,9 @@ public class PolyhedralBoundedSolidValidationEngine
         implements PolyhedralBoundedSolidValidationStrategy
     {
         @Override
-        public boolean validate(PolyhedralBoundedSolid solid, StringBuilder msg)
+        public boolean validate(PolyhedralBoundedSolid solid,
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+            StringBuilder msg)
         {
             PolyhedralBoundedSolidTopologicalValidator
                 .remakeEmanatingHalfedgesReferences(solid);
@@ -96,10 +104,12 @@ public class PolyhedralBoundedSolidValidationEngine
         implements PolyhedralBoundedSolidValidationStrategy
     {
         @Override
-        public boolean validate(PolyhedralBoundedSolid solid, StringBuilder msg)
+        public boolean validate(PolyhedralBoundedSolid solid,
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+            StringBuilder msg)
         {
             return PolyhedralBoundedSolidGeometricValidator
-                .validateLoopsStrict(solid, msg);
+                .validateLoopsStrict(solid, numericContext, msg);
         }
     }
 
@@ -107,10 +117,12 @@ public class PolyhedralBoundedSolidValidationEngine
         implements PolyhedralBoundedSolidValidationStrategy
     {
         @Override
-        public boolean validate(PolyhedralBoundedSolid solid, StringBuilder msg)
+        public boolean validate(PolyhedralBoundedSolid solid,
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+            StringBuilder msg)
         {
             return PolyhedralBoundedSolidGeometricValidator
-                .validateFaceIntersectionsStrict(solid, msg);
+                .validateFaceIntersectionsStrict(solid, numericContext, msg);
         }
     }
 }

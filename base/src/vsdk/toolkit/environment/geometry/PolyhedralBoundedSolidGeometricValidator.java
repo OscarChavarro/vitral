@@ -2,7 +2,6 @@ package vsdk.toolkit.environment.geometry;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
@@ -18,23 +17,34 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
     {
-        if ( points.size() < 3 ) {
+        return validateFacePointsAreCoplanar(points,
+            PolyhedralBoundedSolidNumericPolicy.forPoints(points));
+    }
+
+    public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        if ( points == null || points.size() < 3 ) {
             return false;
+        }
+        if ( numericContext == null ) {
+            numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
         }
 
         Vector3D p0, p1, p2;
         p0 = points.get(0);
-        boolean test = false;
+        boolean foundSeparatedPair = false;
 
         int i;
         for ( i = 1; i < points.size(); i++ ) {
             p1 = points.get(i);
-            if ( VSDK.vectorDistance(p0, p1) > 10 * VSDK.EPSILON ) {
-                test = true;
+            if ( PolyhedralBoundedSolidNumericPolicy.pointsSeparated(
+                p0, p1, numericContext) ) {
+                foundSeparatedPair = true;
                 break;
             }
         }
-        if ( !test ) {
+        if ( !foundSeparatedPair ) {
             return false;
         }
 
@@ -52,14 +62,16 @@ public class PolyhedralBoundedSolidGeometricValidator
                     p0 = points.get(i);
                     p1 = points.get(j);
                     p2 = points.get(k);
-                    if ( VSDK.vectorDistance(p0, p2) > 10 * VSDK.EPSILON &&
-                         VSDK.vectorDistance(p1, p2) > 10 * VSDK.EPSILON ) {
+                    if ( PolyhedralBoundedSolidNumericPolicy.pointsSeparated(
+                             p0, p2, numericContext) &&
+                         PolyhedralBoundedSolidNumericPolicy.pointsSeparated(
+                             p1, p2, numericContext) ) {
                         a = p2.substract(p0);
                         b = p1.substract(p0);
                         a.normalize();
                         b.normalize();
                         aDotB = Math.abs(a.dotProduct(b));
-                        if ( aDotB < 1 - 2*VSDK.EPSILON ) {
+                        if ( aDotB < 1.0 - numericContext.unitVectorTolerance() ) {
                             n = a.crossProduct(b);
                             n.normalize();
                             facePlane = new InfinitePlane(n, p0);
@@ -76,7 +88,8 @@ public class PolyhedralBoundedSolidGeometricValidator
 
         for ( i = 1; i < points.size(); i++ ) {
             p0 = points.get(i);
-            if ( facePlane.doContainmentTest(p0, VSDK.EPSILON) != Geometry.LIMIT ) {
+            if ( facePlane.doContainmentTest(p0, numericContext.epsilon()) !=
+                 Geometry.LIMIT ) {
                 return false;
             }
         }
@@ -120,18 +133,35 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     public static boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face)
     {
+        return validateFaceIsPlanar(face,
+            PolyhedralBoundedSolidNumericPolicy.forFace(face));
+    }
+
+    public static boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
         ArrayList<Vector3D> points = extractPointsFromFace(face);
-        return (points != null) && validateFacePointsAreCoplanar(points);
+        return (points != null) &&
+            validateFacePointsAreCoplanar(points, numericContext);
     }
 
     public static boolean validateAllFacesPlanarityAndPlanes(
         PolyhedralBoundedSolid solid, StringBuilder msg)
     {
+        return validateAllFacesPlanarityAndPlanes(solid,
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
+    }
+
+    public static boolean validateAllFacesPlanarityAndPlanes(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        StringBuilder msg)
+    {
         int i;
         boolean test = true;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( validateFaceIsPlanar(face) ) {
+            if ( validateFaceIsPlanar(face, numericContext) ) {
                 face.calculatePlane();
                 if ( face.containingPlane == null ) {
                     msg.append("  - Face [").append(face.id)
@@ -182,43 +212,60 @@ public class PolyhedralBoundedSolidGeometricValidator
         return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
     }
 
-    private static boolean pointOnSegment2D(Vector2D p, Vector2D a, Vector2D b, double tolerance)
+    private static boolean pointOnSegment2D(Vector2D p, Vector2D a, Vector2D b,
+                                            double orientationTolerance,
+                                            double linearTolerance)
     {
-        if ( Math.abs(orientation2D(a, b, p)) > tolerance ) {
+        if ( Math.abs(orientation2D(a, b, p)) > orientationTolerance ) {
             return false;
         }
-        double minX = Math.min(a.x, b.x) - tolerance;
-        double maxX = Math.max(a.x, b.x) + tolerance;
-        double minY = Math.min(a.y, b.y) - tolerance;
-        double maxY = Math.max(a.y, b.y) + tolerance;
+        double minX = Math.min(a.x, b.x) - linearTolerance;
+        double maxX = Math.max(a.x, b.x) + linearTolerance;
+        double minY = Math.min(a.y, b.y) - linearTolerance;
+        double maxY = Math.max(a.y, b.y) + linearTolerance;
         return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
     }
 
     private static boolean segmentsIntersect2D(Vector2D a1, Vector2D a2,
                                                Vector2D b1, Vector2D b2,
-                                               double tolerance)
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         double o1 = orientation2D(a1, a2, b1);
         double o2 = orientation2D(a1, a2, b2);
         double o3 = orientation2D(b1, b2, a1);
         double o4 = orientation2D(b1, b2, a2);
 
-        boolean proper = (o1 > tolerance && o2 < -tolerance ||
-                          o1 < -tolerance && o2 > tolerance) &&
-                         (o3 > tolerance && o4 < -tolerance ||
-                          o3 < -tolerance && o4 > tolerance);
+        double orientationTolerance = PolyhedralBoundedSolidNumericPolicy
+            .orientationTolerance2D(a1, a2, b1, numericContext);
+        orientationTolerance = Math.max(orientationTolerance,
+            PolyhedralBoundedSolidNumericPolicy
+                .orientationTolerance2D(a1, a2, b2, numericContext));
+        orientationTolerance = Math.max(orientationTolerance,
+            PolyhedralBoundedSolidNumericPolicy
+                .orientationTolerance2D(b1, b2, a1, numericContext));
+        orientationTolerance = Math.max(orientationTolerance,
+            PolyhedralBoundedSolidNumericPolicy
+                .orientationTolerance2D(b1, b2, a2, numericContext));
+        double linearTolerance =
+            PolyhedralBoundedSolidNumericPolicy.linearTolerance2D(numericContext);
+
+        boolean proper = (o1 > orientationTolerance && o2 < -orientationTolerance ||
+                          o1 < -orientationTolerance && o2 > orientationTolerance) &&
+                         (o3 > orientationTolerance && o4 < -orientationTolerance ||
+                          o3 < -orientationTolerance && o4 > orientationTolerance);
         if ( proper ) {
             return true;
         }
 
-        return pointOnSegment2D(b1, a1, a2, tolerance) ||
-               pointOnSegment2D(b2, a1, a2, tolerance) ||
-               pointOnSegment2D(a1, b1, b2, tolerance) ||
-               pointOnSegment2D(a2, b1, b2, tolerance);
+        return pointOnSegment2D(b1, a1, a2, orientationTolerance, linearTolerance) ||
+               pointOnSegment2D(b2, a1, a2, orientationTolerance, linearTolerance) ||
+               pointOnSegment2D(a1, b1, b2, orientationTolerance, linearTolerance) ||
+               pointOnSegment2D(a2, b1, b2, orientationTolerance, linearTolerance);
     }
 
     private static boolean loopHasSelfIntersection(_PolyhedralBoundedSolidFace face,
                                                    _PolyhedralBoundedSolidLoop loop,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
                                                    StringBuilder msg)
     {
         int n = loop.halfEdgesList.size();
@@ -255,7 +302,7 @@ public class PolyhedralBoundedSolidGeometricValidator
                 Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
                 Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
 
-                if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) ) {
+                if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                     msg.append("  - Face [").append(face.id)
                        .append("] has a self-intersecting loop.\n");
                     return true;
@@ -268,6 +315,7 @@ public class PolyhedralBoundedSolidGeometricValidator
     private static boolean loopsIntersect(_PolyhedralBoundedSolidFace face,
                                           _PolyhedralBoundedSolidLoop loopA,
                                           _PolyhedralBoundedSolidLoop loopB,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
                                           StringBuilder msg)
     {
         int dominantCoordinate = dominantCoordinateForFace(face);
@@ -293,7 +341,7 @@ public class PolyhedralBoundedSolidGeometricValidator
                 }
                 Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
                 Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
-                if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) ) {
+                if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                     msg.append("  - Face [").append(face.id)
                        .append("] has intersecting loops.\n");
                     return true;
@@ -304,6 +352,14 @@ public class PolyhedralBoundedSolidGeometricValidator
     }
 
     public static boolean validateLoopsStrict(PolyhedralBoundedSolid solid, StringBuilder msg)
+    {
+        return validateLoopsStrict(solid,
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
+    }
+
+    public static boolean validateLoopsStrict(PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        StringBuilder msg)
     {
         int i, j, k;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
@@ -316,14 +372,15 @@ public class PolyhedralBoundedSolidGeometricValidator
 
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
-                if ( loopHasSelfIntersection(face, loop, msg) ) {
+                if ( loopHasSelfIntersection(face, loop, numericContext, msg) ) {
                     return false;
                 }
             }
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 for ( k = j+1; k < face.boundariesList.size(); k++ ) {
                     if ( loopsIntersect(face, face.boundariesList.get(j),
-                                        face.boundariesList.get(k), msg) ) {
+                                        face.boundariesList.get(k),
+                                        numericContext, msg) ) {
                         return false;
                     }
                 }
@@ -333,7 +390,8 @@ public class PolyhedralBoundedSolidGeometricValidator
     }
 
     private static boolean facesAreCoplanar(_PolyhedralBoundedSolidFace faceA,
-                                            _PolyhedralBoundedSolidFace faceB)
+                                            _PolyhedralBoundedSolidFace faceB,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         if ( faceA.containingPlane == null || faceB.containingPlane == null ) {
             return false;
@@ -343,7 +401,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         Vector3D nB = faceB.containingPlane.getNormal().multiply(1.0);
         nA.normalize();
         nB.normalize();
-        if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) > 100*VSDK.EPSILON ) {
+        if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) >
+             numericContext.coplanarDotTolerance() ) {
             return false;
         }
 
@@ -351,7 +410,8 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             if ( loop.halfEdgesList.size() > 0 ) {
                 Vector3D p = loop.halfEdgesList.get(0).startingVertex.position;
-                return Math.abs(faceB.containingPlane.pointDistance(p)) <= 10*VSDK.EPSILON;
+                return Math.abs(faceB.containingPlane.pointDistance(p)) <=
+                    numericContext.bigEpsilon();
             }
         }
         return false;
@@ -373,16 +433,20 @@ public class PolyhedralBoundedSolidGeometricValidator
     }
 
     private static boolean vertexStrictlyInsideFace(_PolyhedralBoundedSolidVertex v,
-                                                    _PolyhedralBoundedSolidFace face)
+                                                    _PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        if ( face.containingPlane.doContainmentTest(v.position, 10*VSDK.EPSILON) != Geometry.LIMIT ) {
+        if ( face.containingPlane.doContainmentTest(v.position,
+            numericContext.bigEpsilon()) != Geometry.LIMIT ) {
             return false;
         }
-        return face.testPointInside(v.position, 10*VSDK.EPSILON) == Geometry.INSIDE;
+        return PolyhedralBoundedSolidNumericPolicy
+            .testPointInside(face, v.position, numericContext) == Geometry.INSIDE;
     }
 
     private static boolean edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge he,
-                                                   _PolyhedralBoundedSolidFace face)
+                                                   _PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         _PolyhedralBoundedSolidHalfEdge next = he.next();
         if ( next == null || face.containingPlane == null ) {
@@ -394,7 +458,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         double d0 = face.containingPlane.pointDistance(p0);
         double d1 = face.containingPlane.pointDistance(p1);
 
-        if ( Math.abs(d0) <= 10*VSDK.EPSILON && Math.abs(d1) <= 10*VSDK.EPSILON ) {
+        if ( Math.abs(d0) <= numericContext.bigEpsilon() &&
+             Math.abs(d1) <= numericContext.bigEpsilon() ) {
             return false;
         }
         if ( d0*d1 > 0 ) {
@@ -402,20 +467,23 @@ public class PolyhedralBoundedSolidGeometricValidator
         }
 
         double denom = d0 - d1;
-        if ( Math.abs(denom) <= VSDK.EPSILON ) {
+        if ( PolyhedralBoundedSolidNumericPolicy.isZero(denom, numericContext) ) {
             return false;
         }
         double t = d0 / denom;
-        if ( t <= 10*VSDK.EPSILON || t >= 1.0 - 10*VSDK.EPSILON ) {
+        if ( !PolyhedralBoundedSolidNumericPolicy
+            .unitIntervalContainsStrictly(t, numericContext) ) {
             return false;
         }
 
         Vector3D p = p0.add(p1.substract(p0).multiply(t));
-        return face.testPointInside(p, 10*VSDK.EPSILON) == Geometry.INSIDE;
+        return PolyhedralBoundedSolidNumericPolicy
+            .testPointInside(face, p, numericContext) == Geometry.INSIDE;
     }
 
     private static boolean facesHaveImproperIntersection(_PolyhedralBoundedSolidFace faceA,
                                                          _PolyhedralBoundedSolidFace faceB,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
                                                          StringBuilder msg)
     {
         int i, j, k;
@@ -425,12 +493,13 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
                 he = loop.halfEdgesList.get(j);
-                if ( vertexStrictlyInsideFace(he.startingVertex, faceB) ) {
+                if ( vertexStrictlyInsideFace(he.startingVertex, faceB,
+                                              numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
                 }
-                if ( edgePiercesFaceInterior(he, faceB) ) {
+                if ( edgePiercesFaceInterior(he, faceB, numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
@@ -442,12 +511,13 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceB.boundariesList.get(i);
             for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
                 he = loop.halfEdgesList.get(j);
-                if ( vertexStrictlyInsideFace(he.startingVertex, faceA) ) {
+                if ( vertexStrictlyInsideFace(he.startingVertex, faceA,
+                                              numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
                 }
-                if ( edgePiercesFaceInterior(he, faceA) ) {
+                if ( edgePiercesFaceInterior(he, faceA, numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
@@ -455,7 +525,7 @@ public class PolyhedralBoundedSolidGeometricValidator
             }
         }
 
-        if ( facesAreCoplanar(faceA, faceB) ) {
+        if ( facesAreCoplanar(faceA, faceB, numericContext) ) {
             int dominantCoordinate = dominantCoordinateForFace(faceA);
             for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
                 _PolyhedralBoundedSolidLoop loopA = faceA.boundariesList.get(i);
@@ -481,7 +551,7 @@ public class PolyhedralBoundedSolidGeometricValidator
                             }
                             Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
                             Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
-                            if ( segmentsIntersect2D(a1, a2, b1, b2, 10*VSDK.EPSILON) &&
+                            if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) &&
                                  !segmentSharesEndpoint(heA, heB) ) {
                                 msg.append("  - Faces [").append(faceA.id).append("] and [")
                                    .append(faceB.id).append("] intersect improperly.\n");
@@ -499,12 +569,22 @@ public class PolyhedralBoundedSolidGeometricValidator
     public static boolean validateFaceIntersectionsStrict(
         PolyhedralBoundedSolid solid, StringBuilder msg)
     {
+        return validateFaceIntersectionsStrict(solid,
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
+    }
+
+    public static boolean validateFaceIntersectionsStrict(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        StringBuilder msg)
+    {
         int i, j;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace faceA = solid.polygonsList.get(i);
             for ( j = i+1; j < solid.polygonsList.size(); j++ ) {
                 _PolyhedralBoundedSolidFace faceB = solid.polygonsList.get(j);
-                if ( facesHaveImproperIntersection(faceA, faceB, msg) ) {
+                if ( facesHaveImproperIntersection(faceA, faceB, numericContext,
+                                                   msg) ) {
                     return false;
                 }
             }

@@ -1123,6 +1123,8 @@ public class PolyhedralBoundedSolid extends Solid {
         int i;
         boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
@@ -1140,7 +1142,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( ray.t < min_t ) {
                     ray.direction.normalize();
                     p = ray.origin.add(ray.direction.multiply(ray.t));
-                    pos = face.testPointInside(p, VSDK.EPSILON);
+                    pos = face.testPointInside(p, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                         min_t = ray.t;
                         // Stores standard doIntersection operation information
@@ -1232,6 +1234,9 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public void loopGlue(int faceid)
     {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidFace face;
 
@@ -1259,7 +1264,7 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         _PolyhedralBoundedSolidHalfEdge h2start = h2;
-        while ( !h1.vertexPositionMatch(h2, 10*VSDK.EPSILON) ) {
+        while ( !h1.vertexPositionMatch(h2, numericContext.bigEpsilon()) ) {
             h2 = h2.next();
             if ( h2 == h2start ) {
                 VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
@@ -1360,6 +1365,8 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         int qi = 0;
         int i, j;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
         Vector3D d = p.substract(origin);
         Vector3D pi;
         double t0 = d.length();
@@ -1375,16 +1382,17 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
             if ( face.containingPlane.doIntersection(ray) ) {
-                if ( ray.t < t0-VSDK.EPSILON ) {
+                if ( ray.t < t0 - numericContext.epsilon() ) {
                     ray.direction.normalize();
                     pi = ray.origin.add(ray.direction.multiply(ray.t));
-                    pos = face.testPointInside(pi, VSDK.EPSILON);
+                    pos = face.testPointInside(pi, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
                         face.containingPlane.doExtraInformation(ray, 0.0, info);
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             boolean considerIt = true;
                             for ( j = 0; j < ndist; j++ ) {
-                                if ( Math.abs(distances[j]-ray.t) < 2*VSDK.EPSILON ) {
+                                if ( Math.abs(distances[j]-ray.t) <
+                                     numericContext.bigEpsilon() ) {
                                     considerIt = false;
                                     break;
                                 }
@@ -1462,6 +1470,8 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he;
         InfinitePlane a, b;
         Vector3D p0, p1, p2;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
 
         remakeEmanatingHalfedgesReferences();
 
@@ -1470,7 +1480,8 @@ public class PolyhedralBoundedSolid extends Solid {
             e = edgesList.get(i);
             p1 = e.rightHalf.startingVertex.position;
             p2 = e.leftHalf.startingVertex.position;
-            if ( VSDK.vectorDistance(p1, p2) < 10*VSDK.EPSILON ) {
+            if ( PolyhedralBoundedSolidNumericPolicy
+                .pointsCoincident(p1, p2, numericContext) ) {
                 lkev(e.rightHalf, e.leftHalf);
                 // As this breaks the edge sequence, start again!
                 maximizeFaces();
@@ -1497,7 +1508,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 maximizeFaces();
                 return;
             }
-            else if ( a.overlapsWith(b, VSDK.EPSILON) &&
+            else if ( a.overlapsWith(b, numericContext.epsilon()) &&
                 e.rightHalf.parentLoop != e.leftHalf.parentLoop
                 ) {
                 // Case 2: Not tested!
@@ -1660,7 +1671,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 p0 = heStart.startingVertex.position;
                 p1 = heStart.next().startingVertex.position.substract(p0);
                 p2 = heStart.previous().startingVertex.position.substract(p0);
-                if ( p1.crossProduct(p2).length() < VSDK.EPSILON ) {
+                if ( PolyhedralBoundedSolidNumericPolicy
+                    .vectorsColinear(p1, p2, numericContext) ) {
                     if ( p1.dotProduct(p2) < 0 ) {
                         lkev(heStart, heStart.mirrorHalfEdge());
                         // As this breaks the edge sequence, start again!

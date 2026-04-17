@@ -5,10 +5,10 @@
 package vsdk.toolkit.processing;
 
 // VitralSDK classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolidNodes._PolyhedralBoundedSolidEdge;
@@ -22,6 +22,20 @@ PolyhedralBoundedSolidSetOperator.
 */
 public class PolyhedralBoundedSolidOperator extends GeometricModeler
 {
+    protected static PolyhedralBoundedSolidNumericPolicy.ToleranceContext
+        numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+
+    protected static void setNumericContext(
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        if ( context == null ) {
+            numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
+        }
+        else {
+            numericContext = context;
+        }
+    }
+
     /**
     */
     private static boolean searchForEdge(
@@ -258,7 +272,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
 
 // HERE SHOULD COMPARE `c` WITH FACE NORMAL!
 
-        if ( c.length() < 10*VSDK.EPSILON ) {
+        if ( c.length() < numericContext.unitVectorTolerance() ) {
             // Angle greater than 180 degrees
             return true;
         }

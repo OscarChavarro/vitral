@@ -49,7 +49,7 @@ Primary theory baseline reviewed from OCR PDFs:
 
 ## 3.3 Boolean engine flow
 - `setOp` pipeline in `PolyhedralBoundedSolidSetOperator` follows textbook phase structure:
-  1. Normalize/prepare (`compactIds`, `validateModel`, `maximizeFaces`, `updmaxnames`).
+  1. Normalize/prepare (`compactIds`, `validateIntermediate`, `maximizeFaces`, `updmaxnames`).
   2. `setOpGenerate` (vertex-face and vertex-vertex candidates).
   3. `setOpClassify` (vertex-face and vertex-vertex classifiers).
   4. `setOpConnect` (null-edge pairing/joining).
@@ -60,6 +60,7 @@ Primary theory baseline reviewed from OCR PDFs:
 - Strong conceptual alignment with MANT1988 chapter structure and nomenclature.
 - Explicit support for low-level and high-level Euler operators.
 - Split and set-op are built over reusable operator primitives (`PolyhedralBoundedSolidOperator`), which is structurally sound.
+- Numeric tolerance handling now uses a dedicated policy (`PolyhedralBoundedSolidNumericPolicy`) with `BREP_EPSILON`, `BREP_BIG_EPSILON`, relative scale, and centralized predicate helpers.
 - Existing debug infrastructure (stage outputs, optional offline renderer, visual app) is a valuable foundation for hardening.
 
 ## 5) Audit Findings (State, Completeness, Quality)
@@ -68,7 +69,7 @@ Primary theory baseline reviewed from OCR PDFs:
 - **Euler core**: substantial but partial in global operators and ring movement semantics.
 - **Split**: mostly implemented with extra heuristics, but not fully formalized for all corner cases.
 - **Boolean set operations**: implemented end-to-end but with explicit unsupported/untested branches and known theoretical gaps.
-- **Validation layer**: partial; core planar/topological checks exist, but full geometric integrity checks are missing.
+- **Validation layer**: intermediate and strict flows are in place (planarity, topology, loop strictness, face-face improper intersections), now backed by scale-aware numeric policy.
 
 ## 5.2 Critical robustness risks
 
@@ -82,15 +83,17 @@ Primary theory baseline reviewed from OCR PDFs:
 - There are comments marking untested paths and fallback reversals in sector reclassification.
 - Impact: fragile behavior in complex coplanar/coincident neighborhoods.
 
-### C) Numeric model is underspecified for production robustness
-- Heavy dependence on a single global `VSDK.EPSILON` and ad hoc factors (`10*EPSILON`, etc.).
-- MANT1988 Chapter 10 explicitly distinguishes `EPS` and `BIGEPS`; current code does not expose a robust tolerance context.
-- Impact: scale sensitivity, unstable classification, false coplanarity/containment decisions.
-
-### D) Recursive mutation style increases fragility
+### C) Recursive mutation style increases fragility
 - `maximizeFaces` recursively restarts after each mutation.
 - `processEdge` recurses after splitting during edge-face processing.
 - Impact: stack depth risk and hard-to-predict behavior on high-complexity models.
+
+### 5.2.1 Numerical Robustness Re-evaluation (Phase 3)
+- `PolyhedralBoundedSolidNumericPolicy` now defines `BREP_EPSILON`, `BREP_BIG_EPSILON`, and scale-aware `ToleranceContext`.
+- Validation execution now uses one numeric context per run (`validateIntermediate` and `validateStrict`), passed through validation strategies.
+- Geometric strict checks (loop self-intersection, loop-loop intersection, face-face improper intersections) now consume centralized policy predicates.
+- Splitter and set-operator classification predicates were migrated from direct `VSDK.EPSILON` usage to policy-driven thresholds.
+- The previous ad hoc multipliers in B-Rep validation/operator paths were replaced by policy methods and named tolerances.
 
 ## 5.3 Evidence from real flows (`ModelingTools` + visual app)
 - `buildCsgTest4` already documents a known topological issue for `maximizeFaces` under union.
@@ -104,19 +107,18 @@ Primary theory baseline reviewed from OCR PDFs:
 | Topic | MANT1988 intent | Current Java status | Assessment |
 |---|---|---|---|
 | Euler operator foundation | Full constructive basis with syntax discipline | Implemented broadly, with some partial/global limitations | Medium-High |
-| Geometric validity beyond topology | Must be enforced separately | Partial validation, known missing tests | Medium-Low |
-| Split closure/generality/robustness | Explicit requirement (Ch14) | Structurally aligned, heuristic-heavy, tolerance-fragile | Medium |
+| Geometric validity beyond topology | Must be enforced separately | Intermediate/strict validators available; coverage corpus still pending | Medium |
+| Split closure/generality/robustness | Explicit requirement (Ch14) | Structurally aligned, heuristic-heavy, now using centralized numeric policy | Medium |
 | Boolean reduction/classify/connect/finish | Explicit phase architecture (Ch15) | Implemented with strong structural match | High |
 | Containment no-intersection case | Must be handled (Problem 15.1) | Not fully solved | Low |
 | Maximal face precondition | Required before robust set-op reduction | Implemented via `maximizeFaces`, but method has known open cases | Medium |
 | Curved/nonmanifold generality | Book states algorithm does not directly cover | Not covered; no formal guardrail policy | Medium-Low |
-| Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Single global epsilon + ad hoc scaling | Low |
+| Numerical tolerance model | Multiple tolerances and robust tests expected in practice | Scale-aware policy integrated (`BREP_EPSILON`/`BREP_BIG_EPSILON`, centralized predicates) | Medium-High |
 
 ## 7) Hardening Strategy (Roadmap Table)
 
 | Phase | Goal | Main Actions | Deliverables | Exit Criteria |
 |---|---|---|---|---|
-| 3. Numerical Robustness | Make predicates scale-aware and reproducible | Introduce tolerance context (`eps`, `bigEps`, relative scale); centralize predicate calls; replace ad hoc multipliers with policy-driven thresholds | Numeric policy module + predicate audit | Cross-scale test corpus yields stable classification outcomes |
 | 4. Boolean Completeness | Close known algorithmic gaps | Implement containment handling for no-intersection cases (Ch15 Problem 15.1); complete/replace unsupported cases A-E in edge-sequence separation; formalize coplanar overlap handling | Boolean completion patch + scenario tests | Correct results for containment, disjoint, coplanar-overlap, and touching-only suites |
 | 5. Regression Corpus | Prevent future regressions | Build deterministic corpus from MANT1986/MANT1988 figures and existing sample generators; add property tests (idempotence, commutativity where applicable, orientation consistency) | Reproducible test suite + seed catalog | CI gates on geometric/topological invariants and known hard scenarios |
 | 6. Performance + Observability | Make hard cases debuggable and practical | Add structured stage logs (generate/classify/connect/finish), timing counters, and candidate-pair stats; optional acceleration for edge-face comparisons | Perf telemetry and debug artifacts per case | Large-case runtime and diagnosis quality improve without correctness loss |
@@ -127,6 +129,6 @@ Primary theory baseline reviewed from OCR PDFs:
 - Freeze a baseline corpus from existing `SimpleTestGeometryLibrary` and `PolyhedralBoundedSolidModelingTools` scenarios before deeper refactors.
 
 ## 9) Final Assessment
-The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. However, it is not yet production-robust due to incomplete edge-case coverage and tolerance strategy limitations.
+The kernel is a strong research-grade implementation with high conceptual fidelity to MANT1988, especially in algorithm decomposition and operator vocabulary. Numerical robustness improved materially with a centralized scale-aware tolerance policy and stricter validation contracts.
 
-With the phased plan above, the project can realistically evolve from "algorithmically faithful and educational" to "robust and resilient CAD kernel" while preserving its current architectural strengths.
+The main remaining robustness debt is algorithmic completeness in difficult boolean edge cases (containment with no intersections, unsupported A-E branches), plus systematic regression coverage.
