@@ -1,5 +1,0 @@
-rootProject.name = 'Rasterizer2DExample'
-
-include ':base'
-
-project(':base').projectDir = file('../../../base')

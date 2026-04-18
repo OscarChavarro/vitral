@@ -52,7 +52,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glEnable(GL2.GL_DEPTH_TEST);
-        gl.glClearColor(0.93f, 0.95f, 0.98f, 1.0f);
+        gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
