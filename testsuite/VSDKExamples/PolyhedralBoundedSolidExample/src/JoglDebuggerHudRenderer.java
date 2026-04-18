@@ -48,7 +48,7 @@ public class JoglDebuggerHudRenderer
         String selectedModelMessage = "Selected model [3, 4]: " + model.solidModelName.name();
         String referenceFrameMessage = "Reference frame: " +
             (model.showCoordinateSystem ? "ON" : "OFF");
-        String nrMessage = "NR: " + model.subdivisionCircunference;
+        String nrMessage = "NR: " + model.subdivisionCircumference;
         String nhMessage = "NH: " + model.subdivisionHeight;
 
         hudTextRenderer.beginRendering(width, height);

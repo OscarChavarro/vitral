@@ -103,19 +103,23 @@ public class BoundedSolidTestSelector
             break;
 
           case SPHERE:
-            mySolid = createSphere(0.5, model.subdivisionCircunference,
+            mySolid = createSphere(0.5, model.subdivisionCircumference,
                 model.subdivisionHeight);
             break;
           case CONE:
             mySolid = createCone(0.5, 0.0, 1.0,
-                model.subdivisionCircunference, model.subdivisionHeight);
+                model.subdivisionCircumference, model.subdivisionHeight);
             break;
           case CYLINDER:
             mySolid = createCylinder(0.5, 1.0,
-                model.subdivisionCircunference, model.subdivisionHeight);
+                model.subdivisionCircumference, model.subdivisionHeight);
             break;
           case CSG_MOON_BLOCK:
             mySolid = createCsgMoonBlock();
+            break;
+          case CSG_LAMP_SHELL:
+            mySolid = createCsgLampShell(model.subdivisionCircumference,
+                model.subdivisionHeight);
             break;
           case ARROW:
             mySolid = createArrow(0.7, 0.3, 0.05, 0.1);
@@ -136,7 +140,7 @@ public class BoundedSolidTestSelector
                 mySolid, mySolid.findFace(1), T);
 
             break;
-          case GLUED_CILINDERS:
+          case GLUED_CYLINDERS:
             mySolid = createGluedCilinders();
             break;
           case EULER_OPERATORS_TEST:
@@ -341,6 +345,35 @@ public class BoundedSolidTestSelector
         solid = GeometricModeler.setOp(cylinderA, cylinderB, GeometricModeler.SUBTRACT, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
+    }
+
+    public static PolyhedralBoundedSolid createCsgLampShell(
+        int subdivisionCircunference, int subdivisionHeight)
+    {
+        double outerRadius = 0.5;
+        double innerRadius = 0.45;
+
+        PolyhedralBoundedSolid outerSphere = createSphere(outerRadius,
+            subdivisionCircunference, subdivisionHeight);
+        PolyhedralBoundedSolid innerSphere = createSphere(innerRadius,
+            subdivisionCircunference, subdivisionHeight);
+
+        PolyhedralBoundedSolid sphericalShell = GeometricModeler.setOp(
+            outerSphere, innerSphere, GeometricModeler.SUBTRACT, false);
+
+        // Cube fully contains shell in X/Y, starts below it in Z and stops at
+        // ~80% of shell height to mimic the unperforated lamp bowl profile.
+        Box clipCubeGeometry = new Box(new Vector3D(1.4, 1.4, 1.05));
+        PolyhedralBoundedSolid clipCube = clipCubeGeometry
+            .exportToPolyhedralBoundedSolid();
+        Matrix4x4 cubeMove = new Matrix4x4();
+        cubeMove.translation(0.55, 0.55, 0.325);
+        clipCube.applyTransformation(cubeMove);
+
+        PolyhedralBoundedSolid result = GeometricModeler.setOp(
+            sphericalShell, clipCube, GeometricModeler.INTERSECTION, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
+        return result;
     }
 
     /**    

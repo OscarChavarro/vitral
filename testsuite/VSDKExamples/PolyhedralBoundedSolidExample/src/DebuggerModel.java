@@ -17,8 +17,11 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 
 public class DebuggerModel
 {
-    public static final int MIN_SUBDIVISION_CIRCUNFERENCE = 3;
+    public SolidModelNames solidModelName = SolidModelNames.CSG_LAMP_SHELL;
+    public static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     public static final int MIN_SUBDIVISION_HEIGHT = 1;
+    public int subdivisionCircumference = 3;
+    public int subdivisionHeight = 1;
 
     public Camera camera;
     public Material material;
@@ -33,7 +36,6 @@ public class DebuggerModel
     public RendererConfigurationController qualityController;
     public CameraController cameraController;
     public GLCanvas canvas;
-    public SolidModelNames solidModelName = SolidModelNames.MVFS_SMEV_SAMPLE;
     public int csgOperation = 0;
     public int csgSample = 5;
     public boolean debugEdges = false;
@@ -41,8 +43,6 @@ public class DebuggerModel
     public boolean debugCsg = false;
     public boolean errorState = false;
     public String errorMessage = "";
-    public int subdivisionCircunference = 16;
-    public int subdivisionHeight = 8;
 
     public JFrame mainFrame;
     public Rectangle windowedBounds;
@@ -93,8 +93,8 @@ public class DebuggerModel
 
     public void clampSubdivisions()
     {
-        if ( subdivisionCircunference < MIN_SUBDIVISION_CIRCUNFERENCE ) {
-            subdivisionCircunference = MIN_SUBDIVISION_CIRCUNFERENCE;
+        if ( subdivisionCircumference < MIN_SUBDIVISION_CIRCUMFERENCE) {
+            subdivisionCircumference = MIN_SUBDIVISION_CIRCUMFERENCE;
         }
         if ( subdivisionHeight < MIN_SUBDIVISION_HEIGHT ) {
             subdivisionHeight = MIN_SUBDIVISION_HEIGHT;

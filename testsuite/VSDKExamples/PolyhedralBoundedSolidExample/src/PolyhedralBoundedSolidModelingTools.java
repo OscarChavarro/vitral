@@ -38,6 +38,13 @@ public class PolyhedralBoundedSolidModelingTools
         return BoundedSolidTestSelector.createCsgMoonBlock();
     }
 
+    public static PolyhedralBoundedSolid createCsgLampShell(
+        int subdivisionCircunference, int subdivisionHeight)
+    {
+        return BoundedSolidTestSelector.createCsgLampShell(
+            subdivisionCircunference, subdivisionHeight);
+    }
+
     public static PolyhedralBoundedSolid createArrow(double p1, double p2, double p3, double p4)
     {
         return BoundedSolidTestSelector.createArrow(p1, p2, p3, p4);

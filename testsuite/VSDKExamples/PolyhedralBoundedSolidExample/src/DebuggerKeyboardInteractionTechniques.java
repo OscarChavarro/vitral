@@ -112,14 +112,14 @@ public class DebuggerKeyboardInteractionTechniques
             break;
 
           case KeyEvent.KEY_q:
-            model.subdivisionCircunference--;
+            model.subdivisionCircumference--;
             model.clampSubdivisions();
             actions.rebuildSolid();
             handled = true;
             break;
 
           case KeyEvent.KEY_Q:
-            model.subdivisionCircunference++;
+            model.subdivisionCircumference++;
             actions.rebuildSolid();
             handled = true;
             break;
