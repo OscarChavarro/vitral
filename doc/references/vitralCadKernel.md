@@ -55,7 +55,7 @@ Strengths:
 Observed weaknesses:
 - Implementation keeps extensive static mutable state (`son*` sets, debug flags, numeric context wiring), which is not thread-safe and complicates reentrancy.
 - Inputs are mutated in-place during set-op flow (`compactIds`, `maximizeFaces`, id remapping, etc.), making API behavior side-effectful and risky for product use unless clearly isolated by cloning.
-- Robustness still depends on heuristic geometric predicates in difficult coplanar/touching neighborhoods.
+- Robustness still depends on heuristic logic in some topology-normalization and connection paths, but the core coplanar/touching predicate layer is now formalized.
 
 Assessment: very good research-grade realization of MANT1988 architecture, but not yet production-grade in determinism, side-effect isolation, and adversarial robustness.
 
@@ -87,6 +87,7 @@ Assessment: coverage is improving and now honestly captures known failure classe
 Relative to the previous `vitralCadKernel.md`, this update keeps the same high-level verdict (strong conceptual alignment, robustness debt concentrated in hard boundary cases) but clarifies and tightens several points:
 
 - Confirms that coplanar/touching handling moved from ad-hoc logic toward explicit decision tables.
+- Closes the previous open item on coplanar overlap algebra by replacing the old overlap heuristic with interval/orientation classification and touching-only preflight handling.
 - Adds explicit emphasis on non-thread-safe static mutable state in operators.
 - Adds explicit emphasis on side-effectful API behavior (input solids mutated by set-op pipeline).
 - Updates test interpretation: there is now deliberate codification of known algebraic drift in automated tests, not only commented visual scenarios.
@@ -97,7 +98,7 @@ Current maturity level:
 - Advanced research prototype / early pre-production kernel.
 
 Why not production yet:
-- Determinism and robustness under adversarial coplanar/touching configurations are not fully guaranteed.
+- Coplanar/touching predicates are materially stronger now, but industrial confidence still needs broader numeric calibration and a larger adversarial regression corpus.
 - Algebraic properties expected by industrial CAD boolean engines are known to drift in selected corpora.
 - Thread safety and side-effect isolation are insufficient for concurrent, service-style, or transactional CAD backends.
 - Quality gates still rely partly on manual/visual workflows and known-failure expectations.
@@ -146,7 +147,7 @@ This section lists implementation-oriented MANT1988 exercises that are directly 
 | 15.2 (`maximize_faces`) | Implemented (`maximizeFaces`) | Implemented (with known gaps) | Resolve open cases (`Case 2`, nested coplanar-face scenarios), formal convergence criteria | `PolyhedralBoundedSolid.java` |
 | 15.3 (eliminate recursion in edge-face comparison) | Migrated to iterative worklist flow | Implemented | Add complexity/performance regression tests under high intersection density | `PolyhedralBoundedSolidSetOperator.java` |
 | 15.4 (vertex-face classifier for set-op) | Implemented | Implemented | Reduce heuristic branches for in-plane/coplanar tie-breaking | `PolyhedralBoundedSolidSetOperator.java` |
-| 15.5 (`sectoroverlap`) | Implemented | Implemented | Replace tolerance-driven overlap heuristic with exact interval/orientation formalism | `PolyhedralBoundedSolidSetOperator.java` |
+| 15.5 (`sectoroverlap`) | Implemented with interval/orientation coplanar relation algebra and touching-only preflight support | Implemented | Expand micro-case regression coverage for edge/face/vertex touching permutations and tolerance-boundary perturbations | `PolyhedralBoundedSolidSetOperator.java`, set-op predicate tests |
 | 15.6 (`revert`) | Implemented in solid core | Implemented (partial semantics) | Ensure normal/plane consistency contract post-revert (today explicitly warned as not fully corrected) | `PolyhedralBoundedSolid.java`, validator hooks |
 | 15.7 (compute dual results simultaneously) | Not implemented | Missing | Add dual-result mode (`UNION+INTERSECTION`, `A\\B+B\\A`) sharing classification/connect phases | `PolyhedralBoundedSolidSetOperator.java` |
 | 15.8 (2D set-op from 3D algorithm) | Not implemented | Missing | Add planar 2D B-Rep profile boolean module reusing classifier core | new package under processing |
@@ -156,7 +157,7 @@ This section lists implementation-oriented MANT1988 exercises that are directly 
 | 16.4 (undo for transforms) | No transaction-grade undo subsystem | Missing | Introduce operation log / reversible command layer for kernel operations | new transaction module around operators |
 
 Execution guidance:
-- Prioritize Chapter 15 and 14 items first (`15.2`, `15.5`, `15.7`, `14.3`) because they directly affect industrial Boolean/split reliability.
+- Prioritize Chapter 15 and 14 items first (`15.2`, `15.7`, `14.3`) because they directly affect industrial Boolean/split reliability.
 - Treat Chapter 16 items as enablers for production operation safety and recoverability.
 
 ## 9) Industrial Robustness Strategy (Evidence-Driven)
@@ -165,8 +166,8 @@ The table below turns the observed weaknesses into an explicit hardening plan, w
 | Workstream | Current heuristic / weak contract | Formal replacement target | Explicit implementation steps | Contract hardening outcome |
 |---|---|---|---|---|
 | Sector wideness and orientation | Formal signed-angle predicate already implemented in `checkWideness` and reused by `sectorwide` | Keep signed-angle classification as canonical rule and harden its numeric regression envelope | 1. Preserve face-normal-oriented signed turn (`atan2`) as single source of truth. 2. Add mirror-symmetry and orientation invariance tests. 3. Add stress corpus for near-colinear sectors around tolerance boundaries. 4. Track behavioral deltas before/after numeric-policy tuning. | Deterministic sector classification independent of incidental vector magnitudes, with explicit regression guardrails |
-| Coplanar overlap/touching decisions | Probe-point stepping and branchy tolerance comparisons | Interval- and orientation-based coplanar intersection algebra | 1. Project candidate sectors to dominant 2D plane. 2. Compute exact topological relation (disjoint/touching/overlap) via segment interval predicates. 3. Replace probe-step branches with relation table lookup only. 4. Add exhaustive coplanar micro-cases in CI. | Reduced false positives/negatives on coplanar neighborhoods |
-| Point-in-solid fallback logic | Multi-ray parity with hardcoded directions and ambiguity fallback | Certified inside/outside with deterministic degeneracy policy | 1. Introduce robust ray selection seeded by model hash + retry budget. 2. Add explicit degeneracy resolver for `LIMIT` cases (symbolic perturbation policy). 3. Record classification confidence/ambiguity in result metadata. 4. Require deterministic replay under fixed seed in tests. | Reproducible containment classification, auditable ambiguity handling |
+| Coplanar overlap/touching decisions | Interval- and orientation-based coplanar algebra is now the active path, with touching-only preflight fallback before destructive reduction | Keep formal coplanar algebra as canonical path and broaden its numeric/regression envelope | 1. Preserve angular-interval classification and touching-only preflight as the only coplanar/touching decision path. 2. Add exhaustive edge/face/vertex touching micro-cases in CI. 3. Stress mirrored and opposite-orientation coplanar neighborhoods under perturbation. 4. Tune `angle`/`coplanar` tolerances using those fixtures. | Reduced false positives/negatives on coplanar neighborhoods with explicit protection against touching-only false splits |
+| Point-in-solid fallback logic | Multi-ray parity with hardcoded directions | Deterministic inside/outside voting + explicit degeneracy policy | 1. Keep implemented multi-ray voting baseline (`classifyPointAgainstSolid`) and lock determinism tests. 2. Introduce robust ray selection seeded by model hash + retry budget. 3. Add explicit degeneracy resolver for `LIMIT` cases (symbolic perturbation policy). 4. Record classification confidence/ambiguity in result metadata. 5. Require deterministic replay under fixed seed in tests. | Reproducible containment classification, auditable ambiguity handling |
 | Topology normalization (`maximizeFaces`) | Mutation-restart loop with open cases and heuristic loop-size decisions | Rule-complete normalization graph with progress measure and bounded fixpoint | 1. Encode each normalization case as named rule with precondition predicate. 2. Compute rule candidates first, then apply one deterministic priority order. 3. Track monotonic progress metrics (`|edges|`, `|inessential edges|`, etc.). 4. Stop on no-progress and emit structured diagnostic instead of silent drift. 5. Implement missing nested-coplanar-face rule set. | Convergent, explainable normalization with clear non-convergence failure mode |
 | Split/set-op static mutable state | Global static arrays/context (`son*`, debug flags) | Per-operation context object with immutable config and local mutable state | 1. Create `SetOpContext` and `SplitContext` classes. 2. Move all static operation-state fields into context instances. 3. Pass context through all phase methods. 4. Keep only read-only lookup tables as static constants. | Thread-safe and reentrant execution model |
 | Input mutation semantics | `setOp` mutates operands in-place (ids, face maximization, orientation) | Non-mutating public API with explicit destructive internal variant | 1. Introduce `setOpImmutable(a,b,op)` that deep-copies operands. 2. Rename current behavior to `setOpInPlace` (internal/advanced). 3. Document complexity and memory tradeoffs. 4. Add tests proving input solids are unchanged for immutable API. | Safer production contracts for pipelines and concurrent services |
@@ -177,6 +178,8 @@ The table below turns the observed weaknesses into an explicit hardening plan, w
 
 Recommended milestone order:
 1. Contracts + context isolation (`setOp` immutability, static-state removal, validation separation).
-2. Formal predicate replacement (coplanar relation algebra, containment determinism). (`checkWideness` completed)
-3. Normalization completion (`maximizeFaces` missing cases + convergence proofs-in-practice).
-4. Algebraic conformance hard gates and telemetry-backed continuous hardening.
+
+Remaining milestone order:
+1. Normalization completion (`maximizeFaces` missing cases + convergence proofs-in-practice).
+2. Algebraic conformance hard gates and telemetry-backed continuous hardening.
+3. Numeric calibration and scale-stability benchmarking.

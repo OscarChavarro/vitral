@@ -62,6 +62,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static final int DEBUG_05_CONNECT = 0x10;
     private static final int DEBUG_06_FINISH = 0x20;
     private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
+    private static final double TWO_PI = 2.0 * Math.PI;
 
     /**
     The integer `debugFlags` is a bitwise combination of debugging flags
@@ -74,6 +75,20 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     */
     private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
 
+    private static final class CoplanarAngleBasis
+    {
+        private Vector3D normal;
+        private Vector3D u;
+        private Vector3D v;
+    }
+
+    private static final class CoplanarAngularInterval
+    {
+        private double start;
+        private double end;
+        private double interior;
+    }
+
     private static int compareToZero(double value)
     {
         return PolyhedralBoundedSolidNumericPolicy.compareToZero(value,
@@ -83,6 +98,370 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
     {
         return face.testPointInside(point, numericContext.bigEpsilon());
+    }
+
+    private static Vector3D normalizedDirection(Vector3D direction)
+    {
+        Vector3D out;
+
+        if ( direction == null ) {
+            return null;
+        }
+
+        out = new Vector3D(direction);
+        if ( out.length() <= numericContext.unitVectorTolerance() ) {
+            return null;
+        }
+        out.normalize();
+        return out;
+    }
+
+    private static CoplanarAngleBasis buildCoplanarAngleBasis(
+        Vector3D planeNormal,
+        Vector3D preferredDirection,
+        Vector3D fallbackDirection)
+    {
+        CoplanarAngleBasis basis;
+        Vector3D normal;
+        Vector3D u;
+        Vector3D v;
+
+        normal = normalizedDirection(planeNormal);
+        if ( normal == null ) {
+            return null;
+        }
+
+        u = normalizedDirection(preferredDirection);
+        if ( u == null || normal.crossProduct(u).length() <=
+             numericContext.unitVectorTolerance() ) {
+            u = normalizedDirection(fallbackDirection);
+        }
+        if ( u == null || normal.crossProduct(u).length() <=
+             numericContext.unitVectorTolerance() ) {
+            if ( Math.abs(normal.x) < 0.9 ) {
+                u = normalizedDirection(new Vector3D(1.0, 0.0, 0.0)
+                    .substract(normal.multiply(normal.x)));
+            }
+            else {
+                u = normalizedDirection(new Vector3D(0.0, 1.0, 0.0)
+                    .substract(normal.multiply(normal.y)));
+            }
+        }
+        if ( u == null ) {
+            return null;
+        }
+
+        v = normal.crossProduct(u);
+        v = normalizedDirection(v);
+        if ( v == null ) {
+            return null;
+        }
+
+        basis = new CoplanarAngleBasis();
+        basis.normal = normal;
+        basis.u = u;
+        basis.v = v;
+        return basis;
+    }
+
+    private static double angleOnBasis(CoplanarAngleBasis basis,
+                                       Vector3D direction)
+    {
+        Vector3D d;
+
+        d = normalizedDirection(direction);
+        if ( basis == null || d == null ) {
+            return 0.0;
+        }
+        return Math.atan2(d.dotProduct(basis.v), d.dotProduct(basis.u));
+    }
+
+    private static double unwrapAngleNear(double angle, double reference)
+    {
+        while ( angle - reference <= -Math.PI ) {
+            angle += TWO_PI;
+        }
+        while ( angle - reference > Math.PI ) {
+            angle -= TWO_PI;
+        }
+        return angle;
+    }
+
+    private static boolean sectorContainsDirectionInclusive(
+        Vector3D dir,
+        Vector3D ref1,
+        Vector3D ref2,
+        Vector3D ref12)
+    {
+        if ( colinearVectorsWithDirection(dir, ref1) ||
+             colinearVectorsWithDirection(dir, ref2) ) {
+            return true;
+        }
+        return sctrwitthin(dir, ref1, ref2, ref12);
+    }
+
+    private static Vector3D acceptSectorInteriorProbe(
+        Vector3D candidate,
+        Vector3D ref1,
+        Vector3D ref2,
+        Vector3D ref12)
+    {
+        Vector3D normalized;
+
+        normalized = normalizedDirection(candidate);
+        if ( normalized == null ) {
+            return null;
+        }
+        if ( sctrwitthinProper(normalized, ref1, ref2, ref12) ) {
+            return normalized;
+        }
+        if ( !colinearVectors(normalized, ref1) &&
+             !colinearVectors(normalized, ref2) &&
+             sectorContainsDirectionInclusive(normalized, ref1, ref2, ref12) ) {
+            return normalized;
+        }
+        return null;
+    }
+
+    private static Vector3D selectSectorInteriorProbe(
+        Vector3D ref1,
+        Vector3D ref2,
+        Vector3D ref12,
+        Vector3D fallbackProbe)
+    {
+        Vector3D probe;
+        Vector3D bisector;
+
+        bisector = ref1.add(ref2);
+        probe = acceptSectorInteriorProbe(bisector, ref1, ref2, ref12);
+        if ( probe != null ) {
+            return probe;
+        }
+
+        probe = acceptSectorInteriorProbe(bisector.multiply(-1.0), ref1, ref2,
+            ref12);
+        if ( probe != null ) {
+            return probe;
+        }
+
+        probe = acceptSectorInteriorProbe(ref12.crossProduct(ref1), ref1, ref2,
+            ref12);
+        if ( probe != null ) {
+            return probe;
+        }
+
+        probe = acceptSectorInteriorProbe(ref2.crossProduct(ref12), ref1, ref2,
+            ref12);
+        if ( probe != null ) {
+            return probe;
+        }
+
+        return acceptSectorInteriorProbe(fallbackProbe, ref1, ref2, ref12);
+    }
+
+    private static CoplanarAngularInterval buildCoplanarAngularInterval(
+        CoplanarAngleBasis basis,
+        Vector3D boundary1,
+        Vector3D boundary2,
+        Vector3D interiorProbe)
+    {
+        CoplanarAngularInterval interval;
+        Vector3D probe;
+        double t;
+
+        if ( basis == null || normalizedDirection(boundary1) == null ||
+             normalizedDirection(boundary2) == null ) {
+            return null;
+        }
+
+        probe = normalizedDirection(interiorProbe);
+        if ( probe == null ) {
+            return null;
+        }
+
+        interval = new CoplanarAngularInterval();
+        interval.interior = angleOnBasis(basis, probe);
+        interval.start = unwrapAngleNear(angleOnBasis(basis, boundary1),
+            interval.interior);
+        interval.end = unwrapAngleNear(angleOnBasis(basis, boundary2),
+            interval.interior);
+
+        if ( interval.start > interval.end ) {
+            t = interval.start;
+            interval.start = interval.end;
+            interval.end = t;
+        }
+
+        return interval;
+    }
+
+    private static CoplanarAngularInterval alignCoplanarInterval(
+        CoplanarAngularInterval source,
+        double referenceInterior)
+    {
+        CoplanarAngularInterval aligned;
+        double newInterior;
+        double delta;
+
+        if ( source == null ) {
+            return null;
+        }
+
+        newInterior = unwrapAngleNear(source.interior, referenceInterior);
+        delta = newInterior - source.interior;
+        aligned = new CoplanarAngularInterval();
+        aligned.start = source.start + delta;
+        aligned.end = source.end + delta;
+        aligned.interior = newInterior;
+        return aligned;
+    }
+
+    private static int classifyCoplanarIntervalRelation(
+        CoplanarAngularInterval a,
+        CoplanarAngularInterval b)
+    {
+        CoplanarAngularInterval alignedB;
+        double overlap;
+
+        if ( a == null || b == null ) {
+            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_DISJOINT;
+        }
+
+        alignedB = alignCoplanarInterval(b, a.interior);
+        overlap = Math.min(a.end, alignedB.end) -
+            Math.max(a.start, alignedB.start);
+
+        if ( overlap > numericContext.angleTolerance() ) {
+            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_OVERLAP;
+        }
+        if ( overlap >= -numericContext.angleTolerance() ) {
+            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_TOUCHING;
+        }
+        return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+            .COPLANAR_DISJOINT;
+    }
+
+    private static CoplanarAngularInterval buildIntervalForHalfEdgeSector(
+        CoplanarAngleBasis basis,
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        Vector3D ref1;
+        Vector3D ref2;
+        Vector3D probe;
+
+        if ( he == null || he.startingVertex == null || he.previous() == null ||
+             he.next() == null || he.previous().startingVertex == null ||
+             he.next().startingVertex == null ) {
+            return null;
+        }
+
+        ref1 = he.previous().startingVertex.position.substract(
+            he.startingVertex.position);
+        ref2 = he.next().startingVertex.position.substract(
+            he.startingVertex.position);
+        probe = inside(he);
+        if ( probe == null || probe.length() <=
+             numericContext.unitVectorTolerance() ) {
+            probe = selectSectorInteriorProbe(ref1, ref2, ref1.crossProduct(ref2),
+                null);
+        }
+        return buildCoplanarAngularInterval(basis, ref1, ref2, probe);
+    }
+
+    private static CoplanarAngularInterval buildIntervalForVertexSector(
+        CoplanarAngleBasis basis,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex sector)
+    {
+        Vector3D fallbackProbe;
+        Vector3D probe;
+
+        if ( sector == null ) {
+            return null;
+        }
+
+        fallbackProbe = null;
+        if ( sector.he != null ) {
+            fallbackProbe = inside(sector.he);
+        }
+        probe = selectSectorInteriorProbe(sector.ref1, sector.ref2,
+            sector.ref12, fallbackProbe);
+        return buildCoplanarAngularInterval(basis, sector.ref1, sector.ref2,
+            probe);
+    }
+
+    private static CoplanarAngularInterval buildIntervalForCoplanarEdge(
+        CoplanarAngleBasis basis,
+        _PolyhedralBoundedSolidHalfEdge edge,
+        Vector3D faceNormal)
+    {
+        Vector3D edgeDirection;
+        Vector3D inward;
+
+        if ( edge == null || edge.startingVertex == null || edge.next() == null ||
+             edge.next().startingVertex == null ) {
+            return null;
+        }
+
+        edgeDirection = edge.next().startingVertex.position.substract(
+            edge.startingVertex.position);
+        inward = faceNormal.crossProduct(edgeDirection);
+        return buildCoplanarAngularInterval(basis, edgeDirection,
+            edgeDirection.multiply(-1.0), inward);
+    }
+
+    private static int classifySectorAgainstReferenceVertex(
+        CoplanarAngularInterval currentInterval,
+        CoplanarAngleBasis basis,
+        _PolyhedralBoundedSolidFace referenceFace,
+        _PolyhedralBoundedSolidVertex referenceVertex)
+    {
+        int i, j;
+        int bestRelation;
+        CoplanarAngularInterval referenceInterval;
+
+        if ( currentInterval == null || referenceFace == null ||
+             referenceVertex == null ) {
+            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_DISJOINT;
+        }
+
+        bestRelation =
+            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_DISJOINT;
+
+        for ( i = 0; i < referenceFace.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge he;
+            _PolyhedralBoundedSolidHalfEdge heStart;
+
+            heStart = referenceFace.boundariesList.get(i).boundaryStartHalfEdge;
+            if ( heStart == null ) {
+                continue;
+            }
+
+            he = heStart;
+            do {
+                if ( he.startingVertex == referenceVertex ) {
+                    referenceInterval = buildIntervalForHalfEdgeSector(basis,
+                        he);
+                    j = classifyCoplanarIntervalRelation(currentInterval,
+                        referenceInterval);
+                    if ( j > bestRelation ) {
+                        bestRelation = j;
+                    }
+                    if ( bestRelation ==
+                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                             .COPLANAR_OVERLAP ) {
+                        return bestRelation;
+                    }
+                }
+                he = he.next();
+            } while ( he != heStart );
+        }
+
+        return bestRelation;
     }
 
     private static void registerCoplanarRelation(
@@ -227,12 +606,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidFace referenceFace)
     {
         _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidHalfEdge heNext;
         Vector3D start;
-        Vector3D direction;
-        Vector3D probe;
-        double edgeLength;
-        double step;
+        CoplanarAngleBasis basis;
+        CoplanarAngularInterval currentInterval;
         int status;
 
         if ( sectorInfo == null || referenceFace == null ) {
@@ -246,46 +622,45 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 .COPLANAR_DISJOINT;
         }
 
-        heNext = he.next();
         start = he.startingVertex.position;
-        direction = inside(he);
-
-        if ( (direction == null ||
-              direction.length() <= numericContext.epsilon()) &&
-             sectorInfo.position != null ) {
-            direction = sectorInfo.position.substract(start);
-        }
-        if ( direction == null ||
-             direction.length() <= numericContext.epsilon() ) {
-            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                .COPLANAR_TOUCHING;
-        }
-
-        edgeLength = 0.0;
-        if ( heNext != null && heNext.startingVertex != null ) {
-            edgeLength = VSDK.vectorDistance(start, heNext.startingVertex.position);
-        }
-
-        step = Math.max(numericContext.bigEpsilon() * 4.0,
-                        edgeLength * 1.0e-3);
-        if ( edgeLength > numericContext.bigEpsilon() ) {
-            step = Math.min(step, edgeLength * 0.25);
-        }
-
-        direction.normalize();
-        probe = start.add(direction.multiply(step));
-        status = pointInFace(referenceFace, probe);
+        status = pointInFace(referenceFace, start);
 
         if ( status == Geometry.INSIDE ) {
             return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
                 .COPLANAR_OVERLAP;
         }
-        if ( status == Geometry.LIMIT ) {
+        if ( status != Geometry.LIMIT ) {
+            return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                .COPLANAR_DISJOINT;
+        }
+
+        basis = buildCoplanarAngleBasis(
+            he.parentLoop.parentFace.containingPlane.getNormal(),
+            he.next().startingVertex.position.substract(start),
+            he.previous().startingVertex.position.substract(start));
+        currentInterval = buildIntervalForHalfEdgeSector(basis, he);
+        if ( currentInterval == null ) {
             return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
                 .COPLANAR_TOUCHING;
         }
+
+        if ( referenceFace.lastIntersectedHalfedge != null ) {
+            return classifyCoplanarIntervalRelation(currentInterval,
+                buildIntervalForCoplanarEdge(basis,
+                    referenceFace.lastIntersectedHalfedge,
+                    referenceFace.containingPlane.getNormal()));
+        }
+        if ( referenceFace.lastIntersectedVertex != null ) {
+            status = classifySectorAgainstReferenceVertex(currentInterval, basis,
+                referenceFace, referenceFace.lastIntersectedVertex);
+            if ( status !=
+                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                     .COPLANAR_DISJOINT ) {
+                return status;
+            }
+        }
         return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-            .COPLANAR_DISJOINT;
+            .COPLANAR_TOUCHING;
     }
 
     private static int resolveCoplanarSectorClass(int op, int BvsA,
@@ -1294,53 +1669,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         return nb;
     }
 
-    private static double angleFromVectors(Vector3D u, Vector3D v, Vector3D a)
-    {
-        double x, y;
-        double an;
-
-        x = a.dotProduct(u);
-        y = a.dotProduct(v);
-
-        an = Math.acos(x);
-        if ( y < 0 ) an *= -1;
-        return an;
-    }
-
-    /**
-    Given two coplanar sectors that share a common edge, this method determine
-    if the sectors are edge neighbors (this case returs false) or overlaping
-    sectors (this case returns true).
-    */
-    private static boolean sectorOverSector(
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
-        Vector3D commonEdge
-    )
-    {
-        Vector3D boundingEdgeA = null;
-        Vector3D boundingEdgeB = null;
-
-        if ( colinearVectorsWithDirection(na.ref1, commonEdge) ) {
-            boundingEdgeA = na.ref2;
-        }
-        else {
-            boundingEdgeA = na.ref1;
-        }
-
-        if ( colinearVectorsWithDirection(nb.ref1, commonEdge) ) {
-            boundingEdgeB = nb.ref2;
-        }
-        else {
-            boundingEdgeB = nb.ref1;
-        }
-
-        if ( colinearVectorsWithDirection(boundingEdgeA, boundingEdgeB) ) {
-            return true;
-        }
-        return false;
-    }
-
     /**
     Checks if two coplanar sectors overlaps, by doing a "sector within" test
     for coplanar sectors: If the two given sectors are coplanar and with
@@ -1357,47 +1685,21 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
     {
-        //- Convert side vectors of sectors into angles -------------------
-        double a1, a2;
-        double b1, b2;
-        Vector3D u, v, a, b, c, n;
+        CoplanarAngleBasis basis;
+        CoplanarAngularInterval intervalA;
+        CoplanarAngularInterval intervalB;
+        int relation;
 
-        n = na.he.parentLoop.parentFace.containingPlane.getNormal();
-        u = new Vector3D(na.ref1);
-        u.normalize();
-        v = n.crossProduct(u);
-        v.normalize();
+        basis = buildCoplanarAngleBasis(
+            na.he.parentLoop.parentFace.containingPlane.getNormal(),
+            na.ref1, na.ref2);
+        intervalA = buildIntervalForVertexSector(basis, na);
+        intervalB = buildIntervalForVertexSector(basis, nb);
+        relation = classifyCoplanarIntervalRelation(intervalA, intervalB);
 
-        a = new Vector3D(na.ref2);
-        a.normalize();
-        b = new Vector3D(nb.ref1);
-        b.normalize();
-        c = new Vector3D(nb.ref2);
-        c.normalize();
-
-        a1 = angleFromVectors(u, v, u);
-        a2 = angleFromVectors(u, v, a);
-        b1 = angleFromVectors(u, v, b);
-        b2 = angleFromVectors(u, v, c);
-
-        //- Order the angles in ascending order angle intervals -----------
-        // Given angles are between -180 and 180 degrees
-        double t;
-
-        if ( a1 > a2 ) {
-            t = a1;
-            a1 = a2;
-            a2 = t;
-        }
-        if ( b1 > b2 ) {
-            t = b1;
-            b1 = b2;
-            b2 = t;
-        }
-
-        //- Calculate interval intersection -------------------------------
-        if ( PolyhedralBoundedSolidNumericPolicy.angleIntervalsOverlap(
-                a2, b1, numericContext) ) {
+        if ( relation ==
+             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                 .COPLANAR_OVERLAP ) {
 
             if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0 ) {
                 System.out.print(" <TRUE>");
@@ -2214,6 +2516,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         i = 0;
         while ( true ) {
             //-------------------------------------------------------------
+            if ( i >= sectors.size() ) {
+                return;
+            }
             while ( !sectors.get(i).intersect ) {
                 i++;
                 if ( i == sectors.size() ) {
@@ -2236,6 +2541,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             }
 
             //-------------------------------------------------------------
+            if ( i >= sectors.size() ) {
+                return;
+            }
             while ( !sectors.get(i).intersect ) {
                 i++;
                 if ( i == sectors.size() ) {
@@ -2264,6 +2572,20 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 System.out.println("      -> Ha2: " + ha2);
                 System.out.println("      -> Hb1: " + hb1);
                 System.out.println("      -> Hb2: " + hb2);
+            }
+
+            //-------------------------------------------------------------
+            if ( ha1 == null || ha2 == null || hb1 == null || hb2 == null ) {
+                int j;
+
+                for ( j = 0; j < sectors.size(); j++ ) {
+                    sectors.get(j).intersect = false;
+                }
+                if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
+                    System.out.println(
+                        "    . Incomplete coplanar pairing, skipping split");
+                }
+                return;
             }
 
             //-------------------------------------------------------------
@@ -2785,6 +3107,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int i, j;
         _PolyhedralBoundedSolidFace face;
         double eps = numericContext.bigEpsilon();
+        int insideVotes = 0;
+        int outsideVotes = 0;
 
         if ( solid == null || solid.polygonsList.size() < 1 ) {
             return Geometry.OUTSIDE;
@@ -2793,6 +3117,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         // Boundary quick check.
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             face = solid.polygonsList.get(i);
+            if ( face.containingPlane == null ) {
+                continue;
+            }
             if ( Math.abs(face.containingPlane.pointDistance(point)) <= eps ) {
                 if ( face.testPointInside(point, eps) != Geometry.OUTSIDE ) {
                     return Geometry.LIMIT;
@@ -2815,6 +3142,10 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
             for ( i = 0; i < solid.polygonsList.size(); i++ ) {
                 face = solid.polygonsList.get(i);
+                if ( face.containingPlane == null ) {
+                    ambiguous = true;
+                    break;
+                }
                 Ray rayHit = new Ray(ray);
                 if ( !face.containingPlane.doIntersection(rayHit) ) {
                     continue;
@@ -2848,10 +3179,21 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             }
 
             if ( !ambiguous ) {
-                return ((hits % 2) == 1) ? Geometry.INSIDE : Geometry.OUTSIDE;
+                if ( (hits % 2) == 1 ) {
+                    insideVotes++;
+                }
+                else {
+                    outsideVotes++;
+                }
             }
         }
 
+        if ( insideVotes > outsideVotes ) {
+            return Geometry.INSIDE;
+        }
+        if ( outsideVotes > insideVotes ) {
+            return Geometry.OUTSIDE;
+        }
         return Geometry.LIMIT;
     }
 
@@ -2912,6 +3254,91 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
             return NO_INT_RELATION_TOUCHING;
         }
         return NO_INT_RELATION_DISJOINT;
+    }
+
+    /**
+    Preflight detector for proper edge/face crossings. This mirrors the
+    geometric test from [MANT1988].15.3 without mutating topology, so the
+    touching-only no-intersection policy can be applied before reduction.
+    */
+    private static boolean hasProperEdgeFaceIntersection(
+        PolyhedralBoundedSolid current,
+        PolyhedralBoundedSolid other)
+    {
+        int i, j;
+        _PolyhedralBoundedSolidEdge edge;
+        _PolyhedralBoundedSolidFace face;
+        _PolyhedralBoundedSolidVertex v1, v2;
+        double d1, d2, d3, t;
+        int s1, s2;
+        Vector3D p;
+
+        if ( current == null || other == null ) {
+            return false;
+        }
+
+        for ( i = 0; i < current.edgesList.size(); i++ ) {
+            edge = current.edgesList.get(i);
+            if ( edge == null || edge.rightHalf == null || edge.leftHalf == null ) {
+                continue;
+            }
+            v1 = edge.rightHalf.startingVertex;
+            v2 = edge.leftHalf.startingVertex;
+            if ( v1 == null || v2 == null ) {
+                continue;
+            }
+
+            for ( j = 0; j < other.polygonsList.size(); j++ ) {
+                face = other.polygonsList.get(j);
+                if ( face == null || face.containingPlane == null ) {
+                    continue;
+                }
+
+                d1 = face.containingPlane.pointDistance(v1.position);
+                d2 = face.containingPlane.pointDistance(v2.position);
+                s1 = compareToZero(d1);
+                s2 = compareToZero(d2);
+
+                if ( !((s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1)) ) {
+                    continue;
+                }
+
+                t = d1 / (d1 - d2);
+                p = v1.position.add(
+                    v2.position.substract(v1.position).multiply(t));
+                d3 = face.containingPlane.pointDistance(p);
+                if ( compareToZero(d3) != 0 ) {
+                    continue;
+                }
+
+                if ( pointInFace(face, p) == Geometry.INSIDE ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isTouchingOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
+        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+        int relation = classifyNoIntersectionRelation(aInB, bInA);
+
+        if ( relation != NO_INT_RELATION_TOUCHING ) {
+            return false;
+        }
+
+        if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
+            return false;
+        }
+        if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -3071,6 +3498,18 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage01");
             debugSolid(inSolidB, "outputB_stage01");
+        }
+
+        if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            if ( res.polygonsList.size() > 0 ) {
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+                res.compactIds();
+                res.maximizeFaces();
+                res.compactIds();
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+            }
+            return res;
         }
 
         setOpGenerate(inSolidA, inSolidB);
