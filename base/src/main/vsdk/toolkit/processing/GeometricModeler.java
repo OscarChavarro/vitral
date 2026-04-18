@@ -223,6 +223,138 @@ public class GeometricModeler extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
+    private static _PolyhedralBoundedSolidHalfEdge[] findWireSweepEnds(
+        PolyhedralBoundedSolid solid)
+    {
+        _PolyhedralBoundedSolidHalfEdge first;
+        _PolyhedralBoundedSolidHalfEdge last;
+
+        first = solid.polygonsList.get(0).boundariesList.get(0)
+            .boundaryStartHalfEdge;
+        while ( first.parentEdge != first.next().parentEdge ) {
+            first = first.next();
+        }
+        last = first.next();
+        while ( last.parentEdge != last.next().parentEdge ) {
+            last = last.next();
+        }
+        return new _PolyhedralBoundedSolidHalfEdge[] { first, last };
+    }
+
+    private static boolean isOnXAxis(Vector3D p, double tolerance)
+    {
+        return Math.abs(p.y) <= tolerance && Math.abs(p.z) <= tolerance;
+    }
+
+    private static void collapseFaceToAxisVertex(
+        _PolyhedralBoundedSolidFace face, double x)
+    {
+        if ( face == null ) {
+            return;
+        }
+
+        int i;
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge he = start;
+            if ( he == null ) {
+                continue;
+            }
+            do {
+                he.startingVertex.position.x = x;
+                he.startingVertex.position.y = 0.0;
+                he.startingVertex.position.z = 0.0;
+                he = he.next();
+            } while ( he != null && he != start );
+        }
+    }
+
+    /**
+    This method implements rotational sweeping for wire profiles around the
+    x-axis following the construction style used in [MANT1988].12.2 and
+    [MANT1988].12.5.
+
+    PRE:
+      - `solid` is a wire-like profile (single-face, open-loop form).
+      - Profile lies on z=0 and is intended for rotation around x-axis.
+      - `nfaces >= 3`.
+    */
+    public static void rotationalSweepExtrudeWireAroundXAxis(
+        PolyhedralBoundedSolid solid, int nfaces)
+    {
+        if ( solid == null || solid.polygonsList.size() < 1 || nfaces < 3 ) {
+            return;
+        }
+
+        _PolyhedralBoundedSolidHalfEdge[] ends = findWireSweepEnds(solid);
+        _PolyhedralBoundedSolidHalfEdge first = ends[0];
+        _PolyhedralBoundedSolidHalfEdge last = ends[1];
+        _PolyhedralBoundedSolidFace headf = solid.polygonsList.get(0);
+
+        double axisTolerance = VSDK.EPSILON * 100.0;
+        Vector3D firstEndpointPosition = new Vector3D(
+            first.next().startingVertex.position);
+        Vector3D lastEndpointPosition = new Vector3D(
+            last.startingVertex.position);
+        boolean firstEndpointOnAxis = isOnXAxis(firstEndpointPosition,
+            axisTolerance);
+        boolean lastEndpointOnAxis = isOnXAxis(lastEndpointPosition,
+            axisTolerance);
+
+        _PolyhedralBoundedSolidHalfEdge cfirst;
+        _PolyhedralBoundedSolidHalfEdge scan = null;
+        _PolyhedralBoundedSolidFace tailf;
+        Vector3D v;
+        Matrix4x4 rotation;
+
+        cfirst = first;
+        rotation = new Matrix4x4();
+        rotation.axisRotation((2*Math.PI) / ((double)nfaces), 1, 0, 0);
+
+        int i;
+        for ( i = 0; i < nfaces-1; i++ ) {
+            v = rotation.multiply(cfirst.next().startingVertex.position);
+            solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1,
+                v);
+            scan = cfirst.next();
+
+            while ( scan != last.next() ) {
+                v = rotation.multiply(scan.previous().startingVertex.position);
+                solid.lmev(scan.previous(), scan.previous(),
+                    solid.getMaxVertexId()+1, v);
+                solid.lmef(scan.previous().previous(), scan.next(),
+                    solid.getMaxFaceId()+1);
+                scan = (scan.next().next()).mirrorHalfEdge();
+            }
+            last = scan;
+            cfirst = (cfirst.next().next()).mirrorHalfEdge();
+        }
+
+        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(),
+            solid.getMaxFaceId()+1);
+        while ( cfirst != scan ) {
+            solid.lmef(cfirst, cfirst.next().next().next(),
+                solid.getMaxFaceId()+1);
+            cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
+        }
+
+        // [MANT1988].12.2: when the wire touches the axis, cap faces should
+        // degenerate to a single pole vertex instead of an n-gon of
+        // coincident points.
+        if ( firstEndpointOnAxis ) {
+            collapseFaceToAxisVertex(headf, firstEndpointPosition.x);
+        }
+        if ( lastEndpointOnAxis ) {
+            collapseFaceToAxisVertex(tailf, lastEndpointPosition.x);
+        }
+        if ( firstEndpointOnAxis || lastEndpointOnAxis ) {
+            solid.maximizeFaces();
+        }
+
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+    }
+
     public static PolyhedralBoundedSolid createBrepFromParametricCurve(ParametricCurve curve)
     {
         //-----------------------------------------------------------------

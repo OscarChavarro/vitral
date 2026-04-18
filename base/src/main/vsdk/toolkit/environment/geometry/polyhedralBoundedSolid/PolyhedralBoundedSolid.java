@@ -645,10 +645,9 @@ public class PolyhedralBoundedSolid extends Solid {
     the loop of the latter a ring into the former. Face `face2` is hence
     removed.
     PRE: It is assumed that `face2` is simple, i.e., has just one loop.
-    Note that this method is a partial solution to problem [MANT1988].11.5, 
-    and follows the functional definition of section [MANT1988].11.5.1.
-    This method should be shecket to see if it is managing only the
-    "same shell" case, or if it is done.
+    This method implements the low-level operator family from exercise
+    [MANT1988].11.5, following the functional definition of section
+    [MANT1988].11.5.1 for the same-shell case.
     @param face1
     @param face2
     */
@@ -686,8 +685,8 @@ public class PolyhedralBoundedSolid extends Solid {
     Operator `lmfkrh` is the inverse of `lkfmrh`. It makes the loop `l`
     the outer loop of a new face `newFaceId`. It is assumed that `l` is an
     inner loop of its parent face.
-    Note that this method is a partial solution to problem [MANT1988].11.5, 
-    and follows the functional definition of section [MANT1988].11.5.1.
+    This method implements the inverse operator of the low-level family from
+    exercise [MANT1988].11.5, following section [MANT1988].11.5.1.
     @param l
     @param newFaceId
     @return the newly generated face
@@ -708,6 +707,34 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    lkimrh: LowLevelKillInnerMakeRingHole.
+    Naming alias for the [MANT1988].11.5 low-level operator family.
+    Current Vitral codebase uses the `lkfmrh` name for the same semantics.
+    @param face1
+    @param face2
+    */
+    public void lkimrh(
+        _PolyhedralBoundedSolidFace face1,
+        _PolyhedralBoundedSolidFace face2)
+    {
+        lkfmrh(face1, face2);
+    }
+
+    /**
+    lmikrh: LowLevelMakeInnerKillRingHole.
+    Naming alias for the [MANT1988].11.5 low-level inverse operator family.
+    Current Vitral codebase uses the `lmfkrh` name for the same semantics.
+    @param l
+    @param newFaceId
+    @return the newly generated face
+    */
+    public _PolyhedralBoundedSolidFace
+    lmikrh(_PolyhedralBoundedSolidLoop l, int newFaceId)
+    {
+        return lmfkrh(l, newFaceId);
+    }
+
+    /**
     Method `lringmv` moves the loop `l` from its parent face to face `toFace`.
     If `setAsOuterLoop` is false, `l` becomes an "inner" loop of `toFace`.
     Otherwise, `l` is positioned as the outer loop (first boundary) of
@@ -721,7 +748,8 @@ public class PolyhedralBoundedSolid extends Solid {
     to a face without an outer loop.
 
     Note that `lringmv` is an addendum to `lmef`, and not an Euler operator.
-    This method follows the functional definition of section [MANT1988].11.5.1.
+    It is part of the practical support required by the operator family of
+    exercise [MANT1988].11.5, and follows section [MANT1988].11.5.1.
     @param l loop to move or reorder
     @param toFace destination face
     @param setAsOuterLoop true to set `l` as outer loop, false to set it as inner loop
@@ -1135,8 +1163,8 @@ public class PolyhedralBoundedSolid extends Solid {
     Actualy, `kfmrh` creates a hole only if the two argument faces belong
     to the same shell.  This method implements that case, taking `this`
     solid as the only shell.
-    This method should be shecket to see if it is managing only the
-    "same shell" case, or if it is done.
+    This method is the high-level counterpart used in the [MANT1988].11.5
+    operator family implementation for the same-shell case.
     @param f1
     @param f2
     @return true on operation success, false other way.
@@ -1601,7 +1629,8 @@ public class PolyhedralBoundedSolid extends Solid {
                     restart = true;
                     break;
                 }
-                else if ( a.overlapsWith(b, numericContext.epsilon()) &&
+                else if ( a != null && b != null &&
+                          a.overlapsWith(b, numericContext.epsilon()) &&
                           e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
                     // Case 2: Not tested!
                     lkef(e.rightHalf, e.leftHalf);

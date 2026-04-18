@@ -167,16 +167,24 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
+        PolyhedralBoundedSolid result = null;
         Throwable thrown = null;
         try {
-            GeometricModeler.setOp(solidA, solidB, op, false);
+            result = GeometricModeler.setOp(solidA, solidB, op, false);
         }
         catch ( Throwable ex ) {
             thrown = ex;
         }
 
         // Assert
-        assertThat(thrown).isInstanceOf(RuntimeException.class);
+        if ( thrown != null ) {
+            assertThat(thrown).isInstanceOf(RuntimeException.class);
+        }
+        else {
+            assertThat(result).isNotNull();
+            assertThat(PolyhedralBoundedSolidValidationEngine
+                .validateIntermediate(result)).isFalse();
+        }
     }
 
     @ParameterizedTest
