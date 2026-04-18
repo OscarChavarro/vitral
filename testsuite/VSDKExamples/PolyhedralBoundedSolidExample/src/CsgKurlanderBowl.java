@@ -9,7 +9,7 @@ import vsdk.toolkit.processing.GeometricModeler;
 public class CsgKurlanderBowl
 {
     private static final int CYLINDER_SIDES = 30;
-    private static final double OBJECT_SCALE = 0.25;
+    private static final double OBJECT_SCALE = 0.0625;
 
     private static double s(double value)
     {
@@ -95,7 +95,7 @@ public class CsgKurlanderBowl
             s(1.5), s(5.0), new Vector3D(0, 0, 0));
         PolyhedralBoundedSolid b = createCylinder(
             s(1.5), s(5.0), new Vector3D(s(1.1), 0, s(0.6)));
-        return booleanOp(a, b, GeometricModeler.DIFFERENCE);
+        return booleanOp(a, b, GeometricModeler.SUBTRACT);
     }
 
     private static PolyhedralBoundedSolid placeMotif(
@@ -122,44 +122,44 @@ public class CsgKurlanderBowl
         PolyhedralBoundedSolid inner = createSphere(
             s(9.5), new Vector3D(0, 0, s(10.0)));
         PolyhedralBoundedSolid shell = booleanOp(
-            outer, inner, GeometricModeler.DIFFERENCE);
+            outer, inner, GeometricModeler.SUBTRACT);
 
         for ( i = 1; i <= 4; i++ ) {
             double base = -90.0 * i;
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 4.0, base),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 14.0, base),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 11.5, base - 22.5),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 9.0, base - 45.0),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 6.5, base - 67.5),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
         }
 
         for ( i = 1; i <= 4; i++ ) {
             double base = -90.0 * i;
             shell = booleanOp(shell,
                 placeMotif(createStar(), 9.0, base),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 6.5, base - 22.5),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 14.0, base - 45.0),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 4.0, base - 45.0),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 11.5, base - 67.5),
-                GeometricModeler.DIFFERENCE);
+                GeometricModeler.SUBTRACT);
         }
 
         PolyhedralBoundedSolid guide = createCylinder(

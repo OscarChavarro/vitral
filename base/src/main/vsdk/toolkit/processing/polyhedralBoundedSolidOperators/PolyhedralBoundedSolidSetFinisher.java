@@ -59,7 +59,7 @@ final class PolyhedralBoundedSolidSetFinisher
             sonfb.add(f);
         }
 
-        if ( op == DIFFERENCE ) {
+        if ( op == SUBTRACT) {
             inSolidB.revert();
         }
 

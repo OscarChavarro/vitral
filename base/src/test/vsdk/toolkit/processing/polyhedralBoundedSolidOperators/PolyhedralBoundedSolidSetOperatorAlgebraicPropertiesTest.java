@@ -37,7 +37,7 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
             intersectionPair[0], intersectionPair[1],
             GeometricModeler.INTERSECTION, false);
         PolyhedralBoundedSolid differenceResult = GeometricModeler.setOp(
-            differencePair[0], differencePair[1], GeometricModeler.DIFFERENCE,
+            differencePair[0], differencePair[1], GeometricModeler.SUBTRACT,
             false);
 
         // Assert
@@ -109,14 +109,14 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 
         // Action
         PolyhedralBoundedSolid differenceABFirst = GeometricModeler.setOp(
-            pairA[0], pairA[1], GeometricModeler.DIFFERENCE, false);
+            pairA[0], pairA[1], GeometricModeler.SUBTRACT, false);
         PolyhedralBoundedSolid differenceABSecond = GeometricModeler.setOp(
-            pairB[0], pairB[1], GeometricModeler.DIFFERENCE, false);
+            pairB[0], pairB[1], GeometricModeler.SUBTRACT, false);
 
         PolyhedralBoundedSolid differenceBAFirst = GeometricModeler.setOp(
-            pairC[1], pairC[0], GeometricModeler.DIFFERENCE, false);
+            pairC[1], pairC[0], GeometricModeler.SUBTRACT, false);
         PolyhedralBoundedSolid differenceBASecond = GeometricModeler.setOp(
-            pairD[1], pairD[0], GeometricModeler.DIFFERENCE, false);
+            pairD[1], pairD[0], GeometricModeler.SUBTRACT, false);
 
         // Assert
         assertThat(differenceABFirst.polygonsList.size())

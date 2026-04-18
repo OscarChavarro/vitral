@@ -30,7 +30,7 @@ public class DebuggerModel
     public RendererConfigurationController qualityController;
     public CameraController cameraController;
     public GLCanvas canvas;
-    public SolidModelNames solidModelName = SolidModelNames.IMPORT_OR_FEATURED_OBJECT;
+    public SolidModelNames solidModelName = SolidModelNames.MVFS_SMEV_SAMPLE;
     public int csgOperation = 0;
     public int csgSample = 5;
     public boolean debugEdges = false;

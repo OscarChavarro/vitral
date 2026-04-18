@@ -21,14 +21,10 @@ import vsdk.toolkit.environment.geometry.ParametricCurve;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.awt.AwtFontReader;
-import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.processing.GeometricModeler;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidSetOperator;
 import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
 public class BoundedSolidTestSelector
@@ -111,6 +107,12 @@ public class BoundedSolidTestSelector
           case CONE:
             mySolid = createCone(0.5, 0.0, 1.0);
             break;
+          case CYLINDER:
+            mySolid = createCylinder(0.5, 1.0);
+            break;
+          case CSG_MOON_BLOCK:
+            mySolid = createCsgMoonBlock();
+            break;
           case ARROW:
             mySolid = createArrow(0.7, 0.3, 0.05, 0.1);
             break;
@@ -172,12 +174,12 @@ public class BoundedSolidTestSelector
             break;
           case CSG_MANT1988_15_2_LIMIT_DIFFERENCE:
             mySolid = csgMant1988_15_2Case(
-                0, GeometricModeler.DIFFERENCE, model.debugCsg);
+                0, GeometricModeler.SUBTRACT, model.debugCsg);
             model.debugCsg = false;
             break;
           case CSG_MANT1988_15_2_OPEN_DIFFERENCE:
             mySolid = csgMant1988_15_2Case(
-                1, GeometricModeler.DIFFERENCE, model.debugCsg);
+                1, GeometricModeler.SUBTRACT, model.debugCsg);
             model.debugCsg = false;
             break;
           case CSG_KURLANDER_BOWL:
@@ -285,6 +287,39 @@ public class BoundedSolidTestSelector
 
     /**    
     */
+    public static PolyhedralBoundedSolid createCylinder(double r, double h)
+    {
+        PolyhedralBoundedSolid solid;
+
+        Matrix4x4 R = new Matrix4x4();
+        R.translation(0.55, 0.55, 0.05);
+
+        Cone c = new Cone(r, r, h);
+        solid = c.exportToPolyhedralBoundedSolid();
+        solid.applyTransformation(R);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+        return solid;
+    }
+
+    /**    
+    */
+    public static PolyhedralBoundedSolid createCsgMoonBlock()
+    {
+        PolyhedralBoundedSolid cylinderA = createCylinder(0.5, 1.0);
+        PolyhedralBoundedSolid cylinderB = createCylinder(0.5, 2);
+
+        Matrix4x4 T = new Matrix4x4();
+        T.translation(0.275, 0.0, -0.5);
+        cylinderB.applyTransformation(T);
+
+        PolyhedralBoundedSolid solid;
+        solid = GeometricModeler.setOp(cylinderA, cylinderB, GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+        return solid;
+    }
+
+    /**    
+    */
     public static PolyhedralBoundedSolid createArrow(double p1, double p2, double p3, double p4)
     {
         PolyhedralBoundedSolid solid;
@@ -361,7 +396,7 @@ public class BoundedSolidTestSelector
         solidB = BoundedSolidTestSelector.createBox(new Vector3D(0.72, 0.72, 0.72));
 
         // Hollow box = outer box minus inner box.
-        result = GeometricModeler.setOp(solidA, solidB, GeometricModeler.DIFFERENCE);
+        result = GeometricModeler.setOp(solidA, solidB, GeometricModeler.SUBTRACT);
 
         return result;
     }
@@ -1081,11 +1116,11 @@ public class BoundedSolidTestSelector
         }
         else if ( op == 2 ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.DIFFERENCE, withDebug);
+                                         GeometricModeler.SUBTRACT, withDebug);
         }
         else {
             res = GeometricModeler.setOp(operands[1], operands[0],
-                                         GeometricModeler.DIFFERENCE, withDebug);
+                                         GeometricModeler.SUBTRACT, withDebug);
         }
 
         //-----------------------------------------------------------------

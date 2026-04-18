@@ -140,8 +140,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     public boolean
     calculatePlane()
     {
-        //return calculatePlaneByVertexSequenceNormalCrossProduct();
-        return calculatePlaneByCorner(0.1);//If we assume meters, 0.01 is 1cm.
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forFace(this);
+
+        // Ignore only numerically degenerate edges. A fixed 0.1 threshold
+        // rejects valid small polygons such as finely tessellated cylinders.
+        return calculatePlaneByCorner(numericContext.bigEpsilon());
     }
 
     /**

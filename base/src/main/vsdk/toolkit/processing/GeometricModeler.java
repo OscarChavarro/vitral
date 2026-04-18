@@ -42,7 +42,7 @@ public class GeometricModeler extends ProcessingElement
 
     public static final int UNION = 1;
     public static final int INTERSECTION = 2;
-    public static final int DIFFERENCE = 3;
+    public static final int SUBTRACT = 3;
 
     /**
     Creates a 3D line from point (x1, y1, z1) to point (x2, y2, z2).

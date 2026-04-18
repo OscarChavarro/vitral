@@ -4,8 +4,6 @@
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
-
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -96,7 +94,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
               case BonAminus:    cl = BoutA;    break;
             }
         }
-        else if ( op == DIFFERENCE ) {
+        else if ( op == SUBTRACT) {
             switch ( cl ) {
               case AonBplus:     cl = AinB;    break;
               case AonBminus:    cl = AoutB;    break;

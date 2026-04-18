@@ -228,7 +228,7 @@ class PolyhedralBoundedSolidSetOperatorTest
             Arguments.of(GeometricModeler.UNION,
                 facesA + facesB, edgesA + edgesB, verticesA + verticesB),
             Arguments.of(GeometricModeler.INTERSECTION, 0, 0, 0),
-            Arguments.of(GeometricModeler.DIFFERENCE, facesA, edgesA, verticesA)
+            Arguments.of(GeometricModeler.SUBTRACT, facesA, edgesA, verticesA)
         );
     }
 
@@ -246,7 +246,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         return Stream.of(
             Arguments.of(GeometricModeler.UNION),
             Arguments.of(GeometricModeler.INTERSECTION),
-            Arguments.of(GeometricModeler.DIFFERENCE)
+            Arguments.of(GeometricModeler.SUBTRACT)
         );
     }
 
@@ -269,7 +269,7 @@ class PolyhedralBoundedSolidSetOperatorTest
                 facesOuter, edgesOuter, verticesOuter),
             Arguments.of(GeometricModeler.INTERSECTION,
                 facesInner, edgesInner, verticesInner),
-            Arguments.of(GeometricModeler.DIFFERENCE, 0, 0, 0)
+            Arguments.of(GeometricModeler.SUBTRACT, 0, 0, 0)
         );
     }
 
@@ -287,16 +287,16 @@ class PolyhedralBoundedSolidSetOperatorTest
             Arguments.of(-1, GeometricModeler.UNION),
             Arguments.of(0, GeometricModeler.UNION),
             Arguments.of(1, GeometricModeler.UNION),
+            Arguments.of(1, GeometricModeler.INTERSECTION),
             Arguments.of(0, GeometricModeler.INTERSECTION),
-            Arguments.of(0, GeometricModeler.DIFFERENCE)
+            Arguments.of(0, GeometricModeler.SUBTRACT)
         );
     }
 
     private static Stream<Arguments> mant1988KnownFailureSamples()
     {
         return Stream.of(
-            Arguments.of(1, GeometricModeler.INTERSECTION),
-            Arguments.of(-1, GeometricModeler.DIFFERENCE)
+            Arguments.of(-1, GeometricModeler.SUBTRACT)
         );
     }
 }

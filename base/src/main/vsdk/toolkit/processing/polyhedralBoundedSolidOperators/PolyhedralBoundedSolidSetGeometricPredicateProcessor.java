@@ -693,7 +693,7 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
         if ( op == UNION ) {
             return COPLANAR_OP_UNION;
         }
-        if ( op == DIFFERENCE ) {
+        if ( op == SUBTRACT) {
             return COPLANAR_OP_DIFFERENCE;
         }
         return COPLANAR_OP_INTERSECTION;
