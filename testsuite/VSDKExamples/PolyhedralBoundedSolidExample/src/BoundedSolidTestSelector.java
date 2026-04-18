@@ -180,8 +180,8 @@ public class BoundedSolidTestSelector
                 1, GeometricModeler.DIFFERENCE, model.debugCsg);
             model.debugCsg = false;
             break;
-          case CSG_KURLANDER_TEST:
-            mySolid = CsgKurlanderTest.create();
+          case CSG_KURLANDER_BOWL:
+            mySolid = CsgKurlanderBowl.create();
             break;
           case FEATURED_OBJECT:
             mySolid = featuredObject();

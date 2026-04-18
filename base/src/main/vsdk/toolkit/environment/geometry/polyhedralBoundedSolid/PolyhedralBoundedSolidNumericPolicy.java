@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
@@ -9,6 +13,11 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 
+/**
+Numerical tolerances for geometric predicates used to implement the face
+equations and intersection predicates of chapter [MANT1988].13 and the robust
+case distinctions required by chapter [MANT1988].15.
+*/
 public class PolyhedralBoundedSolidNumericPolicy
 {
     public static final double BREP_EPSILON = VSDK.EPSILON;

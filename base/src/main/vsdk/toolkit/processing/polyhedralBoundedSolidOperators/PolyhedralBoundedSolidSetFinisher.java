@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
@@ -6,7 +10,8 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 
 /**
-Finish stage (big phase 4) for set operations.
+Finish stage (big phase 4) for set operations, corresponding to the answer
+integration step of program [MANT1988].15.15.
 */
 final class PolyhedralBoundedSolidSetFinisher
     extends PolyhedralBoundedSolidOperator
@@ -14,6 +19,10 @@ final class PolyhedralBoundedSolidSetFinisher
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_06_FINISH = 0x20;
 
+    /**
+    Answer integrator for the set-operations pipeline.
+    Following program [MANT1988].15.15.
+    */
     static void finish(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,

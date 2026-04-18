@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
@@ -11,7 +15,9 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 /**
-Geometric predicates and coplanar-angle algebra used by set operation stages.
+Geometric predicates and coplanar-angle algebra used by the set-operations
+classifiers from sections [MANT1988].14.5, [MANT1988].15.6.1, and
+[MANT1988].15.6.2.
 */
 final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
     extends PolyhedralBoundedSolidOperator
@@ -140,6 +146,11 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return false;
     }
 
+    /**
+    Following program [MANT1988].15.9. According to the sector intersection
+    test from section [MANT1988].15.6.2, the variables are interpreted as in
+    figure [MANT1988].15.8 and equation [MANT1988].15.5.
+    */
     static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
                                Vector3D ref2, Vector3D ref12)
     {
@@ -161,6 +172,11 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return ( t1 < 0.0 && t2 < 0.0 );
     }
 
+    /**
+    Strict version of the sector-within test from section [MANT1988].15.6.2
+    that excludes the boundary-line cases implicit in figure [MANT1988].15.8
+    and equation [MANT1988].15.5.
+    */
     static boolean sctrwitthinProper(Vector3D dir, Vector3D ref1,
                                      Vector3D ref2, Vector3D ref12)
     {
@@ -171,6 +187,11 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return sctrwitthin(dir, ref1, ref2, ref12);
     }
 
+    /**
+    Checks overlap of two coplanar sectors for the vertex/vertex classifier.
+    Following section [MANT1988].15.6.2, where the operation is required but
+    left implicit after program [MANT1988].15.9.
+    */
     static boolean sectoroverlap(
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
@@ -204,6 +225,11 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return false;
     }
 
+    /**
+    Resolves the class to propagate for coplanar sector pairs when applying the
+    8-way boundary-classification logic of section [MANT1988].15.3 and the
+    vertex/vertex classifier of section [MANT1988].15.6.2.
+    */
     static int resolveCoplanarVertexVertexClass(int op,
         boolean sameOrientation, boolean sideA)
     {
@@ -213,6 +239,12 @@ final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
             [sideIndex];
     }
 
+    /**
+    Applies the coplanar reclassification rules for the vertex/face classifier,
+    starting from sections [MANT1988].14.5.1 and [MANT1988].14.5.2 and biased
+    toward set operations as proposed in [MANT1988].15.6.1 and problem
+    [MANT1988].15.4.
+    */
     static void applyCoplanarRulesToVertexFaceNeighborhood(
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
         _PolyhedralBoundedSolidFace referenceFace,

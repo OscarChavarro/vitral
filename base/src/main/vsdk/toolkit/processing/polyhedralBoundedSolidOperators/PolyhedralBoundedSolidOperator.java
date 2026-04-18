@@ -299,5 +299,4 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
 
         return interiorAngle > (Math.PI + numericContext.angleTolerance());
     }
-
 }

@@ -6,9 +6,15 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.processing.GeometricModeler;
 
-public class CsgKurlanderTest
+public class CsgKurlanderBowl
 {
     private static final int CYLINDER_SIDES = 30;
+    private static final double OBJECT_SCALE = 0.25;
+
+    private static double s(double value)
+    {
+        return value * OBJECT_SCALE;
+    }
 
     private static PolyhedralBoundedSolid booleanOp(
         PolyhedralBoundedSolid a, PolyhedralBoundedSolid b, int op)
@@ -69,8 +75,8 @@ public class CsgKurlanderTest
     {
         int i;
         int n = 10;
-        double outerR = 2.0;
-        double innerR = 0.77;
+        double outerR = s(2.0);
+        double innerR = s(0.77);
         double start = Math.toRadians(-90.0);
         Vector3D[] pts = new Vector3D[n];
 
@@ -80,13 +86,15 @@ public class CsgKurlanderTest
             pts[i] = new Vector3D(r * Math.cos(a), r * Math.sin(a), 0.0);
         }
 
-        return createExtrudedPolygon(pts, 5.5);
+        return createExtrudedPolygon(pts, s(5.5));
     }
 
     private static PolyhedralBoundedSolid createMoon()
     {
-        PolyhedralBoundedSolid a = createCylinder(1.5, 5.0, new Vector3D(0, 0, 0));
-        PolyhedralBoundedSolid b = createCylinder(1.5, 5.0, new Vector3D(1.1, 0, 0.6));
+        PolyhedralBoundedSolid a = createCylinder(
+            s(1.5), s(5.0), new Vector3D(0, 0, 0));
+        PolyhedralBoundedSolid b = createCylinder(
+            s(1.5), s(5.0), new Vector3D(s(1.1), 0, s(0.6)));
         return booleanOp(a, b, GeometricModeler.DIFFERENCE);
     }
 
@@ -98,7 +106,7 @@ public class CsgKurlanderTest
         Matrix4x4 rz = new Matrix4x4();
         Matrix4x4 m;
 
-        t.translation(6.0, 0.0, z);
+        t.translation(s(6.0), 0.0, s(z));
         ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
         rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
         m = rz.multiply(ry.multiply(t));
@@ -109,8 +117,10 @@ public class CsgKurlanderTest
     public static PolyhedralBoundedSolid create()
     {
         int i;
-        PolyhedralBoundedSolid outer = createSphere(10.0, new Vector3D(0, 0, 10.0));
-        PolyhedralBoundedSolid inner = createSphere(9.5, new Vector3D(0, 0, 10.0));
+        PolyhedralBoundedSolid outer = createSphere(
+            s(10.0), new Vector3D(0, 0, s(10.0)));
+        PolyhedralBoundedSolid inner = createSphere(
+            s(9.5), new Vector3D(0, 0, s(10.0)));
         PolyhedralBoundedSolid shell = booleanOp(
             outer, inner, GeometricModeler.DIFFERENCE);
 
@@ -153,7 +163,7 @@ public class CsgKurlanderTest
         }
 
         PolyhedralBoundedSolid guide = createCylinder(
-            10.5, 16.5, new Vector3D(0, 0, 0));
+            s(10.5), s(16.5), new Vector3D(0, 0, 0));
         PolyhedralBoundedSolid result = booleanOp(
             shell, guide, GeometricModeler.INTERSECTION);
 

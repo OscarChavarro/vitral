@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
@@ -11,18 +15,33 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
+/**
+Geometric validation helpers for polyhedral B-Reps, centered on the planar
+face model of [MANT1988].10.2.1 and the geometric primitives developed in
+chapter [MANT1988].13.
+*/
 public class PolyhedralBoundedSolidGeometricValidator
 {
     private PolyhedralBoundedSolidGeometricValidator()
     {
     }
 
+    /**
+    Checks whether a set of face vertices can define the planar polygon
+    required by [MANT1988].10.2.1 and by the face-equation procedure of
+    [MANT1988].13.1.
+    */
     public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
     {
         return validateFacePointsAreCoplanar(points,
             PolyhedralBoundedSolidNumericPolicy.forPoints(points));
     }
 
+    /**
+    Implements the coplanarity precondition needed before applying the face
+    equation ideas of [MANT1988].13.1 to a polyhedral face from
+    [MANT1988].10.2.1.
+    */
     public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
@@ -133,12 +152,20 @@ public class PolyhedralBoundedSolidGeometricValidator
         return points;
     }
 
+    /**
+    Validates that a face instance matches the planar-face assumption from
+    [MANT1988].10.2.1.
+    */
     public static boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face)
     {
         return validateFaceIsPlanar(face,
             PolyhedralBoundedSolidNumericPolicy.forFace(face));
     }
 
+    /**
+    Validates the face-planarity invariant required before evaluating face
+    equations as in [MANT1988].13.1.
+    */
     public static boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
@@ -147,6 +174,11 @@ public class PolyhedralBoundedSolidGeometricValidator
             validateFacePointsAreCoplanar(points, numericContext);
     }
 
+    /**
+    Rebuilds the plane equations expected for face nodes in [MANT1988].10.2.1
+    by first checking planarity and then evaluating planes in the spirit of
+    [MANT1988].13.1.
+    */
     public static boolean validateAllFacesPlanarityAndPlanes(
         PolyhedralBoundedSolid solid, StringBuilder msg)
     {
@@ -154,6 +186,10 @@ public class PolyhedralBoundedSolidGeometricValidator
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
     }
 
+    /**
+    Applies the face-planarity and face-equation checks corresponding to
+    [MANT1988].10.2.1 and [MANT1988].13.1 to every face of the solid.
+    */
     public static boolean validateAllFacesPlanarityAndPlanes(
         PolyhedralBoundedSolid solid,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
@@ -353,12 +389,22 @@ public class PolyhedralBoundedSolidGeometricValidator
         return false;
     }
 
+    /**
+    Validates that loops can act as proper planar face boundaries, consistent
+    with the face/loop organization of [MANT1988].10.2.1 and the planar
+    geometric reasoning of chapter [MANT1988].13.
+    */
     public static boolean validateLoopsStrict(PolyhedralBoundedSolid solid, StringBuilder msg)
     {
         return validateLoopsStrict(solid,
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
     }
 
+    /**
+    Enforces strict geometric loop consistency for the planar polygons assumed
+    by [MANT1988].10.2.1 and manipulated by the geometric tools of chapter
+    [MANT1988].13.
+    */
     public static boolean validateLoopsStrict(PolyhedralBoundedSolid solid,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         StringBuilder msg)
@@ -568,6 +614,10 @@ public class PolyhedralBoundedSolidGeometricValidator
         return false;
     }
 
+    /**
+    Validates the no-self-intersection requirement stated for valid boundary
+    models in [MANT1988].15.2, criterion 3.
+    */
     public static boolean validateFaceIntersectionsStrict(
         PolyhedralBoundedSolid solid, StringBuilder msg)
     {
@@ -575,6 +625,11 @@ public class PolyhedralBoundedSolidGeometricValidator
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
     }
 
+    /**
+    Applies strict face/face intersection checks to preserve the validity
+    condition from [MANT1988].15.2, criterion 3, using predicates from chapter
+    [MANT1988].13.
+    */
     public static boolean validateFaceIntersectionsStrict(
         PolyhedralBoundedSolid solid,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,

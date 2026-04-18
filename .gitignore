@@ -25,3 +25,4 @@ testsuite/**/output/
 testsuite/**/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
+.codex

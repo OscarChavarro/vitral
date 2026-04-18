@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
@@ -7,8 +11,9 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 
 /**
-Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
-design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
+Class `_PolyhedralBoundedSolidSetOperatorNullEdge` decorates a null edge so it
+can participate in the connect stage driven by the `sonea`/`soneb` sets of
+program [MANT1988].15.1 and later consumed by section [MANT1988].15.7.
 */
 public class _PolyhedralBoundedSolidSetOperatorNullEdge
     extends PolyhedralBoundedSolidOperator

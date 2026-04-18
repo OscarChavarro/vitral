@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayDeque;
@@ -14,7 +18,8 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 
 /**
 Helper for set operation big phase 0: generation of vertex/face and
-vertex/vertex intersections.
+vertex/vertex intersections, following the initial detection phase from
+program [MANT1988].15.2.
 */
 final class PolyhedralBoundedSolidSetIntersector
     extends PolyhedralBoundedSolidOperator
@@ -76,6 +81,10 @@ final class PolyhedralBoundedSolidSetIntersector
         return currentMax + 1;
     }
 
+    /**
+    Inserts a vertex/face coincidence into the set corresponding to the
+    `sonva`/`sonvb` variables of program [MANT1988].15.1.
+    */
     private static void addsovf(_PolyhedralBoundedSolidHalfEdge he,
                                 _PolyhedralBoundedSolidFace f, int BvsA,
                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva,
@@ -105,6 +114,10 @@ final class PolyhedralBoundedSolidSetIntersector
         sonv.add(elem);
     }
 
+    /**
+    Inserts a vertex/vertex coincidence into the set corresponding to the
+    `sonvv` variable of program [MANT1988].15.1.
+    */
     private static void addsovv(_PolyhedralBoundedSolidVertex a,
                                 _PolyhedralBoundedSolidVertex b, int BvsA,
                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv)
@@ -132,6 +145,12 @@ final class PolyhedralBoundedSolidSetIntersector
         sonvv.add(elem);
     }
 
+    /**
+    Handles the degenerate branch of the edge/face test from section
+    [MANT1988].15.3 when one endpoint already lies on the reference face, using
+    the point-on-edge and point-on-vertex bookkeeping suggested by problem
+    [MANT1988].13.3.
+    */
     private static void doVertexOnFace(
         _PolyhedralBoundedSolidVertex v,
         _PolyhedralBoundedSolidFace f,
@@ -167,6 +186,11 @@ final class PolyhedralBoundedSolidSetIntersector
         }
     }
 
+    /**
+    Performs one edge/face intersection test for the big-phase-0 generator.
+    This is the edge/face crossing analysis required by section [MANT1988].15.3
+    as part of the initial detector of program [MANT1988].15.2.
+    */
     private static _PolyhedralBoundedSolidEdge doSetOpGenerate(
         _PolyhedralBoundedSolidEdge e,
         _PolyhedralBoundedSolidFace f,
@@ -267,6 +291,11 @@ final class PolyhedralBoundedSolidSetIntersector
         }
     }
 
+    /**
+    Initial vertex intersection detector for the set operations algorithm
+    (big phase 0).
+    Following program [MANT1988].15.2.
+    */
     static GenerationResult setOpGenerate(PolyhedralBoundedSolid inSolidA,
                                           PolyhedralBoundedSolid inSolidB)
     {

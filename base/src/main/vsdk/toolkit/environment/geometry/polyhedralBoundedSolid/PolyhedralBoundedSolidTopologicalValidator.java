@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import vsdk.toolkit.common.VSDK;
@@ -6,12 +10,21 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 
+/**
+Topological validation helpers for the half-edge representation described in
+[MANT1988].10.2.1 and [MANT1988].10.2.2.
+*/
 public class PolyhedralBoundedSolidTopologicalValidator
 {
     private PolyhedralBoundedSolidTopologicalValidator()
     {
     }
 
+    /**
+    Checks the fundamental half-edge consistency expected from the graph and
+    identification structure described in [MANT1988].10.2.1 and
+    [MANT1988].10.2.2.
+    */
     public static boolean validateTopologicalIntegrity(PolyhedralBoundedSolid solid)
     {
         int i, j, k;
@@ -88,6 +101,11 @@ public class PolyhedralBoundedSolidTopologicalValidator
         return true;
     }
 
+    /**
+    Rebuilds the vertex-to-emanating-halfedge links required by the vertex node
+    definition of [MANT1988].10.2.1 and used throughout the Euler-operator
+    programs of chapter [MANT1988].11.
+    */
     public static void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid solid)
     {
         int i, j;

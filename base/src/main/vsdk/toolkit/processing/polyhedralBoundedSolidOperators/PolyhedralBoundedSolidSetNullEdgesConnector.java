@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
@@ -9,7 +13,9 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 /**
-Connect stage (big phase 3) for set operations: null-edges pairing and joins.
+Connect stage (big phase 3) for set operations: null-edges pairing and joins,
+following section [MANT1988].15.7 and programs [MANT1988].15.13 and
+[MANT1988].15.14.
 */
 final class PolyhedralBoundedSolidSetNullEdgesConnector
     extends PolyhedralBoundedSolidOperator
