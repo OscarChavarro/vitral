@@ -250,9 +250,10 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     (larger than 180 degrees) angle. In the first case the method returns
     `false` and `true` for the second case.
     This is an answer to problem [MANT1988].13.6.
-    \todo  Pending to verify functionality against method proposed by [MANT1988].
-    This should be a method of `PolyhedralBoundedSolid`, as it is of
-    common utility to some other operations.
+    Current implementation uses an orientation-consistent formal predicate:
+    the interior angle of the sector is computed with a signed turn (`atan2`)
+    around the parent face normal and considered wide iff that interior angle
+    is strictly greater than PI.
 
     PRE: Parent solid should be previously validated to contain correct
     face equations.
@@ -262,23 +263,41 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     */
     protected static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D a, b, c;
-
-        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
-        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
-        a.normalize();
-        b.normalize();
-
-        c = b.crossProduct(a);
-
-// HERE SHOULD COMPARE `c` WITH FACE NORMAL!
-
-        if ( c.length() < numericContext.unitVectorTolerance() ) {
-            // Angle greater than 180 degrees
+        if ( he == null || he.parentLoop == null ||
+             he.parentLoop.parentFace == null ||
+             he.parentLoop.parentFace.containingPlane == null ||
+             he.previous() == null || he.next() == null ) {
             return true;
         }
 
-        return false;
+        Vector3D v = he.startingVertex.position;
+        Vector3D pPrev = he.previous().startingVertex.position;
+        Vector3D pNext = he.next().startingVertex.position;
+        Vector3D faceNormal = he.parentLoop.parentFace.containingPlane.getNormal();
+
+        // Incoming and outgoing directions at sector vertex.
+        Vector3D eIn = v.substract(pPrev);
+        Vector3D eOut = pNext.substract(v);
+
+        if ( eIn.length() <= numericContext.unitVectorTolerance() ||
+             eOut.length() <= numericContext.unitVectorTolerance() ||
+             faceNormal.length() <= numericContext.unitVectorTolerance() ) {
+            return true;
+        }
+
+        eIn.normalize();
+        eOut.normalize();
+        faceNormal.normalize();
+
+        Vector3D cross = eIn.crossProduct(eOut);
+        double sinTheta = faceNormal.dotProduct(cross);
+        double cosTheta = eIn.dotProduct(eOut);
+        double signedTurn = Math.atan2(sinTheta, cosTheta); // [-PI, PI]
+        double interiorAngle = (signedTurn < 0.0)
+            ? (2.0 * Math.PI + signedTurn)
+            : signedTurn;
+
+        return interiorAngle > (Math.PI + numericContext.angleTolerance());
     }
 
 }

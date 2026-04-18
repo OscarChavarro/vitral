@@ -2145,16 +2145,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     */
     private static boolean sectorwide(_PolyhedralBoundedSolidHalfEdge he, int ind)
     {
-        Vector3D ref1, ref2, ref12;
-
-        ref1 = he.previous().startingVertex.position.substract(he.startingVertex.position);
-        ref2 = he.next().startingVertex.position.substract(he.startingVertex.position);
-        ref12 = ref1.crossProduct(ref2);
-        if ( PolyhedralBoundedSolidNumericPolicy
-            .vectorsColinear(ref1, ref2, numericContext) ) {
-            return true;
-        }
-        return ((ref12.dotProduct(he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0) ? false : true );
+        return checkWideness(he);
     }
 
     /**
