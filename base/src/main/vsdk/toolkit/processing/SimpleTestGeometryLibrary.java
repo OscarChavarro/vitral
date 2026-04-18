@@ -10,7 +10,7 @@
 
 package vsdk.toolkit.processing;
 
-// VitralSDK classes
+// Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Box;
@@ -21,30 +21,30 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 This is a utility class containing a lot of geometry examples (mostly
 geometry generating procedures). This is a companion class for the
 `ComputationalGeometry` and `GeometricModeler` classes, which holds
-geometrical querys and other geometry generation procedures.
+geometrical queries and other geometry generation procedures.
 
-This class is comprised of static methods, depending only of VSDK's Entity's.
-From a design point of view, it can be view as an "strategy" design pattern
-in the sense that encapsulates algorithms. It also could be viewd as a "factory"
+This class comprises static methods, depending on only of Vitral's Entity's.
+From a design point of view, it can be viewed as a "strategy" design pattern
+in the sense that encapsulates algorithms. It also could be viewed as a "factory"
 or "abstract factory", as it is a class for creating objects, following
 the data hierarchy of interface "geometry".
 
 An important characteristic of this class is that the simple geometries that
 creates, are usually "inspired" (or "borrowed") from classic textbooks and
-papers from the computer graphics academic comunity. Most of the methods
+papers from the computer graphics academic community. Most of the methods
 contain references to figures and other data published by original authors.
 
 The simple geometry test object provided here are useful because:
   - They are procedurally generated. That means that no input/output is used.
     This is useful in developing environments where input/output is not
     available, or where its operation is not ported yet (for example mobile
-    devices), so this class can be used for testing VitralSDK software
-    infrastructure, befor input/output operation are made available.
+    devices), so this class can be used for testing Vitral software
+    infrastructure, before input/output operation are made available.
   - For algorithm benchmarking. Usually, original authors has invented
     this simple test objects for testing algorithms and measuring its
-    performance.  When reimplementing the original algorithms in VitralSDK,
+    performance.  When reimplementing the original algorithms in Vitral,
     running them with similar test objects is useful when comparing
-    VitralSDK's implementation performance.
+    Vitral's implementation performance.
 */
 public class SimpleTestGeometryLibrary extends ProcessingElement
 {
@@ -276,8 +276,9 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1986_2()
     {
-        PolyhedralBoundedSolid operands[];
-        PolyhedralBoundedSolid a, b;
+        PolyhedralBoundedSolid[] operands;
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -319,8 +320,9 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1986_3()
     {
-        PolyhedralBoundedSolid operands[];
-        PolyhedralBoundedSolid a, b;
+        PolyhedralBoundedSolid[] operands;
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -367,7 +369,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_6_13()
     {
-        PolyhedralBoundedSolid operands[];
+        PolyhedralBoundedSolid[] operands;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -422,7 +424,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_1()
     {
-        PolyhedralBoundedSolid operands[];
+        PolyhedralBoundedSolid[] operands;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -468,7 +470,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     /**
     This method creates a simple test model pair of objects similar to that
     shown on figures [MANT1988].15.2. and [MANT1988].15.3. These pair of solid
-    are interesing when the position of the wedge is such that its upper edge
+    are interesting when the position of the wedge is such that its upper edge
     touches the upper face of the block.
     Situation can be: 
       -1: Holed object
@@ -478,7 +480,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_2(
         int situation)
     {
-        PolyhedralBoundedSolid operands[];
+        PolyhedralBoundedSolid[] operands;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -502,27 +504,25 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         wedge = new PolyhedralBoundedSolid();
 
-        switch ( situation ) {
-          case 0: default:
-            // Original on edge wedge, generating non manifold object
-            wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
-            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
-            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
-            break;
-
-          case -1:
-            // Lowered wedge, generating a closed holed object
-            wedge.mvfs(new Vector3D(0, 0.225, 0.3-delta), 1, 1);
-            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3-delta));
-            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6-delta));
-            break;
-
-          case 1:
-            // Raised wedge, generating an open object with no holes
-            wedge.mvfs(new Vector3D(0, 0.225, 0.3+delta), 1, 1);
-            wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3+delta));
-            wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6+delta));
-            break;
+        switch (situation) {
+            default -> {
+                // Original on edge wedge, generating non manifold object
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
+            }
+            case -1 -> {
+                // Lowered wedge, generating a closed holed object
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3 - delta), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 - delta));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 - delta));
+            }
+            case 1 -> {
+                // Raised wedge, generating an open object with no holes
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3 + delta), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 + delta));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 + delta));
+            }
         }
 
         wedge.mef(1, 1, 3, 2, 1, 2, 2);
@@ -538,5 +538,4 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         return operands;
     }
-
 }

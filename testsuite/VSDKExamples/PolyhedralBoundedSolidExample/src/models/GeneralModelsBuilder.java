@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-// VitralSDK classes
+// Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Arrow;
@@ -27,7 +27,7 @@ import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.GeometricModeler;
 import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
-public class BoundedSolidTestSelector
+public class GeneralModelsBuilder
 {
     public static PolyhedralBoundedSolid buildSolid(DebuggerModel model)
     {
@@ -233,14 +233,14 @@ public class BoundedSolidTestSelector
         }
         catch ( IOException e ) {
             VSDK.reportMessageWithException(
-                BoundedSolidTestSelector.class,
+                GeneralModelsBuilder.class,
                 VSDK.WARNING,
                 "importFromFile",
                 "Error reading solid from file " + filename, e);
         }
         catch ( ClassNotFoundException e ) {
             VSDK.reportMessageWithException(
-                BoundedSolidTestSelector.class,
+                GeneralModelsBuilder.class,
                 VSDK.WARNING,
                 "importFromFile",
                 "Error reading solid from file " + filename, e);
@@ -422,8 +422,8 @@ public class BoundedSolidTestSelector
     {
         PolyhedralBoundedSolid solid;
 
-        solid = BoundedSolidTestSelector.createBox(new Vector3D(0.9, 0.9, 0.9));
-        BoundedSolidTestSelector.extrudeBox(solid);
+        solid = GeneralModelsBuilder.createBox(new Vector3D(0.9, 0.9, 0.9));
+        GeneralModelsBuilder.extrudeBox(solid);
         solid.kfmrh(2, 11);
         //R.translation(-0.55, -0.55, -0.55);
         //solid.applyTransformation(R);
@@ -443,10 +443,10 @@ public class BoundedSolidTestSelector
         PolyhedralBoundedSolid result;
 
         // Outer box.
-        solidA = BoundedSolidTestSelector.createBox(new Vector3D(0.9, 0.9, 0.9));
+        solidA = GeneralModelsBuilder.createBox(new Vector3D(0.9, 0.9, 0.9));
 
         // Inner box at 80% size, centered at the same position as solidA.
-        solidB = BoundedSolidTestSelector.createBox(new Vector3D(0.72, 0.72, 0.72));
+        solidB = GeneralModelsBuilder.createBox(new Vector3D(0.72, 0.72, 0.72));
 
         // Hollow box = outer box minus inner box.
         result = GeometricModeler.setOp(solidA, solidB, GeometricModeler.SUBTRACT);

@@ -8,32 +8,34 @@ import java.util.ArrayList;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 
 /**
- * This class implements the Weiler Atherton algorithm to clip convex and non
- * convex polygons with holes with convex and non convex polygons with holes.
- * Also, the capacity to manage special cases(where points of clip or clipped
- * polygons coincide with the contour of each other) is added.
+ * Implements the Weiler-Atherton polygon clipping algorithm for convex and
+ * non-convex polygons, including polygons with holes.
  *
- * In this class, the section of the paper [WEATH1977] that is implemented is
- * "POLYGON CLIPPING ALGORITHM".
+ * This implementation also handles degenerate cases in which vertices from the
+ * clip polygon and the subject polygon lie on each other's boundary.
+ *
+ * The code in this class corresponds to the "POLYGON CLIPPING ALGORITHM"
+ * section of [WEATH1977].
 */
 public class WeilerAthertonPolygonClipper {
 
     private _Polygon2DWA clipPolyWA;
     private _Polygon2DWA subjectPolyWA;
-    // Temporal variables.
+    // Per-edge traversal state used while building the intersection graph.
     private boolean firstIntersection;
     private boolean previousOut;
     private final boolean coincidentPoints[] = new boolean[4];
 
     /**
-     * This function performs the clipping operation. 
+     * Computes the intersection and exterior regions produced by clipping the
+     * subject polygon against the clip polygon.
      *
-     * @param clipPoly are the clipping polygons.
-     * @param subjectPoly are the polygons to clip.
-     * @param innerPolyOut are the clipped polygons that lie inside of the
-     * clipping polygon.
-     * @param outerPolyOut are the clipped polygons that lie outside of the
-     * clipping polygon.
+     * @param clipPoly clipping polygon
+     * @param subjectPoly polygon to be clipped
+     * @param innerPolyOut output polygon that receives the regions inside the
+     * clipping polygon
+     * @param outerPolyOut output polygon that receives the regions outside the
+     * clipping polygon
      */
     public void clipPolygons(Polygon2D clipPoly, Polygon2D subjectPoly, Polygon2D innerPolyOut, Polygon2D outerPolyOut) {
         _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeC;
@@ -58,8 +60,7 @@ public class WeilerAthertonPolygonClipper {
         }
         clipPolyWA = new _Polygon2DWA(clipPoly, true);
         subjectPolyWA = new _Polygon2DWA(subjectPoly, true);
-        //Find the intersections and fills intersecVertListOut and intersecVertListIn.
-        //for ( _Polygon2DContourWA p2DContClip : getClipPolyWA().loops ) {
+        // Find all intersections and populate the entry/exit lists.
         for ( i = 0; i < clipPolyWA.loops.size(); ++i ) {
             _Polygon2DContourWA p2DContClip = clipPolyWA.loops.get(i);
             p2DContClip.isClipped = false;
@@ -69,13 +70,12 @@ public class WeilerAthertonPolygonClipper {
                     nodeC = dllnVertNodeC.data;
                     dllnVertNodePrevC = dllnVertNodeC.previous;
                     nodePrevC = dllnVertNodePrevC.data;
-                    previousOut = false; //To avoid parser error.
-//                    for ( _Polygon2DContourWA p2DContSubj : getSubjectPolyWA().loops ) {
+                    previousOut = false;
                     for ( j = 0; j < subjectPolyWA.loops.size(); ++j ) {
                         _Polygon2DContourWA p2DContSubj = subjectPolyWA.loops.get(j);
                         dllnVertNodeS = p2DContSubj.vertices.getHead();
                         if ( p2DContSubj.vertices.size() > 1 ) {
-                            firstIntersection = true; //For all lines in the current polygon for current cuting edge.
+                            firstIntersection = true;
                             do {
                                 nodeS = dllnVertNodeS.data;
                                 dllnVertNodePrevS = dllnVertNodeS.previous;
@@ -93,9 +93,8 @@ public class WeilerAthertonPolygonClipper {
                 } while ( dllnVertNodeC != p2DContClip.vertices.getHead() );
             }
         }
-        //The actual clipping is now performed.
-        //Inner polygons:
-//        for ( DoubleLinkedListNode<VertexNode2D> dllnNodeS : intersecVertListOut ) {
+        // Traverse the generated intersection structure to build the result.
+        // Inner polygons:
         for ( i=0; i < intersecVertListOut.size(); ++i ) {
             _DoubleLinkedListNode<_VertexNode2D> dllnNodeS = intersecVertListOut.get(i);
             if ( (dllnNodeS.data.flags & 0x01) == 0 ) {
@@ -116,9 +115,7 @@ public class WeilerAthertonPolygonClipper {
                 } while ( iterator != dllnNodeS && iterator.data.pairNode != dllnNodeS );
             }
         }
-        //Outer polygons:
-        //outerPolyOut = new Polygon2D();
-//        for ( DoubleLinkedListNode<VertexNode2D> dllnNodeS : intersecVertListIn ) {
+        // Outer polygons:
         for ( i=0; i < intersecVertListIn.size(); ++i ) {
             _DoubleLinkedListNode<_VertexNode2D> dllnNodeS = intersecVertListIn.get(i);
             if ( (dllnNodeS.data.flags & 0x02) == 0 ) {
@@ -148,19 +145,16 @@ public class WeilerAthertonPolygonClipper {
             }
         }
 
-        //Polygons fully inside of fully outside:
-        //Classify holes and contours in clip polygon.
+        // Handle loops that never intersected but are fully contained in the other polygon.
         classifyHolesAndContours(getClipPolyWA());
-        //Classify holes and contours in subject polygon.
         classifyHolesAndContours(getSubjectPolyWA());
 
-        //Clip polygons, in subject polygons, with clipping poligons fully inside.
-//        for ( _Polygon2DContourWA p2DContClip : getClipPolyWA().loops ) {
+        // Handle non-intersecting clip contours that lie entirely inside the subject polygon.
         for ( i=0; i < clipPolyWA.loops.size(); ++i ) {
             _Polygon2DContourWA p2DContClip = clipPolyWA.loops.get(i);
             if ( !p2DContClip.isClipped ) {
                 _DoubleLinkedListNode<_VertexNode2D> dllnNode, head;
-                boolean insideAContourNotAHole = false; //Inside a contour and not inside a hole.
+                boolean insideAContourNotAHole = false;
                 _VertexNode2D vertClip;
                 boolean pointInPolygon;
 
@@ -168,7 +162,6 @@ public class WeilerAthertonPolygonClipper {
                 if ( head == null ) {
                     continue;
                 }
-//                for ( _Polygon2DContourWA p2DContSubj : getSubjectPolyWA().loops ) {
                 for ( j=0; j < subjectPolyWA.loops.size(); ++j ) {
                     _Polygon2DContourWA p2DContSubj = subjectPolyWA.loops.get(j);
                     dllnNode = head;
@@ -185,10 +178,7 @@ public class WeilerAthertonPolygonClipper {
                         insideAContourNotAHole = !insideAContourNotAHole;
                     }
                 }
-                //Clip:
                 if ( insideAContourNotAHole ) {
-//                    DoubleLinkedListNode<VertexNode2D> dllnNode,head;
-//                    head = p2DContClip.vertices.getHead();
                     if ( emptyInnerPolyOut ) {
                         emptyInnerPolyOut = false;
                     } else {
@@ -200,34 +190,31 @@ public class WeilerAthertonPolygonClipper {
                         outerPolyOut.nextLoop();
                     }
                     dllnNode = head;
-                    do { //If clip poly is hole then hole in innerPolyOut[0] else polygon in innerPolyOut[0].
+                    do {
                         innerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
                         dllnNode = dllnNode.next;
                     } while ( dllnNode != head );
                     dllnNode = head;
-                    do { //If clip poly is hole then polygon in outerPolyOut[0] else hole in outerPolyOut[0].
+                    do {
                         outerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
                         dllnNode = dllnNode.previous;
                     } while ( dllnNode != head );
                 }
             }
         }
-        //Classify non clipped subject polygons.
-//        for ( _Polygon2DContourWA p2DContSubj : getSubjectPolyWA().loops ) {
+        // Handle non-intersecting subject contours.
         for ( i=0; i < subjectPolyWA.loops.size(); ++i ) {
             _Polygon2DContourWA p2DContSubj = subjectPolyWA.loops.get(i);
             if ( !p2DContSubj.isClipped ) {
-                boolean insideAContourNotAHole = false; //Inside a contour and not inside a hole.
+                boolean insideAContourNotAHole = false;
                 _VertexNode2D vertSubj;
                 _DoubleLinkedListNode<_VertexNode2D> dllnNode, head;
                 boolean pointInPolygon;
 
-                //vertSubj = p2DContSubj.vertices.getHead().data;
                 head = p2DContSubj.vertices.getHead();
                 if ( head == null ) {
                     continue;
                 }
-//                for ( _Polygon2DContourWA p2DContClip : getClipPolyWA().loops ) {
                 for ( j=0; j < clipPolyWA.loops.size(); ++j ) {
                     _Polygon2DContourWA p2DContClip = clipPolyWA.loops.get(j);
                     dllnNode = head;
@@ -246,14 +233,6 @@ public class WeilerAthertonPolygonClipper {
                     }
                 }
                 head = p2DContSubj.vertices.getHead();
-//                if(insideAContourNotAHole)
-//                    poly = innerPolyOut[0];
-//                else
-//                    poly = outerPolyOut[0];
-//                if(poly == null)
-//                    poly = new Polygon2D();
-//                else
-//                    poly.nextLoop();
 
                 if ( insideAContourNotAHole ) {
                     if ( emptyInnerPolyOut ) {
@@ -284,18 +263,11 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Detects what kind of intersection is and make a cut if some conditions
-     * are met.
+     * Classifies the current edge-edge contact and inserts cut vertices when
+     * the Weiler-Atherton traversal requires them.
      *
-     * @param p2DContClip
-     * @param p2DContSubj
-     * @param dllnVertNodePrevC
-     * @param dllnVertNodeC
-     * @param dllnVertNodePrevS
-     * @param dllnVertNodeS
-     * @param nodeIntersecS
-     * @param intersecVertListOut
-     * @param intersecVertListIn
+     * The method handles both regular intersections and degenerate cases with
+     * coincident endpoints or overlapping parallel edges.
      */
     private void makeCut(
         _Polygon2DContourWA p2DContClip, _Polygon2DContourWA p2DContSubj, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodePrevC, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeC, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodePrevS, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeS, _VertexNode2D nodeIntersecS, ArrayList<_DoubleLinkedListNode<_VertexNode2D>> intersecVertListOut, ArrayList<_DoubleLinkedListNode<_VertexNode2D>> intersecVertListIn) {
@@ -304,7 +276,7 @@ public class WeilerAthertonPolygonClipper {
         double dotProd;
         boolean firstCutOutOfSubject;
 
-        if ( !coincidentPoints[0] && !coincidentPoints[2] ) { //Normal case.
+        if ( !coincidentPoints[0] && !coincidentPoints[2] ) {
             firstCutOutOfSubject = false;
             if ( firstIntersection ) {
                 firstCutOutOfSubject = (crossProduct2D(
@@ -320,11 +292,12 @@ public class WeilerAthertonPolygonClipper {
         nodePrevS = dllnVertNodePrevS.data;
         nodeS = dllnVertNodeS.data;
         dotProd = dotProductNorm2D(nodePrevC, nodeC, nodePrevS, nodeS);
-        if ( dotProd >= 0.9999 && dotProd <= 1.0001 ) { //Are parallel and in the same direction.
+        if ( dotProd >= 0.9999 && dotProd <= 1.0001 ) {
             /**
-             * <br>To understand this vectors, see the image: For the first points:<br>
+             * The vectors below are described by the companion diagrams:
+             * for the first endpoints:
              * <img src="doc-files\ParallelLinesFirstPoints.png" alt="Parallel lines, first points">
-             * <br>For the second points:<br>
+             * and for the second endpoints:
              * <img src="doc-files\ParallelLinesSecondPoints.png" alt="Parallel lines, second points">
              */
             _VertexNode2D vecParallel = new _VertexNode2D();
@@ -366,22 +339,22 @@ public class WeilerAthertonPolygonClipper {
                 vecAwayParallelLines2S.x = vecParallel.x;
                 vecAwayParallelLines2S.y = vecParallel.y;
             }
-            // First points.
+            // First endpoints.
             if ( are3VectorsOrderedCounterclockwise2D(
-                vecParallel, vecAwayParallelLines1C, vecAwayParallelLines1S) == 1 ) { //Make cut.
-                firstCutOutOfSubject = true; //Is used in the next function only if firstIntersection[0]=true.
+                vecParallel, vecAwayParallelLines1C, vecAwayParallelLines1S) == 1 ) {
+                firstCutOutOfSubject = true;
                 updatePolygonsAndListsWithCuts(
                     p2DContClip, p2DContSubj, dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS, nodeIntersecS, firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, true);
             }
-            // Second points.
+            // Second endpoints.
             if ( are3VectorsOrderedCounterclockwise2D(
-                negVecParallel, vecAwayParallelLines2S, vecAwayParallelLines2C) == 1 ) { //Make second cut
-                firstCutOutOfSubject = false; //Is used in the next function only if firstIntersection[0]=true.
+                negVecParallel, vecAwayParallelLines2S, vecAwayParallelLines2C) == 1 ) {
+                firstCutOutOfSubject = false;
                 updatePolygonsAndListsWithCuts(
                     p2DContClip, p2DContSubj, dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS, nodeIntersecS, firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, false);
             }
-        } else if ( Math.abs(dotProd) < 0.9999 ) { //Are not parallel.
-            // Here only coincidentPoints[0] and coincidentPoints[2] are considered.
+        } else if ( Math.abs(dotProd) < 0.9999 ) {
+            // Only coincidentPoints[0] and coincidentPoints[2] matter in this branch.
             _VertexNode2D vecAC = new _VertexNode2D();
             _VertexNode2D vecBC = new _VertexNode2D();
             _VertexNode2D vecAS = new _VertexNode2D();
@@ -407,15 +380,15 @@ public class WeilerAthertonPolygonClipper {
                 vecBS.x = -vecAS.x;
                 vecBS.y = -vecAS.y;
             }
-            // find if there is a cut.
+            // Determine whether the coincident endpoint configuration creates a cut.
             orderVecAC = are3VectorsOrderedCounterclockwise2D(vecAS, vecAC, vecBS);
             orderVecBC = are3VectorsOrderedCounterclockwise2D(vecAS, vecBC, vecBS);
             thereAreCut = false;
-            firstCutOutOfSubject = false; //To avoid parser error.
-            if ( orderVecAC != 0 && orderVecBC != 0 ) {// Pararel lines are considered in another section.
+            firstCutOutOfSubject = false;
+            if ( orderVecAC != 0 && orderVecBC != 0 ) { // Parallel lines are handled above.
                 if ( (orderVecAC == 1) != (orderVecBC == 1) ) {
                     thereAreCut = true;
-                    firstCutOutOfSubject = (orderVecAC == -1); // Ordered clockwise.
+                    firstCutOutOfSubject = (orderVecAC == -1); // Clockwise ordering.
                 }
             }
             if ( thereAreCut ) {
@@ -426,32 +399,26 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Insert points of cuts in original polygons(or update the pairNode
-     * property of the VertexNode2D of the polygons, in the case of coincident
-     * points), the lists of intersections are filled too.
+     * Inserts the cut vertices into both polygon contours, or links existing
+     * vertices when the intersection occurs at coincident endpoints.
      *
-     * @param p2DContClip
-     * @param p2DContSubj
-     * @param dllnVertNodePrevC
-     * @param dllnVertNodeC
-     * @param dllnVertNodePrevS
-     * @param dllnVertNodeS
-     * @param nodeIntersecS
-     * @param firstCutOutOfSubject Only valid if firstIntersection is true.
-     * @param intersecVertListOut
-     * @param intersecVertListIn
-     * @param operateOnFirstPointsOfLines False only in the case of a cut in the
-     * second points of parallel clip and subject lines.
+     * This method also updates the intersection lists used later to traverse
+     * interior and exterior output loops.
+     *
+     * @param firstCutOutOfSubject only meaningful while processing the first
+     * intersection on the current subject contour
+     * @param operateOnFirstPointsOfLines false only when processing the second
+     * endpoint of overlapping parallel edges
      */
     private void updatePolygonsAndListsWithCuts(
         _Polygon2DContourWA p2DContClip, _Polygon2DContourWA p2DContSubj, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodePrevC, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeC, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodePrevS, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeS, _VertexNode2D nodeIntersecS, boolean firstCutOutOfSubject, ArrayList<_DoubleLinkedListNode<_VertexNode2D>> intersecVertListOut, ArrayList<_DoubleLinkedListNode<_VertexNode2D>> intersecVertListIn, boolean operateOnFirstPointsOfLines) {
         _VertexNode2D nodeIntersecC;
         _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeCutS;
 
-        dllnVertNodeCutS = null; //To avoid parser error.
-        if ( !coincidentPoints[0] && !coincidentPoints[2] ) { //Normal case.
+        dllnVertNodeCutS = null;
+        if ( !coincidentPoints[0] && !coincidentPoints[2] ) {
             nodeIntersecC = new _VertexNode2D(nodeIntersecS);
-            //Update the two linked lists:
+            // Insert the cut point into both polygon contours.
             nodeIntersecS.pairNode = insertOrderedNodeBetweenTwoNodes(
                 p2DContClip.vertices, dllnVertNodePrevC, dllnVertNodeC, nodeIntersecC);
             nodeIntersecC.pairNode = p2DContSubj.vertices.insertBefore(nodeIntersecS, dllnVertNodeS);
@@ -501,8 +468,7 @@ public class WeilerAthertonPolygonClipper {
                 }
             }
         }
-        // Fill the two list containing the intersections in the subject polygon;
-        // when the contour of the clip polygon leaves and when enters the subject polygon.
+        // Record subject-polygon intersections as exit or entry events for the later traversal pass.
         if ( firstIntersection ) {
             p2DContSubj.isClipped = true;
             p2DContClip.isClipped = true;
@@ -525,22 +491,21 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Identifies holes and contours in a polygon and stores that information in
-     * the polygon. Assumes no intersections between holes and contours.
+     * Classifies each loop in the polygon as either an outer contour or a hole.
      *
-     * @param polygon Polygon whose contours will be classified.
+     * The method assumes the polygon loops do not intersect each other.
+     *
+     * @param polygon polygon whose loops will be classified
      */
     private void classifyHolesAndContours(_Polygon2DWA polygon) {
         int i,j;
         
-//        for ( _Polygon2DContourWA p2DContTest : polygon.loops ) {
         for ( i = 0; i < polygon.loops.size(); ++i ) {
             _Polygon2DContourWA p2DContTest = polygon.loops.get(i);
             _DoubleLinkedListNode<_VertexNode2D> dllnNode, head;
             _VertexNode2D vertTest;
             boolean pointInPolygon;
 
-//            for ( _Polygon2DContourWA p2DCont : polygon.loops ) {
             for ( j = 0; j < polygon.loops.size(); ++j ) {
                 _Polygon2DContourWA p2DCont = polygon.loops.get(j);
                 if ( p2DCont != p2DContTest ) {
@@ -567,14 +532,14 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Tests if the given three vectors laying in the origin, are ordered
-     * counterclockwise clockwise or two or three vectors are collinear.
+     * Tests the cyclic order of three vectors anchored at the origin.
      *
-     * @param v1 Vector one.
-     * @param v2 Vector two.
-     * @param v3 Vector three.
-     * @return 1: are ordered counterclockwise, -1: are ordered clockwise, 0:
-     * there are collinear vectors in the same direction.
+     * @param v1 first vector
+     * @param v2 second vector
+     * @param v3 third vector
+     * @return 1 if the vectors are ordered counterclockwise, -1 if they are
+     * ordered clockwise, or 0 if any pair is collinear and points in the same
+     * direction
      */
     private byte are3VectorsOrderedCounterclockwise2D(_VertexNode2D v1, _VertexNode2D v2, _VertexNode2D v3) {
         double temp;
@@ -620,11 +585,11 @@ public class WeilerAthertonPolygonClipper {
         }
     }
 
-    /* Function isPointInPolygon2D is based on the function developed by W. Randolph
-     Franklin:
-     http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-     visited on sep 08 2014.
-     The part that tests if the point is in de boundary is new.
+    /* Function isPointInPolygon2D is based on the function developed by
+     * W. Randolph Franklin:
+     * http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+     * visited on Sep 08, 2014.
+     * The boundary test was added in this implementation.
     
      License to Use
 
@@ -651,12 +616,12 @@ public class WeilerAthertonPolygonClipper {
      IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
     /**
-     * Test if point is inside, outside or on the boundary of the polygon.
+     * Classifies a point as inside, outside, or on the boundary of a polygon loop.
      *
-     * @param point
-     * @param polygon
-     * @return 1 if the point is inside, -1 if the point is outside, 0 if the
-     * point is on the boundary.
+     * @param point point to classify
+     * @param polygon polygon loop
+     * @return 1 if the point is inside, -1 if it is outside, or 0 if it lies
+     * on the boundary
      */
     private byte isPointInPolygon2D(_VertexNode2D point, _CircDoubleLinkedList<_VertexNode2D> polygon) {
         _DoubleLinkedListNode<_VertexNode2D> dllnNode;
@@ -668,12 +633,8 @@ public class WeilerAthertonPolygonClipper {
             return -1;
         }
         do {
-//            if(point.y == dllnNode.data.y && point.x<dllnNode.data.x){
-//                if(dllnNode.data.y<dllnNode.next.data.y != dllnNode.data.y<dllnNode.previous.data.y)
-//                    isInside = !isInside;
-//            } else
             temp = dllnNode.data.y - dllnNode.next.data.y;
-            if ( Math.abs(temp) < 0.0001 ) { //Horizontal line.
+            if ( Math.abs(temp) < 0.0001 ) { // Horizontal edge.
                 if ( Math.abs(point.y - (dllnNode.next.data.y + temp / 2)) < 0.0001 ) {
                     if ( (dllnNode.next.data.x - point.x) * (point.x - dllnNode.data.x) >= 0 ) {
                         return 0;
@@ -699,13 +660,9 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Returns the z coordinate, x and y are zero.
+     * Returns the scalar z-component of the 2D cross product between two segments.
      *
-     * @param a1
-     * @param a2
-     * @param b1
-     * @param b2
-     * @return
+     * The segments are interpreted as vectors {@code a1->a2} and {@code b1->b2}.
      */
     private double crossProduct2D(_VertexNode2D a1, _VertexNode2D a2, _VertexNode2D b1, _VertexNode2D b2) {
         double[] v1, v2;
@@ -720,11 +677,9 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Returns the z coordinate, x and y are zero.
+     * Returns the scalar z-component of the 2D cross product of two vectors.
      *
-     * @param v1
-     * @param v2
-     * @return
+     * The vectors are assumed to be anchored at the origin.
      */
     private double crossProduct2D(_VertexNode2D v1, _VertexNode2D v2) {
         return v1.x * v2.y - v1.y * v2.x;
@@ -754,15 +709,10 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Insert a node between two nodes that define a line; between these nodes
-     * could have other nodes (formed by other intersections), but the node are
-     * inserted in the correct position.
+     * Inserts an intersection vertex between two existing contour nodes.
      *
-     * @param linkedList The linked list.
-     * @param dllnVertNode node one.
-     * @param dllnVertNodeNext node two.
-     * @param nodeIntersec 2d point.
-     * @return The inserted node.
+     * Additional intersection vertices may already exist between the input
+     * nodes; this method preserves the ordering along the segment.
      */
     private _DoubleLinkedListNode<_VertexNode2D> insertOrderedNodeBetweenTwoNodes(
         _CircDoubleLinkedList<_VertexNode2D> linkedList, _DoubleLinkedListNode<_VertexNode2D> dllnVertNode, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeNext, _VertexNode2D nodeIntersec) {
@@ -785,20 +735,17 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * Finds intersection between two segments of line. When find coincident
-     * points, only inP0 and inP2 are considered that make intersection.
+     * Computes the intersection between two 2D line segments.
      *
-     * @param inP0
-     * @param inP1
-     * @param inP2
-     * @param inP3
-     * @param outPIntersec Is filled only if the intersection is not a
-     * coincident point or points.
-     * @param outCoincidentPoints Array of four booleans. Indicates if any point
-     * is coincident with the opposite line(the points of the opposite line are
-     * included).
-     * @return True if find intersection. Only inP0 and inP2 are considered that
-     * make intersection in the case of coincident points.
+     * For coincident-endpoint cases, only the {@code inP0}/{@code inP2}
+     * configuration is considered a clipping event by this implementation.
+     *
+     * @param outPIntersec receives the computed intersection point when the
+     * intersection is not represented only by coincident endpoints
+     * @param outCoincidentPoints four-element array describing endpoint
+     * coincidences against the opposite segment
+     * @return true if the segments intersect under the rules used by this
+     * clipper
      */
     public boolean intersecLineLine2D(
         _VertexNode2D inP0, _VertexNode2D inP1, _VertexNode2D inP2, _VertexNode2D inP3, _VertexNode2D outPIntersec, boolean[] outCoincidentPoints) {
@@ -842,8 +789,6 @@ public class WeilerAthertonPolygonClipper {
             outCoincidentPoints[3] = true;
             pointToPointCoincidence = true;
         }
-//        if(pointToPointCoincidence)
-//            return point0ToPoint2Coincidence;
         vertical1 = false;
         vertical2 = false;
         temp1 = inP1.x - inP0.x;
@@ -884,7 +829,7 @@ public class WeilerAthertonPolygonClipper {
         m1 = 0;
         b1 = 0;
         m2 = 0;
-        b2 = 0;//To avoid parser error.
+        b2 = 0;
         if ( !vertical1 ) {
             m1 = (inP1.y - inP0.y) / (inP1.x - inP0.x);
             b1 = inP0.y - m1 * inP0.x;
@@ -965,7 +910,7 @@ public class WeilerAthertonPolygonClipper {
             }
             return point0ToPoint2Coincidence;
         }
-        if ( Math.abs(m2 - m1) < 0.00001 ) { //The two lines are parallel.
+        if ( Math.abs(m2 - m1) < 0.00001 ) { // The two lines are parallel.
             if ( Math.abs(b1 - b2) < 0.0001 ) {
                 if ( (inP3.x - inP0.x) * (inP0.x - inP2.x) >= 0 ) {
                     outCoincidentPoints[0] = true;
@@ -991,7 +936,7 @@ public class WeilerAthertonPolygonClipper {
             }
             return point0ToPoint2Coincidence;
         }
-        //The two lines are not parallel.
+        // The two lines are not parallel.
         intersec1 = false;
         intersec2 = false;
         if ( m1 < 1 ) {//For precision purposes.
@@ -1053,16 +998,14 @@ public class WeilerAthertonPolygonClipper {
     }
 
     /**
-     * @return the clipPolyWA who has the clip points after the clipping
-     * process.
+     * @return internal clip polygon representation after cut vertices have been inserted
      */
     public _Polygon2DWA getClipPolyWA() {
         return clipPolyWA;
     }
 
     /**
-     * @return the subjectPolyWA who has the clip points after the clipping
-     * process.
+     * @return internal subject polygon representation after cut vertices have been inserted
      */
     public _Polygon2DWA getSubjectPolyWA() {
         return subjectPolyWA;

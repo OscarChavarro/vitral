@@ -26,3 +26,4 @@ testsuite/**/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
 .codex
+hs_err_pid*.log
