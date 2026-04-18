@@ -4,11 +4,16 @@
 
 package vsdk.toolkit.environment.geometry;
 
+import java.util.ArrayList;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.processing.GeometricModeler;
 
 public class Cone extends Solid {
@@ -21,6 +26,10 @@ public class Cone extends Solid {
 
     private GeometryIntersectionInformation lastInfo;
     private PolyhedralBoundedSolid brepCache;
+    private static final int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
+    private static final int DEFAULT_HEIGHT_DIVISIONS = 1;
+    private static final int MIN_CIRCUMFERENCE_DIVISIONS = 3;
+    private static final int MIN_HEIGHT_DIVISIONS = 1;
 
     public Cone(double r1, double r2, double h) {
         this.r1 = r1;
@@ -349,9 +358,28 @@ public class Cone extends Solid {
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid();
+            brepCache = buildPolyhedralBoundedSolid(
+                DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
         }
         return brepCache;
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
+        int circumferenceDivisions, int heightDivisions)
+    {
+        int normalizedCircumferenceDivisions = Math.max(
+            MIN_CIRCUMFERENCE_DIVISIONS, circumferenceDivisions);
+        int normalizedHeightDivisions = Math.max(
+            MIN_HEIGHT_DIVISIONS, heightDivisions);
+
+        if ( normalizedCircumferenceDivisions ==
+                 DEFAULT_CIRCUMFERENCE_DIVISIONS &&
+             normalizedHeightDivisions == DEFAULT_HEIGHT_DIVISIONS ) {
+            return exportToPolyhedralBoundedSolid();
+        }
+
+        return buildPolyhedralBoundedSolid(normalizedCircumferenceDivisions,
+            normalizedHeightDivisions);
     }
 
     /**
@@ -360,55 +388,100 @@ public class Cone extends Solid {
     cylinder is built upon a circular lamina base and an extrusion 
     (translational sweep) operation. The cone case is done manually,
     */
-    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    private static void closeTopFaceToApex(PolyhedralBoundedSolid solid,
+        double apexZ)
+    {
+        _PolyhedralBoundedSolidFace topFace = solid.findFace(1);
+        if ( topFace == null || topFace.boundariesList.size() <= 0 ) {
+            return;
+        }
+
+        _PolyhedralBoundedSolidLoop loop = topFace.boundariesList.get(0);
+        _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+        if ( start == null ) {
+            return;
+        }
+
+        ArrayList<Integer> ringVertexIds = new ArrayList<Integer>();
+        _PolyhedralBoundedSolidHalfEdge he = start;
+        do {
+            ringVertexIds.add(Integer.valueOf(he.startingVertex.id));
+            he = he.next();
+        } while ( he != start );
+
+        if ( ringVertexIds.size() < 3 ) {
+            return;
+        }
+
+        int apexVertexId = solid.getMaxVertexId() + 1;
+        solid.smev(1, ringVertexIds.get(0).intValue(), apexVertexId,
+            new Vector3D(0.0, 0.0, apexZ));
+
+        int i;
+        for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
+            solid.mef(1, 1,
+                apexVertexId,
+                ringVertexIds.get(i).intValue(),
+                ringVertexIds.get(i+1).intValue(),
+                ringVertexIds.get(i+2).intValue(),
+                solid.getMaxFaceId() + 1);
+        }
+
+        solid.mef(1, 1,
+            apexVertexId,
+            ringVertexIds.get(ringVertexIds.size()-2).intValue(),
+            ringVertexIds.get(ringVertexIds.size()-1).intValue(),
+            ringVertexIds.get(0).intValue(),
+            solid.getMaxFaceId() + 1);
+    }
+
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(int nsides,
+        int heightDivisions)
     {
         PolyhedralBoundedSolid solid;
-        Matrix4x4 T, R, S, M;
-        int nsides = 36;
+        Matrix4x4 T, S, M;
 
         solid = GeometricModeler.createCircularLamina(
             0.0, 0.0, r1, 0.0, nsides
         );
 
-        if ( r2 > VSDK.EPSILON ) {
-            // Cylinder case
-            double f = r2/r1;
-            T = new Matrix4x4();
-            T.translation(0.0, 0.0, h);
-            S = new Matrix4x4();
-            S.scale(f, f, f);
-            M = T.multiply(S);
-            GeometricModeler.translationalSweepExtrudeFacePlanar(
-                solid, solid.findFace(1), M);
-        }
-        else {
-            // Cone case
-            Vector3D apex;
+        if ( r2 > VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+            double prevRadius = r1;
+            double zStep = h / ((double)heightDivisions);
             int i;
-            int base1 = 1;
-            int base2 = nsides+1;
-
-            apex = new Vector3D(0, 0, h);
-            solid.smev(1, base1, base2, apex);
-
-            for ( i = 0; i < nsides-2; i++ ) {
-                solid.mef(1,           /* seed face, always face 1 */
-                          1,           /* seed face, always face 1 */
-                          base2,       /* start of half edge 1 */
-                          base1+i,     /* end of half edge 1 */
-                          base1+i+1,   /* start of half edge 2 */
-                          base1+i+2,   /* end of half edge 2 */
-                          base2+i+1    /* new face id */);
+            for ( i = 1; i <= heightDivisions; i++ ) {
+                double nextRadius = r1 + (r2 - r1) *
+                    (((double)i) / ((double)heightDivisions));
+                double f = nextRadius / prevRadius;
+                T = new Matrix4x4();
+                T.translation(0.0, 0.0, zStep);
+                S = new Matrix4x4();
+                S.scale(f, f, 1.0);
+                M = T.multiply(S);
+                GeometricModeler.translationalSweepExtrudeFacePlanar(
+                    solid, solid.findFace(1), M);
+                prevRadius = nextRadius;
             }
-
-            solid.mef(1,           /* seed face, always face 1 */
-                      1,           /* seed face, always face 1 */
-                      base2,       /* start of half edge 1 */
-                      base1+i,     /* end of half edge 1 */
-                      base1+i+1,   /* start of half edge 2 */
-                      base1,   /* end of half edge 2 */
-                      base2+i+1    /* new face id */);
-
+        }
+        else if ( r2 <= VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+            // Cone case, with optional vertical subdivisions.
+            double prevRadius = r1;
+            double zStep = h / ((double)heightDivisions);
+            int i;
+            for ( i = 1; i < heightDivisions; i++ ) {
+                double nextRadius = r1 *
+                    (1.0 - (((double)i) / ((double)heightDivisions)));
+                double f = nextRadius / prevRadius;
+                T = new Matrix4x4();
+                T.translation(0.0, 0.0, zStep);
+                S = new Matrix4x4();
+                S.scale(f, f, 1.0);
+                M = T.multiply(S);
+                GeometricModeler.translationalSweepExtrudeFacePlanar(
+                    solid, solid.findFace(1), M);
+                prevRadius = nextRadius;
+            }
+            closeTopFaceToApex(solid, h);
         }
         return solid;
     }

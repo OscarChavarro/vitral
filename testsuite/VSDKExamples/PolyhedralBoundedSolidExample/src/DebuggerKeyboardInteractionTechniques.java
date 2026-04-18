@@ -110,6 +110,32 @@ public class DebuggerKeyboardInteractionTechniques
             actions.toggleFullscreen();
             handled = true;
             break;
+
+          case KeyEvent.KEY_q:
+            model.subdivisionCircunference--;
+            model.clampSubdivisions();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+
+          case KeyEvent.KEY_Q:
+            model.subdivisionCircunference++;
+            actions.rebuildSolid();
+            handled = true;
+            break;
+
+          case KeyEvent.KEY_w:
+            model.subdivisionHeight--;
+            model.clampSubdivisions();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+
+          case KeyEvent.KEY_W:
+            model.subdivisionHeight++;
+            actions.rebuildSolid();
+            handled = true;
+            break;
         }
 
         if ( model.faceIndex < -2 ) {
@@ -118,6 +144,7 @@ public class DebuggerKeyboardInteractionTechniques
         if ( model.edgeIndex < -3 ) {
             model.edgeIndex = -3;
         }
+        model.clampSubdivisions();
 
         return repaint || handled;
     }

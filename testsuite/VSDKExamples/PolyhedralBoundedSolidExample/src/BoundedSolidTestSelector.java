@@ -33,6 +33,7 @@ public class BoundedSolidTestSelector
     {
         PolyhedralBoundedSolid mySolid;
         Matrix4x4 T, R, S, M;
+        model.clampSubdivisions();
 
         switch ( model.solidModelName ) {
           case MVFS_SMEV_SAMPLE:
@@ -102,13 +103,16 @@ public class BoundedSolidTestSelector
             break;
 
           case SPHERE:
-            mySolid = createSphere(0.5);
+            mySolid = createSphere(0.5, model.subdivisionCircunference,
+                model.subdivisionHeight);
             break;
           case CONE:
-            mySolid = createCone(0.5, 0.0, 1.0);
+            mySolid = createCone(0.5, 0.0, 1.0,
+                model.subdivisionCircunference, model.subdivisionHeight);
             break;
           case CYLINDER:
-            mySolid = createCylinder(0.5, 1.0);
+            mySolid = createCylinder(0.5, 1.0,
+                model.subdivisionCircunference, model.subdivisionHeight);
             break;
           case CSG_MOON_BLOCK:
             mySolid = createCsgMoonBlock();
@@ -257,13 +261,20 @@ public class BoundedSolidTestSelector
     */
     public static PolyhedralBoundedSolid createSphere(double r)
     {
+        return createSphere(r, 16, 8);
+    }
+
+    public static PolyhedralBoundedSolid createSphere(double r,
+        int subdivisionCircunference, int subdivisionHeight)
+    {
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
         R.translation(0.55, 0.55, 0.55);
 
         Sphere s = new Sphere(r);
-        solid = s.exportToPolyhedralBoundedSolid();
+        solid = s.exportToPolyhedralBoundedSolid(subdivisionCircunference,
+            subdivisionHeight);
         solid.applyTransformation(R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -273,13 +284,20 @@ public class BoundedSolidTestSelector
     */
     public static PolyhedralBoundedSolid createCone(double r1, double r2, double h)
     {
+        return createCone(r1, r2, h, 36, 1);
+    }
+
+    public static PolyhedralBoundedSolid createCone(double r1, double r2,
+        double h, int subdivisionCircunference, int subdivisionHeight)
+    {
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
         R.translation(0.55, 0.55, 0.05);
 
         Cone c = new Cone(r1, r2, h);
-        solid = c.exportToPolyhedralBoundedSolid();
+        solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
+            subdivisionHeight);
         solid.applyTransformation(R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -289,13 +307,20 @@ public class BoundedSolidTestSelector
     */
     public static PolyhedralBoundedSolid createCylinder(double r, double h)
     {
+        return createCylinder(r, h, 36, 1);
+    }
+
+    public static PolyhedralBoundedSolid createCylinder(double r, double h,
+        int subdivisionCircunference, int subdivisionHeight)
+    {
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
         R.translation(0.55, 0.55, 0.05);
 
         Cone c = new Cone(r, r, h);
-        solid = c.exportToPolyhedralBoundedSolid();
+        solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
+            subdivisionHeight);
         solid.applyTransformation(R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;

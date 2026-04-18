@@ -19,6 +19,10 @@ public class Sphere extends Solid {
     private double [] _static_minmax;
 
     private PolyhedralBoundedSolid brepCache;
+    private static final int DEFAULT_PARALLELS = 8;
+    private static final int DEFAULT_MERIDIANS = 16;
+    private static final int MIN_PARALLELS = 2;
+    private static final int MIN_MERIDIANS = 3;
 
     public Sphere(double r) {
         _radius = r;
@@ -190,9 +194,25 @@ public class Sphere extends Solid {
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid();
+            brepCache = buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS,
+                DEFAULT_PARALLELS);
         }
         return brepCache;
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
+        int meridians, int parallels)
+    {
+        int normalizedMeridians = Math.max(MIN_MERIDIANS, meridians);
+        int normalizedParallels = Math.max(MIN_PARALLELS, parallels);
+
+        if ( normalizedMeridians == DEFAULT_MERIDIANS &&
+             normalizedParallels == DEFAULT_PARALLELS ) {
+            return exportToPolyhedralBoundedSolid();
+        }
+
+        return buildPolyhedralBoundedSolid(normalizedMeridians,
+            normalizedParallels);
     }
 
     /**
@@ -203,12 +223,11 @@ public class Sphere extends Solid {
     on "low level" operators, and doesn't rely on the previous availability of
     generalized rotational sweep operations.
     */
-    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(
+        int nmeridians, int nparalels)
     {
         double theta;
         double phi;
-        int nparalels = 8;
-        int nmeridians = 16;
         double dtheta = 2*Math.PI / ((double)nmeridians);
         double dphi = 1.0 / ((double)nparalels);
         int i, base2, base1;

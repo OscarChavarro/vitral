@@ -17,6 +17,9 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 
 public class DebuggerModel
 {
+    public static final int MIN_SUBDIVISION_CIRCUNFERENCE = 3;
+    public static final int MIN_SUBDIVISION_HEIGHT = 1;
+
     public Camera camera;
     public Material material;
     public Light light1;
@@ -38,6 +41,8 @@ public class DebuggerModel
     public boolean debugCsg = false;
     public boolean errorState = false;
     public String errorMessage = "";
+    public int subdivisionCircunference = 16;
+    public int subdivisionHeight = 8;
 
     public JFrame mainFrame;
     public Rectangle windowedBounds;
@@ -84,5 +89,15 @@ public class DebuggerModel
         errorState = true;
         errorMessage = message;
         System.err.println("[PolyhedralBoundedSolidExample] " + errorMessage);
+    }
+
+    public void clampSubdivisions()
+    {
+        if ( subdivisionCircunference < MIN_SUBDIVISION_CIRCUNFERENCE ) {
+            subdivisionCircunference = MIN_SUBDIVISION_CIRCUNFERENCE;
+        }
+        if ( subdivisionHeight < MIN_SUBDIVISION_HEIGHT ) {
+            subdivisionHeight = MIN_SUBDIVISION_HEIGHT;
+        }
     }
 }

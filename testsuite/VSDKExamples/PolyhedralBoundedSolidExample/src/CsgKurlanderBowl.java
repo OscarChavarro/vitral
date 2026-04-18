@@ -9,7 +9,7 @@ import vsdk.toolkit.processing.GeometricModeler;
 public class CsgKurlanderBowl
 {
     private static final int CYLINDER_SIDES = 30;
-    private static final double OBJECT_SCALE = 0.0625;
+    private static final double OBJECT_SCALE = 0.1;
 
     private static double s(double value)
     {

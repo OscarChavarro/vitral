@@ -1,5 +1,6 @@
 // Java Awt classes
 import java.awt.Font;
+import java.awt.geom.Rectangle2D;
 
 // JOGL classes
 import com.jogamp.opengl.GLAutoDrawable;
@@ -47,12 +48,17 @@ public class JoglDebuggerHudRenderer
         String selectedModelMessage = "Selected model [3, 4]: " + model.solidModelName.name();
         String referenceFrameMessage = "Reference frame: " +
             (model.showCoordinateSystem ? "ON" : "OFF");
+        String nrMessage = "NR: " + model.subdivisionCircunference;
+        String nhMessage = "NH: " + model.subdivisionHeight;
 
         hudTextRenderer.beginRendering(width, height);
         hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
         hudTextRenderer.draw(showingFaceLoopMessage, 16, height - 28);
         hudTextRenderer.draw(selectedModelMessage, 16, height - (28 + LINE_HEIGHT));
         hudTextRenderer.draw(referenceFrameMessage, 16, height - (28 + 2*LINE_HEIGHT));
+        drawTopRight(hudTextRenderer, width, height, nrMessage, 28);
+        drawTopRight(hudTextRenderer, width, height, nhMessage,
+            28 + LINE_HEIGHT);
         if ( model.errorState ) {
             hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
             hudTextRenderer.draw(model.errorMessage, 16, 16);
@@ -83,5 +89,14 @@ public class JoglDebuggerHudRenderer
             hudTextRenderer.dispose();
             hudTextRenderer = null;
         }
+    }
+
+    private static void drawTopRight(TextRenderer renderer, int width,
+        int height, String text, int offsetFromTop)
+    {
+        Rectangle2D textBounds = renderer.getBounds(text);
+        int x = width - 16 - (int)Math.ceil(textBounds.getWidth());
+        int y = height - (int)Math.round((double)offsetFromTop);
+        renderer.draw(text, x, y);
     }
 }
