@@ -15,8 +15,6 @@ import vsdk.toolkit.gui.GuiMenuElement;
 import vsdk.toolkit.gui.GuiMenuItem;
 import vsdk.toolkit.gui.PresentationElement;
 
-/**
-*/
 public class AndroidGuiRenderer extends PresentationElement {
     public static int currentMenuId = -1;
     public static int currentCommandId = 1;

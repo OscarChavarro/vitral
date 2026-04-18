@@ -196,8 +196,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         }
     }
 
-    /**
-    */
     private static int nextVertexId(PolyhedralBoundedSolid current,
                              PolyhedralBoundedSolid other)
     {
@@ -2065,8 +2063,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         return setOp(inSolidA, inSolidB, op, false);
     }
 
-    /**
-    */
     private static void debugSolid(PolyhedralBoundedSolid solid, String pattern)
     {
         System.out.println("**** DEBUGGING SOLID INFORMATION WRITEN TO FILES " +

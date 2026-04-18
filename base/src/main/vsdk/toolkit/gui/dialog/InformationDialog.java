@@ -6,8 +6,6 @@ import java.util.ArrayList;
 // VSDK classes
 import vsdk.toolkit.gui.HudIcon;
 
-/**
-*/
 public class InformationDialog {
     private String title;
     private String contents;

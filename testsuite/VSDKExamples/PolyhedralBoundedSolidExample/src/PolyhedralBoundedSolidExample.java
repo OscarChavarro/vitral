@@ -115,6 +115,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
             if ( model.solid == null ) {
                 throw new IllegalStateException("Solid builder returned null");
             }
+            model.clampFaceIndex();
         }
         catch ( Throwable e ) {
             model.setErrorState(formatBuildErrorMessage(e));

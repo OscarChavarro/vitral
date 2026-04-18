@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.HudIcon;
 
-/**
-*/
 public class AndroidGLES20HudIconRenderer extends AndroidGLES20Renderer {
     public static void draw(ArrayList<HudIcon> hudIcons, Camera camera)
     {

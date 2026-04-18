@@ -20,8 +20,8 @@ public class DebuggerModel
     public SolidModelNames solidModelName = SolidModelNames.CSG_LAMP_SHELL;
     public static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     public static final int MIN_SUBDIVISION_HEIGHT = 1;
-    public int subdivisionCircumference = 3;
-    public int subdivisionHeight = 1;
+    public int subdivisionCircumference = 16;
+    public int subdivisionHeight = 8;
 
     public Camera camera;
     public Material material;
@@ -36,8 +36,8 @@ public class DebuggerModel
     public RendererConfigurationController qualityController;
     public CameraController cameraController;
     public GLCanvas canvas;
-    public int csgOperation = 0;
-    public int csgSample = 5;
+    public CsgOperationNames csgOperation = CsgOperationNames.UNION;
+    public CsgSampleNames csgSample = CsgSampleNames.MANT1988_15_2_HOLED;
     public boolean debugEdges = false;
     public boolean showCoordinateSystem = true;
     public boolean debugCsg = false;
@@ -98,6 +98,28 @@ public class DebuggerModel
         }
         if ( subdivisionHeight < MIN_SUBDIVISION_HEIGHT ) {
             subdivisionHeight = MIN_SUBDIVISION_HEIGHT;
+        }
+    }
+
+    public int getFaceCount()
+    {
+        if ( solid == null || solid.polygonsList == null ) {
+            return 0;
+        }
+        return solid.polygonsList.size();
+    }
+
+    public void clampFaceIndex()
+    {
+        if ( faceIndex < -2 ) {
+            faceIndex = -2;
+            return;
+        }
+
+        int totalFaces = getFaceCount();
+        int maxFaceIndex = totalFaces - 1;
+        if ( faceIndex > maxFaceIndex ) {
+            faceIndex = maxFaceIndex;
         }
     }
 }

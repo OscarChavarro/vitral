@@ -8,8 +8,6 @@ import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.gui.Controller;
 import vsdk.toolkit.gui.MouseEvent;
 
-/**
-*/
 public class PercentageWheelWidgetController extends Controller {
     
     private final PercentageWheelWidget controlledWidget;

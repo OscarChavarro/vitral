@@ -12,8 +12,6 @@ import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.originalMa
 import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.projectionMatrix;
 import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.transientMatrix;
 
-/**
-*/
 public class AndroidGLES20MatrixRenderer extends AndroidGLES20Renderer {
     
     /**

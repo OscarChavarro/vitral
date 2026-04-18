@@ -6,8 +6,6 @@ import android.opengl.GLES10;
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 
-/**
-*/
 public class AndroidGLES10MatrixRenderer extends AndroidGLES10Renderer {
 
     /**

@@ -33,11 +33,6 @@ public class PolyhedralBoundedSolidModelingTools
         return BoundedSolidTestSelector.createCylinder(r, h);
     }
 
-    public static PolyhedralBoundedSolid createCsgMoonBlock()
-    {
-        return BoundedSolidTestSelector.createCsgMoonBlock();
-    }
-
     public static PolyhedralBoundedSolid createCsgLampShell(
         int subdivisionCircunference, int subdivisionHeight)
     {
@@ -100,10 +95,12 @@ public class PolyhedralBoundedSolidModelingTools
         return BoundedSolidTestSelector.splitTest(part);
     }
 
-    public static PolyhedralBoundedSolid csgTest(int part, int op, int set,
+    public static PolyhedralBoundedSolid csgTest(int part,
+        CsgOperationNames op,
+        CsgSampleNames sample,
         boolean withDebug)
     {
-        return BoundedSolidTestSelector.csgTest(part, op, set, withDebug);
+        return BoundedSolidTestSelector.csgTest(part, op, sample, withDebug);
     }
 
     public static PolyhedralBoundedSolid featuredObject()

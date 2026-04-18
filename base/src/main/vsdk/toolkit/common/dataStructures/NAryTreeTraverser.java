@@ -2,8 +2,6 @@ package vsdk.toolkit.common.dataStructures;
 
 import vsdk.toolkit.common.Entity;
 
-/**
-*/
 public abstract class NAryTreeTraverser extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final long serialVersionUID = 20150218L;

@@ -62,8 +62,6 @@ import vsdk.toolkit.processing._VertexNode2D;
 //import geniousCity.toolkit.io.ESRIShapePersistence;
 // Application classes
 //import util.filters.ObjectFilter;
-/**
- */
 public class PolygonClippingExample
     extends JFrame implements GLEventListener, MouseListener,
     MouseMotionListener, MouseWheelListener, KeyListener {

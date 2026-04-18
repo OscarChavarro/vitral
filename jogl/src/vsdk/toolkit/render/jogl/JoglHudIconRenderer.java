@@ -12,8 +12,6 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.HudIcon;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-/**
- */
 public class JoglHudIconRenderer extends JoglRenderer {
 
     public static void activateDefaultTextureParameters(GL2 gl) {

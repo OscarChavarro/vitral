@@ -2,8 +2,6 @@
 import vsdk.toolkit.common.dataStructures.NAryTree;
 import vsdk.toolkit.processing.NAryTreeVisitor;
 
-/**
-*/
 public class NAryTreeExample {
 
     /**

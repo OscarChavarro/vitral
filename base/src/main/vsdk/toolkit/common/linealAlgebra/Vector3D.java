@@ -92,8 +92,6 @@ public class Vector3D extends FundamentalEntity
         return (x*B.x + y*B.y + z*B.z);
     }
 
-    /**
-    */
     public final void normalize() {
         double t = x*x + y*y + z*z;
         if ( Math.abs(t) < VSDK.EPSILON ) return;

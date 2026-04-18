@@ -13,8 +13,6 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import static vsdk.toolkit.render.androidgles10.AndroidGLES10Renderer.FLOAT_SIZE_IN_BYTES;
 
-/**
-*/
 public class AndroidGLES10ProgressMonitorRenderer extends AndroidGLES10Renderer 
 {
     private static void drawFrame(

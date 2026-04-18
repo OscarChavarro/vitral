@@ -45,8 +45,6 @@ import vsdk.toolkit.gui.AwtSystem;
 // Application classes
 import util.filters.ObjectFilter;
 
-/**
- */
 public class MeshExample
     extends JFrame implements GLEventListener, MouseListener,
                    MouseMotionListener, MouseWheelListener, KeyListener {

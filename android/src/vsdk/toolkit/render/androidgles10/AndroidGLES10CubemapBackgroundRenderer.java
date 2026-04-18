@@ -8,8 +8,6 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.media.RGBAImage;
 
-/**
-*/
 public class AndroidGLES10CubemapBackgroundRenderer extends 
     AndroidGLES10BackgroundRenderer {
 

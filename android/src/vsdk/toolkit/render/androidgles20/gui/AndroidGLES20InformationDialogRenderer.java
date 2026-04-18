@@ -21,8 +21,6 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.dialog.InformationDialog;
 
-/**
-*/
 public class AndroidGLES20InformationDialogRenderer 
     extends AndroidGLES20Renderer {
     
@@ -92,8 +90,6 @@ public class AndroidGLES20InformationDialogRenderer
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
     }
 
-    /**
-    */
     private static void
     drawTextInUnitSquare(String msg, Camera c, double t, double x0, double y0)
     {

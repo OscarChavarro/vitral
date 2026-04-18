@@ -74,9 +74,6 @@ NOT DEFINED YET!
         return ?
     }
 */
-    /**
-     *
-     */
     public final void normalize() {
         double t = x*x + y*y + z*z + w*w;
         if ( Math.abs(t) < VSDK.EPSILON ) return;

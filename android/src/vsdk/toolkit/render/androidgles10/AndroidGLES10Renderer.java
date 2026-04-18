@@ -25,8 +25,6 @@ import vsdk.toolkit.gui.TextVisualConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAImage;
 
-/**
-*/
 public class AndroidGLES10Renderer extends RenderingElement {
     private static final String TAG = "AndroidGLES10Renderer";
 

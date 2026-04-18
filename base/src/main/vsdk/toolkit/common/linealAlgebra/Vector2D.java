@@ -63,8 +63,6 @@ public class Vector2D extends FundamentalEntity {
         this.y = other.y;
     }
 
-    /**
-    */
     public final void normalize() {
         double t = x*x + y*y;
         if ( Math.abs(t) < VSDK.EPSILON ) return;

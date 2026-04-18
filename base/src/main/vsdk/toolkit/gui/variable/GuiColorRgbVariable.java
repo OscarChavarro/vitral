@@ -1,7 +1,5 @@
 package vsdk.toolkit.gui.variable;
 
-/**
-*/
 public class GuiColorRgbVariable extends GuiVariable {
 
     @Override

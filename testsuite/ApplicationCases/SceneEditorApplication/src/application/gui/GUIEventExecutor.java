@@ -37,8 +37,6 @@ import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImage;
 
-/**
-*/
 public class GUIEventExecutor extends CommandListener{
     
     private SceneEditorApplication parent;

@@ -6,8 +6,6 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.gui.ProgressMonitor;
 
-/**
-*/
 public class JoglProgressMonitorRenderer extends JoglRenderer {
 
     private static void drawFrame(

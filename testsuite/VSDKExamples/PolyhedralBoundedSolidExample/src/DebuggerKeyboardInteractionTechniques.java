@@ -28,119 +28,115 @@ public class DebuggerKeyboardInteractionTechniques
             repaint = true;
         }
 
-        switch ( event.keycode ) {
-          case KeyEvent.KEY_0:
-            model.debugEdges = !model.debugEdges;
-            handled = true;
-            break;
-          case KeyEvent.KEY_SPACE:
-            model.showCoordinateSystem = !model.showCoordinateSystem;
-            handled = true;
-            break;
-          case KeyEvent.KEY_1:
-            model.faceIndex--;
-            handled = true;
-            break;
-          case KeyEvent.KEY_2:
-            model.faceIndex++;
-            handled = true;
-            break;
-          case KeyEvent.KEY_8:
-            model.edgeIndex--;
-            handled = true;
-            break;
-          case KeyEvent.KEY_9:
-            model.edgeIndex++;
-            handled = true;
-            break;
-          case KeyEvent.KEY_I:
-            System.out.println(model.solid);
-            if ( PolyhedralBoundedSolidValidationEngine.validateIntermediate(model.solid) ) {
-                System.out.println("SOLID MODEL IS VALID!");
+        switch (event.keycode) {
+            // Show vertex numbers
+            case KeyEvent.KEY_v -> {
+                model.debugVertices = !model.debugVertices;
+                handled = true;
             }
-            else {
-                System.out.println("SOLID MODEL IS INVALID!");
+
+            // Full screen
+            case KeyEvent.KEY_f -> {
+                actions.toggleFullscreen();
+                handled = true;
             }
-            handled = true;
-            break;
 
-          case KeyEvent.KEY_3:
-            model.solidModelName = model.solidModelName.previousClamped();
-            actions.rebuildSolid();
-            handled = true;
-            break;
-
-          case KeyEvent.KEY_4:
-            model.solidModelName = model.solidModelName.nextCircular();
-            actions.rebuildSolid();
-            handled = true;
-            break;
-
-          case KeyEvent.KEY_5:
-            model.csgOperation++;
-            if ( model.csgOperation > 3 ) {
-                model.csgOperation = 0;
+            // Reference frame
+            case KeyEvent.KEY_SPACE -> {
+                model.showCoordinateSystem = !model.showCoordinateSystem;
+                handled = true;
             }
-            actions.rebuildSolid();
-            handled = true;
-            break;
 
-          case KeyEvent.KEY_6:
-            model.csgSample++;
-            if ( model.csgSample > 7 ) {
-                model.csgSample = 0;
+            // Console print
+            case KeyEvent.KEY_I -> {
+                System.out.println(model.solid);
+                if (PolyhedralBoundedSolidValidationEngine.validateIntermediate(model.solid)) {
+                    System.out.println("SOLID MODEL IS VALID!");
+                } else {
+                    System.out.println("SOLID MODEL IS INVALID!");
+                }
+                handled = true;
             }
-            actions.rebuildSolid();
-            handled = true;
-            break;
 
-          case KeyEvent.KEY_v:
-            model.debugVertices = !model.debugVertices;
-            handled = true;
-            break;
+            // Highlighted face(s)
+            case KeyEvent.KEY_1 -> {
+                model.faceIndex--;
+                handled = true;
+            }
+            case KeyEvent.KEY_2 -> {
+                model.faceIndex++;
+                handled = true;
+            }
 
-          case KeyEvent.KEY_d:
-            model.debugCsg = !model.debugCsg;
-            actions.rebuildSolid();
-            handled = true;
-            break;
+            // Model selection
+            case KeyEvent.KEY_3 -> {
+                model.solidModelName = model.solidModelName.previousClamped();
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_4 -> {
+                model.solidModelName = model.solidModelName.nextClamped();
+                actions.rebuildSolid();
+                handled = true;
+            }
 
-          case KeyEvent.KEY_f:
-          case KeyEvent.KEY_F:
-            actions.toggleFullscreen();
-            handled = true;
-            break;
+            // Sphere / cylinder subdivisions
+            case KeyEvent.KEY_q -> {
+                model.subdivisionCircumference--;
+                model.clampSubdivisions();
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_Q -> {
+                model.subdivisionCircumference++;
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_w -> {
+                model.subdivisionHeight--;
+                model.clampSubdivisions();
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_W -> {
+                model.subdivisionHeight++;
+                actions.rebuildSolid();
+                handled = true;
+            }
 
-          case KeyEvent.KEY_q:
-            model.subdivisionCircumference--;
-            model.clampSubdivisions();
-            actions.rebuildSolid();
-            handled = true;
-            break;
+            // Hidden line algorithm debug
+            case KeyEvent.KEY_0 -> {
+                model.debugEdges = !model.debugEdges;
+                handled = true;
+            }
+            case KeyEvent.KEY_8 -> {
+                model.edgeIndex--;
+                handled = true;
+            }
+            case KeyEvent.KEY_9 -> {
+                model.edgeIndex++;
+                handled = true;
+            }
 
-          case KeyEvent.KEY_Q:
-            model.subdivisionCircumference++;
-            actions.rebuildSolid();
-            handled = true;
-            break;
-
-          case KeyEvent.KEY_w:
-            model.subdivisionHeight--;
-            model.clampSubdivisions();
-            actions.rebuildSolid();
-            handled = true;
-            break;
-
-          case KeyEvent.KEY_W:
-            model.subdivisionHeight++;
-            actions.rebuildSolid();
-            handled = true;
-            break;
+            // CSG special debug cases
+            case KeyEvent.KEY_5 -> {
+                model.csgOperation = model.csgOperation.nextCircular();
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_6 -> {
+                model.csgSample = model.csgSample.nextCircular();
+                actions.rebuildSolid();
+                handled = true;
+            }
+            case KeyEvent.KEY_d -> {
+                model.debugCsg = !model.debugCsg;
+                actions.rebuildSolid();
+                handled = true;
+            }
         }
 
-        if ( model.faceIndex < -2 ) {
-            model.faceIndex = -2;
-        }
+        model.clampFaceIndex();
         if ( model.edgeIndex < -3 ) {
             model.edgeIndex = -3;
         }

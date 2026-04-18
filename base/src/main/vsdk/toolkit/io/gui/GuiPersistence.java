@@ -30,9 +30,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class GuiPersistence extends PersistenceElement {
-    /**
-    
-    */
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,
             Gui context) throws Exception {

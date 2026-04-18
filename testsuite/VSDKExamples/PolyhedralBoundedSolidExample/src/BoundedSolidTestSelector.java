@@ -115,7 +115,9 @@ public class BoundedSolidTestSelector
                 model.subdivisionCircumference, model.subdivisionHeight);
             break;
           case CSG_MOON_BLOCK:
-            mySolid = createCsgMoonBlock();
+            mySolid = csgTest(1, CsgOperationNames.DIFFERENCE_A_MINUS_B,
+                CsgSampleNames.MOON_BLOCK, model.debugCsg);
+            model.debugCsg = false;
             break;
           case CSG_LAMP_SHELL:
             mySolid = createCsgLampShell(model.subdivisionCircumference,
@@ -261,8 +263,6 @@ public class BoundedSolidTestSelector
         return solid;
     }
 
-    /**    
-    */
     public static PolyhedralBoundedSolid createSphere(double r)
     {
         return createSphere(r, 16, 8);
@@ -284,8 +284,6 @@ public class BoundedSolidTestSelector
         return solid;
     }
 
-    /**    
-    */
     public static PolyhedralBoundedSolid createCone(double r1, double r2, double h)
     {
         return createCone(r1, r2, h, 36, 1);
@@ -307,8 +305,6 @@ public class BoundedSolidTestSelector
         return solid;
     }
 
-    /**    
-    */
     public static PolyhedralBoundedSolid createCylinder(double r, double h)
     {
         return createCylinder(r, h, 36, 1);
@@ -330,9 +326,7 @@ public class BoundedSolidTestSelector
         return solid;
     }
 
-    /**    
-    */
-    public static PolyhedralBoundedSolid createCsgMoonBlock()
+    private static PolyhedralBoundedSolid[] buildCsgMoonBlock()
     {
         PolyhedralBoundedSolid cylinderA = createCylinder(0.5, 1.0);
         PolyhedralBoundedSolid cylinderB = createCylinder(0.5, 2);
@@ -341,10 +335,13 @@ public class BoundedSolidTestSelector
         T.translation(0.275, 0.0, -0.5);
         cylinderB.applyTransformation(T);
 
-        PolyhedralBoundedSolid solid;
-        solid = GeometricModeler.setOp(cylinderA, cylinderB, GeometricModeler.SUBTRACT, false);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
-        return solid;
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderB);
+
+        PolyhedralBoundedSolid[] operands = new PolyhedralBoundedSolid[2];
+        operands[0] = cylinderA;
+        operands[1] = cylinderB;
+        return operands;
     }
 
     public static PolyhedralBoundedSolid createCsgLampShell(
@@ -376,8 +373,6 @@ public class BoundedSolidTestSelector
         return result;
     }
 
-    /**    
-    */
     public static PolyhedralBoundedSolid createArrow(double p1, double p2, double p3, double p4)
     {
         PolyhedralBoundedSolid solid;
@@ -1120,59 +1115,64 @@ public class BoundedSolidTestSelector
         return operands;
     }
 
-    public static PolyhedralBoundedSolid csgTest(int part, int op, int set,
+    public static PolyhedralBoundedSolid csgTest(int part,
+        CsgOperationNames op,
+        CsgSampleNames sample,
         boolean withDebug)
     {
         PolyhedralBoundedSolid res = null;
         PolyhedralBoundedSolid operands[] = null;
 
         System.out.printf("Creating C.S.G. test object with parts %d, " + 
-            "operation %s, and sample pair %d\n", part, 
-            op==0?"UNION":
-                (op==1?"INTERSECTION":
-                    (op==2?"DIFERENCE A-B":"DIFFERENCE B-A")), set);
+            "operation %s, and sample pair %s\n", part,
+            op.getLabel(), sample.getLabel());
 
-        switch ( set ) {
-            case 0:
-              operands =
-                  SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
-              break;
-            case 1:
-              operands = buildCsgTest2(); break;
-            case 2: default:
-              operands = 
-                  SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
-              break;
-            case 3:
-              operands = buildCsgTest4();
-              break;
-            case 4:
-              operands = buildCsgTest5();
-              break;
-            case 5:
-              operands =
-                SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
-              break;
-            case 6:
-              operands =
-                  SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
-              break;
-            case 7:
-              operands =
-                  SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
-              break;
+        switch ( sample ) {
+            case MANT1986_2:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
+                break;
+            case STACKED_BLOCKS:
+                operands = buildCsgTest2();
+                break;
+            case MANT1986_3:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+                break;
+            case HOLLOW_BRICK:
+                operands = buildCsgTest4();
+                break;
+            case CROSS_PAIR:
+                operands = buildCsgTest5();
+                break;
+            case MOON_BLOCK:
+                operands = buildCsgMoonBlock();
+                break;
+            case MANT1988_15_2_HOLED:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+                break;
+            case MANT1988_6_13:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
+                break;
+            case MANT1988_15_1:
+            default:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+                break;
         }
 
         //-----------------------------------------------------------------
-        if ( op == 0 ) {
+        if ( op == CsgOperationNames.UNION ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.UNION, withDebug);
         }
-        else if ( op == 1 ) {
+        else if ( op == CsgOperationNames.INTERSECTION ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.INTERSECTION, withDebug);
         }
-        else if ( op == 2 ) {
+        else if ( op == CsgOperationNames.DIFFERENCE_A_MINUS_B ) {
             res = GeometricModeler.setOp(operands[0], operands[1],
                                          GeometricModeler.SUBTRACT, withDebug);
         }

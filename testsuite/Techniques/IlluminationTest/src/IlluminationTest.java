@@ -45,8 +45,6 @@ import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
 // Application classes
 import util.filters.ObjectFilter;
 
-/**
- */
 public class IlluminationTest
     extends JFrame implements GLEventListener, MouseListener,
                    MouseMotionListener, MouseWheelListener, KeyListener {

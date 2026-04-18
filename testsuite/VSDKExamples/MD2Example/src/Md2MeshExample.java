@@ -53,8 +53,6 @@ import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
 import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
 
-/**
- */
 public class Md2MeshExample
     extends JFrame implements GLEventListener, MouseListener,
                    MouseMotionListener, MouseWheelListener, KeyListener {

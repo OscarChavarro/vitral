@@ -4,8 +4,6 @@ package vsdk.toolkit.render.androidgles10;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.CubemapBackground;
 
-/**
-*/
 public class AndroidGLES10BackgroundRenderer extends AndroidGLES10Renderer {
     public static void draw(final Background inBackground)
     {

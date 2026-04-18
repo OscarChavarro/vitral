@@ -3,8 +3,6 @@ package vsdk.toolkit.animation;
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.Md2Mesh;
 
-/**
-*/
 public class Md2AnimationListener  extends AnimationListener {
     private final Md2Mesh md2Mesh;
 

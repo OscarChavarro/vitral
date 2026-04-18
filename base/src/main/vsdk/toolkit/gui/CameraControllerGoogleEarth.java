@@ -6,8 +6,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 
-/**
-*/
 public class CameraControllerGoogleEarth extends CameraController {
     private Camera camera;
     private double jumpStep;

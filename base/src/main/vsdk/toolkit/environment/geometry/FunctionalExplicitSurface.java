@@ -9,9 +9,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.ProgressMonitor;
 
-/**
-
-*/
 public class FunctionalExplicitSurface extends Surface
 {
     /// Check the general attribute description in superclass Entity.

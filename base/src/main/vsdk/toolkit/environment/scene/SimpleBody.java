@@ -63,9 +63,6 @@ public class SimpleBody extends Entity {
         _static_vector3d = new Vector3D();
     }
 
-    /**
-    
-    */
     @Override
     public void finalize()
     {

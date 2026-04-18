@@ -34,6 +34,41 @@ public enum SolidModelNames
     CSG_MANT1988_15_2_OPEN_DIFFERENCE(31),
     CSG_KURLANDER_BOWL(32);
 
+    private static final SolidModelNames[] MAIN_SEQUENCE = {
+        MVFS_SMEV_SAMPLE,
+        BOX,
+        HOLED_BOX,
+        HOLLOW_BOX,
+        ARC_SAMPLE,
+        CIRCULAR_LAMINA,
+        TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC,
+        TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR,
+        SPHERE,
+        CONE,
+        CYLINDER,
+        CSG_LAMP_SHELL,
+        ARROW,
+        LAMINA_WITH_TWO_SHELLS,
+        LAMINA_WITH_HOLE,
+        FONT_BLOCK,
+        GLUED_CYLINDERS,
+        EULER_OPERATORS_TEST,
+        ROTATIONAL_SWEEP,
+        SPLIT_TEST_PART_1,
+        SPLIT_TEST_PART_2,
+        SPLIT_TEST_PART_3,
+        CSG_TEST_PART_1,
+        CSG_TEST_PART_2,
+        CSG_TEST_PART_3,
+        FEATURED_OBJECT,
+        IMPORT_OR_FEATURED_OBJECT,
+        CSG_MANT1988_15_2_HOLED_INTERSECTION,
+        CSG_MANT1988_15_2_LIMIT_INTERSECTION,
+        CSG_MANT1988_15_2_LIMIT_DIFFERENCE,
+        CSG_MANT1988_15_2_OPEN_DIFFERENCE,
+        CSG_KURLANDER_BOWL
+    };
+
     private final int id;
 
     SolidModelNames(int id)
@@ -51,18 +86,65 @@ public enum SolidModelNames
         return HOLED_BOX;
     }
 
-    public SolidModelNames nextCircular()
+    public SolidModelNames nextClamped()
     {
-        int nextId = (id + 1) % values().length;
-        return fromId(nextId);
+        int currentIndex = getMainSequenceIndex();
+        if ( currentIndex < 0 ) {
+            return MAIN_SEQUENCE[0];
+        }
+
+        int nextIndex = currentIndex + 1;
+        if ( nextIndex >= MAIN_SEQUENCE.length ) {
+            nextIndex = MAIN_SEQUENCE.length - 1;
+        }
+        return MAIN_SEQUENCE[nextIndex];
     }
 
     public SolidModelNames previousClamped()
     {
-        int previousId = id - 1;
-        if ( previousId < 0 ) {
-            previousId = 0;
+        int currentIndex = getMainSequenceIndex();
+        if ( currentIndex < 0 ) {
+            return MAIN_SEQUENCE[0];
         }
-        return fromId(previousId);
+
+        int previousIndex = currentIndex - 1;
+        if ( previousIndex < 0 ) {
+            previousIndex = 0;
+        }
+        return MAIN_SEQUENCE[previousIndex];
+    }
+
+    public int getDisplayIndex()
+    {
+        int index = getMainSequenceIndex();
+        if ( index < 0 ) {
+            return 1;
+        }
+        return index + 1;
+    }
+
+    public static int getTotalModels()
+    {
+        return MAIN_SEQUENCE.length;
+    }
+
+    public boolean usesCsgDebugControls()
+    {
+        return this == CSG_MOON_BLOCK ||
+            this == CSG_TEST_PART_1 ||
+            this == CSG_TEST_PART_2 ||
+            this == CSG_TEST_PART_3;
+    }
+
+    private int getMainSequenceIndex()
+    {
+        int i;
+
+        for ( i = 0; i < MAIN_SEQUENCE.length; i++ ) {
+            if ( MAIN_SEQUENCE[i] == this ) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

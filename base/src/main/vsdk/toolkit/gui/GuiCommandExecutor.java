@@ -2,8 +2,6 @@ package vsdk.toolkit.gui;
 
 import java.util.HashMap;
 
-/**
-*/
 public abstract class GuiCommandExecutor extends PresentationElement {
     protected HashMap<Integer, String> commandCache;
     

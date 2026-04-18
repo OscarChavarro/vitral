@@ -5,9 +5,6 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.PresentationElement;
 
-/**
-
-*/
 public class PercentageWheelWidget extends PresentationElement {
     private VisualVariableSet dataset;
     

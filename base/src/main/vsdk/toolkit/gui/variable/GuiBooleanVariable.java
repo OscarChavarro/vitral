@@ -2,8 +2,6 @@ package vsdk.toolkit.gui.variable;
 
 import vsdk.toolkit.media.Image;
 
-/**
-*/
 public class GuiBooleanVariable extends GuiVariable {
 
     private Image imageForTrueState;

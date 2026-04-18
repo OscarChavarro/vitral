@@ -217,8 +217,6 @@ public class ParametricBiCubicPatch extends Surface {
         Gz_MATRIX.M = mz;
     }
 
-    /**
-    */
     public void printGeometryMatrices()
     {
         double[][] mx = Gx_MATRIX.M;

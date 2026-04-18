@@ -8,8 +8,6 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 
-/**
-*/
 public class AndroidGLES10CameraRenderer extends AndroidGLES10Renderer {
     public static void activate(Camera c)
     {

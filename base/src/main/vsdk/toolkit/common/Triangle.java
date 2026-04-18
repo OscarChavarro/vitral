@@ -10,12 +10,8 @@ public class Triangle extends FundamentalEntity
     public int p1;
     public int p2;
 
-    /**
-    */
     public Vector3D normal;
 
-    /**
-    */
     public Triangle() {
         normal = new Vector3D(0, 0, 0);
     }

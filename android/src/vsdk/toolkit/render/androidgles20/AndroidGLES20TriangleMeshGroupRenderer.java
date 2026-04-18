@@ -5,8 +5,6 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 
-/**
-*/
 public class AndroidGLES20TriangleMeshGroupRenderer 
     extends AndroidGLES20Renderer {
     

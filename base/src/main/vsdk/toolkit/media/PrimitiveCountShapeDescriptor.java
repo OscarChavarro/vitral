@@ -24,8 +24,6 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
         }
     }
 
-    /**
-    */
     public void setFeature(int primitiveType, long count)
     {
         if ( primitiveType < 0 || primitiveType >= numberOfElements ) {

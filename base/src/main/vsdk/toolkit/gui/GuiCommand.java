@@ -20,9 +20,6 @@ public class GuiCommand extends GuiElement {
     private RGBAImage secondaryIcon;
     private RGBImage secondaryIconTransparency;
 
-    /**
-    
-    */
     public GuiCommand()
     {
         id = null;
@@ -89,9 +86,6 @@ public class GuiCommand extends GuiElement {
         return iconTransparency;
     }
 
-    /**
-    
-    */
     public void applyTransparency()
     {
         if ( icon == null || iconTransparency == null ) {
@@ -121,9 +115,6 @@ public class GuiCommand extends GuiElement {
         }
     }
 
-    /**
-    
-    */
     public void applySecondTransparency()
     {
         if ( secondaryIcon == null || secondaryIconTransparency == null ) {

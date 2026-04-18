@@ -559,8 +559,6 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         }
     }
 
-    /**
-    */
     private static boolean isLoose(_PolyhedralBoundedSolidHalfEdge he)
     {
         int i;
@@ -663,8 +661,6 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         return false;
     }
 
-    /**
-    */
     private static void destroy(PolyhedralBoundedSolid inSolid)
     {
         inSolid.polygonsList =
@@ -703,8 +699,6 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
         return true;
     }
 
-    /**
-    */
     private static void fixNullFaces(ArrayList<_PolyhedralBoundedSolidFace> l)
     {
         if ( l.size() == 1 ) {

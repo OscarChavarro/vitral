@@ -37,8 +37,6 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
         }
     }
 
-    /**
-    */
     private static boolean searchForEdge(
         CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> l,
         _PolyhedralBoundedSolidEdge e)
@@ -51,8 +49,6 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
         return false;
     }
 
-    /**
-    */
     private static boolean searchForVertex(
         CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> l,
         _PolyhedralBoundedSolidVertex v)

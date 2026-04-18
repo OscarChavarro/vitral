@@ -6,8 +6,6 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-/**
-*/
 public class CachedImage extends CachedInformation {
     private Image image;
     String source;

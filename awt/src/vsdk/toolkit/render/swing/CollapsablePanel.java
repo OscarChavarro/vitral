@@ -104,8 +104,6 @@ class _CollapsablePanelHeader extends JPanel {
     }
 }
 
-/**
-*/
 public class CollapsablePanel extends JPanel {
     /// Check the general attribute description in superclass Entity.
     public static final long serialVersionUID = 20140314L;

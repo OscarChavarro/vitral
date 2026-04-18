@@ -44,18 +44,35 @@ public class JoglDebuggerHudRenderer
 
         int width = viewportWidth > 0 ? viewportWidth : drawable.getSurfaceWidth();
         int height = viewportHeight > 0 ? viewportHeight : drawable.getSurfaceHeight();
-        String showingFaceLoopMessage = "Showing face loop [1, 2]: " + formatFaceLoopLabel();
-        String selectedModelMessage = "Selected model [3, 4]: " + model.solidModelName.name();
-        String referenceFrameMessage = "Reference frame: " +
+        String showingFaceLoopMessage = "Face [1, 2]: " + formatFaceLoopLabel();
+        String selectedModelMessage = "Selected model [3, 4]: "
+            + model.solidModelName.name()
+            + " (" + model.solidModelName.getDisplayIndex()
+            + "/" + SolidModelNames.getTotalModels() + ")";
+        String csgSampleMessage = "CSG sample [6]: " + model.csgSample.getLabel()
+            + " (" + model.csgSample.getDisplayIndex()
+            + "/" + CsgSampleNames.getTotalSamples() + ")";
+        String csgOperationMessage = "CSG op [5]: " + model.csgOperation.getLabel();
+        String referenceFrameMessage = "Reference frame [Space]: " +
             (model.showCoordinateSystem ? "ON" : "OFF");
-        String nrMessage = "NR: " + model.subdivisionCircumference;
-        String nhMessage = "NH: " + model.subdivisionHeight;
+        String nrMessage = "NR [q, Q]: " + model.subdivisionCircumference;
+        String nhMessage = "NH [w, W]: " + model.subdivisionHeight;
 
         hudTextRenderer.beginRendering(width, height);
         hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
         hudTextRenderer.draw(showingFaceLoopMessage, 16, height - 28);
         hudTextRenderer.draw(selectedModelMessage, 16, height - (28 + LINE_HEIGHT));
-        hudTextRenderer.draw(referenceFrameMessage, 16, height - (28 + 2*LINE_HEIGHT));
+        int nextLeftLine = 2;
+        if ( model.solidModelName.usesCsgDebugControls() ) {
+            hudTextRenderer.draw(csgSampleMessage, 16,
+                height - (28 + nextLeftLine*LINE_HEIGHT));
+            nextLeftLine++;
+            hudTextRenderer.draw(csgOperationMessage, 16,
+                height - (28 + nextLeftLine*LINE_HEIGHT));
+            nextLeftLine++;
+        }
+        hudTextRenderer.draw(referenceFrameMessage, 16,
+            height - (28 + nextLeftLine*LINE_HEIGHT));
         drawTopRight(hudTextRenderer, width, height, nrMessage, 28);
         drawTopRight(hudTextRenderer, width, height, nhMessage,
             28 + LINE_HEIGHT);

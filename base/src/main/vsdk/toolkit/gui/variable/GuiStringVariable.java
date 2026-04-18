@@ -1,7 +1,5 @@
 package vsdk.toolkit.gui.variable;
 
-/**
-*/
 public class GuiStringVariable extends GuiVariable {
     @Override
     public String getType() {
