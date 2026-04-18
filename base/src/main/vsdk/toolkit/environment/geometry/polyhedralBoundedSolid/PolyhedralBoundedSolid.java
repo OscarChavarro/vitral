@@ -1552,6 +1552,192 @@ public class PolyhedralBoundedSolid extends Solid {
         return -1;
     }
 
+    private static boolean planesCoincidentIgnoringOrientation(
+        InfinitePlane a, InfinitePlane b, double tolerance)
+    {
+        double a1, b1, c1, d1;
+        double a2, b2, c2, d2;
+        double l1, l2;
+
+        if ( a == null || b == null ) {
+            return false;
+        }
+
+        a1 = a.getA();
+        b1 = a.getB();
+        c1 = a.getC();
+        d1 = a.getD();
+        a2 = b.getA();
+        b2 = b.getB();
+        c2 = b.getC();
+        d2 = b.getD();
+
+        l1 = Math.sqrt(a1*a1 + b1*b1 + c1*c1);
+        l2 = Math.sqrt(a2*a2 + b2*b2 + c2*c2);
+        if ( l1 <= tolerance || l2 <= tolerance ) {
+            return false;
+        }
+
+        a1 /= l1;
+        b1 /= l1;
+        c1 /= l1;
+        d1 /= l1;
+        a2 /= l2;
+        b2 /= l2;
+        c2 /= l2;
+        d2 /= l2;
+
+        boolean sameOrientation =
+            Math.abs(a2 - a1) <= tolerance &&
+            Math.abs(b2 - b1) <= tolerance &&
+            Math.abs(c2 - c1) <= tolerance &&
+            Math.abs(d2 - d1) <= tolerance;
+
+        boolean oppositeOrientation =
+            Math.abs(a2 + a1) <= tolerance &&
+            Math.abs(b2 + b1) <= tolerance &&
+            Math.abs(c2 + c1) <= tolerance &&
+            Math.abs(d2 + d1) <= tolerance;
+
+        return sameOrientation || oppositeOrientation;
+    }
+
+    private static boolean loopsCoincidentFrom(
+        _PolyhedralBoundedSolidHalfEdge startA,
+        _PolyhedralBoundedSolidHalfEdge startB,
+        boolean reverse,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        _PolyhedralBoundedSolidHalfEdge heA;
+        _PolyhedralBoundedSolidHalfEdge heB;
+
+        heA = startA;
+        heB = startB;
+        do {
+            if ( !PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                heA.startingVertex.position, heB.startingVertex.position,
+                numericContext) ) {
+                return false;
+            }
+            heA = heA.next();
+            heB = reverse ? heB.previous() : heB.next();
+        } while ( heA != startA );
+
+        return true;
+    }
+
+    private static boolean loopsCoincident(
+        _PolyhedralBoundedSolidLoop a,
+        _PolyhedralBoundedSolidLoop b,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        int i;
+        _PolyhedralBoundedSolidHalfEdge startA;
+        _PolyhedralBoundedSolidHalfEdge scanB;
+
+        if ( a == null || b == null ||
+             a.boundaryStartHalfEdge == null || b.boundaryStartHalfEdge == null ) {
+            return false;
+        }
+        if ( a.halfEdgesList.size() != b.halfEdgesList.size() ) {
+            return false;
+        }
+
+        startA = a.boundaryStartHalfEdge;
+        scanB = b.boundaryStartHalfEdge;
+        for ( i = 0; i < b.halfEdgesList.size(); i++ ) {
+            if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                startA.startingVertex.position, scanB.startingVertex.position,
+                numericContext) ) {
+                if ( loopsCoincidentFrom(startA, scanB, false, numericContext) ||
+                     loopsCoincidentFrom(startA, scanB, true, numericContext) ) {
+                    return true;
+                }
+            }
+            scanB = scanB.next();
+        }
+
+        return false;
+    }
+
+    /**
+    Detects the duplicated coplanar-ring configuration that can appear after
+    boolean result integration. The reorganization is meant to expose the
+    pair of coincident loops that `loopglue` consumes in section
+    [MANT1988].12.4.2, as required by the maximal-face cleanup from section
+    [MANT1988].15.5 and the finishing stage of program [MANT1988].15.15.
+    */
+    private boolean reduceCoincidentSimpleFaceOnMultiLoopFace(
+        _PolyhedralBoundedSolidFace multiLoopFace,
+        _PolyhedralBoundedSolidFace simpleFace,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        ArrayList<_PolyhedralBoundedSolidLoop> coincidentLoops;
+        ArrayList<_PolyhedralBoundedSolidLoop> loopsToMove;
+        _PolyhedralBoundedSolidLoop simpleLoop;
+        _PolyhedralBoundedSolidLoop outerGlueLoop;
+        _PolyhedralBoundedSolidLoop duplicateGlueLoop;
+        int i;
+
+        if ( multiLoopFace == null || simpleFace == null ||
+             multiLoopFace == simpleFace ) {
+            return false;
+        }
+        if ( multiLoopFace.boundariesList.size() < 2 ||
+             simpleFace.boundariesList.size() != 1 ) {
+            return false;
+        }
+        if ( multiLoopFace.containingPlane == null ) {
+            multiLoopFace.calculatePlane();
+        }
+        if ( simpleFace.containingPlane == null ) {
+            simpleFace.calculatePlane();
+        }
+        if ( !planesCoincidentIgnoringOrientation(multiLoopFace.containingPlane,
+                simpleFace.containingPlane, numericContext.epsilon()) ) {
+            return false;
+        }
+
+        simpleLoop = simpleFace.boundariesList.get(0);
+        coincidentLoops = new ArrayList<_PolyhedralBoundedSolidLoop>();
+        for ( i = 0; i < multiLoopFace.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop candidate;
+            candidate = multiLoopFace.boundariesList.get(i);
+            if ( loopsCoincident(candidate, simpleLoop, numericContext) ) {
+                coincidentLoops.add(candidate);
+            }
+        }
+
+        if ( coincidentLoops.size() < 2 ) {
+            return false;
+        }
+
+        outerGlueLoop = coincidentLoops.get(0);
+        duplicateGlueLoop = coincidentLoops.get(1);
+        loopsToMove = new ArrayList<_PolyhedralBoundedSolidLoop>();
+        for ( i = 0; i < multiLoopFace.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop candidate;
+            candidate = multiLoopFace.boundariesList.get(i);
+            if ( candidate != outerGlueLoop && candidate != duplicateGlueLoop ) {
+                loopsToMove.add(candidate);
+            }
+        }
+
+        for ( i = 0; i < loopsToMove.size(); i++ ) {
+            if ( !lringmv(loopsToMove.get(i), simpleFace, false) ) {
+                return false;
+            }
+        }
+
+        if ( multiLoopFace.boundariesList.size() != 2 ) {
+            return false;
+        }
+
+        lringmv(outerGlueLoop, multiLoopFace, true);
+        loopGlue(multiLoopFace.id);
+        return true;
+    }
+
     /**
     This method get current solid in an "inverted" (geometrical sense) solid.
     Works on half edge data structure by inverting the order of each loop.
@@ -1576,14 +1762,17 @@ public class PolyhedralBoundedSolid extends Solid {
     For some operations on solid polyhedra such as boolean set operations,
     it is required that faces of solids be "maximal", i.e. that all coplanar
     neighbor faces have been combined, and all "inessential" edges have been
-    removed, as noted on section [MANT1988].15.5.
-    \todo  current method does not fix faces that lies entirely over other
-    faces.
+    removed, as noted on section [MANT1988].15.5. Current implementation also
+    performs an additional coplanar-ring reduction so that coincident sheets
+    can be eliminated with `loopglue`, consistent with section
+    [MANT1988].12.4.2 and the result-finishing strategy of program
+    [MANT1988].15.15.
     */
     public void maximizeFaces()
     {
         int i;
         int j;
+        int k;
         _PolyhedralBoundedSolidEdge e;
         _PolyhedralBoundedSolidHalfEdge he;
         InfinitePlane a, b;
@@ -1731,6 +1920,37 @@ public class PolyhedralBoundedSolid extends Solid {
                     lkemr(heInner, heOuter);
                     restart = true;
                     break;
+                }
+            }
+            if ( restart ) {
+                continue;
+            }
+
+            //- Merge coplanar overlapping faces when one lies entirely over
+            //- another that already carries rings. This completes the
+            //- "maximal face" reduction expected by [MANT1988].15.5.
+            for ( i = 0; i < polygonsList.size() && !restart; i++ ) {
+                _PolyhedralBoundedSolidFace faceA = polygonsList.get(i);
+                if ( faceA.containingPlane == null ) {
+                    faceA.calculatePlane();
+                }
+                for ( j = i + 1; j < polygonsList.size(); j++ ) {
+                    _PolyhedralBoundedSolidFace faceB = polygonsList.get(j);
+                    if ( faceB.containingPlane == null ) {
+                        faceB.calculatePlane();
+                    }
+                    if ( faceA.containingPlane == null ||
+                         faceB.containingPlane == null ) {
+                        continue;
+                    }
+
+                    if ( reduceCoincidentSimpleFaceOnMultiLoopFace(faceA, faceB,
+                             numericContext) ||
+                         reduceCoincidentSimpleFaceOnMultiLoopFace(faceB, faceA,
+                             numericContext) ) {
+                        restart = true;
+                        break;
+                    }
                 }
             }
             if ( restart ) {
