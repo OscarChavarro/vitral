@@ -1,25 +1,8 @@
-//= References:                                                             =
-//= [MANT1986] Mantyla Martti. "Boolean Operations of 2-Manifolds through   =
-//=     Vertex Neighborhood Classification". ACM Transactions on Graphics,  =
-//=     Vol. 5, No. 1, January 1986, pp. 1-29.                              =
-//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
-//=     Computer Science Press, 1988.                                       =
-//= [.wMANT2008] Mantyla Martti. "Personal Home Page", <<shar>> archive     =
-//=     containing the C programs from [MANT1988]. Available at             =
-//=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
-
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidOperator;
-
-// Java classes
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
 
-// VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -27,55 +10,73 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.InfinitePlane;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
-import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
-import vsdk.toolkit.io.PersistenceElement;
 
 /**
-This class encapsulates the set operations algorithms for boundary
-representation solids in VitralSDK. Basically, this class implements the
-original algorithm published in the paper [MANT1986] and in the second
-part of the book [MANT1988].
-The algorithm is structured in 5 big phases:
-  0. Calculate vertex/face and vertex/vertex crossings.
-  1. Classify and split for vertex/face cases.
-  2. Classify and split for vertex/vertex cases.
-  3. Connect.
-  4. Finish.
-Note that each big phase is controlled in a method (mark as "big phase" in
-its documentation).
+Classification stages and no-intersection containment logic for set operations.
 */
-public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOperator
+final class PolyhedralBoundedSolidSetClassifier
+    extends PolyhedralBoundedSolidOperator
 {
-    /**
-    Debug flags.
-    */
     private static final int DEBUG_01_STRUCTURE = 0x01;
-    private static final int DEBUG_02_GENERATOR = 0x02;
     private static final int DEBUG_03_VERTEXFACECLASIFFIER = 0x04;
     private static final int DEBUG_04_VERTEXVERTEXCLASIFFIER = 0x08;
-    private static final int DEBUG_05_CONNECT = 0x10;
-    private static final int DEBUG_06_FINISH = 0x20;
     private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
+
     private static final int NO_INT_RELATION_DISJOINT = 0;
     private static final int NO_INT_RELATION_TOUCHING = 1;
     private static final int NO_INT_RELATION_A_IN_B = 2;
     private static final int NO_INT_RELATION_B_IN_A = 3;
 
-    /**
-    The integer `debugFlags` is a bitwise combination of debugging flags
-    used to control debug messages printed on the standard output.
-    */
-    private static int debugFlags = 0;
+    private static int debugFlags;
 
-    /**
-    Used for exporting internal state in graphical form.
-    */
-    private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
+
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nba;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nbb;
+    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector> sectors;
+
+    static void runSetOpClassify(int op,
+                                 PolyhedralBoundedSolid inSolidA,
+                                 PolyhedralBoundedSolid inSolidB,
+                                 int flags,
+                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> inSonvv,
+                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> inSonva,
+                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> inSonvb,
+                                 ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSonea,
+                                 ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSoneb)
+    {
+        debugFlags = flags;
+        sonvv = inSonvv;
+        sonva = inSonva;
+        sonvb = inSonvb;
+        sonea = inSonea;
+        soneb = inSoneb;
+        setOpClassify(op, inSolidA, inSolidB);
+    }
+
+    static PolyhedralBoundedSolid runSetOpNoIntersectionCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op)
+    {
+        return setOpNoIntersectionCase(inSolidA, inSolidB, outRes, op);
+    }
+
+    static boolean runTouchingOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        return isTouchingOnlyPreflightCase(inSolidA, inSolidB);
+    }
 
     private static int compareToZero(double value)
     {
@@ -108,98 +109,8 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                 nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
     }
 
-    private static int classifyCoplanarSectorRelation(
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace sectorInfo,
-        _PolyhedralBoundedSolidFace referenceFace)
-    {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
-            .classifyCoplanarSectorRelation(sectorInfo, referenceFace);
-    }
-
-    /**
-    Following variable `sonvv` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv;
-
-    /**
-    Following variable `sonva` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva;
-
-    /**
-    Following variable `sonvb` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
-
-    /**
-    Following variable `sonea` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
-
-    /**
-    Following variable `soneb` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
-
-    /**
-    Following variable `sonfa` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
-
-    /**
-    Following variable `sonfb` from program [MANT1988].15.1.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
-
-    /**
-    Following variable `nba` from program [MANT1988].15.6.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nba;
-
-    /**
-    Following variable `nba` from program [MANT1988].15.6.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nbb;
-
-    /**
-    Following variable `sectors` from program [MANT1988].15.6.
-    */
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector> sectors;
-
-    /**
-    Procedure `updmaxnames` functionality is described on section
-    [MANT1988].15.4. This method increments the face and vertex
-    identifiers of `solidToUpdate` so that they do not overlap with
-    `referenceSolid` identifiers.
-    */
-    public static void updmaxnames(PolyhedralBoundedSolid solidToUpdate,
-                                   PolyhedralBoundedSolid referenceSolid)
-    {
-        _PolyhedralBoundedSolidVertex v;
-        _PolyhedralBoundedSolidFace f;
-        int i;
-
-        for ( i = 0; i < solidToUpdate.verticesList.size(); i++ ) {
-            v = solidToUpdate.verticesList.get(i);
-            v.id += referenceSolid.getMaxVertexId();
-            if ( v.id > solidToUpdate.maxVertexId ) {
-                solidToUpdate.maxVertexId = v.id;
-            }
-        }
-
-        for ( i = 0; i < solidToUpdate.polygonsList.size(); i++ ) {
-            f = solidToUpdate.polygonsList.get(i);
-            f.id += referenceSolid.getMaxFaceId();
-            if ( f.id > solidToUpdate.maxFaceId ) {
-                solidToUpdate.maxFaceId = f.id;
-            }
-        }
-    }
-
-    /**
-    */
     private static int nextVertexId(PolyhedralBoundedSolid current,
-                             PolyhedralBoundedSolid other)
+                                    PolyhedralBoundedSolid other)
     {
         int a, b, m;
 
@@ -213,37 +124,6 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         return m+1;
     }
 
-    /**
-    Initial vertex intersection detector for the set operations algorithm
-    (big phase 0).
-    Following program [MANT1988].15.2.
-    */
-    private static void setOpGenerate(PolyhedralBoundedSolid inSolidA,
-                                      PolyhedralBoundedSolid inSolidB)
-    {
-        PolyhedralBoundedSolidSetIntersector.GenerationResult generation;
-
-        generation = PolyhedralBoundedSolidSetIntersector.setOpGenerate(
-            inSolidA, inSolidB);
-        sonvv = generation.sonvv();
-        sonva = generation.sonva();
-        sonvb = generation.sonvb();
-    }
-
-    /**
-    Current method is the first step for the initial vertex/face classification
-    of sectors (vertex neighborhood) for `vtx`, as indicated on section
-    [MANT1988].14.5.2. and program [MANT1988].14.4., but biased towards the
-    set operator classifier, as proposed on section [MANT1988].15.6.1. and
-    problem [MANT1988].15.4.
-
-    Vitral SDK's implementation of this procedure extends the original from
-    [MANT1988] by adding extra information flags to sector classifications
-    `.isWide`, `.position` and `.situation`. Those flags are an additional
-    aid for debugging purposes and specifically the `situation` flag will be
-    later used on `splitClassify` to correct the ordering of sectors in order
-    to keep consistency with Vitral SDK's interpretation of coordinate system.
-    */
     private static
     ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>
     vertexFaceGetNeighborhood(
@@ -1783,40 +1663,35 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                                       PolyhedralBoundedSolid inSolidA,
                                       PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolidSetClassifier.runSetOpClassify(
-            op, inSolidA, inSolidB, debugFlags, sonvv, sonva, sonvb, sonea,
-            soneb);
+        int i;
+
+        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
+            System.out.println("- 1.A. ----------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println("VERTICES OF {A} TOUCHING FACES ON {B} (sonva array of " + sonva.size() + " matches)");
+        }
+
+        for ( i = 0; i < sonva.size(); i++ ) {
+            vertexFaceClassify(sonva.get(i).v, sonva.get(i).f, op, 0, inSolidA, inSolidB);
+        }
+
+        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
+            System.out.println("- 1.B. ----------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println("VERTICES OF {B} TOUCHING FACES ON {A} (sonvb array of " + sonvb.size() + " matches):");
+        }
+
+        for ( i = 0; i < sonvb.size(); i++ ) {
+            vertexFaceClassify(sonvb.get(i).v, sonvb.get(i).f, op, 1, inSolidA, inSolidB);
+        }
+
+        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
+            System.out.println("- 2. ------------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println("VERTEX-VERTEX PAIRS (sonvv array of " + sonvv.size() + " pairs):");
+        }
+
+        for ( i = 0; i < sonvv.size(); i++ ) {
+            vertexVertexClassify(sonvv.get(i).va, sonvv.get(i).vb, op, inSolidA, inSolidB);
+        }
     }
-
-    private static void setOpConnect()
-    {
-        PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult result;
-
-        result = PolyhedralBoundedSolidSetNullEdgesConnector.connect(
-            debugFlags, sonea, soneb);
-        sonfa = result.sonfa();
-        sonfb = result.sonfb();
-    }
-
-    /**
-    Answer integrator for the set operations algorithm (big phase 4).
-    Following program [MANT1988].15.15.
-    */
-    private static void setOpFinish(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        PolyhedralBoundedSolid outRes,
-        int op
-    )
-    {
-        PolyhedralBoundedSolidSetFinisher.finish(
-            inSolidA, inSolidB, outRes, op, debugFlags, sonfa, sonfb);
-    }
-
-    /**
-    Classifies a point against a solid using ray-parity. Returns INSIDE,
-    OUTSIDE or LIMIT for ambiguous cases.
-    */
     private static int classifyPointAgainstSolid(
         PolyhedralBoundedSolid solid,
         Vector3D point)
@@ -2040,8 +1915,22 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        return PolyhedralBoundedSolidSetClassifier.runTouchingOnlyPreflightCase(
-            inSolidA, inSolidB);
+        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
+        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+        int relation = classifyNoIntersectionRelation(aInB, bInA);
+
+        if ( relation != NO_INT_RELATION_TOUCHING ) {
+            return false;
+        }
+
+        if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
+            return false;
+        }
+        if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -2053,187 +1942,49 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid outRes,
         int op)
     {
-        return PolyhedralBoundedSolidSetClassifier.runSetOpNoIntersectionCase(
-            inSolidA, inSolidB, outRes, op);
-    }
+        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
+        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+        int relation = classifyNoIntersectionRelation(aInB, bInA);
 
-    public static PolyhedralBoundedSolid setOp(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        int op)
-    {
-        return setOp(inSolidA, inSolidB, op, false);
-    }
-
-    /**
-    */
-    private static void debugSolid(PolyhedralBoundedSolid solid, String pattern)
-    {
-        System.out.println("**** DEBUGGING SOLID INFORMATION WRITEN TO FILES " +
-            pattern + " ****");
-        try {
-            File fd = new File(pattern + ".txt");
-            FileOutputStream fos = new FileOutputStream(fd);
-            BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-            if ( offlineRenderer != null ) {
-                offlineRenderer.execute(solid, pattern + ".png");
+        if ( op == INTERSECTION ) {
+            if ( relation == NO_INT_RELATION_A_IN_B ) {
+                outRes.merge(inSolidA);
             }
-
-            PersistenceElement.writeAsciiLine(bos, solid.toString());
-            bos.close();
-        }
-        catch ( Exception e ) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-    Following program [MANT1988].15.1.
-    */
-    public static PolyhedralBoundedSolid setOp(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        int op, boolean withDebug)
-    {
-        setNumericContext(
-            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
-        _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
-            numericContext);
-
-        if ( withDebug ) {
-            debugFlags = 0
-              | DEBUG_01_STRUCTURE
-              | DEBUG_02_GENERATOR
-              | DEBUG_03_VERTEXFACECLASIFFIER
-              | DEBUG_04_VERTEXVERTEXCLASIFFIER
-              | DEBUG_05_CONNECT
-              | DEBUG_06_FINISH
-              | DEBUG_99_SHOWOPERATIONS
-              ;
-            offlineRenderer = PolyhedralBoundedSolidDebugger.createOfflineRenderer();
-        }
-        else {
-            debugFlags = 0;
-        }
-
-        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
-            System.out.println("= [START OF SETOP REPORT] =================================================================================================================================");
-            System.out.println("Dumping debug log for PolyhedralBoundedSolidSetOperator.setOp.");
-            System.out.println("The algorithm structure is:");
-            System.out.println("  0. Calculate vertex/face and vertex/vertex crossings.");
-            System.out.println("  1. Classify and split for vertex/face cases.");
-            System.out.println("  2. Classify and split for vertex/vertex cases.");
-            System.out.println("  3. Connect.");
-            System.out.println("  4. Finish.");
-        }
-
-        //-----------------------------------------------------------------
-        PolyhedralBoundedSolid res = new PolyhedralBoundedSolid();
-
-        sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-        soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-
-        //-----------------------------------------------------------------
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage00");
-            debugSolid(inSolidB, "outputB_stage00");
-        }
-
-        inSolidA.compactIds();
-        inSolidB.compactIds();
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
-        inSolidA.maximizeFaces();
-        inSolidB.maximizeFaces();
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
-        inSolidA.compactIds();
-        inSolidB.compactIds();
-        updmaxnames(inSolidB, inSolidA);
-        setNumericContext(
-            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
-        _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
-            numericContext);
-
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage01");
-            debugSolid(inSolidB, "outputB_stage01");
-        }
-
-        if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.polygonsList.size() > 0 ) {
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-                res.compactIds();
-                res.maximizeFaces();
-                res.compactIds();
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+            else if ( relation == NO_INT_RELATION_B_IN_A ) {
+                outRes.merge(inSolidB);
             }
-            return res;
+            // Touching-only and disjoint return empty intersection.
+            return outRes;
         }
 
-        setOpGenerate(inSolidA, inSolidB);
-
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage02");
-            debugSolid(inSolidB, "outputB_stage02");
-        }
-
-        setOpClassify(op, inSolidA, inSolidB);
-
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage03");
-            debugSolid(inSolidB, "outputB_stage03");
-        }
-
-        if ( sonea.isEmpty() && sonvv.isEmpty() ) {
-            // No intersections found
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.polygonsList.size() > 0 ) {
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-                res.compactIds();
-                res.maximizeFaces();
-                res.compactIds();
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+        if ( op == UNION ) {
+            if ( relation == NO_INT_RELATION_A_IN_B ) {
+                outRes.merge(inSolidB);
             }
-            return res;
+            else if ( relation == NO_INT_RELATION_B_IN_A ) {
+                outRes.merge(inSolidA);
+            }
+            else {
+                // Touching-only and disjoint both merge the two solids.
+                outRes.merge(inSolidA);
+                outRes.merge(inSolidB);
+            }
+            return outRes;
         }
 
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage04");
-            debugSolid(inSolidB, "outputB_stage04");
+        // DIFFERENCE
+        if ( relation == NO_INT_RELATION_A_IN_B ) {
+            return outRes;
         }
-
-        setOpConnect();
-
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage05");
-            debugSolid(inSolidB, "outputB_stage05");
+        if ( relation == NO_INT_RELATION_B_IN_A ) {
+            outRes.merge(inSolidA);
+            inSolidB.revert();
+            outRes.merge(inSolidB);
+            outRes.compactIds();
+            return outRes;
         }
-
-        setOpFinish(inSolidA, inSolidB, res, op);
-
-        if ( withDebug ) {
-            debugSolid(inSolidA, "outputA_stage06");
-            debugSolid(inSolidB, "outputB_stage06");
-            debugSolid(res, "outputR_stage06");
-        }
-
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-        res.compactIds();
-        res.maximizeFaces();
-        res.compactIds();
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-
-        if ( withDebug ) {
-            debugSolid(res, "outputR_stage07");
-        }
-
-        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
-            System.out.println("= [END OF SETOP REPORT] ===================================================================================================================================");
-        }
-
-        return res;
+        // Touching-only and disjoint keep minuend unchanged.
+        outRes.merge(inSolidA);
+        return outRes;
     }
 }
