@@ -1,22 +1,19 @@
-           /***************************************************
-            *   An instructional Ray-Tracing Renderer written
-            *   for MIT 6.837  Fall '98 by Leonard McMillan.
-            *   Modified by Tomas Lozano-Perez for Fall '01
-            *   Modified by Oscar Chavarro for Spring '04 
-            *   FUSM 05061.
-            *   Modified by Oscar Chavarro for PUJ Vitral 
-            *   VSDK '05, '06, '10
-            ****************************************************/
+/**
+An instructional Ray-Tracing Renderer written
+for MIT 6.837  Fall '98 by Leonard McMillan.
+Modified by Tomas Lozano-Perez for Fall '01
+Modified by Oscar Chavarro for Spring '04
+FUSM 05061.
+Modified by Oscar Chavarro for PUJ Vitral
+VSDK '05, '06, '10
+*/
 
-//===========================================================================
-
-// Paquetes de java utilizados para el manejo de archivos
+// Java classes
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.IOException;
 
-// VSDK classes
+// Vitral classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
@@ -28,99 +25,86 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 
 public class RaytracerSimple {
-    // Application model
-    private ReaderMitScene theSceneReader;
-    private SimpleScene theScene;
-    private RGBImage theResultingImage;
-    private Raytracer visualizationEngine;
+    private final ReaderMitScene readerMitScene;
+    private final SimpleScene scene;
 
     public RaytracerSimple()
     {
-        theSceneReader = new ReaderMitScene();
-        theScene = new SimpleScene();
+        readerMitScene = new ReaderMitScene();
+        scene = new SimpleScene();
     }
 
     private void
-    offlineExecution(String nombre_de_archivo, boolean save)
+    offlineExecution(String fileName, boolean save)
     {
-        //- 1. Import the scene from an scene description file to RAM -----
-        System.out.println("Loading scene from " + nombre_de_archivo + ": ");
-        InputStream is = null;
+        Raytracer visualizationEngine;
+        RGBImage resultingImage;
+        //- 1. Import the scene from scene description file to RAM -----
+        System.out.println("Loading scene from " + fileName + ": ");
         try {
-            is = new FileInputStream(new File(nombre_de_archivo));
-            theSceneReader.importEnvironment(is, theScene);
+            InputStream is = new FileInputStream(fileName);
+            readerMitScene.importEnvironment(is, scene);
             is.close();
           }
           catch ( Exception e ) {
-            System.err.println("Error reading " + nombre_de_archivo);
+            System.err.println("Error reading " + fileName);
             System.err.println("There are scene samples on ../../../etc/geometry/mitscenes/");
             System.exit(-1);
         }
         System.out.println("Scene loaded OK!");
 
         //- 2. Create an empty image --------------------------------------
-        theResultingImage = new RGBImage();
-        if ( !theResultingImage.initNoFill(
-                  theSceneReader.viewportXSize, theSceneReader.viewportYSize) ) {
-            System.err.println("Error creando la imagen!!");
+        resultingImage = new RGBImage();
+        if ( !resultingImage.initNoFill(
+                  readerMitScene.viewportXSize, readerMitScene.viewportYSize) ) {
+            System.err.println("Error creating image!");
             System.exit(1);
         }
 
-        //- 3. Process the image from the escene data structure -----------
+        //- 3. Process the image from the scene data structure -----------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();
         RendererConfiguration rendererConfiguration = new RendererConfiguration();
 
         visualizationEngine = new Raytracer();
-        theScene.getActiveCamera().updateViewportResize(
-            theResultingImage.getXSize(), theResultingImage.getYSize());
+        scene.getActiveCamera().updateViewportResize(
+            resultingImage.getXSize(), resultingImage.getYSize());
 
         StopWatch clock = new StopWatch();
 
         clock.start();
-        visualizationEngine.execute(theResultingImage, rendererConfiguration,
-                                theScene.getSimpleBodies(),
-                                theScene.getLights(),
-                                theScene.getActiveBackground(),
-                                theScene.getActiveCamera(), reporter, null);
+        visualizationEngine.execute(resultingImage, rendererConfiguration,
+                                scene.getSimpleBodies(),
+                                scene.getLights(),
+                                scene.getActiveBackground(),
+                                scene.getActiveCamera(), reporter, null);
         clock.stop();
 
         System.out.println("Image generated in " + VSDK.formatDouble(clock.getElapsedRealTime(), 3) + " seconds.");
 
         //- 4. Export resulting image to an image file --------------------
-        if ( save == true ) {
-            File fd = new File("./output.bmp");
+        if ( save ) {
+            File fd = new File("./output.ppm");
 
-            System.out.print("Exporting result image to file \"output.bmp\": ");
-            if ( !ImagePersistence.exportBMP(fd, theResultingImage) )
+            System.out.print("Exporting result image to file \"output.ppm\": ");
+            if ( !ImagePersistence.exportPPM(fd, resultingImage) )
             {
-                System.err.println("Error grabando la imagen!!");
+                System.err.println("Error saving output image!");
                 System.exit(1);
             }
             System.out.println(" OK!");
         }
-        //- 5. Destruir las estructuras de datos --------------------------
-        // 5.1. Free image reference
-        theResultingImage.finalize();
-        theResultingImage = null;
-
-        // 5.2. Free scene references
-        visualizationEngine = null;
-        theSceneReader = null;
-        theScene = null;
-
-        // 5.3. Suggest the garbage collector to free unused memory
-        System.gc();
     }
 
     public static void
-    main(String args[])
+    main(String[] args)
     {
         RaytracerSimple instance = new RaytracerSimple();
         boolean save = true;
 
-        for ( int i = 0; i < args.length; i++ ) {
-            if ( args[i].equals("nosave") ) {
+        for (String arg : args) {
+            if (arg.equals("nosave")) {
                 save = false;
+                break;
             }
         }
 
@@ -131,5 +115,4 @@ public class RaytracerSimple {
             instance.offlineExecution(args[0], save);
         }
     }
-
 }

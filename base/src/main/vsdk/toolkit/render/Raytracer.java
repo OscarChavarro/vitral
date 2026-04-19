@@ -27,6 +27,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.ProgressMonitor;
 
@@ -44,7 +45,7 @@ public class Raytracer extends RenderingElement {
     private Vector3D static_tmp;
     private Vector3D static_poffset;
     private Ray static_shadowRay;
-    private GeometryIntersectionInformation static_info;
+    private RayHit static_info;
     private static final double TINY = 0.0001;
 
     public Raytracer()
@@ -53,7 +54,7 @@ public class Raytracer extends RenderingElement {
         static_tmp = new Vector3D();
         static_poffset = new Vector3D();
         static_shadowRay = new Ray();
-        static_info = new GeometryIntersectionInformation();
+        static_info = new RayHit();
     }
 
     /*
@@ -73,7 +74,7 @@ public class Raytracer extends RenderingElement {
     calculation... it is non sense to always be <0, 1, 0>.
     */
     private void evaluateIlluminationModel(
-        GeometryIntersectionInformation info, Vector3D viewVector, 
+        RayHit info, Vector3D viewVector, 
         ArrayList <Light> lights, ArrayList <SimpleBody> objects,
         Background background,
         Material material, RendererConfiguration inQualitySelection,
@@ -159,7 +160,8 @@ public class Raytracer extends RenderingElement {
                     info.p.z() + VSDK.EPSILON*l.z());
                 static_shadowRay = static_shadowRay.withOrigin(Vector3D.copyOf(static_poffset));
                 static_shadowRay = static_shadowRay.withDirection(l.normalized());
-                nearestObject = selectNearestThingInRayDirection(static_shadowRay, objects);
+                RayHit shadowHit = new RayHit();
+                nearestObject = selectNearestThingInRayDirection(static_shadowRay, objects, shadowHit);
                 if ( nearestObject != null ) {
                     //delete l;
                     continue;
@@ -220,17 +222,15 @@ public class Raytracer extends RenderingElement {
                 //delete poffset;
 
                 nearestObject = 
-                    selectNearestThingInRayDirection(reflected_ray, objects);
+                    selectNearestThingInRayDirection(reflected_ray, objects, new RayHit());
                 if ( nearestObject != null ) {
-                    Ray reflectedHit = nearestObject.doIntersection(reflected_ray);
-                    if ( reflectedHit != null ) {
+                    RayHit reflectedHit = new RayHit();
+                    if ( nearestObject.doIntersection(reflected_ray, reflectedHit) ) {
                         Vector3D rv = new Vector3D();
-                        GeometryIntersectionInformation subInfo = 
-                            new GeometryIntersectionInformation();
+                        RayHit subInfo = new RayHit();
 
                         //--------------------------------------------------------
-                        nearestObject.doExtraInformation(
-                            reflectedHit, reflectedHit.t(), subInfo);
+                        subInfo.clone(reflectedHit);
 
                     //-----
                     if ( !inQualitySelection.isTextureSet() ) {
@@ -250,9 +250,9 @@ public class Raytracer extends RenderingElement {
                     //--------------------------------------------------------
 
                         rv = new Vector3D(
-                            -reflectedHit.direction().x(),
-                            -reflectedHit.direction().y(),
-                            -reflectedHit.direction().z());
+                            -reflectedHit.ray().direction().x(),
+                            -reflectedHit.ray().direction().y(),
+                            -reflectedHit.ray().direction().z());
                         ColorRgb rcolor = new ColorRgb();
                         evaluateIlluminationModel(subInfo, rv, lights, objects, 
                                                   background, material, 
@@ -302,7 +302,8 @@ public class Raytracer extends RenderingElement {
     and its combination with geometric transformations.
     */
     private SimpleBody 
-    selectNearestThingInRayDirection(Ray inOut_Ray, ArrayList <SimpleBody> inSimpleBodiesArray) {
+    selectNearestThingInRayDirection(
+        Ray inOut_Ray, ArrayList <SimpleBody> inSimpleBodiesArray, RayHit outHit) {
         int i;
         SimpleBody gi;
         SimpleBody nearestObject;
@@ -313,12 +314,15 @@ public class Raytracer extends RenderingElement {
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             Ray candidateRay = inOut_Ray.withT(Double.MAX_VALUE);
             gi = inSimpleBodiesArray.get(i);
-            Ray hit = gi.doIntersection(candidateRay);
-            if ( hit != null &&
-                 hit.t() < nearestDistance &&
-                 hit.t() > VSDK.EPSILON ) {
-                nearestDistance = hit.t();
-                inOut_Ray = hit;
+            RayHit hit = new RayHit();
+            if ( gi.doIntersection(candidateRay, hit) &&
+                 hit.ray().t() < nearestDistance &&
+                 hit.ray().t() > VSDK.EPSILON ) {
+                nearestDistance = hit.ray().t();
+                inOut_Ray = hit.ray();
+                if ( outHit != null ) {
+                    outHit.clone(hit);
+                }
                 nearestObject = gi;
             }
         }
@@ -341,16 +345,12 @@ public class Raytracer extends RenderingElement {
                                ColorRgb outColor)
     {
         SimpleBody nearestObject;
-        Ray myRay;
+        RayHit hitInfo = new RayHit();
 
-        nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray);
+        nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray, hitInfo);
         if ( nearestObject != null ) {
-            Ray hitRay = nearestObject.doIntersection(inRay);
-            if ( hitRay == null ) {
-                return;
-            }
             //------------------------------------------------------------
-            nearestObject.doExtraInformation(hitRay, hitRay.t(), static_info);
+            static_info.clone(hitInfo);
             //-----
             if ( !inQualitySelection.isTextureSet() ) {
                 static_info.texture = null;
@@ -368,9 +368,9 @@ public class Raytracer extends RenderingElement {
 
             //------------------------------------------------------------
             Vector3D viewVector = new Vector3D(
-                -hitRay.direction().x(),
-                -hitRay.direction().y(),
-                -hitRay.direction().z());
+                -hitInfo.ray().direction().x(),
+                -hitInfo.ray().direction().y(),
+                -hitInfo.ray().direction().z());
 
             Material material;
             if ( static_info.material != null ) {

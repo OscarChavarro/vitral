@@ -12,6 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -294,6 +295,86 @@ public class Cone extends Solid {
         }
     
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inOutRay, RayHit outHit)
+    {
+        Ray bodyRay = new Ray(inOutRay);
+        Ray tap1Ray = new Ray(inOutRay);
+        Ray tap2Ray = new Ray(inOutRay);
+        GeometryIntersectionInformation infoTap1 = new GeometryIntersectionInformation();
+        GeometryIntersectionInformation infoTap2 = new GeometryIntersectionInformation();
+        GeometryIntersectionInformation infoBody = new GeometryIntersectionInformation();
+        Ray bodyHit;
+        Ray tap1Hit;
+        Ray tap2Hit;
+        Ray winner = null;
+        GeometryIntersectionInformation winnerInfo = null;
+
+        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+            bodyHit = doIntersectionCone(bodyRay, r1, h, infoBody);
+            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
+            if ( (tap1Hit != null && bodyHit == null) ||
+                 (tap1Hit != null && bodyHit != null && (tap1Hit.t() < bodyHit.t())) ) {
+                infoTap1.n = infoTap1.n.multiply(-1);
+                winner = inOutRay.withT(tap1Hit.t());
+                winnerInfo = infoTap1;
+            }
+            else if ( bodyHit != null ) {
+                winner = inOutRay.withT(bodyHit.t());
+                winnerInfo = infoBody;
+            }
+        }
+        else if ( VSDK.equals(r1, r2) ) {
+            int nearest = -1;
+            bodyHit = doIntersectionCylinder(bodyRay, r1, h, infoBody);
+            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
+            tap2Hit = doIntersectionTap(tap2Ray, r1, h, infoTap2);
+
+            if ( bodyHit != null &&
+                 ((tap1Hit != null && (bodyHit.t() < tap1Hit.t())) || tap1Hit == null) &&
+                 ((tap2Hit != null && (bodyHit.t() < tap2Hit.t())) || tap2Hit == null) ) {
+                nearest = 1;
+            }
+            else if ( tap1Hit != null &&
+                      (bodyHit != null && (tap1Hit.t() < bodyHit.t()) || bodyHit == null) &&
+                      (tap2Hit != null && (tap1Hit.t() < tap2Hit.t()) || tap2Hit == null) ) {
+                nearest = 3;
+            }
+            else if ( tap2Hit != null ) {
+                nearest = 2;
+            }
+
+            if ( nearest == 1 ) {
+                winner = inOutRay.withT(bodyHit.t());
+                winnerInfo = infoBody;
+            }
+            else if ( nearest == 2 ) {
+                winner = inOutRay.withT(tap2Hit.t());
+                winnerInfo = infoTap2;
+            }
+            else if ( nearest == 3 ) {
+                winner = inOutRay.withT(tap1Hit.t());
+                winnerInfo = infoTap1;
+            }
+        }
+
+        if ( winner == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(winner);
+            outHit.p = new Vector3D(winnerInfo.p);
+            outHit.n = new Vector3D(winnerInfo.n).normalized();
+            outHit.t = new Vector3D(winnerInfo.t);
+            outHit.u = winnerInfo.u;
+            outHit.v = winnerInfo.v;
+            outHit.material = winnerInfo.material;
+            outHit.texture = winnerInfo.texture;
+            outHit.normalMap = winnerInfo.normalMap;
+        }
+        return true;
     }
 
     /**

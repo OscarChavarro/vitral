@@ -2,6 +2,7 @@ package vsdk.toolkit.environment.geometry;
 import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
@@ -32,6 +33,9 @@ public class GeometryIntersectionInformation extends FundamentalEntity {
     // This can be null.
     public NormalMap normalMap; // Internal geometry selected texture map
 
+    // This can be null for miss results.
+    private Ray ray; // Intersected ray with valid t at hit point
+
     public GeometryIntersectionInformation() 
     {
         p = new Vector3D();
@@ -40,6 +44,7 @@ public class GeometryIntersectionInformation extends FundamentalEntity {
         material = null;
         texture = null;
         normalMap = null;
+        ray = null;
     }
 
     public GeometryIntersectionInformation(GeometryIntersectionInformation b) 
@@ -51,10 +56,22 @@ public class GeometryIntersectionInformation extends FundamentalEntity {
     {
         this.p = new Vector3D(other.p);
         this.n = new Vector3D(other.n);
+        this.t = new Vector3D(other.t);
         this.u = other.u;
         this.v = other.v;
         this.material = other.material;
         this.texture = other.texture;
         this.normalMap = other.normalMap;
+        this.ray = other.ray != null ? Ray.copyOf(other.ray) : null;
+    }
+
+    public Ray ray()
+    {
+        return ray;
+    }
+
+    public void setRay(Ray ray)
+    {
+        this.ray = ray != null ? Ray.copyOf(ray) : null;
     }
 }

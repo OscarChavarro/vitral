@@ -9,6 +9,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class Sphere extends Solid {
@@ -87,6 +88,20 @@ public class Sphere extends Solid {
         }
 
         return inout_rayo.withT(t);
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     /**

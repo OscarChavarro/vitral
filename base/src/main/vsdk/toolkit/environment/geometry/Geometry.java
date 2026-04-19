@@ -96,6 +96,26 @@ public abstract class Geometry extends Entity {
     public abstract Ray doIntersection(Ray inOut_ray);
 
     /**
+    New preferred intersection API: receives an immutable input ray and fills
+    a RayHit structure with the intersection result.
+    @param inRay immutable input ray
+    @param outHit intersection output holder, can be null
+    @return true when an intersection exists
+    */
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
+    }
+
+    /**
     This method returns the number of front facing surface elements (with
     respect to `origin`) between the `origin` point and the `p` point. The
     internal working of this method is usually related with the

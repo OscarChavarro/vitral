@@ -11,6 +11,7 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 
 public class SimpleBody extends Entity {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -210,6 +211,15 @@ public class SimpleBody extends Entity {
     */
     public final Ray doIntersection(Ray inOutRay)
     {
+        RayHit hit = new RayHit();
+        if ( doIntersection(inOutRay, hit) ) {
+            return hit.ray();
+        }
+        return null;
+    }
+
+    public final boolean doIntersection(Ray inOutRay, RayHit outHit)
+    {
         // Take in to account current body geometric transformations...
         _static_vector3d = inOutRay.origin().subtract(position);
         _static_ray = _static_ray.withOrigin(rotation_i.multiply(_static_vector3d));
@@ -217,12 +227,18 @@ public class SimpleBody extends Entity {
         _static_ray = _static_ray.withT(inOutRay.t());
 
         // ... and compute doIntersection operation on object's coordinates
-        Ray hit = geometry.doIntersection(_static_ray);
-        if ( hit != null ) {
-            return inOutRay.withT(hit.t());
+        RayHit localHit = new RayHit();
+        if ( geometry.doIntersection(_static_ray, localHit) ) {
+            if ( outHit != null ) {
+                outHit.clone(localHit);
+                Ray worldRay = inOutRay.withT(localHit.ray().t());
+                outHit.setRay(worldRay);
+                outHit.p = rotation.multiply(localHit.p).add(position);
+                outHit.n = rotation.multiply(localHit.n);
+            }
+            return true;
         }
-
-        return null;
+        return false;
     }
 
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
