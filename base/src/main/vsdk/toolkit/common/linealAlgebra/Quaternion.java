@@ -2,9 +2,15 @@ package vsdk.toolkit.common.linealAlgebra;
 
 import java.io.Serial;
 import java.util.Objects;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 
+/**
+Represents a quaternion in vector-scalar form.
+
+<p>For rotation use cases the quaternion is expected to have unit length.
+*/
 public final class Quaternion extends FundamentalEntity
 {
     @Serial
@@ -35,20 +41,59 @@ public final class Quaternion extends FundamentalEntity
         return new Quaternion(Objects.requireNonNull(other, "Quaternion to copy cannot be null"));
     }
 
-    public double length()
+    /**
+    @return the squared Euclidean norm of this quaternion
+    */
+    public double lengthSquared()
     {
         return magnitude * magnitude + direction.dotProduct(direction);
     }
 
+    /**
+    @return the Euclidean norm of this quaternion
+    */
+    public double length()
+    {
+        return Math.sqrt(lengthSquared());
+    }
+
+    /**
+    @return a normalized quaternion, or this quaternion if its norm is near zero
+    */
     public Quaternion normalized()
     {
-        double l;
-
-        l = length();
+        double l = length();
         if ( Math.abs(l) < VSDK.EPSILON ) {
             return this;
         }
         return new Quaternion(direction.multiply(1/l), magnitude * (1/l));
+    }
+
+    /**
+    @return the quaternion conjugate
+    */
+    public Quaternion conjugated()
+    {
+        return new Quaternion(direction.multiply(-1), magnitude);
+    }
+
+    /**
+    Rotates the given vector by this quaternion.
+
+    <p>This method assumes the quaternion has unit length. Callers on hot
+    paths should normalize once when caching the quaternion and reuse it.
+
+    @param vector vector to rotate
+    @return rotated vector
+    */
+    public Vector3D rotate(Vector3D vector)
+    {
+        Vector3D normalizedAxis = direction;
+        Vector3D uv = normalizedAxis.crossProduct(
+            Objects.requireNonNull(vector, "Vector to rotate cannot be null"));
+        Vector3D uuv = normalizedAxis.crossProduct(uv);
+
+        return vector.add(uv.multiply(2 * magnitude)).add(uuv.multiply(2));
     }
 
     public Quaternion withDirection(Vector3D newDirection)

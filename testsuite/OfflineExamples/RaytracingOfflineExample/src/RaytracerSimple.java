@@ -1,11 +1,8 @@
 /**
-An instructional Ray-Tracing Renderer written
-for MIT 6.837  Fall '98 by Leonard McMillan.
+An instructional Ray-Tracing Renderer written for MIT 6.837  Fall '98 by Leonard McMillan.
 Modified by Tomas Lozano-Perez for Fall '01
 Modified by Oscar Chavarro for Spring '04
-FUSM 05061.
-Modified by Oscar Chavarro for PUJ Vitral
-VSDK '05, '06, '10
+Modified by Oscar Chavarro for PUJ Vitral '05, '06, '10
 */
 
 // Java classes
@@ -28,7 +25,7 @@ import vsdk.toolkit.io.geometry.ReaderMitScene;
 public class RaytracerSimple {
     private static final String NO_SAVE_FLAG = "nosave";
     private static final String DEFAULT_SCENE_FILE =
-        "../../../etc/geometry/mitscenes/object.ray";
+        "../../../etc/geometry/mitscenes/balls.ray";
     private static final String SCENE_SAMPLES_PATH =
         "../../../etc/geometry/mitscenes/";
     private static final String OUTPUT_FILE_NAME = "./output.ppm";

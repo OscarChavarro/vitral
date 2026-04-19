@@ -50,6 +50,10 @@ public class ReaderMitScene extends PersistenceElement
 {
     // Debug flag
     private static final boolean showDebugMessages = false;
+    private static final Vector3D DEFAULT_MIT_EYE = new Vector3D(0, 0, 10);
+    private static final Vector3D DEFAULT_MIT_LOOKAT = new Vector3D(0, 0, 0);
+    private static final Vector3D DEFAULT_MIT_UP = new Vector3D(0, 1, 0);
+    private static final double DEFAULT_MIT_HORIZONTAL_FOV = 30;
 
     // Simple scene
     public Camera currentCamera;
@@ -67,6 +71,11 @@ public class ReaderMitScene extends PersistenceElement
 
         viewportXSize = 320;
         viewportYSize = 240;
+        configureCurrentCameraFromMitView(
+            DEFAULT_MIT_EYE,
+            DEFAULT_MIT_LOOKAT,
+            DEFAULT_MIT_UP,
+            DEFAULT_MIT_HORIZONTAL_FOV);
     }
 
     private void
@@ -86,6 +95,34 @@ public class ReaderMitScene extends PersistenceElement
         return st.nval;
     }
 
+    private double
+    convertMitHorizontalFovToVertical(double horizontalFov)
+    {
+        if ( viewportXSize <= 0 || viewportYSize <= 0 ) {
+            return horizontalFov;
+        }
+
+        double aspect = (double)viewportXSize / (double)viewportYSize;
+        double horizontalHalfAngle = Math.toRadians(horizontalFov / 2.0);
+        double verticalHalfAngle = Math.atan(Math.tan(horizontalHalfAngle) / aspect);
+
+        return Math.toDegrees(2.0 * verticalHalfAngle);
+    }
+
+    private void
+    configureCurrentCameraFromMitView(
+        Vector3D eye,
+        Vector3D lookAt,
+        Vector3D up,
+        double horizontalFov)
+    {
+        currentCamera.setPosition(eye);
+        currentCamera.setUpDirect(up);
+        currentCamera.setFocusedPositionMaintainingOrthogonality(lookAt);
+        currentCamera.setFov(convertMitHorizontalFovToVertical(horizontalFov));
+        currentCamera.updateViewportResize(viewportXSize, viewportYSize);
+    }
+
     public void
     importEnvironment(InputStream is, SimpleScene theScene) throws Exception {
         Reader parsero = new BufferedReader(new InputStreamReader(is));
@@ -93,6 +130,16 @@ public class ReaderMitScene extends PersistenceElement
         st.commentChar('#');
         boolean fin_de_lectura = false;
         Material currentMaterial;
+        Vector3D importedEye = DEFAULT_MIT_EYE;
+        Vector3D importedLookAt = DEFAULT_MIT_LOOKAT;
+        Vector3D importedUp = DEFAULT_MIT_UP;
+        double importedHorizontalFov = DEFAULT_MIT_HORIZONTAL_FOV;
+
+        configureCurrentCameraFromMitView(
+            importedEye,
+            importedLookAt,
+            importedUp,
+            importedHorizontalFov);
 
         // Material por defecto...
         /*
@@ -103,7 +150,7 @@ public class ReaderMitScene extends PersistenceElement
         currentMaterial = new Material();
         currentMaterial.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
         currentMaterial.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
-        currentMaterial.setSpecular(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
+        currentMaterial.setSpecular(new ColorRgb(0.4, 0.4, 0.4));
         currentMaterial.setReflectionCoefficient(0);
         currentMaterial.setRefractionCoefficient(0);
         currentMaterial.setPhongExponent(10);
@@ -190,28 +237,53 @@ public class ReaderMitScene extends PersistenceElement
 
                   viewportXSize = (int)readNumber(st);
                   viewportYSize = (int)readNumber(st);
+                  configureCurrentCameraFromMitView(
+                      importedEye,
+                      importedLookAt,
+                      importedUp,
+                      importedHorizontalFov);
                 }
                 else if (st.sval.equals("eye")) {
                   showDebugMessage("eye");
-                  currentCamera.setPosition(new Vector3D(readNumber(st), 
-                                                  readNumber(st), 
-                                                  readNumber(st)));
+                  importedEye = new Vector3D(readNumber(st),
+                                             readNumber(st),
+                                             readNumber(st));
+                  configureCurrentCameraFromMitView(
+                      importedEye,
+                      importedLookAt,
+                      importedUp,
+                      importedHorizontalFov);
                 }
                 else if (st.sval.equals("lookat")) {
                   showDebugMessage("lookat");
-                  currentCamera.setFocusedPositionMaintainingOrthogonality(new Vector3D(readNumber(st), 
-                                                      readNumber(st), 
-                                                      readNumber(st)));
+                  importedLookAt = new Vector3D(readNumber(st),
+                                                readNumber(st),
+                                                readNumber(st));
+                  configureCurrentCameraFromMitView(
+                      importedEye,
+                      importedLookAt,
+                      importedUp,
+                      importedHorizontalFov);
                 }
                 else if (st.sval.equals("up")) {
                   showDebugMessage("up");
-                  currentCamera.setUpDirect(new Vector3D(readNumber(st), 
-                                            readNumber(st), 
-                                            readNumber(st)));
+                  importedUp = new Vector3D(readNumber(st),
+                                            readNumber(st),
+                                            readNumber(st));
+                  configureCurrentCameraFromMitView(
+                      importedEye,
+                      importedLookAt,
+                      importedUp,
+                      importedHorizontalFov);
                 }
                 else if (st.sval.equals("fov")) {
                   showDebugMessage("fov");
-                  currentCamera.setFov(readNumber(st));
+                  importedHorizontalFov = readNumber(st);
+                  configureCurrentCameraFromMitView(
+                      importedEye,
+                      importedLookAt,
+                      importedUp,
+                      importedHorizontalFov);
                 }
                 else if (st.sval.equals("background")) {
                   showDebugMessage("background");
@@ -316,7 +388,7 @@ public class ReaderMitScene extends PersistenceElement
                   currentMaterial = new Material();
                   currentMaterial.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
                   currentMaterial.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
-                  currentMaterial.setSpecular(new ColorRgb(r*ks, g*ks, b*ks));
+                  currentMaterial.setSpecular(new ColorRgb(ks, ks, ks));
                   currentMaterial.setPhongExponent(ns);
                   currentMaterial.setReflectionCoefficient(kr);
                   currentMaterial.setRefractionCoefficient(kt);
@@ -334,15 +406,11 @@ public class ReaderMitScene extends PersistenceElement
             throw new IOException(st.toString());
         }
 
-        Vector3D l, f, u;
-
-        f = new Vector3D(currentCamera.getFront());
-        u = new Vector3D(currentCamera.getUp());
-        l = new Vector3D(f.crossProduct(u));
-        l = l.multiply(-1);
-        l = l.normalized();
-
-        currentCamera.setLeftDirect( l );
+        configureCurrentCameraFromMitView(
+            importedEye,
+            importedLookAt,
+            importedUp,
+            importedHorizontalFov);
 
         theScene.addBackground(currentBackground);
         theScene.addCamera(currentCamera);

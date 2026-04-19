@@ -9,7 +9,7 @@
 //=   rayable objects, with geometries implementing intersection operation  =
 //=   in an object-coordinate basis.                                        =
 //=   for inclusion of sub-viewport spec.                                   =
-//=   submaterials inside geometry.                                         =
+//=   sub-materials inside geometry.                                         =
 
 package vsdk.toolkit.render;
 
@@ -42,6 +42,7 @@ a "Strategy" design pattern.
 */
 public class Raytracer extends RenderingElement {
     private static final double TINY = 0.0001;
+    private static final int MAX_RECURSION_LEVEL = 8;
 
     public Raytracer()
     {
@@ -245,8 +246,16 @@ public class Raytracer extends RenderingElement {
                             -reflectedHit.ray().direction().y(),
                             -reflectedHit.ray().direction().z());
                         ColorRgb rcolor = new ColorRgb();
+                        Material reflectedMaterial;
+
+                        if ( subInfo.material != null ) {
+                            reflectedMaterial = subInfo.material;
+                        }
+                        else {
+                            reflectedMaterial = nearestObject.getMaterial();
+                        }
                         evaluateIlluminationModel(subInfo, rv, lights, objects, 
-                                                  background, material, 
+                                                  background, reflectedMaterial,
                                                   inQualitySelection,
                                                   recursions - 1,
                                                   rcolor);
@@ -256,17 +265,21 @@ public class Raytracer extends RenderingElement {
                         outColor.b += kr*rcolor.b;
                     }
                     else {
-                        outColor.r += kr*backgroundColor.r;
-                        outColor.g += kr*backgroundColor.g;
-                        outColor.b += kr*backgroundColor.b;
+                        ColorRgb reflectedBackground =
+                            background.colorInDireccion(reflect.normalized());
+                        outColor.r += kr*reflectedBackground.r;
+                        outColor.g += kr*reflectedBackground.g;
+                        outColor.b += kr*reflectedBackground.b;
                     }
 
                     //delete subInfo;
                   }
                   else {
-                    outColor.r += kr*backgroundColor.r;
-                    outColor.g += kr*backgroundColor.g;
-                    outColor.b += kr*backgroundColor.b;
+                    ColorRgb reflectedBackground =
+                        background.colorInDireccion(reflect.normalized());
+                    outColor.r += kr*reflectedBackground.r;
+                    outColor.g += kr*reflectedBackground.g;
+                    outColor.b += kr*reflectedBackground.b;
                 }
             }
         }
@@ -373,7 +386,7 @@ public class Raytracer extends RenderingElement {
 
             evaluateIlluminationModel(
                 shadingInfo, viewVector, inLightsArray, inSimpleBodiesArray, in_background, material,
-                inQualitySelection, 3, outColor);
+                inQualitySelection, MAX_RECURSION_LEVEL, outColor);
             //delete viewVector;
           }
           else {
