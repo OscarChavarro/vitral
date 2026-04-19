@@ -83,7 +83,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
         cameraController = new CameraControllerAquynza(camera);
 
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(130), Math.toRadians(-30), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(130), Math.toRadians(-30), 0);
         camera.setPosition(new Vector3D(1.25, -1.25, 1));
         camera.setRotation(R);
 

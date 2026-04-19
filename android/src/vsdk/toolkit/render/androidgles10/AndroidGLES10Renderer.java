@@ -428,7 +428,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
         final int currentPos[] = new int[2];
         RGBAImage glyphMap = null;
 
-        Matrix4x4 glyphTextureTransform = new Matrix4x4();
+        Matrix4x4[] glyphTextureTransform = {new Matrix4x4()};
         ColorRgb fg = characterStyle.getForegroundColor();
         ColorRgb bg = characterStyle.getBackgroundColor();
         int fontSize = characterStyle.getFontSize();
@@ -447,42 +447,42 @@ public class AndroidGLES10Renderer extends RenderingElement {
         if ( glyphMap == null ) {
             char c;
             for ( c = 'A'; c <= 'Z'; c++ ) {
-                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap = AndroidSystem.addGlyphToFontMap(
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = new Matrix4x4(glyphTextureTransform);
+                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
             }
             for ( c = 'a'; c <= 'z'; c++ ) {
-                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap = AndroidSystem.addGlyphToFontMap(
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = new Matrix4x4(glyphTextureTransform);
+                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
             }
             for ( c = '0'; c <= '9'; c++ ) {
-                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap = AndroidSystem.addGlyphToFontMap(
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = new Matrix4x4(glyphTextureTransform);
+                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
             }
             for ( i = 0; i < symbols.length; i++ ) {
                 c = symbols[i];
-                glyphMap = AndroidSystem.addGlyphToFontMap(
+                    glyphMap = AndroidSystem.addGlyphToFontMap(
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = new Matrix4x4(glyphTextureTransform);
+                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
@@ -527,8 +527,8 @@ public class AndroidGLES10Renderer extends RenderingElement {
                 Matrix4x4 M;
                 M = characterTransformCaches.get(key);
                 img = characterSpriteCaches.get(key);
-                sx = (float)M.M[0][0];
-                sy = (float)M.M[1][1];
+                sx = (float)M.get(0, 0);
+                sy = (float)M.get(1, 1);
 
                 GLES10.glMatrixMode(GLES10.GL_TEXTURE);
                 GLES10.glPushMatrix();

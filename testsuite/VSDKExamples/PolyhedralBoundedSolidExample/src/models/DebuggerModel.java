@@ -59,7 +59,7 @@ public class DebuggerModel
         camera = new Camera();
         camera.setPosition(new Vector3D(2, -1, 2));
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
         camera.setRotation(R);
 
         quality = new RendererConfiguration();

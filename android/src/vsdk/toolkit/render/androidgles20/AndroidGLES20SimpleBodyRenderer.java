@@ -27,8 +27,8 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
         Vector3D p = b.getPosition();
         Vector3D s = b.getScale();
 
-        S.scale(s);
-        T.translation(p);
+        S = S.scale(s);
+        T = T.translation(p);
         Matrix4x4 M;
 
         M = T.multiply(R.multiply(S));

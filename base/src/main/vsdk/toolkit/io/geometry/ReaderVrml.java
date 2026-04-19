@@ -446,7 +446,7 @@ public class ReaderVrml extends PersistenceElement
             i++;
         } while ( tokenType != StreamTokenizer.TT_EOF && i <= 3 );
 
-        R.axisRotation(vals[3], vals[0], vals[1], vals[2]);
+        R = R.axisRotation(vals[3], vals[0], vals[1], vals[2]);
         return R;
     }
 
@@ -684,16 +684,10 @@ public class ReaderVrml extends PersistenceElement
         int level = 0;
         SimpleBody thing;
         Matrix4x4 R = new Matrix4x4(M);
-        Vector3D position = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
+        Vector3D position = M.extractTranslation();
         Geometry g = null;
 
-        R.M[0][3] = 0.0;
-        R.M[1][3] = 0.0;
-        R.M[2][3] = 0.0;
-        R.M[3][0] = 0.0;
-        R.M[3][1] = 0.0;
-        R.M[3][2] = 0.0;
-        R.M[3][3] = 1.0;
+        R = R.withoutTranslation();
 
         thing = new SimpleBody();
         thing.setPosition(position);

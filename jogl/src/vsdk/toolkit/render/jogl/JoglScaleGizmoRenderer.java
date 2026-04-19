@@ -16,10 +16,7 @@ public class JoglScaleGizmoRenderer extends JoglRenderer
         Matrix4x4 R;
 
         R = new Matrix4x4(gizmo.getTransformationMatrix());
-
-        R.M[0][3] = position.x();
-        R.M[1][3] = position.y();
-        R.M[2][3] = position.z();
+        R = R.withTranslation(position);
 
         gl.glLineWidth(3);
         JoglMatrixRenderer.draw(gl, R);

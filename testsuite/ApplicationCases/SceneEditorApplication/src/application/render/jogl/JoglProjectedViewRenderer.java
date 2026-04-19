@@ -81,74 +81,74 @@ public class JoglProjectedViewRenderer {
         switch( cameraConfig ) {
           case 1:
             position = new Vector3D(0, -10, 0);
-            R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
             break;
           case 2:
             position = new Vector3D(-10, 0, 0);
             break;
           case 3:
             position = new Vector3D(0, 0, -10);
-            R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(90), 0);
+            R = R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(90), 0);
             break;
           case 4:
             position = new Vector3D(-10, -10, 10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(45), -cornerAngle, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(45), -cornerAngle, 0);
             break;
           case 5:
             position = new Vector3D(10, -10, 10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(135), -cornerAngle, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(135), -cornerAngle, 0);
             break;
           case 6:
             position = new Vector3D(10, 10, 10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(-135), -cornerAngle, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(-135), -cornerAngle, 0);
             break;
           case 7:
             position = new Vector3D(-10, 10, 10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(-45), -cornerAngle, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(-45), -cornerAngle, 0);
             break;
           case 8:
             position = new Vector3D(0, 10, -10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(45), 0);
+            R = R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(45), 0);
             break;
           case 9:
             position = new Vector3D(-10, 0, -10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(0), Math.toRadians(45), 0);
+            R = R.eulerAnglesRotation(Math.toRadians(0), Math.toRadians(45), 0);
             break;
           case 10:
             position = new Vector3D(0, -10, -10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(45), 0);
+            R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(45), 0);
             break;
           case 11:
             position = new Vector3D(10, 0, -10);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(180), Math.toRadians(45), 0);
+            R = R.eulerAnglesRotation(Math.toRadians(180), Math.toRadians(45), 0);
             break;
           case 12:
             position = new Vector3D(10, -10, 0);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(135), 0, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(135), 0, 0);
             break;
           case 13:
             position = new Vector3D(10, 10, 0);
             position = position.normalized();
             position = position.multiply(10);
-            R.eulerAnglesRotation(Math.toRadians(180+45), 0, 0);
+            R = R.eulerAnglesRotation(Math.toRadians(180+45), 0, 0);
             break;
           default:
             break;

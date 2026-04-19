@@ -357,16 +357,16 @@ public class Camera extends Entity
 
         // Warning: near plane clipping
         VRP = eyePosition.add(front.multiply(nearPlaneDistance));
-        T1.translation(VRP.multiply(-1));
+        T1 = T1.translation(VRP.multiply(-1));
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
         //    become the -z axis
         Matrix4x4 R1;
         R1 = getRotation();
-        R1.invert();
+        R1 = R1.invert();
         
         Matrix4x4 R2 = new Matrix4x4();
-        R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R2 = R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         Matrix4x4 RTOTAL = R2.multiply(R1);
 
         //System.out.println("----------------------");
@@ -378,7 +378,7 @@ public class Camera extends Entity
         
         // 3. Translate such that the center of projection is at the origin
         Matrix4x4 T2 = new Matrix4x4();
-        T2.translation(0, 0, -nearPlaneDistance);
+        T2 = T2.translation(0, 0, -nearPlaneDistance);
 
         // 4. Shear such that the center line of the view volume becomes the
         //    z axis
@@ -394,18 +394,18 @@ public class Camera extends Entity
         // planes to fix 45 degrees in u and v directions
         ddx = rightWithScale.length();
         ddy = upWithScale.length();
-        S1.scale(ddx, ddy, 1);
-        S1.invert();
+        S1 = S1.scale(ddx, ddy, 1);
+        S1 = S1.invert();
         
         // 5.2. Proportional scaling to adjust near / far clipping planes
         // maintaining the piramid form
         //ddz = 2.0/(farPlaneDistance - nearPlaneDistance);
-        //S2.scale(1, 1, ddz);
-        //S2.invert();
+        //S2 = S2.scale(1, 1, ddz);
+        //S2 = S2.invert();
 
         // Compose final transformation
         Matrix4x4 T3 = new Matrix4x4();
-        //T3.translation(0, 0, nearPlaneDistance);
+        //T3 = T3.translation(0, 0, nearPlaneDistance);
         
         normalizingTransformation = 
             T3.multiply(S2.multiply(S1.multiply(T2.multiply(RTOTAL.multiply(T1)))));
@@ -484,31 +484,29 @@ public class Camera extends Entity
 
     public void setRotation(Matrix4x4 R)
     {
-        up = up.withX(R.M[0][2]);
-        up = up.withY(R.M[1][2]);
-        up = up.withZ(R.M[2][2]);
+        up = up.withX(R.get(0, 2));
+        up = up.withY(R.get(1, 2));
+        up = up.withZ(R.get(2, 2));
         up = up.normalized();
 
-        front = front.withX(R.M[0][0]);
-        front = front.withY(R.M[1][0]);
-        front = front.withZ(R.M[2][0]);
+        front = front.withX(R.get(0, 0));
+        front = front.withY(R.get(1, 0));
+        front = front.withZ(R.get(2, 0));
         front = front.normalized();
 
-        left = left.withX(R.M[0][1]);
-        left = left.withY(R.M[1][1]);
-        left = left.withZ(R.M[2][1]);
+        left = left.withX(R.get(0, 1));
+        left = left.withY(R.get(1, 1));
+        left = left.withZ(R.get(2, 1));
         left = left.normalized();
     }
 
     public Matrix4x4 getRotation()
     {
         //------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
-
-        R.identity();
-        R.M[0][0] = front.x(); R.M[0][1] = left.x(); R.M[0][2] = up.x();
-        R.M[1][0] = front.y(); R.M[1][1] = left.y(); R.M[1][2] = up.y();
-        R.M[2][0] = front.z(); R.M[2][1] = left.z(); R.M[2][2] = up.z();
+        Matrix4x4 R = new Matrix4x4()
+            .withVal(0, 0, front.x()).withVal(0, 1, left.x()).withVal(0, 2, up.x())
+            .withVal(1, 0, front.y()).withVal(1, 1, left.y()).withVal(1, 2, up.y())
+            .withVal(2, 0, front.z()).withVal(2, 1, left.z()).withVal(2, 2, up.z());
 
         return R;
     }
@@ -526,19 +524,19 @@ public class Camera extends Entity
         aspect = viewportXSize / viewportYSize; 
         switch ( projectionMode ) {
           case Camera.PROJECTION_MODE_ORTHOGONAL:
-            P.orthogonalProjection(-aspect/orthogonalZoom,
-                                    aspect/orthogonalZoom,
-                                   -1/orthogonalZoom, 1/orthogonalZoom,
-                                   nearPlaneDistance, farPlaneDistance);
+            P = P.orthogonalProjection(-aspect/orthogonalZoom,
+                                       aspect/orthogonalZoom,
+                                       -1/orthogonalZoom, 1/orthogonalZoom,
+                                       nearPlaneDistance, farPlaneDistance);
             break;
           case Camera.PROJECTION_MODE_PERSPECTIVE:
             upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
-            P.frustumProjection(leftDistance, rightDistance,
-                                downDistance, upDistance,
-                                nearPlaneDistance, farPlaneDistance);
+            P = P.frustumProjection(leftDistance, rightDistance,
+                                    downDistance, upDistance,
+                                    nearPlaneDistance, farPlaneDistance);
             break;
         }
         return P;
@@ -559,11 +557,11 @@ public class Camera extends Entity
         Matrix4x4 R2 = new Matrix4x4();
 
         R1 = getRotation();
-        R1.invert();
+        R1 = R1.invert();
 
-        T1.translation(-eyePosition.x(), -eyePosition.y(), -eyePosition.z());
-        R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
-        R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
+        T1 = T1.translation(-eyePosition.x(), -eyePosition.y(), -eyePosition.z());
+        R_adic2 = R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
+        R_adic1 = R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
 
         R = R_adic1.multiply(R_adic2.multiply(R1.multiply(T1)));
 
@@ -657,16 +655,16 @@ public class Camera extends Entity
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
-            P.frustumProjection(leftDistance, rightDistance,
-                                downDistance, upDistance,
-                                nearPlaneDistance, farPlaneDistance);
+            P = P.frustumProjection(leftDistance, rightDistance,
+                                    downDistance, upDistance,
+                                    nearPlaneDistance, farPlaneDistance);
             msg = msg + "  - Projection matrix:" + P;
           }
           else if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            P.orthogonalProjection(-aspect/orthogonalZoom, 
-                                    aspect/orthogonalZoom,
-                                   -1/orthogonalZoom, 1/orthogonalZoom,
-                                   nearPlaneDistance, farPlaneDistance);
+            P = P.orthogonalProjection(-aspect/orthogonalZoom, 
+                                       aspect/orthogonalZoom,
+                                       -1/orthogonalZoom, 1/orthogonalZoom,
+                                       nearPlaneDistance, farPlaneDistance);
             msg = msg + "  - Projection matrix:" + P;
         }
 
@@ -738,7 +736,7 @@ public class Camera extends Entity
         Matrix4x4 R = new Matrix4x4();
         Vector3D n;
 
-        R.axisRotation(alpha, up);
+        R = R.axisRotation(alpha, up);
         n = R.multiply(du);
         n = n.normalized();
 
@@ -809,7 +807,7 @@ public class Camera extends Entity
         Matrix4x4 R = new Matrix4x4();
         Vector3D n;
 
-        R.axisRotation(alpha, left);
+        R = R.axisRotation(alpha, left);
         n = R.multiply(dv);
         n = n.normalized();
 
@@ -1569,10 +1567,10 @@ public class Camera extends Entity
         double d = -0.5;
         double h = 0.5;
 
-        T.M[0][0] = a;
-        T.M[1][1] = f;
-        T.M[0][3] = d;
-        T.M[1][3] = h;
+        T = T.withVal(0, 0, a);
+        T = T.withVal(1, 1, f);
+        T = T.withVal(0, 3, d);
+        T = T.withVal(1, 3, h);
 
         return T;
     }

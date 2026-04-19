@@ -70,7 +70,7 @@ KeyListener
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
 
-        R.eulerAnglesRotation(Math.toRadians(110), Math.toRadians(-25), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(110), Math.toRadians(-25), 0);
         camera1 = new Camera();
         camera1.setPosition(new Vector3D(1.5, -5, 2.5));
         camera1.setRotation(R);
@@ -81,7 +81,7 @@ KeyListener
         camera2.setNearPlaneDistance(1);
         camera2.setFarPlaneDistance(3);
         camera2.setFov(90);
-        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera2.setRotation(R);
 
         //-----------------------------------------------------------------
@@ -139,7 +139,7 @@ KeyListener
         }
         cameraMode = TOPVIEW;
         camera1.setPosition(new Vector3D(0, 0, 5));
-        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera1.setRotation(R);
         camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);
@@ -153,7 +153,7 @@ KeyListener
         }
         cameraMode = TOPVIEW;
         camera1.setPosition(new Vector3D(0, -10, 0));
-        R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         camera1.setRotation(R);
         camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);

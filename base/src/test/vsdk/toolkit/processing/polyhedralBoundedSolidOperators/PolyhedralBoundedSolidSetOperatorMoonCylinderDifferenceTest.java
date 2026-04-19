@@ -41,7 +41,7 @@ class PolyhedralBoundedSolidSetOperatorMoonCylinderDifferenceTest
         int originalVertexCount = cylinderA.verticesList.size();
 
         Matrix4x4 translation = new Matrix4x4();
-        translation.translation(CUT_DX, 0.0, CUT_DZ);
+        translation = translation.translation(CUT_DX, 0.0, CUT_DZ);
         cylinderB.applyTransformation(translation);
 
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
@@ -63,7 +63,7 @@ class PolyhedralBoundedSolidSetOperatorMoonCylinderDifferenceTest
             CYLINDER_RADIUS, CYLINDER_RADIUS, CYLINDER_HEIGHT)
                 .exportToPolyhedralBoundedSolid();
         Matrix4x4 move = new Matrix4x4();
-        move.translation(BASE_X, BASE_Y, BASE_Z);
+        move = move.translation(BASE_X, BASE_Y, BASE_Z);
         solid.applyTransformation(move);
         return solid;
     }

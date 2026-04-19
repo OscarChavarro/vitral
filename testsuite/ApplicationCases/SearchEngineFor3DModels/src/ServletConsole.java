@@ -674,7 +674,7 @@ public class ServletConsole extends HttpServlet {
 
         cad = request.getParameter("session");
         if ( cad != null ) {
-            currentSession = currentSession = searchSessionById(Long.parseLong(cad));
+            currentSession = searchSessionById(Long.parseLong(cad));
         }
 
         operation = request.getParameter("input");

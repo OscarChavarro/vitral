@@ -121,7 +121,7 @@ public class CgSimpleUnrestrictedShaderExample
         camera = new Camera();
         camera.setPosition(new Vector3D(0, -4, 0));
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
         camera.setRotation(R);
         camera.setFov(30.0);
 
@@ -213,7 +213,7 @@ public class CgSimpleUnrestrictedShaderExample
             Vector3D axis = new Vector3D(0, -1, 0);
             Matrix4x4 R = new Matrix4x4();
             lightAngle += Math.toRadians(1.0*2);
-            R.axisRotation(lightAngle, axis);
+            R = R.axisRotation(lightAngle, axis);
             lightPosition = R.multiply(lightPosition);
             light.setPosition(lightPosition);
             needPaint = 1;
@@ -327,7 +327,7 @@ public class CgSimpleUnrestrictedShaderExample
                 JoglMatrixRenderer.importJOGL(gl, gl.GL_MODELVIEW_MATRIX));
             MCombined = MProjection.multiply(MModelviewLocal);
             MModelviewLocalIT = MModelviewLocal.inverse();
-            MModelviewLocalIT.transpose();
+            MModelviewLocalIT = MModelviewLocalIT.transpose();
 
             matrixarray = MCombined.exportToDoubleArrayRowOrder();
             CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(

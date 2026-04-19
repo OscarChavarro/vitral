@@ -26,7 +26,7 @@ public class AndroidGLES20MatrixRenderer extends AndroidGLES20Renderer {
         index = 0;
         for ( j = 0; j < 4; j++ ) {
             for ( i = 0; i < 4; i++ ) {
-                transientMatrix[index] = (float)R.M[i][j];
+                transientMatrix[index] = (float)R.get(i, j);
                 index++;
             }
         }

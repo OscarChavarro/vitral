@@ -20,7 +20,7 @@ public class PolyhedralBoundedSolidTestFixtures
         Box box = new Box(new Vector3D(sx, sy, sz));
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
         Matrix4x4 translation = new Matrix4x4();
-        translation.translation(tx, ty, tz);
+        translation = translation.translation(tx, ty, tz);
         solid.applyTransformation(translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;

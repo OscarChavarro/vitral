@@ -20,17 +20,17 @@ public class JoglMatrixRenderer extends JoglRenderer {
     */
     public static Matrix4x4 importJOGL(GL2 gl, int matrixId) {
         double Mgl[] = new double[16];
+        double[][] data = new double[4][4];
 
         int row, column, pos;
 
         gl.glGetDoublev(matrixId, Mgl, 0);
-        Matrix4x4 R = new Matrix4x4();
         for ( pos = 0, column = 0; column < 4; column++ ) {
             for ( row = 0; row < 4; row++, pos++ ) {
-                R.M[row][column] = Mgl[pos];
+                data[row][column] = Mgl[pos];
             }
         }
-        return R;
+        return Matrix4x4.copyOf(data);
     }
 
     /**
@@ -46,7 +46,7 @@ public class JoglMatrixRenderer extends JoglRenderer {
 
         for ( pos = 0, column = 0; column < 4; column++ ) {
             for ( row = 0; row < 4; row++, pos++ ) {
-                Mgl[pos] = A.M[row][column];
+                Mgl[pos] = A.get(row, column);
             }
         }
 
@@ -76,28 +76,28 @@ public class JoglMatrixRenderer extends JoglRenderer {
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glBegin(GL.GL_LINES);
             gl.glColor3d(1, 0, 0);
-            gl.glVertex3d(A.M[0][3],
-                          A.M[1][3],
-                          A.M[2][3]); 
-            gl.glVertex3d(A.M[0][3] + A.M[0][0],
-                          A.M[1][3] + A.M[1][0],
-                          A.M[2][3] + A.M[2][0]);
+            gl.glVertex3d(A.get(0, 3),
+                          A.get(1, 3),
+                          A.get(2, 3)); 
+            gl.glVertex3d(A.get(0, 3) + A.get(0, 0),
+                          A.get(1, 3) + A.get(1, 0),
+                          A.get(2, 3) + A.get(2, 0));
 
             gl.glColor3d(0, 1, 0);
-            gl.glVertex3d(A.M[0][3],
-                          A.M[1][3],
-                          A.M[2][3]); 
-            gl.glVertex3d(A.M[0][3] + A.M[0][1],
-                          A.M[1][3] + A.M[1][1],
-                          A.M[2][3] + A.M[2][1]);
+            gl.glVertex3d(A.get(0, 3),
+                          A.get(1, 3),
+                          A.get(2, 3)); 
+            gl.glVertex3d(A.get(0, 3) + A.get(0, 1),
+                          A.get(1, 3) + A.get(1, 1),
+                          A.get(2, 3) + A.get(2, 1));
 
             gl.glColor3d(0, 0, 1);
-            gl.glVertex3d(A.M[0][3],
-                          A.M[1][3],
-                          A.M[2][3]); 
-            gl.glVertex3d(A.M[0][3] + A.M[0][2],
-                          A.M[1][3] + A.M[1][2],
-                          A.M[2][3] + A.M[2][2]);
+            gl.glVertex3d(A.get(0, 3),
+                          A.get(1, 3),
+                          A.get(2, 3)); 
+            gl.glVertex3d(A.get(0, 3) + A.get(0, 2),
+                          A.get(1, 3) + A.get(1, 2),
+                          A.get(2, 3) + A.get(2, 2));
         gl.glEnd();
         gl.glPopMatrix();
     }

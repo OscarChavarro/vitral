@@ -455,9 +455,9 @@ public class Cone extends Solid {
                     (((double)i) / ((double)heightDivisions));
                 double f = nextRadius / prevRadius;
                 T = new Matrix4x4();
-                T.translation(0.0, 0.0, zStep);
+                T = T.translation(0.0, 0.0, zStep);
                 S = new Matrix4x4();
-                S.scale(f, f, 1.0);
+                S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);
@@ -474,9 +474,9 @@ public class Cone extends Solid {
                     (1.0 - (((double)i) / ((double)heightDivisions)));
                 double f = nextRadius / prevRadius;
                 T = new Matrix4x4();
-                T.translation(0.0, 0.0, zStep);
+                T = T.translation(0.0, 0.0, zStep);
                 S = new Matrix4x4();
-                S.scale(f, f, 1.0);
+                S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);

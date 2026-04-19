@@ -198,7 +198,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         }
 
          // 4. Update camera's internal parameters from local copy
-        //      R.eulerAnglesRotation(yaw, pitch, roll);
+        //      R = R.eulerAnglesRotation(yaw, pitch, roll);
         camera.setPosition(eyePosition);
         camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
         camera.setRotation(R);
@@ -454,7 +454,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         }
 
         // 4. Update camera's internal parameters from local copy
-        R.eulerAnglesRotation(yaw, pitch, roll);
+        R = R.eulerAnglesRotation(yaw, pitch, roll);
 
         camera.setPosition(eyePosition);
         camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);

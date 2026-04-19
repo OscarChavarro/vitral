@@ -61,7 +61,7 @@ public class JoglDrawingArea implements GLEventListener
 
         R1 = parent.scene.camera.getRotation();
         R2 = new Matrix4x4();
-        R2.axisRotation(-Math.toRadians(parent.scene.eyeTorsionAngle), u);
+        R2 = R2.axisRotation(-Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));
 
@@ -93,7 +93,7 @@ public class JoglDrawingArea implements GLEventListener
 
         R1 = parent.scene.camera.getRotation();
         R2 = new Matrix4x4();
-        R2.axisRotation(Math.toRadians(parent.scene.eyeTorsionAngle), u);
+        R2 = R2.axisRotation(Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));
 

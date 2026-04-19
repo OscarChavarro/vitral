@@ -201,16 +201,16 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             for (int i = 0; i < 4; i++) {
                 gl.glBegin(GL.GL_LINE_STRIP);
                 for (int j = 0; j < 4; j++) {
-                    gl.glVertex3d(patch.Gx_MATRIX.M[i][j], patch.Gy_MATRIX.M[i][j],
-                                  patch.Gz_MATRIX.M[i][j]);
+                    gl.glVertex3d(patch.Gx_MATRIX.get(i, j), patch.Gy_MATRIX.get(i, j),
+                                  patch.Gz_MATRIX.get(i, j));
                 }
                 gl.glEnd();
             }
             for (int i = 0; i < 4; i++) {
                 gl.glBegin(GL.GL_LINE_STRIP);
                 for (int j = 0; j < 4; j++) {
-                    gl.glVertex3d(patch.Gx_MATRIX.M[j][i], patch.Gy_MATRIX.M[j][i],
-                                  patch.Gz_MATRIX.M[j][i]);
+                    gl.glVertex3d(patch.Gx_MATRIX.get(j, i), patch.Gy_MATRIX.get(j, i),
+                                  patch.Gz_MATRIX.get(j, i));
                 }
                 gl.glEnd();
             }

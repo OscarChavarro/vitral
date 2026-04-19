@@ -258,9 +258,9 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x();
-                composed.M[1][3] = position.y();
-                composed.M[2][3] = position.z();
+                composed = composed.withVal(0, 3, position.x());
+                composed = composed.withVal(1, 3, position.y());
+                composed = composed.withVal(2, 3, position.z());
                 translationGizmo.setTransformationMatrix(composed);
 
                 JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
@@ -348,14 +348,16 @@ public class JoglDrawingArea implements
                     copiedBody = theScene.addThing(referenceBody.getGeometry());
                     Mbody = referenceBody.getTransformationMatrix();
                     M = Mset.multiply(Mbody);
-                    p = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
-                    M.M[0][3] = M.M[1][3] = M.M[2][3] = 0.0;
+                    p = M.extractTranslation();
+                    M = M.withVal(0, 3, 0.0);
+                    M = M.withVal(1, 3, 0.0);
+                    M = M.withVal(2, 3, 0.0);
                     q = M.exportToQuaternion().normalized();
                     R = new Matrix4x4();
-                    R.importFromQuaternion(q);
+                    R = R.importFromQuaternion(q);
                     Ri = R.inverse();
                     S = Ri.multiply(M);
-                    s = new Vector3D(M.M[0][0], M.M[1][1], M.M[2][2]);
+                    s = new Vector3D(M.get(0, 0), M.get(1, 1), M.get(2, 2));
 
                     copiedBody.setPosition(p);
                     copiedBody.setScale(s);
@@ -435,25 +437,25 @@ public class JoglDrawingArea implements
             switch ( i ) {
               case 1:
                 position = new Vector3D(0, -2, 0);
-                R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                R = R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
                 break;
               case 2:
                 position = new Vector3D(-2, 0, 0);
-                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
-                R2.axisRotation(Math.toRadians(90), new Vector3D(0, -1, 0));
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(90), new Vector3D(0, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 3:
                 position = new Vector3D(0, 0, -2);
-                R.axisRotation(Math.toRadians(180), new Vector3D(0, 1, 0));
+                R = R.axisRotation(Math.toRadians(180), new Vector3D(0, 1, 0));
                 break;
               case 4:
                 position = new Vector3D(-1, -1, 1);
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, -1));
-                R2.axisRotation(Math.toRadians(35), new Vector3D(1, -1, 0));
+                R1 = R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(1, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 5:
@@ -461,8 +463,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
-                R2.axisRotation(Math.toRadians(35), new Vector3D(1, 1, 0));
+                R1 = R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(1, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 6:
@@ -470,8 +472,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
-                R2.axisRotation(Math.toRadians(35), new Vector3D(-1, 1, 0));
+                R1 = R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(-1, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 7:
@@ -479,8 +481,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, -1));
-                R2.axisRotation(Math.toRadians(35), new Vector3D(-1, -1, 0));
+                R1 = R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(-1, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 8:
@@ -488,8 +490,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(180), new Vector3D(0, 0, 1));
-                R2.axisRotation(Math.toRadians(135), new Vector3D(-1, 0, 0));
+                R1 = R1.axisRotation(Math.toRadians(180), new Vector3D(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(-1, 0, 0));
                 R = R2.multiply(R1);
                 break;
               case 9:
@@ -497,8 +499,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
-                R2.axisRotation(Math.toRadians(135), new Vector3D(0, -1, 0));
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 10:
@@ -506,15 +508,15 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R.axisRotation(Math.toRadians(135), new Vector3D(1, 0, 0));
+                R = R.axisRotation(Math.toRadians(135), new Vector3D(1, 0, 0));
                 break;
               case 11:
                 position = new Vector3D(1, 0, -1);
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, 1));
-                R2.axisRotation(Math.toRadians(135), new Vector3D(0, 1, 0));
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 12:
@@ -522,8 +524,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
-                R2.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                R2 = R2.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
                 R = R2.multiply(R1);
                 break;
               case 13:
@@ -531,8 +533,8 @@ public class JoglDrawingArea implements
                 position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
-                R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
-                R2.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
                 R = R2.multiply(R1);
                 break;
             }
@@ -872,7 +874,7 @@ public class JoglDrawingArea implements
         double yaw, pitch;
         yaw = diff.obtainSphericalThetaAngle();
         pitch = diff.obtainSphericalPhiAngle();
-        R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
+        R = R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
 
         gl.glPushMatrix();
         gl.glTranslated(start.x(), start.y(), start.z());
@@ -1112,9 +1114,9 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x();
-                composed.M[1][3] = position.y();
-                composed.M[2][3] = position.z();
+                composed = composed.withVal(0, 3, position.x());
+                composed = composed.withVal(1, 3, position.y());
+                composed = composed.withVal(2, 3, position.z());
 
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
@@ -1163,9 +1165,9 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x();
-            composed.M[1][3] = position.y();
-            composed.M[2][3] = position.z();
+            composed = composed.withVal(0, 3, position.x());
+            composed = composed.withVal(1, 3, position.y());
+            composed = composed.withVal(2, 3, position.z());
 
             if ( mouseView == null ) {
                 return;
@@ -1175,12 +1177,12 @@ public class JoglDrawingArea implements
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.M[0][3]);
-                position = position.withY(composed.M[1][3]);
-                position = position.withZ(composed.M[2][3]);
-                composed.M[0][3] = 0;
-                composed.M[1][3] = 0;
-                composed.M[2][3] = 0;
+                position = position.withX(composed.get(0, 3));
+                position = position.withY(composed.get(1, 3));
+                position = position.withZ(composed.get(2, 3));
+                composed = composed.withVal(0, 3, 0);
+                composed = composed.withVal(1, 3, 0);
+                composed = composed.withVal(2, 3, 0);
                 applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
@@ -1212,21 +1214,21 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x();
-            composed.M[1][3] = position.y();
-            composed.M[2][3] = position.z();
+            composed = composed.withVal(0, 3, position.x());
+            composed = composed.withVal(1, 3, position.y());
+            composed = composed.withVal(2, 3, position.z());
 
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.M[0][3]);
-                position = position.withY(composed.M[1][3]);
-                position = position.withZ(composed.M[2][3]);
-                composed.M[0][3] = 0;
-                composed.M[1][3] = 0;
-                composed.M[2][3] = 0;
+                position = position.withX(composed.get(0, 3));
+                position = position.withY(composed.get(1, 3));
+                position = position.withZ(composed.get(2, 3));
+                composed = composed.withVal(0, 3, 0);
+                composed = composed.withVal(1, 3, 0);
+                composed = composed.withVal(2, 3, 0);
                 applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
@@ -1259,21 +1261,21 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x();
-            composed.M[1][3] = position.y();
-            composed.M[2][3] = position.z();
+            composed = composed.withVal(0, 3, position.x());
+            composed = composed.withVal(1, 3, position.y());
+            composed = composed.withVal(2, 3, position.z());
 
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.M[0][3]);
-                position = position.withY(composed.M[1][3]);
-                position = position.withZ(composed.M[2][3]);
-                composed.M[0][3] = 0;
-                composed.M[1][3] = 0;
-                composed.M[2][3] = 0;
+                position = position.withX(composed.get(0, 3));
+                position = position.withY(composed.get(1, 3));
+                position = position.withZ(composed.get(2, 3));
+                composed = composed.withVal(0, 3, 0);
+                composed = composed.withVal(1, 3, 0);
+                composed = composed.withVal(2, 3, 0);
                 applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
@@ -1304,9 +1306,9 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x();
-            composed.M[1][3] = position.y();
-            composed.M[2][3] = position.z();
+            composed = composed.withVal(0, 3, position.x());
+            composed = composed.withVal(1, 3, position.y());
+            composed = composed.withVal(2, 3, position.z());
 
             if ( mouseView == null ) {
                 return;
@@ -1316,12 +1318,12 @@ public class JoglDrawingArea implements
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.M[0][3]);
-                position = position.withY(composed.M[1][3]);
-                position = position.withZ(composed.M[2][3]);
-                composed.M[0][3] = 0;
-                composed.M[1][3] = 0;
-                composed.M[2][3] = 0;
+                position = position.withX(composed.get(0, 3));
+                position = position.withY(composed.get(1, 3));
+                position = position.withZ(composed.get(2, 3));
+                composed = composed.withVal(0, 3, 0);
+                composed = composed.withVal(1, 3, 0);
+                composed = composed.withVal(2, 3, 0);
                 applyTranslationToSelectedObjects(position);
                 canvas.repaint();
             }
@@ -1392,19 +1394,19 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x();
-                composed.M[1][3] = position.y();
-                composed.M[2][3] = position.z();
+                composed = composed.withVal(0, 3, position.x());
+                composed = composed.withVal(1, 3, position.y());
+                composed = composed.withVal(2, 3, position.z());
 
                 translationGizmo.setTransformationMatrix(composed);
                 if ( translationGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     composed = translationGizmo.getTransformationMatrix();
-                    position = position.withX(composed.M[0][3]);
-                    position = position.withY(composed.M[1][3]);
-                    position = position.withZ(composed.M[2][3]);
-                    composed.M[0][3] = 0;
-                    composed.M[1][3] = 0;
-                    composed.M[2][3] = 0;
+                    position = position.withX(composed.get(0, 3));
+                    position = position.withY(composed.get(1, 3));
+                    position = position.withZ(composed.get(2, 3));
+                    composed = composed.withVal(0, 3, 0);
+                    composed = composed.withVal(1, 3, 0);
+                    composed = composed.withVal(2, 3, 0);
                     applyTranslationToSelectedObjects(position);
                 }
             }
@@ -1422,7 +1424,7 @@ public class JoglDrawingArea implements
                     R = rotateGizmo.getTransformationMatrix();
                     gi.setRotation(R);
                     Matrix4x4 Ri = new Matrix4x4(R);
-                    Ri.invert();
+                    Ri = Ri.invert();
                     gi.setRotationInverse(Ri);
                 }
             }
@@ -1434,15 +1436,15 @@ public class JoglDrawingArea implements
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
                 Vector3D s = gi.getScale();
                 Matrix4x4 S = new Matrix4x4();
-                S.M[0][0] = s.x();
-                S.M[1][1] = s.y();
-                S.M[2][2] = s.z();
+                S = S.withVal(0, 0, s.x());
+                S = S.withVal(1, 1, s.y());
+                S = S.withVal(2, 2, s.z());
 
                 scaleGizmo.setTransformationMatrix(S);
 
                 if ( scaleGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     S = scaleGizmo.getTransformationMatrix();
-                    s = new Vector3D(S.M[0][0], S.M[1][1], S.M[2][2]);
+                    s = new Vector3D(S.get(0, 0), S.get(1, 1), S.get(2, 2));
                     gi.setScale(s);
                 }
             }
@@ -1789,7 +1791,7 @@ public class JoglDrawingArea implements
             gi.setPosition(position);
             gi.setRotation(rotation);
             rotation = new Matrix4x4(rotation);
-            rotation.invert();
+            rotation = rotation.invert();
             gi.setRotationInverse(rotation);
         }
     }

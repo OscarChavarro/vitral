@@ -90,7 +90,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.3, 0.1+0.4, 0.1+0.4);
+        T = T.translation(0.3, 0.1+0.4, 0.1+0.4);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
@@ -98,7 +98,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.5, 0.5);
+        T = T.translation(0.5, 0.5, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1.0));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
@@ -106,7 +106,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.7, 0.5, 0.9);
+        T = T.translation(0.7, 0.5, 0.9);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
@@ -114,7 +114,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.9);
+        T = T.translation(0.9, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1.0, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
@@ -154,7 +154,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.1, 0.1);
+        T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
@@ -162,7 +162,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.9, 0.1);
+        T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
@@ -170,7 +170,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
+        T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
@@ -178,7 +178,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.1);
+        T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
@@ -191,7 +191,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
+        T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
         e.applyTransformation(T);
@@ -199,7 +199,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.9);
+        T = T.translation(0.1, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
         f.applyTransformation(T);
@@ -207,7 +207,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.1, 0.5);
+        T = T.translation(0.1, 0.1, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
         g.applyTransformation(T);
@@ -215,7 +215,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.9, 0.5);
+        T = T.translation(0.1, 0.9, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
         h.applyTransformation(T);
@@ -255,7 +255,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         solid.mef(1, 1, 7, 6, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -0.4, 0);
+        T = T.translation(0, -0.4, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
@@ -285,7 +285,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.5, 0.25, 0.3);
+        R = R.translation(0.5, 0.25, 0.3);
 
         Box box = new Box(new Vector3D(1, 0.5, 0.6));
         a = box.exportToPolyhedralBoundedSolid();
@@ -294,7 +294,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         R = new Matrix4x4();
-        R.translation(0.5+0.24, 0.25-0.18, 0.3+0.42);
+        R = R.translation(0.5+0.24, 0.25-0.18, 0.3+0.42);
 
         box = new Box(new Vector3D(1, 0.5, 0.6));
         b = box.exportToPolyhedralBoundedSolid();
@@ -339,13 +339,13 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -0.42, 0);
+        T = T.translation(0, -0.42, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             a, a.findFace(1), T);
 
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.05 +0.58/2.0+(0.92-0.58) /*+ 0.0001*/,
+        R = R.translation(0.05 +0.58/2.0+(0.92-0.58) /*+ 0.0001*/,
                       0.05 + 0.42/2.0 - 0.42/2.0,
                       0.05 + 0.18/2.0 + 0.18 /*+ 0.0001*/);
 
@@ -385,7 +385,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         leftView.mef(1, 1, 5, 4, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -1.0, 0);
+        T = T.translation(0, -1.0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
@@ -403,7 +403,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         frontView.mef(1, 1, 8, 7, 1, 2, 2);
 
         T = new Matrix4x4();
-        T.translation(1, 0, 0);
+        T = T.translation(1, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
@@ -441,7 +441,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         leftView.mef(1, 1, 6, 5, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, -1.0, 0);
+        T = T.translation(0, -1.0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
@@ -457,7 +457,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         frontView.mef(1, 1, 6, 5, 1, 2, 2);
 
         T = new Matrix4x4();
-        T.translation(1, 0, 0);
+        T = T.translation(1, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
@@ -491,7 +491,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         Matrix4x4 T;
 
         T = new Matrix4x4();
-        T.translation(0.25+0.1375, 0.5, 0.3);
+        T = T.translation(0.25+0.1375, 0.5, 0.3);
 
         box = new Box(new Vector3D(0.5, 1, 0.6));
         block = box.exportToPolyhedralBoundedSolid();
@@ -529,7 +529,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         wedge.mef(1, 1, 3, 2, 1, 2, 2);
 
         T = new Matrix4x4();
-        T.translation(0.775, 0, 0);
+        T = T.translation(0.775, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             wedge, wedge.findFace(1), T);
 

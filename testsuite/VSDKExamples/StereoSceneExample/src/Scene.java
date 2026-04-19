@@ -31,8 +31,8 @@ public class Scene
         Vector3D v = new Vector3D(0, -6, 0);
         Matrix4x4 R1 = new Matrix4x4();
         Matrix4x4 R2 = new Matrix4x4();
-        R1.axisRotation(Math.PI/2, 0, 1, 0);
-        R2.axisRotation(Math.PI/2, 0, 0, 1);
+        R1 = R1.axisRotation(Math.PI/2, 0, 1, 0);
+        R2 = R2.axisRotation(Math.PI/2, 0, 0, 1);
         camera.setPosition(v);
         //camera.setRotation(R2.multiply(R1));
         camera.setRotation(R2);

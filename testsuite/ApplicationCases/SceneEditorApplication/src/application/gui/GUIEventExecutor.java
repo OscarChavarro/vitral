@@ -181,14 +181,14 @@ public class GUIEventExecutor extends CommandListener{
 
             //- Append newly created volume to scene, matching reference form -
             SimpleBody newThing = parent.theScene.addThing(vv);
-            Vector3D pos = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
+            Vector3D pos = M.extractTranslation();
             if ( thing != null ) {
                 pos = pos.add(thing.getPosition());
                 newThing.setRotation(thing.getRotation());
                 newThing.setScale(thing.getScale());
             }
             newThing.setPosition(pos);
-            Vector3D size = new Vector3D(M.M[0][0], M.M[1][1], M.M[2][2]);
+            Vector3D size = new Vector3D(M.get(0, 0), M.get(1, 1), M.get(2, 2));
             newThing.setScale(size);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
@@ -196,7 +196,7 @@ public class GUIEventExecutor extends CommandListener{
 
             brep = (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
             Matrix4x4 R = new Matrix4x4();
-            R.translation(0.55, 0.55, 0.55);
+            R = R.translation(0.55, 0.55, 0.55);
             brep.applyTransformation(R);
             //- Cube modification to holed box ----------------------------
             brep.smev(6, 5, 9, new Vector3D(0.3, 0.3, 1));
@@ -219,7 +219,7 @@ public class GUIEventExecutor extends CommandListener{
             //- Hole creation ---------------------------------------------
             brep.kfmrh(2, 11);
 
-            R.translation(-0.55, -0.55, -0.55);
+            R = R.translation(-0.55, -0.55, -0.55);
             brep.applyTransformation(R);
             PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
 
@@ -665,7 +665,7 @@ public class GUIEventExecutor extends CommandListener{
         body.setMaterial(parent.theScene.defaultMaterial());
         body.getMaterial().setDoubleSided(true);
         scale = voxelBody.getScale();
-        S.scale(scale.x(), scale.y(), scale.z());
+        S = S.scale(scale.x(), scale.y(), scale.z());
         scale = scale.multiply(r);
         body.setScale(scale);
         cm2 = S.multiply(cm);

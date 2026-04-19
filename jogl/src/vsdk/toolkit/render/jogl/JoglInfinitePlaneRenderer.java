@@ -38,7 +38,7 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         double yaw = n.obtainSphericalThetaAngle();
         double pitch = Math.PI/2 - n.obtainSphericalPhiAngle();
 
-        R.eulerAnglesRotation(yaw, pitch, 0);
+        R = R.eulerAnglesRotation(yaw, pitch, 0);
         n = n.normalized();
         n = n.multiply(-s.getD());
 

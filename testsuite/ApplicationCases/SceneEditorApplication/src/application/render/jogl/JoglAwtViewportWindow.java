@@ -89,10 +89,10 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraPerspective = new Camera();
 
         cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
-        R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
 
         //cameraPerspective.setPosition(new Vector3D(0, -4, 0));
-        //R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
+        //R = R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
 
         cameraPerspective.setRotation(R);
         cameraPerspective.setName("Perspective");
@@ -100,7 +100,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraTop = new Camera();
         cameraTop.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraTop.setPosition(new Vector3D(0, 0, 5));
-        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         cameraTop.setRotation(R);
         cameraTop.setOrthogonalZoom(0.25);
         cameraTop.setName("Top");
@@ -108,7 +108,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraBottom = new Camera();
         cameraBottom.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraBottom.setPosition(new Vector3D(0, 0, -5));
-        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
         cameraBottom.setRotation(R);
         cameraBottom.setOrthogonalZoom(0.25);
         cameraBottom.setName("Bottom");
@@ -116,7 +116,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraLeft = new Camera();
         cameraLeft.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraLeft.setPosition(new Vector3D(-5, 0, 0));
-        R.identity();
+        R = R.identity();
         cameraLeft.setRotation(R);
         cameraLeft.setOrthogonalZoom(0.25);
         cameraLeft.setName("Left");
@@ -124,7 +124,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         cameraFront = new Camera();
         cameraFront.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         cameraFront.setPosition(new Vector3D(0, -5, 0));
-        R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         cameraFront.setRotation(R);
         cameraFront.setOrthogonalZoom(0.25);
         cameraFront.setName("Front");
@@ -443,7 +443,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         Matrix4x4 R = camera.getRotation();
 
         gl.glLoadIdentity();
-        R.invert();
+        R = R.invert();
         gl.glRotated(90, -1, 0, 0);
         gl.glRotated(90, 0, 0, 1);
         JoglMatrixRenderer.activate(gl, R);
@@ -689,7 +689,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
                 }
 
                 R = new Matrix4x4();
-                R.translation(r.getPosition());
+                R = R.translation(r.getPosition());
                 R = R.multiply(r.getRotation());
                 p = R.multiply(lv);
                 camera.projectPoint(p, tp);

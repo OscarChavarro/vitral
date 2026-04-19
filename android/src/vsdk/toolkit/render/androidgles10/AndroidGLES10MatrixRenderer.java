@@ -21,7 +21,7 @@ public class AndroidGLES10MatrixRenderer extends AndroidGLES10Renderer {
 
         for ( pos = 0, column = 0; column < 4; column++ ) {
             for ( row = 0; row < 4; row++, pos++ ) {
-                Mgl[pos] = (float)A.M[row][column];
+                Mgl[pos] = (float)A.get(row, column);
             }
         }
 

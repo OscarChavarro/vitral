@@ -92,17 +92,17 @@ public class CameraControllerOrbiter extends CameraController {
 
         Matrix4x4 R = camera.getRotation();
         Matrix4x4 DR = new Matrix4x4();
-        Vector3D axisLeft = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
-        Vector3D axisUp = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
+        Vector3D axisLeft = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        Vector3D axisUp = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
         axisLeft = axisLeft.normalized();
         axisUp = axisUp.normalized();
 
         if ( Math.abs(pitchDelta) > 0 ) {
-            DR.axisRotation(pitchDelta, axisLeft.x(), axisLeft.y(), axisLeft.z());
+            DR = R = R.axisRotation(pitchDelta, axisLeft.x(), axisLeft.y(), axisLeft.z());
             offset = DR.multiply(offset);
         }
         if ( Math.abs(yawDelta) > 0 ) {
-            DR.axisRotation(yawDelta, axisUp.x(), axisUp.y(), axisUp.z());
+            DR = R = R.axisRotation(yawDelta, axisUp.x(), axisUp.y(), axisUp.z());
             offset = DR.multiply(offset);
         }
 
@@ -200,7 +200,7 @@ public class CameraControllerOrbiter extends CameraController {
           case KeyEvent.KEY_S:
             roll -= Math.toRadians(5);
             while ( roll < 0 ) roll += Math.toRadians(360);
-            R.eulerAnglesRotation(
+            R = R.eulerAnglesRotation(
                 R.obtainEulerYawAngle(),
                 R.obtainEulerPitchAngle(),
                 roll);
@@ -209,7 +209,7 @@ public class CameraControllerOrbiter extends CameraController {
           case KeyEvent.KEY_s:
             roll += Math.toRadians(5);
             while ( roll > Math.toRadians(360) ) roll -= Math.toRadians(360);
-            R.eulerAnglesRotation(
+            R = R.eulerAnglesRotation(
                 R.obtainEulerYawAngle(),
                 R.obtainEulerPitchAngle(),
                 roll);
@@ -359,9 +359,9 @@ public class CameraControllerOrbiter extends CameraController {
         modifiers = e.getModifiers();
 
         R = camera.getRotation();
-        u = new Vector3D(R.M[0][0], R.M[1][0], R.M[2][0]);
-        v = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
-        w = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
+        u = new Vector3D(R.get(0, 0), R.get(1, 0), R.get(2, 0));
+        v = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        w = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
         if ( (modifiers & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             // Orbit around point of interest
@@ -382,7 +382,7 @@ public class CameraControllerOrbiter extends CameraController {
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
             DR = new Matrix4x4();
-            DR.axisRotation(ax, u.x(), u.y(), u.z());
+            DR = R = R.axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

@@ -70,7 +70,7 @@ public class SwingCanvas extends JPanel implements
 
         camera = new Camera();
         camera.setPosition(new Vector3D(7, -4, 4));
-        R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
         camera.setNearPlaneDistance(1);
         camera.setFarPlaneDistance(100);
         camera.setRotation(R);

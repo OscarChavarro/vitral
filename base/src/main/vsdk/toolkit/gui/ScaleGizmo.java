@@ -32,7 +32,7 @@ public class ScaleGizmo extends Gizmo {
       unicode_id = keyEvent.unicode_id;
       keycode = keyEvent.keycode;
 
-      Vector3D s = new Vector3D(T.M[0][0], T.M[1][1], T.M[2][2]);
+      Vector3D s = new Vector3D(T.get(0, 0), T.get(1, 1), T.get(2, 2));
 
       if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
@@ -79,9 +79,9 @@ public class ScaleGizmo extends Gizmo {
             }
       }
 
-      T.M[0][0] = s.x();
-      T.M[1][1] = s.y();
-      T.M[2][2] = s.z();
+      T = T.withVal(0, 0, s.x());
+      T = T.withVal(1, 1, s.y());
+      T = T.withVal(2, 2, s.z());
 
       return updateNeeded;
   }

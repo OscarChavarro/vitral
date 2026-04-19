@@ -182,15 +182,15 @@ public class Arrow extends Solid {
 
         // Cylinder case
         T = new Matrix4x4();
-        T.translation(0.0, 0.0, baseLength);
+        T = T.translation(0.0, 0.0, baseLength);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
         T = new Matrix4x4();
-        T.translation(0.0, 0.0, 0);
+        T = T.translation(0.0, 0.0, 0);
         double f = headRadius / baseRadius;
         S = new Matrix4x4();
-        S.scale(f, f, 1);
+        S = S.scale(f, f, 1);
         M = T.multiply(S);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), M);

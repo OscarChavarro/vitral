@@ -172,7 +172,7 @@ public class JoglPreviewGenerator
             break;
         }
 
-        R.eulerAnglesRotation(Math.toRadians(yaw), Math.toRadians(pitch), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(yaw), Math.toRadians(pitch), 0);
         position = new Vector3D(-1, 0, 0);
         position = R.multiply(position);
         position = position.normalized();

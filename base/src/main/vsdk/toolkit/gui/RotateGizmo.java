@@ -52,27 +52,27 @@ public class RotateGizmo extends Gizmo {
             switch ( unicode_id ) {
               // Position
               case 'x':
-                delta.axisRotation(-deltaMov, left.x(), left.y(), left.z());
+                delta = delta.axisRotation(-deltaMov, left.x(), left.y(), left.z());
                 updateNeeded = true;
                 break;
               case 'X':
-                delta.axisRotation(deltaMov, left.x(), left.y(), left.z());
+                delta = delta.axisRotation(deltaMov, left.x(), left.y(), left.z());
                 updateNeeded = true;
                 break;
               case 'y':
-                delta.axisRotation(-deltaMov, front.x(), front.y(), front.z());
+                delta = delta.axisRotation(-deltaMov, front.x(), front.y(), front.z());
                 updateNeeded = true;
                 break;
               case 'Y':
-                delta.axisRotation(deltaMov, front.x(), front.y(), front.z());
+                delta = delta.axisRotation(deltaMov, front.x(), front.y(), front.z());
                 updateNeeded = true;
                 break;
               case 'z':
-                delta.axisRotation(-deltaMov, up.x(), up.y(), up.z());
+                delta = delta.axisRotation(-deltaMov, up.x(), up.y(), up.z());
                 updateNeeded = true;
                 break;
               case 'Z':
-                delta.axisRotation(deltaMov, up.x(), up.y(), up.z());
+                delta = delta.axisRotation(deltaMov, up.x(), up.y(), up.z());
                 updateNeeded = true;
                 break; 
             }

@@ -29,7 +29,7 @@ public class WriterObj extends PersistenceElement {
         Vector3D p, n, vpi, vni;
         Matrix4x4 R = new Matrix4x4();
 
-        R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
+        R = R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
 
         //-----------------------------------------------------------------
         writeAsciiLine(inOutputStream, "# " + nv + " vertex positions");

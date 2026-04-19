@@ -43,7 +43,7 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         PolyhedralBoundedSolid clipCube = clipCubeGeometry
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 cubeMove = new Matrix4x4();
-        cubeMove.translation(0.55, 0.55, 0.325);
+        cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
         clipCube.applyTransformation(cubeMove);
 
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
@@ -82,7 +82,7 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         double radius, int subdivisionCircumference, int subdivisionHeight)
     {
         Matrix4x4 move = new Matrix4x4();
-        move.translation(0.55, 0.55, 0.55);
+        move = move.translation(0.55, 0.55, 0.55);
 
         Sphere sphere = new Sphere(radius);
         PolyhedralBoundedSolid solid = sphere.exportToPolyhedralBoundedSolid(

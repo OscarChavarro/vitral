@@ -60,7 +60,7 @@ public class GlyphExample extends JFrame implements
         camera = new Camera();
         camera.setPosition(new Vector3D(0, 0, 5));
         Matrix4x4 R = new Matrix4x4();
-        R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera.setRotation(R);
         camera.setFov(20);
 

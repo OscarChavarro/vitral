@@ -57,7 +57,7 @@ public class AndroidSystem extends PresentationElement
     public static RGBAImage addGlyphToFontMap(
         RGBAImage inOutFontMap,
         int inOutCurrentPosition[],
-        Matrix4x4 inOutGlyphTextureTransform,
+        Matrix4x4[] inOutGlyphTextureTransform,
         final String inCharacter, 
         final ColorRgb inForegroundColor, 
         final ColorRgb inBackgroundColor,
@@ -108,9 +108,12 @@ public class AndroidSystem extends PresentationElement
         double px = inOutCurrentPosition[0];
         double py = -inOutCurrentPosition[1] - dy;
 
-        S.scale(dx/ux, dy/uy, 1.0);
-        T.translation((px/ux), (py/ux), 0);
-        inOutGlyphTextureTransform.M = (T.multiply(S)).M;
+        S = S.scale(dx/ux, dy/uy, 1.0);
+        T = T.translation((px/ux), (py/ux), 0);
+        if ( inOutGlyphTextureTransform != null &&
+             inOutGlyphTextureTransform.length > 0 ) {
+            inOutGlyphTextureTransform[0] = Matrix4x4.copyOf(T.multiply(S));
+        }
 
         // Next step for incremental algorithm
         inOutCurrentPosition[0] += newGlyph.getXSize()+1;

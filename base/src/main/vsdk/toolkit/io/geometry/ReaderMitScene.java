@@ -128,10 +128,10 @@ public class ReaderMitScene extends PersistenceElement
                   thing.setMaterial(currentMaterial);
 
                   R = new Matrix4x4();
-                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
+                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
-                  Ri.invert();
+                  Ri = Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
                   theScene.addBody(thing);
@@ -147,10 +147,10 @@ public class ReaderMitScene extends PersistenceElement
                   thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(currentMaterial);
                   R = new Matrix4x4();
-                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
+                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
-                  Ri.invert();
+                  Ri = Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
                   theScene.addBody(thing);
@@ -168,10 +168,10 @@ public class ReaderMitScene extends PersistenceElement
                   thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(currentMaterial);
                   R = new Matrix4x4();
-                  R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
+                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
                   thing.setRotation(R);
                   Ri = new Matrix4x4(R);
-                  Ri.invert();
+                  Ri = Ri.invert();
                   thing.setRotationInverse(Ri);
                   thing.setPosition(c);
                   theScene.addBody(thing);

@@ -7,590 +7,362 @@
 
 package vsdk.toolkit.common.linealAlgebra;
 
-import vsdk.toolkit.common.VSDK;
+import java.io.Serial;
+import java.util.Arrays;
+import java.util.Objects;
+
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.VSDK;
 
 /**
-This class is a data structure that represents a 4x4 matrix
- */
-
-public class Matrix4x4 extends FundamentalEntity
+This class is a data structure that represents a 4x4 matrix.
+*/
+public final class Matrix4x4 extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial
+    private static final long serialVersionUID = 20260419L;
 
-    /** This is a 4 by 4 array of type double that represents the data of the 
-        matrix */
-    public double M[][];
+    private static final int SIZE = 4;
 
-    /**
-    This constructor builds the 4x4 identity matrix:<p>
-\f[
-\left[
-   \begin{array}{cccc}
-      1 & 0 & 0 & 0 \\
-      0 & 1 & 0 & 0 \\
-      0 & 0 & 1 & 0 \\
-      0 & 0 & 0 & 1
-   \end{array}
-\right]
-\f]
-    */
+    private final double[][] m;
+
     public Matrix4x4()
     {
-        M = new double[4][4];
-        identity();
+        this(buildIdentityValues(), false);
     }
 
-    /**
-     This constructor builds a matrix given an existing matrix, and copies
-     its contents to the newly created one.
-     @param B The matrix used to build this matrix data from
-     */
-    public Matrix4x4(Matrix4x4 B)
+    public Matrix4x4(Matrix4x4 other)
     {
-        M = new double[4][4];
-        int i,j;
-
-        for ( i = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++ ) {
-                M[i][j] = B.M[i][j];
-            }
-        }
+        this(Objects.requireNonNull(other, "Matrix to copy cannot be null").m,
+             true);
     }
 
-    /**
-    This methods changes current matrix to be the 4x4 identity matrix:<p>
-\f[
-\left[
-   \begin{array}{cccc}
-      1 & 0 & 0 & 0 \\
-      0 & 1 & 0 & 0 \\
-      0 & 0 & 1 & 0 \\
-      0 & 0 & 0 & 1
-   \end{array}
-\right]
-\f]
-    */
-    public final void identity()
+    public Matrix4x4(double[][] values)
     {
-        M[0][0]=1.0;M[0][1]=0.0;M[0][2]=0.0;M[0][3]=0.0;
-        M[1][0]=0.0;M[1][1]=1.0;M[1][2]=0.0;M[1][3]=0.0;
-        M[2][0]=0.0;M[2][1]=0.0;M[2][2]=1.0;M[2][3]=0.0;
-        M[3][0]=0.0;M[3][1]=0.0;M[3][2]=0.0;M[3][3]=1.0;
+        this(values, true);
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     an orthogonal projection matrix.
-     @param leftPlaneDistance
-     @param rightPlaneDistance
-     @param downPlaneDistance
-     @param upPlaneDistance
-     @param nearPlaneDistance
-     @param farPlaneDistance
-
-     /todo
-     Complete the documentation, including the formulae for the generated 
-     matrix.
-     */
-    public void orthogonalProjection(
-        double leftPlaneDistance, double rightPlaneDistance,
-        double downPlaneDistance, double upPlaneDistance,
-        double nearPlaneDistance, double farPlaneDistance)
+    private Matrix4x4(double[][] values, boolean deepCopy)
     {
-        double tx, ty, tz;
-
-        tx = - ( (rightPlaneDistance + leftPlaneDistance) / 
-                 (rightPlaneDistance - leftPlaneDistance) );
-        ty = - ( (upPlaneDistance + downPlaneDistance) / 
-                 (upPlaneDistance - downPlaneDistance) );
-        tz = - ( (farPlaneDistance + nearPlaneDistance) / 
-                 (farPlaneDistance - nearPlaneDistance) );
-
-        M[0][0] = 2 / (rightPlaneDistance - leftPlaneDistance);
-        M[0][1] = 0;
-        M[0][2] = 0;
-        M[0][3] = tx;
-
-        M[1][0] = 0;
-        M[1][1] = 2 / (upPlaneDistance - downPlaneDistance);
-        M[1][2] = 0;
-        M[1][3] = ty;
-
-        M[2][0] = 0;
-        M[2][1] = 0;
-        M[2][2] = -2 / (farPlaneDistance - nearPlaneDistance);
-        M[2][3] = tz;
-
-        M[3][0] = 0;
-        M[3][1] = 0;
-        M[3][2] = 0;
-        M[3][3] = 1;
+        validate4x4(values);
+        this.m = deepCopy ? deepCopy(values) : values;
     }
 
-    /**
-    This method calculates the following new value for current matrix:
-\f[
-\left[
-   \begin{array}{cccc}
-      1 & 0 & 0 & 0 \\
-      0 & 1 & 0 & 0 \\
-      0 & 0 & 0 & 0 \\
-      0 & 0 & -1 & 1
-   \end{array}
-\right]
-\f]
-    which correspond to the perspective projection for the VITRAL's perspective
-    canonical view volume: center of projection is point <0, 0, 1>, projection
-    plane is the z=0 plane, and view volume limiting planes are 45 degrees
-    with respect to the z axis (fov is 90 degrees in u and v directions), that
-    is, they pass by the lines x=-1, x=1, y=-1 and y=1 at the z=0 plane.
-    Note that up vector for containing camera in that projection is the
-    j=<0, 1, 0> vector.
-
-    The derivation of this matrix follows the approach suggested at
-    [FOLE1992].6.4. except that relations are not derived from similar
-    triangles, but writing down line equations and noting that for current
-    view volume, the line equations of x and y with respect to z have
-    negative slopes.
-
-    \todo  document better the derivation process for this matrix, including
-    drawings and algebra, step by step.
-    */
-    public void
-    canonicalPerspectiveProjection()
+    public static Matrix4x4 copyOf(Matrix4x4 other)
     {
-        identity();
-        M[2][2] = 0;
-        M[3][2] = -1;
+        return new Matrix4x4(other);
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     a perspective projection matrix, with a corresponding visualization volume
-     (i.e. the frustum).
-     @param leftDistance
-     @param rightDistance
-     @param downDistance
-     @param upDistance
-     @param nearPlaneDistance
-     @param farPlaneDistance
-
-     /todo
-     Complete the documentation, including the formulae for the generated 
-     matrix.
-     */
-    public void frustumProjection(
-                 double leftDistance, double rightDistance,
-                 double downDistance, double upDistance,
-                 double nearPlaneDistance, double farPlaneDistance)
+    public static Matrix4x4 copyOf(double[][] values)
     {
-        double A, B, C, D;
-
-        A = (rightDistance + leftDistance) / (rightDistance - leftDistance);
-        B = (upDistance + downDistance) / (upDistance - downDistance); 
-        C = - ((farPlaneDistance + nearPlaneDistance) / (farPlaneDistance - nearPlaneDistance));
-        D = - ((2 * farPlaneDistance * nearPlaneDistance) / (farPlaneDistance - nearPlaneDistance));
-
-        M[0][0] = 2 * nearPlaneDistance / (rightDistance - leftDistance);
-        M[0][1] = 0;
-        M[0][2] = A;
-        M[0][3] = 0;
-
-        M[1][0] = 0;
-        M[1][1] = 2 * nearPlaneDistance / (upDistance - downDistance);
-        M[1][2] = B;
-        M[1][3] = 0;
-
-        M[2][0] = 0;
-        M[2][1] = 0;
-        M[2][2] = C;
-        M[2][3] = D;
-
-        M[3][0] = 0;
-        M[3][1] = 0;
-        M[3][2] = -1;
-        M[3][3] = 0;
+        return new Matrix4x4(values);
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     a translation matrix. The matrix is similar to an identity matrix, with
-     recieved values in place to make the matrix a translation one.
-     @param transx The translation distance in the x axis
-     @param transy The translation distance in the y axis
-     @param transz The translation distance in the z axis
-     */
-    public void
-    translation(double transx, double transy, double transz)
+    public static Matrix4x4 identityMatrix()
     {
-        M[0][0]=1.0; M[0][1]=0.0; M[0][2]=0.0; M[0][3]=transx;
-        M[1][0]=0.0; M[1][1]=1.0; M[1][2]=0.0; M[1][3]=transy;
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=1.0; M[2][3]=transz;
-        M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
+        return new Matrix4x4();
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     a scale matrix. The matrix is similar to an identity matrix, with
-     recieved values in place to make the matrix a scale one.
-     @param sx The scale factor in the x axis
-     @param sy The scale factor in the y axis
-     @param sz The scale factor in the z axis
-     */
-    public void
-    scale(double sx, double sy, double sz)
+    public Matrix4x4 identity()
     {
-        M[0][0]=sx;  M[0][1]=0.0; M[0][2]=0.0; M[0][3]=0.0;
-        M[1][0]=0.0; M[1][1]=sy;  M[1][2]=0.0; M[1][3]=0.0;
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=sz;  M[2][3]=0.0;
-        M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
+        return identityMatrix();
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     a scale matrix. The matrix is similar to an identity matrix, with
-     recieved values in place to make the matrix a scale one.
-     @param s The scale factor
-     */
-    public void
-    scale(Vector3D s)
+    public double get(int row, int column)
     {
-        M[0][0]=s.x();  M[0][1]=0.0; M[0][2]=0.0; M[0][3]=0.0;
-        M[1][0]=0.0; M[1][1]=s.y();  M[1][2]=0.0; M[1][3]=0.0;
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=s.z();  M[2][3]=0.0;
-        M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
+        validatePosition(row, column);
+        return m[row][column];
     }
 
-    /**
-     This method calculates new values for current matrix to make it represent
-     a translation matrix. The position of translation for the matrix is the
-     one indicated by the recieved vector.
-     @param T A Vector3D that contains a position to calculate the 
-     translation matrix values which transform the origin to this vector.
-     */
-    public void
-    translation(Vector3D T)
+    public Matrix4x4 withVal(int row, int column, double val)
     {
-        M[0][0]=1.0; M[0][1]=0.0; M[0][2]=0.0; M[0][3]=T.x();
-        M[1][0]=0.0; M[1][1]=1.0; M[1][2]=0.0; M[1][3]=T.y();
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=1.0; M[2][3]=T.z();
-        M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
+        validatePosition(row, column);
+        double[][] r = deepCopy(m);
+        r[row][column] = val;
+        return new Matrix4x4(r, false);
     }
 
-    /**
-     This method constructs in `this` object a matrix that rotates a point in 
-     the x, y and z axis, yaw, pitch and roll radians respectivelly.
-     @param yaw The radians to rotate in the x axis
-     @param pitch The radians to rotate in the y axis
-     @param roll The radians to rotate in the z axis
-     */
-    public void
-    eulerAnglesRotation(double yaw, double pitch, double roll)
+    public double[][] toArrayCopy()
     {
-        Matrix4x4 R1, R2, R3;
-
-        R1 = new Matrix4x4();
-        R2 = new Matrix4x4();
-        R3 = new Matrix4x4();
-
-        R3.axisRotation(yaw, 0, 0, 1);
-        R2.axisRotation(pitch, 0, -1, 0);
-        R1.axisRotation(roll, 1, 0, 0);
-
-        this.M = R3.multiply(R2.multiply(R1)).M;
+        return deepCopy(m);
     }
 
-    /**
-     This method calculates new values for current matrix into a rotation 
-     matrix that rotates a point in space arround a defined axis by some angle 
-     in radians. The axis is specified as a vector.
-     @param angle The angle in radians for the matrix
-     @param axis The axis to which the point in space will rotate arround
-     */
-    public void
-    axisRotation(double angle, Vector3D axis)
+    public Matrix4x4 withoutTranslation()
     {
-        axisRotation(angle, axis.x(), axis.y(), axis.z());
+        return this
+            .withVal(0, 3, 0.0)
+            .withVal(1, 3, 0.0)
+            .withVal(2, 3, 0.0)
+            .withVal(3, 0, 0.0)
+            .withVal(3, 1, 0.0)
+            .withVal(3, 2, 0.0)
+            .withVal(3, 3, 1.0);
     }
 
-    /**
-     This method calculates new values for current matrix into a rotation 
-     matrix that rotates a point in space arround a defined axis by some angle
-     in radians. The axis is specified as separate vector coordinates.
-     @param angle The angle in radians for the matrix
-     @param x X value of the axis to which the point in space will rotate arround
-     @param y Y value of the axis to which the point in space will rotate arround
-     @param z Z value of the axis to which the point in space will rotate arround
-     */
-    public void
-    axisRotation(double angle, double x, double y, double z)
+    public Vector3D extractTranslation()
     {
-        double mag, s, c;
-        double xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+        return new Vector3D(get(0, 3), get(1, 3), get(2, 3));
+    }
 
-        s = Math.sin( angle );
-        c = Math.cos( angle );
+    public Matrix4x4 withTranslation(Vector3D t)
+    {
+        Objects.requireNonNull(t, "Translation vector cannot be null");
+        return this
+            .withVal(0, 3, t.x())
+            .withVal(1, 3, t.y())
+            .withVal(2, 3, t.z());
+    }
 
-        mag = Math.sqrt(x*x + y*y + z*z);
+    public Matrix4x4 orthogonalProjection(
+        double leftPlaneDistance,
+        double rightPlaneDistance,
+        double downPlaneDistance,
+        double upPlaneDistance,
+        double nearPlaneDistance,
+        double farPlaneDistance)
+    {
+        double tx = -((rightPlaneDistance + leftPlaneDistance) /
+                     (rightPlaneDistance - leftPlaneDistance));
+        double ty = -((upPlaneDistance + downPlaneDistance) /
+                     (upPlaneDistance - downPlaneDistance));
+        double tz = -((farPlaneDistance + nearPlaneDistance) /
+                     (farPlaneDistance - nearPlaneDistance));
 
-        // OJO: Propenso a error... deberia ser si es menor a EPSILON
+        return new Matrix4x4(new double[][] {
+            { 2 / (rightPlaneDistance - leftPlaneDistance), 0, 0, tx },
+            { 0, 2 / (upPlaneDistance - downPlaneDistance), 0, ty },
+            { 0, 0, -2 / (farPlaneDistance - nearPlaneDistance), tz },
+            { 0, 0, 0, 1 }
+        }, false);
+    }
+
+    public Matrix4x4 canonicalPerspectiveProjection()
+    {
+        return new Matrix4x4(new double[][] {
+            { 1, 0, 0, 0 },
+            { 0, 1, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, -1, 1 }
+        }, false);
+    }
+
+    public Matrix4x4 frustumProjection(
+        double leftDistance,
+        double rightDistance,
+        double downDistance,
+        double upDistance,
+        double nearPlaneDistance,
+        double farPlaneDistance)
+    {
+        double a = (rightDistance + leftDistance) /
+                   (rightDistance - leftDistance);
+        double b = (upDistance + downDistance) /
+                   (upDistance - downDistance);
+        double c = -((farPlaneDistance + nearPlaneDistance) /
+                    (farPlaneDistance - nearPlaneDistance));
+        double d = -((2 * farPlaneDistance * nearPlaneDistance) /
+                    (farPlaneDistance - nearPlaneDistance));
+
+        return new Matrix4x4(new double[][] {
+            { 2 * nearPlaneDistance / (rightDistance - leftDistance), 0, a, 0 },
+            { 0, 2 * nearPlaneDistance / (upDistance - downDistance), b, 0 },
+            { 0, 0, c, d },
+            { 0, 0, -1, 0 }
+        }, false);
+    }
+
+    public Matrix4x4 translation(double transx, double transy, double transz)
+    {
+        return new Matrix4x4(new double[][] {
+            { 1.0, 0.0, 0.0, transx },
+            { 0.0, 1.0, 0.0, transy },
+            { 0.0, 0.0, 1.0, transz },
+            { 0.0, 0.0, 0.0, 1.0 }
+        }, false);
+    }
+
+    public Matrix4x4 scale(double sx, double sy, double sz)
+    {
+        return new Matrix4x4(new double[][] {
+            { sx, 0.0, 0.0, 0.0 },
+            { 0.0, sy, 0.0, 0.0 },
+            { 0.0, 0.0, sz, 0.0 },
+            { 0.0, 0.0, 0.0, 1.0 }
+        }, false);
+    }
+
+    public Matrix4x4 scale(Vector3D s)
+    {
+        return scale(s.x(), s.y(), s.z());
+    }
+
+    public Matrix4x4 translation(Vector3D t)
+    {
+        return translation(t.x(), t.y(), t.z());
+    }
+
+    public Matrix4x4 eulerAnglesRotation(double yaw, double pitch, double roll)
+    {
+        Matrix4x4 r1 = new Matrix4x4().axisRotation(roll, 1, 0, 0);
+        Matrix4x4 r2 = new Matrix4x4().axisRotation(pitch, 0, -1, 0);
+        Matrix4x4 r3 = new Matrix4x4().axisRotation(yaw, 0, 0, 1);
+        return r3.multiply(r2.multiply(r1));
+    }
+
+    public Matrix4x4 axisRotation(double angle, Vector3D axis)
+    {
+        return axisRotation(angle, axis.x(), axis.y(), axis.z());
+    }
+
+    public Matrix4x4 axisRotation(double angle, double x, double y, double z)
+    {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+
+        double mag = Math.sqrt(x * x + y * y + z * z);
         if ( mag == 0.0 ) {
-            identity();
-            return;
+            return identity();
         }
 
         x /= mag;
         y /= mag;
         z /= mag;
 
-        //-----------------------------------------------------------------
-        xx = x * x;
-        yy = y * y;
-        zz = z * z;
-        xy = x * y;
-        yz = y * z;
-        zx = z * x;
-        xs = x * s;
-        ys = y * s;
-        zs = z * s;
-        one_c = 1 - c;
+        double xx = x * x;
+        double yy = y * y;
+        double zz = z * z;
+        double xy = x * y;
+        double yz = y * z;
+        double zx = z * x;
+        double xs = x * s;
+        double ys = y * s;
+        double zs = z * s;
+        double oneC = 1 - c;
 
-        M[0][0] = (one_c * xx) + c;
-        M[0][1] = (one_c * xy) - zs;
-        M[0][2] = (one_c * zx) + ys;
-        M[0][3] = 0;
-
-        M[1][0] = (one_c * xy) + zs;
-        M[1][1] = (one_c * yy) + c;
-        M[1][2] = (one_c * yz) - xs;
-        M[1][3] = 0;
-
-        M[2][0] = (one_c * zx) - ys;
-        M[2][1] = (one_c * yz) + xs;
-        M[2][2] = (one_c * zz) + c;
-        M[2][3] = 0;
-
-        M[3][0] = 0;
-        M[3][1] = 0;
-        M[3][2] = 0;
-        M[3][3] = 1;
+        return new Matrix4x4(new double[][] {
+            { (oneC * xx) + c,      (oneC * xy) - zs,    (oneC * zx) + ys,    0 },
+            { (oneC * xy) + zs,     (oneC * yy) + c,     (oneC * yz) - xs,    0 },
+            { (oneC * zx) - ys,     (oneC * yz) + xs,    (oneC * zz) + c,     0 },
+            { 0,                    0,                   0,                   1 }
+        }, false);
     }
 
     public Matrix4x4 inverse()
     {
-        Matrix4x4 i = new Matrix4x4(this);
-        i.invert();
-        return i;
+        return invert();
     }
 
-    /**
-     Converts current matrix into it's invert matrix.
-     */
-    public void invert()
+    public Matrix4x4 invert()
     {
-        double a = 1/determinant();
-        Matrix4x4 N = cofactors(), N2;
-        N.transpose();
-        N2 = N.multiply(a);
-        this.M = N2.M;
+        double a = 1.0 / determinant();
+        Matrix4x4 n = cofactors().transpose();
+        return n.multiply(a);
     }
 
     public Matrix4x4 cofactors()
     {
-        Matrix4x4 N = new Matrix4x4();
-        int row, column;
-        double minor3x3[] = new double[9];
-        double sign;
+        double[][] r = new double[SIZE][SIZE];
+        double[] minor3x3 = new double[9];
 
-        for ( row = 0; row < 4; row++ ) {
-            for ( column = 0; column < 4; column++ ) {
+        for ( int row = 0; row < SIZE; row++ ) {
+            for ( int column = 0; column < SIZE; column++ ) {
                 fillMinor(minor3x3, row, column);
-                if ( (row+column) % 2 == 0 ) {
-                    sign = 1;
-                }
-                else {
-                    sign = -1;
-                }
-                N.M[row][column] =
-                    sign*determinant3x3(minor3x3);
+                double sign = ((row + column) % 2 == 0) ? 1.0 : -1.0;
+                r[row][column] = sign * determinant3x3(minor3x3);
             }
         }
-        return N;
+        return new Matrix4x4(r, false);
     }
 
-    /**
-     Converts current matrix into it's transpose matrix.
-     */
-    public void transpose()
+    public Matrix4x4 transpose()
     {
-        double R[][] = new double[4][4];
-
-        int row, column;
-
-        for ( row = 0; row < 4; row++ ) {
-            for ( column = 0; column < 4; column++ ) {
-                R[row][column] = M[column][row];
+        double[][] r = new double[SIZE][SIZE];
+        for ( int row = 0; row < SIZE; row++ ) {
+            for ( int column = 0; column < SIZE; column++ ) {
+                r[row][column] = m[column][row];
             }
         }
-
-        M = R;
+        return new Matrix4x4(r, false);
     }
 
-    /**
-     Multiply this matrix by a scalar, note that this method doesn't modify 
-     this matrix. 
-     @param a The scalar by whom this matrix will be multiplied
-     @return A new Matrix3D that contains the value of current matrix 
-      multiplied by the input parameter.
-     */
-    public final Matrix4x4 multiply(double a)
+    public Matrix4x4 multiply(double a)
     {
-        Matrix4x4 R = new Matrix4x4();
-        int row, column;
-
-        for ( row = 0; row < 4; row++ ) {
-            for ( column = 0; column < 4; column++ ) {
-                R.M[row][column] = a*M[row][column];
+        double[][] r = new double[SIZE][SIZE];
+        for ( int row = 0; row < SIZE; row++ ) {
+            for ( int column = 0; column < SIZE; column++ ) {
+                r[row][column] = a * m[row][column];
             }
         }
-        return R;
+        return new Matrix4x4(r, false);
     }
 
-    /**
-     Multiply a Vector3D by this matrix. Neither this matrix nor the Vector3D 
-     parameter will be modified by this method.  It returns a new Vector3D that
-     represents the input vector multiplied by current matrix.
-     @param E The vector to multiply by this matrix
-     @return the result of the Vector3D by this matrix multiplication
-     */
-    public final Vector3D multiply(Vector3D E)
+    public Vector3D multiply(Vector3D e)
     {
         return new Vector3D(
-            M[0][0] * E.x() + M[0][1] * E.y() + M[0][2] * E.z() + M[0][3],
-            M[1][0] * E.x() + M[1][1] * E.y() + M[1][2] * E.z() + M[1][3],
-            M[2][0] * E.x() + M[2][1] * E.y() + M[2][2] * E.z() + M[2][3]
+            m[0][0] * e.x() + m[0][1] * e.y() + m[0][2] * e.z() + m[0][3],
+            m[1][0] * e.x() + m[1][1] * e.y() + m[1][2] * e.z() + m[1][3],
+            m[2][0] * e.x() + m[2][1] * e.y() + m[2][2] * e.z() + m[2][3]
         );
     }
 
-    /**
-     Multiply a Vector3D by this matrix. Neither this matrix nor the Vector3D 
-     parameter will be modified by this method.  It returns a new Vector3D that
-     represents the input vector multiplied by current matrix.
-     @param E The vector to multiply by this matrix
-     @return the result of the Vector3D by this matrix multiplication
-     */
-    public final Vector4D multiply(Vector4D E)
+    public Vector4D multiply(Vector4D e)
     {
         return new Vector4D(
-            M[0][0] * E.x() + M[0][1] * E.y() + M[0][2] * E.z() + M[0][3] * E.w(),
-            M[1][0] * E.x() + M[1][1] * E.y() + M[1][2] * E.z() + M[1][3] * E.w(),
-            M[2][0] * E.x() + M[2][1] * E.y() + M[2][2] * E.z() + M[2][3] * E.w(),
-            M[3][0] * E.x() + M[3][1] * E.y() + M[3][2] * E.z() + M[3][3] * E.w()
+            m[0][0] * e.x() + m[0][1] * e.y() + m[0][2] * e.z() + m[0][3] * e.w(),
+            m[1][0] * e.x() + m[1][1] * e.y() + m[1][2] * e.z() + m[1][3] * e.w(),
+            m[2][0] * e.x() + m[2][1] * e.y() + m[2][2] * e.z() + m[2][3] * e.w(),
+            m[3][0] * e.x() + m[3][1] * e.y() + m[3][2] * e.z() + m[3][3] * e.w()
         );
     }
 
-    /**
-     This method multiplies an input matrix by this matrix, the result is a 
-     new matrix and current matrix is not modified.
-     @param second The matrix by whom this matrix will be multiplied
-     @return The matrix result of the multiplication.
-     */
     public Matrix4x4 multiply(Matrix4x4 second)
     {
-        Matrix4x4 R = new Matrix4x4();
-        int row_a, column_b, row_b;
-        double acumulado;
-
-        for( row_a = 0; row_a < 4; row_a++ ) {
-            for( column_b = 0; column_b < 4; column_b++ ) {
-                acumulado = 0;
-                for( row_b = 0; row_b < 4; row_b++ ) {
-                    acumulado += M[row_a][row_b]*second.M[row_b][column_b];
+        double[][] r = new double[SIZE][SIZE];
+        for ( int rowA = 0; rowA < SIZE; rowA++ ) {
+            for ( int columnB = 0; columnB < SIZE; columnB++ ) {
+                double accum = 0;
+                for ( int rowB = 0; rowB < SIZE; rowB++ ) {
+                    accum += m[rowA][rowB] * second.m[rowB][columnB];
                 }
-                R.M[row_a][column_b] = acumulado;
+                r[rowA][columnB] = accum;
             }
         }
-        return R;
+        return new Matrix4x4(r, false);
     }
 
-    private double determinant3x3(double minor3x3[])
-    {
-        //return a*e*i + d*h*c + g*b*f - c*e*g - f*h*a - i*b*d;
-        return minor3x3[0]*minor3x3[4]*minor3x3[8] 
-             + minor3x3[3]*minor3x3[7]*minor3x3[2] 
-             + minor3x3[6]*minor3x3[1]*minor3x3[5] 
-             - minor3x3[2]*minor3x3[4]*minor3x3[6] 
-             - minor3x3[5]*minor3x3[7]*minor3x3[0] 
-             - minor3x3[8]*minor3x3[1]*minor3x3[3];
-    }
-
-    private void fillMinor(double minor3x3[], int rowPivot, int columnPivot)
-    {
-        int i, j;
-        int index = 0;
-
-        for ( i = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++ ) {
-                if ( i != rowPivot && j != columnPivot ) {
-                    minor3x3[index] = M[i][j];
-                    index++;
-                }
-            }
-        }
-    }
-
-    /**
-     This method computes the determinant of this matrix.
-     @return this matrix determinant
-     */
     public double determinant()
     {
-        double minor3x3[] = new double[9];
-        int i, j;
-        double acum = 0;
-        int sign;
-
-        i = 0;
-        for ( j = 0, sign = 1; j < 4; j++, sign *= -1 ) {
-            fillMinor(minor3x3, i, j);
-            acum += ((double)sign)*determinant3x3(minor3x3)*M[i][j];
+        double[] minor3x3 = new double[9];
+        double accum = 0;
+        int row = 0;
+        for ( int col = 0, sign = 1; col < SIZE; col++, sign *= -1 ) {
+            fillMinor(minor3x3, row, col);
+            accum += ((double)sign) * determinant3x3(minor3x3) * m[row][col];
         }
-        return acum;
+        return accum;
     }
 
-    /**
-     This method creates an String representation of this matrix, suitable
-     for human interpretation. Note that the matrix values are formated,
-     so precision is lost in sake of readability.
-     @return The String representation of this matrix
-     */
     @Override
     public String toString()
     {
-        String msg;
-
-        msg = "\n------------------------------\n";
-        int row, column, pos;
-
-        for ( row = 0; row < 4; row++, pos++ ) {
-            for ( pos = 0, column = 0; column < 4; column++ ) {
-                msg = msg + VSDK.formatDouble(M[row][column]) + " ";
+        StringBuilder msg = new StringBuilder();
+        msg.append("\n------------------------------\n");
+        for ( int row = 0; row < SIZE; row++ ) {
+            for ( int column = 0; column < SIZE; column++ ) {
+                msg.append(VSDK.formatDouble(m[row][column])).append(' ');
             }
-            msg = msg + "\n";
+            msg.append('\n');
         }
-        msg = msg + "------------------------------\n";
-        return msg;
+        msg.append("------------------------------\n");
+        return msg.toString();
     }
 
     public double[] exportToDoubleArrayRowOrder()
     {
-        double array[] = new double[16];
-        int i, j, k;
-        for ( i = 0, k = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++, k++ ) {
-                array[k] = M[i][j];
+        double[] array = new double[16];
+        for ( int i = 0, k = 0; i < SIZE; i++ ) {
+            for ( int j = 0; j < SIZE; j++, k++ ) {
+                array[k] = m[i][j];
             }
         }
         return array;
@@ -598,11 +370,10 @@ public class Matrix4x4 extends FundamentalEntity
 
     public float[] exportToFloatArrayRowOrder()
     {
-        float array[] = new float[16];
-        int i, j, k;
-        for ( i = 0, k = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++, k++ ) {
-                array[k] = (float)M[i][j];
+        float[] array = new float[16];
+        for ( int i = 0, k = 0; i < SIZE; i++ ) {
+            for ( int j = 0; j < SIZE; j++, k++ ) {
+                array[k] = (float)m[i][j];
             }
         }
         return array;
@@ -610,11 +381,10 @@ public class Matrix4x4 extends FundamentalEntity
 
     public double[] exportToDoubleArrayColumnOrder()
     {
-        double array[] = new double[16];
-        int i, j, k;
-        for ( j = 0, k = 0; j < 4; j++ ) {
-            for ( i = 0; i < 4; i++, k++ ) {
-                array[k] = M[i][j];
+        double[] array = new double[16];
+        for ( int j = 0, k = 0; j < SIZE; j++ ) {
+            for ( int i = 0; i < SIZE; i++, k++ ) {
+                array[k] = m[i][j];
             }
         }
         return array;
@@ -622,67 +392,47 @@ public class Matrix4x4 extends FundamentalEntity
 
     public float[] exportToFloatArrayColumnOrder()
     {
-        float array[] = new float[16];
-        int i, j, k;
-        for ( j = 0, k = 0; j < 4; j++ ) {
-            for ( i = 0; i < 4; i++, k++ ) {
-                array[k] = (float)M[i][j];
+        float[] array = new float[16];
+        for ( int j = 0, k = 0; j < SIZE; j++ ) {
+            for ( int i = 0; i < SIZE; i++, k++ ) {
+                array[k] = (float)m[i][j];
             }
         }
         return array;
     }
 
-    /**
-     This method creates a Quaterion equivalent to current matrix. Note that
-     the resulting Quaternion will be of unit lenght if current matrix is a
-     rotation one. If not, Quaternion normalization could fix a damaged 
-     rotation matrix, as long resulting Quaternion is not 0, which happens
-     if current matrix is nos linearly independent.
-     @return The Quaterion representation of this matrix.
-     */
     public Quaternion exportToQuaternion()
     {
-        double tr, s;
-        double q[] = new double[4];
-        double qx = 0;
-        double qy = 0;
-        double qz = 0;
-        double qw = 0;
-        int i, j, k;
-        int nxt[] = new int[3];
+        double tr = m[0][0] + m[1][1] + m[2][2];
+        double[] q = new double[4];
+        double qx;
+        double qy;
+        double qz;
+        double qw;
+        int[] nxt = {1, 2, 0};
 
-        nxt[0] = 1;
-        nxt[1] = 2;
-        nxt[2] = 0;
-
-        tr = M[0][0] + M[1][1] + M[2][2];
-
-        // check the diagonal
         if ( tr > 0.0 ) {
-            s = Math.sqrt(tr + 1.0);
+            double s = Math.sqrt(tr + 1.0);
             qw = s / 2.0;
             s = 0.5 / s;
-            qx = (M[2][1] - M[1][2]) * s;
-            qy = (M[0][2] - M[2][0]) * s;
-            qz = (M[1][0] - M[0][1]) * s;
-          }
-          else {                
-            // diagonal is negative
-            i = 0;
-            if (M[1][1] > M[0][0]) i = 1;
-            if (M[2][2] > M[i][i]) i = 2;
-            j = nxt[i];
-            k = nxt[j];
+            qx = (m[2][1] - m[1][2]) * s;
+            qy = (m[0][2] - m[2][0]) * s;
+            qz = (m[1][0] - m[0][1]) * s;
+        }
+        else {
+            int i = 0;
+            if ( m[1][1] > m[0][0] ) i = 1;
+            if ( m[2][2] > m[i][i] ) i = 2;
+            int j = nxt[i];
+            int k = nxt[j];
 
-            s = Math.sqrt ((M[i][i] - (M[j][j] + M[k][k])) + 1.0);
-
+            double s = Math.sqrt((m[i][i] - (m[j][j] + m[k][k])) + 1.0);
             q[i] = s * 0.5;
+            if ( s != 0.0 ) s = 0.5 / s;
 
-            if (s != 0.0) s = 0.5 / s;
-
-            q[3] = (M[k][j] - M[j][k]) * s;
-            q[j] = (M[j][i] + M[i][j]) * s;
-            q[k] = (M[k][i] + M[i][k]) * s;
+            q[3] = (m[k][j] - m[j][k]) * s;
+            q[j] = (m[j][i] + m[i][j]) * s;
+            q[k] = (m[k][i] + m[i][k]) * s;
 
             qx = q[0];
             qy = q[1];
@@ -693,73 +443,45 @@ public class Matrix4x4 extends FundamentalEntity
         return new Quaternion(new Vector3D(qx, qy, qz), qw);
     }
 
-    /**
-     This method import the information of the input Quaterion into this 
-     matrix. Note that if input Quaternion is of unit lenght, the resulting
-     matrix will be a rotation matrix.
-     @param a The input Quaterion
-     */
-    public void importFromQuaternion(Quaternion a)
+    public Matrix4x4 importFromQuaternion(Quaternion a)
     {
-        double sx, sy, sz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+        double x2 = a.direction().x() + a.direction().x();
+        double y2 = a.direction().y() + a.direction().y();
+        double z2 = a.direction().z() + a.direction().z();
+        double xx = a.direction().x() * x2;
+        double xy = a.direction().x() * y2;
+        double xz = a.direction().x() * z2;
+        double yy = a.direction().y() * y2;
+        double yz = a.direction().y() * z2;
+        double zz = a.direction().z() * z2;
+        double sx = a.magnitude() * x2;
+        double sy = a.magnitude() * y2;
+        double sz = a.magnitude() * z2;
 
-        x2 = a.direction().x() + a.direction().x();
-        y2 = a.direction().y() + a.direction().y(); 
-        z2 = a.direction().z() + a.direction().z();
-        xx = a.direction().x() * x2;
-        xy = a.direction().x() * y2;
-        xz = a.direction().x() * z2;
-        yy = a.direction().y() * y2;
-        yz = a.direction().y() * z2;
-        zz = a.direction().z() * z2;
-        sx = a.magnitude() * x2;
-        sy = a.magnitude() * y2;   sz = a.magnitude() * z2;
-
-        M[0][0] = 1-(yy+zz);
-        M[0][1] = xy-sz;
-        M[0][2] = xz+sy;
-        M[0][3] = 0;
-
-        M[1][0] = xy+sz;
-        M[1][1] = 1-(xx+zz);
-        M[1][2] = yz-sx;
-        M[1][3] = 0;
-
-        M[2][0] = xz-sy;
-        M[2][1] = yz+sx;
-        M[2][2] = 1-(xx+yy);
-        M[2][3] = 0;
-
-        M[3][0] = 0;
-        M[3][1] = 0;
-        M[3][2] = 0;
-        M[3][3] = 1;
+        return new Matrix4x4(new double[][] {
+            { 1 - (yy + zz),   xy - sz,        xz + sy,        0 },
+            { xy + sz,         1 - (xx + zz),  yz - sx,        0 },
+            { xz - sy,         yz + sx,        1 - (xx + yy),  0 },
+            { 0,               0,              0,              1 }
+        }, false);
     }
 
-    /**
-     This method returns the yaw angle of this matrix, as interpreted if
-     current matrix is a rotation one.
-     @return The yaw angle of this matrix
-     */
     public double obtainEulerYawAngle()
     {
         Vector3D dir = new Vector3D(1, 0, 0);
-        double yaw, pitch;
-        double EPSILON = 0.0004;
+        double yaw;
+        double pitch = obtainEulerPitchAngle();
+        double epsilon = 0.0004;
 
-        pitch = obtainEulerPitchAngle();
+        dir = multiply(dir).withZ(0);
 
-        dir = multiply(dir);
-        dir = dir.withZ(0);
-
-        if ( Math.abs(Math.toRadians(90) - pitch) < EPSILON ) {
-            dir = new Vector3D(0, 0, -1);
-            dir = multiply(dir);
+        if ( Math.abs(Math.toRadians(90) - pitch) < epsilon ) {
+            dir = multiply(new Vector3D(0, 0, -1));
         }
-        if ( Math.abs(Math.toRadians(-90) - pitch) < EPSILON ) {
-            dir = new Vector3D(0, 0, 1);
-            dir = multiply(dir);
+        if ( Math.abs(Math.toRadians(-90) - pitch) < epsilon ) {
+            dir = multiply(new Vector3D(0, 0, 1));
         }
+
         dir = dir.normalized();
         if ( dir.y() <= 0 ) yaw = Math.asin(dir.x()) - Math.toRadians(90);
         else yaw = Math.toRadians(90) - Math.asin(dir.x());
@@ -767,56 +489,110 @@ public class Matrix4x4 extends FundamentalEntity
         return yaw;
     }
 
-    /**
-     This method returns the pitch angle of this matrix, as interpreted if
-     current matrix is a rotation one.
-     @return The pitch angle of this matrix
-     */
     public double obtainEulerPitchAngle()
     {
-        Vector3D dir = new Vector3D(1, 0, 0);
-
-        dir = multiply(dir);
-        dir = dir.normalized();
+        Vector3D dir = multiply(new Vector3D(1, 0, 0)).normalized();
         return Math.toRadians(90) - Math.acos(dir.z());
     }
 
-    /**
-     This method returns the roll angle of this matrix, as interpreted if
-     current matrix is a rotation one.
-     @return The roll angle of this matrix
-     */
     public double obtainEulerRollAngle()
     {
-        Matrix4x4 R1, R2, R3;
-        double yaw, pitch, roll;
+        double pitch = obtainEulerPitchAngle();
+        double yaw = obtainEulerYawAngle();
 
-        pitch = obtainEulerPitchAngle();
-        yaw = obtainEulerYawAngle();
+        Matrix4x4 r3 = new Matrix4x4().axisRotation(yaw, 0, 0, 1).invert();
+        Matrix4x4 r2 = new Matrix4x4().axisRotation(pitch, 0, -1, 0).invert();
 
-        R3 = new Matrix4x4();
-        R2 = new Matrix4x4();
+        Matrix4x4 r1 = r2.multiply(r3.multiply(this));
 
-        R3.axisRotation(yaw, 0, 0, 1);
-        R2.axisRotation(pitch, 0, -1, 0);
-        R3.invert();
-        R2.invert();
+        Quaternion q = r1.exportToQuaternion().normalized();
+        r1 = r1.importFromQuaternion(q);
 
-        R1 = R2.multiply(R3.multiply(this));
-
-        Quaternion q = R1.exportToQuaternion().normalized();
-        R1.importFromQuaternion(q);
-
-        if ( R1.M[2][1] >= 0 ) {  // R1.M[2][1] ::= sin(r)
-            // Our angle is between 0 and 180 degrees
-            roll = Math.acos(R1.M[1][1]);
-          }
-          else {
-            // Our angle is between 180 and 360 degrees
-            roll = -Math.acos(R1.M[1][1]);
+        if ( r1.get(2, 1) >= 0 ) {
+            return Math.acos(r1.get(1, 1));
         }
-
-        return roll;
+        return -Math.acos(r1.get(1, 1));
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if ( this == obj ) return true;
+        if ( !(obj instanceof Matrix4x4 other) ) return false;
+        for ( int i = 0; i < SIZE; i++ ) {
+            if ( !Arrays.equals(m[i], other.m[i]) ) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = 1;
+        for ( int i = 0; i < SIZE; i++ ) {
+            result = 31 * result + Arrays.hashCode(m[i]);
+        }
+        return result;
+    }
+
+    private static double[][] buildIdentityValues()
+    {
+        return new double[][] {
+            { 1.0, 0.0, 0.0, 0.0 },
+            { 0.0, 1.0, 0.0, 0.0 },
+            { 0.0, 0.0, 1.0, 0.0 },
+            { 0.0, 0.0, 0.0, 1.0 }
+        };
+    }
+
+    private static void validate4x4(double[][] values)
+    {
+        if ( values == null || values.length != SIZE ) {
+            throw new IllegalArgumentException("Matrix must have 4 rows");
+        }
+        for ( int i = 0; i < SIZE; i++ ) {
+            if ( values[i] == null || values[i].length != SIZE ) {
+                throw new IllegalArgumentException("Matrix row " + i + " must have 4 columns");
+            }
+        }
+    }
+
+    private static void validatePosition(int row, int column)
+    {
+        if ( row < 0 || row >= SIZE || column < 0 || column >= SIZE ) {
+            throw new IndexOutOfBoundsException("Matrix position out of bounds: (" + row + ", " + column + ")");
+        }
+    }
+
+    private static double[][] deepCopy(double[][] source)
+    {
+        double[][] copy = new double[SIZE][SIZE];
+        for ( int i = 0; i < SIZE; i++ ) {
+            System.arraycopy(source[i], 0, copy[i], 0, SIZE);
+        }
+        return copy;
+    }
+
+    private static double determinant3x3(double[] minor3x3)
+    {
+        return minor3x3[0] * minor3x3[4] * minor3x3[8]
+             + minor3x3[3] * minor3x3[7] * minor3x3[2]
+             + minor3x3[6] * minor3x3[1] * minor3x3[5]
+             - minor3x3[2] * minor3x3[4] * minor3x3[6]
+             - minor3x3[5] * minor3x3[7] * minor3x3[0]
+             - minor3x3[8] * minor3x3[1] * minor3x3[3];
+    }
+
+    private void fillMinor(double[] minor3x3, int rowPivot, int columnPivot)
+    {
+        int index = 0;
+        for ( int i = 0; i < SIZE; i++ ) {
+            for ( int j = 0; j < SIZE; j++ ) {
+                if ( i != rowPivot && j != columnPivot ) {
+                    minor3x3[index] = m[i][j];
+                    index++;
+                }
+            }
+        }
+    }
 }

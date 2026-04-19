@@ -228,7 +228,7 @@ public class CameraControllerAquynza extends CameraController {
         }
 
         // 4. Update camera's internal parameters from local copy
-        R.eulerAnglesRotation(yaw, pitch, roll);
+        R = R.eulerAnglesRotation(yaw, pitch, roll);
   
         camera.setPosition(eyePosition);
         camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
@@ -307,9 +307,9 @@ public class CameraControllerAquynza extends CameraController {
         modifiers = e.getModifiers();
 
         R = camera.getRotation();
-        u = new Vector3D(R.M[0][0], R.M[1][0], R.M[2][0]);
-        v = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
-        w = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
+        u = new Vector3D(R.get(0, 0), R.get(1, 0), R.get(2, 0));
+        v = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        w = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
         if ( (modifiers & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             // Turn
@@ -317,10 +317,10 @@ public class CameraControllerAquynza extends CameraController {
             ay = Math.min(2, 0.01*deltaY);
 
             DR = new Matrix4x4();
-            DR.axisRotation(ay, v.x(), v.y(), v.z());
+            DR = R = R.axisRotation(ay, v.x(), v.y(), v.z());
             R = DR.multiply(R);
 
-            DR.axisRotation(ax, w.x(), w.y(), w.z());
+            DR = R = R.axisRotation(ax, w.x(), w.y(), w.z());
             R = DR.multiply(R);
 
             updated = true;
@@ -338,13 +338,13 @@ public class CameraControllerAquynza extends CameraController {
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
             DR = new Matrix4x4();
-            DR.axisRotation(ax, u.x(), u.y(), u.z());
+            DR = R = R.axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }
 
         // Update camera's internal parameters from local copy
-        //R.eulerAnglesRotation(yaw, pitch, roll);
+        //R = R.eulerAnglesRotation(yaw, pitch, roll);
         camera.setPosition(eyePosition);
         camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
         camera.setRotation(R);

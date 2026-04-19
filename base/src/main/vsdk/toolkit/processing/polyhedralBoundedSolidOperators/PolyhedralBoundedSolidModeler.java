@@ -283,7 +283,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
         cfirst = first;
         rotation = new Matrix4x4();
-        rotation.axisRotation((2*Math.PI) / numberOfFaces, 1, 0, 0);
+        rotation = rotation.axisRotation((2*Math.PI) / numberOfFaces, 1, 0, 0);
 
         int i;
         for ( i = 0; i < numberOfFaces-1; i++ ) {

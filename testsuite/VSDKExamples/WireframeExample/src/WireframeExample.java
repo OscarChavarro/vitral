@@ -112,7 +112,7 @@ public class WireframeExample extends JFrame implements
         Matrix4x4 R = new Matrix4x4();
 
         camera.setPosition(new Vector3D(7, -4, 4));
-        R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
         camera.setNearPlaneDistance(0.001);
         camera.setFarPlaneDistance(100);
         camera.setRotation(R);

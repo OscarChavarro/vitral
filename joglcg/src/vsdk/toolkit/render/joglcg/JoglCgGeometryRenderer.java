@@ -238,7 +238,7 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
             JoglMatrixRenderer.importJOGL(gl, GL2.GL_MODELVIEW_MATRIX));
         MCombined = MProjection.multiply(MModelviewLocal);
         MModelviewLocalIT = MModelviewLocal.inverse();
-        MModelviewLocalIT.transpose();
+        MModelviewLocalIT = MModelviewLocalIT.transpose();
 
         matrixarray = MCombined.exportToDoubleArrayRowOrder();
         CgGL.cgGLSetMatrixParameterdr(CgGL.cgGetNamedParameter(

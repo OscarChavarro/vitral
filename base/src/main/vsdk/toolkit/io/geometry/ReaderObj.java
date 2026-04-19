@@ -415,7 +415,7 @@ public class ReaderObj extends PersistenceElement
         Vector3D p, n;
         Matrix4x4 R = new Matrix4x4();
 
-        R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+        R = R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
         newVertexArray = new Vertex[finalVertexes.size()];
         for ( i = 0; i < finalVertexes.size(); i++ ) {
             // Position

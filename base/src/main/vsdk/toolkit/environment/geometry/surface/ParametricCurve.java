@@ -91,40 +91,35 @@ public class ParametricCurve extends Curve {
                              { 0.0,  0.0,  1.0,  1.0},
                              {-1.0,  1.0,  0.0,  0.0},
                              { 1.0,  0.0,  0.0,  0.0} };
-        LINEAR_MATRIX = new Matrix4x4();
-        LINEAR_MATRIX.M = m;
+        LINEAR_MATRIX = Matrix4x4.copyOf(m);
 
         // Equation 11.19 in [FOLE1992]
         m = new double[][] { { 2.0, -2.0,  1.0,  1.0},
                              {-3.0,  3.0, -2.0, -1.0},
                              { 0.0,  0.0,  1.0,  0.0},
                              { 1.0,  0.0,  0.0,  0.0} };
-        HERMITE_MATRIX = new Matrix4x4();
-        HERMITE_MATRIX.M = m;
+        HERMITE_MATRIX = Matrix4x4.copyOf(m);
 
         // Equation 11.28 in [FOLE1992]
         m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
                              { 3.0, -6.0,  3.0,  0.0},
                              {-3.0,  3.0,  0.0,  0.0},
                              { 1.0,  0.0,  0.0,  0.0} };
-        BEZIER_MATRIX = new Matrix4x4();
-        BEZIER_MATRIX.M = m;
+        BEZIER_MATRIX = Matrix4x4.copyOf(m);
 
         // Equation 11.34 in [FOLE1992], but NOT multiplied by 1/6. (why?)
         m = new double[][] { {-1.0,  3.0, -3.0,  1.0},
                              { 3.0, -6.0,  3.0,  0.0},
                              {-3.0,  0.0,  3.0,  0.0},
                              { 1.0,  4.0,  1.0,  0.0} };
-        UNRBSPLINE_MATRIX = new Matrix4x4();
-        UNRBSPLINE_MATRIX.M = m;
+        UNRBSPLINE_MATRIX = Matrix4x4.copyOf(m);
 
         // Equation 11.47 in [FOLE1992], but NOT multiplied by T. (why?)
         m = new double[][] { {-0.5,  1.5, -1.5,  0.5},
                              { 1.0, -2.5,  2.0, -0.5},
                              {-0.5,  0.0,  0.5,  0.0},
                              { 0.0,  1.0,  0.0,  0.0} };
-        CATMULL_ROM_MATRIX = new Matrix4x4();
-        CATMULL_ROM_MATRIX.M = m;
+        CATMULL_ROM_MATRIX = Matrix4x4.copyOf(m);
     }
 
     // Constants used for identification type values for controlling points
@@ -304,14 +299,14 @@ public class ParametricCurve extends Curve {
         Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += LINEAR_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+            vt += LINEAR_MATRIX.get(i, 0) * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
         // p2
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += LINEAR_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+            vt += LINEAR_MATRIX.get(i, 1) * (Math.pow(t, 3 - i));
         }
         p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
@@ -319,7 +314,7 @@ public class ParametricCurve extends Curve {
         // 0
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += LINEAR_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+            vt += LINEAR_MATRIX.get(i, 2) * (Math.pow(t, 3 - i));
         }
         p = new Vector3D(0, 0, 0);
         result = result.add(p.multiply(vt));
@@ -327,7 +322,7 @@ public class ParametricCurve extends Curve {
         // 0
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += LINEAR_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+            vt += LINEAR_MATRIX.get(i, 3) * (Math.pow(t, 3 - i));
         }
         p = new Vector3D(0, 0, 0);
         result = result.add(p.multiply(vt));
@@ -358,14 +353,14 @@ public class ParametricCurve extends Curve {
         Vector3D result = qp0;
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += BEZIER_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 0) * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
         // p1
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 1) * (Math.pow(t, 3 - i));
         }
         p = qp0.add((qp1.subtract(qp0)).multiply(2/3));
         result = result.add(p.multiply(vt));
@@ -374,7 +369,7 @@ public class ParametricCurve extends Curve {
         vt = 0;
 
         for (int i = 0; i < 4; i++) {
-            vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 2) * (Math.pow(t, 3 - i));
         }
         p = qp1.add((qp2.subtract(qp0)).multiply(1/3));
         result = result.add(p.multiply(vt));
@@ -382,7 +377,7 @@ public class ParametricCurve extends Curve {
         // p3
         vt = 0;
         for (int i = 0; i < 4; i++) {
-            vt += BEZIER_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 3) * (Math.pow(t, 3 - i));
         }
         p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
@@ -398,14 +393,14 @@ public class ParametricCurve extends Curve {
         Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += HERMITE_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+            vt += HERMITE_MATRIX.get(i, 0) * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
         // p4
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += HERMITE_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+            vt += HERMITE_MATRIX.get(i, 1) * (Math.pow(t, 3 - i));
         }
         Vector3D p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
@@ -413,7 +408,7 @@ public class ParametricCurve extends Curve {
         // r1
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += HERMITE_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+            vt += HERMITE_MATRIX.get(i, 2) * (Math.pow(t, 3 - i));
         }
         p = startingSegmentControl[2];
         result = result.add(p.multiply(vt));
@@ -421,7 +416,7 @@ public class ParametricCurve extends Curve {
         // r4
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += HERMITE_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+            vt += HERMITE_MATRIX.get(i, 3) * (Math.pow(t, 3 - i));
         }
         p = endingSegmentControl[1];
         result = result.add(p.multiply(vt));
@@ -438,14 +433,14 @@ public class ParametricCurve extends Curve {
         Vector3D result = startingSegmentControl[0];
         double vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += BEZIER_MATRIX.M[i][0] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 0) * (Math.pow(t, 3 - i));
         }
         result = result.multiply(vt);
 
         // p2
         vt = 0;
         for ( int i = 0; i < 4; i++ ) {
-            vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 1) * (Math.pow(t, 3 - i));
         }
         p = startingSegmentControl[2];
         result = result.add(p.multiply(vt));
@@ -454,7 +449,7 @@ public class ParametricCurve extends Curve {
         vt = 0;
 
         for (int i = 0; i < 4; i++) {
-            vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 2) * (Math.pow(t, 3 - i));
         }
         p = endingSegmentControl[1];
         result = result.add(p.multiply(vt));
@@ -462,7 +457,7 @@ public class ParametricCurve extends Curve {
         // p4
         vt = 0;
         for (int i = 0; i < 4; i++) {
-            vt += BEZIER_MATRIX.M[i][3] * (Math.pow(t, 3 - i));
+            vt += BEZIER_MATRIX.get(i, 3) * (Math.pow(t, 3 - i));
         }
         p = endingSegmentControl[0];
         result = result.add(p.multiply(vt));
@@ -478,7 +473,7 @@ public class ParametricCurve extends Curve {
         for (int np = 0; np < 4; np++) {
             double vt = 0;
             for (int i = 0; i < 4; i++) {
-                vt += UNRBSPLINE_MATRIX.M[i][np] * (Math.pow(t, 3 - i));
+                vt += UNRBSPLINE_MATRIX.get(i, np) * (Math.pow(t, 3 - i));
             }
             Vector3D p = points.get(nseg - np)[0];
             // Note the 1/6 multiplication!

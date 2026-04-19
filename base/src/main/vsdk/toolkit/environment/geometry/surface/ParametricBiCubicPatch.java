@@ -106,7 +106,7 @@ public class ParametricBiCubicPatch extends Surface {
             M_MATRIX = ParametricCurve.HERMITE_MATRIX;
         }
         Mt_MATRIX = new Matrix4x4(M_MATRIX);
-        Mt_MATRIX.transpose();
+        Mt_MATRIX = Mt_MATRIX.transpose();
         M_Gx_Mt_MATRIX = M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
         M_Gy_Mt_MATRIX = M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
         M_Gz_Mt_MATRIX = M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
@@ -147,9 +147,9 @@ public class ParametricBiCubicPatch extends Surface {
                 mz[i][j] = vp.z();
             }
         }
-        Gx_MATRIX.M = mx;
-        Gy_MATRIX.M = my;
-        Gz_MATRIX.M = mz;
+        Gx_MATRIX = Matrix4x4.copyOf(mx);
+        Gy_MATRIX = Matrix4x4.copyOf(my);
+        Gz_MATRIX = Matrix4x4.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -213,16 +213,16 @@ public class ParametricBiCubicPatch extends Surface {
 
         }
 
-        Gx_MATRIX.M = mx;
-        Gy_MATRIX.M = my;
-        Gz_MATRIX.M = mz;
+        Gx_MATRIX = Matrix4x4.copyOf(mx);
+        Gy_MATRIX = Matrix4x4.copyOf(my);
+        Gz_MATRIX = Matrix4x4.copyOf(mz);
     }
 
     public void printGeometryMatrices()
     {
-        double[][] mx = Gx_MATRIX.M;
-        double[][] my = Gy_MATRIX.M;
-        double[][] mz = Gz_MATRIX.M;
+        double[][] mx = Gx_MATRIX.toArrayCopy();
+        double[][] my = Gy_MATRIX.toArrayCopy();
+        double[][] mz = Gz_MATRIX.toArrayCopy();
 
         System.out.println(
             "[ <"   + VSDK.formatDouble(mx[0][0]) + 
@@ -359,9 +359,9 @@ public class ParametricBiCubicPatch extends Surface {
         mz[3][3] = 0;
 
         // Final result
-        Gx_MATRIX.M = mx;
-        Gy_MATRIX.M = my;
-        Gz_MATRIX.M = mz;
+        Gx_MATRIX = Matrix4x4.copyOf(mx);
+        Gy_MATRIX = Matrix4x4.copyOf(my);
+        Gz_MATRIX = Matrix4x4.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -388,15 +388,17 @@ public class ParametricBiCubicPatch extends Surface {
     */
     public void evaluate(Vector3D p, double s, double t)
     {
-        S_MATRIX.M[0][0] = s * s * s;
-        S_MATRIX.M[0][1] = s * s;
-        S_MATRIX.M[0][2] = s;
-        S_MATRIX.M[0][3] = 1;
+        S_MATRIX = S_MATRIX
+            .withVal(0, 0, s * s * s)
+            .withVal(0, 1, s * s)
+            .withVal(0, 2, s)
+            .withVal(0, 3, 1);
 
-        Tt_MATRIX.M[0][0] = t * t * t;
-        Tt_MATRIX.M[1][0] = t * t;
-        Tt_MATRIX.M[2][0] = t;
-        Tt_MATRIX.M[3][0] = 1;
+        Tt_MATRIX = Tt_MATRIX
+            .withVal(0, 0, t * t * t)
+            .withVal(1, 0, t * t)
+            .withVal(2, 0, t)
+            .withVal(3, 0, 1);
 
         Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
         Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
@@ -406,19 +408,21 @@ public class ParametricBiCubicPatch extends Surface {
         Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
         // The result is a 1x1 matrix.
-        p = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
+        p = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
     }
 
     public Vector3D evaluateTangent(double s, double t)
     {
-        S_MATRIX_DS.M[0][0] = 3 * s * s;
-        S_MATRIX_DS.M[0][1] = 2 * s;
-        S_MATRIX_DS.M[0][2] = 1;
-        S_MATRIX_DS.M[0][3] = 0;
-        Tt_MATRIX.M[0][0] = t * t * t;
-        Tt_MATRIX.M[1][0] = t * t;
-        Tt_MATRIX.M[2][0] = t;
-        Tt_MATRIX.M[3][0] = 1;
+        S_MATRIX_DS = S_MATRIX_DS
+            .withVal(0, 0, 3 * s * s)
+            .withVal(0, 1, 2 * s)
+            .withVal(0, 2, 1)
+            .withVal(0, 3, 0);
+        Tt_MATRIX = Tt_MATRIX
+            .withVal(0, 0, t * t * t)
+            .withVal(1, 0, t * t)
+            .withVal(2, 0, t)
+            .withVal(3, 0, 1);
 
         Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
         Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
@@ -430,7 +434,7 @@ public class ParametricBiCubicPatch extends Surface {
         // The result is a 1x1 matrix.
         Vector3D result = new Vector3D();
 
-        result = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
+        result = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
         result = result.normalized();
 
         return result;
@@ -438,15 +442,17 @@ public class ParametricBiCubicPatch extends Surface {
 
     public Vector3D evaluateBinormal(double s, double t)
     {
-        S_MATRIX.M[0][0] = s * s * s;
-        S_MATRIX.M[0][1] = s * s;
-        S_MATRIX.M[0][2] = s;
-        S_MATRIX.M[0][3] = 1;
+        S_MATRIX = S_MATRIX
+            .withVal(0, 0, s * s * s)
+            .withVal(0, 1, s * s)
+            .withVal(0, 2, s)
+            .withVal(0, 3, 1);
 
-        Tt_MATRIX_DT.M[0][0] = 3 * t * t;
-        Tt_MATRIX_DT.M[1][0] = 2 * t;
-        Tt_MATRIX_DT.M[2][0] = 1;
-        Tt_MATRIX_DT.M[3][0] = 0;
+        Tt_MATRIX_DT = Tt_MATRIX_DT
+            .withVal(0, 0, 3 * t * t)
+            .withVal(1, 0, 2 * t)
+            .withVal(2, 0, 1)
+            .withVal(3, 0, 0);
 
         Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
         Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
@@ -457,7 +463,7 @@ public class ParametricBiCubicPatch extends Surface {
 
         // The results are 1x1 matrices.
         Vector3D result = new Vector3D();
-        result = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
+        result = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
         result = result.normalized();
 
         return result;

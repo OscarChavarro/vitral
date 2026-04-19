@@ -48,7 +48,7 @@ public class Scene
         Vector3D p = new Vector3D(0, -5, 5);
         Matrix4x4 R = new Matrix4x4();
 
-        R.eulerAnglesRotation(Math.toRadians(90.0), Math.toRadians(-45.0), 0);
+        R = R.eulerAnglesRotation(Math.toRadians(90.0), Math.toRadians(-45.0), 0);
 
         camera = new Camera();
         camera.setPosition(p);

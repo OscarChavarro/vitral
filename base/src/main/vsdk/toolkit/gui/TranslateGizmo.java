@@ -151,14 +151,7 @@ public class TranslateGizmo extends Gizmo {
         Material green = createMaterial(0, 0.61, 0);
         Material blue = createMaterial(0, 0, 0.76);
 
-        Matrix4x4 R = new Matrix4x4(T);
-        R.M[3][0] = 0.0;
-        R.M[3][1] = 0.0;
-        R.M[3][2] = 0.0;
-        R.M[0][3] = 0.0;
-        R.M[1][3] = 0.0;
-        R.M[2][3] = 0.0;
-        R.M[3][3] = 1.0;
+        Matrix4x4 R = new Matrix4x4(T).withoutTranslation();
         Matrix4x4 subR = new Matrix4x4();
         Matrix4x4 eleR, eleRi;
         Vector3D subP;
@@ -193,11 +186,11 @@ public class TranslateGizmo extends Gizmo {
                 switch ( i ) {
                   case 0:
                     // Rotation
-                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
@@ -207,11 +200,11 @@ public class TranslateGizmo extends Gizmo {
                     break;
                   case 1:
                     // Rotation
-                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
@@ -225,7 +218,7 @@ public class TranslateGizmo extends Gizmo {
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, currentScale*0.7*ARROW_LENGHT);
@@ -305,14 +298,7 @@ public class TranslateGizmo extends Gizmo {
             currentSelection = volatileSelection;
         }
 
-        Matrix4x4 R = new Matrix4x4(T);
-        R.M[3][0] = 0.0;
-        R.M[3][1] = 0.0;
-        R.M[3][2] = 0.0;
-        R.M[0][3] = 0.0;
-        R.M[1][3] = 0.0;
-        R.M[2][3] = 0.0;
-        R.M[3][3] = 1.0;
+        Matrix4x4 R = new Matrix4x4(T).withoutTranslation();
         Matrix4x4 subR = new Matrix4x4();
         Matrix4x4 eleR, eleRi;
         Vector3D subP;
@@ -378,11 +364,11 @@ public class TranslateGizmo extends Gizmo {
                         r.setMaterial(red);
                     }
                     // Rotation
-                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
@@ -403,11 +389,11 @@ public class TranslateGizmo extends Gizmo {
                         r.setMaterial(green);
                     }
                     // Rotation
-                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
@@ -432,7 +418,7 @@ public class TranslateGizmo extends Gizmo {
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, scale*0.2*ARROW_LENGHT);
@@ -452,11 +438,11 @@ public class TranslateGizmo extends Gizmo {
                     }
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
@@ -476,11 +462,11 @@ public class TranslateGizmo extends Gizmo {
                     }
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
@@ -500,11 +486,11 @@ public class TranslateGizmo extends Gizmo {
                     }
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), -1, 0, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
@@ -527,7 +513,7 @@ public class TranslateGizmo extends Gizmo {
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, scale*SEGMENT_LENGHT, 0);
@@ -547,11 +533,11 @@ public class TranslateGizmo extends Gizmo {
                     }
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, 0, scale*SEGMENT_LENGHT);
@@ -574,7 +560,7 @@ public class TranslateGizmo extends Gizmo {
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(scale*SEGMENT_LENGHT, 0, 0);
@@ -596,7 +582,7 @@ public class TranslateGizmo extends Gizmo {
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(scale*BOX_SIDE/2, scale*BOX_SIDE/2, 0);
@@ -615,11 +601,11 @@ public class TranslateGizmo extends Gizmo {
                     r.setMaterial(yellowTransparent); 
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 0, 1, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(0, scale*BOX_SIDE/2, scale*BOX_SIDE/2);
@@ -638,11 +624,11 @@ public class TranslateGizmo extends Gizmo {
                     r.setMaterial(yellowTransparent); 
                     // Rotation
                     subR = new Matrix4x4();
-                    subR.axisRotation(Math.toRadians(90.0), 1, 0, 0);
+                    subR = subR.axisRotation(Math.toRadians(90.0), 1, 0, 0);
                     eleR = R.multiply(subR);
                     r.setRotation(eleR);
                     eleRi = new Matrix4x4(eleR);
-                    eleRi.invert();
+                    eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
                     subP = new Vector3D(scale*BOX_SIDE/2, 0, scale*BOX_SIDE/2);
@@ -656,29 +642,19 @@ public class TranslateGizmo extends Gizmo {
 
     public Vector3D getPosition()
     {
-        Vector3D p = new Vector3D(T.M[0][3], T.M[1][3], T.M[2][3]);
-        return p;
+        return T.extractTranslation();
     }
 
     public void setPosition(Vector3D p)
     {
-        T.M[0][3] = p.x();
-        T.M[1][3] = p.y();
-        T.M[2][3] = p.z();
+        T = T.withTranslation(p);
     }
 
     public void setTransformationMatrix(Matrix4x4 T)
     {
         this.T = T;
 
-        Matrix4x4 R = new Matrix4x4(T);
-        R.M[3][0] = 0.0;
-        R.M[3][1] = 0.0;
-        R.M[3][2] = 0.0;
-        R.M[0][3] = 0.0;
-        R.M[1][3] = 0.0;
-        R.M[2][3] = 0.0;
-        R.M[3][3] = 1.0;
+        Matrix4x4 R = new Matrix4x4(T).withoutTranslation();
         calculateGeometryState(getPosition(), 
                                R, selectedResizing, aparentSizeInPixels,
                                camera);
@@ -706,17 +682,10 @@ public class TranslateGizmo extends Gizmo {
         unicode_id = keyEvent.unicode_id;
         keycode = keyEvent.keycode;
 
-        Matrix4x4 R = new Matrix4x4(T);
-        R.M[3][0] = 0.0;
-        R.M[3][1] = 0.0;
-        R.M[3][2] = 0.0;
-        R.M[0][3] = 0.0;
-        R.M[1][3] = 0.0;
-        R.M[2][3] = 0.0;
-        R.M[3][3] = 1.0;
+        Matrix4x4 R = new Matrix4x4(T).withoutTranslation();
 
         selectedResizing = true;
-        calculateGeometryState(new Vector3D(T.M[0][3], T.M[1][3], T.M[2][3]), 
+        calculateGeometryState(T.extractTranslation(), 
                                R, selectedResizing, aparentSizeInPixels, 
                                camera);
 
@@ -724,27 +693,27 @@ public class TranslateGizmo extends Gizmo {
             switch ( unicode_id ) {
               // Position
               case 'x':
-                T.M[0][3] -= deltaMov;
+                T = T.withVal(0, 3, T.get(0, 3) - deltaMov);
                 updateNeeded = true;
                 break;
               case 'X':
-                T.M[0][3] += deltaMov;
+                T = T.withVal(0, 3, T.get(0, 3) + deltaMov);
                 updateNeeded = true;
                 break;
               case 'y':
-                T.M[1][3] -= deltaMov;
+                T = T.withVal(1, 3, T.get(1, 3) - deltaMov);
                 updateNeeded = true;
                 break;
               case 'Y':
-                T.M[1][3] += deltaMov;
+                T = T.withVal(1, 3, T.get(1, 3) + deltaMov);
                 updateNeeded = true;
                 break;
               case 'z':
-                T.M[2][3] -= deltaMov;
+                T = T.withVal(2, 3, T.get(2, 3) - deltaMov);
                 updateNeeded = true;
                 break;
               case 'Z':
-                T.M[2][3] += deltaMov;
+                T = T.withVal(2, 3, T.get(2, 3) + deltaMov);
                 updateNeeded = true;
                 break; 
             }

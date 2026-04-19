@@ -198,7 +198,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                         loadExternalSceneFile("/storage/extSdCard/mug.ply");
             }
             R = new Matrix4x4();
-            R.axisRotation(Math.toRadians(90), 1, 0, 0);
+            R = R.axisRotation(Math.toRadians(90), 1, 0, 0);
             activateSubScene(preloadedMug, R, new Vector3D(20, 20, 20));
             break;
           case 6:
@@ -549,7 +549,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         if ( withLightRotation && l.size() > 0 ) {
             l.get(0).setPosition(new Vector3D(firstLightRadius, 0, 0));
             Matrix4x4 RL = new Matrix4x4();
-            RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
+            RL = RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
             Vector3D P, PR;
             P = l.get(0).getPosition();
             PR = RL.multiply(P);
@@ -572,7 +572,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                 SimpleBody b = scene.scene.getSimpleBodies().get(i);
                 Matrix4x4 original = b.getRotation();
                 Matrix4x4 delta = new Matrix4x4();
-                delta.axisRotation(Math.toRadians(1.0), new Vector3D(0, 0, 1));
+                delta = delta.axisRotation(Math.toRadians(1.0), new Vector3D(0, 0, 1));
                 b.setRotation(delta.multiply(original));
             }
         }

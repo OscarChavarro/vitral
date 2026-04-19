@@ -30,7 +30,7 @@ public class CsgKurlanderBowl
         PolyhedralBoundedSolid solid = new Sphere(radius)
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 t = new Matrix4x4();
-        t.translation(center);
+        t = t.translation(center);
         solid.applyTransformation(t);
         return solid;
     }
@@ -44,12 +44,12 @@ public class CsgKurlanderBowl
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
             .createCircularLamina(0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
         Matrix4x4 sweep = new Matrix4x4();
-        sweep.translation(0.0, 0.0, height);
+        sweep = sweep.translation(0.0, 0.0, height);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
 
         Matrix4x4 move = new Matrix4x4();
-        move.translation(translation);
+        move = move.translation(translation);
         solid.applyTransformation(move);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -68,7 +68,7 @@ public class CsgKurlanderBowl
         s.smef(1, points.length, 1, 2);
 
         Matrix4x4 t = new Matrix4x4();
-        t.translation(0.0, 0.0, thickness);
+        t = t.translation(0.0, 0.0, thickness);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(s, s.findFace(1), t);
         return s;
     }
@@ -108,9 +108,9 @@ public class CsgKurlanderBowl
         Matrix4x4 rz = new Matrix4x4();
         Matrix4x4 m;
 
-        t.translation(s(6.0), 0.0, s(z));
-        ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-        rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
+        t = t.translation(s(6.0), 0.0, s(z));
+        ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
+        rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
         m = rz.multiply(ry.multiply(t));
         motif.applyTransformation(m);
         return motif;

@@ -322,12 +322,12 @@ public class VoxelVolume extends Solid {
         }
 
         S = new Matrix4x4();
-        S.scale(greaterScale/2, greaterScale/2, greaterScale/2);
+        S = S.scale(greaterScale/2, greaterScale/2, greaterScale/2);
 
         T1 = new Matrix4x4();
-        T1.translation(1, 1, 1);
+        T1 = T1.translation(1, 1, 1);
         T2 = new Matrix4x4();
-        T2.translation(minmax[0]-(greaterScale-sx)/2,
+        T2 = T2.translation(minmax[0]-(greaterScale-sx)/2,
                        minmax[1]-(greaterScale-sy)/2,
                        minmax[2]-(greaterScale-sz)/2);
 

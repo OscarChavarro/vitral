@@ -163,7 +163,7 @@ public class WireframeRenderer extends RenderingElement
         Geometry g;
 
         P = new Matrix4x4();
-        P.canonicalPerspectiveProjection();
+        P = P.canonicalPerspectiveProjection();
 
         for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {
             g = inSimpleBodyArray.get(i).getGeometry();

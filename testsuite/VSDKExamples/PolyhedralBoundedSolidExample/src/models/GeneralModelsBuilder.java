@@ -64,11 +64,11 @@ public class GeneralModelsBuilder
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
             T = new Matrix4x4();
-            T.translation(0.0, 0.0, 0.5);
+            T = T.translation(0.0, 0.0, 0.5);
             R = new Matrix4x4();
-            R.axisRotation(Math.toRadians(5), 0, 1, 0);
+            R = R.axisRotation(Math.toRadians(5), 0, 1, 0);
             S = new Matrix4x4();
-            S.scale(0.5, 0.5, 0.5);
+            S = S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
 
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
@@ -81,22 +81,22 @@ public class GeneralModelsBuilder
             );
 
             T = new Matrix4x4();
-            T.translation(0.0, 0.0, 0.5);
+            T = T.translation(0.0, 0.0, 0.5);
             R = new Matrix4x4();
-            R.axisRotation(Math.toRadians(5), 0, 1, 0);
+            R = R.axisRotation(Math.toRadians(5), 0, 1, 0);
             S = new Matrix4x4();
-            S.scale(0.5, 0.5, 0.5);
+            S = S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), M);
 
 /*
             T = new Matrix4x4();
-            T.translation(0.1, 0.1, 1.0);
+            T = T.translation(0.1, 0.1, 1.0);
             R = new Matrix4x4();
-            //R.axisRotation(Math.toRadians(15), 0, 1, 0);
+            //R = R.axisRotation(Math.toRadians(15), 0, 1, 0);
             S = new Matrix4x4();
-            S.scale(0.2, 0.2, 0.2);
+            S = S.scale(0.2, 0.2, 0.2);
             M = T.multiply(R.multiply(S));
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), M);
@@ -137,7 +137,7 @@ public class GeneralModelsBuilder
             mySolid = createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
             T = new Matrix4x4();
-            T.translation(0.0, 0.0, 0.1);
+            T = T.translation(0.0, 0.0, 0.1);
 
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), T);
@@ -255,7 +255,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.55, 0.55, 0.55);
+        R = R.translation(0.55, 0.55, 0.55);
 
         Box b = new Box(boxSize);
         solid = b.exportToPolyhedralBoundedSolid();
@@ -275,7 +275,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.55, 0.55, 0.55);
+        R = R.translation(0.55, 0.55, 0.55);
 
         Sphere s = new Sphere(r);
         solid = s.exportToPolyhedralBoundedSolid(subdivisionCircunference,
@@ -296,7 +296,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.55, 0.55, 0.05);
+        R = R.translation(0.55, 0.55, 0.05);
 
         Cone c = new Cone(r1, r2, h);
         solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
@@ -317,7 +317,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.55, 0.55, 0.05);
+        R = R.translation(0.55, 0.55, 0.05);
 
         Cone c = new Cone(r, r, h);
         solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
@@ -333,7 +333,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid cylinderB = createCylinder(0.5, 2);
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0.275, 0.0, -0.5);
+        T = T.translation(0.275, 0.0, -0.5);
         cylinderB.applyTransformation(T);
 
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
@@ -365,7 +365,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid clipCube = clipCubeGeometry
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 cubeMove = new Matrix4x4();
-        cubeMove.translation(0.55, 0.55, 0.325);
+        cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
         clipCube.applyTransformation(cubeMove);
 
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
@@ -379,7 +379,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
 
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.55, 0.55, 0.05);
+        R = R.translation(0.55, 0.55, 0.05);
 
         Arrow a = new Arrow(p1, p2, p3, p4);
         solid = a.exportToPolyhedralBoundedSolid();
@@ -426,7 +426,7 @@ public class GeneralModelsBuilder
         solid = GeneralModelsBuilder.createBox(new Vector3D(0.9, 0.9, 0.9));
         GeneralModelsBuilder.extrudeBox(solid);
         solid.kfmrh(2, 11);
-        //R.translation(-0.55, -0.55, -0.55);
+        //R = R.translation(-0.55, -0.55, -0.55);
         //solid.applyTransformation(R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
@@ -461,7 +461,7 @@ public class GeneralModelsBuilder
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;
 
-        R.translation(0.55, 0.55, 0.55);
+        R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
         solid.smev(1, 1, 4, new Vector3D(-0.5, 0.0, 0));
@@ -497,7 +497,7 @@ public class GeneralModelsBuilder
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;
 
-        R.translation(0.55, 0.55, 0.55);
+        R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
         solid.smev(1, 1, 4, new Vector3D(-0.5, 0.5, 0));
@@ -572,7 +572,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid1;
 
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, 0, 0.4);
+        T = T.translation(0, 0, 0.4);
 
         solid1 = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, 0.5, 0.0, 6
@@ -588,7 +588,7 @@ public class GeneralModelsBuilder
         Vector3D b = new Vector3D(0.5*Math.cos(ang), 0.5*Math.sin(ang), 0);
         Vector3D c = a.add(b);
         c = c.multiply(0.5);
-        R.translation(-c.x(), c.y(), c.z());
+        R = R.translation(-c.x(), c.y(), c.z());
         solid1.applyTransformation(R);
 
         //- Create cilynder 2 ---------------------------------------------
@@ -602,7 +602,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid2);
 
         //-----------------------------------------------------------------
-        R.translation(c.x(), -c.y(), c.z());
+        R = R.translation(c.x(), -c.y(), c.z());
         solid2.applyTransformation(R);
 
         //-----------------------------------------------------------------
@@ -704,7 +704,7 @@ public class GeneralModelsBuilder
         }
         cfirst = first;
         M = new Matrix4x4();
-        M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
+        M = M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
 
         int i;
         for ( i = 0; i < nfaces-1; i++ ) {
@@ -768,7 +768,7 @@ public class GeneralModelsBuilder
         }
         cfirst = first;
         M = new Matrix4x4();
-        M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
+        M = M.axisRotation( (2*Math.PI) / ((double)nfaces), 1, 0, 0);
 
         int i;
         for ( i = 0; i < nfaces-1; i++ ) {
@@ -821,9 +821,9 @@ public class GeneralModelsBuilder
         Matrix4x4 T2 = new Matrix4x4();
         Matrix4x4 R = new Matrix4x4();
         Matrix4x4 M;
-        T1.translation(center.multiply(-1));
-        T2.translation(center);
-        R.axisRotation(Math.PI/((double)nsides), 0, 0, 1);
+        T1 = T1.translation(center.multiply(-1));
+        T2 = T2.translation(center);
+        R = R.axisRotation(Math.PI/((double)nsides), 0, 0, 1);
         M = T2.multiply(R.multiply(T1));
         solid.applyTransformation(M);
 
@@ -860,7 +860,7 @@ public class GeneralModelsBuilder
 /*
         Matrix4x4 R = new Matrix4x4();
         PolyhedralBoundedSolid solid;
-        R.translation(0.55, 0.55, 0.55);
+        R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(0.00+0.05, 0.00+0.05, 0), 1, 1);
         solid.smev(1, 1, 2, new Vector3D(0.94+0.05, 0.00+0.05, 0));
@@ -868,7 +868,7 @@ public class GeneralModelsBuilder
         solid.smev(1, 3, 4, new Vector3D(0.00+0.05, 0.30+0.05, 0));
         solid.mef(1, 1, 4, 3, 1, 2, 2);
         Matrix4x4 T = new Matrix4x4();
-        T.translation(0, 0, 0.4);
+        T = T.translation(0, 0, 0.4);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 */
@@ -929,7 +929,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         Matrix4x4 R = new Matrix4x4();
-        R.translation(0.5, 0.5, 0.15);
+        R = R.translation(0.5, 0.5, 0.15);
 
         Box box = new Box(new Vector3D(1, 0.5, 0.3));
         a = box.exportToPolyhedralBoundedSolid();
@@ -938,7 +938,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         R = new Matrix4x4();
-        R.translation(0.5, 0.5, 0.15+0.3);
+        R = R.translation(0.5, 0.5, 0.15+0.3);
 
         box = new Box(new Vector3D(0.5, 1, 0.3));
         b = box.exportToPolyhedralBoundedSolid();
@@ -973,7 +973,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.1, 0.1);
+        T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
@@ -981,7 +981,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.9, 0.1);
+        T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
@@ -989,7 +989,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
+        T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
@@ -997,7 +997,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.1);
+        T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
@@ -1037,7 +1037,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.1, 0.1);
+        T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
         a.applyTransformation(T);
@@ -1045,7 +1045,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.5, 0.9, 0.1);
+        T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
         b.applyTransformation(T);
@@ -1053,7 +1053,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
+        T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
         c.applyTransformation(T);
@@ -1061,7 +1061,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.9, 0.5, 0.1);
+        T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
         d.applyTransformation(T);
@@ -1069,7 +1069,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.1);
+        T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
         e.applyTransformation(T);
@@ -1077,7 +1077,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.5, 0.9);
+        T = T.translation(0.1, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
         f.applyTransformation(T);
@@ -1085,7 +1085,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.1, 0.5);
+        T = T.translation(0.1, 0.1, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
         g.applyTransformation(T);
@@ -1093,7 +1093,7 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
-        T.translation(0.1, 0.9, 0.5);
+        T = T.translation(0.1, 0.9, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
         h.applyTransformation(T);

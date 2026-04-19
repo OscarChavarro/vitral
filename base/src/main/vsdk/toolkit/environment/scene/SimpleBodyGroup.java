@@ -90,17 +90,8 @@ public class SimpleBodyGroup extends Entity {
 
     public void setRotation(Matrix4x4 rotation)
     {
-        this.rotation = rotation;
-
-        // This is an homogeneus matrix, but its supposed to contain only
-        // the rotation component.
-        this.rotation.M[0][3] = 0;
-        this.rotation.M[1][3] = 0;
-        this.rotation.M[2][3] = 0;
-        this.rotation.M[3][3] = 1;
-        this.rotation.M[3][0] = 0;
-        this.rotation.M[3][1] = 0;
-        this.rotation.M[3][2] = 0;
+        // This is an homogeneous matrix, but it should contain only rotation.
+        this.rotation = rotation.withoutTranslation();
     }
 
     public Matrix4x4 getRotationInverse()
@@ -136,8 +127,8 @@ public class SimpleBodyGroup extends Entity {
     public Matrix4x4 getTransformationMatrix()
     {
         Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
-        S.scale(scale);
-        T.translation(position);
+        S = S.scale(scale);
+        T = T.translation(position);
         M = T.multiply(rotation.multiply(S));
         return M;
     }
@@ -196,8 +187,8 @@ public class SimpleBodyGroup extends Entity {
             bi = bodies.get(i);
             minmaxSub = bi.getGeometry().getMinMax();
             R = bi.getRotation();
-            T.translation(bi.getPosition());
-            S.scale(bi.getScale()); 
+            T = T.translation(bi.getPosition());
+            S = S.scale(bi.getScale()); 
             M = T.multiply(R).multiply(S);
 
             p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[1], minmaxSub[2]));
