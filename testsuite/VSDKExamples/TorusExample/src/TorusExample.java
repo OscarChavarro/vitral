@@ -39,7 +39,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.geometry.Torus;
+import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements

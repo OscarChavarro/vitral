@@ -1,6 +1,4 @@
 // Basic java classes
-import java.io.File;
-import java.io.IOException;
 
 // AWT GUI java classes
 import java.awt.BorderLayout;
@@ -15,8 +13,6 @@ import java.awt.event.MouseWheelListener;
 
 // Swing GUI java classes
 import javax.swing.JFrame;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
@@ -28,22 +24,19 @@ import com.jogamp.opengl.GLEventListener;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.environment.Camera;
+        import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.io.geometry.ReaderObj;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+        import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglLightRenderer;
 import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
 
 // Application classes
-import util.filters.ObjectFilter;
+
 
 public class IlluminationTest
     extends JFrame implements GLEventListener, MouseListener,

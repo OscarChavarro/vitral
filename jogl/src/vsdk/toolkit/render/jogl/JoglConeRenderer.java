@@ -12,7 +12,7 @@ import com.jogamp.opengl.glu.GLUquadric;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 
 public class JoglConeRenderer extends JoglRenderer {
 

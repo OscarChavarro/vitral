@@ -11,7 +11,7 @@ import java.awt.geom.AffineTransform;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.geometry.FontReader;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
 
 /**
 This is an implementation of the persistence interface FontReader. It is

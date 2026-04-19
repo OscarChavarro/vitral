@@ -38,7 +38,7 @@ import vsdk.toolkit.gui.CameraController;           // Control elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.AwtSystem;
-import vsdk.toolkit.environment.geometry.Md2Mesh;
+import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.io.geometry.Md2Persistence;
 import vsdk.toolkit.animation.AnimationEventGenerator;
 import vsdk.toolkit.render.jogl.JoglMd2MeshRenderer;
@@ -50,7 +50,7 @@ import vsdk.toolkit.common.VSDK;
 
 //Polygon simplify.
 import vsdk.toolkit.common.Vertex2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
 
 public class Md2MeshExample

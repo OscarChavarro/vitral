@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.geometry.Md2Mesh;
+import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;

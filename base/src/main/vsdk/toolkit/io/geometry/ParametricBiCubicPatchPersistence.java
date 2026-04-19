@@ -9,7 +9,7 @@ import org.w3c.dom.Element;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.PersistenceElement;
 

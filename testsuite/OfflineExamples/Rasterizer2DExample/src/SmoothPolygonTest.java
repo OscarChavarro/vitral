@@ -7,10 +7,9 @@
 import java.io.File;
 
 // VSDK classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.environment.geometry.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.render.Rasterizer2D;
 import vsdk.toolkit.io.image.ImagePersistence;
 

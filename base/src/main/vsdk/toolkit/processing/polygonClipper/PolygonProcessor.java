@@ -13,8 +13,8 @@ import java.util.Collections;
 import java.util.Stack;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.processing.ProcessingElement;
 
 

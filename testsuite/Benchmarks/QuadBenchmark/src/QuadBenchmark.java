@@ -2,9 +2,6 @@
 // supports just a very limited subset of SPECViewperf: quad data.
 
 // Basic Java classes
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 // Awt / swing classes
 import java.applet.Applet;
@@ -23,8 +20,7 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLDrawableFactory;
-import com.jogamp.opengl.GLEventListener;
+        import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.Animator;
 
 // VitralSDK classes
@@ -33,14 +29,13 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.QuadMesh;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.JoglRenderer;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
-import vsdk.toolkit.gui.AwtSystem;
+        import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.io.geometry.ViewpointBinaryPersistence; // Persistence elements

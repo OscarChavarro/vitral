@@ -10,7 +10,7 @@ import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.geometry.QuadMesh;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 
 public class JoglQuadMeshRenderer extends JoglRenderer
 {

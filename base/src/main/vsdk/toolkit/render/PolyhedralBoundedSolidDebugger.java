@@ -1,6 +1,6 @@
 package vsdk.toolkit.render;
 
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**
 This class follows the Singleton design pattern. Its sole function is to

@@ -1,6 +1,6 @@
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.processing.polygonClipper.WeilerAthertonPolygonClipper;
 import vsdk.toolkit.processing.polygonClipper._DoubleLinkedListNode;
 import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;

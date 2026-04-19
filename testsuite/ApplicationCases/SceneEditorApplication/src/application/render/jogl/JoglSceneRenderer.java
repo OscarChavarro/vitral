@@ -8,7 +8,7 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;

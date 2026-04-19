@@ -3,6 +3,7 @@ import java.awt.geom.Rectangle2D;
 
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.awt.TextRenderer;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 
 public class JoglPolygonClippingHudRenderer
 {
@@ -90,7 +91,7 @@ public class JoglPolygonClippingHudRenderer
         }
     }
 
-    private static int countLoops(vsdk.toolkit.environment.geometry.Polygon2D polygon)
+    private static int countLoops(Polygon2D polygon)
     {
         if ( polygon == null || polygon.loops == null ) {
             return 0;

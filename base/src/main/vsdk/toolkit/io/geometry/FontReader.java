@@ -1,5 +1,5 @@
 package vsdk.toolkit.io.geometry;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**

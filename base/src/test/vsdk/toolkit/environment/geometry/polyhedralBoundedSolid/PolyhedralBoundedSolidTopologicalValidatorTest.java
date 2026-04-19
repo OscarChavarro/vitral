@@ -2,7 +2,9 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologicalValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

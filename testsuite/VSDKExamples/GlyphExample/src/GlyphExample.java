@@ -1,10 +1,6 @@
 // Basic JDK classes
 import java.util.ArrayList;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-
 // AWT classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -23,7 +19,6 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
@@ -32,10 +27,9 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.CameraControllerBlender;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;

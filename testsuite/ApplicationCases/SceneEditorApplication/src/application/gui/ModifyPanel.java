@@ -11,7 +11,7 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
+import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
 

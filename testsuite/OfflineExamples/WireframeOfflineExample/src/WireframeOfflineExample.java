@@ -5,12 +5,11 @@ import java.io.File;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;     // Model elements
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Box;
+import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements

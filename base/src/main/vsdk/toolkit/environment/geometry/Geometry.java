@@ -9,8 +9,10 @@ import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.ProgressMonitor;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**
 Every geometric entity (prefer not to call it "Object", for not confusing

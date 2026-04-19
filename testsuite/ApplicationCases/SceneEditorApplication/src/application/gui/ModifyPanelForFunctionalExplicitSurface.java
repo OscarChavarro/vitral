@@ -18,7 +18,7 @@ import javax.swing.border.Border;
 
 // JOGL classes
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
+import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 
 // Application classes
 import application.SceneEditorApplication;

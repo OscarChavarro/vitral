@@ -11,22 +11,22 @@ import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Arrow;
-import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.volume.Arrow;
+import vsdk.toolkit.environment.geometry.volume.Box;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.Torus;
-import vsdk.toolkit.environment.geometry.InfinitePlane;
-import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.TriangleStripMesh;
-import vsdk.toolkit.environment.geometry.QuadMesh;
-import vsdk.toolkit.environment.geometry.VoxelVolume;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
+import vsdk.toolkit.environment.geometry.volume.Torus;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
+import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 
 public class JoglGeometryRenderer extends JoglRenderer 
 {

@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.geometry.Md2Mesh;
+import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 
 /**
  *

@@ -5,7 +5,7 @@
 package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
-import vsdk.toolkit.environment.geometry.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 
 /**
  * Implements the Weiler-Atherton polygon clipping algorithm for convex and

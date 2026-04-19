@@ -9,8 +9,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 
 public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
 

@@ -11,12 +11,12 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.geometry.Arrow;
-import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.volume.Arrow;
+import vsdk.toolkit.environment.geometry.volume.Box;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.InfinitePlane;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.processing.GeometricModeler;
 

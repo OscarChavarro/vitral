@@ -7,8 +7,8 @@ import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.geometry.FunctionalExplicitSurface;
-import vsdk.toolkit.environment.geometry.TriangleMesh;
+import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.Camera;
 
 public class JoglFunctionalExplicitSurfaceRenderer extends JoglRenderer {

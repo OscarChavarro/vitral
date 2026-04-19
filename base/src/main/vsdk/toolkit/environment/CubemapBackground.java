@@ -4,7 +4,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
-import vsdk.toolkit.environment.geometry.Box;
+import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.RGBAImage;
 
 public class CubemapBackground extends Background {

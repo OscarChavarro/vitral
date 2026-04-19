@@ -19,7 +19,7 @@ import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Cone;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 
 public class JoglTranslateGizmoRenderer extends JoglRenderer 
 {

@@ -12,7 +12,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
 
 public class JoglSphereRenderer extends JoglRenderer {
 

@@ -26,8 +26,8 @@ import org.xml.sax.SAXException;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.ParametricCurve;
-import vsdk.toolkit.environment.geometry.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.geometry.ParametricCurvePersistence;
 import vsdk.toolkit.io.geometry.ParametricBiCubicPatchPersistence;

@@ -5,11 +5,10 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 // VSDK Classes
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.Torus;
+import vsdk.toolkit.environment.geometry.volume.Torus;
 
 /**
 @author Leidy Alexandra Lozano Jacome

@@ -3,15 +3,11 @@ import java.io.File;
 
 import vsdk.toolkit.common.ColorRgb;                     // Model elements
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;  // Persistence elements

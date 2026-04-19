@@ -93,7 +93,7 @@ public class JoglPreviewGenerator
 
             // Debug code to check correct posing to unit sphere
 /*
-            vsdk.toolkit.environment.geometry.Sphere sphere = new vsdk.toolkit.environment.geometry.Sphere(1);
+            vsdk.toolkit.environment.geometry.volume.Sphere sphere = new vsdk.toolkit.environment.geometry.volume.Sphere(1);
             RendererConfiguration quality2;
             quality2 = new RendererConfiguration();
             quality2.setWires(true);

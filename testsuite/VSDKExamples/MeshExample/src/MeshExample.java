@@ -1,6 +1,5 @@
 // Basic java classes
 import java.io.File;
-import java.util.ArrayList;
 
 // AWT GUI java classes
 import java.awt.BorderLayout;
@@ -30,8 +29,6 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
-import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.render.jogl.JoglCameraRenderer; // View elements

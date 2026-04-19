@@ -2,8 +2,8 @@ package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
 import vsdk.toolkit.common.Vertex2D;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 
 /**
  * Similar to Polygon2D but is used in polygon clipping(use _Polygon2DContourWA not _Polygon2DContour).

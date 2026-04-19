@@ -4,8 +4,8 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.geometry.VoxelVolume;
-import vsdk.toolkit.environment.geometry.Box;
+import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
+import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 

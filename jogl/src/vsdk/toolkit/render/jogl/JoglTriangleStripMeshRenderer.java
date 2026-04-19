@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL2GL3;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.environment.geometry.TriangleStripMesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
 
 public class JoglTriangleStripMeshRenderer extends JoglRenderer {
 

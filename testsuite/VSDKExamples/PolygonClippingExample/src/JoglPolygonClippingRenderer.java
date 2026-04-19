@@ -8,8 +8,8 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUtessellator;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.Polygon2D;
-import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.processing.polygonClipper._DoubleLinkedListNode;
 import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;
 import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;

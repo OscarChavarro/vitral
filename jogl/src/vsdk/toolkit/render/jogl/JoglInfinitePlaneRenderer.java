@@ -10,7 +10,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.geometry.InfinitePlane;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
 public class JoglInfinitePlaneRenderer extends JoglRenderer {
 

@@ -17,14 +17,13 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.environment.geometry.Sphere;
+import vsdk.toolkit.environment.geometry.volume.Box;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;     // View elements
 import vsdk.toolkit.render.awt.AwtCalligraphic2DBufferRenderer;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
