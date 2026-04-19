@@ -4,6 +4,7 @@ import java.io.Serial;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 
 public abstract class Curve extends Geometry {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
@@ -23,10 +24,23 @@ public abstract class Curve extends Geometry {
     @param r
     @return always if false
     */
-    @Override
     public Ray doIntersection(Ray r)
     {
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     /**
@@ -36,7 +50,6 @@ public abstract class Curve extends Geometry {
     @param intT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double intT, 
                                       GeometryIntersectionInformation outData)

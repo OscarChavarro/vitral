@@ -17,6 +17,7 @@ import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Solid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -1251,7 +1252,6 @@ public class PolyhedralBoundedSolid extends Solid {
     @param inOutRay
     @return true if given ray intersects current PolyhedralBoundedSolid
     */
-    @Override
     public Ray doIntersection(Ray inOutRay) {
         int i;
         double min_t;         // Shortest distance founded so far
@@ -1269,9 +1269,10 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( i = 0; i < polygonsList.size(); i++ ) {
             Ray ray = new Ray(inOutRay);
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            Ray hit = face.containingPlane.doIntersection(ray);
-            if ( hit != null ) {
-                face.containingPlane.doExtraInformation(hit, 0.0, Info);
+            RayHit planeHit = new RayHit();
+            if ( face.containingPlane.doIntersection(ray, planeHit) ) {
+                Ray hit = planeHit.ray();
+                Info = planeHit;
                 if ( hit.t() < min_t ) {
                     hit = hit.withDirection(hit.direction().normalized());
                     p = hit.origin().add(hit.direction().multiply(hit.t()));
@@ -1289,10 +1290,23 @@ public class PolyhedralBoundedSolid extends Solid {
         return nearestHit;
     }
 
-    @Override
     public void doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         outData.clone(lastInfo);
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
@@ -1515,14 +1529,15 @@ public class PolyhedralBoundedSolid extends Solid {
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            Ray hit = face.containingPlane.doIntersection(ray);
-            if ( hit != null ) {
+            RayHit planeHit = new RayHit();
+            if ( face.containingPlane.doIntersection(ray, planeHit) ) {
+                Ray hit = planeHit.ray();
                 if ( hit.t() < t0 - numericContext.epsilon() ) {
                     hit = hit.withDirection(hit.direction().normalized());
                     pi = hit.origin().add(hit.direction().multiply(hit.t()));
                     pos = face.testPointInside(pi, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
-                        face.containingPlane.doExtraInformation(hit, 0.0, info);
+                        info = planeHit;
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             boolean considerIt = true;
                             for ( j = 0; j < ndist; j++ ) {

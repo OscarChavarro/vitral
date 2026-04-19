@@ -7,6 +7,7 @@ import java.io.Serial;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 public class TriangleStripMesh extends Surface {
@@ -112,10 +113,15 @@ public class TriangleStripMesh extends Surface {
     @param inOut_Ray
     @return true if given ray intersects current TriangleStripMesh
     */
-    @Override
     public Ray
     doIntersection(Ray inOut_Ray) {
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return false;
     }
 
     /**
@@ -125,7 +131,6 @@ public class TriangleStripMesh extends Surface {
     \todo  Method not implemented!
     @param inT
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {

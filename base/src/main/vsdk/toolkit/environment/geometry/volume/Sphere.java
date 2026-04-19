@@ -17,8 +17,6 @@ public class Sphere extends Solid {
 
     private double _radius;
     private double _radius_squared;
-    private Vector3D _static_delta;
-    private double [] _static_minmax;
 
     private PolyhedralBoundedSolid brepCache;
     private static final int DEFAULT_PARALLELS = 8;
@@ -29,8 +27,6 @@ public class Sphere extends Solid {
     public Sphere(double r) {
         _radius = r;
         _radius_squared = _radius*_radius;
-        _static_delta = new Vector3D();
-        _static_minmax = new double[6];
         brepCache = null;
     }
 
@@ -40,7 +36,6 @@ public class Sphere extends Solid {
     @param inout_rayo
     @return true if given ray intersects current Sphere
     */
-    @Override
     public Ray
     doIntersection(Ray inout_rayo) {
         /* OJO: Como en Java, a diferencia de C no hay sino objetos por
@@ -65,17 +60,17 @@ public class Sphere extends Solid {
                 NOTA: Comparar este m&eacute;todo modificado con la 
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */
-        _static_delta = new Vector3D(
+        Vector3D delta = new Vector3D(
             -inout_rayo.origin().x(),
             -inout_rayo.origin().y(),
             -inout_rayo.origin().z());
-        double v = inout_rayo.direction().dotProduct(_static_delta);
+        double v = inout_rayo.direction().dotProduct(delta);
 
         // Test if the inout_rayo actually intersects the sphere
         double t = _radius_squared + v*v 
-                  - _static_delta.x()*_static_delta.x()
-                  - _static_delta.y()*_static_delta.y()
-                  - _static_delta.z()*_static_delta.z();
+                  - delta.x()*delta.x()
+                  - delta.y()*delta.y()
+                  - delta.z()*delta.z();
         if ( t < 0 ) {
             return null;
         }
@@ -109,7 +104,6 @@ public class Sphere extends Solid {
     Geometry.doExtraInformation.
     @param inT
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
@@ -176,13 +170,14 @@ public class Sphere extends Solid {
     @Override
     public double[] getMinMax()
     {
+        double[] minmax = new double[6];
         for ( int i = 0; i < 3; i++ ) {
-            _static_minmax[i] = -_radius;
+            minmax[i] = -_radius;
         }
         for ( int i = 3; i < 6; i++ ) {
-            _static_minmax[i] = _radius;
+            minmax[i] = _radius;
         }
-        return _static_minmax;
+        return minmax;
     }
 
     public double getRadius()

@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -194,16 +195,14 @@ public class Scene
         ArrayList<SimpleBody> things = scene.getSimpleBodies();
         boolean intersected = false;
         SimpleBody gi;
-        GeometryIntersectionInformation ii;
-
-        ii = new GeometryIntersectionInformation();
+        RayHit ii = new RayHit();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            Ray hit = gi.doIntersection(r);
-            if ( hit != null && hit.t() < nearestDistance ) {
-                gi.doExtraInformation(hit, hit.t(), ii);
-                nearestDistance = hit.t();
-                r = hit;
+            RayHit hit = new RayHit();
+            if ( gi.doIntersection(r, hit) && hit.ray().t() < nearestDistance ) {
+                ii.clone(hit);
+                nearestDistance = hit.ray().t();
+                r = hit.ray();
                 intersected = true;
             }
         }

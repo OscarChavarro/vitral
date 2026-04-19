@@ -5,6 +5,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 
 public class InfinitePlane extends HalfSpace {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -58,8 +59,6 @@ public class InfinitePlane extends HalfSpace {
         this.c = other.c;
         this.d = other.d;
     }
-
-    @Override
     public Ray
     doIntersection(Ray inout_rayo) {
         double denominator = a*inout_rayo.direction().x() + b*inout_rayo.direction().y() + c*inout_rayo.direction().z();
@@ -69,6 +68,20 @@ public class InfinitePlane extends HalfSpace {
         if ( t < 0 ) return null;
 
         return inout_rayo.withT(t);
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     public Ray
@@ -139,7 +152,6 @@ public class InfinitePlane extends HalfSpace {
     Geometry.doExtraInformation.
     @param inT
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {

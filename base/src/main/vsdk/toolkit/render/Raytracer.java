@@ -26,7 +26,6 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.ProgressMonitor;
@@ -42,19 +41,11 @@ a "Strategy" design pattern.
 \todo  Upgrade ArrayList management to Java 1.5 code style (typed templates)
 */
 public class Raytracer extends RenderingElement {
-    private Vector3D static_tmp;
-    private Vector3D static_poffset;
-    private Ray static_shadowRay;
-    private RayHit static_info;
     private static final double TINY = 0.0001;
 
     public Raytracer()
     {
-        // Dark magic similar to the one described Sphere::intersect
-        static_tmp = new Vector3D();
-        static_poffset = new Vector3D();
-        static_shadowRay = new Ray();
-        static_info = new RayHit();
+        // No mutable shared temporaries: keep method-level variables for reentrancy.
     }
 
     /*
@@ -154,14 +145,13 @@ public class Raytracer extends RenderingElement {
                 }
 
                 // Check if the surface point is in shadow
-                static_poffset = new Vector3D(
+                Vector3D shadowOffset = new Vector3D(
                     info.p.x() + VSDK.EPSILON*l.x(),
                     info.p.y() + VSDK.EPSILON*l.y(),
                     info.p.z() + VSDK.EPSILON*l.z());
-                static_shadowRay = static_shadowRay.withOrigin(Vector3D.copyOf(static_poffset));
-                static_shadowRay = static_shadowRay.withDirection(l.normalized());
+                Ray shadowRay = new Ray(Vector3D.copyOf(shadowOffset), l.normalized());
                 RayHit shadowHit = new RayHit();
-                nearestObject = selectNearestThingInRayDirection(static_shadowRay, objects, shadowHit);
+                nearestObject = selectNearestThingInRayDirection(shadowRay, objects, shadowHit);
                 if ( nearestObject != null ) {
                     //delete l;
                     continue;
@@ -183,12 +173,12 @@ public class Raytracer extends RenderingElement {
 
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
-                        static_tmp = new Vector3D(
+                        Vector3D reflectedView = new Vector3D(
                             lambert*info.n.x() - l.x(),
                             lambert*info.n.y() - l.y(),
                             lambert*info.n.z() - l.z());
                         double spec = 
-                            viewVector.dotProduct(static_tmp);
+                            viewVector.dotProduct(reflectedView);
 
                         if ( spec > 0 ) {
                             // OJO: Raro...
@@ -350,20 +340,20 @@ public class Raytracer extends RenderingElement {
         nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray, hitInfo);
         if ( nearestObject != null ) {
             //------------------------------------------------------------
-            static_info.clone(hitInfo);
+            RayHit shadingInfo = new RayHit(hitInfo);
             //-----
             if ( !inQualitySelection.isTextureSet() ) {
-                static_info.texture = null;
+                shadingInfo.texture = null;
             }
             else {
-                if ( static_info.texture == null ) {
-                    static_info.texture = nearestObject.getTexture();
+                if ( shadingInfo.texture == null ) {
+                    shadingInfo.texture = nearestObject.getTexture();
                 }
             }
 
             //-----
             if ( !inQualitySelection.isBumpMapSet() ) {
-                static_info.normalMap = nearestObject.getNormalMap();
+                shadingInfo.normalMap = nearestObject.getNormalMap();
             }
 
             //------------------------------------------------------------
@@ -373,15 +363,15 @@ public class Raytracer extends RenderingElement {
                 -hitInfo.ray().direction().z());
 
             Material material;
-            if ( static_info.material != null ) {
-                material = static_info.material;
+            if ( shadingInfo.material != null ) {
+                material = shadingInfo.material;
             }
             else {
                 material = nearestObject.getMaterial();
             }
 
             evaluateIlluminationModel(
-                static_info, viewVector, inLightsArray, inSimpleBodiesArray, in_background, material,
+                shadingInfo, viewVector, inLightsArray, inSimpleBodiesArray, in_background, material,
                 inQualitySelection, 3, outColor);
             //delete viewVector;
           }

@@ -7,6 +7,7 @@ import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.RayHit;
 
 public class SimpleBodyGroup extends Entity {
     @Serial private static final long serialVersionUID = 20070526L;
@@ -162,10 +163,10 @@ public class SimpleBodyGroup extends Entity {
         Ray nearestHit = null;
 
         for ( i = 0; i < bodies.size(); i++ ) {
-            Ray hit = bodies.get(i).getGeometry().doIntersection(myRay);
-            if ( hit != null ) {
-                if ( hit.t() < inOutRay.t() ) {
-                    inOutRay = inOutRay.withT(hit.t());
+            RayHit hit = new RayHit();
+            if ( bodies.get(i).getGeometry().doIntersection(myRay, hit) ) {
+                if ( hit.ray().t() < inOutRay.t() ) {
+                    inOutRay = inOutRay.withT(hit.ray().t());
                     nearestHit = inOutRay;
                 }
             }

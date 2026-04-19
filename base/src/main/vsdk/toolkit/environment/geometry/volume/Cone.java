@@ -223,7 +223,6 @@ public class Cone extends Solid {
     @param inOutRay
     @return true if given ray intersects current Cone
     */
-    @Override
     public Ray
     doIntersection(Ray inOutRay) {
         Ray bodyRay;
@@ -384,7 +383,6 @@ public class Cone extends Solid {
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData)

@@ -43,12 +43,6 @@ public class SimpleBody extends Entity {
     /// functionality. Can be null.
     private String name;
 
-    //- Temporary working variable ------------------------------------
-    private Ray _static_ray;
-    private Vector3D _static_vector3d;
-
-    //=======================================================================
-
     public SimpleBody()
     {
         geometry = null;
@@ -59,9 +53,6 @@ public class SimpleBody extends Entity {
         globalMaterial = new Material();
         globalTextureMap = null;
         globalNormalMap = null;
-
-        _static_ray = new Ray();
-        _static_vector3d = new Vector3D();
     }
 
     @Override
@@ -201,11 +192,6 @@ public class SimpleBody extends Entity {
     not included in the geometries representations, making the internal
     code of `doIntersection` methods much easier to develop and maintain.
 
-    Optimization note: class attributes `_static_vector3d` and
-    `_static_ray` are used by this method to avoid several calls to
-    `new` methods, and to avoid extra garbage collector memory de-allocation.
-    This two variables would be temporary local variables in this method
-    if C/C++ style "static" functionality exist in Java.
     @param inOutRay
     @return true if given ray intersects with current body
     */
@@ -221,14 +207,15 @@ public class SimpleBody extends Entity {
     public final boolean doIntersection(Ray inOutRay, RayHit outHit)
     {
         // Take in to account current body geometric transformations...
-        _static_vector3d = inOutRay.origin().subtract(position);
-        _static_ray = _static_ray.withOrigin(rotation_i.multiply(_static_vector3d));
-        _static_ray = _static_ray.withDirection(rotation_i.multiply(inOutRay.direction()).normalized());
-        _static_ray = _static_ray.withT(inOutRay.t());
+        Vector3D localOrigin = inOutRay.origin().subtract(position);
+        Ray localRay = new Ray(
+            rotation_i.multiply(localOrigin),
+            rotation_i.multiply(inOutRay.direction()).normalized(),
+            inOutRay.t());
 
         // ... and compute doIntersection operation on object's coordinates
         RayHit localHit = new RayHit();
-        if ( geometry.doIntersection(_static_ray, localHit) ) {
+        if ( geometry.doIntersection(localRay, localHit) ) {
             if ( outHit != null ) {
                 outHit.clone(localHit);
                 Ray worldRay = inOutRay.withT(localHit.ray().t());
@@ -262,22 +249,9 @@ public class SimpleBody extends Entity {
     */
     public void doExtraInformation(Ray inRay, double inT, GeometryIntersectionInformation outInfo)
     {
-        Vector3D po;
-        Matrix4x4 R, Ri;
-        Ray myRay;
-
-        po = getPosition();
-        R = getRotation();
-        Ri = getRotationInverse();
-        myRay = new Ray ( 
-            Ri.multiply(inRay.origin().subtract(po) ),
-            Ri.multiply(inRay.direction())
-        );
-        myRay = myRay.withT(inRay.t());
-        geometry.doExtraInformation(myRay, inT, outInfo);
-
-        outInfo.p = R.multiply(outInfo.p).add(po);
-        outInfo.n = R.multiply(outInfo.n);
-
+        RayHit hit = new RayHit();
+        if ( doIntersection(inRay.withT(inT), hit) ) {
+            outInfo.clone(hit);
+        }
     }
 }

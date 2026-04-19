@@ -9,6 +9,7 @@ import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.surface.Surface;
 import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
 
@@ -127,13 +128,16 @@ public class Polygon2D extends Surface
         return minMax;
     }
 
-    @Override
     public Ray doIntersection(Ray inOut_ray)
     {
         return null;
     }
 
     @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return false;
+    }
     public void
     doExtraInformation(Ray inRay, double intT, 
                        GeometryIntersectionInformation outData)

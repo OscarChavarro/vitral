@@ -93,27 +93,7 @@ public abstract class Geometry extends Entity {
     @return If the specified input Ray intersects current Geometry, true
     value is returned, otherwise false is returned.
     */
-    public abstract Ray doIntersection(Ray inOut_ray);
-
-    /**
-    New preferred intersection API: receives an immutable input ray and fills
-    a RayHit structure with the intersection result.
-    @param inRay immutable input ray
-    @param outHit intersection output holder, can be null
-    @return true when an intersection exists
-    */
-    public boolean doIntersection(Ray inRay, RayHit outHit)
-    {
-        Ray hit = doIntersection(inRay);
-        if ( hit == null ) {
-            return false;
-        }
-        if ( outHit != null ) {
-            outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
-        }
-        return true;
-    }
+    public abstract boolean doIntersection(Ray inRay, RayHit outHit);
 
     /**
     This method returns the number of front facing surface elements (with
@@ -138,33 +118,6 @@ public abstract class Geometry extends Entity {
     {
         return 0;
     }
-
-    /**
-    This operation is complementary to doIntersection method. It is used to
-    return aditional information after a positive intersection test and
-    obtain a GeometryIntersectionInformation structure.
-
-    Usually, the information needed to filled the fields of the 
-    GeometryIntersectionInformation data structure are computed by the
-    algorithms of the doIntersection method, so each class is responsible
-    of remembering the last results. This situation leads to some level of
-    dificulty in multithreaded scenarios, making this operation non-reentrant
-    nor thread-safe. To solve this situation, an application level
-    syncronization should be provided, which warranties an atomic
-    critical section behavior between this two methods.  As that should be
-    to difficult and impractical to implement, the use of multithreading
-    for quering this toolbox data is discouraged, in favor of a
-    multiprocess distributed approach.
-
-    Prerequisite: this method should be called only after a call to
-    doIntersection method in the same object that returned a true value.
-    @param inRay
-    @param intT
-    @param outData
-    */
-    public abstract void
-    doExtraInformation(Ray inRay, double intT, 
-                                      GeometryIntersectionInformation outData);
 
     /**
     This operation returns a simple bounding volume specification in the

@@ -21,6 +21,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.Image;
@@ -859,7 +860,6 @@ public class TriangleMesh extends Surface {
     @param inOut_Ray
     @return true if given ray intersects current TriangleMesh
     */
-    @Override
     public Ray
     doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating triangles
@@ -930,12 +930,25 @@ public class TriangleMesh extends Surface {
         return hitRay;
     }
 
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
+    }
+
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
     @param inT
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
@@ -1365,8 +1378,8 @@ public class TriangleMesh extends Surface {
                       Vector3D p1, Vector3D p2, Vector3D p3)
     {
         Vector3D a, b, ma = null, mb = null;
-        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
-        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        RayHit gia = new RayHit();
+        RayHit gib = new RayHit();
         a = (p2.subtract(p1));
         b = (p3.subtract(p1));
         a = a.normalized();
@@ -1377,13 +1390,15 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            p.doExtraInformation(hitA, hitA.t(), gia);
-            ma = gia.p;
+            if ( p.doIntersection(hitA, gia) ) {
+                ma = gia.p;
+            }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
-            p.doExtraInformation(hitB, hitB.t(), gib);
-            mb = gib.p;
+            if ( p.doIntersection(hitB, gib) ) {
+                mb = gib.p;
+            }
         }
 
         extraTriangles.add(i);
@@ -1419,8 +1434,8 @@ public class TriangleMesh extends Surface {
                     Vector3D p1, Vector3D p2, Vector3D p3)
     {
         Vector3D a, b, ma = null;
-        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
-        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        RayHit gia = new RayHit();
+        RayHit gib = new RayHit();
         a = (p2.subtract(p3));
         a = a.normalized();
 
@@ -1428,8 +1443,9 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            p.doExtraInformation(hitA, hitA.t(), gia);
-            ma = gia.p;
+            if ( p.doIntersection(hitA, gia) ) {
+                ma = gia.p;
+            }
         }
 
         extraTriangles.add(i);
@@ -1461,8 +1477,8 @@ public class TriangleMesh extends Surface {
                       Vector3D p1, Vector3D p2, Vector3D p3)
     {
         Vector3D a, b, ma = null, mb = null;
-        GeometryIntersectionInformation gia = new GeometryIntersectionInformation();
-        GeometryIntersectionInformation gib = new GeometryIntersectionInformation();
+        RayHit gia = new RayHit();
+        RayHit gib = new RayHit();
         a = (p1.subtract(p3));
         b = (p2.subtract(p3));
         a = a.normalized();
@@ -1473,13 +1489,15 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            p.doExtraInformation(hitA, hitA.t(), gia);
-            ma = gia.p;
+            if ( p.doIntersection(hitA, gia) ) {
+                ma = gia.p;
+            }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
-            p.doExtraInformation(hitB, hitB.t(), gib);
-            mb = gib.p;
+            if ( p.doIntersection(hitB, gib) ) {
+                mb = gib.p;
+            }
         }
 
         //-----------------------------------------------------------------

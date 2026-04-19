@@ -46,7 +46,6 @@ public class Box extends Solid {
     @param inOutRay
     @return true if given ray intersects current Box
     */
-    @Override
     public Ray
     doIntersection(Ray inOutRay) {
         double t, min_t = Double.MAX_VALUE;
@@ -309,7 +308,6 @@ public class Box extends Solid {
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {

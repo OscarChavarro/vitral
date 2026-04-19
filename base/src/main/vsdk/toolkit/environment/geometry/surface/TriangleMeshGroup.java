@@ -7,6 +7,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -145,7 +146,6 @@ public class TriangleMeshGroup extends Surface {
     @param inOut_Ray
     @return true if given ray intersects current TriangleMeshGroup
     */
-    @Override
     public Ray doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating meshes
         double min_t;         // Shortest distance founded so far
@@ -177,9 +177,10 @@ public class TriangleMeshGroup extends Surface {
             TriangleMesh mesh = meshes.get(i);
             Ray ray = new Ray(inOut_Ray);
 
-            Ray hit = mesh.doIntersection(ray);
-            if ( hit != null ) {
-                mesh.doExtraInformation(hit, 0.0, Info);
+            RayHit meshHit = new RayHit();
+            if ( mesh.doIntersection(ray, meshHit) ) {
+                Ray hit = meshHit.ray();
+                Info = meshHit;
 
                 if ( hit.t() < min_t ) {
                     min_t = hit.t();
@@ -206,13 +207,26 @@ public class TriangleMeshGroup extends Surface {
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(
         Ray inRay, 
         double inT,
         GeometryIntersectionInformation outData) {
         outData.clone(lastInfo);
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     public int[] doIntersectionInformation()

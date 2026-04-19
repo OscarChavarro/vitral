@@ -5,6 +5,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
@@ -83,7 +84,6 @@ public class Arrow extends Solid {
     @param inOutRay
     @return true if given ray intersects current Arrow
     */
-    @Override
     public Ray
     doIntersection(Ray inOutRay) {
         Ray headRay, baseRay;
@@ -110,6 +110,34 @@ public class Arrow extends Solid {
         return null;
     }
 
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Vector3D tr = new Vector3D(0, 0, -baseLength);
+        Ray shiftedHeadRay = new Ray(inRay.origin().add(tr), inRay.direction(), inRay.t());
+
+        RayHit baseHit = new RayHit();
+        RayHit headHit = new RayHit();
+        boolean hasBase = baseCylinder.doIntersection(inRay, baseHit);
+        boolean hasHead = headCone.doIntersection(shiftedHeadRay, headHit);
+
+        if ( !hasBase && !hasHead ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            if ( hasBase && (!hasHead || baseHit.ray().t() < headHit.ray().t()) ) {
+                outHit.clone(baseHit);
+                outHit.setRay(inRay.withT(baseHit.ray().t()));
+            }
+            else {
+                outHit.clone(headHit);
+                outHit.setRay(inRay.withT(headHit.ray().t()));
+                outHit.p = outHit.p.withZ(outHit.p.z() + baseLength);
+            }
+        }
+        return true;
+    }
+
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
@@ -117,14 +145,12 @@ public class Arrow extends Solid {
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT, 
            GeometryIntersectionInformation outData) {
-        lastElement.doExtraInformation(inRay, inT, outData);
-        if ( lastElement == headCone ) {
-            // Modify answer!
-            outData.p = outData.p.withZ(outData.p.z() + baseLength);
+        RayHit hit = new RayHit();
+        if ( doIntersection(inRay.withT(inT), hit) ) {
+            outData.clone(hit);
         }
     }
 

@@ -13,6 +13,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.media.IndexedColorImage;
 
 /**
@@ -275,9 +276,14 @@ public class VoxelVolume extends Solid {
     @param inOut_Ray
     @return true if given ray intersects current VoxelVolume
     */
-    @Override
     public Ray doIntersection(Ray inOut_Ray) {
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return false;
     }
 
     /**
@@ -287,7 +293,6 @@ public class VoxelVolume extends Solid {
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, 
         double inT,

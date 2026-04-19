@@ -9,6 +9,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 /**
@@ -345,11 +346,16 @@ public class QuadMesh extends Surface {
     @param inOut_Ray
     @return true if given ray intersects current QuadMesh
     */
-    @Override
     public Ray
     doIntersection(Ray inOut_Ray) {
         // TODO!
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return false;
     }
 
     /**
@@ -357,7 +363,6 @@ public class QuadMesh extends Surface {
     Geometry.doExtraInformation.
     @param inT
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {

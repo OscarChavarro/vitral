@@ -5,6 +5,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.RGBAImage;
 
@@ -48,13 +49,11 @@ public class CubemapBackground extends Background {
 
         d = d.normalized();
         Ray r = new Ray(new Vector3D(0, 0, 0), d);
-        Ray hit = boundingCube.doIntersection(r);
-        if ( hit == null ) {
+        RayHit hit = new RayHit();
+        if ( !boundingCube.doIntersection(r, hit) ) {
             return new ColorRgb();
         }
-        GeometryIntersectionInformation data;
-        data = new GeometryIntersectionInformation();
-        boundingCube.doExtraInformation(hit, hit.t(), data);
+        GeometryIntersectionInformation data = hit;
 
         int plane = boundingCube.getLastIntersectedPlane();
 

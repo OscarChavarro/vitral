@@ -15,6 +15,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 
 public class ParametricBiCubicPatch extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -513,9 +514,14 @@ public class ParametricBiCubicPatch extends Surface {
     @param r
     @return true if given ray intersects current ParametricBicubicPatch
     */
-    @Override
     public Ray doIntersection(Ray r) {
         return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return false;
     }
 
     /**
@@ -533,7 +539,6 @@ public class ParametricBiCubicPatch extends Surface {
 
     TO DO implement the method
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double intT, 
                                    GeometryIntersectionInformation outData) {

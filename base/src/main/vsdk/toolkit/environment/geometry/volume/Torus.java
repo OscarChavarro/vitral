@@ -9,6 +9,7 @@ import java.io.Serial;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
 /**
@@ -68,7 +69,6 @@ public class Torus extends Solid
         this.minorRadius = rMinor;
     }
 
-    @Override
     public Ray doIntersection(Ray inOut_ray) 
     {
         Vector3D p = inOut_ray.origin();
@@ -122,6 +122,20 @@ public class Torus extends Solid
             lastInfo.p = lastInfo.p.withZ(inOut_ray.origin().z() + (mRoot * inOut_ray.direction().z()));
             return inOut_ray.withT(mRoot); //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        Ray hit = doIntersection(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(hit);
+            doExtraInformation(hit, hit.t(), outHit);
+        }
+        return true;
     }
 
     /*
@@ -1266,7 +1280,6 @@ public class Torus extends Solid
     }
     */
     
-    @Override
     public void doExtraInformation(
         Ray inRay, double intT, GeometryIntersectionInformation outData) 
     {

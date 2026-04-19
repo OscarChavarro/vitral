@@ -9,6 +9,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.ProgressMonitor;
 
@@ -228,10 +229,19 @@ public class FunctionalExplicitSurface extends Surface
     @param inOut_Ray
     @return true if given ray intersects current FunctionalExplicitSurface
     */
-    @Override
     public Ray
     doIntersection(Ray inOut_Ray) {
-        return internalGeometry.doIntersection(inOut_Ray);
+        RayHit hit = new RayHit();
+        if ( internalGeometry.doIntersection(inOut_Ray, hit) ) {
+            return hit.ray();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean doIntersection(Ray inRay, RayHit outHit)
+    {
+        return internalGeometry.doIntersection(inRay, outHit);
     }
 
     /**
@@ -241,11 +251,13 @@ public class FunctionalExplicitSurface extends Surface
     @param inT
     @param outData
     */
-    @Override
     public void
     doExtraInformation(Ray inRay, double inT,
                                    GeometryIntersectionInformation outData) {
-        internalGeometry.doExtraInformation(inRay, inT, outData);
+        RayHit hit = new RayHit();
+        if ( internalGeometry.doIntersection(inRay.withT(inT), hit) ) {
+            outData.clone(hit);
+        }
     }
 
     /**

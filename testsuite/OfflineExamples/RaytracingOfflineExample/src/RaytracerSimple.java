@@ -18,6 +18,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
@@ -25,6 +26,16 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 
 public class RaytracerSimple {
+    private static final String NO_SAVE_FLAG = "nosave";
+    private static final String DEFAULT_SCENE_FILE =
+        "../../../etc/geometry/mitscenes/object.ray";
+    private static final String SCENE_SAMPLES_PATH =
+        "../../../etc/geometry/mitscenes/";
+    private static final String OUTPUT_FILE_NAME = "./output.ppm";
+    private static final int ELAPSED_TIME_DECIMALS = 3;
+    private static final int EXIT_CODE_READ_ERROR = -1;
+    private static final int EXIT_CODE_IMAGE_ERROR = 1;
+
     private final ReaderMitScene readerMitScene;
     private final SimpleScene scene;
 
@@ -41,15 +52,13 @@ public class RaytracerSimple {
         RGBImage resultingImage;
         //- 1. Import the scene from scene description file to RAM -----
         System.out.println("Loading scene from " + fileName + ": ");
-        try {
-            InputStream is = new FileInputStream(fileName);
+        try (InputStream is = new FileInputStream(fileName)) {
             readerMitScene.importEnvironment(is, scene);
-            is.close();
           }
           catch ( Exception e ) {
             System.err.println("Error reading " + fileName);
-            System.err.println("There are scene samples on ../../../etc/geometry/mitscenes/");
-            System.exit(-1);
+            System.err.println("There are scene samples on " + SCENE_SAMPLES_PATH);
+            System.exit(EXIT_CODE_READ_ERROR);
         }
         System.out.println("Scene loaded OK!");
 
@@ -58,7 +67,7 @@ public class RaytracerSimple {
         if ( !resultingImage.initNoFill(
                   readerMitScene.viewportXSize, readerMitScene.viewportYSize) ) {
             System.err.println("Error creating image!");
-            System.exit(1);
+            System.exit(EXIT_CODE_IMAGE_ERROR);
         }
 
         //- 3. Process the image from the scene data structure -----------
@@ -66,8 +75,8 @@ public class RaytracerSimple {
         RendererConfiguration rendererConfiguration = new RendererConfiguration();
 
         visualizationEngine = new Raytracer();
-        scene.getActiveCamera().updateViewportResize(
-            resultingImage.getXSize(), resultingImage.getYSize());
+        Camera activeCamera = scene.getActiveCamera();
+        activeCamera.updateViewportResize(resultingImage.getXSize(), resultingImage.getYSize());
 
         StopWatch clock = new StopWatch();
 
@@ -76,20 +85,23 @@ public class RaytracerSimple {
                                 scene.getSimpleBodies(),
                                 scene.getLights(),
                                 scene.getActiveBackground(),
-                                scene.getActiveCamera(), reporter, null);
+                                activeCamera, reporter, null);
         clock.stop();
 
-        System.out.println("Image generated in " + VSDK.formatDouble(clock.getElapsedRealTime(), 3) + " seconds.");
+        System.out.println(
+            "Image generated in " +
+            VSDK.formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS) +
+            " seconds.");
 
         //- 4. Export resulting image to an image file --------------------
         if ( save ) {
-            File fd = new File("./output.ppm");
+            File fd = new File(OUTPUT_FILE_NAME);
 
-            System.out.print("Exporting result image to file \"output.ppm\": ");
+            System.out.print("Exporting result image to file \"" + OUTPUT_FILE_NAME + "\": ");
             if ( !ImagePersistence.exportPPM(fd, resultingImage) )
             {
                 System.err.println("Error saving output image!");
-                System.exit(1);
+                System.exit(EXIT_CODE_IMAGE_ERROR);
             }
             System.out.println(" OK!");
         }
@@ -100,19 +112,17 @@ public class RaytracerSimple {
     {
         RaytracerSimple instance = new RaytracerSimple();
         boolean save = true;
+        String sceneFile = DEFAULT_SCENE_FILE;
 
         for (String arg : args) {
-            if (arg.equals("nosave")) {
+            if (NO_SAVE_FLAG.equals(arg)) {
                 save = false;
-                break;
+            }
+            else {
+                sceneFile = arg;
             }
         }
 
-        if ( args.length < 1 ) {
-            instance.offlineExecution("../../../etc/geometry/mitscenes/object.ray", save);
-          }
-          else {
-            instance.offlineExecution(args[0], save);
-        }
+        instance.offlineExecution(sceneFile, save);
     }
 }
