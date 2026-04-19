@@ -157,8 +157,8 @@ public class Raytracer extends RenderingElement {
                     info.p.x() + VSDK.EPSILON*l.x(),
                     info.p.y() + VSDK.EPSILON*l.y(),
                     info.p.z() + VSDK.EPSILON*l.z());
-                static_shadowRay.origin = Vector3D.copyOf(static_poffset);
-                static_shadowRay.direction = l.normalized();
+                static_shadowRay = static_shadowRay.withOrigin(Vector3D.copyOf(static_poffset));
+                static_shadowRay = static_shadowRay.withDirection(l.normalized());
                 nearestObject = selectNearestThingInRayDirection(static_shadowRay, objects);
                 if ( nearestObject != null ) {
                     //delete l;
@@ -222,13 +222,15 @@ public class Raytracer extends RenderingElement {
                 nearestObject = 
                     selectNearestThingInRayDirection(reflected_ray, objects);
                 if ( nearestObject != null ) {
-                    Vector3D rv = new Vector3D();
-                    GeometryIntersectionInformation subInfo = 
-                        new GeometryIntersectionInformation();
+                    Ray reflectedHit = nearestObject.doIntersection(reflected_ray);
+                    if ( reflectedHit != null ) {
+                        Vector3D rv = new Vector3D();
+                        GeometryIntersectionInformation subInfo = 
+                            new GeometryIntersectionInformation();
 
-                    //--------------------------------------------------------
-                    nearestObject.doExtraInformation(
-                        reflected_ray, reflected_ray.t, subInfo);
+                        //--------------------------------------------------------
+                        nearestObject.doExtraInformation(
+                            reflectedHit, reflectedHit.t(), subInfo);
 
                     //-----
                     if ( !inQualitySelection.isTextureSet() ) {
@@ -247,23 +249,29 @@ public class Raytracer extends RenderingElement {
 
                     //--------------------------------------------------------
 
-                    rv = new Vector3D(
-                        -reflected_ray.direction.x(),
-                        -reflected_ray.direction.y(),
-                        -reflected_ray.direction.z());
-                    ColorRgb rcolor = new ColorRgb();
-                    evaluateIlluminationModel(subInfo, rv, lights, objects, 
-                                              background, material, 
-                                              inQualitySelection,
-                                              recursions - 1,
-                                              rcolor);
+                        rv = new Vector3D(
+                            -reflectedHit.direction().x(),
+                            -reflectedHit.direction().y(),
+                            -reflectedHit.direction().z());
+                        ColorRgb rcolor = new ColorRgb();
+                        evaluateIlluminationModel(subInfo, rv, lights, objects, 
+                                                  background, material, 
+                                                  inQualitySelection,
+                                                  recursions - 1,
+                                                  rcolor);
 
-                    outColor.r += kr*rcolor.r;
-                    outColor.g += kr*rcolor.g;
-                    outColor.b += kr*rcolor.b;
+                        outColor.r += kr*rcolor.r;
+                        outColor.g += kr*rcolor.g;
+                        outColor.b += kr*rcolor.b;
+                    }
+                    else {
+                        outColor.r += kr*backgroundColor.r;
+                        outColor.g += kr*backgroundColor.g;
+                        outColor.b += kr*backgroundColor.b;
+                    }
 
                     //delete subInfo;
-                  } 
+                  }
                   else {
                     outColor.r += kr*backgroundColor.r;
                     outColor.g += kr*backgroundColor.g;
@@ -303,16 +311,17 @@ public class Raytracer extends RenderingElement {
         nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
-            inOut_Ray.t = Double.MAX_VALUE;
+            Ray candidateRay = inOut_Ray.withT(Double.MAX_VALUE);
             gi = inSimpleBodiesArray.get(i);
-            if ( gi.doIntersection(inOut_Ray) && 
-                 inOut_Ray.t < nearestDistance &&
-                 inOut_Ray.t > VSDK.EPSILON ) {
-                nearestDistance = inOut_Ray.t;
+            Ray hit = gi.doIntersection(candidateRay);
+            if ( hit != null &&
+                 hit.t() < nearestDistance &&
+                 hit.t() > VSDK.EPSILON ) {
+                nearestDistance = hit.t();
+                inOut_Ray = hit;
                 nearestObject = gi;
             }
         }
-        inOut_Ray.t = nearestDistance;
         return nearestObject;
     }
 
@@ -336,8 +345,12 @@ public class Raytracer extends RenderingElement {
 
         nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray);
         if ( nearestObject != null ) {
+            Ray hitRay = nearestObject.doIntersection(inRay);
+            if ( hitRay == null ) {
+                return;
+            }
             //------------------------------------------------------------
-            nearestObject.doExtraInformation(inRay, inRay.t, static_info);
+            nearestObject.doExtraInformation(hitRay, hitRay.t(), static_info);
             //-----
             if ( !inQualitySelection.isTextureSet() ) {
                 static_info.texture = null;
@@ -355,9 +368,9 @@ public class Raytracer extends RenderingElement {
 
             //------------------------------------------------------------
             Vector3D viewVector = new Vector3D(
-                -inRay.direction.x(),
-                -inRay.direction.y(),
-                -inRay.direction.z());
+                -hitRay.direction().x(),
+                -hitRay.direction().y(),
+                -hitRay.direction().z());
 
             Material material;
             if ( static_info.material != null ) {
@@ -374,7 +387,7 @@ public class Raytracer extends RenderingElement {
           }
           else {
             ColorRgb c;
-            c = in_background.colorInDireccion(inRay.direction);
+            c = in_background.colorInDireccion(inRay.direction());
             outColor.r = c.r;
             outColor.g = c.g;
             outColor.b = c.b;
@@ -495,7 +508,7 @@ public class Raytracer extends RenderingElement {
                               inLightsArray, inBackground, 
                               inQualitySelection, color);
                 if ( outDepthmap != null ) {
-                    outDepthmap.setZ(x, y, (float)rayo.t);
+                    outDepthmap.setZ(x, y, (float)rayo.t());
                 }
                 //- Exporto el result de color del pixel ----------------
                 if ( color != null ) {

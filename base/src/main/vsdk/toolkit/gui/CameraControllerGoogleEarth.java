@@ -98,21 +98,24 @@ public class CameraControllerGoogleEarth extends CameraController {
         //----------------------------------------------------------------------
         //3. Intercepción con plano infinito
         InfinitePlane infinitePlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
-        infinitePlane.doIntersection(RayA);
-        infinitePlane.doIntersection(RayB);
+        Ray hitA = infinitePlane.doIntersection(RayA);
+        Ray hitB = infinitePlane.doIntersection(RayB);
+        if ( hitA == null || hitB == null ) {
+            return false;
+        }
 
         //----------------------------------------------------------------------
         //4. Distancia entre RayA y RayB
         Vector3D pA = new Vector3D();
         Vector3D pB = new Vector3D();
 
-        pA = pA.withX(RayA.origin.x() + (RayA.direction.x() * RayA.t));
-        pA = pA.withY(RayA.origin.y() + (RayA.direction.y() * RayA.t));
-        pA = pA.withZ(RayA.origin.z() + (RayA.direction.z() * RayA.t));
+        pA = pA.withX(hitA.origin().x() + (hitA.direction().x() * hitA.t()));
+        pA = pA.withY(hitA.origin().y() + (hitA.direction().y() * hitA.t()));
+        pA = pA.withZ(hitA.origin().z() + (hitA.direction().z() * hitA.t()));
 
-        pB = pB.withX(RayB.origin.x() + (RayB.direction.x() * RayB.t));
-        pB = pB.withY(RayB.origin.y() + (RayB.direction.y() * RayB.t));
-        pB = pB.withZ(RayB.origin.z() + (RayB.direction.z() * RayB.t));
+        pB = pB.withX(hitB.origin().x() + (hitB.direction().x() * hitB.t()));
+        pB = pB.withY(hitB.origin().y() + (hitB.direction().y() * hitB.t()));
+        pB = pB.withZ(hitB.origin().z() + (hitB.direction().z() * hitB.t()));
 
         Vector3D d = pB.subtract(pA);
 

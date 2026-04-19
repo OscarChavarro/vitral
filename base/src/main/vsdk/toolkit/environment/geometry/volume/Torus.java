@@ -69,12 +69,12 @@ public class Torus extends Solid
     }
 
     @Override
-    public boolean doIntersection(Ray inOut_ray) 
+    public Ray doIntersection(Ray inOut_ray) 
     {
-        Vector3D p = inOut_ray.origin;
+        Vector3D p = inOut_ray.origin();
 
-        inOut_ray.direction = inOut_ray.direction.normalized();
-        Vector3D d = inOut_ray.direction;
+        inOut_ray = inOut_ray.withDirection(inOut_ray.direction().normalized());
+        Vector3D d = inOut_ray.direction();
 
         double alpha, beta, gama;
 
@@ -114,14 +114,13 @@ public class Torus extends Solid
         }
 
         if (count == 0) {
-            return false;
+            return null;
         } 
         else {
-            lastInfo.p = lastInfo.p.withX(inOut_ray.origin.x() + (mRoot * inOut_ray.direction.x()));
-            lastInfo.p = lastInfo.p.withY(inOut_ray.origin.y() + (mRoot * inOut_ray.direction.y()));
-            lastInfo.p = lastInfo.p.withZ(inOut_ray.origin.z() + (mRoot * inOut_ray.direction.z()));
-            inOut_ray.t = mRoot;
-            return true; //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
+            lastInfo.p = lastInfo.p.withX(inOut_ray.origin().x() + (mRoot * inOut_ray.direction().x()));
+            lastInfo.p = lastInfo.p.withY(inOut_ray.origin().y() + (mRoot * inOut_ray.direction().y()));
+            lastInfo.p = lastInfo.p.withZ(inOut_ray.origin().z() + (mRoot * inOut_ray.direction().z()));
+            return inOut_ray.withT(mRoot); //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
     }
 
@@ -1256,11 +1255,11 @@ public class Torus extends Solid
             return false;
         }
         else {
-                lastInfo.p = lastInfo.p.withX(ray.origin.x() + (root * ray.direction.x()));
-                lastInfo.p = lastInfo.p.withY(ray.origin.y() + (root * ray.direction.y()));
-                lastInfo.p = lastInfo.p.withZ(ray.origin.z() + (root * ray.direction.z()));
+                lastInfo.p = lastInfo.p.withX(ray.origin().x() + (root * ray.direction().x()));
+                lastInfo.p = lastInfo.p.withY(ray.origin().y() + (root * ray.direction().y()));
+                lastInfo.p = lastInfo.p.withZ(ray.origin().z() + (root * ray.direction().z()));
                 
-                ray.t=root;
+                ray = ray.withT(root);
          //       System.out.println("Raiz: "+root);
                 return true;
         }

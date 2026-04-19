@@ -251,15 +251,15 @@ public class HiddenLineRenderer extends RenderingElement
                 // Do not break an edge with itself.
                 continue;
             }
-            ray.origin = cl.start.add(cl.d.multiply(3*VSDK.EPSILON));
-            ray.direction = cl.d;
-            t0 = ray.direction.length() - 6*VSDK.EPSILON;
-            ray.direction = ray.direction.normalized();
+            ray = ray.withOrigin(cl.start.add(cl.d.multiply(3*VSDK.EPSILON)));
+            ray = ray.withDirection(cl.d);
+            t0 = ray.direction().length() - 6*VSDK.EPSILON;
+            ray = ray.withDirection(ray.direction().normalized());
             ComputationalGeometry.TriangleIntersection hit =
                 ComputationalGeometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
             if (
              hit != null &&
-             ray.t < t0
+             hit.t < t0
             ) {
                 // The breaking point in the current testing edge corresponding
                 // to the passing contour is the piercing point where the
@@ -267,22 +267,24 @@ public class HiddenLineRenderer extends RenderingElement
                 sp2a = cl.start;
                 sp2b = cl.end;
                 plane = new InfinitePlane(sp2a, sp2b, sp2c);
-                ray.origin = inEdge.start;
-                ray.direction = inEdge.d.normalized();
-                if ( plane.doIntersection(ray) ) {
+                ray = ray.withOrigin(inEdge.start);
+                ray = ray.withDirection(inEdge.d.normalized());
+                Ray planeHit = plane.doIntersection(ray);
+                if ( planeHit != null ) {
                     segment = new _AppelEdgeSegment();
-                    segment.t = ray.t / inEdge.d.length(); // Point "PP2"
+                    segment.t = hit.t / inEdge.d.length(); // Point "PP2"
 
                     // Determine the change in quantitative invisibility...
                     K = inEdge.start.add(inEdge.d.multiply(segment.t-2*VSDK.EPSILON));
 
                     // Project K on SP2
-                    ray.origin = K;
-                    ray.direction = sp2c.subtract(K);
-                    ray.direction = ray.direction.normalized();
-                    if ( cl.visibleEdgeForContourLine.containingPlane.
-                         doIntersection(ray) ) {
-                        J = ray.origin.add(ray.direction.multiply(ray.t));
+                    ray = ray.withOrigin(K);
+                    ray = ray.withDirection(sp2c.subtract(K));
+                    ray = ray.withDirection(ray.direction().normalized());
+                    Ray contourHit = cl.visibleEdgeForContourLine.containingPlane.
+                         doIntersection(ray);
+                    if ( contourHit != null ) {
+                        J = contourHit.origin().add(contourHit.direction().multiply(contourHit.t()));
                         pos = cl.visibleEdgeForContourLine.testPointInside(J, VSDK.EPSILON);
                         if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                             segment.deltaQI = 1;

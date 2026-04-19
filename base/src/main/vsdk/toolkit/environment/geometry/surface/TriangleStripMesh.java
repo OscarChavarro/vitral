@@ -113,9 +113,9 @@ public class TriangleStripMesh extends Surface {
     @return true if given ray intersects current TriangleStripMesh
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOut_Ray) {
-        return false;
+        return null;
     }
 
     /**

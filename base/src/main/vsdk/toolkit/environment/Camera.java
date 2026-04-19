@@ -1093,13 +1093,14 @@ public class Camera extends Entity
                 }
 
                 if ( clippingPlane != null ) {
-                    if ( !clippingPlane.doIntersection(testRay) ) {
+                    Ray hit = clippingPlane.doIntersection(testRay);
+                    if ( hit == null ) {
                         VSDK.reportMessage(this, VSDK.WARNING, 
                             "clipLineCohenSutherlandPlanes", 
                             "Unusal ray assembly, check code and data");
                     }
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t));
+                    clippingMidPoint = hit.origin().add(
+                        hit.direction().multiply(hit.t()));
                     linePasses = true;
                 }
 
@@ -1249,57 +1250,51 @@ public class Camera extends Entity
 
                 switch ( planeId ) {
                   case 1: // up plane
-                    testRay.t = 
-                          (l * (1 - clippedPoint0.z() - clippedPoint0.y())) / 
+                    testRay = testRay.withT((l * (1 - clippedPoint0.z() - clippedPoint0.y())) / 
                           (clippedPoint1.z() - clippedPoint0.z() + 
-                           clippedPoint1.y() - clippedPoint0.y());
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                           clippedPoint1.y() - clippedPoint0.y()));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                   case 2: // down plane
-                    testRay.t = 
-                          (l * (clippedPoint0.y() - clippedPoint0.z() +1)) / 
+                    testRay = testRay.withT((l * (clippedPoint0.y() - clippedPoint0.z() +1)) / 
                           (clippedPoint1.z() - clippedPoint0.z() - 
-                           clippedPoint1.y() + clippedPoint0.y());
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                           clippedPoint1.y() + clippedPoint0.y()));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                   case 3: // left plane
-                    testRay.t = 
-                          (l * (clippedPoint0.x() - clippedPoint0.z() +1)) / 
+                    testRay = testRay.withT((l * (clippedPoint0.x() - clippedPoint0.z() +1)) / 
                           (clippedPoint1.z() - clippedPoint0.z() - 
-                           clippedPoint1.x() + clippedPoint0.x());
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                           clippedPoint1.x() + clippedPoint0.x()));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                   case 4: // right plane
-                    testRay.t = 
-                          (l * (1 - clippedPoint0.z() - clippedPoint0.x())) / 
+                    testRay = testRay.withT((l * (1 - clippedPoint0.z() - clippedPoint0.x())) / 
                           (clippedPoint1.z() - clippedPoint0.z() + 
-                           clippedPoint1.x() - clippedPoint0.x());
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                           clippedPoint1.x() - clippedPoint0.x()));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                   case 5: // near plane
                     // Warning: near plane clipping
-                    testRay.t = 
-                        ( /*(1-nearPlaneDistance)*/ -clippedPoint0.z() * l) / 
-                          (clippedPoint1.z() - clippedPoint0.z());
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                    testRay = testRay.withT(( /*(1-nearPlaneDistance)*/ -clippedPoint0.z() * l) / 
+                          (clippedPoint1.z() - clippedPoint0.z()));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                   case 6: // far plane
-                    testRay.t = 
-                        (((-fpd()-
+                    testRay = testRay.withT((((-fpd()-
                              clippedPoint0.z()) * l) / 
-                             (clippedPoint1.z() - clippedPoint0.z()));
-                    clippingMidPoint = testRay.origin.add(
-                        testRay.direction.multiply(testRay.t+de));
+                             (clippedPoint1.z() - clippedPoint0.z())));
+                    clippingMidPoint = testRay.origin().add(
+                        testRay.direction().multiply(testRay.t()+de));
                     linePasses = true;
                     break;
                 }
@@ -1420,11 +1415,12 @@ public class Camera extends Entity
             r = new Ray(p, inPoint.subtract(p));
 
             // 3.3. Project point in view plane from perspective eyepoint
-            if ( !viewPlane.doIntersection(r) ||
-                 r.direction.length() < VSDK.EPSILON ) {
+            Ray hit = viewPlane.doIntersection(r);
+            if ( hit == null ||
+                 r.direction().length() < VSDK.EPSILON ) {
                 return false;
             }
-            projected = r.origin.add(r.direction.multiply(r.t)).subtract(center);
+            projected = hit.origin().add(hit.direction().multiply(hit.t())).subtract(center);
             // 3.4. Clip projected point in viewport
             if ( projected.x() < -1 || projected.x() > 1 ||
                  projected.y() < -1 || projected.y() > 1 ) {

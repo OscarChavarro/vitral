@@ -229,7 +229,7 @@ public class FunctionalExplicitSurface extends Surface
     @return true if given ray intersects current FunctionalExplicitSurface
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOut_Ray) {
         return internalGeometry.doIntersection(inOut_Ray);
     }

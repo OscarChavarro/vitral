@@ -792,17 +792,18 @@ public class TranslateGizmo extends Gizmo {
 
         if ( interactionTechnique == 2 ) {
             r = camera.generateRay(mousex, mousey);
-            if ( r.direction.dotProduct(v) > 0 ) {
+            if ( r.direction().dotProduct(v) > 0 ) {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
-            if ( !plane.doIntersection(r) ) {
+            Ray hit = plane.doIntersection(r);
+            if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
                 p = o;
             }
             else {
-                p = r.direction.multiply(r.t).add(r.origin);
+                p = hit.direction().multiply(hit.t()).add(hit.origin());
             }
         }
         else if ( interactionTechnique == 1 ) {
@@ -846,12 +847,13 @@ public class TranslateGizmo extends Gizmo {
 
             r = new Ray(o, v);
             Ray r2 = new Ray(o, v);
-            if ( !plane.doIntersectionWithNegative(r) ) {
+            Ray hit = plane.doIntersectionWithNegative(r);
+            if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
                 return false;
             }
-            p = r.origin.add(r.direction.multiply(r.t));
+            p = hit.origin().add(hit.direction().multiply(hit.t()));
         }
         oldmousex = e.getX();
         oldmousey = e.getY();
@@ -908,12 +910,12 @@ public class TranslateGizmo extends Gizmo {
         /* Note that box elements are only for display, they do not affect
            gravity selections */
         for ( i = 0; index <= 9 && i < elementInstances.size(); index++, i++ ) {
-            r.t = Double.MAX_VALUE;
+            r = r.withT(Double.MAX_VALUE);
             SimpleBody gi = elementInstances.get(i);
 
-            if ( gi.getGeometry() != null && gi.doIntersection(r) &&
-                 r.t < nearestDistance ) {
-                nearestDistance = r.t;
+            Ray hit = gi.getGeometry() != null ? gi.doIntersection(r) : null;
+            if ( hit != null && hit.t() < nearestDistance ) {
+                nearestDistance = hit.t();
                 nearestElement = index;
             }
         }
@@ -1047,17 +1049,18 @@ public class TranslateGizmo extends Gizmo {
 
         if ( interactionTechnique == 2 ) {
             r = camera.generateRay(mousex, mousey);
-            if ( r.direction.dotProduct(v) > 0 ) {
+            if ( r.direction().dotProduct(v) > 0 ) {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
-            if ( !plane.doIntersection(r) ) {
+            Ray hit = plane.doIntersection(r);
+            if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
                 p = o;
             }
             else {
-                p = r.direction.multiply(r.t).add(r.origin);
+                p = hit.direction().multiply(hit.t()).add(hit.origin());
             }
         }
         else if ( interactionTechnique == 1 ) {
@@ -1101,12 +1104,13 @@ public class TranslateGizmo extends Gizmo {
 
             r = new Ray(o, v);
             Ray r2 = new Ray(o, v);
-            if ( !plane.doIntersectionWithNegative(r) ) {
+            Ray hit = plane.doIntersectionWithNegative(r);
+            if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
                 return false;
             }
-            p = r.origin.add(r.direction.multiply(r.t));
+            p = hit.origin().add(hit.direction().multiply(hit.t()));
         }
         oldmousex = e.getX();
         oldmousey = e.getY();

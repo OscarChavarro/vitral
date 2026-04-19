@@ -48,12 +48,13 @@ public class CubemapBackground extends Background {
 
         d = d.normalized();
         Ray r = new Ray(new Vector3D(0, 0, 0), d);
-        if ( !boundingCube.doIntersection(r) ) {
+        Ray hit = boundingCube.doIntersection(r);
+        if ( hit == null ) {
             return new ColorRgb();
         }
         GeometryIntersectionInformation data;
         data = new GeometryIntersectionInformation();
-        boundingCube.doExtraInformation(r, r.t, data);
+        boundingCube.doExtraInformation(hit, hit.t(), data);
 
         int plane = boundingCube.getLastIntersectedPlane();
 

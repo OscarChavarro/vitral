@@ -84,37 +84,30 @@ public class Arrow extends Solid {
     @return true if given ray intersects current Arrow
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOutRay) {
-        boolean headTest, baseTest;
         Ray headRay, baseRay;
         GeometryIntersectionInformation headInfo, baseInfo;
         Vector3D tr = new Vector3D(0, 0, -baseLength);
 
-        headRay = new Ray(inOutRay.origin.add(tr), inOutRay.direction);
+        headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
         baseRay = new Ray(inOutRay);
 
-        baseTest = baseCylinder.doIntersection(baseRay);
-        headTest = headCone.doIntersection(headRay);
+        Ray baseHit = baseCylinder.doIntersection(baseRay);
+        Ray headHit = headCone.doIntersection(headRay);
 
-        if ( (baseTest && !headTest) || 
-             (baseTest && headTest && (baseRay.t < headRay.t) ) ) {
-            inOutRay.origin = baseRay.origin;
-            inOutRay.direction = baseRay.direction;
-            inOutRay.t = baseRay.t;
+        if ( (baseHit != null && headHit == null) ||
+             (baseHit != null && headHit != null && (baseHit.t() < headHit.t()) ) ) {
             lastElement = baseCylinder;
-            return true;
+            return inOutRay.withT(baseHit.t());
         }
-        else if ( (!baseTest && headTest) || 
-                  (baseTest && headTest && (headRay.t < baseRay.t) ) ) {
-            inOutRay.origin = baseRay.origin;
-            inOutRay.direction = headRay.direction;
-            inOutRay.t = headRay.t;
+        else if ( (baseHit == null && headHit != null) ||
+                  (baseHit != null && headHit != null && (headHit.t() < baseHit.t()) ) ) {
             lastElement = headCone;
-            return true;
+            return inOutRay.withT(headHit.t());
         }
 
-        return false;
+        return null;
     }
 
     /**

@@ -199,21 +199,23 @@ public class Scene
         ii = new GeometryIntersectionInformation();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
-                gi.doExtraInformation(r, r.t, ii);
-                nearestDistance = r.t;
+            Ray hit = gi.doIntersection(r);
+            if ( hit != null && hit.t() < nearestDistance ) {
+                gi.doExtraInformation(hit, hit.t(), ii);
+                nearestDistance = hit.t();
+                r = hit;
                 intersected = true;
             }
         }
         if ( intersected ) {
-            r.t = nearestDistance;
+            r = r.withT(nearestDistance);
             info.clone(ii);
             return true;
         }
         return false;
     }
 
-    public void selectObjectWithMouse(int x, int y, boolean composite, Ray ro)
+    public Ray selectObjectWithMouse(int x, int y, boolean composite, Ray ro)
     {
         Ray r;
         SimpleBody gi;
@@ -221,7 +223,7 @@ public class Scene
         activeCamera.updateVectors();
         r = activeCamera.generateRay(x, y);
 
-        ro.clone(r);
+        Ray selectedRay = Ray.copyOf(r);
 
         double nearestDistance = Float.MAX_VALUE;
 
@@ -233,8 +235,10 @@ public class Scene
         ArrayList<SimpleBody> things = scene.getSimpleBodies();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
-                nearestDistance = r.t;
+            Ray hit = gi.doIntersection(r);
+            if ( hit != null && hit.t() < nearestDistance ) {
+                nearestDistance = hit.t();
+                r = hit;
                 if ( !composite ) {
                     selectedThings.unselectAll();
                     selectedThings.select(i);
@@ -244,6 +248,7 @@ public class Scene
                 }
             }
         }
+        return selectedRay;
     }
 
     public void activateSelectedBackground()

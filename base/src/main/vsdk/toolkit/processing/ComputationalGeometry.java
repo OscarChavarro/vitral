@@ -64,7 +64,7 @@ public class ComputationalGeometry extends ProcessingElement
 
     Precondition:
 \f[
-    \mathbf{Q} := inOut\_Ray.direction.length() = 1 \;
+    \mathbf{Q} := inOut\_Ray.direction().length() = 1 \;
 \f]
 
     NOTES:
@@ -131,8 +131,8 @@ public class ComputationalGeometry extends ProcessingElement
         d = -n.dotProduct(v0);
 
         // Calculate numerator and denominator for equation (2)
-        a = n.dotProduct(inOut_Ray.origin) + d;
-        b = n.dotProduct(inOut_Ray.direction);
+        a = n.dotProduct(inOut_Ray.origin()) + d;
+        b = n.dotProduct(inOut_Ray.direction());
 
         // The denominator is big when the ray is not parallel to the plane
         if ( Math.abs(b) > VSDK.EPSILON ) {
@@ -142,7 +142,7 @@ public class ComputationalGeometry extends ProcessingElement
             if ( t < 0.0 ) return null;
 
             // Calculate the intersection point between ray and plane
-            p = inOut_Ray.origin.add(inOut_Ray.direction.multiply(t));
+            p = inOut_Ray.origin().add(inOut_Ray.direction().multiply(t));
 
             // Check if the point is inside the triangle
             s1 = u.crossProduct(p.subtract(v0)).dotProduct(n);
@@ -151,7 +151,6 @@ public class ComputationalGeometry extends ProcessingElement
 
             if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
                 (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
-                inOut_Ray.t = t;
                 return new TriangleIntersection(t, p, n);
             }
         }

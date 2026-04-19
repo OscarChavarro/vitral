@@ -860,10 +860,9 @@ public class TriangleMesh extends Surface {
     @return true if given ray intersects current TriangleMesh
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating triangles
-        boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         Vector3D v0, v1, v2;  // Positions of the three triangle points
         Vector3D p;           // Point of intersection between ray and plane
@@ -883,14 +882,14 @@ public class TriangleMesh extends Surface {
             boundingVolume.setPosition(center);
             boundingVolume.setGeometry(new Box(size));
         }
-        if ( !boundingVolume.doIntersection(inOut_Ray) ) {
-            return false;
+        if ( boundingVolume.doIntersection(inOut_Ray) == null ) {
+            return null;
         }
 
         //-----------------------------------------------------------------
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
-        intersection = false;
+        Ray hitRay = null;
         selectedTriangle = 0;
         p = new Vector3D();
         n = new Vector3D();
@@ -918,18 +917,17 @@ public class TriangleMesh extends Surface {
             ComputationalGeometry.TriangleIntersection hit =
                 ComputationalGeometry.doIntersectionWithTriangle(myRay, v0, v1, v2);
             if ( hit != null ) {
-                if ( myRay.t < min_t ) {
+                if ( hit.t < min_t ) {
                     lastInfo.p = hit.point;
                     lastInfo.n = hit.normal;
-                    inOut_Ray.t = myRay.t;
-                    lastRay = inOut_Ray;
-                    min_t = myRay.t;
+                    hitRay = inOut_Ray.withT(hit.t);
+                    lastRay = hitRay;
+                    min_t = hit.t;
                     selectedTriangle = i;
-                    intersection = true;
                 }
             }
         }
-        return intersection;
+        return hitRay;
     }
 
     /**
@@ -1002,7 +1000,7 @@ public class TriangleMesh extends Surface {
         // Normal is always pointed "outwards" with respect to 
         // the triangle (this manages the issue of back-facing
         // normals)
-        if ( lastInfo.n.dotProduct(lastRay.direction) >= 0 ) {
+        if ( lastInfo.n.dotProduct(lastRay.direction()) >= 0 ) {
             lastInfo.n = lastInfo.n.multiply(-1);
         }
 
@@ -1377,12 +1375,14 @@ public class TriangleMesh extends Surface {
         Ray ra = new Ray(p1, a);
         Ray rb = new Ray(p1, b);
 
-        if ( p.doIntersectionWithNegative(ra) ) {
-            p.doExtraInformation(ra, ra.t, gia);
+        Ray hitA = p.doIntersectionWithNegative(ra);
+        if ( hitA != null ) {
+            p.doExtraInformation(hitA, hitA.t(), gia);
             ma = gia.p;
         }
-        if ( p.doIntersectionWithNegative(rb) ) {
-            p.doExtraInformation(rb, rb.t, gib);
+        Ray hitB = p.doIntersectionWithNegative(rb);
+        if ( hitB != null ) {
+            p.doExtraInformation(hitB, hitB.t(), gib);
             mb = gib.p;
         }
 
@@ -1426,8 +1426,9 @@ public class TriangleMesh extends Surface {
 
         Ray ra = new Ray(p2, a);
 
-        if ( p.doIntersectionWithNegative(ra) ) {
-            p.doExtraInformation(ra, ra.t, gia);
+        Ray hitA = p.doIntersectionWithNegative(ra);
+        if ( hitA != null ) {
+            p.doExtraInformation(hitA, hitA.t(), gia);
             ma = gia.p;
         }
 
@@ -1470,12 +1471,14 @@ public class TriangleMesh extends Surface {
         Ray ra = new Ray(p3, a);
         Ray rb = new Ray(p3, b);
 
-        if ( p.doIntersectionWithNegative(ra) ) {
-            p.doExtraInformation(ra, ra.t, gia);
+        Ray hitA = p.doIntersectionWithNegative(ra);
+        if ( hitA != null ) {
+            p.doExtraInformation(hitA, hitA.t(), gia);
             ma = gia.p;
         }
-        if ( p.doIntersectionWithNegative(rb) ) {
-            p.doExtraInformation(rb, rb.t, gib);
+        Ray hitB = p.doIntersectionWithNegative(rb);
+        if ( hitB != null ) {
+            p.doExtraInformation(hitB, hitB.t(), gib);
             mb = gib.p;
         }
 

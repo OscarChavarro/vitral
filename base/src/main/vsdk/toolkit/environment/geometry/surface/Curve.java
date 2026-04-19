@@ -24,9 +24,9 @@ public abstract class Curve extends Geometry {
     @return always if false
     */
     @Override
-    public boolean doIntersection(Ray r)
+    public Ray doIntersection(Ray r)
     {
-        return false;
+        return null;
     }
 
     /**

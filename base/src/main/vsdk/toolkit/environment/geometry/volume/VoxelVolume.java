@@ -276,8 +276,8 @@ public class VoxelVolume extends Solid {
     @return true if given ray intersects current VoxelVolume
     */
     @Override
-    public boolean doIntersection(Ray inOut_Ray) {
-        return false;
+    public Ray doIntersection(Ray inOut_Ray) {
+        return null;
     }
 
     /**

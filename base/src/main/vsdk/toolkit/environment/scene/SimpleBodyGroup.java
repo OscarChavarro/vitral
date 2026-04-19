@@ -146,31 +146,31 @@ public class SimpleBodyGroup extends Entity {
     @return true if given line intersects with any body inside current body
     group
     */
-    public boolean doIntersection(Ray inOutRay)
+    public Ray doIntersection(Ray inOutRay)
     {
         Ray myRay;
-        boolean answer;
         int i;
 
-        inOutRay.t = Double.MAX_VALUE;
+        inOutRay = inOutRay.withT(Double.MAX_VALUE);
 
         myRay = new Ray (
-            rotation_i.multiply(inOutRay.origin.subtract(position)),
-            rotation_i.multiply(inOutRay.direction)
+            rotation_i.multiply(inOutRay.origin().subtract(position)),
+            rotation_i.multiply(inOutRay.direction())
         );
-        myRay.t = inOutRay.t;
+        myRay = myRay.withT(inOutRay.t());
 
-        answer = false;
+        Ray nearestHit = null;
 
         for ( i = 0; i < bodies.size(); i++ ) {
-            if ( bodies.get(i).getGeometry().doIntersection(myRay) ) {
-                answer = true;
-                if ( myRay.t < inOutRay.t ) {
-                    inOutRay.t = myRay.t;
+            Ray hit = bodies.get(i).getGeometry().doIntersection(myRay);
+            if ( hit != null ) {
+                if ( hit.t() < inOutRay.t() ) {
+                    inOutRay = inOutRay.withT(hit.t());
+                    nearestHit = inOutRay;
                 }
             }
         }
-        return answer;
+        return nearestHit;
     }
 
     public double[] getMinMax()

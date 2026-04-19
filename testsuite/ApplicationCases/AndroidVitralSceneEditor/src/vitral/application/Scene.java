@@ -73,8 +73,10 @@ public class Scene
 
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            if ( gi.doIntersection(r) && r.t < nearestDistance ) {
-                nearestDistance = r.t;
+            Ray hit = gi.doIntersection(r);
+            if ( hit != null && hit.t() < nearestDistance ) {
+                nearestDistance = hit.t();
+                r = hit;
                 selectedObjectIndex = i;
             }
         }
@@ -89,7 +91,7 @@ public class Scene
 
         Vector3D p;
 
-        p = r.origin.add(r.direction.multiply(10.0));
+        p = r.origin().add(r.direction().multiply(10.0));
 
         SimpleBody b;
         Sphere s;

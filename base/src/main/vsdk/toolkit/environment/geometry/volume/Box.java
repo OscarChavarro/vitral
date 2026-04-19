@@ -46,7 +46,7 @@ public class Box extends Solid {
     @return true if given ray intersects current Box
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOutRay) {
         double t, min_t = Double.MAX_VALUE;
         double x2 = size.x()/2;  // OJO: Esto deberia venir precalculado
@@ -56,14 +56,14 @@ public class Box extends Solid {
         GeometryIntersectionInformation info = 
             new GeometryIntersectionInformation();
 
-        inOutRay.direction = inOutRay.direction.normalized();
+        inOutRay = inOutRay.withDirection(inOutRay.direction().normalized());
 
         // (1) Plano superior: Z = size.z()/2
-        if ( Math.abs(inOutRay.direction.z()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().z()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Z=size.z()/2
-            t = (z2-inOutRay.origin.z())/inOutRay.direction.z();
+            t = (z2-inOutRay.origin().z())/inOutRay.direction().z();
             if ( t > -VSDK.EPSILON ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.x() >= -x2 && p.x() <= x2 && 
                      p.y() >= -y2 && p.y() <= y2 ) {
                     info.p = new Vector3D(p);
@@ -74,11 +74,11 @@ public class Box extends Solid {
         }
 
         // (2) Plano inferior: Z = -size.z()/2
-        if ( Math.abs(inOutRay.direction.z()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().z()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Z=-size.z()/2
-            t = (-z2-inOutRay.origin.z())/inOutRay.direction.z();
+            t = (-z2-inOutRay.origin().z())/inOutRay.direction().z();
             if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.x() >= -x2 && p.x() <= x2 && 
                      p.y() >= -y2 && p.y() <= y2 ) {
                     info.p = p;
@@ -89,11 +89,11 @@ public class Box extends Solid {
         }
 
         // (3) Plano frontal: Y = size.y()/2
-        if ( Math.abs(inOutRay.direction.y()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().y()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Y=size.y()/2
-            t = (y2-inOutRay.origin.y())/inOutRay.direction.y();
+            t = (y2-inOutRay.origin().y())/inOutRay.direction().y();
             if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.x() >= -x2 && p.x() <= x2 && 
                      p.z() >= -z2 && p.z() <= z2 ) {
                     info.p = p;
@@ -104,11 +104,11 @@ public class Box extends Solid {
         }
 
         // (4) Plano posterior: Y = -size.y()/2
-        if ( Math.abs(inOutRay.direction.y()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().y()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano Y=-size.y()/2
-            t = (-y2-inOutRay.origin.y())/inOutRay.direction.y();
+            t = (-y2-inOutRay.origin().y())/inOutRay.direction().y();
             if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.x() >= -x2 && p.x() <= x2 && 
                      p.z() >= -z2 && p.z() <= z2 ) {
                     info.p = p;
@@ -119,11 +119,11 @@ public class Box extends Solid {
         }
 
         // (5) Plano X = size.x()/2
-        if ( Math.abs(inOutRay.direction.x()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().x()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano X=size.x()/2
-            t = (x2-inOutRay.origin.x())/inOutRay.direction.x();
+            t = (x2-inOutRay.origin().x())/inOutRay.direction().x();
             if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.y() >= -y2 && p.y() <= y2 && 
                      p.z() >= -z2 && p.z() <= z2 ) {
                     info.p = p;
@@ -134,11 +134,11 @@ public class Box extends Solid {
         }
 
         // (6) Plano X = -size.x()/2
-        if ( Math.abs(inOutRay.direction.x()) > VSDK.EPSILON ) {
+        if ( Math.abs(inOutRay.direction().x()) > VSDK.EPSILON ) {
             // El rayo no es paralelo al plano X=-size.x()/2
-            t = (-x2-inOutRay.origin.x())/inOutRay.direction.x();
+            t = (-x2-inOutRay.origin().x())/inOutRay.direction().x();
             if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin.add(inOutRay.direction.multiply(t));
+                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
                 if ( p.y() >= -y2 && p.y() <= y2 && 
                      p.z() >= -z2 && p.z() <= z2 ) {
                     info.p = p;
@@ -149,11 +149,10 @@ public class Box extends Solid {
         }
 
         if ( min_t < Double.MAX_VALUE ) {
-            inOutRay.t = min_t;
             lastInfo.clone(info);
-            return true;
+            return inOutRay.withT(min_t);
         }
-        return false;
+        return null;
     }
 
     /**

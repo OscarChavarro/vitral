@@ -146,15 +146,14 @@ public class TriangleMeshGroup extends Surface {
     @return true if given ray intersects current TriangleMeshGroup
     */
     @Override
-    public boolean doIntersection(Ray inOut_Ray) {
+    public Ray doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating meshes
-        boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         GeometryIntersectionInformation Info;
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
-        intersection = false;
+        Ray nearestHit = null;
         Info = new GeometryIntersectionInformation();
 
         // Bounding volume check
@@ -169,8 +168,8 @@ public class TriangleMeshGroup extends Surface {
             boundingVolume.setPosition(center);
             boundingVolume.setGeometry(new Box(size));
         }
-        if ( !boundingVolume.doIntersection(inOut_Ray) ) {
-            return false;
+        if ( boundingVolume.doIntersection(inOut_Ray) == null ) {
+            return null;
         }
 
         // Chain of responsability behavior design pattern with TriangleMesh
@@ -178,27 +177,26 @@ public class TriangleMeshGroup extends Surface {
             TriangleMesh mesh = meshes.get(i);
             Ray ray = new Ray(inOut_Ray);
 
-            if ( mesh.doIntersection(ray) ) {
-                mesh.doExtraInformation(ray, 0.0, Info);
+            Ray hit = mesh.doIntersection(ray);
+            if ( hit != null ) {
+                mesh.doExtraInformation(hit, 0.0, Info);
 
-                if ( ray.t < min_t ) {
-                    min_t = ray.t;
+                if ( hit.t() < min_t ) {
+                    min_t = hit.t();
 
                     // Stores standard doIntersection operation information
                     lastInfo.clone(Info);
-                    inOut_Ray.t = ray.t;
+                    nearestHit = inOut_Ray.withT(hit.t());
 
                     // Stores the intersected mesh and the triangle intersected inside that mesh
                     intersectionInformation = new int[2];
                     intersectionInformation[0] = i;
                     intersectionInformation[1] = mesh.doIntersectionInformation();
-
-                    intersection = true;
                 }
             }
         }
 
-        return intersection;
+        return nearestHit;
     }
 
     /**

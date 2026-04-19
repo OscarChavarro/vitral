@@ -165,15 +165,16 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     break;
                 }
                 Ray rayHit = new Ray(ray);
-                if ( !face.containingPlane.doIntersection(rayHit) ) {
+                Ray hit = face.containingPlane.doIntersection(rayHit);
+                if ( hit == null ) {
                     continue;
                 }
-                if ( rayHit.t <= eps ) {
+                if ( hit.t() <= eps ) {
                     continue;
                 }
 
-                Vector3D pi = rayHit.origin.add(
-                    rayHit.direction.multiply(rayHit.t));
+                Vector3D pi = hit.origin().add(
+                    hit.direction().multiply(hit.t()));
                 int status = face.testPointInside(pi, eps);
                 if ( status == Geometry.LIMIT ) {
                     ambiguous = true;
@@ -183,14 +184,14 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     boolean duplicated = false;
                     int k;
                     for ( k = 0; k < distances.size(); k++ ) {
-                        if ( Math.abs(distances.get(k).doubleValue() - rayHit.t)
+                        if ( Math.abs(distances.get(k).doubleValue() - hit.t())
                              <= eps ) {
                             duplicated = true;
                             break;
                         }
                     }
                     if ( !duplicated ) {
-                        distances.add(Double.valueOf(rayHit.t));
+                        distances.add(Double.valueOf(hit.t()));
                         hits++;
                     }
                 }

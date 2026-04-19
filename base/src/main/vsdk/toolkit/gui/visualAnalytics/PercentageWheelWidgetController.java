@@ -65,7 +65,8 @@ public class PercentageWheelWidgetController extends Controller {
         ray = c.generateRay(x, y);
         InfinitePlane plane;
         plane = new InfinitePlane(new Vector3D(0, 0, 1), p);
-        if ( !plane.doIntersection(ray) ) {
+        Ray hit = plane.doIntersection(ray);
+        if ( hit == null ) {
             return -1;
         }
 
@@ -73,7 +74,7 @@ public class PercentageWheelWidgetController extends Controller {
         double r;
         double angle;
         
-        inPlane = ray.origin.add(ray.direction.multiply(ray.t)).subtract(p);
+        inPlane = hit.origin().add(hit.direction().multiply(hit.t())).subtract(p);
         r = inPlane.length();
         angle = Math.toDegrees(inPlane.obtainSphericalThetaAngle());
 

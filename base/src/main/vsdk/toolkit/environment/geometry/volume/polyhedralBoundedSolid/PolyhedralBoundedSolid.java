@@ -1252,16 +1252,15 @@ public class PolyhedralBoundedSolid extends Solid {
     @return true if given ray intersects current PolyhedralBoundedSolid
     */
     @Override
-    public boolean doIntersection(Ray inOutRay) {
+    public Ray doIntersection(Ray inOutRay) {
         int i;
-        boolean intersection; // true if intersection founded
         double min_t;         // Shortest distance founded so far
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(this);
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
-        intersection = false;
+        Ray nearestHit = null;
         GeometryIntersectionInformation Info;
         Info = new GeometryIntersectionInformation();
         Vector3D p;
@@ -1270,24 +1269,24 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( i = 0; i < polygonsList.size(); i++ ) {
             Ray ray = new Ray(inOutRay);
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            if ( face.containingPlane.doIntersection(ray) ) {
-                face.containingPlane.doExtraInformation(ray, 0.0, Info);
-                if ( ray.t < min_t ) {
-                    ray.direction = ray.direction.normalized();
-                    p = ray.origin.add(ray.direction.multiply(ray.t));
+            Ray hit = face.containingPlane.doIntersection(ray);
+            if ( hit != null ) {
+                face.containingPlane.doExtraInformation(hit, 0.0, Info);
+                if ( hit.t() < min_t ) {
+                    hit = hit.withDirection(hit.direction().normalized());
+                    p = hit.origin().add(hit.direction().multiply(hit.t()));
                     pos = face.testPointInside(p, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
-                        min_t = ray.t;
+                        min_t = hit.t();
                         // Stores standard doIntersection operation information
                         lastInfo.clone(Info);
-                        inOutRay.t = ray.t;
-                        intersection = true;
+                        nearestHit = inOutRay.withT(hit.t());
                     }
                 }
             }
         }
 
-        return intersection;
+        return nearestHit;
     }
 
     @Override
@@ -1516,17 +1515,18 @@ public class PolyhedralBoundedSolid extends Solid {
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            if ( face.containingPlane.doIntersection(ray) ) {
-                if ( ray.t < t0 - numericContext.epsilon() ) {
-                    ray.direction = ray.direction.normalized();
-                    pi = ray.origin.add(ray.direction.multiply(ray.t));
+            Ray hit = face.containingPlane.doIntersection(ray);
+            if ( hit != null ) {
+                if ( hit.t() < t0 - numericContext.epsilon() ) {
+                    hit = hit.withDirection(hit.direction().normalized());
+                    pi = hit.origin().add(hit.direction().multiply(hit.t()));
                     pos = face.testPointInside(pi, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
-                        face.containingPlane.doExtraInformation(ray, 0.0, info);
+                        face.containingPlane.doExtraInformation(hit, 0.0, info);
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             boolean considerIt = true;
                             for ( j = 0; j < ndist; j++ ) {
-                                if ( Math.abs(distances[j]-ray.t) <
+                                if ( Math.abs(distances[j]-hit.t()) <
                                      numericContext.bigEpsilon() ) {
                                     considerIt = false;
                                     break;
@@ -1534,7 +1534,7 @@ public class PolyhedralBoundedSolid extends Solid {
                             }
                             if ( considerIt ) {
                                 qi++;
-                                distances[ndist] = ray.t;
+                                distances[ndist] = hit.t();
                                 ndist++;
                             }
                         }

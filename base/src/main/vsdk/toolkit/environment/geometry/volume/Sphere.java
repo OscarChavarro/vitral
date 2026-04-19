@@ -40,7 +40,7 @@ public class Sphere extends Solid {
     @return true if given ray intersects current Sphere
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inout_rayo) {
         /* OJO: Como en Java, a diferencia de C no hay sino objetos por
                 referencia, no se puede hacer una declaraci&oacute;n 
@@ -65,10 +65,10 @@ public class Sphere extends Solid {
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */
         _static_delta = new Vector3D(
-            -inout_rayo.origin.x(),
-            -inout_rayo.origin.y(),
-            -inout_rayo.origin.z());
-        double v = inout_rayo.direction.dotProduct(_static_delta);
+            -inout_rayo.origin().x(),
+            -inout_rayo.origin().y(),
+            -inout_rayo.origin().z());
+        double v = inout_rayo.direction().dotProduct(_static_delta);
 
         // Test if the inout_rayo actually intersects the sphere
         double t = _radius_squared + v*v 
@@ -76,18 +76,17 @@ public class Sphere extends Solid {
                   - _static_delta.y()*_static_delta.y()
                   - _static_delta.z()*_static_delta.z();
         if ( t < 0 ) {
-            return false;
+            return null;
         }
 
         // Test if the intersection is in the positive
         // inout_rayo direction
         t = v - Math.sqrt(t);
         if ( t < 0 ) {
-            return false;
+            return null;
         }
 
-        inout_rayo.t = t;
-        return true;
+        return inout_rayo.withT(t);
     }
 
     /**
@@ -101,9 +100,9 @@ public class Sphere extends Solid {
                                   GeometryIntersectionInformation outData) {
         //-----------------------------------------------------------------
         outData.p = new Vector3D(
-            inRay.origin.x() + inT*inRay.direction.x(),
-            inRay.origin.y() + inT*inRay.direction.y(),
-            inRay.origin.z() + inT*inRay.direction.z());
+            inRay.origin().x() + inT*inRay.direction().x(),
+            inRay.origin().y() + inT*inRay.direction().y(),
+            inRay.origin().z() + inT*inRay.direction().z());
 
         outData.n = new Vector3D(outData.p).normalized();
 

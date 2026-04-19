@@ -514,8 +514,8 @@ public class ParametricBiCubicPatch extends Surface {
     @return true if given ray intersects current ParametricBicubicPatch
     */
     @Override
-    public boolean doIntersection(Ray r) {
-        return false;
+    public Ray doIntersection(Ray r) {
+        return null;
     }
 
     /**
@@ -524,7 +524,7 @@ public class ParametricBiCubicPatch extends Surface {
 
     Check the discusion in [WAYN1990] about solving this problem. Two main
     strategies are known for solving this: a numeric root finding
-    (trying different values for Ray.t until a given error tolerance is
+    (trying different values for Ray.t() until a given error tolerance is
     reached) and converting the patch to a mesh and test the mesh.
 
     This method implements the numerical approach, while an explicit

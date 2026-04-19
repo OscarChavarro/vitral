@@ -76,7 +76,7 @@ public abstract class Geometry extends Entity {
     Sphere emanates a Ray in the direction shown by the cyan Arrow. The 
     Geometry.doIntersection method returns true the first time is called,
     and the Ray is modified to have the distance between the Ray origin and
-    the red Sphere surface in its Ray.t attribute. From this operation,
+    the red Sphere surface in its Ray.t() attribute. From this operation,
     the Geometry.doExtraInformation method could be used to recall the
     normal Vector3D of the red Sphere, which is shown in yellow. Applying a
     reflection rule (equal incident and reflection angles respective to
@@ -87,13 +87,13 @@ public abstract class Geometry extends Entity {
     @param inOut_ray It is used both ways: as an input value and as an output
     returned value. As input parameter, it must specify the ray origin and
     ray direction in the two internal Vector3D fields, it's scalar
-    distance value Ray.t is not relevant.  As output value, the origin and 
-    direction of the Ray are not altered, but the scalar distance value Ray.t 
+    distance value Ray.t() is not relevant.  As output value, the origin and 
+    direction of the Ray are not altered, but the scalar distance value Ray.t() 
     could change if the input Ray intersects current geometry.
     @return If the specified input Ray intersects current Geometry, true
     value is returned, otherwise false is returned.
     */
-    public abstract boolean doIntersection(Ray inOut_ray);
+    public abstract Ray doIntersection(Ray inOut_ray);
 
     /**
     This method returns the number of front facing surface elements (with

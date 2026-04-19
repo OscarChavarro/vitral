@@ -346,10 +346,10 @@ public class QuadMesh extends Surface {
     @return true if given ray intersects current QuadMesh
     */
     @Override
-    public boolean
+    public Ray
     doIntersection(Ray inOut_Ray) {
         // TODO!
-        return false;
+        return null;
     }
 
     /**

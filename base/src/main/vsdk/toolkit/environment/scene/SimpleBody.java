@@ -208,24 +208,21 @@ public class SimpleBody extends Entity {
     @param inOutRay
     @return true if given ray intersects with current body
     */
-    public final boolean doIntersection(Ray inOutRay)
+    public final Ray doIntersection(Ray inOutRay)
     {
-        boolean answer;
-
         // Take in to account current body geometric transformations...
-        _static_vector3d = inOutRay.origin.subtract(position);
-        _static_ray.origin = rotation_i.multiply(_static_vector3d);
-        _static_ray.direction = rotation_i.multiply(inOutRay.direction).normalized();
-        _static_ray.t = inOutRay.t;
+        _static_vector3d = inOutRay.origin().subtract(position);
+        _static_ray = _static_ray.withOrigin(rotation_i.multiply(_static_vector3d));
+        _static_ray = _static_ray.withDirection(rotation_i.multiply(inOutRay.direction()).normalized());
+        _static_ray = _static_ray.withT(inOutRay.t());
 
         // ... and compute doIntersection operation on object's coordinates
-        answer = false;
-        if ( geometry.doIntersection(_static_ray) ) {
-            answer = true;
-            inOutRay.t = _static_ray.t;
+        Ray hit = geometry.doIntersection(_static_ray);
+        if ( hit != null ) {
+            return inOutRay.withT(hit.t());
         }
 
-        return answer;
+        return null;
     }
 
     public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
@@ -257,10 +254,10 @@ public class SimpleBody extends Entity {
         R = getRotation();
         Ri = getRotationInverse();
         myRay = new Ray ( 
-            Ri.multiply(inRay.origin.subtract(po) ),
-            Ri.multiply(inRay.direction)
+            Ri.multiply(inRay.origin().subtract(po) ),
+            Ri.multiply(inRay.direction())
         );
-        myRay.t = inRay.t;
+        myRay = myRay.withT(inRay.t());
         geometry.doExtraInformation(myRay, inT, outInfo);
 
         outInfo.p = R.multiply(outInfo.p).add(po);

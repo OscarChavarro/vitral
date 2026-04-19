@@ -128,9 +128,9 @@ public class Polygon2D extends Surface
     }
 
     @Override
-    public boolean doIntersection(Ray inOut_ray)
+    public Ray doIntersection(Ray inOut_ray)
     {
-        return false;
+        return null;
     }
 
     @Override
