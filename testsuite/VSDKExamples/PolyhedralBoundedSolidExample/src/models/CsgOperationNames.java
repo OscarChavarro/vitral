@@ -1,3 +1,5 @@
+package models;
+
 public enum CsgOperationNames
 {
     UNION("UNION"),

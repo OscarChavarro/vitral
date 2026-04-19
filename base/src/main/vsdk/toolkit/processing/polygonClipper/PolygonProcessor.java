@@ -6,7 +6,7 @@
 //= reduction of the number of points required to represent a digitized     =
 //= line or its caricature", The Canadian Cartographer 10(2), 112–122 (1973)=
 
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +15,7 @@ import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
+import vsdk.toolkit.processing.ProcessingElement;
 
 
 /**

@@ -15,17 +15,11 @@ public class PolygonClippingKeyboardInteractionTechniques
     {
         boolean repaint = false;
         boolean handled = false;
+        boolean handledLetterShortcut = false;
 
         if ( event.keycode == KeyEvent.KEY_ESC ) {
             actions.requestExit();
             return false;
-        }
-
-        if ( model.cameraController.processKeyPressedEvent(event) ) {
-            repaint = true;
-        }
-        if ( model.qualityController.processKeyPressedEvent(event) ) {
-            repaint = true;
         }
 
         switch ( event.keycode ) {
@@ -40,49 +34,59 @@ public class PolygonClippingKeyboardInteractionTechniques
             handled = true;
             break;
           case KeyEvent.KEY_SPACE:
-            model.showReferenceFrame = !model.showReferenceFrame;
+            model.setShowReferenceFrame(!model.isShowReferenceFrame());
             handled = true;
             break;
-          case KeyEvent.KEY_c:
-          case KeyEvent.KEY_C:
-            model.showClipPolygon = !model.showClipPolygon;
+          case KeyEvent.KEY_c, KeyEvent.KEY_C:
+            model.setShowClipPolygon(!model.isShowClipPolygon());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_s:
-          case KeyEvent.KEY_S:
-            model.showSubjectPolygon = !model.showSubjectPolygon;
+          case KeyEvent.KEY_s, KeyEvent.KEY_S:
+            model.setShowSubjectPolygon(!model.isShowSubjectPolygon());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_i:
-          case KeyEvent.KEY_I:
-            model.showInnerPolygon = !model.showInnerPolygon;
+          case KeyEvent.KEY_i, KeyEvent.KEY_I:
+            model.setShowInnerPolygon(!model.isShowInnerPolygon());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_o:
-          case KeyEvent.KEY_O:
-            model.showOuterPolygon = !model.showOuterPolygon;
+          case KeyEvent.KEY_o, KeyEvent.KEY_O:
+            model.setShowOuterPolygon(!model.isShowOuterPolygon());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_p:
-          case KeyEvent.KEY_P:
-            model.showIntersections = !model.showIntersections;
+          case KeyEvent.KEY_p, KeyEvent.KEY_P:
+            model.setShowIntersections(!model.isShowIntersections());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_t:
-          case KeyEvent.KEY_T:
-            model.showFilledPolygons = !model.showFilledPolygons;
+          case KeyEvent.KEY_t, KeyEvent.KEY_T:
+            model.setShowFilledPolygons(!model.isShowFilledPolygons());
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_h:
-          case KeyEvent.KEY_H:
+          case KeyEvent.KEY_h, KeyEvent.KEY_H:
             actions.requestSnapshot();
             handled = true;
+            handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_f:
-          case KeyEvent.KEY_F:
+          case KeyEvent.KEY_f, KeyEvent.KEY_F:
             actions.toggleFullscreen();
             handled = true;
+            handledLetterShortcut = true;
             break;
+          default:
+            break;
+        }
+
+        if ( !handledLetterShortcut
+             && model.getCameraController().processKeyPressedEvent(event) ) {
+            repaint = true;
+        }
+        if ( model.getQualityController().processKeyPressedEvent(event) ) {
+            repaint = true;
         }
 
         return repaint || handled;

@@ -1,4 +1,5 @@
 import vsdk.toolkit.gui.KeyEvent;
+import models.DebuggerModel;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 public class DebuggerKeyboardInteractionTechniques
@@ -20,18 +21,18 @@ public class DebuggerKeyboardInteractionTechniques
             return false;
         }
 
-        if ( model.cameraController.processKeyPressedEvent(event) ) {
+        if ( model.getCameraController().processKeyPressedEvent(event) ) {
             repaint = true;
         }
-        if ( model.qualityController.processKeyPressedEvent(event) ) {
-            System.out.println(model.quality);
+        if ( model.getQualityController().processKeyPressedEvent(event) ) {
+            System.out.println(model.getQuality());
             repaint = true;
         }
 
         switch (event.keycode) {
             // Show vertex numbers
             case KeyEvent.KEY_v -> {
-                model.debugVertices = !model.debugVertices;
+                model.setDebugVertices(!model.isDebugVertices());
                 handled = true;
             }
 
@@ -43,14 +44,14 @@ public class DebuggerKeyboardInteractionTechniques
 
             // Reference frame
             case KeyEvent.KEY_SPACE -> {
-                model.showCoordinateSystem = !model.showCoordinateSystem;
+                model.setShowCoordinateSystem(!model.isShowCoordinateSystem());
                 handled = true;
             }
 
             // Console print
             case KeyEvent.KEY_I -> {
-                System.out.println(model.solid);
-                if (PolyhedralBoundedSolidValidationEngine.validateIntermediate(model.solid)) {
+                System.out.println(model.getSolid());
+                if (PolyhedralBoundedSolidValidationEngine.validateIntermediate(model.getSolid())) {
                     System.out.println("SOLID MODEL IS VALID!");
                 } else {
                     System.out.println("SOLID MODEL IS INVALID!");
@@ -60,85 +61,85 @@ public class DebuggerKeyboardInteractionTechniques
 
             // Highlighted face(s)
             case KeyEvent.KEY_1 -> {
-                model.faceIndex--;
+                model.setFaceIndex(model.getFaceIndex() - 1);
                 handled = true;
             }
             case KeyEvent.KEY_2 -> {
-                model.faceIndex++;
+                model.setFaceIndex(model.getFaceIndex() + 1);
                 handled = true;
             }
 
             // Model selection
             case KeyEvent.KEY_3 -> {
-                model.solidModelName = model.solidModelName.previousClamped();
+                model.setSolidModelName(model.getSolidModelName().previousClamped());
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_4 -> {
-                model.solidModelName = model.solidModelName.nextClamped();
+                model.setSolidModelName(model.getSolidModelName().nextClamped());
                 actions.rebuildSolid();
                 handled = true;
             }
 
             // Sphere / cylinder subdivisions
             case KeyEvent.KEY_q -> {
-                model.subdivisionCircumference--;
+                model.setSubdivisionCircumference(model.getSubdivisionCircumference() - 1);
                 model.clampSubdivisions();
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_Q -> {
-                model.subdivisionCircumference++;
+                model.setSubdivisionCircumference(model.getSubdivisionCircumference() + 1);
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_w -> {
-                model.subdivisionHeight--;
+                model.setSubdivisionHeight(model.getSubdivisionHeight() - 1);
                 model.clampSubdivisions();
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_W -> {
-                model.subdivisionHeight++;
+                model.setSubdivisionHeight(model.getSubdivisionHeight() + 1);
                 actions.rebuildSolid();
                 handled = true;
             }
 
             // Hidden line algorithm debug
             case KeyEvent.KEY_0 -> {
-                model.debugEdges = !model.debugEdges;
+                model.setDebugEdges(!model.isDebugEdges());
                 handled = true;
             }
             case KeyEvent.KEY_8 -> {
-                model.edgeIndex--;
+                model.setEdgeIndex(model.getEdgeIndex() - 1);
                 handled = true;
             }
             case KeyEvent.KEY_9 -> {
-                model.edgeIndex++;
+                model.setEdgeIndex(model.getEdgeIndex() + 1);
                 handled = true;
             }
 
             // CSG special debug cases
             case KeyEvent.KEY_5 -> {
-                model.csgOperation = model.csgOperation.nextCircular();
+                model.setCsgOperation(model.getCsgOperation().nextCircular());
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_6 -> {
-                model.csgSample = model.csgSample.nextCircular();
+                model.setCsgSample(model.getCsgSample().nextCircular());
                 actions.rebuildSolid();
                 handled = true;
             }
             case KeyEvent.KEY_d -> {
-                model.debugCsg = !model.debugCsg;
+                model.setDebugCsg(!model.isDebugCsg());
                 actions.rebuildSolid();
                 handled = true;
             }
         }
 
         model.clampFaceIndex();
-        if ( model.edgeIndex < -3 ) {
-            model.edgeIndex = -3;
+        if ( model.getEdgeIndex() < -3 ) {
+            model.setEdgeIndex(-3);
         }
         model.clampSubdivisions();
 

@@ -1,14 +1,15 @@
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import com.jogamp.opengl.awt.GLCanvas;
 import vsdk.toolkit.gui.AwtSystem;
 
 public class PolygonClippingMouseInteractionTechniques
 {
-    public void processMouseEntered(PolygonClippingDebuggerModel model)
+    public void processMouseEntered(GLCanvas canvas)
     {
-        if ( model.canvas != null ) {
-            model.canvas.requestFocusInWindow();
+        if ( canvas != null ) {
+            canvas.requestFocusInWindow();
         }
     }
 
@@ -19,42 +20,42 @@ public class PolygonClippingMouseInteractionTechniques
     public boolean processMousePressed(PolygonClippingDebuggerModel model,
         MouseEvent e)
     {
-        return model.cameraController.processMousePressedEvent(
+        return model.getCameraController().processMousePressedEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMouseReleased(PolygonClippingDebuggerModel model,
         MouseEvent e)
     {
-        return model.cameraController.processMouseReleasedEvent(
+        return model.getCameraController().processMouseReleasedEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMouseClicked(PolygonClippingDebuggerModel model,
         MouseEvent e)
     {
-        return model.cameraController.processMouseClickedEvent(
+        return model.getCameraController().processMouseClickedEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMouseMoved(PolygonClippingDebuggerModel model,
         MouseEvent e)
     {
-        return model.cameraController.processMouseMovedEvent(
+        return model.getCameraController().processMouseMovedEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMouseDragged(PolygonClippingDebuggerModel model,
         MouseEvent e)
     {
-        return model.cameraController.processMouseDraggedEvent(
+        return model.getCameraController().processMouseDraggedEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 
     public boolean processMouseWheelMoved(PolygonClippingDebuggerModel model,
         MouseWheelEvent e)
     {
-        return model.cameraController.processMouseWheelEvent(
+        return model.getCameraController().processMouseWheelEvent(
             AwtSystem.awt2vsdkEvent(e));
     }
 }

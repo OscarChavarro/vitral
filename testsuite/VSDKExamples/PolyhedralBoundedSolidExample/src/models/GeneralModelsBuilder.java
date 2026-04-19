@@ -1,6 +1,7 @@
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
+package models;
 
 // Java classes
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._Polyhedra
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.awt.AwtFontReader;
-import vsdk.toolkit.processing.GeometricModeler;
-import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
 public class GeneralModelsBuilder
 {
@@ -35,7 +36,7 @@ public class GeneralModelsBuilder
         Matrix4x4 T, R, S, M;
         model.clampSubdivisions();
 
-        switch ( model.solidModelName ) {
+        switch ( model.getSolidModelName() ) {
           case MVFS_SMEV_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
@@ -48,18 +49,18 @@ public class GeneralModelsBuilder
           case ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
-            GeometricModeler.addArc(
+            PolyhedralBoundedSolidModeler.addArc(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
           case CIRCULAR_LAMINA:
-            mySolid = GeometricModeler.createCircularLamina(
+            mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
-            GeometricModeler.addArc(
+            PolyhedralBoundedSolidModeler.addArc(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
             T = new Matrix4x4();
@@ -70,12 +71,12 @@ public class GeneralModelsBuilder
             S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
 
-            GeometricModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), M);
 
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR:
-            mySolid = GeometricModeler.createCircularLamina(
+            mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 24
             );
 
@@ -86,7 +87,7 @@ public class GeneralModelsBuilder
             S = new Matrix4x4();
             S.scale(0.5, 0.5, 0.5);
             M = T.multiply(R.multiply(S));
-            GeometricModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), M);
 
 /*
@@ -97,31 +98,31 @@ public class GeneralModelsBuilder
             S = new Matrix4x4();
             S.scale(0.2, 0.2, 0.2);
             M = T.multiply(R.multiply(S));
-            GeometricModeler.translationalSweepExtrudeFace(
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), M);
 */
             break;
 
           case SPHERE:
-            mySolid = createSphere(0.5, model.subdivisionCircumference,
-                model.subdivisionHeight);
+            mySolid = createSphere(0.5, model.getSubdivisionCircumference(),
+                model.getSubdivisionHeight());
             break;
           case CONE:
             mySolid = createCone(0.5, 0.0, 1.0,
-                model.subdivisionCircumference, model.subdivisionHeight);
+                model.getSubdivisionCircumference(), model.getSubdivisionHeight());
             break;
           case CYLINDER:
             mySolid = createCylinder(0.5, 1.0,
-                model.subdivisionCircumference, model.subdivisionHeight);
+                model.getSubdivisionCircumference(), model.getSubdivisionHeight());
             break;
           case CSG_MOON_BLOCK:
             mySolid = csgTest(1, CsgOperationNames.DIFFERENCE_A_MINUS_B,
-                CsgSampleNames.MOON_BLOCK, model.debugCsg);
-            model.debugCsg = false;
+                CsgSampleNames.MOON_BLOCK, model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_LAMP_SHELL:
-            mySolid = createCsgLampShell(model.subdivisionCircumference,
-                model.subdivisionHeight);
+            mySolid = createCsgLampShell(model.getSubdivisionCircumference(),
+                model.getSubdivisionHeight());
             break;
           case ARROW:
             mySolid = createArrow(0.7, 0.3, 0.05, 0.1);
@@ -138,7 +139,7 @@ public class GeneralModelsBuilder
             T = new Matrix4x4();
             T.translation(0.0, 0.0, 0.1);
 
-            GeometricModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), T);
 
             break;
@@ -161,36 +162,36 @@ public class GeneralModelsBuilder
             mySolid = splitTest(3);
             break;
           case CSG_TEST_PART_1:
-            mySolid = csgTest(1, model.csgOperation, model.csgSample, model.debugCsg);
-            model.debugCsg = false;
+            mySolid = csgTest(1, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_TEST_PART_2:
-            mySolid = csgTest(2, model.csgOperation, model.csgSample, model.debugCsg);
-            model.debugCsg = false;
+            mySolid = csgTest(2, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_TEST_PART_3:
-            mySolid = csgTest(3, model.csgOperation, model.csgSample, model.debugCsg);
-            model.debugCsg = false;
+            mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_MANT1988_15_2_HOLED_INTERSECTION:
             mySolid = csgMant1988_15_2Case(
-                -1, GeometricModeler.INTERSECTION, model.debugCsg);
-            model.debugCsg = false;
+                -1, PolyhedralBoundedSolidModeler.INTERSECTION, model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_MANT1988_15_2_LIMIT_INTERSECTION:
             mySolid = csgMant1988_15_2Case(
-                0, GeometricModeler.INTERSECTION, model.debugCsg);
-            model.debugCsg = false;
+                0, PolyhedralBoundedSolidModeler.INTERSECTION, model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_MANT1988_15_2_LIMIT_DIFFERENCE:
             mySolid = csgMant1988_15_2Case(
-                0, GeometricModeler.SUBTRACT, model.debugCsg);
-            model.debugCsg = false;
+                0, PolyhedralBoundedSolidModeler.SUBTRACT, model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_MANT1988_15_2_OPEN_DIFFERENCE:
             mySolid = csgMant1988_15_2Case(
-                1, GeometricModeler.SUBTRACT, model.debugCsg);
-            model.debugCsg = false;
+                1, PolyhedralBoundedSolidModeler.SUBTRACT, model.isDebugCsg());
+            model.setDebugCsg(false);
             break;
           case CSG_KURLANDER_BOWL:
             mySolid = CsgKurlanderBowl.create();
@@ -355,8 +356,8 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid innerSphere = createSphere(innerRadius,
             subdivisionCircunference, subdivisionHeight);
 
-        PolyhedralBoundedSolid sphericalShell = GeometricModeler.setOp(
-            outerSphere, innerSphere, GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid sphericalShell = PolyhedralBoundedSolidModeler.setOp(
+            outerSphere, innerSphere, PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
         // Cube fully contains shell in X/Y, starts below it in Z and stops at
         // ~80% of shell height to mimic the unperforated lamp bowl profile.
@@ -367,8 +368,8 @@ public class GeneralModelsBuilder
         cubeMove.translation(0.55, 0.55, 0.325);
         clipCube.applyTransformation(cubeMove);
 
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(
-            sphericalShell, clipCube, GeometricModeler.INTERSECTION, false);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            sphericalShell, clipCube, PolyhedralBoundedSolidModeler.INTERSECTION, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
         return result;
     }
@@ -449,7 +450,7 @@ public class GeneralModelsBuilder
         solidB = GeneralModelsBuilder.createBox(new Vector3D(0.72, 0.72, 0.72));
 
         // Hollow box = outer box minus inner box.
-        result = GeometricModeler.setOp(solidA, solidB, GeometricModeler.SUBTRACT);
+        result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB, PolyhedralBoundedSolidModeler.SUBTRACT);
 
         return result;
     }
@@ -542,7 +543,7 @@ public class GeneralModelsBuilder
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid solid;
 
-        solid = GeometricModeler.createBrepFromParametricCurve(curve);
+        solid = PolyhedralBoundedSolidModeler.createBrepFromParametricCurve(curve);
 
         return solid;
     }
@@ -573,10 +574,10 @@ public class GeneralModelsBuilder
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, 0, 0.4);
 
-        solid1 = GeometricModeler.createCircularLamina(
+        solid1 = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, 0.5, 0.0, 6
         );
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid1, solid1.findFace(1), T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
 
@@ -593,10 +594,10 @@ public class GeneralModelsBuilder
         //- Create cilynder 2 ---------------------------------------------
         PolyhedralBoundedSolid solid2;
 
-        solid2 = GeometricModeler.createCircularLamina(
+        solid2 = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, 0.5, 0.0, 6
         );
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid2, solid2.findFace(1), T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid2);
 
@@ -810,7 +811,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
         Vector3D center = new Vector3D(0.5, 0.5, 0);
 
-        solid = GeometricModeler.createCircularLamina(center.x, center.y,
+        solid = PolyhedralBoundedSolidModeler.createCircularLamina(center.x, center.y,
                                                       0.2, 0.0, nsides);
 
         // For seting 4 sided case to be equal to figure [MANT1988].12.5.
@@ -838,7 +839,7 @@ public class GeneralModelsBuilder
 /*
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(0.75, 0.25, 0), 1, 1);
-        GeometricModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
+        PolyhedralBoundedSolidModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
         rotationalSweepVersion1(solid, 20);
 */
         solid = createTestTorus(4, 16);
@@ -868,7 +869,7 @@ public class GeneralModelsBuilder
         solid.mef(1, 1, 4, 3, 1, 2, 2);
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, 0, 0.4);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 */
 
@@ -893,7 +894,7 @@ public class GeneralModelsBuilder
             return solid;
         }
 
-        GeometricModeler.split(solid, sp, solidsAbove, solidsBelow);
+        PolyhedralBoundedSolidModeler.split(solid, sp, solidsAbove, solidsBelow);
 
         //-----------------------------------------------------------------
         if ( part == 3 ) {
@@ -1003,8 +1004,8 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
-        x = GeometricModeler.setOp(b, c, GeometricModeler.UNION);
-        y = GeometricModeler.setOp(a, d, GeometricModeler.UNION);
+        x = PolyhedralBoundedSolidModeler.setOp(b, c, PolyhedralBoundedSolidModeler.UNION);
+        y = PolyhedralBoundedSolidModeler.setOp(a, d, PolyhedralBoundedSolidModeler.UNION);
 
         operands[0] = x;
         operands[1] = y;
@@ -1100,15 +1101,15 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
 /*
-        ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
-        bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
-        abcd = GeometricModeler.setOp(bd, ac, GeometricModeler.UNION);
-        eg = GeometricModeler.setOp(e, g, GeometricModeler.UNION);
-        fh = GeometricModeler.setOp(f, h, GeometricModeler.UNION);
-        efgh = GeometricModeler.setOp(eg, fh, GeometricModeler.UNION);
-        total = GeometricModeler.setOp(abcd, efgh, GeometricModeler.UNION);
+        ac = PolyhedralBoundedSolidModeler.setOp(a, c, PolyhedralBoundedSolidModeler.UNION);
+        bd = PolyhedralBoundedSolidModeler.setOp(b, d, PolyhedralBoundedSolidModeler.UNION);
+        abcd = PolyhedralBoundedSolidModeler.setOp(bd, ac, PolyhedralBoundedSolidModeler.UNION);
+        eg = PolyhedralBoundedSolidModeler.setOp(e, g, PolyhedralBoundedSolidModeler.UNION);
+        fh = PolyhedralBoundedSolidModeler.setOp(f, h, PolyhedralBoundedSolidModeler.UNION);
+        efgh = PolyhedralBoundedSolidModeler.setOp(eg, fh, PolyhedralBoundedSolidModeler.UNION);
+        total = PolyhedralBoundedSolidModeler.setOp(abcd, efgh, PolyhedralBoundedSolidModeler.UNION);
 */
-        ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
+        ac = PolyhedralBoundedSolidModeler.setOp(a, c, PolyhedralBoundedSolidModeler.UNION);
 
         operands[0] = ac;
         operands[1] = g;
@@ -1165,20 +1166,20 @@ public class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         if ( op == CsgOperationNames.UNION ) {
-            res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.UNION, withDebug);
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.UNION, withDebug);
         }
         else if ( op == CsgOperationNames.INTERSECTION ) {
-            res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.INTERSECTION, withDebug);
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.INTERSECTION, withDebug);
         }
         else if ( op == CsgOperationNames.DIFFERENCE_A_MINUS_B ) {
-            res = GeometricModeler.setOp(operands[0], operands[1],
-                                         GeometricModeler.SUBTRACT, withDebug);
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
         }
         else {
-            res = GeometricModeler.setOp(operands[1], operands[0],
-                                         GeometricModeler.SUBTRACT, withDebug);
+            res = PolyhedralBoundedSolidModeler.setOp(operands[1], operands[0],
+                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
         }
 
         //-----------------------------------------------------------------
@@ -1202,7 +1203,7 @@ public class GeneralModelsBuilder
 
         operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(
             situation);
-        return GeometricModeler.setOp(operands[0], operands[1], op, withDebug);
+        return PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1], op, withDebug);
     }
 
     public static PolyhedralBoundedSolid featuredObject()
@@ -1211,8 +1212,8 @@ public class GeneralModelsBuilder
 /*
         PolyhedralBoundedSolid ops[];
         ops = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2();
-        return GeometricModeler.setOp(ops[0], ops[1],
-                                      GeometricModeler.DIFFERENCE);
+        return PolyhedralBoundedSolidModeler.setOp(ops[0], ops[1],
+                                      PolyhedralBoundedSolidModeler.DIFFERENCE);
 */
     }
 }

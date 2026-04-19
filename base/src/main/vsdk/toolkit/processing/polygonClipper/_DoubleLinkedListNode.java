@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 /**
  * Node of the linked list (CircDoubleLinkedListNode), this is the structure

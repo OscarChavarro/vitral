@@ -1,18 +1,18 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 /**
  * Similar to _Polygon2DContour but is used in polygon clipping.
  */
 public class _Polygon2DContourWA {
 
-    public _CircDoubleLinkedList<_VertexNode2D> vertices;
+    public _CircularDoubleLinkedList<_VertexNode2D> vertices;
     public boolean isClipped = false;
     public boolean isHole = false;
 //    /** Classified signify: is a hole or not. */
 //    public boolean isClassified = false;
 
     public _Polygon2DContourWA() {
-        vertices = new _CircDoubleLinkedList<_VertexNode2D>();
+        vertices = new _CircularDoubleLinkedList<_VertexNode2D>();
     }
 
     public void addVertex(double x, double y, double r, double g, double b) {

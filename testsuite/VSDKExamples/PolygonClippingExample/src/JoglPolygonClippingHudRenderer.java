@@ -45,22 +45,22 @@ public class JoglPolygonClippingHudRenderer
         int height = viewportHeight > 0 ? viewportHeight : drawable.getSurfaceHeight();
 
         String testMessage = "Test [1, 2]: " + testCase.name()
-            + " (" + (model.testIndex + 1) + "/" + model.getTotalTestCases() + ")";
-        String sourcesMessage = "Clip [C]: " + onOff(model.showClipPolygon)
-            + "  Subject [S]: " + onOff(model.showSubjectPolygon)
-            + "  Points [P]: " + onOff(model.showIntersections);
-        String outputsMessage = "Inner [I]: " + onOff(model.showInnerPolygon)
-            + "  Outer [O]: " + onOff(model.showOuterPolygon)
-            + "  Fill [T]: " + onOff(model.showFilledPolygons);
+            + " (" + (model.getTestIndex() + 1) + "/" + model.getTotalTestCases() + ")";
+        String sourcesMessage = "Clip [C]: " + onOff(model.isShowClipPolygon())
+            + "  Subject [S]: " + onOff(model.isShowSubjectPolygon())
+            + "  Points [P]: " + onOff(model.isShowIntersections());
+        String outputsMessage = "Inner [I]: " + onOff(model.isShowInnerPolygon())
+            + "  Outer [O]: " + onOff(model.isShowOuterPolygon())
+            + "  Fill [T]: " + onOff(model.isShowFilledPolygons());
         String referenceFrameMessage = "Reference frame [Space]: "
-            + onOff(model.showReferenceFrame);
+            + onOff(model.isShowReferenceFrame());
         String countsMessage = "Loops C/S/I/O: "
-            + countLoops(model.clipPolygon) + "/"
-            + countLoops(model.subjectPolygon) + "/"
-            + countLoops(model.innerPolygon) + "/"
-            + countLoops(model.outerPolygon);
+            + countLoops(model.getClipPolygon()) + "/"
+            + countLoops(model.getSubjectPolygon()) + "/"
+            + countLoops(model.getInnerPolygon()) + "/"
+            + countLoops(model.getOuterPolygon());
         String intersectionsMessage = "Intersections: "
-            + PolygonClippingModelingTools.countPairedVertices(model.subjectPolygonWA);
+            + PolygonClippingModelingTools.countPairedVertices(model.getSubjectPolygonWA());
         String utilityMessage = "Fullscreen [F]  Snapshot [H]";
 
         hudTextRenderer.beginRendering(width, height);
@@ -75,9 +75,9 @@ public class JoglPolygonClippingHudRenderer
             28 + LINE_HEIGHT);
         drawTopRight(hudTextRenderer, width, height, utilityMessage,
             28 + 2 * LINE_HEIGHT);
-        if ( model.errorState ) {
+        if ( model.isErrorState() ) {
             hudTextRenderer.setColor(1.0f, 0.15f, 0.15f, 1.0f);
-            hudTextRenderer.draw(model.errorMessage, 16, 16);
+            hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
         }
         hudTextRenderer.endRendering();
     }

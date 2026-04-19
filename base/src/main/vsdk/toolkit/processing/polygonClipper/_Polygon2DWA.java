@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
 import vsdk.toolkit.common.Vertex2D;

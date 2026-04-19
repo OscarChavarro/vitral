@@ -4,7 +4,11 @@
 
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import models.DebuggerModel;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import models.CsgSampleNames;
+import models.CsgOperationNames;
+import models.GeneralModelsBuilder;
 
 public class PolyhedralBoundedSolidModelingTools
 {

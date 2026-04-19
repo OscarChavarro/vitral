@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 // JOGL classes
 import com.jogamp.opengl.awt.GLCanvas;
 
-// VitralSDK classes
+// Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.AwtSystem;
@@ -25,7 +25,10 @@ import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 
-@SuppressWarnings("removal")
+// Application classes
+import models.DebuggerModel;
+import models.SolidModelNames;
+
 public class PolyhedralBoundedSolidExample extends JFrame implements
     MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
@@ -64,7 +67,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
         try {
             int modelId = Integer.parseInt(modelProperty);
-            model.solidModelName = SolidModelNames.fromId(modelId);
+            model.setSolidModelName(SolidModelNames.fromId(modelId));
             return;
         }
         catch ( NumberFormatException e ) {
@@ -72,7 +75,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         }
 
         try {
-            model.solidModelName = SolidModelNames.valueOf(modelProperty);
+            model.setSolidModelName(SolidModelNames.valueOf(modelProperty));
         }
         catch ( IllegalArgumentException e ) {
             System.err.println("[PolyhedralBoundedSolidExample] Ignoring unknown "
@@ -82,13 +85,13 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private GLCanvas createGUI()
     {
-        model.canvas = new GLCanvas();
-        model.canvas.addGLEventListener(joglDebuggerRenderer);
-        model.canvas.addMouseListener(this);
-        model.canvas.addMouseMotionListener(this);
-        model.canvas.addKeyListener(this);
+        model.setCanvas(new GLCanvas());
+        model.getCanvas().addGLEventListener(joglDebuggerRenderer);
+        model.getCanvas().addMouseListener(this);
+        model.getCanvas().addMouseMotionListener(this);
+        model.getCanvas().addKeyListener(this);
 
-        return model.canvas;
+        return model.getCanvas();
     }
 
     public static void main (String[] args) {
@@ -99,7 +102,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private void setMainFrame(JFrame frame)
     {
-        model.mainFrame = frame;
+        model.setMainFrame(frame);
     }
 
     private void rebuildSolid()
@@ -111,8 +114,8 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     {
         try {
             model.clearErrorState();
-            model.solid = PolyhedralBoundedSolidModelingTools.buildSolid(model);
-            if ( model.solid == null ) {
+            model.setSolid(PolyhedralBoundedSolidModelingTools.buildSolid(model));
+            if ( model.getSolid() == null ) {
                 throw new IllegalStateException("Solid builder returned null");
             }
             model.clampFaceIndex();
@@ -126,8 +129,8 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     {
         StringBuilder msg = new StringBuilder();
         msg.append("Build error");
-        if ( model.solidModelName != null ) {
-            msg.append(" [").append(model.solidModelName.name()).append("]");
+        if ( model.getSolidModelName() != null ) {
+            msg.append(" [").append(model.getSolidModelName().name()).append("]");
         }
         msg.append(": ").append(e.getClass().getSimpleName());
         if ( e.getMessage() != null && !e.getMessage().isEmpty() ) {
@@ -138,18 +141,18 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private void repaintCanvas()
     {
-        if ( model.canvas != null ) {
-            model.canvas.repaint();
+        if ( model.getCanvas() != null ) {
+            model.getCanvas().repaint();
         }
     }
 
     private Vector3D calculateSolidCenter()
     {
-        if ( model.solid == null ) {
+        if ( model.getSolid() == null ) {
             return new Vector3D(0, 0, 0);
         }
 
-        double[] minMax = model.solid.getMinMax();
+        double[] minMax = model.getSolid().getMinMax();
         if ( minMax == null || minMax.length < 6 ) {
             return new Vector3D(0, 0, 0);
         }
@@ -163,32 +166,32 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     private void recenterOrbiterAfterModelChange(SolidModelNames previousModelName,
                                                  Vector3D previousPointOfInterest)
     {
-        if ( previousModelName == model.solidModelName ) {
+        if ( previousModelName == model.getSolidModelName() ) {
             return;
         }
-        if ( model.solid == null ) {
+        if ( model.getSolid() == null ) {
             return;
         }
-        if ( !(model.cameraController instanceof CameraControllerOrbiter) ) {
+        if ( !(model.getCameraController() instanceof CameraControllerOrbiter) ) {
             return;
         }
 
         CameraControllerOrbiter orbiterController =
-            (CameraControllerOrbiter)model.cameraController;
+            (CameraControllerOrbiter)model.getCameraController();
 
-        Vector3D previousEye = model.camera.getPosition();
+        Vector3D previousEye = model.getCamera().getPosition();
         Vector3D relativeVector = previousEye.substract(previousPointOfInterest);
         Vector3D newPointOfInterest = calculateSolidCenter();
         Vector3D newEye = newPointOfInterest.add(relativeVector);
 
         orbiterController.setPointOfInterest(newPointOfInterest);
-        model.camera.setPosition(newEye);
-        model.camera.setFocusedPositionMaintainingOrthogonality(newPointOfInterest);
+        model.getCamera().setPosition(newEye);
+        model.getCamera().setFocusedPositionMaintainingOrthogonality(newPointOfInterest);
     }
 
     private void toggleFullscreenMode()
     {
-        if ( model.mainFrame == null ) {
+        if ( model.getMainFrame() == null ) {
             return;
         }
 
@@ -200,10 +203,10 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         GraphicsDevice device = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getDefaultScreenDevice();
-        JFrame oldFrame = model.mainFrame;
+        JFrame oldFrame = model.getMainFrame();
 
-        if ( !model.fullScreenMode ) {
-            model.windowedBounds = oldFrame.getBounds();
+        if ( !model.isFullScreenMode() ) {
+            model.setWindowedBounds(oldFrame.getBounds());
         }
         if ( device.isFullScreenSupported() &&
              device.getFullScreenWindow() == oldFrame ) {
@@ -213,19 +216,19 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         oldFrame.setVisible(false);
         oldFrame.dispose();
 
-        model.fullScreenMode = !model.fullScreenMode;
-        createMainWindow(model.fullScreenMode);
+        model.setFullScreenMode(!model.isFullScreenMode());
+        createMainWindow(model.isFullScreenMode());
     }
 
     private void toggleFullscreenModeMacOs()
     {
-        final JFrame frame = model.mainFrame;
+        final JFrame frame = model.getMainFrame();
         if ( frame == null ) {
             return;
         }
 
-        if ( !model.fullScreenMode ) {
-            model.windowedBounds = frame.getBounds();
+        if ( !model.isFullScreenMode() ) {
+            model.setWindowedBounds(frame.getBounds());
         }
 
         frame.getRootPane().putClientProperty("apple.awt.fullscreenable", Boolean.TRUE);
@@ -236,16 +239,16 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
                 frame.toFront();
                 frame.requestFocus();
                 if ( requestMacOsNativeFullScreen(frame) ) {
-                    model.fullScreenMode = !model.fullScreenMode;
+                    model.setFullScreenMode(!model.isFullScreenMode());
                     joglDebuggerRenderer.refreshCanvasAfterWindowModeChange();
                 }
                 else {
                     // Last-resort fallback on macOS when native full screen API is unavailable.
                     frame.dispose();
-                    frame.setUndecorated(!model.fullScreenMode);
-                    if ( model.fullScreenMode ) {
-                        if ( model.windowedBounds != null ) {
-                            frame.setBounds(model.windowedBounds);
+                    frame.setUndecorated(!model.isFullScreenMode());
+                    if ( model.isFullScreenMode() ) {
+                        if ( model.getWindowedBounds() != null ) {
+                            frame.setBounds(model.getWindowedBounds());
                         }
                         else {
                             frame.setSize(DEFAULT_WINDOW_SIZE);
@@ -260,7 +263,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
                         frame.setBounds(screenBounds);
                     }
                     frame.setVisible(true);
-                    model.fullScreenMode = !model.fullScreenMode;
+                    model.setFullScreenMode(!model.isFullScreenMode());
                     joglDebuggerRenderer.refreshCanvasAfterWindowModeChange();
                 }
             }
@@ -318,8 +321,8 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
             if ( isMacOs() ) {
                 frame.setUndecorated(false);
-                if ( model.windowedBounds != null ) {
-                    frame.setBounds(model.windowedBounds);
+                if ( model.getWindowedBounds() != null ) {
+                    frame.setBounds(model.getWindowedBounds());
                 }
                 else {
                     frame.setSize(DEFAULT_WINDOW_SIZE);
@@ -341,8 +344,8 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         }
         else {
             frame.setUndecorated(false);
-            if ( model.windowedBounds != null ) {
-                frame.setBounds(model.windowedBounds);
+            if ( model.getWindowedBounds() != null ) {
+                frame.setBounds(model.getWindowedBounds());
             }
             else {
                 //Dimension size = new Dimension(1366, 768);
@@ -413,11 +416,11 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     @Override
     public void keyPressed(java.awt.event.KeyEvent e) {
         KeyEvent event = AwtSystem.awt2vsdkEvent(e);
-        SolidModelNames previousModelName = model.solidModelName;
+        SolidModelNames previousModelName = model.getSolidModelName();
         Vector3D previousPointOfInterest = new Vector3D(0, 0, 0);
-        if ( model.cameraController instanceof CameraControllerOrbiter ) {
+        if ( model.getCameraController() instanceof CameraControllerOrbiter ) {
             CameraControllerOrbiter orbiterController =
-                (CameraControllerOrbiter)model.cameraController;
+                (CameraControllerOrbiter)model.getCameraController();
             previousPointOfInterest = orbiterController.getPointOfInterest();
         }
 
@@ -447,7 +450,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     @Override
     public void keyReleased(java.awt.event.KeyEvent e) {
         KeyEvent event = AwtSystem.awt2vsdkEvent(e);
-        if ( model.cameraController.processKeyReleasedEvent(event) ) {
+        if ( model.getCameraController().processKeyReleasedEvent(event) ) {
             repaintCanvas();
         }
     }

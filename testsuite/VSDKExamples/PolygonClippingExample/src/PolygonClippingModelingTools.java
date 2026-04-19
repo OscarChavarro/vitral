@@ -1,11 +1,11 @@
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
-import vsdk.toolkit.processing.WeilerAthertonPolygonClipper;
-import vsdk.toolkit.processing._DoubleLinkedListNode;
-import vsdk.toolkit.processing._Polygon2DContourWA;
-import vsdk.toolkit.processing._Polygon2DWA;
-import vsdk.toolkit.processing._VertexNode2D;
+import vsdk.toolkit.processing.polygonClipper.WeilerAthertonPolygonClipper;
+import vsdk.toolkit.processing.polygonClipper._DoubleLinkedListNode;
+import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;
+import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;
+import vsdk.toolkit.processing.polygonClipper._VertexNode2D;
 
 public class PolygonClippingModelingTools
 {
@@ -16,26 +16,26 @@ public class PolygonClippingModelingTools
         PolygonClippingTestCase testCase = model.getCurrentTestCase();
         WeilerAthertonPolygonClipper clipper = new WeilerAthertonPolygonClipper();
 
-        model.clipPolygon = buildPolygon(testCase.clipLoops(), CLIP_Y_OFFSET);
-        model.subjectPolygon = buildPolygon(testCase.subjectLoops(), 0.0);
-        model.innerPolygon = new Polygon2D();
-        model.outerPolygon = new Polygon2D();
+        model.setClipPolygon(buildPolygon(testCase.clipLoops(), CLIP_Y_OFFSET));
+        model.setSubjectPolygon(buildPolygon(testCase.subjectLoops(), 0.0));
+        model.setInnerPolygon(new Polygon2D());
+        model.setOuterPolygon(new Polygon2D());
 
-        clipper.clipPolygons(model.clipPolygon, model.subjectPolygon,
-            model.innerPolygon, model.outerPolygon);
+        clipper.clipPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
+            model.getInnerPolygon(), model.getOuterPolygon());
 
-        model.clipPolygonWA = clipper.getClipPolyWA();
-        model.subjectPolygonWA = clipper.getSubjectPolyWA();
+        model.setClipPolygonWA(clipper.getClipPolyWA());
+        model.setSubjectPolygonWA(clipper.getSubjectPolyWA());
     }
 
     public static Vector3D calculateSceneCenter(PolygonClippingDebuggerModel model)
     {
         Bounds2D bounds = new Bounds2D();
 
-        expandBounds(bounds, model.clipPolygon);
-        expandBounds(bounds, model.subjectPolygon);
-        expandBounds(bounds, model.innerPolygon);
-        expandBounds(bounds, model.outerPolygon);
+        expandBounds(bounds, model.getClipPolygon());
+        expandBounds(bounds, model.getSubjectPolygon());
+        expandBounds(bounds, model.getInnerPolygon());
+        expandBounds(bounds, model.getOuterPolygon());
 
         if ( !bounds.initialized ) {
             return new Vector3D(0, 0, 0);

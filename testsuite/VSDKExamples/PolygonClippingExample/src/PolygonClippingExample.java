@@ -1,6 +1,8 @@
+// AWT/Swing classes
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
@@ -12,37 +14,36 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
+// JOGL classes
 import com.jogamp.opengl.awt.GLCanvas;
 
+// Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.render.jogl.JoglRenderer;
 
-@SuppressWarnings("removal")
 public class PolygonClippingExample extends JFrame implements MouseListener,
     MouseMotionListener, MouseWheelListener, KeyListener
 {
-    private static final String WINDOW_TITLE =
-        "VITRAL concept test - Polygon clipping example";
-    private static final Dimension DEFAULT_WINDOW_SIZE =
-        new Dimension(1280, 800);
+    private static final String WINDOW_TITLE = "VITRAL concept test - Polygon clipping example";
+    private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(1280, 800);
 
-    private final PolygonClippingDebuggerModel model;
-    private final PolygonClippingKeyboardInteractionTechniques
-        keyboardInteractionTechniques;
-    private final PolygonClippingMouseInteractionTechniques
-        mouseInteractionTechniques;
-    private final JoglPolygonClippingRenderer renderer;
+    private final transient PolygonClippingDebuggerModel model;
+    private final transient PolygonClippingKeyboardInteractionTechniques keyboardInteractionTechniques;
+    private final transient PolygonClippingMouseInteractionTechniques mouseInteractionTechniques;
+    private final transient JoglPolygonClippingRenderer renderer;
+    private transient GLCanvas canvas;
 
     public PolygonClippingExample()
     {
         model = new PolygonClippingDebuggerModel();
-        keyboardInteractionTechniques =
-            new PolygonClippingKeyboardInteractionTechniques();
-        mouseInteractionTechniques =
-            new PolygonClippingMouseInteractionTechniques();
+        keyboardInteractionTechniques = new PolygonClippingKeyboardInteractionTechniques();
+        mouseInteractionTechniques = new PolygonClippingMouseInteractionTechniques();
         renderer = new JoglPolygonClippingRenderer(model);
+        canvas = null;
 
         VSDK.setWithSystemExit(false);
         VSDK.setWithFatalExceptions(true);
@@ -53,7 +54,10 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     public static void main(String[] args)
     {
-        JoglRenderer.verifyOpenGLAvailability();
+        if (!JoglRenderer.verifyOpenGLAvailability()) {
+            System.err.println("Can not open OpenGL context. Check graphics configuration");
+            System.exit(0);
+        }
         PolygonClippingExample instance = new PolygonClippingExample();
         instance.createMainWindow(false);
     }
@@ -64,7 +68,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
             model.clearErrorState();
             PolygonClippingModelingTools.rebuildScene(model);
         }
-        catch ( Throwable e ) {
+        catch ( Exception e ) {
             model.setErrorState(formatBuildErrorMessage(e));
         }
     }
@@ -72,7 +76,18 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     private void focusCameraOnCurrentScene()
     {
         Vector3D center = PolygonClippingModelingTools.calculateSceneCenter(model);
-        model.camera.setFocusedPositionMaintainingOrthogonality(center);
+        Vector3D eye = model.getCamera().getPosition();
+        Vector3D focus = model.getCamera().getFocusedPosition();
+        double distance = eye.substract(focus).length();
+        if ( distance < VSDK.EPSILON ) {
+            distance = 20.0;
+        }
+        model.getCamera().setPosition(new Vector3D(center.x, center.y - distance, center.z));
+        model.getCamera().setFocusedPositionMaintainingOrthogonality(center);
+        model.getCamera().setUpMaintainingOrthogonality(new Vector3D(0, 0, 1));
+        if ( model.getCameraController() instanceof CameraControllerOrbiter orbiter ) {
+            orbiter.setPointOfInterest(center);
+        }
     }
 
     private String formatBuildErrorMessage(Throwable e)
@@ -86,25 +101,25 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     private GLCanvas createGUI()
     {
-        model.canvas = new GLCanvas();
-        model.canvas.addGLEventListener(renderer);
-        model.canvas.addMouseListener(this);
-        model.canvas.addMouseMotionListener(this);
-        model.canvas.addMouseWheelListener(this);
-        model.canvas.addKeyListener(this);
-        return model.canvas;
+        canvas = new GLCanvas();
+        canvas.addGLEventListener(renderer);
+        canvas.addMouseListener(this);
+        canvas.addMouseMotionListener(this);
+        canvas.addMouseWheelListener(this);
+        canvas.addKeyListener(this);
+        return canvas;
     }
 
     private void repaintCanvas()
     {
-        if ( model.canvas != null ) {
-            model.canvas.repaint();
+        if ( canvas != null ) {
+            canvas.repaint();
         }
     }
 
     private void setMainFrame(JFrame frame)
     {
-        model.mainFrame = frame;
+        model.setMainFrame(frame);
     }
 
     private void createMainWindow(boolean fullScreenMode)
@@ -112,9 +127,9 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
         JFrame frame = new JFrame(WINDOW_TITLE);
         setMainFrame(frame);
 
-        GLCanvas canvas = createGUI();
+        canvas = createGUI();
         frame.add(canvas, BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         if ( fullScreenMode ) {
             GraphicsDevice device = GraphicsEnvironment
@@ -123,8 +138,8 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
             if ( isMacOs() ) {
                 frame.setUndecorated(false);
-                if ( model.windowedBounds != null ) {
-                    frame.setBounds(model.windowedBounds);
+                if ( model.getWindowedBounds() != null ) {
+                    frame.setBounds(model.getWindowedBounds());
                 }
                 else {
                     frame.setSize(DEFAULT_WINDOW_SIZE);
@@ -139,14 +154,14 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
             else {
                 frame.setUndecorated(true);
                 frame.setExtendedState(frame.getExtendedState()
-                    | JFrame.MAXIMIZED_BOTH);
+                    | Frame.MAXIMIZED_BOTH);
                 frame.setVisible(true);
             }
         }
         else {
             frame.setUndecorated(false);
-            if ( model.windowedBounds != null ) {
-                frame.setBounds(model.windowedBounds);
+            if ( model.getWindowedBounds() != null ) {
+                frame.setBounds(model.getWindowedBounds());
             }
             else {
                 frame.setSize(DEFAULT_WINDOW_SIZE);
@@ -160,7 +175,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     private void toggleFullscreenMode()
     {
-        if ( model.mainFrame == null ) {
+        if ( model.getMainFrame() == null ) {
             return;
         }
 
@@ -172,10 +187,10 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
         GraphicsDevice device = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getDefaultScreenDevice();
-        JFrame oldFrame = model.mainFrame;
+        JFrame oldFrame = model.getMainFrame();
 
-        if ( !model.fullScreenMode ) {
-            model.windowedBounds = oldFrame.getBounds();
+        if ( !model.isFullScreenMode() ) {
+            model.setWindowedBounds(oldFrame.getBounds());
         }
         if ( device.isFullScreenSupported()
              && device.getFullScreenWindow() == oldFrame ) {
@@ -185,58 +200,49 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
         oldFrame.setVisible(false);
         oldFrame.dispose();
 
-        model.fullScreenMode = !model.fullScreenMode;
-        createMainWindow(model.fullScreenMode);
+        model.setFullScreenMode(!model.isFullScreenMode());
+        createMainWindow(model.isFullScreenMode());
     }
 
     private void toggleFullscreenModeMacOs()
     {
-        final JFrame frame = model.mainFrame;
+        final JFrame frame = model.getMainFrame();
         if ( frame == null ) {
             return;
         }
 
-        if ( !model.fullScreenMode ) {
-            model.windowedBounds = frame.getBounds();
+        if ( !model.isFullScreenMode() ) {
+            model.setWindowedBounds(frame.getBounds());
         }
 
-        frame.getRootPane().putClientProperty("apple.awt.fullscreenable",
-            Boolean.TRUE);
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run()
-            {
-                frame.toFront();
-                frame.requestFocus();
-                if ( requestMacOsNativeFullScreen(frame) ) {
-                    model.fullScreenMode = !model.fullScreenMode;
-                    renderer.refreshCanvasAfterWindowModeChange();
-                }
-                else {
-                    frame.dispose();
-                    frame.setUndecorated(!model.fullScreenMode);
-                    if ( model.fullScreenMode ) {
-                        if ( model.windowedBounds != null ) {
-                            frame.setBounds(model.windowedBounds);
-                        }
-                        else {
-                            frame.setSize(DEFAULT_WINDOW_SIZE);
-                            frame.setLocationRelativeTo(null);
-                        }
+        frame.getRootPane().putClientProperty("apple.awt.fullscreenable", Boolean.TRUE);
+        EventQueue.invokeLater(() -> {
+            frame.toFront();
+            frame.requestFocus();
+            if ( !requestMacOsNativeFullScreen(frame) ) {
+                frame.dispose();
+                frame.setUndecorated(!model.isFullScreenMode());
+                if ( model.isFullScreenMode() ) {
+                    if ( model.getWindowedBounds() != null ) {
+                        frame.setBounds(model.getWindowedBounds());
                     }
                     else {
-                        GraphicsDevice device = GraphicsEnvironment
-                            .getLocalGraphicsEnvironment()
-                            .getDefaultScreenDevice();
-                        Rectangle screenBounds =
-                            device.getDefaultConfiguration().getBounds();
-                        frame.setBounds(screenBounds);
+                        frame.setSize(DEFAULT_WINDOW_SIZE);
+                        frame.setLocationRelativeTo(null);
                     }
-                    frame.setVisible(true);
-                    model.fullScreenMode = !model.fullScreenMode;
-                    renderer.refreshCanvasAfterWindowModeChange();
                 }
+                else {
+                    GraphicsDevice device = GraphicsEnvironment
+                        .getLocalGraphicsEnvironment()
+                        .getDefaultScreenDevice();
+                    Rectangle screenBounds =
+                        device.getDefaultConfiguration().getBounds();
+                    frame.setBounds(screenBounds);
+                }
+                frame.setVisible(true);
             }
+            model.setFullScreenMode(!model.isFullScreenMode());
+            renderer.refreshCanvasAfterWindowModeChange(canvas);
         });
     }
 
@@ -252,24 +258,17 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
             frame.getRootPane().putClientProperty("apple.awt.fullscreenable",
                 Boolean.TRUE);
 
-            try {
-                Class<?> fullScreenUtilitiesClass =
-                    Class.forName("com.apple.eawt.FullScreenUtilities");
-                fullScreenUtilitiesClass.getMethod("setWindowCanFullScreen",
-                    Window.class, boolean.class).invoke(null, frame, true);
-            }
-            catch ( Throwable e ) {
-            }
+            Class<?> fullScreenUtilitiesClass =
+                Class.forName("com.apple.eawt.FullScreenUtilities");
+            fullScreenUtilitiesClass.getMethod("setWindowCanFullScreen",
+                Window.class, boolean.class).invoke(null, frame, true);
 
-            Class<?> applicationClass =
-                Class.forName("com.apple.eawt.Application");
-            Object application =
-                applicationClass.getMethod("getApplication").invoke(null);
-            applicationClass.getMethod("requestToggleFullScreen",
-                Window.class).invoke(application, frame);
+            Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+            Object application = applicationClass.getMethod("getApplication").invoke(null);
+            applicationClass.getMethod("requestToggleFullScreen", Window.class).invoke(application, frame);
             return true;
         }
-        catch ( Throwable e ) {
+        catch ( Exception e ) {
             return false;
         }
     }
@@ -277,7 +276,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     @Override
     public void mouseEntered(MouseEvent e)
     {
-        mouseInteractionTechniques.processMouseEntered(model);
+        mouseInteractionTechniques.processMouseEntered(canvas);
     }
 
     @Override
@@ -364,7 +363,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
                 @Override
                 public void requestSnapshot()
                 {
-                    model.takeSnapshot = true;
+                    model.setTakeSnapshot(true);
                 }
             }) ) {
             repaintCanvas();
@@ -374,12 +373,11 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     @Override
     public void keyReleased(java.awt.event.KeyEvent e)
     {
-        vsdk.toolkit.gui.KeyEvent event =
-            vsdk.toolkit.gui.AwtSystem.awt2vsdkEvent(e);
-        if ( model.cameraController.processKeyReleasedEvent(event) ) {
+        vsdk.toolkit.gui.KeyEvent event = vsdk.toolkit.gui.AwtSystem.awt2vsdkEvent(e);
+        if ( model.getCameraController().processKeyReleasedEvent(event) ) {
             repaintCanvas();
         }
-        if ( model.qualityController.processKeyReleasedEvent(event) ) {
+        if ( model.getQualityController().processKeyReleasedEvent(event) ) {
             repaintCanvas();
         }
     }
@@ -387,5 +385,6 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     @Override
     public void keyTyped(java.awt.event.KeyEvent e)
     {
+        // Intentionally empty: handled via key press/release
     }
 }

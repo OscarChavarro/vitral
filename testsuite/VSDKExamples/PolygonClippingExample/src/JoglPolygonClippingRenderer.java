@@ -3,16 +3,17 @@ import java.io.File;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUtessellator;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.Polygon2D;
 import vsdk.toolkit.environment.geometry._Polygon2DContour;
-import vsdk.toolkit.processing._DoubleLinkedListNode;
-import vsdk.toolkit.processing._Polygon2DContourWA;
-import vsdk.toolkit.processing._Polygon2DWA;
-import vsdk.toolkit.processing._VertexNode2D;
+import vsdk.toolkit.processing.polygonClipper._DoubleLinkedListNode;
+import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;
+import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;
+import vsdk.toolkit.processing.polygonClipper._VertexNode2D;
 import vsdk.toolkit.render.jogl.JoglCameraRenderer;
 import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
 import vsdk.toolkit.render.jogl._JoglPolygonTesselatorRoutines;
@@ -56,18 +57,18 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activate(gl, model.camera);
+        JoglCameraRenderer.activate(gl, model.getCamera());
         drawObjects(gl);
         hudRenderer.draw(drawable);
 
-        if ( model.takeSnapshot ) {
-            model.takeSnapshot = false;
+        if ( model.isTakeSnapshot() ) {
+            model.setTakeSnapshot(false);
             RGBImage snapshot = JoglRGBImageRenderer.getImageJOGL(gl);
             File output = new File("frame"
-                + VSDK.formatNumberWithinZeroes(model.snapshotNumber, 4)
+                + VSDK.formatNumberWithinZeroes(model.getSnapshotNumber(), 4)
                 + ".png");
             ImagePersistence.exportPNG(output, snapshot);
-            model.snapshotNumber++;
+            model.setSnapshotNumber(model.getSnapshotNumber() + 1);
         }
     }
 
@@ -76,14 +77,14 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         int height)
     {
         drawable.getGL().getGL2().glViewport(0, 0, width, height);
-        model.camera.updateViewportResize(width, height);
+        model.getCamera().updateViewportResize(width, height);
         hudRenderer.updateViewportSize(width, height);
     }
 
-    public void refreshCanvasAfterWindowModeChange()
+    public void refreshCanvasAfterWindowModeChange(GLCanvas canvas)
     {
-        if ( model.canvas != null ) {
-            model.canvas.repaint();
+        if ( canvas != null ) {
+            canvas.repaint();
         }
     }
 
@@ -93,7 +94,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL2.GL_TEXTURE_2D);
 
-        if ( model.showReferenceFrame ) {
+        if ( model.isShowReferenceFrame() ) {
             drawReferenceFrame(gl);
         }
 
@@ -101,25 +102,25 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         double panelWidth = Math.max(6.0, bounds.width());
         double panelDepth = Math.max(6.0, bounds.height());
 
-        if ( model.showClipPolygon ) {
-            drawPolygonWA(gl, model.clipPolygonWA, 0.20, 0.75, 0.25, 0.70, 0.20);
+        if ( model.isShowClipPolygon() ) {
+            drawPolygonWA(gl, model.getClipPolygonWA(), 0.20, 0.75, 0.25, 0.70, 0.20);
         }
-        if ( model.showSubjectPolygon ) {
-            drawPolygonWA(gl, model.subjectPolygonWA, 0.80, 0.74, 0.20, 0.82, 0.56);
+        if ( model.isShowSubjectPolygon() ) {
+            drawPolygonWA(gl, model.getSubjectPolygonWA(), 0.80, 0.74, 0.20, 0.82, 0.56);
         }
 
         gl.glPushMatrix();
         gl.glTranslated(0.0, 0.0, -panelDepth * 1.25);
-        if ( model.showInnerPolygon ) {
-            drawResultPolygon(gl, model.innerPolygon, 0.65, 0.65, 0.70,
+        if ( model.isShowInnerPolygon() ) {
+            drawResultPolygon(gl, model.getInnerPolygon(), 0.65, 0.65, 0.70,
                 0.82, 0.58, 0.36);
         }
         gl.glPopMatrix();
 
         gl.glPushMatrix();
         gl.glTranslated(panelWidth * 1.25, 0.0, 0.0);
-        if ( model.showOuterPolygon ) {
-            drawResultPolygon(gl, model.outerPolygon, 0.68, 0.78, 0.68,
+        if ( model.isShowOuterPolygon() ) {
+            drawResultPolygon(gl, model.getOuterPolygon(), 0.68, 0.78, 0.68,
                 0.18, 0.72, 0.24);
         }
         gl.glPopMatrix();
@@ -167,7 +168,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
             gl.glEnd();
         }
 
-        if ( !model.showIntersections ) {
+        if ( !model.isShowIntersections() ) {
             return;
         }
 
@@ -204,7 +205,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
             return;
         }
 
-        if ( model.showFilledPolygons ) {
+        if ( model.isShowFilledPolygons() ) {
             gl.glColor4d(fillR, fillG, fillB, 1.0);
             drawWithTesselator(gl, polygon);
         }
@@ -264,10 +265,10 @@ public class JoglPolygonClippingRenderer implements GLEventListener
     {
         Bounds2D bounds = new Bounds2D();
 
-        expandBounds(bounds, model.clipPolygonWA);
-        expandBounds(bounds, model.subjectPolygonWA);
-        expandBounds(bounds, model.innerPolygon);
-        expandBounds(bounds, model.outerPolygon);
+        expandBounds(bounds, model.getClipPolygonWA());
+        expandBounds(bounds, model.getSubjectPolygonWA());
+        expandBounds(bounds, model.getInnerPolygon());
+        expandBounds(bounds, model.getOuterPolygon());
 
         if ( !bounds.initialized ) {
             bounds.include(0.0, 0.0);

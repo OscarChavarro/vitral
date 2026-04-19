@@ -2,7 +2,7 @@
 //= [WEATH1977] Kevin Weiler and Peter Atherton. "HIDDEN SURFACE REMOVAL    =
 //= USING POLYGON AREA SORTING",                                            =
 //= Program of Computer Graphics, Cornell University. Ithaca, New York, 1977=
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
 import vsdk.toolkit.environment.geometry.Polygon2D;
@@ -623,7 +623,7 @@ public class WeilerAthertonPolygonClipper {
      * @return 1 if the point is inside, -1 if it is outside, or 0 if it lies
      * on the boundary
      */
-    private byte isPointInPolygon2D(_VertexNode2D point, _CircDoubleLinkedList<_VertexNode2D> polygon) {
+    private byte isPointInPolygon2D(_VertexNode2D point, _CircularDoubleLinkedList<_VertexNode2D> polygon) {
         _DoubleLinkedListNode<_VertexNode2D> dllnNode;
         boolean isInside = false;
         double temp;
@@ -715,7 +715,7 @@ public class WeilerAthertonPolygonClipper {
      * nodes; this method preserves the ordering along the segment.
      */
     private _DoubleLinkedListNode<_VertexNode2D> insertOrderedNodeBetweenTwoNodes(
-        _CircDoubleLinkedList<_VertexNode2D> linkedList, _DoubleLinkedListNode<_VertexNode2D> dllnVertNode, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeNext, _VertexNode2D nodeIntersec) {
+            _CircularDoubleLinkedList<_VertexNode2D> linkedList, _DoubleLinkedListNode<_VertexNode2D> dllnVertNode, _DoubleLinkedListNode<_VertexNode2D> dllnVertNodeNext, _VertexNode2D nodeIntersec) {
         int sign;
         _DoubleLinkedListNode<_VertexNode2D> dllnNode;
 

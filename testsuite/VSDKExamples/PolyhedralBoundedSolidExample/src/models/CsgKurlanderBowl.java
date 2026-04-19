@@ -1,10 +1,12 @@
-// VitralSDK classes
+package models;
+
+// Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class CsgKurlanderBowl
 {
@@ -19,7 +21,7 @@ public class CsgKurlanderBowl
     private static PolyhedralBoundedSolid booleanOp(
         PolyhedralBoundedSolid a, PolyhedralBoundedSolid b, int op)
     {
-        return GeometricModeler.setOp(a, b, op, false);
+        return PolyhedralBoundedSolidModeler.setOp(a, b, op, false);
     }
 
     private static PolyhedralBoundedSolid createSphere(double radius,
@@ -39,11 +41,11 @@ public class CsgKurlanderBowl
     {
         // Robust cylinder B-Rep for CSG: polygonal lamina + sweep, instead of
         // relying on cone export with equal radii.
-        PolyhedralBoundedSolid solid = GeometricModeler
+        PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
             .createCircularLamina(0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
         Matrix4x4 sweep = new Matrix4x4();
         sweep.translation(0.0, 0.0, height);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
 
         Matrix4x4 move = new Matrix4x4();
@@ -67,7 +69,7 @@ public class CsgKurlanderBowl
 
         Matrix4x4 t = new Matrix4x4();
         t.translation(0.0, 0.0, thickness);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(s, s.findFace(1), t);
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(s, s.findFace(1), t);
         return s;
     }
 
@@ -95,7 +97,7 @@ public class CsgKurlanderBowl
             s(1.5), s(5.0), new Vector3D(0, 0, 0));
         PolyhedralBoundedSolid b = createCylinder(
             s(1.5), s(5.0), new Vector3D(s(1.1), 0, s(0.6)));
-        return booleanOp(a, b, GeometricModeler.SUBTRACT);
+        return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
     }
 
     private static PolyhedralBoundedSolid placeMotif(
@@ -122,50 +124,50 @@ public class CsgKurlanderBowl
         PolyhedralBoundedSolid inner = createSphere(
             s(9.5), new Vector3D(0, 0, s(10.0)));
         PolyhedralBoundedSolid shell = booleanOp(
-            outer, inner, GeometricModeler.SUBTRACT);
+            outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
 
         for ( i = 1; i <= 4; i++ ) {
             double base = -90.0 * i;
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 4.0, base),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 14.0, base),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 11.5, base - 22.5),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 9.0, base - 45.0),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createMoon(), 6.5, base - 67.5),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
         }
 
         for ( i = 1; i <= 4; i++ ) {
             double base = -90.0 * i;
             shell = booleanOp(shell,
                 placeMotif(createStar(), 9.0, base),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 6.5, base - 22.5),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 14.0, base - 45.0),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 4.0, base - 45.0),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
             shell = booleanOp(shell,
                 placeMotif(createStar(), 11.5, base - 67.5),
-                GeometricModeler.SUBTRACT);
+                PolyhedralBoundedSolidModeler.SUBTRACT);
         }
 
         PolyhedralBoundedSolid guide = createCylinder(
             s(10.5), s(16.5), new Vector3D(0, 0, 0));
         PolyhedralBoundedSolid result = booleanOp(
-            shell, guide, GeometricModeler.INTERSECTION);
+            shell, guide, PolyhedralBoundedSolidModeler.INTERSECTION);
 
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
         return result;

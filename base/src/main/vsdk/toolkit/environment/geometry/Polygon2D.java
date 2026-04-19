@@ -1,20 +1,21 @@
 package vsdk.toolkit.environment.geometry;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
-import vsdk.toolkit.processing.PolygonProcessor;
+import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
 
 public class Polygon2D extends Surface
 {
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20090816L;
+    @Serial
+    private static final long serialVersionUID = 20260419L;
 
-    public ArrayList<_Polygon2DContour> loops;
+    public List<_Polygon2DContour> loops;
     private _Polygon2DContour currentLoop;
     // headNode is the head node of the n-ary tree codified in a binary tree
     // in left child-right sibling way.

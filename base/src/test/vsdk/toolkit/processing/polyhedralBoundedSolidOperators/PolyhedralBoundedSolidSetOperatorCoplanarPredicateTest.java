@@ -11,7 +11,6 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
-import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

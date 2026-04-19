@@ -3,7 +3,7 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Box;
-import vsdk.toolkit.processing.SimpleTestGeometryLibrary;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
 public class PolyhedralBoundedSolidTestFixtures
 {

@@ -1,5 +1,6 @@
 // Java basic classes
 import java.util.ArrayList;
+import models.DebuggerModel;
 import java.awt.EventQueue;
 
 // JOGL classes
@@ -34,23 +35,23 @@ public class JoglDebuggerRenderer implements GLEventListener
             @Override
             public void run()
             {
-                if ( model.canvas == null ) {
+                if ( model.getCanvas() == null ) {
                     return;
                 }
-                if ( model.mainFrame != null ) {
-                    model.mainFrame.validate();
-                    model.mainFrame.repaint();
+                if ( model.getMainFrame() != null ) {
+                    model.getMainFrame().validate();
+                    model.getMainFrame().repaint();
                 }
-                model.canvas.revalidate();
-                model.canvas.repaint();
-                model.canvas.display();
-                model.canvas.requestFocusInWindow();
+                model.getCanvas().revalidate();
+                model.getCanvas().repaint();
+                model.getCanvas().display();
+                model.getCanvas().requestFocusInWindow();
                 EventQueue.invokeLater(new Runnable() {
                     @Override
                     public void run()
                     {
-                        if ( model.canvas != null ) {
-                            model.canvas.display();
+                        if ( model.getCanvas() != null ) {
+                            model.getCanvas().display();
                         }
                     }
                 });
@@ -125,7 +126,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glLineWidth((float)3.0);
 
-        if ( model.edgeIndex > -3 && model.showCoordinateSystem ) {
+        if ( model.getEdgeIndex() > -3 && model.isShowCoordinateSystem() ) {
             gl.glBegin(GL2.GL_LINES);
                 gl.glColor3d(1, 0, 0);
                 gl.glVertex3d(0, 0, 0);
@@ -141,22 +142,22 @@ public class JoglDebuggerRenderer implements GLEventListener
             gl.glEnd();
         }
 
-        if ( model.solid == null ) {
+        if ( model.getSolid() == null ) {
             return;
         }
 
         //-----------------------------------------------------------------
-        JoglMaterialRenderer.activate(gl, model.material);
-        JoglLightRenderer.activate(gl, model.light1);
-        JoglLightRenderer.draw(gl, model.light1);
-        JoglLightRenderer.activate(gl, model.light2);
-        JoglLightRenderer.draw(gl, model.light2);
+        JoglMaterialRenderer.activate(gl, model.getMaterial());
+        JoglLightRenderer.activate(gl, model.getLight1());
+        JoglLightRenderer.draw(gl, model.getLight1());
+        JoglLightRenderer.activate(gl, model.getLight2());
+        JoglLightRenderer.draw(gl, model.getLight2());
         gl.glEnable(GL2.GL_LIGHTING);
-        JoglPolyhedralBoundedSolidRenderer.draw(gl, model.solid, model.camera, model.quality);
-        JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.solid, model.faceIndex);
-        JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.solid, model.faceIndex);
-        if ( model.debugVertices ) {
-            JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, model.solid, model.camera);
+        JoglPolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
+        JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.getSolid(), model.getFaceIndex());
+        JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(), model.getFaceIndex());
+        if ( model.isDebugVertices() ) {
+            JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, model.getSolid(), model.getCamera());
         }
 
         //-----------------------------------------------------------------
@@ -166,22 +167,22 @@ public class JoglDebuggerRenderer implements GLEventListener
         ArrayList <SimpleBody> bodyArray;
         SimpleBody body;
 
-        if ( model.debugEdges && model.edgeIndex > -3 ) {
-            JoglPolyhedralBoundedSolidRenderer.drawDebugEdges(gl, model.solid, model.camera, model.edgeIndex);
+        if ( model.isDebugEdges() && model.getEdgeIndex() > -3 ) {
+            JoglPolyhedralBoundedSolidRenderer.drawDebugEdges(gl, model.getSolid(), model.getCamera(), model.getEdgeIndex());
         }
-        else if ( model.edgeIndex == -3 ) {
+        else if ( model.getEdgeIndex() == -3 ) {
             contourLines = new ArrayList <Vector3D>();
             visibleLines = new ArrayList <Vector3D>();
             hiddenLines = new ArrayList <Vector3D>();
             bodyArray = new ArrayList <SimpleBody>();
 
             body = new SimpleBody();
-            body.setGeometry(model.solid);
+            body.setGeometry(model.getSolid());
             body.setPosition(new Vector3D());
             body.setRotation(new Matrix4x4());
             body.setRotationInverse(new Matrix4x4());
             bodyArray.add(body);
-            HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.camera,
+            HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);
             renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
         }
@@ -207,7 +208,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glColor3d(1, 1, 1);
         gl.glEnable(GL2.GL_DEPTH_TEST);
 
-        JoglCameraRenderer.activate(gl, model.camera);
+        JoglCameraRenderer.activate(gl, model.getCamera());
 
         drawObjectsGL(gl);
         hudRenderer.draw(drawable);
@@ -245,7 +246,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         GL2 gl = drawable.getGL().getGL2();
         gl.glViewport(0, 0, width, height); 
 
-        model.camera.updateViewportResize(width, height);
+        model.getCamera().updateViewportResize(width, height);
         hudRenderer.updateViewportSize(width, height);
     }
 }

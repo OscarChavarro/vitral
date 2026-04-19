@@ -1,10 +1,13 @@
 // Java Awt classes
 import java.awt.Font;
+import models.DebuggerModel;
 import java.awt.geom.Rectangle2D;
 
 // JOGL classes
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.awt.TextRenderer;
+import models.CsgSampleNames;
+import models.SolidModelNames;
 
 public class JoglDebuggerHudRenderer
 {
@@ -46,24 +49,24 @@ public class JoglDebuggerHudRenderer
         int height = viewportHeight > 0 ? viewportHeight : drawable.getSurfaceHeight();
         String showingFaceLoopMessage = "Face [1, 2]: " + formatFaceLoopLabel();
         String selectedModelMessage = "Selected model [3, 4]: "
-            + model.solidModelName.name()
-            + " (" + model.solidModelName.getDisplayIndex()
+            + model.getSolidModelName().name()
+            + " (" + model.getSolidModelName().getDisplayIndex()
             + "/" + SolidModelNames.getTotalModels() + ")";
-        String csgSampleMessage = "CSG sample [6]: " + model.csgSample.getLabel()
-            + " (" + model.csgSample.getDisplayIndex()
+        String csgSampleMessage = "CSG sample [6]: " + model.getCsgSample().getLabel()
+            + " (" + model.getCsgSample().getDisplayIndex()
             + "/" + CsgSampleNames.getTotalSamples() + ")";
-        String csgOperationMessage = "CSG op [5]: " + model.csgOperation.getLabel();
+        String csgOperationMessage = "CSG op [5]: " + model.getCsgOperation().getLabel();
         String referenceFrameMessage = "Reference frame [Space]: " +
-            (model.showCoordinateSystem ? "ON" : "OFF");
-        String nrMessage = "NR [q, Q]: " + model.subdivisionCircumference;
-        String nhMessage = "NH [w, W]: " + model.subdivisionHeight;
+            (model.isShowCoordinateSystem() ? "ON" : "OFF");
+        String nrMessage = "NR [q, Q]: " + model.getSubdivisionCircumference();
+        String nhMessage = "NH [w, W]: " + model.getSubdivisionHeight();
 
         hudTextRenderer.beginRendering(width, height);
         hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
         hudTextRenderer.draw(showingFaceLoopMessage, 16, height - 28);
         hudTextRenderer.draw(selectedModelMessage, 16, height - (28 + LINE_HEIGHT));
         int nextLeftLine = 2;
-        if ( model.solidModelName.usesCsgDebugControls() ) {
+        if ( model.getSolidModelName().usesCsgDebugControls() ) {
             hudTextRenderer.draw(csgSampleMessage, 16,
                 height - (28 + nextLeftLine*LINE_HEIGHT));
             nextLeftLine++;
@@ -76,26 +79,26 @@ public class JoglDebuggerHudRenderer
         drawTopRight(hudTextRenderer, width, height, nrMessage, 28);
         drawTopRight(hudTextRenderer, width, height, nhMessage,
             28 + LINE_HEIGHT);
-        if ( model.errorState ) {
+        if ( model.isErrorState() ) {
             hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
-            hudTextRenderer.draw(model.errorMessage, 16, 16);
+            hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
         }
         hudTextRenderer.endRendering();
     }
 
     private String formatFaceLoopLabel()
     {
-        if ( model.faceIndex == -2 ) {
+        if ( model.getFaceIndex() == -2 ) {
             return "NONE";
         }
-        if ( model.faceIndex == -1 ) {
+        if ( model.getFaceIndex() == -1 ) {
             return "ALL";
         }
 
-        int currentFace = model.faceIndex + 1;
+        int currentFace = model.getFaceIndex() + 1;
         int totalFaces = 0;
-        if ( model.solid != null && model.solid.polygonsList != null ) {
-            totalFaces = model.solid.polygonsList.size();
+        if ( model.getSolid() != null && model.getSolid().polygonsList != null ) {
+            totalFaces = model.getSolid().polygonsList.size();
         }
         return "[" + currentFace + "/" + totalFaces + "]";
     }

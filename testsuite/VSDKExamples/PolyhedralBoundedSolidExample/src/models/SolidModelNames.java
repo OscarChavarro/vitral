@@ -1,3 +1,5 @@
+package models;
+
 public enum SolidModelNames
 {
     MVFS_SMEV_SAMPLE(0),

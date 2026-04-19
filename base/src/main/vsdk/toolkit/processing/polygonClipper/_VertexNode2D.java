@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 import vsdk.toolkit.common.ColorRgb;
 

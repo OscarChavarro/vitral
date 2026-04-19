@@ -1,3 +1,5 @@
+package models;
+
 public enum CsgSampleNames
 {
     MANT1986_2("MANT1986_2"),

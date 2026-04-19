@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing;
+package vsdk.toolkit.processing.polygonClipper;
 
 import vsdk.toolkit.common.VSDK;
 
@@ -7,13 +7,13 @@ import vsdk.toolkit.common.VSDK;
  *
  * @param <E> data to hold.
  */
-public class _CircDoubleLinkedList<E> { //Circular.
+public class _CircularDoubleLinkedList<E> { //Circular.
 
     private _DoubleLinkedListNode<E> head;
     //private DoubleLinkedListNode<E> last;
     private int currentSize;
 
-    public _CircDoubleLinkedList() {
+    public _CircularDoubleLinkedList() {
         head = null;
 //        last = null;
         currentSize = 0;

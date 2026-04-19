@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment.geometry;
 
+import java.io.Serial;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vertex2D;
 
@@ -8,7 +9,8 @@ import java.util.ArrayList;
 public class _Polygon2DContour extends FundamentalEntity implements Comparable<_Polygon2DContour>
 {
     /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20090816L;
+    @Serial
+    private static final long serialVersionUID = 20260419L;
     public ArrayList<Vertex2D> vertices;
     // If this contour is a hole, exteriorContour is the contour that contains it.
     private _Polygon2DContour exteriorContour;
