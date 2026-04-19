@@ -421,26 +421,33 @@ public class ComputationalGeometry extends ProcessingElement
         Vector2D max,
         double tolerance)
     {
-        double aux;
-        if ( min.x > max.x ) {
-            aux = min.x;
-            min.x = max.x;
-            max.x = aux;
-        }
-        if ( min.y > max.y ) {
-            aux = min.y;
-            min.y = max.y;
-            max.y = aux;
-        }
+        return cohenSutherlandLineClipping2DResult(p0, p1, min, max, tolerance).accepted();
+    }
+
+    public static ClippedLine2DResult cohenSutherlandLineClipping2DResult(
+        Vector2D p0,
+        Vector2D p1,
+        Vector2D min,
+        Vector2D max,
+        double tolerance)
+    {
+        Vector2D clipped0 = p0;
+        Vector2D clipped1 = p1;
+        double minX = Math.min(min.x(), max.x());
+        double maxX = Math.max(min.x(), max.x());
+        double minY = Math.min(min.y(), max.y());
+        double maxY = Math.max(min.y(), max.y());
+        Vector2D clipMin = new Vector2D(minX, minY);
+        Vector2D clipMax = new Vector2D(maxX, maxY);
         
-        if ( max.x - min.x < VSDK.EPSILON ||
-             max.y - min.y < VSDK.EPSILON ) {
+        if ( maxX - minX < VSDK.EPSILON ||
+             maxY - minY < VSDK.EPSILON ) {
             //System.out.println("Error: to small area");
-            return false;
+            return new ClippedLine2DResult(false, p0, p1);
         }
 
-        int outCode0 = computeCohenSutherland2DCode(p0, min, max, tolerance);
-        int outCode1 = computeCohenSutherland2DCode(p1, min, max, tolerance);
+        int outCode0 = computeCohenSutherland2DCode(clipped0, clipMin, clipMax, tolerance);
+        int outCode1 = computeCohenSutherland2DCode(clipped1, clipMin, clipMax, tolerance);
         int outCodeOut;
         boolean accept = false;
         double x = 0.0;
@@ -463,38 +470,65 @@ public class ComputationalGeometry extends ProcessingElement
                 outCodeOut = (outCode0 != 0) ? outCode0 : outCode1;
                 if ( (outCodeOut & COHEN_SUTHERLAND_2D_TOP) == 
                      COHEN_SUTHERLAND_2D_TOP) {
-                    x = p0.x + 
-                        (p1.x - p0.x) * ((max.y-e) - p0.y) / (p1.y - p0.y);
-                    y = max.y - e;
+                    x = clipped0.x() +
+                        (clipped1.x() - clipped0.x()) * ((clipMax.y()-e) - clipped0.y()) /
+                        (clipped1.y() - clipped0.y());
+                    y = clipMax.y() - e;
                 }
                 else if ( (outCodeOut & COHEN_SUTHERLAND_2D_BOTTOM) == 
                     COHEN_SUTHERLAND_2D_BOTTOM) {
-                    x = p0.x + (p1.x - p0.x) * (min.y+e - p0.y) / (p1.y - p0.y);
-                    y = min.y+e;
+                    x = clipped0.x() + (clipped1.x() - clipped0.x()) * (clipMin.y()+e - clipped0.y()) /
+                        (clipped1.y() - clipped0.y());
+                    y = clipMin.y()+e;
                 }
                 else if ( (outCodeOut & COHEN_SUTHERLAND_2D_RIGHT) == 
                     COHEN_SUTHERLAND_2D_RIGHT) {
-                    y = p0.y + (p1.y - p0.y) * (max.x-e - p0.x) / (p1.x - p0.x);
-                    x = max.x-e;
+                    y = clipped0.y() + (clipped1.y() - clipped0.y()) * (clipMax.x()-e - clipped0.x()) /
+                        (clipped1.x() - clipped0.x());
+                    x = clipMax.x()-e;
                 }
                 else if ( (outCodeOut & COHEN_SUTHERLAND_2D_LEFT) == 
                     COHEN_SUTHERLAND_2D_LEFT ) {
-                    y = p0.y + (p1.y - p0.y) * (min.x+e - p0.x) / (p1.x - p0.x);
-                    x = min.x+e;
+                    y = clipped0.y() + (clipped1.y() - clipped0.y()) * (clipMin.x()+e - clipped0.x()) /
+                        (clipped1.x() - clipped0.x());
+                    x = clipMin.x()+e;
                 }
             }
             if ( outCodeOut == outCode0 ) {
-                p0.x = x;
-                p0.y = y;
-                outCode0 = computeCohenSutherland2DCode(p0, min, max, tolerance);
+                clipped0 = new Vector2D(x, y);
+                outCode0 = computeCohenSutherland2DCode(clipped0, clipMin, clipMax, tolerance);
             }
             else {
-                p1.x = x;
-                p1.y = y;
-                outCode1 = computeCohenSutherland2DCode(p1, min, max, tolerance);
+                clipped1 = new Vector2D(x, y);
+                outCode1 = computeCohenSutherland2DCode(clipped1, clipMin, clipMax, tolerance);
             }            
         }
-        return accept;
+        return new ClippedLine2DResult(accept, clipped0, clipped1);
+    }
+
+    public static final class ClippedLine2DResult
+    {
+        private final boolean accepted;
+        private final Vector2D clipped0;
+        private final Vector2D clipped1;
+
+        public ClippedLine2DResult(boolean accepted, Vector2D clipped0, Vector2D clipped1) {
+            this.accepted = accepted;
+            this.clipped0 = clipped0;
+            this.clipped1 = clipped1;
+        }
+
+        public boolean accepted() {
+            return accepted;
+        }
+
+        public Vector2D clipped0() {
+            return clipped0;
+        }
+
+        public Vector2D clipped1() {
+            return clipped1;
+        }
     }
 
     /**
@@ -511,16 +545,16 @@ public class ComputationalGeometry extends ProcessingElement
         outCode = COHEN_SUTHERLAND_2D_INSIDE;
         double e = tolerance;
 
-        if ( p.x < min.x + e ) {
+        if ( p.x() < min.x() + e ) {
             outCode |= COHEN_SUTHERLAND_2D_LEFT;
         }
-        if ( p.x > max.x - e ) {
+        if ( p.x() > max.x() - e ) {
             outCode |= COHEN_SUTHERLAND_2D_RIGHT;
         }
-        if ( p.y < min.y + e ) {
+        if ( p.y() < min.y() + e ) {
             outCode |= COHEN_SUTHERLAND_2D_BOTTOM;
         }
-        if ( p.y > max.y - e ) {
+        if ( p.y() > max.y() - e ) {
             outCode |= COHEN_SUTHERLAND_2D_TOP;
         }
         return outCode;

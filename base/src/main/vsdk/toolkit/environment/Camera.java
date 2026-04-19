@@ -890,21 +890,21 @@ public class Camera extends Entity
     {
         int bits = 0x00;
 
-        if ( p.w > 0 ) {
-            if ( p.x >  p.w ) bits |= OPCODE_RIGHT;
-            if ( p.x < -p.w ) bits |= OPCODE_LEFT;
-            if ( p.y >  p.w ) bits |= OPCODE_UP;
-            if ( p.y < -p.w ) bits |= OPCODE_DOWN;
-            if ( p.z >  p.w ) bits |= OPCODE_FAR;
-            if ( p.z < -p.w ) bits |= OPCODE_NEAR;
+        if ( p.w() > 0 ) {
+            if ( p.x() >  p.w() ) bits |= OPCODE_RIGHT;
+            if ( p.x() < -p.w() ) bits |= OPCODE_LEFT;
+            if ( p.y() >  p.w() ) bits |= OPCODE_UP;
+            if ( p.y() < -p.w() ) bits |= OPCODE_DOWN;
+            if ( p.z() >  p.w() ) bits |= OPCODE_FAR;
+            if ( p.z() < -p.w() ) bits |= OPCODE_NEAR;
         }
         else {
-            if ( p.x > -p.w ) bits |= OPCODE_RIGHT;
-            if ( p.x <  p.w ) bits |= OPCODE_LEFT;
-            if ( p.y > -p.w ) bits |= OPCODE_UP;
-            if ( p.y <  p.w ) bits |= OPCODE_DOWN;
-            if ( p.z > -p.w ) bits |= OPCODE_FAR;
-            if ( p.z <  p.w ) bits |= OPCODE_NEAR;
+            if ( p.x() > -p.w() ) bits |= OPCODE_RIGHT;
+            if ( p.x() <  p.w() ) bits |= OPCODE_LEFT;
+            if ( p.y() > -p.w() ) bits |= OPCODE_UP;
+            if ( p.y() <  p.w() ) bits |= OPCODE_DOWN;
+            if ( p.z() > -p.w() ) bits |= OPCODE_FAR;
+            if ( p.z() <  p.w() ) bits |= OPCODE_NEAR;
         }
         return bits;
     }

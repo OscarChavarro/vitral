@@ -1,355 +1,260 @@
 package vsdk.toolkit.common.linealAlgebra;
 
-import vsdk.toolkit.common.VSDK;
+import java.io.Serial;
+import java.util.Arrays;
+import java.util.Objects;
+
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.VSDK;
 
 /**
-This class is a data structure that represents a 4x4 matrix
- */
-
-public class MatrixNxM extends FundamentalEntity
+This class is a data structure that represents a NxM matrix.
+*/
+public final class MatrixNxM extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20071030L;
+    @Serial
+    private static final long serialVersionUID = 20260419L;
 
-    private int numRows;    // This is the number of rows in the matrix
-    private int numColumns; // This is the number of columns in the matrix
-
-    /** This is a N by M array of type double that represents the data of the 
-        matrix */
-    private double M[][];
+    private final int numRows;
+    private final int numColumns;
+    private final double[][] m;
 
     /**
-    This constructor builds the NxM identity matrix
-    @param n
-    @param m
-    @throws java.lang.Exception
+    This constructor builds the NxM identity matrix.
     */
     public MatrixNxM(int n, int m) throws Exception
     {
         if ( n <= 0 || m <= 0 ) {
             throw new Exception("Invalid matrix size!");
         }
-        numRows = n;
-        numColumns = m;
-        M = new double[n][m];
-        identity();
+        this.numRows = n;
+        this.numColumns = m;
+        this.m = buildIdentityValues(n, m);
     }
 
     /**
-     This constructor builds a matrix given an existing matrix, and copies
-     its contents to the newly created one.
-     @param B The matrix used to build this matrix data from
-     */
-    public MatrixNxM(MatrixNxM B)
-    {
-        this.numRows = B.numRows;
-        this.numColumns = B.numColumns;
-        M = new double[numRows][numColumns];
-        int row, column;
-
-        for ( row = 0; row < numRows; row++ ) {
-            for ( column = 0; column < numColumns; column++ ) {
-                M[row][column] = B.M[row][column];
-            }
-        }
-    }
-
-    /**
-    This methods changes current matrix to be the NxM identity matrix
+    Copy constructor.
     */
-    public final void identity()
+    public MatrixNxM(MatrixNxM other)
     {
-        int i, j;
-        for ( i = 0; i < numRows; i++ ) {
-            for ( j = 0; j < numColumns; j++ ) {
-                if ( i == j ) {
-                    M[i][j] = 1.0;
-                }
-                else {
-                    M[i][j] = 0.0;
-                }
-            }
-        }
+        this(Objects.requireNonNull(other, "Matrix to copy cannot be null").numRows,
+             other.numColumns,
+             other.m,
+             true);
     }
 
-    public double getNumRows()
+    private MatrixNxM(int rows, int cols, double[][] values, boolean deepCopy)
+    {
+        this.numRows = rows;
+        this.numColumns = cols;
+        this.m = deepCopy ? deepCopy(values) : values;
+    }
+
+    public static MatrixNxM copyOf(MatrixNxM other)
+    {
+        return new MatrixNxM(other);
+    }
+
+    /**
+    Returns an identity matrix with the same dimensions.
+    */
+    public MatrixNxM identity()
+    {
+        return new MatrixNxM(numRows, numColumns, buildIdentityValues(numRows, numColumns), false);
+    }
+
+    public int getNumRows()
     {
         return numRows;
     }
 
-    public double getNumColumns()
+    public int getNumColumns()
     {
         return numColumns;
     }
 
     public double getVal(int row, int column) throws Exception
     {
-        if ( row < 0 || row >= numRows || column < 0 || column >= numColumns ) {
-            throw new Exception("Invalid matrix position [" + row + "][" + column + "]");
-        }
-        return M[row][column];
+        validatePosition(row, column);
+        return m[row][column];
     }
 
-    public void setVal(int row, int column, double val) throws Exception
+    public MatrixNxM withVal(int row, int column, double val) throws Exception
     {
-        if ( row < 0 || row >= numRows || column < 0 || column >= numColumns ) {
-            throw new Exception("Invalid matrix position [" + row + "][" + column + "]");
-        }
-        M[row][column] = val;
+        validatePosition(row, column);
+        double[][] r = deepCopy(m);
+        r[row][column] = val;
+        return new MatrixNxM(numRows, numColumns, r, false);
     }
 
     public MatrixNxM inverse() throws Exception
     {
-        MatrixNxM i = new MatrixNxM(this);
-        i.invert();
-        return i;
-    }
-
-    /**
-    Converts current matrix into it's invert matrix.
-    @throws java.lang.Exception
-    */
-    public void invert() throws Exception
-    {
         double d = determinant();
-
         if ( Math.abs(d) < VSDK.EPSILON ) {
             throw new Exception("Trying to invert a matrix with zero determinant!");
         }
-
-        double a = 1/d;
-
-        MatrixNxM N = cofactors(), N2;
-        N.transpose();
-
-        N2 = N.multiply(a);
-        this.M = N2.M;
+        MatrixNxM cof = cofactors();
+        MatrixNxM adj = cof.transpose();
+        return adj.multiply(1.0 / d);
     }
 
     public MatrixNxM cofactors() throws Exception
     {
-        MatrixNxM N = new MatrixNxM(numRows, numColumns);
-        int row, column;
-        double minor3x3[] = new double[9];
-        double sign;
+        double[][] r = new double[numRows][numColumns];
 
-        MatrixNxM minor;
-
-        for ( row = 0; row < numRows; row++ ) {
-            for ( column = 0; column < numColumns; column++ ) {
-                minor = buildMinor(row, column);
-                if ( (row+column) % 2 == 0 ) {
-                    sign = 1;
-                }
-                else {
-                    sign = -1;
-                }
-                N.M[row][column] =
-                    sign*minor.determinant();
+        for ( int row = 0; row < numRows; row++ ) {
+            for ( int column = 0; column < numColumns; column++ ) {
+                MatrixNxM minor = buildMinor(row, column);
+                double sign = ((row + column) % 2 == 0) ? 1.0 : -1.0;
+                r[row][column] = sign * minor.determinant();
             }
         }
-        return N;
+        return new MatrixNxM(numRows, numColumns, r, false);
     }
 
-    /**
-     Converts current matrix into it's transpose matrix.
-     */
-    public void transpose()
+    public MatrixNxM transpose()
     {
-        double R[][] = new double[numColumns][numRows];
-
-        int row, column;
-
-        for ( row = 0; row < numRows; row++ ) {
-            for ( column = 0; column < numColumns; column++ ) {
-                R[column][row] = M[row][column];
+        double[][] r = new double[numColumns][numRows];
+        for ( int row = 0; row < numRows; row++ ) {
+            for ( int column = 0; column < numColumns; column++ ) {
+                r[column][row] = m[row][column];
             }
         }
-
-        int b;
-        b = numColumns;
-        numColumns = numRows;
-        numRows = b;
-
-        M = R;
+        return new MatrixNxM(numColumns, numRows, r, false);
     }
 
-    /**
-    Multiply this matrix by a scalar, note that this method doesn't modify 
-    this matrix. 
-    @param a The scalar by whom this matrix will be multiplied
-    @return A new Matrix3D that contains the value of current matrix 
-    multiplied by the input parameter.
-    @throws java.lang.Exception
-    */
-    public final MatrixNxM multiply(double a) throws Exception
+    public MatrixNxM multiply(double a)
     {
-        MatrixNxM R = new MatrixNxM(numRows, numColumns);
-        int row, column;
-
-        for ( row = 0; row < numRows; row++ ) {
-            for ( column = 0; column < numColumns; column++ ) {
-                R.M[row][column] = a*M[row][column];
+        double[][] r = new double[numRows][numColumns];
+        for ( int row = 0; row < numRows; row++ ) {
+            for ( int column = 0; column < numColumns; column++ ) {
+                r[row][column] = a * m[row][column];
             }
         }
-        return R;
+        return new MatrixNxM(numRows, numColumns, r, false);
     }
 
-    /**
-    This method multiplies an input matrix by this matrix, the result is a 
-    new matrix and current matrix is not modified.
-    @param other The matrix by whom this matrix will be multiplied
-    @return The matrix result of the multiplication.
-    @throws java.lang.Exception
-    */
     public MatrixNxM multiply(MatrixNxM other) throws Exception
     {
-        if ( this.numColumns != other.numRows ) {
+        if ( numColumns != other.numRows ) {
             throw new Exception("When multiplying matrices, first operand number of columns must match second operand number of rows.");
         }
 
-        MatrixNxM R = new MatrixNxM(this.numRows, other.numColumns);
-        int row_a, column_b, row_b;
-        double acumulado;
-
-        for( row_a = 0; row_a < R.numRows; row_a++ ) {
-            for( column_b = 0; column_b < R.numColumns; column_b++ ) {
-                acumulado = 0;
-                for( row_b = 0; row_b < 4; row_b++ ) {
-                    acumulado += M[row_a][row_b]*other.M[row_b][column_b];
+        double[][] r = new double[numRows][other.numColumns];
+        for ( int rowA = 0; rowA < numRows; rowA++ ) {
+            for ( int columnB = 0; columnB < other.numColumns; columnB++ ) {
+                double accum = 0;
+                for ( int rowB = 0; rowB < numColumns; rowB++ ) {
+                    accum += m[rowA][rowB] * other.m[rowB][columnB];
                 }
-                R.M[row_a][column_b] = acumulado;
+                r[rowA][columnB] = accum;
             }
         }
-        return R;
+        return new MatrixNxM(numRows, other.numColumns, r, false);
     }
-
-/*
-    private void fillMinor(double minor3x3[], int rowPivot, int columnPivot)
-    {
-        int i, j;
-        int index = 0;
-
-        for ( i = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++ ) {
-                if ( i != rowPivot && j != columnPivot ) {
-                    minor3x3[index] = M[i][j];
-                    index++;
-                }
-            }
-        }
-    }
-*/
 
     public MatrixNxM buildMinor(int row, int column) throws Exception
     {
         if ( numColumns <= 1 || numRows <= 1 ) {
             throw new Exception("Matrix must be at least of size 2x2 to have a minor matrix!");
         }
+        validatePosition(row, column);
 
-        if ( row < 0 || row >= numRows ||
-             column < 0 || column >= numColumns ) {
-            throw new Exception("Invalid pivot position for minor matrix!");
-        }
-
-        MatrixNxM minor = new MatrixNxM(numRows-1, numColumns-1);
-
-        int r1, r2, c1, c2;
-
-        for ( r1 = 0, r2 = 0; r1 < numRows; r1++ ) {
+        double[][] minor = new double[numRows - 1][numColumns - 1];
+        for ( int r1 = 0, r2 = 0; r1 < numRows; r1++ ) {
             if ( r1 == row ) continue;
-            for ( c1 = 0, c2 = 0; c1 < numColumns; c1++ ) {
+            for ( int c1 = 0, c2 = 0; c1 < numColumns; c1++ ) {
                 if ( c1 == column ) continue;
-                minor.setVal(r2, c2, getVal(r1, c1));
+                minor[r2][c2] = m[r1][c1];
                 c2++;
             }
             r2++;
         }
 
-        return minor;
+        return new MatrixNxM(numRows - 1, numColumns - 1, minor, false);
     }
 
-    /**
-    This method computes the determinant of this matrix.
-    @return this matrix determinant
-    @throws java.lang.Exception
-    */
     public double determinant() throws Exception
     {
         if ( numColumns != numRows ) {
             throw new Exception("Matrix must be square to have a determinant");
         }
-
         if ( numColumns == 1 ) {
-            return M[0][0];
+            return m[0][0];
         }
 
-        int i, j;
-        double acum = 0;
-        int sign;
-        MatrixNxM minor;
-
-        i = 0;
-        for ( j = 0, sign = 1; j < numColumns; j++, sign *= -1 ) {
-            minor = buildMinor(i, j);
-            acum += ((double)sign)*minor.determinant()*M[i][j];
+        double accum = 0;
+        int row = 0;
+        for ( int col = 0, sign = 1; col < numColumns; col++, sign *= -1 ) {
+            MatrixNxM minor = buildMinor(row, col);
+            accum += ((double)sign) * minor.determinant() * m[row][col];
         }
-
-        return acum;
+        return accum;
     }
 
-    /**
-     This method creates an String representation of this matrix, suitable
-     for human interpretation. Note that the matrix values are formated,
-     so precision is lost in sake of readability.
-     @return The String representation of this matrix
-     */
     @Override
     public String toString()
     {
-        String msg;
+        StringBuilder msg = new StringBuilder();
+        msg.append("\n------------------------------\n");
+        msg.append("  - Matrix of ").append(numRows).append(" rows by ").append(numColumns).append(" columns\n");
 
-        msg = "\n------------------------------\n";
-        int row, column, pos;
-
-        msg = msg + "  - Matrix of " + numRows + " rows by " + numColumns + " columns\n";
-
-        for ( row = 0; row < numRows; row++, pos++ ) {
-            for ( pos = 0, column = 0; column < numColumns; column++ ) {
-                msg = msg + VSDK.formatDouble(M[row][column]) + " ";
+        for ( int row = 0; row < numRows; row++ ) {
+            for ( int column = 0; column < numColumns; column++ ) {
+                msg.append(VSDK.formatDouble(m[row][column])).append(' ');
             }
-            msg = msg + "\n";
+            msg.append('\n');
         }
-        msg = msg + "------------------------------\n";
-        return msg;
+        msg.append("------------------------------\n");
+        return msg.toString();
     }
 
-/*
-    public double[] exportToDoubleArrayRowOrder()
+    @Override
+    public boolean equals(Object obj)
     {
-        double array[] = new double[16];
-        int i, j, k;
-        for ( i = 0, k = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++, k++ ) {
-                array[k] = M[i][j];
-            }
+        if ( this == obj ) return true;
+        if ( !(obj instanceof MatrixNxM other) ) return false;
+        if ( numRows != other.numRows || numColumns != other.numColumns ) return false;
+        for ( int i = 0; i < numRows; i++ ) {
+            if ( !Arrays.equals(m[i], other.m[i]) ) return false;
         }
-        return array;
+        return true;
     }
-*/
-/*
-    public float[] exportToFloatArrayRowOrder()
-    {
-        float array[] = new float[16];
-        int i, j, k;
-        for ( i = 0, k = 0; i < 4; i++ ) {
-            for ( j = 0; j < 4; j++, k++ ) {
-                array[k] = (float)M[i][j];
-            }
-        }
-        return array;
-    }
-*/
 
+    @Override
+    public int hashCode()
+    {
+        int result = 31 * numRows + numColumns;
+        for ( int i = 0; i < numRows; i++ ) {
+            result = 31 * result + Arrays.hashCode(m[i]);
+        }
+        return result;
+    }
+
+    private void validatePosition(int row, int column) throws Exception
+    {
+        if ( row < 0 || row >= numRows || column < 0 || column >= numColumns ) {
+            throw new Exception("Invalid matrix position [" + row + "][" + column + "]");
+        }
+    }
+
+    private static double[][] deepCopy(double[][] source)
+    {
+        double[][] copy = new double[source.length][];
+        for ( int i = 0; i < source.length; i++ ) {
+            copy[i] = Arrays.copyOf(source[i], source[i].length);
+        }
+        return copy;
+    }
+
+    private static double[][] buildIdentityValues(int rows, int cols)
+    {
+        double[][] values = new double[rows][cols];
+        for ( int i = 0; i < rows; i++ ) {
+            for ( int j = 0; j < cols; j++ ) {
+                values[i][j] = (i == j) ? 1.0 : 0.0;
+            }
+        }
+        return values;
+    }
 }

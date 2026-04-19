@@ -1,20 +1,38 @@
 package vsdk.toolkit.common.linealAlgebra;
 
+import java.io.Serial;
+import java.util.Objects;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 
-public class Quaternion extends FundamentalEntity
+public final class Quaternion extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial
+    private static final long serialVersionUID = 20260419L;
 
-    public Vector3D direction;
-    public double magnitude;
+    private final Vector3D direction;
+    private final double magnitude;
 
     public Quaternion()
     {
-        direction = new Vector3D(0, 0, 0);
-        magnitude = 0;
+        this(new Vector3D(0, 0, 0), 0);
+    }
+
+    public Quaternion(Vector3D direction, double magnitude)
+    {
+        this.direction = Vector3D.copyOf(Objects.requireNonNull(direction, "Quaternion direction cannot be null"));
+        this.magnitude = magnitude;
+    }
+
+    public Quaternion(Quaternion other)
+    {
+        this(Objects.requireNonNull(other, "Quaternion to copy cannot be null").direction,
+             other.magnitude);
+    }
+
+    public static Quaternion copyOf(Quaternion other)
+    {
+        return new Quaternion(Objects.requireNonNull(other, "Quaternion to copy cannot be null"));
     }
 
     public double length()
@@ -22,13 +40,35 @@ public class Quaternion extends FundamentalEntity
         return magnitude * magnitude + direction.dotProduct(direction);
     }
 
-    public void normalize()
+    public Quaternion normalized()
     {
         double l;
 
         l = length();
-        magnitude *= 1/l;
-        direction = direction.multiply(1/l);
+        if ( Math.abs(l) < VSDK.EPSILON ) {
+            return this;
+        }
+        return new Quaternion(direction.multiply(1/l), magnitude * (1/l));
+    }
+
+    public Quaternion withDirection(Vector3D newDirection)
+    {
+        return new Quaternion(newDirection, magnitude);
+    }
+
+    public Quaternion withMagnitude(double newMagnitude)
+    {
+        return new Quaternion(direction, newMagnitude);
+    }
+
+    public Vector3D direction()
+    {
+        return direction;
+    }
+
+    public double magnitude()
+    {
+        return magnitude;
     }
 
     @Override

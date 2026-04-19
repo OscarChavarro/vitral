@@ -47,6 +47,15 @@ public class CohenSutherlandClipping2D implements
 
     private boolean clipped;
 
+    private void recalculateClip()
+    {
+        ComputationalGeometry.ClippedLine2DResult result =
+            ComputationalGeometry.cohenSutherlandLineClipping2DResult(p0, p1, min, max, DELTA);
+        clipped = result.accepted();
+        clipped0 = result.clipped0();
+        clipped1 = result.clipped1();
+    }
+
     public CohenSutherlandClipping2D(){
         
     }
@@ -57,9 +66,7 @@ public class CohenSutherlandClipping2D implements
         p1 = new Vector2D(-0.85, -0.5);
         min = new Vector2D(-0.8, -0.8);
         max = new Vector2D(0.8, 0.8);
-        clipped0 = new Vector2D(p0);
-        clipped1 = new Vector2D(p1);
-        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max, DELTA);
+        recalculateClip();
 
         frame = new JFrame("VITRAL concept test - Cohen Sutherland 2D line clipping");
         frame.setSize(800, 600);
@@ -122,24 +129,24 @@ public class CohenSutherlandClipping2D implements
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE);
         gl.glColor3d(0.0, 1.0, 0.0);
         gl.glBegin(gl.GL_QUADS);
-            gl.glVertex2d(min.x, min.y);
-            gl.glVertex2d(min.x, max.x);
-            gl.glVertex2d(max.x, max.y);
-            gl.glVertex2d(max.x, min.y);
+            gl.glVertex2d(min.x(), min.y());
+            gl.glVertex2d(min.x(), max.y());
+            gl.glVertex2d(max.x(), max.y());
+            gl.glVertex2d(max.x(), min.y());
         gl.glEnd();
 
         gl.glColor3d(0.0, 0.0, 1.0);
         gl.glBegin(gl.GL_LINES);
-            gl.glVertex2d(p0.x, p0.y);
-            gl.glVertex2d(p1.x, p1.y);
+            gl.glVertex2d(p0.x(), p0.y());
+            gl.glVertex2d(p1.x(), p1.y());
         gl.glEnd();
 
         if(clipped){
             gl.glColor3d(1.0, 0.0, 0.0);
             gl.glLineWidth(3.0f);
             gl.glBegin(gl.GL_LINES);
-                gl.glVertex2d(clipped0.x, clipped0.y);
-                gl.glVertex2d(clipped1.x, clipped1.y);
+                gl.glVertex2d(clipped0.x(), clipped0.y());
+                gl.glVertex2d(clipped1.x(), clipped1.y());
             gl.glEnd();
         }
     }
@@ -153,20 +160,18 @@ public class CohenSutherlandClipping2D implements
     public void adjustmentValueChanged(AdjustmentEvent e) {
         double value = (double) e.getValue() / 100;
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("x0") ) {
-            p0.x = value;
+            p0 = p0.withX(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("y0") ) {
-            p0.y = value;
+            p0 = p0.withY(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("x1") ) {
-            p1.x = value;
+            p1 = p1.withX(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("y1") ) {
-            p1.y = value;
+            p1 = p1.withY(value);
         }
-        clipped0 = new Vector2D(p0);
-        clipped1 = new Vector2D(p1);
-        clipped = ComputationalGeometry.cohenSutherlandLineClipping2D(clipped0, clipped1, min, max, DELTA);
+        recalculateClip();
         canvas.repaint();
     }
     

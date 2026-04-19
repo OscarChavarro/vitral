@@ -350,8 +350,7 @@ public class JoglDrawingArea implements
                     M = Mset.multiply(Mbody);
                     p = new Vector3D(M.M[0][3], M.M[1][3], M.M[2][3]);
                     M.M[0][3] = M.M[1][3] = M.M[2][3] = 0.0;
-                    q = M.exportToQuaternion();
-                    q.normalize();
+                    q = M.exportToQuaternion().normalized();
                     R = new Matrix4x4();
                     R.importFromQuaternion(q);
                     Ri = R.inverse();

@@ -325,10 +325,10 @@ public class PolyhedralBoundedSolidNumericPolicy
                                                 Vector2D c,
                                                 ToleranceContext context)
     {
-        double lx = Math.max(Math.max(Math.abs(a.x - b.x), Math.abs(a.x - c.x)),
-                             Math.abs(b.x - c.x));
-        double ly = Math.max(Math.max(Math.abs(a.y - b.y), Math.abs(a.y - c.y)),
-                             Math.abs(b.y - c.y));
+        double lx = Math.max(Math.max(Math.abs(a.x() - b.x()), Math.abs(a.x() - c.x())),
+                             Math.abs(b.x() - c.x()));
+        double ly = Math.max(Math.max(Math.abs(a.y() - b.y()), Math.abs(a.y() - c.y())),
+                             Math.abs(b.y() - c.y()));
         double span = Math.max(1.0, Math.max(lx, ly));
         return context.bigEpsilon() * span;
     }

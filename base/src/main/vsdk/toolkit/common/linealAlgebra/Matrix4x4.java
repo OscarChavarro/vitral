@@ -483,14 +483,12 @@ public class Matrix4x4 extends FundamentalEntity
      */
     public final Vector4D multiply(Vector4D E)
     {
-        Vector4D R = new Vector4D();
-
-        R.x = M[0][0] * E.x + M[0][1] * E.y + M[0][2] * E.z + M[0][3];
-        R.y = M[1][0] * E.x + M[1][1] * E.y + M[1][2] * E.z + M[1][3];
-        R.z = M[2][0] * E.x + M[2][1] * E.y + M[2][2] * E.z + M[2][3];
-        R.w = M[3][0] * E.x + M[3][1] * E.y + M[3][2] * E.z + M[3][3];
-
-        return R;
+        return new Vector4D(
+            M[0][0] * E.x() + M[0][1] * E.y() + M[0][2] * E.z() + M[0][3] * E.w(),
+            M[1][0] * E.x() + M[1][1] * E.y() + M[1][2] * E.z() + M[1][3] * E.w(),
+            M[2][0] * E.x() + M[2][1] * E.y() + M[2][2] * E.z() + M[2][3] * E.w(),
+            M[3][0] * E.x() + M[3][1] * E.y() + M[3][2] * E.z() + M[3][3] * E.w()
+        );
     }
 
     /**
@@ -644,9 +642,12 @@ public class Matrix4x4 extends FundamentalEntity
      */
     public Quaternion exportToQuaternion()
     {
-        Quaternion quat = new Quaternion();
         double tr, s;
         double q[] = new double[4];
+        double qx = 0;
+        double qy = 0;
+        double qz = 0;
+        double qw = 0;
         int i, j, k;
         int nxt[] = new int[3];
 
@@ -659,11 +660,11 @@ public class Matrix4x4 extends FundamentalEntity
         // check the diagonal
         if ( tr > 0.0 ) {
             s = Math.sqrt(tr + 1.0);
-            quat.magnitude = s / 2.0;
+            qw = s / 2.0;
             s = 0.5 / s;
-            quat.direction = quat.direction.withX((M[2][1] - M[1][2]) * s);
-            quat.direction = quat.direction.withY((M[0][2] - M[2][0]) * s);
-            quat.direction = quat.direction.withZ((M[1][0] - M[0][1]) * s);
+            qx = (M[2][1] - M[1][2]) * s;
+            qy = (M[0][2] - M[2][0]) * s;
+            qz = (M[1][0] - M[0][1]) * s;
           }
           else {                
             // diagonal is negative
@@ -683,13 +684,13 @@ public class Matrix4x4 extends FundamentalEntity
             q[j] = (M[j][i] + M[i][j]) * s;
             q[k] = (M[k][i] + M[i][k]) * s;
 
-            quat.direction = quat.direction.withX(q[0]);
-            quat.direction = quat.direction.withY(q[1]);
-            quat.direction = quat.direction.withZ(q[2]);
-            quat.magnitude = q[3];
+            qx = q[0];
+            qy = q[1];
+            qz = q[2];
+            qw = q[3];
         }
 
-        return quat;
+        return new Quaternion(new Vector3D(qx, qy, qz), qw);
     }
 
     /**
@@ -702,17 +703,17 @@ public class Matrix4x4 extends FundamentalEntity
     {
         double sx, sy, sz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 
-        x2 = a.direction.x() + a.direction.x();
-        y2 = a.direction.y() + a.direction.y(); 
-        z2 = a.direction.z() + a.direction.z();
-        xx = a.direction.x() * x2;
-        xy = a.direction.x() * y2;
-        xz = a.direction.x() * z2;
-        yy = a.direction.y() * y2;
-        yz = a.direction.y() * z2;
-        zz = a.direction.z() * z2;
-        sx = a.magnitude * x2;
-        sy = a.magnitude * y2;   sz = a.magnitude * z2;
+        x2 = a.direction().x() + a.direction().x();
+        y2 = a.direction().y() + a.direction().y(); 
+        z2 = a.direction().z() + a.direction().z();
+        xx = a.direction().x() * x2;
+        xy = a.direction().x() * y2;
+        xz = a.direction().x() * z2;
+        yy = a.direction().y() * y2;
+        yz = a.direction().y() * z2;
+        zz = a.direction().z() * z2;
+        sx = a.magnitude() * x2;
+        sy = a.magnitude() * y2;   sz = a.magnitude() * z2;
 
         M[0][0] = 1-(yy+zz);
         M[0][1] = xy-sz;
@@ -803,8 +804,7 @@ public class Matrix4x4 extends FundamentalEntity
 
         R1 = R2.multiply(R3.multiply(this));
 
-        Quaternion q = R1.exportToQuaternion();
-        q.normalize();
+        Quaternion q = R1.exportToQuaternion().normalized();
         R1.importFromQuaternion(q);
 
         if ( R1.M[2][1] >= 0 ) {  // R1.M[2][1] ::= sin(r)

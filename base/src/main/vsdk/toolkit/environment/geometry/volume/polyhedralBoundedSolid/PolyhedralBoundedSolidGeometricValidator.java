@@ -229,25 +229,18 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     private static Vector2D projectPointTo2D(Vector3D in, int dominantCoordinate)
     {
-        Vector2D out = new Vector2D();
         if ( dominantCoordinate == 1 ) {
-            out.x = in.y();
-            out.y = in.z();
+            return new Vector2D(in.y(), in.z());
         }
-        else if ( dominantCoordinate == 2 ) {
-            out.x = in.x();
-            out.y = in.z();
+        if ( dominantCoordinate == 2 ) {
+            return new Vector2D(in.x(), in.z());
         }
-        else {
-            out.x = in.x();
-            out.y = in.y();
-        }
-        return out;
+        return new Vector2D(in.x(), in.y());
     }
 
     private static double orientation2D(Vector2D a, Vector2D b, Vector2D c)
     {
-        return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+        return (b.x()-a.x())*(c.y()-a.y()) - (b.y()-a.y())*(c.x()-a.x());
     }
 
     private static boolean pointOnSegment2D(Vector2D p, Vector2D a, Vector2D b,
@@ -257,11 +250,11 @@ public class PolyhedralBoundedSolidGeometricValidator
         if ( Math.abs(orientation2D(a, b, p)) > orientationTolerance ) {
             return false;
         }
-        double minX = Math.min(a.x, b.x) - linearTolerance;
-        double maxX = Math.max(a.x, b.x) + linearTolerance;
-        double minY = Math.min(a.y, b.y) - linearTolerance;
-        double maxY = Math.max(a.y, b.y) + linearTolerance;
-        return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
+        double minX = Math.min(a.x(), b.x()) - linearTolerance;
+        double maxX = Math.max(a.x(), b.x()) + linearTolerance;
+        double minY = Math.min(a.y(), b.y()) - linearTolerance;
+        double maxY = Math.max(a.y(), b.y()) + linearTolerance;
+        return p.x() >= minX && p.x() <= maxX && p.y() >= minY && p.y() <= maxY;
     }
 
     private static boolean segmentsIntersect2D(Vector2D a1, Vector2D a2,

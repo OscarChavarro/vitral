@@ -44,11 +44,9 @@ public class WireframeRenderer extends RenderingElement
 
         hp0 = new Vector4D(cp0);
         hp1 = new Vector4D(cp1);
-        pp0 = Proj.multiply(hp0);
-        pp0.divideByW();
-        pp1 = Proj.multiply(hp1);
-        pp1.divideByW();
-        lineSet.add2DLine(pp0.x*f, pp0.y*f, pp1.x*f, pp1.y*f);
+        pp0 = Proj.multiply(hp0).dividedByW();
+        pp1 = Proj.multiply(hp1).dividedByW();
+        lineSet.add2DLine(pp0.x()*f, pp0.y()*f, pp1.x()*f, pp1.y()*f);
     }
 
     private static void processBrep(SimpleBody body, Matrix4x4 P,

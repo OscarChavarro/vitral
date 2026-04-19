@@ -196,8 +196,8 @@ public class VSDK
 
     public static double vectorDistance(Vector2D a, Vector2D b)
     {
-        return Math.sqrt((a.x-b.x)*(a.x-b.x) + 
-                         (a.y-b.y)*(a.y-b.y));
+        return Math.sqrt((a.x()-b.x())*(a.x()-b.x()) +
+                         (a.y()-b.y())*(a.y()-b.y()));
     }
 
     public static double colorDistance(ColorRgb a, ColorRgb b)

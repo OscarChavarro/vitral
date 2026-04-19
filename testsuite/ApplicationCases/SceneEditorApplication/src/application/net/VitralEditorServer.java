@@ -80,10 +80,10 @@ class VitralEditorServerProtocol implements Runnable
             //System.out.println("Processing rotation quaternion " + q);
             out = new byte[17];
             out[0] = 4;
-            PersistenceElement.float2byteArrayBE(out, 1, (float)q.direction.x());
-            PersistenceElement.float2byteArrayBE(out, 5, (float)q.direction.y());
-            PersistenceElement.float2byteArrayBE(out, 9, (float)q.direction.z());
-            PersistenceElement.float2byteArrayBE(out, 13, (float)q.magnitude);
+            PersistenceElement.float2byteArrayBE(out, 1, (float)q.direction().x());
+            PersistenceElement.float2byteArrayBE(out, 5, (float)q.direction().y());
+            PersistenceElement.float2byteArrayBE(out, 9, (float)q.direction().z());
+            PersistenceElement.float2byteArrayBE(out, 13, (float)q.magnitude());
         }
         else {
             out = new byte[1];
