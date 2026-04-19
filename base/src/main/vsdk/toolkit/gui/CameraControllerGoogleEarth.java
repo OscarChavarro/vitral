@@ -106,20 +106,23 @@ public class CameraControllerGoogleEarth extends CameraController {
         Vector3D pA = new Vector3D();
         Vector3D pB = new Vector3D();
 
-        pA.x = RayA.origin.x + (RayA.direction.x * RayA.t);
-        pA.y = RayA.origin.y + (RayA.direction.y * RayA.t);
-        pA.z = RayA.origin.z + (RayA.direction.z * RayA.t);
+        pA = pA.withX(RayA.origin.x() + (RayA.direction.x() * RayA.t));
+        pA = pA.withY(RayA.origin.y() + (RayA.direction.y() * RayA.t));
+        pA = pA.withZ(RayA.origin.z() + (RayA.direction.z() * RayA.t));
 
-        pB.x = RayB.origin.x + (RayB.direction.x * RayB.t);
-        pB.y = RayB.origin.y + (RayB.direction.y * RayB.t);
-        pB.z = RayB.origin.z + (RayB.direction.z * RayB.t);
+        pB = pB.withX(RayB.origin.x() + (RayB.direction.x() * RayB.t));
+        pB = pB.withY(RayB.origin.y() + (RayB.direction.y() * RayB.t));
+        pB = pB.withZ(RayB.origin.z() + (RayB.direction.z() * RayB.t));
 
-        Vector3D d = pB.substract(pA);
+        Vector3D d = pB.subtract(pA);
 
         //----------------------------------------------------------------------
         //5. Mover la cámara
-        camera.getPosition().x = camera.getPosition().x - d.x;
-        camera.getPosition().y = camera.getPosition().y - d.y;
+        Vector3D currentPosition = camera.getPosition();
+        camera.setPosition(new Vector3D(
+            currentPosition.x() - d.x(),
+            currentPosition.y() - d.y(),
+            currentPosition.z()));
 
         setxOld(x);
         setyOld(y);
@@ -155,42 +158,42 @@ public class CameraControllerGoogleEarth extends CameraController {
 
         int clicks = e.getClicks();//();
         boolean updated = false;
-        double altura = eyePosition.z;
+        double altura = eyePosition.z();
         //------------------------------------------------------------
         if (clicks < 0) {
 
             //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
-            double expo = Math.round(Math.log10(eyePosition.z)) - 1;
+            double expo = Math.round(Math.log10(eyePosition.z())) - 1;
             jumpStep = Math.pow(10, expo);//
 
             //Limite inferiror
-            if ((eyePosition.z - jumpStep) <= 12) {
+            if ((eyePosition.z() - jumpStep) <= 12) {
                 return false;
             } //Fotos 0.0000000000000000000001
 
             nearPlaneDistance = altura * 0.1;
             farPlaneDistance = altura * 110;
 
-            eyePosition.z -= jumpStep;
-            focusedPosition.z -= jumpStep;
+            eyePosition = eyePosition.withZ(eyePosition.z() - jumpStep);
+            focusedPosition = focusedPosition.withZ(focusedPosition.z() - jumpStep);
 
             updated = true;
         } else if (clicks > 0) {
             //Limite superior
-            if ((eyePosition.z + jumpStep) >= Math.pow(10, 24)) {
+            if ((eyePosition.z() + jumpStep) >= Math.pow(10, 24)) {
                 return false;
             }//Para las fotos Math.pow(10, 25)
 
             //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
-            jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z)) - 1);
+            jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z())) - 1);
 
-            altura = eyePosition.z;
+            altura = eyePosition.z();
 
             nearPlaneDistance = altura * 0.1;
             farPlaneDistance = altura * 110;
 
-            eyePosition.z += jumpStep;
-            focusedPosition.z += jumpStep;
+            eyePosition = eyePosition.withZ(eyePosition.z() + jumpStep);
+            focusedPosition = focusedPosition.withZ(focusedPosition.z() + jumpStep);
             updated = true;
         }
 
@@ -310,41 +313,41 @@ public class CameraControllerGoogleEarth extends CameraController {
 
             // Position
             case vsdk.toolkit.gui.KeyEvent.KEY_x:
-                eyePosition.x -= jumpStep;
-                focusedPosition.x -= jumpStep;
+                eyePosition = eyePosition.withX(eyePosition.x() - jumpStep);
+                focusedPosition = focusedPosition.withX(focusedPosition.x() - jumpStep);
                 updated = true;
                 break;
             case vsdk.toolkit.gui.KeyEvent.KEY_X:
-                eyePosition.x += jumpStep;
-                focusedPosition.x += jumpStep;
+                eyePosition = eyePosition.withX(eyePosition.x() + jumpStep);
+                focusedPosition = focusedPosition.withX(focusedPosition.x() + jumpStep);
                 updated = true;
                 break;
             case vsdk.toolkit.gui.KeyEvent.KEY_y:
-                eyePosition.y -= jumpStep;
-                focusedPosition.y -= jumpStep;
+                eyePosition = eyePosition.withY(eyePosition.y() - jumpStep);
+                focusedPosition = focusedPosition.withY(focusedPosition.y() - jumpStep);
                 updated = true;
                 break;
             case vsdk.toolkit.gui.KeyEvent.KEY_Y:
-                eyePosition.y += jumpStep; //focusedPosition.y += deltaMov;
+                eyePosition = eyePosition.withY(eyePosition.y() + jumpStep); //focusedPosition.y() += deltaMov;
                 updated = true;
                 break;
             case vsdk.toolkit.gui.KeyEvent.KEY_z:
                 //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
-                double expo = Math.round(Math.log10(eyePosition.z)) - 1;
+                double expo = Math.round(Math.log10(eyePosition.z())) - 1;
                 jumpStep = Math.pow(10, expo);//
 
-                double altura = eyePosition.z;
+                double altura = eyePosition.z();
 
                 //Limite inferiror
-                if ((eyePosition.z - jumpStep) <= 12) {
+                if ((eyePosition.z() - jumpStep) <= 12) {
                     break;
                 } //Fotos 0.0000000000000000000001
 
                 nearPlaneDistance = altura * 0.1;
                 farPlaneDistance = altura * 110;
 
-                eyePosition.z -= jumpStep;
-                focusedPosition.z -= jumpStep;
+                eyePosition = eyePosition.withZ(eyePosition.z() - jumpStep);
+                focusedPosition = focusedPosition.withZ(focusedPosition.z() - jumpStep);
                 updated = true;
                 break;
               //---------------------------------------------------------------
@@ -352,20 +355,20 @@ public class CameraControllerGoogleEarth extends CameraController {
             case vsdk.toolkit.gui.KeyEvent.KEY_Z:
 
                 //Limite superior
-                if ((eyePosition.z + jumpStep) >= Math.pow(10, 4)) {
+                if ((eyePosition.z() + jumpStep) >= Math.pow(10, 4)) {
                     break;
                 }//Para las fotos Math.pow(10, 25)
 
                 //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
-                jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z)) - 1);
+                jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z())) - 1);
 
-                altura = eyePosition.z;
+                altura = eyePosition.z();
 
                 nearPlaneDistance = altura * 0.1;
                 farPlaneDistance = altura * 110;
 
-                eyePosition.z += jumpStep;
-                focusedPosition.z += jumpStep;
+                eyePosition = eyePosition.withZ(eyePosition.z() + jumpStep);
+                focusedPosition = focusedPosition.withZ(focusedPosition.z() + jumpStep);
                 updated = true;
                 break;
             // Rotation
@@ -523,13 +526,13 @@ public class CameraControllerGoogleEarth extends CameraController {
         eyePosition = camera.getPosition();
         focusedPosition = camera.getFocusedPosition();
 
-        double altura = eyePosition.z;
+        double altura = eyePosition.z();
 
         nearPlaneDistance = altura * 0.1;
         farPlaneDistance = altura * 110;
 
-        eyePosition.z += jumpValue;
-        focusedPosition.z += jumpValue;
+        eyePosition = eyePosition.withZ(eyePosition.z() + jumpValue);
+        focusedPosition = focusedPosition.withZ(focusedPosition.z() + jumpValue);
 
         camera.setPosition(eyePosition);
         camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
@@ -552,13 +555,13 @@ public class CameraControllerGoogleEarth extends CameraController {
         eyePosition = camera.getPosition();
         focusedPosition = camera.getFocusedPosition();
 
-        double altura = eyePosition.z;
-        if ((eyePosition.z - jumpValue) >= 12) {
+        double altura = eyePosition.z();
+        if ((eyePosition.z() - jumpValue) >= 12) {
             nearPlaneDistance = altura * 0.1;
             farPlaneDistance = altura * 110;
 
-            eyePosition.z -= jumpValue;
-            focusedPosition.z -= jumpValue;
+            eyePosition = eyePosition.withZ(eyePosition.z() - jumpValue);
+            focusedPosition = focusedPosition.withZ(focusedPosition.z() - jumpValue);
 
             camera.setPosition(eyePosition);
             camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);

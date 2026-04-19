@@ -186,12 +186,12 @@ public class PolyhedralBoundedSolidNumericPolicy
                     continue;
                 }
                 found = true;
-                if ( p.x < minX ) minX = p.x;
-                if ( p.y < minY ) minY = p.y;
-                if ( p.z < minZ ) minZ = p.z;
-                if ( p.x > maxX ) maxX = p.x;
-                if ( p.y > maxY ) maxY = p.y;
-                if ( p.z > maxZ ) maxZ = p.z;
+                if ( p.x() < minX ) minX = p.x();
+                if ( p.y() < minY ) minY = p.y();
+                if ( p.z() < minZ ) minZ = p.z();
+                if ( p.x() > maxX ) maxX = p.x();
+                if ( p.y() > maxY ) maxY = p.y();
+                if ( p.z() > maxZ ) maxZ = p.z();
             }
         }
 
@@ -222,12 +222,12 @@ public class PolyhedralBoundedSolidNumericPolicy
                 continue;
             }
             found = true;
-            if ( p.x < minX ) minX = p.x;
-            if ( p.y < minY ) minY = p.y;
-            if ( p.z < minZ ) minZ = p.z;
-            if ( p.x > maxX ) maxX = p.x;
-            if ( p.y > maxY ) maxY = p.y;
-            if ( p.z > maxZ ) maxZ = p.z;
+            if ( p.x() < minX ) minX = p.x();
+            if ( p.y() < minY ) minY = p.y();
+            if ( p.z() < minZ ) minZ = p.z();
+            if ( p.x() > maxX ) maxX = p.x();
+            if ( p.y() > maxY ) maxY = p.y();
+            if ( p.z() > maxZ ) maxZ = p.z();
         }
 
         if ( !found ) {

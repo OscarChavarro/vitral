@@ -104,9 +104,9 @@ public class JoglSimpleBodyRenderer extends JoglRenderer {
         p = b.getPosition();
         scale = b.getScale();
 
-        gl.glTranslated(p.x, p.y, p.z);
+        gl.glTranslated(p.x(), p.y(), p.z());
         JoglMatrixRenderer.activate(gl, b.getRotation());
-        gl.glScaled(scale.x, scale.y, scale.z);
+        gl.glScaled(scale.x(), scale.y(), scale.z());
 
         gl.glColor3d(1, 1, 1);
         JoglMaterialRenderer.activate(gl, b.getMaterial());

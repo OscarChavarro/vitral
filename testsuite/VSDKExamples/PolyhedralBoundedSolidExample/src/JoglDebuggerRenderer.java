@@ -76,7 +76,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glBegin(GL2.GL_LINES);
         for ( i = 0; i < contourLines.size(); i++ ) {
             p = contourLines.get(i);
-            gl.glVertex3d(p.x, p.y, p.z);
+            gl.glVertex3d(p.x(), p.y(), p.z());
         }
         gl.glEnd();
 
@@ -85,7 +85,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glBegin(GL2.GL_LINES);
         for ( i = 0; i < visibleLines.size(); i++ ) {
             p = visibleLines.get(i);
-            gl.glVertex3d(p.x, p.y, p.z);
+            gl.glVertex3d(p.x(), p.y(), p.z());
         }
         gl.glEnd();
 

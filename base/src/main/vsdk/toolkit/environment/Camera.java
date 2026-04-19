@@ -146,7 +146,7 @@ public class Camera extends Entity
 
     public void setPosition(Vector3D eyePosition)
     {
-        this.eyePosition.clone(eyePosition);
+        this.eyePosition = new Vector3D(eyePosition);
     }
     
     public Vector3D getFocusedPosition()
@@ -170,10 +170,10 @@ public class Camera extends Entity
     {
         Vector3D partial;
 
-        partial = focusedPosition.substract(eyePosition);
-        front.clone(partial);
+        partial = focusedPosition.subtract(eyePosition);
+        front = new Vector3D(partial);
         focalDistance = front.length();
-        front.normalize();
+        front = front.normalized();
     }
 
     /**
@@ -196,15 +196,15 @@ public class Camera extends Entity
     */
     public void setFocusedPositionMaintainingOrthogonality(Vector3D focusedPosition)
     {
-        front.substract(focusedPosition, eyePosition);
+        front = focusedPosition.subtract(eyePosition);
         focalDistance = front.length();
-        front.normalize();
+        front = front.normalized();
 
         left = up.crossProduct(front);
-        left.normalize();
+        left = left.normalized();
 
         up = front.crossProduct(left);
-        up.normalize();
+        up = up.normalized();
     }
 
     public Vector3D getUp()
@@ -243,7 +243,7 @@ public class Camera extends Entity
     */
     public void setUpDirect(Vector3D up)
     {
-        this.up.clone(up);
+        this.up = new Vector3D(up);
     }
 
     /**
@@ -257,7 +257,7 @@ public class Camera extends Entity
     */
     public void setLeftDirect(Vector3D left)
     {
-        this.left.clone(left);
+        this.left = new Vector3D(left);
     }
 
     /**
@@ -267,13 +267,13 @@ public class Camera extends Entity
      */
     public void setUpMaintainingOrthogonality(Vector3D up)
     {
-        up.normalize();
+        up = up.normalized();
 
         left = up.crossProduct(front);
-        left.normalize();
+        left = left.normalized();
  
         this.up=front.crossProduct(left);
-        this.up.normalize();
+        this.up = up.normalized();
     }
 
     public double getFov()
@@ -334,9 +334,9 @@ public class Camera extends Entity
     */
     public final void updateVectors()
     {
-        up.normalize();
-        left.normalize();
-        front.normalize();
+        up = up.normalized();
+        left = left.normalized();
+        front = front.normalized();
 
         double fovFactor = viewportXSize / viewportYSize;
         _dir = front.multiply(0.5);
@@ -484,20 +484,20 @@ public class Camera extends Entity
 
     public void setRotation(Matrix4x4 R)
     {
-        up.x = R.M[0][2];
-        up.y = R.M[1][2];
-        up.z = R.M[2][2];
-        up.normalize();
+        up = up.withX(R.M[0][2]);
+        up = up.withY(R.M[1][2]);
+        up = up.withZ(R.M[2][2]);
+        up = up.normalized();
 
-        front.x = R.M[0][0];
-        front.y = R.M[1][0];
-        front.z = R.M[2][0];
-        front.normalize();
+        front = front.withX(R.M[0][0]);
+        front = front.withY(R.M[1][0]);
+        front = front.withZ(R.M[2][0]);
+        front = front.normalized();
 
-        left.x=R.M[0][1];
-        left.y=R.M[1][1];
-        left.z=R.M[2][1];
-        left.normalize();
+        left = left.withX(R.M[0][1]);
+        left = left.withY(R.M[1][1]);
+        left = left.withZ(R.M[2][1]);
+        left = left.normalized();
     }
 
     public Matrix4x4 getRotation()
@@ -506,9 +506,9 @@ public class Camera extends Entity
         Matrix4x4 R = new Matrix4x4();
 
         R.identity();
-        R.M[0][0] = front.x; R.M[0][1] = left.x; R.M[0][2] = up.x;
-        R.M[1][0] = front.y; R.M[1][1] = left.y; R.M[1][2] = up.y;
-        R.M[2][0] = front.z; R.M[2][1] = left.z; R.M[2][2] = up.z;
+        R.M[0][0] = front.x(); R.M[0][1] = left.x(); R.M[0][2] = up.x();
+        R.M[1][0] = front.y(); R.M[1][1] = left.y(); R.M[1][2] = up.y();
+        R.M[2][0] = front.z(); R.M[2][1] = left.z(); R.M[2][2] = up.z();
 
         return R;
     }
@@ -561,7 +561,7 @@ public class Camera extends Entity
         R1 = getRotation();
         R1.invert();
 
-        T1.translation(-eyePosition.x, -eyePosition.y, -eyePosition.z);
+        T1.translation(-eyePosition.x(), -eyePosition.y(), -eyePosition.z());
         R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
         R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
 
@@ -712,7 +712,7 @@ public class Camera extends Entity
             u /= orthogonalZoom;
             u *= 2*(viewportXSize/viewportYSize);
             Vector3D right = left.multiply(-1);
-            right.normalize();
+            right = right.normalized();
             if ( u > 0 ) {
                 return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
             }
@@ -725,11 +725,11 @@ public class Camera extends Entity
         Vector3D f = new Vector3D(front);
         Vector3D dir = du.add(_dir);
 
-        f.normalize();
+        f = f.normalized();
 
         double alpha;
 
-        dir.normalize();
+        dir = dir.normalized();
 
         alpha = Math.acos(f.dotProduct(dir));
         if ( u > 0 ) alpha *= -1;
@@ -740,7 +740,7 @@ public class Camera extends Entity
 
         R.axisRotation(alpha, up);
         n = R.multiply(du);
-        n.normalize();
+        n = n.normalized();
 
         // 3. Build the plane and return
         InfinitePlane plane;
@@ -782,7 +782,7 @@ public class Camera extends Entity
             v /= orthogonalZoom;
             v *= 2;
             Vector3D up2 = new Vector3D(up);
-            up.normalize();
+            up = up.normalized();
             if ( v > 0 ) {
                 return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
             }
@@ -796,11 +796,11 @@ public class Camera extends Entity
         Vector3D f = new Vector3D(front);
         Vector3D dir = dv.add(_dir);
 
-        f.normalize();
+        f = f.normalized();
 
         double alpha;
 
-        dir.normalize();
+        dir = dir.normalized();
 
         alpha = Math.acos(f.dotProduct(dir));
         if ( v > 0 ) alpha *= -1;
@@ -811,7 +811,7 @@ public class Camera extends Entity
 
         R.axisRotation(alpha, left);
         n = R.multiply(dv);
-        n.normalize();
+        n = n.normalized();
 
         // 3. Build the plane and return
         InfinitePlane plane;
@@ -835,7 +835,7 @@ public class Camera extends Entity
         InfinitePlane plane;
 
         Vector3D f = new Vector3D(front);
-        f.normalize();
+        f = f.normalized();
         Vector3D back = f.multiply(-1);
         f = f.multiply(nearPlaneDistance);
         Vector3D c = eyePosition.add(f);
@@ -859,7 +859,7 @@ public class Camera extends Entity
         InfinitePlane plane;
 
         Vector3D f = new Vector3D(front);
-        f.normalize();
+        f = f.normalized();
         f = f.multiply(farPlaneDistance);
         Vector3D c = eyePosition.add(f);
         plane = new InfinitePlane(front, c);
@@ -928,13 +928,13 @@ public class Camera extends Entity
     {
         int bits = 0x00;
 
-        if ( p.z + p.x - 1 > 0 ) bits |= OPCODE_RIGHT;
-        if ( p.z - p.x - 1 > 0 ) bits |= OPCODE_LEFT;
-        if ( p.z + p.y - 1 > 0 ) bits |= OPCODE_UP;
-        if ( p.z - p.y - 1 > 0 ) bits |= OPCODE_DOWN;
+        if ( p.z() + p.x() - 1 > 0 ) bits |= OPCODE_RIGHT;
+        if ( p.z() - p.x() - 1 > 0 ) bits |= OPCODE_LEFT;
+        if ( p.z() + p.y() - 1 > 0 ) bits |= OPCODE_UP;
+        if ( p.z() - p.y() - 1 > 0 ) bits |= OPCODE_DOWN;
         // Warning: near plane clipping
-        if ( p.z > 0 ) bits |= OPCODE_NEAR;
-        if ( p.z < -fpd() ) bits |= OPCODE_FAR;
+        if ( p.z() > 0 ) bits |= OPCODE_NEAR;
+        if ( p.z() < -fpd() ) bits |= OPCODE_FAR;
 
         return bits;
     }
@@ -1016,12 +1016,12 @@ public class Camera extends Entity
         InfinitePlane clippingPlane; // Selected plane for each iteration
 
         //- Algorithm initial state ---------------------------------------
-        clippedPoint0.x = point0.x;
-        clippedPoint0.y = point0.y;
-        clippedPoint0.z = point0.z;
-        clippedPoint1.x = point1.x;
-        clippedPoint1.y = point1.y;
-        clippedPoint1.z = point1.z;
+        clippedPoint0 = clippedPoint0.withX(point0.x());
+        clippedPoint0 = clippedPoint0.withY(point0.y());
+        clippedPoint0 = clippedPoint0.withZ(point0.z());
+        clippedPoint1 = clippedPoint1.withX(point1.x());
+        clippedPoint1 = clippedPoint1.withY(point1.y());
+        clippedPoint1 = clippedPoint1.withZ(point1.z());
         updateVectors();
         clippingMidPoint = new Vector3D();
         rightPlane = calculateUPlane(0.5);
@@ -1034,8 +1034,8 @@ public class Camera extends Entity
                                       upPlane, downPlane, nearPlane, farPlane);
         outcode1 = calculateOutcodeBits(point1, rightPlane, leftPlane,
                                       upPlane, downPlane, nearPlane, farPlane);
-        dirFromP0ToP1 = point1.substract(point0);
-        dirFromP0ToP1.normalize();
+        dirFromP0ToP1 = point1.subtract(point0);
+        dirFromP0ToP1 = dirFromP0ToP1.normalized();
 
         //- Main Cohen-Sutherland iteration cycle (incremental clipping) --
         boolean linePasses = false; // Algorithm return value
@@ -1107,17 +1107,17 @@ public class Camera extends Entity
 
                 //--------------------------------------------------
                 if ( outcodeout == outcode0 ) {
-                    clippedPoint0.x = clippingMidPoint.x;
-                    clippedPoint0.y = clippingMidPoint.y;
-                    clippedPoint0.z = clippingMidPoint.z;
+                    clippedPoint0 = clippedPoint0.withX(clippingMidPoint.x());
+                    clippedPoint0 = clippedPoint0.withY(clippingMidPoint.y());
+                    clippedPoint0 = clippedPoint0.withZ(clippingMidPoint.z());
                     outcode0 = calculateOutcodeBits(clippedPoint0,
                         rightPlane, leftPlane, upPlane, 
                         downPlane, nearPlane, farPlane);
                   }
                   else {
-                    clippedPoint1.x = clippingMidPoint.x;
-                    clippedPoint1.y = clippingMidPoint.y;
-                    clippedPoint1.z = clippingMidPoint.z;
+                    clippedPoint1 = clippedPoint1.withX(clippingMidPoint.x());
+                    clippedPoint1 = clippedPoint1.withY(clippingMidPoint.y());
+                    clippedPoint1 = clippedPoint1.withZ(clippingMidPoint.z());
                     outcode1 = calculateOutcodeBits(clippedPoint1,
                         rightPlane, leftPlane, upPlane, 
                         downPlane, nearPlane, farPlane);
@@ -1170,12 +1170,12 @@ public class Camera extends Entity
         pp0 = normalizingTransformation.multiply(point0);
         pp1 = normalizingTransformation.multiply(point1);
 
-        clippedPoint0.x = pp0.x;
-        clippedPoint0.y = pp0.y;
-        clippedPoint0.z = pp0.z;
-        clippedPoint1.x = pp1.x;
-        clippedPoint1.y = pp1.y;
-        clippedPoint1.z = pp1.z;
+        clippedPoint0 = clippedPoint0.withX(pp0.x());
+        clippedPoint0 = clippedPoint0.withY(pp0.y());
+        clippedPoint0 = clippedPoint0.withZ(pp0.z());
+        clippedPoint1 = clippedPoint1.withX(pp1.x());
+        clippedPoint1 = clippedPoint1.withY(pp1.y());
+        clippedPoint1 = clippedPoint1.withZ(pp1.z());
         updateVectors();
         clippingMidPoint = new Vector3D();
         outcode0 = calculateOutcodeBits(pp0);
@@ -1198,15 +1198,17 @@ public class Camera extends Entity
             //- Iterative cases: clipping with each of the 6 planes -------
             else {
                 //--------------------------------------------------
-                dirFromP0ToP1 = clippedPoint1.substract(clippedPoint0);
+                dirFromP0ToP1 = clippedPoint1.subtract(clippedPoint0);
                 l = dirFromP0ToP1.length();
                 if ( l < VSDK.EPSILON ) {
                     // continue;
                     return false;
                 }
-                dirFromP0ToP1.x /= l;
-                dirFromP0ToP1.y /= l;
-                dirFromP0ToP1.z /= l;
+                dirFromP0ToP1 = new Vector3D(
+                    dirFromP0ToP1.x() / l,
+                    dirFromP0ToP1.y() / l,
+                    dirFromP0ToP1.z() / l
+                );
 
                 //--------------------------------------------------
                 if ( outcode0 != 0 ) {
@@ -1250,36 +1252,36 @@ public class Camera extends Entity
                 switch ( planeId ) {
                   case 1: // up plane
                     testRay.t = 
-                          (l * (1 - clippedPoint0.z - clippedPoint0.y)) / 
-                          (clippedPoint1.z - clippedPoint0.z + 
-                           clippedPoint1.y - clippedPoint0.y);
+                          (l * (1 - clippedPoint0.z() - clippedPoint0.y())) / 
+                          (clippedPoint1.z() - clippedPoint0.z() + 
+                           clippedPoint1.y() - clippedPoint0.y());
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
                     break;
                   case 2: // down plane
                     testRay.t = 
-                          (l * (clippedPoint0.y - clippedPoint0.z +1)) / 
-                          (clippedPoint1.z - clippedPoint0.z - 
-                           clippedPoint1.y + clippedPoint0.y);
+                          (l * (clippedPoint0.y() - clippedPoint0.z() +1)) / 
+                          (clippedPoint1.z() - clippedPoint0.z() - 
+                           clippedPoint1.y() + clippedPoint0.y());
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
                     break;
                   case 3: // left plane
                     testRay.t = 
-                          (l * (clippedPoint0.x - clippedPoint0.z +1)) / 
-                          (clippedPoint1.z - clippedPoint0.z - 
-                           clippedPoint1.x + clippedPoint0.x);
+                          (l * (clippedPoint0.x() - clippedPoint0.z() +1)) / 
+                          (clippedPoint1.z() - clippedPoint0.z() - 
+                           clippedPoint1.x() + clippedPoint0.x());
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
                     break;
                   case 4: // right plane
                     testRay.t = 
-                          (l * (1 - clippedPoint0.z - clippedPoint0.x)) / 
-                          (clippedPoint1.z - clippedPoint0.z + 
-                           clippedPoint1.x - clippedPoint0.x);
+                          (l * (1 - clippedPoint0.z() - clippedPoint0.x())) / 
+                          (clippedPoint1.z() - clippedPoint0.z() + 
+                           clippedPoint1.x() - clippedPoint0.x());
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
@@ -1287,8 +1289,8 @@ public class Camera extends Entity
                   case 5: // near plane
                     // Warning: near plane clipping
                     testRay.t = 
-                        ( /*(1-nearPlaneDistance)*/ -clippedPoint0.z * l) / 
-                          (clippedPoint1.z - clippedPoint0.z);
+                        ( /*(1-nearPlaneDistance)*/ -clippedPoint0.z() * l) / 
+                          (clippedPoint1.z() - clippedPoint0.z());
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
@@ -1296,8 +1298,8 @@ public class Camera extends Entity
                   case 6: // far plane
                     testRay.t = 
                         (((-fpd()-
-                             clippedPoint0.z) * l) / 
-                             (clippedPoint1.z - clippedPoint0.z));
+                             clippedPoint0.z()) * l) / 
+                             (clippedPoint1.z() - clippedPoint0.z()));
                     clippingMidPoint = testRay.origin.add(
                         testRay.direction.multiply(testRay.t+de));
                     linePasses = true;
@@ -1306,15 +1308,15 @@ public class Camera extends Entity
 
                 //--------------------------------------------------
                 if ( outcodeout == outcode0 ) {
-                    clippedPoint0.x = clippingMidPoint.x;
-                    clippedPoint0.y = clippingMidPoint.y;
-                    clippedPoint0.z = clippingMidPoint.z;
+                    clippedPoint0 = clippedPoint0.withX(clippingMidPoint.x());
+                    clippedPoint0 = clippedPoint0.withY(clippingMidPoint.y());
+                    clippedPoint0 = clippedPoint0.withZ(clippingMidPoint.z());
                     outcode0 = calculateOutcodeBits(clippedPoint0);
                   }
                   else {
-                    clippedPoint1.x = clippingMidPoint.x;
-                    clippedPoint1.y = clippingMidPoint.y;
-                    clippedPoint1.z = clippingMidPoint.z;
+                    clippedPoint1 = clippedPoint1.withX(clippingMidPoint.x());
+                    clippedPoint1 = clippedPoint1.withY(clippingMidPoint.y());
+                    clippedPoint1 = clippedPoint1.withZ(clippingMidPoint.z());
                     outcode1 = calculateOutcodeBits(clippedPoint1);
                 }
             }
@@ -1331,16 +1333,18 @@ public class Camera extends Entity
     public boolean projectPoint(Vector3D worldPosition, Vector3D projectedPosition) {
         Matrix4x4 NT = getNormalizingTransformation();
         Vector3D p = NT.multiply(worldPosition);
-        p.x /= -p.z;
-        p.y /= -p.z;
-        p.z /= p.z;
+        p = new Vector3D(
+            p.x() / (-p.z()),
+            p.y() / (-p.z()),
+            p.z() / p.z()
+        );
 
-        if ( p.x < -1.0 || p.x > 1.0 || p.y < -1.0 || p.y > 1.0 ) {
+        if ( p.x() < -1.0 || p.x() > 1.0 || p.y() < -1.0 || p.y() > 1.0 ) {
             return false;
         }
         
-        projectedPosition.x = ((p.x + 1.0)/2.0 * getViewportXSize());
-        projectedPosition.y = (getViewportYSize() - (p.y + 1.0)/2.0 * getViewportYSize());
+        projectedPosition = projectedPosition.withX(((p.x() + 1.0)/2.0 * getViewportXSize()));
+        projectedPosition = projectedPosition.withY((getViewportYSize() - (p.y() + 1.0)/2.0 * getViewportYSize()));
 
         return true;
     }
@@ -1392,7 +1396,7 @@ public class Camera extends Entity
 
         center = new Vector3D(front);
         p = getPosition();
-        center.normalize();
+        center = center.normalized();
         center.multiply(nearPlaneDistance);
         center = center.add(p);
         viewPlane = new InfinitePlane(front.multiply(-1), center);
@@ -1401,45 +1405,45 @@ public class Camera extends Entity
         Vector3D projected;
 
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            projected = (viewPlane.projectPoint(inPoint).substract(center)).multiply(orthogonalZoom);
+            projected = (viewPlane.projectPoint(inPoint).subtract(center)).multiply(orthogonalZoom);
         }
         else {
             // 3.1. Vector calculation for perspective case
             upCopy = new Vector3D(up);
             rightCopy = new Vector3D(left.multiply(-1));
             scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
-            upCopy.normalize();
+            upCopy = upCopy.normalized();
             upCopy = upCopy.multiply(scaleFactor);
-            rightCopy.normalize();
+            rightCopy = rightCopy.normalized();
             rightCopy = rightCopy.multiply(scaleFactor).multiply(1/fovFactor);
 
             // 3.2. Calculate projector for perspective case
             Ray r;
-            r = new Ray(p, inPoint.substract(p));
+            r = new Ray(p, inPoint.subtract(p));
 
             // 3.3. Project point in view plane from perspective eyepoint
             if ( !viewPlane.doIntersection(r) ||
                  r.direction.length() < VSDK.EPSILON ) {
                 return false;
             }
-            projected = r.origin.add(r.direction.multiply(r.t)).substract(center);
+            projected = r.origin.add(r.direction.multiply(r.t)).subtract(center);
             // 3.4. Clip projected point in viewport
-            if ( projected.x < -1 || projected.x > 1 ||
-                 projected.y < -1 || projected.y > 1 ) {
+            if ( projected.x() < -1 || projected.x() > 1 ||
+                 projected.y() < -1 || projected.y() > 1 ) {
                 return false;
             }
         }
 
         // 4. Scale point to viewport
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            outProjected.x = viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize;
-            outProjected.y = (((projected.dotProduct(up)*-1)+1)/2)*viewportYSize;
+            outProjected = outProjected.withX(viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize);
+            outProjected = outProjected.withY((((projected.dotProduct(up)*-1)+1)/2)*viewportYSize);
         }
         else {
-            outProjected.x = (projected.dotProduct(rightCopy)/2+0.5)*viewportXSize;
-            outProjected.y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize;
+            outProjected = outProjected.withX((projected.dotProduct(rightCopy)/2+0.5)*viewportXSize);
+            outProjected = outProjected.withY((1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize);
         }
-        outProjected.z = 0.0;
+        outProjected = outProjected.withZ(0.0);
 
         return true;
     }
@@ -1544,9 +1548,9 @@ public class Camera extends Entity
         double f = -1.0 / (viewportYSize);
         double d = -0.5;
         double h = 0.5;
-        inOutUnitSquarePoint.x = a * inViewportPoint.x + d;
-        inOutUnitSquarePoint.y = f * inViewportPoint.y + h;
-        inOutUnitSquarePoint.z = 0;
+        inOutUnitSquarePoint = inOutUnitSquarePoint.withX(a * inViewportPoint.x() + d);
+        inOutUnitSquarePoint = inOutUnitSquarePoint.withY(f * inViewportPoint.y() + h);
+        inOutUnitSquarePoint = inOutUnitSquarePoint.withZ(0);
     }
 
     /**

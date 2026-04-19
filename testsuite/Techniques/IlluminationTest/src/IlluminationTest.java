@@ -67,12 +67,11 @@ public class IlluminationTest
 
     private void updateH()
     {
-        Vector3D L = new Vector3D(lightPosition);
-        L.normalize();
+        Vector3D L = lightPosition.normalized();
 
         double mag = N.dotProduct(L) * 2;
 
-        H = (N.multiply(mag)).substract(L);
+        H = (N.multiply(mag)).subtract(L);
     }
 
     private TriangleMesh createFloorMesh()
@@ -155,8 +154,7 @@ public class IlluminationTest
         TriangleMesh m = new TriangleMesh();
 
         //- Prepare illumination model vectors ----------------------------
-        Vector3D L = new Vector3D(lightPosition);
-        L.normalize();
+        Vector3D L = lightPosition.normalized();
 
         //-----------------------------------------------------------------
         m.initVertexPositionsArray((nx+1)*(ny+1));
@@ -165,7 +163,6 @@ public class IlluminationTest
         double dphi = 90.0 / ((double)nx);
         double tetha, phi, z;
         double r, x1, y1, z1, d, s;
-        Vector3D E;
 
         index = 0;
         for ( iy = 0, tetha = 0; iy <= ny; iy++, tetha += dtetha ) {
@@ -182,9 +179,9 @@ public class IlluminationTest
                 y1 = Math.sin(Math.toRadians(tetha)) *
                         Math.cos(Math.toRadians(phi));
                 z1 = Math.cos(Math.toRadians(90-phi));
-                E = new Vector3D(x1, y1, z1);
-                E.normalize();
-                s = Math.pow(H.dotProduct(E), phongExp);
+                // Avoid per-vertex Vector3D allocations in this hot loop.
+                double hDotE = (H.x() * x1) + (H.y() * y1) + (H.z() * z1);
+                s = Math.pow(hDotE, phongExp);
 
                 r = d + s;
 
@@ -375,7 +372,7 @@ public class IlluminationTest
             gl.glBegin(gl.GL_LINES);
                 gl.glColor3d(0.5, 0.5, 0.9);
                 gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(lightPosition.x, lightPosition.y, lightPosition.z);
+                gl.glVertex3d(lightPosition.x(), lightPosition.y(), lightPosition.z());
 
                 gl.glColor3d(0.9, 0.9, 0.5);
                 gl.glVertex3d(0, 0, 0);
@@ -383,7 +380,7 @@ public class IlluminationTest
 
                 gl.glColor3d(0.5, 0.9, 0.5);
                 gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(3*H.x, 3*H.y, 3*H.z);
+                gl.glVertex3d(3*H.x(), 3*H.y(), 3*H.z());
 
             gl.glEnd();
         }
@@ -479,22 +476,22 @@ public class IlluminationTest
             if ( phongExp < 0.0 ) phongExp = 0.0;
         }
         else if ( e.getKeyCode() == KeyEvent.VK_1 ) {
-            lightPosition.x -= deltalight;
+            lightPosition = lightPosition.withX(lightPosition.x() - deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_2 ) {
-            lightPosition.x += deltalight;
+            lightPosition = lightPosition.withX(lightPosition.x() + deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_3 ) {
-            lightPosition.y -= deltalight;
+            lightPosition = lightPosition.withY(lightPosition.y() - deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_4 ) {
-            lightPosition.y += deltalight;
+            lightPosition = lightPosition.withY(lightPosition.y() + deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_5 ) {
-            lightPosition.z -= deltalight;
+            lightPosition = lightPosition.withZ(lightPosition.z() - deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_6 ) {
-            lightPosition.z += deltalight;
+            lightPosition = lightPosition.withZ(lightPosition.z() + deltalight);
         }
         else if ( e.getKeyCode() == KeyEvent.VK_0 ) {
             if ( showVectors == true ) {

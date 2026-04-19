@@ -94,17 +94,17 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         Vector3D middle;
         Vector3D a, b, n;
 
-        a = (he.next()).startingVertex.position.substract(
+        a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
-        b = (he.previous()).startingVertex.position.substract(
+        b = (he.previous()).startingVertex.position.subtract(
             he.startingVertex.position);
-        a.normalize();
-        b.normalize();
+        a = a.normalized();
+        b = b.normalized();
 
         n = he.parentLoop.parentFace.containingPlane.getNormal();
 
         middle = n.crossProduct(a);
-        middle.normalize();
+        middle = middle.normalized();
 
         return middle;
     }

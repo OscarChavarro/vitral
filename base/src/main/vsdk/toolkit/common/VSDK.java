@@ -189,9 +189,9 @@ public class VSDK
 
     public static double vectorDistance(Vector3D a, Vector3D b)
     {
-        return Math.sqrt((a.x-b.x)*(a.x-b.x) + 
-                         (a.y-b.y)*(a.y-b.y) +
-                         (a.z-b.z)*(a.z-b.z));
+        return Math.sqrt((a.x()-b.x())*(a.x()-b.x()) +
+                         (a.y()-b.y())*(a.y()-b.y()) +
+                         (a.z()-b.z())*(a.z()-b.z()));
     }
 
     public static double vectorDistance(Vector2D a, Vector2D b)

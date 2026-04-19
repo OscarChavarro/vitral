@@ -120,17 +120,17 @@ final class _PolyhedralBoundedSolidSetClassifier
         Vector3D middle = null;
         Vector3D a, b, n;
 
-        a = (he.next()).startingVertex.position.substract(
+        a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
-        b = (he.previous()).startingVertex.position.substract(
+        b = (he.previous()).startingVertex.position.subtract(
             he.startingVertex.position);
-        a.normalize();
-        b.normalize();
+        a = a.normalized();
+        b = b.normalized();
 
         n = he.parentLoop.parentFace.containingPlane.getNormal();
 
         middle = n.crossProduct(a);
-        middle.normalize();
+        middle = middle.normalized();
 
         return middle;
     }
@@ -408,7 +408,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         if ( nulledge(he) ) {
             h2 = h2.next();
         }
-        dir = h2.startingVertex.position.substract(he.startingVertex.position);
+        dir = h2.startingVertex.position.subtract(he.startingVertex.position);
         cr = he.parentLoop.parentFace.containingPlane.getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.containingPlane.getNormal());
         if ( cr.length() < numericContext.unitVectorTolerance() ) {
             return true;

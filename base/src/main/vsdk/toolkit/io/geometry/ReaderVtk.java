@@ -51,10 +51,10 @@ public class ReaderVtk extends PersistenceElement
             if ( elementType.startsWith("float") ) {
                 points = new Vector3D[numElements];
                 for ( i = 0; i < numElements; i++ ) {
-                    points[i] = new Vector3D();
-                    points[i].x = readFloatBE(fis) / 1000.0;
-                    points[i].y = readFloatBE(fis) / 1000.0;
-                    points[i].z = readFloatBE(fis) / 1000.0;
+                    points[i] = new Vector3D(
+                        readFloatBE(fis) / 1000.0,
+                        readFloatBE(fis) / 1000.0,
+                        readFloatBE(fis) / 1000.0);
                 }
                 //System.out.println("Ok.");
             }
@@ -111,10 +111,10 @@ public class ReaderVtk extends PersistenceElement
                     //System.out.print("Reading normals... ");
                     normals = new Vector3D[numElements];
                     for ( i = 0; i < numElements; i++ ) {
-                        normals[i] = new Vector3D();
-                        normals[i].x = readFloatBE(fis);
-                        normals[i].y = readFloatBE(fis);
-                        normals[i].z = readFloatBE(fis);
+                        normals[i] = new Vector3D(
+                            readFloatBE(fis),
+                            readFloatBE(fis),
+                            readFloatBE(fis));
                     }
                     readAsciiLine(fis); // Closing string
                     //System.out.println("Ok.");

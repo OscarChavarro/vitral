@@ -22,6 +22,18 @@ over gemetries.
 */
 public class ComputationalGeometry extends ProcessingElement
 {
+    public static final class TriangleIntersection {
+        public final double t;
+        public final Vector3D point;
+        public final Vector3D normal;
+
+        public TriangleIntersection(double t, Vector3D point, Vector3D normal) {
+            this.t = t;
+            this.point = point;
+            this.normal = normal;
+        }
+    }
+
     private static final InfinitePlane workPlane;
         
         // For 2D line clipping an 4 bit outcode is used
@@ -96,14 +108,12 @@ public class ComputationalGeometry extends ProcessingElement
     @param outNormal
     @return 
     */
-    public static boolean
+    public static TriangleIntersection
     doIntersectionWithTriangle(
         Ray inOut_Ray,
         Vector3D v0, 
         Vector3D v1, 
-        Vector3D v2,
-        Vector3D outPoint, 
-        Vector3D outNormal) 
+        Vector3D v2) 
     {
         Vector3D p;           // Point of intersection between ray and plane
         Vector3D u, v, n;     // Edge vectors and normal
@@ -112,10 +122,9 @@ public class ComputationalGeometry extends ProcessingElement
 
         // The vectors u & v are two triangle edges, and define the 
         // normal (1)
-        u = v1.substract(v0);
-        v = v2.substract(v1);
-        n = v.crossProduct(u);
-        n.normalize();
+        u = v1.subtract(v0);
+        v = v2.subtract(v1);
+        n = v.crossProduct(u).normalized();
 
         // This is the result of replacing point v0 on plane equation, 
         // solving for d
@@ -130,25 +139,23 @@ public class ComputationalGeometry extends ProcessingElement
             // Solution for equation (2), only if non-zero denominator
             t = (-a) / b;
 
-            if ( t < 0.0 ) return false;
+            if ( t < 0.0 ) return null;
 
             // Calculate the intersection point between ray and plane
             p = inOut_Ray.origin.add(inOut_Ray.direction.multiply(t));
 
             // Check if the point is inside the triangle
-            s1 = u.crossProduct(p.substract(v0)).dotProduct(n);
-            s2 = (v2.substract(v1)).crossProduct(p.substract(v1)).dotProduct(n);
-            s3 = (v0.substract(v2)).crossProduct(p.substract(v2)).dotProduct(n);
+            s1 = u.crossProduct(p.subtract(v0)).dotProduct(n);
+            s2 = (v2.subtract(v1)).crossProduct(p.subtract(v1)).dotProduct(n);
+            s3 = (v0.subtract(v2)).crossProduct(p.subtract(v2)).dotProduct(n);
 
             if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
-                 (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
+                (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
                 inOut_Ray.t = t;
-                outNormal.clone(n);
-                outPoint.clone(p);
-                return true;
+                return new TriangleIntersection(t, p, n);
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -167,7 +174,7 @@ public class ComputationalGeometry extends ProcessingElement
         Vector3D p)
     {
         //----------------------------------------------------------------------
-        Vector3D lineVector = p1.substract(p0);
+        Vector3D lineVector = p1.subtract(p0);
 
         double denominator = lineVector.length();
         if ( denominator < VSDK.EPSILON ) {
@@ -177,8 +184,8 @@ public class ComputationalGeometry extends ProcessingElement
         //----------------------------------------------------------------------
         Vector3D v, w;
 
-        v = p1.substract(p0);
-        w = p.substract(p0);
+        v = p1.subtract(p0);
+        w = p.subtract(p0);
         
         double c1;
         double c2;
@@ -247,8 +254,8 @@ public class ComputationalGeometry extends ProcessingElement
         double d;
         Vector3D a, b;
 
-        a = p1.substract(p0);
-        b = p.substract(p0);
+        a = p1.subtract(p0);
+        b = p.subtract(p0);
 
         double denominator = a.length();
         if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
@@ -293,17 +300,16 @@ public class ComputationalGeometry extends ProcessingElement
     {
         Vector3D n, a, b;
 
-        a = p1.substract(p0);
-        b = p2.substract(p0);
-        n = a.crossProduct(b);
-        n.normalize();
+        a = p1.subtract(p0);
+        b = p2.subtract(p0);
+        n = a.crossProduct(b).normalized();
 
         workPlane.setFromPointNormal(p0, n);
 
         if ( workPlane.doContainmentTest(p, distanceTolerance) == 
              Geometry.LIMIT ) {
             // Barycentric coordinates test containment technique (Region 1)
-            Vector3D c = p.substract(p0);
+            Vector3D c = p.subtract(p0);
             double dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
             dot00 = a.dotProduct(a);
             dot01 = a.dotProduct(b);
@@ -364,26 +370,26 @@ public class ComputationalGeometry extends ProcessingElement
         double maxY = -Double.MAX_VALUE;
         double maxZ = -Double.MAX_VALUE;
 
-        if ( p0.x < minX ) minX = p0.x;
-        if ( p0.y < minY ) minY = p0.y;
-        if ( p0.z < minZ ) minZ = p0.z;
-        if ( p0.x > maxX ) maxX = p0.x;
-        if ( p0.y > maxY ) maxY = p0.y;
-        if ( p0.z > maxZ ) maxZ = p0.z;
+        if ( p0.x() < minX ) minX = p0.x();
+        if ( p0.y() < minY ) minY = p0.y();
+        if ( p0.z() < minZ ) minZ = p0.z();
+        if ( p0.x() > maxX ) maxX = p0.x();
+        if ( p0.y() > maxY ) maxY = p0.y();
+        if ( p0.z() > maxZ ) maxZ = p0.z();
 
-        if ( p1.x < minX ) minX = p1.x;
-        if ( p1.y < minY ) minY = p1.y;
-        if ( p1.z < minZ ) minZ = p1.z;
-        if ( p1.x > maxX ) maxX = p1.x;
-        if ( p1.y > maxY ) maxY = p1.y;
-        if ( p1.z > maxZ ) maxZ = p1.z;
+        if ( p1.x() < minX ) minX = p1.x();
+        if ( p1.y() < minY ) minY = p1.y();
+        if ( p1.z() < minZ ) minZ = p1.z();
+        if ( p1.x() > maxX ) maxX = p1.x();
+        if ( p1.y() > maxY ) maxY = p1.y();
+        if ( p1.z() > maxZ ) maxZ = p1.z();
 
-        if ( p2.x < minX ) minX = p2.x;
-        if ( p2.y < minY ) minY = p2.y;
-        if ( p2.z < minZ ) minZ = p2.z;
-        if ( p2.x > maxX ) maxX = p2.x;
-        if ( p2.y > maxY ) maxY = p2.y;
-        if ( p2.z > maxZ ) maxZ = p2.z;
+        if ( p2.x() < minX ) minX = p2.x();
+        if ( p2.y() < minY ) minY = p2.y();
+        if ( p2.z() < minZ ) minZ = p2.z();
+        if ( p2.x() > maxX ) maxX = p2.x();
+        if ( p2.y() > maxY ) maxY = p2.y();
+        if ( p2.z() > maxZ ) maxZ = p2.z();
 
         minMax[0] = minX;
         minMax[1] = minY;

@@ -102,7 +102,7 @@ public class JoglBoxRenderer extends JoglRenderer {
 
         gl.glPushMatrix();
         gl.glEnable(GL2.GL_NORMALIZE);
-        gl.glScaled(size.x, size.y, size.z);
+        gl.glScaled(size.x(), size.y(), size.z());
         if ( q.isSurfacesSet() ) {
             JoglGeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);

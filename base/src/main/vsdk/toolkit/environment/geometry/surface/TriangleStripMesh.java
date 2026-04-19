@@ -47,9 +47,9 @@ public class TriangleStripMesh extends Surface {
             int i;
 
             for ( i = 0; i < vertexes.length; i++ ) {
-                double x = vertexes[i].getPosition().x;
-                double y = vertexes[i].getPosition().y;
-                double z = vertexes[i].getPosition().z;
+                double x = vertexes[i].getPosition().x();
+                double y = vertexes[i].getPosition().y();
+                double z = vertexes[i].getPosition().z();
 
                 if ( x < minX ) minX = x;
                 if ( y < minY ) minY = y;

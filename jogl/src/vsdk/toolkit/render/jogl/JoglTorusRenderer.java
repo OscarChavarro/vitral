@@ -133,46 +133,46 @@ public class JoglTorusRenderer extends JoglRenderer {
            
             gl.glBegin(GL2.GL_QUADS);
             for ( v = 0.0f; v < 2*Math.PI + dv; v += dv ) {              
-                normal.x = (R+rr*Math.cos(v))*Math.cos(w) -
-                           (R+r*Math.cos(v))*Math.cos(w);
-                normal.y = (R+rr*Math.cos(v))*Math.sin(w) - 
-                           (R+r*Math.cos(v))*Math.sin(w);
-                normal.z = (rr*Math.sin(v)-r*Math.sin(v));
-                normal.normalize();
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                normal = normal.withX((R+rr*Math.cos(v))*Math.cos(w) -
+                           (R+r*Math.cos(v))*Math.cos(w));
+                normal = normal.withY((R+rr*Math.cos(v))*Math.sin(w) - 
+                           (R+r*Math.cos(v))*Math.sin(w));
+                normal = normal.withZ((rr*Math.sin(v)-r*Math.sin(v)));
+                normal = normal.normalized();
+                gl.glNormal3d(normal.x(), normal.y(), normal.z());
                 gl.glVertex3d((R+r*Math.cos(v))*Math.cos(w),
                               (R+r*Math.cos(v))*Math.sin(w),
                               r*Math.sin(v));
 
-                normal.x = (R+rr*Math.cos(v))*Math.cos(w+dw) - 
-                           (R+r*Math.cos(v))*Math.cos(w+dw);
-                normal.y = (R+rr*Math.cos(v))*Math.sin(w+dw) -
-                           (R+r*Math.cos(v))*Math.sin(w+dw);
-                normal.z = (rr*Math.sin(v)-r*Math.sin(v));
-                normal.normalize();
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                normal = normal.withX((R+rr*Math.cos(v))*Math.cos(w+dw) - 
+                           (R+r*Math.cos(v))*Math.cos(w+dw));
+                normal = normal.withY((R+rr*Math.cos(v))*Math.sin(w+dw) -
+                           (R+r*Math.cos(v))*Math.sin(w+dw));
+                normal = normal.withZ((rr*Math.sin(v)-r*Math.sin(v)));
+                normal = normal.normalized();
+                gl.glNormal3d(normal.x(), normal.y(), normal.z());
                 gl.glVertex3d((R+r*Math.cos(v))*Math.cos(w+dw),
                               (R+r*Math.cos(v))*Math.sin(w+dw),
                               r*Math.sin(v));
                 
-                normal.x = (R+rr*Math.cos(v+dv))*Math.cos(w+dw) -
-                           (R+r*Math.cos(v+dv))*Math.cos(w+dw);
-                normal.y = (R+rr*Math.cos(v+dv))*Math.sin(w+dw) - 
-                           (R+r*Math.cos(v+dv))*Math.sin(w+dw);
-                normal.z = (rr*Math.sin(v+dv)-r*Math.sin(v+dv));
-                normal.normalize();
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                normal = normal.withX((R+rr*Math.cos(v+dv))*Math.cos(w+dw) -
+                           (R+r*Math.cos(v+dv))*Math.cos(w+dw));
+                normal = normal.withY((R+rr*Math.cos(v+dv))*Math.sin(w+dw) - 
+                           (R+r*Math.cos(v+dv))*Math.sin(w+dw));
+                normal = normal.withZ((rr*Math.sin(v+dv)-r*Math.sin(v+dv)));
+                normal = normal.normalized();
+                gl.glNormal3d(normal.x(), normal.y(), normal.z());
                 gl.glVertex3d((R+r*Math.cos(v+dv))*Math.cos(w+dw),
                               (R+r*Math.cos(v+dv))*Math.sin(w+dw),
                               r*Math.sin(v+dv));
 
-                normal.x = (R+rr*Math.cos(v+dv))*Math.cos(w) - 
-                           (R+r*Math.cos(v+dv))*Math.cos(w);
-                normal.y = (R+rr*Math.cos(v+dv))*Math.sin(w) -
-                           (R+r*Math.cos(v+dv))*Math.sin(w);
-                normal.z = (rr*Math.sin(v+dv)-r*Math.sin(v+dv));
-                normal.normalize();
-                gl.glNormal3d(normal.x, normal.y, normal.z);
+                normal = normal.withX((R+rr*Math.cos(v+dv))*Math.cos(w) - 
+                           (R+r*Math.cos(v+dv))*Math.cos(w));
+                normal = normal.withY((R+rr*Math.cos(v+dv))*Math.sin(w) -
+                           (R+r*Math.cos(v+dv))*Math.sin(w));
+                normal = normal.withZ((rr*Math.sin(v+dv)-r*Math.sin(v+dv)));
+                normal = normal.normalized();
+                gl.glNormal3d(normal.x(), normal.y(), normal.z());
             
                 gl.glVertex3d((R+r*Math.cos(v+dv))*Math.cos(w),
                               (R+r*Math.cos(v+dv))*Math.sin(w),
@@ -257,19 +257,19 @@ public class JoglTorusRenderer extends JoglRenderer {
             gl.glBegin(GL.GL_LINES);//_STRIP);
           
             for ( v = 0.0f; v < 2 * Math.PI + dv; v += dv ) {
-                normal.x = (R+rr*Math.cos(v))*Math.cos(w) - 
-                           (R+r*Math.cos(v))*Math.cos(w);              
-                normal.y = (R+rr*Math.cos(v))*Math.sin(w) - 
-                           (R+r*Math.cos(v))*Math.sin(w);
-                normal.z = (rr*Math.sin(v)-r*Math.sin(v));
-                normal.normalize();
+                normal = normal.withX((R+rr*Math.cos(v))*Math.cos(w) - 
+                           (R+r*Math.cos(v))*Math.cos(w));              
+                normal = normal.withY((R+rr*Math.cos(v))*Math.sin(w) - 
+                           (R+r*Math.cos(v))*Math.sin(w));
+                normal = normal.withZ((rr*Math.sin(v)-r*Math.sin(v)));
+                normal = normal.normalized();
                 
-                p.x = (R+r*Math.cos(v))*Math.cos(w);
-                p.y = (R+r*Math.cos(v))*Math.sin(w);
-                p.z = r*Math.sin(v);
+                p = p.withX((R+r*Math.cos(v))*Math.cos(w));
+                p = p.withY((R+r*Math.cos(v))*Math.sin(w));
+                p = p.withZ(r*Math.sin(v));
                 
-                gl.glVertex3d(p.x,p.y,p.z);
-                gl.glVertex3d(p.x+normal.x/f, p.y+normal.y/f, p.z+normal.z/f);
+                gl.glVertex3d(p.x(),p.y(),p.z());
+                gl.glVertex3d(p.x()+normal.x()/f, p.y()+normal.y()/f, p.z()+normal.z()/f);
             }
             gl.glEnd();
         }

@@ -111,9 +111,9 @@ public class VoxelVolume extends Solid {
     public Vector3D getVoxelPosition(int x, int y, int z)
     {
         Vector3D p = new Vector3D();
-        p.x = ((double)x+0.5) / ((double)getXSize())*2 - 1;
-        p.y = ((double)y+0.5) / ((double)getYSize())*2 - 1;
-        p.z = ((double)z+0.5) / ((double)getZSize())*2 - 1;
+        p = p.withX(((double)x+0.5) / ((double)getXSize())*2 - 1);
+        p = p.withY(((double)y+0.5) / ((double)getYSize())*2 - 1);
+        p = p.withZ(((double)z+0.5) / ((double)getZSize())*2 - 1);
         return p;
     }
 
@@ -182,12 +182,12 @@ public class VoxelVolume extends Solid {
     */
     public int getVoxelAtPosition(Vector3D p)
     {
-        if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return 0;
+        if ( p.x() < -1 || p.x() > 1 || p.y() < -1 || p.y() > 1 || p.z() < -1 || p.z() > 1 ) return 0;
         int i, j, k;
 
-        i = (int)(((p.x + 1)/2) * ((double)getXSize()) - 0.5);
-        j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
-        k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
+        i = (int)(((p.x() + 1)/2) * ((double)getXSize()) - 0.5);
+        j = (int)(((p.y() + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((p.z() + 1)/2) * ((double)getZSize()) - 0.5);
 
         return getVoxel(i, j, k);
     }
@@ -224,12 +224,12 @@ public class VoxelVolume extends Solid {
     */
     public void putVoxelAtPosition(Vector3D p, byte val)
     {
-        if ( p.x < -1 || p.x > 1 || p.y < -1 || p.y > 1 || p.z < -1 || p.z > 1 ) return;
+        if ( p.x() < -1 || p.x() > 1 || p.y() < -1 || p.y() > 1 || p.z() < -1 || p.z() > 1 ) return;
         int i, j, k;
 
-        i = (int)(((p.x + 1)/2) * ((double)getXSize()) - 0.5);
-        j = (int)(((p.y + 1)/2) * ((double)getYSize()) - 0.5);
-        k = (int)(((p.z + 1)/2) * ((double)getZSize()) - 0.5);
+        i = (int)(((p.x() + 1)/2) * ((double)getXSize()) - 0.5);
+        j = (int)(((p.y() + 1)/2) * ((double)getYSize()) - 0.5);
+        k = (int)(((p.z() + 1)/2) * ((double)getZSize()) - 0.5);
 
         putVoxel(i, j, k, val);
     }
@@ -342,8 +342,10 @@ public class VoxelVolume extends Solid {
     */
     @Override
     public Vector3D doCenterOfMass() {
-        Vector3D cm, p;
-        cm = new Vector3D(0, 0, 0);
+        Vector3D p;
+        double cmx = 0;
+        double cmy = 0;
+        double cmz = 0;
         double mi; // Maximum mass of one voxel (linear to voxel density)
         double M = 0;  // Total mass for current voxel volume
         int x, y, z;
@@ -355,9 +357,9 @@ public class VoxelVolume extends Solid {
                     mi = (double)(getVoxel(x, y, z)) / 255.0;
                     M += mi;
                     p = getVoxelPosition(x, y, z);
-                    cm.x += mi * p.x;
-                    cm.y += mi * p.y;
-                    cm.z += mi * p.z;
+                    cmx += mi * p.x();
+                    cmy += mi * p.y();
+                    cmz += mi * p.z();
                 }
             }
         }
@@ -366,7 +368,7 @@ public class VoxelVolume extends Solid {
             return new Vector3D(0, 0, 0);
         }
 
-        return cm.multiply(1/M);
+        return new Vector3D(cmx / M, cmy / M, cmz / M);
     }
 
 }

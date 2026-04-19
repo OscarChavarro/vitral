@@ -216,7 +216,7 @@ final class _PolyhedralBoundedSolidSetIntersector
         if ( (s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1) ) {
             t = d1 / (d1 - d2);
             p = v1.position.add(
-                    (v2.position.substract(
+                    (v2.position.subtract(
                          v1.position)).multiply(t));
 
             d3 = f.containingPlane.pointDistance(p);

@@ -324,7 +324,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         if ( out.length() <= numericContext.unitVectorTolerance() ) {
             return null;
         }
-        out.normalize();
+        out = out.normalized();
         return out;
     }
 
@@ -350,13 +350,13 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         }
         if ( u == null || normal.crossProduct(u).length() <=
              numericContext.unitVectorTolerance() ) {
-            if ( Math.abs(normal.x) < 0.9 ) {
+            if ( Math.abs(normal.x()) < 0.9 ) {
                 u = normalizedDirection(new Vector3D(1.0, 0.0, 0.0)
-                    .substract(normal.multiply(normal.x)));
+                    .subtract(normal.multiply(normal.x())));
             }
             else {
                 u = normalizedDirection(new Vector3D(0.0, 1.0, 0.0)
-                    .substract(normal.multiply(normal.y)));
+                    .subtract(normal.multiply(normal.y())));
             }
         }
         if ( u == null ) {
@@ -570,9 +570,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             return null;
         }
 
-        ref1 = he.previous().startingVertex.position.substract(
+        ref1 = he.previous().startingVertex.position.subtract(
             he.startingVertex.position);
-        ref2 = he.next().startingVertex.position.substract(
+        ref2 = he.next().startingVertex.position.subtract(
             he.startingVertex.position);
         probe = PolyhedralBoundedSolidSetOperator.inside(he);
         if ( probe == null || probe.length() <=
@@ -617,7 +617,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             return null;
         }
 
-        edgeDirection = edge.next().startingVertex.position.substract(
+        edgeDirection = edge.next().startingVertex.position.subtract(
             edge.startingVertex.position);
         inward = faceNormal.crossProduct(edgeDirection);
         return buildCoplanarAngularInterval(basis, edgeDirection,
@@ -745,8 +745,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
 
         basis = buildCoplanarAngleBasis(
             he.parentLoop.parentFace.containingPlane.getNormal(),
-            he.next().startingVertex.position.substract(start),
-            he.previous().startingVertex.position.substract(start));
+            he.next().startingVertex.position.subtract(start),
+            he.previous().startingVertex.position.subtract(start));
         currentInterval = buildIntervalForHalfEdgeSector(basis, he);
         if ( currentInterval == null ) {
             return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace

@@ -56,15 +56,14 @@ public class NormalMap extends MediaEntity
     {
         if ( i < 0 || j < 0 || i >= xSize || j >= ySize ) return;
         int index = j * xSize + i;
-        Vector3D elem = data.get(index);
-        elem.clone(n);
+        data.set(index, Vector3D.copyOf(n));
     }
 
     public Vector3D getNormal(int u, int v)
     {
         if ( u < 0 || v < 0 || u >= xSize || v >= ySize ) return null;
         int index = v * xSize + u;
-        return data.get(index);
+        return Vector3D.copyOf(data.get(index));
     }
 
     /**
@@ -90,9 +89,9 @@ public class NormalMap extends MediaEntity
         F10 = getNormal(i+1, j);
         F11 = getNormal(i+1, j+1);
 
-        FU0 = F00.add(F10.substract(F00).multiply(du));
-        FU1 = F01.add(F11.substract(F01).multiply(du));
-        FVAL = FU0.add(FU1.substract(FU0).multiply(dv));
+        FU0 = F00.add(F10.subtract(F00).multiply(du));
+        FU1 = F01.add(F11.subtract(F01).multiply(du));
+        FVAL = FU0.add(FU1.subtract(FU0).multiply(dv));
         return FVAL;
     }
 
@@ -120,15 +119,12 @@ public class NormalMap extends MediaEntity
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
-                n.normalize();
+                n = n.normalized();
+                Vector3D mapped = new Vector3D((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
 
-                n.x = (n.x+1)/2; // This ensures Nvidia compatibility!
-                n.y = (n.y+1)/2;
-                n.z = (n.z+1)/2;
-
-                rr = (int)(n.x * 255.0);
-                gg = (int)(n.y * 255.0);
-                bb = (int)(n.z * 255.0);
+                rr = (int)(mapped.x() * 255.0);
+                gg = (int)(mapped.y() * 255.0);
+                bb = (int)(mapped.z() * 255.0);
                 if ( rr < 0 ) rr += 256;
                 if ( gg < 0 ) gg += 256;
                 if ( bb < 0 ) bb += 256;
@@ -168,15 +164,12 @@ public class NormalMap extends MediaEntity
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
-                n.normalize();
+                n = n.normalized();
+                Vector3D mapped = new Vector3D((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
 
-                n.x = (n.x+1)/2; // This ensures Nvidia compatibility!
-                n.y = (n.y+1)/2;
-                n.z = (n.z+1)/2;
-
-                rr = (int)(n.x * 255.0);
-                gg = (int)(n.y * 255.0);
-                bb = (int)(n.z * 255.0);
+                rr = (int)(mapped.x() * 255.0);
+                gg = (int)(mapped.y() * 255.0);
+                bb = (int)(mapped.z() * 255.0);
                 if ( rr < 0 ) rr += 256;
                 if ( gg < 0 ) gg += 256;
                 if ( bb < 0 ) bb += 256;
@@ -211,7 +204,7 @@ public class NormalMap extends MediaEntity
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
-                n.normalize();
+                n = n.normalized();
 
                 val = (int)((1.0-k.dotProduct(n)) * 255.0);
                 col = VSDK.unsigned8BitInteger2signedByte(val);
@@ -242,7 +235,7 @@ public class NormalMap extends MediaEntity
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
-                n.normalize();
+                n = n.normalized();
 
                 val = (int)((1.0-k.dotProduct(n)) * 255.0);
                 col = VSDK.unsigned8BitInteger2signedByte(val);
@@ -260,31 +253,27 @@ public class NormalMap extends MediaEntity
         return output;
     }
 
-    public void importBumpMap(IndexedColorImage inBumpmap, Vector3D inOutScale)
+    public Vector3D importBumpMap(IndexedColorImage inBumpmap, Vector3D inScale)
     {
         //-------------------------------------------------------------------
         int xxSize = inBumpmap.getXSize();
         int yySize = inBumpmap.getYSize();
+        Vector3D scale = inScale;
 
         //- 1. Si el vector de escala dado es erroneo, crear uno base -------
-        if( inOutScale.x < VSDK.EPSILON || inOutScale.y < VSDK.EPSILON ||
-            inOutScale.z < VSDK.EPSILON ) {
+        if( scale.x() < VSDK.EPSILON || scale.y() < VSDK.EPSILON ||
+            scale.z() < VSDK.EPSILON ) {
             double val = ((double)xxSize) / ((double)yySize);
             if( val < 1.0 ) {
-                inOutScale.x = 1.0;
-                inOutScale.y = 1.0 / val;
+                scale = new Vector3D(1.0, 1.0 / val, 1.0);
             }
             else {
-                inOutScale.x = val;
-                inOutScale.y = 1.0;
+                scale = new Vector3D(val, 1.0, 1.0);
             }
-            inOutScale.z = 1.0;
         }
         init(xxSize, yySize);
 
         //- 2. Calculo de las derivadas parciales al interior de la imagen --
-        Vector3D df_du = new Vector3D();
-        Vector3D df_dv = new Vector3D();
         Vector3D normal;
         int a, b, c, d;
         int u, v;
@@ -296,21 +285,17 @@ public class NormalMap extends MediaEntity
                 c = inBumpmap.getPixel(u, v+1);
                 d = inBumpmap.getPixel(u, v-1);
 
-                df_du.x = 2;
-                df_du.y = 0;
-                df_du.z = ( (double)(a - b) ) / 255.0;
-
-                df_dv.x = 0;
-                df_dv.y = 2;
-                df_dv.z = ( (double)(d - c) ) / 255.0;
+                Vector3D df_du = new Vector3D(2, 0, ((double)(a - b)) / 255.0);
+                Vector3D df_dv = new Vector3D(0, 2, ((double)(d - c)) / 255.0);
 
                 normal = df_du.crossProduct(df_dv);
 
                 // Modular el vector `normal` respecto al vector `inOutScale`
-                normal.x *= inOutScale.x;
-                normal.y *= inOutScale.y;
-                normal.z *= inOutScale.z;
-                normal.normalize();
+                normal = new Vector3D(
+                    normal.x() * scale.x(),
+                    normal.y() * scale.y(),
+                    normal.z() * scale.z()
+                ).normalized();
 
                 putNormal(u, v, normal);
             }
@@ -328,5 +313,6 @@ public class NormalMap extends MediaEntity
             putNormal(0, v, getNormal(1, v));
             putNormal(xxSize-1, v, getNormal(xxSize-2, v));
         }
+        return scale;
     }
 }

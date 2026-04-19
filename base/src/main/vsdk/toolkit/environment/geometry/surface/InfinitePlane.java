@@ -28,10 +28,10 @@ public class InfinitePlane extends HalfSpace {
     }
 
     public InfinitePlane(Vector3D normal, Vector3D pointInPlane) {
-        normal.normalize();
-        a = normal.x;
-        b = normal.y;
-        c = normal.z;
+        normal = normal.normalized();
+        a = normal.x();
+        b = normal.y();
+        c = normal.z();
         d = -normal.dotProduct(pointInPlane);
     }
 
@@ -39,15 +39,15 @@ public class InfinitePlane extends HalfSpace {
         Vector3D aa;
         Vector3D bb;
         Vector3D normal;
-        aa = p1.substract(p0);
-        aa.normalize();
-        bb = p2.substract(p0);
-        bb.normalize();
+        aa = p1.subtract(p0);
+        aa = aa.normalized();
+        bb = p2.subtract(p0);
+        bb = bb.normalized();
         normal = aa.crossProduct(bb);
-        normal.normalize();
-        this.a = normal.x;
-        this.b = normal.y;
-        this.c = normal.z;
+        normal = normal.normalized();
+        this.a = normal.x();
+        this.b = normal.y();
+        this.c = normal.z();
         this.d = -normal.dotProduct(p0);
     }
 
@@ -62,9 +62,9 @@ public class InfinitePlane extends HalfSpace {
     @Override
     public boolean
     doIntersection(Ray inout_rayo) {
-        double denominator = a*inout_rayo.direction.x + b*inout_rayo.direction.y + c*inout_rayo.direction.z;
+        double denominator = a*inout_rayo.direction.x() + b*inout_rayo.direction.y() + c*inout_rayo.direction.z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) return false;
-        double t = -(a*inout_rayo.origin.x + b*inout_rayo.origin.y + c*inout_rayo.origin.z + d)/denominator;
+        double t = -(a*inout_rayo.origin.x() + b*inout_rayo.origin.y() + c*inout_rayo.origin.z() + d)/denominator;
 
         if ( t < 0 ) return false;
 
@@ -75,7 +75,7 @@ public class InfinitePlane extends HalfSpace {
 
     public boolean
     doIntersectionWithNegative(Ray inout_rayo) {
-        double denominator = a*inout_rayo.direction.x + b*inout_rayo.direction.y + c*inout_rayo.direction.z;
+        double denominator = a*inout_rayo.direction.x() + b*inout_rayo.direction.y() + c*inout_rayo.direction.z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) {
             Ray r = new Ray(inout_rayo.origin, inout_rayo.direction.multiply(-1));
             if ( doIntersection(r) ) {
@@ -86,7 +86,7 @@ public class InfinitePlane extends HalfSpace {
                 return false;
             }
         }
-        double t = -(a*inout_rayo.origin.x + b*inout_rayo.origin.y + c*inout_rayo.origin.z + d)/denominator;
+        double t = -(a*inout_rayo.origin.x() + b*inout_rayo.origin.y() + c*inout_rayo.origin.z() + d)/denominator;
 
         inout_rayo.t = t;
 
@@ -106,7 +106,7 @@ public class InfinitePlane extends HalfSpace {
     */
     public int doContainmentTestHalfSpace(Vector3D p,
                                           double distanceTolerance) {
-        double num = a*p.x + b*p.y + c*p.z + d;
+        double num = a*p.x() + b*p.y() + c*p.z() + d;
         int op = LIMIT;
 
         if( num > distanceTolerance ) {
@@ -126,7 +126,7 @@ public class InfinitePlane extends HalfSpace {
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
-        double num = a*p.x + b*p.y + c*p.z + d;
+        double num = a*p.x() + b*p.y() + c*p.z() + d;
         int op = LIMIT;
 
         if( num > distanceTolerance ) {
@@ -147,11 +147,12 @@ public class InfinitePlane extends HalfSpace {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
-        outData.p.x = inRay.origin.x + inT*inRay.direction.x;
-        outData.p.y = inRay.origin.y + inT*inRay.direction.y;
-        outData.p.z = inRay.origin.z + inT*inRay.direction.z;
-
-        outData.n.clone(getNormal());
+        outData.p = new Vector3D(
+            inRay.origin.x() + inT*inRay.direction.x(),
+            inRay.origin.y() + inT*inRay.direction.y(),
+            inRay.origin.z() + inT*inRay.direction.z()
+        );
+        outData.n = getNormal();
     }
 
     /**
@@ -175,8 +176,7 @@ public class InfinitePlane extends HalfSpace {
     public Vector3D getNormal()
     {
         Vector3D n = new Vector3D(a, b, c);
-        n.normalize();
-        return n;
+        return n.normalized();
     }
 
     public double getD()
@@ -186,10 +186,10 @@ public class InfinitePlane extends HalfSpace {
 
     public void setNormal(Vector3D n)
     {
-        n.normalize();
-        a = n.x;
-        b = n.y;
-        c = n.z;
+        n = n.normalized();
+        a = n.x();
+        b = n.y();
+        c = n.z();
     }
 
     public void setD(double d)
@@ -206,7 +206,7 @@ public class InfinitePlane extends HalfSpace {
     public void setFromPointNormal(Vector3D p, Vector3D n)
     {
         setNormal(n);
-        setD(-(n.x*p.x + n.y*p.y + n.z*p.z));
+        setD(-(n.x()*p.x() + n.y()*p.y() + n.z()*p.z()));
     }
 
     /**
@@ -217,7 +217,7 @@ public class InfinitePlane extends HalfSpace {
     */
     public double pointDistance(Vector3D p)
     {
-        return a*p.x + b*p.y + c*p.z + d;
+        return a*p.x() + b*p.y() + c*p.z() + d;
     }
 
     /**
@@ -232,9 +232,9 @@ public class InfinitePlane extends HalfSpace {
     {
         double distance = pointDistance(p);
         Vector3D n = new Vector3D(a, b, c);
-        n.normalize();
+        n = n.normalized();
         n = n.multiply(distance);
-        return p.substract(n);
+        return p.subtract(n);
     }
 
     /**
@@ -249,9 +249,9 @@ public class InfinitePlane extends HalfSpace {
     {
         double distance = pointDistance(p);
         Vector3D n = new Vector3D(a, b, c);
-        n.normalize();
+        n = n.normalized();
         n = n.multiply(2*distance);
-        return p.substract(n);
+        return p.subtract(n);
     }
 
     /**

@@ -175,7 +175,7 @@ public class SwingCanvas extends JPanel implements
         switch ( vsdke.keycode ) {
           case KeyEvent.KEY_1:
             p = scene.getSimpleBodies().get(0).getPosition();
-            p.x += 0.1;
+            p = p.withX(p.x() + 0.1);
             scene.getSimpleBodies().get(0).setPosition(p);
             repaint();
             break;

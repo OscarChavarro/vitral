@@ -88,7 +88,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 
                 gl.glLoadIdentity();
                 position = r.getPosition();
-                gl.glTranslated(position.x, position.y, position.z);
+                gl.glTranslated(position.x(), position.y(), position.z());
                 JoglMatrixRenderer.activate(gl, r.getRotation());
                 gl.glDisable(GL2.GL_LIGHTING);
                 c = r.getMaterial().getDiffuse();
@@ -116,7 +116,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 
                 gl.glLoadIdentity();
                 position = r.getPosition();
-                gl.glTranslated(position.x, position.y, position.z);
+                gl.glTranslated(position.x(), position.y(), position.z());
                 JoglMatrixRenderer.activate(gl, r.getRotation());
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
@@ -153,7 +153,7 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
 
                 gl.glLoadIdentity();
                 position = r.getPosition();
-                gl.glTranslated(position.x, position.y, position.z);
+                gl.glTranslated(position.x(), position.y(), position.z());
                 JoglMatrixRenderer.activate(gl, r.getRotation());
                 JoglMaterialRenderer.activate(gl, r.getMaterial());
                 JoglGeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
@@ -171,12 +171,12 @@ public class JoglTranslateGizmoRenderer extends JoglRenderer
         Vector3D lp2;
 
         lp1 = new Vector3D(gizmo.getPosition());
-        lp1.x += 20;
-        lp1.y += 20;
-        lp1.z += 20;
+        lp1 = lp1.withX(lp1.x() + 20);
+        lp1 = lp1.withY(lp1.y() + 20);
+        lp1 = lp1.withZ(lp1.z() + 20);
         lp2 = new Vector3D(gizmo.getPosition());
-        lp2.x -= 20;
-        lp2.y -= 20;
+        lp2 = lp2.withX(lp2.x() - 20);
+        lp2 = lp2.withY(lp2.y() - 20);
         if ( light1 == null ) {
             light1 = new Light(Light.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
         }

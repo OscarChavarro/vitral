@@ -367,7 +367,7 @@ public class ParametricCurve extends Curve {
         for ( int i = 0; i < 4; i++ ) {
             vt += BEZIER_MATRIX.M[i][1] * (Math.pow(t, 3 - i));
         }
-        p = qp0.add((qp1.substract(qp0)).multiply(2/3));
+        p = qp0.add((qp1.subtract(qp0)).multiply(2/3));
         result = result.add(p.multiply(vt));
 
         // p2
@@ -376,7 +376,7 @@ public class ParametricCurve extends Curve {
         for (int i = 0; i < 4; i++) {
             vt += BEZIER_MATRIX.M[i][2] * (Math.pow(t, 3 - i));
         }
-        p = qp1.add((qp2.substract(qp0)).multiply(1/3));
+        p = qp1.add((qp2.subtract(qp0)).multiply(1/3));
         result = result.add(p.multiply(vt));
 
         // p3
@@ -583,12 +583,12 @@ public class ParametricCurve extends Curve {
             ArrayList<Vector3D> polyline = calculatePoints(i, false);
             for ( j = 0; j < polyline.size(); j++ ) {
                 p = polyline.get(j);
-                if ( p.x < minmax[0] ) minmax[0] = p.x;
-                if ( p.y < minmax[1] ) minmax[1] = p.y;
-                if ( p.z < minmax[2] ) minmax[2] = p.z;
-                if ( p.x > minmax[3] ) minmax[3] = p.x;
-                if ( p.y > minmax[4] ) minmax[4] = p.y;
-                if ( p.z > minmax[5] ) minmax[5] = p.z;
+                if ( p.x() < minmax[0] ) minmax[0] = p.x();
+                if ( p.y() < minmax[1] ) minmax[1] = p.y();
+                if ( p.z() < minmax[2] ) minmax[2] = p.z();
+                if ( p.x() > minmax[3] ) minmax[3] = p.x();
+                if ( p.y() > minmax[4] ) minmax[4] = p.y();
+                if ( p.z() > minmax[5] ) minmax[5] = p.z();
             }
         }
         return minmax;

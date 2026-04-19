@@ -96,18 +96,18 @@ public class QuadMesh extends Surface {
     }
 
     public void getVertexAt(int i, Vertex vertex) {
-        vertex.position.x = vertexPositions[3*i];
-        vertex.position.y = vertexPositions[3*i+1];
-        vertex.position.z = vertexPositions[3*i+2];
-        vertex.normal.x = vertexNormals[3*i];
-        vertex.normal.y = vertexNormals[3*i+1];
-        vertex.normal.z = vertexNormals[3*i+2];
-        vertex.binormal.x = vertexBinormals[3*i];
-        vertex.binormal.y = vertexBinormals[3*i+1];
-        vertex.binormal.z = vertexBinormals[3*i+2];
-        vertex.tangent.x = vertexTangents[3*i];
-        vertex.tangent.y = vertexTangents[3*i+1];
-        vertex.tangent.z = vertexTangents[3*i+2];
+        vertex.position = vertex.position.withX(vertexPositions[3*i]);
+        vertex.position = vertex.position.withY(vertexPositions[3*i+1]);
+        vertex.position = vertex.position.withZ(vertexPositions[3*i+2]);
+        vertex.normal = vertex.normal.withX(vertexNormals[3*i]);
+        vertex.normal = vertex.normal.withY(vertexNormals[3*i+1]);
+        vertex.normal = vertex.normal.withZ(vertexNormals[3*i+2]);
+        vertex.binormal = vertex.binormal.withX(vertexBinormals[3*i]);
+        vertex.binormal = vertex.binormal.withY(vertexBinormals[3*i+1]);
+        vertex.binormal = vertex.binormal.withZ(vertexBinormals[3*i+2]);
+        vertex.tangent = vertex.tangent.withX(vertexTangents[3*i]);
+        vertex.tangent = vertex.tangent.withY(vertexTangents[3*i+1]);
+        vertex.tangent = vertex.tangent.withZ(vertexTangents[3*i+2]);
         vertex.u = vertexUvs[2*i];
         vertex.v = vertexUvs[2*i+1];
     }
@@ -156,18 +156,18 @@ public class QuadMesh extends Surface {
         //initVertexTangentsArray();
 
         for ( i = 0; i < n; i++ ) {
-            vertexPositions[3*i] = vertexes[i].position.x;
-            vertexPositions[3*i+1] = vertexes[i].position.y;
-            vertexPositions[3*i+2] = vertexes[i].position.z;
-            vertexNormals[3*i] = vertexes[i].normal.x;
-            vertexNormals[3*i+1] = vertexes[i].normal.y;
-            vertexNormals[3*i+2] = vertexes[i].normal.z;
-            //vertexBinormals[3*i] = vertexes[i].binormal.x;
-            //vertexBinormals[3*i+1] = vertexes[i].binormal.y;
-            //vertexBinormals[3*i+2] = vertexes[i].binormal.z;
-            //vertexTangents[3*i] = vertexes[i].tangent.x;
-            //vertexTangents[3*i+1] = vertexes[i].tangent.y;
-            //vertexTangents[3*i+2] = vertexes[i].tangent.z;
+            vertexPositions[3*i] = vertexes[i].position.x();
+            vertexPositions[3*i+1] = vertexes[i].position.y();
+            vertexPositions[3*i+2] = vertexes[i].position.z();
+            vertexNormals[3*i] = vertexes[i].normal.x();
+            vertexNormals[3*i+1] = vertexes[i].normal.y();
+            vertexNormals[3*i+2] = vertexes[i].normal.z();
+            //vertexBinormals[3*i] = vertexes[i].binormal.x();
+            //vertexBinormals[3*i+1] = vertexes[i].binormal.y();
+            //vertexBinormals[3*i+2] = vertexes[i].binormal.z();
+            //vertexTangents[3*i] = vertexes[i].tangent.x();
+            //vertexTangents[3*i+1] = vertexes[i].tangent.y();
+            //vertexTangents[3*i+2] = vertexes[i].tangent.z();
             //vertexUvs[2*i] = vertexes[i].u;
             //vertexUvs[2*i+1] = vertexes[i].v;
         }
@@ -188,18 +188,18 @@ public class QuadMesh extends Surface {
     @param vertex
     */
     public void setVertexAt(int i, Vertex vertex) {
-        vertexPositions[3*i] = vertex.position.x;
-        vertexPositions[3*i+1] = vertex.position.y;
-        vertexPositions[3*i+2] = vertex.position.z;
-        vertexNormals[3*i] = vertex.normal.x;
-        vertexNormals[3*i+1] = vertex.normal.y;
-        vertexNormals[3*i+2] = vertex.normal.z;
-        vertexBinormals[3*i] = vertex.binormal.x;
-        vertexBinormals[3*i+1] = vertex.binormal.y;
-        vertexBinormals[3*i+2] = vertex.binormal.z;
-        vertexTangents[3*i] = vertex.tangent.x;
-        vertexTangents[3*i+1] = vertex.tangent.y;
-        vertexTangents[3*i+2] = vertex.tangent.z;
+        vertexPositions[3*i] = vertex.position.x();
+        vertexPositions[3*i+1] = vertex.position.y();
+        vertexPositions[3*i+2] = vertex.position.z();
+        vertexNormals[3*i] = vertex.normal.x();
+        vertexNormals[3*i+1] = vertex.normal.y();
+        vertexNormals[3*i+2] = vertex.normal.z();
+        vertexBinormals[3*i] = vertex.binormal.x();
+        vertexBinormals[3*i+1] = vertex.binormal.y();
+        vertexBinormals[3*i+2] = vertex.binormal.z();
+        vertexTangents[3*i] = vertex.tangent.x();
+        vertexTangents[3*i+1] = vertex.tangent.y();
+        vertexTangents[3*i+2] = vertex.tangent.z();
         vertexUvs[2*i] = vertex.u;
         vertexUvs[2*i+1] = vertex.v;
 

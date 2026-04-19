@@ -32,14 +32,11 @@ public class WriterObj extends PersistenceElement {
         R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
 
         //-----------------------------------------------------------------
-        vpi = new Vector3D();
         writeAsciiLine(inOutputStream, "# " + nv + " vertex positions");
         for ( i = 0; i < nv; i++ ) {
-            vpi.x = vp[3*i];
-            vpi.y = vp[3*i+1];
-            vpi.z = vp[3*i+2];
+            vpi = new Vector3D(vp[3*i], vp[3*i+1], vp[3*i+2]);
             p = R.multiply(vpi);
-            writeAsciiLine(inOutputStream, "v " + p.x + " " + p.y + " " + p.z);
+            writeAsciiLine(inOutputStream, "v " + p.x() + " " + p.y() + " " + p.z());
         }
 
         //-----------------------------------------------------------------
@@ -49,14 +46,11 @@ public class WriterObj extends PersistenceElement {
         }
 
         //-----------------------------------------------------------------
-        vni = new Vector3D();
         writeAsciiLine(inOutputStream, "# " + nv + " vertex normals");
         for ( i = 0; i < nv && vn != null; i++ ) {
-            vni.x = vn[3*i];
-            vni.y = vn[3*i+1];
-            vni.z = vn[3*i+2];
+            vni = new Vector3D(vn[3*i], vn[3*i+1], vn[3*i+2]);
             n = R.multiply(vni);
-            writeAsciiLine(inOutputStream, "vn " + n.x + " " + n.y + " " + n.z);
+            writeAsciiLine(inOutputStream, "vn " + n.x() + " " + n.y() + " " + n.z());
         }
 
         //-----------------------------------------------------------------

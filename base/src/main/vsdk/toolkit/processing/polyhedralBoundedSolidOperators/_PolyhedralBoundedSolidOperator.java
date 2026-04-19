@@ -167,10 +167,10 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         Vector3D middle;
         Vector3D a, b;
 
-        a = (he.next()).startingVertex.position.substract(he.startingVertex.position);
-        b = (he.previous()).startingVertex.position.substract(he.startingVertex.position);
-        a.normalize();
-        b.normalize();
+        a = (he.next()).startingVertex.position.subtract(he.startingVertex.position);
+        b = (he.previous()).startingVertex.position.subtract(he.startingVertex.position);
+        a = a.normalized();
+        b = b.normalized();
 
         middle = he.startingVertex.position.add((a.add(b)).multiply(0.5));
 
@@ -278,8 +278,8 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         Vector3D faceNormal = he.parentLoop.parentFace.containingPlane.getNormal();
 
         // Incoming and outgoing directions at sector vertex.
-        Vector3D eIn = v.substract(pPrev);
-        Vector3D eOut = pNext.substract(v);
+        Vector3D eIn = v.subtract(pPrev);
+        Vector3D eOut = pNext.subtract(v);
 
         if ( eIn.length() <= numericContext.unitVectorTolerance() ||
              eOut.length() <= numericContext.unitVectorTolerance() ||
@@ -287,9 +287,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             return true;
         }
 
-        eIn.normalize();
-        eOut.normalize();
-        faceNormal.normalize();
+        eIn = eIn.normalized();
+        eOut = eOut.normalized();
+        faceNormal = faceNormal.normalized();
 
         Vector3D cross = eIn.crossProduct(eOut);
         double sinTheta = faceNormal.dotProduct(cross);

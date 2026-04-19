@@ -46,7 +46,7 @@ public class CubemapBackground extends Background {
         double v;
         RGBAImage img;
 
-        d.normalize();
+        d = d.normalized();
         Ray r = new Ray(new Vector3D(0, 0, 0), d);
         if ( !boundingCube.doIntersection(r) ) {
             return new ColorRgb();

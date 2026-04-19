@@ -679,13 +679,13 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
                 gl.glPushMatrix();
                 gl.glLoadIdentity();
 
-                lv.x = lv.y = 0;
+                lv = new Vector3D(0, 0, lv.z());
                 if ( g instanceof Arrow ) {
                     Arrow a = ((Arrow)g);
-                    lv.z = (a.getHeadLength() + a.getBaseLength()) * 1.1;
+                    lv = lv.withZ((a.getHeadLength() + a.getBaseLength()) * 1.1);
                 }
                 else {
-                    lv.z = 1;
+                    lv = lv.withZ(1);
                 }
 
                 R = new Matrix4x4();
@@ -705,31 +705,31 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
                 switch ( i ) {
                   case 0:
                     if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             xLabelImageSelected);
                     }
                     else {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             xLabelImage);
                     }
                     break;
                   case 1:
                     if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             yLabelImageSelected);
                     }
                     else {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             yLabelImage);
                     }
                     break;
                   case 2:
                     if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             zLabelImageSelected);
                     }
                     else {
-                        drawTextureString2D(gl, (int)tp.x-3, (int)tp.y+12,
+                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
                             zLabelImage);
                     }
                     break;

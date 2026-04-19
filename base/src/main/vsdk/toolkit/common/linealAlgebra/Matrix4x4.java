@@ -257,9 +257,9 @@ public class Matrix4x4 extends FundamentalEntity
     public void
     scale(Vector3D s)
     {
-        M[0][0]=s.x;  M[0][1]=0.0; M[0][2]=0.0; M[0][3]=0.0;
-        M[1][0]=0.0; M[1][1]=s.y;  M[1][2]=0.0; M[1][3]=0.0;
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=s.z;  M[2][3]=0.0;
+        M[0][0]=s.x();  M[0][1]=0.0; M[0][2]=0.0; M[0][3]=0.0;
+        M[1][0]=0.0; M[1][1]=s.y();  M[1][2]=0.0; M[1][3]=0.0;
+        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=s.z();  M[2][3]=0.0;
         M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
     }
 
@@ -273,9 +273,9 @@ public class Matrix4x4 extends FundamentalEntity
     public void
     translation(Vector3D T)
     {
-        M[0][0]=1.0; M[0][1]=0.0; M[0][2]=0.0; M[0][3]=T.x;
-        M[1][0]=0.0; M[1][1]=1.0; M[1][2]=0.0; M[1][3]=T.y;
-        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=1.0; M[2][3]=T.z;
+        M[0][0]=1.0; M[0][1]=0.0; M[0][2]=0.0; M[0][3]=T.x();
+        M[1][0]=0.0; M[1][1]=1.0; M[1][2]=0.0; M[1][3]=T.y();
+        M[2][0]=0.0; M[2][1]=0.0; M[2][2]=1.0; M[2][3]=T.z();
         M[3][0]=0.0; M[3][1]=0.0; M[3][2]=0.0; M[3][3]=1.0;
     }
 
@@ -312,7 +312,7 @@ public class Matrix4x4 extends FundamentalEntity
     public void
     axisRotation(double angle, Vector3D axis)
     {
-        axisRotation(angle, axis.x, axis.y, axis.z);
+        axisRotation(angle, axis.x(), axis.y(), axis.z());
     }
 
     /**
@@ -467,13 +467,11 @@ public class Matrix4x4 extends FundamentalEntity
      */
     public final Vector3D multiply(Vector3D E)
     {
-        Vector3D R = new Vector3D();
-
-        R.x = M[0][0] * E.x + M[0][1] * E.y + M[0][2] * E.z + M[0][3];
-        R.y = M[1][0] * E.x + M[1][1] * E.y + M[1][2] * E.z + M[1][3];
-        R.z = M[2][0] * E.x + M[2][1] * E.y + M[2][2] * E.z + M[2][3];
-
-        return R;
+        return new Vector3D(
+            M[0][0] * E.x() + M[0][1] * E.y() + M[0][2] * E.z() + M[0][3],
+            M[1][0] * E.x() + M[1][1] * E.y() + M[1][2] * E.z() + M[1][3],
+            M[2][0] * E.x() + M[2][1] * E.y() + M[2][2] * E.z() + M[2][3]
+        );
     }
 
     /**
@@ -663,9 +661,9 @@ public class Matrix4x4 extends FundamentalEntity
             s = Math.sqrt(tr + 1.0);
             quat.magnitude = s / 2.0;
             s = 0.5 / s;
-            quat.direction.x = (M[2][1] - M[1][2]) * s;
-            quat.direction.y = (M[0][2] - M[2][0]) * s;
-            quat.direction.z = (M[1][0] - M[0][1]) * s;
+            quat.direction = quat.direction.withX((M[2][1] - M[1][2]) * s);
+            quat.direction = quat.direction.withY((M[0][2] - M[2][0]) * s);
+            quat.direction = quat.direction.withZ((M[1][0] - M[0][1]) * s);
           }
           else {                
             // diagonal is negative
@@ -685,9 +683,9 @@ public class Matrix4x4 extends FundamentalEntity
             q[j] = (M[j][i] + M[i][j]) * s;
             q[k] = (M[k][i] + M[i][k]) * s;
 
-            quat.direction.x = q[0];
-            quat.direction.y = q[1];
-            quat.direction.z = q[2];
+            quat.direction = quat.direction.withX(q[0]);
+            quat.direction = quat.direction.withY(q[1]);
+            quat.direction = quat.direction.withZ(q[2]);
             quat.magnitude = q[3];
         }
 
@@ -704,15 +702,15 @@ public class Matrix4x4 extends FundamentalEntity
     {
         double sx, sy, sz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 
-        x2 = a.direction.x + a.direction.x;
-        y2 = a.direction.y + a.direction.y; 
-        z2 = a.direction.z + a.direction.z;
-        xx = a.direction.x * x2;
-        xy = a.direction.x * y2;
-        xz = a.direction.x * z2;
-        yy = a.direction.y * y2;
-        yz = a.direction.y * z2;
-        zz = a.direction.z * z2;
+        x2 = a.direction.x() + a.direction.x();
+        y2 = a.direction.y() + a.direction.y(); 
+        z2 = a.direction.z() + a.direction.z();
+        xx = a.direction.x() * x2;
+        xy = a.direction.x() * y2;
+        xz = a.direction.x() * z2;
+        yy = a.direction.y() * y2;
+        yz = a.direction.y() * z2;
+        zz = a.direction.z() * z2;
         sx = a.magnitude * x2;
         sy = a.magnitude * y2;   sz = a.magnitude * z2;
 
@@ -751,19 +749,19 @@ public class Matrix4x4 extends FundamentalEntity
         pitch = obtainEulerPitchAngle();
 
         dir = multiply(dir);
-        dir.z = 0;
+        dir = dir.withZ(0);
 
         if ( Math.abs(Math.toRadians(90) - pitch) < EPSILON ) {
-            dir.x = 0;  dir.y = 0;  dir.z = -1;
+            dir = new Vector3D(0, 0, -1);
             dir = multiply(dir);
         }
         if ( Math.abs(Math.toRadians(-90) - pitch) < EPSILON ) {
-            dir.x = 0;  dir.y = 0;  dir.z = 1;
+            dir = new Vector3D(0, 0, 1);
             dir = multiply(dir);
         }
-        dir.normalize();
-        if ( dir.y <= 0 ) yaw = Math.asin(dir.x) - Math.toRadians(90);
-        else yaw = Math.toRadians(90) - Math.asin(dir.x);
+        dir = dir.normalized();
+        if ( dir.y() <= 0 ) yaw = Math.asin(dir.x()) - Math.toRadians(90);
+        else yaw = Math.toRadians(90) - Math.asin(dir.x());
 
         return yaw;
     }
@@ -778,8 +776,8 @@ public class Matrix4x4 extends FundamentalEntity
         Vector3D dir = new Vector3D(1, 0, 0);
 
         dir = multiply(dir);
-        dir.normalize();
-        return Math.toRadians(90) - Math.acos(dir.z);
+        dir = dir.normalized();
+        return Math.toRadians(90) - Math.acos(dir.z());
     }
 
     /**

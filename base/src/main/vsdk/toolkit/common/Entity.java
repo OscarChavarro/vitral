@@ -1,6 +1,7 @@
 package vsdk.toolkit.common;
 
 // Java basic classes
+import java.io.Serial;
 import java.lang.reflect.Method;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,9 +14,10 @@ pattern). Note that this class supports two functionalities:
     all of the
 */
 
-public class Entity extends ModelElement implements Serializable
+public class Entity implements ModelElement, Serializable
 {
-    public static final long serialVersionUID = 20150218L;
+    @Serial
+    private static final long serialVersionUID = 20150218L;
 
     /// Constants used for operations of type getSizeInBytes
     public static final int BYTE_SIZE_IN_BYTES = 1;

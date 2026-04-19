@@ -39,7 +39,9 @@ public class Vector4D extends FundamentalEntity
     }
 
     public Vector4D(Vector3D B) {
-        this.x = B.x; this.y = B.y; this.z = B.z;
+        this.x = B.x();
+        this.y = B.y();
+        this.z = B.z();
         w = 1;
     }
 

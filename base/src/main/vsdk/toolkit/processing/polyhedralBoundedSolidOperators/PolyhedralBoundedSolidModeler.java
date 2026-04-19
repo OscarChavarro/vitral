@@ -219,7 +219,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
     private static boolean isOnXAxis(Vector3D p, double tolerance)
     {
-        return Math.abs(p.y) <= tolerance && Math.abs(p.z) <= tolerance;
+        return Math.abs(p.y()) <= tolerance && Math.abs(p.z()) <= tolerance;
     }
 
     private static void collapseFaceToAxisVertex(
@@ -238,9 +238,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
                 continue;
             }
             do {
-                he.startingVertex.position.x = x;
-                he.startingVertex.position.y = 0.0;
-                he.startingVertex.position.z = 0.0;
+                he.startingVertex.position = new Vector3D(x, 0.0, 0.0);
                 he = he.next();
             } while ( he != null && he != start );
         }
@@ -318,10 +316,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         // cap vertices collapse to a single pole instead of leaving a
         // degenerate ring of coincident points.
         if ( firstEndpointOnAxis ) {
-            collapseFaceToAxisVertex(headf, firstEndpointPosition.x);
+            collapseFaceToAxisVertex(headf, firstEndpointPosition.x());
         }
         if ( lastEndpointOnAxis ) {
-            collapseFaceToAxisVertex(tailf, lastEndpointPosition.x);
+            collapseFaceToAxisVertex(tailf, lastEndpointPosition.x());
         }
         if ( firstEndpointOnAxis || lastEndpointOnAxis ) {
             solid.maximizeFaces();

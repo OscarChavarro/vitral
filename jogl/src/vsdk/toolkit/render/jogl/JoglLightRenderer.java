@@ -29,7 +29,7 @@ public class JoglLightRenderer extends JoglRenderer {
     public static void activate(GL2 gl, Light l)
     {
         //-----------------------------------------------------------------
-        float[] lightPosition=l.getPosition().exportToFloatArrayVect();
+        float[] lightPosition=l.getPosition().exportToFloatArrayVector();
         float global_ambient[] = {0, 0, 0, 1};
         float global_twoside[] = {GL.GL_TRUE};  // WARNING: This is inefficient!
         int lightNumber = l.getId();
@@ -72,7 +72,7 @@ public class JoglLightRenderer extends JoglRenderer {
         double delta = 0.1;
 
         gl.glPushMatrix();
-        gl.glTranslated(p.x, p.y, p.z);
+        gl.glTranslated(p.x(), p.y(), p.z());
         gl.glScaled(scale, scale, scale);
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);

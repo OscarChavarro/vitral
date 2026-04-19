@@ -144,9 +144,9 @@ public class ShapeDescriptor3DGenerator extends Component
              ((double)s) / ((double)texture.getXSize()) * Math.PI * 2;
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
-                p.setSphericalCoordinates(r, tetha, phi);
+                p = Vector3D.fromSpherical(r, tetha, phi);
                 p = cm.add(p);
-                voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
+                voxelValue = vv.getVoxelAtPosition(p.x(), p.y(), p.z());
                 if ( voxelValue < 128 ) {
                     texture.putPixel(s, t, (byte)255);
                 }
@@ -191,14 +191,15 @@ public class ShapeDescriptor3DGenerator extends Component
         Vector3D min, max, s;
         min = new Vector3D(minmax[0], minmax[1], minmax[2]);
         max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-        s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
+        s = new Vector3D(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
 
-        double maxsize = s.x;
-        if ( s.y > maxsize ) maxsize = s.y;
-        if ( s.z > maxsize ) maxsize = s.z;
+        double maxsize = s.x();
+        if ( s.y() > maxsize ) maxsize = s.y();
+        if ( s.z() > maxsize ) maxsize = s.z();
         // The 95% scale factor is to allow a full render of the object to
         // fit inside the rendered view
-        s.x = s.y = s.z = (2/maxsize) * 0.95;
+        s = new Vector3D((2/maxsize) * 0.95, (2/maxsize) * 0.95,
+                         (2/maxsize) * 0.95);
 
         p = max.add(min);
         p = p.multiply(-1/maxsize);

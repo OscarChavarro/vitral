@@ -61,9 +61,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         Vector3D P, n;
 
         n = loopPlane.getNormal();
-        v = endP.substract(startP);
+        v = endP.subtract(startP);
         factor = v.length()/2;
-        v.normalize();
+        v = v.normalized();
         u = v.crossProduct(n);
         double delta = factor/((double)N);
 
@@ -72,24 +72,24 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glBegin(GL.GL_LINES);
             for ( i = 0, t = 0; i < N; i++, t += delta ) {
                 P = startP.add(v.multiply(t).add(u.multiply(invert*curveFactor(t, factor))));
-                gl.glVertex3d(P.x, P.y, P.z);
+                gl.glVertex3d(P.x(), P.y(), P.z());
                 P = startP.add(v.multiply(t+delta).add(u.multiply(invert*curveFactor(t+delta, factor))));
-                gl.glVertex3d(P.x, P.y, P.z);
+                gl.glVertex3d(P.x(), P.y(), P.z());
             }
         gl.glEnd();
         P = startP.add(v.multiply(factor).add(u.multiply(0)));
         Vector3D Pi = u.multiply(invert*factor*0.1);
-        gl.glTranslated(Pi.x, Pi.y, Pi.z);
+        gl.glTranslated(Pi.x(), Pi.y(), Pi.z());
 
         gl.glBegin(GL.GL_LINES);
-            gl.glVertex3d(P.x, P.y, P.z);
+            gl.glVertex3d(P.x(), P.y(), P.z());
             P = startP.add(v.multiply(factor*0.9).add(u.multiply(factor*0.05)));
-            gl.glVertex3d(P.x, P.y, P.z);
+            gl.glVertex3d(P.x(), P.y(), P.z());
 
             P = startP.add(v.multiply(factor).add(u.multiply(0)));
-            gl.glVertex3d(P.x, P.y, P.z);
+            gl.glVertex3d(P.x(), P.y(), P.z());
             P = startP.add(v.multiply(factor*0.9).add(u.multiply((-factor)*0.05)));
-            gl.glVertex3d(P.x, P.y, P.z);
+            gl.glVertex3d(P.x(), P.y(), P.z());
 
         gl.glEnd();
 
@@ -142,7 +142,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             gl.glColor3d(c.r, c.g, c.b);
 
             gl.glBegin(GL.GL_POINTS);
-                gl.glVertex3d(p.x, p.y, p.z);
+                gl.glVertex3d(p.x(), p.y(), p.z());
             gl.glEnd();
         }
     }
@@ -187,9 +187,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                 endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
                     gl.glBegin(GL.GL_LINES);
-                    gl.glVertex3d(startPosition.x, startPosition.y, 
-                                  startPosition.z);
-                    gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
+                    gl.glVertex3d(startPosition.x(), startPosition.y(), 
+                                  startPosition.z());
+                    gl.glVertex3d(endPosition.x(), endPosition.y(), endPosition.z());
                     gl.glEnd();
                 }
             }
@@ -239,15 +239,15 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         gl.glColor3d(1, 0, 0);
 
         Vector3D midpoint = new Vector3D();
-        midpoint.x = (minmax[3] + minmax[0]) / 2;
-        midpoint.y = (minmax[4] + minmax[1]) / 2;
-        midpoint.z = (minmax[5] + minmax[2]) / 2;
+        midpoint = midpoint.withX((minmax[3] + minmax[0]) / 2);
+        midpoint = midpoint.withY((minmax[4] + minmax[1]) / 2);
+        midpoint = midpoint.withZ((minmax[5] + minmax[2]) / 2);
 
         camera.updateVectors();
         Vector3D u = camera.getLeft().multiply(-1.0);
         Vector3D v = camera.getUp();
-        u.normalize();
-        v.normalize();
+        u = u.normalized();
+        v = v.normalized();
 
         //-----------------------------------------------------------------
         int i;
@@ -261,27 +261,27 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             //gl.glPointSize(8.0f);
             //gl.glColor3d(1, 1, 0);
             //gl.glBegin(GL.GL_POINTS);
-            //    gl.glVertex3d(p.x, p.y, p.z);
+            //    gl.glVertex3d(p.x(), p.y(), p.z());
             //gl.glEnd();
 
             // Explode point with respect to camera
             double perspectiveDistance;
-            Vector3D delta = p.substract(midpoint);
-            delta.normalize();
+            Vector3D delta = p.subtract(midpoint);
+            delta = delta.normalized();
             double projected_u = u.dotProduct(delta);
             double projected_v = v.dotProduct(delta);
             Vector3D projected = u.multiply(projected_u).add(
                 v.multiply(projected_v));
             if ( projected.length() > VSDK.EPSILON ) {
-                projected.normalize();
+                projected = projected.normalized();
             }
             perspectiveDistance = VSDK.vectorDistance(camera.getPosition(), p);
             projected = projected.multiply(perspectiveDistance/80.0);
 
             // Bring point a little nearest towards the camera
             Vector3D ep = p.add(projected);
-            Vector3D deltaView = camera.getPosition().substract(ep);
-            deltaView.normalize();
+            Vector3D deltaView = camera.getPosition().subtract(ep);
+            deltaView = deltaView.normalized();
             deltaView = deltaView.multiply(0.01);
             ep = ep.add(deltaView);
 
@@ -289,7 +289,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             //gl.glPointSize(4.0f);
             //gl.glColor3d(0.9, 0.9, 0.5);
             //gl.glBegin(GL.GL_POINTS);
-            //    gl.glVertex3d(ep.x, ep.y, ep.z);
+            //    gl.glVertex3d(ep.x(), ep.y(), ep.z());
             //gl.glEnd();
 
             // Draw vertex id label
@@ -299,7 +299,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glPushMatrix();
             gl.glLoadIdentity();
-            gl.glTranslated(ep.x, ep.y, ep.z);
+            gl.glTranslated(ep.x(), ep.y(), ep.z());
             drawTextureString3D(gl, label);
             gl.glPopMatrix();
         }
@@ -370,9 +370,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                     //- Draw line --------------------------------------------
                     gl.glBegin(GL.GL_LINES);
-                    gl.glVertex3d(startPosition.x, startPosition.y, 
-                                  startPosition.z);
-                    gl.glVertex3d(endPosition.x, endPosition.y, endPosition.z);
+                    gl.glVertex3d(startPosition.x(), startPosition.y(), 
+                                  startPosition.z());
+                    gl.glVertex3d(endPosition.x(), endPosition.y(), endPosition.z());
                     gl.glEnd();
 
                     //- If debugging a single edge, draw extra information ---
@@ -383,19 +383,19 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(1, 1, 0);
                         gl.glBegin(GL.GL_LINES);
-                            gl.glVertex3d(middle.x, middle.y, middle.z);
-                            gl.glVertex3d(middle.x + n.x/10,
-                                          middle.y + n.y/10,
-                                          middle.z + n.z/10);
+                            gl.glVertex3d(middle.x(), middle.y(), middle.z());
+                            gl.glVertex3d(middle.x() + n.x()/10,
+                                          middle.y() + n.y()/10,
+                                          middle.z() + n.z()/10);
                         gl.glEnd();
                         n = face2.containingPlane.getNormal();
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(0, 1, 1);
                         gl.glBegin(GL.GL_LINES);
-                            gl.glVertex3d(middle.x, middle.y, middle.z);
-                            gl.glVertex3d(middle.x + n.x/10,
-                                          middle.y + n.y/10,
-                                          middle.z + n.z/10);
+                            gl.glVertex3d(middle.x(), middle.y(), middle.z());
+                            gl.glVertex3d(middle.x() + n.x()/10,
+                                          middle.y() + n.y()/10,
+                                          middle.z() + n.z()/10);
                         gl.glEnd();
 
                         // Draw som sample points for quantitative invisibility
@@ -405,9 +405,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                         double t;
                         int qi;
 
-                        d = endPosition.substract(startPosition);
+                        d = endPosition.subtract(startPosition);
                         l = d.length();
-                        d.normalize();
+                        d = d.normalized();
 
                         for ( t = VSDK.EPSILON; isVisible && t < l; t += (l/20) ) {
                             p = startPosition.add(d.multiply(t));
@@ -423,7 +423,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                                 break;
                             }
                             gl.glBegin(GL.GL_POINTS);
-                                gl.glVertex3d(p.x, p.y, p.z);
+                                gl.glVertex3d(p.x(), p.y(), p.z());
                             gl.glEnd();
                         }
                     }
@@ -512,7 +512,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
             if ( face.containingPlane != null ) {
                 n = face.containingPlane.getNormal();
-                gl.glNormal3d(n.x, n.y, n.z);
+                gl.glNormal3d(n.x(), n.y(), n.z());
             }
 
             // Count used vertex for current face
@@ -580,9 +580,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                     // Draw polygon parts
                     p0 = he.startingVertex.position;
-                    list[count][0] = p0.x;
-                    list[count][1] = p0.y;
-                    list[count][2] = p0.z;
+                    list[count][0] = p0.x();
+                    list[count][1] = p0.y();
+                    list[count][2] = p0.z();
                     GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
                     count++;
 
@@ -647,9 +647,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     p0 = he.startingVertex.position;
                     p1 = he.next().startingVertex.position;
                     p2 = he.next().next().startingVertex.position;
-                    a = p1.substract(p0);    a.normalize();
-                    b = p2.substract(p0);    b.normalize();
-                    n = a.crossProduct(b);   n.normalize();
+                    a = p1.subtract(p0);    a = a.normalized();
+                    b = p2.subtract(p0);    b = b.normalized();
+                    n = a.crossProduct(b);   n = n.normalized();
                     loopPlane = new InfinitePlane(n, p0);
                     //loopPlane = face.containingPlane;
 
@@ -701,7 +701,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
             if ( face.containingPlane != null ) {
                 n = face.containingPlane.getNormal();
-                gl.glNormal3d(n.x, n.y, n.z);
+                gl.glNormal3d(n.x(), n.y(), n.z());
             }
 
             // Count used vertex for current face
@@ -768,9 +768,9 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
 
                     // Draw polygon parts
                     p0 = he.startingVertex.position;
-                    list[count][0] = p0.x;
-                    list[count][1] = p0.y;
-                    list[count][2] = p0.z;
+                    list[count][0] = p0.x();
+                    list[count][1] = p0.y();
+                    list[count][2] = p0.z();
                     GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
                     count++;
 

@@ -81,20 +81,20 @@ public class Cone extends Solid {
 
         //- Translacion para concordar con la interpretacion AQUYNZA --------
         Ray r = new Ray(inOutRay);
-        r.direction.normalize();
+        r.direction = r.direction.normalized();
 
         //- Calcula el termino A --------------------------------------------
-        A = VSDK.square(r.direction.x) +
-            VSDK.square(r.direction.y);
+        A = VSDK.square(r.direction.x()) +
+            VSDK.square(r.direction.y());
 
         //- Calcula el termino B --------------------------------------------
         B = 2 *
-            ( (r.direction.x * r.origin.x) +
-              (r.direction.y * r.origin.y) );
+            ( (r.direction.x() * r.origin.x()) +
+              (r.direction.y() * r.origin.y()) );
 
         //- Calcula el termino C --------------------------------------------
-        C = VSDK.square(r.origin.x) +
-            VSDK.square(r.origin.y) -
+        C = VSDK.square(r.origin.x()) +
+            VSDK.square(r.origin.y()) -
             VSDK.square(inR);
 
         //- Calcula el discriminant. Si el discriminant no es positivo el -
@@ -111,17 +111,17 @@ public class Cone extends Solid {
         if ( t0 > VSDK.EPSILON ) {
             // OJO: Aqui va el calculo del punto y la normal!
             outInfo.p = r.origin.add(r.direction.multiply(t0));
-            if ( outInfo.p.z > inH || outInfo.p.z < 0 ) {
+            if ( outInfo.p.z() > inH || outInfo.p.z() < 0 ) {
                 return false;
             }
 
             // Se calcula la normal como el gradiente de la formula del cono,
             // notese que aqui se obtiene un vector escalado en 1/2 respecto al
             // gradiente (para ahorrar multiplicaciones)
-            outInfo.n.x = outInfo.p.x;
-            outInfo.n.y = outInfo.p.y;
-            outInfo.n.z = 0;
-            outInfo.n.normalize();
+            outInfo.n = outInfo.n.withX(outInfo.p.x());
+            outInfo.n = outInfo.n.withY(outInfo.p.y());
+            outInfo.n = outInfo.n.withZ(0);
+            outInfo.n = outInfo.n.normalized();
             inOutRay.t = t0;
 
             return true;
@@ -138,26 +138,26 @@ public class Cone extends Solid {
 
         //- Translacion para concordar con la interpretacion AQUYNZA --------
         Ray r = new Ray(inOutRay);
-        r.origin.z -= inH;
-        r.direction.normalize();
+        r.origin = r.origin.withZ(r.origin.z() - inH);
+        r.direction = r.direction.normalized();
 
         //- Calcula el termino A --------------------------------------------
-        A = VSDK.square(r.direction.x) +
-            VSDK.square(r.direction.y) -
-            VSDK.square(r.direction.z * inR / inH);
+        A = VSDK.square(r.direction.x()) +
+            VSDK.square(r.direction.y()) -
+            VSDK.square(r.direction.z() * inR / inH);
 
         //- Calcula el termino B --------------------------------------------
         B = 2 *
-            ((r.direction.x * r.origin.x) +
-             (r.direction.y * r.origin.y) -
-             (r.direction.z * r.origin.z * VSDK.square(inR)) / 
+            ((r.direction.x() * r.origin.x()) +
+             (r.direction.y() * r.origin.y()) -
+             (r.direction.z() * r.origin.z() * VSDK.square(inR)) / 
              VSDK.square(inH)
              );
 
         //- Calcula el termino C --------------------------------------------
-        C = VSDK.square(r.origin.x) +
-            VSDK.square(r.origin.y) -
-            VSDK.square(r.origin.z * inR / inH);
+        C = VSDK.square(r.origin.x()) +
+            VSDK.square(r.origin.y()) -
+            VSDK.square(r.origin.z() * inR / inH);
 
         //- Calcula el discriminant. Si el discriminant no es positivo el -
         //- rayo no intersecta la esfera. retorna t = 0                      
@@ -173,19 +173,19 @@ public class Cone extends Solid {
         if ( t0 > VSDK.EPSILON ) {
             // OJO: Aqui va el calculo del punto y la normal!
             outInfo.p = r.origin.add(r.direction.multiply(t0));
-            if ( outInfo.p.z > 0 || outInfo.p.z < -inH ) {
+            if ( outInfo.p.z() > 0 || outInfo.p.z() < -inH ) {
                 return false;
             }
 
             // Se calcula la normal como el gradiente de la formula del cono,
             // notese que aqui se obtiene un vector escalado en 1/2 respecto al
             // gradiente (para ahorrar multiplicaciones)
-            outInfo.n.x = outInfo.p.x;
-            outInfo.n.y = outInfo.p.y;
-            outInfo.n.z = -outInfo.p.z * VSDK.square(inR/inH);
-            outInfo.n.normalize();
+            outInfo.n = outInfo.n.withX(outInfo.p.x());
+            outInfo.n = outInfo.n.withY(outInfo.p.y());
+            outInfo.n = outInfo.n.withZ(-outInfo.p.z() * VSDK.square(inR/inH));
+            outInfo.n = outInfo.n.normalized();
     
-            outInfo.p.z += inH;
+            outInfo.p = outInfo.p.withZ(outInfo.p.z() + inH);
             inOutRay.t = t0;
 
             return true;
@@ -203,16 +203,16 @@ public class Cone extends Solid {
         Vector3D proy;
         Vector3D o = new Vector3D(0, 0, 0);
 
-        if ( Math.abs(inOutRay.direction.z) > VSDK.EPSILON ) {
-            t = (inH - inOutRay.origin.z) / inOutRay.direction.z;
+        if ( Math.abs(inOutRay.direction.z()) > VSDK.EPSILON ) {
+            t = (inH - inOutRay.origin.z()) / inOutRay.direction.z();
             if ( t > VSDK.EPSILON ) {
                 p = inOutRay.origin.add(inOutRay.direction.multiply(t));
-                proy = new Vector3D(p.x, p.y, 0);
+                proy = new Vector3D(p.x(), p.y(), 0);
                 if ( VSDK.vectorDistance(proy, o) < inR ) {
                     inOutRay.t = t;
-                    outInfo.n.x = 0;
-                    outInfo.n.y = 0;
-                    outInfo.n.z = 1;
+                    outInfo.n = outInfo.n.withX(0);
+                    outInfo.n = outInfo.n.withY(0);
+                    outInfo.n = outInfo.n.withZ(1);
                     outInfo.p = p;
                     return true;
                 }
@@ -330,7 +330,7 @@ public class Cone extends Solid {
     {
         outData.p = lastInfo.p;
         outData.n = lastInfo.n;
-        outData.n.normalize();
+        outData.n = outData.n.normalized();
     }
 
     /**

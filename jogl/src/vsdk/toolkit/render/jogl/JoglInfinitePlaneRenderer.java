@@ -39,11 +39,11 @@ public class JoglInfinitePlaneRenderer extends JoglRenderer {
         double pitch = Math.PI/2 - n.obtainSphericalPhiAngle();
 
         R.eulerAnglesRotation(yaw, pitch, 0);
-        n.normalize();
+        n = n.normalized();
         n = n.multiply(-s.getD());
 
         gl.glPushMatrix();
-        gl.glTranslated(n.x, n.y, n.z);
+        gl.glTranslated(n.x(), n.y(), n.z());
         JoglMatrixRenderer.activate(gl, R);
         gl.glNormal3d(1, 0, 0);
         gl.glBegin(GL2.GL_QUADS);

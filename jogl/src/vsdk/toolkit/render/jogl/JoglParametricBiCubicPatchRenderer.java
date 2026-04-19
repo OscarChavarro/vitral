@@ -42,7 +42,7 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
             for ( j = 0; j < n; j += (n-1) ) {
                 t = ((double)j)*dt;
                 p.evaluate(pos, s, t);
-                gl.glVertex3d(pos.x, pos.y, pos.z);
+                gl.glVertex3d(pos.x(), pos.y(), pos.z());
             }
         }
 
@@ -82,35 +82,35 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                 sizeDivTu = (textureUSizeFactor / (n-1));
 
                 Vector3D p1 = new Vector3D();
-                Vector3D normal = new Vector3D();
+                Vector3D normal;
 
                 p.evaluate(p1, s, t);
 
                 // Normal
-                p.evaluateNormal(normal, s, t);
+                normal = p.evaluateNormal(s, t);
 
                 gl.glColor3d(1, 1, 0);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x + normal.x/reductionFactor,
-                              p1.y + normal.y/reductionFactor, 
-                              p1.z + normal.z/reductionFactor);
+                gl.glVertex3d(p1.x(), p1.y(), p1.z());
+                gl.glVertex3d(p1.x() + normal.x()/reductionFactor,
+                              p1.y() + normal.y()/reductionFactor, 
+                              p1.z() + normal.z()/reductionFactor);
 
                 // Tangent
-                p.evaluateTangent(normal, s, t);
+                normal = p.evaluateTangent(s, t);
 
                 gl.glColor3d(0.9, 0.5, 0.5);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x + normal.x/(reductionFactor*2),
-                              p1.y + normal.y/(reductionFactor*2), 
-                              p1.z + normal.z/(reductionFactor*2));
+                gl.glVertex3d(p1.x(), p1.y(), p1.z());
+                gl.glVertex3d(p1.x() + normal.x()/(reductionFactor*2),
+                              p1.y() + normal.y()/(reductionFactor*2), 
+                              p1.z() + normal.z()/(reductionFactor*2));
                 // Binormal
-                p.evaluateBinormal(normal, s, t);
+                normal = p.evaluateBinormal(s, t);
 
                 gl.glColor3d(0.5, 0.9, 0.5);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
-                gl.glVertex3d(p1.x + normal.x/(reductionFactor*2),
-                              p1.y + normal.y/(reductionFactor*2), 
-                              p1.z + normal.z/(reductionFactor*2));
+                gl.glVertex3d(p1.x(), p1.y(), p1.z());
+                gl.glVertex3d(p1.x() + normal.x()/(reductionFactor*2),
+                              p1.y() + normal.y()/(reductionFactor*2), 
+                              p1.z() + normal.z()/(reductionFactor*2));
             }
         }
         gl.glEnd();
@@ -170,24 +170,21 @@ public class JoglParametricBiCubicPatchRenderer extends JoglRenderer {
                 p.evaluate(p1, s, t);
                 p.evaluate(p2, s+ds, t);
 
-                Vector3D n1 = new Vector3D();
-                Vector3D n2 = new Vector3D();
-
-                p.evaluateNormal(n1, s, t);
-                p.evaluateNormal(n2, s+ds, t);
+                Vector3D n1 = p.evaluateNormal(s, t);
+                Vector3D n2 = p.evaluateNormal(s+ds, t);
 
                 //- Generate GL primitives ------------------------------------
                 // First vertex
                 gl.glTexCoord3d( (i * sizeDivTu) + textureURelaviteStart,
                                  (j * sizeDivTv) + textureVRelativeStart, 0);
-                gl.glNormal3d(n1.x, n1.y, n1.z);
-                gl.glVertex3d(p1.x, p1.y, p1.z);
+                gl.glNormal3d(n1.x(), n1.y(), n1.z());
+                gl.glVertex3d(p1.x(), p1.y(), p1.z());
 
                 // Second vertex
                 gl.glTexCoord3d( ((i+1) * sizeDivTu) + textureURelaviteStart,
                                    (j * sizeDivTv) + textureVRelativeStart, 0);
-                gl.glNormal3d(n2.x, n2.y, n2.z);
-                gl.glVertex3d(p2.x, p2.y, p2.z);
+                gl.glNormal3d(n2.x(), n2.y(), n2.z());
+                gl.glVertex3d(p2.x(), p2.y(), p2.z());
             }
             gl.glEnd();
         }

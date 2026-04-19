@@ -112,22 +112,22 @@ class _PolyhedralBoundedSolidSplitterNullEdge extends _PolyhedralBoundedSolidOpe
         b = other.e.rightHalf.startingVertex.position;
 
         if ( PolyhedralBoundedSolidNumericPolicy
-            .compare(a.x, b.x, numericContext.bigEpsilon()) != 0 ) {
-            if ( a.x < b.x ) {
+            .compare(a.x(), b.x(), numericContext.bigEpsilon()) != 0 ) {
+            if ( a.x() < b.x() ) {
                 return -1;
             }
             return 1;
         }
         else {
             if ( PolyhedralBoundedSolidNumericPolicy
-                .compare(a.y, b.y, numericContext.bigEpsilon()) != 0 ) {
-                if ( a.y < b.y ) {
+                .compare(a.y(), b.y(), numericContext.bigEpsilon()) != 0 ) {
+                if ( a.y() < b.y() ) {
                     return -1;
                 }
                 return 1;
             }
             else {
-                if ( a.z < b.z ) {
+                if ( a.z() < b.z() ) {
                     return -1;
                 }
                 return 1;
@@ -226,7 +226,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             s2 = compareToZero(d2);
             if ( (s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1) ) {
                 t = d1 / (d1 - d2);
-                p = v1.position.add((v2.position.substract(v1.position)).multiply(t));
+                p = v1.position.add((v2.position.subtract(v1.position)).multiply(t));
                 he = e.leftHalf.next();
                 inSolid.lmev(e.rightHalf, he, inSolid.getMaxVertexId()+1, p);
                 addsoov(he.previous().startingVertex);

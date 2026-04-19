@@ -49,10 +49,10 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
         Vector3D u, v;
 
         u = new Vector3D(referenceU);
-        u.normalize();
+        u = u.normalized();
         v = new Vector3D(referenceV);
-        v.normalize();
-        a.normalize();
+        v = v.normalized();
+        a = a.normalized();
 
         x = a.dotProduct(u);
         y = a.dotProduct(v);

@@ -45,8 +45,7 @@ public class JoglDrawingArea implements GLEventListener
         //-----------------------------------------------------------------
         parent.scene.camera.updateVectors();
 
-        Vector3D l = new Vector3D(parent.scene.camera.getLeft());
-        l.normalize();
+        Vector3D l = new Vector3D(parent.scene.camera.getLeft()).normalized();
         l = l.multiply(parent.scene.eyeDistance/2.0);
         Vector3D p = new Vector3D(parent.scene.camera.getPosition());
 
@@ -78,13 +77,12 @@ public class JoglDrawingArea implements GLEventListener
         //-----------------------------------------------------------------
         parent.scene.camera.updateVectors();
 
-        Vector3D l = new Vector3D(parent.scene.camera.getLeft());
-        l.normalize();
+        Vector3D l = new Vector3D(parent.scene.camera.getLeft()).normalized();
         l = l.multiply(parent.scene.eyeDistance/2.0);
         Vector3D p = new Vector3D(parent.scene.camera.getPosition());
 
         parent.scene.activeCamera = new Camera(parent.scene.camera);
-        parent.scene.activeCamera.setPosition(p.substract(l));
+        parent.scene.activeCamera.setPosition(p.subtract(l));
         
         //-----------------------------------------------------------------
         Matrix4x4 R1;

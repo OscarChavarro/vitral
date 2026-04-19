@@ -326,7 +326,7 @@ public class TranslateGizmo extends Gizmo {
             Vector3D p = getPosition();
             Vector3D right = camera.getLeft().multiply(-1);
 
-            right.normalize();
+            right = right.normalized();
             camera.projectPointUsingRayMethod(p, a);
             camera.projectPointUsingRayMethod(p.add(right), b);
             double factor = VSDK.vectorDistance(a, b);
@@ -662,9 +662,9 @@ public class TranslateGizmo extends Gizmo {
 
     public void setPosition(Vector3D p)
     {
-        T.M[0][3] = p.x;
-        T.M[1][3] = p.y;
-        T.M[2][3] = p.z;
+        T.M[0][3] = p.x();
+        T.M[1][3] = p.y();
+        T.M[2][3] = p.z();
     }
 
     public void setTransformationMatrix(Matrix4x4 T)
@@ -844,9 +844,9 @@ public class TranslateGizmo extends Gizmo {
             left = camera.getLeft();
             up = camera.getUp();
 
-            v.normalize();
-            left.normalize();
-            up.normalize();
+            v = v.normalized();
+            left = left.normalized();
+            up = up.normalized();
 
             if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
                 accountForU = true;
@@ -887,7 +887,7 @@ public class TranslateGizmo extends Gizmo {
         oldmousex = e.getX();
         oldmousey = e.getY();
         //* HOW TO REFACTOR TO HERE ***************************************
-        lastDeltaPosition = p.substract(getPosition());
+        lastDeltaPosition = p.subtract(getPosition());
 
         return false;
     }
@@ -1099,9 +1099,9 @@ public class TranslateGizmo extends Gizmo {
             left = camera.getLeft();
             up = camera.getUp();
 
-            v.normalize();
-            left.normalize();
-            up.normalize();
+            v = v.normalized();
+            left = left.normalized();
+            up = up.normalized();
 
             if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
                 accountForU = true;
@@ -1143,7 +1143,7 @@ public class TranslateGizmo extends Gizmo {
         oldmousey = e.getY();
         //* HOW TO REFACTOR TO HERE ***************************************
 
-        setPosition(p.substract(lastDeltaPosition));
+        setPosition(p.subtract(lastDeltaPosition));
         selectedResizing = false;
 
         //- Automatic cursor repositioning constrain ----------------------

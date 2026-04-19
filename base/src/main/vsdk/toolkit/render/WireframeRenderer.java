@@ -128,36 +128,24 @@ public class WireframeRenderer extends RenderingElement
                 p1 = tr[3*t+1];
                 p2 = tr[3*t+2];
 
-                mp0.x = v[3*p0];
-                mp0.y = v[3*p0+1];
-                mp0.z = v[3*p0+2];
-                mp1.x = v[3*p1];
-                mp1.y = v[3*p1+1];
-                mp1.z = v[3*p1+2];
+                mp0 = new Vector3D(v[3*p0], v[3*p0+1], v[3*p0+2]);
+                mp1 = new Vector3D(v[3*p1], v[3*p1+1], v[3*p1+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0.x = v[3*p1];
-                mp0.y = v[3*p1+1];
-                mp0.z = v[3*p1+2];
-                mp1.x = v[3*p2];
-                mp1.y = v[3*p2+1];
-                mp1.z = v[3*p2+2];
+                mp0 = new Vector3D(v[3*p1], v[3*p1+1], v[3*p1+2]);
+                mp1 = new Vector3D(v[3*p2], v[3*p2+1], v[3*p2+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0.x = v[3*p2];
-                mp0.y = v[3*p2+1];
-                mp0.z = v[3*p2+2];
-                mp1.x = v[3*p0];
-                mp1.y = v[3*p0+1];
-                mp1.z = v[3*p0+2];
+                mp0 = new Vector3D(v[3*p2], v[3*p2+1], v[3*p2+2]);
+                mp1 = new Vector3D(v[3*p0], v[3*p0+1], v[3*p0+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {

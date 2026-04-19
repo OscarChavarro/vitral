@@ -108,24 +108,23 @@ public class Raytracer extends RenderingElement {
             normalVariation = info.normalMap.getNormal(info.u, 1-info.v);
             if ( normalVariation != null ) {
                 // Evaluation of [BLIN1978b]/[FOLE1992].16.23 equation
-                N = info.n;    N.normalize();
-                Ps = info.t;   Ps.normalize();
+                N = info.n.normalized();
+                Ps = info.t.normalized();
 
                 // This is non-sense, but it works! Currently not using
                 // tangent vector from geometry! Explain this!
-                Ps.x = 0; Ps.y = 1; Ps.z = 0;
+                Ps = new Vector3D(0, 1, 0);
 
                 Pt = N.crossProduct(Ps);
                 NxPt = N.crossProduct(Pt);
                 NxPs = N.crossProduct(Ps);
-                Bu = normalVariation.x;
-                Bv = normalVariation.y;
+                Bu = normalVariation.x();
+                Bv = normalVariation.y();
                 // Note: this only works when `N` is a unit vector. If not,
                 //      `normalPerturbation` must be divided by N's length
                 normalPerturbation =
-                    NxPt.multiply(Bu).substract(NxPs.multiply(Bv));
-                info.n = info.n.add(normalPerturbation);
-                info.n.normalize();
+                    NxPt.multiply(Bu).subtract(NxPs.multiply(Bv));
+                info.n = info.n.add(normalPerturbation).normalized();
             }
         }
 
@@ -145,22 +144,21 @@ public class Raytracer extends RenderingElement {
               else {
                 Vector3D l;
                 if ( light.tipo_de_luz == Light.POINT ) {
-                    l = new Vector3D(light.lvec.x - info.p.x, 
-                                     light.lvec.y - info.p.y, 
-                                     light.lvec.z - info.p.z);
-                    l.normalize();
+                    l = new Vector3D(light.lvec.x() - info.p.x(),
+                                     light.lvec.y() - info.p.y(),
+                                     light.lvec.z() - info.p.z()).normalized();
                   } 
                   else {
-                    l = new Vector3D(-light.lvec.x, -light.lvec.y, -light.lvec.z);
+                    l = new Vector3D(-light.lvec.x(), -light.lvec.y(), -light.lvec.z());
                 }
 
                 // Check if the surface point is in shadow
-                static_poffset.x = info.p.x + VSDK.EPSILON*l.x;
-                static_poffset.y = info.p.y + VSDK.EPSILON*l.y;
-                static_poffset.z = info.p.z + VSDK.EPSILON*l.z;
-                static_shadowRay.origin.clone(static_poffset);
-                static_shadowRay.direction.clone(l);
-                static_shadowRay.direction.normalize();
+                static_poffset = new Vector3D(
+                    info.p.x() + VSDK.EPSILON*l.x(),
+                    info.p.y() + VSDK.EPSILON*l.y(),
+                    info.p.z() + VSDK.EPSILON*l.z());
+                static_shadowRay.origin = Vector3D.copyOf(static_poffset);
+                static_shadowRay.direction = l.normalized();
                 nearestObject = selectNearestThingInRayDirection(static_shadowRay, objects);
                 if ( nearestObject != null ) {
                     //delete l;
@@ -183,9 +181,10 @@ public class Raytracer extends RenderingElement {
 
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
-                        static_tmp.x = lambert*info.n.x - l.x;
-                        static_tmp.y = lambert*info.n.y - l.y;
-                        static_tmp.z = lambert*info.n.z - l.z;
+                        static_tmp = new Vector3D(
+                            lambert*info.n.x() - l.x(),
+                            lambert*info.n.y() - l.y(),
+                            lambert*info.n.z() - l.z());
                         double spec = 
                             viewVector.dotProduct(static_tmp);
 
@@ -209,12 +208,12 @@ public class Raytracer extends RenderingElement {
             double t = viewVector.dotProduct(info.n);
             if ( t > 0 ) {
                 t *= 2;
-                Vector3D reflect = new Vector3D(t*info.n.x - viewVector.x, 
-                                                t*info.n.y - viewVector.y, 
-                                                t*info.n.z - viewVector.z);
-                Vector3D poffset = new Vector3D(info.p.x + VSDK.EPSILON*reflect.x, 
-                                                info.p.y + VSDK.EPSILON*reflect.y, 
-                                                info.p.z + VSDK.EPSILON*reflect.z);
+                Vector3D reflect = new Vector3D(t*info.n.x() - viewVector.x(),
+                                                t*info.n.y() - viewVector.y(),
+                                                t*info.n.z() - viewVector.z());
+                Vector3D poffset = new Vector3D(info.p.x() + VSDK.EPSILON*reflect.x(),
+                                                info.p.y() + VSDK.EPSILON*reflect.y(),
+                                                info.p.z() + VSDK.EPSILON*reflect.z());
                 Ray reflected_ray = new Ray(poffset, reflect);
 
                 //delete reflect;
@@ -248,9 +247,10 @@ public class Raytracer extends RenderingElement {
 
                     //--------------------------------------------------------
 
-                    rv.x = -reflected_ray.direction.x;
-                    rv.y = -reflected_ray.direction.y;
-                    rv.z = -reflected_ray.direction.z;                    
+                    rv = new Vector3D(
+                        -reflected_ray.direction.x(),
+                        -reflected_ray.direction.y(),
+                        -reflected_ray.direction.z());
                     ColorRgb rcolor = new ColorRgb();
                     evaluateIlluminationModel(subInfo, rv, lights, objects, 
                                               background, material, 
@@ -354,10 +354,10 @@ public class Raytracer extends RenderingElement {
             }
 
             //------------------------------------------------------------
-            Vector3D viewVector = new Vector3D();
-            viewVector.x = -inRay.direction.x;
-            viewVector.y = -inRay.direction.y;
-            viewVector.z = -inRay.direction.z;
+            Vector3D viewVector = new Vector3D(
+                -inRay.direction.x(),
+                -inRay.direction.y(),
+                -inRay.direction.z());
 
             Material material;
             if ( static_info.material != null ) {

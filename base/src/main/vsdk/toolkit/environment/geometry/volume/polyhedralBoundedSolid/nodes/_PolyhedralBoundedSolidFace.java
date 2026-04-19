@@ -193,19 +193,19 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             //Obtain any two non collinear vectors
             p0 = he.startingVertex.position;
             p1 = he.next ().startingVertex.position;
-            temp.substract (p1, p0);
+            temp = p1.subtract(p0);
             if ( !readyVecA ) {
                 if ( temp.length () > tolerance ) {
-                    a.clone (temp);
-                    a.normalize ();
+                    a = new Vector3D(temp);
+                    a = a.normalized();
                     readyVecA = true;
                 }
             } else if ( !readyVecB ) {
                 if ( temp.length () > tolerance ) {
-                    temp.normalize ();
+                    temp = temp.normalized();
                     dotP = Math.abs (temp.dotProduct (a));
                     if ( dotP < 1 - nonColinearDotTolerance ) {
-                        b.clone (temp);
+                        b = new Vector3D(temp);
                         readyVecB = true;
                     }
                 }
@@ -219,19 +219,19 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         n1 = a.crossProduct (b); //Temporal normal.
         // Special case: triangle
         if ( loop.halfEdgesList.size () == 3 ) {
-            n1.normalize ();
+            n1 = n1.normalized();
             containingPlane = new InfinitePlane (n1, p0);
             return false;
         }
         //Test for dominant plane.
         //domPlane: 1=xy, 2=xz, 3=yz
-        if ( Math.abs(n1.z) > Math.abs(n1.x) ) {
-            if ( Math.abs(n1.z) > Math.abs(n1.y) ) {
+        if ( Math.abs(n1.z()) > Math.abs(n1.x()) ) {
+            if ( Math.abs(n1.z()) > Math.abs(n1.y()) ) {
                 domPlane = 1;
             } else {
                 domPlane = 2;
             }
-        } else if ( Math.abs(n1.x) > Math.abs(n1.y) ) {
+        } else if ( Math.abs(n1.x()) > Math.abs(n1.y()) ) {
             domPlane = 3;
         } else {
             domPlane = 2;
@@ -244,17 +244,17 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             p0 = he.startingVertex.position;
             switch ( domPlane ) {
                 case 1: //xy plane
-                    if ( p0.y < heInferior.startingVertex.position.y ) {
+                    if ( p0.y() < heInferior.startingVertex.position.y() ) {
                         heInferior = he;
                     }
                     break;
                 case 2: //xz plane
-                    if ( p0.z < heInferior.startingVertex.position.z ) {
+                    if ( p0.z() < heInferior.startingVertex.position.z() ) {
                         heInferior = he;
                     }
                     break;
                 case 3: //yz plane
-                    if ( p0.z < heInferior.startingVertex.position.z ) {
+                    if ( p0.z() < heInferior.startingVertex.position.z() ) {
                         heInferior = he;
                     }
                     break;
@@ -268,9 +268,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         do {
             he = he.next ();
             p1 = he.startingVertex.position;
-            vNext.substract (p1, p0);
+            vNext = p1.subtract(p0);
             if ( vNext.length () > tolerance ) {
-                vNext.normalize ();
+                vNext = vNext.normalized();
                 break;
             }
         } while ( he != heInferior );
@@ -279,9 +279,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             // The previous vector should not be collinear with the first one found.
             he = he.previous ();
             p1 = he.startingVertex.position;
-            vPrev.substract (p1, p0);
+            vPrev = p1.subtract(p0);
             if ( vPrev.length () > tolerance ) {
-                vPrev.normalize ();
+                vPrev = vPrev.normalized();
                 dotP = Math.abs (vPrev.dotProduct (vNext));
                 if ( dotP < 1 - nonColinearDotTolerance ) {
                     break;
@@ -328,10 +328,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             p0 = he.startingVertex.position;
             p1 = he.next().startingVertex.position;
             p2 = he.next().next().startingVertex.position;
-            a = p1.substract(p0);
-            a.normalize();
-            b = p2.substract(p0);
-            b.normalize();
+            a = p1.subtract(p0);
+            a = a.normalized();
+            b = p2.subtract(p0);
+            b = b.normalized();
             n = a.crossProduct(b);
             // Iterate if the given three vertices are colinear
             double angleInDegrees;
@@ -356,9 +356,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 p2 = he.next().next().startingVertex.position;
 
                 a = p1.substract(p0);
-                a.normalize();
+                a = a.normalized();
                 b = p2.substract(p0);
-                b.normalize();
+                b = b.normalized();
                 n = a.crossProduct(b);
                 angleInDegrees = Math.acos(a.dotProduct(b));
                 //System.out.println("  . Big iteration angle: " + angleInDegrees);
@@ -376,10 +376,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 p1 = he.next().startingVertex.position;
                 p2 = he.next().next().startingVertex.position;
 
-                a = p1.substract(p0);
-                a.normalize();
-                b = p2.substract(p0);
-                b.normalize();
+                a = p1.subtract(p0);
+                a = a.normalized();
+                b = p2.subtract(p0);
+                b = b.normalized();
                 n = a.crossProduct(b);
                 angleInDegrees = Math.acos(a.dotProduct(b));
                 //System.out.println("  . Iteration angle: " + angleInDegrees);
@@ -406,12 +406,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             else {
                 colinearPoints = false;
             }
-            n.normalize();
+            n = n.normalized();
             containingPlane = new InfinitePlane(n, p0);
             //- Determine if p1 region is convex or concave -------------------
             Vector3D middle = a.add(b);
             Vector3D testPoint;
-            middle.normalize();
+            middle = middle.normalized();
             middle = middle.multiply(numericContext.bigEpsilon());
             testPoint = p0.add(middle);
             //- If concave, swap normal direction -----------------------------
@@ -439,26 +439,18 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /**
     @coord: 1 means drop x, 2 means drop y and 3 means drop z
     */
-    private void dropCoordinate(Vector3D in, Vector3D out, int coord)
+    private Vector3D dropCoordinate(Vector3D in, int coord)
     {
-        out.z = 0;
-
         switch ( coord ) {
           case 1:
             // Drop X
-            out.x = in.y;
-            out.y = in.z;
-            break;
+            return new Vector3D(in.y(), in.z(), 0);
           case 2:
             // Drop Y
-            out.x = in.x;
-            out.y = in.z;
-            break;
+            return new Vector3D(in.x(), in.z(), 0);
           case 3: default:
             // Drop Z
-            out.x = in.x;
-            out.y = in.y;
-            break;
+            return new Vector3D(in.x(), in.y(), 0);
         }
     }
 
@@ -520,12 +512,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         polygon2Dvv = new ArrayList<_PolyhedralBoundedSolidVertex>();
         n = containingPlane.getNormal();
 
-        if ( Math.abs(n.x) >= Math.abs(n.y) &&
-             Math.abs(n.x) >= Math.abs(n.z) ) {
+        if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
+             Math.abs(n.x()) >= Math.abs(n.z()) ) {
             dominantCoordinate = 1;
         }
-        else if ( Math.abs(n.y) >= Math.abs(n.x) &&
-                  Math.abs(n.y) >= Math.abs(n.z) ) {
+        else if ( Math.abs(n.y()) >= Math.abs(n.x()) &&
+                  Math.abs(n.y()) >= Math.abs(n.z()) ) {
             dominantCoordinate = 2;
         }
         else {
@@ -552,10 +544,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                     return Geometry.LIMIT;
                 }
 
-                dropCoordinate(he.startingVertex.position, projectedPoint,
-                               dominantCoordinate);
-                polygon2Du.add(projectedPoint.x);
-                polygon2Dv.add(projectedPoint.y);
+                projectedPoint = dropCoordinate(he.startingVertex.position,
+                    dominantCoordinate);
+                polygon2Du.add(projectedPoint.x());
+                polygon2Dv.add(projectedPoint.y());
                 polygon2Dh.add(he);
                 heOld = he;
                 polygon2Dvv.add(he.startingVertex);
@@ -564,10 +556,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                     // Loop is not closed!
                     return Geometry.OUTSIDE;
                 }
-                dropCoordinate(he.startingVertex.position, projectedPoint,
-                               dominantCoordinate);
-                polygon2Du.add(projectedPoint.x);
-                polygon2Dv.add(projectedPoint.y);
+                projectedPoint = dropCoordinate(he.startingVertex.position,
+                    dominantCoordinate);
+                polygon2Du.add(projectedPoint.x());
+                polygon2Dv.add(projectedPoint.y());
                 polygon2Dvv.add(he.startingVertex);
 
                 if ( VSDK.vectorDistance(p, he.startingVertex.position) 
@@ -586,9 +578,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             } while( he != heStart );
         }
 
-        dropCoordinate(p, projectedPoint, dominantCoordinate);
-        u = projectedPoint.x;
-        v = projectedPoint.y;
+        projectedPoint = dropCoordinate(p, dominantCoordinate);
+        u = projectedPoint.x();
+        v = projectedPoint.y();
 
         //-----------------------------------------------------------------
         //- 2. Translate the 2D polygon such that the intersection point is
@@ -671,13 +663,13 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         viewingVector = c.getRotation().multiply(iv);
         Vector3D n = containingPlane.getNormal();
         Vector3D cp, t;
-        n.normalize();
+        n = n.normalized();
         double dot;
         int i;
         Vector3D p;
 
         if ( c.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            viewingVector.normalize();
+            viewingVector = viewingVector.normalized();
             dot = n.dotProduct(viewingVector);
             if ( dot > VSDK.EPSILON ) {
                 return -1;
@@ -708,9 +700,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                     // Calculate containing plane equation for current edge
                     p = he.startingVertex.position;
                     //System.out.println("    . Testing point " + p);
-                    t = p.substract(cp);
+                    t = p.subtract(cp);
                     t = t.multiply(-1);
-                    t.normalize();
+                    t = t.normalized();
                     //System.out.println("     -> Viewing point " + t);
                     if ( t.dotProduct(n) > 0.0 ) {
                         return 1;

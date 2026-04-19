@@ -164,7 +164,7 @@ public class SimpleBodyGroup extends Entity {
         inOutRay.t = Double.MAX_VALUE;
 
         myRay = new Ray (
-            rotation_i.multiply(inOutRay.origin.substract(position)),
+            rotation_i.multiply(inOutRay.origin.subtract(position)),
             rotation_i.multiply(inOutRay.direction)
         );
         myRay.t = inOutRay.t;
@@ -188,7 +188,7 @@ public class SimpleBodyGroup extends Entity {
         int i;
         SimpleBody bi;
         Matrix4x4 T = new Matrix4x4(), R, S = new Matrix4x4(), M;
-        Vector3D p = new Vector3D(), p2;
+        Vector3D p2;
         ArrayList<Vector3D> points = new ArrayList<Vector3D>();
         double[] minmaxSub;
 
@@ -200,52 +200,28 @@ public class SimpleBodyGroup extends Entity {
             S.scale(bi.getScale()); 
             M = T.multiply(R).multiply(S);
 
-            p.x = minmaxSub[0];
-            p.y = minmaxSub[1];
-            p.z = minmaxSub[2];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[1], minmaxSub[2]));
             points.add(p2);
 
-            p.x = minmaxSub[3];
-            p.y = minmaxSub[1];
-            p.z = minmaxSub[2];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[1], minmaxSub[2]));
             points.add(p2);
 
-            p.x = minmaxSub[0];
-            p.y = minmaxSub[4];
-            p.z = minmaxSub[2];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[4], minmaxSub[2]));
             points.add(p2);
 
-            p.x = minmaxSub[3];
-            p.y = minmaxSub[4];
-            p.z = minmaxSub[2];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[4], minmaxSub[2]));
             points.add(p2);
 
-            p.x = minmaxSub[0];
-            p.y = minmaxSub[1];
-            p.z = minmaxSub[5];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[1], minmaxSub[5]));
             points.add(p2);
 
-            p.x = minmaxSub[3];
-            p.y = minmaxSub[1];
-            p.z = minmaxSub[5];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[1], minmaxSub[5]));
             points.add(p2);
 
-            p.x = minmaxSub[0];
-            p.y = minmaxSub[4];
-            p.z = minmaxSub[5];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[4], minmaxSub[5]));
             points.add(p2);
 
-            p.x = minmaxSub[3];
-            p.y = minmaxSub[4];
-            p.z = minmaxSub[5];
-            p2 = M.multiply(p);
+            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[4], minmaxSub[5]));
             points.add(p2);
         }
 
@@ -257,13 +233,13 @@ public class SimpleBodyGroup extends Entity {
             maxZ = -Double.MAX_VALUE;
 
         for ( i = 0; i < points.size(); i++ ) {
-            p = points.get(i);
-            if ( p.x < minX ) minX = p.x;
-            if ( p.y < minY ) minY = p.y;
-            if ( p.z < minZ ) minZ = p.z;
-            if ( p.x > maxX ) maxX = p.x;
-            if ( p.y > maxY ) maxY = p.y;
-            if ( p.z > maxZ ) maxZ = p.z;
+            Vector3D p = points.get(i);
+            if ( p.x() < minX ) minX = p.x();
+            if ( p.y() < minY ) minY = p.y();
+            if ( p.z() < minZ ) minZ = p.z();
+            if ( p.x() > maxX ) maxX = p.x();
+            if ( p.y() > maxY ) maxY = p.y();
+            if ( p.z() > maxZ ) maxZ = p.z();
         }
         MinMax[0] = minX;
         MinMax[1] = minY;

@@ -258,9 +258,9 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x;
-                composed.M[1][3] = position.y;
-                composed.M[2][3] = position.z;
+                composed.M[0][3] = position.x();
+                composed.M[1][3] = position.y();
+                composed.M[2][3] = position.z();
                 translationGizmo.setTransformationMatrix(composed);
 
                 JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
@@ -308,14 +308,15 @@ public class JoglDrawingArea implements
             Vector3D min, max, s;
             min = new Vector3D(minmax[0], minmax[1], minmax[2]);
             max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-            s = new Vector3D(max.x - min.x, max.y - min.y, max.z - min.z);
+            s = new Vector3D(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
 
-            double maxsize = s.x;
-            if ( s.y > maxsize ) maxsize = s.y;
-            if ( s.z > maxsize ) maxsize = s.z;
+            double maxsize = s.x();
+            if ( s.y() > maxsize ) maxsize = s.y();
+            if ( s.z() > maxsize ) maxsize = s.z();
             // The 95% scale factor is to allow a full render of the object to
             // fit inside the rendered view
-            s.x = s.y = s.z = (2/maxsize) * 0.95;
+            s = new Vector3D((2/maxsize) * 0.95, (2/maxsize) * 0.95,
+                (2/maxsize) * 0.95);
 
             p = max.add(min);
             p = p.multiply(-1/maxsize);
@@ -449,7 +450,7 @@ public class JoglDrawingArea implements
                 break;
               case 4:
                 position = new Vector3D(-1, -1, 1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, -1));
@@ -458,7 +459,7 @@ public class JoglDrawingArea implements
                 break;
               case 5:
                 position = new Vector3D(1, -1, 1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
@@ -467,7 +468,7 @@ public class JoglDrawingArea implements
                 break;
               case 6:
                 position = new Vector3D(1, 1, 1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
@@ -476,7 +477,7 @@ public class JoglDrawingArea implements
                 break;
               case 7:
                 position = new Vector3D(-1, 1, 1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, -1));
@@ -485,7 +486,7 @@ public class JoglDrawingArea implements
                 break;
               case 8:
                 position = new Vector3D(0, 1, -1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(180), new Vector3D(0, 0, 1));
@@ -494,7 +495,7 @@ public class JoglDrawingArea implements
                 break;
               case 9:
                 position = new Vector3D(-1, 0, -1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
@@ -503,14 +504,14 @@ public class JoglDrawingArea implements
                 break;
               case 10:
                 position = new Vector3D(0, -1, -1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R.axisRotation(Math.toRadians(135), new Vector3D(1, 0, 0));
                 break;
               case 11:
                 position = new Vector3D(1, 0, -1);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, 1));
@@ -519,7 +520,7 @@ public class JoglDrawingArea implements
                 break;
               case 12:
                 position = new Vector3D(1, -1, 0);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
@@ -528,7 +529,7 @@ public class JoglDrawingArea implements
                 break;
               case 13:
                 position = new Vector3D(1, 1, 0);
-                position.normalize();
+                position = position.normalized();
                 position = position.multiply(1.5);
                 scale = new Vector3D(0.5, 0.5, 0.5);
                 R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
@@ -730,7 +731,7 @@ public class JoglDrawingArea implements
         if ( view.getCamera().projectPoint(
              parent.visualDebugRay.origin, projected) ) {
             view.drawTextureString2D(gl,
-                (int)projected.x-3, (int)projected.y+10, view.xLabelImage);
+                (int)projected.x()-3, (int)projected.y()+10, view.xLabelImage);
         }
         gl.glPopAttrib();
 */
@@ -853,7 +854,7 @@ public class JoglDrawingArea implements
     private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
     {
         double l;
-        Vector3D diff = end.substract(start);
+        Vector3D diff = end.subtract(start);
         l = diff.length();
 
         gl.glEnable(GL2.GL_LIGHTING);
@@ -875,7 +876,7 @@ public class JoglDrawingArea implements
         R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
 
         gl.glPushMatrix();
-        gl.glTranslated(start.x, start.y, start.z);
+        gl.glTranslated(start.x(), start.y(), start.z());
         JoglMatrixRenderer.activate(gl, R);
         JoglGeometryRenderer.draw(gl, a, theScene.camera, qualitySelectionVisualDebug);
         gl.glPopMatrix();
@@ -886,11 +887,11 @@ public class JoglDrawingArea implements
             Vector3D p;
             double offset = 0.1;
             int i;
-            diff.normalize();
+            diff = diff.normalized();
             for ( i = 0; i < 3; i++, offset += 0.1 ) {
                 p = end.add(diff.multiply(offset));
                 gl.glPushMatrix();
-                gl.glTranslated(p.x, p.y, p.z);
+                gl.glTranslated(p.x(), p.y(), p.z());
                 JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
                 gl.glPopMatrix();
             }
@@ -909,7 +910,7 @@ public class JoglDrawingArea implements
         //-----------------------------------------------------------------
         Vector3D p;
         Vector3D d = new Vector3D(ray.direction);
-        d.normalize();
+        d = d.normalized();
         GeometryIntersectionInformation info;
 
         info = new GeometryIntersectionInformation();
@@ -919,7 +920,7 @@ public class JoglDrawingArea implements
         JoglMaterialRenderer.activate(gl, visualDebugMaterial);
         Sphere s = new Sphere(0.05);
         gl.glPushMatrix();
-        gl.glTranslated(ray.origin.x, ray.origin.y, ray.origin.z);
+        gl.glTranslated(ray.origin.x(), ray.origin.y(), ray.origin.z());
         JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
         gl.glPopMatrix();
 
@@ -936,8 +937,8 @@ public class JoglDrawingArea implements
             }
             // Reflection ray
             Vector3D dd = ray.direction.multiply(-1);
-            dd.normalize();
-            Vector3D h = info.n.multiply(dd.dotProduct(info.n)).substract(dd);
+            dd = dd.normalized();
+            Vector3D h = info.n.multiply(dd.dotProduct(info.n)).subtract(dd);
             Ray subray = new Ray(p, dd.add(h.multiply(2)));
             subray.origin = subray.origin.add(subray.direction.multiply(VSDK.EPSILON*10.0));
             drawVisualRayDebug(gl, subray, level-1);
@@ -1112,9 +1113,9 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x;
-                composed.M[1][3] = position.y;
-                composed.M[2][3] = position.z;
+                composed.M[0][3] = position.x();
+                composed.M[1][3] = position.y();
+                composed.M[2][3] = position.z();
 
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
@@ -1163,9 +1164,9 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x;
-            composed.M[1][3] = position.y;
-            composed.M[2][3] = position.z;
+            composed.M[0][3] = position.x();
+            composed.M[1][3] = position.y();
+            composed.M[2][3] = position.z();
 
             if ( mouseView == null ) {
                 return;
@@ -1175,9 +1176,9 @@ public class JoglDrawingArea implements
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position.x = composed.M[0][3];
-                position.y = composed.M[1][3];
-                position.z = composed.M[2][3];
+                position = position.withX(composed.M[0][3]);
+                position = position.withY(composed.M[1][3]);
+                position = position.withZ(composed.M[2][3]);
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
@@ -1212,18 +1213,18 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x;
-            composed.M[1][3] = position.y;
-            composed.M[2][3] = position.z;
+            composed.M[0][3] = position.x();
+            composed.M[1][3] = position.y();
+            composed.M[2][3] = position.z();
 
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position.x = composed.M[0][3];
-                position.y = composed.M[1][3];
-                position.z = composed.M[2][3];
+                position = position.withX(composed.M[0][3]);
+                position = position.withY(composed.M[1][3]);
+                position = position.withZ(composed.M[2][3]);
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
@@ -1259,18 +1260,18 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x;
-            composed.M[1][3] = position.y;
-            composed.M[2][3] = position.z;
+            composed.M[0][3] = position.x();
+            composed.M[1][3] = position.y();
+            composed.M[2][3] = position.z();
 
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position.x = composed.M[0][3];
-                position.y = composed.M[1][3];
-                position.z = composed.M[2][3];
+                position = position.withX(composed.M[0][3]);
+                position = position.withY(composed.M[1][3]);
+                position = position.withZ(composed.M[2][3]);
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
@@ -1304,9 +1305,9 @@ public class JoglDrawingArea implements
             position = gi.getPosition();
             //composed = new Matrix4x4(gi.getRotation());
             composed = new Matrix4x4();
-            composed.M[0][3] = position.x;
-            composed.M[1][3] = position.y;
-            composed.M[2][3] = position.z;
+            composed.M[0][3] = position.x();
+            composed.M[1][3] = position.y();
+            composed.M[2][3] = position.z();
 
             if ( mouseView == null ) {
                 return;
@@ -1316,9 +1317,9 @@ public class JoglDrawingArea implements
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
             if ( translationGizmo.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                 composed = translationGizmo.getTransformationMatrix();
-                position.x = composed.M[0][3];
-                position.y = composed.M[1][3];
-                position.z = composed.M[2][3];
+                position = position.withX(composed.M[0][3]);
+                position = position.withY(composed.M[1][3]);
+                position = position.withZ(composed.M[2][3]);
                 composed.M[0][3] = 0;
                 composed.M[1][3] = 0;
                 composed.M[2][3] = 0;
@@ -1392,16 +1393,16 @@ public class JoglDrawingArea implements
                 position = gi.getPosition();
                 //composed = new Matrix4x4(gi.getRotation());
                 composed = new Matrix4x4();
-                composed.M[0][3] = position.x;
-                composed.M[1][3] = position.y;
-                composed.M[2][3] = position.z;
+                composed.M[0][3] = position.x();
+                composed.M[1][3] = position.y();
+                composed.M[2][3] = position.z();
 
                 translationGizmo.setTransformationMatrix(composed);
                 if ( translationGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     composed = translationGizmo.getTransformationMatrix();
-                    position.x = composed.M[0][3];
-                    position.y = composed.M[1][3];
-                    position.z = composed.M[2][3];
+                    position = position.withX(composed.M[0][3]);
+                    position = position.withY(composed.M[1][3]);
+                    position = position.withZ(composed.M[2][3]);
                     composed.M[0][3] = 0;
                     composed.M[1][3] = 0;
                     composed.M[2][3] = 0;
@@ -1434,9 +1435,9 @@ public class JoglDrawingArea implements
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
                 Vector3D s = gi.getScale();
                 Matrix4x4 S = new Matrix4x4();
-                S.M[0][0] = s.x;
-                S.M[1][1] = s.y;
-                S.M[2][2] = s.z;
+                S.M[0][0] = s.x();
+                S.M[1][1] = s.y();
+                S.M[2][2] = s.z();
 
                 scaleGizmo.setTransformationMatrix(S);
 
@@ -1554,32 +1555,32 @@ public class JoglDrawingArea implements
                 //- Visual debug ray control ---------------------------------
               case '4': // Numpad 4
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.x -= 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withX(parent.visualDebugRay.origin.x() - 0.1);
                 }
                 break;
               case '6': // Numpad 6
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.x += 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withX(parent.visualDebugRay.origin.x() + 0.1);
                 }
                 break;
               case '8': // Numpad 8
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.y += 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withY(parent.visualDebugRay.origin.y() + 0.1);
                 }
                 break;
               case '2': // Numpad 2
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.y -= 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withY(parent.visualDebugRay.origin.y() - 0.1);
                 }
                 break;
               case '1': // Numpad 1
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.z -= 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withZ(parent.visualDebugRay.origin.z() - 0.1);
                 }
                 break;
               case '7': // Numpad 7
                 if ( parent.withVisualDebugRay ) {
-                    parent.visualDebugRay.origin.z += 0.1;
+                    parent.visualDebugRay.origin = parent.visualDebugRay.origin.withZ(parent.visualDebugRay.origin.z() + 0.1);
                 }
                 break;
               case '9': // Numpad 9
@@ -1605,7 +1606,7 @@ public class JoglDrawingArea implements
                     phi =
                         parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     theta -= Math.toRadians(5);
-                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                    parent.visualDebugRay.direction = Vector3D.fromSpherical(
                         1, theta, phi);
                 }
                 break;
@@ -1616,7 +1617,7 @@ public class JoglDrawingArea implements
                     phi =
                         parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     theta += Math.toRadians(5);
-                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                    parent.visualDebugRay.direction = Vector3D.fromSpherical(
                         1, theta, phi);
                 }
                 break;
@@ -1628,7 +1629,7 @@ public class JoglDrawingArea implements
                         parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     phi += Math.toRadians(5);
                     if ( phi > Math.PI ) phi = Math.PI;
-                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                    parent.visualDebugRay.direction = Vector3D.fromSpherical(
                         1, theta, phi);
                 }
                 break;
@@ -1640,7 +1641,7 @@ public class JoglDrawingArea implements
                         parent.visualDebugRay.direction.obtainSphericalPhiAngle();
                     phi -= Math.toRadians(5);
                     if ( phi < 0 ) phi = 0;
-                    parent.visualDebugRay.direction.setSphericalCoordinates(
+                    parent.visualDebugRay.direction = Vector3D.fromSpherical(
                         1, theta, phi);
                 }
                 break;

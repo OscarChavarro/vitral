@@ -97,7 +97,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
                 for (int j = 0; j < v3.length; j++) {
                     Element eVector = document.createElement(nodesNames[1]);
                     Vector3D v = v3[j];
-                    eVector.setTextContent(v.x + " " + v.y + " " + v.z);
+                    eVector.setTextContent(v.x() + " " + v.y() + " " + v.z());
                     ePoint.appendChild(eVector);
                 }
                 nodeCurve.appendChild(ePoint);

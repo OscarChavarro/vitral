@@ -78,7 +78,7 @@ class PolyhedralBoundedSolidSetOperatorMoonCylinderDifferenceTest
         int i;
         for ( i = 0; i < solid.verticesList.size(); i++ ) {
             _PolyhedralBoundedSolidVertex vertex = solid.verticesList.get(i);
-            double z = vertex.position.z;
+            double z = vertex.position.z();
             if ( z > minInteriorZ && z < maxInteriorZ ) {
                 count++;
             }

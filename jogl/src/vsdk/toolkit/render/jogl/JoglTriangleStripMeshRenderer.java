@@ -22,9 +22,9 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
 
         gl.glBegin(GL.GL_POINTS);
         for ( int i = 0; i < mesh.getVertexes().length; i++ ) {
-            gl.glVertex3d(mesh.getVertexAt(i).getPosition().x,
-                          mesh.getVertexAt(i).getPosition().y,
-                          mesh.getVertexAt(i).getPosition().z);
+            gl.glVertex3d(mesh.getVertexAt(i).getPosition().x(),
+                          mesh.getVertexAt(i).getPosition().y(),
+                          mesh.getVertexAt(i).getPosition().z());
         }
         gl.glEnd();
     }
@@ -47,8 +47,8 @@ public class JoglTriangleStripMeshRenderer extends JoglRenderer {
             gl.glBegin(GL.GL_TRIANGLE_STRIP);
             for ( j = 0; j < strip.length; j++ ) {
                 v = vertexes[strip[j]];
-                gl.glNormal3d(v.normal.x, v.normal.y, v.normal.z);
-                gl.glVertex3d(v.position.x, v.position.y, v.position.z);
+                gl.glNormal3d(v.normal.x(), v.normal.y(), v.normal.z());
+                gl.glVertex3d(v.position.x(), v.position.y(), v.position.z());
             }
             gl.glEnd();
         }

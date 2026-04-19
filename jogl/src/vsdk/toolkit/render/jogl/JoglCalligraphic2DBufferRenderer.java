@@ -12,14 +12,16 @@ public class JoglCalligraphic2DBufferRenderer extends JoglRenderer
     public static void draw(GL2 gl, Calligraphic2DBuffer vectors)
     {
         int i;
-        Vector3D p0 = new Vector3D();
-        Vector3D p1 = new Vector3D();
+        Vector3D p0;
+        Vector3D p1;
 
         gl.glBegin(GL.GL_LINES);
         for ( i = 0; i < vectors.getNumLines(); i++ ) {
-            vectors.get2DLine(i, p0, p1);
-            gl.glVertex3d(p0.x, p0.y, p0.z);
-            gl.glVertex3d(p1.x, p1.y, p1.z);
+            Vector3D[] segment = vectors.get2DLine(i);
+            p0 = segment[0];
+            p1 = segment[1];
+            gl.glVertex3d(p0.x(), p0.y(), p0.z());
+            gl.glVertex3d(p1.x(), p1.y(), p1.z());
         }
         gl.glEnd();
     }

@@ -37,10 +37,10 @@ public class JoglSimpleBodyGroupRenderer extends JoglRenderer {
 
             gl.glPushMatrix();
             p = b.getPosition();
-            gl.glTranslated(p.x, p.y, p.z);
+            gl.glTranslated(p.x(), p.y(), p.z());
             JoglMatrixRenderer.activate(gl, b.getRotation());
             scale = b.getScale();
-            gl.glScaled(scale.x, scale.y, scale.z);
+            gl.glScaled(scale.x(), scale.y(), scale.z());
 
             for (i = 0; i < sublist.size(); i++) {
                 gi = sublist.get(i);

@@ -64,16 +64,17 @@ public class Sphere extends Solid {
                 NOTA: Comparar este m&eacute;todo modificado con la 
                       versi&oacute;n original en la etapa 1, con la 
                       ayuda de un profiler. ... */
-        _static_delta.x = -inout_rayo.origin.x;
-        _static_delta.y = -inout_rayo.origin.y;
-        _static_delta.z = -inout_rayo.origin.z;
+        _static_delta = new Vector3D(
+            -inout_rayo.origin.x(),
+            -inout_rayo.origin.y(),
+            -inout_rayo.origin.z());
         double v = inout_rayo.direction.dotProduct(_static_delta);
 
         // Test if the inout_rayo actually intersects the sphere
         double t = _radius_squared + v*v 
-                  - _static_delta.x*_static_delta.x 
-                  - _static_delta.y*_static_delta.y 
-                  - _static_delta.z*_static_delta.z;
+                  - _static_delta.x()*_static_delta.x()
+                  - _static_delta.y()*_static_delta.y()
+                  - _static_delta.z()*_static_delta.z();
         if ( t < 0 ) {
             return false;
         }
@@ -99,26 +100,24 @@ public class Sphere extends Solid {
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
         //-----------------------------------------------------------------
-        outData.p.x = inRay.origin.x + inT*inRay.direction.x;
-        outData.p.y = inRay.origin.y + inT*inRay.direction.y;
-        outData.p.z = inRay.origin.z + inT*inRay.direction.z;
+        outData.p = new Vector3D(
+            inRay.origin.x() + inT*inRay.direction.x(),
+            inRay.origin.y() + inT*inRay.direction.y(),
+            inRay.origin.z() + inT*inRay.direction.z());
 
-        outData.n.x = outData.p.x;
-        outData.n.y = outData.p.y;
-        outData.n.z = outData.p.z;
-        outData.n.normalize();
+        outData.n = new Vector3D(outData.p).normalized();
 
         //-----------------------------------------------------------------
         double theta;
         double phi;
 
-        phi = Math.acos(outData.n.z);
-        if ( outData.n.x > VSDK.EPSILON ) {
-            theta = Math.atan(outData.n.y / outData.n.x) + 3*Math.PI/2;
+        phi = Math.acos(outData.n.z());
+        if ( outData.n.x() > VSDK.EPSILON ) {
+            theta = Math.atan(outData.n.y() / outData.n.x()) + 3*Math.PI/2;
           }
-          else if ( outData.n.x < VSDK.EPSILON ) {
+          else if ( outData.n.x() < VSDK.EPSILON ) {
             // OJO: Habra una manera mas eficiente de lograr este intervalo?
-            theta = Math.atan(outData.n.y / outData.n.x) + 3*Math.PI/2;
+            theta = Math.atan(outData.n.y() / outData.n.x()) + 3*Math.PI/2;
             theta += Math.PI;
             if ( theta > 2*Math.PI ) theta -= 2*Math.PI;
           }
@@ -130,9 +129,10 @@ public class Sphere extends Solid {
         outData.v = 1 - (phi / Math.PI);
 
         //-----------------------------------------------------------------
-        outData.t.x = Math.sin(theta-Math.PI/2);
-        outData.t.y = -Math.cos(theta-Math.PI/2);
-        outData.t.z = 0;
+        outData.t = new Vector3D(
+            Math.sin(theta-Math.PI/2),
+            -Math.cos(theta-Math.PI/2),
+            0);
 
         //-----------------------------------------------------------------
     }
@@ -182,13 +182,14 @@ public class Sphere extends Solid {
         _radius_squared = r*r;
     }
 
-    private static void
-    spherePosition(Vector3D p, double theta, double t, double r)
+    private static Vector3D
+    spherePosition(double theta, double t, double r)
     {
         double phi = (t-0.5)*Math.PI;
-        p.x = Math.cos(phi) * Math.cos(theta) * r;
-        p.y = Math.cos(phi) * Math.sin(theta) * r;
-        p.z = Math.sin(phi) * r;
+        return new Vector3D(
+            Math.cos(phi) * Math.cos(theta) * r,
+            Math.cos(phi) * Math.sin(theta) * r,
+            Math.sin(phi) * r);
     }
 
     @Override
@@ -242,10 +243,10 @@ public class Sphere extends Solid {
         solid.mvfs(pos, 1, 1);
 
         pos = new Vector3D();
-        spherePosition(pos, dtheta, dphi, _radius);
+        pos = spherePosition(dtheta, dphi, _radius);
         solid.smev(1, 1, 3, pos);
         pos = new Vector3D();
-        spherePosition(pos, 0, dphi, _radius);
+        pos = spherePosition(0, dphi, _radius);
         solid.smev(1, 3, 2, pos);
 
         solid.mef(1, 1, 1, 3, 2, 3, 2);
@@ -253,7 +254,7 @@ public class Sphere extends Solid {
         for ( i = 2; i < nmeridians; i++ ) {
             theta = dtheta * ((double)i);
             pos = new Vector3D();
-            spherePosition(pos, theta, dphi, _radius);
+            pos = spherePosition(theta, dphi, _radius);
             solid.smev(1, 1, (i+1)+1, pos);
             // Next face is <(1), (i+1), (i+0)>
             solid.mef(1,        /* seed face, always face 1 */
@@ -282,7 +283,7 @@ public class Sphere extends Solid {
             for ( i = 0; i < nmeridians; i++ ) {
                 theta = dtheta * ((double)i);
                 pos = new Vector3D();
-                spherePosition(pos, theta, phi, _radius);
+                pos = spherePosition(theta, phi, _radius);
                 solid.smev(1, (i)+base1, (i)+base2, pos);
                 if ( i > 0 ) {
                     // Next face is <(i), (i+base2), (i-1+base2), (i-1)>
@@ -341,12 +342,13 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public void
-    spherePosition(Vector3D p, double theta, double phi)
+    public Vector3D
+    spherePosition(double theta, double phi)
     {
-        p.x = Math.cos(phi) * Math.cos(theta) * _radius;
-        p.y = -Math.cos(phi) * Math.sin(theta) * _radius;
-        p.z = Math.sin(phi) * _radius;
+        return new Vector3D(
+            Math.cos(phi) * Math.cos(theta) * _radius,
+            -Math.cos(phi) * Math.sin(theta) * _radius,
+            Math.sin(phi) * _radius);
     }
 
     /**
@@ -358,12 +360,13 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public void
-    sphereNormal(Vector3D n, double theta, double phi)
+    public Vector3D
+    sphereNormal(double theta, double phi)
     {
-        n.x = Math.cos(phi) * Math.cos(theta);
-        n.y = -Math.cos(phi) * Math.sin(theta);
-        n.z = Math.sin(phi);
+        return new Vector3D(
+            Math.cos(phi) * Math.cos(theta),
+            -Math.cos(phi) * Math.sin(theta),
+            Math.sin(phi));
     }
 
     /**
@@ -377,12 +380,13 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public void
-    sphereTangent(Vector3D t, double theta, double phi)
+    public Vector3D
+    sphereTangent(double theta, double phi)
     {
-        t.x = Math.sin(theta);
-        t.y = Math.cos(theta);
-        t.z = 0;
+        return new Vector3D(
+            Math.sin(theta),
+            Math.cos(theta),
+            0);
     }
 
     /**
@@ -395,13 +399,14 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public void
-    sphereBinormal(Vector3D b, double theta, double phi)
+    public Vector3D
+    sphereBinormal(double theta, double phi)
     {
-        b.x = -Math.sin(phi)*Math.cos(theta);
-        b.y = Math.sin(phi)*Math.sin(theta);
-        b.z = Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + 
-              Math.cos(phi)*Math.sin(theta)*Math.sin(theta);
+        return new Vector3D(
+            -Math.sin(phi)*Math.cos(theta),
+            Math.sin(phi)*Math.sin(theta),
+            Math.cos(phi)*Math.cos(theta)*Math.cos(theta) +
+            Math.cos(phi)*Math.sin(theta)*Math.sin(theta));
     }
 
 }

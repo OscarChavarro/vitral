@@ -455,9 +455,26 @@ public class PolyhedralBoundedSolid extends Solid {
 
         _PolyhedralBoundedSolidHalfEdge he;
         he = he2.next();
+        int maxTraversal = he2.parentLoop.halfEdgesList.size() + 1;
+        int traversed = 0;
         while ( he != he2 ) {
+            if ( he == null || traversed > maxTraversal ) {
+                VSDK.reportMessage(this, VSDK.WARNING, "lkef",
+                    "Detected inconsistent next-chain; falling back to halfEdgesList order.");
+                migratedHalfEdges.clear();
+                int idx;
+                for ( idx = 0; idx < he2.parentLoop.halfEdgesList.size(); idx++ ) {
+                    _PolyhedralBoundedSolidHalfEdge candidate;
+                    candidate = he2.parentLoop.halfEdgesList.get(idx);
+                    if ( candidate != he2 ) {
+                        migratedHalfEdges.add(candidate);
+                    }
+                }
+                break;
+            }
             migratedHalfEdges.add(he);
             he = he.next();
+            traversed++;
         }
 
         he1.parentLoop.unlistHalfEdge(he1);
@@ -1256,7 +1273,7 @@ public class PolyhedralBoundedSolid extends Solid {
             if ( face.containingPlane.doIntersection(ray) ) {
                 face.containingPlane.doExtraInformation(ray, 0.0, Info);
                 if ( ray.t < min_t ) {
-                    ray.direction.normalize();
+                    ray.direction = ray.direction.normalized();
                     p = ray.origin.add(ray.direction.multiply(ray.t));
                     pos = face.testPointInside(p, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
@@ -1295,9 +1312,9 @@ public class PolyhedralBoundedSolid extends Solid {
             for ( i = 0; i < verticesList.size(); i++ ) {
                 _PolyhedralBoundedSolidVertex v;
                 v = verticesList.get(i);
-                double x = v.position.x;
-                double y = v.position.y;
-                double z = v.position.z;
+                double x = v.position.x();
+                double y = v.position.y();
+                double z = v.position.z();
 
                 if ( x < minX ) minX = x;
                 if ( y < minY ) minY = y;
@@ -1485,10 +1502,10 @@ public class PolyhedralBoundedSolid extends Solid {
         int i, j;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-        Vector3D d = p.substract(origin);
+        Vector3D d = p.subtract(origin);
         Vector3D pi;
         double t0 = d.length();
-        d.normalize();
+        d = d.normalized();
         int pos;
         double distances[] = new double[polygonsList.size()];
         int ndist = 0;
@@ -1501,7 +1518,7 @@ public class PolyhedralBoundedSolid extends Solid {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
             if ( face.containingPlane.doIntersection(ray) ) {
                 if ( ray.t < t0 - numericContext.epsilon() ) {
-                    ray.direction.normalize();
+                    ray.direction = ray.direction.normalized();
                     pi = ray.origin.add(ray.direction.multiply(ray.t));
                     pos = face.testPointInside(pi, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
@@ -1875,12 +1892,12 @@ public class PolyhedralBoundedSolid extends Solid {
                             break;
                         }
                         p = he.startingVertex.position;
-                        if ( p.x > max.x ) max.x = p.x;
-                        if ( p.y > max.y ) max.y = p.y;
-                        if ( p.z > max.z ) max.z = p.z;
-                        if ( p.x < min.x ) min.x = p.x;
-                        if ( p.y < min.y ) min.y = p.y;
-                        if ( p.z < min.z ) min.z = p.z;
+                        if ( p.x() > max.x() ) max = max.withX(p.x());
+                        if ( p.y() > max.y() ) max = max.withY(p.y());
+                        if ( p.z() > max.z() ) max = max.withZ(p.z());
+                        if ( p.x() < min.x() ) min = min.withX(p.x());
+                        if ( p.y() < min.y() ) min = min.withY(p.y());
+                        if ( p.z() < min.z() ) min = min.withZ(p.z());
                     } while( he != heStart && he != e.rightHalf);
                     double leftDistance = VSDK.vectorDistance(min, max);
 
@@ -1896,12 +1913,12 @@ public class PolyhedralBoundedSolid extends Solid {
                             break;
                         }
                         p = he.startingVertex.position;
-                        if ( p.x > max.x ) max.x = p.x;
-                        if ( p.y > max.y ) max.y = p.y;
-                        if ( p.z > max.z ) max.z = p.z;
-                        if ( p.x < min.x ) min.x = p.x;
-                        if ( p.y < min.y ) min.y = p.y;
-                        if ( p.z < min.z ) min.z = p.z;
+                        if ( p.x() > max.x() ) max = max.withX(p.x());
+                        if ( p.y() > max.y() ) max = max.withY(p.y());
+                        if ( p.z() > max.z() ) max = max.withZ(p.z());
+                        if ( p.x() < min.x() ) min = min.withX(p.x());
+                        if ( p.y() < min.y() ) min = min.withY(p.y());
+                        if ( p.z() < min.z() ) min = min.withZ(p.z());
                     } while( he != heStart && he != e.leftHalf);
                     double rightDistance = VSDK.vectorDistance(min, max);
 
@@ -2005,8 +2022,8 @@ public class PolyhedralBoundedSolid extends Solid {
 
                 if ( nedges == 2 ) {
                     p0 = heStart.startingVertex.position;
-                    p1 = heStart.next().startingVertex.position.substract(p0);
-                    p2 = heStart.previous().startingVertex.position.substract(p0);
+                    p1 = heStart.next().startingVertex.position.subtract(p0);
+                    p2 = heStart.previous().startingVertex.position.subtract(p0);
                     if ( PolyhedralBoundedSolidNumericPolicy
                         .vectorsColinear(p1, p2, numericContext) ) {
                         if ( p1.dotProduct(p2) < 0 ) {

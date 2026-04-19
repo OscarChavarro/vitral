@@ -532,32 +532,32 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
             mesh.getVertexAt(t[3*i+2], v2);
 
             if ( !flipNormals ) {
-                gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
+                gl.glNormal3d(v0.normal.x(), v0.normal.y(), v0.normal.z());
               }
               else {
-                gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
+                gl.glNormal3d(-v0.normal.x(), -v0.normal.y(), -v0.normal.z());
             }
 
             gl.glTexCoord2d(v0.u, v0.v);
-            gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
+            gl.glVertex3d(v0.position.x(), v0.position.y(), v0.position.z());
             if ( !flipNormals ) {
-                gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
+                gl.glNormal3d(v1.normal.x(), v1.normal.y(), v1.normal.z());
             }
             else {
-                gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
+                gl.glNormal3d(-v1.normal.x(), -v1.normal.y(), -v1.normal.z());
             }
 
             gl.glTexCoord2d(v1.u, v1.v);
-            gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
+            gl.glVertex3d(v1.position.x(), v1.position.y(), v1.position.z());
             if ( !flipNormals ) {
-                gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
+                gl.glNormal3d(v2.normal.x(), v2.normal.y(), v2.normal.z());
               }
               else {
-                gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
+                gl.glNormal3d(-v2.normal.x(), -v2.normal.y(), -v2.normal.z());
             }
             gl.glTexCoord2d(v2.u, v2.v);
 
-            gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
+            gl.glVertex3d(v2.position.x(), v2.position.y(), v2.position.z());
         }
         gl.glEnd();
     }
@@ -583,30 +583,30 @@ public class JoglTriangleMeshRenderer extends JoglRenderer {
 
             //-----------------------------------------------------------------
             if ( !flipNormals ) {
-                gl.glNormal3d(v0.normal.x, v0.normal.y, v0.normal.z);
+                gl.glNormal3d(v0.normal.x(), v0.normal.y(), v0.normal.z());
               }
               else {
-                gl.glNormal3d(-v0.normal.x, -v0.normal.y, -v0.normal.z);
+                gl.glNormal3d(-v0.normal.x(), -v0.normal.y(), -v0.normal.z());
             }
-            gl.glVertex3d(v0.position.x, v0.position.y, v0.position.z);
+            gl.glVertex3d(v0.position.x(), v0.position.y(), v0.position.z());
 
             //-----------------------------------------------------------------
             if ( !flipNormals ) {
-                gl.glNormal3d(v1.normal.x, v1.normal.y, v1.normal.z);
+                gl.glNormal3d(v1.normal.x(), v1.normal.y(), v1.normal.z());
             }
             else {
-                gl.glNormal3d(-v1.normal.x, -v1.normal.y, -v1.normal.z);
+                gl.glNormal3d(-v1.normal.x(), -v1.normal.y(), -v1.normal.z());
             }
-            gl.glVertex3d(v1.position.x, v1.position.y, v1.position.z);
+            gl.glVertex3d(v1.position.x(), v1.position.y(), v1.position.z());
 
             //-----------------------------------------------------------------
             if ( !flipNormals ) {
-                gl.glNormal3d(v2.normal.x, v2.normal.y, v2.normal.z);
+                gl.glNormal3d(v2.normal.x(), v2.normal.y(), v2.normal.z());
               }
               else {
-                gl.glNormal3d(-v2.normal.x, -v2.normal.y, -v2.normal.z);
+                gl.glNormal3d(-v2.normal.x(), -v2.normal.y(), -v2.normal.z());
             }
-            gl.glVertex3d(v2.position.x, v2.position.y, v2.position.z);
+            gl.glVertex3d(v2.position.x(), v2.position.y(), v2.position.z());
         }
         gl.glEnd();
     }

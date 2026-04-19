@@ -116,7 +116,7 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         }
 
         Vector3D normal = face.containingPlane.getNormal();
-        return normal.z;
+        return normal.z();
     }
 
     private static boolean isLoopOnZPlane(
@@ -126,7 +126,7 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         _PolyhedralBoundedSolidHalfEdge he = start;
 
         do {
-            if ( Math.abs(he.startingVertex.position.z - expectedZ) >
+            if ( Math.abs(he.startingVertex.position.z() - expectedZ) >
                  EPSILON ) {
                 return false;
             }
@@ -144,8 +144,8 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
 
         do {
             Vector3D p = he.startingVertex.position;
-            double dx = p.x - 0.55;
-            double dy = p.y - 0.55;
+            double dx = p.x() - 0.55;
+            double dy = p.y() - 0.55;
             double radius = Math.sqrt(dx*dx + dy*dy);
             if ( radius > maxRadius ) {
                 maxRadius = radius;

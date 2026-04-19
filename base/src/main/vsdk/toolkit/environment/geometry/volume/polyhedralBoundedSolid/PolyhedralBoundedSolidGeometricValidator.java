@@ -87,14 +87,14 @@ public class PolyhedralBoundedSolidGeometricValidator
                              p0, p2, numericContext) &&
                          PolyhedralBoundedSolidNumericPolicy.pointsSeparated(
                              p1, p2, numericContext) ) {
-                        a = p2.substract(p0);
-                        b = p1.substract(p0);
-                        a.normalize();
-                        b.normalize();
+                        a = p2.subtract(p0);
+                        b = p1.subtract(p0);
+                        a = a.normalized();
+                        b = b.normalized();
                         aDotB = Math.abs(a.dotProduct(b));
                         if ( aDotB < 1.0 - numericContext.unitVectorTolerance() ) {
                             n = a.crossProduct(b);
-                            n.normalize();
+                            n = n.normalized();
                             facePlane = new InfinitePlane(n, p0);
                         }
                         break;
@@ -218,10 +218,10 @@ public class PolyhedralBoundedSolidGeometricValidator
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
         Vector3D n = face.containingPlane.getNormal();
-        if ( Math.abs(n.x) >= Math.abs(n.y) && Math.abs(n.x) >= Math.abs(n.z) ) {
+        if ( Math.abs(n.x()) >= Math.abs(n.y()) && Math.abs(n.x()) >= Math.abs(n.z()) ) {
             return 1;
         }
-        if ( Math.abs(n.y) >= Math.abs(n.x) && Math.abs(n.y) >= Math.abs(n.z) ) {
+        if ( Math.abs(n.y()) >= Math.abs(n.x()) && Math.abs(n.y()) >= Math.abs(n.z()) ) {
             return 2;
         }
         return 3;
@@ -231,16 +231,16 @@ public class PolyhedralBoundedSolidGeometricValidator
     {
         Vector2D out = new Vector2D();
         if ( dominantCoordinate == 1 ) {
-            out.x = in.y;
-            out.y = in.z;
+            out.x = in.y();
+            out.y = in.z();
         }
         else if ( dominantCoordinate == 2 ) {
-            out.x = in.x;
-            out.y = in.z;
+            out.x = in.x();
+            out.y = in.z();
         }
         else {
-            out.x = in.x;
-            out.y = in.y;
+            out.x = in.x();
+            out.y = in.y();
         }
         return out;
     }
@@ -447,8 +447,8 @@ public class PolyhedralBoundedSolidGeometricValidator
 
         Vector3D nA = faceA.containingPlane.getNormal().multiply(1.0);
         Vector3D nB = faceB.containingPlane.getNormal().multiply(1.0);
-        nA.normalize();
-        nB.normalize();
+        nA = nA.normalized();
+        nB = nB.normalized();
         if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) >
              numericContext.coplanarDotTolerance() ) {
             return false;
@@ -524,7 +524,7 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D p = p0.add(p1.substract(p0).multiply(t));
+        Vector3D p = p0.add(p1.subtract(p0).multiply(t));
         return PolyhedralBoundedSolidNumericPolicy
             .testPointInside(face, p, numericContext) == Geometry.INSIDE;
     }

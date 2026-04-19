@@ -157,7 +157,7 @@ public class HiddenLineRenderer extends RenderingElement
                     materialLine = new _AppelEdgeCache();
                     materialLine.setStart(startPosition);
                     materialLine.setEnd(endPosition);
-                    materialLine.d = endPosition.substract(startPosition);
+                    materialLine.d = endPosition.subtract(startPosition);
                     if ( l > 0 &&
                          VSDK.vectorDistance(prevEnd, startPosition) < 
                              VSDK.EPSILON ) {
@@ -187,7 +187,7 @@ public class HiddenLineRenderer extends RenderingElement
                     }
                     cache.add(materialLine);
                     //--------------------------------------------------------
-                    prevEnd.clone(endPosition);
+                    prevEnd = Vector3D.copyOf(endPosition);
                     l++;
                 }
             }
@@ -251,12 +251,14 @@ public class HiddenLineRenderer extends RenderingElement
                 // Do not break an edge with itself.
                 continue;
             }
-            ray.origin.clone(cl.start.add(cl.d.multiply(3*VSDK.EPSILON)));
-            ray.direction.clone(cl.d);
+            ray.origin = cl.start.add(cl.d.multiply(3*VSDK.EPSILON));
+            ray.direction = cl.d;
             t0 = ray.direction.length() - 6*VSDK.EPSILON;
-            ray.direction.normalize();
+            ray.direction = ray.direction.normalized();
+            ComputationalGeometry.TriangleIntersection hit =
+                ComputationalGeometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
             if (
-             ComputationalGeometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c, p, n) &&
+             hit != null &&
              ray.t < t0
             ) {
                 // The breaking point in the current testing edge corresponding
@@ -265,9 +267,8 @@ public class HiddenLineRenderer extends RenderingElement
                 sp2a = cl.start;
                 sp2b = cl.end;
                 plane = new InfinitePlane(sp2a, sp2b, sp2c);
-                ray.origin.clone(inEdge.start);
-                ray.direction.clone(inEdge.d);
-                ray.direction.normalize();
+                ray.origin = inEdge.start;
+                ray.direction = inEdge.d.normalized();
                 if ( plane.doIntersection(ray) ) {
                     segment = new _AppelEdgeSegment();
                     segment.t = ray.t / inEdge.d.length(); // Point "PP2"
@@ -276,9 +277,9 @@ public class HiddenLineRenderer extends RenderingElement
                     K = inEdge.start.add(inEdge.d.multiply(segment.t-2*VSDK.EPSILON));
 
                     // Project K on SP2
-                    ray.origin.clone(K);
-                    ray.direction = sp2c.substract(K);
-                    ray.direction.normalize();
+                    ray.origin = K;
+                    ray.direction = sp2c.subtract(K);
+                    ray.direction = ray.direction.normalized();
                     if ( cl.visibleEdgeForContourLine.containingPlane.
                          doIntersection(ray) ) {
                         J = ray.origin.add(ray.direction.multiply(ray.t));

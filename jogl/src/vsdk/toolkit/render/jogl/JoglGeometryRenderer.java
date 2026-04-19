@@ -61,12 +61,12 @@ public class JoglGeometryRenderer extends JoglRenderer
         p = vertex.getPosition();
         n = vertex.getNormal();
 
-        gl.glVertex3d(p.x + (n.x * l/100),
-                      p.y + (n.y * l/100),
-                      p.z + (n.z * l/100));
-        gl.glVertex3d(p.x + (n.x * l),
-                      p.y + (n.y * l),
-                      p.z + (n.z * l));
+        gl.glVertex3d(p.x() + (n.x() * l/100),
+                      p.y() + (n.y() * l/100),
+                      p.z() + (n.z() * l/100));
+        gl.glVertex3d(p.x() + (n.x() * l),
+                      p.y() + (n.y() * l),
+                      p.z() + (n.z() * l));
     }
 
     public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)
@@ -116,8 +116,8 @@ public class JoglGeometryRenderer extends JoglRenderer
         Vector3D min, max, delta;
         min = new Vector3D(minmax[0], minmax[1], minmax[2]);
         max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-        delta = max.substract(min);
-        min = min.substract(delta.multiply(borderPercent));
+        delta = max.subtract(min);
+        min = min.subtract(delta.multiply(borderPercent));
         max = max.add(delta.multiply(borderPercent));
         delta = delta.multiply(linePercent);
 
@@ -129,61 +129,61 @@ public class JoglGeometryRenderer extends JoglRenderer
         gl.glLineWidth(1.0f);
         gl.glBegin(GL.GL_LINES);
 
-            gl.glVertex3d(min.x, min.y, min.z);
-            gl.glVertex3d(min.x+delta.x, min.y, min.z);
-            gl.glVertex3d(min.x, min.y, min.z);
-            gl.glVertex3d(min.x, min.y+delta.y, min.z);
-            gl.glVertex3d(min.x, min.y, min.z);
-            gl.glVertex3d(min.x, min.y, min.z+delta.z);
+            gl.glVertex3d(min.x(), min.y(), min.z());
+            gl.glVertex3d(min.x()+delta.x(), min.y(), min.z());
+            gl.glVertex3d(min.x(), min.y(), min.z());
+            gl.glVertex3d(min.x(), min.y()+delta.y(), min.z());
+            gl.glVertex3d(min.x(), min.y(), min.z());
+            gl.glVertex3d(min.x(), min.y(), min.z()+delta.z());
 
-            gl.glVertex3d(max.x, min.y, min.z);
-            gl.glVertex3d(max.x-delta.x, min.y, min.z);
-            gl.glVertex3d(max.x, min.y, min.z);
-            gl.glVertex3d(max.x, min.y+delta.y, min.z);
-            gl.glVertex3d(max.x, min.y, min.z);
-            gl.glVertex3d(max.x, min.y, min.z+delta.z);
+            gl.glVertex3d(max.x(), min.y(), min.z());
+            gl.glVertex3d(max.x()-delta.x(), min.y(), min.z());
+            gl.glVertex3d(max.x(), min.y(), min.z());
+            gl.glVertex3d(max.x(), min.y()+delta.y(), min.z());
+            gl.glVertex3d(max.x(), min.y(), min.z());
+            gl.glVertex3d(max.x(), min.y(), min.z()+delta.z());
 
-            gl.glVertex3d(min.x, max.y, min.z);
-            gl.glVertex3d(min.x+delta.x, max.y, min.z);
-            gl.glVertex3d(min.x, max.y, min.z);
-            gl.glVertex3d(min.x, max.y-delta.y, min.z);
-            gl.glVertex3d(min.x, max.y, min.z);
-            gl.glVertex3d(min.x, max.y, min.z+delta.z);
+            gl.glVertex3d(min.x(), max.y(), min.z());
+            gl.glVertex3d(min.x()+delta.x(), max.y(), min.z());
+            gl.glVertex3d(min.x(), max.y(), min.z());
+            gl.glVertex3d(min.x(), max.y()-delta.y(), min.z());
+            gl.glVertex3d(min.x(), max.y(), min.z());
+            gl.glVertex3d(min.x(), max.y(), min.z()+delta.z());
 
-            gl.glVertex3d(min.x, min.y, max.z);
-            gl.glVertex3d(min.x+delta.x, min.y, max.z);
-            gl.glVertex3d(min.x, min.y, max.z);
-            gl.glVertex3d(min.x, min.y+delta.y, max.z);
-            gl.glVertex3d(min.x, min.y, max.z);
-            gl.glVertex3d(min.x, min.y, max.z-delta.z);
+            gl.glVertex3d(min.x(), min.y(), max.z());
+            gl.glVertex3d(min.x()+delta.x(), min.y(), max.z());
+            gl.glVertex3d(min.x(), min.y(), max.z());
+            gl.glVertex3d(min.x(), min.y()+delta.y(), max.z());
+            gl.glVertex3d(min.x(), min.y(), max.z());
+            gl.glVertex3d(min.x(), min.y(), max.z()-delta.z());
 
-            gl.glVertex3d(max.x, max.y, min.z);
-            gl.glVertex3d(max.x-delta.x, max.y, min.z);
-            gl.glVertex3d(max.x, max.y, min.z);
-            gl.glVertex3d(max.x, max.y-delta.y, min.z);
-            gl.glVertex3d(max.x, max.y, min.z);
-            gl.glVertex3d(max.x, max.y, min.z+delta.z);
+            gl.glVertex3d(max.x(), max.y(), min.z());
+            gl.glVertex3d(max.x()-delta.x(), max.y(), min.z());
+            gl.glVertex3d(max.x(), max.y(), min.z());
+            gl.glVertex3d(max.x(), max.y()-delta.y(), min.z());
+            gl.glVertex3d(max.x(), max.y(), min.z());
+            gl.glVertex3d(max.x(), max.y(), min.z()+delta.z());
 
-            gl.glVertex3d(max.x, min.y, max.z);
-            gl.glVertex3d(max.x-delta.x, min.y, max.z);
-            gl.glVertex3d(max.x, min.y, max.z);
-            gl.glVertex3d(max.x, min.y+delta.y, max.z);
-            gl.glVertex3d(max.x, min.y, max.z);
-            gl.glVertex3d(max.x, min.y, max.z-delta.z);
+            gl.glVertex3d(max.x(), min.y(), max.z());
+            gl.glVertex3d(max.x()-delta.x(), min.y(), max.z());
+            gl.glVertex3d(max.x(), min.y(), max.z());
+            gl.glVertex3d(max.x(), min.y()+delta.y(), max.z());
+            gl.glVertex3d(max.x(), min.y(), max.z());
+            gl.glVertex3d(max.x(), min.y(), max.z()-delta.z());
 
-            gl.glVertex3d(min.x, max.y, max.z);
-            gl.glVertex3d(min.x+delta.x, max.y, max.z);
-            gl.glVertex3d(min.x, max.y, max.z);
-            gl.glVertex3d(min.x, max.y-delta.y, max.z);
-            gl.glVertex3d(min.x, max.y, max.z);
-            gl.glVertex3d(min.x, max.y, max.z-delta.z);
+            gl.glVertex3d(min.x(), max.y(), max.z());
+            gl.glVertex3d(min.x()+delta.x(), max.y(), max.z());
+            gl.glVertex3d(min.x(), max.y(), max.z());
+            gl.glVertex3d(min.x(), max.y()-delta.y(), max.z());
+            gl.glVertex3d(min.x(), max.y(), max.z());
+            gl.glVertex3d(min.x(), max.y(), max.z()-delta.z());
 
-            gl.glVertex3d(max.x, max.y, max.z);
-            gl.glVertex3d(max.x-delta.x, max.y, max.z);
-            gl.glVertex3d(max.x, max.y, max.z);
-            gl.glVertex3d(max.x, max.y-delta.y, max.z);
-            gl.glVertex3d(max.x, max.y, max.z);
-            gl.glVertex3d(max.x, max.y, max.z-delta.z);
+            gl.glVertex3d(max.x(), max.y(), max.z());
+            gl.glVertex3d(max.x()-delta.x(), max.y(), max.z());
+            gl.glVertex3d(max.x(), max.y(), max.z());
+            gl.glVertex3d(max.x(), max.y()-delta.y(), max.z());
+            gl.glVertex3d(max.x(), max.y(), max.z());
+            gl.glVertex3d(max.x(), max.y(), max.z()-delta.z());
 
         gl.glEnd();
 

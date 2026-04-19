@@ -38,27 +38,27 @@ public class ScaleGizmo extends Gizmo {
             switch ( unicode_id ) {
               // Position
               case 'x':
-                s.x /= deltaMov;
+                s = s.withX(s.x() / deltaMov);
                 updateNeeded = true;
                 break;
               case 'X':
-                s.x *= deltaMov;
+                s = s.withX(s.x() * deltaMov);
                 updateNeeded = true;
                 break;
               case 'y':
-                s.y /= deltaMov;
+                s = s.withY(s.y() / deltaMov);
                 updateNeeded = true;
                 break;
               case 'Y':
-                s.y *= deltaMov;
+                s = s.withY(s.y() * deltaMov);
                 updateNeeded = true;
                 break;
               case 'z':
-                s.z /= deltaMov;
+                s = s.withZ(s.z() / deltaMov);
                 updateNeeded = true;
                 break;
               case 'Z':
-                s.z *= deltaMov;
+                s = s.withZ(s.z() * deltaMov);
                 updateNeeded = true;
                 break; 
             }
@@ -67,25 +67,21 @@ public class ScaleGizmo extends Gizmo {
             switch ( keycode ) {
               case KeyEvent.KEY_UP:
               case KeyEvent.KEY_RIGHT:
-                s.x *= deltaMov;
-                s.y *= deltaMov;
-                s.z *= deltaMov;
+                s = new Vector3D(s.x() * deltaMov, s.y() * deltaMov, s.z() * deltaMov);
                 updateNeeded = true;
                 break;
 
               case KeyEvent.KEY_LEFT:
               case KeyEvent.KEY_DOWN:
-                s.x /= deltaMov;
-                s.y /= deltaMov;
-                s.z /= deltaMov;
+                s = new Vector3D(s.x() / deltaMov, s.y() / deltaMov, s.z() / deltaMov);
                 updateNeeded = true;
                 break;
             }
       }
 
-      T.M[0][0] = s.x;
-      T.M[1][1] = s.y;
-      T.M[2][2] = s.z;
+      T.M[0][0] = s.x();
+      T.M[1][1] = s.y();
+      T.M[2][2] = s.z();
 
       return updateNeeded;
   }

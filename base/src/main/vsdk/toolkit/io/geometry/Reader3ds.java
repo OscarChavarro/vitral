@@ -1258,10 +1258,7 @@ public class Reader3ds extends PersistenceElement
             currentVertexPositionArray = new ArrayList<Vector3D>();
             Vector3D p;
             for ( i = 0; i < numVertexes; i++ ) {
-                p = new Vector3D();
-                p.x = readFloatLE(is);
-                p.y = readFloatLE(is);
-                p.z = readFloatLE(is);
+                p = new Vector3D(readFloatLE(is), readFloatLE(is), readFloatLE(is));
                 currentVertexPositionArray.add(p);
             }
             if ( currentChunk.length-8-numVertexes*12 > 0 ) {

@@ -665,7 +665,7 @@ public class GUIEventExecutor extends CommandListener{
         body.setMaterial(parent.theScene.defaultMaterial());
         body.getMaterial().setDoubleSided(true);
         scale = voxelBody.getScale();
-        S.scale(scale.x, scale.y, scale.z);
+        S.scale(scale.x(), scale.y(), scale.z());
         scale = scale.multiply(r);
         body.setScale(scale);
         cm2 = S.multiply(cm);
@@ -685,9 +685,9 @@ public class GUIEventExecutor extends CommandListener{
              ((double)s) / ((double)texture.getXSize()) * Math.PI * 2;
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
-                p.setSphericalCoordinates(r, tetha, phi);
+                p = Vector3D.fromSpherical(r, tetha, phi);
                 p = cm.add(p);
-                voxelValue = vv.getVoxelAtPosition(p.x, p.y, p.z);
+                voxelValue = vv.getVoxelAtPosition(p.x(), p.y(), p.z());
                 if ( voxelValue < 128 ) {
                     texture.putPixel(s, t, (byte)0, (byte)0, (byte)0, (byte)0);
                 }

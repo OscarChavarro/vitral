@@ -180,7 +180,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
             (CameraControllerOrbiter)model.getCameraController();
 
         Vector3D previousEye = model.getCamera().getPosition();
-        Vector3D relativeVector = previousEye.substract(previousPointOfInterest);
+        Vector3D relativeVector = previousEye.subtract(previousPointOfInterest);
         Vector3D newPointOfInterest = calculateSolidCenter();
         Vector3D newEye = newPointOfInterest.add(relativeVector);
 

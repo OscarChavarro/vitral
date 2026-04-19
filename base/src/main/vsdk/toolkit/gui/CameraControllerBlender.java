@@ -181,9 +181,9 @@ public class CameraControllerBlender extends CameraController {
                 else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
-                        eyePosition.substract(v.multiply(deltaMov));
+                        eyePosition.subtract(v.multiply(deltaMov));
                     focusedPosition = 
-                        focusedPosition.substract(v.multiply(deltaMov));
+                        focusedPosition.subtract(v.multiply(deltaMov));
                     updated = true;
                 }
                 break;
@@ -208,9 +208,9 @@ public class CameraControllerBlender extends CameraController {
                 else if ( (mask & CTRL_MASK) != 0 ) {
                     // Translation
                     eyePosition = 
-                        eyePosition.substract(w.multiply(deltaMov));
+                        eyePosition.subtract(w.multiply(deltaMov));
                     focusedPosition = 
-                        focusedPosition.substract(w.multiply(deltaMov));
+                        focusedPosition.subtract(w.multiply(deltaMov));
                     updated = true;
                 }
                 break;
@@ -259,9 +259,9 @@ public class CameraControllerBlender extends CameraController {
               case 109: // Warning: How to tell java.awt.event.KeyEvent.VK_NUMPAD_LESS: ?
                 // Translation
                 eyePosition = 
-                    eyePosition.substract(u.multiply(deltaMov));
+                    eyePosition.subtract(u.multiply(deltaMov));
                 focusedPosition = 
-                    focusedPosition.substract(u.multiply(deltaMov));
+                    focusedPosition.subtract(u.multiply(deltaMov));
                 updated = true;
                 break;
 

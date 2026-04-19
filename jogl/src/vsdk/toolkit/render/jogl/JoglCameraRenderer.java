@@ -168,9 +168,9 @@ public class JoglCameraRenderer extends JoglRenderer
 
         Matrix4x4 R = cam.getRotation();
         Vector3D p = cam.getPosition();
-        R.M[0][3] = p.x;
-        R.M[1][3] = p.y;
-        R.M[2][3] = p.z;
+        R.M[0][3] = p.x();
+        R.M[1][3] = p.y();
+        R.M[2][3] = p.z();
 
         JoglMatrixRenderer.activate(gl, R);
         //drawBase(gl);

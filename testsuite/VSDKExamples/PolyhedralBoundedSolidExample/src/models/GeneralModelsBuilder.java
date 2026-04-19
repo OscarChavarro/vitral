@@ -588,7 +588,7 @@ public class GeneralModelsBuilder
         Vector3D b = new Vector3D(0.5*Math.cos(ang), 0.5*Math.sin(ang), 0);
         Vector3D c = a.add(b);
         c = c.multiply(0.5);
-        R.translation(-c.x, c.y, c.z);
+        R.translation(-c.x(), c.y(), c.z());
         solid1.applyTransformation(R);
 
         //- Create cilynder 2 ---------------------------------------------
@@ -602,7 +602,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid2);
 
         //-----------------------------------------------------------------
-        R.translation(c.x, -c.y, c.z);
+        R.translation(c.x(), -c.y(), c.z());
         solid2.applyTransformation(R);
 
         //-----------------------------------------------------------------
@@ -811,7 +811,7 @@ public class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
         Vector3D center = new Vector3D(0.5, 0.5, 0);
 
-        solid = PolyhedralBoundedSolidModeler.createCircularLamina(center.x, center.y,
+        solid = PolyhedralBoundedSolidModeler.createCircularLamina(center.x(), center.y(),
                                                       0.2, 0.0, nsides);
 
         // For seting 4 sided case to be equal to figure [MANT1988].12.5.

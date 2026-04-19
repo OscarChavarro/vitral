@@ -22,9 +22,9 @@ public class JoglSphereRenderer extends JoglRenderer {
     private static void
     spherePosition(Vector3D p, double theta, double phi, double r)
     {
-        p.x = Math.cos(phi) * Math.cos(theta) * r;
-        p.y = -Math.cos(phi) * Math.sin(theta) * r;
-        p.z = Math.sin(phi) * r;
+        p = p.withX(Math.cos(phi) * Math.cos(theta) * r);
+        p = p.withY(-Math.cos(phi) * Math.sin(theta) * r);
+        p = p.withZ(Math.sin(phi) * r);
     }
 
     /**
@@ -33,9 +33,9 @@ public class JoglSphereRenderer extends JoglRenderer {
     private static void
     sphereNormal(Vector3D n, double theta, double phi)
     {
-        n.x = Math.cos(phi) * Math.cos(theta);
-        n.y = -Math.cos(phi) * Math.sin(theta);
-        n.z = Math.sin(phi);
+        n = n.withX(Math.cos(phi) * Math.cos(theta));
+        n = n.withY(-Math.cos(phi) * Math.sin(theta));
+        n = n.withZ(Math.sin(phi));
     }
 
     /**
@@ -44,9 +44,9 @@ public class JoglSphereRenderer extends JoglRenderer {
     private static void
     sphereTangent(Vector3D t, double theta, double phi)
     {
-        t.x = Math.sin(theta);
-        t.y = Math.cos(theta);
-        t.z = 0;
+        t = t.withX(Math.sin(theta));
+        t = t.withY(Math.cos(theta));
+        t = t.withZ(0);
     }
 
     /**
@@ -55,9 +55,9 @@ public class JoglSphereRenderer extends JoglRenderer {
     private static void
     sphereBinormal(Vector3D b, double theta, double phi)
     {
-        b.x = -Math.sin(phi)*Math.cos(theta);
-        b.y = Math.sin(phi)*Math.sin(theta);
-        b.z = Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + Math.cos(phi)*Math.sin(theta)*Math.sin(theta);
+        b = b.withX(-Math.sin(phi)*Math.cos(theta));
+        b = b.withY(Math.sin(phi)*Math.sin(theta));
+        b = b.withZ(Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + Math.cos(phi)*Math.sin(theta)*Math.sin(theta));
     }
 
     /**
@@ -90,16 +90,16 @@ public class JoglSphereRenderer extends JoglRenderer {
                 sphereBinormal(b, theta, phi1);
 
                 gl.glColor3d(1, 1, 0);
-                gl.glVertex3d(p.x, p.y, p.z);
-                gl.glVertex3d(p.x+n.x/10.0, p.y+n.y/10.0, p.z+n.z/10.0);
+                gl.glVertex3d(p.x(), p.y(), p.z());
+                gl.glVertex3d(p.x()+n.x()/10.0, p.y()+n.y()/10.0, p.z()+n.z()/10.0);
 
                 gl.glColor3d(0.9, 0.5, 0.5);
-                gl.glVertex3d(p.x, p.y, p.z);
-                gl.glVertex3d(p.x+T.x/20.0, p.y+T.y/20.0, p.z+T.z/20.0);
+                gl.glVertex3d(p.x(), p.y(), p.z());
+                gl.glVertex3d(p.x()+T.x()/20.0, p.y()+T.y()/20.0, p.z()+T.z()/20.0);
 
                 gl.glColor3d(0.5, 0.9, 0.5);
-                gl.glVertex3d(p.x, p.y, p.z);
-                gl.glVertex3d(p.x+b.x/20.0, p.y+b.y/20.0, p.z+b.z/20.0);
+                gl.glVertex3d(p.x(), p.y(), p.z());
+                gl.glVertex3d(p.x()+b.x()/20.0, p.y()+b.y()/20.0, p.z()+b.z()/20.0);
             }
         }
         gl.glEnd();
@@ -122,7 +122,7 @@ public class JoglSphereRenderer extends JoglRenderer {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
                 spherePosition(p, theta, phi1, r);
-                gl.glVertex3d(p.x, p.y, p.z);
+                gl.glVertex3d(p.x(), p.y(), p.z());
             }
         }
         gl.glEnd();
@@ -138,11 +138,11 @@ public class JoglSphereRenderer extends JoglRenderer {
         //- Pass standard vertex parameters to OpenGL ---------------------
         sphereNormal(N, theta, phi);
         gl.glTexCoord2d(1.0-s, t);
-        gl.glNormal3d(N.x, N.y, N.z);
+        gl.glNormal3d(N.x(), N.y(), N.z());
 
         //- Execute vertex -----------------------------------------------
         spherePosition(P, theta, phi, r);
-        gl.glVertex3d(P.x, P.y, P.z);
+        gl.glVertex3d(P.x(), P.y(), P.z());
     }
 
     private static void

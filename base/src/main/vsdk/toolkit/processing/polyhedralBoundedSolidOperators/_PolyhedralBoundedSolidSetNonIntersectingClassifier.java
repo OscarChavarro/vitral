@@ -309,7 +309,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
                 t = d1 / (d1 - d2);
                 p = v1.position.add(
-                    v2.position.substract(v1.position).multiply(t));
+                    v2.position.subtract(v1.position).multiply(t));
                 d3 = face.containingPlane.pointDistance(p);
                 if ( compareToZero(d3) != 0 ) {
                     continue;

@@ -126,9 +126,9 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
             n.he = he;
             n.wide = false;
 
-            n.ref1 = he.previous().startingVertex.position.substract(
+            n.ref1 = he.previous().startingVertex.position.subtract(
                 he.startingVertex.position);
-            n.ref2 = he.next().startingVertex.position.substract(
+            n.ref2 = he.next().startingVertex.position.subtract(
                 he.startingVertex.position);
             n.ref12 = n.ref1.crossProduct(n.ref2);
 

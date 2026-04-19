@@ -131,7 +131,7 @@ public class Arrow extends Solid {
         lastElement.doExtraInformation(inRay, inT, outData);
         if ( lastElement == headCone ) {
             // Modify answer!
-            outData.p.z += baseLength;
+            outData.p = outData.p.withZ(outData.p.z() + baseLength);
         }
     }
 

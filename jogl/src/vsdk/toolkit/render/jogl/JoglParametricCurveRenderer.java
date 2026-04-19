@@ -51,7 +51,7 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
             for ( j = 0; j < polyline.size(); j++ ) {
                 Vector3D vec = polyline.get(j);
 
-                gl.glVertex3d(vec.x, vec.y, vec.z);
+                gl.glVertex3d(vec.x(), vec.y(), vec.z());
             }
             gl.glEnd();
         }
@@ -130,10 +130,10 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
             Vector3D vecarray[] = pts.get(i);
             Vector3D vec = vecarray[0];
             gl.glBegin(GL.GL_LINES);
-            gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-            gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-            gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-            gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+            gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+            gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+            gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+            gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
 
             gl.glEnd();
         }
@@ -143,21 +143,21 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
     static public void drawOneControlPoints(GL2 gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
         gl.glBegin(GL.GL_LINES);
-        gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+        gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
     }
 
     static public void drawFirstControlPoint(GL2 gl, Vector3D vec, ColorRgb color) {
         gl.glColor3d(color.r, color.g, color.b);
         gl.glBegin(GL.GL_LINE_STRIP);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
     }
 
@@ -170,26 +170,26 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         gl.glColor3d(colorCenterPoint.r, colorCenterPoint.g, colorCenterPoint.b);
         Vector3D vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
-        gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+        gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
 
         //p2
         gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
         Vector3D vec2 = ptsB[tangPoint];
         gl.glBegin(GL.GL_LINES);
-        gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+        gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
         gl.glBegin(GL.GL_LINE_STRIP);
-        gl.glVertex3d(vec.x, vec.y, vec.z);
-        gl.glVertex3d(vec2.x, vec2.y, vec2.z);
+        gl.glVertex3d(vec.x(), vec.y(), vec.z());
+        gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());
         gl.glEnd();
     }
 
@@ -202,10 +202,10 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         // p1
         Vector3D vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
-        gl.glVertex3d(vec.x + 0.02, vec.y - 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x + 0.02, vec.y + 0.02, vec.z);
-        gl.glVertex3d(vec.x - 0.02, vec.y - 0.02, vec.z);
+        gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() + 0.02, vec.y() + 0.02, vec.z());
+        gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
 
         // p2
@@ -213,32 +213,32 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
         Vector3D vec2 = ptsB[1];
         gl.glBegin(GL.GL_LINES);
 
-        gl.glVertex3d(vec2.x + 0.02, vec2.y - 0.02, vec2.z);
-        gl.glVertex3d(vec2.x - 0.02, vec2.y + 0.02, vec2.z);
-        gl.glVertex3d(vec2.x + 0.02, vec2.y + 0.02, vec2.z);
-        gl.glVertex3d(vec2.x - 0.02, vec2.y - 0.02, vec2.z);
+        gl.glVertex3d(vec2.x() + 0.02, vec2.y() - 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() - 0.02, vec2.y() + 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() + 0.02, vec2.y() + 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() - 0.02, vec2.y() - 0.02, vec2.z());
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
         gl.glBegin(GL.GL_LINE_STRIP);
-        gl.glVertex3d(vec.x, vec.y, vec.z);
-        gl.glVertex3d(vec2.x, vec2.y, vec2.z);
+        gl.glVertex3d(vec.x(), vec.y(), vec.z());
+        gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());
         gl.glEnd();
 
         gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
         vec2 = ptsB[2];
         gl.glBegin(GL.GL_LINES);
 
-        gl.glVertex3d(vec2.x + 0.02, vec2.y - 0.02, vec2.z);
-        gl.glVertex3d(vec2.x - 0.02, vec2.y + 0.02, vec2.z);
-        gl.glVertex3d(vec2.x + 0.02, vec2.y + 0.02, vec2.z);
-        gl.glVertex3d(vec2.x - 0.02, vec2.y - 0.02, vec2.z);
+        gl.glVertex3d(vec2.x() + 0.02, vec2.y() - 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() - 0.02, vec2.y() + 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() + 0.02, vec2.y() + 0.02, vec2.z());
+        gl.glVertex3d(vec2.x() - 0.02, vec2.y() - 0.02, vec2.z());
         gl.glEnd();
 
         gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
         gl.glBegin(GL.GL_LINE_STRIP);
-        gl.glVertex3d(vec.x, vec.y, vec.z);
-        gl.glVertex3d(vec2.x, vec2.y, vec2.z);
+        gl.glVertex3d(vec.x(), vec.y(), vec.z());
+        gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());
         gl.glEnd();
     }
 
@@ -315,22 +315,22 @@ public class JoglParametricCurveRenderer extends JoglRenderer {
                                                  list[count-1][2]);
                     if ( VSDK.vectorDistance(vec,  prev) > VSDK.EPSILON &&
                          VSDK.vectorDistance(vec, first) > VSDK.EPSILON ) {
-                        list[count][0] = vec.x;
-                        list[count][1] = vec.y;
-                        list[count][2] = vec.z;
+                        list[count][0] = vec.x();
+                        list[count][1] = vec.y();
+                        list[count][2] = vec.z();
                         GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
-                        //gl.glVertex3d(vec.x, vec.y, vec.z);
+                        //gl.glVertex3d(vec.x(), vec.y(), vec.z());
                         count++;
                     }
                   }
                   else {
                     beginning = false;
-                    list[count][0] = vec.x;
-                    list[count][1] = vec.y;
-                    list[count][2] = vec.z;
+                    list[count][0] = vec.x();
+                    list[count][1] = vec.y();
+                    list[count][2] = vec.z();
                     GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
-                    //gl.glVertex3d(vec.x, vec.y, vec.z);
-                    first = new Vector3D(vec.x, vec.y, vec.z);
+                    //gl.glVertex3d(vec.x(), vec.y(), vec.z());
+                    first = new Vector3D(vec.x(), vec.y(), vec.z());
                     count++;
                 }
             }

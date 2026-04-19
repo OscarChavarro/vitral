@@ -72,7 +72,7 @@ public class Torus extends Solid
     {
         Vector3D p = inOut_ray.origin;
 
-        inOut_ray.direction.normalize();
+        inOut_ray.direction = inOut_ray.direction.normalized();
         Vector3D d = inOut_ray.direction;
 
         double alpha, beta, gama;
@@ -85,9 +85,9 @@ public class Torus extends Solid
 
         a4 = alpha * alpha;
         a3 = 2 * alpha * beta;
-        a2 = (beta * beta) + 2 * alpha * gama + 4 * (majorRadius * majorRadius) * (d.z * d.z);
-        a1 = 2 * beta * gama + 8 * (majorRadius * majorRadius) * p.z * d.z;
-        a0 = (gama * gama) + 4 * (majorRadius * majorRadius) * (p.z * p.z) - (4 * (majorRadius * majorRadius) * (minorRadius * minorRadius));
+        a2 = (beta * beta) + 2 * alpha * gama + 4 * (majorRadius * majorRadius) * (d.z() * d.z());
+        a1 = 2 * beta * gama + 8 * (majorRadius * majorRadius) * p.z() * d.z();
+        a0 = (gama * gama) + 4 * (majorRadius * majorRadius) * (p.z() * p.z()) - (4 * (majorRadius * majorRadius) * (minorRadius * minorRadius));
 
         //System.out.println(inOut_ray);
         //System.out.println("minorRadius: "+minorRadius+" majorRadius: "+majorRadius);
@@ -116,9 +116,9 @@ public class Torus extends Solid
             return false;
         } 
         else {
-            lastInfo.p.x = inOut_ray.origin.x + (mRoot * inOut_ray.direction.x);
-            lastInfo.p.y = inOut_ray.origin.y + (mRoot * inOut_ray.direction.y);
-            lastInfo.p.z = inOut_ray.origin.z + (mRoot * inOut_ray.direction.z);
+            lastInfo.p = lastInfo.p.withX(inOut_ray.origin.x() + (mRoot * inOut_ray.direction.x()));
+            lastInfo.p = lastInfo.p.withY(inOut_ray.origin.y() + (mRoot * inOut_ray.direction.y()));
+            lastInfo.p = lastInfo.p.withZ(inOut_ray.origin.z() + (mRoot * inOut_ray.direction.z()));
             inOut_ray.t = mRoot;
             return true; //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
@@ -1255,9 +1255,9 @@ public class Torus extends Solid
             return false;
         }
         else {
-                lastInfo.p.x = ray.origin.x + (root * ray.direction.x);
-                lastInfo.p.y = ray.origin.y + (root * ray.direction.y);
-                lastInfo.p.z = ray.origin.z + (root * ray.direction.z);
+                lastInfo.p = lastInfo.p.withX(ray.origin.x() + (root * ray.direction.x()));
+                lastInfo.p = lastInfo.p.withY(ray.origin.y() + (root * ray.direction.y()));
+                lastInfo.p = lastInfo.p.withZ(ray.origin.z() + (root * ray.direction.z()));
                 
                 ray.t=root;
          //       System.out.println("Raiz: "+root);
@@ -1274,11 +1274,11 @@ public class Torus extends Solid
         double r2=minorRadius*minorRadius;
         double R2=majorRadius*majorRadius;
      
-        outData.n.x = (4*lastInfo.p.x*(Math.pow(lastInfo.p.x, 2) + Math.pow(lastInfo.p.y, 2) + Math.pow(lastInfo.p.z, 2) - r2 - R2) );
-        outData.n.y = (4*lastInfo.p.y*(Math.pow(lastInfo.p.x, 2) + Math.pow(lastInfo.p.y, 2) + Math.pow(lastInfo.p.z, 2) - r2 - R2) );
-        outData.n.z = (4*lastInfo.p.z*(Math.pow(lastInfo.p.x, 2) + Math.pow(lastInfo.p.y, 2) + Math.pow(lastInfo.p.z, 2) - r2 - R2) + 8*R2*lastInfo.p.z);
+        outData.n = outData.n.withX((4*lastInfo.p.x()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) ));
+        outData.n = outData.n.withY((4*lastInfo.p.y()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) ));
+        outData.n = outData.n.withZ((4*lastInfo.p.z()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) + 8*R2*lastInfo.p.z()));
 
-        outData.n.normalize();
+        outData.n = outData.n.normalized();
     }
 
     /**

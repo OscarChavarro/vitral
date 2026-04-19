@@ -222,10 +222,9 @@ public class SimpleBody extends Entity {
         boolean answer;
 
         // Take in to account current body geometric transformations...
-        _static_vector3d.substract(inOutRay.origin, position);
-        _static_ray.origin.multiply(rotation_i, _static_vector3d);
-        _static_ray.direction.multiply(rotation_i, inOutRay.direction);
-        _static_ray.direction.normalize();
+        _static_vector3d = inOutRay.origin.subtract(position);
+        _static_ray.origin = rotation_i.multiply(_static_vector3d);
+        _static_ray.direction = rotation_i.multiply(inOutRay.direction).normalized();
         _static_ray.t = inOutRay.t;
 
         // ... and compute doIntersection operation on object's coordinates
@@ -244,9 +243,9 @@ public class SimpleBody extends Entity {
         Ray myRay;
 
         myOrigin = new Vector3D(
-            rotation_i.multiply(origin.substract(position)));
+            rotation_i.multiply(origin.subtract(position)));
         myP = new Vector3D(
-            rotation_i.multiply(p.substract(position)));
+            rotation_i.multiply(p.subtract(position)));
 
         return geometry.computeQuantitativeInvisibility(myOrigin, myP);
     }
@@ -267,7 +266,7 @@ public class SimpleBody extends Entity {
         R = getRotation();
         Ri = getRotationInverse();
         myRay = new Ray ( 
-            Ri.multiply(inRay.origin.substract(po) ),
+            Ri.multiply(inRay.origin.subtract(po) ),
             Ri.multiply(inRay.direction)
         );
         myRay.t = inRay.t;

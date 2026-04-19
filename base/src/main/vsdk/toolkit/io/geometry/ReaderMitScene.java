@@ -340,7 +340,7 @@ public class ReaderMitScene extends PersistenceElement
         u = new Vector3D(currentCamera.getUp());
         l = new Vector3D(f.crossProduct(u));
         l = l.multiply(-1);
-        l.normalize();
+        l = l.normalized();
 
         currentCamera.setLeftDirect( l );
 

@@ -22,9 +22,8 @@ public class Ray  extends FundamentalEntity
 
     public Ray(Vector3D origin, Vector3D direction)
     {
-        this.origin = new Vector3D(origin.x, origin.y, origin.z);
-        this.direction = new Vector3D(direction.x, direction.y, direction.z);
-        this.direction.normalize();
+        this.origin = new Vector3D(origin.x(), origin.y(), origin.z());
+        this.direction = new Vector3D(direction.x(), direction.y(), direction.z()).normalized();
     }
 
     public Ray(Ray b)
@@ -36,8 +35,8 @@ public class Ray  extends FundamentalEntity
 
     public void clone(Ray other)
     {
-        this.origin.clone(other.origin);
-        this.direction.clone(other.direction);
+        this.origin = new Vector3D(other.origin);
+        this.direction = new Vector3D(other.direction);
         this.t = other.t;
     }
 

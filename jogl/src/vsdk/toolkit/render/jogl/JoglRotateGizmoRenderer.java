@@ -17,9 +17,9 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
 
         R = new Matrix4x4(gizmo.getTransformationMatrix());
 
-        R.M[0][3] = position.x;
-        R.M[1][3] = position.y;
-        R.M[2][3] = position.z;
+        R.M[0][3] = position.x();
+        R.M[1][3] = position.y();
+        R.M[2][3] = position.z();
 
         gl.glLineWidth(3);
         JoglMatrixRenderer.draw(gl, R);
@@ -40,7 +40,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 1, 0, 0);
             p = giro.multiply(agujay);
-            gl.glVertex3d(p.x, p.y, p.z);
+            gl.glVertex3d(p.x(), p.y(), p.z());
         }
         gl.glEnd();
         gl.glPopMatrix();
@@ -52,7 +52,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 0, 1, 0);
             p = giro.multiply(agujax);
-            gl.glVertex3d(p.x, p.y, p.z);
+            gl.glVertex3d(p.x(), p.y(), p.z());
         }
         gl.glEnd();
         gl.glPopMatrix();
@@ -64,7 +64,7 @@ public class JoglRotateGizmoRenderer extends JoglRenderer
         for ( a = delta; a < Math.toRadians(360-delta); a += delta ) {
             giro.axisRotation(a, 0, 0, 1);
             p = giro.multiply(agujax);
-            gl.glVertex3d(p.x, p.y, p.z);
+            gl.glVertex3d(p.x(), p.y(), p.z());
         }
         gl.glEnd();
         gl.glPopMatrix();

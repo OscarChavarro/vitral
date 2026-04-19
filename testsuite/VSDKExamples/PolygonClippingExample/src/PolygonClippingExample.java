@@ -78,11 +78,11 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
         Vector3D center = PolygonClippingModelingTools.calculateSceneCenter(model);
         Vector3D eye = model.getCamera().getPosition();
         Vector3D focus = model.getCamera().getFocusedPosition();
-        double distance = eye.substract(focus).length();
+        double distance = eye.subtract(focus).length();
         if ( distance < VSDK.EPSILON ) {
             distance = 20.0;
         }
-        model.getCamera().setPosition(new Vector3D(center.x, center.y - distance, center.z));
+        model.getCamera().setPosition(new Vector3D(center.x(), center.y() - distance, center.z()));
         model.getCamera().setFocusedPositionMaintainingOrthogonality(center);
         model.getCamera().setUpMaintainingOrthogonality(new Vector3D(0, 0, 1));
         if ( model.getCameraController() instanceof CameraControllerOrbiter orbiter ) {

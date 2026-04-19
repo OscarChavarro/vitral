@@ -131,27 +131,27 @@ public class CameraControllerAquynza extends CameraController {
 
           // Position
           case KeyEvent.KEY_x:
-            eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
+            eyePosition = eyePosition.withX(eyePosition.x() - deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_X:
-            eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
+            eyePosition = eyePosition.withX(eyePosition.x() + deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_y:
-            eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;
+            eyePosition = eyePosition.withY(eyePosition.y() - deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_Y:
-            eyePosition.y += deltaMov; focusedPosition.y += deltaMov;
+            eyePosition = eyePosition.withY(eyePosition.y() + deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_z:
-            eyePosition.z -= deltaMov; focusedPosition.z -= deltaMov;
+            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_Z:
-            eyePosition.z += deltaMov; focusedPosition.z += deltaMov;
+            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMov);
             updated = true;
             break; 
           // Rotation
@@ -317,28 +317,28 @@ public class CameraControllerAquynza extends CameraController {
             ay = Math.min(2, 0.01*deltaY);
 
             DR = new Matrix4x4();
-            DR.axisRotation(ay, v.x, v.y, v.z);
+            DR.axisRotation(ay, v.x(), v.y(), v.z());
             R = DR.multiply(R);
 
-            DR.axisRotation(ax, w.x, w.y, w.z);
+            DR.axisRotation(ax, w.x(), w.y(), w.z());
             R = DR.multiply(R);
 
             updated = true;
         }
         else if ( (modifiers & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             // Move
-            eyePosition = eyePosition.substract(v.multiply(senseFactor*((double)deltaX)));
-            eyePosition = eyePosition.substract(w.multiply(senseFactor*((double)deltaY)));
-            focusedPosition = focusedPosition.substract(v.multiply(senseFactor*((double)deltaX)));
-            focusedPosition = focusedPosition.substract(w.multiply(senseFactor*((double)deltaY)));
+            eyePosition = eyePosition.subtract(v.multiply(senseFactor*((double)deltaX)));
+            eyePosition = eyePosition.subtract(w.multiply(senseFactor*((double)deltaY)));
+            focusedPosition = focusedPosition.subtract(v.multiply(senseFactor*((double)deltaX)));
+            focusedPosition = focusedPosition.subtract(w.multiply(senseFactor*((double)deltaY)));
             updated = true;
         }
         else if ( (modifiers & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             // Advance
-            eyePosition = eyePosition.substract(u.multiply(senseFactor*((double)deltaY)));
+            eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
             DR = new Matrix4x4();
-            DR.axisRotation(ax, u.x, u.y, u.z);
+            DR.axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

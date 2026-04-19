@@ -48,22 +48,22 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         b = other.e.rightHalf.startingVertex.position;
 
         if ( PolyhedralBoundedSolidNumericPolicy
-            .compare(a.x, b.x, numericContext.bigEpsilon()) != 0 ) {
-            if ( a.x < b.x ) {
+            .compare(a.x(), b.x(), numericContext.bigEpsilon()) != 0 ) {
+            if ( a.x() < b.x() ) {
                 return -1;
             }
             return 1;
         }
         else {
             if ( PolyhedralBoundedSolidNumericPolicy
-                .compare(a.y, b.y, numericContext.bigEpsilon()) != 0 ) {
-                if ( a.y < b.y ) {
+                .compare(a.y(), b.y(), numericContext.bigEpsilon()) != 0 ) {
+                if ( a.y() < b.y() ) {
                     return -1;
                 }
                 return 1;
             }
             else {
-                if ( a.z < b.z ) {
+                if ( a.z() < b.z() ) {
                     return -1;
                 }
                 return 1;

@@ -1,7 +1,7 @@
 package vsdk.toolkit.common;
 
 /**
-A `ModelElement` in VitralSDK is a software element with algorithms and data 
+A `ModelElement` in Vitral is a software element with algorithms and data
 structures (i.e. a class) with the specific functionality of representing
 application internal state or "Model".
 
@@ -30,17 +30,5 @@ of such high level should be included here, but to this class subclasses
 (the organizers of each specific rendering technology classes).
 */
 
-public abstract class ModelElement {
-    /**
-    Just to do not the inheritance chain.
-    @return
-    @throws CloneNotSupportedException 
-    */
-    @Override
-    public Object clone() throws CloneNotSupportedException
-    {
-        super.clone();
-        return null;
-    }
-
+public interface ModelElement {
 }

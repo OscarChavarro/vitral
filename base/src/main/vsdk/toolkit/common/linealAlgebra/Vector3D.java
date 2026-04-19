@@ -1,5 +1,8 @@
 package vsdk.toolkit.common.linealAlgebra;
 
+import java.io.Serial;
+import java.util.Objects;
+
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 
@@ -13,28 +16,26 @@ array elements are not indexed, to say from 0 to 2, but are instead named
 with the usual 3D axis labels `x`, `y` and `z`.
 This is one of the most fundamental classes in VitralSDK toolkit, and its
 attributes are usually accessed in the inner loops of computational intensive
-calculations. As such, the attributes are promoted to be public, yes, 
-breaking encapsulation and converting current class to a mere non-evolvable
-structure.
+calculations.
+
 Lack of get/set method enforces a direct attribute access programming style
 which will lend to shorter code.
 */
-public class Vector3D extends FundamentalEntity
+public final class Vector3D extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20060502L;
+    // Check the general attribute description in superclass Entity.
+    @Serial
+    private static final long serialVersionUID = 20260419L;
 
-    /// Yes, they are public due to efficiency issues
-    public double x, y, z;
+    private final double x;
+    private final double y;
+    private final double z;
 
     /**
     The default Vector3D value is the zero value
     */
     public Vector3D() {
-        x = 0;
-        y = 0;
-        z = 0;
+        this(0, 0, 0);
     }
 
     /**
@@ -43,122 +44,75 @@ public class Vector3D extends FundamentalEntity
     @param z Z coordinate
     */
     public Vector3D(double x, double y, double z) {
-        this.x = x; this.y = y; this.z = z;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
-    public Vector3D(Vector3D B) {
-        this.x = B.x; this.y = B.y; this.z = B.z;
+    public Vector3D(Vector3D other) {
+        this(Objects.requireNonNull(other, "Vector3D to copy cannot be null").x,
+             other.y,
+             other.z);
     }
 
-    public final void multiply(Matrix4x4 M, Vector3D E)
-    {
-        this.x = M.M[0][0] * E.x + M.M[0][1] * E.y + M.M[0][2] * E.z + M.M[0][3];
-        this.y = M.M[1][0] * E.x + M.M[1][1] * E.y + M.M[1][2] * E.z + M.M[1][3];
-        this.z = M.M[2][0] * E.x + M.M[2][1] * E.y + M.M[2][2] * E.z + M.M[2][3];
+    public static Vector3D copyOf(Vector3D other) {
+        return new Vector3D(Objects.requireNonNull(other, "Vector3D to copy cannot be null"));
     }
 
-    public final Vector3D multiply(double a) {
+    public Vector3D multiply(double a) {
         return new Vector3D(a * x, a * y, a * z);
     }
 
     /**
-    @param B the second vector in cross product
+    @param other the second vector in cross product
     @return Vector3D, the result of the operation
     */
-    public final Vector3D crossProduct(Vector3D B) {
-        return new Vector3D(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x);
-    }
-
-    public final Vector3D modulate(Vector3D B) {
-        return new Vector3D(x*B.x, y*B.y, z*B.z);
+    public Vector3D crossProduct(Vector3D other) {
+        return new Vector3D(y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x);
     }
 
     /**
-    Make this vector internal values equal to the other's.
-    @param other
-    */
-    public final void clone(Vector3D other)
-    {
-        this.x = other.x;
-        this.y = other.y;
-        this.z = other.z;
-    }
-
-    /**
-    @param B Vector3D
+    @param other Vector3D
     @return dot product between two vectors
     */
-    public final double dotProduct(Vector3D B) {
-        return (x*B.x + y*B.y + z*B.z);
+    public double dotProduct(Vector3D other) {
+        return (x * other.x + y * other.y + z * other.z);
     }
 
-    public final void normalize() {
+    public Vector3D normalized() {
         double t = x*x + y*y + z*z;
-        if ( Math.abs(t) < VSDK.EPSILON ) return;
+        if ( Math.abs(t) < VSDK.EPSILON ) return this;
         if (t != 0 && t != 1) t = (1.0 / Math.sqrt(t));
-        x *= t;
-        y *= t;
-        z *= t;
+        return new Vector3D(x * t, y * t, z * t);
     }
 
     /**
     @return current vector length
     */
-    public final double length() {
+    public double length() {
         return Math.sqrt(x*x + y*y + z*z);
     }
 
-    public final Vector3D add(Vector3D b)
+    public Vector3D add(Vector3D b)
     {
         return new Vector3D(x + b.x, y + b.y, z + b.z);
     }
 
-    /**
-    Stores in `this` Vector3D the result of adding the operands `a` and `b`
-    @param a
-    @param b
-    */
-    public final void add(Vector3D a, Vector3D b)
-    {
-        this.x = a.x + b.x;
-        this.y = a.y + b.y;
-        this.z = a.z + b.z;
-    }
-
-    public final Vector3D substract(Vector3D b)
+    public Vector3D subtract(Vector3D b)
     {
         return new Vector3D(x - b.x, y - b.y, z - b.z);
     }
 
-    /**
-    Stores in `this` Vector3D the result of subtracting the operands `a` and `b`
-    @param a
-    @param b
-    */
-    public final void substract(Vector3D a, Vector3D b)
+    public float[] exportToFloatArrayVector()
     {
-        this.x = a.x - b.x;
-        this.y = a.y - b.y;
-        this.z = a.z - b.z;
-    }
-
-    public float[] exportToFloatArrayVect()
-    {
-        float[] ret={(float)x, (float)y, (float)z, 1};
-        return ret;
-    }
-
-    public double[] exportToDoubleArrayVect()
-    {
-        double[] ret={x, y, z, 1};
-        return ret;
+        return new float[]{(float)x, (float)y, (float)z, 1};
     }
 
     /**
     Provides an object to text report a convert, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return human readable representation of current vector
+    @return human-readable representation of current vector
     */
     @Override
     public String toString()
@@ -174,7 +128,7 @@ public class Vector3D extends FundamentalEntity
     /**
     Taking current vector as tail-anchored to the origin, this method
     calculates the theta angle (in radians) of the tip, corresponding
-    to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
+    to tip coordinate <x, y, z>, in spherical coordinates <r, theta, phi>.
     Note that theta goes from 0 to 2*PI, and correspond to an axis of
     rotation <0, 0, 1>.
     POST: 0 <= theta <= 2*PI
@@ -202,7 +156,7 @@ public class Vector3D extends FundamentalEntity
     /**
     Taking current vector as tail-anchored to the origin, this method
     calculates the phi angle (in radians) of the tip, corresponding
-    to tip coordinate <x, y, z>, in spheric coordinates <r, theta, phi>.
+    to tip coordinate <x, y, z>, in spherical coordinates <r, theta, phi>.
     Note phi goes from 0 to PI.
     @return an angle with phi angle spherical coordinate for the point at
     the tip of current vector, when vector tail is anchored at the origin
@@ -216,18 +170,57 @@ public class Vector3D extends FundamentalEntity
         return Math.acos(z/r);
     }
 
-    /**
-    Given a point [r, theta, phi] in spherical coordinates, this method sets
-    current vector to corresponding Cartesian coordinates <x, y, z>. Angles
-    are in radians.
-    @param r
-    @param theta
-    @param phi
-    */
-    public void setSphericalCoordinates(double r, double theta, double phi)
+    public static Vector3D fromSpherical(double r, double theta, double phi)
     {
-        x = r * Math.sin(phi) * Math.cos(theta);
-        y = r * Math.sin(phi) * Math.sin(theta);
-        z = r * Math.cos(phi);
+        return new Vector3D(
+            r * Math.sin(phi) * Math.cos(theta),
+            r * Math.sin(phi) * Math.sin(theta),
+            r * Math.cos(phi)
+        );
+    }
+
+    public Vector3D withX(double nx) {
+        return new Vector3D(nx, y, z);
+    }
+
+    public Vector3D withY(double ny) {
+        return new Vector3D(x, ny, z);
+    }
+
+    public Vector3D withZ(double nz) {
+        return new Vector3D(x, y, nz);
+    }
+
+    public double x() {
+        return x;
+    }
+
+    public double y() {
+        return y;
+    }
+
+    public double z() {
+        return z;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( !(obj instanceof Vector3D other) ) {
+            return false;
+        }
+        return Double.compare(x, other.x) == 0 &&
+               Double.compare(y, other.y) == 0 &&
+               Double.compare(z, other.z) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Double.hashCode(x);
+        result = 31 * result + Double.hashCode(y);
+        result = 31 * result + Double.hashCode(z);
+        return result;
     }
 }

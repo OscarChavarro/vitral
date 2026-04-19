@@ -42,7 +42,7 @@ public class CameraControllerOrbiter extends CameraController {
             this.pointOfInterest = new Vector3D(0, 0, 0);
             return;
         }
-        this.pointOfInterest.clone(pointOfInterest);
+        this.pointOfInterest = Vector3D.copyOf(pointOfInterest);
     }
 
     private double augmentLogarithmic(double val, double EPSILON)
@@ -84,7 +84,7 @@ public class CameraControllerOrbiter extends CameraController {
     private boolean orbitAroundPointOfInterest(double yawDelta, double pitchDelta)
     {
         Vector3D eyePosition = camera.getPosition();
-        Vector3D offset = eyePosition.substract(pointOfInterest);
+        Vector3D offset = eyePosition.subtract(pointOfInterest);
 
         if ( offset.length() < 1e-9 ) {
             return false;
@@ -94,21 +94,21 @@ public class CameraControllerOrbiter extends CameraController {
         Matrix4x4 DR = new Matrix4x4();
         Vector3D axisLeft = new Vector3D(R.M[0][1], R.M[1][1], R.M[2][1]);
         Vector3D axisUp = new Vector3D(R.M[0][2], R.M[1][2], R.M[2][2]);
-        axisLeft.normalize();
-        axisUp.normalize();
+        axisLeft = axisLeft.normalized();
+        axisUp = axisUp.normalized();
 
         if ( Math.abs(pitchDelta) > 0 ) {
-            DR.axisRotation(pitchDelta, axisLeft.x, axisLeft.y, axisLeft.z);
+            DR.axisRotation(pitchDelta, axisLeft.x(), axisLeft.y(), axisLeft.z());
             offset = DR.multiply(offset);
         }
         if ( Math.abs(yawDelta) > 0 ) {
-            DR.axisRotation(yawDelta, axisUp.x, axisUp.y, axisUp.z);
+            DR.axisRotation(yawDelta, axisUp.x(), axisUp.y(), axisUp.z());
             offset = DR.multiply(offset);
         }
 
         Vector3D newEyePosition = pointOfInterest.add(offset);
-        Vector3D newFrontDirection = pointOfInterest.substract(newEyePosition);
-        newFrontDirection.normalize();
+        Vector3D newFrontDirection = pointOfInterest.subtract(newEyePosition);
+        newFrontDirection = newFrontDirection.normalized();
         Vector3D upHint = camera.getUp();
         if ( Math.abs(newFrontDirection.dotProduct(upHint)) > 0.99999 ) {
             return false;
@@ -173,27 +173,27 @@ public class CameraControllerOrbiter extends CameraController {
 
           // Position
           case KeyEvent.KEY_x:
-            eyePosition.x -= deltaMov; focusedPosition.x -= deltaMov;
+            eyePosition = eyePosition.withX(eyePosition.x() - deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_X:
-            eyePosition.x += deltaMov; focusedPosition.x += deltaMov;
+            eyePosition = eyePosition.withX(eyePosition.x() + deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_y:
-            eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;
+            eyePosition = eyePosition.withY(eyePosition.y() - deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_Y:
-            eyePosition.y += deltaMov; focusedPosition.y += deltaMov;
+            eyePosition = eyePosition.withY(eyePosition.y() + deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_z:
-            eyePosition.z -= deltaMov; focusedPosition.z -= deltaMov;
+            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMov);
             updated = true;
             break;
           case KeyEvent.KEY_Z:
-            eyePosition.z += deltaMov; focusedPosition.z += deltaMov;
+            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMov);
             updated = true;
             break;
           // Rotation
@@ -371,18 +371,18 @@ public class CameraControllerOrbiter extends CameraController {
         }
         else if ( (modifiers & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             // Move
-            eyePosition = eyePosition.substract(v.multiply(senseFactor*((double)deltaX)));
-            eyePosition = eyePosition.substract(w.multiply(senseFactor*((double)deltaY)));
-            focusedPosition = focusedPosition.substract(v.multiply(senseFactor*((double)deltaX)));
-            focusedPosition = focusedPosition.substract(w.multiply(senseFactor*((double)deltaY)));
+            eyePosition = eyePosition.subtract(v.multiply(senseFactor*((double)deltaX)));
+            eyePosition = eyePosition.subtract(w.multiply(senseFactor*((double)deltaY)));
+            focusedPosition = focusedPosition.subtract(v.multiply(senseFactor*((double)deltaX)));
+            focusedPosition = focusedPosition.subtract(w.multiply(senseFactor*((double)deltaY)));
             updated = true;
         }
         else if ( (modifiers & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             // Advance
-            eyePosition = eyePosition.substract(u.multiply(senseFactor*((double)deltaY)));
+            eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
             DR = new Matrix4x4();
-            DR.axisRotation(ax, u.x, u.y, u.z);
+            DR.axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

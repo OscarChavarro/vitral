@@ -136,22 +136,22 @@ public class ControlPanel extends JPanel implements AdjustmentListener, ActionLi
         double val = (((double)ev.getValue()) - 50.0) / 10.0;
 
         if ( ((JScrollBar)ev.getAdjustable()).getName().equals("x1") ) {
-            parent.point0.x = val;
+            parent.point0 = parent.point0.withX(val);
         }
         else if ( ((JScrollBar)ev.getAdjustable()).getName().equals("y1") ) {
-            parent.point0.y = val;
+            parent.point0 = parent.point0.withY(val);
         }
         else if ( ((JScrollBar)ev.getAdjustable()).getName().equals("z1") ) {
-            parent.point0.z = val;
+            parent.point0 = parent.point0.withZ(val);
         }
         else if ( ((JScrollBar)ev.getAdjustable()).getName().equals("x2") ) {
-            parent.point1.x = val;
+            parent.point1 = parent.point1.withX(val);
         }
         else if ( ((JScrollBar)ev.getAdjustable()).getName().equals("y2") ) {
-            parent.point1.y = val;
+            parent.point1 = parent.point1.withY(val);
         }
         else if ( ((JScrollBar)ev.getAdjustable()).getName().equals("z2") ) {
-            parent.point1.z = val;
+            parent.point1 = parent.point1.withZ(val);
         }
         parent.canvas.repaint();
     }

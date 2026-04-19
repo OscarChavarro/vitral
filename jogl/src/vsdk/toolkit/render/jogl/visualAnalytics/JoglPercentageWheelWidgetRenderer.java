@@ -152,7 +152,7 @@ public class JoglPercentageWheelWidgetRenderer extends JoglRenderer {
         gl.glDisable(GL2.GL_TEXTURE_2D);
         gl.glDisable(GL2.GL_DEPTH_TEST);
         gl.glLoadIdentity();
-        gl.glTranslated(pos.x, pos.y, pos.z);
+        gl.glTranslated(pos.x(), pos.y(), pos.z());
         gl.glScaled(s, s, 1);
         
         drawInternal(gl, widget);
@@ -257,7 +257,7 @@ public class JoglPercentageWheelWidgetRenderer extends JoglRenderer {
 
         for ( i = 0, angle = 0.0; i < dataset.size(); i++, angle += da ) {
             gl.glLoadIdentity();
-            gl.glTranslated(pos.x, pos.y, pos.z);
+            gl.glTranslated(pos.x(), pos.y(), pos.z());
             gl.glScaled(s, s, s);
 
             drawSectorText(
@@ -278,7 +278,7 @@ public class JoglPercentageWheelWidgetRenderer extends JoglRenderer {
         gl.glPushMatrix();
         
         gl.glLoadIdentity();
-        gl.glTranslated(pos.x, pos.y, pos.z);
+        gl.glTranslated(pos.x(), pos.y(), pos.z());
         gl.glScaled(s, s, s);
 
         

@@ -142,9 +142,9 @@ public class ParametricBiCubicPatch extends Surface {
         for ( i = 0; i < 4; i++ ) {
             for ( j = 0; j < 4; j++ ) {
                 Vector3D vp = controlMeshPoints[i][j];
-                mx[i][j] = vp.x;
-                my[i][j] = vp.y;
-                mz[i][j] = vp.z;
+                mx[i][j] = vp.x();
+                my[i][j] = vp.y();
+                mz[i][j] = vp.z();
             }
         }
         Gx_MATRIX.M = mx;
@@ -168,23 +168,23 @@ public class ParametricBiCubicPatch extends Surface {
         for (int j = 0; j < 2; j++) {
             Vector3D[] vp = contourCurve.getPoint(p);
 
-            mx[i][j] = vp[0].x;
-            my[i][j] = vp[0].y;
-            mz[i][j] = vp[0].z;
+            mx[i][j] = vp[0].x();
+            my[i][j] = vp[0].y();
+            mz[i][j] = vp[0].z();
 
-            mx[i][j + 2] = vp[2 - j].x;
-            my[i][j + 2] = vp[2 - j].y;
-            mz[i][j + 2] = vp[2 - j].z;
+            mx[i][j + 2] = vp[2 - j].x();
+            my[i][j + 2] = vp[2 - j].y();
+            mz[i][j + 2] = vp[2 - j].z();
 
-            mx[i + 2][j] = vp[1 + j].x;
-            my[i + 2][j] = vp[1 + j].y;
-            mz[i + 2][j] = vp[1 + j].z;
+            mx[i + 2][j] = vp[1 + j].x();
+            my[i + 2][j] = vp[1 + j].y();
+            mz[i + 2][j] = vp[1 + j].z();
 
             Vector3D vn = new Vector3D(0, 0, 0);
 
-            mx[i + 2][j + 2] = vn.x;
-            my[i + 2][j + 2] = vn.y;
-            mz[i + 2][j + 2] = vn.z;
+            mx[i + 2][j + 2] = vn.x();
+            my[i + 2][j + 2] = vn.y();
+            mz[i + 2][j + 2] = vn.z();
             p++;
         }
         p = 2;
@@ -192,23 +192,23 @@ public class ParametricBiCubicPatch extends Surface {
         for (int j = 0; j < 2; j++) {
             Vector3D[] vp = contourCurve.getPoint(p);
 
-            mx[i][j] = vp[0].x;
-            my[i][j] = vp[0].y;
-            mz[i][j] = vp[0].z;
+            mx[i][j] = vp[0].x();
+            my[i][j] = vp[0].y();
+            mz[i][j] = vp[0].z();
 
-            mx[i][j + 2] = vp[j + 1].x;
-            my[i][j + 2] = vp[j + 1].y;
-            mz[i][j + 2] = vp[j + 1].z;
+            mx[i][j + 2] = vp[j + 1].x();
+            my[i][j + 2] = vp[j + 1].y();
+            mz[i][j + 2] = vp[j + 1].z();
 
-            mx[i + 2][j] = vp[2 - j].x;
-            my[i + 2][j] = vp[2 - j].y;
-            mz[i + 2][j] = vp[2 - j].z;
+            mx[i + 2][j] = vp[2 - j].x();
+            my[i + 2][j] = vp[2 - j].y();
+            mz[i + 2][j] = vp[2 - j].z();
 
             Vector3D vn = new Vector3D(0, 0, 0);
 
-            mx[i + 2][j + 2] = vn.x;
-            my[i + 2][j + 2] = vn.y;
-            mz[i + 2][j + 2] = vn.z;
+            mx[i + 2][j + 2] = vn.x();
+            my[i + 2][j + 2] = vn.y();
+            mz[i + 2][j + 2] = vn.z();
             p++;
 
         }
@@ -300,48 +300,48 @@ public class ParametricBiCubicPatch extends Surface {
         Vector3D[] vp01 = contourCurve.getPoint(3);
 
         // Positions with respect to contour curve
-        mx[0][0] = vp00[0].x;
-        my[0][0] = vp00[0].y;
-        mz[0][0] = vp00[0].z;
-        mx[0][1] = vp01[0].x;
-        my[0][1] = vp01[0].y;
-        mz[0][1] = vp01[0].z;
-        mx[1][0] = vp10[0].x;
-        my[1][0] = vp10[0].y;
-        mz[1][0] = vp10[0].z;
-        mx[1][1] = vp11[0].x;
-        my[1][1] = vp11[0].y;
-        mz[1][1] = vp11[0].z;
+        mx[0][0] = vp00[0].x();
+        my[0][0] = vp00[0].y();
+        mz[0][0] = vp00[0].z();
+        mx[0][1] = vp01[0].x();
+        my[0][1] = vp01[0].y();
+        mz[0][1] = vp01[0].z();
+        mx[1][0] = vp10[0].x();
+        my[1][0] = vp10[0].y();
+        mz[1][0] = vp10[0].z();
+        mx[1][1] = vp11[0].x();
+        my[1][1] = vp11[0].y();
+        mz[1][1] = vp11[0].z();
 
         // Partial derivatives with respect to S direction
         // For Hermite contour
-        mx[2][0] = (vp00[2].x);
-        my[2][0] = (vp00[2].y);
-        mz[2][0] = (vp00[2].z);
-        mx[2][1] = -(vp01[1].x);
-        my[2][1] = -(vp01[1].y);
-        mz[2][1] = -(vp01[1].z);
-        mx[3][0] = (vp10[1].x);
-        my[3][0] = (vp10[1].y);
-        mz[3][0] = (vp10[1].z);
-        mx[3][1] = -(vp11[2].x);
-        my[3][1] = -(vp11[2].y);
-        mz[3][1] = -(vp11[2].z);
+        mx[2][0] = (vp00[2].x());
+        my[2][0] = (vp00[2].y());
+        mz[2][0] = (vp00[2].z());
+        mx[2][1] = -(vp01[1].x());
+        my[2][1] = -(vp01[1].y());
+        mz[2][1] = -(vp01[1].z());
+        mx[3][0] = (vp10[1].x());
+        my[3][0] = (vp10[1].y());
+        mz[3][0] = (vp10[1].z());
+        mx[3][1] = -(vp11[2].x());
+        my[3][1] = -(vp11[2].y());
+        mz[3][1] = -(vp11[2].z());
 
         // Partial derivatives with respect to T direction
         // For Hermite contour
-        mx[0][2] = -(vp00[1].x);
-        my[0][2] = -(vp00[1].y);
-        mz[0][2] = -(vp00[1].z);
-        mx[0][3] = -(vp01[2].x);
-        my[0][3] = -(vp01[2].y);
-        mz[0][3] = -(vp01[2].z);
-        mx[1][2] = (vp10[2].x);
-        my[1][2] = (vp10[2].y);
-        mz[1][2] = (vp10[2].z);
-        mx[1][3] = (vp11[1].x);
-        my[1][3] = (vp11[1].y);
-        mz[1][3] = (vp11[1].z);
+        mx[0][2] = -(vp00[1].x());
+        my[0][2] = -(vp00[1].y());
+        mz[0][2] = -(vp00[1].z());
+        mx[0][3] = -(vp01[2].x());
+        my[0][3] = -(vp01[2].y());
+        mz[0][3] = -(vp01[2].z());
+        mx[1][2] = (vp10[2].x());
+        my[1][2] = (vp10[2].y());
+        mz[1][2] = (vp10[2].z());
+        mx[1][3] = (vp11[1].x());
+        my[1][3] = (vp11[1].y());
+        mz[1][3] = (vp11[1].z());
 
         // Ferguson patch: twist vectors (second order partial derivatives)
         // are all 0, as noted on [FOLE1992].11.3.1, equation [FOLE1992].11.84
@@ -406,12 +406,10 @@ public class ParametricBiCubicPatch extends Surface {
         Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
         // The result is a 1x1 matrix.
-        p.x = Qx_MATRIX.M[0][0];
-        p.y = Qy_MATRIX.M[0][0];
-        p.z = Qz_MATRIX.M[0][0];
+        p = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
     }
 
-    public void evaluateTangent(Vector3D dQds, double s, double t)
+    public Vector3D evaluateTangent(double s, double t)
     {
         S_MATRIX_DS.M[0][0] = 3 * s * s;
         S_MATRIX_DS.M[0][1] = 2 * s;
@@ -432,15 +430,13 @@ public class ParametricBiCubicPatch extends Surface {
         // The result is a 1x1 matrix.
         Vector3D result = new Vector3D();
 
-        result.x = Qx_MATRIX.M[0][0];
-        result.y = Qy_MATRIX.M[0][0];
-        result.z = Qz_MATRIX.M[0][0];
-        result.normalize();
+        result = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
+        result = result.normalized();
 
-        dQds.clone(result);
+        return result;
     }
 
-    public void evaluateBinormal(Vector3D dQdt, double s, double t)
+    public Vector3D evaluateBinormal(double s, double t)
     {
         S_MATRIX.M[0][0] = s * s * s;
         S_MATRIX.M[0][1] = s * s;
@@ -461,12 +457,10 @@ public class ParametricBiCubicPatch extends Surface {
 
         // The results are 1x1 matrices.
         Vector3D result = new Vector3D();
-        result.x = Qx_MATRIX.M[0][0];
-        result.y = Qy_MATRIX.M[0][0];
-        result.z = Qz_MATRIX.M[0][0];
-        result.normalize();
+        result = new Vector3D(Qx_MATRIX.M[0][0], Qy_MATRIX.M[0][0], Qz_MATRIX.M[0][0]);
+        result = result.normalized();
 
-        dQdt.clone(result);
+        return result;
     }
 
     /**
@@ -491,18 +485,18 @@ public class ParametricBiCubicPatch extends Surface {
     @param s
     @param t
     */
-    public void evaluateNormal(Vector3D n, double s, double t)
+    public Vector3D evaluateNormal(double s, double t)
     {
-        Vector3D dQds = new Vector3D();
-        Vector3D dQdt = new Vector3D();
+        Vector3D dQds;
+        Vector3D dQdt;
 
-        evaluateTangent(dQds, s, t);
-        evaluateBinormal(dQdt, s, t);
+        dQds = evaluateTangent(s, t);
+        dQdt = evaluateBinormal(s, t);
 
         Vector3D nn = dQds.crossProduct(dQdt);
-        nn.normalize();
+        nn = nn.normalized();
 
-        n.clone(nn);
+        return nn;
     }
 
     /**
@@ -568,12 +562,12 @@ public class ParametricBiCubicPatch extends Surface {
                 for ( j = 0; j < 4; j++ ) {
                     Vector3D p = controlMeshPoints[i][j];
 
-                    if ( p.x < minX ) minX = p.x;
-                    if ( p.y < minY ) minY = p.y;
-                    if ( p.z < minZ ) minZ = p.z;
-                    if ( p.x > maxX ) maxX = p.x;
-                    if ( p.y > maxY ) maxY = p.y;
-                    if ( p.z > maxZ ) maxZ = p.z;
+                    if ( p.x() < minX ) minX = p.x();
+                    if ( p.y() < minY ) minY = p.y();
+                    if ( p.z() < minZ ) minZ = p.z();
+                    if ( p.x() > maxX ) maxX = p.x();
+                    if ( p.y() > maxY ) maxY = p.y();
+                    if ( p.z() > maxZ ) maxZ = p.z();
                 }
             }
             minMax[0] = minX;

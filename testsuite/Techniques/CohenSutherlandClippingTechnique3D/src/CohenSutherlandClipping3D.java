@@ -234,13 +234,13 @@ KeyListener
         double delta = 0.1;
 
         gl.glLoadIdentity();
-        gl.glTranslated(point0.x, point0.y, point0.z);
+        gl.glTranslated(point0.x(), point0.y(), point0.z());
         gl.glLineWidth((float)1.0);
         gl.glColor3d(1, 1, 1);
         drawMark(gl, delta);
 
         gl.glLoadIdentity();
-        gl.glTranslated(point1.x, point1.y, point1.z);
+        gl.glTranslated(point1.x(), point1.y(), point1.z());
         gl.glLineWidth((float)1.0);
         gl.glColor3d(1, 1, 0);
         drawMark(gl, delta);
@@ -250,16 +250,16 @@ KeyListener
         gl.glLineWidth((float)1.0);
         gl.glColor3d(1, 0, 1);
         gl.glBegin(GL2.GL_LINES);
-            gl.glVertex3d(point0.x, point0.y, point0.z);
-            gl.glVertex3d(point1.x, point1.y, point1.z);
+            gl.glVertex3d(point0.x(), point0.y(), point0.z());
+            gl.glVertex3d(point1.x(), point1.y(), point1.z());
         gl.glEnd();
         if ( linePasses == true ) {
             gl.glLineWidth((float)5.0);
             gl.glBegin(GL2.GL_LINES);
-                gl.glVertex3d(clippedPoint0.x, clippedPoint0.y,
-                    clippedPoint0.z);
-                gl.glVertex3d(clippedPoint1.x, clippedPoint1.y,
-                    clippedPoint1.z);
+                gl.glVertex3d(clippedPoint0.x(), clippedPoint0.y(),
+                    clippedPoint0.z());
+                gl.glVertex3d(clippedPoint1.x(), clippedPoint1.y(),
+                    clippedPoint1.z());
             gl.glEnd();
         }
         //-----------------------------------------------------------------

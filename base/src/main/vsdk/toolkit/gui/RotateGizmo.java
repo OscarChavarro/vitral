@@ -38,41 +38,41 @@ public class RotateGizmo extends Gizmo {
       delta = new Matrix4x4();
       //up = new Vector3D(T.M[0][2], T.M[1][2], T.M[2][2]);
       up = new Vector3D(0, 0, 1);
-      up.normalize();
+      up = up.normalized();
 
       //front = new Vector3D(T.M[0][0], T.M[1][0], T.M[2][0]);
       front = new Vector3D(0, 1, 0);
-      front.normalize();
+      front = front.normalized();
 
       //left = new Vector3D(T.M[0][1], T.M[1][1], T.M[2][1]);
       left = new Vector3D(1, 0, 0);
-      left.normalize();
+      left = left.normalized();
 
       if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
               // Position
               case 'x':
-                delta.axisRotation(-deltaMov, left.x, left.y, left.z);
+                delta.axisRotation(-deltaMov, left.x(), left.y(), left.z());
                 updateNeeded = true;
                 break;
               case 'X':
-                delta.axisRotation(deltaMov, left.x, left.y, left.z);
+                delta.axisRotation(deltaMov, left.x(), left.y(), left.z());
                 updateNeeded = true;
                 break;
               case 'y':
-                delta.axisRotation(-deltaMov, front.x, front.y, front.z);
+                delta.axisRotation(-deltaMov, front.x(), front.y(), front.z());
                 updateNeeded = true;
                 break;
               case 'Y':
-                delta.axisRotation(deltaMov, front.x, front.y, front.z);
+                delta.axisRotation(deltaMov, front.x(), front.y(), front.z());
                 updateNeeded = true;
                 break;
               case 'z':
-                delta.axisRotation(-deltaMov, up.x, up.y, up.z);
+                delta.axisRotation(-deltaMov, up.x(), up.y(), up.z());
                 updateNeeded = true;
                 break;
               case 'Z':
-                delta.axisRotation(deltaMov, up.x, up.y, up.z);
+                delta.axisRotation(deltaMov, up.x(), up.y(), up.z());
                 updateNeeded = true;
                 break; 
             }

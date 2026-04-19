@@ -426,8 +426,8 @@ public class ReaderObj extends PersistenceElement
             // Texture coordinates
             ti = finalVertexes.get(i).vertexTextureCoordinateIndex - 1;
             if ( ti >= 0 ) {
-                newVertexArray[i].u = vertexTextureCoordinatesArray.get(ti).x;
-                newVertexArray[i].v = vertexTextureCoordinatesArray.get(ti).y;
+                newVertexArray[i].u = vertexTextureCoordinatesArray.get(ti).x();
+                newVertexArray[i].v = vertexTextureCoordinatesArray.get(ti).y();
             }
             else {
                 newVertexArray[i].u = newVertexArray[i].v = 0.0;
@@ -713,26 +713,29 @@ public class ReaderObj extends PersistenceElement
     
     private static Vector3D readVertex(String lineOfText)
     {
-        Vector3D vert = new Vector3D();
+        Vector3D vert;
         StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
-        vert.x = Double.parseDouble(st.nextToken());
-        vert.y = Double.parseDouble(st.nextToken());
-        vert.z = Double.parseDouble(st.nextToken());
+        vert = new Vector3D(
+            Double.parseDouble(st.nextToken()),
+            Double.parseDouble(st.nextToken()),
+            Double.parseDouble(st.nextToken()));
 
         return vert;
     }
 
     private static Vector3D readVertexTexture(String lineOfText) {
-        Vector3D vert = new Vector3D();
+        Vector3D vert;
         StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
-        vert.x = Double.parseDouble(st.nextToken());
-        vert.y = Double.parseDouble(st.nextToken());
+        double x = Double.parseDouble(st.nextToken());
+        double y = Double.parseDouble(st.nextToken());
+        double z = 0.0;
         try {
-            vert.z = Double.parseDouble(st.nextToken());
+            z = Double.parseDouble(st.nextToken());
         }
         catch( Exception e ) {}
+        vert = new Vector3D(x, y, z);
         return vert;
     }
 
