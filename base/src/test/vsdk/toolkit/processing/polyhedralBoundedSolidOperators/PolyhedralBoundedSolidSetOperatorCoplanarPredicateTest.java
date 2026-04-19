@@ -44,7 +44,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
                 PolyhedralBoundedSolid.class);
         touchingOnlyPreflightCaseMethod.setAccessible(true);
 
-        setNumericContextMethod = PolyhedralBoundedSolidOperator.class
+        setNumericContextMethod = _PolyhedralBoundedSolidOperator.class
             .getDeclaredMethod("setNumericContext",
                 PolyhedralBoundedSolidNumericPolicy.ToleranceContext.class);
         setNumericContextMethod.setAccessible(true);

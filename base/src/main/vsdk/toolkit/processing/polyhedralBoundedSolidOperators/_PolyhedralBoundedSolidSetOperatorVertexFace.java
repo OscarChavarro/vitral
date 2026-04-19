@@ -12,7 +12,7 @@ Stores one vertex/face coincidence from the `sonva`/`sonvb` sets introduced by
 program [MANT1988].15.1.
 */
 public class _PolyhedralBoundedSolidSetOperatorVertexFace
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
 {
     public _PolyhedralBoundedSolidVertex v;
     public _PolyhedralBoundedSolidFace f;

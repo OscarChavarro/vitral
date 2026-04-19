@@ -16,7 +16,7 @@ operation algorithm as proposed on section [MANT1988].15..1. and problem
 [MANT1988].15.4.
 */
 public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
 {
     public static final int ABOVE = 1;
     public static final int BELOW = -1;

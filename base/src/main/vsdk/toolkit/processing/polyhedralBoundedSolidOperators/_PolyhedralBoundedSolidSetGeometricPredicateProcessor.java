@@ -19,8 +19,8 @@ Geometric predicates and coplanar-angle algebra used by the set-operations
 classifiers from sections [MANT1988].14.5, [MANT1988].15.6.1, and
 [MANT1988].15.6.2.
 */
-final class PolyhedralBoundedSolidSetGeometricPredicateProcessor
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final double TWO_PI = 2.0 * Math.PI;
 

@@ -17,8 +17,8 @@ Connect stage (big phase 3) for set operations: null-edges pairing and joins,
 following section [MANT1988].15.7 and programs [MANT1988].15.13 and
 [MANT1988].15.14.
 */
-final class PolyhedralBoundedSolidSetNullEdgesConnector
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetNullEdgesConnector
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_05_CONNECT = 0x10;

@@ -18,7 +18,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.CurveModeler;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state
@@ -172,10 +172,10 @@ public class TranslateGizmo extends Gizmo {
         ParametricCurve lineModel;
         ParametricCurve segmentModel;
 
-        lineModel = GeometricModeler.createLine(0, 0, 0,
+        lineModel = CurveModeler.createLine(0, 0, 0,
             0, 0, currentScale*0.7);
 
-        segmentModel = GeometricModeler.createLine(0, 0, 0,
+        segmentModel = CurveModeler.createLine(0, 0, 0,
             0, 0, currentScale*SEGMENT_LENGHT);
 
         //-----------------------------------------------------------------

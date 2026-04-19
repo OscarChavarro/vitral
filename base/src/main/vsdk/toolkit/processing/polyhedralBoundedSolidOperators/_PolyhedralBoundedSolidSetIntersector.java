@@ -21,8 +21,8 @@ Helper for set operation big phase 0: generation of vertex/face and
 vertex/vertex intersections, following the initial detection phase from
 program [MANT1988].15.2.
 */
-final class PolyhedralBoundedSolidSetIntersector
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetIntersector
+    extends _PolyhedralBoundedSolidOperator
 {
     static final class GenerationResult
     {

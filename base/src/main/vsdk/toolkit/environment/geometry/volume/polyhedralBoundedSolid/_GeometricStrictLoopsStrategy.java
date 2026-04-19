@@ -9,8 +9,8 @@ Checks loop geometry against the planar-loop expectations of the half-edge
 representation from [MANT1988].10.2.1 and the planar polygon predicates of
 chapter [MANT1988].13.
 */
-public class GeometricStrictLoopsStrategy
-    implements PolyhedralBoundedSolidValidationStrategy
+public class _GeometricStrictLoopsStrategy
+    implements _PolyhedralBoundedSolidValidationStrategy
 {
     /**
     Validates that loop boundaries behave as planar polygonal contours, in the

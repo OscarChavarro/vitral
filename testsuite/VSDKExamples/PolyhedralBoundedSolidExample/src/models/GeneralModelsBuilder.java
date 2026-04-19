@@ -49,7 +49,7 @@ public class GeneralModelsBuilder
           case ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
-            PolyhedralBoundedSolidModeler.addArc(
+            PolyhedralBoundedSolidModeler.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
           case CIRCULAR_LAMINA:
@@ -60,7 +60,7 @@ public class GeneralModelsBuilder
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC:
             mySolid = new PolyhedralBoundedSolid();
             mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
-            PolyhedralBoundedSolidModeler.addArc(
+            PolyhedralBoundedSolidModeler.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
             T = new Matrix4x4();

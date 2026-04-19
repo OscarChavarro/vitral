@@ -31,10 +31,10 @@ public class PolyhedralBoundedSolidValidationEngine
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
 
-        ArrayList<PolyhedralBoundedSolidValidationStrategy> strategies =
-            new ArrayList<PolyhedralBoundedSolidValidationStrategy>();
-        strategies.add(new GeometricPlanarityStrategy());
-        strategies.add(new TopologicalIntegrityStrategy());
+        ArrayList<_PolyhedralBoundedSolidValidationStrategy> strategies =
+            new ArrayList<_PolyhedralBoundedSolidValidationStrategy>();
+        strategies.add(new _GeometricPlanarityStrategy());
+        strategies.add(new _TopologicalIntegrityStrategy());
 
         int i;
         for ( i = 0; i < strategies.size(); i++ ) {
@@ -64,12 +64,12 @@ public class PolyhedralBoundedSolidValidationEngine
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
 
-        ArrayList<PolyhedralBoundedSolidValidationStrategy> strategies =
-            new ArrayList<PolyhedralBoundedSolidValidationStrategy>();
-        strategies.add(new GeometricPlanarityStrategy());
-        strategies.add(new TopologicalIntegrityStrategy());
-        strategies.add(new GeometricStrictLoopsStrategy());
-        strategies.add(new GeometricStrictFaceIntersectionsStrategy());
+        ArrayList<_PolyhedralBoundedSolidValidationStrategy> strategies =
+            new ArrayList<_PolyhedralBoundedSolidValidationStrategy>();
+        strategies.add(new _GeometricPlanarityStrategy());
+        strategies.add(new _TopologicalIntegrityStrategy());
+        strategies.add(new _GeometricStrictLoopsStrategy());
+        strategies.add(new _GeometricStrictFaceIntersectionsStrategy());
 
         int i;
         for ( i = 0; i < strategies.size(); i++ ) {

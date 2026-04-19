@@ -9,7 +9,7 @@ Strategy abstraction for checks that preserve the half-edge invariants of
 [MANT1988].10 and the geometric validity conditions later used by chapters
 [MANT1988].13 and [MANT1988].15.
 */
-public interface PolyhedralBoundedSolidValidationStrategy
+public interface _PolyhedralBoundedSolidValidationStrategy
 {
     /**
     Executes one validation criterion derived from the boundary-representation

@@ -15,7 +15,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class Cone extends Solid {
     /// Check the general attribute description in superclass Entity.
@@ -442,7 +442,7 @@ public class Cone extends Solid {
         PolyhedralBoundedSolid solid;
         Matrix4x4 T, S, M;
 
-        solid = GeometricModeler.createCircularLamina(
+        solid = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, r1, 0.0, nsides
         );
 
@@ -459,7 +459,7 @@ public class Cone extends Solid {
                 S = new Matrix4x4();
                 S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                GeometricModeler.translationalSweepExtrudeFacePlanar(
+                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
@@ -478,7 +478,7 @@ public class Cone extends Solid {
                 S = new Matrix4x4();
                 S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                GeometricModeler.translationalSweepExtrudeFacePlanar(
+                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }

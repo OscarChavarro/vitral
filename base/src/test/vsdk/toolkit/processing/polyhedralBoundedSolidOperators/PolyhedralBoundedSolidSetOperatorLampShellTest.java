@@ -13,7 +13,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,8 +36,8 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         PolyhedralBoundedSolid innerSphere = createSphere(
             INNER_RADIUS, subdivisionCircumference, subdivisionHeight);
 
-        PolyhedralBoundedSolid sphericalShell = GeometricModeler.setOp(
-            outerSphere, innerSphere, GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid sphericalShell = PolyhedralBoundedSolidModeler.setOp(
+            outerSphere, innerSphere, PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
         Box clipCubeGeometry = new Box(new Vector3D(1.4, 1.4, 1.05));
         PolyhedralBoundedSolid clipCube = clipCubeGeometry
@@ -46,8 +46,8 @@ class PolyhedralBoundedSolidSetOperatorLampShellTest
         cubeMove.translation(0.55, 0.55, 0.325);
         clipCube.applyTransformation(cubeMove);
 
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(
-            sphericalShell, clipCube, GeometricModeler.INTERSECTION, false);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            sphericalShell, clipCube, PolyhedralBoundedSolidModeler.INTERSECTION, false);
 
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();

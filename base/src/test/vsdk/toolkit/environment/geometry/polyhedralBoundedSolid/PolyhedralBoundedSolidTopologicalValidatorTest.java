@@ -3,7 +3,7 @@ package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologicalValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid._PolyhedralBoundedSolidTopologicalValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +19,7 @@ class PolyhedralBoundedSolidTopologicalValidatorTest
                 0.0, 0.0, 0.0);
 
         // Action
-        boolean result = PolyhedralBoundedSolidTopologicalValidator
+        boolean result = _PolyhedralBoundedSolidTopologicalValidator
             .validateTopologicalIntegrity(solid);
 
         // Assert
@@ -37,7 +37,7 @@ class PolyhedralBoundedSolidTopologicalValidatorTest
         edge.leftHalf = null;
 
         // Action
-        boolean result = PolyhedralBoundedSolidTopologicalValidator
+        boolean result = _PolyhedralBoundedSolidTopologicalValidator
             .validateTopologicalIntegrity(solid);
 
         // Assert

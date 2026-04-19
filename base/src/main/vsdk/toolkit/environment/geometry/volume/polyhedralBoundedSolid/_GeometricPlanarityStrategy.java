@@ -8,8 +8,8 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 Applies the planar-face consistency expected from the half-edge face model in
 [MANT1988].10.2.1 and from the face-equation discussion of [MANT1988].13.1.
 */
-public class GeometricPlanarityStrategy
-    implements PolyhedralBoundedSolidValidationStrategy
+public class _GeometricPlanarityStrategy
+    implements _PolyhedralBoundedSolidValidationStrategy
 {
     /**
     Validates that each face can act as the planar polygon required by

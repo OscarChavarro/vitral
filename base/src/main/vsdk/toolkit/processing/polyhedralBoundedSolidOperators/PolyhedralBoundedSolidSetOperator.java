@@ -44,7 +44,7 @@ The algorithm is structured in 5 big phases:
 Note that each big phase is controlled in a method (mark as "big phase" in
 its documentation).
 */
-public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOperator
+public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOperator
 {
     /**
     Debug flags.
@@ -65,20 +65,20 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
     private static int compareToZero(double value)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
     }
 
     private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
     }
 
     private static int resolveCoplanarVertexVertexClass(int op,
         boolean sameOrientation, boolean sideA)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
     }
 
@@ -89,7 +89,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int BvsA, int op,
         boolean useMirrorFace)
     {
-        PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .applyCoplanarRulesToVertexFaceNeighborhood(
                 nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
     }
@@ -98,7 +98,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace sectorInfo,
         _PolyhedralBoundedSolidFace referenceFace)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .classifyCoplanarSectorRelation(sectorInfo, referenceFace);
     }
 
@@ -205,9 +205,9 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static void setOpGenerate(PolyhedralBoundedSolid inSolidA,
                                       PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolidSetIntersector.GenerationResult generation;
+        _PolyhedralBoundedSolidSetIntersector.GenerationResult generation;
 
-        generation = PolyhedralBoundedSolidSetIntersector.setOpGenerate(
+        generation = _PolyhedralBoundedSolidSetIntersector.setOpGenerate(
             inSolidA, inSolidB);
         sonvv = generation.sonvv();
         sonva = generation.sonva();
@@ -813,7 +813,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sectoroverlap(na, nb,
                 (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0);
     }
@@ -837,14 +837,14 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
     private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
                             Vector3D ref2, Vector3D ref12)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
     }
 
     private static boolean sctrwitthinProper(Vector3D dir, Vector3D ref1,
                                              Vector3D ref2, Vector3D ref12)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthinProper(dir, ref1, ref2, ref12);
     }
 
@@ -1083,13 +1083,13 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
 
     private static boolean colinearVectors(Vector3D a, Vector3D b)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectors(a, b);
     }
 
     public static boolean colinearVectorsWithDirection(Vector3D a, Vector3D b)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectorsWithDirection(a, b);
     }
 
@@ -1767,16 +1767,16 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
                                       PolyhedralBoundedSolid inSolidA,
                                       PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolidSetClassifier.runSetOpClassify(
+        _PolyhedralBoundedSolidSetClassifier.runSetOpClassify(
             op, inSolidA, inSolidB, debugFlags, sonvv, sonva, sonvb, sonea,
             soneb);
     }
 
     private static void setOpConnect()
     {
-        PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult result;
+        _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult result;
 
-        result = PolyhedralBoundedSolidSetNullEdgesConnector.connect(
+        result = _PolyhedralBoundedSolidSetNullEdgesConnector.connect(
             debugFlags, sonea, soneb);
         sonfa = result.sonfa();
         sonfb = result.sonfb();
@@ -1793,7 +1793,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         int op
     )
     {
-        PolyhedralBoundedSolidSetFinisher.finish(
+        _PolyhedralBoundedSolidSetFinisher.finish(
             inSolidA, inSolidB, outRes, op, debugFlags, sonfa, sonfb);
     }
 
@@ -1801,7 +1801,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        return PolyhedralBoundedSolidSetNonIntersectingClassifier
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .runTouchingOnlyPreflightCase(inSolidA, inSolidB);
     }
 
@@ -1814,7 +1814,7 @@ public class PolyhedralBoundedSolidSetOperator extends PolyhedralBoundedSolidOpe
         PolyhedralBoundedSolid outRes,
         int op)
     {
-        return PolyhedralBoundedSolidSetNonIntersectingClassifier
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op);
     }
 

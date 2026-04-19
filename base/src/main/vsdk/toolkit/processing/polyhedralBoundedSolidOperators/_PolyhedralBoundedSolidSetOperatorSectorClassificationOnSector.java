@@ -12,7 +12,7 @@ vertex/vertex classifier as proposed on section [MANT1988].15.5. and program
 [MANT1988].15.6.
 */
 public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
 {
     public int secta;
     public int sectb;

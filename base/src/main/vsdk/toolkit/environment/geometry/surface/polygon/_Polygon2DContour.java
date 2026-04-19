@@ -1,17 +1,18 @@
 package vsdk.toolkit.environment.geometry.surface.polygon;
 
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
+
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Vertex2D;
-
-import java.util.ArrayList;
 
 public class _Polygon2DContour extends FundamentalEntity implements Comparable<_Polygon2DContour>
 {
     /// Check the general attribute description in superclass Entity.
     @Serial
     private static final long serialVersionUID = 20260419L;
-    public ArrayList<Vertex2D> vertices;
+    public List<Vertex2D> vertices;
     // If this contour is a hole, exteriorContour is the contour that contains it.
     private _Polygon2DContour exteriorContour;
     private double minMaxArea;
@@ -20,7 +21,7 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
 
     public _Polygon2DContour()
     {
-        vertices = new ArrayList<Vertex2D>();
+        vertices = new ArrayList<>();
         exteriorContour = null;
         minMaxAreaCalculated = false;
     }

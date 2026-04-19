@@ -18,8 +18,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 Classification stages, connection stages, and no-intersection containment
 logic for the Boolean set-operations pipeline of chapter [MANT1988].15.
 */
-final class PolyhedralBoundedSolidSetClassifier
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetClassifier
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
@@ -63,7 +63,7 @@ final class PolyhedralBoundedSolidSetClassifier
         PolyhedralBoundedSolid outRes,
         int op)
     {
-        return PolyhedralBoundedSolidSetNonIntersectingClassifier
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op);
     }
 
@@ -71,26 +71,26 @@ final class PolyhedralBoundedSolidSetClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        return PolyhedralBoundedSolidSetNonIntersectingClassifier
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .runTouchingOnlyPreflightCase(inSolidA, inSolidB);
     }
 
     private static int compareToZero(double value)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
     }
 
     private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
     }
 
     private static int resolveCoplanarVertexVertexClass(int op,
         boolean sameOrientation, boolean sideA)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
     }
 
@@ -138,7 +138,7 @@ final class PolyhedralBoundedSolidSetClassifier
     private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
                             Vector3D ref2, Vector3D ref12)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
     }
 
@@ -463,7 +463,7 @@ final class PolyhedralBoundedSolidSetClassifier
     Following section [MANT1988].15.6.2. and program [MANT1988].15.11.
     */
     private static void vertexVertexInsertNullEdges(
-        PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
@@ -604,10 +604,10 @@ final class PolyhedralBoundedSolidSetClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolidSetVertexVertexClassifier
+        _PolyhedralBoundedSolidSetVertexVertexClassifier
             .VertexVertexClassificationData data;
 
-        data = PolyhedralBoundedSolidSetVertexVertexClassifier.classify(
+        data = _PolyhedralBoundedSolidSetVertexVertexClassifier.classify(
             va, vb, op, debugFlags);
         vertexVertexInsertNullEdges(data, inSolidA, inSolidB);
     }
@@ -630,7 +630,7 @@ final class PolyhedralBoundedSolidSetClassifier
         }
 
         for ( i = 0; i < sonva.size(); i++ ) {
-            PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
+            _PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
                 sonva.get(i).v, sonva.get(i).f, op, 0, debugFlags,
                 sonea, soneb, inSolidA, inSolidB);
         }
@@ -641,7 +641,7 @@ final class PolyhedralBoundedSolidSetClassifier
         }
 
         for ( i = 0; i < sonvb.size(); i++ ) {
-            PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
+            _PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
                 sonvb.get(i).v, sonvb.get(i).f, op, 1, debugFlags,
                 sonea, soneb, inSolidA, inSolidB);
         }

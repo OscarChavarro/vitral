@@ -10,6 +10,7 @@ package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Stack;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
@@ -334,8 +335,8 @@ public class PolygonProcessor extends ProcessingElement {
      * @return
      */
     public static boolean contourInsidePolygon(
-             ArrayList<Vertex2D> contour
-            ,ArrayList<Vertex2D> mainPolygon)
+             List<Vertex2D> contour
+            ,List<Vertex2D> mainPolygon)
     {
         int i;
         Vertex2D point;
@@ -396,7 +397,8 @@ public class PolygonProcessor extends ProcessingElement {
      * @return 1 if the point is inside, -1 if the point is outside, 0 if the
      * point is on the boundary.
      */
-    public static byte isPointInsidePolygon2D(Vertex2D point, ArrayList<Vertex2D> polygon)
+    public static byte isPointInsidePolygon2D(Vertex2D point,
+                                              List<Vertex2D> polygon)
     {
         int i,polSize;
         boolean isInside = false;

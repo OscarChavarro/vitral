@@ -13,8 +13,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 Finish stage (big phase 4) for set operations, corresponding to the answer
 integration step of program [MANT1988].15.15.
 */
-final class PolyhedralBoundedSolidSetFinisher
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetFinisher
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_06_FINISH = 0x20;

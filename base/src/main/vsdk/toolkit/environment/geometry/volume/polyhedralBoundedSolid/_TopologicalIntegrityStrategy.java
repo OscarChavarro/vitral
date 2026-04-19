@@ -8,8 +8,8 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 Applies topological consistency checks for the half-edge data structure of
 [MANT1988].10.2.1 and [MANT1988].10.2.2.
 */
-public class TopologicalIntegrityStrategy
-    implements PolyhedralBoundedSolidValidationStrategy
+public class _TopologicalIntegrityStrategy
+    implements _PolyhedralBoundedSolidValidationStrategy
 {
     /**
     Validates the basic incidence and cycle properties assumed by the half-edge
@@ -20,9 +20,9 @@ public class TopologicalIntegrityStrategy
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         StringBuilder msg)
     {
-        PolyhedralBoundedSolidTopologicalValidator
+        _PolyhedralBoundedSolidTopologicalValidator
             .remakeEmanatingHalfedgesReferences(solid);
-        if ( !PolyhedralBoundedSolidTopologicalValidator
+        if ( !_PolyhedralBoundedSolidTopologicalValidator
             .validateTopologicalIntegrity(solid) ) {
             msg.append("  - Topological integrity test failed.\n");
             return false;

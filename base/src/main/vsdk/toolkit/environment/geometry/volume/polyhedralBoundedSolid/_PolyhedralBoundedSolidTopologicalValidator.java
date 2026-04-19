@@ -14,9 +14,9 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 Topological validation helpers for the half-edge representation described in
 [MANT1988].10.2.1 and [MANT1988].10.2.2.
 */
-public class PolyhedralBoundedSolidTopologicalValidator
+public class _PolyhedralBoundedSolidTopologicalValidator
 {
-    private PolyhedralBoundedSolidTopologicalValidator()
+    private _PolyhedralBoundedSolidTopologicalValidator()
     {
     }
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 // VitralSDK classes
+import java.util.List;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -26,7 +27,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 This class is used to store vertex / halfedge neigborhood information, as presented
 in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
-class _PolyhedralBoundedSolidSplitterSectorClassification extends PolyhedralBoundedSolidOperator
+class _PolyhedralBoundedSolidSplitterSectorClassification extends _PolyhedralBoundedSolidOperator
 {
     public static final int ABOVE = 1;
     public static final int BELOW = -1;
@@ -78,7 +79,7 @@ class _PolyhedralBoundedSolidSplitterSectorClassification extends PolyhedralBoun
 Class `_PolyhedralBoundedSolidSplitterNullEdge` plays a role of a decorator
 design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
-class _PolyhedralBoundedSolidSplitterNullEdge extends PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
+class _PolyhedralBoundedSolidSplitterNullEdge extends _PolyhedralBoundedSolidOperator implements Comparable <_PolyhedralBoundedSolidSplitterNullEdge>
 {
     private static PolyhedralBoundedSolidNumericPolicy.ToleranceContext
         numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
@@ -144,7 +145,7 @@ at chapter [MANT1988].14.
 This class offers just one public method, which is supposed to be called
 from GeometricModeler class.
 */
-public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperator
+public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOperator
 {
     private static int compareToZero(double value)
     {
@@ -726,8 +727,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
     Following section [MANT1988].14.8. and program [MANT1988].14.11.
     */
     private static void splitFinish(PolyhedralBoundedSolid inSolid,
-                             ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
-                             ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
+                             List<PolyhedralBoundedSolid> outSolidsAbove,
+                             List<PolyhedralBoundedSolid> outSolidsBelow)
     {
         int i;
         int firstHalfSize;
@@ -767,8 +768,8 @@ public class PolyhedralBoundedSolidSplitter extends PolyhedralBoundedSolidOperat
     public static void split(
                       PolyhedralBoundedSolid inSolid,
                       InfinitePlane inSplittingPlane,
-                      ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
-                      ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
+                      List<PolyhedralBoundedSolid> outSolidsAbove,
+                      List<PolyhedralBoundedSolid> outSolidsBelow)
     {
         //-----------------------------------------------------------------
         setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolid(inSolid));

@@ -5,7 +5,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class Arrow extends Solid {
     /// Check the general attribute description in superclass Entity.
@@ -176,14 +176,14 @@ public class Arrow extends Solid {
         Matrix4x4 T, S, M;
         int nsides = 36/4;
 
-        solid = GeometricModeler.createCircularLamina(
+        solid = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, baseRadius, 0.0, nsides
         );
 
         // Cylinder case
         T = new Matrix4x4();
         T.translation(0.0, 0.0, baseLength);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
         T = new Matrix4x4();
@@ -192,7 +192,7 @@ public class Arrow extends Solid {
         S = new Matrix4x4();
         S.scale(f, f, 1);
         M = T.multiply(S);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), M);
 
         // Cone case

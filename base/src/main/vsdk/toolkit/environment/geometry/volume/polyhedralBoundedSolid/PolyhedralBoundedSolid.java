@@ -1448,7 +1448,7 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     private void remakeEmanatingHalfedgesReferences()
     {
-        PolyhedralBoundedSolidTopologicalValidator
+        _PolyhedralBoundedSolidTopologicalValidator
             .remakeEmanatingHalfedgesReferences(this);
     }
     //= TEXTUAL QUERY OPERATIONS ======================================

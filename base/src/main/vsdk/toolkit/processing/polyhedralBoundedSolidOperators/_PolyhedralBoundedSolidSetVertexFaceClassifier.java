@@ -19,8 +19,8 @@ Classification stages for vertex/face coincidences during set operations,
 starting from the splitting-classifier rules of [MANT1988].14.5 and adapted
 to boundary classification by [MANT1988].15.6.1 and problem [MANT1988].15.4.
 */
-final class PolyhedralBoundedSolidSetVertexFaceClassifier
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetVertexFaceClassifier
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_03_VERTEX_FACE_CLASSIFIER = 0x04;
@@ -52,7 +52,7 @@ final class PolyhedralBoundedSolidSetVertexFaceClassifier
 
     private static int compareToZero(double value)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
     }
 
@@ -64,7 +64,7 @@ final class PolyhedralBoundedSolidSetVertexFaceClassifier
         int op,
         boolean useMirrorFace)
     {
-        PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .applyCoplanarRulesToVertexFaceNeighborhood(
                 nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
     }

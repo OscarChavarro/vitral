@@ -4,6 +4,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import java.util.ArrayList;
 
 // Vitral classes
+import java.util.List;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -30,20 +31,26 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static final int UNION = 1;
     public static final int INTERSECTION = 2;
     public static final int SUBTRACT = 3;
-    public static final int DIFFERENCE = SUBTRACT;
 
     /**
     Implements the construction style from [MANT1988] section 12.2 / program
     12.1.
 
-    Builds an arc on plane `z = h`, centered at (`cx`, `cy`), radius `rad`.
+    Builds an arc on plane `z = height`, centered at (`cx`, `cy`), radius `radius`.
     The start vertex already exists in `faceId` and is identified by
     `vertexId`; the method appends `n` new edge steps from `phi1` to `phi2`
     (degrees, counterclockwise, 0 degrees on +X).
     */
-    public static void addArc(PolyhedralBoundedSolid solid,
-        int faceId, int vertexId,
-        double cx, double cy, double rad, double h, double phi1, double phi2,
+    public static void addArcToExistingFace(
+        PolyhedralBoundedSolid solid,
+        int faceId,
+        int vertexId,
+        double cx,
+        double cy,
+        double radius,
+        double height,
+        double phi1,
+        double phi2,
         int n)
     {
         double x;
@@ -55,14 +62,14 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         int nextVertexId;
 
         angle = Math.toRadians(phi1);
-        inc = Math.toRadians((phi2 - phi1) / ((double)n));
+        inc = Math.toRadians((phi2 - phi1) / (n));
         prev = vertexId;
         for ( i = 0; i < n; i++ ) {
             angle += inc;
-            x = cx + rad * Math.cos(angle);
-            y = cy + rad * Math.sin(angle);
+            x = cx + radius * Math.cos(angle);
+            y = cy + radius * Math.sin(angle);
             nextVertexId = solid.getMaxVertexId() + 1;
-            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
+            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, height));
             prev = nextVertexId;
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -83,8 +90,8 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
         solid = new PolyhedralBoundedSolid();
         solid.mvfs(new Vector3D(cx + rad, cy, h), 1, 1);
-        addArc(solid, 1, 1, cx, cy, rad, h, 0,
-            ((double)(n-1)) * 360.0 / ((double)n), n-1);
+        addArcToExistingFace(solid, 1, 1, cx, cy, rad, h, 0,
+            (n - 1) * 360.0 / n, n-1);
         solid.smef(1, n, 1, 2);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -101,7 +108,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void translationalSweepExtrudeFace(
         PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace face,
-        Matrix4x4 T)
+        Matrix4x4 transformationMatrix)
     {
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge first;
@@ -115,11 +122,11 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             first = l.boundaryStartHalfEdge;
             scan = first.next();
             v = scan.startingVertex;
-            newPos = T.multiply(v.position);
+            newPos = transformationMatrix.multiply(v.position);
             solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
             while ( scan != first ) {
                 v = scan.next().startingVertex;
-                newPos = T.multiply(v.position);
+                newPos = transformationMatrix.multiply(v.position);
                 solid.lmev(scan.next(), scan.next(),
                     solid.getMaxVertexId()+1, newPos);
                 solid.lmef(scan.previous(), scan.next().next(),
@@ -141,52 +148,52 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void translationalSweepExtrudeFacePlanar(
         PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace face,
-        Matrix4x4 T)
+        Matrix4x4 transformationMatrix)
     {
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge first;
         _PolyhedralBoundedSolidHalfEdge scan;
         _PolyhedralBoundedSolidVertex v;
         Vector3D newPos;
-        ArrayList<Integer> newfaces = new ArrayList<Integer>();
+        ArrayList<Integer> newFaces = new ArrayList<>();
         int i;
-        int newfaceid;
+        int newFaceId;
 
         for ( i = 0; i < face.boundariesList.size(); i++ ) {
             l = face.boundariesList.get(i);
             first = l.boundaryStartHalfEdge;
             scan = first.next();
             v = scan.startingVertex;
-            newPos = T.multiply(v.position);
+            newPos = transformationMatrix.multiply(v.position);
             solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
             while ( scan != first ) {
                 v = scan.next().startingVertex;
-                newPos = T.multiply(v.position);
+                newPos = transformationMatrix.multiply(v.position);
                 solid.lmev(scan.next(), scan.next(),
                     solid.getMaxVertexId()+1, newPos);
-                newfaceid = solid.getMaxFaceId()+1;
-                solid.lmef(scan.previous(), scan.next().next(), newfaceid);
-                newfaces.add(Integer.valueOf(newfaceid));
+                newFaceId = solid.getMaxFaceId()+1;
+                solid.lmef(scan.previous(), scan.next().next(), newFaceId);
+                newFaces.add(newFaceId);
                 scan = (scan.next().mirrorHalfEdge()).next();
             }
-            newfaceid = solid.getMaxFaceId()+1;
-            solid.lmef(scan.previous(), scan.next().next(), newfaceid);
-            newfaces.add(Integer.valueOf(newfaceid));
+            newFaceId = solid.getMaxFaceId()+1;
+            solid.lmef(scan.previous(), scan.next().next(), newFaceId);
+            newFaces.add(newFaceId);
         }
 
-        _PolyhedralBoundedSolidFace newface;
-        for ( i = 0; i < newfaces.size(); i++ ) {
-            newfaceid = newfaces.get(i).intValue();
-            newface = solid.findFace(newfaceid);
-            if ( !PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(newface) ) {
-                scan = newface.boundariesList.get(0).boundaryStartHalfEdge;
-                newfaceid = solid.getMaxFaceId()+1;
-                solid.lmef(scan.next(), scan.previous(), newfaceid);
+        _PolyhedralBoundedSolidFace newFace;
+        for ( i = 0; i < newFaces.size(); i++ ) {
+            newFaceId = newFaces.get(i);
+            newFace = solid.findFace(newFaceId);
+            if ( !PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(newFace) ) {
+                scan = newFace.boundariesList.get(0).boundaryStartHalfEdge;
+                newFaceId = solid.getMaxFaceId()+1;
+                solid.lmef(scan.next(), scan.previous(), newFaceId);
             }
         }
 
-        while ( newfaces.size() > 0 ) {
-            newfaces.remove(0);
+        while ( !newFaces.isEmpty() ) {
+            newFaces.remove(0);
         }
 
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -246,12 +253,12 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     PRE:
     - `solid` is a wire-like profile (single face, open loop)
     - profile lies on `z = 0`
-    - `nfaces >= 3`
+    - `numberOfFaces >= 3`
     */
     public static void rotationalSweepExtrudeWireAroundXAxis(
-        PolyhedralBoundedSolid solid, int nfaces)
+        PolyhedralBoundedSolid solid, int numberOfFaces)
     {
-        if ( solid == null || solid.polygonsList.size() < 1 || nfaces < 3 ) {
+        if ( solid == null || solid.polygonsList.size() < 1 || numberOfFaces < 3 ) {
             return;
         }
 
@@ -278,10 +285,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
         cfirst = first;
         rotation = new Matrix4x4();
-        rotation.axisRotation((2*Math.PI) / ((double)nfaces), 1, 0, 0);
+        rotation.axisRotation((2*Math.PI) / numberOfFaces, 1, 0, 0);
 
         int i;
-        for ( i = 0; i < nfaces-1; i++ ) {
+        for ( i = 0; i < numberOfFaces-1; i++ ) {
             v = rotation.multiply(cfirst.next().startingVertex.position);
             solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1,
                 v);
@@ -323,120 +330,116 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
+    private static boolean isBreakMarker(ParametricCurve curve, int segmentIndex)
+    {
+        return curve.types.get(segmentIndex) == ParametricCurve.BREAK;
+    }
+
+    private static List<Vector3D> sampleCurveSegment(ParametricCurve curve,
+                                                     int segmentIndex)
+    {
+        // Approximate one parametric segment as a polyLine.
+        return curve.calculatePoints(segmentIndex, false);
+    }
+
+    private static void startLoopWithSeedPoint(_BoundaryRepresentationFromCurveBuildState state,
+                                               Vector3D point)
+    {
+        state.beginningOfLoop = false;
+        if ( state.firstLoop ) {
+            // [MANT1988] 12.2: first contour starts with MVFS.
+            state.solid.mvfs(new Vector3D(point), state.nextVertexId,
+                state.nextFaceId);
+            state.nextVertexId++;
+            state.nextFaceId++;
+        }
+        else {
+            // Additional contours are connected and converted into rings.
+            state.solid.smev(1, state.nextVertexId-1, state.nextVertexId,
+                new Vector3D(point));
+            state.nextVertexId++;
+            state.solid.kemr(1, 1, state.nextVertexId-2, state.nextVertexId-1,
+                state.nextVertexId-1, state.nextVertexId-2);
+            state.lastLoopStartVertexId = state.nextVertexId-1;
+        }
+
+        state.firstPointInLoop = new Vector3D(point);
+        state.lastAcceptedPoint = new Vector3D(point);
+    }
+
+    private static boolean shouldAcceptPolyLinePoint(_BoundaryRepresentationFromCurveBuildState state,
+                                                     Vector3D point)
+    {
+        return VSDK.vectorDistance(point, state.lastAcceptedPoint) >
+            VSDK.EPSILON &&
+            VSDK.vectorDistance(point, state.firstPointInLoop) > VSDK.EPSILON;
+    }
+
+    private static void appendPointToCurrentLoop(_BoundaryRepresentationFromCurveBuildState state,
+                                                 Vector3D point)
+    {
+        state.solid.smev(1, state.nextVertexId-1, state.nextVertexId,
+            new Vector3D(point));
+        state.nextVertexId++;
+        state.lastAcceptedPoint = new Vector3D(point);
+    }
+
+    private static void processSampledSegment(_BoundaryRepresentationFromCurveBuildState state,
+                                              List<Vector3D> polyline)
+    {
+        int j;
+        for ( j = 0; j < polyline.size(); j++ ) {
+            Vector3D point = polyline.get(j);
+            if ( state.beginningOfLoop ) {
+                startLoopWithSeedPoint(state, point);
+            }
+            else if ( shouldAcceptPolyLinePoint(state, point) ) {
+                appendPointToCurrentLoop(state, point);
+            }
+        }
+    }
+
+    private static void closeLoopWithMef(_BoundaryRepresentationFromCurveBuildState state)
+    {
+        // [MANT1988] 12.2: close current wire by creating the face boundary.
+        state.solid.mef(1, 1,
+            state.lastLoopStartVertexId, state.lastLoopStartVertexId+1,
+            state.nextVertexId-1, state.nextVertexId-2, state.nextFaceId);
+        state.nextFaceId++;
+
+        if ( !state.firstLoop ) {
+            // For inner contours, merge ring into the first face.
+            state.solid.kfmrh(2, state.nextFaceId-1);
+        }
+        state.firstLoop = false;
+        state.beginningOfLoop = true;
+        state.lastAcceptedPoint = null;
+    }
+
     public static PolyhedralBoundedSolid createBrepFromParametricCurve(
         ParametricCurve curve)
     {
         int i;
-        int j;
-        int totalNumberOfPoints;
-        double[][] list;
-        Vector3D first;
-        boolean beginning;
-        int count;
-
-        totalNumberOfPoints = 0;
+        _BoundaryRepresentationFromCurveBuildState state = new _BoundaryRepresentationFromCurveBuildState();
 
         for ( i = 1; i < curve.types.size(); i++ ) {
-            if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
+            if ( isBreakMarker(curve, i) ) {
                 i++;
+                closeLoopWithMef(state);
                 continue;
             }
-            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
-            totalNumberOfPoints += polyline.size();
+            processSampledSegment(state, sampleCurveSegment(curve, i));
         }
 
-        list = new double[totalNumberOfPoints][3];
+        closeLoopWithMef(state);
 
-        PolyhedralBoundedSolid solid;
-        boolean firstLoop = true;
-        int nextVertexId = 1;
-        int lastLoopStartVertexId = 1;
-        count = 0;
-        boolean needAnEnding = false;
-        int nextFaceId = 1;
-
-        solid = new PolyhedralBoundedSolid();
-
-        first = new Vector3D();
-        beginning = true;
-        for ( i = 1; i < curve.types.size(); i++ ) {
-            if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
-                i++;
-
-                solid.mef(1, 1,
-                          lastLoopStartVertexId, lastLoopStartVertexId+1,
-                          nextVertexId-1, nextVertexId-2, nextFaceId);
-                nextFaceId++;
-
-                if ( !firstLoop ) {
-                    solid.kfmrh(2, nextFaceId-1);
-                }
-                firstLoop = false;
-                beginning = true;
-                continue;
-            }
-
-            // Approximate the current parametric segment with a polyline.
-            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
-
-            // Insert the sampled polyline points into the current contour.
-            for ( j = 0; j < polyline.size(); j++ ) {
-                Vector3D vec = polyline.get(j);
-                if ( !beginning ) {
-                    Vector3D prev = new Vector3D(list[count-1][0],
-                                                 list[count-1][1],
-                                                 list[count-1][2]);
-                    if ( VSDK.vectorDistance(vec, prev) > VSDK.EPSILON &&
-                         VSDK.vectorDistance(vec, first) > VSDK.EPSILON ) {
-                        list[count][0] = vec.x;
-                        list[count][1] = vec.y;
-                        list[count][2] = vec.z;
-                        solid.smev(1, nextVertexId-1, nextVertexId,
-                            new Vector3D(vec));
-                        nextVertexId++;
-                        count++;
-                    }
-                }
-                else {
-                    beginning = false;
-                    list[count][0] = vec.x;
-                    list[count][1] = vec.y;
-                    list[count][2] = vec.z;
-                    if ( firstLoop ) {
-                        solid.mvfs(new Vector3D(vec), nextVertexId, nextFaceId);
-                        nextVertexId++;
-                        nextFaceId++;
-                    }
-                    else {
-                        solid.smev(1, nextVertexId-1, nextVertexId,
-                            new Vector3D(vec));
-                        nextVertexId++;
-                        solid.kemr(1, 1, nextVertexId-2, nextVertexId-1,
-                            nextVertexId-1, nextVertexId-2);
-                        lastLoopStartVertexId = nextVertexId-1;
-                        needAnEnding = true;
-                    }
-
-                    first = new Vector3D(vec.x, vec.y, vec.z);
-                    count++;
-                }
-            }
-        }
-
-        solid.mef(1, 1,
-                  lastLoopStartVertexId, lastLoopStartVertexId+1,
-                  nextVertexId-1, nextVertexId-2, nextFaceId);
-        nextFaceId++;
-        if ( needAnEnding ) {
-            solid.kfmrh(2, nextFaceId-1);
-        }
-
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
-        return solid;
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(
+            state.solid);
+        return state.solid;
     }
 
     /**
-    Convenience wrapper over `PolyhedralBoundedSolidSplitter.split`.
+    Convenience wrapper over `_PolyhedralBoundedSolidSplitter.split`.
 
     Splits `inSolid` by `inSplittingPlane` and appends resulting pieces to
     `outSolidsAbove` and `outSolidsBelow`.
@@ -444,10 +447,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void split(
         PolyhedralBoundedSolid inSolid,
         InfinitePlane inSplittingPlane,
-        ArrayList<PolyhedralBoundedSolid> outSolidsAbove,
-        ArrayList<PolyhedralBoundedSolid> outSolidsBelow)
+        List<PolyhedralBoundedSolid> outSolidsAbove,
+        List<PolyhedralBoundedSolid> outSolidsBelow)
     {
-        PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
+        _PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
                                              outSolidsAbove, outSolidsBelow);
     }
 

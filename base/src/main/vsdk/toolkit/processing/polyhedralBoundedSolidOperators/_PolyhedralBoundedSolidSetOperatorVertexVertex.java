@@ -11,7 +11,7 @@ Stores one vertex/vertex coincidence from the `sonvv` set introduced by
 program [MANT1988].15.1.
 */
 public class _PolyhedralBoundedSolidSetOperatorVertexVertex
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
 {
     public _PolyhedralBoundedSolidVertex va;
     public _PolyhedralBoundedSolidVertex vb;

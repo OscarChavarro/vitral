@@ -17,8 +17,8 @@ Geometric preprocessing and sector reclassification for vertex/vertex matches,
 following section [MANT1988].15.6.2 and programs [MANT1988].15.7 through
 [MANT1988].15.10.
 */
-final class PolyhedralBoundedSolidSetVertexVertexClassifier
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetVertexVertexClassifier
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
@@ -138,7 +138,7 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
                      he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0 ) ) {
                 if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
                          n.ref1, n.ref2, numericContext) ) {
-                    bisec = PolyhedralBoundedSolidSetClassifier.inside(he);
+                    bisec = _PolyhedralBoundedSolidSetClassifier.inside(he);
                 }
                 else {
                     bisec = n.ref1.add(n.ref2);
@@ -174,7 +174,7 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sectoroverlap(na, nb,
                 (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0);
     }
@@ -187,13 +187,13 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
     private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
                                        Vector3D ref2, Vector3D ref12)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
     }
 
     private static int compareToZero(double value)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
     }
 
@@ -201,7 +201,7 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
                                                         boolean sameOrientation,
                                                         boolean sideA)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
     }
 
@@ -444,10 +444,10 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
                  sectors.get(i).s1b ==
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
-                newsa = (op == PolyhedralBoundedSolidSetClassifier.UNION) ?
+                newsa = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                newsb = (op == PolyhedralBoundedSolidSetClassifier.UNION) ?
+                newsb = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
 
@@ -509,7 +509,7 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0) ? nba.size() - 1 : secta - 1;
                 prevsectb = (sectb == 0) ? nbb.size() - 1 : sectb - 1;
-                newsa = (op == PolyhedralBoundedSolidSetClassifier.UNION) ?
+                newsa = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
 
@@ -542,7 +542,7 @@ final class PolyhedralBoundedSolidSetVertexVertexClassifier
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0) ? nba.size() - 1 : secta - 1;
                 prevsectb = (sectb == 0) ? nbb.size() - 1 : sectb - 1;
-                newsb = (op == PolyhedralBoundedSolidSetClassifier.UNION) ?
+                newsb = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
 

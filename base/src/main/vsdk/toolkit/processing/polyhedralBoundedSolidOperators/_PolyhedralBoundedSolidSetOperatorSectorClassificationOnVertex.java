@@ -13,7 +13,7 @@ vertex/vertex classifier as proposed on section [MANT1988].15.5. and program
 [MANT1988].15.6.
 */
 public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
     implements Comparable<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>
 {
     public _PolyhedralBoundedSolidHalfEdge he;

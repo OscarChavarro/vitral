@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,8 +44,8 @@ class PolyhedralBoundedSolidSetOperatorMoonCylinderDifferenceTest
         translation.translation(CUT_DX, 0.0, CUT_DZ);
         cylinderB.applyTransformation(translation);
 
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(
-            cylinderA, cylinderB, GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            cylinderA, cylinderB, PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
         assertThat(result).isNotNull();
         assertThat(result.polygonsList.size()).isGreaterThan(0);

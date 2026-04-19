@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(solidA, solidB,
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
             op, false);
 
         // Assert
@@ -52,17 +52,17 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(solidA, solidB,
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
             op, false);
 
         // Assert
         assertThat(result).isNotNull();
-        if ( op == GeometricModeler.INTERSECTION ) {
+        if ( op == PolyhedralBoundedSolidModeler.INTERSECTION ) {
             assertThat(result.polygonsList.size()).isEqualTo(0);
             assertThat(result.edgesList.size()).isEqualTo(0);
             assertThat(result.verticesList.size()).isEqualTo(0);
         }
-        else if ( op == GeometricModeler.UNION ) {
+        else if ( op == PolyhedralBoundedSolidModeler.UNION ) {
             assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(1);
             assertThat(result.edgesList.size()).isGreaterThanOrEqualTo(1);
             assertThat(result.verticesList.size()).isGreaterThanOrEqualTo(1);
@@ -89,7 +89,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid outer = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(inner, outer,
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(inner, outer,
             op, false);
 
         // Assert
@@ -113,9 +113,9 @@ class PolyhedralBoundedSolidSetOperatorTest
             PolyhedralBoundedSolidTestFixtures.createDisjointBoxPair();
 
         // Action
-        PolyhedralBoundedSolid resultAB = GeometricModeler.setOp(
+        PolyhedralBoundedSolid resultAB = PolyhedralBoundedSolidModeler.setOp(
             disjointPairA[0], disjointPairA[1], op, false);
-        PolyhedralBoundedSolid resultBA = GeometricModeler.setOp(
+        PolyhedralBoundedSolid resultBA = PolyhedralBoundedSolidModeler.setOp(
             disjointPairB[1], disjointPairB[0], op, false);
 
         // Assert
@@ -144,7 +144,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(solidA, solidB,
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
             op, false);
 
         // Assert
@@ -170,7 +170,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid result = null;
         Throwable thrown = null;
         try {
-            result = GeometricModeler.setOp(solidA, solidB, op, false);
+            result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false);
         }
         catch ( Throwable ex ) {
             thrown = ex;
@@ -200,8 +200,8 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = GeometricModeler.setOp(solidA, solidB,
-            GeometricModeler.UNION, false);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
+            PolyhedralBoundedSolidModeler.UNION, false);
 
         // Assert
         assertThat(result).isNotNull();
@@ -225,10 +225,10 @@ class PolyhedralBoundedSolidSetOperatorTest
         int verticesB = solidB.verticesList.size();
 
         return Stream.of(
-            Arguments.of(GeometricModeler.UNION,
+            Arguments.of(PolyhedralBoundedSolidModeler.UNION,
                 facesA + facesB, edgesA + edgesB, verticesA + verticesB),
-            Arguments.of(GeometricModeler.INTERSECTION, 0, 0, 0),
-            Arguments.of(GeometricModeler.SUBTRACT, facesA, edgesA, verticesA)
+            Arguments.of(PolyhedralBoundedSolidModeler.INTERSECTION, 0, 0, 0),
+            Arguments.of(PolyhedralBoundedSolidModeler.SUBTRACT, facesA, edgesA, verticesA)
         );
     }
 
@@ -244,9 +244,9 @@ class PolyhedralBoundedSolidSetOperatorTest
     private static Stream<Arguments> touchingSetOperationSamples()
     {
         return Stream.of(
-            Arguments.of(GeometricModeler.UNION),
-            Arguments.of(GeometricModeler.INTERSECTION),
-            Arguments.of(GeometricModeler.SUBTRACT)
+            Arguments.of(PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(PolyhedralBoundedSolidModeler.INTERSECTION),
+            Arguments.of(PolyhedralBoundedSolidModeler.SUBTRACT)
         );
     }
 
@@ -265,38 +265,38 @@ class PolyhedralBoundedSolidSetOperatorTest
         int verticesOuter = outer.verticesList.size();
 
         return Stream.of(
-            Arguments.of(GeometricModeler.UNION,
+            Arguments.of(PolyhedralBoundedSolidModeler.UNION,
                 facesOuter, edgesOuter, verticesOuter),
-            Arguments.of(GeometricModeler.INTERSECTION,
+            Arguments.of(PolyhedralBoundedSolidModeler.INTERSECTION,
                 facesInner, edgesInner, verticesInner),
-            Arguments.of(GeometricModeler.SUBTRACT, 0, 0, 0)
+            Arguments.of(PolyhedralBoundedSolidModeler.SUBTRACT, 0, 0, 0)
         );
     }
 
     private static Stream<Arguments> commutativeOperations()
     {
         return Stream.of(
-            Arguments.of(GeometricModeler.UNION),
-            Arguments.of(GeometricModeler.INTERSECTION)
+            Arguments.of(PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(PolyhedralBoundedSolidModeler.INTERSECTION)
         );
     }
 
     private static Stream<Arguments> mant1988StableOperationSamples()
     {
         return Stream.of(
-            Arguments.of(-1, GeometricModeler.UNION),
-            Arguments.of(0, GeometricModeler.UNION),
-            Arguments.of(1, GeometricModeler.UNION),
-            Arguments.of(1, GeometricModeler.INTERSECTION),
-            Arguments.of(0, GeometricModeler.INTERSECTION),
-            Arguments.of(0, GeometricModeler.SUBTRACT)
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(1, PolyhedralBoundedSolidModeler.INTERSECTION),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.SUBTRACT)
         );
     }
 
     private static Stream<Arguments> mant1988KnownFailureSamples()
     {
         return Stream.of(
-            Arguments.of(-1, GeometricModeler.SUBTRACT)
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT)
         );
     }
 }

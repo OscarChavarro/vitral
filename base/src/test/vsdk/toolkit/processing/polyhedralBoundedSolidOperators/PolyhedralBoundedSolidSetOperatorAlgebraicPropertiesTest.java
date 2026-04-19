@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.processing.GeometricModeler;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,13 +31,13 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
             corpusKey, solidIndex);
 
         // Action
-        PolyhedralBoundedSolid unionResult = GeometricModeler.setOp(
-            unionPair[0], unionPair[1], GeometricModeler.UNION, false);
-        PolyhedralBoundedSolid intersectionResult = GeometricModeler.setOp(
+        PolyhedralBoundedSolid unionResult = PolyhedralBoundedSolidModeler.setOp(
+            unionPair[0], unionPair[1], PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolid intersectionResult = PolyhedralBoundedSolidModeler.setOp(
             intersectionPair[0], intersectionPair[1],
-            GeometricModeler.INTERSECTION, false);
-        PolyhedralBoundedSolid differenceResult = GeometricModeler.setOp(
-            differencePair[0], differencePair[1], GeometricModeler.SUBTRACT,
+            PolyhedralBoundedSolidModeler.INTERSECTION, false);
+        PolyhedralBoundedSolid differenceResult = PolyhedralBoundedSolidModeler.setOp(
+            differencePair[0], differencePair[1], PolyhedralBoundedSolidModeler.SUBTRACT,
             false);
 
         // Assert
@@ -72,18 +72,18 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
         PolyhedralBoundedSolid[] pairForFinalIntersection = createPair(corpusKey);
 
         // Action
-        PolyhedralBoundedSolid aIntersectionB = GeometricModeler.setOp(
+        PolyhedralBoundedSolid aIntersectionB = PolyhedralBoundedSolidModeler.setOp(
             pairForIntersection[0], pairForIntersection[1],
-            GeometricModeler.INTERSECTION, false);
-        PolyhedralBoundedSolid firstAbsorption = GeometricModeler.setOp(
-            pairForFinalUnion[0], aIntersectionB, GeometricModeler.UNION,
+            PolyhedralBoundedSolidModeler.INTERSECTION, false);
+        PolyhedralBoundedSolid firstAbsorption = PolyhedralBoundedSolidModeler.setOp(
+            pairForFinalUnion[0], aIntersectionB, PolyhedralBoundedSolidModeler.UNION,
             false);
 
-        PolyhedralBoundedSolid aUnionB = GeometricModeler.setOp(
-            pairForUnion[0], pairForUnion[1], GeometricModeler.UNION, false);
-        PolyhedralBoundedSolid secondAbsorption = GeometricModeler.setOp(
+        PolyhedralBoundedSolid aUnionB = PolyhedralBoundedSolidModeler.setOp(
+            pairForUnion[0], pairForUnion[1], PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolid secondAbsorption = PolyhedralBoundedSolidModeler.setOp(
             pairForFinalIntersection[0], aUnionB,
-            GeometricModeler.INTERSECTION, false);
+            PolyhedralBoundedSolidModeler.INTERSECTION, false);
 
         // Assert
         boolean firstMatches = isBoundingBoxClose(firstAbsorption, baselineMinMax);
@@ -108,15 +108,15 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
         PolyhedralBoundedSolid[] pairD = createPair(corpusKey);
 
         // Action
-        PolyhedralBoundedSolid differenceABFirst = GeometricModeler.setOp(
-            pairA[0], pairA[1], GeometricModeler.SUBTRACT, false);
-        PolyhedralBoundedSolid differenceABSecond = GeometricModeler.setOp(
-            pairB[0], pairB[1], GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid differenceABFirst = PolyhedralBoundedSolidModeler.setOp(
+            pairA[0], pairA[1], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid differenceABSecond = PolyhedralBoundedSolidModeler.setOp(
+            pairB[0], pairB[1], PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
-        PolyhedralBoundedSolid differenceBAFirst = GeometricModeler.setOp(
-            pairC[1], pairC[0], GeometricModeler.SUBTRACT, false);
-        PolyhedralBoundedSolid differenceBASecond = GeometricModeler.setOp(
-            pairD[1], pairD[0], GeometricModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid differenceBAFirst = PolyhedralBoundedSolidModeler.setOp(
+            pairC[1], pairC[0], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+        PolyhedralBoundedSolid differenceBASecond = PolyhedralBoundedSolidModeler.setOp(
+            pairD[1], pairD[0], PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
         // Assert
         assertThat(differenceABFirst.polygonsList.size())

@@ -16,7 +16,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.processing.GeometricModeler;
 import vsdk.toolkit.processing.ProcessingElement;
 
 /**
@@ -69,7 +68,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         a = createTestObjectAPPE1967_1();
         b = createTestObjectAPPE1967_2();
 
-        return GeometricModeler.setOp(a, b, GeometricModeler.UNION);
+        return PolyhedralBoundedSolidModeler.setOp(a, b, PolyhedralBoundedSolidModeler.UNION);
     }
 
     /**
@@ -122,9 +121,9 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
-        ab = GeometricModeler.setOp(a, b, GeometricModeler.UNION);
-        cd = GeometricModeler.setOp(c, d, GeometricModeler.UNION);
-        abcd = GeometricModeler.setOp(ab, cd, GeometricModeler.UNION);
+        ab = PolyhedralBoundedSolidModeler.setOp(a, b, PolyhedralBoundedSolidModeler.UNION);
+        cd = PolyhedralBoundedSolidModeler.setOp(c, d, PolyhedralBoundedSolidModeler.UNION);
+        abcd = PolyhedralBoundedSolidModeler.setOp(ab, cd, PolyhedralBoundedSolidModeler.UNION);
         return abcd;
     }
 
@@ -186,9 +185,9 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
-        ac = GeometricModeler.setOp(a, c, GeometricModeler.UNION);
-        bd = GeometricModeler.setOp(b, d, GeometricModeler.UNION);
-        abcd = GeometricModeler.setOp(bd, ac, GeometricModeler.UNION);
+        ac = PolyhedralBoundedSolidModeler.setOp(a, c, PolyhedralBoundedSolidModeler.UNION);
+        bd = PolyhedralBoundedSolidModeler.setOp(b, d, PolyhedralBoundedSolidModeler.UNION);
+        abcd = PolyhedralBoundedSolidModeler.setOp(bd, ac, PolyhedralBoundedSolidModeler.UNION);
 
         //-----------------------------------------------------------------
         T = new Matrix4x4();
@@ -223,10 +222,10 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------
-        eg = GeometricModeler.setOp(e, g, GeometricModeler.UNION);
-        fh = GeometricModeler.setOp(f, h, GeometricModeler.UNION);
-        efgh = GeometricModeler.setOp(eg, fh, GeometricModeler.UNION);
-        total = GeometricModeler.setOp(abcd, efgh, GeometricModeler.UNION);
+        eg = PolyhedralBoundedSolidModeler.setOp(e, g, PolyhedralBoundedSolidModeler.UNION);
+        fh = PolyhedralBoundedSolidModeler.setOp(f, h, PolyhedralBoundedSolidModeler.UNION);
+        efgh = PolyhedralBoundedSolidModeler.setOp(eg, fh, PolyhedralBoundedSolidModeler.UNION);
+        total = PolyhedralBoundedSolidModeler.setOp(abcd, efgh, PolyhedralBoundedSolidModeler.UNION);
 
         return total;
     }
@@ -257,7 +256,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, -0.4, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
         return solid;
@@ -341,7 +340,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, -0.42, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             a, a.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -387,7 +386,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, -1.0, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -405,7 +404,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         T = new Matrix4x4();
         T.translation(1, 0, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -443,7 +442,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4 T = new Matrix4x4();
         T.translation(0, -1.0, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -459,7 +458,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         T = new Matrix4x4();
         T.translation(1, 0, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -531,7 +530,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         T = new Matrix4x4();
         T.translation(0.775, 0, 0);
-        GeometricModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             wedge, wedge.findFace(1), T);
 
         //-----------------------------------------------------------------

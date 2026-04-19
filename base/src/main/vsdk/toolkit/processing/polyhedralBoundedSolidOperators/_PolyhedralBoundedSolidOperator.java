@@ -7,7 +7,6 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
-import vsdk.toolkit.processing.GeometricModeler;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -15,14 +14,21 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.processing.ProcessingElement;
 
 /**
 This class is not intended to be used directly, but rather as a common service
-provider for classes PolyhedralBoundedSolidSplitter and
+provider for classes _PolyhedralBoundedSolidSplitter and
 PolyhedralBoundedSolidSetOperator.
 */
-public class PolyhedralBoundedSolidOperator extends GeometricModeler
+public class _PolyhedralBoundedSolidOperator extends ProcessingElement
 {
+    public static final int UNION = PolyhedralBoundedSolidModeler.UNION;
+    public static final int INTERSECTION =
+        PolyhedralBoundedSolidModeler.INTERSECTION;
+    public static final int SUBTRACT = PolyhedralBoundedSolidModeler.SUBTRACT;
+    public static final int DIFFERENCE = SUBTRACT;
+
     protected static PolyhedralBoundedSolidNumericPolicy.ToleranceContext
         numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
 
@@ -154,7 +160,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     \todo : check current assumptions!
 
     This protected method is here for exclusive use of subclasses
-    `PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    `_PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
     */
     protected static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -255,7 +261,7 @@ public class PolyhedralBoundedSolidOperator extends GeometricModeler
     face equations.
 
     This protected method is here for exclusive use of subclasses
-    `PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    `_PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
     */
     protected static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
     {

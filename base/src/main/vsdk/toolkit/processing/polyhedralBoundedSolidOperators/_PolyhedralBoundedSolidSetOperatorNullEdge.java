@@ -14,7 +14,7 @@ can participate in the connect stage driven by the `sonea`/`soneb` sets of
 program [MANT1988].15.1 and later consumed by section [MANT1988].15.7.
 */
 public class _PolyhedralBoundedSolidSetOperatorNullEdge
-    extends PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidOperator
     implements Comparable<_PolyhedralBoundedSolidSetOperatorNullEdge>
 {
     private static PolyhedralBoundedSolidNumericPolicy.ToleranceContext

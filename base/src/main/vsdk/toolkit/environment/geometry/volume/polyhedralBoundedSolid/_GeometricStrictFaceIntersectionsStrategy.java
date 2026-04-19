@@ -9,8 +9,8 @@ Checks the non-self-intersection requirement imposed on boundary models in
 [MANT1988].15.2, criterion 3, using the geometric intersection tools of
 chapter [MANT1988].13.
 */
-public class GeometricStrictFaceIntersectionsStrategy
-    implements PolyhedralBoundedSolidValidationStrategy
+public class _GeometricStrictFaceIntersectionsStrategy
+    implements _PolyhedralBoundedSolidValidationStrategy
 {
     /**
     Validates that distinct faces only meet in the ways allowed by

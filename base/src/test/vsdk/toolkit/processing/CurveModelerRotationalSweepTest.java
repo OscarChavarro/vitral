@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GeometricModelerRotationalSweepTest
+class CurveModelerRotationalSweepTest
 {
     @Test
     void given_wireWithOneEndpointOnXAxis_when_rotationalSweep_then_returnsValidSolid()
@@ -19,7 +20,7 @@ class GeometricModelerRotationalSweepTest
             new Vector3D(1.2, 0.5, 0.0));
 
         // Action
-        GeometricModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 16);
+        PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 16);
 
         // Assert
         assertThat(wire.polygonsList.size()).isGreaterThan(0);
@@ -37,7 +38,7 @@ class GeometricModelerRotationalSweepTest
             new Vector3D(1.1, 0.0, 0.0));
 
         // Action
-        GeometricModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 18);
+        PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 18);
 
         // Assert
         assertThat(wire.polygonsList.size()).isGreaterThan(0);

@@ -20,15 +20,15 @@ Encapsulates preflight classification and no-intersection resolution for
 Boolean set operations. This keeps containment/touching policy separate from
 the main intersection/splitting pipeline.
 */
-final class PolyhedralBoundedSolidSetNonIntersectingClassifier
-    extends PolyhedralBoundedSolidOperator
+final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
+    extends _PolyhedralBoundedSolidOperator
 {
     private static final int NO_INT_RELATION_DISJOINT = 0;
     private static final int NO_INT_RELATION_TOUCHING = 1;
     private static final int NO_INT_RELATION_A_IN_B = 2;
     private static final int NO_INT_RELATION_B_IN_A = 3;
 
-    private PolyhedralBoundedSolidSetNonIntersectingClassifier()
+    private _PolyhedralBoundedSolidSetNonIntersectingClassifier()
     {
     }
 
@@ -110,14 +110,14 @@ final class PolyhedralBoundedSolidSetNonIntersectingClassifier
 
     private static int compareToZero(double value)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
     }
 
     private static int pointInFace(_PolyhedralBoundedSolidFace face,
         Vector3D point)
     {
-        return PolyhedralBoundedSolidSetGeometricPredicateProcessor
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
     }
 
