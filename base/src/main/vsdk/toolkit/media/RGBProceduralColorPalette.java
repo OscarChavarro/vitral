@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 
@@ -16,8 +17,7 @@ method) are more rapidly calculated in some procedural defined palettes that
 its normal method.
 */
 public abstract class RGBProceduralColorPalette extends RGBColorPalette {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061218L;
+    @Serial private static final long serialVersionUID = 20061218L;
 
     /// A procedural palette is "pure" if its contents are the original ones
     /// defined by its filling procedure method "init", and are not pure

@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 // Note that on (old or incomplete) Java implementations as such those found
 // on mobile devices, this class can be disabled, by commenting out following
@@ -39,9 +40,8 @@ to keep this class conceptually consistent with non-java VSDK realizations
 */
 public class RGBImage extends Image
 {
-    /// Check the general attribute description in superclass Entity.
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //    private byte[] data;

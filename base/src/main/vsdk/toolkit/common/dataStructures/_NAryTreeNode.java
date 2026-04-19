@@ -1,4 +1,5 @@
 package vsdk.toolkit.common.dataStructures;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 
@@ -8,7 +9,7 @@ NAry tree nodes organized from composite structural design pattern.
 */
 public abstract class _NAryTreeNode<T> extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     private T data;
 
     /**

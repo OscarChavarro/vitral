@@ -1,4 +1,5 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 // Java basic classes
 import java.io.IOException;
@@ -21,8 +22,7 @@ with _AlgebraicExpression*Node classes.
 */
 public class AlgebraicExpression extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20071014L;
+    @Serial private static final long serialVersionUID = 20071014L;
 
     private _AlgebraicExpressionNode root;
     private HashMap<String, Double> values;

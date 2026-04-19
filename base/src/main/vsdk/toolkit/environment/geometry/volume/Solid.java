@@ -1,11 +1,12 @@
 package vsdk.toolkit.environment.geometry.volume;
+import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 public abstract class Solid extends Geometry {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     
     /**
     Given current solid, the method `doCenterOfMass` returns a vector

@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 
@@ -17,7 +18,7 @@ classes NOT related with 3D geometry. This serves two purposes:
 */
 public abstract class MediaEntity extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     
     /**
     Just to do not the inheritance chain.

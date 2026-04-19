@@ -1,12 +1,12 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 
 public class IndexedColorImage extends Image
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060821L;
+    @Serial private static final long serialVersionUID = 20060821L;
 
     private byte data[];
     private int xSize;

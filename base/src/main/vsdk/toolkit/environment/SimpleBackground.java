@@ -1,11 +1,11 @@
 package vsdk.toolkit.environment;
+import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public class SimpleBackground extends Background {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     private ColorRgb _color;
 

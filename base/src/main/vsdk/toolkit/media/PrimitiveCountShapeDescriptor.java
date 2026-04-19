@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 
@@ -8,8 +9,7 @@ defined in the VSDK utility class.
 */
 public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070523L;
+    @Serial private static final long serialVersionUID = 20070523L;
 
     private double featureVector[];
     private static final int numberOfElements = VSDK.PRIMITIVE_TYPE_COUNT;

@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.scene;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -12,8 +13,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 
 public class SimpleBody extends Entity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     //=======================================================================
     //- Model (1/6): body form ----------------------------------------

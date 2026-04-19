@@ -1,14 +1,14 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
  This class models a mathematical RAY.
  */
-public class Ray  extends FundamentalEntity
+public class Ray extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public Vector3D origin;
     public Vector3D direction;
@@ -44,7 +44,7 @@ public class Ray  extends FundamentalEntity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return human readable representation of current Ray
+    @return human-readable representation of current Ray
     */
     @Override
     public String toString()

@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -30,8 +31,7 @@ public class QuadMesh extends Surface {
 
 //= Class attributes ========================================================
 
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20080512L;
+    @Serial private static final long serialVersionUID = 20080512L;
 
     // Basic mesh data model
     private String name = "default";

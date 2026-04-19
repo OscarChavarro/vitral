@@ -37,7 +37,7 @@ public class Entity implements ModelElement, Serializable
     define this value.  The proposed number to asign is the concatenation of
     8 digits YYYYMMDD, for year, month and day respectively.
     */
-    //public static final long serialVersionUID = 20060502L;
+    //@Serial private static final long serialVersionUID = 20060502L;
 
     /**
     Each Entity object in the VSDK model should be responsible for calculating

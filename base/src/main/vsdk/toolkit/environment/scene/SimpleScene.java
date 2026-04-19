@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.scene;
+import java.io.Serial;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -11,8 +12,7 @@ import vsdk.toolkit.environment.Light;
 
 public class SimpleScene extends Entity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20100901L;
+    @Serial private static final long serialVersionUID = 20100901L;
 
     private ArrayList<SimpleBody> simpleBodiesArray;
     private ArrayList<Light> lightsArray;

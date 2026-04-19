@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 
@@ -6,8 +7,7 @@ import vsdk.toolkit.common.ColorRgb;
 Represents a linear scale gray palette.
 */
 public class GrayScalePalette extends RGBProceduralColorPalette {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061218L;
+    @Serial private static final long serialVersionUID = 20061218L;
 
     public GrayScalePalette() {
         super();

@@ -5,6 +5,7 @@
 //=     January 2003. Pp. 83-105                                            =
 
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 
@@ -15,8 +16,7 @@ around a volume or image as described in [FUNK2003]
 */
 public class FourierShapeDescriptor extends ShapeDescriptor
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070523L;
+    @Serial private static final long serialVersionUID = 20070523L;
 
     private double featureVector[];
     private static final int numberOfElements = 32;

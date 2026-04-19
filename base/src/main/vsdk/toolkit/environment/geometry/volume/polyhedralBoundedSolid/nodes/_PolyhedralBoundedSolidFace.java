@@ -5,6 +5,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -41,8 +42,7 @@ from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
 public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061118L;
+    @Serial private static final long serialVersionUID = 20061118L;
 
     /// Defined as presented in [MANT1988].10.2.1
     public int id;

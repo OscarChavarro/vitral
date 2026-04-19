@@ -1,6 +1,7 @@
 //=                     version                                             =
 
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 /**
 The RendererConfiguration class is used to indicate some attributes in which a 
@@ -11,8 +12,7 @@ responsible of display any data, it is just an a suggestion on how to draw it.
 */
 public class RendererConfiguration extends FundamentalEntity /*implements Comparable <RendererConfiguration>*/ {
 
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public static final int SHADING_TYPE_NOLIGHT  = 0;
     public static final int SHADING_TYPE_FLAT     = 1;

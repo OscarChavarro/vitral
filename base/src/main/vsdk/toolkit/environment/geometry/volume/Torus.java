@@ -3,6 +3,7 @@
 //= report for CS400 class                                                  =
 
 package vsdk.toolkit.environment.geometry.volume;
+import java.io.Serial;
 
 // VSDK classes
 import vsdk.toolkit.common.Ray;
@@ -16,7 +17,7 @@ Current implementation is based on [WAGN2004].
 public class Torus extends Solid
 {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20131024L;
+    @Serial private static final long serialVersionUID = 20131024L;
     
     private double majorRadius;
     private double minorRadius;

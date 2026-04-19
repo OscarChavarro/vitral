@@ -1,8 +1,8 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 public class ArrayListOfDoubles extends FundamentalEntity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061105L;
+    @Serial private static final long serialVersionUID = 20061105L;
 
     private int increment;
     private int assignedSize;    

@@ -3,6 +3,7 @@
 //=          proceedings, 1978.                                             =
 
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
@@ -15,9 +16,8 @@ bi-linear interpolation evaluation on Rgb space.
 
 public abstract class Image extends MediaEntity
 {
-    /// Check the general attribute description in superclass Entity.
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
 
     private static final RGBPixel rgb = new RGBPixel();
 

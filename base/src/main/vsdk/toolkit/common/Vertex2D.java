@@ -1,9 +1,9 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 public class Vertex2D extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20090816L;
+    @Serial private static final long serialVersionUID = 20090816L;
 
     public double x;
     public double y;

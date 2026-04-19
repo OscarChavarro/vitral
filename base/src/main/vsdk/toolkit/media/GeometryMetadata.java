@@ -9,6 +9,7 @@
 //=     January 2003. Pp. 83-105                                            =
 
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -20,8 +21,7 @@ indexing, querying and matching of 3D models, as described in [FUNK2003].
 */
 public class GeometryMetadata extends MediaEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070523L;
+    @Serial private static final long serialVersionUID = 20070523L;
 
     private static long lastId = 0;
 

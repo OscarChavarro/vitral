@@ -1,4 +1,5 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 /**
 Respect to data representation:
@@ -19,8 +20,7 @@ Nevertheless, get and set methods are provided.
 */
 public class ColorRgb extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     /// Contains the red component of a color 
     public double r;

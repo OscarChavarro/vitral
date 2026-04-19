@@ -1,9 +1,9 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070422L;
+    @Serial private static final long serialVersionUID = 20070422L;
 
     public E data;
     public _CircularDoubleLinkedListNode<E> next;
@@ -12,8 +12,7 @@ class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
 
 public class CircularDoubleLinkedList<E> extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070422L;
+    @Serial private static final long serialVersionUID = 20070422L;
 
     private _CircularDoubleLinkedListNode<E> head;
     private _CircularDoubleLinkedListNode<E> window;

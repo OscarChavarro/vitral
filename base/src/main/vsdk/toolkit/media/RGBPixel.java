@@ -1,4 +1,5 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
@@ -17,8 +18,7 @@ Nevertheless, get and set methods are provided.
 */
 
 public class RGBPixel extends MediaEntity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     /// The red component of this RGBAPixel
     public byte r;

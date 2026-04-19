@@ -9,7 +9,6 @@ import vsdk.toolkit.common.Vertex2D;
 
 public class _Polygon2DContour extends FundamentalEntity implements Comparable<_Polygon2DContour>
 {
-    /// Check the general attribute description in superclass Entity.
     @Serial
     private static final long serialVersionUID = 20260419L;
     public List<Vertex2D> vertices;

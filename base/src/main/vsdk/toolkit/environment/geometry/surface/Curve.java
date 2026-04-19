@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -6,7 +7,7 @@ import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 
 public abstract class Curve extends Geometry {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     
     /**
     This method is provided to ease the integration with generic operation

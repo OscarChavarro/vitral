@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.scene;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -8,8 +9,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 
 public class SimpleBodyGroup extends Entity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070526L;
+    @Serial private static final long serialVersionUID = 20070526L;
 
     //=======================================================================
     //- Model (1/6): set of bodies ------------------------------------

@@ -1,9 +1,10 @@
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 public abstract class ShapeDescriptor extends MediaEntity
 {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     protected String label;
 
     public ShapeDescriptor(String label)

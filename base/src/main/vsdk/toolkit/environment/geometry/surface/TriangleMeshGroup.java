@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -12,8 +13,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.ProgressMonitor;
 
 public class TriangleMeshGroup extends Surface {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     private ArrayList<TriangleMesh> meshes;
     private double[] MinMax;

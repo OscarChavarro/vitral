@@ -1,10 +1,10 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public class Triangle extends FundamentalEntity 
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public int p0;
     public int p1;

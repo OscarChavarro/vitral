@@ -1,4 +1,5 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 /**
 The VSDKException abstract class provides an interface for *Exception
@@ -10,7 +11,7 @@ style classes inside the Vitral SDK. This serves two purposes:
 */
 
 public abstract class VSDKException extends Exception {
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     public VSDKException() {
     }
 

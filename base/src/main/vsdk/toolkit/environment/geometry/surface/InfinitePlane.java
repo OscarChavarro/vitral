@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
@@ -6,8 +7,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 
 public class InfinitePlane extends HalfSpace {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     // This is the infinite plane with canonical equation ax + bx + cx + d = 0
     private double a;

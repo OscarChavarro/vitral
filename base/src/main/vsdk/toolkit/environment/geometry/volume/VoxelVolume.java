@@ -4,6 +4,7 @@
 //=     Graphics, volume 21, number 4, July 1987.                           =
 
 package vsdk.toolkit.environment.geometry.volume;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -34,8 +35,7 @@ For general representation of N-dimensional images of arbitrary data sample
 format, use another toolkit, like ITK or VTK.
 */
 public class VoxelVolume extends Solid {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20070222L;
+    @Serial private static final long serialVersionUID = 20070222L;
 
     private ArrayList<IndexedColorImage> data;
 

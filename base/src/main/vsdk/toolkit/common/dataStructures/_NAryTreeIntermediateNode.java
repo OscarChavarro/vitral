@@ -1,4 +1,5 @@
 package vsdk.toolkit.common.dataStructures;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -8,7 +9,7 @@ NAry tree nodes organized from composite structural design pattern.
 */
 public class _NAryTreeIntermediateNode<T> extends _NAryTreeNode<T> {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     
     private final ArrayList<_NAryTreeNode<T>> children;
 

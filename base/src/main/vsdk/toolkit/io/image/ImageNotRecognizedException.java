@@ -1,4 +1,5 @@
 package vsdk.toolkit.io.image;
+import java.io.Serial;
 import java.io.File;
 
 import vsdk.toolkit.common.VSDKException;
@@ -9,8 +10,7 @@ by an image persistence operation.
 */
 public class ImageNotRecognizedException extends VSDKException
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     File image;
 

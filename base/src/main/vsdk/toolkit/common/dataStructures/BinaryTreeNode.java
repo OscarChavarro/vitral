@@ -1,4 +1,5 @@
 package vsdk.toolkit.common.dataStructures;
+import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
 
@@ -8,7 +9,7 @@ import vsdk.toolkit.common.FundamentalEntity;
 public class BinaryTreeNode<T> extends FundamentalEntity
 {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150601L;
+    @Serial private static final long serialVersionUID = 20150601L;
 
     private T data;
     private BinaryTreeNode<T> sibling = null;

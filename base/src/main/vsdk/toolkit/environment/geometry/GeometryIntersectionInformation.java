@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry;
+import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -11,8 +12,7 @@ Note: contains public attributes so this structure is critical for various
 performance compute intensive algorithms.
 */
 public class GeometryIntersectionInformation extends FundamentalEntity {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public Vector3D p; // Intersection point coordinates
     public Vector3D n; // Surface normal at intersection point

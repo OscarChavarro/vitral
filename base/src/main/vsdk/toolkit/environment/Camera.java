@@ -5,6 +5,7 @@
 //=   clipping functionality                                                =
 
 package vsdk.toolkit.environment;
+import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Entity;
@@ -17,9 +18,8 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
 public class Camera extends Entity
 {
-    /// Check the general attribute description in superclass Entity.
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     // Global constants
     public static final int OPCODE_FAR = (0x01 << 1);

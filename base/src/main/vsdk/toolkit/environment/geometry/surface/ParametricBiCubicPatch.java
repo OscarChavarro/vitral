@@ -7,6 +7,7 @@
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -16,8 +17,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 
 public class ParametricBiCubicPatch extends Surface {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public Matrix4x4 Gx_MATRIX = new Matrix4x4();
     public Matrix4x4 Gy_MATRIX = new Matrix4x4();

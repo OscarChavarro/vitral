@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 // VitralSDK classes
 import vsdk.toolkit.common.AlgebraicExpression;
@@ -13,8 +14,7 @@ import vsdk.toolkit.gui.ProgressMonitor;
 
 public class FunctionalExplicitSurface extends Surface
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20071015L;
+    @Serial private static final long serialVersionUID = 20071015L;
 
     private AlgebraicExpression xyFunction;
     private String functionExpression;

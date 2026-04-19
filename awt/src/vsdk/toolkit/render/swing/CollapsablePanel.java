@@ -1,4 +1,5 @@
 package vsdk.toolkit.render.swing;
+import java.io.Serial;
 
 import java.awt.Font;
 import java.awt.Color;
@@ -16,8 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 
 class _CollapsablePanelMouseListener implements MouseListener {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20140314L;
+    @Serial private static final long serialVersionUID = 20140314L;
 
     private CollapsablePanel parent;
 
@@ -48,8 +48,7 @@ class _CollapsablePanelMouseListener implements MouseListener {
 }
 
 class _CollapsablePanelHeader extends JPanel {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20140314L;
+    @Serial private static final long serialVersionUID = 20140314L;
 
     private String text_;
     private Font font;
@@ -105,8 +104,7 @@ class _CollapsablePanelHeader extends JPanel {
 }
 
 public class CollapsablePanel extends JPanel {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20140314L;
+    @Serial private static final long serialVersionUID = 20140314L;
 
     public boolean selected;
     private JPanel contentPanel;

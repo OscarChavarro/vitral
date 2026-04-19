@@ -1,4 +1,5 @@
 package vsdk.toolkit.environment;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -8,8 +9,7 @@ import vsdk.toolkit.common.ColorRgb;
 // wanted Lights and Surfaces to be "friends"
 public class Light extends Entity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     public static final int AMBIENT = 0;
     public static final int DIRECTIONAL = 1;

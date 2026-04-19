@@ -6,6 +6,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -57,8 +58,7 @@ unmanageable, both in terms of code verbosity and bad performance (time
 complexity) due to extra calls to a lot of simple methods.
 */
 public class PolyhedralBoundedSolid extends Solid {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061118L;
+    @Serial private static final long serialVersionUID = 20061118L;
 
     public static final int PLUS = 1;
     public static final int MINUS = 0;

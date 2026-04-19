@@ -1,9 +1,9 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20071014L;
+    @Serial private static final long serialVersionUID = 20071014L;
 
     private double val;
     public _AlgebraicExpressionConstantNode(double val)

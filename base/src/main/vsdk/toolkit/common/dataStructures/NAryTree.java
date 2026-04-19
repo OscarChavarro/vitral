@@ -1,4 +1,5 @@
 package vsdk.toolkit.common.dataStructures;
+import java.io.Serial;
 
 import java.util.ArrayList;
 import vsdk.toolkit.common.FundamentalEntity;
@@ -14,7 +15,7 @@ was followed:
 */
 public class NAryTree<T> extends FundamentalEntity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     
     private _NAryTreeNode<T> root;
 

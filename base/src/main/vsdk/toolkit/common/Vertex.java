@@ -1,4 +1,5 @@
 package vsdk.toolkit.common;
+import java.io.Serial;
 
 import java.util.ArrayList;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -22,8 +23,7 @@ BinarySpacePartitioningTreeSolid.
 */
 public class Vertex extends FundamentalEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     ///
     public Vector3D position;

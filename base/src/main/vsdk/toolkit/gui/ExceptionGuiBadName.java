@@ -1,8 +1,8 @@
 package vsdk.toolkit.gui;
+import java.io.Serial;
 
 public class ExceptionGuiBadName extends Exception {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20140314L;
+    @Serial private static final long serialVersionUID = 20140314L;
 
     @Override
     public String toString(){

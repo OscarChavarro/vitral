@@ -4,6 +4,7 @@
 //=          meeting 1967.                                                  =
 
 package vsdk.toolkit.environment.geometry;
+import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -28,7 +29,7 @@ geometric algorithm, including but not limited to rendering operations.<P>
 */
 public abstract class Geometry extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final long serialVersionUID = 20150218L;
+    @Serial private static final long serialVersionUID = 20150218L;
     public static final int INSIDE = 1;
     public static final int LIMIT = 0;
     public static final int OUTSIDE = -1;

@@ -6,6 +6,7 @@
 //=            http://fontforge.sourceforge.net/bezier.html                 =
 
 package vsdk.toolkit.environment.geometry.surface;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -66,8 +67,7 @@ parametric curve development derived in Chapter 11 of [FOLE1992].
 */
 
 public class ParametricCurve extends Curve {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20060502L;
 
     // Model's "basis matrices" for evaluating curve parametric equations like
     // described in [FOLE1992].11.2.

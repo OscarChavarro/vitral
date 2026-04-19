@@ -3,6 +3,7 @@
 //=          proceedings, 1978.                                             =
 
 package vsdk.toolkit.media;
+import java.io.Serial;
 
 import java.util.ArrayList;
 
@@ -11,8 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 public class NormalMap extends MediaEntity
 {
-    /// Check the general attribute description in superclass Entity.
-    public static final long serialVersionUID = 20061220L;
+    @Serial private static final long serialVersionUID = 20061220L;
 
     private int xSize;
     private int ySize;
