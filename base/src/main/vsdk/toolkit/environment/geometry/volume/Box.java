@@ -16,28 +16,14 @@ public class Box extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
 
     private Vector3D size;
-
-    private GeometryIntersectionInformation lastInfo;
-    private int lastPlane;
     private PolyhedralBoundedSolid brepCache;
 
     public Box(double dx, double dy, double dz) {
         size = new Vector3D(dx, dy, dz);
-
-        lastInfo = new GeometryIntersectionInformation();
-        lastPlane = 0;
     }
 
     public Box(Vector3D s) {
         size = new Vector3D(s);
-
-        lastInfo = new GeometryIntersectionInformation();
-        lastPlane = 0;
-    }
-
-    public int getLastIntersectedPlane()
-    {
-        return lastPlane;
     }
 
     /**
@@ -48,109 +34,9 @@ public class Box extends Solid {
     */
     public Ray
     doIntersection(Ray inOutRay) {
-        double t, min_t = Double.MAX_VALUE;
-        double x2 = size.x()/2;  // OJO: Esto deberia venir precalculado
-        double y2 = size.y()/2;  // OJO: Esto deberia venir precalculado
-        double z2 = size.z()/2;  // OJO: Esto deberia venir precalculado
-        Vector3D p;
-        GeometryIntersectionInformation info = 
-            new GeometryIntersectionInformation();
-
-        inOutRay = inOutRay.withDirection(inOutRay.direction().normalized());
-
-        // (1) Plano superior: Z = size.z()/2
-        if ( Math.abs(inOutRay.direction().z()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano Z=size.z()/2
-            t = (z2-inOutRay.origin().z())/inOutRay.direction().z();
-            if ( t > -VSDK.EPSILON ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.x() >= -x2 && p.x() <= x2 && 
-                     p.y() >= -y2 && p.y() <= y2 ) {
-                    info.p = new Vector3D(p);
-                    min_t = t;
-                    lastPlane = 1;
-                }
-            }
-        }
-
-        // (2) Plano inferior: Z = -size.z()/2
-        if ( Math.abs(inOutRay.direction().z()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano Z=-size.z()/2
-            t = (-z2-inOutRay.origin().z())/inOutRay.direction().z();
-            if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.x() >= -x2 && p.x() <= x2 && 
-                     p.y() >= -y2 && p.y() <= y2 ) {
-                    info.p = p;
-                    min_t = t;
-                    lastPlane = 2;
-                }
-            }
-        }
-
-        // (3) Plano frontal: Y = size.y()/2
-        if ( Math.abs(inOutRay.direction().y()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano Y=size.y()/2
-            t = (y2-inOutRay.origin().y())/inOutRay.direction().y();
-            if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.x() >= -x2 && p.x() <= x2 && 
-                     p.z() >= -z2 && p.z() <= z2 ) {
-                    info.p = p;
-                    min_t = t;
-                    lastPlane = 3;
-                }
-            }
-        }
-
-        // (4) Plano posterior: Y = -size.y()/2
-        if ( Math.abs(inOutRay.direction().y()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano Y=-size.y()/2
-            t = (-y2-inOutRay.origin().y())/inOutRay.direction().y();
-            if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.x() >= -x2 && p.x() <= x2 && 
-                     p.z() >= -z2 && p.z() <= z2 ) {
-                    info.p = p;
-                    min_t = t;
-                    lastPlane = 4;
-                }
-            }
-        }
-
-        // (5) Plano X = size.x()/2
-        if ( Math.abs(inOutRay.direction().x()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano X=size.x()/2
-            t = (x2-inOutRay.origin().x())/inOutRay.direction().x();
-            if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.y() >= -y2 && p.y() <= y2 && 
-                     p.z() >= -z2 && p.z() <= z2 ) {
-                    info.p = p;
-                    min_t = t;
-                    lastPlane = 5;
-                }
-            }
-        }
-
-        // (6) Plano X = -size.x()/2
-        if ( Math.abs(inOutRay.direction().x()) > VSDK.EPSILON ) {
-            // El rayo no es paralelo al plano X=-size.x()/2
-            t = (-x2-inOutRay.origin().x())/inOutRay.direction().x();
-            if ( t > -VSDK.EPSILON && t < min_t ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                if ( p.y() >= -y2 && p.y() <= y2 && 
-                     p.z() >= -z2 && p.z() <= z2 ) {
-                    info.p = p;
-                    min_t = t;
-                    lastPlane = 6;
-                }
-            }
-        }
-
-        if ( min_t < Double.MAX_VALUE ) {
-            lastInfo.clone(info);
-            return inOutRay.withT(min_t);
+        RayHit hit = new RayHit();
+        if ( doIntersection(inOutRay, hit) ) {
+            return hit.ray();
         }
         return null;
     }
@@ -311,9 +197,11 @@ public class Box extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData) {
-        outData.p = lastInfo.p;
+        Vector3D point = inRay.origin().add(inRay.direction().multiply(inT));
+        int hitPlane = classifyHitPlane(point);
+        outData.p = point;
 
-        switch ( lastPlane ) {
+        switch ( hitPlane ) {
           case 1:
             outData.n = outData.n.withX(0);
             outData.n = outData.n.withY(0);
@@ -379,6 +267,28 @@ public class Box extends Solid {
             outData.v = 0;
             break;
         }
+    }
+
+    private int classifyHitPlane(Vector3D point)
+    {
+        double x2 = size.x() / 2;
+        double y2 = size.y() / 2;
+        double z2 = size.z() / 2;
+        double dxPlus = Math.abs(point.x() - x2);
+        double dxMinus = Math.abs(point.x() + x2);
+        double dyPlus = Math.abs(point.y() - y2);
+        double dyMinus = Math.abs(point.y() + y2);
+        double dzPlus = Math.abs(point.z() - z2);
+        double dzMinus = Math.abs(point.z() + z2);
+
+        double min = dzPlus;
+        int plane = 1;
+        if ( dzMinus < min ) { min = dzMinus; plane = 2; }
+        if ( dyPlus < min ) { min = dyPlus; plane = 3; }
+        if ( dyMinus < min ) { min = dyMinus; plane = 4; }
+        if ( dxPlus < min ) { min = dxPlus; plane = 5; }
+        if ( dxMinus < min ) { plane = 6; }
+        return plane;
     }
 
     /**

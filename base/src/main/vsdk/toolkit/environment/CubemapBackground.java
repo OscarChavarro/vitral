@@ -4,7 +4,6 @@ import java.io.Serial;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.RGBAImage;
@@ -53,22 +52,20 @@ public class CubemapBackground extends Background {
         if ( !boundingCube.doIntersection(r, hit) ) {
             return new ColorRgb();
         }
-        GeometryIntersectionInformation data = hit;
+        int plane = classifyPlane(hit.n);
 
-        int plane = boundingCube.getLastIntersectedPlane();
-
-        u = 1 - data.u;
-        v = 1 - data.v;
+        u = 1 - hit.u;
+        v = 1 - hit.v;
         switch ( plane ) {
           case 1: // Top
             img = backgroundImages[5];
-            u = 1 - data.v;
-            v = data.u;
+            u = 1 - hit.v;
+            v = hit.u;
             break;
           case 2: // Down
             img = backgroundImages[4];
-            u = data.v;
-            v = 1 - data.u;
+            u = hit.v;
+            v = 1 - hit.u;
             break;
           case 3: // Front
             img = backgroundImages[0];
@@ -85,6 +82,21 @@ public class CubemapBackground extends Background {
         }
 
         return img.getColorRgbBiLinear(u, v);
+    }
+
+    private int classifyPlane(Vector3D normal)
+    {
+        double ax = Math.abs(normal.x());
+        double ay = Math.abs(normal.y());
+        double az = Math.abs(normal.z());
+
+        if ( az >= ax && az >= ay ) {
+            return normal.z() >= 0 ? 1 : 2;
+        }
+        if ( ay >= ax ) {
+            return normal.y() >= 0 ? 3 : 4;
+        }
+        return normal.x() >= 0 ? 5 : 6;
     }
 
     public RGBAImage [] getImages()

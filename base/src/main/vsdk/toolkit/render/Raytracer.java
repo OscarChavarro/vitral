@@ -72,7 +72,8 @@ public class Raytracer extends RenderingElement {
         int recursions, ColorRgb outColor) {
         //-----------------------------------------------------------------
         SimpleBody nearestObject;
-        ColorRgb backgroundColor = background.colorInDireccion(info.n);
+        Vector3D surfaceNormal = info.n;
+        ColorRgb backgroundColor = background.colorInDireccion(surfaceNormal);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -100,7 +101,7 @@ public class Raytracer extends RenderingElement {
             normalVariation = info.normalMap.getNormal(info.u, 1-info.v);
             if ( normalVariation != null ) {
                 // Evaluation of [BLIN1978b]/[FOLE1992].16.23 equation
-                N = info.n.normalized();
+                N = surfaceNormal.normalized();
                 Ps = info.t.normalized();
 
                 // This is non-sense, but it works! Currently not using
@@ -116,7 +117,7 @@ public class Raytracer extends RenderingElement {
                 //      `normalPerturbation` must be divided by N's length
                 normalPerturbation =
                     NxPt.multiply(Bu).subtract(NxPs.multiply(Bv));
-                info.n = info.n.add(normalPerturbation).normalized();
+                surfaceNormal = surfaceNormal.add(normalPerturbation).normalized();
             }
         }
 
@@ -157,7 +158,7 @@ public class Raytracer extends RenderingElement {
                     continue;
                 }
 
-                double lambert = info.n.dotProduct(l);
+                double lambert = surfaceNormal.dotProduct(l);
                 if ( lambert > 0 ) {
                     diffuse = material.getDiffuse();
                     if ( info.texture != null ) {
@@ -174,9 +175,9 @@ public class Raytracer extends RenderingElement {
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
                         Vector3D reflectedView = new Vector3D(
-                            lambert*info.n.x() - l.x(),
-                            lambert*info.n.y() - l.y(),
-                            lambert*info.n.z() - l.z());
+                            lambert*surfaceNormal.x() - l.x(),
+                            lambert*surfaceNormal.y() - l.y(),
+                            lambert*surfaceNormal.z() - l.z());
                         double spec = 
                             viewVector.dotProduct(reflectedView);
 
@@ -197,12 +198,12 @@ public class Raytracer extends RenderingElement {
         // Compute illumination due to reflection
         double kr = material.getReflectionCoefficient();
         if ( kr > 0 && recursions > 0 ) {
-            double t = viewVector.dotProduct(info.n);
+            double t = viewVector.dotProduct(surfaceNormal);
             if ( t > 0 ) {
                 t *= 2;
-                Vector3D reflect = new Vector3D(t*info.n.x() - viewVector.x(),
-                                                t*info.n.y() - viewVector.y(),
-                                                t*info.n.z() - viewVector.z());
+                Vector3D reflect = new Vector3D(t*surfaceNormal.x() - viewVector.x(),
+                                                t*surfaceNormal.y() - viewVector.y(),
+                                                t*surfaceNormal.z() - viewVector.z());
                 Vector3D poffset = new Vector3D(info.p.x() + VSDK.EPSILON*reflect.x(),
                                                 info.p.y() + VSDK.EPSILON*reflect.y(),
                                                 info.p.z() + VSDK.EPSILON*reflect.z());

@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment;
 import java.io.Serial;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -15,7 +16,7 @@ public class Light extends Entity
     public static final int DIRECTIONAL = 1;
     public static final int POINT = 2;
 
-    private static int lightNumber = 0;
+    private static final AtomicInteger lightNumber = new AtomicInteger(0);
 
     public int tipo_de_luz;
     public Vector3D lvec;             // the position of a point light or
@@ -53,8 +54,7 @@ public class Light extends Entity
         ambient=new ColorRgb(0,0,0);
         diffuse=new ColorRgb(1,1,1);
         specular=emission;
-        id = lightNumber;
-        lightNumber++;
+        id = lightNumber.getAndIncrement();
     }
 
     public int getId()

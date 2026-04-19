@@ -21,7 +21,7 @@ public class SimpleBackground extends Background {
     @Override
     public ColorRgb colorInDireccion(Vector3D d)
     {
-        return _color;
+        return new ColorRgb(_color);
     }
 
     public void setColor(double r, double g, double b)

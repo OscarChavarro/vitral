@@ -26,7 +26,6 @@ public class Cone extends Solid {
     private double r2; // Radius at the top
     private double h;  // Height
 
-    private GeometryIntersectionInformation lastInfo;
     private PolyhedralBoundedSolid brepCache;
     private static final int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     private static final int DEFAULT_HEIGHT_DIVISIONS = 1;
@@ -225,74 +224,10 @@ public class Cone extends Solid {
     */
     public Ray
     doIntersection(Ray inOutRay) {
-        Ray bodyRay;
-        Ray tap1Ray;
-        Ray tap2Ray;
-        GeometryIntersectionInformation infoTap1;
-        GeometryIntersectionInformation infoTap2;
-        GeometryIntersectionInformation infoBody;
-        Ray tap1Hit, tap2Hit, bodyHit;
-
-        bodyRay = new Ray(inOutRay);
-        tap1Ray = new Ray(inOutRay);
-        tap2Ray = new Ray(inOutRay);
-        infoTap1 = new GeometryIntersectionInformation();
-        infoTap2 = new GeometryIntersectionInformation();
-        infoBody = new GeometryIntersectionInformation();
-
-        //- Cone case -----------------------------------------------------
-        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            bodyHit = doIntersectionCone(bodyRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
-            if ( (tap1Hit != null && bodyHit == null) ||
-                 (tap1Hit != null && bodyHit != null && (tap1Hit.t() < bodyHit.t())) ) {
-                infoTap1.n = infoTap1.n.multiply(-1);
-                lastInfo = infoTap1;
-                return inOutRay.withT(tap1Hit.t());
-            }
-            if ( (tap1Hit == null && bodyHit != null) ||
-                 (tap1Hit != null && bodyHit != null && (tap1Hit.t() > bodyHit.t())) ) {
-                lastInfo = infoBody;
-                return inOutRay.withT(bodyHit.t());
-            }
+        RayHit hit = new RayHit();
+        if ( doIntersection(inOutRay, hit) ) {
+            return hit.ray();
         }
-
-        //- Cylinder case -------------------------------------------------
-        int cercano = -1;
-
-        if ( VSDK.equals(r1, r2) ) {
-            bodyHit = doIntersectionCylinder(bodyRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
-            tap2Hit = doIntersectionTap(tap2Ray, r1, h, infoTap2);
-    
-            if ( bodyHit != null &&
-                 ((tap1Hit != null && (bodyHit.t() < tap1Hit.t())) || tap1Hit == null) &&
-                 ((tap2Hit != null && (bodyHit.t() < tap2Hit.t())) || tap2Hit == null) ) {
-                cercano = 1;
-            }
-            else if ( tap1Hit != null &&
-                      (bodyHit != null && (tap1Hit.t() < bodyHit.t()) || bodyHit == null) &&
-                      (tap2Hit != null && (tap1Hit.t() < tap2Hit.t()) || tap2Hit == null) ) {
-                cercano = 3;
-            }
-            else if ( tap2Hit != null ) {
-                cercano = 2;
-            }
-
-            if ( cercano == 1 ) {
-                lastInfo = infoBody;
-                return inOutRay.withT(bodyHit.t());
-              }
-              else if ( cercano == 2 )  {
-                lastInfo = infoTap2;
-                return inOutRay.withT(tap2Hit.t());
-              }
-              else if ( cercano == 3 ) {
-                lastInfo = infoTap1;
-                return inOutRay.withT(tap1Hit.t());
-            }
-        }
-    
         return null;
     }
 
@@ -387,9 +322,10 @@ public class Cone extends Solid {
     doExtraInformation(Ray inRay, double inT, 
                                   GeometryIntersectionInformation outData)
     {
-        outData.p = lastInfo.p;
-        outData.n = lastInfo.n;
-        outData.n = outData.n.normalized();
+        RayHit hit = new RayHit();
+        if ( doIntersection(inRay.withT(Double.MAX_VALUE), hit) ) {
+            outData.clone(hit);
+        }
     }
 
     /**

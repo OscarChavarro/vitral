@@ -218,13 +218,30 @@ public class TriangleMeshGroup extends Surface {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
-        if ( hit == null ) {
+        double minT = Double.MAX_VALUE;
+        RayHit bestHit = null;
+        int bestMesh = -1;
+        int bestTriangle = -1;
+
+        for ( int i = 0; i < meshes.size(); i++ ) {
+            TriangleMesh mesh = meshes.get(i);
+            RayHit meshHit = new RayHit();
+            if ( mesh.doIntersection(inRay, meshHit) && meshHit.ray().t() < minT ) {
+                minT = meshHit.ray().t();
+                bestHit = new RayHit(meshHit);
+                bestMesh = i;
+                bestTriangle = mesh.doIntersectionInformation();
+            }
+        }
+
+        if ( bestHit == null ) {
             return false;
         }
+
+        intersectionInformation = new int[] {bestMesh, bestTriangle};
+
         if ( outHit != null ) {
-            outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            outHit.clone(bestHit);
         }
         return true;
     }

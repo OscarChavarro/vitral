@@ -933,15 +933,150 @@ public class TriangleMesh extends Surface {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
-        if ( hit == null ) {
+        Ray ray = new Ray(inRay);
+        int bestTriangle = -1;
+        double minT = Double.MAX_VALUE;
+        ComputationalGeometry.TriangleIntersection bestHit = null;
+
+        int nt = getNumTriangles();
+        for ( int i = 0; i < nt; i++ ) {
+            Vector3D v0 = new Vector3D(
+                vertexPositions[3*triangleIndices[3*i+0]+0],
+                vertexPositions[3*triangleIndices[3*i+0]+1],
+                vertexPositions[3*triangleIndices[3*i+0]+2]
+            );
+            Vector3D v1 = new Vector3D(
+                vertexPositions[3*triangleIndices[3*i+1]+0],
+                vertexPositions[3*triangleIndices[3*i+1]+1],
+                vertexPositions[3*triangleIndices[3*i+1]+2]
+            );
+            Vector3D v2 = new Vector3D(
+                vertexPositions[3*triangleIndices[3*i+2]+0],
+                vertexPositions[3*triangleIndices[3*i+2]+1],
+                vertexPositions[3*triangleIndices[3*i+2]+2]
+            );
+
+            ComputationalGeometry.TriangleIntersection hit =
+                ComputationalGeometry.doIntersectionWithTriangle(ray, v0, v1, v2);
+            if ( hit != null && hit.t < minT ) {
+                minT = hit.t;
+                bestTriangle = i;
+                bestHit = hit;
+            }
+        }
+
+        if ( bestHit == null ) {
             return false;
         }
+
+        selectedTriangle = bestTriangle;
+
         if ( outHit != null ) {
-            outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            outHit.setRay(inRay.withT(bestHit.t));
+            outHit.p = new Vector3D(bestHit.point);
+            outHit.n = new Vector3D(bestHit.normal).normalized();
+            outHit.t = new Vector3D();
+            outHit.u = 0;
+            outHit.v = 0;
+
+            interpolateTriangleData(bestTriangle, outHit, inRay.direction());
+            fillMaterialAndTexture(bestTriangle, outHit);
         }
         return true;
+    }
+
+    private void interpolateTriangleData(int triangleIndex, RayHit outHit, Vector3D rayDirection)
+    {
+        if ( vertexNormals == null || vertexUvs == null ) {
+            if ( outHit.n.dotProduct(rayDirection) >= 0 ) {
+                outHit.n = outHit.n.multiply(-1);
+            }
+            return;
+        }
+
+        Vector3D p0 = new Vector3D(
+            vertexPositions[3*triangleIndices[3*triangleIndex+0]+0],
+            vertexPositions[3*triangleIndices[3*triangleIndex+0]+1],
+            vertexPositions[3*triangleIndices[3*triangleIndex+0]+2]);
+        Vector3D p1 = new Vector3D(
+            vertexPositions[3*triangleIndices[3*triangleIndex+1]+0],
+            vertexPositions[3*triangleIndices[3*triangleIndex+1]+1],
+            vertexPositions[3*triangleIndices[3*triangleIndex+1]+2]);
+        Vector3D p2 = new Vector3D(
+            vertexPositions[3*triangleIndices[3*triangleIndex+2]+0],
+            vertexPositions[3*triangleIndices[3*triangleIndex+2]+1],
+            vertexPositions[3*triangleIndices[3*triangleIndex+2]+2]);
+
+        double A = p0.x() - p2.x();
+        double B = p1.x() - p2.x();
+        double C = p2.x() - outHit.p.x();
+        double D = p0.y() - p2.y();
+        double E = p1.y() - p2.y();
+        double F = p2.y() - outHit.p.y();
+        double G = p0.z() - p2.z();
+        double H = p1.z() - p2.z();
+        double I = p2.z() - outHit.p.z();
+
+        double lambda0 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
+        double lambda1 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
+        double lambda2 = 1-lambda0-lambda1;
+
+        Vector3D n0 = new Vector3D(
+            vertexNormals[3*triangleIndices[3*triangleIndex+0]+0],
+            vertexNormals[3*triangleIndices[3*triangleIndex+0]+1],
+            vertexNormals[3*triangleIndices[3*triangleIndex+0]+2]);
+        Vector3D n1 = new Vector3D(
+            vertexNormals[3*triangleIndices[3*triangleIndex+1]+0],
+            vertexNormals[3*triangleIndices[3*triangleIndex+1]+1],
+            vertexNormals[3*triangleIndices[3*triangleIndex+1]+2]);
+        Vector3D n2 = new Vector3D(
+            vertexNormals[3*triangleIndices[3*triangleIndex+2]+0],
+            vertexNormals[3*triangleIndices[3*triangleIndex+2]+1],
+            vertexNormals[3*triangleIndices[3*triangleIndex+2]+2]);
+        outHit.n = n0.multiply(lambda0)
+            .add(n1.multiply(lambda1)
+            .add(n2.multiply(lambda2)))
+            .normalized();
+
+        double u0 = vertexUvs[2*triangleIndices[3*triangleIndex+0]+0];
+        double v0 = vertexUvs[2*triangleIndices[3*triangleIndex+0]+1];
+        double u1 = vertexUvs[2*triangleIndices[3*triangleIndex+1]+0];
+        double v1 = vertexUvs[2*triangleIndices[3*triangleIndex+1]+1];
+        double u2 = vertexUvs[2*triangleIndices[3*triangleIndex+2]+0];
+        double v2 = vertexUvs[2*triangleIndices[3*triangleIndex+2]+1];
+        outHit.u = u0*lambda0 + u1*lambda1 + u2*lambda2;
+        outHit.v = v0*lambda0 + v1*lambda1 + v2*lambda2;
+
+        if ( outHit.n.dotProduct(rayDirection) >= 0 ) {
+            outHit.n = outHit.n.multiply(-1);
+        }
+    }
+
+    private void fillMaterialAndTexture(int triangleIndex, RayHit outHit)
+    {
+        if ( materials != null ) {
+            outHit.material = materials[0];
+        }
+        if ( materialRanges != null ) {
+            for ( int i = 0; i < materialRanges.length-1 ; i++ ) {
+                if ( triangleIndex >= materialRanges[i][0] &&
+                     triangleIndex < materialRanges[i+1][0] ) {
+                    outHit.material = materials[materialRanges[i+1][1]];
+                    break;
+                }
+            }
+        }
+
+        outHit.texture = null;
+        if ( textureRanges != null ) {
+            for ( int i = 0; i < textureRanges.length-1 ; i++ ) {
+                if ( triangleIndex >= textureRanges[i][0] &&
+                     triangleIndex < textureRanges[i+1][0] ) {
+                    outHit.texture = textures[textureRanges[i+1][1]-1];
+                    break;
+                }
+            }
+        }
     }
 
     /**
