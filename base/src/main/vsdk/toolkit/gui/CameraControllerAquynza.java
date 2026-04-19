@@ -251,7 +251,7 @@ public class CameraControllerAquynza extends CameraController {
     public boolean processMousePressedEvent(MouseEvent e)
     {
         oldMouseX = e.getX();
-        oldMouseY = e.getX();
+        oldMouseY = e.getY();
         return false;
     }
 
@@ -316,11 +316,10 @@ public class CameraControllerAquynza extends CameraController {
             ax = -Math.min(2, 0.01*deltaX);
             ay = Math.min(2, 0.01*deltaY);
 
-            DR = new Matrix4x4();
-            DR = R = R.axisRotation(ay, v.x(), v.y(), v.z());
+            DR = new Matrix4x4().axisRotation(ay, v.x(), v.y(), v.z());
             R = DR.multiply(R);
 
-            DR = R = R.axisRotation(ax, w.x(), w.y(), w.z());
+            DR = new Matrix4x4().axisRotation(ax, w.x(), w.y(), w.z());
             R = DR.multiply(R);
 
             updated = true;
@@ -337,8 +336,7 @@ public class CameraControllerAquynza extends CameraController {
             // Advance
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
-            DR = new Matrix4x4();
-            DR = R = R.axisRotation(ax, u.x(), u.y(), u.z());
+            DR = new Matrix4x4().axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 // VitralSDK classes
+import java.util.List;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
@@ -77,7 +78,7 @@ This class implements the Appel's algorithm for hidden line rendering. :)
 public class HiddenLineRenderer extends RenderingElement
 {
     private static int
-    computeQuantitativeInvisibility(ArrayList <SimpleBody> solids,
+    computeQuantitativeInvisibility(List <SimpleBody> solids,
         Camera camera, _AppelEdgeCache edge)
     {
         int qi = 0;
@@ -94,13 +95,13 @@ public class HiddenLineRenderer extends RenderingElement
     Given a set of solids, this method computes the "edge cache": a list
     of edges, where every edge gets one of three classifications:
     HIDDEN_LINE, VISIBLE_LINE or CONTOUR_LINE.
-    Edges are classified acording to the visibility of its participating
+    Edges are classified according to the visibility of its participating
     faces. Note that current implementation supposes that every given
     edge is shared by exactly two planar surfaces, and that no pair of
     edges intersects. This assumption is implied here by first converting
     the solid to a polyhedral bounded representation (BREP). As VitralSDK
     BREP ensures that assumptions, current implementation is solid with
-    that datastructure.
+    that data structure.
 
     Original [APPE1967] paper makes no assumption on data representation as
     long that the representation is able to answer the question of what pair
@@ -206,13 +207,13 @@ public class HiddenLineRenderer extends RenderingElement
     */
     private static void
     processLineToBeDrawn(
-        ArrayList <SimpleBody> solids,
+        List <SimpleBody> solids,
         _AppelEdgeCache inEdge,
         Camera inCamera,
-        ArrayList <Vector3D> outVisibleContourLineEndPoints,
-        ArrayList <Vector3D> outVisibleNonContourLineEndPoints,
-        ArrayList <Vector3D> outHiddenLineEndPoints,
-        ArrayList <_AppelEdgeCache> contourCache)
+        List <Vector3D> outVisibleContourLineEndPoints,
+        List <Vector3D> outVisibleNonContourLineEndPoints,
+        List <Vector3D> outHiddenLineEndPoints,
+        List <_AppelEdgeCache> contourCache)
     {
         //- 1. Compute the sweep plane triangle ---------------------------
         // Defines plane "SP1" on figure [APPE1967].5.
@@ -272,7 +273,10 @@ public class HiddenLineRenderer extends RenderingElement
                 Ray planeHit = plane.doIntersection(ray);
                 if ( planeHit != null ) {
                     segment = new _AppelEdgeSegment();
-                    segment.t = hit.t / inEdge.d.length(); // Point "PP2"
+                    // Point PP2 lies on the current edge, so its parameter must
+                    // come from the edge/plane intersection rather than from the
+                    // contour line piercing the sweep triangle.
+                    segment.t = planeHit.t() / inEdge.d.length();
 
                     // Determine the change in quantitative invisibility...
                     K = inEdge.start.add(inEdge.d.multiply(segment.t-2*VSDK.EPSILON));
@@ -333,7 +337,11 @@ public class HiddenLineRenderer extends RenderingElement
 
             // This disables propagation of Q.I., making all slower!
             Vector3D posx = inEdge.start.add(inEdge.d.multiply((val2+val1)/2));
-            qi = solids.get(0).computeQuantitativeInvisibility(inCamera.getPosition(), posx);
+            qi = 0;
+            for ( int solidIndex = 0; solidIndex < solids.size(); solidIndex++ ) {
+                qi += solids.get(solidIndex).computeQuantitativeInvisibility(
+                    inCamera.getPosition(), posx);
+            }
             //
 
             if ( qi == 0 ) {
@@ -360,15 +368,15 @@ public class HiddenLineRenderer extends RenderingElement
     sets of lines for visible/hidden line rendering, as described in
     paper [APPE1967] and section [FOLE1992].15.3.2. The calculated end line
     points are in 3D space and contains viewer's perception to respect to which
-    line segments are visible (as part of the object contour or non contour
+    line segments are visible (as part of the object contour or non-contour
     material lines) and which line segments are visible.
     */
     public static void executeAppelAlgorithm(
-        ArrayList <SimpleBody> inSimpleBodyArray,
+        List<SimpleBody> inSimpleBodyArray,
         Camera inCamera,
-        ArrayList <Vector3D> outVisibleContourLineEndPoints,
-        ArrayList <Vector3D> outVisibleNonContourLineEndPoints,
-        ArrayList <Vector3D> outHiddenLineEndPoints)
+        List <Vector3D> outVisibleContourLineEndPoints,
+        List <Vector3D> outVisibleNonContourLineEndPoints,
+        List <Vector3D> outHiddenLineEndPoints)
     {
         //-----------------------------------------------------------------
         ArrayList <_AppelEdgeCache> cache;

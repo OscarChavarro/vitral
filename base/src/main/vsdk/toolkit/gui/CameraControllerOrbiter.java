@@ -98,11 +98,13 @@ public class CameraControllerOrbiter extends CameraController {
         axisUp = axisUp.normalized();
 
         if ( Math.abs(pitchDelta) > 0 ) {
-            DR = R = R.axisRotation(pitchDelta, axisLeft.x(), axisLeft.y(), axisLeft.z());
+            DR = new Matrix4x4().axisRotation(pitchDelta,
+                axisLeft.x(), axisLeft.y(), axisLeft.z());
             offset = DR.multiply(offset);
         }
         if ( Math.abs(yawDelta) > 0 ) {
-            DR = R = R.axisRotation(yawDelta, axisUp.x(), axisUp.y(), axisUp.z());
+            DR = new Matrix4x4().axisRotation(yawDelta,
+                axisUp.x(), axisUp.y(), axisUp.z());
             offset = DR.multiply(offset);
         }
 
@@ -381,8 +383,7 @@ public class CameraControllerOrbiter extends CameraController {
             // Advance
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
-            DR = new Matrix4x4();
-            DR = R = R.axisRotation(ax, u.x(), u.y(), u.z());
+            DR = new Matrix4x4().axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

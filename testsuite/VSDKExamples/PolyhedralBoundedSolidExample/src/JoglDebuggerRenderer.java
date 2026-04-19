@@ -1,5 +1,7 @@
 // Java basic classes
+import com.jogamp.opengl.GL;
 import java.util.ArrayList;
+import java.util.List;
 import models.DebuggerModel;
 import java.awt.EventQueue;
 
@@ -60,15 +62,15 @@ public class JoglDebuggerRenderer implements GLEventListener
     }
 
     private void
-    renderLinesResult(GL2 gl, ArrayList <Vector3D> contourLines,
-                      ArrayList <Vector3D> visibleLines,
-                      ArrayList <Vector3D> hiddenLines)
+    renderLinesResult(GL2 gl, List <Vector3D> contourLines,
+                      List <Vector3D> visibleLines,
+                      List <Vector3D> hiddenLines)
     {
         int i;
         Vector3D p;
 
-        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
-        gl.glDisable(GL2.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL.GL_DEPTH_TEST);
+        gl.glDisable(GL.GL_DEPTH_TEST);
 
         //-----------------------------------------------------------------
         gl.glLineWidth(4.0f);
@@ -161,10 +163,10 @@ public class JoglDebuggerRenderer implements GLEventListener
         }
 
         //-----------------------------------------------------------------
-        ArrayList <Vector3D> contourLines;
-        ArrayList <Vector3D> visibleLines;
-        ArrayList <Vector3D> hiddenLines;
-        ArrayList <SimpleBody> bodyArray;
+        List<Vector3D> contourLines;
+        List <Vector3D> visibleLines;
+        List <Vector3D> hiddenLines;
+        List <SimpleBody> bodyArray;
         SimpleBody body;
 
         if ( model.isDebugEdges() && model.getEdgeIndex() > -3 ) {

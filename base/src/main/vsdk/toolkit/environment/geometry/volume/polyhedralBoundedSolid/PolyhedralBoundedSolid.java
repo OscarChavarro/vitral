@@ -1536,7 +1536,10 @@ public class PolyhedralBoundedSolid extends Solid {
                     hit = hit.withDirection(hit.direction().normalized());
                     pi = hit.origin().add(hit.direction().multiply(hit.t()));
                     pos = face.testPointInside(pi, numericContext.bigEpsilon());
-                    if ( pos == Geometry.INSIDE /*|| pos == Geometry.LIMIT*/ ) {
+                    if ( pos == Geometry.INSIDE ||
+                         (pos == Geometry.LIMIT &&
+                          boundaryHitProducesInteriorPenetration(
+                              pi, d, numericContext.bigEpsilon())) ) {
                         info = planeHit;
                         if ( info.n.dotProduct(d) < 0.0 ) {
                             boolean considerIt = true;
@@ -1559,6 +1562,36 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         return qi;
+    }
+
+    private boolean boundaryHitProducesInteriorPenetration(
+        Vector3D hitPoint,
+        Vector3D direction,
+        double tolerance)
+    {
+        Vector3D afterHit = hitPoint.add(direction.multiply(4.0 * tolerance));
+        boolean touchesBoundary = false;
+
+        for ( int i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+
+            if ( Math.abs(face.containingPlane.pointDistance(hitPoint)) >
+                 tolerance ) {
+                continue;
+            }
+            int pointStatus = face.testPointInside(hitPoint, tolerance);
+            if ( pointStatus == Geometry.OUTSIDE ) {
+                continue;
+            }
+
+            touchesBoundary = true;
+            int halfSpaceStatus = face.containingPlane.doContainmentTestHalfSpace(
+                afterHit, tolerance);
+            if ( halfSpaceStatus != Geometry.INSIDE ) {
+                return false;
+            }
+        }
+        return touchesBoundary;
     }
 
     /**
