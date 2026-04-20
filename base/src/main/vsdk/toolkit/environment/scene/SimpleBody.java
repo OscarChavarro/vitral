@@ -356,12 +356,24 @@ public class SimpleBody extends Entity {
 
         // ... and compute doIntersection operation on object's coordinates
         if ( geometry.doIntersection(localRay, hit) ) {
-            if ( hit.ray() == null ) {
+            double localHitT;
+            if ( hit.ray() != null ) {
+                localHitT = hit.ray().t();
+            }
+            else if ( hit.hasHitDistance() ) {
+                localHitT = hit.hitDistance();
+            }
+            else {
                 return false;
             }
             if ( outHit != null ) {
-                double worldT = hit.ray().t() / localDirectionLength;
-                outHit.setRay(inOutRay.withT(worldT));
+                double worldT = localHitT / localDirectionLength;
+                if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                    outHit.setRay(inOutRay.withT(worldT));
+                }
+                else {
+                    outHit.setHitDistance(worldT);
+                }
                 if ( outHit.needsPoint() ) {
                     outHit.p = objectPointToWorldSpace(hit.p);
                 }
@@ -515,11 +527,26 @@ public class SimpleBody extends Entity {
             hit.reset(requiredDetailMask);
         }
 
-        if ( !geometry.doIntersection(localRay, hit) || hit.ray() == null ) {
+        if ( !geometry.doIntersection(localRay, hit) ) {
+            return false;
+        }
+        double localHitT;
+        if ( hit.ray() != null ) {
+            localHitT = hit.ray().t();
+        }
+        else if ( hit.hasHitDistance() ) {
+            localHitT = hit.hitDistance();
+        }
+        else {
             return false;
         }
         if ( outHit != null ) {
-            outHit.setRay(inOutRay.withT(hit.ray().t()));
+            if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                outHit.setRay(inOutRay.withT(localHitT));
+            }
+            else {
+                outHit.setHitDistance(localHitT);
+            }
             if ( outHit.needsPoint() ) {
                 outHit.p = hit.p.add(position);
             }

@@ -108,11 +108,16 @@ public class Sphere extends Solid {
         }
 
         if ( outHit != null ) {
-            Ray hitRay = inRay.withT(t);
-            outHit.setRay(hitRay);
-            if ( outHit.needsAnySurfaceData() ) {
-                doExtraInformation(hitRay, t, outHit);
+            if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                Ray hitRay = inRay.withT(t);
                 outHit.setRay(hitRay);
+                if ( outHit.needsAnySurfaceData() ) {
+                    doExtraInformation(hitRay, t, outHit);
+                    outHit.setRay(hitRay);
+                }
+            }
+            else {
+                outHit.setHitDistance(t);
             }
         }
         return true;

@@ -43,25 +43,12 @@ a "Strategy" design pattern.
 */
 public class Raytracer extends RenderingElement {
     private static final double TINY = 0.0001;
-    private static final int MAX_RECURSION_LEVEL = 8;
-
-    private static final class RenderContext {
-        private final boolean localLightingEnabled;
-        private final boolean textureEnabled;
-        private final boolean bumpMappingEnabled;
-
-        private RenderContext(
-            boolean localLightingEnabled,
-            boolean textureEnabled,
-            boolean bumpMappingEnabled)
-        {
-            this.localLightingEnabled = localLightingEnabled;
-            this.textureEnabled = textureEnabled;
-            this.bumpMappingEnabled = bumpMappingEnabled;
-        }
-    }
+    private static final int MAX_RECURSION_LEVEL =
+        TraceWorkspace.DEFAULT_MAX_RECURSION_LEVEL;
 
     private static final Vector3D BUMP_TANGENT_FALLBACK = new Vector3D(0, 1, 0);
+    private final ThreadLocal<TraceWorkspace> traceWorkspace =
+        ThreadLocal.withInitial(() -> new TraceWorkspace(MAX_RECURSION_LEVEL));
 
     public Raytracer()
     {
@@ -196,7 +183,10 @@ public class Raytracer extends RenderingElement {
         Background background,
         Material material, RendererConfiguration inQualitySelection,
         RenderContext renderContext,
-        int recursions, ColorRgb outColor) {
+        int recursions,
+        int recursionLevel,
+        TraceWorkspace workspace,
+        ColorRgb outColor) {
         //-----------------------------------------------------------------
         SimpleBody nearestObject;
         Vector3D surfaceNormal = info.n;
@@ -262,10 +252,25 @@ public class Raytracer extends RenderingElement {
                     continue;
                 }
                 Vector3D l;
+                double maxShadowDistance = Double.MAX_VALUE;
                 if ( light.tipo_de_luz == Light.POINT ) {
-                    l = new Vector3D(light.lvec.x() - info.p.x(),
-                                     light.lvec.y() - info.p.y(),
-                                     light.lvec.z() - info.p.z()).normalized();
+                    double lx = light.lvec.x() - info.p.x();
+                    double ly = light.lvec.y() - info.p.y();
+                    double lz = light.lvec.z() - info.p.z();
+                    double lightDistanceSquared = lx*lx + ly*ly + lz*lz;
+                    if ( lightDistanceSquared <= VSDK.EPSILON ) {
+                        continue;
+                    }
+                    double lightDistance = Math.sqrt(lightDistanceSquared);
+                    double invLightDistance = 1.0 / lightDistance;
+                    l = new Vector3D(
+                        lx * invLightDistance,
+                        ly * invLightDistance,
+                        lz * invLightDistance);
+                    maxShadowDistance = lightDistance - VSDK.EPSILON;
+                    if ( maxShadowDistance <= VSDK.EPSILON ) {
+                        continue;
+                    }
                   } 
                   else {
                     l = new Vector3D(-light.lvec.x(), -light.lvec.y(), -light.lvec.z());
@@ -278,8 +283,11 @@ public class Raytracer extends RenderingElement {
                     info.p.z() + VSDK.EPSILON*l.z());
                 RaytraceProfiling.recordShadowRay();
                 Ray shadowRay = new Ray(shadowOffset, l);
-                nearestObject = selectNearestThingInRayDirection(shadowRay, objects, null);
-                if ( nearestObject != null ) {
+                if ( anyThingInRayDirection(
+                         shadowRay,
+                         objects,
+                         maxShadowDistance,
+                         workspace.shadowCandidateHit) ) {
                     //delete l;
                     continue;
                 }
@@ -345,20 +353,29 @@ public class Raytracer extends RenderingElement {
                 //delete reflect;
                 //delete poffset;
 
-                RayHit reflectedHit = new RayHit(RayHit.DETAIL_NONE);
+                RayHit reflectedHit = workspace.reflectionHits[recursionLevel];
                 nearestObject =
-                    selectNearestThingInRayDirection(reflected_ray, objects, reflectedHit);
+                    selectNearestThingInRayDirection(
+                        reflected_ray,
+                        objects,
+                        reflectedHit,
+                        workspace.traversalCandidateHit);
                 if ( nearestObject != null ) {
                     Vector3D rv = new Vector3D(
-                        -reflectedHit.ray().direction().x(),
-                        -reflectedHit.ray().direction().y(),
-                        -reflectedHit.ray().direction().z());
-                    RayHit subInfo = new RayHit();
-                    ColorRgb rcolor = new ColorRgb();
+                        -reflected_ray.direction().x(),
+                        -reflected_ray.direction().y(),
+                        -reflected_ray.direction().z());
+                    RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
+                    ColorRgb rcolor = workspace.reflectionColors[recursionLevel];
+                    rcolor.r = 0;
+                    rcolor.g = 0;
+                    rcolor.b = 0;
+                    Ray reflectedHitRay =
+                        reflected_ray.withT(reflectedHit.hitDistance());
 
                     prepareSurfaceHit(
                         nearestObject,
-                        reflectedHit.ray(),
+                        reflectedHitRay,
                         inQualitySelection,
                         renderContext,
                         subInfo);
@@ -372,6 +389,8 @@ public class Raytracer extends RenderingElement {
                         inQualitySelection,
                         renderContext,
                         recursions - 1,
+                        recursionLevel + 1,
+                        workspace,
                         rcolor);
 
                     outColor.r += kr*rcolor.r;
@@ -411,35 +430,60 @@ public class Raytracer extends RenderingElement {
     */
     private SimpleBody 
     selectNearestThingInRayDirection(
-        Ray inRay, ArrayList <SimpleBody> inSimpleBodiesArray, RayHit outHit) {
+        Ray inRay,
+        ArrayList <SimpleBody> inSimpleBodiesArray,
+        RayHit outHit,
+        RayHit candidateHit) {
         int i;
         SimpleBody gi;
         SimpleBody nearestObject;
         double nearestDistance;
-        Ray nearestRay;
-        RayHit candidateHit = new RayHit(RayHit.DETAIL_NONE);
 
         nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
-        nearestRay = null;
+        candidateHit.setStoreRay(false);
         RaytraceProfiling.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             gi = inSimpleBodiesArray.get(i);
             candidateHit.reset(RayHit.DETAIL_NONE);
             RaytraceProfiling.recordObjectIntersectionTest();
-            if ( gi.doIntersection(inRay, candidateHit) &&
-                 candidateHit.ray().t() < nearestDistance &&
-                 candidateHit.ray().t() > VSDK.EPSILON ) {
-                nearestDistance = candidateHit.ray().t();
-                nearestRay = candidateHit.ray();
-                nearestObject = gi;
+            if ( gi.doIntersection(inRay, candidateHit) ) {
+                double hitDistance = candidateHit.hitDistance();
+                if ( hitDistance < nearestDistance && hitDistance > VSDK.EPSILON ) {
+                    nearestDistance = hitDistance;
+                    nearestObject = gi;
+                }
             }
         }
         if ( nearestObject != null && outHit != null ) {
             outHit.reset(RayHit.DETAIL_NONE);
-            outHit.setRay(nearestRay);
+            outHit.setHitDistance(nearestDistance);
         }
         return nearestObject;
+    }
+
+    private boolean anyThingInRayDirection(
+        Ray inRay,
+        ArrayList <SimpleBody> inSimpleBodiesArray,
+        double maxDistance,
+        RayHit candidateHit)
+    {
+        int i;
+
+        candidateHit.setStoreRay(false);
+        RaytraceProfiling.recordSceneTraversal();
+        for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
+            SimpleBody gi = inSimpleBodiesArray.get(i);
+            candidateHit.reset(RayHit.DETAIL_NONE);
+            RaytraceProfiling.recordObjectIntersectionTest();
+            if ( gi.doIntersection(inRay, candidateHit) ) {
+                double hitDistance = candidateHit.hitDistance();
+                if ( hitDistance > VSDK.EPSILON && hitDistance < maxDistance ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -456,25 +500,32 @@ public class Raytracer extends RenderingElement {
                                Background in_background,
                                RendererConfiguration inQualitySelection,
                                RenderContext renderContext,
+                               TraceWorkspace workspace,
                                ColorRgb outColor)
     {
         SimpleBody nearestObject;
-        RayHit hitInfo = new RayHit(RayHit.DETAIL_NONE);
+        RayHit hitInfo = workspace.nearestHit;
 
-        nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray, hitInfo);
+        nearestObject =
+            selectNearestThingInRayDirection(
+                inRay,
+                inSimpleBodiesArray,
+                hitInfo,
+                workspace.traversalCandidateHit);
         if ( nearestObject != null ) {
             //------------------------------------------------------------
-            RayHit shadingInfo = new RayHit();
+            Ray primaryHitRay = inRay.withT(hitInfo.hitDistance());
+            RayHit shadingInfo = workspace.shadingHits[0];
             prepareSurfaceHit(
                 nearestObject,
-                hitInfo.ray(),
+                primaryHitRay,
                 inQualitySelection,
                 renderContext,
                 shadingInfo);
             Vector3D viewVector = new Vector3D(
-                -hitInfo.ray().direction().x(),
-                -hitInfo.ray().direction().y(),
-                -hitInfo.ray().direction().z());
+                -inRay.direction().x(),
+                -inRay.direction().y(),
+                -inRay.direction().z());
 
             evaluateIlluminationModel(
                 shadingInfo,
@@ -486,6 +537,8 @@ public class Raytracer extends RenderingElement {
                 inQualitySelection,
                 renderContext,
                 MAX_RECURSION_LEVEL,
+                0,
+                workspace,
                 outColor);
             //delete viewVector;
           }
@@ -592,6 +645,7 @@ public class Raytracer extends RenderingElement {
         ColorRgb color = new ColorRgb();
         RenderContext renderContext =
             buildRenderContext(inQualitySelection, inLightsArray);
+        TraceWorkspace workspace = traceWorkspace.get();
 
         inCamera.updateVectors();
 
@@ -613,7 +667,7 @@ public class Raytracer extends RenderingElement {
                 color.b = 0;
                 followRayPath(rayo, inSimpleBodiesArray,
                               inLightsArray, inBackground, 
-                              inQualitySelection, renderContext, color);
+                              inQualitySelection, renderContext, workspace, color);
                 if ( outDepthmap != null ) {
                     outDepthmap.setZ(x, y, (float)rayo.t());
                 }

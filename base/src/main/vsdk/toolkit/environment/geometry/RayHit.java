@@ -49,15 +49,24 @@ public class RayHit extends FundamentalEntity {
     private Ray ray; // Intersected ray with valid t at hit point
 
     private int requiredDetailMask;
+    private boolean storeRay;
+    private double hitDistance;
+    private boolean hasHitDistance;
 
     public RayHit()
     {
-        this(DETAIL_ALL);
+        this(DETAIL_ALL, true);
     }
 
     public RayHit(int requiredDetailMask)
     {
+        this(requiredDetailMask, true);
+    }
+
+    public RayHit(int requiredDetailMask, boolean storeRay)
+    {
         this.requiredDetailMask = requiredDetailMask;
+        this.storeRay = storeRay;
         clear();
         RaytraceProfiling.recordRayHitInstance();
     }
@@ -79,6 +88,8 @@ public class RayHit extends FundamentalEntity {
         texture = null;
         normalMap = null;
         ray = null;
+        hitDistance = 0;
+        hasHitDistance = false;
     }
 
     public final void reset(int newRequiredDetailMask)
@@ -91,6 +102,9 @@ public class RayHit extends FundamentalEntity {
     {
         RaytraceProfiling.recordHitInfoClone();
         this.requiredDetailMask = other.requiredDetailMask;
+        this.storeRay = other.storeRay;
+        this.hitDistance = other.hitDistance;
+        this.hasHitDistance = other.hasHitDistance;
         this.p = other.p;
         this.n = other.n;
         this.t = other.t;
@@ -110,6 +124,16 @@ public class RayHit extends FundamentalEntity {
     public void setRequiredDetailMask(int requiredDetailMask)
     {
         this.requiredDetailMask = requiredDetailMask;
+    }
+
+    public boolean shouldStoreRay()
+    {
+        return storeRay;
+    }
+
+    public void setStoreRay(boolean storeRay)
+    {
+        this.storeRay = storeRay;
     }
 
     public boolean needsPoint()
@@ -145,5 +169,31 @@ public class RayHit extends FundamentalEntity {
     public void setRay(Ray ray)
     {
         this.ray = ray;
+        if ( ray != null ) {
+            hitDistance = ray.t();
+            hasHitDistance = true;
+        }
+    }
+
+    public boolean hasHitDistance()
+    {
+        return hasHitDistance;
+    }
+
+    public double hitDistance()
+    {
+        if ( hasHitDistance ) {
+            return hitDistance;
+        }
+        if ( ray != null ) {
+            return ray.t();
+        }
+        return 0;
+    }
+
+    public void setHitDistance(double hitDistance)
+    {
+        this.hitDistance = hitDistance;
+        this.hasHitDistance = true;
     }
 }
