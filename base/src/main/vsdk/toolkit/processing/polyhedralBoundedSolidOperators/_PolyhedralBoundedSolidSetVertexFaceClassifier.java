@@ -22,6 +22,8 @@ to boundary classification by [MANT1988].15.6.1 and problem [MANT1988].15.4.
 final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     extends _PolyhedralBoundedSolidOperator
 {
+    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
+        "vsdk.setop.traceCoplanarTangential";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_03_VERTEX_FACE_CLASSIFIER = 0x04;
     private static final int DEBUG_99_SHOW_OPERATIONS = 0x40;
@@ -29,6 +31,19 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     private static int debugFlags;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
+
+    private static boolean isCoplanarTangentialTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
+    }
+
+    private static void traceCoplanarTangential(String message)
+    {
+        if ( !isCoplanarTangentialTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpCoplanarTrace] " + message);
+    }
 
     /**
     Vertex/Face classifier for the set operations algorithm (big phase 1).
@@ -67,6 +82,19 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .applyCoplanarRulesToVertexFaceNeighborhood(
                 nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
+        for ( int i = 0; i < nbr.size(); i++ ) {
+            if ( nbr.get(i).coplanarRelation !=
+                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
+                    .COPLANAR_UNKNOWN ) {
+                traceCoplanarTangential(
+                    "vf neighborhood op=" + op +
+                    " side=" + BvsA +
+                    " face=" + referenceFace.id +
+                    " sectorIndex=" + i +
+                    " coplanarRelation=" + nbr.get(i).coplanarRelation +
+                    " class=" + nbr.get(i).cl);
+            }
+        }
     }
 
     private static int nextVertexId(PolyhedralBoundedSolid current,

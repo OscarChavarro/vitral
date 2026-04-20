@@ -23,6 +23,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     extends _PolyhedralBoundedSolidOperator
 {
     private static final double TWO_PI = 2.0 * Math.PI;
+    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
+        "vsdk.setop.traceCoplanarTangential";
 
     private static final class CoplanarAngleBasis
     {
@@ -47,6 +49,19 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
 
     private static final int COPLANAR_ORIENTATION_SAME = 0;
     private static final int COPLANAR_ORIENTATION_OPPOSITE = 1;
+
+    private static boolean isCoplanarTangentialTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
+    }
+
+    private static void traceCoplanarTangential(String message)
+    {
+        if ( !isCoplanarTangentialTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpCoplanarTrace] " + message);
+    }
 
     /*
     Coplanar overlap decision table for vertex/face classifier.
@@ -297,6 +312,13 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             relation = classifyCoplanarSectorRelation(current, referenceFace);
             registerCoplanarRelation(nbr, i, relation);
             registerCoplanarRelation(nbr, (i+1)%nnbr, relation);
+            traceCoplanarTangential(
+                "vertexFace coplanar relation op=" + op +
+                " side=" + BvsA +
+                " face=" + referenceFace.id +
+                " localFace=" + localFace.id +
+                " sectorIndex=" + i +
+                " relation=" + relation);
 
             if ( relation ==
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
@@ -306,6 +328,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
                 sameOrientation = (compareToZero(d) == 1);
                 resolvedClass = resolveCoplanarSectorClass(op, BvsA,
                     sameOrientation);
+                traceCoplanarTangential(
+                    "  resolved vertexFace coplanar overlap sameOrientation=" +
+                    sameOrientation + " class=" + resolvedClass);
                 nbr.get(i).cl = resolvedClass;
                 nbr.get((i+1)%nnbr).cl = resolvedClass;
             }

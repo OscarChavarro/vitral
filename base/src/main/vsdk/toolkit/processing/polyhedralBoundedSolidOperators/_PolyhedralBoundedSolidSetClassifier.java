@@ -21,6 +21,8 @@ logic for the Boolean set-operations pipeline of chapter [MANT1988].15.
 final class _PolyhedralBoundedSolidSetClassifier
     extends _PolyhedralBoundedSolidOperator
 {
+    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
+        "vsdk.setop.traceCoplanarTangential";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
     private static final int DEBUG_99_SHOW_OPERATIONS = 0x40;
@@ -79,6 +81,55 @@ final class _PolyhedralBoundedSolidSetClassifier
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
+    }
+
+    private static boolean isCoplanarTangentialTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
+    }
+
+    private static void traceCoplanarTangential(String message)
+    {
+        if ( !isCoplanarTangentialTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpCoplanarTrace] " + message);
+    }
+
+    private static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( he == null ) {
+            return "null";
+        }
+
+        return "he(v=" + he.startingVertex.id +
+            ",f=" + he.parentLoop.parentFace.id + ")";
+    }
+
+    private static void traceIntersectingSectorsSnapshot(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int cursor)
+    {
+        int idx;
+
+        if ( !isCoplanarTangentialTraceEnabled() ) {
+            return;
+        }
+
+        for ( idx = 0; idx < data.sectors.size(); idx++ ) {
+            if ( !data.sectors.get(idx).intersect ) {
+                continue;
+            }
+            traceCoplanarTangential(
+                "  sector idx=" + idx +
+                " cursor=" + cursor +
+                " sectA=" + data.sectors.get(idx).secta +
+                " sectB=" + data.sectors.get(idx).sectb +
+                " s1a=" + data.sectors.get(idx).s1a +
+                " s2a=" + data.sectors.get(idx).s2a +
+                " s1b=" + data.sectors.get(idx).s1b +
+                " s2b=" + data.sectors.get(idx).s2b);
+        }
     }
 
     private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
@@ -529,6 +580,11 @@ final class _PolyhedralBoundedSolidSetClassifier
         _PolyhedralBoundedSolidHalfEdge hb1,
         _PolyhedralBoundedSolidHalfEdge hb2)
     {
+        traceCoplanarTangential(
+            "recover endpoints before ha1=" + summarizeHalfEdge(ha1) +
+            " ha2=" + summarizeHalfEdge(ha2) +
+            " hb1=" + summarizeHalfEdge(hb1) +
+            " hb2=" + summarizeHalfEdge(hb2));
         if ( ha1 == null ) {
             ha1 = selectMissingEndpoint(
                 data, true,
@@ -553,6 +609,12 @@ final class _PolyhedralBoundedSolidSetClassifier
                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
                 hb1);
         }
+
+        traceCoplanarTangential(
+            "recover endpoints after ha1=" + summarizeHalfEdge(ha1) +
+            " ha2=" + summarizeHalfEdge(ha2) +
+            " hb1=" + summarizeHalfEdge(hb1) +
+            " hb2=" + summarizeHalfEdge(hb2));
 
         return new _PolyhedralBoundedSolidHalfEdge[] { ha1, ha2, hb1, hb2 };
     }
@@ -586,6 +648,10 @@ final class _PolyhedralBoundedSolidSetClassifier
             hb1 = data.nbb.get(data.sectors.get(0).sectb).he;
             //System.out.println("**** EMPTY CASE");
         }
+
+        traceCoplanarTangential(
+            "vv insert null edges intersectCount=" + count +
+            " totalSectors=" + data.sectors.size());
 
         i = 0;
         while ( true ) {
@@ -666,6 +732,13 @@ final class _PolyhedralBoundedSolidSetClassifier
                     System.out.println(
                         "    . Incomplete coplanar pairing, waiting for more sectors");
                 }
+                traceCoplanarTangential(
+                    "incomplete coplanar pairing cursor=" + i +
+                    " ha1=" + summarizeHalfEdge(ha1) +
+                    " ha2=" + summarizeHalfEdge(ha2) +
+                    " hb1=" + summarizeHalfEdge(hb1) +
+                    " hb2=" + summarizeHalfEdge(hb2));
+                traceIntersectingSectorsSnapshot(data, i);
                 continue;
             }
 

@@ -1,5 +1,5 @@
 //= References:                                                             =
-//= [APPE1967] Appel, Arthur. "The notion of quantitative invisivility and  =
+//= [APPE1967] Appel, Arthur. "The notion of quantitative invisibility and  =
 //=          the machine rendering of solids". Proceedings, ACM National    =
 //=          meeting 1967.                                                  =
 //= [MANT1986] Mantyla Martti. "Boolean Operations of 2-Manifolds through   =
@@ -269,11 +269,11 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     [MANT1986].11. and [MANT1988].15.4.
     This set correspond to the simpler of all cases for CSG operations
     test, and its processing in set operations are characterized by
-    the following consecuences:
+    the following consequences:
       - Only the vertex-face classifier is called (can be processed
-        without using a verte-vertex classifier).
+        without using a vertex-vertex classifier).
       - On the vertex-face classifier, the second stage (reclassification
-        on sectors) is not used, due to non coplanar cases on neigborhoods.
+        on sectors) is not used, due to non-coplanar cases on neighborhoods.
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1986_2()
     {
@@ -316,7 +316,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     The generated simple solids pair is interesting because in the
     current positions their vertices touches in several different ways,
     so a vertex neighborhood classifier is stressed to manage different
-    cases. Some faces between the solid are overlaping, making this sample
+    cases. Some faces between the solid are overlap, making this sample
     example a "difficult" one for set operations.
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1986_3()
@@ -344,14 +344,14 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
             a, a.findFace(1), T);
 
         //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
-        R = R.translation(0.05 +0.58/2.0+(0.92-0.58) /*+ 0.0001*/,
+        Matrix4x4 transformationMatrix = new Matrix4x4();
+        transformationMatrix = transformationMatrix.translation(0.05 +0.58/2.0+(0.92-0.58) /*+ 0.0001*/,
                       0.05 + 0.42/2.0 - 0.42/2.0,
                       0.05 + 0.18/2.0 + 0.18 /*+ 0.0001*/);
 
         Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(R);
+        b.applyTransformation(transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -421,7 +421,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     from its left and front view using boolean set operations (a.k.a. 
     "profile set operations" at section [MANT1988].6.4.2.). As commented
     on section [MANT1988].15.1., this simple pair of solids are difficult
-    to intersect due to its overlaping faces.
+    to intersect due to its overlap faces.
     */
     public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_1()
     {
@@ -478,8 +478,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
       0: Limit case
       1: Open object
     */
-    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_2(
-        int situation)
+    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_15_2(int situation)
     {
         PolyhedralBoundedSolid[] operands;
 
@@ -487,15 +486,14 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid block;
-        Box box;
-        Matrix4x4 T;
+        Matrix4x4 transformationMatrix;
 
-        T = new Matrix4x4();
-        T = T.translation(0.25+0.1375, 0.5, 0.3);
+        transformationMatrix = new Matrix4x4();
+        transformationMatrix = transformationMatrix.translation(0.25 + 0.1375, 0.5, 0.3);
 
-        box = new Box(new Vector3D(0.5, 1, 0.6));
+        Box box = new Box(new Vector3D(0.5, 1, 0.6));
         block = box.exportToPolyhedralBoundedSolid();
-        block.applyTransformation(T);
+        block.applyTransformation(transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(block);
 
         //-----------------------------------------------------------------
@@ -527,10 +525,10 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         wedge.mef(1, 1, 3, 2, 1, 2, 2);
 
-        T = new Matrix4x4();
-        T = T.translation(0.775, 0, 0);
+        transformationMatrix = new Matrix4x4();
+        transformationMatrix = transformationMatrix.translation(0.775, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-            wedge, wedge.findFace(1), T);
+            wedge, wedge.findFace(1), transformationMatrix);
 
         //-----------------------------------------------------------------
         operands[0] = block;

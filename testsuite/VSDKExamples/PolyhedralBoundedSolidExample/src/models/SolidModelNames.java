@@ -25,9 +25,9 @@ public enum SolidModelNames
     SPLIT_TEST_PART_1(20),
     SPLIT_TEST_PART_2(21),
     SPLIT_TEST_PART_3(22),
-    CSG_TEST_PART_1(23),
-    CSG_TEST_PART_2(24),
-    CSG_TEST_PART_3(25),
+    CSG_DIRECT(23),
+    CSG_OPERAND1_PARTIAL(24),
+    CSG_OPERAND2_PARTIAL(25),
     FEATURED_OBJECT(26),
     IMPORT_OR_FEATURED_OBJECT(27),
     CSG_MANT1988_15_2_HOLED_INTERSECTION(28),
@@ -59,9 +59,9 @@ public enum SolidModelNames
         SPLIT_TEST_PART_1,
         SPLIT_TEST_PART_2,
         SPLIT_TEST_PART_3,
-        CSG_TEST_PART_1,
-        CSG_TEST_PART_2,
-        CSG_TEST_PART_3,
+            CSG_DIRECT,
+            CSG_OPERAND1_PARTIAL,
+            CSG_OPERAND2_PARTIAL,
         FEATURED_OBJECT,
         IMPORT_OR_FEATURED_OBJECT,
         CSG_MANT1988_15_2_HOLED_INTERSECTION,
@@ -133,9 +133,9 @@ public enum SolidModelNames
     public boolean usesCsgDebugControls()
     {
         return this == CSG_MOON_BLOCK ||
-            this == CSG_TEST_PART_1 ||
-            this == CSG_TEST_PART_2 ||
-            this == CSG_TEST_PART_3;
+            this == CSG_DIRECT ||
+            this == CSG_OPERAND1_PARTIAL ||
+            this == CSG_OPERAND2_PARTIAL;
     }
 
     private int getMainSequenceIndex()

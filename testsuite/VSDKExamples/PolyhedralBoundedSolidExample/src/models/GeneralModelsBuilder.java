@@ -28,13 +28,19 @@ import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
-public class GeneralModelsBuilder
+public final class GeneralModelsBuilder
 {
+    private GeneralModelsBuilder() {
+    }
+
     public static PolyhedralBoundedSolid buildSolid(DebuggerModel model)
     {
         PolyhedralBoundedSolid mySolid;
         PolyhedralBoundedSolid[] csgPreviewOperands;
-        Matrix4x4 T, R, S, M;
+        Matrix4x4 translationMatrix;
+        Matrix4x4 rotationMatrix;
+        Matrix4x4 scaleMatrix;
+        Matrix4x4 transformationMatrix;
         model.clampSubdivisions();
         model.setCsgPreviewOperandA(null);
         model.setCsgPreviewOperandB(null);
@@ -66,16 +72,16 @@ public class GeneralModelsBuilder
             PolyhedralBoundedSolidModeler.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
-            T = new Matrix4x4();
-            T = T.translation(0.0, 0.0, 0.5);
-            R = new Matrix4x4();
-            R = R.axisRotation(Math.toRadians(5), 0, 1, 0);
-            S = new Matrix4x4();
-            S = S.scale(0.5, 0.5, 0.5);
-            M = T.multiply(R.multiply(S));
+            translationMatrix = new Matrix4x4();
+            translationMatrix = translationMatrix.translation(0.0, 0.0, 0.5);
+            rotationMatrix = new Matrix4x4();
+            rotationMatrix = rotationMatrix.axisRotation(Math.toRadians(5), 0, 1, 0);
+            scaleMatrix = new Matrix4x4();
+            scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
+            transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
 
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-                mySolid, mySolid.findFace(1), M);
+                mySolid, mySolid.findFace(1), transformationMatrix);
 
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR:
@@ -83,15 +89,15 @@ public class GeneralModelsBuilder
                 0.5, 0.5, 0.5, 0.1, 24
             );
 
-            T = new Matrix4x4();
-            T = T.translation(0.0, 0.0, 0.5);
-            R = new Matrix4x4();
-            R = R.axisRotation(Math.toRadians(5), 0, 1, 0);
-            S = new Matrix4x4();
-            S = S.scale(0.5, 0.5, 0.5);
-            M = T.multiply(R.multiply(S));
+            translationMatrix = new Matrix4x4();
+            translationMatrix = translationMatrix.translation(0.0, 0.0, 0.5);
+            rotationMatrix = new Matrix4x4();
+            rotationMatrix = rotationMatrix.axisRotation(Math.toRadians(5), 0, 1, 0);
+            scaleMatrix = new Matrix4x4();
+            scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
+            transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-                mySolid, mySolid.findFace(1), M);
+                mySolid, mySolid.findFace(1), transformationMatrix);
 
 /*
             T = new Matrix4x4();
@@ -119,7 +125,8 @@ public class GeneralModelsBuilder
                 model.getSubdivisionCircumference(), model.getSubdivisionHeight());
             break;
           case CSG_MOON_BLOCK:
-            csgPreviewOperands = createCsgOperands(CsgSampleNames.MOON_BLOCK);
+            csgPreviewOperands = createCsgHudPreviewOperands(
+                CsgSampleNames.MOON_BLOCK);
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(1, CsgOperationNames.DIFFERENCE_A_MINUS_B,
@@ -142,11 +149,11 @@ public class GeneralModelsBuilder
           case FONT_BLOCK:
             mySolid = createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
 
-            T = new Matrix4x4();
-            T = T.translation(0.0, 0.0, 0.1);
+            translationMatrix = new Matrix4x4();
+            translationMatrix = translationMatrix.translation(0.0, 0.0, 0.1);
 
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-                mySolid, mySolid.findFace(1), T);
+                mySolid, mySolid.findFace(1), translationMatrix);
 
             break;
           case GLUED_CYLINDERS:
@@ -167,22 +174,25 @@ public class GeneralModelsBuilder
           case SPLIT_TEST_PART_3:
             mySolid = splitTest(3);
             break;
-          case CSG_TEST_PART_1:
-            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+          case CSG_DIRECT:
+            csgPreviewOperands = createCsgHudPreviewOperands(
+                model.getCsgSample());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(1, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
-          case CSG_TEST_PART_2:
-            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+          case CSG_OPERAND1_PARTIAL:
+            csgPreviewOperands = createCsgHudPreviewOperands(
+                model.getCsgSample());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(2, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
-          case CSG_TEST_PART_3:
-            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+          case CSG_OPERAND2_PARTIAL:
+            csgPreviewOperands = createCsgHudPreviewOperands(
+                model.getCsgSample());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
@@ -1219,6 +1229,30 @@ public class GeneralModelsBuilder
         }
 
         return operands;
+    }
+
+    private static PolyhedralBoundedSolid[] createCsgHudPreviewOperands(
+        CsgSampleNames sample)
+    {
+        switch ( sample ) {
+            case MANT1986_2:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
+            case MANT1986_3:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+            case MANT1988_15_2_HOLED:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+            case MANT1988_6_13:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
+            case MANT1988_15_1:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+            default:
+                return createCsgOperands(sample);
+        }
     }
 
     private static PolyhedralBoundedSolid csgMant1988_15_2Case(

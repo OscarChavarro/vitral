@@ -222,6 +222,45 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @org.junit.jupiter.api.Test
+    void given_mant1988Section15_2HoledUnion_when_currentKernelRuns_then_resultStaysIntermediateButFailsStrictOnIntersectingLoops()
+    {
+        PolyhedralBoundedSolid[] operands =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            operands[0], operands[1], PolyhedralBoundedSolidModeler.UNION,
+            false);
+
+        assertThat(result).isNotNull();
+        assertThat(result.polygonsList.size()).isEqualTo(12);
+        assertThat(result.edgesList.size()).isEqualTo(24);
+        assertThat(result.verticesList.size()).isEqualTo(18);
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isFalse();
+        assertThat(result.findFace(1)).isNotNull();
+        assertThat(result.findFace(1).boundariesList.size()).isEqualTo(2);
+    }
+
+    @org.junit.jupiter.api.Disabled(
+        "Known bug: coplanar/tangential UNION on MANT1988_15_2_HOLED leaves intersecting loops")
+    @org.junit.jupiter.api.Test
+    void given_mant1988Section15_2HoledUnion_when_coplanarTangentialKernelIsFixed_then_resultBecomesStrictAndKeepsBlockWithTriangularWings()
+    {
+        PolyhedralBoundedSolid[] operands =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            operands[0], operands[1], PolyhedralBoundedSolidModeler.UNION,
+            false);
+
+        assertThat(result).isNotNull();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isTrue();
+    }
+
+    @org.junit.jupiter.api.Test
     void given_mant1988Section15_2HoledIntersection_when_togglingFinalMaximizeFaces_then_resultTopologyIsPreserved()
     {
         // Arrange

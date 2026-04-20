@@ -25,7 +25,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
-    private SolidModelNames solidModelName = SolidModelNames.CSG_TEST_PART_1;
+    private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
 
@@ -45,7 +45,7 @@ public class DebuggerModel
     private CameraController cameraController;
     private GLCanvas canvas;
     private CsgOperationNames csgOperation = CsgOperationNames.UNION;
-    private CsgSampleNames csgSample = CsgSampleNames.MANT1988_15_2_HOLED;
+    private CsgSampleNames csgSample = CsgSampleNames.HOLLOW_BRICK;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
     private boolean debugCsg = false;

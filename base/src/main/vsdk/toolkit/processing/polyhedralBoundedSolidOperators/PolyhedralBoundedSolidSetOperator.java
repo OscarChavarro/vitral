@@ -46,6 +46,9 @@ its documentation).
 */
 public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOperator
 {
+    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
+        "vsdk.setop.traceCoplanarTangential";
+
     /**
     Debug flags.
     */
@@ -62,6 +65,19 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     Used for exporting internal state in graphical form.
     */
     private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
+
+    private static boolean isCoplanarTangentialTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
+    }
+
+    private static void traceCoplanarTangential(String message)
+    {
+        if ( !isCoplanarTangentialTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpCoplanarTrace] " + message);
+    }
 
     private static int compareToZero(double value)
     {
@@ -1034,10 +1050,20 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
                 d = VSDK.vectorDistance(n1, n2);
                 sameOrientation = ( d < numericContext.unitVectorTolerance() );
+                traceCoplanarTangential(
+                    "vertexVertexReclassifyOnSectors op=" + op +
+                    " sectA=" + secta +
+                    " sectB=" + sectb +
+                    " sameOrientation=" + sameOrientation +
+                    " faceA=" + ha.parentLoop.parentFace.id +
+                    " faceB=" + hb.parentLoop.parentFace.id);
                 newsa = resolveCoplanarVertexVertexClass(op, sameOrientation,
                     true);
                 newsb = resolveCoplanarVertexVertexClass(op, sameOrientation,
                     false);
+                traceCoplanarTangential(
+                    "  resolved coplanar vertex/vertex classes newsa=" +
+                    newsa + " newsb=" + newsb);
                 si = sectors.get(i);
 
                 // Propagate to neigbor sectors
@@ -1077,6 +1103,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 si.s1a = si.s2a = newsa;
                 si.s1b = si.s2b = newsb;
                 si.intersect = false;
+                traceCoplanarTangential(
+                    "  deactivated coplanar sector pair sectA=" + secta +
+                    " sectB=" + sectb);
             }
         }
     }
@@ -1085,6 +1114,39 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectors(a, b);
+    }
+
+    private static Boolean coplanarSameOrientationForSectorPair(int secta,
+        int sectb)
+    {
+        _PolyhedralBoundedSolidHalfEdge ha;
+        _PolyhedralBoundedSolidHalfEdge hb;
+        Vector3D n1;
+        Vector3D n2;
+
+        if ( secta < 0 || sectb < 0 || secta >= nba.size() ||
+             sectb >= nbb.size() ) {
+            return null;
+        }
+
+        ha = nba.get(secta).he;
+        hb = nbb.get(sectb).he;
+        if ( ha == null || hb == null ||
+             ha.parentLoop == null || hb.parentLoop == null ||
+             ha.parentLoop.parentFace == null ||
+             hb.parentLoop.parentFace == null ||
+             ha.parentLoop.parentFace.containingPlane == null ||
+             hb.parentLoop.parentFace.containingPlane == null ) {
+            return null;
+        }
+
+        n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
+        n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
+        if ( !colinearVectors(n1, n2) ) {
+            return null;
+        }
+
+        return n1.dotProduct(n2) >= 0.0;
     }
 
     public static boolean colinearVectorsWithDirection(Vector3D a, Vector3D b)
@@ -1134,6 +1196,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int i, j, newsa, newsb;
         int secta, prevsecta;
         int sectb, prevsectb;
+        Boolean sameOrientation;
 
         // Search for doubly coplanar edges
         for ( i = 0; i < sectors.size(); i++ ) {
@@ -1141,14 +1204,33 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             if ( sectors.get(i).intersect &&
                  sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
                  sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
-                // Figure out the new classifications for the "on"-edges
-                newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-
                 secta = sectors.get(i).secta;
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0)?nba.size()-1:secta-1;
                 prevsectb = (sectb == 0)?nbb.size()-1:sectb-1;
+                sameOrientation = coplanarSameOrientationForSectorPair(secta,
+                    sectb);
+                if ( sameOrientation != null ) {
+                    newsa = resolveCoplanarVertexVertexClass(op,
+                        sameOrientation.booleanValue(), true);
+                    newsb = resolveCoplanarVertexVertexClass(op,
+                        sameOrientation.booleanValue(), false);
+                }
+                else {
+                    newsa = (op == UNION)?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                    newsb = (op == UNION)?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                }
+                traceCoplanarTangential(
+                    "vertexVertexReclassifyOnEdges double-on op=" + op +
+                    " sectA=" + secta +
+                    " sectB=" + sectb +
+                    " sameOrientation=" + sameOrientation +
+                    " newsa=" + newsa +
+                    " newsb=" + newsb);
 
                 // Reclassify all instances of the situation
                 for ( j = 0; j < sectors.size(); j++ ) {
@@ -1199,7 +1281,23 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0)?nba.size()-1:secta-1;
                 prevsectb = (sectb == 0)?nbb.size()-1:sectb-1;
-                newsa = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                sameOrientation = coplanarSameOrientationForSectorPair(secta,
+                    sectb);
+                if ( sameOrientation != null ) {
+                    newsa = resolveCoplanarVertexVertexClass(op,
+                        sameOrientation.booleanValue(), true);
+                }
+                else {
+                    newsa = (op == UNION)?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                }
+                traceCoplanarTangential(
+                    "vertexVertexReclassifyOnEdges single-on-A op=" + op +
+                    " sectA=" + secta +
+                    " sectB=" + sectb +
+                    " sameOrientation=" + sameOrientation +
+                    " newsa=" + newsa);
 
                 for ( j = 0; j < sectors.size(); j++ ) {
                     if ( sectors.get(j).intersect ) {
@@ -1226,7 +1324,23 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 sectb = sectors.get(i).sectb;
                 prevsecta = (secta == 0)?nba.size()-1:secta-1;
                 prevsectb = (sectb == 0)?nbb.size()-1:sectb-1;
-                newsb = (op == UNION)?_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                sameOrientation = coplanarSameOrientationForSectorPair(secta,
+                    sectb);
+                if ( sameOrientation != null ) {
+                    newsb = resolveCoplanarVertexVertexClass(op,
+                        sameOrientation.booleanValue(), false);
+                }
+                else {
+                    newsb = (op == UNION)?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                }
+                traceCoplanarTangential(
+                    "vertexVertexReclassifyOnEdges single-on-B op=" + op +
+                    " sectA=" + secta +
+                    " sectB=" + sectb +
+                    " sameOrientation=" + sameOrientation +
+                    " newsb=" + newsb);
 
                 for ( j=0; j < sectors.size(); j++ ) {
                     if ( sectors.get(j).intersect ) {

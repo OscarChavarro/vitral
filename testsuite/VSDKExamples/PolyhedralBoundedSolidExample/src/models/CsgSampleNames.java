@@ -2,21 +2,21 @@ package models;
 
 public enum CsgSampleNames
 {
-    MANT1986_2("MANT1986_2"),
-    STACKED_BLOCKS("STACKED_BLOCKS"),
-    MANT1986_3("MANT1986_3"),
-    HOLLOW_BRICK("HOLLOW_BRICK"),
-    CROSS_PAIR("CROSS_PAIR"),
-    MOON_BLOCK("MOON_BLOCK"),
-    MANT1988_15_2_HOLED("MANT1988_15_2_HOLED"),
-    MANT1988_6_13("MANT1988_6_13"),
-    MANT1988_15_1("MANT1988_15_1");
+    HOLLOW_BRICK(1),
+    MANT1986_2(2),
+    STACKED_BLOCKS(3),
+    CROSS_PAIR(4),
+    MOON_BLOCK(5),
+    MANT1988_6_13(6),
+    MANT1988_15_1(7),
+    MANT1986_3(8),
+    MANT1988_15_2_HOLED(9);
 
-    private final String label;
+    private final int id;
 
-    CsgSampleNames(String label)
+    CsgSampleNames(int id)
     {
-        this.label = label;
+        this.id = id;
     }
 
     public CsgSampleNames nextCircular()
@@ -28,12 +28,12 @@ public enum CsgSampleNames
 
     public String getLabel()
     {
-        return label;
+        return name();
     }
 
     public int getDisplayIndex()
     {
-        return ordinal() + 1;
+        return id;
     }
 
     public static int getTotalSamples()
