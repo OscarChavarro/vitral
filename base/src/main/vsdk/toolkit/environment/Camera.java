@@ -440,36 +440,30 @@ public class Camera extends Entity
     */
     public final Ray generateRay(int x, int y)
     {
-        double u, v;
-        Ray ray;
-
         // 1. Convert integer image coordinates into values in the range [-0.5, 0.5]
-        u = ((double)x - viewportXSize/2.0) / viewportXSize;
-        v = ((viewportYSize - (double)y - 1) -  viewportYSize/2.0) / viewportYSize;
-
-        // 2. Calculate the ray direction
-        Vector3D dv;
-        Vector3D du;
+        double u = ((double)x - viewportXSize/2.0) / viewportXSize;
+        double v =
+            ((viewportYSize - (double)y - 1) -  viewportYSize/2.0) / viewportYSize;
 
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
             double fovFactor = viewportXSize/viewportYSize;
-            du = left.multiply(-fovFactor);
-            dv = up;
-            du = du.multiply(2*u/orthogonalZoom);
-            dv = dv.multiply(2*v/orthogonalZoom);
-            ray = new Ray(eyePosition.add(du.add(dv)), front);
-            return ray;
+            double duScale = (-fovFactor) * (2*u/orthogonalZoom);
+            double dvScale = 2*v/orthogonalZoom;
+            Vector3D origin = new Vector3D(
+                eyePosition.x() + left.x()*duScale + up.x()*dvScale,
+                eyePosition.y() + left.y()*duScale + up.y()*dvScale,
+                eyePosition.z() + left.z()*duScale + up.z()*dvScale);
+            return new Ray(origin, front);
         }
-        // Default behavior is to assume planar perspective projection
-        du = rightWithScale.multiply(u);
-        dv = upWithScale.multiply(v);
 
-        Vector3D dir = dv.add(du).add(_dir);
+        // 2. Default behavior is to assume planar perspective projection
+        Vector3D direction = new Vector3D(
+            rightWithScale.x()*u + upWithScale.x()*v + _dir.x(),
+            rightWithScale.y()*u + upWithScale.y()*v + _dir.y(),
+            rightWithScale.z()*u + upWithScale.z()*v + _dir.z());
 
-        // 3. Build up and return a ray with origin in the eye position and with calculated direction
-        ray = new Ray(eyePosition, dir);
-
-        return ray;
+        // 3. Build up and return a ray with origin in the eye position
+        return new Ray(eyePosition, direction);
     }
 
     public double getOrthogonalZoom()

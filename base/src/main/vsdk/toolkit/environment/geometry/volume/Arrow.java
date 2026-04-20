@@ -10,6 +10,7 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 public class Arrow extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
+    private static final double NO_HIT = Double.POSITIVE_INFINITY;
 
     private double baseLength;
     private double headLength;
@@ -85,12 +86,10 @@ public class Arrow extends Solid {
     */
     public Ray
     doIntersection(Ray inOutRay) {
-        Ray headRay, baseRay;
-        RayHit headInfo, baseInfo;
         Vector3D tr = new Vector3D(0, 0, -baseLength);
 
-        headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
-        baseRay = new Ray(inOutRay);
+        Ray headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
+        Ray baseRay = new Ray(inOutRay);
 
         Ray baseHit = baseCylinder.doIntersection(baseRay);
         Ray headHit = headCone.doIntersection(headRay);
@@ -109,29 +108,90 @@ public class Arrow extends Solid {
         return null;
     }
 
+    private boolean doIntersectionDistanceOnly(Ray inRay, RayHit outHit)
+    {
+        Vector3D shiftedHeadOrigin = new Vector3D(
+            inRay.origin().x(),
+            inRay.origin().y(),
+            inRay.origin().z() - baseLength);
+        Ray shiftedHeadRay =
+            new Ray(shiftedHeadOrigin, inRay.direction(), inRay.t());
+
+        RayHit candidateHit;
+        boolean shouldStoreRay = false;
+        if ( outHit != null ) {
+            candidateHit = outHit;
+            shouldStoreRay = outHit.shouldStoreRay();
+        }
+        else {
+            candidateHit = new RayHit(RayHit.DETAIL_NONE, false);
+        }
+        candidateHit.setStoreRay(false);
+
+        double baseT = NO_HIT;
+        candidateHit.resetForDistanceOnly();
+        if ( baseCylinder.doIntersection(inRay, candidateHit) ) {
+            baseT = candidateHit.hitDistance();
+        }
+
+        double headT = NO_HIT;
+        candidateHit.resetForDistanceOnly();
+        if ( headCone.doIntersection(shiftedHeadRay, candidateHit) ) {
+            headT = candidateHit.hitDistance();
+        }
+
+        double winnerT = baseT < headT ? baseT : headT;
+        if ( winnerT == NO_HIT ) {
+            return false;
+        }
+
+        if ( outHit != null ) {
+            if ( shouldStoreRay ) {
+                outHit.setRay(inRay.withT(winnerT));
+            }
+            else {
+                outHit.setHitDistance(winnerT);
+            }
+            outHit.setStoreRay(shouldStoreRay);
+        }
+        return true;
+    }
+
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
+        if ( outHit == null || !outHit.needsAnySurfaceData() ) {
+            return doIntersectionDistanceOnly(inRay, outHit);
+        }
+
         Vector3D tr = new Vector3D(0, 0, -baseLength);
         Ray shiftedHeadRay = new Ray(inRay.origin().add(tr), inRay.direction(), inRay.t());
 
-        RayHit baseHit = new RayHit();
-        RayHit headHit = new RayHit();
+        RayHit baseHit = new RayHit(outHit.requiredDetailMask());
+        RayHit headHit = new RayHit(outHit.requiredDetailMask());
         boolean hasBase = baseCylinder.doIntersection(inRay, baseHit);
         boolean hasHead = headCone.doIntersection(shiftedHeadRay, headHit);
 
         if ( !hasBase && !hasHead ) {
             return false;
         }
-        if ( outHit != null ) {
-            if ( hasBase && (!hasHead || baseHit.ray().t() < headHit.ray().t()) ) {
-                outHit.clone(baseHit);
-                outHit.setRay(inRay.withT(baseHit.ray().t()));
-            }
-            else {
-                outHit.clone(headHit);
-                outHit.setRay(inRay.withT(headHit.ray().t()));
-                outHit.p = outHit.p.withZ(outHit.p.z() + baseLength);
+
+        double baseT =
+            hasBase ? (baseHit.ray() != null ? baseHit.ray().t() : baseHit.hitDistance()) :
+            NO_HIT;
+        double headT =
+            hasHead ? (headHit.ray() != null ? headHit.ray().t() : headHit.hitDistance()) :
+            NO_HIT;
+
+        if ( hasBase && (!hasHead || baseT < headT) ) {
+            outHit.clone(baseHit);
+            outHit.setRay(inRay.withT(baseT));
+        }
+        else {
+            outHit.clone(headHit);
+            outHit.setRay(inRay.withT(headT));
+            if ( outHit.p != null ) {
+                outHit.p = new Vector3D(outHit.p.x(), outHit.p.y(), outHit.p.z() + baseLength);
             }
         }
         return true;

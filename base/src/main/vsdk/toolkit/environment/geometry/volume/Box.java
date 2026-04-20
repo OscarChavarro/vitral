@@ -13,6 +13,17 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 public class Box extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
+    private static final Vector3D NORMAL_POS_Z = new Vector3D(0, 0, 1);
+    private static final Vector3D NORMAL_NEG_Z = new Vector3D(0, 0, -1);
+    private static final Vector3D NORMAL_POS_Y = new Vector3D(0, 1, 0);
+    private static final Vector3D NORMAL_NEG_Y = new Vector3D(0, -1, 0);
+    private static final Vector3D NORMAL_POS_X = new Vector3D(1, 0, 0);
+    private static final Vector3D NORMAL_NEG_X = new Vector3D(-1, 0, 0);
+    private static final Vector3D TANGENT_POS_Y = new Vector3D(0, 1, 0);
+    private static final Vector3D TANGENT_NEG_Y = new Vector3D(0, -1, 0);
+    private static final Vector3D TANGENT_NEG_X = new Vector3D(-1, 0, 0);
+    private static final Vector3D TANGENT_POS_X = new Vector3D(1, 0, 0);
+    private static final Vector3D ZERO_VECTOR = new Vector3D();
 
     private Vector3D size;
     private PolyhedralBoundedSolid brepCache;
@@ -43,87 +54,90 @@ public class Box extends Solid {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        double t;
         double minT = Double.MAX_VALUE;
         int hitPlane = 0;
         double x2 = size.x()/2;
         double y2 = size.y()/2;
         double z2 = size.z()/2;
-        Ray normalizedRay = inRay.withDirection(inRay.direction().normalized());
-        Vector3D p = null;
+        double ox = inRay.origin().x();
+        double oy = inRay.origin().y();
+        double oz = inRay.origin().z();
+        double dx = inRay.direction().x();
+        double dy = inRay.direction().y();
+        double dz = inRay.direction().z();
 
-        if ( Math.abs(normalizedRay.direction().z()) > VSDK.EPSILON ) {
-            t = (z2-normalizedRay.origin().z())/normalizedRay.direction().z();
+        if ( Math.abs(dz) > VSDK.EPSILON ) {
+            double t = (z2 - oz) / dz;
             if ( t > -VSDK.EPSILON ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.x() >= -x2 && candidate.x() <= x2 &&
-                     candidate.y() >= -y2 && candidate.y() <= y2 ) {
-                    p = candidate;
+                double cx = ox + dx*t;
+                double cy = oy + dy*t;
+                if ( cx >= -x2 && cx <= x2 &&
+                     cy >= -y2 && cy <= y2 ) {
                     minT = t;
                     hitPlane = 1;
                 }
             }
         }
 
-        if ( Math.abs(normalizedRay.direction().z()) > VSDK.EPSILON ) {
-            t = (-z2-normalizedRay.origin().z())/normalizedRay.direction().z();
+        if ( Math.abs(dz) > VSDK.EPSILON ) {
+            double t = (-z2 - oz) / dz;
             if ( t > -VSDK.EPSILON && t < minT ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.x() >= -x2 && candidate.x() <= x2 &&
-                     candidate.y() >= -y2 && candidate.y() <= y2 ) {
-                    p = candidate;
+                double cx = ox + dx*t;
+                double cy = oy + dy*t;
+                if ( cx >= -x2 && cx <= x2 &&
+                     cy >= -y2 && cy <= y2 ) {
                     minT = t;
                     hitPlane = 2;
                 }
             }
         }
 
-        if ( Math.abs(normalizedRay.direction().y()) > VSDK.EPSILON ) {
-            t = (y2-normalizedRay.origin().y())/normalizedRay.direction().y();
+        if ( Math.abs(dy) > VSDK.EPSILON ) {
+            double t = (y2 - oy) / dy;
             if ( t > -VSDK.EPSILON && t < minT ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.x() >= -x2 && candidate.x() <= x2 &&
-                     candidate.z() >= -z2 && candidate.z() <= z2 ) {
-                    p = candidate;
+                double cx = ox + dx*t;
+                double cz = oz + dz*t;
+                if ( cx >= -x2 && cx <= x2 &&
+                     cz >= -z2 && cz <= z2 ) {
                     minT = t;
                     hitPlane = 3;
                 }
             }
         }
 
-        if ( Math.abs(normalizedRay.direction().y()) > VSDK.EPSILON ) {
-            t = (-y2-normalizedRay.origin().y())/normalizedRay.direction().y();
+        if ( Math.abs(dy) > VSDK.EPSILON ) {
+            double t = (-y2 - oy) / dy;
             if ( t > -VSDK.EPSILON && t < minT ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.x() >= -x2 && candidate.x() <= x2 &&
-                     candidate.z() >= -z2 && candidate.z() <= z2 ) {
-                    p = candidate;
+                double cx = ox + dx*t;
+                double cz = oz + dz*t;
+                if ( cx >= -x2 && cx <= x2 &&
+                     cz >= -z2 && cz <= z2 ) {
                     minT = t;
                     hitPlane = 4;
                 }
             }
         }
 
-        if ( Math.abs(normalizedRay.direction().x()) > VSDK.EPSILON ) {
-            t = (x2-normalizedRay.origin().x())/normalizedRay.direction().x();
+        if ( Math.abs(dx) > VSDK.EPSILON ) {
+            double t = (x2 - ox) / dx;
             if ( t > -VSDK.EPSILON && t < minT ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.y() >= -y2 && candidate.y() <= y2 &&
-                     candidate.z() >= -z2 && candidate.z() <= z2 ) {
-                    p = candidate;
+                double cy = oy + dy*t;
+                double cz = oz + dz*t;
+                if ( cy >= -y2 && cy <= y2 &&
+                     cz >= -z2 && cz <= z2 ) {
                     minT = t;
                     hitPlane = 5;
                 }
             }
         }
 
-        if ( Math.abs(normalizedRay.direction().x()) > VSDK.EPSILON ) {
-            t = (-x2-normalizedRay.origin().x())/normalizedRay.direction().x();
+        if ( Math.abs(dx) > VSDK.EPSILON ) {
+            double t = (-x2 - ox) / dx;
             if ( t > -VSDK.EPSILON && t < minT ) {
-                Vector3D candidate = normalizedRay.origin().add(normalizedRay.direction().multiply(t));
-                if ( candidate.y() >= -y2 && candidate.y() <= y2 &&
-                     candidate.z() >= -z2 && candidate.z() <= z2 ) {
-                    p = candidate;
+                double cy = oy + dy*t;
+                double cz = oz + dz*t;
+                if ( cy >= -y2 && cy <= y2 &&
+                     cz >= -z2 && cz <= z2 ) {
                     minT = t;
                     hitPlane = 6;
                 }
@@ -135,51 +149,61 @@ public class Box extends Solid {
         }
 
         if ( outHit != null ) {
-            outHit.setRay(inRay.withT(minT));
-            outHit.p = p;
-            outHit.u = 0;
-            outHit.v = 0;
-            switch ( hitPlane ) {
-              case 1:
-                outHit.n = new Vector3D(0, 0, 1);
-                outHit.u = outHit.p.y() / size.y() - 0.5;
-                outHit.v = 1-(outHit.p.x() / size.x() - 0.5);
-                outHit.t = new Vector3D(0, 1, 0);
-                break;
-              case 2:
-                outHit.n = new Vector3D(0, 0, -1);
-                outHit.u = outHit.p.y() / size.y() - 0.5;
-                outHit.v = outHit.p.x() / size.x() - 0.5;
-                outHit.t = new Vector3D(0, 1, 0);
-                break;
-              case 3:
-                outHit.n = new Vector3D(0, 1, 0);
-                outHit.u = 1-(outHit.p.x() / size.x() - 0.5);
-                outHit.v = outHit.p.z() / size.z() - 0.5;
-                outHit.t = new Vector3D(-1, 0, 0);
-                break;
-              case 4:
-                outHit.n = new Vector3D(0, -1, 0);
-                outHit.u = outHit.p.x() / size.x() - 0.5;
-                outHit.v = outHit.p.z() / size.z() - 0.5;
-                outHit.t = new Vector3D(1, 0, 0);
-                break;
-              case 5:
-                outHit.n = new Vector3D(1, 0, 0);
-                outHit.u = outHit.p.y() / size.y() - 0.5;
-                outHit.v = outHit.p.z() / size.z() - 0.5;
-                outHit.t = new Vector3D(0, 1, 0);
-                break;
-              case 6:
-                outHit.n = new Vector3D(-1, 0, 0);
-                outHit.u = 1-(outHit.p.y() / size.y() - 0.5);
-                outHit.v = outHit.p.z() / size.z() - 0.5;
-                outHit.t = new Vector3D(0, -1, 0);
-                break;
-              default:
-                outHit.n = new Vector3D();
-                outHit.t = new Vector3D();
-                break;
+            if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                outHit.setRay(inRay.withT(minT));
+            }
+            else {
+                outHit.setHitDistance(minT);
+            }
+
+            if ( outHit.needsAnySurfaceData() ) {
+                double hitX = ox + dx*minT;
+                double hitY = oy + dy*minT;
+                double hitZ = oz + dz*minT;
+
+                if ( outHit.needsPoint() ) {
+                    outHit.p = new Vector3D(hitX, hitY, hitZ);
+                }
+
+                if ( outHit.needsTextureCoordinates() ) {
+                    outHit.u = 0;
+                    outHit.v = 0;
+                    switch ( hitPlane ) {
+                      case 1:
+                        outHit.u = hitY / size.y() - 0.5;
+                        outHit.v = 1-(hitX / size.x() - 0.5);
+                        break;
+                      case 2:
+                        outHit.u = hitY / size.y() - 0.5;
+                        outHit.v = hitX / size.x() - 0.5;
+                        break;
+                      case 3:
+                        outHit.u = 1-(hitX / size.x() - 0.5);
+                        outHit.v = hitZ / size.z() - 0.5;
+                        break;
+                      case 4:
+                        outHit.u = hitX / size.x() - 0.5;
+                        outHit.v = hitZ / size.z() - 0.5;
+                        break;
+                      case 5:
+                        outHit.u = hitY / size.y() - 0.5;
+                        outHit.v = hitZ / size.z() - 0.5;
+                        break;
+                      case 6:
+                        outHit.u = 1-(hitY / size.y() - 0.5);
+                        outHit.v = hitZ / size.z() - 0.5;
+                        break;
+                      default:
+                        break;
+                    }
+                }
+
+                if ( outHit.needsNormal() ) {
+                    outHit.n = planeNormal(hitPlane);
+                }
+                if ( outHit.needsTangent() ) {
+                    outHit.t = planeTangent(hitPlane);
+                }
             }
         }
 
@@ -196,89 +220,97 @@ public class Box extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
-        Vector3D point = inRay.origin().add(inRay.direction().multiply(inT));
-        int hitPlane = classifyHitPlane(point);
-        outData.p = point;
+        double hitX = inRay.origin().x() + inRay.direction().x()*inT;
+        double hitY = inRay.origin().y() + inRay.direction().y()*inT;
+        double hitZ = inRay.origin().z() + inRay.direction().z()*inT;
+        int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
 
-        switch ( hitPlane ) {
-          case 1:
-            outData.n = outData.n.withX(0);
-            outData.n = outData.n.withY(0);
-            outData.n = outData.n.withZ(1);
-            outData.u = outData.p.y() / size.y() - 0.5;
-            outData.v = 1-(outData.p.x() / size.x() - 0.5);
-            outData.t = outData.t.withX(0);
-            outData.t = outData.t.withY(1);
-            outData.t = outData.t.withZ(0);
-            break;
-          case 2:
-            outData.n = outData.n.withX(0);
-            outData.n = outData.n.withY(0);
-            outData.n = outData.n.withZ(-1);
-            outData.u = outData.p.y() / size.y() - 0.5;
-            outData.v = outData.p.x() / size.x() - 0.5;
-            outData.t = outData.t.withX(0);
-            outData.t = outData.t.withY(1);
-            outData.t = outData.t.withZ(0);
-            break;
-          case 3:
-            outData.n = outData.n.withX(0);
-            outData.n = outData.n.withZ(0);
-            outData.n = outData.n.withY(1);
-            outData.u = 1-(outData.p.x() / size.x() - 0.5);
-            outData.v = outData.p.z() / size.z() - 0.5;
-            outData.t = outData.t.withX(-1);
-            outData.t = outData.t.withY(0);
-            outData.t = outData.t.withZ(0);
-            break;
-          case 4:
-            outData.n = outData.n.withX(0);
-            outData.n = outData.n.withZ(0);
-            outData.n = outData.n.withY(-1);
-            outData.u = outData.p.x() / size.x() - 0.5;
-            outData.v = outData.p.z() / size.z() - 0.5;
-            outData.t = outData.t.withX(1);
-            outData.t = outData.t.withY(0);
-            outData.t = outData.t.withZ(0);
-            break;
-          case 5:
-            outData.n = outData.n.withX(1);
-            outData.n = outData.n.withY(0);
-            outData.n = outData.n.withZ(0);
-            outData.u = outData.p.y() / size.y() - 0.5;
-            outData.v = outData.p.z() / size.z() - 0.5;
-            outData.t = outData.t.withX(0);
-            outData.t = outData.t.withY(1);
-            outData.t = outData.t.withZ(0);
-            break;
-          case 6:
-            outData.n = outData.n.withX(-1);
-            outData.n = outData.n.withY(0);
-            outData.n = outData.n.withZ(0);
-            outData.u = 1-(outData.p.y() / size.y() - 0.5);
-            outData.v = outData.p.z() / size.z() - 0.5;
-            outData.t = outData.t.withX(0);
-            outData.t = outData.t.withY(-1);
-            outData.t = outData.t.withZ(0);
-            break;
-          default:
-            outData.u = 0;
-            outData.v = 0;
-            break;
+        if ( outData.needsPoint() ) {
+            outData.p = new Vector3D(hitX, hitY, hitZ);
+        }
+        if ( outData.needsNormal() ) {
+            outData.n = planeNormal(hitPlane);
+        }
+        if ( outData.needsTangent() ) {
+            outData.t = planeTangent(hitPlane);
+        }
+
+        if ( outData.needsTextureCoordinates() ) {
+            switch ( hitPlane ) {
+              case 1:
+                outData.u = hitY / size.y() - 0.5;
+                outData.v = 1-(hitX / size.x() - 0.5);
+                break;
+              case 2:
+                outData.u = hitY / size.y() - 0.5;
+                outData.v = hitX / size.x() - 0.5;
+                break;
+              case 3:
+                outData.u = 1-(hitX / size.x() - 0.5);
+                outData.v = hitZ / size.z() - 0.5;
+                break;
+              case 4:
+                outData.u = hitX / size.x() - 0.5;
+                outData.v = hitZ / size.z() - 0.5;
+                break;
+              case 5:
+                outData.u = hitY / size.y() - 0.5;
+                outData.v = hitZ / size.z() - 0.5;
+                break;
+              case 6:
+                outData.u = 1-(hitY / size.y() - 0.5);
+                outData.v = hitZ / size.z() - 0.5;
+                break;
+              default:
+                outData.u = 0;
+                outData.v = 0;
+                break;
+            }
         }
     }
 
-    private int classifyHitPlane(Vector3D point)
+    private static Vector3D planeNormal(int hitPlane)
+    {
+        switch ( hitPlane ) {
+          case 1: return NORMAL_POS_Z;
+          case 2: return NORMAL_NEG_Z;
+          case 3: return NORMAL_POS_Y;
+          case 4: return NORMAL_NEG_Y;
+          case 5: return NORMAL_POS_X;
+          case 6: return NORMAL_NEG_X;
+          default: return ZERO_VECTOR;
+        }
+    }
+
+    private static Vector3D planeTangent(int hitPlane)
+    {
+        switch ( hitPlane ) {
+          case 1:
+          case 2:
+          case 5:
+            return TANGENT_POS_Y;
+          case 3:
+            return TANGENT_NEG_X;
+          case 4:
+            return TANGENT_POS_X;
+          case 6:
+            return TANGENT_NEG_Y;
+          default:
+            return ZERO_VECTOR;
+        }
+    }
+
+    private int classifyHitPlane(double x, double y, double z)
     {
         double x2 = size.x() / 2;
         double y2 = size.y() / 2;
         double z2 = size.z() / 2;
-        double dxPlus = Math.abs(point.x() - x2);
-        double dxMinus = Math.abs(point.x() + x2);
-        double dyPlus = Math.abs(point.y() - y2);
-        double dyMinus = Math.abs(point.y() + y2);
-        double dzPlus = Math.abs(point.z() - z2);
-        double dzMinus = Math.abs(point.z() + z2);
+        double dxPlus = Math.abs(x - x2);
+        double dxMinus = Math.abs(x + x2);
+        double dyPlus = Math.abs(y - y2);
+        double dyMinus = Math.abs(y + y2);
+        double dzPlus = Math.abs(z - z2);
+        double dzMinus = Math.abs(z + z2);
 
         double min = dzPlus;
         int plane = 1;

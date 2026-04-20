@@ -21,6 +21,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
@@ -55,6 +57,56 @@ public class Raytracer extends RenderingElement {
         // No mutable shared temporaries: keep method-level variables for reentrancy.
     }
 
+    private static final class SceneObjectRenderData {
+        final Material material;
+        final Image texture;
+        final NormalMap normalMap;
+        final int detailMask;
+
+        private SceneObjectRenderData(
+            Material material,
+            Image texture,
+            NormalMap normalMap,
+            int detailMask)
+        {
+            this.material = material;
+            this.texture = texture;
+            this.normalMap = normalMap;
+            this.detailMask = detailMask;
+        }
+    }
+
+    private static final class SceneRenderCache {
+        final SceneObjectRenderData[] objects;
+
+        private SceneRenderCache(
+            ArrayList<SimpleBody> bodies,
+            RenderContext renderContext)
+        {
+            objects = new SceneObjectRenderData[bodies.size()];
+            for ( int i = 0; i < bodies.size(); i++ ) {
+                SimpleBody body = bodies.get(i);
+                Material material = body.getMaterial();
+                Image texture =
+                    renderContext.textureEnabled ? body.getTexture() : null;
+                NormalMap normalMap =
+                    renderContext.bumpMappingEnabled ? body.getNormalMap() : null;
+                int detailMask = buildSurfaceDetailMask(
+                    material, texture, normalMap, renderContext);
+                objects[i] = new SceneObjectRenderData(
+                    material,
+                    texture,
+                    normalMap,
+                    detailMask);
+            }
+        }
+
+        private SceneObjectRenderData objectData(int objectIndex)
+        {
+            return objects[objectIndex];
+        }
+    }
+
     private static boolean hasNonAmbientLights(ArrayList<Light> lights)
     {
         for ( Light light : lights ) {
@@ -85,23 +137,21 @@ public class Raytracer extends RenderingElement {
     }
 
     private static int buildSurfaceDetailMask(
-        SimpleBody nearestObject,
+        Material material,
+        Image texture,
+        NormalMap normalMap,
         RenderContext renderContext)
     {
-        boolean objectReflective = isReflective(nearestObject.getMaterial());
+        boolean objectReflective = isReflective(material);
         boolean needsPoint = renderContext.localLightingEnabled || objectReflective;
         boolean needsNormal = needsPoint;
         boolean needsUv =
-            (renderContext.localLightingEnabled &&
-             renderContext.textureEnabled &&
-             nearestObject.getTexture() != null) ||
+            (renderContext.localLightingEnabled && texture != null) ||
             ((renderContext.localLightingEnabled || objectReflective) &&
-             renderContext.bumpMappingEnabled &&
-             nearestObject.getNormalMap() != null);
+             normalMap != null);
         boolean needsTangent =
             (renderContext.localLightingEnabled || objectReflective) &&
-            renderContext.bumpMappingEnabled &&
-            nearestObject.getNormalMap() != null;
+            normalMap != null;
         int detailMask = RayHit.DETAIL_NONE;
 
         if ( needsPoint ) {
@@ -121,12 +171,11 @@ public class Raytracer extends RenderingElement {
 
     private void prepareSurfaceHit(
         SimpleBody nearestObject,
+        SceneObjectRenderData objectData,
         Ray hitRay,
-        RendererConfiguration qualitySelection,
-        RenderContext renderContext,
         RayHit outHit)
     {
-        int detailMask = buildSurfaceDetailMask(nearestObject, renderContext);
+        int detailMask = objectData.detailMask;
 
         outHit.reset(detailMask);
         outHit.setRay(hitRay);
@@ -135,30 +184,31 @@ public class Raytracer extends RenderingElement {
             outHit.setRay(hitRay);
         }
 
-        if ( !qualitySelection.isTextureSet() || !outHit.needsTextureCoordinates() ) {
+        if ( !outHit.needsTextureCoordinates() ) {
             outHit.texture = null;
         }
         else if ( outHit.texture == null ) {
-            outHit.texture = nearestObject.getTexture();
+            outHit.texture = objectData.texture;
         }
 
-        if ( !qualitySelection.isBumpMapSet() ||
-             !outHit.needsTextureCoordinates() ||
+        if ( !outHit.needsTextureCoordinates() ||
              !outHit.needsNormal() ||
              !outHit.needsTangent() ) {
             outHit.normalMap = null;
         }
         else if ( outHit.normalMap == null ) {
-            outHit.normalMap = nearestObject.getNormalMap();
+            outHit.normalMap = objectData.normalMap;
         }
     }
 
-    private static Material resolveMaterial(RayHit hit, SimpleBody nearestObject)
+    private static Material resolveMaterial(
+        RayHit hit,
+        SceneObjectRenderData objectData)
     {
         if ( hit.material != null ) {
             return hit.material;
         }
-        return nearestObject.getMaterial();
+        return objectData.material;
     }
 
     /*
@@ -178,19 +228,23 @@ public class Raytracer extends RenderingElement {
     calculation... it is non sense to always be <0, 1, 0>.
     */
     private void evaluateIlluminationModel(
-        RayHit info, Vector3D viewVector, 
-        ArrayList <Light> lights, ArrayList <SimpleBody> objects,
+        RayHit info,
+        double viewX,
+        double viewY,
+        double viewZ,
+        ArrayList <Light> lights,
+        ArrayList <SimpleBody> objects,
+        SceneRenderCache sceneRenderCache,
         Background background,
-        Material material, RendererConfiguration inQualitySelection,
+        Material material,
         RenderContext renderContext,
         int recursions,
         int recursionLevel,
         TraceWorkspace workspace,
-        ColorRgb outColor) {
+        ColorRgb outColor)
+    {
         //-----------------------------------------------------------------
-        SimpleBody nearestObject;
         Vector3D surfaceNormal = info.n;
-        ColorRgb lightEmission;
 
         //- Normal perturbation / bump mapping ----------------------------
         // This code follows the variable name convention used on equation
@@ -233,13 +287,16 @@ public class Raytracer extends RenderingElement {
                 surfaceNormal = surfaceNormal.add(normalPerturbation).normalized();
             }
         }
+        double surfaceNormalX = surfaceNormal.x();
+        double surfaceNormalY = surfaceNormal.y();
+        double surfaceNormalZ = surfaceNormal.z();
 
         //-----------------------------------------------------------------
         //-----------------------------------------------------------------
         int i;
         for ( i = 0; i< lights.size(); i++ ) {
             Light light = lights.get(i);
-            lightEmission = light.getSpecularReference();
+            ColorRgb lightEmission = light.getSpecularReference();
 
             if ( light.tipo_de_luz == Light.AMBIENT ) {
                 ColorRgb ambient = material.getAmbientReference();
@@ -251,38 +308,41 @@ public class Raytracer extends RenderingElement {
                 if ( !renderContext.localLightingEnabled ) {
                     continue;
                 }
-                Vector3D l;
+                double lx;
+                double ly;
+                double lz;
                 double maxShadowDistance = Double.MAX_VALUE;
                 if ( light.tipo_de_luz == Light.POINT ) {
-                    double lx = light.lvec.x() - info.p.x();
-                    double ly = light.lvec.y() - info.p.y();
-                    double lz = light.lvec.z() - info.p.z();
+                    lx = light.lvec.x() - info.p.x();
+                    ly = light.lvec.y() - info.p.y();
+                    lz = light.lvec.z() - info.p.z();
                     double lightDistanceSquared = lx*lx + ly*ly + lz*lz;
                     if ( lightDistanceSquared <= VSDK.EPSILON ) {
                         continue;
                     }
                     double lightDistance = Math.sqrt(lightDistanceSquared);
                     double invLightDistance = 1.0 / lightDistance;
-                    l = new Vector3D(
-                        lx * invLightDistance,
-                        ly * invLightDistance,
-                        lz * invLightDistance);
+                    lx *= invLightDistance;
+                    ly *= invLightDistance;
+                    lz *= invLightDistance;
                     maxShadowDistance = lightDistance - VSDK.EPSILON;
                     if ( maxShadowDistance <= VSDK.EPSILON ) {
                         continue;
                     }
                   } 
                   else {
-                    l = new Vector3D(-light.lvec.x(), -light.lvec.y(), -light.lvec.z());
+                    lx = -light.lvec.x();
+                    ly = -light.lvec.y();
+                    lz = -light.lvec.z();
                 }
 
                 // Check if the surface point is in shadow
                 Vector3D shadowOffset = new Vector3D(
-                    info.p.x() + VSDK.EPSILON*l.x(),
-                    info.p.y() + VSDK.EPSILON*l.y(),
-                    info.p.z() + VSDK.EPSILON*l.z());
+                    info.p.x() + VSDK.EPSILON*lx,
+                    info.p.y() + VSDK.EPSILON*ly,
+                    info.p.z() + VSDK.EPSILON*lz);
                 RaytraceProfiling.recordShadowRay();
-                Ray shadowRay = new Ray(shadowOffset, l);
+                Ray shadowRay = new Ray(shadowOffset, new Vector3D(lx, ly, lz));
                 if ( anyThingInRayDirection(
                          shadowRay,
                          objects,
@@ -292,7 +352,8 @@ public class Raytracer extends RenderingElement {
                     continue;
                 }
 
-                double lambert = surfaceNormal.dotProduct(l);
+                double lambert =
+                    surfaceNormalX*lx + surfaceNormalY*ly + surfaceNormalZ*lz;
                 if ( lambert > 0 ) {
                     ColorRgb diffuse = material.getDiffuseReference();
                     double diffuseR = diffuse.r;
@@ -313,13 +374,14 @@ public class Raytracer extends RenderingElement {
                     ColorRgb specular = material.getSpecularReference();
 
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
-                        lambert *= 2;
-                        Vector3D reflectedView = new Vector3D(
-                            lambert*surfaceNormal.x() - l.x(),
-                            lambert*surfaceNormal.y() - l.y(),
-                            lambert*surfaceNormal.z() - l.z());
-                        double spec = 
-                            viewVector.dotProduct(reflectedView);
+                        double twoLambert = 2*lambert;
+                        double reflectedViewX = twoLambert*surfaceNormalX - lx;
+                        double reflectedViewY = twoLambert*surfaceNormalY - ly;
+                        double reflectedViewZ = twoLambert*surfaceNormalZ - lz;
+                        double spec =
+                            viewX*reflectedViewX +
+                            viewY*reflectedViewY +
+                            viewZ*reflectedViewZ;
 
                         if ( spec > 0 ) {
                             // OJO: Raro...
@@ -338,15 +400,20 @@ public class Raytracer extends RenderingElement {
         // Compute illumination due to reflection
         double kr = material.getReflectionCoefficient();
         if ( kr > 0 && recursions > 0 ) {
-            double t = viewVector.dotProduct(surfaceNormal);
+            double t =
+                viewX*surfaceNormalX +
+                viewY*surfaceNormalY +
+                viewZ*surfaceNormalZ;
             if ( t > 0 ) {
-                t *= 2;
-                Vector3D reflect = new Vector3D(t*surfaceNormal.x() - viewVector.x(),
-                                                t*surfaceNormal.y() - viewVector.y(),
-                                                t*surfaceNormal.z() - viewVector.z());
-                Vector3D poffset = new Vector3D(info.p.x() + VSDK.EPSILON*reflect.x(),
-                                                info.p.y() + VSDK.EPSILON*reflect.y(),
-                                                info.p.z() + VSDK.EPSILON*reflect.z());
+                double twoT = 2*t;
+                double reflectX = twoT*surfaceNormalX - viewX;
+                double reflectY = twoT*surfaceNormalY - viewY;
+                double reflectZ = twoT*surfaceNormalZ - viewZ;
+                Vector3D reflect = new Vector3D(reflectX, reflectY, reflectZ);
+                Vector3D poffset = new Vector3D(
+                    info.p.x() + VSDK.EPSILON*reflectX,
+                    info.p.y() + VSDK.EPSILON*reflectY,
+                    info.p.z() + VSDK.EPSILON*reflectZ);
                 RaytraceProfiling.recordReflectionRay();
                 Ray reflected_ray = new Ray(poffset, reflect);
 
@@ -354,17 +421,16 @@ public class Raytracer extends RenderingElement {
                 //delete poffset;
 
                 RayHit reflectedHit = workspace.reflectionHits[recursionLevel];
-                nearestObject =
+                int nearestObjectIndex =
                     selectNearestThingInRayDirection(
                         reflected_ray,
                         objects,
                         reflectedHit,
                         workspace.traversalCandidateHit);
-                if ( nearestObject != null ) {
-                    Vector3D rv = new Vector3D(
-                        -reflected_ray.direction().x(),
-                        -reflected_ray.direction().y(),
-                        -reflected_ray.direction().z());
+                if ( nearestObjectIndex >= 0 ) {
+                    SimpleBody nearestObject = objects.get(nearestObjectIndex);
+                    SceneObjectRenderData objectData =
+                        sceneRenderCache.objectData(nearestObjectIndex);
                     RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
                     ColorRgb rcolor = workspace.reflectionColors[recursionLevel];
                     rcolor.r = 0;
@@ -375,18 +441,19 @@ public class Raytracer extends RenderingElement {
 
                     prepareSurfaceHit(
                         nearestObject,
+                        objectData,
                         reflectedHitRay,
-                        inQualitySelection,
-                        renderContext,
                         subInfo);
                     evaluateIlluminationModel(
                         subInfo,
-                        rv,
+                        -reflected_ray.direction().x(),
+                        -reflected_ray.direction().y(),
+                        -reflected_ray.direction().z(),
                         lights,
                         objects,
+                        sceneRenderCache,
                         background,
-                        resolveMaterial(subInfo, nearestObject),
-                        inQualitySelection,
+                        resolveMaterial(subInfo, objectData),
                         renderContext,
                         recursions - 1,
                         recursionLevel + 1,
@@ -421,45 +488,44 @@ public class Raytracer extends RenderingElement {
     /**
     This method intersect the `inOut_Ray` with all of the geometries contained
     in `inSimpleBodiesArray`. If none of the geometries is intersected
-    `null` is returned, otherwise a reference to the containing SimpleBody
-    is returned.
+    `-1` is returned, otherwise the nearest object index is returned.
 
     Warning: This method includes the use of the ray transformation technique
     that permits the representation of geometries centered in its origin,
     and its combination with geometric transformations.
     */
-    private SimpleBody 
+    private int 
     selectNearestThingInRayDirection(
         Ray inRay,
         ArrayList <SimpleBody> inSimpleBodiesArray,
         RayHit outHit,
-        RayHit candidateHit) {
+        RayHit candidateHit)
+    {
         int i;
-        SimpleBody gi;
-        SimpleBody nearestObject;
+        int nearestObjectIndex;
         double nearestDistance;
 
         nearestDistance = Double.MAX_VALUE;
-        nearestObject = null;
+        nearestObjectIndex = -1;
         candidateHit.setStoreRay(false);
         RaytraceProfiling.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
-            gi = inSimpleBodiesArray.get(i);
+            SimpleBody gi = inSimpleBodiesArray.get(i);
             candidateHit.resetForDistanceOnly();
             RaytraceProfiling.recordObjectIntersectionTest();
             if ( gi.doIntersection(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();
                 if ( hitDistance < nearestDistance && hitDistance > VSDK.EPSILON ) {
                     nearestDistance = hitDistance;
-                    nearestObject = gi;
+                    nearestObjectIndex = i;
                 }
             }
         }
-        if ( nearestObject != null && outHit != null ) {
+        if ( nearestObjectIndex >= 0 && outHit != null ) {
             outHit.resetForDistanceOnly();
             outHit.setHitDistance(nearestDistance);
         }
-        return nearestObject;
+        return nearestObjectIndex;
     }
 
     private boolean anyThingInRayDirection(
@@ -498,49 +564,48 @@ public class Raytracer extends RenderingElement {
                                ArrayList <SimpleBody> inSimpleBodiesArray, 
                                ArrayList <Light> inLightsArray,
                                Background in_background,
-                               RendererConfiguration inQualitySelection,
                                RenderContext renderContext,
+                               SceneRenderCache sceneRenderCache,
                                TraceWorkspace workspace,
                                ColorRgb outColor)
     {
-        SimpleBody nearestObject;
         RayHit hitInfo = workspace.nearestHit;
 
-        nearestObject =
+        int nearestObjectIndex =
             selectNearestThingInRayDirection(
                 inRay,
                 inSimpleBodiesArray,
                 hitInfo,
                 workspace.traversalCandidateHit);
-        if ( nearestObject != null ) {
+        if ( nearestObjectIndex >= 0 ) {
             //------------------------------------------------------------
+            SimpleBody nearestObject =
+                inSimpleBodiesArray.get(nearestObjectIndex);
+            SceneObjectRenderData objectData =
+                sceneRenderCache.objectData(nearestObjectIndex);
             Ray primaryHitRay = inRay.withT(hitInfo.hitDistance());
             RayHit shadingInfo = workspace.shadingHits[0];
             prepareSurfaceHit(
                 nearestObject,
+                objectData,
                 primaryHitRay,
-                inQualitySelection,
-                renderContext,
                 shadingInfo);
-            Vector3D viewVector = new Vector3D(
-                -inRay.direction().x(),
-                -inRay.direction().y(),
-                -inRay.direction().z());
 
             evaluateIlluminationModel(
                 shadingInfo,
-                viewVector,
+                -inRay.direction().x(),
+                -inRay.direction().y(),
+                -inRay.direction().z(),
                 inLightsArray,
                 inSimpleBodiesArray,
+                sceneRenderCache,
                 in_background,
-                resolveMaterial(shadingInfo, nearestObject),
-                inQualitySelection,
+                resolveMaterial(shadingInfo, objectData),
                 renderContext,
                 MAX_RECURSION_LEVEL,
                 0,
                 workspace,
                 outColor);
-            //delete viewVector;
           }
           else {
             ColorRgb c;
@@ -645,6 +710,8 @@ public class Raytracer extends RenderingElement {
         ColorRgb color = new ColorRgb();
         RenderContext renderContext =
             buildRenderContext(inQualitySelection, inLightsArray);
+        SceneRenderCache sceneRenderCache =
+            new SceneRenderCache(inSimpleBodiesArray, renderContext);
         TraceWorkspace workspace = traceWorkspace.get();
 
         inCamera.updateVectors();
@@ -667,7 +734,7 @@ public class Raytracer extends RenderingElement {
                 color.b = 0;
                 followRayPath(rayo, inSimpleBodiesArray,
                               inLightsArray, inBackground, 
-                              inQualitySelection, renderContext, workspace, color);
+                              renderContext, sceneRenderCache, workspace, color);
                 if ( outDepthmap != null ) {
                     outDepthmap.setZ(x, y, (float)rayo.t());
                 }

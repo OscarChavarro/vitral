@@ -20,6 +20,7 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 public class Cone extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
+    private static final double NO_HIT = Double.POSITIVE_INFINITY;
 
     private double r1; // Radius at the base
     private double r2; // Radius at the top
@@ -77,23 +78,22 @@ public class Cone extends Solid {
                       RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
-
-        //- Translacion para concordar con la interpretacion AQUYNZA --------
-        Ray r = new Ray(inOutRay);
-        r = r.withDirection(r.direction().normalized());
+        double ox = inOutRay.origin().x();
+        double oy = inOutRay.origin().y();
+        double oz = inOutRay.origin().z();
+        double dx = inOutRay.direction().x();
+        double dy = inOutRay.direction().y();
+        double dz = inOutRay.direction().z();
 
         //- Calcula el termino A --------------------------------------------
-        A = VSDK.square(r.direction().x()) +
-            VSDK.square(r.direction().y());
+        A = VSDK.square(dx) + VSDK.square(dy);
+        if ( Math.abs(A) <= VSDK.EPSILON ) return null;
 
         //- Calcula el termino B --------------------------------------------
-        B = 2 *
-            ( (r.direction().x() * r.origin().x()) +
-              (r.direction().y() * r.origin().y()) );
+        B = 2 * ((dx * ox) + (dy * oy));
 
         //- Calcula el termino C --------------------------------------------
-        C = VSDK.square(r.origin().x()) +
-            VSDK.square(r.origin().y()) -
+        C = VSDK.square(ox) + VSDK.square(oy) -
             VSDK.square(inR);
 
         //- Calcula el discriminant. Si el discriminant no es positivo el -
@@ -108,19 +108,17 @@ public class Cone extends Solid {
 
         //- Si t0 es > 0 listo. Si no debemos calcular la otra raiz t1. -----
         if ( t0 > VSDK.EPSILON ) {
-            // OJO: Aqui va el calculo del punto y la normal!
-            outInfo.p = r.origin().add(r.direction().multiply(t0));
-            if ( outInfo.p.z() > inH || outInfo.p.z() < 0 ) {
+            double pz = oz + dz*t0;
+            if ( pz > inH || pz < 0 ) {
                 return null;
             }
 
-            // Se calcula la normal como el gradiente de la formula del cono,
-            // notese que aqui se obtiene un vector escalado en 1/2 respecto al
-            // gradiente (para ahorrar multiplicaciones)
-            outInfo.n = outInfo.n.withX(outInfo.p.x());
-            outInfo.n = outInfo.n.withY(outInfo.p.y());
-            outInfo.n = outInfo.n.withZ(0);
-            outInfo.n = outInfo.n.normalized();
+            if ( outInfo != null ) {
+                double px = ox + dx*t0;
+                double py = oy + dy*t0;
+                outInfo.p = new Vector3D(px, py, pz);
+                outInfo.n = new Vector3D(px, py, 0).normalized();
+            }
             return inOutRay.withT(t0);
         }
 
@@ -132,29 +130,36 @@ public class Cone extends Solid {
                       RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
-
-        //- Translacion para concordar con la interpretacion AQUYNZA --------
-        Ray r = new Ray(inOutRay);
-        r = r.withOrigin(r.origin().withZ(r.origin().z() - inH));
-        r = r.withDirection(r.direction().normalized());
+        double ox = inOutRay.origin().x();
+        double oy = inOutRay.origin().y();
+        double oz = inOutRay.origin().z();
+        double dx = inOutRay.direction().x();
+        double dy = inOutRay.direction().y();
+        double dz = inOutRay.direction().z();
+        if ( inH <= VSDK.EPSILON ) {
+            return null;
+        }
+        double shiftedOz = oz - inH;
+        double ratio = inR / inH;
+        double ratioSquared = VSDK.square(ratio);
 
         //- Calcula el termino A --------------------------------------------
-        A = VSDK.square(r.direction().x()) +
-            VSDK.square(r.direction().y()) -
-            VSDK.square(r.direction().z() * inR / inH);
+        A = VSDK.square(dx) +
+            VSDK.square(dy) -
+            VSDK.square(dz * ratio);
+        if ( Math.abs(A) <= VSDK.EPSILON ) return null;
 
         //- Calcula el termino B --------------------------------------------
         B = 2 *
-            ((r.direction().x() * r.origin().x()) +
-             (r.direction().y() * r.origin().y()) -
-             (r.direction().z() * r.origin().z() * VSDK.square(inR)) / 
-             VSDK.square(inH)
+            ((dx * ox) +
+             (dy * oy) -
+             (dz * shiftedOz * ratioSquared)
              );
 
         //- Calcula el termino C --------------------------------------------
-        C = VSDK.square(r.origin().x()) +
-            VSDK.square(r.origin().y()) -
-            VSDK.square(r.origin().z() * inR / inH);
+        C = VSDK.square(ox) +
+            VSDK.square(oy) -
+            VSDK.square(shiftedOz * ratio);
 
         //- Calcula el discriminant. Si el discriminant no es positivo el -
         //- rayo no intersecta la esfera. retorna t = 0                      
@@ -168,21 +173,18 @@ public class Cone extends Solid {
 
         //- Si t0 es > 0 listo. Si no debemos calcular la otra raiz t1. -----
         if ( t0 > VSDK.EPSILON ) {
-            // OJO: Aqui va el calculo del punto y la normal!
-            outInfo.p = r.origin().add(r.direction().multiply(t0));
-            if ( outInfo.p.z() > 0 || outInfo.p.z() < -inH ) {
+            double shiftedPz = shiftedOz + dz*t0;
+            if ( shiftedPz > 0 || shiftedPz < -inH ) {
                 return null;
             }
 
-            // Se calcula la normal como el gradiente de la formula del cono,
-            // notese que aqui se obtiene un vector escalado en 1/2 respecto al
-            // gradiente (para ahorrar multiplicaciones)
-            outInfo.n = outInfo.n.withX(outInfo.p.x());
-            outInfo.n = outInfo.n.withY(outInfo.p.y());
-            outInfo.n = outInfo.n.withZ(-outInfo.p.z() * VSDK.square(inR/inH));
-            outInfo.n = outInfo.n.normalized();
-    
-            outInfo.p = outInfo.p.withZ(outInfo.p.z() + inH);
+            if ( outInfo != null ) {
+                double px = ox + dx*t0;
+                double py = oy + dy*t0;
+                outInfo.p = new Vector3D(px, py, shiftedPz + inH);
+                outInfo.n =
+                    new Vector3D(px, py, -shiftedPz * ratioSquared).normalized();
+            }
             return inOutRay.withT(t0);
         }
 
@@ -193,26 +195,170 @@ public class Cone extends Solid {
     private Ray
     doIntersectionTap(Ray inOutRay, double inR, double inH,
                       RayHit outInfo) {
-        double t;
-        Vector3D p;
-        Vector3D proy;
-        Vector3D o = new Vector3D(0, 0, 0);
+        double dx = inOutRay.direction().x();
+        double dy = inOutRay.direction().y();
+        double dz = inOutRay.direction().z();
+        double ox = inOutRay.origin().x();
+        double oy = inOutRay.origin().y();
+        double oz = inOutRay.origin().z();
 
-        if ( Math.abs(inOutRay.direction().z()) > VSDK.EPSILON ) {
-            t = (inH - inOutRay.origin().z()) / inOutRay.direction().z();
+        if ( Math.abs(dz) > VSDK.EPSILON ) {
+            double t = (inH - oz) / dz;
             if ( t > VSDK.EPSILON ) {
-                p = inOutRay.origin().add(inOutRay.direction().multiply(t));
-                proy = new Vector3D(p.x(), p.y(), 0);
-                if ( VSDK.vectorDistance(proy, o) < inR ) {
-                    outInfo.n = outInfo.n.withX(0);
-                    outInfo.n = outInfo.n.withY(0);
-                    outInfo.n = outInfo.n.withZ(1);
-                    outInfo.p = p;
+                double px = ox + dx*t;
+                double py = oy + dy*t;
+                if ( VSDK.square(px) + VSDK.square(py) < VSDK.square(inR) ) {
+                    if ( outInfo != null ) {
+                        outInfo.n = new Vector3D(0, 0, 1);
+                        outInfo.p = new Vector3D(px, py, inH);
+                    }
                     return inOutRay.withT(t);
                 }
             }
         }
         return null;
+    }
+
+    private static boolean hasHit(double t)
+    {
+        return t != NO_HIT;
+    }
+
+    private double doIntersectionCylinderDistance(Ray inOutRay, double inR, double inH)
+    {
+        double dx = inOutRay.direction().x();
+        double dy = inOutRay.direction().y();
+        double dz = inOutRay.direction().z();
+        double ox = inOutRay.origin().x();
+        double oy = inOutRay.origin().y();
+        double oz = inOutRay.origin().z();
+        double A = VSDK.square(dx) + VSDK.square(dy);
+        if ( Math.abs(A) <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double B = 2 * ((dx * ox) + (dy * oy));
+        double C = VSDK.square(ox) + VSDK.square(oy) - VSDK.square(inR);
+        double discriminant = VSDK.square(B) - 4*A*C;
+        if ( discriminant <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double t0 = (-B - Math.sqrt(discriminant)) / (2 * A);
+        if ( t0 <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+        double pz = oz + dz*t0;
+        if ( pz > inH || pz < 0 ) {
+            return NO_HIT;
+        }
+        return t0;
+    }
+
+    private double doIntersectionConeDistance(Ray inOutRay, double inR, double inH)
+    {
+        if ( inH <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double dx = inOutRay.direction().x();
+        double dy = inOutRay.direction().y();
+        double dz = inOutRay.direction().z();
+        double ox = inOutRay.origin().x();
+        double oy = inOutRay.origin().y();
+        double shiftedOz = inOutRay.origin().z() - inH;
+        double ratio = inR / inH;
+        double ratioSquared = VSDK.square(ratio);
+        double A = VSDK.square(dx) + VSDK.square(dy) - VSDK.square(dz * ratio);
+        if ( Math.abs(A) <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double B = 2 * ((dx * ox) + (dy * oy) - (dz * shiftedOz * ratioSquared));
+        double C =
+            VSDK.square(ox) + VSDK.square(oy) - VSDK.square(shiftedOz * ratio);
+        double discriminant = VSDK.square(B) - 4*A*C;
+        if ( discriminant <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double t0 = (-B - Math.sqrt(discriminant)) / (2 * A);
+        if ( t0 <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+        double shiftedPz = shiftedOz + dz*t0;
+        if ( shiftedPz > 0 || shiftedPz < -inH ) {
+            return NO_HIT;
+        }
+        return t0;
+    }
+
+    private double doIntersectionTapDistance(Ray inOutRay, double inR, double inH)
+    {
+        double dz = inOutRay.direction().z();
+        if ( Math.abs(dz) <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double t = (inH - inOutRay.origin().z()) / dz;
+        if ( t <= VSDK.EPSILON ) {
+            return NO_HIT;
+        }
+
+        double px = inOutRay.origin().x() + inOutRay.direction().x()*t;
+        double py = inOutRay.origin().y() + inOutRay.direction().y()*t;
+        if ( VSDK.square(px) + VSDK.square(py) >= VSDK.square(inR) ) {
+            return NO_HIT;
+        }
+        return t;
+    }
+
+    private boolean doIntersectionDistanceOnly(Ray inOutRay, RayHit outHit)
+    {
+        double winnerT = NO_HIT;
+
+        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+            double bodyT = doIntersectionConeDistance(inOutRay, r1, h);
+            double tap1T = doIntersectionTapDistance(inOutRay, r1, 0);
+            if ( hasHit(tap1T) && (!hasHit(bodyT) || tap1T < bodyT) ) {
+                winnerT = tap1T;
+            }
+            else if ( hasHit(bodyT) ) {
+                winnerT = bodyT;
+            }
+        }
+        else if ( VSDK.equals(r1, r2) ) {
+            double bodyT = doIntersectionCylinderDistance(inOutRay, r1, h);
+            double tap1T = doIntersectionTapDistance(inOutRay, r1, 0);
+            double tap2T = doIntersectionTapDistance(inOutRay, r1, h);
+
+            if ( hasHit(bodyT) &&
+                 ((hasHit(tap1T) && bodyT < tap1T) || !hasHit(tap1T)) &&
+                 ((hasHit(tap2T) && bodyT < tap2T) || !hasHit(tap2T)) ) {
+                winnerT = bodyT;
+            }
+            else if ( hasHit(tap1T) &&
+                      ((hasHit(bodyT) && tap1T < bodyT) || !hasHit(bodyT)) &&
+                      ((hasHit(tap2T) && tap1T < tap2T) || !hasHit(tap2T)) ) {
+                winnerT = tap1T;
+            }
+            else if ( hasHit(tap2T) ) {
+                winnerT = tap2T;
+            }
+        }
+
+        if ( !hasHit(winnerT) ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            if ( outHit.shouldStoreRay() ) {
+                outHit.setRay(inOutRay.withT(winnerT));
+            }
+            else {
+                outHit.setHitDistance(winnerT);
+            }
+        }
+        return true;
     }
 
     /**
@@ -233,9 +379,10 @@ public class Cone extends Solid {
     @Override
     public boolean doIntersection(Ray inOutRay, RayHit outHit)
     {
-        Ray bodyRay = new Ray(inOutRay);
-        Ray tap1Ray = new Ray(inOutRay);
-        Ray tap2Ray = new Ray(inOutRay);
+        if ( outHit == null || !outHit.needsAnySurfaceData() ) {
+            return doIntersectionDistanceOnly(inOutRay, outHit);
+        }
+
         RayHit infoTap1 = new RayHit();
         RayHit infoTap2 = new RayHit();
         RayHit infoBody = new RayHit();
@@ -246,8 +393,8 @@ public class Cone extends Solid {
         RayHit winnerInfo = null;
 
         if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            bodyHit = doIntersectionCone(bodyRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
+            bodyHit = doIntersectionCone(inOutRay, r1, h, infoBody);
+            tap1Hit = doIntersectionTap(inOutRay, r1, 0, infoTap1);
             if ( (tap1Hit != null && bodyHit == null) ||
                  (tap1Hit != null && bodyHit != null && (tap1Hit.t() < bodyHit.t())) ) {
                 infoTap1.n = infoTap1.n.multiply(-1);
@@ -261,9 +408,9 @@ public class Cone extends Solid {
         }
         else if ( VSDK.equals(r1, r2) ) {
             int nearest = -1;
-            bodyHit = doIntersectionCylinder(bodyRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(tap1Ray, r1, 0, infoTap1);
-            tap2Hit = doIntersectionTap(tap2Ray, r1, h, infoTap2);
+            bodyHit = doIntersectionCylinder(inOutRay, r1, h, infoBody);
+            tap1Hit = doIntersectionTap(inOutRay, r1, 0, infoTap1);
+            tap2Hit = doIntersectionTap(inOutRay, r1, h, infoTap2);
 
             if ( bodyHit != null &&
                  ((tap1Hit != null && (bodyHit.t() < tap1Hit.t())) || tap1Hit == null) &&
