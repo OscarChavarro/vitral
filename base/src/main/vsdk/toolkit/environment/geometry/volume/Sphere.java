@@ -38,39 +38,17 @@ public class Sphere extends Solid {
     */
     public Ray
     doIntersection(Ray inout_rayo) {
-        /* OJO: Como en Java, a diferencia de C no hay sino objetos por
-                referencia, no se puede hacer una declaraci&oacute;n 
-                est&aacute;tica de un objeto, y poder hacerla es importante 
-                porque la constructora Vector3D::Vector3D se ejecuta muchas veces, 
-                y no se debe gastar tiempo creando objetos (i.e. haciento 
-                Vector3D delta; delta = new Vector3D(); ...).  El c&oacute;digo
-                original de MIT resolvi&oacute; &eacute;sto usando unos 
-                flotantes double dx, dy, dz; e implementando una versi&oacute;n
-                adicional de Vector3D::dotProduct() que recibe 3 doubles.  
-                Se considera que esa soluci&oacute;n es "fea" y que al ofrecer
-                el nuevo m&eacute;todo `Vector3D::dotProduct` se le 
-                desorganiza la mente al usuario/programador.  Por eso, se 
-                resolvi&oacute; implementar otra soluci&oacute;n (tal vez 
-                igual de fea): a&ntilde;adir un nuevo atributo de clase en
-                Sphere, y utilizarlo como su fuese una variable est&aacute;tica
-                de tipo Vector3D dentro del m&eacute;todo.  Esto no es bueno 
-                porque gasta memoria, pero ... que m&aacute;s podr&aacute; 
-                hacerse? Al menos el tiempo de ejecuci&oacute;n se mantiene 
-                igual respecto al c&oacute;digo original de MIT.
-                NOTA: Comparar este m&eacute;todo modificado con la 
-                      versi&oacute;n original en la etapa 1, con la 
-                      ayuda de un profiler. ... */
-        Vector3D delta = new Vector3D(
-            -inout_rayo.origin().x(),
-            -inout_rayo.origin().y(),
-            -inout_rayo.origin().z());
-        double v = inout_rayo.direction().dotProduct(delta);
+        double dx = -inout_rayo.origin().x();
+        double dy = -inout_rayo.origin().y();
+        double dz = -inout_rayo.origin().z();
+        Vector3D direction = inout_rayo.direction();
+        double v = direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
         // Test if the inout_rayo actually intersects the sphere
         double t = _radius_squared + v*v 
-                  - delta.x()*delta.x()
-                  - delta.y()*delta.y()
-                  - delta.z()*delta.z();
+                  - dx*dx
+                  - dy*dy
+                  - dz*dz;
         if ( t < 0 ) {
             return null;
         }
@@ -88,16 +66,17 @@ public class Sphere extends Solid {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        Vector3D delta = new Vector3D(
-            -inRay.origin().x(),
-            -inRay.origin().y(),
-            -inRay.origin().z());
-        double projection = inRay.direction().dotProduct(delta);
+        double dx = -inRay.origin().x();
+        double dy = -inRay.origin().y();
+        double dz = -inRay.origin().z();
+        Vector3D direction = inRay.direction();
+        double projection =
+            direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
         double discriminant = _radius_squared + projection*projection
-                            - delta.x()*delta.x()
-                            - delta.y()*delta.y()
-                            - delta.z()*delta.z();
+                            - dx*dx
+                            - dy*dy
+                            - dz*dz;
         if ( discriminant < 0 ) {
             return false;
         }
@@ -227,6 +206,11 @@ public class Sphere extends Solid {
     public double getRadius()
     {
         return _radius;
+    }
+
+    public double getRadiusSquared()
+    {
+        return _radius_squared;
     }
 
     public void setRadius(double r)

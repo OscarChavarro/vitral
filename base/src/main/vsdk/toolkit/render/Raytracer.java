@@ -445,7 +445,7 @@ public class Raytracer extends RenderingElement {
         RaytraceProfiling.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             gi = inSimpleBodiesArray.get(i);
-            candidateHit.reset(RayHit.DETAIL_NONE);
+            candidateHit.resetForDistanceOnly();
             RaytraceProfiling.recordObjectIntersectionTest();
             if ( gi.doIntersection(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();
@@ -456,7 +456,7 @@ public class Raytracer extends RenderingElement {
             }
         }
         if ( nearestObject != null && outHit != null ) {
-            outHit.reset(RayHit.DETAIL_NONE);
+            outHit.resetForDistanceOnly();
             outHit.setHitDistance(nearestDistance);
         }
         return nearestObject;
@@ -474,7 +474,7 @@ public class Raytracer extends RenderingElement {
         RaytraceProfiling.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             SimpleBody gi = inSimpleBodiesArray.get(i);
-            candidateHit.reset(RayHit.DETAIL_NONE);
+            candidateHit.resetForDistanceOnly();
             RaytraceProfiling.recordObjectIntersectionTest();
             if ( gi.doIntersection(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();

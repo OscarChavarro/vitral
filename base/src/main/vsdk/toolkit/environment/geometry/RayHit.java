@@ -98,6 +98,14 @@ public class RayHit extends FundamentalEntity {
         clear();
     }
 
+    public void resetForDistanceOnly()
+    {
+        requiredDetailMask = DETAIL_NONE;
+        ray = null;
+        hitDistance = 0;
+        hasHitDistance = false;
+    }
+
     public final void clone(RayHit other)
     {
         RaytraceProfiling.recordHitInfoClone();

@@ -16,6 +16,7 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
 
 /**
 Represents a scene body composed of geometry plus object-to-world transform
@@ -323,6 +324,13 @@ public class SimpleBody extends Entity {
         int requiredDetailMask =
             outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
 
+        if ( hasTranslationOnlyTransform &&
+             requiredDetailMask == RayHit.DETAIL_NONE &&
+             geometry instanceof Sphere sphere ) {
+            return doIntersectionWithTranslationOnlySphereFastPath(
+                inOutRay, outHit, sphere);
+        }
+
         if ( hasIdentityTransform ) {
             return geometry.doIntersection(inOutRay, outHit);
         }
@@ -351,7 +359,12 @@ public class SimpleBody extends Entity {
             hit = new RayHit(RayHit.DETAIL_NONE);
         }
         else {
-            hit.reset(requiredDetailMask);
+            if ( requiredDetailMask == RayHit.DETAIL_NONE ) {
+                hit.resetForDistanceOnly();
+            }
+            else {
+                hit.reset(requiredDetailMask);
+            }
         }
 
         // ... and compute doIntersection operation on object's coordinates
@@ -524,7 +537,12 @@ public class SimpleBody extends Entity {
             hit = new RayHit(RayHit.DETAIL_NONE);
         }
         else {
-            hit.reset(requiredDetailMask);
+            if ( requiredDetailMask == RayHit.DETAIL_NONE ) {
+                hit.resetForDistanceOnly();
+            }
+            else {
+                hit.reset(requiredDetailMask);
+            }
         }
 
         if ( !geometry.doIntersection(localRay, hit) ) {
@@ -563,6 +581,41 @@ public class SimpleBody extends Entity {
             outHit.material = hit.material;
             outHit.texture = hit.texture;
             outHit.normalMap = hit.normalMap;
+        }
+        return true;
+    }
+
+    private boolean doIntersectionWithTranslationOnlySphereFastPath(
+        Ray inOutRay,
+        RayHit outHit,
+        Sphere sphere)
+    {
+        double dx = position.x() - inOutRay.origin().x();
+        double dy = position.y() - inOutRay.origin().y();
+        double dz = position.z() - inOutRay.origin().z();
+        Vector3D direction = inOutRay.direction();
+        double projection =
+            direction.x()*dx + direction.y()*dy + direction.z()*dz;
+        double discriminant =
+            sphere.getRadiusSquared() + projection*projection
+            - dx*dx - dy*dy - dz*dz;
+
+        if ( discriminant < 0 ) {
+            return false;
+        }
+
+        double t = projection - Math.sqrt(discriminant);
+        if ( t < 0 ) {
+            return false;
+        }
+
+        if ( outHit != null ) {
+            if ( outHit.shouldStoreRay() ) {
+                outHit.setRay(inOutRay.withT(t));
+            }
+            else {
+                outHit.setHitDistance(t);
+            }
         }
         return true;
     }
