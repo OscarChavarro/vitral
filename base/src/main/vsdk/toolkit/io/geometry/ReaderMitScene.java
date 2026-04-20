@@ -38,6 +38,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -213,6 +214,36 @@ public class ReaderMitScene extends PersistenceElement
         }
     }
 
+    private void
+    flushQuadBatch(SimpleScene theScene,
+                   ArrayList<Vertex> vertices,
+                   ArrayList<int[]> quads,
+                   Material material,
+                   double yaw, double pitch, double roll)
+    {
+        if ( quads.isEmpty() ) {
+            return;
+        }
+
+        QuadMesh mesh = new QuadMesh();
+        mesh.setVertexes(vertices.toArray(new Vertex[0]));
+        mesh.initQuadArrays(quads.size());
+        int[] quadIndices = mesh.getQuadIndices();
+        for ( int i = 0; i < quads.size(); i++ ) {
+            int[] q = quads.get(i);
+            quadIndices[4*i] = q[0];
+            quadIndices[4*i+1] = q[1];
+            quadIndices[4*i+2] = q[2];
+            quadIndices[4*i+3] = q[3];
+        }
+
+        SimpleBody thing = new SimpleBody();
+        thing.setGeometry(mesh);
+        thing.setMaterial(material);
+        applyBodyTransform(thing, yaw, pitch, roll, new Vector3D());
+        theScene.addBody(thing);
+    }
+
     private double
     convertMitHorizontalFovToVertical(double horizontalFov)
     {
@@ -251,6 +282,7 @@ public class ReaderMitScene extends PersistenceElement
         boolean fin_de_lectura = false;
         Material currentMaterial;
         Material currentTrianglesMaterial = null;
+        Material currentQuadsMaterial = null;
         Vector3D importedEye = DEFAULT_MIT_EYE;
         Vector3D importedLookAt = DEFAULT_MIT_LOOKAT;
         Vector3D importedUp = DEFAULT_MIT_UP;
@@ -277,8 +309,11 @@ public class ReaderMitScene extends PersistenceElement
         currentMaterial.setPhongExponent(10);
 
         boolean readingTriangles = false;
+        boolean readingQuads = false;
         ArrayList<Vertex> triangleVertices = new ArrayList<Vertex>();
         ArrayList<Triangle> triangleFaces = new ArrayList<Triangle>();
+        ArrayList<Vertex> quadVertices = new ArrayList<Vertex>();
+        ArrayList<int[]> quadFaces = new ArrayList<int[]>();
         SimpleBody thing;
         double yaw_actual = 0;
         double pitch_actual = 0;
@@ -353,6 +388,42 @@ public class ReaderMitScene extends PersistenceElement
                   }
                   else {
                       System.err.println("ERROR: unsupported triangles token \"" + st.sval +
+                          "\" in line " + st.lineno());
+                      throw new IOException(st.toString());
+                  }
+                  break;
+              }
+              if ( readingQuads ) {
+                  if ( st.sval.equals("v") ) {
+                      Vector3D p = new Vector3D(
+                          readNumber(st),
+                          readNumber(st),
+                          readNumber(st));
+                      quadVertices.add(new Vertex(p));
+                  }
+                  else if ( st.sval.equals("q") ) {
+                      int i0 = (int)readNumber(st);
+                      int i1 = (int)readNumber(st);
+                      int i2 = (int)readNumber(st);
+                      int i3 = (int)readNumber(st);
+                      quadFaces.add(new int[] {i0, i1, i2, i3});
+                  }
+                  else if ( st.sval.equals("surface") ) {
+                      flushQuadBatch(theScene, quadVertices, quadFaces,
+                          currentQuadsMaterial, yaw_actual, pitch_actual, roll_actual);
+                      quadFaces.clear();
+                      currentMaterial = readSurfaceDefinition(st);
+                      currentQuadsMaterial = currentMaterial;
+                  }
+                  else if ( st.sval.equals("end") ) {
+                      flushQuadBatch(theScene, quadVertices, quadFaces,
+                          currentQuadsMaterial, yaw_actual, pitch_actual, roll_actual);
+                      quadVertices.clear();
+                      quadFaces.clear();
+                      readingQuads = false;
+                  }
+                  else {
+                      System.err.println("ERROR: unsupported quads token \"" + st.sval +
                           "\" in line " + st.lineno());
                       throw new IOException(st.toString());
                   }
@@ -495,6 +566,13 @@ public class ReaderMitScene extends PersistenceElement
                   triangleVertices.clear();
                   triangleFaces.clear();
                   currentTrianglesMaterial = currentMaterial;
+                }
+                else if ( st.sval.equals("quads") ) {
+                  showDebugMessage("quads");
+                  readingQuads = true;
+                  quadVertices.clear();
+                  quadFaces.clear();
+                  currentQuadsMaterial = currentMaterial;
                 }
                 else if (st.sval.equals("viewport")) {
                   showDebugMessage("viewport");

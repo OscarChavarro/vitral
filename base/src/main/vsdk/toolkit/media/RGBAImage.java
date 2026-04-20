@@ -201,11 +201,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(r);
-        data.put(g);
-        data.put(b);
-        data.put((byte)-1);
+        data.put(index, r);
+        data.put(index+1, g);
+        data.put(index+2, b);
+        data.put(index+3, (byte)-1);
 //#endif
 
     }
@@ -222,11 +221,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(r);
-        data.put(g);
-        data.put(b);
-        data.put(a);
+        data.put(index, r);
+        data.put(index+1, g);
+        data.put(index+2, b);
+        data.put(index+3, a);
 //#endif
 
     }
@@ -243,11 +241,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(p.r);
-        data.put(p.g);
-        data.put(p.b);
-        data.put(p.a);
+        data.put(index, p.r);
+        data.put(index+1, p.g);
+        data.put(index+2, p.b);
+        data.put(index+3, p.a);
 //#endif
 
     }
@@ -269,11 +266,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(p.r);
-        data.put(p.g);
-        data.put(p.b);
-        data.put(Byte.MAX_VALUE);
+        data.put(index, p.r);
+        data.put(index+1, p.g);
+        data.put(index+2, p.b);
+        data.put(index+3, Byte.MAX_VALUE);
 //#endif
 
     }
@@ -298,11 +294,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
-        p.a = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index+1);
+        p.b = data.get(index+2);
+        p.a = data.get(index+3);
 //#endif
 
         return p;
@@ -326,10 +321,9 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index+1);
+        p.b = data.get(index+2);
 //#endif
 
         return p;
@@ -347,11 +341,10 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
-        p.a = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index+1);
+        p.b = data.get(index+2);
+        p.a = data.get(index+3);
 //#endif
 
     }
@@ -372,10 +365,9 @@ public class RGBAImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index+1);
+        p.b = data.get(index+2);
 //#endif
 
     }

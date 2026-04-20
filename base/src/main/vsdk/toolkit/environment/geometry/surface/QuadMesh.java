@@ -6,10 +6,10 @@ import java.util.ArrayList;
 
 // VitralSDK classes
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.RayHit;
-import vsdk.toolkit.environment.scene.SimpleBody;
 
 /**
 This class represents a "basic" quad mesh. Its model is based in a set
@@ -66,19 +66,12 @@ public class QuadMesh extends Surface {
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
     private double[] minMax;
-    private int selectedQuad;
-    private SimpleBody boundingVolume;
-    private RayHit lastInfo;
-    private Ray lastRay;
     private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public QuadMesh() {
-        lastInfo = new RayHit();
-        lastRay = null;
         minMax = null;
-        boundingVolume = null;
         triangleMeshGroupCache = null;
 
         vertexPositions = null;
@@ -125,6 +118,8 @@ public class QuadMesh extends Surface {
         //vertexUvs = new double[n*2];
         //vertexColors = null;
         incidentQuadsPerVertexArray = new ArrayList<ArrayList<Integer>>();
+        triangleMeshGroupCache = null;
+        minMax = null;
     }
 
     public void initVertexColorsArray()
@@ -172,12 +167,14 @@ public class QuadMesh extends Surface {
             //vertexUvs[2*i+1] = vertexes[i].v;
         }
 
-        boundingVolume = null;
+        triangleMeshGroupCache = null;
+        minMax = null;
     }
 
     public void initQuadArrays(int n)
     {
         quadIndices = new int[n*4];
+        triangleMeshGroupCache = null;
     }
 
     /**
@@ -203,7 +200,8 @@ public class QuadMesh extends Surface {
         vertexUvs[2*i] = vertex.u;
         vertexUvs[2*i+1] = vertex.v;
 
-        boundingVolume = null;
+        triangleMeshGroupCache = null;
+        minMax = null;
     }
 
     /**
@@ -220,9 +218,10 @@ public class QuadMesh extends Surface {
         quadIndices[4*i] = p0;
         quadIndices[4*i+1] = p1;
         quadIndices[4*i+2] = p2;
-        quadIndices[4*i+3] = p2;
+        quadIndices[4*i+3] = p3;
 
-        boundingVolume = null;
+        triangleMeshGroupCache = null;
+        minMax = null;
     }
 
     public int getNumVertices()
@@ -280,7 +279,6 @@ public class QuadMesh extends Surface {
 
     /** Needed for supplying the Geometry.getMinMax operation */
     private void calculateMinMaxPositions() {
-        boundingVolume = null;
         if ( minMax == null ) {
             minMax = new double[6];
 
@@ -347,14 +345,17 @@ public class QuadMesh extends Surface {
     */
     public Ray
     doIntersection(Ray inOut_Ray) {
-        // TODO!
+        RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
+        if ( doIntersection(inOut_Ray, hit) ) {
+            return hit.ray();
+        }
         return null;
     }
 
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        return false;
+        return exportToTriangleMeshGroup().doIntersection(inRay, outHit);
     }
 
     /**
@@ -365,7 +366,10 @@ public class QuadMesh extends Surface {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    RayHit outData) {
-        // TODO!
+        if ( outData == null ) {
+            return;
+        }
+        exportToTriangleMeshGroup().doExtraInformation(inRay, inT, outData);
     }
 
     /**
@@ -374,8 +378,7 @@ public class QuadMesh extends Surface {
     @Override
     public int doContainmentTest(Vector3D p, double distanceTolerance)
     {
-        // TODO!
-        return OUTSIDE;
+        return exportToTriangleMeshGroup().doContainmentTest(p, distanceTolerance);
     }
 
     /**
@@ -396,12 +399,53 @@ public class QuadMesh extends Surface {
     @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
-        /*
         if ( triangleMeshGroupCache == null ) {
+            TriangleMeshGroup group = new TriangleMeshGroup();
+
+            int nVertices = getNumVertices();
+            int nQuads = getNumQuads();
+            if ( nVertices <= 0 || nQuads <= 0 ) {
+                triangleMeshGroupCache = group;
+                return triangleMeshGroupCache;
+            }
+
+            Vertex[] vertices = new Vertex[nVertices];
+            for ( int i = 0; i < nVertices; i++ ) {
+                Vector3D p = new Vector3D(
+                    vertexPositions[3*i],
+                    vertexPositions[3*i+1],
+                    vertexPositions[3*i+2]);
+                if ( vertexNormals != null ) {
+                    Vector3D n = new Vector3D(
+                        vertexNormals[3*i],
+                        vertexNormals[3*i+1],
+                        vertexNormals[3*i+2]);
+                    vertices[i] = new Vertex(p, n);
+                }
+                else {
+                    vertices[i] = new Vertex(p);
+                }
+            }
+
+            Triangle[] triangles = new Triangle[nQuads*2];
+            for ( int i = 0; i < nQuads; i++ ) {
+                int p0 = quadIndices[4*i];
+                int p1 = quadIndices[4*i+1];
+                int p2 = quadIndices[4*i+2];
+                int p3 = quadIndices[4*i+3];
+                triangles[2*i] = new Triangle(p0, p1, p2);
+                triangles[2*i+1] = new Triangle(p0, p2, p3);
+            }
+
+            TriangleMesh mesh = new TriangleMesh();
+            mesh.setVertexes(vertices, vertexNormals != null, false, false, false);
+            mesh.setTriangles(triangles);
+            mesh.calculateNormals();
+
+            mesh.setName(name + "_triangulated");
             triangleMeshGroupCache = new TriangleMeshGroup();
-            triangleMeshGroupCache.addMesh(this);
+            triangleMeshGroupCache.addMesh(mesh);
         }
-        return triangleMeshGroupCache;*/
-        return new TriangleMeshGroup();
+        return triangleMeshGroupCache;
     }
 }

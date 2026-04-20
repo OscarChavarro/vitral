@@ -1,0 +1,38 @@
+# QuadMesh reentrancy/intersection smoke scene
+
+viewport 800 600
+
+eye 3.0 2.2 1.8
+up 0 0 1
+lookat 0 0 0
+fov 45
+background 0.10 0.12 0.16
+
+# Ground
+surface 0.6 0.6 0.62 0.2 0.9 0.5 20 0.2 0.0 1.0
+sphere 0 0 -100 99.2
+
+# Center object built as QuadMesh block
+rotation 0.2 0.25 0.1
+surface 0.30 0.70 0.90 0.2 0.9 0.8 30 0.3 0.0 1.0
+quads
+v -0.5 -0.5 -0.5
+v  0.5 -0.5 -0.5
+v  0.5  0.5 -0.5
+v -0.5  0.5 -0.5
+v -0.5 -0.5  0.5
+v  0.5 -0.5  0.5
+v  0.5  0.5  0.5
+v -0.5  0.5  0.5
+q 0 1 2 3
+q 4 5 6 7
+q 0 4 5 1
+q 1 5 6 2
+q 2 6 7 3
+q 3 7 4 0
+end
+rotation 0 0 0
+
+light 0.8 0.8 0.8 ambient
+light 0.5 0.5 0.5 point 3 2 2
+light 0.4 0.4 0.4 point -2 -3 3
