@@ -14,7 +14,6 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 
 public class ParametricBiCubicPatch extends Surface {
@@ -541,7 +540,7 @@ public class ParametricBiCubicPatch extends Surface {
     */
     public void
     doExtraInformation(Ray inRay, double intT, 
-                                   GeometryIntersectionInformation outData) {
+                                   RayHit outData) {
         
     }
 

@@ -12,7 +12,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.media.IndexedColorImage;
 
@@ -296,7 +295,7 @@ public class VoxelVolume extends Solid {
     public void
     doExtraInformation(Ray inRay, 
         double inT,
-        GeometryIntersectionInformation outData) {
+        RayHit outData) {
 
     }
 

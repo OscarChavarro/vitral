@@ -96,6 +96,18 @@ public abstract class Geometry extends Entity {
     public abstract boolean doIntersection(Ray inRay, RayHit outHit);
 
     /**
+    Rebuilds additional surface information for a ray/parameter pair already
+    known to intersect this geometry.
+
+    <p>Subclasses should override this when they can compute hit attributes
+    such as point, normal, texture coordinates or tangent without repeating
+    the intersection search.
+    */
+    public void doExtraInformation(Ray inRay, double inT, RayHit outHit)
+    {
+    }
+
+    /**
     This method returns the number of front facing surface elements (with
     respect to `origin`) between the `origin` point and the `p` point. The
     internal working of this method is usually related with the

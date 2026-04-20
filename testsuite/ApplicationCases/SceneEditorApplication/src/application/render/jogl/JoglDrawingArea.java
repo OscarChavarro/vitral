@@ -43,7 +43,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -976,9 +976,9 @@ public class JoglDrawingArea implements
         Vector3D p;
         Vector3D d = new Vector3D(ray.direction());
         d = d.normalized();
-        GeometryIntersectionInformation info;
+        RayHit info;
 
-        info = new GeometryIntersectionInformation();
+        info = new RayHit();
 
         //-----------------------------------------------------------------
         visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.5, 0.0));

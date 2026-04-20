@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
@@ -69,14 +68,14 @@ public class QuadMesh extends Surface {
     private double[] minMax;
     private int selectedQuad;
     private SimpleBody boundingVolume;
-    private GeometryIntersectionInformation lastInfo;
+    private RayHit lastInfo;
     private Ray lastRay;
     private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public QuadMesh() {
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         lastRay = null;
         minMax = null;
         boundingVolume = null;
@@ -365,7 +364,7 @@ public class QuadMesh extends Surface {
     */
     public void
     doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outData) {
+                                   RayHit outData) {
         // TODO!
     }
 

@@ -11,7 +11,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -75,7 +74,7 @@ public class Cone extends Solid {
 
     private Ray
     doIntersectionCylinder(Ray inOutRay, double inR, double inH,
-                      GeometryIntersectionInformation outInfo) 
+                      RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
 
@@ -130,7 +129,7 @@ public class Cone extends Solid {
 
     private Ray
     doIntersectionCone(Ray inOutRay, double inR, double inH,
-                      GeometryIntersectionInformation outInfo) 
+                      RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
 
@@ -193,7 +192,7 @@ public class Cone extends Solid {
 
     private Ray
     doIntersectionTap(Ray inOutRay, double inR, double inH,
-                      GeometryIntersectionInformation outInfo) {
+                      RayHit outInfo) {
         double t;
         Vector3D p;
         Vector3D proy;
@@ -237,14 +236,14 @@ public class Cone extends Solid {
         Ray bodyRay = new Ray(inOutRay);
         Ray tap1Ray = new Ray(inOutRay);
         Ray tap2Ray = new Ray(inOutRay);
-        GeometryIntersectionInformation infoTap1 = new GeometryIntersectionInformation();
-        GeometryIntersectionInformation infoTap2 = new GeometryIntersectionInformation();
-        GeometryIntersectionInformation infoBody = new GeometryIntersectionInformation();
+        RayHit infoTap1 = new RayHit();
+        RayHit infoTap2 = new RayHit();
+        RayHit infoBody = new RayHit();
         Ray bodyHit;
         Ray tap1Hit;
         Ray tap2Hit;
         Ray winner = null;
-        GeometryIntersectionInformation winnerInfo = null;
+        RayHit winnerInfo = null;
 
         if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
             bodyHit = doIntersectionCone(bodyRay, r1, h, infoBody);
@@ -320,7 +319,7 @@ public class Cone extends Solid {
     */
     public void
     doExtraInformation(Ray inRay, double inT, 
-                                  GeometryIntersectionInformation outData)
+                                  RayHit outData)
     {
         RayHit hit = new RayHit();
         if ( doIntersection(inRay.withT(Double.MAX_VALUE), hit) ) {

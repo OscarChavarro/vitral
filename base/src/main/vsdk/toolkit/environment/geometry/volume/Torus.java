@@ -8,7 +8,6 @@ import java.io.Serial;
 // VSDK classes
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
@@ -23,7 +22,7 @@ public class Torus extends Solid
     private double majorRadius;
     private double minorRadius;
     
-    private final GeometryIntersectionInformation lastInfo;
+    private final RayHit lastInfo;
 
     /**
     @param inMajorRadius
@@ -34,7 +33,7 @@ public class Torus extends Solid
         majorRadius = inMajorRadius;
         minorRadius = inMinorRadius;
         
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
     }
 
     /**
@@ -1281,7 +1280,7 @@ public class Torus extends Solid
     */
     
     public void doExtraInformation(
-        Ray inRay, double intT, GeometryIntersectionInformation outData) 
+        Ray inRay, double intT, RayHit outData) 
     {
         outData.p = lastInfo.p;
         double r2=minorRadius*minorRadius;

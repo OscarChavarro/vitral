@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -19,7 +18,7 @@ public class TriangleMeshGroup extends Surface {
     private ArrayList<TriangleMesh> meshes;
     private double[] MinMax;
 
-    private GeometryIntersectionInformation lastInfo;
+    private RayHit lastInfo;
     private int[] intersectionInformation;
 
     private SimpleBody boundingVolume;
@@ -27,19 +26,19 @@ public class TriangleMeshGroup extends Surface {
     public TriangleMeshGroup() {
         meshes = new ArrayList<TriangleMesh> ();
         MinMax = null;
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
     public TriangleMeshGroup(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
     public TriangleMeshGroup(TriangleMeshGroup group) {
         this.meshes = group.getMeshes();
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
@@ -149,12 +148,12 @@ public class TriangleMeshGroup extends Surface {
     public Ray doIntersection(Ray inOut_Ray) {
         int i;                // Index for iterating meshes
         double min_t;         // Shortest distance founded so far
-        GeometryIntersectionInformation Info;
+        RayHit Info;
 
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
         Ray nearestHit = null;
-        Info = new GeometryIntersectionInformation();
+        Info = new RayHit();
 
         // Bounding volume check
         if ( boundingVolume == null ) {
@@ -211,7 +210,7 @@ public class TriangleMeshGroup extends Surface {
     doExtraInformation(
         Ray inRay, 
         double inT,
-        GeometryIntersectionInformation outData) {
+        RayHit outData) {
         outData.clone(lastInfo);
     }
 

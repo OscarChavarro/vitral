@@ -15,7 +15,6 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 
 /**
@@ -319,25 +318,45 @@ public class SimpleBody extends Entity {
             return false;
         }
 
+        int requiredDetailMask =
+            outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
         Ray localRay = new Ray(
             localOrigin,
             localDirection.multiply(1.0 / localDirectionLength),
             scaleRayParameterForObjectSpace(inOutRay.t(), localDirectionLength));
 
+        RayHit hit = outHit;
+        if ( hit == null ) {
+            hit = new RayHit(RayHit.DETAIL_NONE);
+        }
+        else {
+            hit.reset(requiredDetailMask);
+        }
+
         // ... and compute doIntersection operation on object's coordinates
-        RayHit localHit = new RayHit();
-        if ( geometry.doIntersection(localRay, localHit) ) {
-            if ( localHit.ray() == null ) {
+        if ( geometry.doIntersection(localRay, hit) ) {
+            if ( hit.ray() == null ) {
                 return false;
             }
             if ( outHit != null ) {
-                outHit.clone(localHit);
-                double worldT = localHit.ray().t() / localDirectionLength;
-                Ray worldRay = inOutRay.withT(worldT);
-                outHit.setRay(worldRay);
-                outHit.p = objectPointToWorldSpace(localHit.p);
-                outHit.n = objectNormalToWorldSpace(localHit.n);
-                outHit.t = objectTangentToWorldSpace(localHit.t);
+                double worldT = hit.ray().t() / localDirectionLength;
+                outHit.setRay(inOutRay.withT(worldT));
+                if ( outHit.needsPoint() ) {
+                    outHit.p = objectPointToWorldSpace(hit.p);
+                }
+                if ( outHit.needsNormal() ) {
+                    outHit.n = objectNormalToWorldSpace(hit.n);
+                }
+                if ( outHit.needsTextureCoordinates() ) {
+                    outHit.u = hit.u;
+                    outHit.v = hit.v;
+                }
+                if ( outHit.needsTangent() ) {
+                    outHit.t = objectTangentToWorldSpace(hit.t);
+                }
+                outHit.material = hit.material;
+                outHit.texture = hit.texture;
+                outHit.normalMap = hit.normalMap;
             }
             return true;
         }
@@ -372,11 +391,36 @@ public class SimpleBody extends Entity {
     @param outInfo structure populated with world-space hit data
     */
     public void doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outInfo)
+                                   RayHit outInfo)
     {
-        RayHit hit = new RayHit();
-        if ( doIntersection(inRay.withT(inT), hit) ) {
-            outInfo.clone(hit);
+        if ( outInfo == null || geometry == null || !hasInvertibleScale ) {
+            return;
+        }
+
+        Vector3D localOrigin = worldPointToObjectSpace(inRay.origin());
+        Vector3D localDirection = worldDirectionToObjectSpace(inRay.direction());
+        double localDirectionLength = localDirection.length();
+        if ( localDirectionLength <= VSDK.EPSILON ) {
+            return;
+        }
+
+        double localT = scaleRayParameterForObjectSpace(inT, localDirectionLength);
+        Ray localRay = new Ray(
+            localOrigin,
+            localDirection.multiply(1.0 / localDirectionLength),
+            localT);
+
+        outInfo.setRay(inRay);
+        geometry.doExtraInformation(localRay, localT, outInfo);
+        outInfo.setRay(inRay);
+        if ( outInfo.needsPoint() ) {
+            outInfo.p = objectPointToWorldSpace(outInfo.p);
+        }
+        if ( outInfo.needsNormal() ) {
+            outInfo.n = objectNormalToWorldSpace(outInfo.n);
+        }
+        if ( outInfo.needsTangent() ) {
+            outInfo.t = objectTangentToWorldSpace(outInfo.t);
         }
     }
 

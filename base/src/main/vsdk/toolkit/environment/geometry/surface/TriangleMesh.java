@@ -20,7 +20,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -125,14 +124,14 @@ public class TriangleMesh extends Surface {
     private double[] minMax;
     private int selectedTriangle;
     private SimpleBody boundingVolume;
-    private GeometryIntersectionInformation lastInfo;
+    private RayHit lastInfo;
     private Ray lastRay;
     private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public TriangleMesh() {
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         lastRay = null;
         minMax = null;
         boundingVolume = null;
@@ -240,7 +239,7 @@ public class TriangleMesh extends Surface {
         int[][] materialRanges;
         int selectedTriangle;
         SimpleBody boundingVolume;
-        GeometryIntersectionInformation lastInfo;
+        RayHit lastInfo;
         Ray lastRay;
         TriangleMeshGroup triangleMeshGroupCache;
 */
@@ -1086,7 +1085,7 @@ public class TriangleMesh extends Surface {
     */
     public void
     doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outData) {
+                                   RayHit outData) {
         //-----------------------------------------------------------------
         Vector3D p0, p1, p2;  // Positions of the three triangle points
         Vector3D n0, n1, n2;  // Normals of the three triangle points
@@ -1360,7 +1359,7 @@ public class TriangleMesh extends Surface {
 
         //- Calculate new vertex arrays -----------------------------------
 
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
         lastRay = null;
         minMax = null;
         boundingVolume = null;

@@ -16,7 +16,6 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Solid;
@@ -74,7 +73,7 @@ public class PolyhedralBoundedSolid extends Solid {
     public int maxVertexId;
     public int maxFaceId;
     private boolean modelIsValid;
-    private GeometryIntersectionInformation lastInfo;
+    private RayHit lastInfo;
 
     //=================================================================
     public PolyhedralBoundedSolid()
@@ -89,7 +88,7 @@ public class PolyhedralBoundedSolid extends Solid {
         maxVertexId = -1;
         maxFaceId = -1;
         modelIsValid = false;
-        lastInfo = new GeometryIntersectionInformation();
+        lastInfo = new RayHit();
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -1261,8 +1260,8 @@ public class PolyhedralBoundedSolid extends Solid {
         // Initialization values for search algorithm
         min_t = Double.MAX_VALUE;
         Ray nearestHit = null;
-        GeometryIntersectionInformation Info;
-        Info = new GeometryIntersectionInformation();
+        RayHit Info;
+        Info = new RayHit();
         Vector3D p;
         int pos;
 
@@ -1291,7 +1290,7 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     public void doExtraInformation(Ray inRay, double inT, 
-                                  GeometryIntersectionInformation outData) {
+                                  RayHit outData) {
         outData.clone(lastInfo);
     }
 
@@ -1524,8 +1523,8 @@ public class PolyhedralBoundedSolid extends Solid {
         int ndist = 0;
 
         Ray ray = new Ray(origin, d);
-        GeometryIntersectionInformation info;
-        info = new GeometryIntersectionInformation();
+        RayHit info;
+        info = new RayHit();
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);

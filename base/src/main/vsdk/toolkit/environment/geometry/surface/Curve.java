@@ -3,7 +3,6 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 
 public abstract class Curve extends Geometry {
@@ -52,7 +51,7 @@ public abstract class Curve extends Geometry {
     */
     public void
     doExtraInformation(Ray inRay, double intT, 
-                                      GeometryIntersectionInformation outData)
+                                      RayHit outData)
     {
         
     }

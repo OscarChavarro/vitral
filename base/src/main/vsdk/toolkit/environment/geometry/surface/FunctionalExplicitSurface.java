@@ -8,7 +8,6 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.ProgressMonitor;
@@ -253,7 +252,7 @@ public class FunctionalExplicitSurface extends Surface
     */
     public void
     doExtraInformation(Ray inRay, double inT,
-                                   GeometryIntersectionInformation outData) {
+                                   RayHit outData) {
         RayHit hit = new RayHit();
         if ( internalGeometry.doIntersection(inRay.withT(inT), hit) ) {
             outData.clone(hit);

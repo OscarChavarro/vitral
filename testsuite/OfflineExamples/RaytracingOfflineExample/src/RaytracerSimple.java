@@ -9,13 +9,16 @@ Modified by Oscar Chavarro for PUJ Vitral '05, '06, '10
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 // Vitral classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.RaytraceProfiling;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
@@ -40,6 +43,33 @@ public class RaytracerSimple {
     {
         readerMitScene = new ReaderMitScene();
         scene = new SimpleScene();
+    }
+
+    private void optimizeRendererConfigurationForScene(
+        RendererConfiguration rendererConfiguration)
+    {
+        boolean hasTextures = false;
+        boolean hasNormalMaps = false;
+        ArrayList<SimpleBody> bodies = scene.getSimpleBodies();
+
+        for ( SimpleBody body : bodies ) {
+            if ( body.getTexture() != null ) {
+                hasTextures = true;
+            }
+            if ( body.getNormalMap() != null ) {
+                hasNormalMaps = true;
+            }
+            if ( hasTextures && hasNormalMaps ) {
+                break;
+            }
+        }
+
+        if ( !hasTextures ) {
+            rendererConfiguration.setTexture(false);
+        }
+        if ( !hasNormalMaps ) {
+            rendererConfiguration.setBumpMap(false);
+        }
     }
 
     private void
@@ -70,6 +100,7 @@ public class RaytracerSimple {
         //- 3. Process the image from the scene data structure -----------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();
         RendererConfiguration rendererConfiguration = new RendererConfiguration();
+        optimizeRendererConfigurationForScene(rendererConfiguration);
 
         visualizationEngine = new Raytracer();
         Camera activeCamera = scene.getActiveCamera();
@@ -89,6 +120,7 @@ public class RaytracerSimple {
             "Image generated in " +
             VSDK.formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS) +
             " seconds.");
+        RaytraceProfiling.printSummary();
 
         //- 4. Export resulting image to an image file --------------------
         if ( save ) {

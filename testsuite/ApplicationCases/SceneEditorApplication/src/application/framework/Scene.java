@@ -19,7 +19,7 @@ import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
+import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
@@ -188,7 +188,7 @@ public class Scene
         return thing;
     }
 
-    public boolean doIntersection(Ray r, GeometryIntersectionInformation info)
+    public boolean doIntersection(Ray r, RayHit info)
     {
         int i;
         double nearestDistance = Float.MAX_VALUE;

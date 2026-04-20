@@ -4,7 +4,6 @@ import java.io.Serial;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 
 public class InfinitePlane extends HalfSpace {
@@ -154,7 +153,7 @@ public class InfinitePlane extends HalfSpace {
     */
     public void
     doExtraInformation(Ray inRay, double inT, 
-                                  GeometryIntersectionInformation outData) {
+                                  RayHit outData) {
         outData.p = new Vector3D(
             inRay.origin().x() + inT*inRay.direction().x(),
             inRay.origin().y() + inT*inRay.direction().y(),

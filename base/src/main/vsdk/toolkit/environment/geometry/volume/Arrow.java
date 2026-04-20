@@ -4,7 +4,6 @@ import java.io.Serial;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
@@ -87,7 +86,7 @@ public class Arrow extends Solid {
     public Ray
     doIntersection(Ray inOutRay) {
         Ray headRay, baseRay;
-        GeometryIntersectionInformation headInfo, baseInfo;
+        RayHit headInfo, baseInfo;
         Vector3D tr = new Vector3D(0, 0, -baseLength);
 
         headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
@@ -147,7 +146,7 @@ public class Arrow extends Solid {
     */
     public void
     doExtraInformation(Ray inRay, double inT, 
-           GeometryIntersectionInformation outData) {
+           RayHit outData) {
         RayHit hit = new RayHit();
         if ( doIntersection(inRay.withT(inT), hit) ) {
             outData.clone(hit);

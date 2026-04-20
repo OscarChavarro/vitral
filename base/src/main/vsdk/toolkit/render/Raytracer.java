@@ -15,6 +15,7 @@ package vsdk.toolkit.render;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.RaytraceProfiling;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
@@ -44,9 +45,131 @@ public class Raytracer extends RenderingElement {
     private static final double TINY = 0.0001;
     private static final int MAX_RECURSION_LEVEL = 8;
 
+    private static final class RenderContext {
+        private final boolean localLightingEnabled;
+        private final boolean textureEnabled;
+        private final boolean bumpMappingEnabled;
+
+        private RenderContext(
+            boolean localLightingEnabled,
+            boolean textureEnabled,
+            boolean bumpMappingEnabled)
+        {
+            this.localLightingEnabled = localLightingEnabled;
+            this.textureEnabled = textureEnabled;
+            this.bumpMappingEnabled = bumpMappingEnabled;
+        }
+    }
+
     public Raytracer()
     {
         // No mutable shared temporaries: keep method-level variables for reentrancy.
+    }
+
+    private static boolean hasNonAmbientLights(ArrayList<Light> lights)
+    {
+        for ( Light light : lights ) {
+            if ( light.tipo_de_luz != Light.AMBIENT ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isReflective(Material material)
+    {
+        return material != null && material.getReflectionCoefficient() > 0;
+    }
+
+    private static RenderContext buildRenderContext(
+        RendererConfiguration qualitySelection,
+        ArrayList<Light> lights)
+    {
+        boolean localLightingEnabled =
+            qualitySelection.getShadingType() != RendererConfiguration.SHADING_TYPE_NOLIGHT &&
+            hasNonAmbientLights(lights);
+
+        return new RenderContext(
+            localLightingEnabled,
+            qualitySelection.isTextureSet(),
+            qualitySelection.isBumpMapSet());
+    }
+
+    private static int buildSurfaceDetailMask(
+        SimpleBody nearestObject,
+        RenderContext renderContext)
+    {
+        boolean objectReflective = isReflective(nearestObject.getMaterial());
+        boolean needsPoint = renderContext.localLightingEnabled || objectReflective;
+        boolean needsNormal = needsPoint;
+        boolean needsUv =
+            (renderContext.localLightingEnabled &&
+             renderContext.textureEnabled &&
+             nearestObject.getTexture() != null) ||
+            ((renderContext.localLightingEnabled || objectReflective) &&
+             renderContext.bumpMappingEnabled &&
+             nearestObject.getNormalMap() != null);
+        boolean needsTangent =
+            (renderContext.localLightingEnabled || objectReflective) &&
+            renderContext.bumpMappingEnabled &&
+            nearestObject.getNormalMap() != null;
+        int detailMask = RayHit.DETAIL_NONE;
+
+        if ( needsPoint ) {
+            detailMask |= RayHit.DETAIL_POINT;
+        }
+        if ( needsNormal ) {
+            detailMask |= RayHit.DETAIL_NORMAL;
+        }
+        if ( needsUv ) {
+            detailMask |= RayHit.DETAIL_UV;
+        }
+        if ( needsTangent ) {
+            detailMask |= RayHit.DETAIL_TANGENT;
+        }
+        return detailMask;
+    }
+
+    private void prepareSurfaceHit(
+        SimpleBody nearestObject,
+        Ray hitRay,
+        RendererConfiguration qualitySelection,
+        RenderContext renderContext,
+        RayHit outHit)
+    {
+        int detailMask = buildSurfaceDetailMask(nearestObject, renderContext);
+
+        outHit.reset(detailMask);
+        outHit.setRay(hitRay);
+        if ( detailMask != RayHit.DETAIL_NONE ) {
+            nearestObject.doExtraInformation(hitRay, hitRay.t(), outHit);
+            outHit.setRay(hitRay);
+        }
+
+        if ( !qualitySelection.isTextureSet() || !outHit.needsTextureCoordinates() ) {
+            outHit.texture = null;
+        }
+        else if ( outHit.texture == null ) {
+            outHit.texture = nearestObject.getTexture();
+        }
+
+        if ( !qualitySelection.isBumpMapSet() ||
+             !outHit.needsTextureCoordinates() ||
+             !outHit.needsNormal() ||
+             !outHit.needsTangent() ) {
+            outHit.normalMap = null;
+        }
+        else if ( outHit.normalMap == null ) {
+            outHit.normalMap = nearestObject.getNormalMap();
+        }
+    }
+
+    private static Material resolveMaterial(RayHit hit, SimpleBody nearestObject)
+    {
+        if ( hit.material != null ) {
+            return hit.material;
+        }
+        return nearestObject.getMaterial();
     }
 
     /*
@@ -70,11 +193,11 @@ public class Raytracer extends RenderingElement {
         ArrayList <Light> lights, ArrayList <SimpleBody> objects,
         Background background,
         Material material, RendererConfiguration inQualitySelection,
+        RenderContext renderContext,
         int recursions, ColorRgb outColor) {
         //-----------------------------------------------------------------
         SimpleBody nearestObject;
         Vector3D surfaceNormal = info.n;
-        ColorRgb backgroundColor = background.colorInDireccion(surfaceNormal);
         ColorRgb ambient;
         ColorRgb diffuse;
         ColorRgb specular;
@@ -136,6 +259,9 @@ public class Raytracer extends RenderingElement {
                 outColor.b += ambient.b*lightEmission.b;
               } 
               else {
+                if ( !renderContext.localLightingEnabled ) {
+                    continue;
+                }
                 Vector3D l;
                 if ( light.tipo_de_luz == Light.POINT ) {
                     l = new Vector3D(light.lvec.x() - info.p.x(),
@@ -151,9 +277,9 @@ public class Raytracer extends RenderingElement {
                     info.p.x() + VSDK.EPSILON*l.x(),
                     info.p.y() + VSDK.EPSILON*l.y(),
                     info.p.z() + VSDK.EPSILON*l.z());
+                RaytraceProfiling.recordShadowRay();
                 Ray shadowRay = new Ray(Vector3D.copyOf(shadowOffset), l.normalized());
-                RayHit shadowHit = new RayHit();
-                nearestObject = selectNearestThingInRayDirection(shadowRay, objects, shadowHit);
+                nearestObject = selectNearestThingInRayDirection(shadowRay, objects, null);
                 if ( nearestObject != null ) {
                     //delete l;
                     continue;
@@ -208,71 +334,44 @@ public class Raytracer extends RenderingElement {
                 Vector3D poffset = new Vector3D(info.p.x() + VSDK.EPSILON*reflect.x(),
                                                 info.p.y() + VSDK.EPSILON*reflect.y(),
                                                 info.p.z() + VSDK.EPSILON*reflect.z());
+                RaytraceProfiling.recordReflectionRay();
                 Ray reflected_ray = new Ray(poffset, reflect);
 
                 //delete reflect;
                 //delete poffset;
 
-                nearestObject = 
-                    selectNearestThingInRayDirection(reflected_ray, objects, new RayHit());
+                RayHit reflectedHit = new RayHit(RayHit.DETAIL_NONE);
+                nearestObject =
+                    selectNearestThingInRayDirection(reflected_ray, objects, reflectedHit);
                 if ( nearestObject != null ) {
-                    RayHit reflectedHit = new RayHit();
-                    if ( nearestObject.doIntersection(reflected_ray, reflectedHit) ) {
-                        Vector3D rv = new Vector3D();
-                        RayHit subInfo = new RayHit();
+                    Vector3D rv = new Vector3D(
+                        -reflectedHit.ray().direction().x(),
+                        -reflectedHit.ray().direction().y(),
+                        -reflectedHit.ray().direction().z());
+                    RayHit subInfo = new RayHit();
+                    ColorRgb rcolor = new ColorRgb();
 
-                        //--------------------------------------------------------
-                        subInfo.clone(reflectedHit);
+                    prepareSurfaceHit(
+                        nearestObject,
+                        reflectedHit.ray(),
+                        inQualitySelection,
+                        renderContext,
+                        subInfo);
+                    evaluateIlluminationModel(
+                        subInfo,
+                        rv,
+                        lights,
+                        objects,
+                        background,
+                        resolveMaterial(subInfo, nearestObject),
+                        inQualitySelection,
+                        renderContext,
+                        recursions - 1,
+                        rcolor);
 
-                    //-----
-                    if ( !inQualitySelection.isTextureSet() ) {
-                        subInfo.texture = null;
-                    }
-                    else {
-                        if ( subInfo.texture == null ) {
-                            subInfo.texture = nearestObject.getTexture();
-                        }
-                    }
-
-                    //-----
-                    if ( !inQualitySelection.isBumpMapSet() ) {
-                        subInfo.normalMap = nearestObject.getNormalMap();
-                    }
-
-                    //--------------------------------------------------------
-
-                        rv = new Vector3D(
-                            -reflectedHit.ray().direction().x(),
-                            -reflectedHit.ray().direction().y(),
-                            -reflectedHit.ray().direction().z());
-                        ColorRgb rcolor = new ColorRgb();
-                        Material reflectedMaterial;
-
-                        if ( subInfo.material != null ) {
-                            reflectedMaterial = subInfo.material;
-                        }
-                        else {
-                            reflectedMaterial = nearestObject.getMaterial();
-                        }
-                        evaluateIlluminationModel(subInfo, rv, lights, objects, 
-                                                  background, reflectedMaterial,
-                                                  inQualitySelection,
-                                                  recursions - 1,
-                                                  rcolor);
-
-                        outColor.r += kr*rcolor.r;
-                        outColor.g += kr*rcolor.g;
-                        outColor.b += kr*rcolor.b;
-                    }
-                    else {
-                        ColorRgb reflectedBackground =
-                            background.colorInDireccion(reflect.normalized());
-                        outColor.r += kr*reflectedBackground.r;
-                        outColor.g += kr*reflectedBackground.g;
-                        outColor.b += kr*reflectedBackground.b;
-                    }
-
-                    //delete subInfo;
+                    outColor.r += kr*rcolor.r;
+                    outColor.g += kr*rcolor.g;
+                    outColor.b += kr*rcolor.b;
                   }
                   else {
                     ColorRgb reflectedBackground =
@@ -307,28 +406,33 @@ public class Raytracer extends RenderingElement {
     */
     private SimpleBody 
     selectNearestThingInRayDirection(
-        Ray inOut_Ray, ArrayList <SimpleBody> inSimpleBodiesArray, RayHit outHit) {
+        Ray inRay, ArrayList <SimpleBody> inSimpleBodiesArray, RayHit outHit) {
         int i;
         SimpleBody gi;
         SimpleBody nearestObject;
         double nearestDistance;
+        Ray nearestRay;
+        RayHit candidateHit = new RayHit(RayHit.DETAIL_NONE);
 
         nearestDistance = Double.MAX_VALUE;
         nearestObject = null;
+        nearestRay = null;
+        RaytraceProfiling.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
-            Ray candidateRay = inOut_Ray.withT(Double.MAX_VALUE);
             gi = inSimpleBodiesArray.get(i);
-            RayHit hit = new RayHit();
-            if ( gi.doIntersection(candidateRay, hit) &&
-                 hit.ray().t() < nearestDistance &&
-                 hit.ray().t() > VSDK.EPSILON ) {
-                nearestDistance = hit.ray().t();
-                inOut_Ray = hit.ray();
-                if ( outHit != null ) {
-                    outHit.clone(hit);
-                }
+            candidateHit.reset(RayHit.DETAIL_NONE);
+            RaytraceProfiling.recordObjectIntersectionTest();
+            if ( gi.doIntersection(inRay, candidateHit) &&
+                 candidateHit.ray().t() < nearestDistance &&
+                 candidateHit.ray().t() > VSDK.EPSILON ) {
+                nearestDistance = candidateHit.ray().t();
+                nearestRay = candidateHit.ray();
                 nearestObject = gi;
             }
+        }
+        if ( nearestObject != null && outHit != null ) {
+            outHit.reset(RayHit.DETAIL_NONE);
+            outHit.setRay(nearestRay);
         }
         return nearestObject;
     }
@@ -346,47 +450,38 @@ public class Raytracer extends RenderingElement {
                                ArrayList <Light> inLightsArray,
                                Background in_background,
                                RendererConfiguration inQualitySelection,
+                               RenderContext renderContext,
                                ColorRgb outColor)
     {
         SimpleBody nearestObject;
-        RayHit hitInfo = new RayHit();
+        RayHit hitInfo = new RayHit(RayHit.DETAIL_NONE);
 
         nearestObject = selectNearestThingInRayDirection(inRay, inSimpleBodiesArray, hitInfo);
         if ( nearestObject != null ) {
             //------------------------------------------------------------
-            RayHit shadingInfo = new RayHit(hitInfo);
-            //-----
-            if ( !inQualitySelection.isTextureSet() ) {
-                shadingInfo.texture = null;
-            }
-            else {
-                if ( shadingInfo.texture == null ) {
-                    shadingInfo.texture = nearestObject.getTexture();
-                }
-            }
-
-            //-----
-            if ( !inQualitySelection.isBumpMapSet() ) {
-                shadingInfo.normalMap = nearestObject.getNormalMap();
-            }
-
-            //------------------------------------------------------------
+            RayHit shadingInfo = new RayHit();
+            prepareSurfaceHit(
+                nearestObject,
+                hitInfo.ray(),
+                inQualitySelection,
+                renderContext,
+                shadingInfo);
             Vector3D viewVector = new Vector3D(
                 -hitInfo.ray().direction().x(),
                 -hitInfo.ray().direction().y(),
                 -hitInfo.ray().direction().z());
 
-            Material material;
-            if ( shadingInfo.material != null ) {
-                material = shadingInfo.material;
-            }
-            else {
-                material = nearestObject.getMaterial();
-            }
-
             evaluateIlluminationModel(
-                shadingInfo, viewVector, inLightsArray, inSimpleBodiesArray, in_background, material,
-                inQualitySelection, MAX_RECURSION_LEVEL, outColor);
+                shadingInfo,
+                viewVector,
+                inLightsArray,
+                inSimpleBodiesArray,
+                in_background,
+                resolveMaterial(shadingInfo, nearestObject),
+                inQualitySelection,
+                renderContext,
+                MAX_RECURSION_LEVEL,
+                outColor);
             //delete viewVector;
           }
           else {
@@ -490,6 +585,8 @@ public class Raytracer extends RenderingElement {
         int relativeY;
         Ray rayo;
         ColorRgb color = new ColorRgb();
+        RenderContext renderContext =
+            buildRenderContext(inQualitySelection, inLightsArray);
 
         inCamera.updateVectors();
 
@@ -504,13 +601,14 @@ public class Raytracer extends RenderingElement {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
+                RaytraceProfiling.recordPrimaryRay();
                 rayo = inCamera.generateRay(x, y);
                 color.r = 0;
                 color.g = 0;
                 color.b = 0;
                 followRayPath(rayo, inSimpleBodiesArray,
                               inLightsArray, inBackground, 
-                              inQualitySelection, color);
+                              inQualitySelection, renderContext, color);
                 if ( outDepthmap != null ) {
                     outDepthmap.setZ(x, y, (float)rayo.t());
                 }

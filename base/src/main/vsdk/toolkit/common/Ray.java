@@ -57,6 +57,7 @@ public final class Ray extends FundamentalEntity
 
     public Ray withT(double newT)
     {
+        RaytraceProfiling.recordRayWithT();
         return new Ray(origin, direction, newT);
     }
 

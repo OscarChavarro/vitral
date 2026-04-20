@@ -5,10 +5,10 @@
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
 
+import vsdk.toolkit.common.RaytraceProfiling;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
@@ -88,13 +88,32 @@ public class Sphere extends Solid {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
-        if ( hit == null ) {
+        Vector3D delta = new Vector3D(
+            -inRay.origin().x(),
+            -inRay.origin().y(),
+            -inRay.origin().z());
+        double projection = inRay.direction().dotProduct(delta);
+
+        double discriminant = _radius_squared + projection*projection
+                            - delta.x()*delta.x()
+                            - delta.y()*delta.y()
+                            - delta.z()*delta.z();
+        if ( discriminant < 0 ) {
             return false;
         }
+
+        double t = projection - Math.sqrt(discriminant);
+        if ( t < 0 ) {
+            return false;
+        }
+
         if ( outHit != null ) {
-            outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            Ray hitRay = inRay.withT(t);
+            outHit.setRay(hitRay);
+            if ( outHit.needsAnySurfaceData() ) {
+                doExtraInformation(hitRay, t, outHit);
+                outHit.setRay(hitRay);
+            }
         }
         return true;
     }
@@ -106,43 +125,63 @@ public class Sphere extends Solid {
     */
     public void
     doExtraInformation(Ray inRay, double inT, 
-                                  GeometryIntersectionInformation outData) {
-        //-----------------------------------------------------------------
-        outData.p = new Vector3D(
+                                  RayHit outData) {
+        RaytraceProfiling.recordGeometryDetailComputation();
+        boolean needsNormalVector =
+            outData.needsNormal() ||
+            outData.needsTextureCoordinates() ||
+            outData.needsTangent();
+        if ( !outData.needsPoint() && !needsNormalVector ) {
+            return;
+        }
+
+        Vector3D point = new Vector3D(
             inRay.origin().x() + inT*inRay.direction().x(),
             inRay.origin().y() + inT*inRay.direction().y(),
             inRay.origin().z() + inT*inRay.direction().z());
+        if ( outData.needsPoint() ) {
+            outData.p = point;
+        }
 
-        outData.n = new Vector3D(outData.p).normalized();
+        Vector3D normal = null;
+        if ( needsNormalVector ) {
+            normal = new Vector3D(point).normalized();
+            if ( outData.needsNormal() ) {
+                outData.n = normal;
+            }
+        }
 
-        //-----------------------------------------------------------------
+        if ( !outData.needsTextureCoordinates() && !outData.needsTangent() ) {
+            return;
+        }
+
         double theta;
-        double phi;
+        double phi = Math.acos(normal.z());
 
-        phi = Math.acos(outData.n.z());
-        if ( outData.n.x() > VSDK.EPSILON ) {
-            theta = Math.atan(outData.n.y() / outData.n.x()) + 3*Math.PI/2;
-          }
-          else if ( outData.n.x() < VSDK.EPSILON ) {
-            // OJO: Habra una manera mas eficiente de lograr este intervalo?
-            theta = Math.atan(outData.n.y() / outData.n.x()) + 3*Math.PI/2;
+        if ( normal.x() > VSDK.EPSILON ) {
+            theta = Math.atan(normal.y() / normal.x()) + 3*Math.PI/2;
+        }
+        else if ( normal.x() < VSDK.EPSILON ) {
+            theta = Math.atan(normal.y() / normal.x()) + 3*Math.PI/2;
             theta += Math.PI;
-            if ( theta > 2*Math.PI ) theta -= 2*Math.PI;
-          }
-          else {
+            if ( theta > 2*Math.PI ) {
+                theta -= 2*Math.PI;
+            }
+        }
+        else {
             theta = 0.0;
         }
-        // Suponiendo que theta esta en [0, 2*PI] y phi en [0, PI]...
-        outData.u = ((theta+Math.PI/2)/(2*Math.PI));
-        outData.v = 1 - (phi / Math.PI);
 
-        //-----------------------------------------------------------------
-        outData.t = new Vector3D(
-            Math.sin(theta-Math.PI/2),
-            -Math.cos(theta-Math.PI/2),
-            0);
-
-        //-----------------------------------------------------------------
+        if ( outData.needsTextureCoordinates() ) {
+            outData.u = ((theta+Math.PI/2)/(2*Math.PI));
+            outData.v = 1 - (phi / Math.PI);
+        }
+        if ( outData.needsTangent() ) {
+            outData.t = new Vector3D(
+                Math.sin(theta-Math.PI/2),
+                -Math.cos(theta-Math.PI/2),
+                0);
+        }
     }
 
     /**

@@ -8,7 +8,6 @@ import java.io.Serial;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.GeometryIntersectionInformation;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
@@ -196,7 +195,7 @@ public class Box extends Solid {
     */
     public void
     doExtraInformation(Ray inRay, double inT, 
-                                  GeometryIntersectionInformation outData) {
+                                  RayHit outData) {
         Vector3D point = inRay.origin().add(inRay.direction().multiply(inT));
         int hitPlane = classifyHitPlane(point);
         outData.p = point;
