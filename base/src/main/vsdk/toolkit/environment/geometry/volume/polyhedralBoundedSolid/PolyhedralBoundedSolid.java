@@ -73,7 +73,6 @@ public class PolyhedralBoundedSolid extends Solid {
     public int maxVertexId;
     public int maxFaceId;
     private boolean modelIsValid;
-    private RayHit lastInfo;
 
     //=================================================================
     public PolyhedralBoundedSolid()
@@ -88,7 +87,6 @@ public class PolyhedralBoundedSolid extends Solid {
         maxVertexId = -1;
         maxFaceId = -1;
         modelIsValid = false;
-        lastInfo = new RayHit();
     }
 
     //= SUPPORT MACROS FOR BASIC DATASTRUCTURE MANIPULATION ===========
@@ -1252,60 +1250,71 @@ public class PolyhedralBoundedSolid extends Solid {
     @return true if given ray intersects current PolyhedralBoundedSolid
     */
     public Ray doIntersection(Ray inOutRay) {
-        int i;
-        double min_t;         // Shortest distance founded so far
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-
-        // Initialization values for search algorithm
-        min_t = Double.MAX_VALUE;
-        Ray nearestHit = null;
-        RayHit Info;
-        Info = new RayHit();
-        Vector3D p;
-        int pos;
-
-        for ( i = 0; i < polygonsList.size(); i++ ) {
-            Ray ray = new Ray(inOutRay);
-            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            RayHit planeHit = new RayHit();
-            if ( face.containingPlane.doIntersection(ray, planeHit) ) {
-                Ray hit = planeHit.ray();
-                Info = planeHit;
-                if ( hit.t() < min_t ) {
-                    hit = hit.withDirection(hit.direction().normalized());
-                    p = hit.origin().add(hit.direction().multiply(hit.t()));
-                    pos = face.testPointInside(p, numericContext.bigEpsilon());
-                    if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
-                        min_t = hit.t();
-                        // Stores standard doIntersection operation information
-                        lastInfo.clone(Info);
-                        nearestHit = inOutRay.withT(hit.t());
-                    }
-                }
-            }
+        RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
+        if ( doIntersection(inOutRay, hit) ) {
+            return hit.ray();
         }
-
-        return nearestHit;
-    }
-
-    public void doExtraInformation(Ray inRay, double inT, 
-                                  RayHit outData) {
-        outData.clone(lastInfo);
+        return null;
     }
 
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
-        if ( hit == null ) {
-            return false;
+        synchronized ( this ) {
+            int i;
+            double min_t;         // Shortest distance founded so far
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+                PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+
+            // Initialization values for search algorithm
+            min_t = Double.MAX_VALUE;
+            RayHit bestInfo = null;
+            Vector3D p;
+            int pos;
+
+            for ( i = 0; i < polygonsList.size(); i++ ) {
+                Ray ray = new Ray(inRay);
+                _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+                if ( face.containingPlane == null ) {
+                    face.calculatePlane();
+                    if ( face.containingPlane == null ) {
+                        continue;
+                    }
+                }
+                RayHit planeHit = new RayHit();
+                if ( face.containingPlane.doIntersection(ray, planeHit) ) {
+                    Ray hit = planeHit.ray();
+                    if ( hit.t() < min_t ) {
+                        hit = hit.withDirection(hit.direction().normalized());
+                        p = hit.origin().add(hit.direction().multiply(hit.t()));
+                        synchronized ( face ) {
+                            pos = face.testPointInside(p, numericContext.bigEpsilon());
+                        }
+                        if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
+                            min_t = hit.t();
+                            bestInfo = new RayHit(planeHit);
+                        }
+                    }
+                }
+            }
+
+            if ( bestInfo == null ) {
+                return false;
+            }
+            if ( outHit != null ) {
+                outHit.clone(bestInfo);
+                outHit.setRay(inRay.withT(min_t));
+            }
+            return true;
         }
-        if ( outHit != null ) {
-            outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+    }
+
+    public void doExtraInformation(Ray inRay, double inT, 
+                                  RayHit outData) {
+        if ( outData == null ) {
+            return;
         }
-        return true;
+        doIntersection(inRay.withT(inT), outData);
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */

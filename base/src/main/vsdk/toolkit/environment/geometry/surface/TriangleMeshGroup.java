@@ -18,27 +18,24 @@ public class TriangleMeshGroup extends Surface {
     private ArrayList<TriangleMesh> meshes;
     private double[] MinMax;
 
-    private RayHit lastInfo;
-    private int[] intersectionInformation;
+    private final ThreadLocal<int[]> intersectionInformation =
+        ThreadLocal.withInitial(() -> new int[] {-1, -1});
 
     private SimpleBody boundingVolume;
 
     public TriangleMeshGroup() {
         meshes = new ArrayList<TriangleMesh> ();
         MinMax = null;
-        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
     public TriangleMeshGroup(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
-        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
     public TriangleMeshGroup(TriangleMeshGroup group) {
         this.meshes = group.getMeshes();
-        lastInfo = new RayHit();
         boundingVolume = null;
     }
 
@@ -146,57 +143,11 @@ public class TriangleMeshGroup extends Surface {
     @return true if given ray intersects current TriangleMeshGroup
     */
     public Ray doIntersection(Ray inOut_Ray) {
-        int i;                // Index for iterating meshes
-        double min_t;         // Shortest distance founded so far
-        RayHit Info;
-
-        // Initialization values for search algorithm
-        min_t = Double.MAX_VALUE;
-        Ray nearestHit = null;
-        Info = new RayHit();
-
-        // Bounding volume check
-        if ( boundingVolume == null ) {
-            double[] mm = getMinMax();
-            Vector3D size, center;
-            size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-            center = new Vector3D((mm[3]+mm[0])/2,
-                                  (mm[4]+mm[1])/2,
-                                  (mm[5]+mm[2])/2);
-            boundingVolume = new SimpleBody();
-            boundingVolume.setPosition(center);
-            boundingVolume.setGeometry(new Box(size));
+        RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
+        if ( doIntersection(inOut_Ray, hit) ) {
+            return hit.ray();
         }
-        if ( boundingVolume.doIntersection(inOut_Ray) == null ) {
-            return null;
-        }
-
-        // Chain of responsability behavior design pattern with TriangleMesh
-        for ( i= 0; i< meshes.size(); i++ ) {
-            TriangleMesh mesh = meshes.get(i);
-            Ray ray = new Ray(inOut_Ray);
-
-            RayHit meshHit = new RayHit();
-            if ( mesh.doIntersection(ray, meshHit) ) {
-                Ray hit = meshHit.ray();
-                Info = meshHit;
-
-                if ( hit.t() < min_t ) {
-                    min_t = hit.t();
-
-                    // Stores standard doIntersection operation information
-                    lastInfo.clone(Info);
-                    nearestHit = inOut_Ray.withT(hit.t());
-
-                    // Stores the intersected mesh and the triangle intersected inside that mesh
-                    intersectionInformation = new int[2];
-                    intersectionInformation[0] = i;
-                    intersectionInformation[1] = mesh.doIntersectionInformation();
-                }
-            }
-        }
-
-        return nearestHit;
+        return null;
     }
 
     /**
@@ -211,33 +162,61 @@ public class TriangleMeshGroup extends Surface {
         Ray inRay, 
         double inT,
         RayHit outData) {
-        outData.clone(lastInfo);
+        if ( outData == null ) {
+            return;
+        }
+        doIntersection(inRay.withT(inT), outData);
     }
 
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
+        if ( boundingVolume == null ) {
+            double[] mm = getMinMax();
+            Vector3D size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+            Vector3D center = new Vector3D(
+                (mm[3]+mm[0])/2,
+                (mm[4]+mm[1])/2,
+                (mm[5]+mm[2])/2
+            );
+            boundingVolume = new SimpleBody();
+            boundingVolume.setPosition(center);
+            boundingVolume.setGeometry(new Box(size));
+        }
+        if ( boundingVolume.doIntersection(inRay) == null ) {
+            int[] info = intersectionInformation.get();
+            info[0] = -1;
+            info[1] = -1;
+            return false;
+        }
+
         double minT = Double.MAX_VALUE;
         RayHit bestHit = null;
         int bestMesh = -1;
         int bestTriangle = -1;
+        int[] triangleInformation = new int[1];
 
         for ( int i = 0; i < meshes.size(); i++ ) {
             TriangleMesh mesh = meshes.get(i);
             RayHit meshHit = new RayHit();
-            if ( mesh.doIntersection(inRay, meshHit) && meshHit.ray().t() < minT ) {
+            if ( mesh.doIntersection(inRay, meshHit, triangleInformation) &&
+                 meshHit.ray().t() < minT ) {
                 minT = meshHit.ray().t();
                 bestHit = new RayHit(meshHit);
                 bestMesh = i;
-                bestTriangle = mesh.doIntersectionInformation();
+                bestTriangle = triangleInformation[0];
             }
         }
 
         if ( bestHit == null ) {
+            int[] info = intersectionInformation.get();
+            info[0] = -1;
+            info[1] = -1;
             return false;
         }
-
-        intersectionInformation = new int[] {bestMesh, bestTriangle};
+        int[] info = intersectionInformation.get();
+        info[0] = bestMesh;
+        info[1] = bestTriangle;
 
         if ( outHit != null ) {
             outHit.clone(bestHit);
@@ -247,7 +226,8 @@ public class TriangleMeshGroup extends Surface {
 
     public int[] doIntersectionInformation()
     {
-        return intersectionInformation;
+        int[] info = intersectionInformation.get();
+        return new int[] {info[0], info[1]};
     }
 
     /**

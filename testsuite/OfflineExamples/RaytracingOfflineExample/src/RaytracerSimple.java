@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 
 // Vitral classes
 import vsdk.toolkit.common.RendererConfiguration;
@@ -26,15 +27,15 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 
 public class RaytracerSimple {
-    private static final String NO_SAVE_FLAG = "nosave";
     private static final String DEFAULT_SCENE_FILE =
         "../../../etc/geometry/mitscenes/balls.ray";
     private static final String SCENE_SAMPLES_PATH =
         "../../../etc/geometry/mitscenes/";
-    private static final String OUTPUT_FILE_NAME = "./output.ppm";
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
     private static final int ELAPSED_TIME_DECIMALS = 3;
     private static final int EXIT_CODE_READ_ERROR = -1;
     private static final int EXIT_CODE_IMAGE_ERROR = 1;
+    private static final int EXIT_CODE_ARGUMENT_ERROR = 2;
 
     private final ReaderMitScene readerMitScene;
     private final SimpleScene scene;
@@ -73,7 +74,7 @@ public class RaytracerSimple {
     }
 
     private void
-    offlineExecution(String fileName, boolean save)
+    offlineExecution(String fileName, boolean save, String outputFileName)
     {
         Raytracer visualizationEngine;
         RGBImage resultingImage;
@@ -124,11 +125,10 @@ public class RaytracerSimple {
 
         //- 4. Export resulting image to an image file --------------------
         if ( save ) {
-            File fd = new File(OUTPUT_FILE_NAME);
+            File fd = new File(outputFileName);
 
-            System.out.print("Exporting result image to file \"" + OUTPUT_FILE_NAME + "\": ");
-            if ( !ImagePersistence.exportPPM(fd, resultingImage) )
-            {
+            System.out.print("Exporting result image to file \"" + outputFileName + "\": ");
+            if ( !exportImage(fd, resultingImage) ) {
                 System.err.println("Error saving output image!");
                 System.exit(EXIT_CODE_IMAGE_ERROR);
             }
@@ -136,22 +136,106 @@ public class RaytracerSimple {
         }
     }
 
+    private static boolean exportImage(File outputFile, RGBImage image)
+    {
+        String lowerName = outputFile.getName().toLowerCase(Locale.ROOT);
+        if ( lowerName.endsWith(".png") ) {
+            ImagePersistence.exportPNG(outputFile, image);
+            return true;
+        }
+        if ( lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") ) {
+            return ImagePersistence.exportJPG(outputFile, image);
+        }
+        return ImagePersistence.exportPPM(outputFile, image);
+    }
+
+    private static void printUsage()
+    {
+        System.out.println("Usage: RaytracerSimple [options] [scene_file]");
+        System.out.println("Options:");
+        System.out.println("  --scene, -s <file>     MIT scene file (.ray)");
+        System.out.println("  --output, -o <file>    Output image file (.ppm/.png/.jpg)");
+        System.out.println("  --nosave, -n           Render only, no image file");
+        System.out.println("  --help, -h             Show this help");
+        System.out.println();
+        System.out.println("Legacy compatibility:");
+        System.out.println("  - `nosave` (without dashes) is still accepted.");
+    }
+
+    private static final class CliOptions {
+        String sceneFile = DEFAULT_SCENE_FILE;
+        String outputFile = DEFAULT_OUTPUT_FILE_NAME;
+        boolean save = true;
+        boolean showHelp = false;
+    }
+
+    private static CliOptions parseArguments(String[] args)
+    {
+        CliOptions options = new CliOptions();
+        int positionalCount = 0;
+
+        for ( int i = 0; i < args.length; i++ ) {
+            String arg = args[i];
+            if ( "nosave".equals(arg) || "--nosave".equals(arg) || "-n".equals(arg) ) {
+                options.save = false;
+                continue;
+            }
+            if ( "--help".equals(arg) || "-h".equals(arg) ) {
+                options.showHelp = true;
+                continue;
+            }
+            if ( "--scene".equals(arg) || "-s".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    System.err.println("Missing value for " + arg);
+                    options.showHelp = true;
+                    return options;
+                }
+                options.sceneFile = args[++i];
+                continue;
+            }
+            if ( "--output".equals(arg) || "-o".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    System.err.println("Missing value for " + arg);
+                    options.showHelp = true;
+                    return options;
+                }
+                options.outputFile = args[++i];
+                continue;
+            }
+            if ( arg.startsWith("-") ) {
+                System.err.println("Unknown option: " + arg);
+                options.showHelp = true;
+                return options;
+            }
+
+            if ( positionalCount == 0 ) {
+                options.sceneFile = arg;
+            }
+            else if ( positionalCount == 1 ) {
+                options.outputFile = arg;
+            }
+            else {
+                System.err.println("Unexpected argument: " + arg);
+                options.showHelp = true;
+                return options;
+            }
+            positionalCount++;
+        }
+
+        return options;
+    }
+
     public static void
     main(String[] args)
     {
         RaytracerSimple instance = new RaytracerSimple();
-        boolean save = true;
-        String sceneFile = DEFAULT_SCENE_FILE;
-
-        for (String arg : args) {
-            if (NO_SAVE_FLAG.equals(arg)) {
-                save = false;
-            }
-            else {
-                sceneFile = arg;
+        CliOptions options = parseArguments(args);
+        if ( options.showHelp ) {
+            printUsage();
+            if ( args.length > 0 ) {
+                System.exit(EXIT_CODE_ARGUMENT_ERROR);
             }
         }
-
-        instance.offlineExecution(sceneFile, save);
+        instance.offlineExecution(options.sceneFile, options.save, options.outputFile);
     }
 }

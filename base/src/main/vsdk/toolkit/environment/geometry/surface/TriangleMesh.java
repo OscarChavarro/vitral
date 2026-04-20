@@ -122,17 +122,14 @@ public class TriangleMesh extends Surface {
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
     private double[] minMax;
-    private int selectedTriangle;
+    private final ThreadLocal<Integer> intersectionTriangleIndex =
+        ThreadLocal.withInitial(() -> -1);
     private SimpleBody boundingVolume;
-    private RayHit lastInfo;
-    private Ray lastRay;
     private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public TriangleMesh() {
-        lastInfo = new RayHit();
-        lastRay = null;
         minMax = null;
         boundingVolume = null;
         triangleMeshGroupCache = null;
@@ -218,7 +215,6 @@ public class TriangleMesh extends Surface {
 
         other. vertexSelections = cloneBooleanArray(this.vertexSelections);
         other.triangleIndices = cloneIntArray(this.triangleIndices);
-        other.selectedTriangle = this.selectedTriangle;
 
         // Pending!
         other.incidentTrianglesPerVertexArray = null;
@@ -227,8 +223,6 @@ public class TriangleMesh extends Surface {
         other.textureRanges = null;
         other.materialRanges = null;
         other.boundingVolume = null;
-        other.lastInfo = null;
-        other.lastRay = null;
         other.triangleMeshGroupCache = null;
          
 /*
@@ -237,10 +231,7 @@ public class TriangleMesh extends Surface {
         Image[] textures;
         int[][] textureRanges;
         int[][] materialRanges;
-        int selectedTriangle;
         SimpleBody boundingVolume;
-        RayHit lastInfo;
-        Ray lastRay;
         TriangleMeshGroup triangleMeshGroupCache;
 */
         return other;
@@ -790,7 +781,7 @@ public class TriangleMesh extends Surface {
     @return selected triangle
     */
     public int doIntersectionInformation() {
-        return selectedTriangle;
+        return intersectionTriangleIndex.get();
     }
 
     /**
@@ -861,77 +852,49 @@ public class TriangleMesh extends Surface {
     */
     public Ray
     doIntersection(Ray inOut_Ray) {
-        int i;                // Index for iterating triangles
-        double min_t;         // Shortest distance founded so far
-        Vector3D v0, v1, v2;  // Positions of the three triangle points
-        Vector3D p;           // Point of intersection between ray and plane
-        Vector3D n;           // Normal at point of intersection
-        Ray myRay = new Ray(inOut_Ray);
-
-        //-----------------------------------------------------------------
-        // Bounding volume check
-        if ( boundingVolume == null ) {
-            double[] mm = getMinMax();
-            Vector3D size, center;
-            size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-            center = new Vector3D((mm[3]+mm[0])/2,
-                                  (mm[4]+mm[1])/2,
-                                  (mm[5]+mm[2])/2);
-            boundingVolume = new SimpleBody();
-            boundingVolume.setPosition(center);
-            boundingVolume.setGeometry(new Box(size));
+        RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
+        if ( doIntersection(inOut_Ray, hit) ) {
+            return hit.ray();
         }
-        if ( boundingVolume.doIntersection(inOut_Ray) == null ) {
-            return null;
-        }
-
-        //-----------------------------------------------------------------
-        // Initialization values for search algorithm
-        min_t = Double.MAX_VALUE;
-        Ray hitRay = null;
-        selectedTriangle = 0;
-        p = new Vector3D();
-        n = new Vector3D();
-
-        // For each triangle in the mesh ...
-        int nt = getNumTriangles();
-        for ( i = 0; i < nt; i++ ) {
-            // The Triangle i has vertices <v0, v1, v2>
-            v0 = new Vector3D(
-                vertexPositions[3*triangleIndices[3*i+0]+0],
-                vertexPositions[3*triangleIndices[3*i+0]+1],
-                vertexPositions[3*triangleIndices[3*i+0]+2]
-            );
-            v1 = new Vector3D(
-                vertexPositions[3*triangleIndices[3*i+1]+0],
-                vertexPositions[3*triangleIndices[3*i+1]+1],
-                vertexPositions[3*triangleIndices[3*i+1]+2]
-            );
-            v2 = new Vector3D(
-                vertexPositions[3*triangleIndices[3*i+2]+0],
-                vertexPositions[3*triangleIndices[3*i+2]+1],
-                vertexPositions[3*triangleIndices[3*i+2]+2]
-            );
-
-            ComputationalGeometry.TriangleIntersection hit =
-                ComputationalGeometry.doIntersectionWithTriangle(myRay, v0, v1, v2);
-            if ( hit != null ) {
-                if ( hit.t < min_t ) {
-                    lastInfo.p = hit.point;
-                    lastInfo.n = hit.normal;
-                    hitRay = inOut_Ray.withT(hit.t);
-                    lastRay = hitRay;
-                    min_t = hit.t;
-                    selectedTriangle = i;
-                }
-            }
-        }
-        return hitRay;
+        return null;
     }
 
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
+        return doIntersectionInternal(inRay, outHit, null);
+    }
+
+    boolean doIntersection(Ray inRay, RayHit outHit, int[] outTriangleIndex)
+    {
+        return doIntersectionInternal(inRay, outHit, outTriangleIndex);
+    }
+
+    private boolean doIntersectionInternal(
+        Ray inRay,
+        RayHit outHit,
+        int[] outTriangleIndex)
+    {
+        if ( boundingVolume == null ) {
+            double[] mm = getMinMax();
+            Vector3D size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+            Vector3D center = new Vector3D(
+                (mm[3]+mm[0])/2,
+                (mm[4]+mm[1])/2,
+                (mm[5]+mm[2])/2
+            );
+            boundingVolume = new SimpleBody();
+            boundingVolume.setPosition(center);
+            boundingVolume.setGeometry(new Box(size));
+        }
+        if ( boundingVolume.doIntersection(inRay) == null ) {
+            intersectionTriangleIndex.set(-1);
+            if ( outTriangleIndex != null && outTriangleIndex.length > 0 ) {
+                outTriangleIndex[0] = -1;
+            }
+            return false;
+        }
+
         Ray ray = new Ray(inRay);
         int bestTriangle = -1;
         double minT = Double.MAX_VALUE;
@@ -965,10 +928,16 @@ public class TriangleMesh extends Surface {
         }
 
         if ( bestHit == null ) {
+            intersectionTriangleIndex.set(-1);
+            if ( outTriangleIndex != null && outTriangleIndex.length > 0 ) {
+                outTriangleIndex[0] = -1;
+            }
             return false;
         }
-
-        selectedTriangle = bestTriangle;
+        intersectionTriangleIndex.set(bestTriangle);
+        if ( outTriangleIndex != null && outTriangleIndex.length > 0 ) {
+            outTriangleIndex[0] = bestTriangle;
+        }
 
         if ( outHit != null ) {
             outHit.setRay(inRay.withT(bestHit.t));
@@ -1086,97 +1055,11 @@ public class TriangleMesh extends Surface {
     public void
     doExtraInformation(Ray inRay, double inT,
                                    RayHit outData) {
-        //-----------------------------------------------------------------
-        Vector3D p0, p1, p2;  // Positions of the three triangle points
-        Vector3D n0, n1, n2;  // Normals of the three triangle points
-        double u0, v0, u1, v1, u2, v2; // Texture coordinates
-
-        p0 = new Vector3D();
-        p1 = new Vector3D();
-        p2 = new Vector3D();
-        n0 = new Vector3D();
-        n1 = new Vector3D();
-        n2 = new Vector3D();
-
-        //if ( withInterpolation ) {
-            p0 = new Vector3D(vertexPositions[3*triangleIndices[3*selectedTriangle+0]+0], vertexPositions[3*triangleIndices[3*selectedTriangle+0]+1], vertexPositions[3*triangleIndices[3*selectedTriangle+0]+2]);
-            p1 = new Vector3D(vertexPositions[3*triangleIndices[3*selectedTriangle+1]+0], vertexPositions[3*triangleIndices[3*selectedTriangle+1]+1], vertexPositions[3*triangleIndices[3*selectedTriangle+1]+2]);
-            p2 = new Vector3D(vertexPositions[3*triangleIndices[3*selectedTriangle+2]+0], vertexPositions[3*triangleIndices[3*selectedTriangle+2]+1], vertexPositions[3*triangleIndices[3*selectedTriangle+2]+2]);
-
-            // Obtain barycentric coordinates for point p
-            // Method taken from wikipedia
-            double A, B, C, D, E, F, G, H, I;
-            double lambda0, lambda1, lambda2;
-
-            A = p0.x() - p2.x();
-            B = p1.x() - p2.x();
-            C = p2.x() - lastInfo.p.x();
-            D = p0.y() - p2.y();
-            E = p1.y() - p2.y();
-            F = p2.y() - lastInfo.p.y();
-            G = p0.z() - p2.z();
-            H = p1.z() - p2.z();
-            I = p2.z() - lastInfo.p.z();
-
-            // Point interpolation of three vertex positions
-            lambda0 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
-            lambda1 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
-            lambda2 = 1-lambda0-lambda1;
-
-            // Normal interpolation
-            n0 = new Vector3D(vertexNormals[3*triangleIndices[3*selectedTriangle+0]+0], vertexNormals[3*triangleIndices[3*selectedTriangle+0]+1], vertexNormals[3*triangleIndices[3*selectedTriangle+0]+2]);
-            n1 = new Vector3D(vertexNormals[3*triangleIndices[3*selectedTriangle+1]+0], vertexNormals[3*triangleIndices[3*selectedTriangle+1]+1], vertexNormals[3*triangleIndices[3*selectedTriangle+1]+2]);
-            n2 = new Vector3D(vertexNormals[3*triangleIndices[3*selectedTriangle+2]+0], vertexNormals[3*triangleIndices[3*selectedTriangle+2]+1], vertexNormals[3*triangleIndices[3*selectedTriangle+2]+2]);
-            lastInfo.n = n0.multiply(lambda0).
-                add(n1.multiply(lambda1).
-                add(n2.multiply(lambda2)));
-
-            // Texture map coordinates interpolation
-            u0 = vertexUvs[2*triangleIndices[3*selectedTriangle+0]+0];
-            v0 = vertexUvs[2*triangleIndices[3*selectedTriangle+0]+1];
-            u1 = vertexUvs[2*triangleIndices[3*selectedTriangle+1]+0];
-            v1 = vertexUvs[2*triangleIndices[3*selectedTriangle+1]+1];
-            u2 = vertexUvs[2*triangleIndices[3*selectedTriangle+2]+0];
-            v2 = vertexUvs[2*triangleIndices[3*selectedTriangle+2]+1];
-            lastInfo.u = u0*lambda0 + u1*lambda1 + u2*lambda2;
-            lastInfo.v = v0*lambda0 + v1*lambda1 + v2*lambda2;
-        //}
-
-        lastInfo.n = lastInfo.n.normalized();
-
-        // Normal is always pointed "outwards" with respect to 
-        // the triangle (this manages the issue of back-facing
-        // normals)
-        if ( lastInfo.n.dotProduct(lastRay.direction()) >= 0 ) {
-            lastInfo.n = lastInfo.n.multiply(-1);
+        if ( outData == null ) {
+            return;
         }
-
-        //-----------------------------------------------------------------
-        outData.clone(lastInfo);
-
-        //-----------------------------------------------------------------
-        if ( materials != null ) {
-            outData.material = materials[0];
-        }
-        if ( materialRanges != null ) {
-            for ( int i = 0; i < materialRanges.length-1 ; i++ ) {
-                if ( selectedTriangle >= materialRanges[i][0] &&
-                     selectedTriangle < materialRanges[i+1][0] ) {
-                    outData.material = materials[materialRanges[i+1][1]];
-                    break;
-                }
-            }
-        }
-        outData.texture = null;
-        if ( textureRanges != null ) {
-            for ( int i = 0; i < textureRanges.length-1 ; i++ ) {
-                if ( selectedTriangle >= textureRanges[i][0] &&
-                     selectedTriangle < textureRanges[i+1][0] ) {
-                    outData.texture = textures[textureRanges[i+1][1]-1];
-                    break;
-                }
-            }
-        }
+        Ray queryRay = inRay.withT(inT);
+        doIntersection(queryRay, outData);
     }
 
     /**
@@ -1359,8 +1242,6 @@ public class TriangleMesh extends Surface {
 
         //- Calculate new vertex arrays -----------------------------------
 
-        lastInfo = new RayHit();
-        lastRay = null;
         minMax = null;
         boundingVolume = null;
         triangleMeshGroupCache = null;

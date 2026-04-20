@@ -21,8 +21,6 @@ public class Torus extends Solid
     
     private double majorRadius;
     private double minorRadius;
-    
-    private final RayHit lastInfo;
 
     /**
     @param inMajorRadius
@@ -32,8 +30,6 @@ public class Torus extends Solid
     {
         majorRadius = inMajorRadius;
         minorRadius = inMinorRadius;
-        
-        lastInfo = new RayHit();
     }
 
     /**
@@ -116,9 +112,6 @@ public class Torus extends Solid
             return null;
         } 
         else {
-            lastInfo.p = lastInfo.p.withX(inOut_ray.origin().x() + (mRoot * inOut_ray.direction().x()));
-            lastInfo.p = lastInfo.p.withY(inOut_ray.origin().y() + (mRoot * inOut_ray.direction().y()));
-            lastInfo.p = lastInfo.p.withZ(inOut_ray.origin().z() + (mRoot * inOut_ray.direction().z()));
             return inOut_ray.withT(mRoot); //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
         }
     }
@@ -133,6 +126,7 @@ public class Torus extends Solid
         if ( outHit != null ) {
             outHit.setRay(hit);
             doExtraInformation(hit, hit.t(), outHit);
+            outHit.setRay(hit);
         }
         return true;
     }
@@ -1268,10 +1262,6 @@ public class Torus extends Solid
             return false;
         }
         else {
-                lastInfo.p = lastInfo.p.withX(ray.origin().x() + (root * ray.direction().x()));
-                lastInfo.p = lastInfo.p.withY(ray.origin().y() + (root * ray.direction().y()));
-                lastInfo.p = lastInfo.p.withZ(ray.origin().z() + (root * ray.direction().z()));
-                
                 ray = ray.withT(root);
          //       System.out.println("Raiz: "+root);
                 return true;
@@ -1282,15 +1272,26 @@ public class Torus extends Solid
     public void doExtraInformation(
         Ray inRay, double intT, RayHit outData) 
     {
-        outData.p = lastInfo.p;
+        if ( outData == null ) {
+            return;
+        }
+        Vector3D hitPoint = new Vector3D(
+            inRay.origin().x() + intT*inRay.direction().x(),
+            inRay.origin().y() + intT*inRay.direction().y(),
+            inRay.origin().z() + intT*inRay.direction().z());
+        outData.p = hitPoint;
         double r2=minorRadius*minorRadius;
         double R2=majorRadius*majorRadius;
+        double hitNormSquared =
+            hitPoint.x()*hitPoint.x() +
+            hitPoint.y()*hitPoint.y() +
+            hitPoint.z()*hitPoint.z();
      
-        outData.n = outData.n.withX((4*lastInfo.p.x()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) ));
-        outData.n = outData.n.withY((4*lastInfo.p.y()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) ));
-        outData.n = outData.n.withZ((4*lastInfo.p.z()*(Math.pow(lastInfo.p.x(), 2) + Math.pow(lastInfo.p.y(), 2) + Math.pow(lastInfo.p.z(), 2) - r2 - R2) + 8*R2*lastInfo.p.z()));
-
-        outData.n = outData.n.normalized();
+        outData.n = new Vector3D(
+            4 * hitPoint.x() * (hitNormSquared - r2 - R2),
+            4 * hitPoint.y() * (hitNormSquared - r2 - R2),
+            4 * hitPoint.z() * (hitNormSquared - r2 - R2) + 8 * R2 * hitPoint.z()
+        ).normalized();
     }
 
     /**

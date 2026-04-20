@@ -19,8 +19,11 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.util.ArrayList;
 
 // VSDK classes
+import vsdk.toolkit.common.Triangle;
+import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.ColorRgb;
@@ -33,11 +36,15 @@ import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.Torus;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
 /**
 This class implements an scene reader based on the instructional raytracer
@@ -95,6 +102,117 @@ public class ReaderMitScene extends PersistenceElement
         return st.nval;
     }
 
+    private String
+    readStringToken(StreamTokenizer st) throws IOException
+    {
+        int tokenType = st.nextToken();
+        if ( tokenType == StreamTokenizer.TT_WORD || tokenType == '"' ) {
+            return st.sval;
+        }
+        System.err.println("ERROR: string expected in line " + st.lineno());
+        throw new IOException(st.toString());
+    }
+
+    private Material
+    readSurfaceDefinition(StreamTokenizer st) throws IOException
+    {
+        double r = readNumber(st);
+        double g = readNumber(st);
+        double b = readNumber(st);
+        double ka = readNumber(st);
+        double kd = readNumber(st);
+        double ks = readNumber(st);
+        double ns = readNumber(st);
+        double kr = readNumber(st);
+        double kt = readNumber(st);
+        double index = readNumber(st);
+
+        Material material = new Material();
+        material.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
+        material.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
+        material.setSpecular(new ColorRgb(ks, ks, ks));
+        material.setPhongExponent(ns);
+        material.setReflectionCoefficient(kr);
+        material.setRefractionCoefficient(kt);
+        return material;
+    }
+
+    private void
+    applyBodyTransform(SimpleBody thing,
+                       double yaw, double pitch, double roll,
+                       Vector3D position)
+    {
+        Matrix4x4 R = new Matrix4x4();
+        R = R.eulerAnglesRotation(yaw, pitch, roll);
+        thing.setRotation(R);
+        Matrix4x4 Ri = new Matrix4x4(R);
+        Ri = Ri.invert();
+        thing.setRotationInverse(Ri);
+        thing.setPosition(position);
+    }
+
+    private void
+    flushTriangleBatch(SimpleScene theScene,
+                       ArrayList<Vertex> vertices,
+                       ArrayList<Triangle> triangles,
+                       Material material,
+                       double yaw, double pitch, double roll)
+    {
+        if ( triangles.isEmpty() ) {
+            return;
+        }
+
+        TriangleMesh mesh = new TriangleMesh();
+        mesh.setVertexes(vertices.toArray(new Vertex[0]), false, false, false, false);
+        mesh.setTriangles(triangles.toArray(new Triangle[0]));
+        mesh.calculateNormals();
+
+        SimpleBody thing = new SimpleBody();
+        thing.setGeometry(mesh);
+        thing.setMaterial(material);
+        applyBodyTransform(thing, yaw, pitch, roll, new Vector3D());
+        theScene.addBody(thing);
+    }
+
+    private void
+    addImportedObj(SimpleScene theScene,
+                   String objectPath,
+                   Material fallbackMaterial,
+                   double yaw, double pitch, double roll,
+                   Vector3D translation,
+                   double uniformScale) throws Exception
+    {
+        SimpleScene importedScene = new SimpleScene();
+        EnvironmentPersistence.importEnvironment(new File(objectPath), importedScene);
+
+        Matrix4x4 sceneRotation = new Matrix4x4().eulerAnglesRotation(yaw, pitch, roll);
+        for ( SimpleBody importedBody : importedScene.getSimpleBodies() ) {
+            SimpleBody thing = new SimpleBody();
+            thing.setName(importedBody.getName());
+            thing.setGeometry(importedBody.getGeometry());
+            thing.setMaterial(importedBody.getMaterial() != null
+                ? importedBody.getMaterial() : fallbackMaterial);
+            thing.setTexture(importedBody.getTexture());
+            thing.setNormalMap(importedBody.getNormalMap());
+
+            Matrix4x4 composedRotation = sceneRotation.multiply(importedBody.getRotation());
+            thing.setRotation(composedRotation);
+            thing.setRotationInverse(new Matrix4x4(composedRotation).invert());
+
+            Vector3D sourceScale = importedBody.getScale();
+            thing.setScale(new Vector3D(
+                sourceScale.x() * uniformScale,
+                sourceScale.y() * uniformScale,
+                sourceScale.z() * uniformScale));
+
+            Vector3D translatedPosition =
+                sceneRotation.multiply(importedBody.getPosition().multiply(uniformScale))
+                    .add(translation);
+            thing.setPosition(translatedPosition);
+            theScene.addBody(thing);
+        }
+    }
+
     private double
     convertMitHorizontalFovToVertical(double horizontalFov)
     {
@@ -128,8 +246,11 @@ public class ReaderMitScene extends PersistenceElement
         Reader parsero = new BufferedReader(new InputStreamReader(is));
         StreamTokenizer st = new StreamTokenizer(parsero);
         st.commentChar('#');
+        st.quoteChar('"');
+        st.eolIsSignificant(true);
         boolean fin_de_lectura = false;
         Material currentMaterial;
+        Material currentTrianglesMaterial = null;
         Vector3D importedEye = DEFAULT_MIT_EYE;
         Vector3D importedLookAt = DEFAULT_MIT_LOOKAT;
         Vector3D importedUp = DEFAULT_MIT_UP;
@@ -154,15 +275,90 @@ public class ReaderMitScene extends PersistenceElement
         currentMaterial.setReflectionCoefficient(0);
         currentMaterial.setRefractionCoefficient(0);
         currentMaterial.setPhongExponent(10);
+
+        boolean readingTriangles = false;
+        ArrayList<Vertex> triangleVertices = new ArrayList<Vertex>();
+        ArrayList<Triangle> triangleFaces = new ArrayList<Triangle>();
         SimpleBody thing;
-        Matrix4x4 R, Ri;
         double yaw_actual = 0;
         double pitch_actual = 0;
         double roll_actual = 0;
 
         while ( !fin_de_lectura ) {
-          switch ( st.nextToken() ) {
+          int tokenType = st.nextToken();
+          switch ( tokenType ) {
+            case StreamTokenizer.TT_EOL:
+              break;
+            case StreamTokenizer.TT_EOF:
+              fin_de_lectura = true;
+              break;
             case StreamTokenizer.TT_WORD:
+              if ( readingTriangles ) {
+                  if ( st.sval.equals("v") ) {
+                      Vector3D p = new Vector3D(
+                          readNumber(st),
+                          readNumber(st),
+                          readNumber(st));
+                      triangleVertices.add(new Vertex(p));
+                  }
+                  else if ( st.sval.equals("f") ) {
+                      ArrayList<Integer> polygonIndices = new ArrayList<Integer>();
+                      while ( true ) {
+                          int faceToken = st.nextToken();
+                          if ( faceToken == StreamTokenizer.TT_EOL ) {
+                              break;
+                          }
+                          if ( faceToken == StreamTokenizer.TT_EOF ) {
+                              fin_de_lectura = true;
+                              break;
+                          }
+
+                          int index;
+                          if ( faceToken == StreamTokenizer.TT_NUMBER ) {
+                              index = (int)st.nval;
+                          }
+                          else if ( faceToken == StreamTokenizer.TT_WORD ) {
+                              index = Integer.parseInt(st.sval);
+                          }
+                          else {
+                              System.err.println("ERROR: face index expected in line " + st.lineno());
+                              throw new IOException(st.toString());
+                          }
+                          polygonIndices.add(Integer.valueOf(index));
+                      }
+                      if ( polygonIndices.size() < 3 ) {
+                          System.err.println("ERROR: face with less than 3 vertices in line " + st.lineno());
+                          throw new IOException(st.toString());
+                      }
+                      int anchor = polygonIndices.get(0).intValue();
+                      for ( int i = 1; i < polygonIndices.size()-1; i++ ) {
+                          int i1 = polygonIndices.get(i).intValue();
+                          int i2 = polygonIndices.get(i+1).intValue();
+                          triangleFaces.add(new Triangle(anchor, i1, i2));
+                      }
+                  }
+                  else if ( st.sval.equals("surface") ) {
+                      flushTriangleBatch(theScene, triangleVertices, triangleFaces,
+                          currentTrianglesMaterial, yaw_actual, pitch_actual, roll_actual);
+                      triangleFaces.clear();
+                      currentMaterial = readSurfaceDefinition(st);
+                      currentTrianglesMaterial = currentMaterial;
+                  }
+                  else if ( st.sval.equals("end") ) {
+                      flushTriangleBatch(theScene, triangleVertices, triangleFaces,
+                          currentTrianglesMaterial, yaw_actual, pitch_actual, roll_actual);
+                      triangleVertices.clear();
+                      triangleFaces.clear();
+                      readingTriangles = false;
+                  }
+                  else {
+                      System.err.println("ERROR: unsupported triangles token \"" + st.sval +
+                          "\" in line " + st.lineno());
+                      throw new IOException(st.toString());
+                  }
+                  break;
+              }
+
               if ( st.sval.equals("sphere") ) {
                   Vector3D c = new Vector3D(readNumber(st), 
                                             readNumber(st), 
@@ -173,14 +369,7 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Sphere(r));
                   thing.setMaterial(currentMaterial);
-
-                  R = new Matrix4x4();
-                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
-                  thing.setRotation(R);
-                  Ri = new Matrix4x4(R);
-                  Ri = Ri.invert();
-                  thing.setRotationInverse(Ri);
-                  thing.setPosition(c);
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("cube") ) {
@@ -193,13 +382,7 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(currentMaterial);
-                  R = new Matrix4x4();
-                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
-                  thing.setRotation(R);
-                  Ri = new Matrix4x4(R);
-                  Ri = Ri.invert();
-                  thing.setRotationInverse(Ri);
-                  thing.setPosition(c);
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 } 
                 else if ( st.sval.equals("cylinder") ) {
@@ -214,24 +397,105 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(currentMaterial);
-                  R = new Matrix4x4();
-                  R = R.eulerAnglesRotation(yaw_actual, pitch_actual, roll_actual);
-                  thing.setRotation(R);
-                  Ri = new Matrix4x4(R);
-                  Ri = Ri.invert();
-                  thing.setRotationInverse(Ri);
-                  thing.setPosition(c);
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
-                /*
-                else if (st.sval.equals("triangles")) {
-                  showDebugMessage("triangles");
+                else if ( st.sval.equals("torus") ) {
+                  Vector3D c = new Vector3D(readNumber(st),
+                                            readNumber(st),
+                                            readNumber(st));
+                  double majorRadius = readNumber(st);
+                  double minorRadius = readNumber(st);
+
+                  showDebugMessage("torus");
                   thing = new SimpleBody();
-                  thing.setGeometry(new MESH(st));
+                  thing.setGeometry(new Torus(majorRadius, minorRadius));
                   thing.setMaterial(currentMaterial);
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
-                } 
-                */
+                }
+                else if ( st.sval.equals("polybox") ) {
+                  Vector3D c = new Vector3D(readNumber(st),
+                                            readNumber(st),
+                                            readNumber(st));
+                  double sx = readNumber(st);
+                  double sy = readNumber(st);
+                  double sz = readNumber(st);
+
+                  showDebugMessage("polybox");
+                  PolyhedralBoundedSolid solid =
+                      new Box(sx, sy, sz).exportToPolyhedralBoundedSolid();
+                  thing = new SimpleBody();
+                  thing.setGeometry(solid);
+                  thing.setMaterial(currentMaterial);
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
+                  theScene.addBody(thing);
+                }
+                else if ( st.sval.equals("appel") ) {
+                  int appelId = (int)readNumber(st);
+                  Vector3D c = new Vector3D(readNumber(st),
+                                            readNumber(st),
+                                            readNumber(st));
+                  double uniformScale = 1.0;
+                  int nextToken = st.nextToken();
+                  if ( nextToken == StreamTokenizer.TT_NUMBER ) {
+                      uniformScale = st.nval;
+                  }
+                  else {
+                      st.pushBack();
+                  }
+                  if ( uniformScale <= 0 ) {
+                      uniformScale = 1.0;
+                  }
+
+                  showDebugMessage("appel");
+                  PolyhedralBoundedSolid solid;
+                  if ( appelId == 1 ) {
+                      solid = SimpleTestGeometryLibrary.createTestObjectAPPE1967_1();
+                  }
+                  else if ( appelId == 2 ) {
+                      solid = SimpleTestGeometryLibrary.createTestObjectAPPE1967_2();
+                  }
+                  else {
+                      solid = SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
+                  }
+
+                  // APPEL solids are defined in [0,1]^3; recenter for scene placement.
+                  solid.applyTransformation(new Matrix4x4().translation(-0.5, -0.5, -0.5));
+
+                  thing = new SimpleBody();
+                  thing.setGeometry(solid);
+                  thing.setMaterial(currentMaterial);
+                  thing.setScale(new Vector3D(uniformScale, uniformScale, uniformScale));
+                  applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
+                  theScene.addBody(thing);
+                }
+                else if ( st.sval.equals("obj") ) {
+                  String objectPath = readStringToken(st);
+                  Vector3D c = new Vector3D(readNumber(st),
+                                            readNumber(st),
+                                            readNumber(st));
+                  double uniformScale = 1.0;
+                  int nextToken = st.nextToken();
+                  if ( nextToken == StreamTokenizer.TT_NUMBER ) {
+                      uniformScale = st.nval;
+                  }
+                  else {
+                      st.pushBack();
+                  }
+                  if ( uniformScale <= 0 ) {
+                      uniformScale = 1.0;
+                  }
+                  addImportedObj(theScene, objectPath, currentMaterial,
+                      yaw_actual, pitch_actual, roll_actual, c, uniformScale);
+                }
+                else if ( st.sval.equals("triangles") ) {
+                  showDebugMessage("triangles");
+                  readingTriangles = true;
+                  triangleVertices.clear();
+                  triangleFaces.clear();
+                  currentTrianglesMaterial = currentMaterial;
+                }
                 else if (st.sval.equals("viewport")) {
                   showDebugMessage("viewport");
 
@@ -370,34 +634,18 @@ public class ReaderMitScene extends PersistenceElement
                 }
                 else if ( st.sval.equals("surface") ) {
                   showDebugMessage("surface");
-                  double r = readNumber(st);
-                  double g = readNumber(st);
-                  double b = readNumber(st);
-                  double ka = readNumber(st);
-                  double kd = readNumber(st);
-                  double ks = readNumber(st);
-                  double ns = readNumber(st);
-                  double kr = readNumber(st);
-                  double kt = readNumber(st);
-                  double index = readNumber(st);
-                  /*
-                  currentMaterial = new Material(r, g, b, 
-                                                ka, kd, ks, 
-                                                ns, kr, kt, index);
-                  */
-                  currentMaterial = new Material();
-                  currentMaterial.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
-                  currentMaterial.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
-                  currentMaterial.setSpecular(new ColorRgb(ks, ks, ks));
-                  currentMaterial.setPhongExponent(ns);
-                  currentMaterial.setReflectionCoefficient(kr);
-                  currentMaterial.setRefractionCoefficient(kt);
+                  currentMaterial = readSurfaceDefinition(st);
+                }
+                else {
+                  System.err.println("ERROR: unsupported token \"" + st.sval +
+                      "\" in line " + st.lineno());
+                  throw new IOException(st.toString());
                 }
               ;
               break;
             default:
-              fin_de_lectura = true;
-              break;
+              System.err.println("ERROR: in line "+st.lineno()+" at "+st.sval);
+              throw new IOException(st.toString());
           } // switch
         } // while
         is.close();
