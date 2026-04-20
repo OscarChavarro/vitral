@@ -500,29 +500,28 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid wedge;
-        //double delta = 0.00001;
-        double delta = 0.05;
+        double facesModelDelta = 0.05;
 
         wedge = new PolyhedralBoundedSolid();
 
         switch (situation) {
-            default -> {
-                // Original on edge wedge, generating non manifold object
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
-            }
             case -1 -> {
                 // Lowered wedge, generating a closed holed object
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3 - delta), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 - delta));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 - delta));
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3 - facesModelDelta), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 - facesModelDelta));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 - facesModelDelta));
             }
             case 1 -> {
                 // Raised wedge, generating an open object with no holes
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3 + delta), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 + delta));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 + delta));
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3 + facesModelDelta), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 + facesModelDelta));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 + facesModelDelta));
+            }
+            default -> {
+                // Original on edge wedge, generating non-manifold object
+                wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
+                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
+                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
             }
         }
 

@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
@@ -174,6 +176,22 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         assertThat(touchingOnly).isFalse();
     }
 
+    @Test
+    void given_hollowBrickLOperands_when_runningTouchingOnlyPreflight_then_itDoesNotDowngradeCornerOverlapsToTouching()
+        throws Exception
+    {
+        PolyhedralBoundedSolid[] pair = createHollowBrickOperands();
+
+        setNumericContextMethod.invoke(null,
+            PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
+
+        boolean touchingOnly =
+            ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
+                pair[1])).booleanValue();
+
+        assertThat(touchingOnly).isFalse();
+    }
+
     private boolean invokeSectorOverlap(
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex a,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex b)
@@ -201,6 +219,37 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     {
         double radians = Math.toRadians(degrees);
         return new Vector3D(Math.cos(radians), Math.sin(radians), 0.0);
+    }
+
+    private static PolyhedralBoundedSolid[] createHollowBrickOperands()
+    {
+        PolyhedralBoundedSolid[] operands = new PolyhedralBoundedSolid[2];
+        PolyhedralBoundedSolid a = createTranslatedBox(1.0, 0.2, 0.2,
+            0.5, 0.1, 0.1);
+        PolyhedralBoundedSolid b = createTranslatedBox(1.0, 0.2, 0.2,
+            0.5, 0.9, 0.1);
+        PolyhedralBoundedSolid c = createTranslatedBox(0.2, 1.0, 0.2,
+            0.1, 0.5, 0.1);
+        PolyhedralBoundedSolid d = createTranslatedBox(0.2, 1.0, 0.2,
+            0.9, 0.5, 0.1);
+
+        operands[0] = PolyhedralBoundedSolidModeler.setOp(
+            b, c, PolyhedralBoundedSolidModeler.UNION, false);
+        operands[1] = PolyhedralBoundedSolidModeler.setOp(
+            a, d, PolyhedralBoundedSolidModeler.UNION, false);
+        return operands;
+    }
+
+    private static PolyhedralBoundedSolid createTranslatedBox(
+        double sx, double sy, double sz,
+        double tx, double ty, double tz)
+    {
+        Box box = new Box(new Vector3D(sx, sy, sz));
+        PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
+        Matrix4x4 translation = new Matrix4x4();
+        translation = translation.translation(tx, ty, tz);
+        solid.applyTransformation(translation);
+        return solid;
     }
 
     private static _PolyhedralBoundedSolidFace findFaceWithNormal(

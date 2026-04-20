@@ -84,6 +84,60 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         lastIntersectedHalfedge = null;
     }
 
+    private static double boundaryLoopAreaMagnitude(
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        _PolyhedralBoundedSolidHalfEdge start;
+        _PolyhedralBoundedSolidHalfEdge he;
+        Vector3D normalAccumulator;
+
+        if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+            return 0.0;
+        }
+
+        start = loop.boundaryStartHalfEdge;
+        he = start;
+        normalAccumulator = new Vector3D();
+        do {
+            Vector3D p = he.startingVertex.position;
+            Vector3D q = he.next().startingVertex.position;
+
+            normalAccumulator = normalAccumulator.add(new Vector3D(
+                (p.y() - q.y()) * (p.z() + q.z()),
+                (p.z() - q.z()) * (p.x() + q.x()),
+                (p.x() - q.x()) * (p.y() + q.y())));
+            he = he.next();
+        } while ( he != start );
+
+        return normalAccumulator.length();
+    }
+
+    private _PolyhedralBoundedSolidLoop selectLoopForPlaneCalculation()
+    {
+        _PolyhedralBoundedSolidLoop selectedLoop;
+        int i;
+        double maxAreaMagnitude;
+
+        if ( boundariesList.size() < 1 ) {
+            return null;
+        }
+
+        selectedLoop = boundariesList.get(0);
+        maxAreaMagnitude = boundaryLoopAreaMagnitude(selectedLoop);
+
+        for ( i = 1; i < boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop candidate = boundariesList.get(i);
+            double candidateAreaMagnitude =
+                boundaryLoopAreaMagnitude(candidate);
+            if ( candidateAreaMagnitude > maxAreaMagnitude ) {
+                maxAreaMagnitude = candidateAreaMagnitude;
+                selectedLoop = candidate;
+            }
+        }
+
+        return selectedLoop;
+    }
+
     /**
     Find the halfedge from vertex `vn1` to vertex `vn2`. 
     Returns null if halfedge not found, or current founded halfedge otherwise.
@@ -175,7 +229,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         if ( boundariesList.size () < 1 ) {
             return true;
         }
-        loop = boundariesList.get (0);
+        loop = selectLoopForPlaneCalculation();
+        if ( loop == null ) {
+            return true;
+        }
         he = loop.boundaryStartHalfEdge;
         if ( he == null ) {
             // Loop without starting halfedge

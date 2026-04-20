@@ -5,6 +5,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -245,13 +246,116 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             bounds[5] - bounds[2] > eps;
     }
 
-    private static double[] sampleCoordinates(double min, double max)
+    private static double vertexCoordinate(
+        _PolyhedralBoundedSolidVertex vertex,
+        int axis)
     {
+        if ( axis == 0 ) {
+            return vertex.position.x();
+        }
+        if ( axis == 1 ) {
+            return vertex.position.y();
+        }
+        return vertex.position.z();
+    }
+
+    private static void appendInteriorVertexCoordinates(
+        ArrayList<Double> coords,
+        PolyhedralBoundedSolid solid,
+        int axis,
+        double min,
+        double max,
+        double eps)
+    {
+        int i;
+
+        if ( solid == null ) {
+            return;
+        }
+
+        for ( i = 0; i < solid.verticesList.size(); i++ ) {
+            double c = vertexCoordinate(solid.verticesList.get(i), axis);
+            if ( c > min + eps && c < max - eps ) {
+                coords.add(Double.valueOf(c));
+            }
+        }
+    }
+
+    private static void appendUniqueInteriorSample(
+        ArrayList<Double> samples,
+        double value,
+        double min,
+        double max,
+        double eps)
+    {
+        int i;
+
+        if ( value <= min + eps || value >= max - eps ) {
+            return;
+        }
+
+        for ( i = 0; i < samples.size(); i++ ) {
+            if ( Math.abs(samples.get(i).doubleValue() - value) <= eps ) {
+                return;
+            }
+        }
+        samples.add(Double.valueOf(value));
+    }
+
+    private static double[] sampleCoordinates(double min, double max,
+                                              PolyhedralBoundedSolid solidA,
+                                              PolyhedralBoundedSolid solidB,
+                                              int axis)
+    {
+        ArrayList<Double> coords;
+        ArrayList<Double> samples;
+        ArrayList<Double> uniqueCoords;
+        double eps = numericContext.bigEpsilon();
         double center = (min + max) / 2.0;
         double quarter = min + (max - min) / 4.0;
         double threeQuarters = max - (max - min) / 4.0;
+        int i;
 
-        return new double[] { quarter, center, threeQuarters };
+        coords = new ArrayList<Double>();
+        coords.add(Double.valueOf(min));
+        coords.add(Double.valueOf(max));
+        appendInteriorVertexCoordinates(coords, solidA, axis, min, max, eps);
+        appendInteriorVertexCoordinates(coords, solidB, axis, min, max, eps);
+        Collections.sort(coords);
+
+        uniqueCoords = new ArrayList<Double>();
+        for ( i = 0; i < coords.size(); i++ ) {
+            double c = coords.get(i).doubleValue();
+            if ( uniqueCoords.isEmpty() ||
+                 Math.abs(uniqueCoords.get(uniqueCoords.size()-1).doubleValue() - c) > eps ) {
+                uniqueCoords.add(Double.valueOf(c));
+            }
+        }
+
+        samples = new ArrayList<Double>();
+        appendUniqueInteriorSample(samples, quarter, min, max, eps);
+        appendUniqueInteriorSample(samples, center, min, max, eps);
+        appendUniqueInteriorSample(samples, threeQuarters, min, max, eps);
+
+        for ( i = 0; i < uniqueCoords.size() - 1; i++ ) {
+            double left = uniqueCoords.get(i).doubleValue();
+            double right = uniqueCoords.get(i+1).doubleValue();
+            if ( right - left > eps ) {
+                appendUniqueInteriorSample(samples, (left + right) / 2.0,
+                    min, max, eps);
+            }
+        }
+
+        Collections.sort(samples);
+        if ( samples.isEmpty() ) {
+            return new double[] { center };
+        }
+
+        double[] result = new double[samples.size()];
+        for ( i = 0; i < samples.size(); i++ ) {
+            result[i] = samples.get(i).doubleValue();
+        }
+        return result;
     }
 
     private static boolean hasConfirmedInteriorOverlap(
@@ -275,9 +379,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        xs = sampleCoordinates(bounds[0], bounds[3]);
-        ys = sampleCoordinates(bounds[1], bounds[4]);
-        zs = sampleCoordinates(bounds[2], bounds[5]);
+        xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
+        ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
+        zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
 
         for ( i = 0; i < xs.length; i++ ) {
             for ( j = 0; j < ys.length; j++ ) {
