@@ -1823,7 +1823,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
-        return setOp(inSolidA, inSolidB, op, false);
+        return setOp(inSolidA, inSolidB, op, false, true);
     }
 
     private static void debugSolid(PolyhedralBoundedSolid solid, String pattern)
@@ -1850,10 +1850,39 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     /**
     Following program [MANT1988].15.1.
     */
+    private static void postProcessResult(
+        PolyhedralBoundedSolid res,
+        boolean maximizeResultFaces)
+    {
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+        res.compactIds();
+        if ( maximizeResultFaces ) {
+            res.maximizeFaces();
+            res.compactIds();
+        }
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+    }
+
+    /**
+    Following program [MANT1988].15.1.
+    */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,
         int op, boolean withDebug)
+    {
+        return setOp(inSolidA, inSolidB, op, withDebug, true);
+    }
+
+    /**
+    Following program [MANT1988].15.1.
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces)
     {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
@@ -1923,11 +1952,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             if ( res.polygonsList.size() > 0 ) {
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-                res.compactIds();
-                res.maximizeFaces();
-                res.compactIds();
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+                postProcessResult(res, maximizeResultFaces);
             }
             return res;
         }
@@ -1950,11 +1975,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             // No intersections found
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             if ( res.polygonsList.size() > 0 ) {
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-                res.compactIds();
-                res.maximizeFaces();
-                res.compactIds();
-                PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+                postProcessResult(res, maximizeResultFaces);
             }
             return res;
         }
@@ -1979,11 +2000,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(res, "outputR_stage06");
         }
 
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-        res.compactIds();
-        res.maximizeFaces();
-        res.compactIds();
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+        postProcessResult(res, maximizeResultFaces);
 
         if ( withDebug ) {
             debugSolid(res, "outputR_stage07");

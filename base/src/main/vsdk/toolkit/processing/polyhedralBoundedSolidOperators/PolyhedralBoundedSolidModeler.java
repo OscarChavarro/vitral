@@ -476,4 +476,19 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
             withDebug);
     }
+
+    /**
+    Convenience wrapper over `PolyhedralBoundedSolidSetOperator.setOp`
+    including debug mode and optional final face maximization.
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces)
+    {
+        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
+            withDebug, maximizeResultFaces);
+    }
 }

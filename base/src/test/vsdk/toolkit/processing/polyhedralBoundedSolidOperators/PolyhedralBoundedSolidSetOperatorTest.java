@@ -150,8 +150,8 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @ParameterizedTest
-    @MethodSource("mant1988StableOperationSamples")
-    void given_mant1988Section15_2Scenarios_when_stableOperations_then_resultIsReturnedAndValid(
+    @MethodSource("mant1988StrictOperationSamples")
+    void given_mant1988Section15_2Scenarios_when_strictOperations_then_resultIsReturnedAndStrictValid(
         int situation, int op)
     {
         // Arrange
@@ -170,11 +170,13 @@ class PolyhedralBoundedSolidSetOperatorTest
         assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(0);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isTrue();
     }
 
     @ParameterizedTest
-    @MethodSource("mant1988KnownFailureSamples")
-    void given_mant1988Section15_2Scenarios_when_knownFailureOperations_then_throwsRuntimeException(
+    @MethodSource("mant1988IntermediateOnlySamples")
+    void given_mant1988Section15_2Scenarios_when_pseudomanifoldOperations_then_resultRemainsIntermediateButNotStrict(
         int situation, int op)
     {
         // Arrange
@@ -185,47 +187,72 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = null;
-        Throwable thrown = null;
-        try {
-            result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false);
-        }
-        catch ( Throwable ex ) {
-            thrown = ex;
-        }
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            solidA, solidB, op, false);
 
         // Assert
-        if ( thrown != null ) {
-            assertThat(thrown).isInstanceOf(RuntimeException.class);
-        }
-        else {
-            assertThat(result).isNotNull();
-            assertThat(PolyhedralBoundedSolidValidationEngine
-                .validateIntermediate(result)).isFalse();
-        }
+        assertThat(result).isNotNull();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isFalse();
     }
 
-    @ParameterizedTest
-    @MethodSource("mant1988LimitSamples")
-    void given_mant1988Section15_2Scenarios_when_union_then_returnsValidResult(
-        int situation)
+    @org.junit.jupiter.api.Test
+    void given_mant1988Section15_2HoledIntersection_when_finalMaximizeFacesEnabled_then_resultRemainsIntermediateValidButNotStrict()
     {
         // Arrange
         PolyhedralBoundedSolid[] operands =
             PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(
-                situation);
+                -1);
         PolyhedralBoundedSolid solidA = operands[0];
         PolyhedralBoundedSolid solidB = operands[1];
 
         // Action
-        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
-            PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            solidA, solidB, PolyhedralBoundedSolidModeler.INTERSECTION, false,
+            true);
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(0);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isFalse();
+    }
+
+    @org.junit.jupiter.api.Test
+    void given_mant1988Section15_2HoledIntersection_when_togglingFinalMaximizeFaces_then_resultTopologyIsPreserved()
+    {
+        // Arrange
+        PolyhedralBoundedSolid[] operandsWithMax =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
+        PolyhedralBoundedSolid[] operandsWithoutMax =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
+
+        // Action
+        PolyhedralBoundedSolid withMax = PolyhedralBoundedSolidModeler.setOp(
+            operandsWithMax[0], operandsWithMax[1],
+            PolyhedralBoundedSolidModeler.INTERSECTION, false, true);
+        PolyhedralBoundedSolid withoutMax = PolyhedralBoundedSolidModeler.setOp(
+            operandsWithoutMax[0], operandsWithoutMax[1],
+            PolyhedralBoundedSolidModeler.INTERSECTION, false, false);
+
+        // Assert
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(withMax)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(withoutMax)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(withMax)).isFalse();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(withoutMax)).isFalse();
+        assertThat(withMax.polygonsList.size())
+            .isEqualTo(withoutMax.polygonsList.size());
+        assertThat(withMax.edgesList.size())
+            .isEqualTo(withoutMax.edgesList.size());
+        assertThat(withMax.verticesList.size())
+            .isEqualTo(withoutMax.verticesList.size());
     }
 
     private static Stream<Arguments> disjointSetOperationSamples()
@@ -247,15 +274,6 @@ class PolyhedralBoundedSolidSetOperatorTest
                 facesA + facesB, edgesA + edgesB, verticesA + verticesB),
             Arguments.of(PolyhedralBoundedSolidModeler.INTERSECTION, 0, 0, 0),
             Arguments.of(PolyhedralBoundedSolidModeler.SUBTRACT, facesA, edgesA, verticesA)
-        );
-    }
-
-    private static Stream<Arguments> mant1988LimitSamples()
-    {
-        return Stream.of(
-            Arguments.of(-1),
-            Arguments.of(0),
-            Arguments.of(1)
         );
     }
 
@@ -299,23 +317,24 @@ class PolyhedralBoundedSolidSetOperatorTest
         );
     }
 
-    private static Stream<Arguments> mant1988StableOperationSamples()
+    private static Stream<Arguments> mant1988StrictOperationSamples()
     {
         return Stream.of(
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
-            Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.INTERSECTION),
-            Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
-            Arguments.of(0, PolyhedralBoundedSolidModeler.SUBTRACT)
+            Arguments.of(1, PolyhedralBoundedSolidModeler.SUBTRACT)
         );
     }
 
-    private static Stream<Arguments> mant1988KnownFailureSamples()
+    private static Stream<Arguments> mant1988IntermediateOnlySamples()
     {
         return Stream.of(
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION)
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION),
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(0, PolyhedralBoundedSolidModeler.SUBTRACT)
         );
     }
 

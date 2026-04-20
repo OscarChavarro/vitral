@@ -1826,6 +1826,10 @@ public class PolyhedralBoundedSolid extends Solid {
             }
         }
 
+        if ( loopsToMove.isEmpty() ) {
+            return false;
+        }
+
         for ( i = 0; i < loopsToMove.size(); i++ ) {
             if ( !lringmv(loopsToMove.get(i), simpleFace, false) ) {
                 return false;
@@ -1839,6 +1843,41 @@ public class PolyhedralBoundedSolid extends Solid {
         lringmv(outerGlueLoop, multiLoopFace, true);
         loopGlue(multiLoopFace.id);
         return true;
+    }
+
+    private static boolean hasCoincidentMultiLoopReductionCandidate(
+        _PolyhedralBoundedSolidFace faceA,
+        _PolyhedralBoundedSolidFace faceB,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        return countCoincidentLoops(faceA, faceB, numericContext) >= 2 ||
+               countCoincidentLoops(faceB, faceA, numericContext) >= 2;
+    }
+
+    private static int countCoincidentLoops(
+        _PolyhedralBoundedSolidFace multiLoopFace,
+        _PolyhedralBoundedSolidFace simpleFace,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        int i;
+        int coincidentCount;
+        _PolyhedralBoundedSolidLoop simpleLoop;
+
+        if ( multiLoopFace == null || simpleFace == null ||
+             multiLoopFace.boundariesList.size() < 2 ||
+             simpleFace.boundariesList.size() != 1 ) {
+            return 0;
+        }
+
+        simpleLoop = simpleFace.boundariesList.get(0);
+        coincidentCount = 0;
+        for ( i = 0; i < multiLoopFace.boundariesList.size(); i++ ) {
+            if ( loopsCoincident(multiLoopFace.boundariesList.get(i), simpleLoop,
+                    numericContext) ) {
+                coincidentCount++;
+            }
+        }
+        return coincidentCount;
     }
 
     /**
@@ -1924,7 +1963,12 @@ public class PolyhedralBoundedSolid extends Solid {
                 else if ( a != null && b != null &&
                           a.overlapsWith(b, numericContext.epsilon()) &&
                           e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
-                    // Case 2: Not tested!
+                    if ( hasCoincidentMultiLoopReductionCandidate(
+                             e.rightHalf.parentLoop.parentFace,
+                             e.leftHalf.parentLoop.parentFace,
+                             numericContext) ) {
+                        continue;
+                    }
                     lkef(e.rightHalf, e.leftHalf);
                     restart = true;
                     break;
