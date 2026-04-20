@@ -26,6 +26,7 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
@@ -167,6 +168,41 @@ public class Raytracer extends RenderingElement {
             detailMask |= RayHit.DETAIL_TANGENT;
         }
         return detailMask;
+    }
+
+    private static long[] captureBodyVersions(ArrayList<SimpleBody> bodies)
+    {
+        long[] versions = new long[bodies.size()];
+        for ( int i = 0; i < bodies.size(); i++ ) {
+            versions[i] = bodies.get(i).getModificationVersion();
+        }
+        return versions;
+    }
+
+    private static void assertSceneUnmodifiedDuringRender(
+        long expectedCameraVersion,
+        Camera camera,
+        long[] expectedBodyVersions,
+        ArrayList<SimpleBody> bodies)
+    {
+        if ( camera.getModificationVersion() != expectedCameraVersion ) {
+            throw new IllegalStateException(
+                "Camera was modified while raytracing. " +
+                "Freeze scene/camera edits during Raytracer.execute.");
+        }
+        if ( expectedBodyVersions.length != bodies.size() ) {
+            throw new IllegalStateException(
+                "Scene bodies list changed while raytracing. " +
+                "Freeze scene edits during Raytracer.execute.");
+        }
+        for ( int i = 0; i < bodies.size(); i++ ) {
+            if ( bodies.get(i).getModificationVersion() != expectedBodyVersions[i] ) {
+                throw new IllegalStateException(
+                    "SimpleBody at index " + i +
+                    " was modified while raytracing. " +
+                    "Freeze scene/body edits during Raytracer.execute.");
+            }
+        }
     }
 
     private void prepareSurfaceHit(
@@ -713,13 +749,19 @@ public class Raytracer extends RenderingElement {
         SceneRenderCache sceneRenderCache =
             new SceneRenderCache(inSimpleBodiesArray, renderContext);
         TraceWorkspace workspace = traceWorkspace.get();
-
-        inCamera.updateVectors();
+        long initialCameraVersion = inCamera.getModificationVersion();
+        long[] initialBodyVersions = captureBodyVersions(inSimpleBodiesArray);
+        CameraSnapshot cameraSnapshot = CameraSnapshot.fromCamera(inCamera);
 
         if ( liveReport != null ) {
             liveReport.begin();
         }
         for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
+            assertSceneUnmodifiedDuringRender(
+                initialCameraVersion,
+                inCamera,
+                initialBodyVersions,
+                inSimpleBodiesArray);
             if ( liveReport != null ) {
                 liveReport.update(0, inoutViewport.getYSize(), y);
             }
@@ -728,7 +770,7 @@ public class Raytracer extends RenderingElement {
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
                 RaytraceProfiling.recordPrimaryRay();
-                rayo = inCamera.generateRay(x, y);
+                rayo = cameraSnapshot.generateRay(x, y);
                 color.r = 0;
                 color.g = 0;
                 color.b = 0;

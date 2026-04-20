@@ -6,6 +6,7 @@
 
 package vsdk.toolkit.environment;
 import java.io.Serial;
+import java.util.concurrent.atomic.AtomicLong;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Entity;
@@ -70,6 +71,7 @@ public class Camera extends Entity
     // Private values which are preprocessed to speed up calculations
     private Vector3D dx, dy, _dir, upWithScale, rightWithScale;
     private Matrix4x4 normalizingTransformation;
+    private final AtomicLong modificationVersion = new AtomicLong();
     
     public Camera() 
     {
@@ -119,6 +121,16 @@ public class Camera extends Entity
         return normalizingTransformation;
     }
 
+    public long getModificationVersion()
+    {
+        return modificationVersion.get();
+    }
+
+    private void markModified()
+    {
+        modificationVersion.incrementAndGet();
+    }
+
     public String getName()
     {
         return name;
@@ -127,6 +139,7 @@ public class Camera extends Entity
     public void setName(String n)
     {
         name = n;
+        markModified();
     }
 
     public double getViewportXSize()
@@ -147,6 +160,7 @@ public class Camera extends Entity
     public void setPosition(Vector3D eyePosition)
     {
         this.eyePosition = new Vector3D(eyePosition);
+        markModified();
     }
     
     public Vector3D getFocusedPosition()
@@ -174,6 +188,7 @@ public class Camera extends Entity
         front = new Vector3D(partial);
         focalDistance = front.length();
         front = front.normalized();
+        markModified();
     }
 
     /**
@@ -205,6 +220,7 @@ public class Camera extends Entity
 
         up = front.crossProduct(left);
         up = up.normalized();
+        markModified();
     }
 
     public Vector3D getUp()
@@ -244,6 +260,7 @@ public class Camera extends Entity
     public void setUpDirect(Vector3D up)
     {
         this.up = new Vector3D(up);
+        markModified();
     }
 
     /**
@@ -258,6 +275,7 @@ public class Camera extends Entity
     public void setLeftDirect(Vector3D left)
     {
         this.left = new Vector3D(left);
+        markModified();
     }
 
     /**
@@ -274,6 +292,7 @@ public class Camera extends Entity
  
         this.up=front.crossProduct(left);
         this.up = up.normalized();
+        markModified();
     }
 
     public double getFov()
@@ -284,6 +303,7 @@ public class Camera extends Entity
     public void setFov(double fov)
     {
         this.fov = fov;
+        markModified();
     }
 
     public double getNearPlaneDistance()
@@ -294,6 +314,7 @@ public class Camera extends Entity
     public void setNearPlaneDistance(double nearPlaneDistance)
     {
         this.nearPlaneDistance = nearPlaneDistance;
+        markModified();
     }
 
     public double getFarPlaneDistance()
@@ -304,6 +325,7 @@ public class Camera extends Entity
     public void setFarPlaneDistance(double farPlaneDistance)
     {
         this.farPlaneDistance = farPlaneDistance;
+        markModified();
     }
 
     public int getProjectionMode()
@@ -314,6 +336,7 @@ public class Camera extends Entity
     public void setProjectionMode(int projectionMode)
     {
         this.projectionMode = projectionMode;
+        markModified();
     }
 
     public void updateViewportResize(int dx, int dy)
@@ -321,6 +344,7 @@ public class Camera extends Entity
         viewportXSize = dx;
         viewportYSize = dy;
         updateVectors();
+        markModified();
     }
 
     /**
@@ -474,6 +498,7 @@ public class Camera extends Entity
     public void setOrthogonalZoom(double orthogonalZoom)
     {
         this.orthogonalZoom = orthogonalZoom;
+        markModified();
     }
 
     public void setRotation(Matrix4x4 R)
@@ -492,6 +517,7 @@ public class Camera extends Entity
         left = left.withY(R.get(1, 1));
         left = left.withZ(R.get(2, 1));
         left = left.normalized();
+        markModified();
     }
 
     public Matrix4x4 getRotation()

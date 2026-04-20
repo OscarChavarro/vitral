@@ -2,6 +2,7 @@ package vsdk.toolkit.environment.scene;
 
 // Java
 import java.io.Serial;
+import java.util.concurrent.atomic.AtomicLong;
 
 // Vitral
 import vsdk.toolkit.common.Entity;
@@ -58,6 +59,7 @@ public class SimpleBody extends Entity {
 
     //- Model (6/6): body semantic data -------------------------------
     private String name;
+    private final AtomicLong modificationVersion = new AtomicLong();
 
     public SimpleBody()
     {
@@ -78,12 +80,23 @@ public class SimpleBody extends Entity {
         return name;
     }
 
+    public long getModificationVersion()
+    {
+        return modificationVersion.get();
+    }
+
+    private void markModified()
+    {
+        modificationVersion.incrementAndGet();
+    }
+
     /**
     @param n application-defined body name
     */
     public void setName(String n)
     {
         name = n;
+        markModified();
     }
 
     /**
@@ -100,6 +113,7 @@ public class SimpleBody extends Entity {
     public void setGeometry(Geometry g)
     {
         geometry = g;
+        markModified();
     }
 
     /**
@@ -128,6 +142,7 @@ public class SimpleBody extends Entity {
         this.rotationInverse = new Matrix4x4()
             .importFromQuaternion(rotationInverseQuaternion);
         updateTransformFlags();
+        markModified();
     }
 
     /**
@@ -156,6 +171,7 @@ public class SimpleBody extends Entity {
         this.rotationQuaternion = cachedInverseRotationQuaternion.conjugated();
         this.rotation = new Matrix4x4().importFromQuaternion(rotationQuaternion);
         updateTransformFlags();
+        markModified();
     }
 
     /**
@@ -172,6 +188,7 @@ public class SimpleBody extends Entity {
     public void setMaterial(Material m)
     {
         globalMaterial = m;
+        markModified();
     }
 
     /**
@@ -188,6 +205,7 @@ public class SimpleBody extends Entity {
     public void setTexture(Image in)
     {
         globalTextureMap = in;
+        markModified();
     }
 
     /**
@@ -215,6 +233,7 @@ public class SimpleBody extends Entity {
         if ( globalNormalMap != null ) {
             globalNormalMapRgb = globalNormalMap.exportToRgbImage();
         }
+        markModified();
     }
 
     /**
@@ -232,6 +251,7 @@ public class SimpleBody extends Entity {
     {
         position = p;
         updateTransformFlags();
+        markModified();
     }
 
     /**
@@ -285,6 +305,7 @@ public class SimpleBody extends Entity {
             inverseScale = new Vector3D();
         }
         updateTransformFlags();
+        markModified();
     }
 
     /**
