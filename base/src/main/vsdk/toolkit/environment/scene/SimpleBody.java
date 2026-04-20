@@ -39,6 +39,11 @@ public class SimpleBody extends Entity {
     private Quaternion rotationInverseQuaternion;
     private Vector3D inverseScale;
     private boolean hasInvertibleScale;
+    private boolean hasIdentityRotation;
+    private boolean hasUnitScale;
+    private boolean hasZeroTranslation;
+    private boolean hasIdentityTransform;
+    private boolean hasTranslationOnlyTransform;
 
     //- Model (3/6): body visual data ---------------------------------
     private Material globalMaterial;
@@ -56,7 +61,7 @@ public class SimpleBody extends Entity {
     public SimpleBody()
     {
         geometry = null;
-        position = new Vector3D(0, 0, 0);
+        setPosition(new Vector3D(0, 0, 0));
         setRotation(new Matrix4x4());
         setScale(new Vector3D(1, 1, 1));
         globalMaterial = new Material();
@@ -121,6 +126,7 @@ public class SimpleBody extends Entity {
         this.rotationInverseQuaternion = cachedRotationQuaternion.conjugated();
         this.rotationInverse = new Matrix4x4()
             .importFromQuaternion(rotationInverseQuaternion);
+        updateTransformFlags();
     }
 
     /**
@@ -148,6 +154,7 @@ public class SimpleBody extends Entity {
         this.rotationInverseQuaternion = cachedInverseRotationQuaternion;
         this.rotationQuaternion = cachedInverseRotationQuaternion.conjugated();
         this.rotation = new Matrix4x4().importFromQuaternion(rotationQuaternion);
+        updateTransformFlags();
     }
 
     /**
@@ -223,6 +230,7 @@ public class SimpleBody extends Entity {
     public void setPosition(Vector3D p)
     {
         position = p;
+        updateTransformFlags();
     }
 
     /**
@@ -275,6 +283,7 @@ public class SimpleBody extends Entity {
         else {
             inverseScale = new Vector3D();
         }
+        updateTransformFlags();
     }
 
     /**
@@ -311,6 +320,10 @@ public class SimpleBody extends Entity {
             return false;
         }
 
+        if ( hasIdentityTransform ) {
+            return geometry.doIntersection(inOutRay, outHit);
+        }
+
         Vector3D localOrigin = worldPointToObjectSpace(inOutRay.origin());
         Vector3D localDirection = worldDirectionToObjectSpace(inOutRay.direction());
         double localDirectionLength = localDirection.length();
@@ -320,6 +333,12 @@ public class SimpleBody extends Entity {
 
         int requiredDetailMask =
             outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
+        if ( hasTranslationOnlyTransform ) {
+            return doIntersectionWithTranslationOnly(
+                inOutRay,
+                outHit,
+                requiredDetailMask);
+        }
         Ray localRay = new Ray(
             localOrigin,
             localDirection.multiply(1.0 / localDirectionLength),
@@ -397,6 +416,27 @@ public class SimpleBody extends Entity {
             return;
         }
 
+        if ( hasIdentityTransform ) {
+            outInfo.setRay(inRay);
+            geometry.doExtraInformation(inRay, inT, outInfo);
+            outInfo.setRay(inRay);
+            return;
+        }
+
+        if ( hasTranslationOnlyTransform ) {
+            Ray localRay = new Ray(
+                inRay.origin().subtract(position),
+                inRay.direction(),
+                inT);
+            outInfo.setRay(inRay);
+            geometry.doExtraInformation(localRay, inT, outInfo);
+            outInfo.setRay(inRay);
+            if ( outInfo.needsPoint() ) {
+                outInfo.p = outInfo.p.add(position);
+            }
+            return;
+        }
+
         Vector3D localOrigin = worldPointToObjectSpace(inRay.origin());
         Vector3D localDirection = worldDirectionToObjectSpace(inRay.direction());
         double localDirectionLength = localDirection.length();
@@ -427,6 +467,81 @@ public class SimpleBody extends Entity {
     private static Matrix4x4 sanitizeRotationMatrix(Matrix4x4 rotationMatrix)
     {
         return rotationMatrix.withoutTranslation();
+    }
+
+    private void updateTransformFlags()
+    {
+        hasIdentityRotation =
+            rotation != null && isIdentityRotation(rotation);
+        hasUnitScale =
+            scale != null &&
+            Math.abs(scale.x() - 1.0) <= VSDK.EPSILON &&
+            Math.abs(scale.y() - 1.0) <= VSDK.EPSILON &&
+            Math.abs(scale.z() - 1.0) <= VSDK.EPSILON;
+        hasZeroTranslation =
+            position != null &&
+            Math.abs(position.x()) <= VSDK.EPSILON &&
+            Math.abs(position.y()) <= VSDK.EPSILON &&
+            Math.abs(position.z()) <= VSDK.EPSILON;
+        hasTranslationOnlyTransform = hasIdentityRotation && hasUnitScale;
+        hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
+    }
+
+    private static boolean isIdentityRotation(Matrix4x4 matrix)
+    {
+        return
+            Math.abs(matrix.get(0, 0) - 1.0) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(0, 1)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(0, 2)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 0)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 1) - 1.0) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 2)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 0)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 1)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 2) - 1.0) <= VSDK.EPSILON;
+    }
+
+    private boolean doIntersectionWithTranslationOnly(
+        Ray inOutRay,
+        RayHit outHit,
+        int requiredDetailMask)
+    {
+        Ray localRay = new Ray(
+            inOutRay.origin().subtract(position),
+            inOutRay.direction(),
+            inOutRay.t());
+
+        RayHit hit = outHit;
+        if ( hit == null ) {
+            hit = new RayHit(RayHit.DETAIL_NONE);
+        }
+        else {
+            hit.reset(requiredDetailMask);
+        }
+
+        if ( !geometry.doIntersection(localRay, hit) || hit.ray() == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.setRay(inOutRay.withT(hit.ray().t()));
+            if ( outHit.needsPoint() ) {
+                outHit.p = hit.p.add(position);
+            }
+            if ( outHit.needsNormal() ) {
+                outHit.n = hit.n;
+            }
+            if ( outHit.needsTextureCoordinates() ) {
+                outHit.u = hit.u;
+                outHit.v = hit.v;
+            }
+            if ( outHit.needsTangent() ) {
+                outHit.t = hit.t;
+            }
+            outHit.material = hit.material;
+            outHit.texture = hit.texture;
+            outHit.normalMap = hit.normalMap;
+        }
+        return true;
     }
 
     private static Vector3D scaleComponents(Vector3D value, Vector3D factors)

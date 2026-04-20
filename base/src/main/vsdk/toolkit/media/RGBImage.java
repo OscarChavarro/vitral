@@ -43,6 +43,8 @@ public class RGBImage extends Image
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20060502L;
 
+    private static final int BYTES_PER_PIXEL = 3;
+
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //    private byte[] data;
 //#endif
@@ -53,6 +55,7 @@ public class RGBImage extends Image
 
     private int xSize;
     private int ySize;
+    private int rowStride;
 
     /**
     Check the general signature contract in superclass method
@@ -62,6 +65,7 @@ public class RGBImage extends Image
     {
         xSize = 0;
         ySize = 0;
+        rowStride = 0;
         data = null;
     }
 
@@ -122,9 +126,9 @@ public class RGBImage extends Image
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
           //byte arr[] = new byte[width * height * 3];
           //data = ByteBuffer.wrap(arr);
-          data = ByteBuffer.allocateDirect(width * height * 3);
+          data = ByteBuffer.allocateDirect(width * height * BYTES_PER_PIXEL);
           data.rewind();
-          for ( int i = 0; i < width*height*3; i++ ) {
+          for ( int i = 0; i < width*height*BYTES_PER_PIXEL; i++ ) {
               data.put((byte)0);
           }
 //#endif
@@ -134,8 +138,9 @@ public class RGBImage extends Image
             data = null;
             return false;
         }
-        xSize = width;        
-        ySize = height;        
+        xSize = width;
+        ySize = height;
+        rowStride = width * BYTES_PER_PIXEL;
         return true;
     }
 
@@ -165,7 +170,7 @@ public class RGBImage extends Image
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
           //byte arr[] = new byte[width * height * 3];
           //data = ByteBuffer.wrap(arr);
-          data = ByteBuffer.allocateDirect(width * height * 3);
+          data = ByteBuffer.allocateDirect(width * height * BYTES_PER_PIXEL);
           data.rewind();
 //#endif
 
@@ -174,9 +179,15 @@ public class RGBImage extends Image
             data = null;
             return false;
         }
-        xSize = width;        
-        ySize = height;        
+        xSize = width;
+        ySize = height;
+        rowStride = width * BYTES_PER_PIXEL;
         return true;
+    }
+
+    private int pixelBaseIndex(int x, int y)
+    {
+        return (ySize - 1 - y) * rowStride + x * BYTES_PER_PIXEL;
     }
 
     /**
@@ -188,9 +199,9 @@ public class RGBImage extends Image
     @param g
     @param b
     */
-    public synchronized void putPixel(int x, int y, byte r, byte g, byte b)
+    public void putPixel(int x, int y, byte r, byte g, byte b)
     {
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        data[index] = r;
@@ -199,17 +210,16 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(r);
-        data.put(g);
-        data.put(b);
+        data.put(index, r);
+        data.put(index + 1, g);
+        data.put(index + 2, b);
 //#endif
 
     }
 
-    public synchronized void putPixel(int x, int y, RGBPixel p)
+    public void putPixel(int x, int y, RGBPixel p)
     {
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        data[index] = p.r;
@@ -218,10 +228,9 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(p.r);
-        data.put(p.g);
-        data.put(p.b);
+        data.put(index, p.r);
+        data.put(index + 1, p.g);
+        data.put(index + 2, p.b);
 //#endif
 
     }
@@ -232,9 +241,9 @@ public class RGBImage extends Image
     @param p
     */
     @Override
-    public synchronized void putPixelRgb(int x, int y, RGBPixel p)
+    public void putPixelRgb(int x, int y, RGBPixel p)
     {
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        data[index] = p.r;
@@ -243,10 +252,9 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        data.put(p.r);
-        data.put(p.g);
-        data.put(p.b);
+        data.put(index, p.r);
+        data.put(index + 1, p.g);
+        data.put(index + 2, p.b);
 //#endif
 
     }
@@ -261,7 +269,7 @@ public class RGBImage extends Image
     public RGBPixel getPixel(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        p.r = data[index];
@@ -270,10 +278,9 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index + 1);
+        p.b = data.get(index + 2);
 //#endif
 
         return p;
@@ -288,7 +295,7 @@ public class RGBImage extends Image
     public RGBPixel getPixelRgb(int x, int y)
     {
         RGBPixel p = new RGBPixel();
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        p.r = data[index];
@@ -297,10 +304,9 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index + 1);
+        p.b = data.get(index + 2);
 //#endif
 
         return p;
@@ -314,7 +320,7 @@ public class RGBImage extends Image
     @Override
     public void getPixelRgb(int x, int y, RGBPixel p)
     {
-        int index = (xSize*(ySize-1-y) + x)*3;
+        int index = pixelBaseIndex(x, y);
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        p.r = data[index];
@@ -323,10 +329,9 @@ public class RGBImage extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        data.position(index);
-        p.r = data.get();
-        p.g = data.get();
-        p.b = data.get();
+        p.r = data.get(index);
+        p.g = data.get(index + 1);
+        p.b = data.get(index + 2);
 //#endif
 
     }
@@ -386,6 +391,7 @@ public class RGBImage extends Image
     {
         this.xSize = xSize;
         this.ySize = ySize;
+        this.rowStride = xSize * BYTES_PER_PIXEL;
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
 //        this.data = data;

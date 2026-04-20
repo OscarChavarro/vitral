@@ -11,6 +11,7 @@ public final class Ray extends FundamentalEntity
 {
     @Serial
     private static final long serialVersionUID = 20060502L;
+    private static final double UNIT_DIRECTION_TOLERANCE = 1e-12;
 
     private final Vector3D origin;
     private final Vector3D direction;
@@ -28,37 +29,39 @@ public final class Ray extends FundamentalEntity
 
     public Ray(Vector3D origin, Vector3D direction, double t)
     {
-        this.origin = Vector3D.copyOf(Objects.requireNonNull(origin, "Ray origin cannot be null"));
-        this.direction = normalizeDirection(direction);
-        this.t = t;
+        this(origin, direction, t, false);
     }
 
     public Ray(Ray b)
     {
         this(Objects.requireNonNull(b, "Ray to copy cannot be null").origin,
              b.direction,
-             b.t);
+             b.t,
+             true);
     }
 
     public static Ray copyOf(Ray other)
     {
-        return new Ray(other);
+        return Objects.requireNonNull(other, "Ray to copy cannot be null");
     }
 
     public Ray withOrigin(Vector3D newOrigin)
     {
-        return new Ray(newOrigin, direction, t);
+        return new Ray(newOrigin, direction, t, true);
     }
 
     public Ray withDirection(Vector3D newDirection)
     {
-        return new Ray(origin, newDirection, t);
+        return new Ray(origin, newDirection, t, false);
     }
 
     public Ray withT(double newT)
     {
         RaytraceProfiling.recordRayWithT();
-        return new Ray(origin, direction, newT);
+        if ( Double.compare(newT, t) == 0 ) {
+            return this;
+        }
+        return new Ray(origin, direction, newT, true);
     }
 
     public Vector3D origin()
@@ -76,10 +79,31 @@ public final class Ray extends FundamentalEntity
         return t;
     }
 
+    private Ray(
+        Vector3D origin,
+        Vector3D direction,
+        double t,
+        boolean directionAlreadyNormalized)
+    {
+        this.origin = Objects.requireNonNull(origin, "Ray origin cannot be null");
+        this.direction = directionAlreadyNormalized ?
+            Objects.requireNonNull(direction, "Ray direction cannot be null") :
+            normalizeDirection(direction);
+        this.t = t;
+    }
+
     private static Vector3D normalizeDirection(Vector3D direction)
     {
-        return Vector3D.copyOf(
-            Objects.requireNonNull(direction, "Ray direction cannot be null")).normalized();
+        Vector3D candidate =
+            Objects.requireNonNull(direction, "Ray direction cannot be null");
+        double lengthSquared = candidate.dotProduct(candidate);
+        if ( lengthSquared <= VSDK.EPSILON ) {
+            return candidate;
+        }
+        if ( Math.abs(lengthSquared - 1.0) <= UNIT_DIRECTION_TOLERANCE ) {
+            return candidate;
+        }
+        return candidate.multiply(1.0 / Math.sqrt(lengthSquared));
     }
 
     @Override
