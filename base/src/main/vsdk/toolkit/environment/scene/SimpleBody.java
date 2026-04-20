@@ -320,8 +320,18 @@ public class SimpleBody extends Entity {
             return false;
         }
 
+        int requiredDetailMask =
+            outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
+
         if ( hasIdentityTransform ) {
             return geometry.doIntersection(inOutRay, outHit);
+        }
+
+        if ( hasTranslationOnlyTransform ) {
+            return doIntersectionWithTranslationOnly(
+                inOutRay,
+                outHit,
+                requiredDetailMask);
         }
 
         Vector3D localOrigin = worldPointToObjectSpace(inOutRay.origin());
@@ -331,14 +341,6 @@ public class SimpleBody extends Entity {
             return false;
         }
 
-        int requiredDetailMask =
-            outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
-        if ( hasTranslationOnlyTransform ) {
-            return doIntersectionWithTranslationOnly(
-                inOutRay,
-                outHit,
-                requiredDetailMask);
-        }
         Ray localRay = new Ray(
             localOrigin,
             localDirection.multiply(1.0 / localDirectionLength),
@@ -424,10 +426,7 @@ public class SimpleBody extends Entity {
         }
 
         if ( hasTranslationOnlyTransform ) {
-            Ray localRay = new Ray(
-                inRay.origin().subtract(position),
-                inRay.direction(),
-                inT);
+            Ray localRay = inRay.withOrigin(inRay.origin().subtract(position));
             outInfo.setRay(inRay);
             geometry.doExtraInformation(localRay, inT, outInfo);
             outInfo.setRay(inRay);
@@ -506,10 +505,7 @@ public class SimpleBody extends Entity {
         RayHit outHit,
         int requiredDetailMask)
     {
-        Ray localRay = new Ray(
-            inOutRay.origin().subtract(position),
-            inOutRay.direction(),
-            inOutRay.t());
+        Ray localRay = inOutRay.withOrigin(inOutRay.origin().subtract(position));
 
         RayHit hit = outHit;
         if ( hit == null ) {

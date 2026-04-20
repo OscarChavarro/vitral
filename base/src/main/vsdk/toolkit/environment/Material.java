@@ -115,9 +115,19 @@ public class Material extends Entity
         return new ColorRgb(ambient);
     }
 
+    public ColorRgb getAmbientReference()
+    {
+        return ambient;
+    }
+
     public ColorRgb getDiffuse()
     {
         return new ColorRgb(diffuse);
+    }
+
+    public ColorRgb getDiffuseReference()
+    {
+        return diffuse;
     }
 
     public ColorRgb getSpecular()
@@ -125,9 +135,19 @@ public class Material extends Entity
         return new ColorRgb(specular);
     }
 
+    public ColorRgb getSpecularReference()
+    {
+        return specular;
+    }
+
     public ColorRgb getEmission()
     {
         return new ColorRgb(emission);
+    }
+
+    public ColorRgb getEmissionReference()
+    {
+        return emission;
     }
 
     public double getPhongExponent()

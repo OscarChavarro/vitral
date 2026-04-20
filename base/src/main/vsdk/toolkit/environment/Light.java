@@ -108,6 +108,11 @@ public class Light extends Entity
         return new ColorRgb(specular);
     }
 
+    public ColorRgb getSpecularReference()
+    {
+        return specular;
+    }
+
     public int getLightType()
     {
         return tipo_de_luz;

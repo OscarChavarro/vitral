@@ -61,6 +61,8 @@ public class Raytracer extends RenderingElement {
         }
     }
 
+    private static final Vector3D BUMP_TANGENT_FALLBACK = new Vector3D(0, 1, 0);
+
     public Raytracer()
     {
         // No mutable shared temporaries: keep method-level variables for reentrancy.
@@ -198,9 +200,6 @@ public class Raytracer extends RenderingElement {
         //-----------------------------------------------------------------
         SimpleBody nearestObject;
         Vector3D surfaceNormal = info.n;
-        ColorRgb ambient;
-        ColorRgb diffuse;
-        ColorRgb specular;
         ColorRgb lightEmission;
 
         //- Normal perturbation / bump mapping ----------------------------
@@ -230,7 +229,7 @@ public class Raytracer extends RenderingElement {
 
                 // This is non-sense, but it works! Currently not using
                 // tangent vector from geometry! Explain this!
-                Ps = new Vector3D(0, 1, 0);
+                Ps = BUMP_TANGENT_FALLBACK;
 
                 Pt = N.crossProduct(Ps);
                 NxPt = N.crossProduct(Pt);
@@ -250,10 +249,10 @@ public class Raytracer extends RenderingElement {
         int i;
         for ( i = 0; i< lights.size(); i++ ) {
             Light light = lights.get(i);
-            lightEmission = light.getSpecular();
+            lightEmission = light.getSpecularReference();
 
             if ( light.tipo_de_luz == Light.AMBIENT ) {
-                ambient = material.getAmbient();
+                ColorRgb ambient = material.getAmbientReference();
                 outColor.r += ambient.r*lightEmission.r;
                 outColor.g += ambient.g*lightEmission.g;
                 outColor.b += ambient.b*lightEmission.b;
@@ -278,7 +277,7 @@ public class Raytracer extends RenderingElement {
                     info.p.y() + VSDK.EPSILON*l.y(),
                     info.p.z() + VSDK.EPSILON*l.z());
                 RaytraceProfiling.recordShadowRay();
-                Ray shadowRay = new Ray(Vector3D.copyOf(shadowOffset), l.normalized());
+                Ray shadowRay = new Ray(shadowOffset, l);
                 nearestObject = selectNearestThingInRayDirection(shadowRay, objects, null);
                 if ( nearestObject != null ) {
                     //delete l;
@@ -287,17 +286,23 @@ public class Raytracer extends RenderingElement {
 
                 double lambert = surfaceNormal.dotProduct(l);
                 if ( lambert > 0 ) {
-                    diffuse = material.getDiffuse();
+                    ColorRgb diffuse = material.getDiffuseReference();
+                    double diffuseR = diffuse.r;
+                    double diffuseG = diffuse.g;
+                    double diffuseB = diffuse.b;
                     if ( info.texture != null ) {
-                        diffuse.modulate(
-                            info.texture.getColorRgbBiLinear(info.u, 1-info.v));
+                        ColorRgb textureColor =
+                            info.texture.getColorRgbBiLinear(info.u, 1-info.v);
+                        diffuseR *= textureColor.r;
+                        diffuseG *= textureColor.g;
+                        diffuseB *= textureColor.b;
                     }
-                    if ( (diffuse.r + diffuse.g + diffuse.b) > 0 ) {
-                        outColor.r += lambert*diffuse.r*lightEmission.r;
-                        outColor.g += lambert*diffuse.g*lightEmission.g;
-                        outColor.b += lambert*diffuse.b*lightEmission.b;
+                    if ( (diffuseR + diffuseG + diffuseB) > 0 ) {
+                        outColor.r += lambert*diffuseR*lightEmission.r;
+                        outColor.g += lambert*diffuseG*lightEmission.g;
+                        outColor.b += lambert*diffuseB*lightEmission.b;
                     }
-                    specular = material.getSpecular();
+                    ColorRgb specular = material.getSpecularReference();
 
                     if ( (specular.r + specular.g + specular.b) > 0 ) {
                         lambert *= 2;
@@ -375,7 +380,7 @@ public class Raytracer extends RenderingElement {
                   }
                   else {
                     ColorRgb reflectedBackground =
-                        background.colorInDireccion(reflect.normalized());
+                        background.colorInDireccion(reflect);
                     outColor.r += kr*reflectedBackground.r;
                     outColor.g += kr*reflectedBackground.g;
                     outColor.b += kr*reflectedBackground.b;
