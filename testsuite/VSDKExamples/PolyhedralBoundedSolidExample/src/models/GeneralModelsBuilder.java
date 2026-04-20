@@ -33,8 +33,11 @@ public class GeneralModelsBuilder
     public static PolyhedralBoundedSolid buildSolid(DebuggerModel model)
     {
         PolyhedralBoundedSolid mySolid;
+        PolyhedralBoundedSolid[] csgPreviewOperands;
         Matrix4x4 T, R, S, M;
         model.clampSubdivisions();
+        model.setCsgPreviewOperandA(null);
+        model.setCsgPreviewOperandB(null);
 
         switch ( model.getSolidModelName() ) {
           case MVFS_SMEV_SAMPLE:
@@ -116,6 +119,9 @@ public class GeneralModelsBuilder
                 model.getSubdivisionCircumference(), model.getSubdivisionHeight());
             break;
           case CSG_MOON_BLOCK:
+            csgPreviewOperands = createCsgOperands(CsgSampleNames.MOON_BLOCK);
+            model.setCsgPreviewOperandA(csgPreviewOperands[0]);
+            model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(1, CsgOperationNames.DIFFERENCE_A_MINUS_B,
                 CsgSampleNames.MOON_BLOCK, model.isDebugCsg());
             model.setDebugCsg(false);
@@ -162,14 +168,23 @@ public class GeneralModelsBuilder
             mySolid = splitTest(3);
             break;
           case CSG_TEST_PART_1:
+            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+            model.setCsgPreviewOperandA(csgPreviewOperands[0]);
+            model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(1, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
           case CSG_TEST_PART_2:
+            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+            model.setCsgPreviewOperandA(csgPreviewOperands[0]);
+            model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(2, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
           case CSG_TEST_PART_3:
+            csgPreviewOperands = createCsgOperands(model.getCsgSample());
+            model.setCsgPreviewOperandA(csgPreviewOperands[0]);
+            model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
@@ -1122,11 +1137,50 @@ public class GeneralModelsBuilder
         boolean withDebug)
     {
         PolyhedralBoundedSolid res = null;
-        PolyhedralBoundedSolid operands[] = null;
+        PolyhedralBoundedSolid operands[];
 
         System.out.printf("Creating C.S.G. test object with parts %d, " + 
             "operation %s, and sample pair %s\n", part,
             op.getLabel(), sample.getLabel());
+
+        operands = createCsgOperands(sample);
+
+        //-----------------------------------------------------------------
+        if ( op == CsgOperationNames.UNION ) {
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.UNION, withDebug);
+        }
+        else if ( op == CsgOperationNames.INTERSECTION ) {
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.INTERSECTION, withDebug);
+        }
+        else if ( op == CsgOperationNames.DIFFERENCE_A_MINUS_B ) {
+            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
+                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
+        }
+        else {
+            res = PolyhedralBoundedSolidModeler.setOp(operands[1], operands[0],
+                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
+        }
+
+        //-----------------------------------------------------------------
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[0]);
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[1]);
+        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+
+        if ( part == 2 ) {
+            return operands[0];
+        }
+        if ( part == 3 ) {
+            return operands[1];
+        }
+        return res;
+    }
+
+    private static PolyhedralBoundedSolid[] createCsgOperands(
+        CsgSampleNames sample)
+    {
+        PolyhedralBoundedSolid[] operands;
 
         switch ( sample ) {
             case MANT1986_2:
@@ -1164,36 +1218,7 @@ public class GeneralModelsBuilder
                 break;
         }
 
-        //-----------------------------------------------------------------
-        if ( op == CsgOperationNames.UNION ) {
-            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
-                                         PolyhedralBoundedSolidModeler.UNION, withDebug);
-        }
-        else if ( op == CsgOperationNames.INTERSECTION ) {
-            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
-                                         PolyhedralBoundedSolidModeler.INTERSECTION, withDebug);
-        }
-        else if ( op == CsgOperationNames.DIFFERENCE_A_MINUS_B ) {
-            res = PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1],
-                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
-        }
-        else {
-            res = PolyhedralBoundedSolidModeler.setOp(operands[1], operands[0],
-                                         PolyhedralBoundedSolidModeler.SUBTRACT, withDebug);
-        }
-
-        //-----------------------------------------------------------------
-        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[0]);
-        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[1]);
-        //PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-
-        if ( part == 2 ) {
-            return operands[0];
-        }
-        if ( part == 3 ) {
-            return operands[1];
-        }
-        return res;
+        return operands;
     }
 
     private static PolyhedralBoundedSolid csgMant1988_15_2Case(

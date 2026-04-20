@@ -25,7 +25,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
-    private SolidModelNames solidModelName = SolidModelNames.CSG_LAMP_SHELL;
+    private SolidModelNames solidModelName = SolidModelNames.CSG_TEST_PART_1;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
 
@@ -34,6 +34,8 @@ public class DebuggerModel
     private Light light1;
     private Light light2;
     private PolyhedralBoundedSolid solid;
+    private PolyhedralBoundedSolid csgPreviewOperandA;
+    private PolyhedralBoundedSolid csgPreviewOperandB;
     private int faceIndex = -2;
     private int edgeIndex = -2;
     private boolean debugVertices = false;
@@ -207,6 +209,26 @@ public class DebuggerModel
     public void setSolid(PolyhedralBoundedSolid solid)
     {
         this.solid = solid;
+    }
+
+    public PolyhedralBoundedSolid getCsgPreviewOperandA()
+    {
+        return csgPreviewOperandA;
+    }
+
+    public void setCsgPreviewOperandA(PolyhedralBoundedSolid csgPreviewOperandA)
+    {
+        this.csgPreviewOperandA = csgPreviewOperandA;
+    }
+
+    public PolyhedralBoundedSolid getCsgPreviewOperandB()
+    {
+        return csgPreviewOperandB;
+    }
+
+    public void setCsgPreviewOperandB(PolyhedralBoundedSolid csgPreviewOperandB)
+    {
+        this.csgPreviewOperandB = csgPreviewOperandB;
     }
 
     public int getFaceIndex()
