@@ -132,6 +132,24 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @ParameterizedTest
+    @MethodSource("appe1967CornerUnionSamples")
+    void given_coplanarOverlappingBars_when_union_then_itProducesTheExpectedLPrism(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB,
+        int expectedFaceCount, int expectedEdgeCount, int expectedVertexCount)
+    {
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            solidA, solidB, PolyhedralBoundedSolidModeler.UNION, false);
+
+        assertThat(result).isNotNull();
+        assertThat(result.polygonsList.size()).isEqualTo(expectedFaceCount);
+        assertThat(result.edgesList.size()).isEqualTo(expectedEdgeCount);
+        assertThat(result.verticesList.size()).isEqualTo(expectedVertexCount);
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+    }
+
+    @ParameterizedTest
     @MethodSource("mant1988StableOperationSamples")
     void given_mant1988Section15_2Scenarios_when_stableOperations_then_resultIsReturnedAndValid(
         int situation, int op)
@@ -285,6 +303,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     {
         return Stream.of(
             Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
             Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.INTERSECTION),
@@ -296,7 +315,19 @@ class PolyhedralBoundedSolidSetOperatorTest
     private static Stream<Arguments> mant1988KnownFailureSamples()
     {
         return Stream.of(
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT)
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION)
+        );
+    }
+
+    private static Stream<Arguments> appe1967CornerUnionSamples()
+    {
+        return Stream.of(
+            Arguments.of(
+                PolyhedralBoundedSolidTestFixtures.createBoxSolid(
+                    1.0, 0.2, 0.2, 0.5, 0.1, 0.1),
+                PolyhedralBoundedSolidTestFixtures.createBoxSolid(
+                    0.2, 1.0, 0.2, 0.1, 0.5, 0.1),
+                8, 18, 12)
         );
     }
 }

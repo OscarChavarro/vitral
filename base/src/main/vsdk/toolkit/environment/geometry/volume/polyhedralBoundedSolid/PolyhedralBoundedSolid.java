@@ -1384,16 +1384,32 @@ public class PolyhedralBoundedSolid extends Solid {
         modelIsValid = flag;
     }
 
+    private void remakeLoopBoundaryStartHalfEdgesReferences()
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
+                loop.parentFace = face;
+                if ( loop.halfEdgesList.size() > 0 ) {
+                    loop.boundaryStartHalfEdge = loop.halfEdgesList.get(0);
+                }
+                else {
+                    loop.boundaryStartHalfEdge = null;
+                }
+            }
+        }
+    }
+
     /**
     After section [MANT1988].12.4.2 and program [MANT1988].12.9.
     @param faceid
     */
     public void loopGlue(int faceid)
     {
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-
-        //-----------------------------------------------------------------
         _PolyhedralBoundedSolidFace face;
 
         face = findFace(faceid);
@@ -1402,9 +1418,22 @@ public class PolyhedralBoundedSolid extends Solid {
                 "Face " + faceid + " not found.");
             return;
         }
+        loopGlue(face);
+    }
+
+    public void loopGlue(_PolyhedralBoundedSolidFace face)
+    {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+
+        if ( face == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                "Null face received.");
+            return;
+        }
         if ( face.boundariesList.size() < 2 ) {
             VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
-                "Face " + faceid + " does not contain at least two loops.");
+                "Face " + face.id + " does not contain at least two loops.");
             return;
         }
 
@@ -1440,6 +1469,7 @@ public class PolyhedralBoundedSolid extends Solid {
             h1 = h1next;
         }
         lkef(h1.mirrorHalfEdge(), h1);
+        remakeLoopBoundaryStartHalfEdgesReferences();
     }
 
     /**

@@ -47,6 +47,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
+        if ( hasConfirmedInteriorOverlap(inSolidA, inSolidB) ) {
+            return false;
+        }
+
         if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
             return false;
         }
@@ -214,6 +218,82 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return Geometry.OUTSIDE;
         }
         return Geometry.LIMIT;
+    }
+
+    private static double[] overlappingBounds(PolyhedralBoundedSolid solidA,
+                                              PolyhedralBoundedSolid solidB)
+    {
+        double[] a = solidA.getMinMax();
+        double[] b = solidB.getMinMax();
+
+        return new double[] {
+            Math.max(a[0], b[0]),
+            Math.max(a[1], b[1]),
+            Math.max(a[2], b[2]),
+            Math.min(a[3], b[3]),
+            Math.min(a[4], b[4]),
+            Math.min(a[5], b[5])
+        };
+    }
+
+    private static boolean hasPositiveOverlapVolume(double[] bounds)
+    {
+        double eps = numericContext.bigEpsilon();
+
+        return bounds[3] - bounds[0] > eps &&
+            bounds[4] - bounds[1] > eps &&
+            bounds[5] - bounds[2] > eps;
+    }
+
+    private static double[] sampleCoordinates(double min, double max)
+    {
+        double center = (min + max) / 2.0;
+        double quarter = min + (max - min) / 4.0;
+        double threeQuarters = max - (max - min) / 4.0;
+
+        return new double[] { quarter, center, threeQuarters };
+    }
+
+    private static boolean hasConfirmedInteriorOverlap(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        double[] bounds;
+        double[] xs;
+        double[] ys;
+        double[] zs;
+        int i;
+        int j;
+        int k;
+
+        if ( solidA == null || solidB == null ) {
+            return false;
+        }
+
+        bounds = overlappingBounds(solidA, solidB);
+        if ( !hasPositiveOverlapVolume(bounds) ) {
+            return false;
+        }
+
+        xs = sampleCoordinates(bounds[0], bounds[3]);
+        ys = sampleCoordinates(bounds[1], bounds[4]);
+        zs = sampleCoordinates(bounds[2], bounds[5]);
+
+        for ( i = 0; i < xs.length; i++ ) {
+            for ( j = 0; j < ys.length; j++ ) {
+                for ( k = 0; k < zs.length; k++ ) {
+                    Vector3D sample = new Vector3D(xs[i], ys[j], zs[k]);
+                    if ( classifyPointAgainstSolid(solidA, sample) ==
+                         Geometry.INSIDE &&
+                         classifyPointAgainstSolid(solidB, sample) ==
+                         Geometry.INSIDE ) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static int classifySolidAgainstSolid(

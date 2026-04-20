@@ -459,6 +459,104 @@ final class _PolyhedralBoundedSolidSetClassifier
         return !retcode;
     }
 
+    private static boolean sectorContainsAState(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sector,
+        int wantedState)
+    {
+        return sector.s1a == wantedState || sector.s2a == wantedState;
+    }
+
+    private static boolean sectorContainsBState(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sector,
+        int wantedState)
+    {
+        return sector.s1b == wantedState || sector.s2b == wantedState;
+    }
+
+    private static _PolyhedralBoundedSolidHalfEdge selectMissingEndpoint(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        boolean fromSolidA,
+        int wantedState,
+        _PolyhedralBoundedSolidHalfEdge avoid)
+    {
+        _PolyhedralBoundedSolidHalfEdge fallback;
+        int i;
+
+        fallback = null;
+        for ( i = 0; i < data.sectors.size(); i++ ) {
+            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sector;
+            _PolyhedralBoundedSolidHalfEdge candidate;
+            boolean containsState;
+
+            sector = data.sectors.get(i);
+            if ( !sector.intersect ) {
+                continue;
+            }
+
+            if ( fromSolidA ) {
+                containsState = sectorContainsAState(sector, wantedState);
+                candidate = data.nba.get(sector.secta).he;
+            }
+            else {
+                containsState = sectorContainsBState(sector, wantedState);
+                candidate = data.nbb.get(sector.sectb).he;
+            }
+
+            if ( !containsState ) {
+                continue;
+            }
+
+            if ( fallback == null ) {
+                fallback = candidate;
+            }
+
+            if ( avoid != null && candidate != avoid ) {
+                return candidate;
+            }
+
+            if ( avoid == null ) {
+                return candidate;
+            }
+        }
+
+        return fallback;
+    }
+
+    private static _PolyhedralBoundedSolidHalfEdge[] recoverMissingCoplanarEndpoints(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        _PolyhedralBoundedSolidHalfEdge ha1,
+        _PolyhedralBoundedSolidHalfEdge ha2,
+        _PolyhedralBoundedSolidHalfEdge hb1,
+        _PolyhedralBoundedSolidHalfEdge hb2)
+    {
+        if ( ha1 == null ) {
+            ha1 = selectMissingEndpoint(
+                data, true,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                ha2);
+        }
+        if ( ha2 == null ) {
+            ha2 = selectMissingEndpoint(
+                data, true,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                ha1);
+        }
+        if ( hb1 == null ) {
+            hb1 = selectMissingEndpoint(
+                data, false,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN,
+                hb2);
+        }
+        if ( hb2 == null ) {
+            hb2 = selectMissingEndpoint(
+                data, false,
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT,
+                hb1);
+        }
+
+        return new _PolyhedralBoundedSolidHalfEdge[] { ha1, ha2, hb1, hb2 };
+    }
+
     /**
     Following section [MANT1988].15.6.2. and program [MANT1988].15.11.
     */
@@ -552,16 +650,23 @@ final class _PolyhedralBoundedSolidSetClassifier
 
             //-------------------------------------------------------------
             if ( ha1 == null || ha2 == null || hb1 == null || hb2 == null ) {
-                int j;
+                _PolyhedralBoundedSolidHalfEdge[] recovered;
 
-                for ( j = 0; j < data.sectors.size(); j++ ) {
-                    data.sectors.get(j).intersect = false;
-                }
+                recovered = recoverMissingCoplanarEndpoints(
+                    data, ha1, ha2, hb1, hb2);
+                ha1 = recovered[0];
+                ha2 = recovered[1];
+                hb1 = recovered[2];
+                hb2 = recovered[3];
+            }
+
+            //-------------------------------------------------------------
+            if ( ha1 == null || ha2 == null || hb1 == null || hb2 == null ) {
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println(
-                        "    . Incomplete coplanar pairing, skipping split");
+                        "    . Incomplete coplanar pairing, waiting for more sectors");
                 }
-                return;
+                continue;
             }
 
             //-------------------------------------------------------------
@@ -569,14 +674,16 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT A CASE");
                 }
-                separateInterior(ha1, 0, getOrientation(ha1, hb1, hb2), inSolidA, inSolidB);
+                separateInterior(ha1, 0, getOrientation(ha1, hb1, hb2),
+                    inSolidA, inSolidB);
                 separateEdgeSequence(hb1, hb2, 1, inSolidA, inSolidB);
             }
             else if ( hb1 == hb2 ) {
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT B CASE");
                 }
-                separateInterior(hb1, 1, getOrientation(hb1, ha2, ha1), inSolidA, inSolidB);
+                separateInterior(hb1, 1, getOrientation(hb1, ha2, ha1),
+                    inSolidA, inSolidB);
                 separateEdgeSequence(ha2, ha1, 0, inSolidA, inSolidB);
             }
             else {

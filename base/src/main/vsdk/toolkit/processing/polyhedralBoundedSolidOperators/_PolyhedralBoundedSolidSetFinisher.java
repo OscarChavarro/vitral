@@ -72,7 +72,7 @@ final class _PolyhedralBoundedSolidSetFinisher
 
         for ( i = 0; i < oldsize; i++ ) {
             outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
-            outRes.loopGlue(sonfa.get(i+inda).id);
+            outRes.loopGlue(sonfa.get(i+inda));
         }
         outRes.compactIds();
     }
