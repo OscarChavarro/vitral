@@ -2,8 +2,8 @@ package application;
 
 public class MainThread implements Runnable
 {
-    private String args[];
-    public MainThread(String args[])
+    private final String[] args;
+    public MainThread(String[] args)
     {
         this.args = args;
     }
@@ -11,7 +11,6 @@ public class MainThread implements Runnable
     @Override
     public void run()
     {
-        SceneEditorApplication app;
-        app = new SceneEditorApplication(args);
+        new SceneEditorApplication(args);
     }
 }

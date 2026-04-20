@@ -351,7 +351,11 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
             viewportSizeX = w;
             viewportSizeY = h;
         }
-        camera.updateViewportResize(viewportSizeX, viewportSizeY);
+        cameraPerspective.updateViewportResize(viewportSizeX, viewportSizeY);
+        cameraTop.updateViewportResize(viewportSizeX, viewportSizeY);
+        cameraBottom.updateViewportResize(viewportSizeX, viewportSizeY);
+        cameraLeft.updateViewportResize(viewportSizeX, viewportSizeY);
+        cameraFront.updateViewportResize(viewportSizeX, viewportSizeY);
     }
 
     public void activateViewportGL(GL2 gl, int canvasXSize, int canvasYSize)
