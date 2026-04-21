@@ -498,8 +498,8 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
-            //light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
+            light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
+            //light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
             parent.theScene.scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------

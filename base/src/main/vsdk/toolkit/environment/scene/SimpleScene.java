@@ -67,6 +67,7 @@ public class SimpleScene extends Entity
 
     public void addLight(Light l)
     {
+        l.setId(lightsArray.size());
         lightsArray.add(l);
     }
 
@@ -98,6 +99,9 @@ public class SimpleScene extends Entity
     public void setLights(ArrayList<Light> lights)
     {
         lightsArray = lights;
+        for ( int i = 0; i < lightsArray.size(); i++ ) {
+            lightsArray.get(i).setId(i);
+        }
     }
 
     public void setBackgrounds(ArrayList<Background> backgrounds)

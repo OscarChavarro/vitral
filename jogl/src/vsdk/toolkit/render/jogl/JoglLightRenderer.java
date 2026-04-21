@@ -40,7 +40,7 @@ public class JoglLightRenderer extends JoglRenderer {
 
         lightPosition[3]=1.0f;
 /*
-        if ( l.getLightType() == Light.DIRECTIONAL ) { // Why?
+        if ( l.getLightType() == vsdk.toolkit.environment.LightType.DIRECTIONAL ) { // Why?
             lightPosition[3]=0;
         }
 */

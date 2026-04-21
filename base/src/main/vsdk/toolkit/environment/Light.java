@@ -1,6 +1,4 @@
 package vsdk.toolkit.environment;
-import java.io.Serial;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -10,14 +8,6 @@ import vsdk.toolkit.common.ColorRgb;
 // wanted Lights and Surfaces to be "friends"
 public class Light extends Entity
 {
-    @Serial private static final long serialVersionUID = 20060502L;
-
-    public static final int AMBIENT = 0;
-    public static final int DIRECTIONAL = 1;
-    public static final int POINT = 2;
-
-    private static final AtomicInteger lightNumber = new AtomicInteger(0);
-
     public int tipo_de_luz;
     public Vector3D lvec;             // the position of a point light or
                                       // the direction to a directional light
@@ -44,9 +34,9 @@ public class Light extends Entity
     {
         tipo_de_luz = type;
         lvec = new Vector3D();
-        if ( type != AMBIENT ) {
+        if ( type != LightType.AMBIENT ) {
             lvec = Vector3D.copyOf(pos);
-            if ( type == DIRECTIONAL ) 
+            if ( type == LightType.DIRECTIONAL )
             {
                 lvec = lvec.normalized();
             }
@@ -54,7 +44,7 @@ public class Light extends Entity
         ambient=new ColorRgb(0,0,0);
         diffuse=new ColorRgb(1,1,1);
         specular=emission;
-        id = lightNumber.getAndIncrement();
+        id = 0;
     }
 
     public int getId()
@@ -65,7 +55,6 @@ public class Light extends Entity
     public void setId(int i)
     {
         id = i;
-        //lightNumber = i+1;
     }
 
     public void setAmbient(ColorRgb a)

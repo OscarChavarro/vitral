@@ -207,8 +207,10 @@ public class JoglPreviewGenerator
         Light light2;
         Vector3D p;
 
-        light1 = new Light(Light.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
-        light2 = new Light(Light.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
+        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
+        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
+        light1.setId(0);
+        light2.setId(1);
         JoglLightRenderer.activate(gl, light1);
         JoglLightRenderer.activate(gl, light2);
 

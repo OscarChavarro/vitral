@@ -266,7 +266,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         int i;
         for ( i = 0; i < n; i++ ) {
-            l = new Light(Light.POINT, 
+            l = new Light(vsdk.toolkit.environment.LightType.POINT, 
                 new Vector3D(p[6*(i%3)+0], p[6*(i%3)+1], p[6*(i%3)+2]), 
                 new ColorRgb(p[6*(i%3)+3], p[6*(i%3)+4], p[6*(i%3)+5]));
             list.add(l);

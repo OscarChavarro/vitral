@@ -1,15 +1,12 @@
 //=   recursive raytracing ilumination model                                =
 
 package vsdk.toolkit.environment;
-import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 
 public class Material extends Entity
 {
-    @Serial private static final long serialVersionUID = 20060502L;
-
     private ColorRgb ambient; 
     private ColorRgb diffuse; 
     private ColorRgb specular; 

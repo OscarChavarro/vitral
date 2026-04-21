@@ -187,7 +187,8 @@ public class TorusExample implements
         
         light = 
             new Light(
-                Light.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+                vsdk.toolkit.environment.LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+        light.setId(0);
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));

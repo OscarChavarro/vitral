@@ -13,6 +13,7 @@ import com.jogamp.opengl.cg.CGprogram;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.LightType;
 
 public class JoglCgLightRenderer extends JoglCgRenderer {
 
@@ -30,7 +31,6 @@ public class JoglCgLightRenderer extends JoglCgRenderer {
 
     public static void activate(GL2 gl, Light l)
     {
-        //-----------------------------------------------------------------
         if ( nvidiaCgAutomaticMode ) {
             ArrayList<CGprogram> allVertexShaders;
             ArrayList<CGprogram> allTextureShaders;
@@ -46,40 +46,31 @@ public class JoglCgLightRenderer extends JoglCgRenderer {
             }
         }
 
-        //-----------------------------------------------------------------
-        float[] lightPosition=l.getPosition().exportToFloatArrayVect();
-        float global_ambient[] = {0, 0, 0, 1};
-        float global_twoside[] = {GL.GL_TRUE};  // WARNING: This is inefficient!
+        float[] lightPosition = l.getPosition().exportToFloatArrayVect();
+        float[] globalAmbient = {0, 0, 0, 1};
+        float[] globalTwoside = {GL.GL_TRUE};
         int lightNumber = l.getId();
 
         if ( lightNumber >= supportedLightsInOpenGL || lightNumber < 0 ) {
             return;
         }
 
-        lightPosition[3]=1.0f;
-/*
-        if ( l.getLightType() == Light.DIRECTIONAL ) { // Why?
-            lightPosition[3]=0;
+        lightPosition[3] = 1.0f;
+        if ( l.getLightType() == LightType.DIRECTIONAL ) {
+            lightPosition[3] = 0.0f;
         }
-*/
         gl.glPushMatrix();
         gl.glLoadIdentity();
-        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, global_ambient, 0);   // OJO! Esta
-        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_TWO_SIDE, global_twoside, 0);  // cableado!
-        gl.glLightModeli(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_TRUE); // OJO: ?
-        gl.glEnable(GL2.GL_LIGHTING);  // Is it right to have this here and re-set all the time?
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, globalAmbient, 0);
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_TWO_SIDE, globalTwoside, 0);
+        gl.glLightModeli(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_TRUE);
+        gl.glEnable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_LIGHT0 + lightNumber);
 
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_POSITION, lightPosition, 0);
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, l.getAmbient().exportToFloatArrayVect(), 0);
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, l.getDiffuse().exportToFloatArrayVect(), 0);
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, l.getSpecular().exportToFloatArrayVect(), 0);
-        
-/*
-        gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_CONSTANT_ATTENUATION, constantAtenuation);
-        gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_LINEAR_ATTENUATION, linearAtenuation);
-        gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_QUADRATIC_ATTENUATION, quadricAtenuation);
-*/
         gl.glPopMatrix();
     }
 

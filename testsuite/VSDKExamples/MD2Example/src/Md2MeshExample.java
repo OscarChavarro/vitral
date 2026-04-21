@@ -133,7 +133,8 @@ public class Md2MeshExample
         camera.setFarPlaneDistance(4000);
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
-        light = new Light(Light.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light.setId(0);
     }
 
     @Override

@@ -84,7 +84,7 @@ public class SwingCanvas extends JPanel implements
         background = new SimpleBackground();
         background.setColor(0.5, 0.5, 0.9);
 
-        light = new Light(Light.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
+        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
 
         scene = new SimpleScene();
         scene.addBackground(background);

@@ -65,7 +65,7 @@ public class Scene
         //-----------------------------------------------------------------
         lights = new ArrayList<Light>();
         Light l;
-        l = new Light(Light.POINT, 
+        l = new Light(vsdk.toolkit.environment.LightType.POINT, 
                       new Vector3D(5, -5, 10), 
                       new ColorRgb(1, 1, 1));
         lights.add(l);

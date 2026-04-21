@@ -112,7 +112,7 @@ public class Raytracer extends RenderingElement {
     private static boolean hasNonAmbientLights(List<Light> lights)
     {
         for ( Light light : lights ) {
-            if ( light.tipo_de_luz != Light.AMBIENT ) {
+            if ( light.tipo_de_luz != vsdk.toolkit.environment.LightType.AMBIENT ) {
                 return true;
             }
         }
@@ -363,7 +363,7 @@ public class Raytracer extends RenderingElement {
             Light light = lights.get(i);
             ColorRgb lightEmission = light.getSpecularReference();
 
-            if ( light.tipo_de_luz == Light.AMBIENT ) {
+            if ( light.tipo_de_luz == vsdk.toolkit.environment.LightType.AMBIENT ) {
                 ColorRgb ambient = material.getAmbientReference();
                 outColor.r += ambient.r*lightEmission.r;
                 outColor.g += ambient.g*lightEmission.g;
@@ -377,7 +377,7 @@ public class Raytracer extends RenderingElement {
                 double ly;
                 double lz;
                 double maxShadowDistance = Double.MAX_VALUE;
-                if ( light.tipo_de_luz == Light.POINT ) {
+                if ( light.tipo_de_luz == vsdk.toolkit.environment.LightType.POINT ) {
                     lx = light.lvec.x() - info.p.x();
                     ly = light.lvec.y() - info.p.y();
                     lz = light.lvec.z() - info.p.z();
@@ -459,7 +459,7 @@ public class Raytracer extends RenderingElement {
                     }
                 }
                 //delete l;
-              } // else case of "if ( light.tipo_de_luz == Light.AMBIENT )" conditional
+              } // else case of "if ( light.tipo_de_luz == vsdk.toolkit.environment.LightType.AMBIENT )" conditional
         } // for ( i = 0; i< lights.size(); i++ )
 
         // Compute illumination due to reflection

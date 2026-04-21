@@ -257,17 +257,20 @@ public class IlluminationTest
         qualityController = new RendererConfigurationController(qualitySelection1);
 
         lightPosition = new Vector3D(0, 0, 3);
-        light1 = new Light(Light.POINT, lightPosition, 
+        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, lightPosition, 
                 new ColorRgb(1, 1, 1));
         light1.setPosition(lightPosition);
         showVectors = false;
 
 
 
-        light2 = new Light(Light.POINT, new Vector3D(30, -70, 50), 
+        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(30, -70, 50), 
                 new ColorRgb(1, 1, 1));
-        light3 = new Light(Light.POINT, new Vector3D(-40, 60, 30), 
+        light3 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-40, 60, 30), 
                 new ColorRgb(1, 1, 1));
+        light1.setId(0);
+        light2.setId(1);
+        light3.setId(2);
 
         //-----------------------------------------------------------------
         N = new Vector3D(0, 0, 1); // For the floor!

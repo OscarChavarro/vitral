@@ -126,7 +126,8 @@ public class CgSimpleUnrestrictedShaderExample
         camera.setFov(30.0);
 
         // 2: Lights
-        light = new Light(Light.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
+        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
+        light.setId(0);
 
         // 3.1. Object attribute -> material propierties
         material = new Material();

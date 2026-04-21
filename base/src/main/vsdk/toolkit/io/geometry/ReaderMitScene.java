@@ -665,21 +665,21 @@ public class ReaderMitScene extends PersistenceElement
                   }
                   if ( st.sval.equals("ambient") ) {
                       showDebugMessage("ambient");
-                      theScene.addLight(new Light(Light.AMBIENT, null, new ColorRgb(r,g,b)));
+                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.AMBIENT, null, new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       showDebugMessage("directional");
                       Vector3D v = new Vector3D(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
-                      theScene.addLight(new Light(Light.DIRECTIONAL, v, new ColorRgb(r,g,b)));
+                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.DIRECTIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       showDebugMessage("point");
                       Vector3D v = new Vector3D(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
-                      theScene.addLight(new Light(Light.POINT, v, new ColorRgb(r, g, b)));
+                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.POINT, v, new ColorRgb(r, g, b)));
                     } 
                     else {
                       System.err.println("ERROR: in line " + 
