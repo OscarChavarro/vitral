@@ -5,6 +5,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -119,10 +120,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static void sortNullEdges()
     {
-        // Keep the insertion order from the classifier. The vertex/vertex
-        // pairing logic already resolves the coplanar matches before
-        // emitting null edges, so re-sorting both solids independently tends
-        // to destroy that correspondence in multi-branch cases.
+        Collections.sort(sonea);
+        Collections.sort(soneb);
     }
 
     /**

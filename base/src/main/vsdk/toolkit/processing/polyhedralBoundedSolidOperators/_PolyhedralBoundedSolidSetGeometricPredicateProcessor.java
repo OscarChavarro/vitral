@@ -6,6 +6,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
@@ -218,21 +219,35 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
         boolean withDebug)
     {
-        CoplanarAngleBasis basis;
-        CoplanarAngularInterval intervalA;
-        CoplanarAngularInterval intervalB;
-        int relation;
+        double a1, a2;
+        double b1, b2;
+        Vector3D u, v, a, b, c, n;
 
-        basis = buildCoplanarAngleBasis(
-            na.he.parentLoop.parentFace.getContainingPlane().getNormal(),
-            na.ref1, na.ref2);
-        intervalA = buildIntervalForVertexSector(basis, na);
-        intervalB = buildIntervalForVertexSector(basis, nb);
-        relation = classifyCoplanarIntervalRelation(intervalA, intervalB);
+        n = na.he.parentLoop.parentFace.getContainingPlane().getNormal();
+        u = new Vector3D(na.ref1).normalized();
+        v = n.crossProduct(u).normalized();
 
-        if ( relation ==
-             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                 .COPLANAR_OVERLAP ) {
+        a = new Vector3D(na.ref2).normalized();
+        b = new Vector3D(nb.ref1).normalized();
+        c = new Vector3D(nb.ref2).normalized();
+
+        a1 = angleFromVectors(u, v, u);
+        a2 = angleFromVectors(u, v, a);
+        b1 = angleFromVectors(u, v, b);
+        b2 = angleFromVectors(u, v, c);
+
+        if ( a1 > a2 ) {
+            double t = a1;
+            a1 = a2;
+            a2 = t;
+        }
+        if ( b1 > b2 ) {
+            double t = b1;
+            b1 = b2;
+            b2 = t;
+        }
+
+        if ( a2 + VSDK.EPSILON > b1 - VSDK.EPSILON ) {
             if ( withDebug ) {
                 System.out.print(" <TRUE>");
             }
@@ -244,6 +259,28 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         }
 
         return false;
+    }
+
+    private static double angleFromVectors(Vector3D u, Vector3D v, Vector3D a)
+    {
+        double x;
+        double y;
+        double angle;
+
+        x = a.dotProduct(u);
+        y = a.dotProduct(v);
+        if ( x > 1.0 ) {
+            x = 1.0;
+        }
+        else if ( x < -1.0 ) {
+            x = -1.0;
+        }
+
+        angle = Math.acos(x);
+        if ( y < 0 ) {
+            angle *= -1;
+        }
+        return angle;
     }
 
     /**

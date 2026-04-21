@@ -8,6 +8,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -254,10 +255,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     (larger than 180 degrees) angle. In the first case the method returns
     `false` and `true` for the second case.
     This is an answer to problem [MANT1988].13.6.
-    Current implementation uses an orientation-consistent formal predicate:
-    the interior angle of the sector is computed with a signed turn (`atan2`)
-    around the parent face normal and considered wide iff that interior angle
-    is strictly greater than PI.
+    Current implementation intentionally follows the legacy boolean-kernel
+    predicate: the sector is wide when the cross product of its two boundary
+    vectors is degenerate or points opposite to the parent face normal.
 
     PRE: Parent solid should be previously validated to contain correct
     face equations.
@@ -274,33 +274,19 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             return true;
         }
 
-        Vector3D v = he.startingVertex.position;
-        Vector3D pPrev = he.previous().startingVertex.position;
-        Vector3D pNext = he.next().startingVertex.position;
-        Vector3D faceNormal = he.parentLoop.parentFace.getContainingPlane().getNormal();
+        Vector3D ref1;
+        Vector3D ref2;
+        Vector3D ref12;
 
-        // Incoming and outgoing directions at sector vertex.
-        Vector3D eIn = v.subtract(pPrev);
-        Vector3D eOut = pNext.subtract(v);
-
-        if ( eIn.length() <= numericContext.unitVectorTolerance() ||
-             eOut.length() <= numericContext.unitVectorTolerance() ||
-             faceNormal.length() <= numericContext.unitVectorTolerance() ) {
+        ref1 = he.previous().startingVertex.position.subtract(
+            he.startingVertex.position);
+        ref2 = he.next().startingVertex.position.subtract(
+            he.startingVertex.position);
+        ref12 = ref1.crossProduct(ref2);
+        if ( ref12.length() < VSDK.EPSILON ) {
             return true;
         }
-
-        eIn = eIn.normalized();
-        eOut = eOut.normalized();
-        faceNormal = faceNormal.normalized();
-
-        Vector3D cross = eIn.crossProduct(eOut);
-        double sinTheta = faceNormal.dotProduct(cross);
-        double cosTheta = eIn.dotProduct(eOut);
-        double signedTurn = Math.atan2(sinTheta, cosTheta); // [-PI, PI]
-        double interiorAngle = (signedTurn < 0.0)
-            ? (2.0 * Math.PI + signedTurn)
-            : signedTurn;
-
-        return interiorAngle > (Math.PI + numericContext.angleTolerance());
+        return ref12.dotProduct(
+            he.parentLoop.parentFace.getContainingPlane().getNormal()) <= 0.0;
     }
 }

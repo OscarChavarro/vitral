@@ -79,20 +79,117 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         int op,
         boolean useMirrorFace)
     {
-        _PolyhedralBoundedSolidSetGeometricPredicateProcessor
-            .applyCoplanarRulesToVertexFaceNeighborhood(
-                nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
-        for ( int i = 0; i < nbr.size(); i++ ) {
-            if ( nbr.get(i).coplanarRelation !=
-                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-                    .COPLANAR_UNKNOWN ) {
-                traceCoplanarTangential(
-                    "vf neighborhood op=" + op +
-                    " side=" + BvsA +
-                    " face=" + referenceFace.id +
-                    " sectorIndex=" + i +
-                    " coplanarRelation=" + nbr.get(i).coplanarRelation +
-                    " class=" + nbr.get(i).cl);
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace current;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidFace localFace;
+        Vector3D c;
+        double d;
+        int i;
+        int nnbr;
+        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> backup;
+
+        nnbr = nbr.size();
+        backup = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>();
+        for ( i = 0; i < nnbr; i++ ) {
+            backup.add(
+                new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace(
+                    nbr.get(i)));
+        }
+
+        for ( i = 0; i < nnbr; i++ ) {
+            current = nbr.get(i);
+            he = current.sector;
+            if ( he == null || he.parentLoop == null ||
+                 he.parentLoop.parentFace == null ) {
+                continue;
+            }
+
+            if ( useMirrorFace ) {
+                he = he.mirrorHalfEdge();
+                if ( he == null || he.parentLoop == null ||
+                     he.parentLoop.parentFace == null ) {
+                    continue;
+                }
+            }
+            localFace = he.parentLoop.parentFace;
+            if ( localFace.getContainingPlane() == null ||
+                 referencePlane == null ) {
+                continue;
+            }
+
+            c = localFace.getContainingPlane().getNormal().crossProduct(
+                referencePlane.getNormal());
+            d = c.dotProduct(c);
+            if ( compareToZero(d) != 0 ) {
+                continue;
+            }
+
+            d = localFace.getContainingPlane().getNormal().dotProduct(
+                referencePlane.getNormal());
+            if ( compareToZero(d) == 1 ) {
+                if ( BvsA != 0 ) {
+                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                    nbr.get((i + 1) % nnbr).cl =
+                        (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                }
+                else {
+                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                    nbr.get((i + 1) % nnbr).cl =
+                        (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
+                }
+            }
+            else {
+                if ( BvsA != 0 ) {
+                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                    nbr.get((i + 1) % nnbr).cl =
+                        (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                }
+                else {
+                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                    nbr.get((i + 1) % nnbr).cl =
+                        (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                            _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+                }
+            }
+
+            traceCoplanarTangential(
+                "vf legacy coplanar rule op=" + op +
+                " side=" + BvsA +
+                " face=" + referenceFace.id +
+                " localFace=" + localFace.id +
+                " sectorIndex=" + i +
+                " class=" + nbr.get(i).cl);
+        }
+
+        int ins = 0;
+        int outs = 0;
+        for ( i = 0; i < nnbr; i++ ) {
+            if ( nbr.get(i).cl ==
+                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
+                outs++;
+            }
+            else {
+                ins++;
+            }
+        }
+        if ( outs == nnbr || ins == nnbr ) {
+            for ( i = 0; i < nnbr; i++ ) {
+                nbr.get(i).cl = backup.get(i).cl;
             }
         }
     }

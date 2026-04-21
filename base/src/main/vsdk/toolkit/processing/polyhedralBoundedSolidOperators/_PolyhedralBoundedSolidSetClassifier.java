@@ -890,8 +890,6 @@ final class _PolyhedralBoundedSolidSetClassifier
         i = 0;
         while ( true ) {
             String traceContext;
-            int firstSectorIndex;
-            int secondSectorIndex;
             //-------------------------------------------------------------
             if ( i >= data.sectors.size() ) {
                 return;
@@ -902,7 +900,6 @@ final class _PolyhedralBoundedSolidSetClassifier
                     return;
                 }
             }
-            firstSectorIndex = i;
             if ( data.sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = data.nba.get(data.sectors.get(i).secta).he;
             }
@@ -910,16 +907,13 @@ final class _PolyhedralBoundedSolidSetClassifier
                 ha2 = data.nba.get(data.sectors.get(i).secta).he;
             }
             if ( data.sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                hb1 = resolveBEndpointCandidate(data, i, true, hb1, hb2);
+                hb1 = data.nbb.get(data.sectors.get(i).sectb).he;
                 i++;
             }
             else {
-                hb2 = resolveBEndpointCandidate(data, i, false, hb1, hb2);
+                hb2 = data.nbb.get(data.sectors.get(i).sectb).he;
                 i++;
             }
-            traceVertexVertexDecisionStep(
-                data, op, "first-sector", firstSectorIndex,
-                ha1, ha2, hb1, hb2);
 
             //-------------------------------------------------------------
             if ( i >= data.sectors.size() ) {
@@ -931,7 +925,6 @@ final class _PolyhedralBoundedSolidSetClassifier
                     return;
                 }
             }
-            secondSectorIndex = i;
             if ( data.sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = data.nba.get(data.sectors.get(i).secta).he;
             }
@@ -939,16 +932,13 @@ final class _PolyhedralBoundedSolidSetClassifier
                 ha2 = data.nba.get(data.sectors.get(i).secta).he;
             }
             if ( data.sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                hb1 = resolveBEndpointCandidate(data, i, true, hb1, hb2);
+                hb1 = data.nbb.get(data.sectors.get(i).sectb).he;
                 i++;
             }
             else {
-                hb2 = resolveBEndpointCandidate(data, i, false, hb1, hb2);
+                hb2 = data.nbb.get(data.sectors.get(i).sectb).he;
                 i++;
             }
-            traceVertexVertexDecisionStep(
-                data, op, "second-sector", secondSectorIndex,
-                ha1, ha2, hb1, hb2);
 
             //-------------------------------------------------------------
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
@@ -961,30 +951,16 @@ final class _PolyhedralBoundedSolidSetClassifier
 
             //-------------------------------------------------------------
             if ( ha1 == null || ha2 == null || hb1 == null || hb2 == null ) {
-                _PolyhedralBoundedSolidHalfEdge[] recovered;
+                int j;
 
-                recovered = recoverMissingCoplanarEndpoints(
-                    data, ha1, ha2, hb1, hb2);
-                ha1 = recovered[0];
-                ha2 = recovered[1];
-                hb1 = recovered[2];
-                hb2 = recovered[3];
-            }
-
-            //-------------------------------------------------------------
-            if ( ha1 == null || ha2 == null || hb1 == null || hb2 == null ) {
+                for ( j = 0; j < data.sectors.size(); j++ ) {
+                    data.sectors.get(j).intersect = false;
+                }
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println(
-                        "    . Incomplete coplanar pairing, waiting for more sectors");
+                        "    . Incomplete coplanar pairing, skipping split");
                 }
-                traceCoplanarTangential(
-                    "incomplete coplanar pairing cursor=" + i +
-                    " ha1=" + summarizeHalfEdge(ha1) +
-                    " ha2=" + summarizeHalfEdge(ha2) +
-                    " hb1=" + summarizeHalfEdge(hb1) +
-                    " hb2=" + summarizeHalfEdge(hb2));
-                traceIntersectingSectorsSnapshot(data, i);
-                continue;
+                return;
             }
 
             //-------------------------------------------------------------

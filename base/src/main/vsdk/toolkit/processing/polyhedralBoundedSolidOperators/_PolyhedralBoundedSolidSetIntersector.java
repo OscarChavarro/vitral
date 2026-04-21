@@ -4,7 +4,6 @@
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -287,20 +286,14 @@ final class _PolyhedralBoundedSolidSetIntersector
         _PolyhedralBoundedSolidFace f;
         _PolyhedralBoundedSolidEdge generatedEdge;
         int i;
-        ArrayDeque<_PolyhedralBoundedSolidEdge> pendingEdges;
 
-        pendingEdges = new ArrayDeque<_PolyhedralBoundedSolidEdge>();
-        pendingEdges.addFirst(e);
-
-        while ( !pendingEdges.isEmpty() ) {
-            e = pendingEdges.removeFirst();
-            for ( i = 0; i < s.polygonsList.size(); i++ ) {
-                f = s.polygonsList.get(i);
-                generatedEdge = doSetOpGenerate(e, f, BvsA, s, other, sonvv,
-                    sonva, sonvb);
-                if ( generatedEdge != null ) {
-                    pendingEdges.addFirst(generatedEdge);
-                }
+        for ( i = 0; i < s.polygonsList.size(); i++ ) {
+            f = s.polygonsList.get(i);
+            generatedEdge = doSetOpGenerate(e, f, BvsA, s, other, sonvv,
+                sonva, sonvb);
+            if ( generatedEdge != null ) {
+                processEdge(generatedEdge, s, BvsA, other, sonvv, sonva,
+                    sonvb);
             }
         }
     }
