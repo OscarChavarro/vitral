@@ -4,7 +4,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.RaytraceProfiling;
+import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
@@ -68,7 +68,7 @@ public class RayHit extends FundamentalEntity {
         this.requiredDetailMask = requiredDetailMask;
         this.storeRay = storeRay;
         clear();
-        RaytraceProfiling.recordRayHitInstance();
+        RaytraceStatistics.recordRayHitInstance();
     }
 
     public RayHit(RayHit other)
@@ -108,7 +108,7 @@ public class RayHit extends FundamentalEntity {
 
     public final void clone(RayHit other)
     {
-        RaytraceProfiling.recordHitInfoClone();
+        RaytraceStatistics.recordHitInfoClone();
         this.requiredDetailMask = other.requiredDetailMask;
         this.storeRay = other.storeRay;
         this.hitDistance = other.hitDistance;

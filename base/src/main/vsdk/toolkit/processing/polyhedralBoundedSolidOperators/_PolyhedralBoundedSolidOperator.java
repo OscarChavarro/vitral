@@ -7,6 +7,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -208,6 +209,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     protected static void
     join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2, boolean withDebug)
     {
+        PolyhedralBoundedSolidStatistics.recordJoinCall();
         _PolyhedralBoundedSolidFace oldf, newf;
         PolyhedralBoundedSolid s;
 

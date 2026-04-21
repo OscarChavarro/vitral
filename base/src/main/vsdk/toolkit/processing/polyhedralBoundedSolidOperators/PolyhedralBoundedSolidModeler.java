@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 // Vitral classes
 import java.util.List;
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -460,6 +461,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
+        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
     }
 
@@ -473,6 +475,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         int op,
         boolean withDebug)
     {
+        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
             withDebug);
     }
@@ -488,6 +491,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         boolean withDebug,
         boolean maximizeResultFaces)
     {
+        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
         return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
             withDebug, maximizeResultFaces);
     }

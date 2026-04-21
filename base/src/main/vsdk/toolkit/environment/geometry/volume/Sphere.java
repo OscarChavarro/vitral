@@ -5,7 +5,7 @@
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
 
-import vsdk.toolkit.common.RaytraceProfiling;
+import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
@@ -110,7 +110,7 @@ public class Sphere extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
-        RaytraceProfiling.recordGeometryDetailComputation();
+        RaytraceStatistics.recordGeometryDetailComputation();
         boolean needsNormalVector =
             outData.needsNormal() ||
             outData.needsTextureCoordinates() ||

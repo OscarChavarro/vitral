@@ -10,6 +10,7 @@ import java.util.Collections;
 
 // VitralSDK classes
 import java.util.List;
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -773,6 +774,9 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
                       List<PolyhedralBoundedSolid> outSolidsAbove,
                       List<PolyhedralBoundedSolid> outSolidsBelow)
     {
+        PolyhedralBoundedSolidStatistics.recordSplitCall();
+        int aboveBefore = outSolidsAbove.size();
+        int belowBefore = outSolidsBelow.size();
         //-----------------------------------------------------------------
         setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolid(inSolid));
         _PolyhedralBoundedSolidSplitterNullEdge.setNumericContext(numericContext);
@@ -783,13 +787,20 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
 
         if ( sone.size() <= 0 ) {
             // Plane should be tested here before asuming this order!
+            PolyhedralBoundedSolidStatistics.recordSplitNoNullEdgesCase();
             outSolidsAbove.add(inSolid);
             outSolidsBelow.add(new PolyhedralBoundedSolid());
+            PolyhedralBoundedSolidStatistics.recordSplitProducedSolids(
+                outSolidsAbove.size() - aboveBefore,
+                outSolidsBelow.size() - belowBefore);
             return;
         }
 
         splitConnect();
         splitFinish(inSolid, outSolidsAbove, outSolidsBelow);
+        PolyhedralBoundedSolidStatistics.recordSplitProducedSolids(
+            outSolidsAbove.size() - aboveBefore,
+            outSolidsBelow.size() - belowBefore);
 
         //-----------------------------------------------------------------
         soov = null;

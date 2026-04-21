@@ -10,6 +10,7 @@ import java.io.Serial;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -276,17 +277,22 @@ public class PolyhedralBoundedSolid extends Solid {
                      _PolyhedralBoundedSolidHalfEdge he2,
                      int vertexID, Vector3D p)
     {
+        PolyhedralBoundedSolidStatistics.recordLmevCall();
         if ( he1 == null || he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lmev",
             "Calling with empty halfedge!");
             return;
         }
         if ( he1.startingVertex != he2.startingVertex ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmev",
             "Halfedges not starting at the same vertex. Not supported case!");
             return;
         }
         if ( he1 == he2 ) {
+            PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
             insertLineDrawingEdge(he1, vertexID, p);
             return;
         }
@@ -364,20 +370,26 @@ public class PolyhedralBoundedSolid extends Solid {
     public void lkev(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2)
     {
+        PolyhedralBoundedSolidStatistics.recordLkevCall();
         //-----------------------------------------------------------------
         if ( he1 == null || he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lkev",
             "Two halfedges are needed for this Euler operator two work!");
             return;
         }
 
         if ( he1.parentEdge != he2.parentEdge ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lkev",
             "Given halfedges must lie over the same edge!");
             return;
         }        
 
         if ( he1 == he2 ) {
+            PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lkev",
             "Given halfedges must be different!");
             return;
@@ -428,12 +440,15 @@ public class PolyhedralBoundedSolid extends Solid {
     public void lkef(_PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2)
     {
+        PolyhedralBoundedSolidStatistics.recordLkefCall();
         if ( he1.parentEdge != he2.parentEdge ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkef",
             "Given halfedges must lie over the same edge. Operation aborted.");
             return;
         }
         if ( he1.parentLoop.parentFace == he2.parentLoop.parentFace ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lkef",
             "Given halfedges must belong to different faces. Operation aborted.");
             return;
@@ -458,6 +473,7 @@ public class PolyhedralBoundedSolid extends Solid {
         int traversed = 0;
         while ( he != he2 ) {
             if ( he == null || traversed > maxTraversal ) {
+                PolyhedralBoundedSolidStatistics.recordConsistencyWarningCase();
                 VSDK.reportMessage(this, VSDK.WARNING, "lkef",
                     "Detected inconsistent next-chain; falling back to halfEdgesList order.");
                 migratedHalfEdges.clear();
@@ -521,6 +537,7 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he2,
          int newFaceId)
     {
+        PolyhedralBoundedSolidStatistics.recordLmefCall();
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
         _PolyhedralBoundedSolidLoop oldLoop;
@@ -553,10 +570,14 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmef",
             "Non-existing halfedge 1!");
         }
         if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmef",
             "Non-existing halfedge 2!");
         }
@@ -596,6 +617,7 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he1,
         _PolyhedralBoundedSolidHalfEdge he2)
     {
+        PolyhedralBoundedSolidStatistics.recordLkemrCall();
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge he3;
         _PolyhedralBoundedSolidHalfEdge he4;
@@ -773,11 +795,13 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     public boolean lringmv(_PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace toFace, boolean setAsOuterLoop)
     {
+        PolyhedralBoundedSolidStatistics.recordLringmvCall();
         _PolyhedralBoundedSolidFace fromfac;
         boolean sameFace;
         int nloops;
 
         if ( l == null || toFace == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Null input loop or destination face.");
             return false;
@@ -785,11 +809,13 @@ public class PolyhedralBoundedSolid extends Solid {
 
         fromfac = l.parentFace;
         if ( fromfac == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Given loop does not have a parent face.");
             return false;
         }
         if ( fromfac.parentSolid != toFace.parentSolid ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Loop move across different solids is not supported.");
             return false;
@@ -802,6 +828,7 @@ public class PolyhedralBoundedSolid extends Solid {
         // Same-face case: only reorder to satisfy outer/inner intent.
         if ( sameFace ) {
             if ( !toFace.boundariesList.locateWindowAtElem(l) ) {
+                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
                 VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                     "Given loop was not found in its parent face boundaries.");
                 return false;
@@ -817,6 +844,7 @@ public class PolyhedralBoundedSolid extends Solid {
 
             // setAsOuterLoop == false
             if ( nloops <= 1 ) {
+                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
                 VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                     "Cannot mark the only boundary loop as inner.");
                 return false;
@@ -831,16 +859,19 @@ public class PolyhedralBoundedSolid extends Solid {
         //-----------------------------------------------------------------
         // Cross-face case: move loop and place it as outer/inner.
         if ( fromfac.boundariesList.size() <= 1 ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Cannot move the only boundary loop of a face.");
             return false;
         }
         if ( !setAsOuterLoop && toFace.boundariesList.size() <= 0 ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Cannot insert an inner loop into a face without outer loop.");
             return false;
         }
         if ( !fromfac.boundariesList.locateWindowAtElem(l) ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lringmv",
                 "Given loop was not found in source face boundaries.");
             return false;
@@ -878,13 +909,16 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge he1,
         _PolyhedralBoundedSolidHalfEdge he2)
     {
+        PolyhedralBoundedSolidStatistics.recordLmekrCall();
         //-----------------------------------------------------------------
         if ( he1.parentLoop == he2.parentLoop ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lmekr",
             "Given halfedges are on the same loop. Operation aborted.");
             return;
         }
         if ( he1.parentLoop.parentFace != he2.parentLoop.parentFace ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "lmekr",
             "Given halfedges are not on the same face. Operation aborted.");
             return;
@@ -961,12 +995,14 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f1 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1);
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Edge " + v1 + " - * not found in face " + f1 + ".");
             return false;
@@ -1007,24 +1043,28 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f1 + " not found.");
             return false;
         }
         oldface2 = findFace(f2);
         if ( oldface2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Face " + f2 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
             return false;
         }
         he2 = oldface2.findHalfEdge(v1, v3);
         if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mev",
             "Edge " + v1 + " - " + v3 + " not found in face " + f2 + ".");
             return false;
@@ -1049,18 +1089,21 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Face " + f1 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1);
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Edge " + v1 + " - * not found in face " + f1 + ".");
             return false;
         }
         he2 = oldface1.findHalfEdge(v3);
         if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "smef",
             "Edge " + v3 + " - * not found in face " + f1 + ".");
             return false;
@@ -1095,24 +1138,28 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mef",
             "Face " + f1 + " not found.");
             return false;
         }
         oldface2 = findFace(f2);
         if ( oldface2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mef",
             "Face " + f2 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mef",
             "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
             return false;
         }
         he2 = oldface2.findHalfEdge(v3, v4);
         if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "mef",
             "Edge " + v3 + " - " + v4 + " not found in face " + f2 + ".");
             return false;
@@ -1141,24 +1188,28 @@ public class PolyhedralBoundedSolid extends Solid {
 
         oldface1 = findFace(f1);
         if ( oldface1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "kemr",
             "Face " + f1 + " not found.");
             return false;
         }
         oldface2 = findFace(f2);
         if ( oldface2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "kemr",
             "Face " + f2 + " not found.");
             return false;
         }
         he1 = oldface1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "kemr",
             "Edge " + v1 + " - " + v2 + " not found in face " + f1 + ".");
             return false;
         }
         he2 = oldface2.findHalfEdge(v3, v4);
         if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             VSDK.reportMessage(this, VSDK.WARNING, "kemr",
             "Edge " + v3 + " - " + v4 + " not found in face " + f2 + ".");
             return false;

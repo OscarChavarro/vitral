@@ -57,7 +57,7 @@ public final class Ray extends FundamentalEntity
 
     public Ray withT(double newT)
     {
-        RaytraceProfiling.recordRayWithT();
+        RaytraceStatistics.recordRayWithT();
         if ( Double.compare(newT, t) == 0 ) {
             return this;
         }

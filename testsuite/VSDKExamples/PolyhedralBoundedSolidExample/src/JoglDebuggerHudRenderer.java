@@ -11,6 +11,7 @@ import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import models.CsgSampleNames;
 import models.SolidModelNames;
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
@@ -93,8 +94,50 @@ public class JoglDebuggerHudRenderer
             hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
             hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
         }
+        drawCsgStatisticsSummary(height);
         hudTextRenderer.endRendering();
         drawDebugVertexLabels(drawable, width, height);
+    }
+
+    private void drawCsgStatisticsSummary(int height)
+    {
+        if ( !model.getSolidModelName().usesCsgDebugControls() ) {
+            return;
+        }
+        if ( !PolyhedralBoundedSolidStatistics.isEnabled() ) {
+            return;
+        }
+        if ( PolyhedralBoundedSolidStatistics.getSetOpCalls() <= 0 ) {
+            return;
+        }
+
+        long failures = PolyhedralBoundedSolidStatistics.getOperationFailureCases();
+        long warnings = PolyhedralBoundedSolidStatistics.getConsistencyWarningCases();
+        long he1eqhe2 = PolyhedralBoundedSolidStatistics.getHe1EqualsHe2Cases();
+        long invalidInputs =
+            PolyhedralBoundedSolidStatistics.getInvalidHalfEdgeInputCases();
+        long joinIncomplete =
+            PolyhedralBoundedSolidStatistics.getJoinIncompleteCases();
+
+        long issueTotal = failures + warnings + he1eqhe2 +
+            invalidInputs + joinIncomplete;
+        if ( issueTotal <= 0 ) {
+            return;
+        }
+
+        int lineGap = 22;
+        int startY = model.isErrorState() ? (16 + (3 * lineGap)) : 16;
+
+        hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
+        hudTextRenderer.draw("CSG stats issues:", 16, startY);
+        hudTextRenderer.draw(
+            "fail=" + failures + " warn=" + warnings +
+            " he1==he2=" + he1eqhe2,
+            16, startY + lineGap);
+        hudTextRenderer.draw(
+            "joinIncomplete=" + joinIncomplete +
+            " invalidHE=" + invalidInputs,
+            16, startY + (2 * lineGap));
     }
 
     private String formatFaceLoopLabel()

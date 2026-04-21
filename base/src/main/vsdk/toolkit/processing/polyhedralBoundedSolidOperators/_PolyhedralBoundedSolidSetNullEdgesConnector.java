@@ -6,6 +6,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -311,6 +312,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         int j;
 
         if ( sonea.size() != soneb.size() ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             System.out.println("**** Not paired null edges!");
         }
 
@@ -414,6 +416,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     summarizeHalfEdge(h2b));
             }
             else {
+                PolyhedralBoundedSolidStatistics.recordJoinIncompleteCase();
+                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
                 tracePipelineSummary(
                     "connect pair[" + i + "] incomplete h1a=" +
                     summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +

@@ -15,7 +15,7 @@ package vsdk.toolkit.render;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.RaytraceProfiling;
+import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
@@ -377,7 +377,7 @@ public class Raytracer extends RenderingElement {
                     info.p.x() + VSDK.EPSILON*lx,
                     info.p.y() + VSDK.EPSILON*ly,
                     info.p.z() + VSDK.EPSILON*lz);
-                RaytraceProfiling.recordShadowRay();
+                RaytraceStatistics.recordShadowRay();
                 Ray shadowRay = new Ray(shadowOffset, new Vector3D(lx, ly, lz));
                 if ( anyThingInRayDirection(
                          shadowRay,
@@ -450,7 +450,7 @@ public class Raytracer extends RenderingElement {
                     info.p.x() + VSDK.EPSILON*reflectX,
                     info.p.y() + VSDK.EPSILON*reflectY,
                     info.p.z() + VSDK.EPSILON*reflectZ);
-                RaytraceProfiling.recordReflectionRay();
+                RaytraceStatistics.recordReflectionRay();
                 Ray reflected_ray = new Ray(poffset, reflect);
 
                 //delete reflect;
@@ -544,11 +544,11 @@ public class Raytracer extends RenderingElement {
         nearestDistance = Double.MAX_VALUE;
         nearestObjectIndex = -1;
         candidateHit.setStoreRay(false);
-        RaytraceProfiling.recordSceneTraversal();
+        RaytraceStatistics.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             SimpleBody gi = inSimpleBodiesArray.get(i);
             candidateHit.resetForDistanceOnly();
-            RaytraceProfiling.recordObjectIntersectionTest();
+            RaytraceStatistics.recordObjectIntersectionTest();
             if ( gi.doIntersection(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();
                 if ( hitDistance < nearestDistance && hitDistance > VSDK.EPSILON ) {
@@ -573,11 +573,11 @@ public class Raytracer extends RenderingElement {
         int i;
 
         candidateHit.setStoreRay(false);
-        RaytraceProfiling.recordSceneTraversal();
+        RaytraceStatistics.recordSceneTraversal();
         for ( i = 0; i < inSimpleBodiesArray.size(); i++ ) {
             SimpleBody gi = inSimpleBodiesArray.get(i);
             candidateHit.resetForDistanceOnly();
-            RaytraceProfiling.recordObjectIntersectionTest();
+            RaytraceStatistics.recordObjectIntersectionTest();
             if ( gi.doIntersection(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();
                 if ( hitDistance > VSDK.EPSILON && hitDistance < maxDistance ) {
@@ -769,7 +769,7 @@ public class Raytracer extends RenderingElement {
                 //- Trazado individual de un rayo --------------------------
                 // Es importante que la operacion generateRay sea inline
                 // (i.e. "final")
-                RaytraceProfiling.recordPrimaryRay();
+                RaytraceStatistics.recordPrimaryRay();
                 rayo = cameraSnapshot.generateRay(x, y);
                 color.r = 0;
                 color.g = 0;

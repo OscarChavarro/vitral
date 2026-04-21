@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 // Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -381,6 +382,7 @@ public final class GeneralModelsBuilder
         PolyhedralBoundedSolid innerSphere = createSphere(innerRadius,
             subdivisionCircunference, subdivisionHeight);
 
+        PolyhedralBoundedSolidStatistics.reset();
         PolyhedralBoundedSolid sphericalShell = PolyhedralBoundedSolidModeler.setOp(
             outerSphere, innerSphere, PolyhedralBoundedSolidModeler.SUBTRACT, false);
 
@@ -393,6 +395,7 @@ public final class GeneralModelsBuilder
         cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
         clipCube.applyTransformation(cubeMove);
 
+        PolyhedralBoundedSolidStatistics.reset();
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             sphericalShell, clipCube, PolyhedralBoundedSolidModeler.INTERSECTION, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
@@ -1154,6 +1157,7 @@ public final class GeneralModelsBuilder
             op.getLabel(), sample.getLabel());
 
         operands = createCsgOperands(sample);
+        PolyhedralBoundedSolidStatistics.reset();
 
         //-----------------------------------------------------------------
         if ( op == CsgOperationNames.UNION ) {
@@ -1262,6 +1266,7 @@ public final class GeneralModelsBuilder
 
         operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(
             situation);
+        PolyhedralBoundedSolidStatistics.reset();
         return PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1], op, withDebug);
     }
 

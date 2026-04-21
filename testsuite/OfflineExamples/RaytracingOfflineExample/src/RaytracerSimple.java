@@ -16,7 +16,7 @@ import java.util.Locale;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.RaytraceProfiling;
+import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -121,7 +121,7 @@ public class RaytracerSimple {
             "Image generated in " +
             VSDK.formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS) +
             " seconds.");
-        RaytraceProfiling.printSummary();
+        RaytraceStatistics.printSummary();
 
         //- 4. Export resulting image to an image file --------------------
         if ( save ) {

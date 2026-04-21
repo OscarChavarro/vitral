@@ -2,7 +2,7 @@ package vsdk.toolkit.common;
 
 import java.util.concurrent.atomic.LongAdder;
 
-public final class RaytraceProfiling {
+public final class RaytraceStatistics {
     private static final boolean ENABLED = Boolean.getBoolean("vsdk.raytrace.stats");
 
     private static final LongAdder primaryRays = new LongAdder();
@@ -15,7 +15,7 @@ public final class RaytraceProfiling {
     private static final LongAdder hitInfoClones = new LongAdder();
     private static final LongAdder geometryDetailComputations = new LongAdder();
 
-    private RaytraceProfiling() {
+    private RaytraceStatistics() {
     }
 
     public static boolean isEnabled() {
