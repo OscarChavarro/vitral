@@ -13,6 +13,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
+/**
+Hard regression corpus for boolean fixtures currently considered stable.
+
+<p>Traceability: [MANT1988] Ch. 15 set-operation algorithm; these tests
+lock topology and bounding geometry after union, intersection, and
+difference so generate/classify/connect/finish changes cannot drift silently.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorStableCsgRegressionTest
 {
     @ParameterizedTest

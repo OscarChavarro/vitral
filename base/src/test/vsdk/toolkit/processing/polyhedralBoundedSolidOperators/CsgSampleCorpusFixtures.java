@@ -8,6 +8,13 @@ import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
+/**
+Builds reusable operand pairs for the boolean set-operation corpus.
+
+<p>Traceability: [MANT1988] Ch. 12 sweep/generator examples for primitive
+construction and Ch. 15 boolean examples for pairwise set-operation
+scenarios.</p>
+ */
 final class CsgSampleCorpusFixtures
 {
     private CsgSampleCorpusFixtures()

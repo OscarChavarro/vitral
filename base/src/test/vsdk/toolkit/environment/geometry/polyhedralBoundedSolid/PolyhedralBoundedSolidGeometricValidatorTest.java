@@ -15,6 +15,12 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Exercises face-planarity predicates used by the B-Rep validation layer.
+
+<p>Traceability: [MANT1988] Ch. 13.1, face equations and plane
+consistency for polyhedral faces.</p>
+ */
 class PolyhedralBoundedSolidGeometricValidatorTest
 {
     @ParameterizedTest

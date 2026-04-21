@@ -8,6 +8,13 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Exercises rotational sweep generation from an open wire profile represented
+as a polyhedral bounded solid.
+
+<p>Traceability: [MANT1988] Ch. 12.3/12.5 sweep construction and the
+Euler-operator profile construction style from Ch. 11.5.</p>
+ */
 class CurveModelerRotationalSweepTest
 {
     @Test

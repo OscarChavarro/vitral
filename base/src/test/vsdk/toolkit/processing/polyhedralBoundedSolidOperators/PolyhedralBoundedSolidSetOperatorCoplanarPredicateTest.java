@@ -16,6 +16,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Probes coplanar and touching predicates used by boolean classification.
+
+<p>Traceability: [MANT1988] Ch. 13.2 containment/intersection predicates
+and Ch. 15.6 boundary classification for vertex/face and vertex/vertex
+neighborhoods.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
 {
     private Method sectorOverlapMethod;

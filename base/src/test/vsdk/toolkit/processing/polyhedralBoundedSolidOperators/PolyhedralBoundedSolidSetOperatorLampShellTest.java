@@ -17,6 +17,14 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Regression test for a shell/cube CSG intersection that must retain one
+top cap with an inner ring.
+
+<p>Traceability: [MANT1988] Ch. 12 generator/sweep-derived primitives,
+Ch. 15 boolean set operations, and Ch. 15.8 finish behavior for multi-loop
+faces.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorLampShellTest
 {
     private static final double EPSILON = 1.0e-6;

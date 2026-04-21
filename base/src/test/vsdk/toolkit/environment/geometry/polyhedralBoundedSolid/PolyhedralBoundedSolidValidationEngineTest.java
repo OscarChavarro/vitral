@@ -9,6 +9,12 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Covers intermediate and strict validation policies for B-Rep solids.
+
+<p>Traceability: [MANT1988] Ch. 6 boundary models, Ch. 10 half-edge
+storage invariants, and Ch. 13.1 face-equation geometric validity.</p>
+ */
 class PolyhedralBoundedSolidValidationEngineTest
 {
     @Test

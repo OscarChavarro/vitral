@@ -451,13 +451,15 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             if ( d1 != Geometry.OUTSIDE ) {
                 //System.out.println("  - H1: " + tail);
                 //System.out.println("  - H2: " + head);
-                inSolid.lmev(tail, head, inSolid.getMaxVertexId()+1, head.startingVertex.position);
+                inSolid.lmev(tail, head, inSolid.getMaxVertexId()+1,
+                    head.startingVertex.position);
                 sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(tail.previous().parentEdge));
             }
             else {
                 //System.out.println("  - H1: " + head);
                 //System.out.println("  - H2: " + tail);
-                inSolid.lmev(head, tail, inSolid.getMaxVertexId()+1, head.startingVertex.position);
+                inSolid.lmev(head, tail, inSolid.getMaxVertexId()+1,
+                    head.startingVertex.position);
                 sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(head.previous().parentEdge));
             }
 

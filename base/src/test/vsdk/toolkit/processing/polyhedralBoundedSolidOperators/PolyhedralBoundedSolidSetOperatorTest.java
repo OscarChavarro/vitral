@@ -13,6 +13,13 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Policy tests for no-intersection, touching-only, and containment boolean
+cases.
+
+<p>Traceability: [MANT1988] Ch. 15.1 set-operation statement and special
+cases where boundaries do not properly intersect before the normal pipeline.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorTest
 {
     @ParameterizedTest

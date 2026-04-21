@@ -509,7 +509,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
 
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB), head.startingVertex.position);
+            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+                head.startingVertex.position);
 
             if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
                  (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
@@ -593,7 +594,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 System.out.println("          . (" + start + ") H1: " + head);
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB), head.startingVertex.position);
+            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+                head.startingVertex.position);
 
             if ( BvsA != 0 ) {
                 sone = soneb;

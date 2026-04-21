@@ -259,9 +259,9 @@ public class PolyhedralBoundedSolid extends Solid {
     Operator lmev "splits" the vertex pointed at by `he1` and `he2`,
     and adds a new vertex and new edge between the resulting two vertices.
     The coordinates specified by `p` are assigned to the new vertex position.
-    If `he1` and `he2` are the same halfedge, the new vertex and edge are
-    added into the face of `he1`. The new edge is oriented from the new
-    vertex to the old one.
+    If `he1` and `he2` are the same halfedge, the operation creates the
+    practical line-drawing strut needed for empty-loop construction, sweeps,
+    and zero-length null edges.
 
     As described in sections [MANT1988].9.2.3, [MANT1988].11.3.2 and
     [MANT1988].11.5.1; and following the structure of sample program
@@ -276,39 +276,30 @@ public class PolyhedralBoundedSolid extends Solid {
                      _PolyhedralBoundedSolidHalfEdge he2,
                      int vertexID, Vector3D p)
     {
-        //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidVertex newVertex;
-        _PolyhedralBoundedSolidEdge newEdge;
-        boolean strutCase = false;
-
-        if ( he1 == he2 ) {
-            strutCase = true;
-        }
-
-        if ( he1 == null && he2 == null ) {
+        if ( he1 == null || he2 == null ) {
             VSDK.reportMessage(this, VSDK.WARNING, "lmev",
-            "Calling with (both) empty halfedges!");
+            "Calling with empty halfedge!");
             return;
         }
-
-        if ( he1 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "lmev",
-            "Calling with (first) empty halfedge!");
-            return;
-        }
-
-        if ( he2 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "lmev",
-            "Calling with (second) empty halfedge!");
-            return;
-        }
-
         if ( he1.startingVertex != he2.startingVertex ) {
             VSDK.reportMessage(this, VSDK.FATAL_ERROR, "lmev",
             "Halfedges not starting at the same vertex. Not supported case!");
             return;
         }
+        if ( he1 == he2 ) {
+            insertLineDrawingEdge(he1, vertexID, p);
+            return;
+        }
+        splitVertexNeighborhood(he1, he2, vertexID, p);
+    }
+
+    private void splitVertexNeighborhood(_PolyhedralBoundedSolidHalfEdge he1,
+                                         _PolyhedralBoundedSolidHalfEdge he2,
+                                         int vertexID, Vector3D p)
+    {
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidVertex newVertex;
+        _PolyhedralBoundedSolidEdge newEdge;
 
         if ( vertexID > maxVertexId ) maxVertexId = vertexID;
 
@@ -324,24 +315,33 @@ public class PolyhedralBoundedSolid extends Solid {
         }
 
         //-----------------------------------------------------------------
-        // Original [MANT1988] code...
-        //addhe(newEdge, newVertex, he2, PLUS);
-        //addhe(newEdge, he2.startingVertex, he1, MINUS);
-
-        // Modified code...
-        _PolyhedralBoundedSolidVertex oldVertex = he2.startingVertex;
-        if ( strutCase ) {
-            addhe(newEdge, oldVertex, he2, PLUS);
-            addhe(newEdge, newVertex, he1, MINUS);
-        }
-        else {
-            addhe(newEdge, newVertex, he2, PLUS);
-            addhe(newEdge, he2.startingVertex, he1, MINUS);
-        }
+        addhe(newEdge, newVertex, he2, PLUS);
+        addhe(newEdge, he2.startingVertex, he1, MINUS);
 
         //-----------------------------------------------------------------
         newVertex.emanatingHalfEdge = he2.previous();
         he2.startingVertex.emanatingHalfEdge = he2;
+    }
+
+    private void insertLineDrawingEdge(_PolyhedralBoundedSolidHalfEdge he,
+                                       int vertexID, Vector3D p)
+    {
+        _PolyhedralBoundedSolidVertex oldVertex;
+        _PolyhedralBoundedSolidVertex newVertex;
+        _PolyhedralBoundedSolidEdge newEdge;
+
+        if ( vertexID > maxVertexId ) maxVertexId = vertexID;
+
+        newEdge = new _PolyhedralBoundedSolidEdge(he.parentLoop.parentFace.parentSolid);
+        newVertex = new _PolyhedralBoundedSolidVertex(he.parentLoop.parentFace.parentSolid, p, vertexID);
+        oldVertex = he.startingVertex;
+        minMax = null;
+
+        addhe(newEdge, oldVertex, he, PLUS);
+        addhe(newEdge, newVertex, he, MINUS);
+
+        newVertex.emanatingHalfEdge = he.previous();
+        oldVertex.emanatingHalfEdge = he;
     }
 
     /**
@@ -409,6 +409,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( he2.parentLoop.halfEdgesList.size() <= 0 ) {
             he2.parentEdge = null;
             he2.parentLoop.halfEdgesList.add(he2);
+            he2.parentLoop.boundaryStartHalfEdge = he2;
         }
     }
 
@@ -810,8 +811,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( nloops <= 0 || toFace.boundariesList.get(0) == l ) {
                     return true;
                 }
-                toFace.boundariesList.removeElemAtWindow();
-                toFace.boundariesList.push(l);
+                toFace.boundariesList.swapElements(l, toFace.boundariesList.get(0));
                 return true;
             }
 
@@ -824,8 +824,7 @@ public class PolyhedralBoundedSolid extends Solid {
             if ( toFace.boundariesList.get(0) != l ) {
                 return true;
             }
-            toFace.boundariesList.removeElemAtWindow();
-            toFace.boundariesList.add(l);
+            toFace.boundariesList.swapElements(l, toFace.boundariesList.get(1));
             return true;
         }
 

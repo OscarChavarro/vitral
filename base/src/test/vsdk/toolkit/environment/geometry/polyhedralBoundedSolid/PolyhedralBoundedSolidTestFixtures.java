@@ -7,6 +7,14 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
+/**
+Shared bounded-solid fixtures for Euler, validation, and set-operation
+tests.
+
+<p>Traceability: box and MANT fixtures are drawn from [MANT1988] Ch. 6
+B-Rep examples, Ch. 9 Euler-construction examples, Fig. 6.13, and Ch. 15
+boolean set-operation examples.</p>
+ */
 public class PolyhedralBoundedSolidTestFixtures
 {
     private PolyhedralBoundedSolidTestFixtures()

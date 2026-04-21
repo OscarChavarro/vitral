@@ -7,6 +7,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Exercises boundary-contact handling for quantitative invisibility queries.
+
+<p>Traceability: APPEL hidden-line quantitative invisibility, used here
+against [MANT1988] Ch. 6/10 polyhedral B-Rep topology so edge and vertex
+contacts are not double-counted as volume piercings.</p>
+ */
 class PolyhedralBoundedSolidQuantitativeInvisibilityTest
 {
     @Test

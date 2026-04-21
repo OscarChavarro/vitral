@@ -5,6 +5,13 @@ import org.junit.jupiter.api.Test;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
+/**
+Diagnostic trace harness for a boolean case whose classification/connect
+behavior is under active investigation.
+
+<p>Traceability: [MANT1988] Ch. 15.5-15.8, covering setopgenerate,
+classify, connect, and finish phases.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorCrossPairDiagnosticTest
 {
     private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =

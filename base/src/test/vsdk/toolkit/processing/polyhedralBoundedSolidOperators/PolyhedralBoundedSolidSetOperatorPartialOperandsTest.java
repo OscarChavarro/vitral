@@ -8,6 +8,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
+/**
+Smoke coverage for fixture creation, final results, and mutated partial
+operands during boolean processing.
+
+<p>Traceability: [MANT1988] Ch. 15.5-15.8, where the two operands are
+mutated through generate/classify/connect before finish extracts the result.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorPartialOperandsTest
 {
     @ParameterizedTest

@@ -8,6 +8,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Checks half-edge topology invariants for valid and intentionally damaged
+bounded solids.
+
+<p>Traceability: [MANT1988] Ch. 10.2-10.4, especially the solid, face,
+loop, edge, half-edge, and vertex incidence structure.</p>
+ */
 class PolyhedralBoundedSolidTopologicalValidatorTest
 {
     @Test

@@ -11,6 +11,13 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Regression test for subtracting two generated cylinders into a moon-like
+polyhedral prism.
+
+<p>Traceability: [MANT1988] Ch. 12.2-12.3 generator/sweep construction and
+Ch. 15 boolean difference through generate, classify, connect, and finish.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorMoonCylinderDifferenceTest
 {
     private static final double CYLINDER_RADIUS = 0.5;

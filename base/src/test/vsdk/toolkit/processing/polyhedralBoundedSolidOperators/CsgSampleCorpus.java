@@ -1,5 +1,11 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
+/**
+Names the boolean fixture corpus used by regression and diagnostic tests.
+
+<p>Traceability: [MANT1988] Ch. 15 boolean set-operation examples and
+project-local fixtures derived from the book's CSG discussion.</p>
+ */
 enum CsgSampleCorpus
 {
     HOLLOW_BRICK(1),

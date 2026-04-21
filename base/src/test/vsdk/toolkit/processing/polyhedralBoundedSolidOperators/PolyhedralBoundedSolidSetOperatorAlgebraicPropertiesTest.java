@@ -13,6 +13,13 @@ import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBounded
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Uses algebraic set-operation identities as drift detectors for known
+problematic CSG fixtures.
+
+<p>Traceability: [MANT1988] Ch. 15.1 set-operation statement and problem
+cases for union, intersection, and difference.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 {
     @ParameterizedTest

@@ -9,6 +9,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Covers same-shell face/loop movement operators that convert faces to
+interior rings and back.
+
+<p>Traceability: [MANT1988] Ch. 9.2.4 global manipulations and
+Ch. 11.5 high-level Euler operator family, especially the KFMRH/MFKRH
+same-shell case.</p>
+ */
 class PolyhedralBoundedSolidKimrhMikrhTest
 {
     @Test

@@ -10,6 +10,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
+/**
+Validates the scale-aware tolerance policy used by B-Rep predicates.
+
+<p>Traceability: [MANT1988] Ch. 13.1-13.2, where face equations,
+containment, and intersection predicates depend on robust numerical
+comparisons even though the book presents them in exact arithmetic.</p>
+ */
 class PolyhedralBoundedSolidNumericPolicyTest
 {
     @Test

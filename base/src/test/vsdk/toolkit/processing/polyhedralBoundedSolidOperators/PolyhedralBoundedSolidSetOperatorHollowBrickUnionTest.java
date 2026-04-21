@@ -15,6 +15,13 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+Checks that boolean union preserves a rectangular ring on a hollow-brick
+fixture.
+
+<p>Traceability: [MANT1988] Ch. 9.2.4 global manipulations for rings/holes
+and Ch. 15.8 setopfinish result assembly.</p>
+ */
 class PolyhedralBoundedSolidSetOperatorHollowBrickUnionTest
 {
     private static final double EPSILON = 1.0e-6;
