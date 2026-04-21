@@ -143,6 +143,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     {
         if ( model.getCanvas() != null ) {
             model.getCanvas().repaint();
+            model.getCanvas().display();
         }
     }
 

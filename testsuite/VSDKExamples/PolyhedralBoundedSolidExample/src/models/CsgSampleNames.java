@@ -2,11 +2,11 @@ package models;
 
 public enum CsgSampleNames
 {
-    HOLLOW_BRICK(1),
-    MANT1986_2(2),
-    STACKED_BLOCKS(3),
+    MANT1986_2(1),
+    STACKED_BLOCKS(2),
+    MOON_BLOCK(3),
     CROSS_PAIR(4),
-    MOON_BLOCK(5),
+    HOLLOW_BRICK(5),
     MANT1988_6_13(6),
     MANT1988_15_1(7),
     MANT1986_3(8),

@@ -4,10 +4,17 @@ import models.DebuggerModel;
 import java.awt.geom.Rectangle2D;
 
 // JOGL classes
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import models.CsgSampleNames;
 import models.SolidModelNames;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
+import com.jogamp.opengl.glu.GLU;
 
 public class JoglDebuggerHudRenderer
 {
@@ -15,13 +22,14 @@ public class JoglDebuggerHudRenderer
 
     private final DebuggerModel model;
     private TextRenderer hudTextRenderer;
+    private TextRenderer vertexLabelRenderer;
     private int viewportWidth;
     private int viewportHeight;
-
     public JoglDebuggerHudRenderer(DebuggerModel model)
     {
         this.model = model;
         this.hudTextRenderer = null;
+        this.vertexLabelRenderer = null;
         this.viewportWidth = 0;
         this.viewportHeight = 0;
     }
@@ -30,6 +38,8 @@ public class JoglDebuggerHudRenderer
     {
         hudTextRenderer = new TextRenderer(
             new Font("SansSerif", Font.BOLD, 18), true, true);
+        vertexLabelRenderer = new TextRenderer(
+            new Font("SansSerif", Font.PLAIN, 12), true, true);
         updateViewportSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
     }
 
@@ -41,7 +51,7 @@ public class JoglDebuggerHudRenderer
 
     public void draw(GLAutoDrawable drawable)
     {
-        if ( hudTextRenderer == null ) {
+        if ( hudTextRenderer == null || vertexLabelRenderer == null ) {
             return;
         }
 
@@ -84,6 +94,7 @@ public class JoglDebuggerHudRenderer
             hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
         }
         hudTextRenderer.endRendering();
+        drawDebugVertexLabels(drawable, width, height);
     }
 
     private String formatFaceLoopLabel()
@@ -109,6 +120,10 @@ public class JoglDebuggerHudRenderer
             hudTextRenderer.dispose();
             hudTextRenderer = null;
         }
+        if ( vertexLabelRenderer != null ) {
+            vertexLabelRenderer.dispose();
+            vertexLabelRenderer = null;
+        }
     }
 
     private static void drawTopRight(TextRenderer renderer, int width,
@@ -118,5 +133,56 @@ public class JoglDebuggerHudRenderer
         int x = width - 16 - (int)Math.ceil(textBounds.getWidth());
         int y = height - (int)Math.round((double)offsetFromTop);
         renderer.draw(text, x, y);
+    }
+
+    private void drawDebugVertexLabels(GLAutoDrawable drawable, int width, int height)
+    {
+        PolyhedralBoundedSolid solid = model.getSolid();
+        if ( !model.isDebugVertices() || solid == null || solid.verticesList == null ) {
+            return;
+        }
+
+        GL2 gl = drawable.getGL().getGL2();
+        double[] modelview = new double[16];
+        double[] projection = new double[16];
+        int[] viewport = new int[4];
+
+        gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, modelview, 0);
+        gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+
+        vertexLabelRenderer.beginRendering(width, height);
+        vertexLabelRenderer.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+        for ( int i = 0; i < solid.verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex vertex = solid.verticesList.get(i);
+            Vector3D projectedPosition = projectVertexToViewport(
+                vertex.position, modelview, projection, viewport);
+            if ( projectedPosition == null ) {
+                continue;
+            }
+            vertexLabelRenderer.draw(Integer.toString(vertex.id),
+                (int)Math.round(projectedPosition.x()) + 4,
+                (int)Math.round(projectedPosition.y()) + 4);
+        }
+        vertexLabelRenderer.endRendering();
+    }
+
+    private static Vector3D projectVertexToViewport(
+        Vector3D worldPosition,
+        double[] modelview,
+        double[] projection,
+        int[] viewport)
+    {
+        double[] projected = new double[4];
+        if ( !(new GLU()).gluProject(worldPosition.x(), worldPosition.y(),
+                worldPosition.z(), modelview, 0, projection, 0,
+                viewport, 0, projected, 0) ) {
+            return null;
+        }
+        if ( projected[2] < 0.0 || projected[2] > 1.0 ) {
+            return null;
+        }
+        return new Vector3D(projected[0], projected[1], projected[2]);
     }
 }

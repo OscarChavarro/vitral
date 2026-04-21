@@ -310,9 +310,6 @@ public class JoglDebuggerRenderer implements GLEventListener
         JoglPolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
         JoglPolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.getSolid(), model.getFaceIndex());
         JoglPolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(), model.getFaceIndex());
-        if ( model.isDebugVertices() ) {
-            JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, model.getSolid(), model.getCamera());
-        }
 
         //-----------------------------------------------------------------
         List<Vector3D> contourLines;
