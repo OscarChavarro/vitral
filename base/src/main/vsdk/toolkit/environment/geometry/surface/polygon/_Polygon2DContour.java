@@ -14,15 +14,12 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
     public List<Vertex2D> vertices;
     // If this contour is a hole, exteriorContour is the contour that contains it.
     private _Polygon2DContour exteriorContour;
-    private double minMaxArea;
-    private boolean minMaxAreaCalculated;
     public boolean fleetingFlag; //Caution, not a long term flag.
 
     public _Polygon2DContour()
     {
         vertices = new ArrayList<>();
         exteriorContour = null;
-        minMaxAreaCalculated = false;
     }
 
     public void addVertex(double x, double y, double r, double g, double b)
@@ -95,9 +92,7 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
         return minMax;
     }
     /**
-     * The variable modifyState allows that the state of this object, that hold
-     * if the area of the square that contains this object contour is calculated,
-     * is modified.
+     * The variable modifyState is kept for source compatibility.
      * @param modifyState
      * @return 
      */
@@ -106,10 +101,7 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
         double minMax[];
         
         minMax = getMinMax();
-        minMaxArea = (minMax[3]-minMax[0])*(minMax[4]-minMax[1]);
-        if(modifyState)
-            minMaxAreaCalculated = true;
-        return minMaxArea;
+        return (minMax[3]-minMax[0])*(minMax[4]-minMax[1]);
     }
     
 //    /**
@@ -155,16 +147,12 @@ public class _Polygon2DContour extends FundamentalEntity implements Comparable<_
         _Polygon2DContour other;
         other = /*(_Polygon2DContour)*/ obj;
 
-        if(!minMaxAreaCalculated)
-            calcMinMaxArea(false); // The variable minMaxAreaCalculated must be
-                                   // modified explicitly, not from here(in the
-                                   // calcMinMaxArea() function).
-        if(!other.minMaxAreaCalculated)
-            other.calcMinMaxArea(false);
+        double area = calcMinMaxArea(false);
+        double otherArea = other.calcMinMaxArea(false);
         
-        if(this.minMaxArea == other.minMaxArea)
+        if(area == otherArea)
             return 0;
-        if(this.minMaxArea < other.minMaxArea)
+        if(area < otherArea)
             return -1;
         else
             return 1;

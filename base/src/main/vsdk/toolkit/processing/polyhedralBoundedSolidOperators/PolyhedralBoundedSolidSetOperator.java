@@ -646,7 +646,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             System.out.println("Vertex/face pair V[" + v.id + "] / f[" + f.id + "]");
         }
 
-        nbr = vertexFaceGetNeighborhood(v, f.containingPlane, BvsA);
+        nbr = vertexFaceGetNeighborhood(v, f.getContainingPlane(), BvsA);
         if ( inplaneEdgesOn(nbr) ) {
             // In "strict analogy" to the splitter problem
             Collections.reverse(nbr);
@@ -657,7 +657,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             printNbr(nbr);
         }
 
-        vertexFaceReclassifyOnSectorsNoPeekVersion(nbr, f, f.containingPlane,
+        vertexFaceReclassifyOnSectorsNoPeekVersion(nbr, f, f.getContainingPlane(),
             BvsA, op);
 
         //- Adjusting results for set operation interpretation ------------
@@ -744,7 +744,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         a = a.normalized();
         b = b.normalized();
 
-        n = he.parentLoop.parentFace.containingPlane.getNormal();
+        n = he.parentLoop.parentFace.getContainingPlane().getNormal();
 
         middle = n.crossProduct(a);
         middle = middle.normalized();
@@ -783,7 +783,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
             if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
                      n.ref1, n.ref2, numericContext) ||
-                 (n.ref12.dotProduct(he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0 ) ) {
+                 (n.ref12.dotProduct(he.parentLoop.parentFace.getContainingPlane().getNormal()) > 0.0 ) ) {
                 // Inside this conditional means: current vertex is a wide one
                 if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
                          n.ref1, n.ref2, numericContext) ) {
@@ -889,8 +889,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         Vector3D n1, n2;
         Vector3D intrs;
 
-        n1 = h1.parentLoop.parentFace.containingPlane.getNormal();
-        n2 = h2.parentLoop.parentFace.containingPlane.getNormal();
+        n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
+        n2 = h2.parentLoop.parentFace.getContainingPlane().getNormal();
         intrs = n1.crossProduct(n2);
 
         //-----------------------------------------------------------------
@@ -991,8 +991,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                     s.wa = xa.wide;
                     s.wb = xb.wide;
 
-                    na = xa.he.parentLoop.parentFace.containingPlane.getNormal();
-                    nb = xb.he.parentLoop.parentFace.containingPlane.getNormal();
+                    na = xa.he.parentLoop.parentFace.getContainingPlane().getNormal();
+                    nb = xb.he.parentLoop.parentFace.getContainingPlane().getNormal();
                     d1 = nb.dotProduct(xa.ref1);
                     d2 = nb.dotProduct(xa.ref2);
                     d3 = na.dotProduct(xb.ref1);
@@ -1048,8 +1048,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 nextsectb = (sectb == nbb.size()-1)?0:sectb+1;
                 ha = nba.get(secta).he;
                 hb = nbb.get(sectb).he;
-                n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
-                n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
+                n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
+                n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
                 d = VSDK.vectorDistance(n1, n2);
                 sameOrientation = ( d < numericContext.unitVectorTolerance() );
                 traceCoplanarTangential(
@@ -1137,13 +1137,13 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
              ha.parentLoop == null || hb.parentLoop == null ||
              ha.parentLoop.parentFace == null ||
              hb.parentLoop.parentFace == null ||
-             ha.parentLoop.parentFace.containingPlane == null ||
-             hb.parentLoop.parentFace.containingPlane == null ) {
+             ha.parentLoop.parentFace.getContainingPlane() == null ||
+             hb.parentLoop.parentFace.getContainingPlane() == null ) {
             return null;
         }
 
-        n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
-        n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
+        n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
+        n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
         if ( !colinearVectors(n1, n2) ) {
             return null;
         }
@@ -1634,7 +1634,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             h2 = h2.next();
         }
         dir = h2.startingVertex.position.subtract(he.startingVertex.position);
-        cr = he.parentLoop.parentFace.containingPlane.getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.containingPlane.getNormal());
+        cr = he.parentLoop.parentFace.getContainingPlane().getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.getContainingPlane().getNormal());
         if ( cr.length() < numericContext.unitVectorTolerance() ) {
             return true;
         }

@@ -379,7 +379,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     if ( edgeIndex > -1 ) {
                         // Draw containing face normals at the edge middle point
                         middle = startPosition.add(endPosition).multiply(0.5);
-                        n = face1.containingPlane.getNormal();
+                        n = face1.getContainingPlane().getNormal();
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(1, 1, 0);
                         gl.glBegin(GL.GL_LINES);
@@ -388,7 +388,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                                           middle.y() + n.y()/10,
                                           middle.z() + n.z()/10);
                         gl.glEnd();
-                        n = face2.containingPlane.getNormal();
+                        n = face2.getContainingPlane().getNormal();
                         gl.glLineWidth(1.0f);
                         gl.glColor3d(0, 1, 1);
                         gl.glBegin(GL.GL_LINES);
@@ -452,8 +452,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane != null ) {
-                vertex.normal = face.containingPlane.getNormal();
+            if ( face.getContainingPlane() != null ) {
+                vertex.normal = face.getContainingPlane().getNormal();
             }
             else {
                 continue;
@@ -510,8 +510,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane != null ) {
-                n = face.containingPlane.getNormal();
+            if ( face.getContainingPlane() != null ) {
+                n = face.getContainingPlane().getNormal();
                 gl.glNormal3d(n.x(), n.y(), n.z());
             }
 
@@ -618,7 +618,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
         //- Draw face boundaries, one for each loop -----------------------
         for ( i = 0; faceIndex >= -1 && i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            //n = face.containingPlane.getNormal();
+            //n = face.getContainingPlane().getNormal();
 
             if ( i != faceIndex && faceIndex > -1 ) {
                 continue;
@@ -651,7 +651,7 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
                     b = p2.subtract(p0);    b = b.normalized();
                     n = a.crossProduct(b);   n = n.normalized();
                     loopPlane = new InfinitePlane(n, p0);
-                    //loopPlane = face.containingPlane;
+                    //loopPlane = face.getContainingPlane();
 
                     // Draw halfedges
                     if ( i == faceIndex ) {
@@ -699,8 +699,8 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
               i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane != null ) {
-                n = face.containingPlane.getNormal();
+            if ( face.getContainingPlane() != null ) {
+                n = face.getContainingPlane().getNormal();
                 gl.glNormal3d(n.x(), n.y(), n.z());
             }
 

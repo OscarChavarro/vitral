@@ -369,7 +369,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         a = a.normalized();
         b = b.normalized();
 
-        n = he.parentLoop.parentFace.containingPlane.getNormal();
+        n = he.parentLoop.parentFace.getContainingPlane().getNormal();
 
         middle = n.crossProduct(a);
         middle = middle.normalized();
@@ -693,7 +693,7 @@ final class _PolyhedralBoundedSolidSetClassifier
             h2 = h2.next();
         }
         dir = h2.startingVertex.position.subtract(he.startingVertex.position);
-        cr = he.parentLoop.parentFace.containingPlane.getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.containingPlane.getNormal());
+        cr = he.parentLoop.parentFace.getContainingPlane().getNormal().crossProduct(he.mirrorHalfEdge().parentLoop.parentFace.getContainingPlane().getNormal());
         if ( cr.length() < numericContext.unitVectorTolerance() ) {
             return true;
         }

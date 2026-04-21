@@ -121,19 +121,12 @@ public class TriangleMesh extends Surface {
 
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
-    private double[] minMax;
     private final ThreadLocal<Integer> intersectionTriangleIndex =
         ThreadLocal.withInitial(() -> -1);
-    private SimpleBody boundingVolume;
-    private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public TriangleMesh() {
-        minMax = null;
-        boundingVolume = null;
-        triangleMeshGroupCache = null;
-
         vertexPositions = null;
         vertexNormals = null;
         vertexBinormals = null;
@@ -211,7 +204,6 @@ public class TriangleMesh extends Surface {
         other.vertexColors = cloneDoubleArray(this.vertexColors);
         other.vertexUvs = cloneDoubleArray(this.vertexUvs);
         other.triangleNormals = cloneDoubleArray(this.triangleNormals);
-        other.minMax = cloneDoubleArray(this.minMax);
 
         other. vertexSelections = cloneBooleanArray(this.vertexSelections);
         other.triangleIndices = cloneIntArray(this.triangleIndices);
@@ -222,8 +214,6 @@ public class TriangleMesh extends Surface {
         other.textures = null;
         other.textureRanges = null;
         other.materialRanges = null;
-        other.boundingVolume = null;
-        other.triangleMeshGroupCache = null;
          
 /*
         ArrayList<ArrayList<Integer>> incidentTrianglesPerVertexArray;
@@ -231,8 +221,6 @@ public class TriangleMesh extends Surface {
         Image[] textures;
         int[][] textureRanges;
         int[][] materialRanges;
-        SimpleBody boundingVolume;
-        TriangleMeshGroup triangleMeshGroupCache;
 */
         return other;
     }
@@ -406,8 +394,6 @@ public class TriangleMesh extends Surface {
                 vertexUvs[2*i+1] = vertexes[i].v;
             }
         }
-
-        boundingVolume = null;
     }
 
     public void initTriangleArrays(int n)
@@ -439,8 +425,6 @@ public class TriangleMesh extends Surface {
                 triangleNormals[3*i+2] = triangles[i].normal.z();
             }
         }
-
-        boundingVolume = null;
     }
 
     public void setTextures(Image[] textures) {
@@ -473,8 +457,6 @@ public class TriangleMesh extends Surface {
         vertexTangents[3*i+2] = vertex.tangent.z();
         vertexUvs[2*i] = vertex.u;
         vertexUvs[2*i+1] = vertex.v;
-
-        boundingVolume = null;
     }
 
     /**
@@ -493,8 +475,6 @@ public class TriangleMesh extends Surface {
             triangleNormals[3*i+1] = triangle.normal.y();
             triangleNormals[3*i+2] = triangle.normal.z();
         }
-
-        boundingVolume = null;
     }
 
     public int getNumVertices()
@@ -564,7 +544,6 @@ public class TriangleMesh extends Surface {
 
     public void setTextureAt(int index, Image image) {
         this.textures[index] = image;
-        boundingVolume = null;
     }
 
 //= Methods for managing textureRanges ======================================
@@ -612,7 +591,6 @@ public class TriangleMesh extends Surface {
 //= Fundamental geometry operations methods =================================
 
     public void calculateNormals() {
-        boundingVolume = null;
         Vector3D tn;
         int i, j;
 
@@ -740,38 +718,36 @@ public class TriangleMesh extends Surface {
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
-    private void calculateMinMaxPositions() {
-        boundingVolume = null;
-        if ( minMax == null ) {
-            minMax = new double[6];
+    private double[] calculateMinMaxPositions() {
+        double[] minMax = new double[6];
 
-            double minX = Double.MAX_VALUE;
-            double minY = Double.MAX_VALUE;
-            double minZ = Double.MAX_VALUE;
-            double maxX = -Double.MAX_VALUE;
-            double maxY = -Double.MAX_VALUE;
-            double maxZ = -Double.MAX_VALUE;
-            int i;
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        int i;
 
-            for ( i = 0; i < getNumVertices(); i++ ) {
-                double x = vertexPositions[3*i+0];
-                double y = vertexPositions[3*i+1];
-                double z = vertexPositions[3*i+2];
+        for ( i = 0; i < getNumVertices(); i++ ) {
+            double x = vertexPositions[3*i+0];
+            double y = vertexPositions[3*i+1];
+            double z = vertexPositions[3*i+2];
 
-                if ( x < minX ) minX = x;
-                if ( y < minY ) minY = y;
-                if ( z < minZ ) minZ = z;
-                if ( x > maxX ) maxX = x;
-                if ( y > maxY ) maxY = y;
-                if ( z > maxZ ) maxZ = z;
-            }
-            minMax[0] = minX;
-            minMax[1] = minY;
-            minMax[2] = minZ;
-            minMax[3] = maxX;
-            minMax[4] = maxY;
-            minMax[5] = maxZ;
+            if ( x < minX ) minX = x;
+            if ( y < minY ) minY = y;
+            if ( z < minZ ) minZ = z;
+            if ( x > maxX ) maxX = x;
+            if ( y > maxY ) maxY = y;
+            if ( z > maxZ ) maxZ = z;
         }
+        minMax[0] = minX;
+        minMax[1] = minY;
+        minMax[2] = minZ;
+        minMax[3] = maxX;
+        minMax[4] = maxY;
+        minMax[5] = maxZ;
+        return minMax;
     }
 
     /**
@@ -875,18 +851,16 @@ public class TriangleMesh extends Surface {
         RayHit outHit,
         int[] outTriangleIndex)
     {
-        if ( boundingVolume == null ) {
-            double[] mm = getMinMax();
-            Vector3D size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-            Vector3D center = new Vector3D(
-                (mm[3]+mm[0])/2,
-                (mm[4]+mm[1])/2,
-                (mm[5]+mm[2])/2
-            );
-            boundingVolume = new SimpleBody();
-            boundingVolume.setPosition(center);
-            boundingVolume.setGeometry(new Box(size));
-        }
+        double[] mm = getMinMax();
+        Vector3D size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+        Vector3D center = new Vector3D(
+            (mm[3]+mm[0])/2,
+            (mm[4]+mm[1])/2,
+            (mm[5]+mm[2])/2
+        );
+        SimpleBody boundingVolume = new SimpleBody();
+        boundingVolume.setPosition(center);
+        boundingVolume.setGeometry(new Box(size));
         if ( boundingVolume.doIntersection(inRay) == null ) {
             intersectionTriangleIndex.set(-1);
             if ( outTriangleIndex != null && outTriangleIndex.length > 0 ) {
@@ -1104,10 +1078,7 @@ public class TriangleMesh extends Surface {
     */
     @Override
     public double[] getMinMax() {
-        if ( minMax == null ) {
-            calculateMinMaxPositions();
-        }
-        return minMax;
+        return calculateMinMaxPositions();
     }
 
     /**
@@ -1187,11 +1158,9 @@ public class TriangleMesh extends Surface {
     @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
-        if ( triangleMeshGroupCache == null ) {
-            triangleMeshGroupCache = new TriangleMeshGroup();
-            triangleMeshGroupCache.addMesh(this);
-        }
-        return triangleMeshGroupCache;
+        TriangleMeshGroup group = new TriangleMeshGroup();
+        group.addMesh(this);
+        return group;
     }
 
     /**
@@ -1241,11 +1210,6 @@ public class TriangleMesh extends Surface {
         }
 
         //- Calculate new vertex arrays -----------------------------------
-
-        minMax = null;
-        boundingVolume = null;
-        triangleMeshGroupCache = null;
-
         double oldVertexPositions[] = vertexPositions;
         double oldVertexNormals[] = vertexNormals;
 

@@ -285,7 +285,7 @@ public class HiddenLineRenderer extends RenderingElement
                     ray = ray.withOrigin(K);
                     ray = ray.withDirection(sp2c.subtract(K));
                     ray = ray.withDirection(ray.direction().normalized());
-                    Ray contourHit = cl.visibleEdgeForContourLine.containingPlane.
+                    Ray contourHit = cl.visibleEdgeForContourLine.getContainingPlane().
                          doIntersection(ray);
                     if ( contourHit != null ) {
                         J = contourHit.origin().add(contourHit.direction().multiply(contourHit.t()));

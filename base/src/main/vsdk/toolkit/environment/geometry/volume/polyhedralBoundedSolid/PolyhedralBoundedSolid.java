@@ -68,9 +68,6 @@ public class PolyhedralBoundedSolid extends Solid {
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList;
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
-    // Auxiliary data structures for storage of parcial results and 
-    // preprocessing
-    private double[] minMax;
     public int maxVertexId;
     public int maxFaceId;
     private boolean modelIsValid;
@@ -84,7 +81,6 @@ public class PolyhedralBoundedSolid extends Solid {
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
         verticesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
-        minMax = null;
         maxVertexId = -1;
         maxFaceId = -1;
         modelIsValid = false;
@@ -210,7 +206,6 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( vertexId > maxVertexId ) maxVertexId = vertexId;
         if ( faceId > maxFaceId ) maxFaceId = faceId;
 
-        minMax = null;
         newFace = new _PolyhedralBoundedSolidFace(this, faceId);
         newLoop = new _PolyhedralBoundedSolidLoop(newFace);
         newVertex = new _PolyhedralBoundedSolidVertex(this, p, vertexId);
@@ -311,7 +306,6 @@ public class PolyhedralBoundedSolid extends Solid {
 
         newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
         newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexID);
-        minMax = null;
 
         //-----------------------------------------------------------------
         he = he1;
@@ -341,7 +335,6 @@ public class PolyhedralBoundedSolid extends Solid {
         newEdge = new _PolyhedralBoundedSolidEdge(he.parentLoop.parentFace.parentSolid);
         newVertex = new _PolyhedralBoundedSolidVertex(he.parentLoop.parentFace.parentSolid, p, vertexID);
         oldVertex = he.startingVertex;
-        minMax = null;
 
         addhe(newEdge, oldVertex, he, PLUS);
         addhe(newEdge, newVertex, he, MINUS);
@@ -1285,7 +1278,6 @@ public class PolyhedralBoundedSolid extends Solid {
     {
         int i;
 
-        minMax = null;
         for ( i = 0; i < verticesList.size(); i++ ) {
             _PolyhedralBoundedSolidVertex v;
             v = verticesList.get(i);
@@ -1310,53 +1302,47 @@ public class PolyhedralBoundedSolid extends Solid {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        synchronized ( this ) {
-            int i;
-            double min_t;         // Shortest distance founded so far
-            PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-                PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+        int i;
+        double min_t;         // Shortest distance founded so far
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
 
-            // Initialization values for search algorithm
-            min_t = Double.MAX_VALUE;
-            RayHit bestInfo = null;
-            Vector3D p;
-            int pos;
+        // Initialization values for search algorithm
+        min_t = Double.MAX_VALUE;
+        RayHit bestInfo = null;
+        Vector3D p;
+        int pos;
 
-            for ( i = 0; i < polygonsList.size(); i++ ) {
-                Ray ray = new Ray(inRay);
-                _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-                if ( face.containingPlane == null ) {
-                    face.calculatePlane();
-                    if ( face.containingPlane == null ) {
-                        continue;
-                    }
-                }
-                RayHit planeHit = new RayHit();
-                if ( face.containingPlane.doIntersection(ray, planeHit) ) {
-                    Ray hit = planeHit.ray();
-                    if ( hit.t() < min_t ) {
-                        hit = hit.withDirection(hit.direction().normalized());
-                        p = hit.origin().add(hit.direction().multiply(hit.t()));
-                        synchronized ( face ) {
-                            pos = face.testPointInside(p, numericContext.bigEpsilon());
-                        }
-                        if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
-                            min_t = hit.t();
-                            bestInfo = new RayHit(planeHit);
-                        }
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            Ray ray = new Ray(inRay);
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            InfinitePlane containingPlane = face.getContainingPlane();
+            if ( containingPlane == null ) {
+                continue;
+            }
+            RayHit planeHit = new RayHit();
+            if ( containingPlane.doIntersection(ray, planeHit) ) {
+                Ray hit = planeHit.ray();
+                if ( hit.t() < min_t ) {
+                    hit = hit.withDirection(hit.direction().normalized());
+                    p = hit.origin().add(hit.direction().multiply(hit.t()));
+                    pos = face.testPointInside(p, numericContext.bigEpsilon());
+                    if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
+                        min_t = hit.t();
+                        bestInfo = new RayHit(planeHit);
                     }
                 }
             }
-
-            if ( bestInfo == null ) {
-                return false;
-            }
-            if ( outHit != null ) {
-                outHit.clone(bestInfo);
-                outHit.setRay(inRay.withT(min_t));
-            }
-            return true;
         }
+
+        if ( bestInfo == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            outHit.clone(bestInfo);
+            outHit.setRay(inRay.withT(min_t));
+        }
+        return true;
     }
 
     public void doExtraInformation(Ray inRay, double inT, 
@@ -1368,39 +1354,38 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
-    private void calculateMinMaxPositions() {
-        if ( minMax == null ) {
-            minMax = new double[6];
+    private double[] calculateMinMaxPositions() {
+        double[] minMax = new double[6];
 
-            double minX = Double.MAX_VALUE;
-            double minY = Double.MAX_VALUE;
-            double minZ = Double.MAX_VALUE;
-            double maxX = -Double.MAX_VALUE;
-            double maxY = -Double.MAX_VALUE;
-            double maxZ = -Double.MAX_VALUE;
-            int i;
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        int i;
 
-            for ( i = 0; i < verticesList.size(); i++ ) {
-                _PolyhedralBoundedSolidVertex v;
-                v = verticesList.get(i);
-                double x = v.position.x();
-                double y = v.position.y();
-                double z = v.position.z();
+        for ( i = 0; i < verticesList.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v;
+            v = verticesList.get(i);
+            double x = v.position.x();
+            double y = v.position.y();
+            double z = v.position.z();
 
-                if ( x < minX ) minX = x;
-                if ( y < minY ) minY = y;
-                if ( z < minZ ) minZ = z;
-                if ( x > maxX ) maxX = x;
-                if ( y > maxY ) maxY = y;
-                if ( z > maxZ ) maxZ = z;
-            }
-            minMax[0] = minX;
-            minMax[1] = minY;
-            minMax[2] = minZ;
-            minMax[3] = maxX;
-            minMax[4] = maxY;
-            minMax[5] = maxZ;
+            if ( x < minX ) minX = x;
+            if ( y < minY ) minY = y;
+            if ( z < minZ ) minZ = z;
+            if ( x > maxX ) maxX = x;
+            if ( y > maxY ) maxY = y;
+            if ( z > maxZ ) maxZ = z;
         }
+        minMax[0] = minX;
+        minMax[1] = minY;
+        minMax[2] = minZ;
+        minMax[3] = maxX;
+        minMax[4] = maxY;
+        minMax[5] = maxZ;
+        return minMax;
     }
 
     /**
@@ -1411,10 +1396,7 @@ public class PolyhedralBoundedSolid extends Solid {
     */
     @Override
     public double[] getMinMax() {
-        if ( minMax == null ) {
-            calculateMinMaxPositions();
-        }
-        return minMax;
+        return calculateMinMaxPositions();
     }
 
     /**
@@ -1618,7 +1600,7 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
             RayHit planeHit = new RayHit();
-            if ( face.containingPlane.doIntersection(ray, planeHit) ) {
+            if ( face.getContainingPlane().doIntersection(ray, planeHit) ) {
                 Ray hit = planeHit.ray();
                 if ( hit.t() < t0 - numericContext.epsilon() ) {
                     hit = hit.withDirection(hit.direction().normalized());
@@ -1663,7 +1645,7 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( int i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
 
-            if ( Math.abs(face.containingPlane.pointDistance(hitPoint)) >
+            if ( Math.abs(face.getContainingPlane().pointDistance(hitPoint)) >
                  tolerance ) {
                 continue;
             }
@@ -1673,7 +1655,7 @@ public class PolyhedralBoundedSolid extends Solid {
             }
 
             touchesBoundary = true;
-            int halfSpaceStatus = face.containingPlane.doContainmentTestHalfSpace(
+            int halfSpaceStatus = face.getContainingPlane().doContainmentTestHalfSpace(
                 afterHit, tolerance);
             if ( halfSpaceStatus != Geometry.INSIDE ) {
                 return false;
@@ -1840,14 +1822,13 @@ public class PolyhedralBoundedSolid extends Solid {
              simpleFace.boundariesList.size() != 1 ) {
             return false;
         }
-        if ( multiLoopFace.containingPlane == null ) {
-            multiLoopFace.calculatePlane();
+        InfinitePlane multiLoopPlane = multiLoopFace.getContainingPlane();
+        InfinitePlane simplePlane = simpleFace.getContainingPlane();
+        if ( multiLoopPlane == null || simplePlane == null ) {
+            return false;
         }
-        if ( simpleFace.containingPlane == null ) {
-            simpleFace.calculatePlane();
-        }
-        if ( !planesCoincidentIgnoringOrientation(multiLoopFace.containingPlane,
-                simpleFace.containingPlane, numericContext.epsilon()) ) {
+        if ( !planesCoincidentIgnoringOrientation(multiLoopPlane, simplePlane,
+                numericContext.epsilon()) ) {
             return false;
         }
 
@@ -1998,8 +1979,8 @@ public class PolyhedralBoundedSolid extends Solid {
             //- Join coplanar faces ---------------------------------------
             for ( i = 0; i < edgesList.size(); i++ ) {
                 e = edgesList.get(i);
-                a = e.rightHalf.parentLoop.parentFace.containingPlane;
-                b = e.leftHalf.parentLoop.parentFace.containingPlane;
+                a = e.rightHalf.parentLoop.parentFace.getContainingPlane();
+                b = e.leftHalf.parentLoop.parentFace.getContainingPlane();
                 if ( e.rightHalf.parentLoop.parentFace ==
                      e.leftHalf.parentLoop.parentFace &&
                      e.rightHalf.parentLoop != e.leftHalf.parentLoop ) {
@@ -2128,16 +2109,14 @@ public class PolyhedralBoundedSolid extends Solid {
             //- "maximal face" reduction expected by [MANT1988].15.5.
             for ( i = 0; i < polygonsList.size() && !restart; i++ ) {
                 _PolyhedralBoundedSolidFace faceA = polygonsList.get(i);
-                if ( faceA.containingPlane == null ) {
-                    faceA.calculatePlane();
+                InfinitePlane planeA = faceA.getContainingPlane();
+                if ( planeA == null ) {
+                    continue;
                 }
                 for ( j = i + 1; j < polygonsList.size(); j++ ) {
                     _PolyhedralBoundedSolidFace faceB = polygonsList.get(j);
-                    if ( faceB.containingPlane == null ) {
-                        faceB.calculatePlane();
-                    }
-                    if ( faceA.containingPlane == null ||
-                         faceB.containingPlane == null ) {
+                    InfinitePlane planeB = faceB.getContainingPlane();
+                    if ( planeB == null ) {
                         continue;
                     }
 

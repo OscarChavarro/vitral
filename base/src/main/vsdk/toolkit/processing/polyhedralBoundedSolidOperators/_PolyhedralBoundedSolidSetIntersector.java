@@ -62,9 +62,10 @@ final class _PolyhedralBoundedSolidSetIntersector
             numericContext);
     }
 
-    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
+    private static _PolyhedralBoundedSolidFace.PointInsideResult
+    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3D point)
     {
-        return face.testPointInside(point, numericContext.bigEpsilon());
+        return face.testPointInsideDetailed(point, numericContext.bigEpsilon());
     }
 
     private static int nextVertexId(PolyhedralBoundedSolid current,
@@ -163,25 +164,31 @@ final class _PolyhedralBoundedSolidSetIntersector
     {
         int cont;
         double d;
+        _PolyhedralBoundedSolidFace.PointInsideResult containment;
+        _PolyhedralBoundedSolidHalfEdge intersectedHalfedge;
+        _PolyhedralBoundedSolidVertex intersectedVertex;
 
-        d = f.containingPlane.pointDistance(v.position);
+        d = f.getContainingPlane().pointDistance(v.position);
         if ( compareToZero(d) == 0 ) {
-            cont = pointInFace(f, v.position);
+            containment = pointInFaceDetailed(f, v.position);
+            cont = containment.status();
+            intersectedHalfedge = containment.intersectedHalfedge();
+            intersectedVertex = containment.intersectedVertex();
             if ( cont == Geometry.INSIDE ) {
                 addsovf(v.emanatingHalfEdge, f, BvsA, sonva, sonvb);
             }
             else if ( cont == Geometry.LIMIT &&
-                      f.lastIntersectedHalfedge != null ) {
+                      intersectedHalfedge != null ) {
                 current.lmev(
-                    f.lastIntersectedHalfedge,
-                    f.lastIntersectedHalfedge.mirrorHalfEdge().next(),
+                    intersectedHalfedge,
+                    intersectedHalfedge.mirrorHalfEdge().next(),
                     nextVertexId(current, other), v.position);
-                addsovv(v, f.lastIntersectedHalfedge.startingVertex, BvsA,
+                addsovv(v, intersectedHalfedge.startingVertex, BvsA,
                     sonvv);
             }
             else if ( cont == Geometry.LIMIT &&
-                      f.lastIntersectedVertex != null ) {
-                addsovv(v, f.lastIntersectedVertex, BvsA, sonvv);
+                      intersectedVertex != null ) {
+                addsovv(v, intersectedVertex, BvsA, sonvv);
             }
         }
     }
@@ -205,11 +212,14 @@ final class _PolyhedralBoundedSolidSetIntersector
         double d1, d2, d3, t;
         Vector3D p;
         int s1, s2, cont;
+        _PolyhedralBoundedSolidFace.PointInsideResult containment;
+        _PolyhedralBoundedSolidHalfEdge intersectedHalfedge;
+        _PolyhedralBoundedSolidVertex intersectedVertex;
 
         v1 = e.rightHalf.startingVertex;
         v2 = e.leftHalf.startingVertex;
-        d1 = f.containingPlane.pointDistance(v1.position);
-        d2 = f.containingPlane.pointDistance(v2.position);
+        d1 = f.getContainingPlane().pointDistance(v1.position);
+        d2 = f.getContainingPlane().pointDistance(v2.position);
         s1 = compareToZero(d1);
         s2 = compareToZero(d2);
 
@@ -219,9 +229,10 @@ final class _PolyhedralBoundedSolidSetIntersector
                     (v2.position.subtract(
                          v1.position)).multiply(t));
 
-            d3 = f.containingPlane.pointDistance(p);
+            d3 = f.getContainingPlane().pointDistance(p);
             if ( compareToZero(d3) == 0 ) {
-                cont = pointInFace(f, p);
+                containment = pointInFaceDetailed(f, p);
+                cont = containment.status();
 
                 if ( cont != Geometry.OUTSIDE ) {
                     current.lmev(e.rightHalf, e.leftHalf.next(),
@@ -231,18 +242,21 @@ final class _PolyhedralBoundedSolidSetIntersector
                         addsovf(e.rightHalf, f, BvsA, sonva, sonvb);
                     }
                     else if ( cont == Geometry.LIMIT &&
-                              f.lastIntersectedHalfedge != null ) {
-                        current.lmev(f.lastIntersectedHalfedge,
-                            f.lastIntersectedHalfedge.mirrorHalfEdge().next(),
+                              containment.intersectedHalfedge() != null ) {
+                        intersectedHalfedge =
+                            containment.intersectedHalfedge();
+                        current.lmev(intersectedHalfedge,
+                            intersectedHalfedge.mirrorHalfEdge().next(),
                                      nextVertexId(current, other), p);
                         addsovv(e.rightHalf.startingVertex,
-                            f.lastIntersectedHalfedge.startingVertex, BvsA,
+                            intersectedHalfedge.startingVertex, BvsA,
                             sonvv);
                     }
                     else if ( cont == Geometry.LIMIT &&
-                              f.lastIntersectedVertex != null ) {
+                              containment.intersectedVertex() != null ) {
+                        intersectedVertex = containment.intersectedVertex();
                         addsovv(e.rightHalf.startingVertex,
-                            f.lastIntersectedVertex, BvsA, sonvv);
+                            intersectedVertex, BvsA, sonvv);
                     }
                     return e.rightHalf.previous().parentEdge;
                 }

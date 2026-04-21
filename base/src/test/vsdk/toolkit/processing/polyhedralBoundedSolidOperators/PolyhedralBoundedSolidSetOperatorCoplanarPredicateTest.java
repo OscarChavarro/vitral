@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -266,8 +267,9 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         int i;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane != null &&
-                 face.containingPlane.getNormal().dotProduct(normalHint) > 0.9 ) {
+            InfinitePlane plane = face.getContainingPlane();
+            if ( plane != null &&
+                 plane.getNormal().dotProduct(normalHint) > 0.9 ) {
                 return face;
             }
         }
@@ -282,12 +284,13 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         int i;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane == null ) {
+            InfinitePlane plane = face.getContainingPlane();
+            if ( plane == null ) {
                 continue;
             }
-            if ( Math.abs(face.containingPlane.pointDistance(pointOnPlane)) <=
+            if ( Math.abs(plane.pointDistance(pointOnPlane)) <=
                  1.0e-6 &&
-                 face.containingPlane.getNormal().dotProduct(normalHint) > 0.9 ) {
+                 plane.getNormal().dotProduct(normalHint) > 0.9 ) {
                 return face;
             }
         }

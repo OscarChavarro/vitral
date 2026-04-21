@@ -75,9 +75,24 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         if ( he == null ) {
             return "null";
         }
-        return "he(v=" + he.startingVertex.id +
-            "->" + he.next().startingVertex.id +
-            ",f=" + he.parentLoop.parentFace.id + ")";
+
+        String from = "?";
+        String to = "?";
+        String face = "?";
+
+        if ( he.startingVertex != null ) {
+            from = Integer.toString(he.startingVertex.id);
+        }
+        if ( he.parentLoop != null ) {
+            _PolyhedralBoundedSolidHalfEdge next = he.next();
+            if ( next != null && next.startingVertex != null ) {
+                to = Integer.toString(next.startingVertex.id);
+            }
+            if ( he.parentLoop.parentFace != null ) {
+                face = Integer.toString(he.parentLoop.parentFace.id);
+            }
+        }
+        return "he(v=" + from + "->" + to + ",f=" + face + ")";
     }
 
     private static String summarizeNullEdge(

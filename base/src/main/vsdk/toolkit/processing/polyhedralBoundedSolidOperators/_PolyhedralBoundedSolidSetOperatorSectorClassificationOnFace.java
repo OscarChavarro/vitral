@@ -106,7 +106,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
 
     public void updateLabel(int BvsA)
     {
-        InfinitePlane a = sector.parentLoop.parentFace.containingPlane;
+        InfinitePlane a = sector.parentLoop.parentFace.getContainingPlane();
         InfinitePlane b = referencePlane;
 
         if ( BvsA == 0 ) {

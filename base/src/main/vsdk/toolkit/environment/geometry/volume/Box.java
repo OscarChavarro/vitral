@@ -26,7 +26,6 @@ public class Box extends Solid {
     private static final Vector3D ZERO_VECTOR = new Vector3D();
 
     private Vector3D size;
-    private PolyhedralBoundedSolid brepCache;
 
     public Box(double dx, double dy, double dz) {
         size = new Vector3D(dx, dy, dz);
@@ -358,10 +357,7 @@ public class Box extends Solid {
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
-        if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid();
-        }
-        return brepCache;
+        return buildPolyhedralBoundedSolid();
     }
 
     /**

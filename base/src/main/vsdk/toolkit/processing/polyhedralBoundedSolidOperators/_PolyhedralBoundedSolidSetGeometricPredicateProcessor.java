@@ -146,6 +146,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return face.testPointInside(point, numericContext.bigEpsilon());
     }
 
+    static _PolyhedralBoundedSolidFace.PointInsideResult
+    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3D point)
+    {
+        return face.testPointInsideDetailed(point, numericContext.bigEpsilon());
+    }
+
     static boolean colinearVectors(Vector3D a, Vector3D b)
     {
         return PolyhedralBoundedSolidNumericPolicy
@@ -218,7 +224,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         int relation;
 
         basis = buildCoplanarAngleBasis(
-            na.he.parentLoop.parentFace.containingPlane.getNormal(),
+            na.he.parentLoop.parentFace.getContainingPlane().getNormal(),
             na.ref1, na.ref2);
         intervalA = buildIntervalForVertexSector(basis, na);
         intervalB = buildIntervalForVertexSector(basis, nb);
@@ -297,12 +303,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             else {
                 localFace = he.parentLoop.parentFace;
             }
-            if ( localFace == null || localFace.containingPlane == null ||
+            if ( localFace == null || localFace.getContainingPlane() == null ||
                  referencePlane == null ) {
                 continue;
             }
 
-            c = localFace.containingPlane.getNormal().crossProduct(
+            c = localFace.getContainingPlane().getNormal().crossProduct(
                 referencePlane.getNormal());
             d = c.dotProduct(c);
             if ( compareToZero(d) != 0 ) {
@@ -323,7 +329,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             if ( relation ==
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
                      .COPLANAR_OVERLAP ) {
-                d = localFace.containingPlane.getNormal().dotProduct(
+                d = localFace.getContainingPlane().getNormal().dotProduct(
                     referencePlane.getNormal());
                 sameOrientation = (compareToZero(d) == 1);
                 resolvedClass = resolveCoplanarSectorClass(op, BvsA,
@@ -744,6 +750,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         CoplanarAngleBasis basis;
         CoplanarAngularInterval currentInterval;
         int status;
+        _PolyhedralBoundedSolidFace.PointInsideResult containment;
+        _PolyhedralBoundedSolidHalfEdge intersectedHalfedge;
+        _PolyhedralBoundedSolidVertex intersectedVertex;
 
         if ( sectorInfo == null || referenceFace == null ) {
             return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
@@ -757,7 +766,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         }
 
         start = he.startingVertex.position;
-        status = pointInFace(referenceFace, start);
+        containment = pointInFaceDetailed(referenceFace, start);
+        status = containment.status();
 
         if ( status == Geometry.INSIDE ) {
             return _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
@@ -769,7 +779,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         }
 
         basis = buildCoplanarAngleBasis(
-            he.parentLoop.parentFace.containingPlane.getNormal(),
+            he.parentLoop.parentFace.getContainingPlane().getNormal(),
             he.next().startingVertex.position.subtract(start),
             he.previous().startingVertex.position.subtract(start));
         currentInterval = buildIntervalForHalfEdgeSector(basis, he);
@@ -778,15 +788,17 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
                 .COPLANAR_TOUCHING;
         }
 
-        if ( referenceFace.lastIntersectedHalfedge != null ) {
+        intersectedHalfedge = containment.intersectedHalfedge();
+        if ( intersectedHalfedge != null ) {
             return classifyCoplanarIntervalRelation(currentInterval,
                 buildIntervalForCoplanarEdge(basis,
-                    referenceFace.lastIntersectedHalfedge,
-                    referenceFace.containingPlane.getNormal()));
+                    intersectedHalfedge,
+                    referenceFace.getContainingPlane().getNormal()));
         }
-        if ( referenceFace.lastIntersectedVertex != null ) {
+        intersectedVertex = containment.intersectedVertex();
+        if ( intersectedVertex != null ) {
             status = classifySectorAgainstReferenceVertex(currentInterval, basis,
-                referenceFace, referenceFace.lastIntersectedVertex);
+                referenceFace, intersectedVertex);
             if ( status !=
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
                      .COPLANAR_DISJOINT ) {

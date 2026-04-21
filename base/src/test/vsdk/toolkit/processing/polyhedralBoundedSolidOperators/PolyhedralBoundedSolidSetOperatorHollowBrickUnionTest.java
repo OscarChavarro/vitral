@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -158,13 +159,11 @@ class PolyhedralBoundedSolidSetOperatorHollowBrickUnionTest
 
     private static double faceNormalZ(_PolyhedralBoundedSolidFace face)
     {
-        if ( face.containingPlane == null ) {
-            face.calculatePlane();
-        }
-        if ( face.containingPlane == null ) {
+        InfinitePlane plane = face.getContainingPlane();
+        if ( plane == null ) {
             return 0.0;
         }
-        return face.containingPlane.getNormal().z();
+        return plane.getNormal().z();
     }
 
     private static double loopMaxXYExtent(_PolyhedralBoundedSolidLoop loop)

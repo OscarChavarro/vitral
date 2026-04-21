@@ -183,10 +183,9 @@ public class PolygonProcessor extends ProcessingElement {
         ArrayList<_Polygon2DContour> tempList;
         _Polygon2DContour p2DContour,p2DContourTest;
 
-        // Actualize minMaxArea in all contours of the polygon, and clear the flag.
+        // Clear temporary tree flags.
         for(i=0; i<polygon.loops.size(); ++i) {
             p2DContour = polygon.loops.get(i);
-            p2DContour.calcMinMaxArea(true);
             // Indicates that the contour is in the binary tree.
             p2DContour.fleetingFlag = false;
         }

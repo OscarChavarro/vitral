@@ -65,15 +65,10 @@ public class QuadMesh extends Surface {
 
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
-    private double[] minMax;
-    private TriangleMeshGroup triangleMeshGroupCache;
 
 //= Basic class management methods ==========================================
 
     public QuadMesh() {
-        minMax = null;
-        triangleMeshGroupCache = null;
-
         vertexPositions = null;
         vertexNormals = null;
         vertexBinormals = null;
@@ -118,8 +113,6 @@ public class QuadMesh extends Surface {
         //vertexUvs = new double[n*2];
         //vertexColors = null;
         incidentQuadsPerVertexArray = new ArrayList<ArrayList<Integer>>();
-        triangleMeshGroupCache = null;
-        minMax = null;
     }
 
     public void initVertexColorsArray()
@@ -166,15 +159,11 @@ public class QuadMesh extends Surface {
             //vertexUvs[2*i] = vertexes[i].u;
             //vertexUvs[2*i+1] = vertexes[i].v;
         }
-
-        triangleMeshGroupCache = null;
-        minMax = null;
     }
 
     public void initQuadArrays(int n)
     {
         quadIndices = new int[n*4];
-        triangleMeshGroupCache = null;
     }
 
     /**
@@ -199,9 +188,6 @@ public class QuadMesh extends Surface {
         vertexTangents[3*i+2] = vertex.tangent.z();
         vertexUvs[2*i] = vertex.u;
         vertexUvs[2*i+1] = vertex.v;
-
-        triangleMeshGroupCache = null;
-        minMax = null;
     }
 
     /**
@@ -219,9 +205,6 @@ public class QuadMesh extends Surface {
         quadIndices[4*i+1] = p1;
         quadIndices[4*i+2] = p2;
         quadIndices[4*i+3] = p3;
-
-        triangleMeshGroupCache = null;
-        minMax = null;
     }
 
     public int getNumVertices()
@@ -278,37 +261,36 @@ public class QuadMesh extends Surface {
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */
-    private void calculateMinMaxPositions() {
-        if ( minMax == null ) {
-            minMax = new double[6];
+    private double[] calculateMinMaxPositions() {
+        double[] minMax = new double[6];
 
-            double minX = Double.MAX_VALUE;
-            double minY = Double.MAX_VALUE;
-            double minZ = Double.MAX_VALUE;
-            double maxX = -Double.MAX_VALUE;
-            double maxY = -Double.MAX_VALUE;
-            double maxZ = -Double.MAX_VALUE;
-            int i;
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        int i;
 
-            for ( i = 0; i < getNumVertices(); i++ ) {
-                double x = vertexPositions[3*i+0];
-                double y = vertexPositions[3*i+1];
-                double z = vertexPositions[3*i+2];
+        for ( i = 0; i < getNumVertices(); i++ ) {
+            double x = vertexPositions[3*i+0];
+            double y = vertexPositions[3*i+1];
+            double z = vertexPositions[3*i+2];
 
-                if ( x < minX ) minX = x;
-                if ( y < minY ) minY = y;
-                if ( z < minZ ) minZ = z;
-                if ( x > maxX ) maxX = x;
-                if ( y > maxY ) maxY = y;
-                if ( z > maxZ ) maxZ = z;
-            }
-            minMax[0] = minX;
-            minMax[1] = minY;
-            minMax[2] = minZ;
-            minMax[3] = maxX;
-            minMax[4] = maxY;
-            minMax[5] = maxZ;
+            if ( x < minX ) minX = x;
+            if ( y < minY ) minY = y;
+            if ( z < minZ ) minZ = z;
+            if ( x > maxX ) maxX = x;
+            if ( y > maxY ) maxY = y;
+            if ( z > maxZ ) maxZ = z;
         }
+        minMax[0] = minX;
+        minMax[1] = minY;
+        minMax[2] = minZ;
+        minMax[3] = maxX;
+        minMax[4] = maxY;
+        minMax[5] = maxZ;
+        return minMax;
     }
 
     /**
@@ -389,63 +371,56 @@ public class QuadMesh extends Surface {
     */
     @Override
     public double[] getMinMax() {
-        if ( minMax == null ) {
-            calculateMinMaxPositions();
-        }
-        return minMax;
+        return calculateMinMaxPositions();
     }
 
     // Todo!
     @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
-        if ( triangleMeshGroupCache == null ) {
-            TriangleMeshGroup group = new TriangleMeshGroup();
+        TriangleMeshGroup group = new TriangleMeshGroup();
 
-            int nVertices = getNumVertices();
-            int nQuads = getNumQuads();
-            if ( nVertices <= 0 || nQuads <= 0 ) {
-                triangleMeshGroupCache = group;
-                return triangleMeshGroupCache;
-            }
-
-            Vertex[] vertices = new Vertex[nVertices];
-            for ( int i = 0; i < nVertices; i++ ) {
-                Vector3D p = new Vector3D(
-                    vertexPositions[3*i],
-                    vertexPositions[3*i+1],
-                    vertexPositions[3*i+2]);
-                if ( vertexNormals != null ) {
-                    Vector3D n = new Vector3D(
-                        vertexNormals[3*i],
-                        vertexNormals[3*i+1],
-                        vertexNormals[3*i+2]);
-                    vertices[i] = new Vertex(p, n);
-                }
-                else {
-                    vertices[i] = new Vertex(p);
-                }
-            }
-
-            Triangle[] triangles = new Triangle[nQuads*2];
-            for ( int i = 0; i < nQuads; i++ ) {
-                int p0 = quadIndices[4*i];
-                int p1 = quadIndices[4*i+1];
-                int p2 = quadIndices[4*i+2];
-                int p3 = quadIndices[4*i+3];
-                triangles[2*i] = new Triangle(p0, p1, p2);
-                triangles[2*i+1] = new Triangle(p0, p2, p3);
-            }
-
-            TriangleMesh mesh = new TriangleMesh();
-            mesh.setVertexes(vertices, vertexNormals != null, false, false, false);
-            mesh.setTriangles(triangles);
-            mesh.calculateNormals();
-
-            mesh.setName(name + "_triangulated");
-            triangleMeshGroupCache = new TriangleMeshGroup();
-            triangleMeshGroupCache.addMesh(mesh);
+        int nVertices = getNumVertices();
+        int nQuads = getNumQuads();
+        if ( nVertices <= 0 || nQuads <= 0 ) {
+            return group;
         }
-        return triangleMeshGroupCache;
+
+        Vertex[] vertices = new Vertex[nVertices];
+        for ( int i = 0; i < nVertices; i++ ) {
+            Vector3D p = new Vector3D(
+                vertexPositions[3*i],
+                vertexPositions[3*i+1],
+                vertexPositions[3*i+2]);
+            if ( vertexNormals != null ) {
+                Vector3D n = new Vector3D(
+                    vertexNormals[3*i],
+                    vertexNormals[3*i+1],
+                    vertexNormals[3*i+2]);
+                vertices[i] = new Vertex(p, n);
+            }
+            else {
+                vertices[i] = new Vertex(p);
+            }
+        }
+
+        Triangle[] triangles = new Triangle[nQuads*2];
+        for ( int i = 0; i < nQuads; i++ ) {
+            int p0 = quadIndices[4*i];
+            int p1 = quadIndices[4*i+1];
+            int p2 = quadIndices[4*i+2];
+            int p3 = quadIndices[4*i+3];
+            triangles[2*i] = new Triangle(p0, p1, p2);
+            triangles[2*i+1] = new Triangle(p0, p2, p3);
+        }
+
+        TriangleMesh mesh = new TriangleMesh();
+        mesh.setVertexes(vertices, vertexNormals != null, false, false, false);
+        mesh.setTriangles(triangles);
+        mesh.calculateNormals();
+
+        mesh.setName(name + "_triangulated");
+        group.addMesh(mesh);
+        return group;
     }
 }

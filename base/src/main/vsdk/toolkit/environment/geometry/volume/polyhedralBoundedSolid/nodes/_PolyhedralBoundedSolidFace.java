@@ -54,20 +54,39 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /// external boundary. Each subsequent loop will be interpreted as a ring.
     /// Defined as presented in [MANT1988].10.2.1
     public CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop> boundariesList;
-    /// Defined as presented in [MANT1988].10.2.1
-    public InfinitePlane containingPlane;
-
-    /// Used by method testPointInside. Normally null, not null value when
-    /// a point intersected an edge. Following problem [MANT1988].13.3. and
-    /// variable `hitthe`  from program [MANT1988].15.3.
-    public _PolyhedralBoundedSolidHalfEdge lastIntersectedHalfedge;
-
-    /// Used by method testPointInside. Normally null, not null value when
-    /// a point intersected a vertex.  Following problem [MANT1988].13.3. and
-    /// variable `hitvertex`  from program [MANT1988].15.3.
-    public _PolyhedralBoundedSolidVertex lastIntersectedVertex;
 
     //=================================================================
+
+    public static final class PointInsideResult {
+        private final int status;
+        private final _PolyhedralBoundedSolidHalfEdge intersectedHalfedge;
+        private final _PolyhedralBoundedSolidVertex intersectedVertex;
+
+        private PointInsideResult(
+            int status,
+            _PolyhedralBoundedSolidHalfEdge intersectedHalfedge,
+            _PolyhedralBoundedSolidVertex intersectedVertex)
+        {
+            this.status = status;
+            this.intersectedHalfedge = intersectedHalfedge;
+            this.intersectedVertex = intersectedVertex;
+        }
+
+        public int status()
+        {
+            return status;
+        }
+
+        public _PolyhedralBoundedSolidHalfEdge intersectedHalfedge()
+        {
+            return intersectedHalfedge;
+        }
+
+        public _PolyhedralBoundedSolidVertex intersectedVertex()
+        {
+            return intersectedVertex;
+        }
+    }
 
     public _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid parent, int id)
     {
@@ -81,7 +100,6 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         parentSolid.polygonsList.add(this);
         boundariesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
-        lastIntersectedHalfedge = null;
     }
 
     private static double boundaryLoopAreaMagnitude(
@@ -185,14 +203,18 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     }
 
     /**
-    PRE: current face points must be all co-planar. Previous solid validation
-    should be made!
-    POST: current face contains a plane containing the face.
-    @return true if current face is in a situation where containing plane
-    could be calculated.
+    Compatibility hook for callers that used to refresh a cached containing
+    plane. Faces no longer store that plane; use getContainingPlane() to
+    compute it for the current topology.
+    @return true when a containing plane cannot be calculated.
     */
     public boolean
     calculatePlane()
+    {
+        return getContainingPlane() == null;
+    }
+
+    public InfinitePlane getContainingPlane()
     {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forFace(this);
@@ -204,10 +226,9 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
     /**
     Current implementation takes in to account only the first loop.
-    @return true if current face is in a situation where containing plane
-    could be calculated.
+    @return a plane containing the face, or null when it cannot be calculated.
     */
-    private boolean calculatePlaneByCorner (double tolerance) {
+    private InfinitePlane calculatePlaneByCorner (double tolerance) {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forFace(this);
         double nonColinearDotTolerance = numericContext.coplanarDotTolerance();
@@ -227,16 +248,16 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D vNext = new Vector3D ();
 
         if ( boundariesList.size () < 1 ) {
-            return true;
+            return null;
         }
         loop = selectLoopForPlaneCalculation();
         if ( loop == null ) {
-            return true;
+            return null;
         }
         he = loop.boundaryStartHalfEdge;
         if ( he == null ) {
             // Loop without starting halfedge
-            return true;
+            return null;
         }
         heStart = he;
 
@@ -271,14 +292,13 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         } while ( he != heStart && !readyVecB );
         if ( (a.length () == 0) || (b.length () == 0) ) {
             // Any vector is zero.
-            return true;
+            return null;
         }
         n1 = a.crossProduct (b); //Temporal normal.
         // Special case: triangle
         if ( loop.halfEdgesList.size () == 3 ) {
             n1 = n1.normalized();
-            containingPlane = new InfinitePlane (n1, p0);
-            return false;
+            return new InfinitePlane (n1, p0);
         }
         //Test for dominant plane.
         //domPlane: 1=xy, 2=xz, 3=yz
@@ -346,151 +366,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             }
         } while ( he != heInferior );
         n1 = vNext.crossProduct (vPrev);
-        containingPlane = new InfinitePlane (n1, p0);
-        return false;
-    }
-
-    /**
-    Current implementation takes in to account only the first loop. This method
-    has proved to be inefficient.
-    @return true if current face is in a situation where containing plane
-    could be calculated.
-    */
-    private boolean calculatePlaneByVertexSequenceNormalCrossProduct() {
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            PolyhedralBoundedSolidNumericPolicy.forFace(this);
-        if ( boundariesList.size() < 1 ) {
-            return true;
-        }
-        _PolyhedralBoundedSolidLoop loop;
-        _PolyhedralBoundedSolidHalfEdge he, heStart;
-        loop = boundariesList.get(0);
-        he = loop.boundaryStartHalfEdge;
-        if ( he == null ) {
-            // Loop without starting halfedge
-            return true;
-        }
-        heStart = he;
-        boolean colinearPoints = true;
-        do {
-            // This is only considering the first three vertices, and not taking
-            // in to account the possible case of too close vertices. Should be
-            // replaced to consider the full vertices set.
-            //- Do normal estimation on a three set of points -----------------
-            Vector3D p0;
-            Vector3D p1;
-            Vector3D p2;
-            Vector3D a, b;
-            Vector3D n;
-            p0 = he.startingVertex.position;
-            p1 = he.next().startingVertex.position;
-            p2 = he.next().next().startingVertex.position;
-            a = p1.subtract(p0);
-            a = a.normalized();
-            b = p2.subtract(p0);
-            b = b.normalized();
-            n = a.crossProduct(b);
-            // Iterate if the given three vertices are colinear
-            double angleInDegrees;
-            angleInDegrees = Math.toDegrees(Math.acos(a.dotProduct(b)));
-            
-            /*
-            System.out.println("  - Face plane determination angle: " +
-            VSDK.formatDouble(angleInDegrees));
-            if ( angleInDegrees < 1.0 ) {
-            System.out.println("  * Need to fix face");
-            }
-             */
-            boolean firstTimer = true;
-            // In a given polygon, pass 1 for angle correction seeks big
-            // angles, leading to less error on normal plane calculation
-            /*
-            while ( angleInDegrees < 30.0 && he.next().next() != heStart &&
-                he.next() != heStart ) {
-                he = he.next();
-                p0 = he.startingVertex.position;
-                p1 = he.next().startingVertex.position;
-                p2 = he.next().next().startingVertex.position;
-
-                a = p1.substract(p0);
-                a = a.normalized();
-                b = p2.substract(p0);
-                b = b.normalized();
-                n = a.crossProduct(b);
-                angleInDegrees = Math.acos(a.dotProduct(b));
-                //System.out.println("  . Big iteration angle: " + angleInDegrees);
-                firstTimer = false;
-            }
-            */
-            
-            // This code will fail for polygons with all angles under 1 degre,
-            // for example a polygon representing a circle with more than 
-            // 360 segments
-            while ( angleInDegrees < 1.0 && he.next().next() != heStart &&
-                he.next() != heStart ) {
-                he = he.next();
-                p0 = he.startingVertex.position;
-                p1 = he.next().startingVertex.position;
-                p2 = he.next().next().startingVertex.position;
-
-                a = p1.subtract(p0);
-                a = a.normalized();
-                b = p2.subtract(p0);
-                b = b.normalized();
-                n = a.crossProduct(b);
-                angleInDegrees = Math.acos(a.dotProduct(b));
-                //System.out.println("  . Iteration angle: " + angleInDegrees);
-                firstTimer = false;
-            }
-            
-            //if ( !firstTimer ) {
-            //    System.out.println("  * fixed");
-            //}
-            
-            if ( angleInDegrees < 1.0 ) {
-                //VSDK.reportMessage(this, VSDK.WARNING, "calculatePlane", 
-                //    "Face is colinear degenerate case!");
-                containingPlane = null;
-                return false;
-            }
-            // Do plane
-            if ( n.length() < numericContext.epsilon() ||
-                a.length() < numericContext.epsilon() ||
-                b.length() < numericContext.epsilon() ) {
-                he = he.next();
-                continue;
-            }
-            else {
-                colinearPoints = false;
-            }
-            n = n.normalized();
-            containingPlane = new InfinitePlane(n, p0);
-            //- Determine if p1 region is convex or concave -------------------
-            Vector3D middle = a.add(b);
-            Vector3D testPoint;
-            middle = middle.normalized();
-            middle = middle.multiply(numericContext.bigEpsilon());
-            testPoint = p0.add(middle);
-            //- If concave, swap normal direction -----------------------------
-            if ( testPointInside(testPoint, numericContext.epsilon()) ==
-                Geometry.OUTSIDE ) {
-                n = n.multiply(-1.0);
-            }
-            containingPlane = new InfinitePlane(n, p0);
-            he = he.next();
-        }
-        while ( he != heStart && colinearPoints );
-        /*
-        do {
-        he = he.next();
-        if ( he == null ) {
-        // Loop is not closed!
-        break;
-        }
-        // ?
-        } while( he != heStart );
-         */
-        return false;
+        return new InfinitePlane (n1, p0);
     }
 
     /**
@@ -525,32 +401,20 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     which allows this code to manage internal loops.
 
     Functionally, this is equivalent to procedure `contfv` proposed at
-    problem [MANT1988].13.3. For [MANT1988] based algorithms compatibility
-    this method supports the generation oof extra information, and
-    stores .
-
-    When point is outside the border of the polygon, this method writes
-    null values to attributes `lastIntersectedHalfedge` and
-    `lastIntersectedVertex`. When the point is on the border of the polygon,
-    it can be over a vertex or over an edge.  If it is on a vertex, the
-    intersecting vertex is referenced on attribute `lastIntersectedVertex`
-    and `lastIntersectedHalfedge` is leaved null. Otherwise, when point
-    intersects an edge, the intersected edge is referenced at
-    `lastIntersectedHalfedge`, and `lastIntersectedVertex` is leaved null.
-
-    Altough should be seldom of a problem, note the decribed mechanism for
-    quering extra border intersection is not re-entrant (thread safe) for
-    current face.
+    problem [MANT1988].13.3.
     */
     public int
     testPointInside(Vector3D p, double tolerance)
     {
+        return testPointInsideDetailed(p, tolerance).status();
+    }
+
+    public PointInsideResult
+    testPointInsideDetailed(Vector3D p, double tolerance)
+    {
         int nc; // Number of crossings
         int sh; // Sign holder for vertex crossings
         int nsh; // Next sign holder for vertex crossings
-
-        lastIntersectedHalfedge = null;
-        lastIntersectedVertex = null;
 
         //-----------------------------------------------------------------
         //- 1. For all vertices in face, project them in to dominant
@@ -567,7 +431,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
         polygon2Dh = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
         polygon2Dvv = new ArrayList<_PolyhedralBoundedSolidVertex>();
-        n = containingPlane.getNormal();
+        n = getContainingPlane().getNormal();
 
         if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
              Math.abs(n.x()) >= Math.abs(n.z()) ) {
@@ -591,14 +455,14 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             he = loop.boundaryStartHalfEdge;            
             if ( he == null ) {
                 // Loop without starting halfedge
-                return Geometry.OUTSIDE;
+                return new PointInsideResult(Geometry.OUTSIDE, null, null);
             }
             heStart = he;
             do {
                 if ( VSDK.vectorDistance(p, he.startingVertex.position) 
                      < 2*tolerance ) {
-                    lastIntersectedVertex = he.startingVertex;
-                    return Geometry.LIMIT;
+                    return new PointInsideResult(Geometry.LIMIT, null,
+                        he.startingVertex);
                 }
 
                 projectedPoint = dropCoordinate(he.startingVertex.position,
@@ -611,7 +475,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 he = he.next();
                 if ( he == null ) {
                     // Loop is not closed!
-                    return Geometry.OUTSIDE;
+                    return new PointInsideResult(Geometry.OUTSIDE, null, null);
                 }
                 projectedPoint = dropCoordinate(he.startingVertex.position,
                     dominantCoordinate);
@@ -621,16 +485,15 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
                 if ( VSDK.vectorDistance(p, he.startingVertex.position) 
                      < 2*tolerance ) {
-                    lastIntersectedVertex = he.startingVertex;
-                    return Geometry.LIMIT;
+                    return new PointInsideResult(Geometry.LIMIT, null,
+                        he.startingVertex);
                 }
 
                 if ( ComputationalGeometry.lineSegmentContainmentTest(
                          heOld.startingVertex.position,
                          he.startingVertex.position, p, tolerance
                      ) == Geometry.LIMIT ) {
-                    lastIntersectedHalfedge = heOld;
-                    return Geometry.LIMIT;
+                    return new PointInsideResult(Geometry.LIMIT, heOld, null);
                 }
             } while( he != heStart );
         }
@@ -699,10 +562,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
 
         if ( (nc % 2) == 1 ) {
-            return Geometry.INSIDE;
+            return new PointInsideResult(Geometry.INSIDE, null, null);
         }
 
-        return Geometry.OUTSIDE;
+        return new PointInsideResult(Geometry.OUTSIDE, null, null);
     }
 
     /**
@@ -718,7 +581,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D iv = new Vector3D(1, 0, 0);
         Vector3D viewingVector;
         viewingVector = c.getRotation().multiply(iv);
-        Vector3D n = containingPlane.getNormal();
+        Vector3D n = getContainingPlane().getNormal();
         Vector3D cp, t;
         n = n.normalized();
         double dot;

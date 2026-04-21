@@ -19,8 +19,6 @@ public abstract class Image extends MediaEntity
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20150218L;
 
-    private static final RGBPixel rgb = new RGBPixel();
-
     /**
     Given the width and height of the desired new size for this image, this
     method is responsable of allocating the necesary memory to keep such
@@ -106,6 +104,7 @@ public abstract class Image extends MediaEntity
     */
     public byte getPixel8bitGrayScale(int x, int y)
     {
+        RGBPixel rgb = new RGBPixel();
         getPixelRgb(x, y, rgb);
 
         int sum = VSDK.signedByte2unsignedInteger(rgb.r) + VSDK.signedByte2unsignedInteger(rgb.g) + VSDK.signedByte2unsignedInteger(rgb.b);

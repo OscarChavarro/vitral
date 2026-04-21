@@ -18,7 +18,6 @@ public class Sphere extends Solid {
     private double _radius;
     private double _radius_squared;
 
-    private PolyhedralBoundedSolid brepCache;
     private static final int DEFAULT_PARALLELS = 8;
     private static final int DEFAULT_MERIDIANS = 16;
     private static final int MIN_PARALLELS = 2;
@@ -27,7 +26,6 @@ public class Sphere extends Solid {
     public Sphere(double r) {
         _radius = r;
         _radius_squared = _radius*_radius;
-        brepCache = null;
     }
 
     /**
@@ -232,11 +230,8 @@ public class Sphere extends Solid {
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
-        if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS,
-                DEFAULT_PARALLELS);
-        }
-        return brepCache;
+        return buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS,
+            DEFAULT_PARALLELS);
     }
 
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(

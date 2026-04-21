@@ -345,11 +345,11 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         for ( i = 0; i < nbr.size(); i++ ) {
             l = nbr.get(i);
             f = l.sector.parentLoop.parentFace;
-            c = f.containingPlane.getNormal().crossProduct(inSplittingPlane.getNormal());
+            c = f.getContainingPlane().getNormal().crossProduct(inSplittingPlane.getNormal());
             d = c.dotProduct(c);
             if ( compareToZero(d) == 0 ) {
                 // Entering this means "faces are coplanar"
-                d = f.containingPlane.getNormal().dotProduct(inSplittingPlane.getNormal());
+                d = f.getContainingPlane().getNormal().dotProduct(inSplittingPlane.getNormal());
                 if ( compareToZero(d) == 1 ) {
                     l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                     l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
@@ -688,7 +688,6 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge he, heStart;
 
-        a.calculatePlane();
         for ( i = 0; i < b.boundariesList.size(); i++ ) {
             heStart = b.boundariesList.get(i).boundaryStartHalfEdge;
             he = heStart;

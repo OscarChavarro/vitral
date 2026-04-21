@@ -200,8 +200,7 @@ public class PolyhedralBoundedSolidGeometricValidator
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
             if ( validateFaceIsPlanar(face, numericContext) ) {
-                face.calculatePlane();
-                if ( face.containingPlane == null ) {
+                if ( face.getContainingPlane() == null ) {
                     msg.append("  - Face [").append(face.id)
                        .append("] was not able to compute containing plane\n");
                     test = false;
@@ -217,7 +216,7 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
-        Vector3D n = face.containingPlane.getNormal();
+        Vector3D n = face.getContainingPlane().getNormal();
         if ( Math.abs(n.x()) >= Math.abs(n.y()) && Math.abs(n.x()) >= Math.abs(n.z()) ) {
             return 1;
         }
@@ -405,7 +404,7 @@ public class PolyhedralBoundedSolidGeometricValidator
         int i, j, k;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
-            if ( face.containingPlane == null ) {
+            if ( face.getContainingPlane() == null ) {
                 msg.append("  - Face [").append(face.id)
                    .append("] has no containing plane for strict checks.\n");
                 return false;
@@ -434,12 +433,12 @@ public class PolyhedralBoundedSolidGeometricValidator
                                             _PolyhedralBoundedSolidFace faceB,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        if ( faceA.containingPlane == null || faceB.containingPlane == null ) {
+        if ( faceA.getContainingPlane() == null || faceB.getContainingPlane() == null ) {
             return false;
         }
 
-        Vector3D nA = faceA.containingPlane.getNormal().multiply(1.0);
-        Vector3D nB = faceB.containingPlane.getNormal().multiply(1.0);
+        Vector3D nA = faceA.getContainingPlane().getNormal().multiply(1.0);
+        Vector3D nB = faceB.getContainingPlane().getNormal().multiply(1.0);
         nA = nA.normalized();
         nB = nB.normalized();
         if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) >
@@ -451,7 +450,7 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             if ( loop.halfEdgesList.size() > 0 ) {
                 Vector3D p = loop.halfEdgesList.get(0).startingVertex.position;
-                return Math.abs(faceB.containingPlane.pointDistance(p)) <=
+                return Math.abs(faceB.getContainingPlane().pointDistance(p)) <=
                     numericContext.bigEpsilon();
             }
         }
@@ -477,7 +476,7 @@ public class PolyhedralBoundedSolidGeometricValidator
                                                     _PolyhedralBoundedSolidFace face,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        if ( face.containingPlane.doContainmentTest(v.position,
+        if ( face.getContainingPlane().doContainmentTest(v.position,
             numericContext.bigEpsilon()) != Geometry.LIMIT ) {
             return false;
         }
@@ -490,14 +489,14 @@ public class PolyhedralBoundedSolidGeometricValidator
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         _PolyhedralBoundedSolidHalfEdge next = he.next();
-        if ( next == null || face.containingPlane == null ) {
+        if ( next == null || face.getContainingPlane() == null ) {
             return false;
         }
 
         Vector3D p0 = he.startingVertex.position;
         Vector3D p1 = next.startingVertex.position;
-        double d0 = face.containingPlane.pointDistance(p0);
-        double d1 = face.containingPlane.pointDistance(p1);
+        double d0 = face.getContainingPlane().pointDistance(p0);
+        double d1 = face.getContainingPlane().pointDistance(p1);
 
         if ( Math.abs(d0) <= numericContext.bigEpsilon() &&
              Math.abs(d1) <= numericContext.bigEpsilon() ) {

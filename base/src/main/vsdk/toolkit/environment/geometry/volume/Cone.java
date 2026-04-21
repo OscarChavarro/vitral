@@ -26,7 +26,6 @@ public class Cone extends Solid {
     private double r2; // Radius at the top
     private double h;  // Height
 
-    private PolyhedralBoundedSolid brepCache;
     private static final int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     private static final int DEFAULT_HEIGHT_DIVISIONS = 1;
     private static final int MIN_CIRCUMFERENCE_DIVISIONS = 3;
@@ -499,11 +498,8 @@ public class Cone extends Solid {
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
-        if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid(
-                DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
-        }
-        return brepCache;
+        return buildPolyhedralBoundedSolid(
+            DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
     }
 
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(

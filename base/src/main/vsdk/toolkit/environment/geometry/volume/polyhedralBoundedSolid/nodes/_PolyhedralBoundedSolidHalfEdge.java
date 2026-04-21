@@ -63,9 +63,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     */
     public _PolyhedralBoundedSolidHalfEdge previous()
     {
-        parentLoop.halfEdgesList.locateWindowAtElem(this);
-        parentLoop.halfEdgesList.previous();
-        return parentLoop.halfEdgesList.getWindow();
+        return parentLoop.halfEdgesList.previousOf(this);
     }
 
     /**
@@ -74,9 +72,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     */
     public _PolyhedralBoundedSolidHalfEdge next()
     {
-        parentLoop.halfEdgesList.locateWindowAtElem(this);
-        parentLoop.halfEdgesList.next();
-        return parentLoop.halfEdgesList.getWindow();
+        return parentLoop.halfEdgesList.nextOf(this);
     }
 
     private int

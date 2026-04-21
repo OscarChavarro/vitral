@@ -269,7 +269,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     {
         if ( he == null || he.parentLoop == null ||
              he.parentLoop.parentFace == null ||
-             he.parentLoop.parentFace.containingPlane == null ||
+             he.parentLoop.parentFace.getContainingPlane() == null ||
              he.previous() == null || he.next() == null ) {
             return true;
         }
@@ -277,7 +277,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         Vector3D v = he.startingVertex.position;
         Vector3D pPrev = he.previous().startingVertex.position;
         Vector3D pNext = he.next().startingVertex.position;
-        Vector3D faceNormal = he.parentLoop.parentFace.containingPlane.getNormal();
+        Vector3D faceNormal = he.parentLoop.parentFace.getContainingPlane().getNormal();
 
         // Incoming and outgoing directions at sector vertex.
         Vector3D eIn = v.subtract(pPrev);

@@ -141,10 +141,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             face = solid.polygonsList.get(i);
-            if ( face.containingPlane == null ) {
+            if ( face.getContainingPlane() == null ) {
                 continue;
             }
-            if ( Math.abs(face.containingPlane.pointDistance(point)) <= eps ) {
+            if ( Math.abs(face.getContainingPlane().pointDistance(point)) <= eps ) {
                 if ( face.testPointInside(point, eps) != Geometry.OUTSIDE ) {
                     return Geometry.LIMIT;
                 }
@@ -165,12 +165,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
             for ( i = 0; i < solid.polygonsList.size(); i++ ) {
                 face = solid.polygonsList.get(i);
-                if ( face.containingPlane == null ) {
+                if ( face.getContainingPlane() == null ) {
                     ambiguous = true;
                     break;
                 }
                 Ray rayHit = new Ray(ray);
-                Ray hit = face.containingPlane.doIntersection(rayHit);
+                Ray hit = face.getContainingPlane().doIntersection(rayHit);
                 if ( hit == null ) {
                     continue;
                 }
@@ -479,12 +479,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
             for ( j = 0; j < other.polygonsList.size(); j++ ) {
                 face = other.polygonsList.get(j);
-                if ( face == null || face.containingPlane == null ) {
+                if ( face == null || face.getContainingPlane() == null ) {
                     continue;
                 }
 
-                d1 = face.containingPlane.pointDistance(v1.position);
-                d2 = face.containingPlane.pointDistance(v2.position);
+                d1 = face.getContainingPlane().pointDistance(v1.position);
+                d2 = face.getContainingPlane().pointDistance(v2.position);
                 s1 = compareToZero(d1);
                 s2 = compareToZero(d2);
 
@@ -495,7 +495,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 t = d1 / (d1 - d2);
                 p = v1.position.add(
                     v2.position.subtract(v1.position).multiply(t));
-                d3 = face.containingPlane.pointDistance(p);
+                d3 = face.getContainingPlane().pointDistance(p);
                 if ( compareToZero(d3) != 0 ) {
                     continue;
                 }

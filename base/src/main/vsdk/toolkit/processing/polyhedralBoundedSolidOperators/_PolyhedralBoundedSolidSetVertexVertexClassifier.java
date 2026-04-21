@@ -79,13 +79,13 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
              ha.parentLoop == null || hb.parentLoop == null ||
              ha.parentLoop.parentFace == null ||
              hb.parentLoop.parentFace == null ||
-             ha.parentLoop.parentFace.containingPlane == null ||
-             hb.parentLoop.parentFace.containingPlane == null ) {
+             ha.parentLoop.parentFace.getContainingPlane() == null ||
+             hb.parentLoop.parentFace.getContainingPlane() == null ) {
             return null;
         }
 
-        n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
-        n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
+        n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
+        n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
         if ( !_PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectors(n1, n2) ) {
             return null;
@@ -184,7 +184,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
             if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
                      n.ref1, n.ref2, numericContext) ||
                  (n.ref12.dotProduct(
-                     he.parentLoop.parentFace.containingPlane.getNormal()) > 0.0 ) ) {
+                     he.parentLoop.parentFace.getContainingPlane().getNormal()) > 0.0 ) ) {
                 if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
                          n.ref1, n.ref2, numericContext) ) {
                     bisec = _PolyhedralBoundedSolidSetClassifier.inside(he);
@@ -272,8 +272,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
         Vector3D n1, n2;
         Vector3D intrs;
 
-        n1 = h1.parentLoop.parentFace.containingPlane.getNormal();
-        n2 = h2.parentLoop.parentFace.containingPlane.getNormal();
+        n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
+        n2 = h2.parentLoop.parentFace.getContainingPlane().getNormal();
         intrs = n1.crossProduct(n2);
 
         if ( PolyhedralBoundedSolidNumericPolicy.unitVectorsParallel(
@@ -366,8 +366,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
                     s.wa = xa.wide;
                     s.wb = xb.wide;
 
-                    na = xa.he.parentLoop.parentFace.containingPlane.getNormal();
-                    nb = xb.he.parentLoop.parentFace.containingPlane.getNormal();
+                    na = xa.he.parentLoop.parentFace.getContainingPlane().getNormal();
+                    nb = xb.he.parentLoop.parentFace.getContainingPlane().getNormal();
                     d1 = nb.dotProduct(xa.ref1);
                     d2 = nb.dotProduct(xa.ref2);
                     d3 = na.dotProduct(xb.ref1);
@@ -418,8 +418,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
                 nextsectb = (sectb == nbb.size() - 1) ? 0 : sectb + 1;
                 ha = nba.get(secta).he;
                 hb = nbb.get(sectb).he;
-                n1 = ha.parentLoop.parentFace.containingPlane.getNormal();
-                n2 = hb.parentLoop.parentFace.containingPlane.getNormal();
+                n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
+                n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
                 d = VSDK.vectorDistance(n1, n2);
                 sameOrientation = ( d < numericContext.unitVectorTolerance() );
                 traceCoplanarTangential(

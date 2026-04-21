@@ -129,7 +129,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         a = a.normalized();
         b = b.normalized();
 
-        n = he.parentLoop.parentFace.containingPlane.getNormal();
+        n = he.parentLoop.parentFace.getContainingPlane().getNormal();
 
         middle = n.crossProduct(a);
         middle = middle.normalized();
@@ -555,7 +555,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
             System.out.println("Vertex/face pair V[" + v.id + "] / f[" + f.id + "]");
         }
 
-        nbr = vertexFaceGetNeighborhood(v, f.containingPlane, BvsA);
+        nbr = vertexFaceGetNeighborhood(v, f.getContainingPlane(), BvsA);
         if ( inplaneEdgesOn(nbr) ) {
             Collections.reverse(nbr);
         }
@@ -567,7 +567,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         }
 
         vertexFaceReclassifyOnSectorsNoPeekVersion(
-            nbr, f, f.containingPlane, BvsA, op);
+            nbr, f, f.getContainingPlane(), BvsA, op);
 
         boolean borrowed = false;
 

@@ -21,8 +21,6 @@ public class Arrow extends Solid {
     private Cone headCone;
     private Cone lastElement;
 
-    private PolyhedralBoundedSolid brepCache;
-
     public Arrow(double baseLength, double headLength, double baseRadius, double headRadius) {
         this.baseLength = baseLength;
         this.headLength = headLength;
@@ -236,10 +234,7 @@ public class Arrow extends Solid {
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
-        if ( brepCache == null ) {
-            brepCache = buildPolyhedralBoundedSolid();
-        }
-        return brepCache;
+        return buildPolyhedralBoundedSolid();
     }
 
     /**
