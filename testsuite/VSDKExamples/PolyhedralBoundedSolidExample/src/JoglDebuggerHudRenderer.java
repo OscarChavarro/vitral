@@ -1,5 +1,6 @@
 // Java Awt classes
 import java.awt.Font;
+import java.util.ArrayList;
 import models.DebuggerModel;
 import java.awt.geom.Rectangle2D;
 
@@ -14,12 +15,15 @@ import models.SolidModelNames;
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import com.jogamp.opengl.glu.GLU;
 
 public class JoglDebuggerHudRenderer
 {
     private static final int LINE_HEIGHT = 34;
+    private static final double VERTEX_LABEL_GROUPING_PIXELS = 18.0;
+    private static final double VERTEX_LABEL_GROUPING_EPSILON_FACTOR = 1000.0;
 
     private final DebuggerModel model;
     private TextRenderer hudTextRenderer;
@@ -194,21 +198,148 @@ public class JoglDebuggerHudRenderer
         gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
         gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
 
+        ArrayList<VertexLabelGroup> vertexGroups = buildVertexGroups(solid,
+            modelview, projection, viewport);
+
         vertexLabelRenderer.beginRendering(width, height);
         vertexLabelRenderer.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+        for ( int i = 0; i < vertexGroups.size(); i++ ) {
+            VertexLabelGroup group = vertexGroups.get(i);
+            Vector3D projectedPosition = group.projectedPosition;
+            vertexLabelRenderer.draw(buildVertexIdsLabel(group.vertices),
+                (int)Math.round(projectedPosition.x()) + 4,
+                (int)Math.round(projectedPosition.y()) + 4);
+        }
+        vertexLabelRenderer.endRendering();
+    }
+
+    private static ArrayList<VertexLabelGroup> buildVertexGroups(
+        PolyhedralBoundedSolid solid,
+        double[] modelview,
+        double[] projection,
+        int[] viewport)
+    {
+        ArrayList<VertexLabelGroup> vertexGroups =
+            new ArrayList<VertexLabelGroup>();
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+        double spatialTolerance = numericContext.bigEpsilon() *
+            VERTEX_LABEL_GROUPING_EPSILON_FACTOR;
 
         for ( int i = 0; i < solid.verticesList.size(); i++ ) {
             _PolyhedralBoundedSolidVertex vertex = solid.verticesList.get(i);
             Vector3D projectedPosition = projectVertexToViewport(
                 vertex.position, modelview, projection, viewport);
+            VertexLabelGroup group;
+
             if ( projectedPosition == null ) {
                 continue;
             }
-            vertexLabelRenderer.draw(Integer.toString(vertex.id),
-                (int)Math.round(projectedPosition.x()) + 4,
-                (int)Math.round(projectedPosition.y()) + 4);
+            group = findVertexGroup(vertexGroups, vertex, projectedPosition,
+                spatialTolerance);
+            if ( group == null ) {
+                vertexGroups.add(new VertexLabelGroup(vertex,
+                    projectedPosition));
+            }
+            else {
+                group.add(vertex, projectedPosition);
+            }
         }
-        vertexLabelRenderer.endRendering();
+        return vertexGroups;
+    }
+
+    private static VertexLabelGroup findVertexGroup(
+        ArrayList<VertexLabelGroup> vertexGroups,
+        _PolyhedralBoundedSolidVertex vertex,
+        Vector3D projectedPosition,
+        double spatialTolerance)
+    {
+        for ( int i = 0; i < vertexGroups.size(); i++ ) {
+            VertexLabelGroup group = vertexGroups.get(i);
+            if ( group.containsCloseVertex(vertex, projectedPosition,
+                 spatialTolerance) ) {
+                return group;
+            }
+        }
+        return null;
+    }
+
+    private static double distanceSquared3D(Vector3D a, Vector3D b)
+    {
+        double dx = a.x() - b.x();
+        double dy = a.y() - b.y();
+        double dz = a.z() - b.z();
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    private static double distanceSquared2D(Vector3D a, Vector3D b)
+    {
+        double dx = a.x() - b.x();
+        double dy = a.y() - b.y();
+
+        return dx * dx + dy * dy;
+    }
+
+    private static String buildVertexIdsLabel(
+        ArrayList<_PolyhedralBoundedSolidVertex> vertices)
+    {
+        StringBuilder label = new StringBuilder();
+
+        for ( int i = 0; i < vertices.size(); i++ ) {
+            if ( i > 0 ) {
+                label.append(", ");
+            }
+            label.append(vertices.get(i).id);
+        }
+        return label.toString();
+    }
+
+    private static final class VertexLabelGroup
+    {
+        private final ArrayList<_PolyhedralBoundedSolidVertex> vertices;
+        private final ArrayList<Vector3D> projectedPositions;
+        private final Vector3D projectedPosition;
+
+        private VertexLabelGroup(_PolyhedralBoundedSolidVertex vertex,
+                                 Vector3D projectedPosition)
+        {
+            this.vertices = new ArrayList<_PolyhedralBoundedSolidVertex>();
+            this.projectedPositions = new ArrayList<Vector3D>();
+            this.projectedPosition = projectedPosition;
+            add(vertex, projectedPosition);
+        }
+
+        private void add(_PolyhedralBoundedSolidVertex vertex,
+                         Vector3D projectedPosition)
+        {
+            vertices.add(vertex);
+            projectedPositions.add(projectedPosition);
+        }
+
+        private boolean containsCloseVertex(
+            _PolyhedralBoundedSolidVertex vertex,
+            Vector3D projectedPosition,
+            double spatialTolerance)
+        {
+            double spatialToleranceSquared = spatialTolerance *
+                spatialTolerance;
+            double viewportToleranceSquared = VERTEX_LABEL_GROUPING_PIXELS *
+                VERTEX_LABEL_GROUPING_PIXELS;
+
+            for ( int i = 0; i < vertices.size(); i++ ) {
+                if ( distanceSquared3D(vertices.get(i).position,
+                     vertex.position) <= spatialToleranceSquared ) {
+                    return true;
+                }
+                if ( distanceSquared2D(projectedPositions.get(i),
+                     projectedPosition) <= viewportToleranceSquared ) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private static Vector3D projectVertexToViewport(
