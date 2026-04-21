@@ -180,16 +180,9 @@ public class Raytracer extends RenderingElement {
     }
 
     private static void assertSceneUnmodifiedDuringRender(
-        long expectedCameraVersion,
-        Camera camera,
         long[] expectedBodyVersions,
         ArrayList<SimpleBody> bodies)
     {
-        if ( camera.getModificationVersion() != expectedCameraVersion ) {
-            throw new IllegalStateException(
-                "Camera was modified while raytracing. " +
-                "Freeze scene/camera edits during Raytracer.execute.");
-        }
         if ( expectedBodyVersions.length != bodies.size() ) {
             throw new IllegalStateException(
                 "Scene bodies list changed while raytracing. " +
@@ -203,6 +196,41 @@ public class Raytracer extends RenderingElement {
                     "Freeze scene/body edits during Raytracer.execute.");
             }
         }
+    }
+
+    private static Ray generateRay(CameraSnapshot cameraSnapshot, int x, int y)
+    {
+        double viewportXSize = cameraSnapshot.getViewportXSize();
+        double viewportYSize = cameraSnapshot.getViewportYSize();
+        double u = ((double)x - viewportXSize/2.0) / viewportXSize;
+        double v =
+            ((viewportYSize - (double)y - 1) - viewportYSize/2.0) / viewportYSize;
+
+        if ( cameraSnapshot.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
+            Vector3D left = cameraSnapshot.getLeft();
+            Vector3D up = cameraSnapshot.getUp();
+            Vector3D front = cameraSnapshot.getFront();
+            Vector3D eyePosition = cameraSnapshot.getEyePosition();
+            double fovFactor = viewportXSize/viewportYSize;
+            double duScale =
+                (-fovFactor) * (2*u/cameraSnapshot.getOrthogonalZoom());
+            double dvScale = 2*v/cameraSnapshot.getOrthogonalZoom();
+            Vector3D origin = new Vector3D(
+                eyePosition.x() + left.x()*duScale + up.x()*dvScale,
+                eyePosition.y() + left.y()*duScale + up.y()*dvScale,
+                eyePosition.z() + left.z()*duScale + up.z()*dvScale);
+            return new Ray(origin, front);
+        }
+
+        Vector3D rightWithScale = cameraSnapshot.getRightWithScale();
+        Vector3D upWithScale = cameraSnapshot.getUpWithScale();
+        Vector3D dir = cameraSnapshot.getDir();
+        Vector3D direction = new Vector3D(
+            rightWithScale.x()*u + upWithScale.x()*v + dir.x(),
+            rightWithScale.y()*u + upWithScale.y()*v + dir.y(),
+            rightWithScale.z()*u + upWithScale.z()*v + dir.z());
+
+        return new Ray(cameraSnapshot.getEyePosition(), direction);
     }
 
     private void prepareSurfaceHit(
@@ -657,12 +685,12 @@ public class Raytracer extends RenderingElement {
                         ArrayList <SimpleBody> inSimpleBodiesArray,
                         ArrayList <Light> in_arr_luces,
                         Background in_background,
-                        Camera inCamera,
+                        CameraSnapshot cameraSnapshot,
                         ProgressMonitor report)
     {
         execute(inoutViewport, inQualitySelection,
                 inSimpleBodiesArray, in_arr_luces,
-                in_background, inCamera, report, null, 0, 0,
+                in_background, cameraSnapshot, report, null, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
@@ -671,13 +699,13 @@ public class Raytracer extends RenderingElement {
                         ArrayList <SimpleBody> inSimpleBodiesArray,
                         ArrayList <Light> in_arr_luces,
                         Background in_background,
-                        Camera inCamera,
+                        CameraSnapshot cameraSnapshot,
                         ProgressMonitor report,
                         ZBuffer depthmap)
     {
         execute(inoutViewport, inQualitySelection, inSimpleBodiesArray, 
                 in_arr_luces,
-                in_background, inCamera, report, depthmap, 0, 0,
+                in_background, cameraSnapshot, report, depthmap, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
@@ -695,7 +723,7 @@ public class Raytracer extends RenderingElement {
     - `inLightsArray`: arreglo din&aacute;mico de Light'es (luces puntuales)
     - `in_background`: especificaci&oacute;n de un color de fondo para la escena
       (i.e. el color que se ve si no se ve ning&uacute;n objeto!)
-    - `inCamera`: especificaci&oacute;n de la transformaci&oacute;n de
+    - `cameraSnapshot`: especificaci&oacute;n de la transformaci&oacute;n de
       proyecci&oacute;n 3D a 2D que se lleva a cabo en el proceso de 
       visualizaci&oacute;n.
     - `depthmap`: can be null or a reference to a ZBuffer. If it is null,
@@ -720,7 +748,7 @@ public class Raytracer extends RenderingElement {
     - `inout_viewport` contiene una representaci&oacute;n visual de la
        escena 3D (`inSimpleBodiesArray`, `inLightsArray`, `in_background`), tal que corresponde a
        una proyecci&oacute;n 3D a 2D controlada por la c&aacute;mara
-       virtual `inCamera`.
+       virtual congelada en `cameraSnapshot`.
 
     NOTA: Este algoritmo se inici&oacute; como una modificaci&oacute;n del 
           raytracer del curso 6.837 (computaci&oacute;n gr&aacute;fica) de MIT,
@@ -733,7 +761,7 @@ public class Raytracer extends RenderingElement {
                         ArrayList <SimpleBody> inSimpleBodiesArray,
                         ArrayList <Light> inLightsArray,
                         Background inBackground,
-                        Camera inCamera,
+                        CameraSnapshot cameraSnapshot,
                         ProgressMonitor liveReport,
                         ZBuffer outDepthmap,
                         int limx1, int limy1,
@@ -749,17 +777,13 @@ public class Raytracer extends RenderingElement {
         SceneRenderCache sceneRenderCache =
             new SceneRenderCache(inSimpleBodiesArray, renderContext);
         TraceWorkspace workspace = traceWorkspace.get();
-        long initialCameraVersion = inCamera.getModificationVersion();
         long[] initialBodyVersions = captureBodyVersions(inSimpleBodiesArray);
-        CameraSnapshot cameraSnapshot = CameraSnapshot.fromCamera(inCamera);
 
         if ( liveReport != null ) {
             liveReport.begin();
         }
         for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
             assertSceneUnmodifiedDuringRender(
-                initialCameraVersion,
-                inCamera,
                 initialBodyVersions,
                 inSimpleBodiesArray);
             if ( liveReport != null ) {
@@ -767,10 +791,8 @@ public class Raytracer extends RenderingElement {
             }
             for ( x = limx1, relativeX = 0; x < limx2; x++, relativeX++ ) {
                 //- Trazado individual de un rayo --------------------------
-                // Es importante que la operacion generateRay sea inline
-                // (i.e. "final")
                 RaytraceStatistics.recordPrimaryRay();
-                rayo = cameraSnapshot.generateRay(x, y);
+                rayo = generateRay(cameraSnapshot, x, y);
                 color.r = 0;
                 color.g = 0;
                 color.b = 0;

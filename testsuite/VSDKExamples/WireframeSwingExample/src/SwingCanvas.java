@@ -16,6 +16,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -119,14 +120,13 @@ public class SwingCanvas extends JPanel implements
         int width = r.width;
         int height = r.height;
 
-        //- (2/4): Frame initialization -----------------------------------
-        camera.updateViewportResize(width, height);
-
         //- (3/4): Visualization process ----------------------------------
         if ( renderingMode == 3 ) {
             ProgressMonitorConsole reporter = new ProgressMonitorConsole();
             RendererConfiguration q = new RendererConfiguration();
             Raytracer visualizationEngine = new Raytracer();
+            CameraSnapshot cameraSnapshot =
+                camera.exportToCameraSnapshot(width, height);
 
             long initialTime = System.currentTimeMillis();
             img.init(width, height);
@@ -134,13 +134,14 @@ public class SwingCanvas extends JPanel implements
                                     scene.getSimpleBodies(),
                                     scene.getLights(), 
                                     scene.getBackgrounds().get(0),
-                                    camera, reporter, null);
+                                    cameraSnapshot, reporter, null);
 
             long finalTime = System.currentTimeMillis();
             System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
             AwtRGBImageRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 2 ) {
+            camera.updateViewportResize(width, height);
             WireframeRenderer.execute(
                 lineSet, scene.getSimpleBodies(), camera);
             img.init(width, height);
@@ -149,6 +150,7 @@ public class SwingCanvas extends JPanel implements
             AwtRGBImageRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 1 ) {
+            camera.updateViewportResize(width, height);
             WireframeRenderer.execute(
                 lineSet, scene.getSimpleBodies(), camera);
             AwtCalligraphic2DBufferRenderer.draw(

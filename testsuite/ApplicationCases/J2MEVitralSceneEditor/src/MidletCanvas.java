@@ -20,6 +20,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Sphere;
@@ -153,24 +154,24 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         g.setColor(0xFFFFFF);
         g.fillRect(0, 0, width, height);
 
-        //- (2/4): Frame initialization -----------------------------------
-        camera.updateViewportResize(width, height);
-
         //- (3/4): Visualization process ----------------------------------
         if ( renderingMode == 3 ) {
             RendererConfiguration q = new RendererConfiguration();
             Raytracer visualizationEngine = new Raytracer();
+            CameraSnapshot cameraSnapshot =
+                camera.exportToCameraSnapshot(width, height);
 
             img.init(width, height);
             visualizationEngine.execute(img, q,
                                     scene.getSimpleBodies(),
                                     scene.getLights(), 
                                     scene.getBackgrounds().get(0),
-                                    camera, null, null);
+                                    cameraSnapshot, null, null);
 
             J2meRGBImageRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 2 ) {
+            camera.updateViewportResize(width, height);
             WireframeRenderer.execute(
                 lineSet, scene.getSimpleBodies(), camera);
             img.init(width, height);
@@ -179,6 +180,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             J2meRGBImageRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 1 ) {
+            camera.updateViewportResize(width, height);
             WireframeRenderer.execute(
                 lineSet, scene.getSimpleBodies(), camera);
             J2meCalligraphic2DBufferRenderer.draw(

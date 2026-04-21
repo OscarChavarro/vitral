@@ -1,6 +1,5 @@
 package vsdk.toolkit.environment;
 
-import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**
@@ -21,57 +20,84 @@ public final class CameraSnapshot
     private final Vector3D upWithScale;
     private final Vector3D rightWithScale;
 
-    private CameraSnapshot(Camera camera)
+    public CameraSnapshot(
+        Vector3D eyePosition,
+        Vector3D front,
+        Vector3D left,
+        Vector3D up,
+        int projectionMode,
+        double orthogonalZoom,
+        double viewportXSize,
+        double viewportYSize,
+        Vector3D dir,
+        Vector3D upWithScale,
+        Vector3D rightWithScale)
     {
-        eyePosition = new Vector3D(camera.getPosition());
-        front = new Vector3D(camera.getFront()).normalized();
-        left = new Vector3D(camera.getLeft()).normalized();
-        up = new Vector3D(camera.getUp()).normalized();
-        projectionMode = camera.getProjectionMode();
-        orthogonalZoom = camera.getOrthogonalZoom();
-        viewportXSize = camera.getViewportXSize();
-        viewportYSize = camera.getViewportYSize();
-
-        double safeViewportX = viewportXSize > 0 ? viewportXSize : 1.0;
-        double safeViewportY = viewportYSize > 0 ? viewportYSize : 1.0;
-        double fovFactor = safeViewportX / safeViewportY;
-        double tanHalfFov = Math.tan(Math.toRadians(camera.getFov() / 2.0));
-
-        dir = front.multiply(0.5);
-        upWithScale = up.multiply(tanHalfFov);
-        rightWithScale = left.multiply(-fovFactor * tanHalfFov);
+        this.eyePosition = new Vector3D(eyePosition);
+        this.front = new Vector3D(front);
+        this.left = new Vector3D(left);
+        this.up = new Vector3D(up);
+        this.projectionMode = projectionMode;
+        this.orthogonalZoom = orthogonalZoom;
+        this.viewportXSize = viewportXSize;
+        this.viewportYSize = viewportYSize;
+        this.dir = new Vector3D(dir);
+        this.upWithScale = new Vector3D(upWithScale);
+        this.rightWithScale = new Vector3D(rightWithScale);
     }
 
-    public static CameraSnapshot fromCamera(Camera camera)
+    public Vector3D getEyePosition()
     {
-        return new CameraSnapshot(camera);
+        return eyePosition;
     }
 
-    public Ray generateRay(int x, int y)
+    public Vector3D getFront()
     {
-        double safeViewportX = viewportXSize > 0 ? viewportXSize : 1.0;
-        double safeViewportY = viewportYSize > 0 ? viewportYSize : 1.0;
+        return front;
+    }
 
-        double u = ((double)x - safeViewportX/2.0) / safeViewportX;
-        double v =
-            ((safeViewportY - (double)y - 1) - safeViewportY/2.0) / safeViewportY;
+    public Vector3D getLeft()
+    {
+        return left;
+    }
 
-        if ( projectionMode == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            double fovFactor = safeViewportX / safeViewportY;
-            double duScale = (-fovFactor) * (2*u/orthogonalZoom);
-            double dvScale = 2*v/orthogonalZoom;
-            Vector3D origin = new Vector3D(
-                eyePosition.x() + left.x()*duScale + up.x()*dvScale,
-                eyePosition.y() + left.y()*duScale + up.y()*dvScale,
-                eyePosition.z() + left.z()*duScale + up.z()*dvScale);
-            return new Ray(origin, front);
-        }
+    public Vector3D getUp()
+    {
+        return up;
+    }
 
-        Vector3D direction = new Vector3D(
-            rightWithScale.x()*u + upWithScale.x()*v + dir.x(),
-            rightWithScale.y()*u + upWithScale.y()*v + dir.y(),
-            rightWithScale.z()*u + upWithScale.z()*v + dir.z());
+    public int getProjectionMode()
+    {
+        return projectionMode;
+    }
 
-        return new Ray(eyePosition, direction);
+    public double getOrthogonalZoom()
+    {
+        return orthogonalZoom;
+    }
+
+    public double getViewportXSize()
+    {
+        return viewportXSize;
+    }
+
+    public double getViewportYSize()
+    {
+        return viewportYSize;
+    }
+
+    public Vector3D getDir()
+    {
+        return dir;
+    }
+
+    public Vector3D getUpWithScale()
+    {
+        return upWithScale;
+    }
+
+    public Vector3D getRightWithScale()
+    {
+        return rightWithScale;
     }
 }

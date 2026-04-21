@@ -14,6 +14,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.CubemapBackground;
@@ -308,7 +309,8 @@ public class Scene
 
         originalWidth = (int)activeCamera.getViewportXSize();
         originalHeight = (int)activeCamera.getViewportYSize();
-        activeCamera.updateViewportResize(out_Viewport.getXSize(), out_Viewport.getYSize());
+        CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
+            out_Viewport.getXSize(), out_Viewport.getYSize());
 
         //-----------------------------------------------------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
@@ -347,7 +349,7 @@ public class Scene
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, qualityTemplate,
                                     scene.getSimpleBodies(), scene.getLights(), 
-                                    activeBackground, activeCamera,
+                                    activeBackground, cameraSnapshot,
                                     reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");

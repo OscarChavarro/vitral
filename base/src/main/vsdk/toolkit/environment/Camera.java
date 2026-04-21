@@ -437,6 +437,28 @@ public class Camera extends Entity
         //System.out.println("normalizingTransformation: " + normalizingTransformation);
     }
 
+    public CameraSnapshot exportToCameraSnapshot()
+    {
+        return exportToCameraSnapshot((int)viewportXSize, (int)viewportYSize);
+    }
+
+    public CameraSnapshot exportToCameraSnapshot(int viewportXSize, int viewportYSize)
+    {
+        updateViewportResize(viewportXSize, viewportYSize);
+        return new CameraSnapshot(
+            eyePosition,
+            front,
+            left,
+            up,
+            projectionMode,
+            orthogonalZoom,
+            this.viewportXSize,
+            this.viewportYSize,
+            _dir,
+            upWithScale,
+            rightWithScale);
+    }
+
     /**
     Given a 2D integer coordinate in viewport space, this method calculates a
     proyector ray that emanates from the eye position and passes over the 

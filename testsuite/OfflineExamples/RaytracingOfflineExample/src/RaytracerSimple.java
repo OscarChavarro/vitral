@@ -19,6 +19,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
@@ -105,7 +106,8 @@ public class RaytracerSimple {
 
         visualizationEngine = new Raytracer();
         Camera activeCamera = scene.getActiveCamera();
-        activeCamera.updateViewportResize(resultingImage.getXSize(), resultingImage.getYSize());
+        CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
+            resultingImage.getXSize(), resultingImage.getYSize());
 
         StopWatch clock = new StopWatch();
 
@@ -114,7 +116,7 @@ public class RaytracerSimple {
                                 scene.getSimpleBodies(),
                                 scene.getLights(),
                                 scene.getActiveBackground(),
-                                activeCamera, reporter, null);
+                                cameraSnapshot, reporter, null);
         clock.stop();
 
         System.out.println(

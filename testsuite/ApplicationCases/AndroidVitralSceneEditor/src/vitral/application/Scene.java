@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.render.Raytracer;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
@@ -197,7 +198,8 @@ public class Scene
 
         originalWidth = (int)camera.getViewportXSize();
         originalHeight = (int)camera.getViewportYSize();
-        camera.updateViewportResize(out_Viewport.getXSize(), out_Viewport.getYSize());
+        CameraSnapshot cameraSnapshot = camera.exportToCameraSnapshot(
+            out_Viewport.getXSize(), out_Viewport.getYSize());
 
         //-----------------------------------------------------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
@@ -238,7 +240,7 @@ public class Scene
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, quality,
                                     scene.getSimpleBodies(), scene.getLights(), 
-                                    activeBackground, camera,
+                                    activeBackground, cameraSnapshot,
                                     reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
