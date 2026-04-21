@@ -13,6 +13,7 @@
 
 package vsdk.toolkit.render;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.List;
 
 import vsdk.toolkit.common.RaytraceStatistics;
@@ -23,6 +24,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
@@ -49,6 +51,9 @@ public class Raytracer extends RenderingElement {
     private static final double TINY = 0.0001;
     private static final int MAX_RECURSION_LEVEL =
         TraceWorkspace.DEFAULT_MAX_RECURSION_LEVEL;
+    private static final TileGenerationStrategy TILE_STRATEGY =
+        TileGenerationStrategy.SERIAL;
+    private static final int TILE_WORKERS_HINT = 1;
 
     private static final Vector3D BUMP_TANGENT_FALLBACK = new Vector3D(0, 1, 0);
     private final ThreadLocal<TraceWorkspace> traceWorkspace =
@@ -780,46 +785,60 @@ public class Raytracer extends RenderingElement {
                          int limx2, int limy2)
     {
         int x, y;
-        int relativeX;
-        int relativeY;
         Ray rayo;
         ColorRgb color = new ColorRgb();
+        RGBPixel outputPixel = new RGBPixel();
         RenderContext renderContext =
             buildRenderContext(inQualitySelection, inLightsArray);
         SceneRenderCache sceneRenderCache =
             new SceneRenderCache(inSimpleBodiesArray, renderContext);
         TraceWorkspace workspace = traceWorkspace.get();
         long[] initialBodyVersions = captureBodyVersions(inSimpleBodiesArray);
+        TileGenerator tileGenerator = new TileGenerator(
+            TILE_STRATEGY,
+            inoutViewport,
+            limx1, limy1,
+            limx2 - limx1, limy2 - limy1,
+            TILE_WORKERS_HINT);
+        ConcurrentLinkedQueue<Tile> pendingTiles =
+            new ConcurrentLinkedQueue<Tile>(tileGenerator.getTiles());
+        Tile tile;
 
         if ( liveReport != null ) {
             liveReport.begin();
         }
-        for ( y = limy1, relativeY = 0; y < limy2; y++, relativeY++ ) {
-            assertSceneUnmodifiedDuringRender(
-                initialBodyVersions,
-                inSimpleBodiesArray);
-            if ( liveReport != null ) {
-                liveReport.update(0, inoutViewport.getYSize(), y);
-            }
-            for ( x = limx1, relativeX = 0; x < limx2; x++, relativeX++ ) {
-                //- Trazado individual de un rayo --------------------------
-                RaytraceStatistics.recordPrimaryRay();
-                rayo = generateRay(cameraSnapshot, x, y);
-                color.r = 0;
-                color.g = 0;
-                color.b = 0;
-                followRayPath(rayo, inSimpleBodiesArray,
-                              inLightsArray, inBackground, 
-                              renderContext, sceneRenderCache, workspace, color);
-                if ( outDepthmap != null ) {
-                    outDepthmap.setZ(x, y, (float)rayo.t());
+        while ( (tile = pendingTiles.poll()) != null ) {
+            Image tileImage = tile.getImage();
+            int tileX0 = tile.getX0();
+            int tileY0 = tile.getY0();
+            int tileX1 = tileX0 + tile.getDx();
+            int tileY1 = tileY0 + tile.getDy();
+
+            for ( y = tileY0; y < tileY1; y++ ) {
+                assertSceneUnmodifiedDuringRender(
+                    initialBodyVersions,
+                    inSimpleBodiesArray);
+                if ( liveReport != null ) {
+                    liveReport.update(0, inoutViewport.getYSize(), y);
                 }
-                //- Exporto el result de color del pixel ----------------
-                if ( color != null ) {
-                    inoutViewport.putPixel(relativeX, relativeY,
-                                              (byte)(255 * color.r),
-                                              (byte)(255 * color.g),
-                                              (byte)(255 * color.b));
+                for ( x = tileX0; x < tileX1; x++ ) {
+                    //- Trazado individual de un rayo --------------------------
+                    RaytraceStatistics.recordPrimaryRay();
+                    rayo = generateRay(cameraSnapshot, x, y);
+                    color.r = 0;
+                    color.g = 0;
+                    color.b = 0;
+                    followRayPath(rayo, inSimpleBodiesArray,
+                                  inLightsArray, inBackground, 
+                                  renderContext, sceneRenderCache, workspace, color);
+                    if ( outDepthmap != null ) {
+                        outDepthmap.setZ(x, y, (float)rayo.t());
+                    }
+                    //- Exporto el result de color del pixel ----------------
+                    outputPixel.r = (byte)(255 * color.r);
+                    outputPixel.g = (byte)(255 * color.g);
+                    outputPixel.b = (byte)(255 * color.b);
+                    tileImage.putPixelRgb(x, y, outputPixel);
                 }
             }
         }
