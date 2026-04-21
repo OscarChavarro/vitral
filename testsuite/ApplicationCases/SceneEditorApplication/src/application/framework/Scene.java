@@ -25,6 +25,7 @@ import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.render.Raytracer;
 
 // Application classes
@@ -346,11 +347,11 @@ public class Scene
         }
 
         visualizationEngine = new Raytracer();
+        SimpleSceneSnapshot sceneSnapshot =
+            scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, qualityTemplate,
-                                    scene.getSimpleBodies(), scene.getLights(), 
-                                    activeBackground, cameraSnapshot,
-                                    reporter, null);
+                                    sceneSnapshot, reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 

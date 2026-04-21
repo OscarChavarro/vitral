@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Light;
 
 public class SimpleScene extends Entity
@@ -117,5 +118,32 @@ public class SimpleScene extends Entity
     public void setCameras(ArrayList<Camera> cameras)
     {
         camerasArray = cameras;
+    }
+
+    public SimpleSceneSnapshot exportToSimpleSceneSnapshot()
+    {
+        return exportToSimpleSceneSnapshot(
+            getActiveCamera().exportToCameraSnapshot(),
+            getActiveBackground());
+    }
+
+    public SimpleSceneSnapshot exportToSimpleSceneSnapshot(
+        int viewportXSize,
+        int viewportYSize)
+    {
+        return exportToSimpleSceneSnapshot(
+            getActiveCamera().exportToCameraSnapshot(viewportXSize, viewportYSize),
+            getActiveBackground());
+    }
+
+    public SimpleSceneSnapshot exportToSimpleSceneSnapshot(
+        CameraSnapshot cameraSnapshot,
+        Background background)
+    {
+        return new SimpleSceneSnapshot(
+            simpleBodiesArray,
+            lightsArray,
+            background,
+            cameraSnapshot);
     }
 }

@@ -12,6 +12,7 @@ import java.io.File;
 // VitralSDK classes
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
@@ -133,14 +134,15 @@ class VitralVisualizationServerProtocol implements Runnable
                 reporter = null; //new ProgressMonitorConsole();
                 CameraSnapshot cameraSnapshot =
                     theScene.getActiveCamera().exportToCameraSnapshot();
+                SimpleSceneSnapshot sceneSnapshot =
+                    theScene.exportToSimpleSceneSnapshot(
+                        cameraSnapshot,
+                        theScene.getActiveBackground());
 
                 visualizationEngine.execute(
                                 theResultingImage,
                                 rendererConfiguration,
-                                theScene.getSimpleBodies(),
-                                theScene.getLights(),
-                                theScene.getActiveBackground(),
-                                cameraSnapshot,
+                                sceneSnapshot,
                                 reporter, null,
                                 x0, y0, x1, y1);
                 System.out.println("SCENE RAYTRACED!");

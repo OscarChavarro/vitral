@@ -56,42 +56,47 @@ for Vitral.
 */
 public class ReaderMitScene extends PersistenceElement
 {
-    // Debug flag
-    private static final boolean showDebugMessages = false;
-    private static final Vector3D DEFAULT_MIT_EYE = new Vector3D(0, 0, 10);
-    private static final Vector3D DEFAULT_MIT_LOOKAT = new Vector3D(0, 0, 0);
-    private static final Vector3D DEFAULT_MIT_UP = new Vector3D(0, 1, 0);
-    private static final double DEFAULT_MIT_HORIZONTAL_FOV = 30;
+    private final class ImportContext {
+        Camera currentCamera;
+        Background currentBackground;
+        int viewportXSize;
+        int viewportYSize;
+        Vector3D importedEye;
+        Vector3D importedLookAt;
+        Vector3D importedUp;
+        double importedHorizontalFov;
 
-    // Simple scene
-    public Camera currentCamera;
-    public Background currentBackground;
+        ImportContext()
+        {
+            currentCamera = new Camera();
+            currentBackground = new SimpleBackground();
+            ((SimpleBackground)currentBackground).setColor(0, 0, 0);
 
-    // Viewport size information
-    public int viewportXSize;
-    public int viewportYSize;
+            viewportXSize = 320;
+            viewportYSize = 240;
+            importedEye = new Vector3D(0, 0, 10);
+            importedLookAt = new Vector3D(0, 0, 0);
+            importedUp = new Vector3D(0, 1, 0);
+            importedHorizontalFov = 30;
+        }
+    }
 
     public ReaderMitScene()
     {
-        currentCamera = new Camera();
-        currentBackground = new SimpleBackground();
-        ((SimpleBackground)currentBackground).setColor(0, 0, 0);
-
-        viewportXSize = 320;
-        viewportYSize = 240;
-        configureCurrentCameraFromMitView(
-            DEFAULT_MIT_EYE,
-            DEFAULT_MIT_LOOKAT,
-            DEFAULT_MIT_UP,
-            DEFAULT_MIT_HORIZONTAL_FOV);
     }
 
     private void
     showDebugMessage(String m)
     {
-        if ( showDebugMessages ) {
+        if ( showDebugMessages() ) {
             System.out.println(m);
         }
+    }
+
+    private boolean
+    showDebugMessages()
+    {
+        return false;
     }
 
     private double
@@ -245,7 +250,10 @@ public class ReaderMitScene extends PersistenceElement
     }
 
     private double
-    convertMitHorizontalFovToVertical(double horizontalFov)
+    convertMitHorizontalFovToVertical(
+        double horizontalFov,
+        int viewportXSize,
+        int viewportYSize)
     {
         if ( viewportXSize <= 0 || viewportYSize <= 0 ) {
             return horizontalFov;
@@ -259,21 +267,26 @@ public class ReaderMitScene extends PersistenceElement
     }
 
     private void
-    configureCurrentCameraFromMitView(
-        Vector3D eye,
-        Vector3D lookAt,
-        Vector3D up,
-        double horizontalFov)
+    configureCurrentCameraFromMitView(ImportContext context)
     {
-        currentCamera.setPosition(eye);
-        currentCamera.setUpDirect(up);
-        currentCamera.setFocusedPositionMaintainingOrthogonality(lookAt);
-        currentCamera.setFov(convertMitHorizontalFovToVertical(horizontalFov));
-        currentCamera.updateViewportResize(viewportXSize, viewportYSize);
+        context.currentCamera.setPosition(context.importedEye);
+        context.currentCamera.setUpDirect(context.importedUp);
+        context.currentCamera.setFocusedPositionMaintainingOrthogonality(
+            context.importedLookAt);
+        context.currentCamera.setFov(convertMitHorizontalFovToVertical(
+            context.importedHorizontalFov,
+            context.viewportXSize,
+            context.viewportYSize));
+        context.currentCamera.updateViewportResize(
+            context.viewportXSize,
+            context.viewportYSize);
     }
 
     public void
     importEnvironment(InputStream is, SimpleScene theScene) throws Exception {
+        ImportContext context = new ImportContext();
+        configureCurrentCameraFromMitView(context);
+
         Reader parsero = new BufferedReader(new InputStreamReader(is));
         StreamTokenizer st = new StreamTokenizer(parsero);
         st.commentChar('#');
@@ -283,16 +296,6 @@ public class ReaderMitScene extends PersistenceElement
         Material currentMaterial;
         Material currentTrianglesMaterial = null;
         Material currentQuadsMaterial = null;
-        Vector3D importedEye = DEFAULT_MIT_EYE;
-        Vector3D importedLookAt = DEFAULT_MIT_LOOKAT;
-        Vector3D importedUp = DEFAULT_MIT_UP;
-        double importedHorizontalFov = DEFAULT_MIT_HORIZONTAL_FOV;
-
-        configureCurrentCameraFromMitView(
-            importedEye,
-            importedLookAt,
-            importedUp,
-            importedHorizontalFov);
 
         // Material por defecto...
         /*
@@ -577,61 +580,41 @@ public class ReaderMitScene extends PersistenceElement
                 else if (st.sval.equals("viewport")) {
                   showDebugMessage("viewport");
 
-                  viewportXSize = (int)readNumber(st);
-                  viewportYSize = (int)readNumber(st);
-                  configureCurrentCameraFromMitView(
-                      importedEye,
-                      importedLookAt,
-                      importedUp,
-                      importedHorizontalFov);
+                  context.viewportXSize = (int)readNumber(st);
+                  context.viewportYSize = (int)readNumber(st);
+                  configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("eye")) {
                   showDebugMessage("eye");
-                  importedEye = new Vector3D(readNumber(st),
-                                             readNumber(st),
-                                             readNumber(st));
-                  configureCurrentCameraFromMitView(
-                      importedEye,
-                      importedLookAt,
-                      importedUp,
-                      importedHorizontalFov);
+                  context.importedEye = new Vector3D(readNumber(st),
+                                                     readNumber(st),
+                                                     readNumber(st));
+                  configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("lookat")) {
                   showDebugMessage("lookat");
-                  importedLookAt = new Vector3D(readNumber(st),
-                                                readNumber(st),
-                                                readNumber(st));
-                  configureCurrentCameraFromMitView(
-                      importedEye,
-                      importedLookAt,
-                      importedUp,
-                      importedHorizontalFov);
+                  context.importedLookAt = new Vector3D(readNumber(st),
+                                                        readNumber(st),
+                                                        readNumber(st));
+                  configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("up")) {
                   showDebugMessage("up");
-                  importedUp = new Vector3D(readNumber(st),
-                                            readNumber(st),
-                                            readNumber(st));
-                  configureCurrentCameraFromMitView(
-                      importedEye,
-                      importedLookAt,
-                      importedUp,
-                      importedHorizontalFov);
+                  context.importedUp = new Vector3D(readNumber(st),
+                                                    readNumber(st),
+                                                    readNumber(st));
+                  configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("fov")) {
                   showDebugMessage("fov");
-                  importedHorizontalFov = readNumber(st);
-                  configureCurrentCameraFromMitView(
-                      importedEye,
-                      importedLookAt,
-                      importedUp,
-                      importedHorizontalFov);
+                  context.importedHorizontalFov = readNumber(st);
+                  configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("background")) {
                   showDebugMessage("background");
-                  currentBackground = new SimpleBackground();
-                  ((SimpleBackground)currentBackground).setColor(readNumber(st), 
-                                 readNumber(st), 
+                  context.currentBackground = new SimpleBackground();
+                  ((SimpleBackground)context.currentBackground).setColor(readNumber(st),
+                                 readNumber(st),
                                  readNumber(st));
                 }
                 else if (st.sval.equals("backgroundcubemap")) {
@@ -660,8 +643,8 @@ public class ReaderMitScene extends PersistenceElement
                         new File("../../../etc/cubemaps/dorise1/entorno5.jpg"));
             System.out.println(" OK!");
 
-            currentBackground = 
-                new CubemapBackground(currentCamera, 
+            context.currentBackground =
+                new CubemapBackground(context.currentCamera,
                                       front, right, back, left, down, up);
 
                     }
@@ -732,14 +715,10 @@ public class ReaderMitScene extends PersistenceElement
             throw new IOException(st.toString());
         }
 
-        configureCurrentCameraFromMitView(
-            importedEye,
-            importedLookAt,
-            importedUp,
-            importedHorizontalFov);
+        configureCurrentCameraFromMitView(context);
 
-        theScene.addBackground(currentBackground);
-        theScene.addCamera(currentCamera);
+        theScene.addBackground(context.currentBackground);
+        theScene.addCamera(context.currentCamera);
         theScene.setActiveCameraIndex(0);
         theScene.setActiveBackgroundIndex(0);
     }

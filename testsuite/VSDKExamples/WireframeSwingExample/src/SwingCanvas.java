@@ -22,6 +22,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImage;
@@ -127,14 +128,14 @@ public class SwingCanvas extends JPanel implements
             Raytracer visualizationEngine = new Raytracer();
             CameraSnapshot cameraSnapshot =
                 camera.exportToCameraSnapshot(width, height);
+            SimpleSceneSnapshot sceneSnapshot =
+                scene.exportToSimpleSceneSnapshot(
+                    cameraSnapshot,
+                    scene.getBackgrounds().get(0));
 
             long initialTime = System.currentTimeMillis();
             img.init(width, height);
-            visualizationEngine.execute(img, q,
-                                    scene.getSimpleBodies(),
-                                    scene.getLights(), 
-                                    scene.getBackgrounds().get(0),
-                                    cameraSnapshot, reporter, null);
+            visualizationEngine.execute(img, q, sceneSnapshot, reporter, null);
 
             long finalTime = System.currentTimeMillis();
             System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");

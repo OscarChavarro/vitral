@@ -12,6 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
@@ -237,11 +238,11 @@ public class Scene
 */
         activeBackground = simpleBackground;
         visualizationEngine = new Raytracer();
+        SimpleSceneSnapshot sceneSnapshot =
+            scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();
         visualizationEngine.execute(out_Viewport, quality,
-                                    scene.getSimpleBodies(), scene.getLights(), 
-                                    activeBackground, cameraSnapshot,
-                                    reporter, null);
+                                    sceneSnapshot, reporter, null);
         long finalTime = System.currentTimeMillis();
         System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 

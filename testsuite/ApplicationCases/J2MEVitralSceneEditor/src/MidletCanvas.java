@@ -26,6 +26,7 @@ import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImage;
@@ -160,13 +161,13 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             Raytracer visualizationEngine = new Raytracer();
             CameraSnapshot cameraSnapshot =
                 camera.exportToCameraSnapshot(width, height);
+            SimpleSceneSnapshot sceneSnapshot =
+                scene.exportToSimpleSceneSnapshot(
+                    cameraSnapshot,
+                    scene.getBackgrounds().get(0));
 
             img.init(width, height);
-            visualizationEngine.execute(img, q,
-                                    scene.getSimpleBodies(),
-                                    scene.getLights(), 
-                                    scene.getBackgrounds().get(0),
-                                    cameraSnapshot, null, null);
+            visualizationEngine.execute(img, q, sceneSnapshot, null, null);
 
             J2meRGBImageRenderer.draw(g, img, 0, 0);
         }

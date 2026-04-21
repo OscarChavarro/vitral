@@ -13,7 +13,7 @@
 
 package vsdk.toolkit.render;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
@@ -32,6 +32,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.ProgressMonitor;
 
 /**
@@ -81,7 +82,7 @@ public class Raytracer extends RenderingElement {
         final SceneObjectRenderData[] objects;
 
         private SceneRenderCache(
-            ArrayList<SimpleBody> bodies,
+            List<SimpleBody> bodies,
             RenderContext renderContext)
         {
             objects = new SceneObjectRenderData[bodies.size()];
@@ -108,7 +109,7 @@ public class Raytracer extends RenderingElement {
         }
     }
 
-    private static boolean hasNonAmbientLights(ArrayList<Light> lights)
+    private static boolean hasNonAmbientLights(List<Light> lights)
     {
         for ( Light light : lights ) {
             if ( light.tipo_de_luz != Light.AMBIENT ) {
@@ -125,7 +126,7 @@ public class Raytracer extends RenderingElement {
 
     private static RenderContext buildRenderContext(
         RendererConfiguration qualitySelection,
-        ArrayList<Light> lights)
+        List<Light> lights)
     {
         boolean localLightingEnabled =
             qualitySelection.getShadingType() != RendererConfiguration.SHADING_TYPE_NOLIGHT &&
@@ -170,7 +171,7 @@ public class Raytracer extends RenderingElement {
         return detailMask;
     }
 
-    private static long[] captureBodyVersions(ArrayList<SimpleBody> bodies)
+    private static long[] captureBodyVersions(List<SimpleBody> bodies)
     {
         long[] versions = new long[bodies.size()];
         for ( int i = 0; i < bodies.size(); i++ ) {
@@ -181,7 +182,7 @@ public class Raytracer extends RenderingElement {
 
     private static void assertSceneUnmodifiedDuringRender(
         long[] expectedBodyVersions,
-        ArrayList<SimpleBody> bodies)
+        List<SimpleBody> bodies)
     {
         if ( expectedBodyVersions.length != bodies.size() ) {
             throw new IllegalStateException(
@@ -296,8 +297,8 @@ public class Raytracer extends RenderingElement {
         double viewX,
         double viewY,
         double viewZ,
-        ArrayList <Light> lights,
-        ArrayList <SimpleBody> objects,
+        List<Light> lights,
+        List<SimpleBody> objects,
         SceneRenderCache sceneRenderCache,
         Background background,
         Material material,
@@ -561,7 +562,7 @@ public class Raytracer extends RenderingElement {
     private int 
     selectNearestThingInRayDirection(
         Ray inRay,
-        ArrayList <SimpleBody> inSimpleBodiesArray,
+        List<SimpleBody> inSimpleBodiesArray,
         RayHit outHit,
         RayHit candidateHit)
     {
@@ -594,7 +595,7 @@ public class Raytracer extends RenderingElement {
 
     private boolean anyThingInRayDirection(
         Ray inRay,
-        ArrayList <SimpleBody> inSimpleBodiesArray,
+        List<SimpleBody> inSimpleBodiesArray,
         double maxDistance,
         RayHit candidateHit)
     {
@@ -625,8 +626,8 @@ public class Raytracer extends RenderingElement {
     should be used.
     */
     private void followRayPath(Ray inRay,
-                               ArrayList <SimpleBody> inSimpleBodiesArray, 
-                               ArrayList <Light> inLightsArray,
+                               List<SimpleBody> inSimpleBodiesArray,
+                               List<Light> inLightsArray,
                                Background in_background,
                                RenderContext renderContext,
                                SceneRenderCache sceneRenderCache,
@@ -682,31 +683,42 @@ public class Raytracer extends RenderingElement {
 
     public void execute(RGBImage inoutViewport,
                         RendererConfiguration inQualitySelection,
-                        ArrayList <SimpleBody> inSimpleBodiesArray,
-                        ArrayList <Light> in_arr_luces,
-                        Background in_background,
-                        CameraSnapshot cameraSnapshot,
+                        SimpleSceneSnapshot sceneSnapshot,
                         ProgressMonitor report)
     {
         execute(inoutViewport, inQualitySelection,
-                inSimpleBodiesArray, in_arr_luces,
-                in_background, cameraSnapshot, report, null, 0, 0,
+                sceneSnapshot, report, null, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
-    public void execute(RGBImage inoutViewport, 
+    public void execute(RGBImage inoutViewport,
                         RendererConfiguration inQualitySelection,
-                        ArrayList <SimpleBody> inSimpleBodiesArray,
-                        ArrayList <Light> in_arr_luces,
-                        Background in_background,
-                        CameraSnapshot cameraSnapshot,
+                        SimpleSceneSnapshot sceneSnapshot,
                         ProgressMonitor report,
                         ZBuffer depthmap)
     {
-        execute(inoutViewport, inQualitySelection, inSimpleBodiesArray, 
-                in_arr_luces,
-                in_background, cameraSnapshot, report, depthmap, 0, 0,
+        execute(inoutViewport, inQualitySelection, sceneSnapshot,
+                report, depthmap, 0, 0,
                 inoutViewport.getXSize(), inoutViewport.getYSize());
+    }
+
+    public void execute(RGBImage inoutViewport,
+                        RendererConfiguration inQualitySelection,
+                        SimpleSceneSnapshot sceneSnapshot,
+                        ProgressMonitor liveReport,
+                        ZBuffer outDepthmap,
+                        int limx1, int limy1,
+                        int limx2, int limy2)
+    {
+        execute(inoutViewport, inQualitySelection,
+                sceneSnapshot.getSimpleBodies(),
+                sceneSnapshot.getLights(),
+                sceneSnapshot.getBackground(),
+                sceneSnapshot.getCameraSnapshot(),
+                liveReport,
+                outDepthmap,
+                limx1, limy1,
+                limx2, limy2);
     }
 
     /**
@@ -756,16 +768,16 @@ public class Raytracer extends RenderingElement {
           considerarse que es una re-escritura y re-estructuraci&oacute;n 
           completa de Oscar Chavarro.
     */
-    public void execute(RGBImage inoutViewport,
-                        RendererConfiguration inQualitySelection,
-                        ArrayList <SimpleBody> inSimpleBodiesArray,
-                        ArrayList <Light> inLightsArray,
-                        Background inBackground,
-                        CameraSnapshot cameraSnapshot,
-                        ProgressMonitor liveReport,
-                        ZBuffer outDepthmap,
-                        int limx1, int limy1,
-                        int limx2, int limy2)
+    private void execute(RGBImage inoutViewport,
+                         RendererConfiguration inQualitySelection,
+                         List<SimpleBody> inSimpleBodiesArray,
+                         List<Light> inLightsArray,
+                         Background inBackground,
+                         CameraSnapshot cameraSnapshot,
+                         ProgressMonitor liveReport,
+                         ZBuffer outDepthmap,
+                         int limx1, int limy1,
+                         int limx2, int limy2)
     {
         int x, y;
         int relativeX;

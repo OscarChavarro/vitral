@@ -22,6 +22,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.render.Raytracer;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -38,12 +39,10 @@ public class RaytracerSimple {
     private static final int EXIT_CODE_IMAGE_ERROR = 1;
     private static final int EXIT_CODE_ARGUMENT_ERROR = 2;
 
-    private final ReaderMitScene readerMitScene;
     private final SimpleScene scene;
 
     public RaytracerSimple()
     {
-        readerMitScene = new ReaderMitScene();
         scene = new SimpleScene();
     }
 
@@ -82,6 +81,7 @@ public class RaytracerSimple {
         //- 1. Import the scene from scene description file to RAM -----
         System.out.println("Loading scene from " + fileName + ": ");
         try (InputStream is = new FileInputStream(fileName)) {
+            ReaderMitScene readerMitScene = new ReaderMitScene();
             readerMitScene.importEnvironment(is, scene);
           }
           catch ( Exception e ) {
@@ -93,8 +93,10 @@ public class RaytracerSimple {
 
         //- 2. Create an empty image --------------------------------------
         resultingImage = new RGBImage();
+        Camera activeCamera = scene.getActiveCamera();
         if ( !resultingImage.initNoFill(
-                  readerMitScene.viewportXSize, readerMitScene.viewportYSize) ) {
+                  (int)activeCamera.getViewportXSize(),
+                  (int)activeCamera.getViewportYSize()) ) {
             System.err.println("Error creating image!");
             System.exit(EXIT_CODE_IMAGE_ERROR);
         }
@@ -105,18 +107,18 @@ public class RaytracerSimple {
         optimizeRendererConfigurationForScene(rendererConfiguration);
 
         visualizationEngine = new Raytracer();
-        Camera activeCamera = scene.getActiveCamera();
         CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
             resultingImage.getXSize(), resultingImage.getYSize());
+        SimpleSceneSnapshot sceneSnapshot =
+            scene.exportToSimpleSceneSnapshot(
+                cameraSnapshot,
+                scene.getActiveBackground());
 
         StopWatch clock = new StopWatch();
 
         clock.start();
         visualizationEngine.execute(resultingImage, rendererConfiguration,
-                                scene.getSimpleBodies(),
-                                scene.getLights(),
-                                scene.getActiveBackground(),
-                                cameraSnapshot, reporter, null);
+                                sceneSnapshot, reporter, null);
         clock.stop();
 
         System.out.println(

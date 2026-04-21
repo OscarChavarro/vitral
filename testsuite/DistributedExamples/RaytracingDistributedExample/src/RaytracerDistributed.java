@@ -20,14 +20,12 @@ an stochastic raytracer (it is not).
 */
 public class RaytracerDistributed {
     // Application model
-    private ReaderMitScene theSceneReader;
     private SimpleScene theScene;
     private RGBImage theResultingImage;
     private DistributerByArea visualizationClient;
 
     public RaytracerDistributed()
     {
-        theSceneReader = new ReaderMitScene();
         theScene = new SimpleScene();
         visualizationClient = new DistributerByArea();
     }
@@ -40,7 +38,8 @@ public class RaytracerDistributed {
         InputStream is = null;
         try {
             is = new FileInputStream(new File(nombre_de_archivo));
-            theSceneReader.importEnvironment(is, theScene);
+            ReaderMitScene sceneReader = new ReaderMitScene();
+            sceneReader.importEnvironment(is, theScene);
             is.close();
           }
           catch ( Exception e ) {
@@ -53,7 +52,8 @@ public class RaytracerDistributed {
         //- 2. Create an empty image --------------------------------------
         theResultingImage = new RGBImage();
         if ( !theResultingImage.initNoFill(
-                  theSceneReader.viewportXSize, theSceneReader.viewportYSize) ) {
+                  (int)theScene.getActiveCamera().getViewportXSize(),
+                  (int)theScene.getActiveCamera().getViewportYSize()) ) {
             System.err.println("Error creando la imagen!!");
             System.exit(1);
         }
@@ -92,7 +92,6 @@ public class RaytracerDistributed {
         theResultingImage = null;
 
         // 5.2. Free scene references
-        theSceneReader = null;
         theScene = null;
 
         // 5.3. Suggest the garbage collector to free unused memory
