@@ -19,6 +19,8 @@ following section [MANT1988].15.7 and programs [MANT1988].15.13 and
 final class _PolyhedralBoundedSolidSetNullEdgesConnector
     extends _PolyhedralBoundedSolidOperator
 {
+    private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
+        "vsdk.setop.tracePipelineSummary";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_05_CONNECT = 0x10;
     private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
@@ -53,6 +55,39 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
+
+    private static boolean isPipelineSummaryTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
+    }
+
+    private static void tracePipelineSummary(String message)
+    {
+        if ( !isPipelineSummaryTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpPipelineTrace] " + message);
+    }
+
+    private static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( he == null ) {
+            return "null";
+        }
+        return "he(v=" + he.startingVertex.id +
+            "->" + he.next().startingVertex.id +
+            ",f=" + he.parentLoop.parentFace.id + ")";
+    }
+
+    private static String summarizeNullEdge(
+        _PolyhedralBoundedSolidSetOperatorNullEdge edge)
+    {
+        if ( edge == null || edge.e == null ) {
+            return "null";
+        }
+        return summarizeHalfEdge(edge.e.rightHalf) + " | " +
+            summarizeHalfEdge(edge.e.leftHalf);
+    }
 
     static ConnectResult connect(
         int flags,
@@ -258,6 +293,9 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
             System.out.println("SORTED SET OF " + sonea.size() + " NULL EDGES PAIRS TO BE CONNECTED");
         }
+        tracePipelineSummary(
+            "connect start pairsA=" + sonea.size() +
+            " pairsB=" + soneb.size());
 
         _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
         _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
@@ -285,6 +323,9 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             ham = sonea.get(i).e.leftHalf;
             hb = soneb.get(i).e.rightHalf;
             hbm = soneb.get(i).e.leftHalf;
+            tracePipelineSummary(
+                "connect pair[" + i + "] A{" + summarizeNullEdge(sonea.get(i)) +
+                "} B{" + summarizeNullEdge(soneb.get(i)) + "}");
 
             if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
                 System.out.println("  - " + (endsa.size()+endsb.size()) +
@@ -366,6 +407,19 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             if ( h1a != null && h1b != null && h2a != null && h2b != null ) {
                 cutA(nextedgea.rightHalf);
                 cutB(nextedgeb.rightHalf);
+                tracePipelineSummary(
+                    "connect pair[" + i + "] produced cuts h1a=" +
+                    summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +
+                    " h1b=" + summarizeHalfEdge(h1b) + " h2b=" +
+                    summarizeHalfEdge(h2b));
+            }
+            else {
+                tracePipelineSummary(
+                    "connect pair[" + i + "] incomplete h1a=" +
+                    summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +
+                    " h1b=" + summarizeHalfEdge(h1b) + " h2b=" +
+                    summarizeHalfEdge(h2b) + " looseA=" + endsa.size() +
+                    " looseB=" + endsb.size());
             }
         }
 
@@ -378,5 +432,10 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 System.out.println("    . B[" + (i+1) + "]: " + endsb.get(i));
             }
         }
+        tracePipelineSummary(
+            "connect end sonfa=" + sonfa.size() +
+            " sonfb=" + sonfb.size() +
+            " looseA=" + endsa.size() +
+            " looseB=" + endsb.size());
     }
 }

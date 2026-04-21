@@ -16,8 +16,23 @@ integration step of program [MANT1988].15.15.
 final class _PolyhedralBoundedSolidSetFinisher
     extends _PolyhedralBoundedSolidOperator
 {
+    private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
+        "vsdk.setop.tracePipelineSummary";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_06_FINISH = 0x20;
+
+    private static boolean isPipelineSummaryTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
+    }
+
+    private static void tracePipelineSummary(String message)
+    {
+        if ( !isPipelineSummaryTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpPipelineTrace] " + message);
+    }
 
     /**
     Answer integrator for the set-operations pipeline.
@@ -43,6 +58,10 @@ final class _PolyhedralBoundedSolidSetFinisher
         if ( (debugFlags & DEBUG_06_FINISH) != 0x00 ) {
             System.out.println("TESTING FINISH: " + sonfa.size());
         }
+        tracePipelineSummary(
+            "finish start op=" + op +
+            " sonfa=" + sonfa.size() +
+            " sonfb=" + sonfb.size());
 
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
@@ -75,5 +94,9 @@ final class _PolyhedralBoundedSolidSetFinisher
             outRes.loopGlue(sonfa.get(i+inda));
         }
         outRes.compactIds();
+        tracePipelineSummary(
+            "finish end outRes faces=" + outRes.polygonsList.size() +
+            " edges=" + outRes.edgesList.size() +
+            " vertices=" + outRes.verticesList.size());
     }
 }

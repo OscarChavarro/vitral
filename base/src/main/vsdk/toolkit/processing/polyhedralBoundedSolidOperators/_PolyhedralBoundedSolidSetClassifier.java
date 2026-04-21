@@ -23,6 +23,8 @@ final class _PolyhedralBoundedSolidSetClassifier
 {
     private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
         "vsdk.setop.traceCoplanarTangential";
+    private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
+        "vsdk.setop.tracePipelineSummary";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
     private static final int DEBUG_99_SHOW_OPERATIONS = 0x40;
@@ -57,6 +59,13 @@ final class _PolyhedralBoundedSolidSetClassifier
         sonea = inSonea;
         soneb = inSoneb;
         setOpClassify(op, inSolidA, inSolidB);
+        tracePipelineSummary(
+            "classify done op=" + op +
+            " sonva=" + sonva.size() +
+            " sonvb=" + sonvb.size() +
+            " sonvv=" + sonvv.size() +
+            " sonea=" + sonea.size() +
+            " soneb=" + soneb.size());
     }
 
     static PolyhedralBoundedSolid runSetOpNoIntersectionCase(
@@ -96,6 +105,19 @@ final class _PolyhedralBoundedSolidSetClassifier
         System.out.println("[SetOpCoplanarTrace] " + message);
     }
 
+    private static boolean isPipelineSummaryTraceEnabled()
+    {
+        return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
+    }
+
+    private static void tracePipelineSummary(String message)
+    {
+        if ( !isPipelineSummaryTraceEnabled() ) {
+            return;
+        }
+        System.out.println("[SetOpPipelineTrace] " + message);
+    }
+
     private static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
     {
         if ( he == null ) {
@@ -104,6 +126,175 @@ final class _PolyhedralBoundedSolidSetClassifier
 
         return "he(v=" + he.startingVertex.id +
             ",f=" + he.parentLoop.parentFace.id + ")";
+    }
+
+    private static String summarizeNullEdge(
+        _PolyhedralBoundedSolidSetOperatorNullEdge edge)
+    {
+        if ( edge == null || edge.e == null ) {
+            return "null";
+        }
+        return summarizeHalfEdge(edge.e.rightHalf) + " | " +
+            summarizeHalfEdge(edge.e.leftHalf);
+    }
+
+    private static String formatVertexVertexTraceContext(
+        int op,
+        int cursor,
+        String caseName,
+        String action,
+        int type)
+    {
+        return "op=" + op +
+            " cursor=" + cursor +
+            " case=" + caseName +
+            " action=" + action +
+            " target=" + (type == 0 ? "A" : "B");
+    }
+
+    private static String labelSectorState(int state)
+    {
+        switch ( state ) {
+            case _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON:
+                return "ON";
+            case _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT:
+                return "OUT";
+            case _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN:
+                return "IN";
+            default:
+                return "?" + state;
+        }
+    }
+
+    private static String summarizeSector(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int index)
+    {
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sector;
+
+        if ( data == null || index < 0 || index >= data.sectors.size() ) {
+            return "sector[idx=" + index + "]=<out>";
+        }
+        sector = data.sectors.get(index);
+        return "sector[idx=" + index +
+            ",intersect=" + sector.intersect +
+            ",sectA=" + sector.secta +
+            ",sectB=" + sector.sectb +
+            ",s1a=" + labelSectorState(sector.s1a) +
+            ",s2a=" + labelSectorState(sector.s2a) +
+            ",s1b=" + labelSectorState(sector.s1b) +
+            ",s2b=" + labelSectorState(sector.s2b) +
+            ",hea=" + summarizeHalfEdge(data.nba.get(sector.secta).he) +
+            ",heb=" + summarizeHalfEdge(data.nbb.get(sector.sectb).he) +
+            "]";
+    }
+
+    private static void traceVertexVertexDecisionStep(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int op,
+        String phase,
+        int index,
+        _PolyhedralBoundedSolidHalfEdge ha1,
+        _PolyhedralBoundedSolidHalfEdge ha2,
+        _PolyhedralBoundedSolidHalfEdge hb1,
+        _PolyhedralBoundedSolidHalfEdge hb2)
+    {
+        tracePipelineSummary(
+            "vv-step op=" + op +
+            " phase=" + phase +
+            " " + summarizeSector(data, index) +
+            " => ha1=" + summarizeHalfEdge(ha1) +
+            " ha2=" + summarizeHalfEdge(ha2) +
+            " hb1=" + summarizeHalfEdge(hb1) +
+            " hb2=" + summarizeHalfEdge(hb2));
+    }
+
+    private static void traceVertexVertexDecisionReason(
+        int op,
+        int cursor,
+        String caseName,
+        String reason,
+        _PolyhedralBoundedSolidHalfEdge ha1,
+        _PolyhedralBoundedSolidHalfEdge ha2,
+        _PolyhedralBoundedSolidHalfEdge hb1,
+        _PolyhedralBoundedSolidHalfEdge hb2)
+    {
+        tracePipelineSummary(
+            "vv-decision op=" + op +
+            " cursor=" + cursor +
+            " case=" + caseName +
+            " reason=" + reason +
+            " ha1=" + summarizeHalfEdge(ha1) +
+            " ha2=" + summarizeHalfEdge(ha2) +
+            " hb1=" + summarizeHalfEdge(hb1) +
+            " hb2=" + summarizeHalfEdge(hb2));
+    }
+
+    private static _PolyhedralBoundedSolidHalfEdge selectAlternativeBHalfEdge(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int sectb,
+        _PolyhedralBoundedSolidHalfEdge avoid)
+    {
+        _PolyhedralBoundedSolidHalfEdge candidate;
+        int nextsectb;
+        int prevsectb;
+
+        if ( data == null || data.nbb == null || data.nbb.isEmpty() ) {
+            return null;
+        }
+        if ( sectb < 0 || sectb >= data.nbb.size() ) {
+            return null;
+        }
+
+        nextsectb = (sectb == data.nbb.size() - 1) ? 0 : sectb + 1;
+        prevsectb = (sectb == 0) ? data.nbb.size() - 1 : sectb - 1;
+
+        candidate = data.nbb.get(nextsectb).he;
+        if ( candidate != null && candidate != avoid ) {
+            return candidate;
+        }
+
+        candidate = data.nbb.get(prevsectb).he;
+        if ( candidate != null && candidate != avoid ) {
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private static _PolyhedralBoundedSolidHalfEdge resolveBEndpointCandidate(
+        _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int sectorIndex,
+        boolean selectHb1,
+        _PolyhedralBoundedSolidHalfEdge hb1,
+        _PolyhedralBoundedSolidHalfEdge hb2)
+    {
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sector;
+        _PolyhedralBoundedSolidHalfEdge candidate;
+        _PolyhedralBoundedSolidHalfEdge avoid;
+        _PolyhedralBoundedSolidHalfEdge alternative;
+
+        sector = data.sectors.get(sectorIndex);
+        candidate = data.nbb.get(sector.sectb).he;
+        avoid = selectHb1 ? hb2 : hb1;
+
+        if ( candidate != null &&
+             candidate == avoid &&
+             sector.s2b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
+            alternative = selectAlternativeBHalfEdge(data, sector.sectb, avoid);
+            if ( alternative != null ) {
+                tracePipelineSummary(
+                    "vv-adjust B endpoint sectorIdx=" + sectorIndex +
+                    " sectB=" + sector.sectb +
+                    " select=" + (selectHb1 ? "hb1" : "hb2") +
+                    " repeated=" + summarizeHalfEdge(candidate) +
+                    " alternative=" + summarizeHalfEdge(alternative) +
+                    " because s2b=ON");
+                return alternative;
+            }
+        }
+
+        return candidate;
     }
 
     private static void traceIntersectingSectorsSnapshot(
@@ -238,6 +429,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     private static void separateEdgeSequence(_PolyhedralBoundedSolidHalfEdge from,
                                _PolyhedralBoundedSolidHalfEdge to,
                                int type,
+                               String traceContext,
                                PolyhedralBoundedSolid inSolidA,
                                PolyhedralBoundedSolid inSolidB)
     {
@@ -353,10 +545,30 @@ final class _PolyhedralBoundedSolidSetClassifier
         }
 
         if ( type == 0 ) {
-            sonea.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(from.previous().parentEdge));
+            _PolyhedralBoundedSolidSetOperatorNullEdge edge;
+            edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
+                from.previous().parentEdge);
+            sonea.add(edge);
+            tracePipelineSummary(
+                "emit " + traceContext +
+                " separateEdgeSequence sourceFrom=" + summarizeHalfEdge(from) +
+                " sourceTo=" + summarizeHalfEdge(to) +
+                " inserted=" + summarizeNullEdge(edge) +
+                " soneaSize=" + sonea.size() +
+                " sonebSize=" + soneb.size());
         }
         else {
-            soneb.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(from.previous().parentEdge));
+            _PolyhedralBoundedSolidSetOperatorNullEdge edge;
+            edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
+                from.previous().parentEdge);
+            soneb.add(edge);
+            tracePipelineSummary(
+                "emit " + traceContext +
+                " separateEdgeSequence sourceFrom=" + summarizeHalfEdge(from) +
+                " sourceTo=" + summarizeHalfEdge(to) +
+                " inserted=" + summarizeNullEdge(edge) +
+                " soneaSize=" + sonea.size() +
+                " sonebSize=" + soneb.size());
         }
 
     }
@@ -369,6 +581,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     private static void separateInterior(_PolyhedralBoundedSolidHalfEdge he,
                                int type,
                                boolean orient,
+                               String traceContext,
                                PolyhedralBoundedSolid inSolidA,
                                PolyhedralBoundedSolid inSolidB)
     {
@@ -417,10 +630,30 @@ final class _PolyhedralBoundedSolidSetClassifier
         }
 
         if ( type == 0 ) {
-            sonea.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(he.previous().parentEdge));
+            _PolyhedralBoundedSolidSetOperatorNullEdge edge;
+            edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
+                he.previous().parentEdge);
+            sonea.add(edge);
+            tracePipelineSummary(
+                "emit " + traceContext +
+                " separateInterior orient=" + orient +
+                " source=" + summarizeHalfEdge(he) +
+                " inserted=" + summarizeNullEdge(edge) +
+                " soneaSize=" + sonea.size() +
+                " sonebSize=" + soneb.size());
         }
         else {
-            soneb.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(he.previous().parentEdge));
+            _PolyhedralBoundedSolidSetOperatorNullEdge edge;
+            edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
+                he.previous().parentEdge);
+            soneb.add(edge);
+            tracePipelineSummary(
+                "emit " + traceContext +
+                " separateInterior orient=" + orient +
+                " source=" + summarizeHalfEdge(he) +
+                " inserted=" + summarizeNullEdge(edge) +
+                " soneaSize=" + sonea.size() +
+                " sonebSize=" + soneb.size());
         }
 
     }
@@ -624,6 +857,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     */
     private static void vertexVertexInsertNullEdges(
         _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
+        int op,
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
@@ -655,6 +889,9 @@ final class _PolyhedralBoundedSolidSetClassifier
 
         i = 0;
         while ( true ) {
+            String traceContext;
+            int firstSectorIndex;
+            int secondSectorIndex;
             //-------------------------------------------------------------
             if ( i >= data.sectors.size() ) {
                 return;
@@ -665,6 +902,7 @@ final class _PolyhedralBoundedSolidSetClassifier
                     return;
                 }
             }
+            firstSectorIndex = i;
             if ( data.sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = data.nba.get(data.sectors.get(i).secta).he;
             }
@@ -672,13 +910,16 @@ final class _PolyhedralBoundedSolidSetClassifier
                 ha2 = data.nba.get(data.sectors.get(i).secta).he;
             }
             if ( data.sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                hb1 = data.nbb.get(data.sectors.get(i).sectb).he;
+                hb1 = resolveBEndpointCandidate(data, i, true, hb1, hb2);
                 i++;
             }
             else {
-                hb2 = data.nbb.get(data.sectors.get(i).sectb).he;
+                hb2 = resolveBEndpointCandidate(data, i, false, hb1, hb2);
                 i++;
             }
+            traceVertexVertexDecisionStep(
+                data, op, "first-sector", firstSectorIndex,
+                ha1, ha2, hb1, hb2);
 
             //-------------------------------------------------------------
             if ( i >= data.sectors.size() ) {
@@ -690,6 +931,7 @@ final class _PolyhedralBoundedSolidSetClassifier
                     return;
                 }
             }
+            secondSectorIndex = i;
             if ( data.sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 ha1 = data.nba.get(data.sectors.get(i).secta).he;
             }
@@ -697,13 +939,16 @@ final class _PolyhedralBoundedSolidSetClassifier
                 ha2 = data.nba.get(data.sectors.get(i).secta).he;
             }
             if ( data.sectors.get(i).s1b == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                hb1 = data.nbb.get(data.sectors.get(i).sectb).he;
+                hb1 = resolveBEndpointCandidate(data, i, true, hb1, hb2);
                 i++;
             }
             else {
-                hb2 = data.nbb.get(data.sectors.get(i).sectb).he;
+                hb2 = resolveBEndpointCandidate(data, i, false, hb1, hb2);
                 i++;
             }
+            traceVertexVertexDecisionStep(
+                data, op, "second-sector", secondSectorIndex,
+                ha1, ha2, hb1, hb2);
 
             //-------------------------------------------------------------
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
@@ -744,27 +989,57 @@ final class _PolyhedralBoundedSolidSetClassifier
 
             //-------------------------------------------------------------
             if ( ha1 == ha2 ) {
+                traceVertexVertexDecisionReason(
+                    op, i, "STRUT_A",
+                    "ha1==ha2 after sector accumulation",
+                    ha1, ha2, hb1, hb2);
+                traceContext = formatVertexVertexTraceContext(
+                    op, i, "STRUT_A", "separate", 0);
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT A CASE");
                 }
                 separateInterior(ha1, 0, getOrientation(ha1, hb1, hb2),
+                    traceContext,
                     inSolidA, inSolidB);
-                separateEdgeSequence(hb1, hb2, 1, inSolidA, inSolidB);
+                separateEdgeSequence(hb1, hb2, 1,
+                    formatVertexVertexTraceContext(
+                        op, i, "STRUT_A", "separate", 1),
+                    inSolidA, inSolidB);
             }
             else if ( hb1 == hb2 ) {
+                traceVertexVertexDecisionReason(
+                    op, i, "STRUT_B",
+                    "hb1==hb2 after sector accumulation",
+                    ha1, ha2, hb1, hb2);
+                traceContext = formatVertexVertexTraceContext(
+                    op, i, "STRUT_B", "separate", 1);
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT B CASE");
                 }
                 separateInterior(hb1, 1, getOrientation(hb1, ha2, ha1),
+                    traceContext,
                     inSolidA, inSolidB);
-                separateEdgeSequence(ha2, ha1, 0, inSolidA, inSolidB);
+                separateEdgeSequence(ha2, ha1, 0,
+                    formatVertexVertexTraceContext(
+                        op, i, "STRUT_B", "separate", 0),
+                    inSolidA, inSolidB);
             }
             else {
+                traceVertexVertexDecisionReason(
+                    op, i, "PARALLEL",
+                    "ha1!=ha2 and hb1!=hb2",
+                    ha1, ha2, hb1, hb2);
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . PARALLEL CASE");
                 }
-                separateEdgeSequence(ha2, ha1, 0, inSolidA, inSolidB);
-                separateEdgeSequence(hb1, hb2, 1, inSolidA, inSolidB);
+                separateEdgeSequence(ha2, ha1, 0,
+                    formatVertexVertexTraceContext(
+                        op, i, "PARALLEL", "separate", 0),
+                    inSolidA, inSolidB);
+                separateEdgeSequence(hb1, hb2, 1,
+                    formatVertexVertexTraceContext(
+                        op, i, "PARALLEL", "separate", 1),
+                    inSolidA, inSolidB);
             }
             if ( i == data.sectors.size() ) {
                 return;
@@ -789,7 +1064,7 @@ final class _PolyhedralBoundedSolidSetClassifier
 
         data = _PolyhedralBoundedSolidSetVertexVertexClassifier.classify(
             va, vb, op, debugFlags);
-        vertexVertexInsertNullEdges(data, inSolidA, inSolidB);
+        vertexVertexInsertNullEdges(data, op, inSolidA, inSolidB);
     }
 
     /**
