@@ -3,7 +3,12 @@ package vsdk.toolkit.render;
 import vsdk.toolkit.media.Image;
 
 /**
-Represents an image sub-region bound to a target image sink.
+Represents an absolute sub-region of a target output image.
+
+The origin and end coordinates are expressed in the coordinate system of the
+target image. Rendering code must iterate from x0 to x1 and y0 to y1, and
+write directly to the target image at those absolute coordinates. The width
+and height values are extents, not a local coordinate system.
 */
 public class Tile
 {
@@ -59,5 +64,15 @@ public class Tile
     public int getDy()
     {
         return dy;
+    }
+
+    public int getX1()
+    {
+        return x0 + dx;
+    }
+
+    public int getY1()
+    {
+        return y0 + dy;
     }
 }

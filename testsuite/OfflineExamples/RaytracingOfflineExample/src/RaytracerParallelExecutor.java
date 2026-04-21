@@ -11,7 +11,6 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.ProgressMonitor;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.Raytracer;
 import vsdk.toolkit.render.Tile;
 import vsdk.toolkit.render.TileGenerationStrategy;
@@ -33,14 +32,14 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
             resultingImage.getYSize(),
             numberOfThreads);
         ConcurrentLinkedQueue<Tile> pendingTiles =
-            new ConcurrentLinkedQueue<Tile>(tileGenerator.getTiles());
+            new ConcurrentLinkedQueue<>(tileGenerator.getTiles());
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
 
         if ( reporter != null ) {
             reporter.begin();
         }
         try {
-            List<Future<List<TileRenderResult>>> futures =
+            List<Future<Void>> futures =
                 startWorkers(
                     executorService,
                     numberOfThreads,
@@ -48,7 +47,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
                     resultingImage,
                     rendererConfiguration,
                     sceneSnapshot);
-            joinRenderedTiles(resultingImage, pendingTiles, futures);
+            awaitWorkers(pendingTiles, futures);
         }
         catch ( InterruptedException e ) {
             Thread.currentThread().interrupt();
@@ -65,7 +64,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         }
     }
 
-    private List<Future<List<TileRenderResult>>> startWorkers(
+    private List<Future<Void>> startWorkers(
         ExecutorService executorService,
         int numberOfThreads,
         ConcurrentLinkedQueue<Tile> pendingTiles,
@@ -73,114 +72,59 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot)
     {
-        ArrayList<Future<List<TileRenderResult>>> futures =
-            new ArrayList<Future<List<TileRenderResult>>>(numberOfThreads);
+        ArrayList<Future<Void>> futures =
+            new ArrayList<>(numberOfThreads);
 
         for ( int i = 0; i < numberOfThreads; i++ ) {
             futures.add(executorService.submit(new TileWorker(
                 pendingTiles,
-                resultingImage.getXSize(),
-                resultingImage.getYSize(),
+                resultingImage,
                 rendererConfiguration,
                 sceneSnapshot)));
         }
         return futures;
     }
 
-    private void joinRenderedTiles(
-        RGBImage resultingImage,
+    private void awaitWorkers(
         ConcurrentLinkedQueue<Tile> pendingTiles,
-        List<Future<List<TileRenderResult>>> futures)
+        List<Future<Void>> futures)
         throws InterruptedException, ExecutionException
     {
-        for ( Future<List<TileRenderResult>> future : futures ) {
-            copyTiles(resultingImage, future.get());
+        for ( Future<Void> future : futures ) {
+            future.get();
         }
         if ( !pendingTiles.isEmpty() ) {
             throw new IllegalStateException("Parallel raytracing finished with pending tiles");
         }
     }
 
-    private void copyTiles(RGBImage resultingImage, List<TileRenderResult> tileResults)
-    {
-        RGBPixel pixel = new RGBPixel();
-
-        for ( TileRenderResult tileResult : tileResults ) {
-            Tile tile = tileResult.tile;
-            RGBImage tileImage = tileResult.image;
-            int x1 = tile.getX0() + tile.getDx();
-            int y1 = tile.getY0() + tile.getDy();
-
-            for ( int y = tile.getY0(); y < y1; y++ ) {
-                for ( int x = tile.getX0(); x < x1; x++ ) {
-                    tileImage.getPixelRgb(x, y, pixel);
-                    resultingImage.putPixelRgb(x, y, pixel);
-                }
-            }
-        }
-    }
-
-    private static final class TileWorker
-        implements Callable<List<TileRenderResult>>
-    {
-        private final ConcurrentLinkedQueue<Tile> pendingTiles;
-        private final int imageWidth;
-        private final int imageHeight;
-        private final RendererConfiguration rendererConfiguration;
-        private final SimpleSceneSnapshot sceneSnapshot;
-
-        private TileWorker(
-            ConcurrentLinkedQueue<Tile> pendingTiles,
-            int imageWidth,
-            int imageHeight,
-            RendererConfiguration rendererConfiguration,
-            SimpleSceneSnapshot sceneSnapshot)
-        {
-            this.pendingTiles = pendingTiles;
-            this.imageWidth = imageWidth;
-            this.imageHeight = imageHeight;
-            this.rendererConfiguration = rendererConfiguration;
-            this.sceneSnapshot = sceneSnapshot;
-        }
+    private record TileWorker(
+        ConcurrentLinkedQueue<Tile> pendingTiles,
+        RGBImage resultingImage,
+        RendererConfiguration rendererConfiguration,
+        SimpleSceneSnapshot sceneSnapshot)
+        implements Callable<Void> {
 
         @Override
-        public List<TileRenderResult> call()
+        public Void call()
         {
-            ArrayList<TileRenderResult> renderedTiles =
-                new ArrayList<TileRenderResult>();
             Tile tile;
+            Raytracer raytracer = new Raytracer();
 
             while ( (tile = pendingTiles.poll()) != null ) {
-                RGBImage tileImage = new RGBImage();
-                if ( !tileImage.initNoFill(imageWidth, imageHeight) ) {
-                    throw new IllegalStateException("Error creating tile image");
-                }
-                Raytracer raytracer = new Raytracer();
                 raytracer.execute(
-                    tileImage,
+                    resultingImage,
                     rendererConfiguration,
                     sceneSnapshot,
                     null,
                     null,
                     tile.getX0(),
                     tile.getY0(),
-                    tile.getX0() + tile.getDx(),
-                    tile.getY0() + tile.getDy());
-                renderedTiles.add(new TileRenderResult(tile, tileImage));
+                    tile.getX1(),
+                    tile.getY1());
             }
 
-            return renderedTiles;
-        }
-    }
-
-    private static final class TileRenderResult {
-        private final Tile tile;
-        private final RGBImage image;
-
-        private TileRenderResult(Tile tile, RGBImage image)
-        {
-            this.tile = tile;
-            this.image = image;
+            return null;
         }
     }
 }
