@@ -171,6 +171,15 @@ class BooleansFromReferenceObjectPairsTest
             pairCase(CsgSampleCorpus.STACKED_BLOCKS,
                 ReferenceBooleanOperation.UNION,
                 expectedSTACKED_BLOCKSUnion()),
+            pairCase(CsgSampleCorpus.STACKED_BLOCKS,
+                ReferenceBooleanOperation.INTERSECTION,
+                expectedSTACKED_BLOCKSIntersection()),
+            pairCase(CsgSampleCorpus.STACKED_BLOCKS,
+                ReferenceBooleanOperation.DIFFERENCE_A_MINUS_B,
+                expectedSTACKED_BLOCKSDifferenceAB()),
+            pairCase(CsgSampleCorpus.STACKED_BLOCKS,
+                ReferenceBooleanOperation.DIFFERENCE_B_MINUS_A,
+                expectedSTACKED_BLOCKSDifferenceBA()),
 
             pairCase(CsgSampleCorpus.MOON_BLOCK,
                 ReferenceBooleanOperation.UNION, expectedMOON_BLOCKUnion()),
@@ -229,6 +238,9 @@ class BooleansFromReferenceObjectPairsTest
     private static TopologicalSummary expectedMANT1986_2DifferenceAB() { return TopologicalSummary.of(1, 9, 21, 14, 9, 0, 2, new int[] {9}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6, 6}, new long[] {0L, 0L, 0L, 1000000L, 500000L, 600000L}); }
     private static TopologicalSummary expectedMANT1986_2DifferenceBA() { return TopologicalSummary.of(1, 9, 21, 14, 9, 0, 2, new int[] {9}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6, 6}, new long[] {240000L, -180000L, 420000L, 1240000L, 320000L, 1020000L}); }
     private static TopologicalSummary expectedSTACKED_BLOCKSUnion() { return TopologicalSummary.of(1, 14, 32, 20, 14, 0, 2, new int[] {14}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6}, new long[] {0L, 0L, 0L, 1000000L, 1000000L, 600000L}); }
+    private static TopologicalSummary expectedSTACKED_BLOCKSIntersection() { return TopologicalSummary.of(1, 2, 4, 4, 2, 0, 2, new int[] {2}, new int[] {1, 1}, new int[] {4, 4}, new long[] {250000L, 250000L, 300000L, 750000L, 750000L, 300000L}); }
+    private static TopologicalSummary expectedSTACKED_BLOCKSDifferenceAB() { return TopologicalSummary.of(1, 6, 12, 8, 6, 0, 2, new int[] {6}, new int[] {1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4}, new long[] {0L, 250000L, 0L, 1000000L, 750000L, 300000L}); }
+    private static TopologicalSummary expectedSTACKED_BLOCKSDifferenceBA() { return TopologicalSummary.of(1, 6, 12, 8, 6, 0, 2, new int[] {6}, new int[] {1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4}, new long[] {250000L, 0L, 300000L, 750000L, 1000000L, 600000L}); }
     private static TopologicalSummary expectedMOON_BLOCKUnion() { return TopologicalSummary.of(1, 76, 222, 148, 76, 0, 2, new int[] {76}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 36, 36, 38, 38}, new long[] {50000L, 50000L, -450000L, 1325000L, 1050000L, 1550000L}); }
     private static TopologicalSummary expectedMOON_BLOCKIntersection() { return TopologicalSummary.of(1, 34, 96, 64, 34, 0, 2, new int[] {34}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 32, 32}, new long[] {325000L, 71175L, 50000L, 1050000L, 1028825L, 1050000L}); }
     private static TopologicalSummary expectedMOON_BLOCKDifferenceAB() { return TopologicalSummary.of(1, 40, 114, 76, 40, 0, 2, new int[] {40}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 38, 38}, new long[] {50000L, 50000L, 50000L, 687500L, 1050000L, 1050000L}); }
