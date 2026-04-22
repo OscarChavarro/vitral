@@ -2065,6 +2065,17 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidB, "outputB_stage01");
         }
 
+        PolyhedralBoundedSolid coplanarAreaContactResult =
+            _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                .runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op);
+        if ( coplanarAreaContactResult != null ) {
+            res = coplanarAreaContactResult;
+            if ( res.polygonsList.size() > 0 ) {
+                postProcessResult(res, maximizeResultFaces);
+            }
+            return res;
+        }
+
         if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             if ( res.polygonsList.size() > 0 ) {

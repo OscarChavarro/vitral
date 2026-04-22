@@ -8,12 +8,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 /**
@@ -56,6 +59,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
         if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+            return false;
+        }
+
+        if ( hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB) ) {
             return false;
         }
 
@@ -110,6 +117,50 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return outRes;
         }
         outRes.merge(inSolidA);
+        return outRes;
+    }
+
+    static PolyhedralBoundedSolid runPartialCoplanarFaceAreaCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op)
+    {
+        ArrayList<ArrayList<Vector3D>> contactPolygons;
+        int i;
+
+        if ( op == UNION ) {
+            return null;
+        }
+
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
+
+        if ( hasConfirmedInteriorOverlap(inSolidA, inSolidB) ||
+             hasProperEdgeFaceIntersection(inSolidA, inSolidB) ||
+             hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+            return null;
+        }
+
+        contactPolygons = partialCoplanarFaceAreaOverlapPolygons(inSolidA,
+            inSolidB);
+        if ( contactPolygons.isEmpty() ) {
+            return null;
+        }
+
+        if ( op == SUBTRACT ) {
+            outRes.merge(inSolidA);
+            return outRes;
+        }
+
+        for ( i = 0; i < contactPolygons.size(); i++ ) {
+            PolyhedralBoundedSolid lamina =
+                createLaminaFromPolygon(contactPolygons.get(i));
+            if ( lamina.polygonsList.size() > 0 ) {
+                outRes.merge(lamina);
+            }
+        }
+
         return outRes;
     }
 
@@ -506,5 +557,482 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             }
         }
         return false;
+    }
+
+    private static boolean hasPartialCoplanarFaceAreaOverlap(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        int i, j;
+
+        if ( solidA == null || solidB == null ) {
+            return false;
+        }
+
+        for ( i = 0; i < solidA.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solidA.polygonsList.get(i);
+            for ( j = 0; j < solidB.polygonsList.size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = solidB.polygonsList.get(j);
+                if ( coplanarFaces(faceA, faceB) &&
+                     partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static ArrayList<ArrayList<Vector3D>>
+    partialCoplanarFaceAreaOverlapPolygons(PolyhedralBoundedSolid solidA,
+                                           PolyhedralBoundedSolid solidB)
+    {
+        ArrayList<ArrayList<Vector3D>> polygons;
+        int i, j;
+
+        polygons = new ArrayList<ArrayList<Vector3D>>();
+        if ( solidA == null || solidB == null ) {
+            return polygons;
+        }
+
+        for ( i = 0; i < solidA.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solidA.polygonsList.get(i);
+            for ( j = 0; j < solidB.polygonsList.size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = solidB.polygonsList.get(j);
+                if ( coplanarFaces(faceA, faceB) &&
+                     partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
+                    ArrayList<Vector3D> polygon =
+                        coplanarFaceIntersectionPolygon(faceA, faceB);
+                    if ( polygon.size() >= 3 ) {
+                        polygons.add(polygon);
+                    }
+                }
+            }
+        }
+
+        return polygons;
+    }
+
+    private static boolean coplanarFaces(_PolyhedralBoundedSolidFace faceA,
+                                         _PolyhedralBoundedSolidFace faceB)
+    {
+        if ( faceA == null || faceB == null ||
+             faceA.getContainingPlane() == null ||
+             faceB.getContainingPlane() == null ) {
+            return false;
+        }
+        if ( !PolyhedralBoundedSolidNumericPolicy.unitVectorsParallel(
+                 faceA.getContainingPlane().getNormal(),
+                 faceB.getContainingPlane().getNormal(), numericContext) ) {
+            return false;
+        }
+        if ( faceB.boundariesList.size() < 1 ||
+             faceB.boundariesList.get(0).boundaryStartHalfEdge == null ) {
+            return false;
+        }
+
+        return Math.abs(faceA.getContainingPlane().pointDistance(
+            faceB.boundariesList.get(0).boundaryStartHalfEdge
+                .startingVertex.position)) <= numericContext.bigEpsilon();
+    }
+
+    private static boolean partialCoplanarFaceAreaOverlap(
+        _PolyhedralBoundedSolidFace faceA,
+        _PolyhedralBoundedSolidFace faceB)
+    {
+        if ( faceHasInteriorVertexOrEdgeMidpoint(faceA, faceB) ||
+             faceHasInteriorVertexOrEdgeMidpoint(faceB, faceA) ) {
+            return true;
+        }
+
+        return faceBoundariesCrossProperly(faceA, faceB);
+    }
+
+    private static ArrayList<Vector3D> coplanarFaceIntersectionPolygon(
+        _PolyhedralBoundedSolidFace faceA,
+        _PolyhedralBoundedSolidFace faceB)
+    {
+        ArrayList<Vector3D> points;
+
+        points = new ArrayList<Vector3D>();
+        appendFaceVerticesInsideOther(points, faceA, faceB);
+        appendFaceVerticesInsideOther(points, faceB, faceA);
+        appendBoundaryIntersections(points, faceA, faceB);
+        sortCoplanarPolygon(points, faceA.getContainingPlane().getNormal());
+
+        if ( coplanarPolygonAreaMagnitude(points,
+                 faceA.getContainingPlane().getNormal()) <=
+             numericContext.bigEpsilon() * numericContext.bigEpsilon() ) {
+            points.clear();
+        }
+
+        return points;
+    }
+
+    private static void appendFaceVerticesInsideOther(
+        ArrayList<Vector3D> points,
+        _PolyhedralBoundedSolidFace source,
+        _PolyhedralBoundedSolidFace target)
+    {
+        int i;
+
+        for ( i = 0; i < source.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = source.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge he;
+
+            if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+                continue;
+            }
+            start = loop.boundaryStartHalfEdge;
+            he = start;
+            do {
+                if ( target.testPointInside(he.startingVertex.position,
+                         numericContext.bigEpsilon()) != Geometry.OUTSIDE ) {
+                    appendUniquePoint(points, he.startingVertex.position);
+                }
+                he = he.next();
+            } while ( he != null && he != start );
+        }
+    }
+
+    private static void appendBoundaryIntersections(
+        ArrayList<Vector3D> points,
+        _PolyhedralBoundedSolidFace faceA,
+        _PolyhedralBoundedSolidFace faceB)
+    {
+        int i, j;
+        int dominantCoordinate = dominantCoordinateForFace(faceA);
+
+        for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loopA = faceA.boundariesList.get(i);
+            if ( loopA == null ) {
+                continue;
+            }
+            for ( j = 0; j < faceB.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loopB = faceB.boundariesList.get(j);
+                if ( loopB != null ) {
+                    appendLoopIntersections(points, loopA, loopB,
+                        dominantCoordinate);
+                }
+            }
+        }
+    }
+
+    private static void appendLoopIntersections(
+        ArrayList<Vector3D> points,
+        _PolyhedralBoundedSolidLoop loopA,
+        _PolyhedralBoundedSolidLoop loopB,
+        int dominantCoordinate)
+    {
+        int i, j;
+
+        for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);
+            if ( heA == null || heA.next() == null ) {
+                continue;
+            }
+            for ( j = 0; j < loopB.halfEdgesList.size(); j++ ) {
+                _PolyhedralBoundedSolidHalfEdge heB =
+                    loopB.halfEdgesList.get(j);
+                if ( heB == null || heB.next() == null ) {
+                    continue;
+                }
+                appendSegmentIntersection(points, heA, heB,
+                    dominantCoordinate);
+            }
+        }
+    }
+
+    private static void appendSegmentIntersection(
+        ArrayList<Vector3D> points,
+        _PolyhedralBoundedSolidHalfEdge heA,
+        _PolyhedralBoundedSolidHalfEdge heB,
+        int dominantCoordinate)
+    {
+        Vector2D a1 = projectPointTo2D(heA.startingVertex.position,
+            dominantCoordinate);
+        Vector2D a2 = projectPointTo2D(heA.next().startingVertex.position,
+            dominantCoordinate);
+        Vector2D b1 = projectPointTo2D(heB.startingVertex.position,
+            dominantCoordinate);
+        Vector2D b2 = projectPointTo2D(heB.next().startingVertex.position,
+            dominantCoordinate);
+        double den;
+        double t;
+        Vector2D da;
+        Vector2D db;
+        Vector2D ba;
+
+        if ( !segmentsCrossProperly2D(a1, a2, b1, b2) ) {
+            return;
+        }
+
+        da = new Vector2D(a2.x() - a1.x(), a2.y() - a1.y());
+        db = new Vector2D(b2.x() - b1.x(), b2.y() - b1.y());
+        ba = new Vector2D(b1.x() - a1.x(), b1.y() - a1.y());
+        den = cross2D(da, db);
+        if ( Math.abs(den) <= numericContext.bigEpsilon() ) {
+            return;
+        }
+
+        t = cross2D(ba, db) / den;
+        appendUniquePoint(points, heA.startingVertex.position.add(
+            heA.next().startingVertex.position
+                .subtract(heA.startingVertex.position).multiply(t)));
+    }
+
+    private static double cross2D(Vector2D a, Vector2D b)
+    {
+        return a.x()*b.y() - a.y()*b.x();
+    }
+
+    private static void appendUniquePoint(ArrayList<Vector3D> points,
+                                          Vector3D point)
+    {
+        int i;
+
+        for ( i = 0; i < points.size(); i++ ) {
+            if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                    points.get(i), point, numericContext) ) {
+                return;
+            }
+        }
+        points.add(new Vector3D(point));
+    }
+
+    private static void sortCoplanarPolygon(ArrayList<Vector3D> points,
+                                            Vector3D normal)
+    {
+        Vector3D center;
+        Vector3D u;
+        Vector3D v;
+        Vector3D n;
+        int i;
+
+        if ( points.size() < 3 ) {
+            return;
+        }
+
+        center = new Vector3D();
+        for ( i = 0; i < points.size(); i++ ) {
+            center = center.add(points.get(i));
+        }
+        center = center.multiply(1.0 / points.size());
+
+        n = new Vector3D(normal).normalized();
+        u = points.get(0).subtract(center);
+        if ( u.length() <= numericContext.bigEpsilon() ) {
+            return;
+        }
+        u = u.normalized();
+        v = n.crossProduct(u).normalized();
+
+        final Vector3D sortCenter = center;
+        final Vector3D sortU = u;
+        final Vector3D sortV = v;
+        Collections.sort(points, (p1, p2) -> {
+            Vector3D d1 = p1.subtract(sortCenter);
+            Vector3D d2 = p2.subtract(sortCenter);
+            double a1 = Math.atan2(d1.dotProduct(sortV),
+                d1.dotProduct(sortU));
+            double a2 = Math.atan2(d2.dotProduct(sortV),
+                d2.dotProduct(sortU));
+            return Double.compare(a1, a2);
+        });
+    }
+
+    private static double coplanarPolygonAreaMagnitude(
+        ArrayList<Vector3D> points,
+        Vector3D normal)
+    {
+        Vector3D accumulator;
+        int i;
+
+        if ( points.size() < 3 ) {
+            return 0.0;
+        }
+
+        accumulator = new Vector3D();
+        for ( i = 0; i < points.size(); i++ ) {
+            Vector3D p = points.get(i);
+            Vector3D q = points.get((i+1)%points.size());
+            accumulator = accumulator.add(p.crossProduct(q));
+        }
+
+        return Math.abs(accumulator.dotProduct(normal.normalized())) * 0.5;
+    }
+
+    private static PolyhedralBoundedSolid createLaminaFromPolygon(
+        ArrayList<Vector3D> points)
+    {
+        PolyhedralBoundedSolid solid;
+        int i;
+
+        solid = new PolyhedralBoundedSolid();
+        if ( points.size() < 3 ) {
+            return solid;
+        }
+
+        solid.mvfs(points.get(0), 1, 1);
+        for ( i = 1; i < points.size(); i++ ) {
+            solid.smev(1, i, i+1, points.get(i));
+        }
+        solid.smef(1, points.size(), 1, 2);
+        return solid;
+    }
+
+    private static boolean faceHasInteriorVertexOrEdgeMidpoint(
+        _PolyhedralBoundedSolidFace source,
+        _PolyhedralBoundedSolidFace target)
+    {
+        int i;
+
+        for ( i = 0; i < source.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = source.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge he;
+
+            if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+                continue;
+            }
+            start = loop.boundaryStartHalfEdge;
+            he = start;
+            do {
+                if ( target.testPointInside(he.startingVertex.position,
+                         numericContext.bigEpsilon()) == Geometry.INSIDE ) {
+                    return true;
+                }
+                if ( he.next() != null ) {
+                    Vector3D midpoint = he.startingVertex.position.add(
+                        he.next().startingVertex.position
+                            .subtract(he.startingVertex.position)
+                            .multiply(0.5));
+                    if ( target.testPointInside(midpoint,
+                             numericContext.bigEpsilon()) ==
+                         Geometry.INSIDE ) {
+                        return true;
+                    }
+                }
+                he = he.next();
+            } while ( he != null && he != start );
+        }
+
+        return false;
+    }
+
+    private static boolean faceBoundariesCrossProperly(
+        _PolyhedralBoundedSolidFace faceA,
+        _PolyhedralBoundedSolidFace faceB)
+    {
+        int i, j;
+        int dominantCoordinate = dominantCoordinateForFace(faceA);
+
+        for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loopA = faceA.boundariesList.get(i);
+            if ( loopA == null ) {
+                continue;
+            }
+            for ( j = 0; j < faceB.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loopB = faceB.boundariesList.get(j);
+                if ( loopB != null &&
+                     loopsCrossProperly(loopA, loopB, dominantCoordinate) ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean loopsCrossProperly(_PolyhedralBoundedSolidLoop loopA,
+                                              _PolyhedralBoundedSolidLoop loopB,
+                                              int dominantCoordinate)
+    {
+        int i, j;
+
+        for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);
+            if ( heA == null || heA.next() == null ) {
+                continue;
+            }
+            Vector2D a1 = projectPointTo2D(heA.startingVertex.position,
+                dominantCoordinate);
+            Vector2D a2 = projectPointTo2D(heA.next().startingVertex.position,
+                dominantCoordinate);
+
+            for ( j = 0; j < loopB.halfEdgesList.size(); j++ ) {
+                _PolyhedralBoundedSolidHalfEdge heB =
+                    loopB.halfEdgesList.get(j);
+                if ( heB == null || heB.next() == null ) {
+                    continue;
+                }
+                Vector2D b1 = projectPointTo2D(heB.startingVertex.position,
+                    dominantCoordinate);
+                Vector2D b2 = projectPointTo2D(
+                    heB.next().startingVertex.position, dominantCoordinate);
+                if ( segmentsCrossProperly2D(a1, a2, b1, b2) ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
+    {
+        Vector3D n = face.getContainingPlane().getNormal();
+
+        if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
+             Math.abs(n.x()) >= Math.abs(n.z()) ) {
+            return 1;
+        }
+        if ( Math.abs(n.y()) >= Math.abs(n.x()) &&
+             Math.abs(n.y()) >= Math.abs(n.z()) ) {
+            return 2;
+        }
+        return 3;
+    }
+
+    private static Vector2D projectPointTo2D(Vector3D in,
+                                             int dominantCoordinate)
+    {
+        if ( dominantCoordinate == 1 ) {
+            return new Vector2D(in.y(), in.z());
+        }
+        if ( dominantCoordinate == 2 ) {
+            return new Vector2D(in.x(), in.z());
+        }
+        return new Vector2D(in.x(), in.y());
+    }
+
+    private static double orientation2D(Vector2D a, Vector2D b, Vector2D c)
+    {
+        return (b.x()-a.x())*(c.y()-a.y()) -
+            (b.y()-a.y())*(c.x()-a.x());
+    }
+
+    private static boolean segmentsCrossProperly2D(Vector2D a1, Vector2D a2,
+                                                   Vector2D b1, Vector2D b2)
+    {
+        double o1 = orientation2D(a1, a2, b1);
+        double o2 = orientation2D(a1, a2, b2);
+        double o3 = orientation2D(b1, b2, a1);
+        double o4 = orientation2D(b1, b2, a2);
+        double tolerance = PolyhedralBoundedSolidNumericPolicy
+            .orientationTolerance2D(a1, a2, b1, numericContext);
+
+        tolerance = Math.max(tolerance, PolyhedralBoundedSolidNumericPolicy
+            .orientationTolerance2D(a1, a2, b2, numericContext));
+        tolerance = Math.max(tolerance, PolyhedralBoundedSolidNumericPolicy
+            .orientationTolerance2D(b1, b2, a1, numericContext));
+        tolerance = Math.max(tolerance, PolyhedralBoundedSolidNumericPolicy
+            .orientationTolerance2D(b1, b2, a2, numericContext));
+
+        return (o1 > tolerance && o2 < -tolerance ||
+                o1 < -tolerance && o2 > tolerance) &&
+               (o3 > tolerance && o4 < -tolerance ||
+                o3 < -tolerance && o4 > tolerance);
     }
 }

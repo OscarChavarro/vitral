@@ -12,6 +12,7 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -168,6 +169,43 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
                 pair[1])).booleanValue();
 
         assertThat(touchingOnly).isTrue();
+    }
+
+    @Test
+    void given_stackedBlocksWithPartialFaceOverlap_when_runningTouchingOnlyPreflight_then_itDoesNotDowngradeToTouching()
+        throws Exception
+    {
+        PolyhedralBoundedSolid[] pair = CsgSampleCorpusFixtures.createPair(
+            CsgSampleCorpus.STACKED_BLOCKS);
+
+        setNumericContextMethod.invoke(null,
+            PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
+
+        boolean touchingOnly =
+            ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
+                pair[1])).booleanValue();
+
+        assertThat(touchingOnly).isFalse();
+    }
+
+    @Test
+    void given_stackedBlocksWithPartialFaceOverlap_when_intersecting_then_itReturnsContactLamina()
+    {
+        PolyhedralBoundedSolid[] pair = CsgSampleCorpusFixtures.createPair(
+            CsgSampleCorpus.STACKED_BLOCKS);
+
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            pair[0], pair[1], PolyhedralBoundedSolidModeler.INTERSECTION,
+            false);
+        double[] minmax = result.getMinMax();
+
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(result.polygonsList.size()).isEqualTo(2);
+        assertThat(result.edgesList.size()).isEqualTo(4);
+        assertThat(result.verticesList.size()).isEqualTo(4);
+        assertThat(minmax)
+            .containsExactly(0.25, 0.25, 0.3, 0.75, 0.75, 0.3);
     }
 
     @Test
