@@ -58,13 +58,7 @@ Treat vertex/vertex classification as the highest-risk Boolean phase. Coincident
 
 Recovery should preserve traceability of `nba`, `nbb`, sector pairs, `intersect` flags, and chosen `ha1`, `ha2`, `hb1`, `hb2`. If endpoint recovery is used, prove it does not change legacy-good cases. If legacy rules are used, identify which intersection/difference cases lose necessary side/orientation information.
 
-### (8) Predicates
-
-Predicates must be classified as permissive legacy predicates or precise geometric predicates. Do not silently replace one with the other. A permissive predicate such as legacy `sectoroverlap` can recover old Boolean behavior while also creating false positives in tangential or separated coplanar cases.
-
-When recovering this level, keep predicate tests grouped by intent: overlap, boundary-only contact, disjoint coplanar intervals, reversed orientation, and degenerate sectors. If a Boolean phase requires permissive behavior, name that behavior explicitly and avoid presenting it as mathematically exact.
-
-### (9) Tests
+### (8) Tests
 
 Treat disabled tests as a work queue, not as discarded coverage. Each disabled test should state whether it conflicts with legacy behavior, hits a known fatal path, or encodes a newer experimental strategy. Do not re-enable a broad corpus all at once.
 
@@ -78,44 +72,115 @@ Following table covers two commited versions of PolyhedralBoundedSolid suport:
 
 Having a green check means test worked, red cross means test not working and empty means not covered - not checked.
 
-| model name / operation | legacy logic | new logic | change (1) | change (2) | change (3) | change (4) | change (5) | change (6) | change (7) | change (8) | change (9) |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| MANT1986_2 + UNION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MANT1986_2 + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MANT1986_2 + A-B | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MANT1986_2 + B-A | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| STACKED_BLOCKS + UNION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| STACKED_BLOCKS + INTERSECTION | ❌ | ✅ | - | - | - | - | - | - | - | ⬆️ | - |
-| STACKED_BLOCKS + A-B | ❌ | ✅ | - | - | - | - | - | - | - | ⬆️ | - |
-| STACKED_BLOCKS + B-A | ❌ | ✅ | - | - | - | - | - | - | - | ⬆️ | - |
-| MOON_BLOCK + UNION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MOON_BLOCK + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MOON_BLOCK + A-B | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MOON_BLOCK + B-A | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| CROSS_PAIR + UNION | ✅ | ✅ | - | - | - | - | - | - | - | ⬇️ | - |
-| CROSS_PAIR + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| CROSS_PAIR + A-B | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| CROSS_PAIR + B-A | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| HOLLOW_BRICK + UNION | ✅ | ✅ | - | - | - | - | - | - | - | ⬇️ | - |
-| HOLLOW_BRICK + INTERSECTION | ✅ | ❌ | - | ⬇️ | - | - | - | - | - | ⬇️ | - |
-| HOLLOW_BRICK + A-B | ✅ | ❌ | - | ⬇️ | - | - | - | - | - | ⬇️ | - |
-| HOLLOW_BRICK + B-A | ✅ | ❌ | - | ⬇️ | - | - | - | - | - | ⬇️ | - |
-| MANT1988_6_13 + UNION | ❌ | ✅ |   |   |   |   |   |   |   | - |   |
-| MANT1988_6_13 + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_6_13 + A-B | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_6_13 + B-A | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_15_1 + UNION | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| MANT1988_15_1 + INTERSECTION | ✅ | ❌ | - | ⬇️ | - | - | - | - | - | ⬇️ | - |
-| MANT1988_15_1 + A-B | ✅ | ❌ | - | ⬇️ | - | - | - | - | - | ⬇️ | - |
-| MANT1988_15_1 + B-A | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1986_3 + UNION | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1986_3 + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1986_3 + A-B | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1986_3 + B-A | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_15_2_HOLED + UNION | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_15_2_HOLED + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - | - |   |
-| MANT1988_15_2_HOLED + A-B | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| MANT1988_15_2_HOLED + B-A | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
-| CSG_LAMP_SHELL | ✅ | ✅ | - | - | - | - | - | - | - | - | - |
-| FEATURED_OBJECT | ✅ | ❌ | - | - | - | - | ⬇️ | - | - | ⬇️ | - |
-| CSG_KURLANDER_BOWL | ❌ | ❌ | - | - | - | - | - | - | - | - |   |
+Current logic now also includes a post-matrix hardening in the `UNION`
+connect stage for `MANT1988_15_2_HOLED`: joins on side A preserve carrier
+loops instead of moving them to detached laminar shells. This is not one of
+the legacy changes (1)-(8), but it explains why the current logic now passes
+that specific UNION case.
+
+| model name / operation | current logic | new logic | change (1) | change (2) | change (3) | change (4) | change (5) | change (6) | change (7) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| MANT1986_2 + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MANT1986_2 + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MANT1986_2 + A-B | ✅ | ✅ | - | - | - | - | - | - | - |
+| MANT1986_2 + B-A | ✅ | ✅ | - | - | - | - | - | - | - |
+| STACKED_BLOCKS + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| STACKED_BLOCKS + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - |
+| STACKED_BLOCKS + A-B | ✅ | ✅ | - | - | - | - | - | - | - |
+| STACKED_BLOCKS + B-A | ✅ | ✅ | - | - | - | - | - | - | - |
+| MOON_BLOCK + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MOON_BLOCK + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MOON_BLOCK + A-B | ✅ | ✅ | - | - | - | - | - | - | - |
+| MOON_BLOCK + B-A | ✅ | ✅ | - | - | - | - | - | - | - |
+| CROSS_PAIR + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| CROSS_PAIR + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - | - |
+| CROSS_PAIR + A-B | ❌ | ❌ | - | - | - | - | - | - | - |
+| CROSS_PAIR + B-A | ❌ | ❌ | - | - | - | - | - | - | - |
+| HOLLOW_BRICK + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| HOLLOW_BRICK + INTERSECTION | ✅ | ❌ | - | ⬇️ | - | - | - | - | - |
+| HOLLOW_BRICK + A-B | ✅ | ❌ | - | ⬇️ | - | - | - | - | - |
+| HOLLOW_BRICK + B-A | ✅ | ❌ | - | ⬇️ | - | - | - | - | - |
+| MANT1988_6_13 + UNION | ❌ | ✅ | - | - | - | - | - | - | - |
+| MANT1988_6_13 + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_6_13 + A-B | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_6_13 + B-A | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_15_1 + UNION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MANT1988_15_1 + INTERSECTION | ✅ | ❌ | - | ⬇️ | - | - | - | - | - |
+| MANT1988_15_1 + A-B | ✅ | ❌ | - | ⬇️ | - | - | - | - | - |
+| MANT1988_15_1 + B-A | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1986_3 + UNION | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1986_3 + INTERSECTION | ❌ | ❌ | - | - | - | - | - | - |   |
+| MANT1986_3 + A-B | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1986_3 + B-A | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_15_2_HOLED + UNION | ✅ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_15_2_HOLED + INTERSECTION | ✅ | ✅ | - | - | - | - | - | - | - |
+| MANT1988_15_2_HOLED + A-B | ❌ | ❌ | - | - | - | - | - | - | - |
+| MANT1988_15_2_HOLED + B-A | ❌ | ❌ | - | - | - | - | - | - | - |
+| CSG_LAMP_SHELL | ✅ | ✅ | - | - | - | - | - | - | - |
+| FEATURED_OBJECT | ✅ | ❌ | - | - | - | - | ⬇️ | - | - |
+| CSG_KURLANDER_BOWL | ❌ | ❌ | - | - | - | - | - | - | - |
+
+# The block and wedge case
+
+The deviation of MANT1988_15_2 in UNION does not come from generate, nor from preflight, nor from the fine coplanar rules. The case breaks at the connect -> finish boundary: the pipeline correctly detects intersections, but ends up selecting the wrong shells from the block, and therefore the final result retains only the two external “sub-wedges”.
+
+What I confirmed
+The fixture is in base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/SimpleTestGeometryLibrary.java and the expected bug was already documented in base/src/test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidSetOperatorTest.java. To follow the case step by step, I left a harness in base/src/test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/Mant1988Section15_2UnionDiagnostic.java, without functional changes in the kernel.
+
+The observed sequence for createMant1988_15_2Pair(-1) and UNION was:
+	•	Preflight: neither the touching-only case nor the partial-coplanar case is triggered.
+	•	Generate: sonva=0, sonvb=6, sonvv=0. That is: no vertex/vertex; only six vertices of the wedge fall onto faces of the block.
+	•	Classify: sonea=6, soneb=6. Up to this point the case remains consistent. The block stays as 1 shell and the wedge as 1 shell, although with intermediate topology still not strictly valid.
+	•	Connect: here the strong deviation appears. The block becomes 3 shells with distribution [6, 2, 2]. Those two shells with 2 faces lie exactly on the input/output planes of the block (x=0.1375 and x=0.6375). The wedge remains as 1 shell.
+	•	Finish: the final result ends up with 2 shells [6, 6], with bbox [0.0, 0.225, 0.25] -> [0.775, 0.775, 0.55], which matches the volume of the wedge, not the block. This explains why visually you see “two shells with sub-wedges” and the main body of the block disappears.
+
+Why it ends up so strange
+The key detail is this: after connect, the main shell of the block still exists, but finish does not integrate it. In base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSetNullEdgesConnector.java, sonfa ends up pointing to the detached lateral caps, not to the large outer shell of the block. Then base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSetFinisher.java builds the UNION by moving exactly the faces referenced by sonfa/sonfb. Result: it integrates the two external wings of the wedge, but leaves out the main shell of the block.
+
+There are two observations that help rule out false paths:
+	•	Removing sortNullEdges() does not change the result. The ordering hypothesis does not explain this case.
+	•	Forcing different leftHalf/rightHalf in the connect split also does not change the final result in any useful way. This is not a simple “we are cutting with the wrong half-edge” problem.
+
+I also tested variants of the selector in finish:
+	•	Choosing orig/new on side A does not materially change anything.
+	•	Choosing orig/new on side B alternates between two incorrect outputs:
+	•	B orig: keeps the external wings.
+	•	B new: keeps the central core (intersection-like).
+This reinforces that the problem is not on the wedge side, but rather that from the block side no reference to the correct outer shell ever reaches finish.
+
+What would improve
+I do not recommend a heuristic patch based on bbox or “largest shell” directly inside finish; that would be fragile. The more sensible improvement is:
+	1.	Make connect/finish shell-aware for UNION, so that side A contributes the residual outer shell of the block, not only the interface faces recorded in sonfa.
+	2.	More specifically: review the contract of sonfa in the “only vertex/face from B to A” case. In this fixture, sonfa should end up representing the outer part of the block that survives the UNION, but currently it represents the detached interface caps.
+	3.	Once that is fixed, it would make sense to lock the case in base/src/test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/BooleansFromReferenceObjectPairsTest.java with an expected value of 1 shell for MANT1988_15_2_HOLED + UNION.
+
+Result
+	•	The UNION of MANT1988_15_2 is now fixed by default.
+	•	The correct result is now faces=14, edges=30, vertices=20, shells=1, strict=true, with bbox=[0.0, 0.0, 0.0, 0.775, 1.0, 0.6].
+	•	This matches the full block plus the two triangular protrusions, instead of the two lateral sub-wedges.
+
+Why it looked so strange
+	•	The real problem was not in generate nor in classify; at that stage the case was already reasonable.
+	•	In connect, on side A, the critical joins of the block ended up creating new faces from carrier faces 1 and 4.
+	•	In those joins, laringmv moved the inner loops out of the carrier faces and transferred them to new faces, leaving the main block without those loops.
+	•	That caused sonfa to point to faces that still had loops, but now inside laminar shells separated from the main shell of the block.
+	•	Then finish did exactly what it was told: movefac(sonfa[i]) moved those small lateral shells, not the outer shell of the block.
+	•	That is why the solid was intermediate-valid but geometrically unexpected: topologically it closed two lateral pieces, but had lost the outer shell that should survive the union.
+
+What I changed
+	•	I made the op explicit in the connect stage in base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidSetOperator.java:1891.
+	•	I split join into an overload with ring movement control in base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.java:253.
+	•	In UNION, joins on side A now preserve carrier loops instead of expelling them into separate shells, in base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSetNullEdgesConnector.java:398 and base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSetNullEdgesConnector.java:481.
+	•	I updated the regression for MANT1988_15_2_HOLED + UNION in base/src/test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidSetOperatorTest.java:231.
+	•	I left the ad-hoc diagnostic in base/src/test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/Mant1988Section15_2UnionDiagnostic.java to keep exploring variants if needed.
+
+The evidence that closed the hypothesis
+	•	With the previous behavior, the relevant A joins reported ringMove=true in the steps that converted oldFace=1 -> newFace=9 and oldFace=4 -> newFace=13.
+	•	Right there, faces 1 and 4 were left with a single loop and the useful loops were moved to lateral shells.
+	•	By preserving those rings in UNION, connectedA changes from shellFaceCounts=[2, 2, 6] to shellFaceCounts=[10].
+	•	Then sonfa is still 10/14, but now those faces belong to the same shell of the block, so movefac drags the correct shell and finish produces the expected solid.
+
+Verification
+	•	I ran: :base:test --tests vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidSetOperatorTest.
+	•	I ran: :base:test --tests "vsdk.toolkit.processing.polyhedralBoundedSolidOperators.*Test".
+	•	Both passed with the fix.

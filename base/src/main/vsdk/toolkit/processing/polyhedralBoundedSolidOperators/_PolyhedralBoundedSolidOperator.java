@@ -210,6 +210,14 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     protected static void
     join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2, boolean withDebug)
     {
+        join(h1, h2, withDebug, true);
+    }
+
+    protected static void join(_PolyhedralBoundedSolidHalfEdge h1,
+                               _PolyhedralBoundedSolidHalfEdge h2,
+                               boolean withDebug,
+                               boolean allowRingMove)
+    {
         PolyhedralBoundedSolidStatistics.recordJoinCall();
         _PolyhedralBoundedSolidFace oldf, newf;
         PolyhedralBoundedSolid s;
@@ -244,7 +252,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                 //h2.next().parentEdge.debugColor = new ColorRgb(0, 0, 1);
             }
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
-                laringmv(oldf, newf);
+                if ( allowRingMove ) {
+                    laringmv(oldf, newf);
+                }
             }
         }
     }

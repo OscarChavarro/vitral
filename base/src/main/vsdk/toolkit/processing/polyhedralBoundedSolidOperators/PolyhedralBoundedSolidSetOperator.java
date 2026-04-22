@@ -1888,12 +1888,12 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             soneb);
     }
 
-    private static void setOpConnect()
+    private static void setOpConnect(int op)
     {
         _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult result;
 
         result = _PolyhedralBoundedSolidSetNullEdgesConnector.connect(
-            debugFlags, sonea, soneb);
+            op, debugFlags, sonea, soneb);
         sonfa = result.sonfa();
         sonfb = result.sonfb();
     }
@@ -2112,7 +2112,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidB, "outputB_stage04");
         }
 
-        setOpConnect();
+        setOpConnect(op);
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage05");

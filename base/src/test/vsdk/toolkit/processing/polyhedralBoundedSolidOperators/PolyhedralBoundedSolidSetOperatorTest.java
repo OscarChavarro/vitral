@@ -229,7 +229,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @org.junit.jupiter.api.Test
-    void given_mant1988Section15_2HoledUnion_when_currentKernelRuns_then_resultStaysIntermediateButFailsStrictOnIntersectingLoops()
+    void given_mant1988Section15_2HoledUnion_when_currentKernelRuns_then_resultBecomesStrictAndKeepsBlockWithTriangularWings()
     {
         PolyhedralBoundedSolid[] operands =
             PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
@@ -238,33 +238,17 @@ class PolyhedralBoundedSolidSetOperatorTest
             false);
 
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(12);
-        assertThat(result.edgesList.size()).isEqualTo(24);
-        assertThat(result.verticesList.size()).isEqualTo(18);
-        assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateIntermediate(result)).isTrue();
-        assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateStrict(result)).isFalse();
-        assertThat(result.findFace(1)).isNotNull();
-        assertThat(result.findFace(1).boundariesList.size()).isEqualTo(2);
-    }
-
-    @org.junit.jupiter.api.Disabled(
-        "Known bug: coplanar/tangential UNION on MANT1988_15_2_HOLED leaves intersecting loops")
-    @org.junit.jupiter.api.Test
-    void given_mant1988Section15_2HoledUnion_when_coplanarTangentialKernelIsFixed_then_resultBecomesStrictAndKeepsBlockWithTriangularWings()
-    {
-        PolyhedralBoundedSolid[] operands =
-            PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
-        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
-            operands[0], operands[1], PolyhedralBoundedSolidModeler.UNION,
-            false);
-
-        assertThat(result).isNotNull();
+        assertThat(result.polygonsList.size()).isEqualTo(14);
+        assertThat(result.edgesList.size()).isEqualTo(30);
+        assertThat(result.verticesList.size()).isEqualTo(20);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateStrict(result)).isTrue();
+        assertThat(result.findFace(1)).isNotNull();
+        assertThat(result.findFace(1).boundariesList.size()).isEqualTo(2);
+        assertThat(result.getMinMax()).containsExactly(
+            0.0, 0.0, 0.0, 0.775, 1.0, 0.6);
     }
 
     @org.junit.jupiter.api.Test
@@ -366,6 +350,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     private static Stream<Arguments> mant1988StrictOperationSamples()
     {
         return Stream.of(
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.INTERSECTION),
@@ -376,7 +361,6 @@ class PolyhedralBoundedSolidSetOperatorTest
     private static Stream<Arguments> mant1988IntermediateOnlySamples()
     {
         return Stream.of(
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
             Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),

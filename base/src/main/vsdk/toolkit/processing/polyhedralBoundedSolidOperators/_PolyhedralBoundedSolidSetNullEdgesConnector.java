@@ -51,6 +51,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
     private static int debugFlags;
+    private static int operation;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
@@ -107,10 +108,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
     static ConnectResult connect(
+        int op,
         int flags,
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSonea,
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSoneb)
     {
+        operation = op;
         debugFlags = flags;
         sonea = inSonea;
         soneb = inSoneb;
@@ -315,6 +318,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
         _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
+        boolean allowRingMoveOnAJoin = (operation != UNION);
         boolean withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                             ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
@@ -370,7 +374,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " He(B2): " + hbm.startingVertex.id + "/" + hbm.next().startingVertex.id);
             }
 
-            boolean swap = false;
             nextedgea = sonea.get(i).e;
             nextedgeb = soneb.get(i).e;
             h1a = null;
@@ -392,7 +395,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             if ( r != null ) {
                 h1a = r[0];
                 h2b = r[1];
-                join(h1a, nextedgea.rightHalf, withDebug);
+                join(h1a, nextedgea.rightHalf, withDebug,
+                    allowRingMoveOnAJoin);
                 removeLooseEndsA(h1a);
                 if ( !isLooseA(h1a.mirrorHalfEdge()) ) {
                     cutA(h1a);
@@ -408,7 +412,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             if ( r != null ) {
                 h2a = r[0];
                 h1b = r[1];
-                join(h2a, nextedgea.leftHalf, withDebug);
+                join(h2a, nextedgea.leftHalf, withDebug,
+                    allowRingMoveOnAJoin);
                 removeLooseEndsA(h2a);
                 if ( !isLooseA(h2a.mirrorHalfEdge()) ) {
                     cutA(h2a);
