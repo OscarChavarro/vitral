@@ -12,6 +12,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -41,6 +43,8 @@ public class ImageExample extends JFrame implements
     private GLCanvas canvas;
     private SimpleCorridor corridor;
     private RGBImage img;
+    private boolean closing;
+    private boolean glResourcesReleased;
 
     public ImageExample() {
         super("VITRAL concept test - Image use example");
@@ -51,9 +55,16 @@ public class ImageExample extends JFrame implements
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+        canvas.addMouseWheelListener(this);
 
         this.add(canvas, BorderLayout.CENTER);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                requestClose();
+            }
+        });
 
         camera = new Camera();
 
@@ -112,9 +123,11 @@ public class ImageExample extends JFrame implements
             gl.glVertex3d(0, 0, 1);
         gl.glEnd();
 
-        // Prepare to draw polygon with image
-        gl.glPolygonMode(gl.GL_FRONT, gl.GL_FILL);
-        gl.glPolygonMode(gl.GL_BACK, gl.GL_LINE);
+        // Prepare to draw polygon with image.
+        // On macOS, drawing back faces in line mode can make this textured
+        // quad appear as wireframe depending on current view orientation.
+        gl.glDisable(gl.GL_CULL_FACE);
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL);
         gl.glShadeModel(gl.GL_FLAT);
         gl.glEnable(gl.GL_TEXTURE_2D);
 
@@ -182,7 +195,15 @@ public class ImageExample extends JFrame implements
 
     /** Not used method, but needed to instanciate GLEventListener */
     public void dispose(GLAutoDrawable drawable) {
-        ;
+        GL2 gl = drawable.getGL().getGL2();
+        if ( !glResourcesReleased ) {
+            Jogl2ImageRenderer.unload(gl, img);
+            glResourcesReleased = true;
+        }
+
+        if ( closing ) {
+            System.exit(0);
+        }
     }
 
     /** Not used method, but needed to instanciate GLEventListener */
@@ -252,7 +273,8 @@ public class ImageExample extends JFrame implements
 
   public void keyPressed(KeyEvent e) {
       if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-          System.exit(0);
+          requestClose();
+          return;
       }
 
       if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
@@ -273,6 +295,22 @@ public class ImageExample extends JFrame implements
   */
   public void keyTyped(KeyEvent e) {
       ;
+  }
+
+  private void requestClose() {
+      if ( closing ) {
+          return;
+      }
+      closing = true;
+
+      if ( canvas != null ) {
+          canvas.destroy();
+      }
+
+      if ( !glResourcesReleased ) {
+          // Fallback in case dispose was not called.
+          System.exit(0);
+      }
   }
 
 }
