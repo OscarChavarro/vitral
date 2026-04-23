@@ -194,6 +194,18 @@ project(':jogl2') {
     }
 }
 
+project(':jogl4') {
+    dependencies {
+        api project(':base')
+        api project(':awt')
+
+        api 'org.jogamp.jogl:jogl-all:2.5.0'
+        api 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
 project(':testsuite:ApplicationCases:CommandServer') {
     dependencies {
         implementation project(':base')
@@ -241,6 +253,19 @@ configure(subprojects.findAll {
     dependencies {
         implementation project(':base')
         implementation project(':awt')
+    }
+}
+
+configure(subprojects.findAll {
+    it.path.startsWith(':testsuite:Jogl4Examples:') &&
+    it.buildFile.exists()
+}) {
+    dependencies {
+        implementation project(':jogl4')
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
     }
 }
 
