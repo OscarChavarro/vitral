@@ -16,7 +16,7 @@ import com.jogamp.opengl.cg.CGparameter;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.render.jogl.JoglRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 /**
 The JoglCgRenderer abstract class provides an interface for JoglCg*Renderer
@@ -29,7 +29,7 @@ style classes. This serves two purposes:
     Nvidia Cg access and general JOGL initialization, as such verifying
     correct availavility of native Nvidia Cg libraries.
 */
-public abstract class JoglCgRenderer extends JoglRenderer
+public abstract class JoglCgRenderer extends Jogl2Renderer
 {
     // Nvidia Cg general management
     protected static boolean nvidiaCgErrorReported = false;

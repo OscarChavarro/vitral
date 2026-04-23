@@ -11,7 +11,7 @@ import com.jogamp.opengl.cg.CGprogram;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 
 public class JoglCgCameraRenderer extends JoglCgRenderer
 {
@@ -22,7 +22,7 @@ public class JoglCgCameraRenderer extends JoglCgRenderer
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         R = cam.calculateProjectionMatrix();
-        JoglMatrixRenderer.activate(gl, R);
+        Jogl2MatrixRenderer.activate(gl, R);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
@@ -41,7 +41,7 @@ public class JoglCgCameraRenderer extends JoglCgRenderer
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         R = camera2.calculateProjectionMatrix();
-        JoglMatrixRenderer.activate(gl, R);
+        Jogl2MatrixRenderer.activate(gl, R);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
@@ -173,7 +173,7 @@ public class JoglCgCameraRenderer extends JoglCgRenderer
         Vector3D p = cam.getPosition();
         R = R.withTranslation(p);
 
-        JoglMatrixRenderer.activate(gl, R);
+        Jogl2MatrixRenderer.activate(gl, R);
         //drawBase(gl);
         drawVolume(gl, cam);
         gl.glPopMatrix();

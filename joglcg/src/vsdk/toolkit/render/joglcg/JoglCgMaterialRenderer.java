@@ -26,7 +26,7 @@ public class JoglCgMaterialRenderer extends JoglCgRenderer {
         if ( m == null ) {
             if ( errorReported == false ) {
                 VSDK.reportMessage(null, VSDK.WARNING, 
-                    "JoglMaterialRenderer.activate", 
+                    "Jogl2MaterialRenderer.activate", 
                     "Trying to activate null reference to Material." + 
                     " Avoiding further reporting.");
                 errorReported = true;

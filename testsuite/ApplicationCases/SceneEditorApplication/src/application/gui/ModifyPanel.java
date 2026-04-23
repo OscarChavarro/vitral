@@ -13,7 +13,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
@@ -67,7 +67,7 @@ public class ModifyPanel extends JPanel
 
     public void draw(GL2 gl, Camera camera, RendererConfiguration quality)
     {
-        JoglSimpleBodyRenderer.draw(gl, target, camera, quality);
+        Jogl2SimpleBodyRenderer.draw(gl, target, camera, quality);
     }
 
 }

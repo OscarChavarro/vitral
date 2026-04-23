@@ -7,7 +7,7 @@ rm -rf `find . -type d -name "lib"` `find . -type d -name "classes"` testsuite/A
 if [ -f ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin ]; then
     rm -i ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin
 fi
-cd testsuite/VSDKExamples/PolyhedralBoundedSolidExample
+cd testsuite/Jogl2Examples/PolyhedralBoundedSolidExample
 rm -rf outputA* outputB* outputR*
 cd ../../..
 rm -rf testsuite/Tools/SpriteFontGenerator/output/*

@@ -1,0 +1,126 @@
+package vsdk.toolkit.render.jogl;
+
+// JOGL classes
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.util.gl2.GLUT;
+
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.geometry.volume.Box;
+
+public class Jogl2BoxRenderer extends Jogl2Renderer {
+
+    private static GLUT glut = null;
+
+    private static void drawSolidUnitCube(GL2 gl)
+    {
+        double l = 0.5;
+
+        gl.glBegin(GL2.GL_QUADS);
+            // Down
+            gl.glNormal3d(0, 0, -1);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(-l, -l, -l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(-l, l, -l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(l, l, -l);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(l, -l, -l);
+
+            // Up
+            gl.glNormal3d(0, 0, 1);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(-l, -l, l);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(l, -l, l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(l, l, l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(-l, l, l);
+
+            // Front
+            gl.glNormal3d(0, -1, 0);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(-l, -l, l);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(-l, -l, -l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(l, -l, -l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(l, -l, l);
+
+            // Left
+            gl.glNormal3d(-1, 0, 0);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(-l, l, l);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(-l, l, -l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(-l, -l, -l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(-l, -l, l);
+
+            // Back
+            gl.glNormal3d(0, 1, 0);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(l, l, l);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(l, l, -l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(-l, l, -l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(-l, l, l);
+
+            // Right
+            gl.glNormal3d(1, 0, 0);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex3d(l, -l, l);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex3d(l, -l, -l);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex3d(l, l, -l);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex3d(l, l, l);
+        gl.glEnd();
+    }
+
+    /**
+    Generate OpenGL/JOGL primitives needed for the rendering of recieved
+    Geometry object.
+    */
+    public static void draw(GL2 gl, Box box, Camera c, RendererConfiguration q)
+    {
+        if (glut == null) {
+            glut = new GLUT();
+        }
+
+        Vector3D size = box.getSize();
+
+        gl.glPushMatrix();
+        gl.glEnable(GL2.GL_NORMALIZE);
+        gl.glScaled(size.x(), size.y(), size.z());
+        if ( q.isSurfacesSet() ) {
+            Jogl2GeometryRenderer.prepareSurfaceQuality(gl, q);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            drawSolidUnitCube(gl);
+        }
+
+        if ( q.isWiresSet() ) {
+            gl.glLineWidth(1);
+            glut.glutWireCube(1);
+        }
+        gl.glPopMatrix();
+
+        if ( q.isBoundingVolumeSet() ) {
+            Jogl2GeometryRenderer.drawMinMaxBox(gl, box, q);
+        }
+        if ( q.isSelectionCornersSet() ) {
+            Jogl2GeometryRenderer.drawSelectionCorners(gl, box, q);
+        }
+    }
+
+}

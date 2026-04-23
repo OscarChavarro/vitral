@@ -24,8 +24,8 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 
 // Internal classes
 import vsdk.transition.render.swing.SwingGuiCacheRenderer;
@@ -120,7 +120,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
 
     private void display3DSlices(GL2 gl)
     {
-        JoglCameraRenderer.activate(gl, camera);
+        Jogl2CameraRenderer.activate(gl, camera);
 
         gl.glDisable(gl.GL_LIGHTING);
 
@@ -197,7 +197,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
                 reference = parent.study.getSliceImageAt(parent.currentTimeTake, i);
                 if ( reference != null ) {
                     gl.glEnable(gl.GL_TEXTURE_2D);
-                    JoglImageRenderer.activate(gl, reference);
+                    Jogl2ImageRenderer.activate(gl, reference);
                 }
                 else {
                     gl.glDisable(gl.GL_TEXTURE_2D);

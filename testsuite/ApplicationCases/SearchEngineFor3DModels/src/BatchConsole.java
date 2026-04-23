@@ -23,9 +23,9 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 // VSDK Classes
 import vsdk.toolkit.media.GeometryMetadata;
-import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
+import vsdk.framework.shapeMatching.Jogl2ShapeMatchingOfflineRenderer;
 import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderable;
-import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
+import vsdk.framework.shapeMatching.Jogl2ProjectedViewRenderer;
 
 /**
 Current application provides a batch (command line) oriented management control
@@ -45,8 +45,8 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
 {
     // Graphical contexts for indexing
     private GLCanvas canvas;
-    private JoglShapeMatchingOfflineRenderer offlineRenderer = null;
-    private JoglProjectedViewRenderer projectedViewRenderer = null;
+    private Jogl2ShapeMatchingOfflineRenderer offlineRenderer = null;
+    private Jogl2ProjectedViewRenderer projectedViewRenderer = null;
     private int renderPreviewXSize = 640;
     private int renderPreviewYSize = 480;
 
@@ -59,8 +59,8 @@ public class BatchConsole extends JoglShapeMatchingOfflineRenderable implements 
     private BatchConsole(String command[])
     {
         this.command = command;
-        projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
-        offlineRenderer = new JoglShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, this);
+        projectedViewRenderer = new Jogl2ProjectedViewRenderer(distanceFieldSide, distanceFieldSide, false);
+        offlineRenderer = new Jogl2ShapeMatchingOfflineRenderer(renderPreviewXSize, renderPreviewYSize, this);
         searchEngine = new SearchEngine();
         canvas = null;
         shapeDatabase = new ShapeDatabaseFile("etc/metadata.bin");

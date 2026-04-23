@@ -72,16 +72,32 @@ subprojects { subproject ->
     ]
     def skipLegacy = legacyExternalProjects.contains(subproject.path) && !rootProject.hasProperty('enableLegacyApis')
 
-    def srcDir = file('src').exists() ? 'src' : '.'
+    def mainSrcDirs = []
+    def testSrcDirs = []
+
+    if (file('src/main').exists()) {
+        mainSrcDirs = ['src/main']
+        if (file('src/test').exists()) {
+            testSrcDirs = ['src/test']
+        }
+    }
+    else if (file('src').exists()) {
+        mainSrcDirs = ['src']
+    }
+    else {
+        mainSrcDirs = []
+    }
+
     if (skipLegacy) {
-        srcDir = null
+        mainSrcDirs = []
+        testSrcDirs = []
         logger.lifecycle("Skipping legacy external API project ${subproject.path}. Use -PenableLegacyApis to enable it.")
     }
 
     sourceSets {
         main {
             java {
-                setSrcDirs(srcDir == null ? [] : [srcDir])
+                setSrcDirs(mainSrcDirs)
                 exclude 'build/**'
                 exclude 'target/**'
                 exclude '.gradle/**'
@@ -91,7 +107,7 @@ subprojects { subproject ->
             resources.setSrcDirs([])
         }
         test {
-            java.setSrcDirs([])
+            java.setSrcDirs(testSrcDirs)
             resources.setSrcDirs([])
         }
     }
@@ -166,7 +182,7 @@ project(':base') {
     }
 }
 
-project(':jogl') {
+project(':jogl2') {
     dependencies {
         api project(':base')
         api project(':awt')
@@ -190,7 +206,7 @@ project(':testsuite:ApplicationCases:SearchEngineFor3DModels') {
     }
 }
 
-project(':testsuite:_APITests:_JOGLHelloWorld') {
+project(':testsuite:_APITests:_JOGL2HelloWorld') {
     dependencies {
         implementation 'org.jogamp.jogl:jogl-all:2.5.0'
         implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
@@ -202,13 +218,24 @@ project(':testsuite:_APITests:_JOGLHelloWorld') {
 configure(subprojects.findAll {
     it.path.startsWith(':testsuite:') &&
     it.buildFile.exists() &&
-    it.path != ':testsuite:ApplicationCases:CommandServer' &&
-    it.path != ':testsuite:_APITests:_JOGLHelloWorld'
+    it.path != ':testsuite:ApplicationCases:CommandServer'
 }) {
     dependencies {
         implementation project(':base')
         implementation project(':awt')
-        implementation project(':jogl')
+    }
+}
+
+configure(subprojects.findAll {
+    it.path.startsWith(':testsuite:') &&
+    it.buildFile.exists() &&
+    it.path != ':testsuite:ApplicationCases:CommandServer' &&
+    it.path != ':testsuite:_APITests:_JOGL2HelloWorld' &&
+    !it.path.startsWith(':testsuite:VSDKExamples:') &&
+    !it.path.startsWith(':testsuite:Jogl4Examples:')
+}) {
+    dependencies {
+        implementation project(':jogl2')
         implementation 'org.jogamp.jogl:jogl-all:2.5.0'
         implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
         runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'

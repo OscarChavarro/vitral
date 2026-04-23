@@ -48,16 +48,16 @@ import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.JoglBackgroundRenderer;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.jogl.JoglMaterialRenderer;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglGeometryRenderer;
-import vsdk.toolkit.render.jogl.JoglTranslateGizmoRenderer;
-import vsdk.toolkit.render.jogl.JoglRotateGizmoRenderer;
-import vsdk.toolkit.render.jogl.JoglScaleGizmoRenderer;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
-import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
+import vsdk.toolkit.render.jogl.Jogl2BackgroundRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2TranslateGizmoRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RotateGizmoRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ScaleGizmoRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -69,7 +69,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.toolkit.gui.ViewportWindow;
 import vsdk.toolkit.gui.ViewportWindowSetManager;
-import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
@@ -324,7 +323,7 @@ public class JoglDrawingArea implements
                 composed = composed.withVal(2, 3, position.z());
                 translationGizmo.setTransformationMatrix(composed);
 
-                JoglTranslateGizmoRenderer.draw(gl, translationGizmo);
+                Jogl2TranslateGizmoRenderer.draw(gl, translationGizmo);
                 translationGizmoDrawn = true;
             }
         }
@@ -337,7 +336,7 @@ public class JoglDrawingArea implements
 
                 position = gi.getPosition();
                 rotateGizmo.setTransformationMatrix(gi.getRotation());
-                JoglRotateGizmoRenderer.draw(gl, rotateGizmo, position);
+                Jogl2RotateGizmoRenderer.draw(gl, rotateGizmo, position);
             }
         }
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
@@ -349,7 +348,7 @@ public class JoglDrawingArea implements
 
                 position = gi.getPosition();
                 scaleGizmo.setTransformationMatrix(gi.getRotation());
-                JoglScaleGizmoRenderer.draw(gl, scaleGizmo, position);
+                Jogl2ScaleGizmoRenderer.draw(gl, scaleGizmo, position);
             }
         }
         gl.glEnable(GL2.GL_DEPTH_TEST);
@@ -705,7 +704,7 @@ public class JoglDrawingArea implements
     private void copyColorBufferIfNeeded(GL2 gl)
     {
         if ( wantToGetColor ) {
-            parent.zbufferImage = JoglRGBImageRenderer.getImageJOGL(gl);
+            parent.zbufferImage = Jogl2RGBImageRenderer.getImageJOGL(gl);
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
             }
@@ -724,14 +723,14 @@ public class JoglDrawingArea implements
             if ( wantToGetContourns ) {
                 IndexedColorImage zbuffer;
                 NormalMap nm;
-                zbuffer = JoglZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+                zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
                 nm = new NormalMap();
                 nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
                 parent.zbufferImage = nm.exportToRgbImageGradient();
             }
             else {
                 parent.zbufferImage =
-                    JoglZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
+                    Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
                         parent.palette);
             }
 
@@ -764,7 +763,7 @@ public class JoglDrawingArea implements
         }
         else {
             theScene.activateSelectedBackground();
-            JoglBackgroundRenderer.draw(gl,
+            Jogl2BackgroundRenderer.draw(gl,
             theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
             parent.raytracedImageWidth = view.getViewportSizeX();
             parent.raytracedImageHeight = view.getViewportSizeY();
@@ -775,7 +774,7 @@ public class JoglDrawingArea implements
             gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glPushMatrix();
             gl.glLoadIdentity();
-            JoglImageRenderer.draw(gl, parent.raytracedImage);
+            Jogl2ImageRenderer.draw(gl, parent.raytracedImage);
             gl.glPopMatrix();
             gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glPopMatrix();
@@ -923,7 +922,7 @@ public class JoglDrawingArea implements
         l = diff.length();
 
         gl.glEnable(GL2.GL_LIGHTING);
-        JoglMaterialRenderer.activate(gl, visualDebugMaterial);
+        Jogl2MaterialRenderer.activate(gl, visualDebugMaterial);
 
         //-----------------------------------------------------------------
         Geometry a;
@@ -942,8 +941,8 @@ public class JoglDrawingArea implements
 
         gl.glPushMatrix();
         gl.glTranslated(start.x(), start.y(), start.z());
-        JoglMatrixRenderer.activate(gl, R);
-        JoglGeometryRenderer.draw(gl, a, theScene.camera, qualitySelectionVisualDebug);
+        Jogl2MatrixRenderer.activate(gl, R);
+        Jogl2GeometryRenderer.draw(gl, a, theScene.camera, qualitySelectionVisualDebug);
         gl.glPopMatrix();
 
         //-----------------------------------------------------------------
@@ -957,7 +956,7 @@ public class JoglDrawingArea implements
                 p = end.add(diff.multiply(offset));
                 gl.glPushMatrix();
                 gl.glTranslated(p.x(), p.y(), p.z());
-                JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
+                Jogl2GeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
                 gl.glPopMatrix();
             }
         }
@@ -982,11 +981,11 @@ public class JoglDrawingArea implements
 
         //-----------------------------------------------------------------
         visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.5, 0.0));
-        JoglMaterialRenderer.activate(gl, visualDebugMaterial);
+        Jogl2MaterialRenderer.activate(gl, visualDebugMaterial);
         Sphere s = new Sphere(0.05);
         gl.glPushMatrix();
         gl.glTranslated(ray.origin().x(), ray.origin().y(), ray.origin().z());
-        JoglGeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
+        Jogl2GeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
         gl.glPopMatrix();
 
         //-----------------------------------------------------------------

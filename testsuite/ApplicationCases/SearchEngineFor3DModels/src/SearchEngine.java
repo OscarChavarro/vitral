@@ -48,8 +48,8 @@ import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 import vsdk.framework.shapeMatching.ShapeDescriptor3DGenerator;
-import vsdk.framework.shapeMatching.JoglShapeMatchingOfflineRenderer;
-import vsdk.framework.shapeMatching.JoglProjectedViewRenderer;
+import vsdk.framework.shapeMatching.Jogl2ShapeMatchingOfflineRenderer;
+import vsdk.framework.shapeMatching.Jogl2ProjectedViewRenderer;
 
 /**
 Class `SearchEngine` stablishes a Fachade design pattern role in which any
@@ -78,7 +78,7 @@ public class SearchEngine
     This 3D model indexing method implements the analysis technique presented
     in [FUNK2003].4.
     */
-    private GeometryMetadata analyzeModel(GL2 gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, JoglShapeMatchingOfflineRenderer offlineRenderer, JoglProjectedViewRenderer projectedViewRenderer)
+    private GeometryMetadata analyzeModel(GL2 gl, String filename, boolean withProjection, boolean withPreviews, int distanceFieldSide, GLCanvas canvas, Jogl2ShapeMatchingOfflineRenderer offlineRenderer, Jogl2ProjectedViewRenderer projectedViewRenderer)
     {
         //- Variables -----------------------------------------------------
         SimpleScene scene = new SimpleScene();
@@ -481,8 +481,8 @@ public class SearchEngine
     public void indexFiles(GL2 gl, String filenamesList[],
                            ShapeDatabase shapeDatabase,
                            int distanceFieldSide, GLCanvas canvas,
-                           JoglShapeMatchingOfflineRenderer offlineRenderer,
-                           JoglProjectedViewRenderer projectedViewRenderer)
+                           Jogl2ShapeMatchingOfflineRenderer offlineRenderer,
+                           Jogl2ProjectedViewRenderer projectedViewRenderer)
     {
         int i, j;
         GeometryMetadata m, other;
@@ -760,9 +760,9 @@ public class SearchEngine
 
     public ArrayList <Result> runCommand(
         GL2 gl,
-        JoglShapeMatchingOfflineRenderer offlineRenderer,
+        Jogl2ShapeMatchingOfflineRenderer offlineRenderer,
         GLCanvas canvas,
-        JoglProjectedViewRenderer projectedViewRenderer,
+        Jogl2ProjectedViewRenderer projectedViewRenderer,
         String command[],
         ShapeDatabase shapeDatabase,
         int distanceFieldSide)

@@ -25,5 +25,6 @@ testsuite/**/output/
 testsuite/**/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
+testsuite/_APITests/_JOGL2HelloWorld/doc/javadoc/
 .codex
 hs_err_pid*.log

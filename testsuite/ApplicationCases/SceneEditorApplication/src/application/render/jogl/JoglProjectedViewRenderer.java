@@ -18,9 +18,9 @@ import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.JoglZBufferRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
+import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
 public class JoglProjectedViewRenderer {
     public Image image;
@@ -166,7 +166,7 @@ public class JoglProjectedViewRenderer {
         gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
         gl.glEnable(GL2.GL_DEPTH_TEST);
-        JoglCameraRenderer.activate(gl, camera);
+        Jogl2CameraRenderer.activate(gl, camera);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
@@ -178,7 +178,7 @@ public class JoglProjectedViewRenderer {
             gl.glEnd();
         }
         else {
-            JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
+            Jogl2SimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
         }
         
         gl.glFlush();
@@ -186,7 +186,7 @@ public class JoglProjectedViewRenderer {
         //- Obtain ZBuffer ------------------------------------------------
         IndexedColorImage zbuffer;
         NormalMap nm;
-        zbuffer = JoglZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+        zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
 
         //- Erase internal details: keep just the depth frontier border ---
         int x, y;
@@ -224,7 +224,7 @@ public class JoglProjectedViewRenderer {
         }
 
         //- Debug code (disabled) -----------------------------------------
-        //image=JoglRGBImageRenderer.getImageJOGL(gl);
+        //image=Jogl2RGBImageRenderer.getImageJOGL(gl);
         //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./output" + side + ".ppm"), image);
     }
 }

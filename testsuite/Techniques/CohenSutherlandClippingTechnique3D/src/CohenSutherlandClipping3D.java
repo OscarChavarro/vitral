@@ -39,7 +39,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
 public class CohenSutherlandClipping3D implements 
 GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, 
@@ -274,12 +274,12 @@ KeyListener
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activate(gl, camera1);
+        Jogl2CameraRenderer.activate(gl, camera1);
 
         drawObjectsGL(gl);
 
         gl.glLoadIdentity();
-        JoglCameraRenderer.draw(gl, camera2);
+        Jogl2CameraRenderer.draw(gl, camera2);
     }
    
     /** Not used method, but needed to instanciate GLEventListener */

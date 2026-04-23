@@ -18,7 +18,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.render.jogl._JoglSimpleBodyRendererDisplayList;
 
 /**
@@ -107,7 +107,7 @@ public class JoglCgSimpleBodyRenderer extends JoglCgRenderer {
         scale = b.getScale();
 
         gl.glTranslated(p.x, p.y, p.z);
-        JoglMatrixRenderer.activate(gl, b.getRotation());
+        Jogl2MatrixRenderer.activate(gl, b.getRotation());
         gl.glScaled(scale.x, scale.y, scale.z);
 
         gl.glColor3d(1, 1, 1);
@@ -180,7 +180,7 @@ public class JoglCgSimpleBodyRenderer extends JoglCgRenderer {
                 JoglCgGeometryRenderer.draw(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "JoglSimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
+                    VSDK.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
                 }
                 gl.glCallList(id);
             }
@@ -221,7 +221,7 @@ public class JoglCgSimpleBodyRenderer extends JoglCgRenderer {
                 JoglCgGeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "JoglSimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
+                    VSDK.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
                 }
                 gl.glCallList(id);
             }

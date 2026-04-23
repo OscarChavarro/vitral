@@ -7,7 +7,7 @@ concieved simply as a set of "black box" type of software components that
 aids in traditional shader programming. For example, in OpenGL/JOGL, one
 can program a camera using standard functions like glFrustum or 
 gluPerspective, but VitralSDK offers a "Camera" class and a 
-"JoglCameraRenderer" class with methods that allows more convenient
+"Jogl2CameraRenderer" class with methods that allows more convenient
 object oriented programming. Note that any of such components use is
 optional, and the application programmer can choose to use basic functions
 or its VitralSDK counterparts at any time, even in a mixed way.
@@ -166,16 +166,16 @@ examples provided by jogl demos.
 
 The following are the general VitralSDK aids to make general unrestricted
 Nvidia Cg shader programming:
-  - JoglRenderer.verifyOpenGLAvailability(); and
-    JoglRenderer.verifyNvidiaCgAvailability();
+  - Jogl2Renderer.verifyOpenGLAvailability(); and
+    Jogl2Renderer.verifyNvidiaCgAvailability();
     Checks wisely for a correct installed OpenGL / JOGL / Cg environment.
-  - JoglRenderer.tryToEnableNvidiaCg();
+  - Jogl2Renderer.tryToEnableNvidiaCg();
     Check wisely for a correct installed and working Cg toolkit, and turns
     it on.
-  - JoglRenderer.loadNvidiaGpuVertexShader(); and 
-    JoglRenderer.loadNvidiaGpuPixelShader(); methods loads and compiles
+  - Jogl2Renderer.loadNvidiaGpuVertexShader(); and 
+    Jogl2Renderer.loadNvidiaGpuPixelShader(); methods loads and compiles
     shaders.
-  - JoglRenderer.getNvidiaCgAvailability();
+  - Jogl2Renderer.getNvidiaCgAvailability();
     Could be checked at any time to guard Cg operations. It is used by
     internal VitralSDK classes to append Nvidia Cg commands, under a
     technology independent and portable programming schema.
@@ -189,12 +189,12 @@ The following are the standarized VitralSDK aids that provides restricted
 access to predefined Nvidia Cg shaders that follows the guidelines stated
 in this document, but that also offers greater ease of development,
 portability and generality:
-    - activateNvidiaGpuParameters method in JoglRenderer, JoglCameraRenderer,
-      JoglMaterialRenderer, JoglLightRenderer and JoglGeometryRenderer.
+    - activateNvidiaGpuParameters method in Jogl2Renderer, Jogl2CameraRenderer,
+      Jogl2MaterialRenderer, Jogl2LightRenderer and Jogl2GeometryRenderer.
       Those are used to ease the passing of uniform parameters from
       VitralSDK scene elements to Nvidia Cg shaders.  Note that they assume
       standarized parameter names.
-    - setDefaultTextureForFixedFunctionOpenGL in JoglRenderer, is a
+    - setDefaultTextureForFixedFunctionOpenGL in Jogl2Renderer, is a
       not-so-fair desperate measure to reprogram default texture in fixed
       function OpenGL/JOGL when using shaders with multiple samplers.
 

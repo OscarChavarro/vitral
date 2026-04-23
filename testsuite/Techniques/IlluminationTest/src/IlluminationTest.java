@@ -31,9 +31,9 @@ import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
-        import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
+        import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl2TriangleMeshRenderer;
 
 // Application classes
 
@@ -328,13 +328,13 @@ public class IlluminationTest
         gl.glDisable(gl.GL_CULL_FACE);
         //gl.glCullFace(gl.GL_BACK);
 
-        JoglLightRenderer.activate(gl, light1);
-        JoglTriangleMeshRenderer.draw(gl, baseMesh, qualitySelection2, false);
+        Jogl2LightRenderer.activate(gl, light1);
+        Jogl2TriangleMeshRenderer.draw(gl, baseMesh, qualitySelection2, false);
 
-        JoglLightRenderer.deactivate(gl, light1);
-        JoglLightRenderer.activate(gl, light2);
-        JoglLightRenderer.activate(gl, light3);
-        JoglTriangleMeshRenderer.draw(gl, surfaceMesh, qualitySelection1, false);
+        Jogl2LightRenderer.deactivate(gl, light1);
+        Jogl2LightRenderer.activate(gl, light2);
+        Jogl2LightRenderer.activate(gl, light3);
+        Jogl2TriangleMeshRenderer.draw(gl, surfaceMesh, qualitySelection1, false);
     }
 
     /** Called by drawable to initiate drawing */
@@ -348,15 +348,15 @@ public class IlluminationTest
         gl.glColor3d(1, 1, 1);
         gl.glLineWidth(1.0f);
         
-        JoglCameraRenderer.activate(gl, camera);
+        Jogl2CameraRenderer.activate(gl, camera);
 
-        JoglLightRenderer.turnOffAllLights(gl);
+        Jogl2LightRenderer.turnOffAllLights(gl);
 
         drawObjectsGL(gl);
 
         gl.glDisable(gl.GL_LIGHTING);
         gl.glColor3d(1, 1, 0);
-        JoglLightRenderer.draw(gl, light1);
+        Jogl2LightRenderer.draw(gl, light1);
 
         // red box around interest point over surface
         double z = 0.01;

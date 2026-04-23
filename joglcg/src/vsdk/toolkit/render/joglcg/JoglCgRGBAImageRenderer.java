@@ -198,7 +198,7 @@ public class JoglCgRGBAImageRenderer extends JoglCgRenderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBAImageRenderer.unload", "Error unloading image.");
+            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBAImageRenderer.unload", "Error unloading image.");
 
         }
     }

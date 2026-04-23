@@ -42,7 +42,7 @@
   - Library is now packaged in just one big dir, not using the old
     stages order directories. Now all the examples are inside the 
     testsuite directory.
-  - Incorporated ZBuffer and JoglZBufferRenderer classes from Fabio Aroca
+  - Incorporated ZBuffer and Jogl2ZBufferRenderer classes from Fabio Aroca
     & Eduardo Mendoza main work, allowing for distributed rendering based
     on ZBuffer algorithms and other manipulations for depth maps.
   - New organization of packages and classes inside packages. Below are
@@ -111,7 +111,7 @@
 
 2006 july 25, Oscar Chavarro: <<?>>
   - GUI infraestructure advanced inside the SceneEditorApplication
-  - JoglRenderer interface
+  - Jogl2Renderer interface
   - ParametricCubicCurve renamed to ParametricCurve, as is currently
     representing also linear curves (polylines) and will be extended to
     support quadric curves
@@ -141,7 +141,7 @@
   - JoglParametricCurve.drawTesselatedCurveInterior added
 
 2006 october 8, Oscar Chavarro: <<?>>
-  - Checked TriangleMesh/JoglTriangleMeshRenderer tunning for manual
+  - Checked TriangleMesh/Jogl2TriangleMeshRenderer tunning for manual
     construction (Bug fixes)
   - CameraControllerGravZero class removed
   - IlluminationTest example added to testsuite
@@ -166,16 +166,16 @@
 
 2006 november 13, Oscar Chavarro: <<?>>
   - Changed internal representation of triangle group to texture span range
-    representation in TriangleMesh, JoglTriangleMeshRenderer and ReaderObj
+    representation in TriangleMesh, Jogl2TriangleMeshRenderer and ReaderObj
   - Added support for multiple materials in a single TriangleMesh :)
     This implied the development of a new algorithm for TriangleMesh
     traversal that uses a mixtured texture/material spans in
-    JoglTriangleMeshRenderer.
+    Jogl2TriangleMeshRenderer.
 
 2006 november 19, Oscar Chavarro: <<?>>
   - Implementation of PolyhedralBoundedSolid representation started! :)
   - Updates to TriangleMesh internal representation and ReaderObj /
-    JoglTriangleMeshRenderer to simplify design.
+    Jogl2TriangleMeshRenderer to simplify design.
   - Raytracer now support objects with sub-materials
 
 2006 december 8 to 10, Oscar Chavarro: <<?>>
@@ -230,7 +230,7 @@
     boundary representation based upon Mantylla text.
 
 2007 april 21, Oscar Chavarro: <<?>>
-  - Face triangle tesselation in JoglPolyhedralBoundedSolidRenderer, now
+  - Face triangle tesselation in Jogl2PolyhedralBoundedSolidRenderer, now
     compatible with multiple loop face polyhedra.
   - First succesful tests for the operator lkemr in the polyhedral boundary
     representation based upon Mantylla text.
@@ -300,7 +300,7 @@
     Zbuffer) incorporated into SceneEditorApplication
 
 2007 may 26, Oscar Chavarro: <<?>>
-  - JoglSimpleBodyRenderer and JoglSimpleBodyGroupRenderer. Some new
+  - Jogl2SimpleBodyRenderer and Jogl2SimpleBodyGroupRenderer. Some new
     organization of SceneEditorApplication
 
 2007 may 29-30, Oscar Chavarro: <<?>>
@@ -333,7 +333,7 @@
 2007 june 11, Oscar Chavarro: <<?>>
   - Reader3ds additions to load texture coordinates, support texture maps
     and handle more chunks :)
-  - JoglTriangleMeshRenderer can manage texture coordinates for textures
+  - Jogl2TriangleMeshRenderer can manage texture coordinates for textures
     activated externally to TriangleMesh (i.e. global texture associated
     with containing Body)
 
@@ -411,7 +411,7 @@
 2007 august 2, Oscar Chavarro: <<?>>
   - Stating up ReaderVtk code and creating basic parsing structure for
     ReaderAse.
-  - 1h25min: Creating TriangleStripMesh class, and JoglTriangleStripMeshRenderer
+  - 1h25min: Creating TriangleStripMesh class, and Jogl2TriangleStripMeshRenderer
 
 2007 august 4, Oscar Chavarro: <<?>>
   - SciVisApplication application added
@@ -423,7 +423,7 @@
   - 2h40min: PolyhedralBoundedSolid.doIntersection working!!! :) :)
 
 2007 september 4, Oscar Chavarro: <<?>>
-  - 1h48m: JoglPolyhedralBoundedSolidRenderer.drawDebugEdges implements 
+  - 1h48m: Jogl2PolyhedralBoundedSolidRenderer.drawDebugEdges implements 
     Zajac/Loutrel hidden edge identification for convex polyhedra.
 
 2007 september 5, Oscar Chavarro: <<?>>
@@ -455,7 +455,7 @@
     but inside gizmo working.
 
 2007 september 23, Oscar Chavarro: <<?>>
-  - 2h30min: TranslationGizmo/JoglTranslationGizmoRenderer supporting 3dstudio
+  - 2h30min: TranslationGizmo/Jogl2TranslationGizmoRenderer supporting 3dstudio
     max like interaction and display. First version of GeometricModeler class.
   - 1h35min: TranslationGizmo gets text labels. This step completes its
     interaction technique and feedback. :)
@@ -500,7 +500,7 @@
   - 1h30min: MatrixNxM basic class
 
 2007 november 13, Oscar Chavarro: <<170min>>
-  - 50min: JoglInfinitePlaneRenderer, minor additions to 
+  - 50min: Jogl2InfinitePlaneRenderer, minor additions to 
     CameraControllerAquynza
   - 2h: Plane rendering and managing revisited. Camera.getBoundingPlanes added.
 
@@ -748,7 +748,7 @@
 
 2008 may 15, Oscar Chavarro: <<50min>>
   - 50min: Revisiting the structure of rendering a Scene (added class
-    JoglBackgroundRenderer & minor structural changes to SceneEditorApplication)
+    Jogl2BackgroundRenderer & minor structural changes to SceneEditorApplication)
 
 2008 may 18, Oscar Chavarro: <<41min>>
   - 41min: ReaderVtk handling POLYGON data.
@@ -762,7 +762,7 @@
 
 2008 may 22, Oscar Chavarro: <<106min>>
   - 1h36min: experimental support for automatic GL display lists on
-    JoglSimpleBodyRenderer code. Not working when using Nvidia Cg
+    Jogl2SimpleBodyRenderer code. Not working when using Nvidia Cg
     vertex / pixel shaders, because Cg parameters goes freezed for
     first time GL list compilation.
   - 15min: Simple update to QuadBenchmark. Now reporting performance results!
@@ -772,7 +772,7 @@
   - 42min: Disgregating TriangleMesh vertex management
 
 2008 may 26, Oscar Chavarro: <<123min>>
-  - 2h03min: JoglTriangleMeshRenderer.drawWithVertexArrays :)
+  - 2h03min: Jogl2TriangleMeshRenderer.drawWithVertexArrays :)
 
 2008 may 26, Oscar Chavarro: <<195min>>
   - 30min: Fixing bug in ReaderGts (some triangles where incorrectly assembled)
@@ -893,7 +893,7 @@
   - 47min: LogAnalyzer tool
 
 2012 june 10, Oscar Chavarro <<518min>>
-  - 1h33min: JoglPolyhedralBoundedSolidRenderer.drawDebugVertices
+  - 1h33min: Jogl2PolyhedralBoundedSolidRenderer.drawDebugVertices
   - 2h38min: Studying [MANT1988] structure of chapters, sections, programs,
     figures and problems, and updating polihedralBoundedSolidImplementation.xls
     document (Chapters 1 to 5).
@@ -1142,7 +1142,7 @@
     of vertices.
 
 2014 may 19, Oscar Chavarro
-  - 44min: JoglHudIconRenderer
+  - 44min: Jogl2HudIconRenderer
 
 2014 june 07, Oscar Chavarro
   - 2h: Adding @return comments to javadoc. They where missing and 

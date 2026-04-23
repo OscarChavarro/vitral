@@ -28,20 +28,20 @@ import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.TriangleStripMesh;
 import vsdk.toolkit.environment.geometry.QuadMesh;
 import vsdk.toolkit.environment.geometry.VoxelVolume;
-import vsdk.toolkit.render.jogl.JoglArrowRenderer;
-import vsdk.toolkit.render.jogl.JoglBoxRenderer;
-import vsdk.toolkit.render.jogl.JoglConeRenderer;
-import vsdk.toolkit.render.jogl.JoglFunctionalExplicitSurfaceRenderer;
-import vsdk.toolkit.render.jogl.JoglInfinitePlaneRenderer;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
-import vsdk.toolkit.render.jogl.JoglParametricBiCubicPatchRenderer;
-import vsdk.toolkit.render.jogl.JoglParametricCurveRenderer;
-import vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidRenderer;
-import vsdk.toolkit.render.jogl.JoglQuadMeshRenderer;
-import vsdk.toolkit.render.jogl.JoglTriangleMeshGroupRenderer;
-import vsdk.toolkit.render.jogl.JoglTriangleMeshRenderer;
-import vsdk.toolkit.render.jogl.JoglTriangleStripMeshRenderer;
-import vsdk.toolkit.render.jogl.JoglVoxelVolumeRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ArrowRenderer;
+import vsdk.toolkit.render.jogl.Jogl2BoxRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ConeRenderer;
+import vsdk.toolkit.render.jogl.Jogl2FunctionalExplicitSurfaceRenderer;
+import vsdk.toolkit.render.jogl.Jogl2InfinitePlaneRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ParametricBiCubicPatchRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ParametricCurveRenderer;
+import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.Jogl2QuadMeshRenderer;
+import vsdk.toolkit.render.jogl.Jogl2TriangleMeshGroupRenderer;
+import vsdk.toolkit.render.jogl.Jogl2TriangleMeshRenderer;
+import vsdk.toolkit.render.jogl.Jogl2TriangleStripMeshRenderer;
+import vsdk.toolkit.render.jogl.Jogl2VoxelVolumeRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgRenderer;
 import vsdk.toolkit.render.joglcg.JoglCgCameraRenderer;
 
@@ -235,7 +235,7 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
         MProjection = camera.calculateViewVolumeMatrix();
         MModelviewGlobal = camera.calculateTransformationMatrix();
         MModelviewLocal = MModelviewGlobal.multiply(
-            JoglMatrixRenderer.importJOGL(gl, GL2.GL_MODELVIEW_MATRIX));
+            Jogl2MatrixRenderer.importJOGL(gl, GL2.GL_MODELVIEW_MATRIX));
         MCombined = MProjection.multiply(MModelviewLocal);
         MModelviewLocalIT = MModelviewLocal.inverse();
         MModelviewLocalIT = MModelviewLocalIT.transpose();
@@ -265,7 +265,7 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
     {
         if ( g == null ) {
             VSDK.reportMessage(null, VSDK.WARNING,
-                               "JoglGeometryRenderer.draw",
+                               "Jogl2GeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;
         }
@@ -274,43 +274,43 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
             JoglCgSphereRenderer.draw(gl, (Sphere)g, c, q);
         }
         if ( g instanceof InfinitePlane ) {
-            JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
+            Jogl2InfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
         }
         else if ( g instanceof Box ) {
-            JoglBoxRenderer.draw(gl, (Box)g, c, q);
+            Jogl2BoxRenderer.draw(gl, (Box)g, c, q);
         }
         else if ( g instanceof Cone ) {
-            JoglConeRenderer.draw(gl, (Cone)g, c, q);
+            Jogl2ConeRenderer.draw(gl, (Cone)g, c, q);
         }
         else if ( g instanceof Arrow ) {
-            JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+            Jogl2ArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
         else if ( g instanceof ParametricCurve ) {
-            JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
+            Jogl2ParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
         else if ( g instanceof ParametricBiCubicPatch ) {
-            JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
+            Jogl2ParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
         else if ( g instanceof PolyhedralBoundedSolid ) {
-            JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
+            Jogl2PolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
         }
         else if ( g instanceof TriangleMesh ) {
-            JoglTriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
+            Jogl2TriangleMeshRenderer.draw(gl, (TriangleMesh)g, q, false);
         }
         else if ( g instanceof QuadMesh ) {
-            JoglQuadMeshRenderer.draw(gl, (QuadMesh)g, q, false);
+            Jogl2QuadMeshRenderer.draw(gl, (QuadMesh)g, q, false);
         }
         else if ( g instanceof FunctionalExplicitSurface ) {
-            JoglFunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
+            Jogl2FunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
         }
         else if ( g instanceof TriangleStripMesh ) {
-            JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
+            Jogl2TriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
         }
         else if ( g instanceof TriangleMeshGroup ) {
-            JoglTriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
+            Jogl2TriangleMeshGroupRenderer.draw(gl, (TriangleMeshGroup)g,q);
         }
         else if ( g instanceof VoxelVolume ) {
-            JoglVoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
+            Jogl2VoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
         }
     }
 
@@ -323,7 +323,7 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
     {
         if ( g == null ) {
             VSDK.reportMessage(null, VSDK.WARNING,
-                               "JoglGeometryRenderer.draw",
+                               "Jogl2GeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;
         }
@@ -332,43 +332,43 @@ public class JoglCgGeometryRenderer extends JoglCgRenderer
             JoglCgSphereRenderer.draw(gl, (Sphere)g, c, q);
         }
         if ( g instanceof InfinitePlane ) {
-            JoglInfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
+            Jogl2InfinitePlaneRenderer.draw(gl, (InfinitePlane)g, c, q);
         }
         else if ( g instanceof Box ) {
-            JoglBoxRenderer.draw(gl, (Box)g, c, q);
+            Jogl2BoxRenderer.draw(gl, (Box)g, c, q);
         }
         else if ( g instanceof Cone ) {
-            JoglConeRenderer.draw(gl, (Cone)g, c, q);
+            Jogl2ConeRenderer.draw(gl, (Cone)g, c, q);
         }
         else if ( g instanceof Arrow ) {
-            JoglArrowRenderer.draw(gl, (Arrow)g, c, q);
+            Jogl2ArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
         else if ( g instanceof ParametricCurve ) {
-            JoglParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
+            Jogl2ParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
         else if ( g instanceof ParametricBiCubicPatch ) {
-            JoglParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
+            Jogl2ParametricBiCubicPatchRenderer.draw(gl, (ParametricBiCubicPatch)g, c, q);
         }
         else if ( g instanceof PolyhedralBoundedSolid ) {
-            JoglPolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
+            Jogl2PolyhedralBoundedSolidRenderer.draw(gl, (PolyhedralBoundedSolid)g, c, q);
         }
         else if ( g instanceof TriangleMesh ) {
-            JoglTriangleMeshRenderer.drawWithVertexArrays(gl, (TriangleMesh)g, q, false);
+            Jogl2TriangleMeshRenderer.drawWithVertexArrays(gl, (TriangleMesh)g, q, false);
         }
         else if ( g instanceof QuadMesh ) {
-            JoglQuadMeshRenderer.drawWithVertexArrays(gl, (QuadMesh)g, q, false);
+            Jogl2QuadMeshRenderer.drawWithVertexArrays(gl, (QuadMesh)g, q, false);
         }
         else if ( g instanceof FunctionalExplicitSurface ) {
-            JoglFunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
+            Jogl2FunctionalExplicitSurfaceRenderer.draw(gl, (FunctionalExplicitSurface)g, c, q);
         }
         else if ( g instanceof TriangleStripMesh ) {
-            JoglTriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
+            Jogl2TriangleStripMeshRenderer.draw(gl, (TriangleStripMesh)g, q, false);
         }
         else if ( g instanceof TriangleMeshGroup ) {
-            JoglTriangleMeshGroupRenderer.drawWithVertexArrays(gl, (TriangleMeshGroup)g,q);
+            Jogl2TriangleMeshGroupRenderer.drawWithVertexArrays(gl, (TriangleMeshGroup)g,q);
         }
         else if ( g instanceof VoxelVolume ) {
-            JoglVoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
+            Jogl2VoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
         }
     }
 }

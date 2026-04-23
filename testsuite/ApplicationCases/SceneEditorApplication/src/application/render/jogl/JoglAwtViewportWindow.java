@@ -24,8 +24,8 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.render.jogl.JoglImageRenderer;
-import vsdk.toolkit.render.jogl.JoglMatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
@@ -450,7 +450,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         R = R.invert();
         gl.glRotated(90, -1, 0, 0);
         gl.glRotated(90, 0, 0, 1);
-        JoglMatrixRenderer.activate(gl, R);
+        Jogl2MatrixRenderer.activate(gl, R);
 
         gl.glPushMatrix();
         gl.glTranslated(2, 1, 0);
@@ -619,7 +619,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         //float c[] = {1f, 1f, 1f, 1f};
         //gl.glTexEnvfv(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_COLOR, c, 0);
 
-        JoglImageRenderer.draw(gl, i);
+        Jogl2ImageRenderer.draw(gl, i);
         gl.glPopAttrib();
     }
 

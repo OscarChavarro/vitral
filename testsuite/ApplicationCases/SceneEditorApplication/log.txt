@@ -97,7 +97,7 @@ Started from stage 041 CameraSwing
     interaction techniques. Fixing some bugs in ray calculations.  :-)
   - 8min: TranslationGizmo: plane elements interaction technique.  :-)
   - 30min: TranslationGizmo: Automatic resizing
-  - 30min: JoglTranslationGizmoRenderer updated to manage its own lighting
+  - 30min: Jogl2TranslationGizmoRenderer updated to manage its own lighting
 
 2006 may 3, Oscar Chavarro:
   - 20min: Adding ParametricCubicCurve sample

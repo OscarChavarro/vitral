@@ -35,6 +35,6 @@
     working with Linux or Nvidia Cg, they work fine, but they do not work
     on fixed function OpenGL on Windows.
   - Implement OBHU technique in SearchEngineFor3DModels
-  - Color arrays are handled on JoglTriangleMeshRenderer only for the
+  - Color arrays are handled on Jogl2TriangleMeshRenderer only for the
     vertex arrays case. Normal processing of color array with glColor3d
     primitive pending.

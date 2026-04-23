@@ -16,7 +16,7 @@ public abstract class PolyhedralBoundedSolidDebugger extends RenderingElement
     public static PolyhedralBoundedSolidDebugger createOfflineRenderer()
     {
         return loadPluginHelper(
-            "vsdk.toolkit.render.jogl.JoglPolyhedralBoundedSolidDebugger");
+            "vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidDebugger");
     }
 
     private static PolyhedralBoundedSolidDebugger 

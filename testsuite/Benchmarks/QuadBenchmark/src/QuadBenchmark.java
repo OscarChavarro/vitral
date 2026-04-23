@@ -30,9 +30,9 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;  // View elements
-import vsdk.toolkit.render.jogl.JoglRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyRenderer;
+import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;  // View elements
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
         import vsdk.toolkit.gui.AwtSystem;
@@ -122,7 +122,7 @@ public class QuadBenchmark extends Applet implements
     public static void main(String[] args) {
 
         // Common VitralSDK initialization
-        JoglRenderer.verifyOpenGLAvailability();
+        Jogl2Renderer.verifyOpenGLAvailability();
         QuadBenchmark instance = new QuadBenchmark();
         instance.appletMode = false;
         instance.options = new Configuration();
@@ -223,13 +223,13 @@ public class QuadBenchmark extends Applet implements
         for ( i = 0;
               options.withVertexArrays && i < scene.getSimpleBodies().size();
               i++ ) {
-            JoglSimpleBodyRenderer.drawWithVertexArrays(gl,
+            Jogl2SimpleBodyRenderer.drawWithVertexArrays(gl,
                 scene.getSimpleBodies().get(i), camera, qualitySelection);
         }
         for ( i = 0;
               !options.withVertexArrays && i < scene.getSimpleBodies().size();
               i++ ) {
-            JoglSimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i),
+            Jogl2SimpleBodyRenderer.draw(gl, scene.getSimpleBodies().get(i),
                                         camera, qualitySelection);
         }
 
@@ -250,14 +250,14 @@ public class QuadBenchmark extends Applet implements
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
         gl.glColor3d(1, 1, 1);
 
-        JoglCameraRenderer.activate(gl, camera);        
+        Jogl2CameraRenderer.activate(gl, camera);        
 
         //-----------------------------------------------------------------
         if ( options.withDisplayList ) {
-            JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(true);
+            Jogl2SimpleBodyRenderer.setAutomaticDisplayListManagement(true);
         }
         else {
-            JoglSimpleBodyRenderer.setAutomaticDisplayListManagement(false);
+            Jogl2SimpleBodyRenderer.setAutomaticDisplayListManagement(false);
         }
         drawObjectsGL(gl); 
    }

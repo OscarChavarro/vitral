@@ -124,11 +124,11 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
         //- 4. Use the image's glList -------------------------------------
         //if ( glListIsCompiled == false ) {
             if ( item == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item");
+                VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageRenderer.activate", "null item");
                 return -1;
             }
             if ( item.renderer == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.activate", "null item renderer");
+                VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageRenderer.activate", "null item renderer");
                 return -1;
             }
             item.renderer.bind(gl);
@@ -193,7 +193,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.deactivate", "Error unloading image.");
+            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageRenderer.deactivate", "Error unloading image.");
 
         }
     }
@@ -216,7 +216,7 @@ public class JoglCgRGBImageRenderer extends JoglCgRenderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "JoglRGBImageRenderer.unload", "Error unloading image.");
+            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageRenderer.unload", "Error unloading image.");
 
         }
     }

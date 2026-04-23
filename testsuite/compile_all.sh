@@ -1,9 +1,9 @@
 #---------------------------------------------------------------------------
 cd _APITests
-cd _JOGLHelloWorld
+cd _JOGL2HelloWorld
 ./compile.sh
 cd ..
-cd _JOGLPbufferExample
+cd _JOGL2PbufferExample
 ./compile.sh
 cd ..
 cd ..
@@ -31,6 +31,20 @@ cd ..
 cd ..
 #---------------------------------------------------------------------------
 cd VSDKExamples
+cd ImageSwingExample
+./compile.sh
+cd ..
+cd PaletteSwingExample
+./compile.sh
+cd ..
+cd WireframeSwingExample
+./compile.sh
+cd ..
+cd GUIExample
+./compile.sh
+cd ..
+cd ..
+cd Jogl2Examples
 cd CameraExample
 ./compile.sh
 cd ..
@@ -41,12 +55,6 @@ cd GlyphExample
 ./compile.sh
 cd ..
 cd ImageExample
-./compile.sh
-cd ..
-cd ImageSwingExample
-./compile.sh
-cd ..
-cd PaletteSwingExample
 ./compile.sh
 cd ..
 cd MeshExample
@@ -66,16 +74,10 @@ cd ..
 cd WireframeExample
 ./compile.sh
 cd ..
-cd WireframeSwingExample
-./compile.sh
-cd ..
 cd StereoExample
 ./compile.sh
 cd ..
 cd StereoSceneExample
-./compile.sh
-cd ..
-cd GUIExample
 ./compile.sh
 cd ..
 cd ..

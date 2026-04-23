@@ -25,10 +25,10 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.JoglRGBImageRenderer;
-import vsdk.toolkit.render.jogl.JoglCameraRenderer;
-import vsdk.toolkit.render.jogl.JoglLightRenderer;
-import vsdk.toolkit.render.jogl.JoglSimpleBodyGroupRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.ImageProcessing;
@@ -79,7 +79,7 @@ public class JoglPreviewGenerator
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 
-        JoglCameraRenderer.activate(gl, camera);
+        Jogl2CameraRenderer.activate(gl, camera);
         gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
 
@@ -89,7 +89,7 @@ public class JoglPreviewGenerator
         drawGridRectangle(gl, minmax[2]);
 
         if ( bodies != null ) {
-            JoglSimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
+            Jogl2SimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
 
             // Debug code to check correct posing to unit sphere
 /*
@@ -98,7 +98,7 @@ public class JoglPreviewGenerator
             quality2 = new RendererConfiguration();
             quality2.setWires(true);
             quality2.setSurfaces(false);
-            vsdk.toolkit.render.jogl.JoglSphereRenderer.draw(gl, sphere, camera, quality2);
+            vsdk.toolkit.render.jogl.Jogl2SphereRenderer.draw(gl, sphere, camera, quality2);
 */
         }
 
@@ -211,8 +211,8 @@ public class JoglPreviewGenerator
         light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
-        JoglLightRenderer.activate(gl, light1);
-        JoglLightRenderer.activate(gl, light2);
+        Jogl2LightRenderer.activate(gl, light1);
+        Jogl2LightRenderer.activate(gl, light2);
 
         for ( i = 0; i < 8; i++ ) {
             configureView(i, cam, quality);
@@ -227,7 +227,7 @@ public class JoglPreviewGenerator
             if ( canvas != null ) {
                 canvas.swapBuffers();
             }
-            RGBImage img = JoglRGBImageRenderer.getImageJOGL(gl);
+            RGBImage img = Jogl2RGBImageRenderer.getImageJOGL(gl);
             ImagePersistence.exportJPG(new File(filename), img);
             RGBImage thumbnail;
             thumbnail = new RGBImage();

@@ -63,7 +63,7 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
         //-----------------------------------------------------------------
         //RGBImage nm = b.getNormalMapRgb();
         //if ( q.isBumpMapSet() && (nm != null) ) {
-        //    JoglImageRenderer.activateAsNormalMap(gl, nm, q);
+        //    Jogl2ImageRenderer.activateAsNormalMap(gl, nm, q);
         //}
     }
 

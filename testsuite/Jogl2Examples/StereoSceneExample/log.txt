@@ -1,0 +1,7 @@
+This example is based upon "SceneApplicationExample", which took 10h49min to develop.
+
+2011, march 21 - Oscar Chavarro:
+  - 30min: Creating base Scene and Jogl2SceneRenderer classes, including
+    a cameraController.
+  - 30min: testing stereo methods on simple geometry (anaglyph)
+
