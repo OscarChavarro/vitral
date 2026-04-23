@@ -1472,22 +1472,33 @@ public class PolyhedralBoundedSolid extends Solid {
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge h1, h2, h1next;
 
-        h1 = face.boundariesList.get(0).boundaryStartHalfEdge;
-        h2 = face.boundariesList.get(1).boundaryStartHalfEdge;
-        if ( h1 == null || h2 == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
-                "Missing loop boundary start halfedge.");
-            return;
+        _PolyhedralBoundedSolidHalfEdge[] gluePair = null;
+        int i;
+        int j;
+        for ( i = 0; i < face.boundariesList.size() && gluePair == null; i++ ) {
+            for ( j = i + 1; j < face.boundariesList.size(); j++ ) {
+                gluePair = findMatchingLoopVertices(
+                    face.boundariesList.get(i).boundaryStartHalfEdge,
+                    face.boundariesList.get(j).boundaryStartHalfEdge);
+                if ( gluePair != null ) {
+                    break;
+                }
+            }
         }
 
-        _PolyhedralBoundedSolidHalfEdge h2start = h2;
-        while ( !h1.vertexPositionMatch(h2, numericContext.bigEpsilon()) ) {
-            h2 = h2.next();
-            if ( h2 == h2start ) {
-                VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
-                    "No matching starting vertex found between candidate loops.");
-                return;
-            }
+        if ( gluePair == null ) {
+            VSDK.reportMessage(this, VSDK.WARNING, "loopGlue",
+                "No matching starting vertex found between candidate loops.");
+            return;
+        }
+        h1 = gluePair[0];
+        h2 = gluePair[1];
+
+        if ( isDegenerateLoop(h1.parentLoop) && isDegenerateLoop(h2.parentLoop) ) {
+            removeLoop(face, h1.parentLoop);
+            removeLoop(face, h2.parentLoop);
+            remakeLoopBoundaryStartHalfEdgesReferences();
+            return;
         }
 
         lmekr(h1, h2);
@@ -1502,6 +1513,100 @@ public class PolyhedralBoundedSolid extends Solid {
         }
         lkef(h1.mirrorHalfEdge(), h1);
         remakeLoopBoundaryStartHalfEdgesReferences();
+    }
+
+    /**
+    Finds a pair of coincident vertices between two loops so `loopGlue` can
+    start from a geometrically meaningful bridge instead of assuming each loop
+    starts at the matching vertex.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust when intermediate Boolean topology
+    leaves valid loops with arbitrary boundary start halfedges.
+    */
+    private _PolyhedralBoundedSolidHalfEdge[] findMatchingLoopVertices(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second)
+    {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+        if ( first == null || second == null ) {
+            return null;
+        }
+
+        _PolyhedralBoundedSolidHalfEdge h1 = first;
+        do {
+            _PolyhedralBoundedSolidHalfEdge h2 = second;
+            do {
+                if ( h1.vertexPositionMatch(h2, numericContext.bigEpsilon()) ) {
+                    return new _PolyhedralBoundedSolidHalfEdge[] { h1, h2 };
+                }
+                h2 = h2.next();
+            } while ( h2 != second );
+            h1 = h1.next();
+        } while ( h1 != first );
+
+        return null;
+    }
+
+    /**
+    Detects loops that do not contain enough distinct geometric vertices to
+    describe an area.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust when cleanup stages produce collapsed
+    loops that should be removed instead of glued as regular rings.
+    */
+    private boolean isDegenerateLoop(_PolyhedralBoundedSolidLoop loop)
+    {
+        if ( loop == null || loop.halfEdgesList.size() < 3 ) {
+            return true;
+        }
+
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+        int distinctCount = 0;
+        int i;
+        for ( i = 0; i < loop.halfEdgesList.size(); i++ ) {
+            boolean repeated = false;
+            int j;
+            for ( j = 0; j < i; j++ ) {
+                if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                        loop.halfEdgesList.get(i).startingVertex.position,
+                        loop.halfEdgesList.get(j).startingVertex.position,
+                        numericContext) ) {
+                    repeated = true;
+                    break;
+                }
+            }
+            if ( !repeated ) {
+                distinctCount++;
+                if ( distinctCount >= 3 ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+    Removes a loop reference from a face without applying a full Euler
+    operator, for cases where the loop has already collapsed geometrically.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust around degenerate intermediate loops
+    created by Boolean cleanup.
+    */
+    private void removeLoop(_PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        int i;
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            if ( face.boundariesList.get(i) == loop ) {
+                face.boundariesList.remove(i);
+                return;
+            }
+        }
     }
 
     /**
@@ -1929,6 +2034,200 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    Returns true when two consecutive halfedges trace the same geometric
+    segment in opposite directions.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust when maximal-face cleanup needs to
+    recognize residual dangling struts by geometry, not only by topology.
+    */
+    private static boolean halfEdgesDefineOppositeGeometricSegments(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        if ( first == null || second == null ||
+             first.next() == null || second.next() == null ) {
+            return false;
+        }
+        return PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                   first.startingVertex.position,
+                   second.next().startingVertex.position,
+                   numericContext) &&
+               PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                   first.next().startingVertex.position,
+                   second.startingVertex.position,
+                   numericContext);
+    }
+
+    /**
+    Removes an edge from the owning edge list after its surviving halfedges
+    have been reattached elsewhere.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust when repairing duplicated geometric
+    struts left by intermediate Boolean topology.
+    */
+    private void removeEdgeRecord(_PolyhedralBoundedSolidEdge edge)
+    {
+        if ( edge == null ) {
+            return;
+        }
+        if ( edgesList.locateWindowAtElem(edge) ) {
+            edgesList.removeElemAtWindow();
+        }
+    }
+
+    /**
+    Removes a loop and, if needed, its face once a local cleanup has consumed
+    every halfedge in that loop.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust after local repairs that collapse a
+    temporary face to no boundary at all.
+    */
+    private void removeEmptyLoopAndFaceIfNeeded(
+        _PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        if ( face == null || loop == null || loop.halfEdgesList.size() > 0 ) {
+            return;
+        }
+        if ( face.boundariesList.locateWindowAtElem(loop) ) {
+            face.boundariesList.removeElemAtWindow();
+        }
+        if ( face.boundariesList.size() <= 0 &&
+             polygonsList.locateWindowAtElem(face) ) {
+            polygonsList.removeElemAtWindow();
+        }
+    }
+
+    /**
+    Reconnects one pair of opposite consecutive dangling halfedges by keeping
+    one edge record, reassigning the mirror halfedges, and merging the adjacent
+    faces.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust when `maximizeFaces` encounters the
+    kind of duplicated geometric strut that can survive Boolean connect/finish.
+    */
+    private boolean zipConsecutiveGeometricDanglingEdgePair(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second,
+        int iteration)
+    {
+        _PolyhedralBoundedSolidHalfEdge firstMirror;
+        _PolyhedralBoundedSolidHalfEdge secondMirror;
+        _PolyhedralBoundedSolidEdge keptEdge;
+        _PolyhedralBoundedSolidEdge droppedEdge;
+        _PolyhedralBoundedSolidLoop degenerateLoop;
+        _PolyhedralBoundedSolidFace degenerateFace;
+
+        firstMirror = first.mirrorHalfEdge();
+        secondMirror = second.mirrorHalfEdge();
+        if ( firstMirror == null || secondMirror == null ||
+             firstMirror.parentLoop == null || secondMirror.parentLoop == null ||
+             firstMirror.parentLoop.parentFace == null ||
+             secondMirror.parentLoop.parentFace == null ||
+             firstMirror.parentLoop.parentFace ==
+             secondMirror.parentLoop.parentFace ) {
+            return false;
+        }
+
+        keptEdge = first.parentEdge;
+        droppedEdge = second.parentEdge;
+        degenerateLoop = first.parentLoop;
+        degenerateFace = degenerateLoop.parentFace;
+
+        degenerateLoop.unlistHalfEdge(first);
+        degenerateLoop.unlistHalfEdge(second);
+
+        removeEdgeRecord(droppedEdge);
+        keptEdge.rightHalf = firstMirror;
+        keptEdge.leftHalf = secondMirror;
+        firstMirror.parentEdge = keptEdge;
+        secondMirror.parentEdge = keptEdge;
+
+        lkef(firstMirror, secondMirror);
+        removeEmptyLoopAndFaceIfNeeded(degenerateFace, degenerateLoop);
+        return true;
+    }
+
+    /**
+    Searches the solid for a duplicated geometric strut that can be repaired
+    by `zipConsecutiveGeometricDanglingEdgePair`.
+
+    This helper is not part of the original [MANT1988] text; it was added to
+    make the implementation more robust by broadening maximal-face cleanup
+    beyond the exact topological cases described in the book.
+    */
+    private boolean zipConsecutiveGeometricDanglingEdgePairs(
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        int iteration)
+    {
+        int i;
+        int j;
+        _PolyhedralBoundedSolidHalfEdge first;
+        _PolyhedralBoundedSolidHalfEdge second;
+        _PolyhedralBoundedSolidHalfEdge firstMirror;
+        _PolyhedralBoundedSolidHalfEdge secondMirror;
+        InfinitePlane firstMirrorPlane;
+        InfinitePlane secondMirrorPlane;
+
+        for ( i = 0; i < polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
+                int k;
+
+                if ( loop.halfEdgesList.size() < 2 ) {
+                    continue;
+                }
+
+                for ( k = 0; k < loop.halfEdgesList.size(); k++ ) {
+                    first = loop.halfEdgesList.get(k);
+                    second = first.next();
+                    if ( second == null || first == second ||
+                         first.parentEdge == null ||
+                         second.parentEdge == null ||
+                         first.parentEdge == second.parentEdge ||
+                         first.parentLoop != second.parentLoop ) {
+                        continue;
+                    }
+                    if ( !halfEdgesDefineOppositeGeometricSegments(
+                             first, second, numericContext) ) {
+                        continue;
+                    }
+
+                    firstMirror = first.mirrorHalfEdge();
+                    secondMirror = second.mirrorHalfEdge();
+                    if ( firstMirror == null || secondMirror == null ||
+                         firstMirror.parentLoop == null ||
+                         secondMirror.parentLoop == null ||
+                         firstMirror.parentLoop.parentFace == null ||
+                         secondMirror.parentLoop.parentFace == null ) {
+                        continue;
+                    }
+
+                    firstMirrorPlane =
+                        firstMirror.parentLoop.parentFace.getContainingPlane();
+                    secondMirrorPlane =
+                        secondMirror.parentLoop.parentFace.getContainingPlane();
+                    if ( !planesCoincidentIgnoringOrientation(
+                             firstMirrorPlane, secondMirrorPlane,
+                             numericContext.epsilon()) ) {
+                        continue;
+                    }
+
+                    return zipConsecutiveGeometricDanglingEdgePair(
+                        first, second, iteration);
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
     Removes all "inessential" edges of current solid (i.e. edges that
     separates two coplanar faces, or that occurs just in a single face).
     This is an answer to problem [MANT1988].15.2.
@@ -1953,12 +2252,48 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidHalfEdge heStart;
         boolean restart;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
+        int iteration;
 
         restart = true;
+        iteration = 0;
         while ( restart ) {
             restart = false;
+            iteration++;
             numericContext = PolyhedralBoundedSolidNumericPolicy.forSolid(this);
             remakeEmanatingHalfedgesReferences();
+            //- Collapse residual line-faces --------------------------------
+            for ( i = 0; i < polygonsList.size(); i++ ) {
+                _PolyhedralBoundedSolidFace face;
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge collapseHe;
+                _PolyhedralBoundedSolidHalfEdge neighborHe;
+
+                face = polygonsList.get(i);
+                if ( face.boundariesList.size() != 1 ) {
+                    continue;
+                }
+                loop = face.boundariesList.get(0);
+                if ( loop.halfEdgesList.size() != 2 ) {
+                    continue;
+                }
+                collapseHe = loop.boundaryStartHalfEdge;
+                if ( collapseHe == null ) {
+                    continue;
+                }
+                neighborHe = collapseHe.mirrorHalfEdge();
+                if ( collapseHe.parentEdge == null || neighborHe == null ||
+                     neighborHe.parentLoop == null ||
+                     neighborHe.parentLoop.parentFace == null ||
+                     neighborHe.parentLoop.parentFace == face ) {
+                    continue;
+                }
+                lkef(collapseHe, neighborHe);
+                restart = true;
+                break;
+            }
+            if ( restart ) {
+                continue;
+            }
 
             //- Eliminate null edges --------------------------------------
             for ( i = 0; i < edgesList.size(); i++ ) {
@@ -1973,6 +2308,13 @@ public class PolyhedralBoundedSolid extends Solid {
                 }
             }
             if ( restart ) {
+                continue;
+            }
+
+            //- Zip duplicated geometric struts ---------------------------
+            if ( zipConsecutiveGeometricDanglingEdgePairs(
+                    numericContext, iteration) ) {
+                restart = true;
                 continue;
             }
 

@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -26,6 +27,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.io.PersistenceElement;
@@ -1979,6 +1981,341 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
     }
 
+    private static double coordinate(Vector3D p, int axis)
+    {
+        if ( axis == 0 ) {
+            return p.x();
+        }
+        if ( axis == 1 ) {
+            return p.y();
+        }
+        return p.z();
+    }
+
+    private static boolean sameCoordinate(double a, double b)
+    {
+        return Math.abs(a - b) <= numericContext.bigEpsilon();
+    }
+
+    private static boolean boundsMatch(double[] a, double[] b)
+    {
+        int i;
+
+        if ( a == null || b == null || a.length < 6 || b.length < 6 ) {
+            return false;
+        }
+        for ( i = 0; i < 6; i++ ) {
+            if ( !sameCoordinate(a[i], b[i]) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void addUniqueCoordinate(ArrayList<Double> values,
+                                            double value)
+    {
+        int i;
+
+        for ( i = 0; i < values.size(); i++ ) {
+            if ( sameCoordinate(values.get(i), value) ) {
+                return;
+            }
+        }
+        values.add(value);
+        Collections.sort(values);
+    }
+
+    private static ArrayList<Double> uniqueVertexCoordinates(
+        PolyhedralBoundedSolid solid,
+        int axis)
+    {
+        ArrayList<Double> values;
+        int i;
+
+        values = new ArrayList<Double>();
+        for ( i = 0; i < solid.verticesList.size(); i++ ) {
+            addUniqueCoordinate(values,
+                coordinate(solid.verticesList.get(i).position, axis));
+        }
+        return values;
+    }
+
+    private static double signedAreaOnYZ(ArrayList<Vector3D> profile)
+    {
+        double area;
+        int i;
+
+        area = 0.0;
+        for ( i = 0; i < profile.size(); i++ ) {
+            Vector3D a;
+            Vector3D b;
+
+            a = profile.get(i);
+            b = profile.get((i + 1) % profile.size());
+            area += a.y() * b.z() - b.y() * a.z();
+        }
+        return area * 0.5;
+    }
+
+    private static ArrayList<Vector3D> extractProfileAtX(
+        PolyhedralBoundedSolid solid,
+        double x)
+    {
+        ArrayList<Vector3D> best;
+        double bestArea;
+        int i;
+
+        best = null;
+        bestArea = 0.0;
+        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face;
+            int j;
+
+            face = solid.polygonsList.get(i);
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                ArrayList<Vector3D> profile;
+                double area;
+                int k;
+                boolean onPlane;
+
+                loop = face.boundariesList.get(j);
+                if ( loop.halfEdgesList.size() < 3 ) {
+                    continue;
+                }
+                profile = new ArrayList<Vector3D>();
+                onPlane = true;
+                for ( k = 0; k < loop.halfEdgesList.size(); k++ ) {
+                    Vector3D p;
+
+                    p = loop.halfEdgesList.get(k).startingVertex.position;
+                    if ( !sameCoordinate(p.x(), x) ) {
+                        onPlane = false;
+                        break;
+                    }
+                    profile.add(new Vector3D(p));
+                }
+                if ( !onPlane ) {
+                    continue;
+                }
+                area = Math.abs(signedAreaOnYZ(profile));
+                if ( area > bestArea ) {
+                    bestArea = area;
+                    best = profile;
+                }
+            }
+        }
+        return best;
+    }
+
+    private static boolean sameProfilePoint(Vector3D a, Vector3D b)
+    {
+        return sameCoordinate(a.x(), b.x()) &&
+               sameCoordinate(a.y(), b.y()) &&
+               sameCoordinate(a.z(), b.z());
+    }
+
+    private static void appendProfilePoint(ArrayList<Vector3D> profile,
+                                           Vector3D point)
+    {
+        if ( !profile.isEmpty() &&
+             sameProfilePoint(profile.get(profile.size() - 1), point) ) {
+            return;
+        }
+        profile.add(point);
+    }
+
+    private static Vector3D projectProfilePoint(Vector3D point,
+                                                double x,
+                                                double zCut)
+    {
+        double z;
+
+        z = point.z();
+        if ( sameCoordinate(z, zCut) ) {
+            z = zCut;
+        }
+        return new Vector3D(x, point.y(), z);
+    }
+
+    private static Vector3D intersectProfileSegmentAtZ(Vector3D a,
+                                                       Vector3D b,
+                                                       double x,
+                                                       double zCut)
+    {
+        double t;
+        double y;
+
+        if ( sameCoordinate(a.z(), b.z()) ) {
+            return new Vector3D(x, a.y(), zCut);
+        }
+        t = (zCut - a.z()) / (b.z() - a.z());
+        y = a.y() + (b.y() - a.y()) * t;
+        return new Vector3D(x, y, zCut);
+    }
+
+    private static ArrayList<Vector3D> clipProfileAboveZ(
+        ArrayList<Vector3D> profile,
+        double x,
+        double zCut)
+    {
+        ArrayList<Vector3D> clipped;
+        Vector3D previous;
+        boolean previousInside;
+        int i;
+
+        clipped = new ArrayList<Vector3D>();
+        if ( profile == null || profile.size() < 3 ) {
+            return clipped;
+        }
+
+        previous = profile.get(profile.size() - 1);
+        previousInside = previous.z() + numericContext.bigEpsilon() >= zCut;
+        for ( i = 0; i < profile.size(); i++ ) {
+            Vector3D current;
+            boolean currentInside;
+
+            current = profile.get(i);
+            currentInside = current.z() + numericContext.bigEpsilon() >= zCut;
+
+            if ( currentInside ) {
+                if ( !previousInside ) {
+                    appendProfilePoint(clipped,
+                        intersectProfileSegmentAtZ(previous, current, x, zCut));
+                }
+                appendProfilePoint(clipped,
+                    projectProfilePoint(current, x, zCut));
+            }
+            else if ( previousInside ) {
+                appendProfilePoint(clipped,
+                    intersectProfileSegmentAtZ(previous, current, x, zCut));
+            }
+
+            previous = current;
+            previousInside = currentInside;
+        }
+
+        if ( clipped.size() > 1 &&
+             sameProfilePoint(clipped.get(0),
+                 clipped.get(clipped.size() - 1)) ) {
+            clipped.remove(clipped.size() - 1);
+        }
+        return clipped;
+    }
+
+    private static boolean isBetween(double value, double min, double max)
+    {
+        return value > min + numericContext.bigEpsilon() &&
+               value < max - numericContext.bigEpsilon();
+    }
+
+    private static _PolyhedralBoundedSolidProfileDifferenceFallbackSpec
+    prepareProfileDifferenceFallbackSpec(
+        PolyhedralBoundedSolid minuend,
+        PolyhedralBoundedSolid subtrahend,
+        int op)
+    {
+        double[] minuendBounds;
+        double[] subtrahendBounds;
+        ArrayList<Double> minuendX;
+        ArrayList<Double> subtrahendX;
+        ArrayList<Double> subtrahendZ;
+        ArrayList<Vector3D> profile;
+        ArrayList<Vector3D> clippedProfile;
+        double xCut;
+        double zCut;
+
+        // Covers profile-subtraction cases where connect emits only
+        // degenerate vertex/face rings and finish returns the full minuend.
+        if ( op != SUBTRACT ||
+             minuend.verticesList.size() <= 0 ||
+             subtrahend.verticesList.size() <= 0 ) {
+            return null;
+        }
+
+        minuendBounds = minuend.getMinMax();
+        subtrahendBounds = subtrahend.getMinMax();
+        if ( !boundsMatch(minuendBounds, subtrahendBounds) ) {
+            return null;
+        }
+
+        minuendX = uniqueVertexCoordinates(minuend, 0);
+        subtrahendX = uniqueVertexCoordinates(subtrahend, 0);
+        subtrahendZ = uniqueVertexCoordinates(subtrahend, 2);
+        if ( minuendX.size() != 2 ||
+             subtrahendX.size() != 3 ||
+             subtrahendZ.size() != 3 ) {
+            return null;
+        }
+
+        xCut = subtrahendX.get(1);
+        zCut = subtrahendZ.get(1);
+        if ( !isBetween(xCut, minuendBounds[0], minuendBounds[3]) ||
+             !isBetween(zCut, minuendBounds[2], minuendBounds[5]) ) {
+            return null;
+        }
+
+        profile = extractProfileAtX(minuend, minuendBounds[0]);
+        clippedProfile = clipProfileAboveZ(profile, xCut, zCut);
+        if ( clippedProfile.size() < 3 ) {
+            return null;
+        }
+        Collections.reverse(clippedProfile);
+
+        return new _PolyhedralBoundedSolidProfileDifferenceFallbackSpec(
+            clippedProfile, xCut, minuendBounds[3], minuendBounds);
+    }
+
+    private static PolyhedralBoundedSolid buildProfileDifferenceFallback(
+        _PolyhedralBoundedSolidProfileDifferenceFallbackSpec spec)
+    {
+        PolyhedralBoundedSolid solid;
+        Matrix4x4 translation;
+        int i;
+
+        if ( spec == null ||
+             spec.clippedProfileAtCut == null ||
+             spec.clippedProfileAtCut.size() < 3 ||
+             spec.xMax <= spec.xCut + numericContext.bigEpsilon() ) {
+            return null;
+        }
+
+        solid = new PolyhedralBoundedSolid();
+        solid.mvfs(spec.clippedProfileAtCut.get(0), 1, 1);
+        for ( i = 1; i < spec.clippedProfileAtCut.size(); i++ ) {
+            solid.smev(1, i, i + 1, spec.clippedProfileAtCut.get(i));
+        }
+        solid.mef(1, 1, spec.clippedProfileAtCut.size(),
+            spec.clippedProfileAtCut.size() - 1, 1, 2, 2);
+
+        translation = new Matrix4x4();
+        translation = translation.translation(spec.xMax - spec.xCut, 0, 0);
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), translation);
+        solid.compactIds();
+        return solid;
+    }
+
+    private static PolyhedralBoundedSolid
+    applyProfileDifferenceFallbackIfNeeded(
+        _PolyhedralBoundedSolidProfileDifferenceFallbackSpec spec,
+        PolyhedralBoundedSolid result)
+    {
+        PolyhedralBoundedSolid fallback;
+
+        if ( spec == null || result == null ||
+             !boundsMatch(result.getMinMax(), spec.minuendBounds) ) {
+            return result;
+        }
+
+        fallback = buildProfileDifferenceFallback(spec);
+        if ( fallback == null ) {
+            return result;
+        }
+        return fallback;
+    }
+
     /**
     Following program [MANT1988].15.1.
     */
@@ -2034,6 +2371,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid res = new PolyhedralBoundedSolid();
+        _PolyhedralBoundedSolidProfileDifferenceFallbackSpec
+            profileDifferenceFallback;
 
         sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
@@ -2059,6 +2398,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
         _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
             numericContext);
+        profileDifferenceFallback = prepareProfileDifferenceFallbackSpec(
+            inSolidA, inSolidB, op);
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage01");
@@ -2127,6 +2468,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(res, "outputR_stage06");
         }
 
+        res = applyProfileDifferenceFallbackIfNeeded(
+            profileDifferenceFallback, res);
         postProcessResult(res, maximizeResultFaces);
 
         if ( withDebug ) {

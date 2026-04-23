@@ -252,6 +252,75 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @org.junit.jupiter.api.Test
+    void given_mant1988Section15_1DifferenceBA_when_currentKernelRuns_then_resultClosesDoubleLoop()
+    {
+        PolyhedralBoundedSolid[] operands =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
+
+        assertThat(result).isNotNull();
+        assertThat(result.polygonsList.size()).isEqualTo(8);
+        assertThat(result.edgesList.size()).isEqualTo(18);
+        assertThat(result.verticesList.size()).isEqualTo(12);
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isTrue();
+        assertThat(result.getMinMax()).containsExactly(
+            1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
+    }
+
+    @org.junit.jupiter.api.Test
+    void given_mant1988Section15_1DifferenceBA_when_flexibleBilateralConnectRuns_then_resultClosesDoubleLoop()
+    {
+        String[] properties = new String[] {
+            "vsdk.setop.connect.keepInsertionOrder",
+            "vsdk.setop.connect.flexibleEndpointChains",
+            "vsdk.setop.connect.flexibleAllowSamePointSelfClosure",
+            "vsdk.setop.connect.flexibleKeepOnlyPairedCutFaces",
+            "vsdk.setop.connect.flexibleRejectOneSidedMatches"
+        };
+        String[] previousValues = new String[properties.length];
+        int i;
+
+        for ( i = 0; i < properties.length; i++ ) {
+            previousValues[i] = System.getProperty(properties[i]);
+            System.setProperty(properties[i], "true");
+        }
+
+        try {
+            PolyhedralBoundedSolid[] operands =
+                PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
+            PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+                operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
+                false);
+
+            assertThat(result).isNotNull();
+            assertThat(result.polygonsList.size()).isEqualTo(8);
+            assertThat(result.edgesList.size()).isEqualTo(18);
+            assertThat(result.verticesList.size()).isEqualTo(12);
+            assertThat(PolyhedralBoundedSolidValidationEngine
+                .validateIntermediate(result)).isTrue();
+            assertThat(PolyhedralBoundedSolidValidationEngine
+                .validateStrict(result)).isTrue();
+            assertThat(result.getMinMax()).containsExactly(
+                1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
+        }
+        finally {
+            for ( i = 0; i < properties.length; i++ ) {
+                if ( previousValues[i] == null ) {
+                    System.clearProperty(properties[i]);
+                }
+                else {
+                    System.setProperty(properties[i], previousValues[i]);
+                }
+            }
+        }
+    }
+
+    @org.junit.jupiter.api.Test
     void given_mant1988Section15_2HoledIntersection_when_togglingFinalMaximizeFaces_then_resultTopologyIsPreserved()
     {
         // Arrange
@@ -351,6 +420,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     {
         return Stream.of(
             Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
             Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.INTERSECTION),
@@ -362,7 +432,6 @@ class PolyhedralBoundedSolidSetOperatorTest
     {
         return Stream.of(
             Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION),
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
             Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(0, PolyhedralBoundedSolidModeler.SUBTRACT)
         );

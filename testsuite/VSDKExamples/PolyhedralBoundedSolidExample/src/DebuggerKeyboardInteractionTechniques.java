@@ -1,7 +1,5 @@
 import vsdk.toolkit.gui.KeyEvent;
 import models.DebuggerModel;
-import models.SolidModelNames;
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 public class DebuggerKeyboardInteractionTechniques
@@ -17,8 +15,6 @@ public class DebuggerKeyboardInteractionTechniques
     {
         boolean repaint = false;
         boolean handled = false;
-        boolean booleanKeyboardChange = false;
-        SolidModelNames modelBefore = model.getSolidModelName();
 
         if ( event.keycode == KeyEvent.KEY_ESC ) {
             actions.requestExit();
@@ -77,17 +73,11 @@ public class DebuggerKeyboardInteractionTechniques
             case KeyEvent.KEY_3 -> {
                 model.setSolidModelName(model.getSolidModelName().previousClamped());
                 actions.rebuildSolid();
-                booleanKeyboardChange =
-                    isBooleanModel(modelBefore) ||
-                    isBooleanModel(model.getSolidModelName());
                 handled = true;
             }
             case KeyEvent.KEY_4 -> {
                 model.setSolidModelName(model.getSolidModelName().nextClamped());
                 actions.rebuildSolid();
-                booleanKeyboardChange =
-                    isBooleanModel(modelBefore) ||
-                    isBooleanModel(model.getSolidModelName());
                 handled = true;
             }
 
@@ -133,19 +123,16 @@ public class DebuggerKeyboardInteractionTechniques
             case KeyEvent.KEY_5 -> {
                 model.setCsgOperation(model.getCsgOperation().nextCircular());
                 actions.rebuildSolid();
-                booleanKeyboardChange = true;
                 handled = true;
             }
             case KeyEvent.KEY_6 -> {
                 model.setCsgSample(model.getCsgSample().nextCircular());
                 actions.rebuildSolid();
-                booleanKeyboardChange = true;
                 handled = true;
             }
             case KeyEvent.KEY_d -> {
                 model.setDebugCsg(!model.isDebugCsg());
                 actions.rebuildSolid();
-                booleanKeyboardChange = true;
                 handled = true;
             }
         }
@@ -155,15 +142,7 @@ public class DebuggerKeyboardInteractionTechniques
             model.setEdgeIndex(-3);
         }
         model.clampSubdivisions();
-        if ( booleanKeyboardChange ) {
-            PolyhedralBoundedSolidStatistics.printSummary();
-        }
 
         return repaint || handled;
-    }
-
-    private static boolean isBooleanModel(SolidModelNames modelName)
-    {
-        return modelName != null && modelName.name().startsWith("CSG_");
     }
 }

@@ -143,6 +143,11 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
 
         for ( i = 0; i < halfEdgesList.size(); i++ ) {
             he = halfEdgesList.get(i);
+            // Degenerate loops can be left behind transiently after lkemr
+            // during boolean finishing. They are not traversable via an edge.
+            if ( he.parentEdge == null ) {
+                return;
+            }
             edges[i] = he.parentEdge;
             sides[i] = false;
             if ( he.parentEdge.rightHalf == he ) {

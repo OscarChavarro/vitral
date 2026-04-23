@@ -93,6 +93,7 @@ final class _PolyhedralBoundedSolidSetFinisher
             outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
             outRes.loopGlue(sonfa.get(i+inda));
         }
+        cleanup(outRes);
         outRes.compactIds();
         tracePipelineSummary(
             "finish end outRes faces=" + outRes.polygonsList.size() +
