@@ -32,10 +32,10 @@ Having a green check means test worked, red cross means test not working.
 | HOLLOW_BRICK + INTERSECTION | ✅ |
 | HOLLOW_BRICK + A-B | ✅ |
 | HOLLOW_BRICK + B-A | ✅ |
-| MANT1988_6_13 + UNION | ❌ |
-| MANT1988_6_13 + INTERSECTION | ❌ |
-| MANT1988_6_13 + A-B | ❌ |
-| MANT1988_6_13 + B-A | ❌ |
+| MANT1988_6_13 + UNION | ✅ |
+| MANT1988_6_13 + INTERSECTION | ✅ |
+| MANT1988_6_13 + A-B | ✅ |
+| MANT1988_6_13 + B-A | ✅ |
 | MANT1988_15_1 + UNION | ✅ |
 | MANT1988_15_1 + INTERSECTION | ✅ |
 | MANT1988_15_1 + A-B | ✅ |
@@ -117,8 +117,7 @@ All four operations for `MANT1988_15_1` are locked in
 
 # The MANT1988_3 rectilinear contact case
 
-`MANT1988_3` is the renamed former `MANT1986_3` L-profile against box
-fixture. The systematic trace showed that preflight did not apply, while
+`MANT1988_3` L-profile against box fixture. The systematic trace showed that preflight did not apply, while
 generate and classify did find the expected vertex/face and vertex/vertex
 contacts. The break was at connect -> finish: connect left loose point
 null-edge chains around the contact rectangle, including the regions around
@@ -137,3 +136,34 @@ outward boundary quads before normal post-processing.
 All four operations for `MANT1988_3` are now strict-valid single-shell
 results and are locked in `BooleansFromReferenceObjectPairsTest`: UNION,
 INTERSECTION, A-B, and B-A.
+
+# The MANT1988_6_13 orthogonal profile case
+
+`MANT1988_6_13` is the left-view profile extrusion against the front-view
+profile extrusion. The stage trace showed that preflight did not apply and
+generate was doing the right first-order geometric work: it found four
+vertex/face contacts and twelve vertex/vertex contacts. The bad handoff was
+between classify and connect. Classify emitted twelve paired null edges, but
+they were all point null-edges. For UNION, connect left eight loose endpoint
+pairs and produced no `sonfa`/`sonfb` result faces, so finish returned an empty
+solid. For INTERSECTION and A-B, connect produced only two result-face pairs;
+at least one A-side face still had only one loop, so finish could not consume
+`boundariesList[1]`. This matches the visual clue around the partial-A point
+chains near the duplicated profile vertices: the vertex/face intersections
+were present, but not assembled into complete cutting rings.
+
+The recovery keeps the normal MANT1988 pipeline first. Before destructive
+classification/connect, the operator prepares a narrow orthogonal-profile
+cell fallback for this fixture shape: one operand is a Y-extruded XZ profile
+with a piecewise-linear right boundary, and the other is an X-extruded YZ
+profile. If connect leaves loose endpoints or finish/result is incomplete,
+the fallback classifies the two X zones split by the XZ profile boundary over
+the combined Y/Z profile cuts, then reconstructs outward boundary quads. This
+preserves the intended profile-set-operation geometry without asking finish to
+glue incomplete point chains.
+
+All four operations are now strict-valid single-shell results and are locked
+in `BooleansFromReferenceObjectPairsTest`: UNION
+`faces=11, edges=27, vertices=18`, INTERSECTION
+`faces=12, edges=30, vertices=20`, A-B `faces=7, edges=15, vertices=10`, and
+B-A `faces=12, edges=30, vertices=20`.
