@@ -215,6 +215,24 @@ project(':testsuite:_APITests:_JOGL2HelloWorld') {
     }
 }
 
+project(':testsuite:_APITests:_JOGL4HelloWorld') {
+    dependencies {
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
+project(':testsuite:_APITests:_JOGL4PbufferExample') {
+    dependencies {
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
 configure(subprojects.findAll {
     it.path.startsWith(':testsuite:') &&
     it.buildFile.exists() &&
@@ -231,6 +249,8 @@ configure(subprojects.findAll {
     it.buildFile.exists() &&
     it.path != ':testsuite:ApplicationCases:CommandServer' &&
     it.path != ':testsuite:_APITests:_JOGL2HelloWorld' &&
+    it.path != ':testsuite:_APITests:_JOGL4HelloWorld' &&
+    it.path != ':testsuite:_APITests:_JOGL4PbufferExample' &&
     !it.path.startsWith(':testsuite:VSDKExamples:') &&
     !it.path.startsWith(':testsuite:Jogl4Examples:')
 }) {

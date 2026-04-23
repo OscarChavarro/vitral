@@ -5,9 +5,15 @@
 // Java Awt/Swing classes
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 // JOGL classes
-import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GL2;
@@ -22,6 +28,9 @@ does not respond to mouse neither keyboard events.
 public class HelloWorldJOGL implements GLEventListener 
 {
     private JFrame mainWindowWidget;
+    private GLCanvas canvas;
+    private boolean closing;
+    private boolean glResourcesReleased;
 
     /**
     Default constructor.
@@ -39,8 +48,9 @@ public class HelloWorldJOGL implements GLEventListener
         //-----------------------------------------------------------------
         GLProfile glp = GLProfile.get(GLProfile.GL2); 
         GLCapabilities caps = new GLCapabilities(glp);
-        GLJPanel canvas = new GLJPanel(caps);
+        canvas = new GLCanvas(caps);
         canvas.addGLEventListener(this);
+        canvas.setFocusable(true);
 
         //-----------------------------------------------------------------
         mainWindowWidget = new JFrame("VITRAL concept test - JOGL Hello World");
@@ -48,7 +58,25 @@ public class HelloWorldJOGL implements GLEventListener
         mainWindowWidget.pack();
         mainWindowWidget.setSize(640, 480);
         mainWindowWidget.setLocationRelativeTo(null);
-        mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainWindowWidget.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        KeyAdapter escKeyHandler = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+                    requestClose();
+                }
+            }
+        };
+
+        canvas.addKeyListener(escKeyHandler);
+        mainWindowWidget.addKeyListener(escKeyHandler);
+        mainWindowWidget.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                requestClose();
+            }
+        });
     }
 
     /**
@@ -57,6 +85,7 @@ public class HelloWorldJOGL implements GLEventListener
     public final void runApp()
     {
         mainWindowWidget.setVisible(true);
+        canvas.requestFocusInWindow();
     }
 
     /** 
@@ -97,7 +126,8 @@ public class HelloWorldJOGL implements GLEventListener
     */
     @Override
     public void dispose(GLAutoDrawable drawable) {
-
+        glResourcesReleased = true;
+        System.out.println("HelloWorldJOGL.dispose: OpenGL resources released = " + glResourcesReleased);
     }
 
     /**
@@ -127,6 +157,28 @@ public class HelloWorldJOGL implements GLEventListener
     public static void main(String[] args) {
         HelloWorldJOGL instance = new HelloWorldJOGL();
         instance.runApp();
+    }
+
+    private void requestClose()
+    {
+        if ( closing ) return;
+        closing = true;
+
+        Runnable closeAction = () -> {
+            if ( canvas != null ) {
+                canvas.destroy();
+            }
+            if ( mainWindowWidget != null ) {
+                mainWindowWidget.dispose();
+            }
+        };
+
+        if ( SwingUtilities.isEventDispatchThread() ) {
+            closeAction.run();
+        }
+        else {
+            SwingUtilities.invokeLater(closeAction);
+        }
     }
 
 }
