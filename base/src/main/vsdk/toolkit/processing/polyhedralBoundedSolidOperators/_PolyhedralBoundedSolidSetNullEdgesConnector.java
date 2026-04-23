@@ -242,7 +242,20 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 face = Integer.toString(he.parentLoop.parentFace.id);
             }
         }
-        return "he(v=" + from + "->" + to + ",f=" + face + ")";
+        String fromPoint = "?";
+        String toPoint = "?";
+
+        if ( he.startingVertex != null ) {
+            fromPoint = he.startingVertex.position.toString();
+        }
+        if ( he.parentLoop != null ) {
+            _PolyhedralBoundedSolidHalfEdge next = he.next();
+            if ( next != null && next.startingVertex != null ) {
+                toPoint = next.startingVertex.position.toString();
+            }
+        }
+        return "he(v=" + from + "->" + to + ",f=" + face +
+            ",p=" + fromPoint + "->" + toPoint + ")";
     }
 
     private static String summarizeNullEdge(
@@ -977,11 +990,11 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 tmp = nextedgea.rightHalf;
                 nextedgea.rightHalf = nextedgea.leftHalf;
                 nextedgea.leftHalf = tmp;
-                if ( hb.startingVertex.id > hbm.startingVertex.id ) {
-                    tmp = nextedgeb.rightHalf;
-                    nextedgeb.rightHalf = nextedgeb.leftHalf;
-                    nextedgeb.leftHalf = tmp;
-                }
+            }
+            if ( hb.startingVertex.id > hbm.startingVertex.id ) {
+                tmp = nextedgeb.rightHalf;
+                nextedgeb.rightHalf = nextedgeb.leftHalf;
+                nextedgeb.leftHalf = tmp;
             }
 
             pointResult = processPointWithFlexibleChains(
@@ -1140,11 +1153,11 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 tmp = nextedgea.rightHalf;
                 nextedgea.rightHalf = nextedgea.leftHalf;
                 nextedgea.leftHalf = tmp;
-                if ( hb.startingVertex.id > hbm.startingVertex.id ) {
-                    tmp = nextedgeb.rightHalf;
-                    nextedgeb.rightHalf = nextedgeb.leftHalf;
-                    nextedgeb.leftHalf = tmp;
-                }
+            }
+            if ( hb.startingVertex.id > hbm.startingVertex.id ) {
+                tmp = nextedgeb.rightHalf;
+                nextedgeb.rightHalf = nextedgeb.leftHalf;
+                nextedgeb.leftHalf = tmp;
             }
 
             r = canJoin(nextedgea.rightHalf, nextedgeb.leftHalf);

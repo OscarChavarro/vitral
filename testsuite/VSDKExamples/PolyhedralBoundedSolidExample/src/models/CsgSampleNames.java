@@ -9,7 +9,7 @@ public enum CsgSampleNames
     HOLLOW_BRICK(5),
     MANT1988_6_13(6),
     MANT1988_15_1(7),
-    MANT1986_3(8),
+    MANT1988_3(8),
     MANT1988_15_2_HOLED(9);
 
     private final int id;

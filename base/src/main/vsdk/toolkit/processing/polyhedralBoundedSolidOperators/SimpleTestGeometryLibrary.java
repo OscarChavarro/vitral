@@ -319,7 +319,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
     cases. Some faces between the solid are overlap, making this sample
     example a "difficult" one for set operations.
     */
-    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1986_3()
+    public static PolyhedralBoundedSolid[] createTestObjectPairMANT1988_3()
     {
         PolyhedralBoundedSolid[] operands;
         PolyhedralBoundedSolid a;

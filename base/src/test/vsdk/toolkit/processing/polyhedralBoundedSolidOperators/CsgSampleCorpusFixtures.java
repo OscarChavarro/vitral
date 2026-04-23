@@ -36,8 +36,8 @@ final class CsgSampleCorpusFixtures
                 return createMoonBlockPair();
             case MANT1988_6_13:
                 return PolyhedralBoundedSolidTestFixtures.createMant1988_6_13Pair();
-            case MANT1986_3:
-                return PolyhedralBoundedSolidTestFixtures.createMant1986_3Pair();
+            case MANT1988_3:
+                return PolyhedralBoundedSolidTestFixtures.createMant1988_3Pair();
             case MANT1988_15_2_HOLED:
                 return PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
             case MANT1988_15_1:

@@ -71,9 +71,9 @@ public class PolyhedralBoundedSolidTestFixtures
         return SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
     }
 
-    public static PolyhedralBoundedSolid[] createMant1986_3Pair()
+    public static PolyhedralBoundedSolid[] createMant1988_3Pair()
     {
-        return SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_3();
     }
 
     public static PolyhedralBoundedSolid[] createMant1988_6_13Pair()

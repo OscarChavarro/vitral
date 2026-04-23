@@ -25,9 +25,9 @@ Having a green check means test worked, red cross means test not working.
 | MOON_BLOCK + A-B | ✅ |
 | MOON_BLOCK + B-A | ✅ |
 | CROSS_PAIR + UNION | ✅ |
-| CROSS_PAIR + INTERSECTION | ❌ |
-| CROSS_PAIR + A-B | ❌ |
-| CROSS_PAIR + B-A | ❌ |
+| CROSS_PAIR + INTERSECTION | ✅ |
+| CROSS_PAIR + A-B | ✅ |
+| CROSS_PAIR + B-A | ✅ |
 | HOLLOW_BRICK + UNION | ✅ |
 | HOLLOW_BRICK + INTERSECTION | ✅ |
 | HOLLOW_BRICK + A-B | ✅ |
@@ -40,10 +40,10 @@ Having a green check means test worked, red cross means test not working.
 | MANT1988_15_1 + INTERSECTION | ✅ |
 | MANT1988_15_1 + A-B | ✅ |
 | MANT1988_15_1 + B-A | ✅ |
-| MANT1986_3 + UNION | ❌ |
-| MANT1986_3 + INTERSECTION | ❌ |
-| MANT1986_3 + A-B | ❌ |
-| MANT1986_3 + B-A | ❌ |
+| MANT1988_3 + UNION | ✅ |
+| MANT1988_3 + INTERSECTION | ✅ |
+| MANT1988_3 + A-B | ✅ |
+| MANT1988_3 + B-A | ✅ |
 | MANT1988_15_2_HOLED + UNION | ✅ |
 | MANT1988_15_2_HOLED + INTERSECTION | ✅ |
 | MANT1988_15_2_HOLED + A-B | ✅ |
@@ -114,3 +114,26 @@ The recovered `B-A` result now has bbox
 `[1/3, 0, 0.25] -> [1, 1, 1]`, one shell, 8 faces, 18 edges, and 12 vertices.
 All four operations for `MANT1988_15_1` are locked in
 `BooleansFromReferenceObjectPairsTest`: UNION, INTERSECTION, A-B, and B-A.
+
+# The MANT1988_3 rectilinear contact case
+
+`MANT1988_3` is the renamed former `MANT1986_3` L-profile against box
+fixture. The systematic trace showed that preflight did not apply, while
+generate and classify did find the expected vertex/face and vertex/vertex
+contacts. The break was at connect -> finish: connect left loose point
+null-edge chains around the contact rectangle, including the regions around
+the duplicated vertices `28/50` vs `35/36`, `26/48` vs `32/33`,
+`38/39` vs `35/35`, `19/23` vs `26/48`, and `24/46` vs `32/33`, so finish
+either returned an empty union or tried to glue degenerate faces.
+
+The recovery keeps the normal MANT1988 pipeline first. For axis-aligned
+rectilinear operands, the operator now prepares a bounded cell-decomposition
+fallback from all operand vertex coordinate planes. The fallback is used only
+when connect leaves loose endpoints, finish throws, or the finished result is
+empty or degenerate. It classifies each open grid cell against A and B,
+applies the requested set expression, and reconstructs a valid B-Rep from
+outward boundary quads before normal post-processing.
+
+All four operations for `MANT1988_3` are now strict-valid single-shell
+results and are locked in `BooleansFromReferenceObjectPairsTest`: UNION,
+INTERSECTION, A-B, and B-A.

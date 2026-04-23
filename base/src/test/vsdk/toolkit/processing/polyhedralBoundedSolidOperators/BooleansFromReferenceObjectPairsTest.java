@@ -231,7 +231,19 @@ class BooleansFromReferenceObjectPairsTest
                 expectedMANT1988_15_1DifferenceAB()),
             pairCase(CsgSampleCorpus.MANT1988_15_1,
                 ReferenceBooleanOperation.DIFFERENCE_B_MINUS_A,
-                expectedMANT1988_15_1DifferenceBA())
+                expectedMANT1988_15_1DifferenceBA()),
+
+            pairCase(CsgSampleCorpus.MANT1988_3,
+                ReferenceBooleanOperation.UNION, expectedMANT1988_3Union()),
+            pairCase(CsgSampleCorpus.MANT1988_3,
+                ReferenceBooleanOperation.INTERSECTION,
+                expectedMANT1988_3Intersection()),
+            pairCase(CsgSampleCorpus.MANT1988_3,
+                ReferenceBooleanOperation.DIFFERENCE_A_MINUS_B,
+                expectedMANT1988_3DifferenceAB()),
+            pairCase(CsgSampleCorpus.MANT1988_3,
+                ReferenceBooleanOperation.DIFFERENCE_B_MINUS_A,
+                expectedMANT1988_3DifferenceBA())
         );
     }
 
@@ -274,6 +286,10 @@ class BooleansFromReferenceObjectPairsTest
     private static TopologicalSummary expectedMANT1988_15_1Intersection() { return TopologicalSummary.of(1, 10, 24, 16, 10, 0, 2, new int[] {10}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6, 6, 6}, new long[] {0L, 0L, 0L, 1000000L, 1000000L, 1000000L}); }
     private static TopologicalSummary expectedMANT1988_15_1DifferenceAB() { return TopologicalSummary.of(2, 10, 18, 12, 10, 0, 4, new int[] {5, 5}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, new long[] {0L, 0L, 583333L, 333333L, 1000000L, 1000000L}); }
     private static TopologicalSummary expectedMANT1988_15_1DifferenceBA() { return TopologicalSummary.of(1, 8, 18, 12, 8, 0, 2, new int[] {8}, new int[] {1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6}, new long[] {333333L, 0L, 250000L, 1000000L, 1000000L, 1000000L}); }
+    private static TopologicalSummary expectedMANT1988_3Union() { return TopologicalSummary.of(1, 14, 35, 23, 14, 0, 2, new int[] {14}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 8}, new long[] {50000L, -160000L, 50000L, 970000L, 470000L, 770000L}); }
+    private static TopologicalSummary expectedMANT1988_3Intersection() { return TopologicalSummary.of(1, 6, 12, 8, 6, 0, 2, new int[] {6}, new int[] {1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4}, new long[] {750000L, 50000L, 230000L, 970000L, 260000L, 410000L}); }
+    private static TopologicalSummary expectedMANT1988_3DifferenceAB() { return TopologicalSummary.of(1, 11, 27, 18, 11, 0, 2, new int[] {11}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 8}, new long[] {50000L, 50000L, 50000L, 970000L, 470000L, 770000L}); }
+    private static TopologicalSummary expectedMANT1988_3DifferenceBA() { return TopologicalSummary.of(1, 8, 18, 12, 8, 0, 2, new int[] {8}, new int[] {1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6}, new long[] {390000L, -160000L, 230000L, 970000L, 260000L, 410000L}); }
     private static TopologicalSummary expectedLampShellSummary() { return TopologicalSummary.of(1, 13, 24, 14, 14, 1, 3, new int[] {13}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}, new int[] {3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, new long[] {300000L, 116987L, 50000L, 1050000L, 983013L, 850000L}); }
     private static TopologicalSummary expectedFeaturedObjectSummary() { return TopologicalSummary.of(2, 32, 84, 54, 34, 2, 2, new int[] {16, 16}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 8, 8, 10, 10}, new long[] {0L, 0L, 0L, 1000000L, 1000000L, 1000000L}); }
     private static TopologicalSummary expectedKurlanderBowlSummary() { return TopologicalSummary.placeholder("CSG_KURLANDER_BOWL"); }

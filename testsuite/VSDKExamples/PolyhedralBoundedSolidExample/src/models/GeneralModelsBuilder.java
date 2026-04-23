@@ -1204,9 +1204,9 @@ public final class GeneralModelsBuilder
             case STACKED_BLOCKS:
                 operands = buildCsgTest2();
                 break;
-            case MANT1986_3:
+            case MANT1988_3:
                 operands =
-                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_3();
                 break;
             case HOLLOW_BRICK:
                 operands = buildCsgTest4();
@@ -1242,9 +1242,9 @@ public final class GeneralModelsBuilder
             case MANT1986_2:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
-            case MANT1986_3:
+            case MANT1988_3:
                 return
-                    SimpleTestGeometryLibrary.createTestObjectPairMANT1986_3();
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_3();
             case MANT1988_15_2_HOLED:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);

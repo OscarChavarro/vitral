@@ -74,7 +74,7 @@ yet stable across the full neighborhood-classification space.
 | Boolean connect | `_PolyhedralBoundedSolidSetNullEdgesConnector` | Stable CSG regressions and CROSS_PAIR traces | Low-medium; known failures suggest classification/connect pairing mismatch. |
 | Boolean finish | `_PolyhedralBoundedSolidSetFinisher` | Stable CSG regressions assert topology and bounds for known-good fixtures | Medium; depends on correct `sonfa`/`sonfb` from connect. |
 | Boolean stable regression corpus | `MANT1986_2`, `STACKED_BLOCKS`, `MOON_BLOCK` fixtures | `PolyhedralBoundedSolidSetOperatorStableCsgRegressionTest` | High for these fixtures and four operation directions. |
-| Boolean exploratory corpus | `CROSS_PAIR`, `MANT1986_3`, `MANT1988_6_13`, `MANT1988_15_1`, `MANT1988_15_2_HOLED` | `PartialOperandsTest`, `CrossPairDiagnosticTest`, general set-op tests | Diagnostic only; assertions are intentionally weak where correctness is unknown. |
+| Boolean exploratory corpus | `CROSS_PAIR`, `MANT1988_3`, `MANT1988_6_13`, `MANT1988_15_1`, `MANT1988_15_2_HOLED` | `PartialOperandsTest`, `CrossPairDiagnosticTest`, general set-op tests | Diagnostic only; assertions are intentionally weak where correctness is unknown. |
 
 ## Known Alignment Gaps
 

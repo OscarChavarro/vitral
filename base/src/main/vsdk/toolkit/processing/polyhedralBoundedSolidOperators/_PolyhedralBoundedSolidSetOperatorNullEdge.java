@@ -39,14 +39,8 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         }
     }
 
-    public int compareTo(_PolyhedralBoundedSolidSetOperatorNullEdge other)
+    private static int comparePoint(Vector3D a, Vector3D b)
     {
-        Vector3D a;
-        Vector3D b;
-
-        a = this.e.rightHalf.startingVertex.position;
-        b = other.e.rightHalf.startingVertex.position;
-
         int cmpX = PolyhedralBoundedSolidNumericPolicy.compare(
             a.x(), b.x(), numericContext.bigEpsilon());
         if ( cmpX != 0 ) {
@@ -63,9 +57,54 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
             a.z(), b.z(), numericContext.bigEpsilon());
     }
 
+    private static Vector3D canonicalFirstEndpoint(
+        _PolyhedralBoundedSolidEdge edge)
+    {
+        Vector3D right;
+        Vector3D left;
+
+        right = edge.rightHalf.startingVertex.position;
+        left = edge.leftHalf.startingVertex.position;
+        if ( comparePoint(right, left) <= 0 ) {
+            return right;
+        }
+        return left;
+    }
+
+    private static Vector3D canonicalSecondEndpoint(
+        _PolyhedralBoundedSolidEdge edge)
+    {
+        Vector3D right;
+        Vector3D left;
+
+        right = edge.rightHalf.startingVertex.position;
+        left = edge.leftHalf.startingVertex.position;
+        if ( comparePoint(right, left) <= 0 ) {
+            return left;
+        }
+        return right;
+    }
+
+    public int compareTo(_PolyhedralBoundedSolidSetOperatorNullEdge other)
+    {
+        int firstEndpointComparison;
+
+        firstEndpointComparison = comparePoint(
+            canonicalFirstEndpoint(this.e),
+            canonicalFirstEndpoint(other.e));
+        if ( firstEndpointComparison != 0 ) {
+            return firstEndpointComparison;
+        }
+        return comparePoint(
+            canonicalSecondEndpoint(this.e),
+            canonicalSecondEndpoint(other.e));
+    }
+
     @Override
     public String toString()
     {
-        return e.toString() + " (sorted with respect to position " + this.e.rightHalf.startingVertex.position + ")";
+        return e.toString() + " (sorted with respect to segment " +
+            canonicalFirstEndpoint(this.e) + " -> " +
+            canonicalSecondEndpoint(this.e) + ")";
     }
 }
