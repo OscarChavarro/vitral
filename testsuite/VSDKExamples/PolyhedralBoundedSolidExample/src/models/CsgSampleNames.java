@@ -10,7 +10,9 @@ public enum CsgSampleNames
     MANT1988_6_13(6),
     MANT1988_15_1(7),
     MANT1988_3(8),
-    MANT1988_15_2_HOLED(9);
+    MANT1988_15_2_HOLED(9),
+    MANT1988_15_2_LIMIT_DIFFERENCE(10),
+    MANT1988_15_2_OPEN_DIFFERENCE(11);
 
     private final int id;
 
@@ -29,6 +31,16 @@ public enum CsgSampleNames
     public String getLabel()
     {
         return name();
+    }
+
+    public CsgOperationNames getPreferredOperation(
+        CsgOperationNames currentOperation)
+    {
+        if ( this == MANT1988_15_2_LIMIT_DIFFERENCE ||
+             this == MANT1988_15_2_OPEN_DIFFERENCE ) {
+            return CsgOperationNames.DIFFERENCE_A_MINUS_B;
+        }
+        return currentOperation;
     }
 
     public int getDisplayIndex()

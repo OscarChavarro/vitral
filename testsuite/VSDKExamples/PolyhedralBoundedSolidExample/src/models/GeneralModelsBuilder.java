@@ -199,26 +199,6 @@ public final class GeneralModelsBuilder
             mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
             break;
-          case CSG_MANT1988_15_2_HOLED_INTERSECTION:
-            mySolid = csgMant1988_15_2Case(
-                -1, PolyhedralBoundedSolidModeler.INTERSECTION, model.isDebugCsg());
-            model.setDebugCsg(false);
-            break;
-          case CSG_MANT1988_15_2_LIMIT_INTERSECTION:
-            mySolid = csgMant1988_15_2Case(
-                0, PolyhedralBoundedSolidModeler.INTERSECTION, model.isDebugCsg());
-            model.setDebugCsg(false);
-            break;
-          case CSG_MANT1988_15_2_LIMIT_DIFFERENCE:
-            mySolid = csgMant1988_15_2Case(
-                0, PolyhedralBoundedSolidModeler.SUBTRACT, model.isDebugCsg());
-            model.setDebugCsg(false);
-            break;
-          case CSG_MANT1988_15_2_OPEN_DIFFERENCE:
-            mySolid = csgMant1988_15_2Case(
-                1, PolyhedralBoundedSolidModeler.SUBTRACT, model.isDebugCsg());
-            model.setDebugCsg(false);
-            break;
           case CSG_KURLANDER_BOWL:
             mySolid = CsgKurlanderBowl.create();
             break;
@@ -1221,6 +1201,14 @@ public final class GeneralModelsBuilder
                 operands =
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
                 break;
+            case MANT1988_15_2_LIMIT_DIFFERENCE:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(0);
+                break;
+            case MANT1988_15_2_OPEN_DIFFERENCE:
+                operands =
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(1);
+                break;
             case MANT1988_6_13:
                 operands =
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
@@ -1248,6 +1236,12 @@ public final class GeneralModelsBuilder
             case MANT1988_15_2_HOLED:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+            case MANT1988_15_2_LIMIT_DIFFERENCE:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(0);
+            case MANT1988_15_2_OPEN_DIFFERENCE:
+                return
+                    SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(1);
             case MANT1988_6_13:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
@@ -1257,17 +1251,6 @@ public final class GeneralModelsBuilder
             default:
                 return createCsgOperands(sample);
         }
-    }
-
-    private static PolyhedralBoundedSolid csgMant1988_15_2Case(
-        int situation, int op, boolean withDebug)
-    {
-        PolyhedralBoundedSolid[] operands;
-
-        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(
-            situation);
-        PolyhedralBoundedSolidStatistics.reset();
-        return PolyhedralBoundedSolidModeler.setOp(operands[0], operands[1], op, withDebug);
     }
 
     public static PolyhedralBoundedSolid featuredObject()

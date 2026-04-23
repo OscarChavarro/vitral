@@ -321,6 +321,7 @@ public class DebuggerModel
     public void setCsgSample(CsgSampleNames csgSample)
     {
         this.csgSample = csgSample;
+        this.csgOperation = csgSample.getPreferredOperation(csgOperation);
     }
 
     public boolean isDebugEdges()
